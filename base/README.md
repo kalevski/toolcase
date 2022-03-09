@@ -9,8 +9,12 @@
 
 ## ⭐ Features
 
+- **VectorClock** - Vector clock data structure used for synchronization in distributed systems
+- **EventEmitter** - fast implementation of EventEmitter compatible with NodeJS & Browser
+- **Broadcast** - utility used for providing broadcasting interface on top of EventEmitter
 - **env(key, defaultValue, type)** - NodeJS helper function for reading environment variable
 - **generateId()** - function for generating unique identifier
+- **toHex(value)** - function for converting number to hexadecimal string
 
 ## 🚀 Getting started
 
