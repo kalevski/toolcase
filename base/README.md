@@ -18,6 +18,7 @@
 - **toHex(value)** - function for converting number to hexadecimal string
 - **bufferToHex(buffer)** - function for converting Uint8Array to hexadecimal string
 - **hextToBuffer(hex)** - function for converting hexadecimal string to Uint8Array
+- **Color** - Material design color palette
 
 ## 🚀 Getting started
 

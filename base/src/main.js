@@ -8,6 +8,7 @@ import toHex from './toHex'
 import formatByteSize from './formatByteSize'
 import bufferToHex from './bufferToHex'
 import hexToBuffer from './hexToBuffer'
+import Color from './Color'
 
 export {
     VectorClock,
@@ -19,5 +20,6 @@ export {
     toHex,
     formatByteSize,
     bufferToHex,
-    hexToBuffer
+    hexToBuffer,
+    Color
 }
