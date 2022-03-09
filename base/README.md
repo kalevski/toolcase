@@ -16,6 +16,8 @@
 - **env(key, defaultValue, type)** - NodeJS helper function for reading environment variable
 - **generateId()** - function for generating unique identifier
 - **toHex(value)** - function for converting number to hexadecimal string
+- **bufferToHex(buffer)** - function for converting Uint8Array to hexadecimal string
+- **hextToBuffer(hex)** - function for converting hexadecimal string to Uint8Array
 
 ## 🚀 Getting started
 

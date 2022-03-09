@@ -6,6 +6,8 @@ import env from './env'
 import generateId from './generateId'
 import toHex from './toHex'
 import formatByteSize from './formatByteSize'
+import bufferToHex from './bufferToHex'
+import hexToBuffer from './hexToBuffer'
 
 export {
     VectorClock,
@@ -15,5 +17,7 @@ export {
     env,
     generateId,
     toHex,
-    formatByteSize
+    formatByteSize,
+    bufferToHex,
+    hexToBuffer
 }
