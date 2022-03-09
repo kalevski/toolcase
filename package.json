@@ -1,14 +1,14 @@
 {
     "name": "@toolcase/root",
     "private": true,
-    "scripts": {
-
-    },
+    "scripts": {},
     "workspaces": [
-
+        "./base",
+        "./logging"
     ],
     "devDependencies": {
-        
+        "parcel": "^2.3.2",
+        "typescript": "^4.6.2"
     },
     "license": "MIT",
     "author": {
