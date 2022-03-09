@@ -28,7 +28,6 @@ const myLogger = logging.getLogger('[scope]')
 myLogger.info('Hello world!')
 
 ```
-----
 
 ## License
 The project is licensed under [MIT License](https://github.com/kalevski/toolcase/blob/main/LICENSE)
