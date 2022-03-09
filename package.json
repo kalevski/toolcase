@@ -1,0 +1,24 @@
+{
+    "name": "@toolcase/root",
+    "private": true,
+    "scripts": {
+
+    },
+    "workspaces": [
+
+    ],
+    "devDependencies": {
+        
+    },
+    "license": "MIT",
+    "author": {
+        "name": "Daniel Kalevski"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
+    }
+}
