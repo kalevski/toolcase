@@ -1,5 +1,4 @@
-* Modules
-  
-  <!-- * [Logging](quickstart.md)
-  * [Events](more-pages.md)
-  * [UI](custom-navbar.md) -->
+* **Logging** <small>(@toolcase/logging)</small>
+
+  * [Getting started](logging/getting_started.md)
+

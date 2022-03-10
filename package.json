@@ -1,12 +1,15 @@
 {
     "name": "@toolcase/root",
     "private": true,
-    "scripts": {},
+    "scripts": {
+        "docs": "docsify serve docs"
+    },
     "workspaces": [
         "./base",
         "./logging"
     ],
     "devDependencies": {
+        "docsify-cli": "^4.4.3",
         "parcel": "^2.3.2",
         "typescript": "^4.6.2"
     },
