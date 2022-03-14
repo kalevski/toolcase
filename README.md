@@ -1,6 +1,6 @@
 # toolcase 🧰
 
-[![GitHub](https://img.shields.io/github/license/rivalis/rivalis?style=for-the-badge)](https://github.com/rivalis/rivalis/blob/main/LICENSE)
+[![GitHub](https://img.shields.io/github/license/kalevski/toolcase?style=for-the-badge)](https://github.com/kalevski/toolcase/blob/main/LICENSE)
 [![Read docs](https://img.shields.io/badge/READ-DOCS-green?style=for-the-badge)](https://kalevski.dev/toolcase)
 
 Collection of JavaScript modules useful for building Web and NodeJS applications.
