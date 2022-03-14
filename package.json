@@ -2,15 +2,25 @@
     "name": "@toolcase/root",
     "private": true,
     "scripts": {
+        "webgame": "concurrently \"npm run webgame:*\"",
+        "webgame:demo": "npm run dev -w @toolcase/demo-webgame",
+        "webgame:phaser-plus": "npm run dev -w @toolcase/phaser-plus",
+
         "docs": "docsify serve docs"
     },
     "workspaces": [
-        "./base",
-        "./logging"
+        "base",
+        "logging",
+        "phaser-plus",
+        
+        "demos/webgame"
     ],
     "devDependencies": {
+        "concurrently": "^7.0.0",
         "docsify-cli": "^4.4.3",
+        "express": "^4.17.3",
         "parcel": "^2.3.2",
+        "phaser": "^3.55.2",
         "typescript": "^4.6.2"
     },
     "license": "MIT",
