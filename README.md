@@ -8,6 +8,7 @@ Collection of JavaScript modules useful for building Web and NodeJS applications
 ## 📦 Packages
 - 🧬 [**base**](https://github.com/kalevski/toolcase/tree/main/base) - Collection of JavaScript helper functions and structures
 - 🏷 [**logging**](https://github.com/kalevski/toolcase/tree/main/logging) - Lightweight logger for NodeJS and Browser
+- 🐠 [**phaser-plus**](https://github.com/kalevski/toolcase/tree/main/phaser-plus) - Makes PhaserJS framework more awesome
 
 ## License
 The project is licensed under [MIT License](https://github.com/kalevski/toolcase/blob/main/LICENSE)
