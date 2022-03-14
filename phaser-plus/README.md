@@ -11,9 +11,8 @@
 ## ⭐ Features
 
 - 🎟️ Scene centralized state
-- 🧩 Module API with built-in modules
+- 🧩 Module API with built-in events
 - 📋 Sharing code between scenes easily
-- 
 
 ## 🚀 Getting started
 
@@ -27,7 +26,7 @@ import { Scene } from '@toolcase/phaser-plus'
 class MyGameScene extends Scene {
 
     onCreate() {
-        
+
     }
 
 }
