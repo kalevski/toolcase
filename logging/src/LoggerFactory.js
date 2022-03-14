@@ -28,6 +28,7 @@ class LoggerFactory {
      */
     constructor(reporters = []) {
         this.reporters = reporters
+        this.level = 'info'
     }
 
     set level(level) {
@@ -55,7 +56,6 @@ class LoggerFactory {
      */
     onLog = (level, scope, time, messages) => {
         let order = getLevelOrder(level)
-        console.log(`${order} < ${this.levelOrder}`)
         if (this.levelOrder < order) {
             return
         }
