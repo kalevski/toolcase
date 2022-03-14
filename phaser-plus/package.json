@@ -1,29 +1,35 @@
 {
-    "name": "@toolcase/base",
-    "version": "0.11.2",
-    "description": "🧬 Collection of JavaScript helper functions and structures",
+    "name": "@toolcase/phaser-plus",
+    "version": "0.1.1",
+    "description": "🐠 Makes PhaserJS framework more awesome",
     "source": "src/main.js",
     "main": "lib/main.js",
     "module": "lib/module.js",
     "types": "lib/main.d.ts",
     "scripts": {
+        "dev": "nodemon -e js -w src --exec \"npm run build\"",
         "build": "npm run build:src && npm run build:tsd",
         "build:src": "parcel build --no-source-maps",
-        "build:tsd": "tsc -d --allowJs --emitDeclarationOnly --target es5 --lib ES2015 --outDir ./lib src/*.js"
+        "build:tsd": "tsc -d --allowJs --types @toolcase/base,@toolcase/logging,phaser --emitDeclarationOnly --target es5 --lib ES2015,DOM,ScriptHost --outDir ./lib src/*.js"
     },
     "dependencies": {
-        "eventemitter3": "^4.0.7"
+        "@toolcase/base": "^0.11.0",
+        "@toolcase/logging": "^0.2.6"
+    },
+    "peerDependencies": {
+        "phaser": "3.x"
     },
     "targets": {
         "types": false
     },
     "homepage": "https://kalevski.dev/toolcase",
     "keywords": [
-        "helpers",
-        "utils",
-        "functions",
-        "toolcase",
-        "nodejs",
+        "phaser",
+        "phaser3",
+        "utilities",
+        "games",
+        "html5",
+        "gamedev",
         "browser"
     ],
     "directories": {

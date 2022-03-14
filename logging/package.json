@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/logging",
-    "version": "0.2.6",
+    "version": "0.2.9",
     "description": "🏷 Lightweight logger for NodeJS and Browser",
     "source": "src/main.js",
     "main": "lib/main.js",
