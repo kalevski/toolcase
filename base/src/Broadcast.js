@@ -7,11 +7,6 @@ import EventEmitter from './EventEmitter'
 class Broadcast {
 
     /**
-     * @callback EventListener
-     * @param {T} message
-     */
-
-    /**
      * @private
      * @type {EventEmitter.<EventTypes,Context>}
      */
@@ -20,7 +15,7 @@ class Broadcast {
     /**
      * 
      * @param {EventTypes} event 
-     * @param {EventListener} eventListener 
+     * @param {T} eventListener 
      * @param {Context} context 
      * @returns {this}
      */
@@ -32,7 +27,7 @@ class Broadcast {
     /**
      * 
      * @param {EventTypes} event 
-     * @param {EventListener} eventListener 
+     * @param {T} eventListener 
      * @param {Context} context 
      * @returns {this}
      */
@@ -44,7 +39,7 @@ class Broadcast {
     /**
      * 
      * @param {EventTypes} event 
-     * @param {EventListener} eventListener 
+     * @param {T} eventListener 
      * @param {Context} context 
      * @returns {this}
      */
