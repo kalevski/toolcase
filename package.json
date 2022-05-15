@@ -16,7 +16,7 @@
         "demos/webgame"
     ],
     "devDependencies": {
-        "concurrently": "^7.0.0",
+        "concurrently": "^7.2.0",
         "docsify-cli": "^4.4.4",
         "express": "^4.17.3",
         "parcel": "^2.3.2",
