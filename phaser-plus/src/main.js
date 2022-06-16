@@ -1,5 +1,49 @@
 import Scene from './Scene'
-import Module from './Module'
-import GameState from './GameState'
+import GameObject from './GameObject'
+import Feature from './Feature'
 
-export { Scene, Module, GameState }
+import Matrix2 from './structs/Matrix2'
+
+import ISOWorld from './iso/ISOWorld'
+import ISOGameObject from './iso/ISOGameObject'
+
+import GameEvent from './flow/GameEvent'
+import SensorEvent from './flow/SensorEvent'
+import TimeEvent from './flow/TimeEvent'
+import SensorProcessor from './flow/SensorProcessor'
+import MatterJSProcessor from './flow/MatterJSProcessor'
+
+import NavMesh from './ai/NavMesh'
+import Path from './ai/Path'
+import PathFinder from './ai/PathFinder'
+import PathNode from './ai/PathNode'
+
+const Structs = {
+    Matrix2
+}
+
+const ISO = {
+    ISOWorld,
+    ISOGameObject
+}
+
+const Flow = {
+    GameEvent,
+    SensorEvent,
+    TimeEvent,
+    SensorProcessor,
+    MatterJSProcessor
+}
+
+const AI = {
+    NavMesh,
+    Path,
+    PathFinder,
+    PathNode
+}
+
+export {
+    Scene,
+    GameObject,
+    Feature
+}

@@ -2,18 +2,12 @@
     "name": "@toolcase/root",
     "private": true,
     "scripts": {
-        "webgame": "concurrently \"npm run webgame:*\"",
-        "webgame:demo": "npm run dev -w @toolcase/demo-webgame",
-        "webgame:phaser-plus": "npm run dev -w @toolcase/phaser-plus",
-
         "docs": "docsify serve docs"
     },
     "workspaces": [
         "base",
         "logging",
-        "phaser-plus",
-
-        "demos/webgame"
+        "phaser-plus"
     ],
     "devDependencies": {
         "concurrently": "^7.2.2",

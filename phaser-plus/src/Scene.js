@@ -1,30 +1,35 @@
 import { Scene as PScene } from 'phaser'
 import logging, { Logger } from '@toolcase/logging'
-import ModuleRegistry from './ModuleRegistry'
-import ServiceRegistry from './ServiceRegistry'
-import GameStateRegistry from './GameStateRegistry'
+import FeatureRegistry from './registry/FeatureRegistry'
+import ServiceRegistry from './registry/ServiceRegistry'
+import GameFlow from './flow/GameFlow'
+import Feature from './Feature'
 
 class Scene extends PScene {
 
     /** @type {Object<string,any>} */
     payload = null
 
-    /** @type {ModuleRegistry} */
-    modules = null
-
-    /** @type {ServiceRegistry} */
-    services = null
-
-    /**
-     * @type {GameStateRegistry}
-     */
-    state = null
-
     /** 
      * @protected
      * @type {Logger}
      */
     logger = null
+
+    /**
+     * @type {FeatureRegistry}
+     */
+    features = null
+
+    /**
+     * @type {GameFlow}
+     */
+    flow = null
+
+    /**
+     * @type {ServiceRegistry}
+     */
+    services = null
 
     /** @protected */
     onInit() {}
@@ -38,46 +43,50 @@ class Scene extends PScene {
     /** @protected */
     onDestroy() {}
 
-    //onUpdate (time, delta)
-
     /**
-     * 
      * @param {Object<string,any>} payload 
      */
     init(payload = {}) {
         this.payload = payload
-        if (this.modules !== null) {
+        if (this.features !== null) {
             return this.onInit()
         }
-        this.logger = logging.getLogger(`scene=${this.scene.key}`)
-        this.modules = new ModuleRegistry(this)
         if (typeof this.game.services === 'undefined') {
-            this.game.services = new ServiceRegistry(this.game)
+            this.game.services = new ServiceRegistry()   
         }
+
+        this.logger = logging.getLogger(`scene=${this.scene.key}`)
         this.services = this.game.services
-        this.state = new GameStateRegistry(this.modules, this.services)
+        this.features = new FeatureRegistry(this)
+        this.flow = new GameFlow(this)
+
+        this.features.on('register', this.onFeatureRegister, this)
+
         this.logger.verbose('initialized')
-        this.modules.on('register', this.onModuleRegister, this)
         this.onInit()
     }
 
+    /** @private */
     preload() {
         this.onLoad()
     }
 
+    /** @private */
     create() {
         this.onCreate()
     }
 
+    /** @private */
     update(time, delta) {
-        this.modules.forEach((key, module) => {
-            module.onUpdate(time, delta)
-        })
+        
     }
 
+    /** @private */
     destroy() {
-        this.modules.off('register', this.onModuleRegister, this)
-        this.modules.destroyAll()
+        this.features.off('register', this.onFeatureRegister, this)
+        this.onDestroy()
+        this.features.destroyAll()
+        this.flow.destroy()
     }
 
     /**
@@ -93,11 +102,11 @@ class Scene extends PScene {
 
     /**
      * @private
-     * @param {Module} module 
+     * @param {Feature} feature 
      */
-    onModuleRegister(module) {
-        this.add.existing(module)
-        module.onCreate()
+    onFeatureRegister(feature) {
+        this.add.existing(feature)
+        feature.onCreate()
     }
 }
 

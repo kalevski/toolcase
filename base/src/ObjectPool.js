@@ -10,6 +10,12 @@
      */
 
     /**
+     * @callback InstanceFn
+     * @param {typeof Object} object
+     * @return {T}
+     */
+
+    /**
      * @private
      * @type {Array<T>}
      */
@@ -28,14 +34,26 @@
     resetFn = () => {}
 
     /**
+     * @private
+     * @type {InstanceFn}
+     */
+    instanceFn = () => new this.objectClass() 
+
+    /**
      * 
      * @param {typeof Object} objectClass 
      * @param {ResetFn} resetFn 
+     * @param {InstanceFn} instanceFn
      */
-    constructor(objectClass, resetFn = null) {
+    constructor(objectClass, resetFn = null, instanceFn = null) {
         this.objectClass = objectClass
+
         if (typeof resetFn === 'function') {
             this.resetFn = resetFn
+        }
+
+        if (typeof instanceFn === 'function') {
+            this.instanceFn = instanceFn
         }
     }
 
@@ -55,7 +73,7 @@
      * @private
      */
     createInstance() {
-        let object = new this.objectClass()
+        let object = this.instanceFn()
         if (typeof object.release === 'undefined') {
             object.release = () => this.releaseObject(object)
         } else {
