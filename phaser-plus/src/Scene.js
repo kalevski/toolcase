@@ -76,9 +76,13 @@ class Scene extends PScene {
         this.onCreate()
     }
 
-    /** @private */
+    /**
+     * @private
+     * @param {number} time 
+     * @param {number} delta 
+     */
     update(time, delta) {
-        
+        this.features.forEach((_, feature) => feature.onUpdate(time, delta))
     }
 
     /** @private */

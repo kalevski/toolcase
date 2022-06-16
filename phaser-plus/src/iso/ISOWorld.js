@@ -23,7 +23,6 @@ class ISOWorld extends Feature {
     path = null
 
     /**
-     * @private
      * @type {ISOWorldObjects}
      */
     objects = null

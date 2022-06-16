@@ -30,6 +30,7 @@ class FeatureRegistry extends Broadcast {
     features = new Map()
 
     constructor(scene) {
+        super()
         this.scene = scene
     }
 
@@ -58,7 +59,7 @@ class FeatureRegistry extends Broadcast {
         if (typeof options !== 'object') {
             options = {}
         }
-        let feature = new featureClass(this.scene, options)
+        let feature = new featureClass(this.scene, options, key)
         this.features.set(key, feature)
         this.emit('register', feature)
         return feature

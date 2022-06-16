@@ -45,5 +45,9 @@ const AI = {
 export {
     Scene,
     GameObject,
-    Feature
+    Feature,
+    Structs,
+    ISO,
+    Flow,
+    AI
 }

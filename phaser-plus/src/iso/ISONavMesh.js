@@ -14,6 +14,7 @@ class ISONavMesh extends NavMesh {
      * @param {ISOWorldObjects} objects 
      */
     constructor(objects) {
+        super()
         this.objects = objects
     }
 
