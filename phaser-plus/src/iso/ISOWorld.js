@@ -46,7 +46,6 @@ class ISOWorld extends Feature {
         this.size = size
         
        this.projection = Matrix2.getISO(size, size)
-
         this.objects = new ISOWorldObjects(this.scene, this.projection, this.logger)
         this.overlay = this.scene.add.container()
         this.add(this.objects).add(this.overlay)
@@ -68,6 +67,7 @@ class ISOWorld extends Feature {
      */
     onUpdate(time, delta) {
         this.objects.doUpdate(time, delta)
+        this.path.onUpdate()
     }
 
     /** @private */

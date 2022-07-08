@@ -5,6 +5,7 @@ import Scene from '../Scene'
 import ISOGameObject from './ISOGameObject'
 import Matrix2 from '../structs/Matrix2'
 
+/** @extends {any} */
 class ISOWorldObjects extends GameObjects.Container {
 
     /**
@@ -77,6 +78,7 @@ class ISOWorldObjects extends GameObjects.Container {
             return null
         }
         let object = pool.obtain()
+        object.key = key
         super.add(object)
         object.emit(ISOGameObject.Events.ADD_TO_ISO_WORLD)
         object.setISO(x, y)
@@ -107,6 +109,12 @@ class ISOWorldObjects extends GameObjects.Container {
         }
     }
 
+    /** @private */
+    onDestroy() {
+        // TODO: need implementation
+    }
+
+    /** @private */
     doUpdateOrder() {
         this.list.sort((a, b) => {
             let order = (a.iso.y + a.offset.y) - (b.iso.y + b.offset.y)
@@ -118,11 +126,14 @@ class ISOWorldObjects extends GameObjects.Container {
     }
 
     /**
-     * 
+     * @private
      * @param {typeof ISOGameObject} gameObjectClass 
      */
-    createInstance(gameObjectClass) {
-        return new gameObjectClass(this.scene, this.projection)
+    createInstance = (gameObjectClass) => {
+        let object = new gameObjectClass(this.scene, this.projection)
+        object.onCreate()
+        console.log('create')
+        return object
     }
 
 }

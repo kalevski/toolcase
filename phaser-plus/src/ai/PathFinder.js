@@ -31,6 +31,7 @@ class PathFinder {
     iterator = null
 
     /**
+     * @private
      * @type {Array<Path>}
      */
     queue = []

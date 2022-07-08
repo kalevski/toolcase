@@ -18,6 +18,14 @@ import Path from './ai/Path'
 import PathFinder from './ai/PathFinder'
 import PathNode from './ai/PathNode'
 
+import KeyboardInput from './features/KeyboardInput'
+import SplitScreen from './features/SplitScreen'
+
+const Features = {
+    KeyboardInput,
+    SplitScreen
+}
+
 const Structs = {
     Matrix2
 }
@@ -46,6 +54,7 @@ export {
     Scene,
     GameObject,
     Feature,
+    Features,
     Structs,
     ISO,
     Flow,

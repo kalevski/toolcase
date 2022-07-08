@@ -2,6 +2,14 @@ import { Broadcast, PriorityQueue } from '@toolcase/base'
 import { Math } from 'phaser'
 import PathNode from './PathNode'
 
+/**
+ * @typedef EventTypes
+ * @type {('found')}
+ */
+
+/**
+ * @extends Broadcast<EventTypes,any,any>
+ */
 class Path extends Broadcast {
 
     /**

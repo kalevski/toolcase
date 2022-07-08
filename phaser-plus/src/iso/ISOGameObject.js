@@ -5,6 +5,12 @@ import Matrix2 from '../structs/Matrix2'
 
 class ISOGameObject extends GameObject {
 
+    /** 
+     * @readonly
+     * @type {string}
+     */
+    key = null
+
     iso = new Math.Vector2(0, 0)
 
     offset = new Math.Vector2(0, 0)
@@ -23,7 +29,18 @@ class ISOGameObject extends GameObject {
         super(scene)
         this.on(ISOGameObject.Events.ADD_TO_WORLD, this.onAddToWorld, this)
         this.on(ISOGameObject.Events.REMOVE_FROM_WORLD, this.onRemoveFromWorld, this)
+        this.projection = projection
     }
+
+    
+    /** @protected */
+    onCreate() {}
+
+    /** @protected */
+    onUpdate(time, delta) {}
+
+    /** @protected */
+    onDestroy() {}
 
     /**
      * 

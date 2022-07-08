@@ -1,11 +1,11 @@
-import { Scene as PScene } from 'phaser'
+import { Scene as PhaserScene } from 'phaser'
 import logging, { Logger } from '@toolcase/logging'
 import FeatureRegistry from './registry/FeatureRegistry'
 import ServiceRegistry from './registry/ServiceRegistry'
 import GameFlow from './flow/GameFlow'
 import Feature from './Feature'
 
-class Scene extends PScene {
+class Scene extends PhaserScene {
 
     /** @type {Object<string,any>} */
     payload = null

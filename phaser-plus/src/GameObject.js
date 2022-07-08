@@ -4,8 +4,6 @@ import Scene from './Scene'
 
 class GameObject extends GameObjects.Container {
 
-    id = generateId(12)
-
     /** @type {Scene} */
     scene = null
 
@@ -16,16 +14,12 @@ class GameObject extends GameObjects.Container {
     constructor(scene) {
         super(scene)
         this.scene = scene
+        this.name = generateId(20)
     }
 
-    /** @protected */
-    onCreate() {}
-
-    /** @protected */
-    onUpdate(time, delta) {}
-
-    /** @protected */
-    onDestroy() {}
+    get id() {
+        return this.name
+    }
 
 }
 
