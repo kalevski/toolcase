@@ -1,0 +1,26 @@
+{
+    "name": "@toolcase/phaser-plus-demo",
+    "private": true,
+    "scripts": {
+        "dev": "parcel game.html --dist-dir public"
+    },
+    "dependencies": {},
+    "peerDependencies": {
+        "@toolcase/phaser-plus": "0.x",
+        "@toolcase/base": "0.x",
+        "@toolcase/logging": "0.x"
+    },
+    "targets": {
+        "types": false
+    },
+    "homepage": "https://kalevski.dev/toolcase",
+    "keywords": [],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "license": "MIT"
+}

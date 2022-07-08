@@ -1,0 +1,84 @@
+{
+	"textures": [
+		{
+			"image": "hall_textures.png",
+			"normalMap": "hall_textures_n.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 564,
+				"h": 724
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "floor",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 560,
+						"h": 280
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 560,
+						"h": 280
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 560,
+						"h": 280
+					}
+				},
+				{
+					"filename": "wall-left",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 280,
+						"h": 440
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 280,
+						"h": 440
+					},
+					"frame": {
+						"x": 1,
+						"y": 283,
+						"w": 280,
+						"h": 440
+					}
+				},
+				{
+					"filename": "wall-right",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 280,
+						"h": 440
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 280,
+						"h": 440
+					},
+					"frame": {
+						"x": 283,
+						"y": 283,
+						"w": 280,
+						"h": 440
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:6be7062d3a679c9483c28852bba6ee38:41085b2ee5cf01220f76483b6191f406:ed21fd8f73de4c496743c623cd358582$"
+	}
+}
