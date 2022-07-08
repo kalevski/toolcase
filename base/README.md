@@ -13,12 +13,16 @@
 - **EventEmitter** - fast implementation of EventEmitter compatible with NodeJS & Browser
 - **Broadcast** - utility used for providing broadcasting interface on top of EventEmitter
 - **LSystem** - Lindenmayer system structure used for modeling the morphology of a variety of organisms.
+- **ObjectPool** - Creational design pattern for reusing object instances and save GC time.
+- **PriorityQueue** - Ordered queue data structure.
 - **env(key, defaultValue, type)** - NodeJS helper function for reading environment variable
-- **generateId()** - function for generating unique identifier
+- **generateId(length)** - function for generating unique identifier
 - **toHex(value)** - function for converting number to hexadecimal string
 - **bufferToHex(buffer)** - function for converting Uint8Array to hexadecimal string
 - **hextToBuffer(hex)** - function for converting hexadecimal string to Uint8Array
 - **Color** - Material design color palette
+- **formatByteSize** - Format byte size to human readable string
+
 
 ## 🚀 Getting started
 
