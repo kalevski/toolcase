@@ -73,7 +73,7 @@
      * @private
      */
     createInstance() {
-        let object = this.instanceFn()
+        let object = this.instanceFn(this.objectClass)
         if (typeof object.release === 'undefined') {
             object.release = () => this.releaseObject(object)
         } else {

@@ -21,6 +21,8 @@
 - **bufferToHex(buffer)** - function for converting Uint8Array to hexadecimal string
 - **hextToBuffer(hex)** - function for converting hexadecimal string to Uint8Array
 - **Color** - Material design color palette
+- **formatByteSize** - Format byte size to human readable string
+
 
 ## 🚀 Getting started
 
