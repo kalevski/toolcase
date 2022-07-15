@@ -12,6 +12,7 @@ import bufferToHex from './bufferToHex'
 import hexToBuffer from './hexToBuffer'
 import Color from './Color'
 import JSONSchema from './JSONSchema'
+import getNumberInRange from './getNumberInRange'
 
 export {
     VectorClock,
@@ -27,5 +28,6 @@ export {
     bufferToHex,
     hexToBuffer,
     Color,
-    JSONSchema
+    JSONSchema,
+    getNumberInRange
 }
