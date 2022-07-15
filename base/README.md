@@ -22,6 +22,7 @@
 - **hextToBuffer(hex)** - function for converting hexadecimal string to Uint8Array
 - **Color** - Material design color palette
 - **formatByteSize** - Format byte size to human readable string
+- **JSONSchema** - Schema is extensible structure for validating JSON objects. 
 
 
 ## 🚀 Getting started

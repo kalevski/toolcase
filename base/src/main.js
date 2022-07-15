@@ -11,6 +11,7 @@ import formatByteSize from './formatByteSize'
 import bufferToHex from './bufferToHex'
 import hexToBuffer from './hexToBuffer'
 import Color from './Color'
+import JSONSchema from './JSONSchema'
 
 export {
     VectorClock,
@@ -25,5 +26,6 @@ export {
     formatByteSize,
     bufferToHex,
     hexToBuffer,
-    Color
+    Color,
+    JSONSchema
 }
