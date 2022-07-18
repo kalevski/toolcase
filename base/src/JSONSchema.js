@@ -122,7 +122,7 @@ class JSONSchema {
     validateString = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
-            throw new Error(`property "${propertyName}" must be a string`)
+            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
         }
     }
 
@@ -133,7 +133,7 @@ class JSONSchema {
     validateBoolean = (propertyName, schema, data) => {
 
         if (typeof data !== 'boolean') {
-            throw new Error(`property "${propertyName}" must be a boolean`)
+            throw new Error(`property "${propertyName}" can be "true" or "false", "${data}" provided`)
         }
     }
 
@@ -144,7 +144,7 @@ class JSONSchema {
     validateNumber = (propertyName, schema, data) => {
 
         if (typeof data !== 'number') {
-            throw new Error(`property "${propertyName}" must be a number`)
+            throw new Error(`property "${propertyName}" must be a number, "${data}" provided`)
         }
 
     }
@@ -157,7 +157,7 @@ class JSONSchema {
 
 
         if (typeof data !== 'object') {
-            throw new Error(`property "${propertyName}" must be an object`)
+            throw new Error(`property "${propertyName}" must be an object, "${data}" provided`)
         }
 
         let isStrict = schema.flexible !== true
@@ -190,7 +190,7 @@ class JSONSchema {
     validateArray = (propertyName, schema, data) => {
 
         if (!Array.isArray(data)) {
-            throw new Error(`property "${propertyName}" must be an array`)
+            throw new Error(`property "${propertyName}" must be an array, "${data}" provided`)
         }
 
         if (typeof schema.items !== 'object') {
@@ -205,21 +205,21 @@ class JSONSchema {
 
     }
 
-    /** @private */
-    mailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/g
-
+    
     /**
      * @private
      * @type {ValidationFn}
      */
     validateEmail = (propertyName, schema, data) => {
 
+        const mailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/g
+
         if (typeof data !== 'string') {
-            throw new Error(`property "${propertyName}" must be a string`)
+            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
         }
         
-        if(!this.mailRegex.test(data)) {
-            throw new Error(`property "${propertyName}" must be a valid email address`)
+        if(!mailRegex.test(data)) {
+            throw new Error(`property "${propertyName}" must be a valid email address, "${data}" provided`)
         }
     }
 
