@@ -4,7 +4,7 @@ class ServiceRegistry {
      * @private
      * @type {Map<string,Object>}
      */
-    services = null
+    services = new Map()
 
     /**
      * @template T
