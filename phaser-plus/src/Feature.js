@@ -68,6 +68,8 @@ class Feature extends GameObject {
     dispatch(eventName, payload) {
         if (this.bindings.listenerCount(eventName) === 0) {
             this.logger.warning(`event=(${eventName}) is not handled, payload=(${JSON.stringify(payload)})`)
+        } else {
+            this.bindings.emit(eventName, payload)
         }
     }
 }
