@@ -14,7 +14,19 @@ import Color from './Color'
 import JSONSchema from './JSONSchema'
 import getNumberInRange from './getNumberInRange'
 
+import Status from './http/Status'
+import RESTError from './http/RESTError'
+import RESTResponse from './http/RESTResponse'
+
+
+const HTTP = {
+    Status,
+    RESTError,
+    RESTResponse
+}
+
 export {
+    HTTP,
     VectorClock,
     EventEmitter,
     Broadcast,
