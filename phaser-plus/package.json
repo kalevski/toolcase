@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/phaser-plus",
-    "version": "0.3.8",
+    "version": "0.3.9",
     "description": "🐠 Makes PhaserJS framework more awesome",
     "source": "src/main.js",
     "main": "lib/main.js",

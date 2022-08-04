@@ -132,7 +132,6 @@ class ISOWorldObjects extends GameObjects.Container {
     createInstance = (gameObjectClass) => {
         let object = new gameObjectClass(this.scene, this.projection)
         object.onCreate()
-        console.log('create')
         return object
     }
 

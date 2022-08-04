@@ -38,6 +38,19 @@ class Feature extends GameObject {
         this.logger = logging.getLogger(`feature=${key}`)
     }
 
+    /** @protected */
+    onCreate() {}
+
+    /**
+     * @protected
+     * @param {number} time 
+     * @param {number} delta 
+     */
+    onUpdate() {}
+
+    /** @protected */
+    onDestroy() {}
+
     /**
      * 
      * @param {string} eventName 
