@@ -13,6 +13,7 @@ import hexToBuffer from './hexToBuffer'
 import Color from './Color'
 import JSONSchema from './JSONSchema'
 import getNumberInRange from './getNumberInRange'
+import Cache from './Cache'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -41,5 +42,6 @@ export {
     hexToBuffer,
     Color,
     JSONSchema,
-    getNumberInRange
+    getNumberInRange,
+    Cache
 }
