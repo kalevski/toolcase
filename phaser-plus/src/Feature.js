@@ -38,6 +38,19 @@ class Feature extends GameObject {
         this.logger = logging.getLogger(`feature=${key}`)
     }
 
+    /** @protected */
+    onCreate() {}
+
+    /**
+     * @protected
+     * @param {number} time 
+     * @param {number} delta 
+     */
+    onUpdate() {}
+
+    /** @protected */
+    onDestroy() {}
+
     /**
      * 
      * @param {string} eventName 
@@ -68,6 +81,8 @@ class Feature extends GameObject {
     dispatch(eventName, payload) {
         if (this.bindings.listenerCount(eventName) === 0) {
             this.logger.warning(`event=(${eventName}) is not handled, payload=(${JSON.stringify(payload)})`)
+        } else {
+            this.bindings.emit(eventName, payload)
         }
     }
 }

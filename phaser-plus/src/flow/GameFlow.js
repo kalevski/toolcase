@@ -75,6 +75,10 @@ class GameFlow {
         })
     }
 
+    /**
+     * 
+     * @param {SensorProcessor} processor 
+     */
     setSensorProcessor(processor) {
         if (this.processor !== null) {
             this.processor.onDestroy()
