@@ -4,15 +4,21 @@
 class Cache {
 
     /**
+     * @typedef CachedEntry
+     * @property {number} fetchedAt
+     * @property {T} data
+     */
+
+    /**
      * @callback FetchFn
      * @returns {T|Promise<T>}
      */
 
     /**
      * @private
-     * @type {T}
+     * @type {Map<string,CachedEntry>}
      */
-    data = null
+    entiries = new Map()
 
     /**
      * @readonly
@@ -46,13 +52,15 @@ class Cache {
         this.setMS(ms)
     }
 
-    async get() {
+    async get(...args) {
         let currentTime = this.getTime()
-        if (currentTime > this.fetchedAt + this.ms) {
-            this.data = await this.fetchFn()
-            this.fetchedAt = currentTime
+        let hash = this.getHash(args)
+        let entry = this.getEntry(hash)
+        if (currentTime > entry.fetchedAt + this.ms) {
+            entry.data = await this.fetchFn(...args)
+            entry.fetchedAt = currentTime
         }
-        return this.data
+        return entry.data
     }
 
     setMS(ms = 0) {
@@ -68,6 +76,29 @@ class Cache {
      */
     getTime() {
         return new Date().getTime()
+    }
+
+    /**
+     * @private
+     * @param {any} filter 
+     * @returns {string}
+     */
+    getHash(filter) {
+        let hash = JSON.stringify(filter)
+        return hash
+    }
+
+    /**
+     * @private
+     * @param {string} hash 
+     */
+    getEntry(hash) {
+        let entry = this.entiries.get(hash) || null
+        if (entry === null) {
+            entry = { data: null, fetchedAt: 0 }
+            this.entiries.set(hash, entry)
+        }
+        return entry
     }
 
 }
