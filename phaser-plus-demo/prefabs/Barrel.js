@@ -1,6 +1,6 @@
-import { GameObject, ISO } from '@toolcase/phaser-plus'
+import { GameObject, Perspective2D } from '@toolcase/phaser-plus'
 
-class Barrel extends ISO.ISOGameObject {
+class Barrel extends Perspective2D.GameObject2D {
 
     /** @type {GameObjects.Image} */
     base = null
@@ -21,7 +21,7 @@ class Barrel extends ISO.ISOGameObject {
 
         // this.setSensorPoint('action:take', 0, -40)
 
-        // super.onCreate()
+        super.onCreate()
     }
 
 }

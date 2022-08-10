@@ -1,4 +1,4 @@
-import { Scene, Features, ISO, Flow } from '@toolcase/phaser-plus'
+import { Scene, Features, Perspective2D, Flow, Structs } from '@toolcase/phaser-plus'
 import GameUI from '../features/GameUI'
 import Barrel from '../prefabs/Barrel'
 
@@ -11,7 +11,7 @@ class World extends Scene {
         B: null
     }
 
-    /** @type {ISO.ISOWorld} */
+    /** @type {Perspective2D.World} */
     world = null
 
     /** @type {Features.SplitScreen} */
@@ -34,8 +34,9 @@ class World extends Scene {
             action: 'ENTER'
         })
 
-        this.world = this.features.register('world', ISO.ISOWorld)
-
+        this.world = this.features.register('world', Perspective2D.World, {
+            projection: Structs.Matrix2.create(128, -32, 40, 12)
+        })
 
         this.screen = this.features.register('screen', Features.SplitScreen)
         this.ui = this.features.register('ui', GameUI)
@@ -46,7 +47,7 @@ class World extends Scene {
 
         this.world.objects.register('barrel', Barrel)
 
-        let distance = 3.5
+        let distance = 2
 
         let barrelA = this.world.objects.add('barrel', -distance, -distance)
         let barrelB = this.world.objects.add('barrel', distance, distance)
@@ -55,8 +56,10 @@ class World extends Scene {
 
         this.screen.follow(barrelC, barrelD)
 
-        let bg = this.add.image(0, 0, 'lobby')
-        this.world.add(bg)
+        // let bg = this.add.image(0, 0, 'lobby')
+        // this.world.add(bg)
+
+        this.world.grid.draw()
 
         if (typeof this.matter.world.debugGraphic !== 'undefined') {
             this.screen.cameras.ui.ignore(this.matter.world.debugGraphic)
