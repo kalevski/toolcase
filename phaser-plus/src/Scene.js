@@ -4,6 +4,7 @@ import FeatureRegistry from './registry/FeatureRegistry'
 import ServiceRegistry from './registry/ServiceRegistry'
 import GameFlow from './flow/GameFlow'
 import Feature from './Feature'
+import DOMFeature from './DOMFeature'
 
 class Scene extends PhaserScene {
 
@@ -54,6 +55,8 @@ class Scene extends PhaserScene {
         if (typeof this.game.services === 'undefined') {
             this.game.services = new ServiceRegistry()   
         }
+
+        DOMFeature.setup()
 
         this.logger = logging.getLogger(`scene=${this.scene.key}`)
         this.services = this.game.services

@@ -1,5 +1,6 @@
 import { Scene, Features, Perspective2D, Flow, Structs } from '@toolcase/phaser-plus'
 import GameUI from '../features/GameUI'
+import HTMLFeature from '../features/HTMLFeature'
 import Barrel from '../prefabs/Barrel'
 
 class World extends Scene {
@@ -41,6 +42,8 @@ class World extends Scene {
         this.screen = this.features.register('screen', Features.SplitScreen)
         this.ui = this.features.register('ui', GameUI)
 
+        this.features.register('html', HTMLFeature)
+
         this.screen.cameras.A.ignore(this.ui)
         this.screen.cameras.B.ignore(this.ui)
         this.screen.cameras.ui.ignore(this.world)
@@ -59,7 +62,7 @@ class World extends Scene {
         // let bg = this.add.image(0, 0, 'lobby')
         // this.world.add(bg)
 
-        this.world.grid.draw()
+        // this.world.grid.draw()
 
         if (typeof this.matter.world.debugGraphic !== 'undefined') {
             this.screen.cameras.ui.ignore(this.matter.world.debugGraphic)

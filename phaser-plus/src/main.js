@@ -1,6 +1,7 @@
 import Scene from './Scene'
 import GameObject from './GameObject'
 import Feature from './Feature'
+import DOMFeature from './DOMFeature'
 
 import Matrix2 from './structs/Matrix2'
 
@@ -54,6 +55,7 @@ export {
     Scene,
     GameObject,
     Feature,
+    DOMFeature,
     Features,
     Structs,
     Perspective2D,
