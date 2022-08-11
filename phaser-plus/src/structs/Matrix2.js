@@ -48,8 +48,8 @@ class Matrix2 extends Float32Array {
      * @returns {M.Vector2}
      */
     translate(x, y, out = new M.Vector2()) {
-        out.x = x * this[0] + y * this[1]
-        out.y = x * this[2] + y * this[3]
+        out.x = Math.round((x * this[0] + y * this[1]) * 10000) / 10000
+        out.y = Math.round((x * this[2] + y * this[3]) * 10000) / 10000
         return out
     }
 

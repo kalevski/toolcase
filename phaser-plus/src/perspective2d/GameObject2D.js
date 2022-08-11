@@ -50,6 +50,7 @@ class GameObject2D extends GameObject {
      */
     setTransform(x, y) {
         this.projection.translate(x, y, this)
+        this.transform.set(x, y)
     }
 
     /**

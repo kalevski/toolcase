@@ -29,8 +29,8 @@ class PerspectiveGrid extends GameObjects.Graphics {
         const { width, height } = this.scene.game.config
         let bounds = this.getPerspectiveBounds()
 
-        this.fillStyle(0x1565c0, 1)
-        this.lineStyle(1, 0xffffff, 1)
+        this.fillStyle(0x59758a, 1)
+        this.lineStyle(1, 0xffffff, .3)
 
         this.fillRect(-width / 2, -height / 2, width, height)
 
