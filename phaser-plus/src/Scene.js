@@ -56,8 +56,6 @@ class Scene extends PhaserScene {
             this.game.services = new ServiceRegistry()   
         }
 
-        DOMFeature.setup()
-
         this.logger = logging.getLogger(`scene=${this.scene.key}`)
         this.services = this.game.services
         this.features = new FeatureRegistry(this)

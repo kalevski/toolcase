@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { createRoot } from 'react-dom/client'
 import Feature from './Feature'
+import Scene from './Scene'
 
 /**
  * @template T
@@ -38,6 +39,16 @@ import Feature from './Feature'
         } else {
             return this.jsxRef.current.state
         }
+    }
+
+    /**
+     * 
+     * @param {Scene} scene 
+     * @param {Map<string, any>} options 
+     */
+    constructor(scene, options) {
+        super(scene, options)
+        DOMFeature.setup()
     }
 
     /**
@@ -135,9 +146,10 @@ DOMFeature.setup = () => {
         height: 100%;
         overflow: hidden;
     }
-    .html-feature * { pointer-events: auto; }
+    .html-feature * {
+        pointer-events: auto;
         user-select: none;
-    `
+    }`
     document.head.append(style)
 }
 
