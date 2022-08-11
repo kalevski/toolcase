@@ -46,8 +46,8 @@ import Scene from './Scene'
      * @param {Scene} scene 
      * @param {Map<string, any>} options 
      */
-    constructor(scene, options) {
-        super(scene, options)
+    constructor(scene, options, key) {
+        super(scene, options, key)
         DOMFeature.setup()
     }
 
@@ -62,7 +62,7 @@ import Scene from './Scene'
         }
         
         this.node = window.document.createElement('div')
-        this.node.id = this.key
+        this.node.setAttribute('id', this.key)
         this.node.classList.add('html-feature')
 
         this.game.domContainer.append(this.node)
