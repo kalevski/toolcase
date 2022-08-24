@@ -74,8 +74,10 @@ class GameObject2D extends GameObject {
 
     /** @private */
     onRemoveFromWorld() {
-        this.scene.matter.world.remove(this.body, true)
-        this.body.removedFromWorld = true
+        if (this.body !== null) {
+            this.scene.matter.world.remove(this.body, true)
+            this.body.removedFromWorld = true
+        }
     }
 
 }
