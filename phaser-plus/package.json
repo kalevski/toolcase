@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/phaser-plus",
-    "version": "0.3.9",
+    "version": "0.6.11",
     "description": "🐠 Makes PhaserJS framework more awesome",
     "source": "src/main.js",
     "main": "lib/main.js",
@@ -12,11 +12,12 @@
         "build:src": "parcel build src/main.js --no-source-maps --no-optimize",
         "build:tsd": "tsc -d --allowJs --types @toolcase/base,@toolcase/logging,phaser --emitDeclarationOnly --target es5 --lib ES2015,DOM,ScriptHost --outDir ./lib src/*.js"
     },
-    "dependencies": {},
     "peerDependencies": {
-        "phaser": "3.x",
         "@toolcase/base": "0.x",
-        "@toolcase/logging": "0.x"
+        "@toolcase/logging": "0.x",
+        "phaser": "3.x",
+        "react": "18.x",
+        "react-dom": "18.x"
     },
     "targets": {
         "types": false

@@ -4,6 +4,8 @@ import FeatureRegistry from './registry/FeatureRegistry'
 import ServiceRegistry from './registry/ServiceRegistry'
 import GameFlow from './flow/GameFlow'
 import Feature from './Feature'
+import GameObjectPool from './structs/GameObjectPool'
+import GameObject from './GameObject'
 
 class Scene extends PhaserScene {
 
@@ -25,6 +27,11 @@ class Scene extends PhaserScene {
      * @type {GameFlow}
      */
     flow = null
+
+    /**
+     * @type {GameObjectPool<GameObject>}
+     */
+    pool = null
 
     /**
      * @type {ServiceRegistry}
@@ -59,6 +66,7 @@ class Scene extends PhaserScene {
         this.services = this.game.services
         this.features = new FeatureRegistry(this)
         this.flow = new GameFlow(this)
+        this.pool = new GameObjectPool(this)
 
         this.features.on('register', this.onFeatureRegister, this)
 
@@ -91,6 +99,7 @@ class Scene extends PhaserScene {
         this.onDestroy()
         this.features.destroyAll()
         this.flow.destroy()
+        this.pool.destroyAll()
     }
 
     /**

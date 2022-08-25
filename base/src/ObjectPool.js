@@ -28,6 +28,12 @@
     objectClass = null
 
     /**
+     * @readonly
+     * @type {number}
+     */
+    instances = 0
+
+    /**
      * @private
      * @type {ResetFn}
      */
@@ -69,24 +75,31 @@
         return object
     }
 
+    release = (object) => {
+        this.resetFn(object)
+        this.pool.push(object)
+        return this
+    }
+
+    dispose() {
+        this.pool = []
+    }
+
     /**
      * @private
      */
     createInstance() {
         let object = this.instanceFn(this.objectClass)
+        this.instances++
         if (typeof object.release === 'undefined') {
-            object.release = () => this.releaseObject(object)
+            object.release = () => this.release(object)
         } else {
-            // TODO: throw error
+            throw new Error(`object ${JSON.stringify(object)} already have release function`)
         }
         this.pool.push(object)
     }
 
-    releaseObject = (object) => {
-        this.resetFn(object)
-        this.pool.push(object)
-        return this
-    }
+
 
 }
 

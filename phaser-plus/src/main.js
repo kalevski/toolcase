@@ -1,11 +1,14 @@
 import Scene from './Scene'
 import GameObject from './GameObject'
 import Feature from './Feature'
+import DOMFeature from './DOMFeature'
 
 import Matrix2 from './structs/Matrix2'
+import GameObjectPool from './structs/GameObjectPool'
 
-import ISOWorld from './iso/ISOWorld'
-import ISOGameObject from './iso/ISOGameObject'
+import World from './perspective2d/World'
+import GameObject2D from './perspective2d/GameObject2D'
+import WorldObjects from './perspective2d/WorldObjects'
 
 import GameEvent from './flow/GameEvent'
 import SensorEvent from './flow/SensorEvent'
@@ -27,12 +30,14 @@ const Features = {
 }
 
 const Structs = {
-    Matrix2
+    Matrix2,
+    GameObjectPool
 }
 
-const ISO = {
-    ISOWorld,
-    ISOGameObject
+const Perspective2D = {
+    World,
+    GameObject2D,
+    WorldObjects
 }
 
 const Flow = {
@@ -54,9 +59,10 @@ export {
     Scene,
     GameObject,
     Feature,
+    DOMFeature,
     Features,
     Structs,
-    ISO,
+    Perspective2D,
     Flow,
     AI
 }

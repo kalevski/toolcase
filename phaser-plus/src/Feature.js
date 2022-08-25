@@ -10,6 +10,12 @@ import Scene from './Scene'
 
 class Feature extends GameObject {
 
+    /** 
+     * @readonly
+     * @type {string}
+     */
+    key = null
+
     /**
      * @protected
      * @type {Object<string,any>}
@@ -35,6 +41,7 @@ class Feature extends GameObject {
     constructor(scene, options = {}, key = null) {
         super(scene)
         this.options = options
+        this.key = key
         this.logger = logging.getLogger(`feature=${key}`)
     }
 

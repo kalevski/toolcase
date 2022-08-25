@@ -17,7 +17,7 @@ class Matrix2 extends Float32Array {
      * @param {number} v01 
      * @param {number} v10 
      * @param {number} v11 
-     * @param {Matrix2} [inverse=null] 
+     * @param {Matrix2} inverse 
      */
     constructor(v00 = 1, v01 = 1, v10 = 1, v11 = 1, inverse = null) {
         super(4)
@@ -49,7 +49,7 @@ class Matrix2 extends Float32Array {
      */
     translate(x, y, out = new M.Vector2()) {
         out.x = Math.round((x * this[0] + y * this[1]) * 10000) / 10000
-        out.y = Math.round((x * this[2] + y * this[3])  * 10000) / 10000
+        out.y = Math.round((x * this[2] + y * this[3]) * 10000) / 10000
         return out
     }
 
@@ -81,8 +81,27 @@ class Matrix2 extends Float32Array {
 
 }
 
-Matrix2.getISO = (width, height) => {
-    return new Matrix2(width, -width, height / 2, height / 2)
+/**
+ * 
+ * @param {number} size 
+ */
+Matrix2.createISO = (size = 64) => {
+    return new Matrix2(size, -size, size / 2, size / 2)
+}
+
+/**
+ * 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {number} angleX 
+ * @param {number} angleY 
+ */
+Matrix2.create = (x = 1, y = 1, angleX = 0, angleY = 0) => {
+    let vectorA = new M.Vector2(1 * x, -0 * y)
+    let vectorB = new M.Vector2(0 * x, 1 * y)
+    vectorA.rotate(M.DegToRad(angleX))
+    vectorB.rotate(M.DegToRad(angleY))
+    return new Matrix2(vectorA.x, vectorA.y, vectorB.x, vectorB.y)
 }
 
 export default Matrix2

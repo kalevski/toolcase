@@ -1,3 +1,7 @@
 lib
 node_modules
 .parcel-cache
+
+phaser-plus-demo/public/*
+!phaser-plus-demo/public/README.md
+!phaser-plus-demo/public/assets

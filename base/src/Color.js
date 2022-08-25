@@ -34,6 +34,18 @@
 
     /**
      * 
+     * @param {ColorType} color 
+     */
+    toNumber: (color) => {
+        let hex = Color.getHex(color)
+        if (hex === null) {
+            return 0
+        }
+        return parseInt(hex.split('#')[1], 16)
+    },
+
+    /**
+     * 
      * @returns {string}
      */
     getRandomHex: () => {
