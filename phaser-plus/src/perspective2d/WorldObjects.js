@@ -1,9 +1,9 @@
-import { ObjectPool } from '@toolcase/base'
 import { Logger } from '@toolcase/logging'
 import { GameObjects, Time } from 'phaser'
 import Scene from '../Scene'
 import GameObject2D from './GameObject2D'
 import Matrix2 from '../structs/Matrix2'
+import GameObjectPool from '../structs/GameObjectPool'
 
 class WorldObjects extends GameObjects.Container {
 
@@ -21,15 +21,12 @@ class WorldObjects extends GameObjects.Container {
 
     /**
      * @private
-     * @type {Map<string,ObjectPool<GameObject2D>>}
-     */
-    pool = new Map()
-
-    /**
-     * @private
      * @type {Time.TimerEvent}
      */
     orderLoop = null
+
+    /** @type {GameObjectPool<GameObject2D>} */
+    pool = null
 
     /**
      * 
@@ -41,6 +38,7 @@ class WorldObjects extends GameObjects.Container {
         super(scene)
         this.projection = projection
         this.logger = logger
+        this.pool = scene.pool
         this.orderLoop = this.scene.time.addEvent({
             delay: 100,
             callback: this.doUpdateOrder,
@@ -55,11 +53,7 @@ class WorldObjects extends GameObjects.Container {
      * @param {typeof GameObject2D} gameObjectClass 
      */
     register(key, gameObjectClass, resetFn) {
-        if (this.pool.has(key)) {
-            this.logger.error(`iso game object ${key} is already registered!`)
-            return this
-        }
-        this.pool.set(key, new ObjectPool(gameObjectClass, resetFn, this.createInstance))
+        this.pool.register(key, gameObjectClass, resetFn, this.createInstance)
         return this
     }
 
@@ -71,12 +65,7 @@ class WorldObjects extends GameObjects.Container {
      * @returns {GameObject2D}
      */
     add(key, x, y) {
-        let pool = this.pool.get(key) || null
-        if (pool === null) {
-            this.logger.error(`game object ${key} does not exist!`)
-            return null
-        }
-        let object = pool.obtain()
+        let object = this.pool.obtain(key)
         object.key = key
         super.add(object)
         object.emit(GameObject2D.Events.ADD_TO_WORLD)
@@ -92,7 +81,7 @@ class WorldObjects extends GameObjects.Container {
         super.remove(gameObject)
         this.scene.children.remove(gameObject)
         gameObject.emit(GameObject2D.Events.REMOVE_FROM_WORLD)
-        gameObject.release()
+        this.pool.release(gameObject)
     }
 
     

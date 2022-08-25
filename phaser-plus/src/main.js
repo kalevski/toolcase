@@ -4,6 +4,7 @@ import Feature from './Feature'
 import DOMFeature from './DOMFeature'
 
 import Matrix2 from './structs/Matrix2'
+import GameObjectPool from './structs/GameObjectPool'
 
 import World from './perspective2d/World'
 import GameObject2D from './perspective2d/GameObject2D'
@@ -29,7 +30,8 @@ const Features = {
 }
 
 const Structs = {
-    Matrix2
+    Matrix2,
+    GameObjectPool
 }
 
 const Perspective2D = {
