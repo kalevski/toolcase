@@ -33,6 +33,10 @@ class GameObject2D extends GameObject {
         this.projection = projection
     }
 
+    getProjection() {
+        return this.projection
+    }
+
     
     /** @protected */
     onCreate() {}

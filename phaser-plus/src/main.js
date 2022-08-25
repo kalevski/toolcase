@@ -7,6 +7,7 @@ import Matrix2 from './structs/Matrix2'
 
 import World from './perspective2d/World'
 import GameObject2D from './perspective2d/GameObject2D'
+import WorldObjects from './perspective2d/WorldObjects'
 
 import GameEvent from './flow/GameEvent'
 import SensorEvent from './flow/SensorEvent'
@@ -33,7 +34,8 @@ const Structs = {
 
 const Perspective2D = {
     World,
-    GameObject2D
+    GameObject2D,
+    WorldObjects
 }
 
 const Flow = {
