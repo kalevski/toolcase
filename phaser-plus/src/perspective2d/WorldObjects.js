@@ -66,9 +66,9 @@ class WorldObjects extends GameObjects.Container {
      */
     add(key, x, y) {
         let object = this.pool.obtain(key)
-        object.key = key
+        // object.key = key
         super.add(object)
-        object.emit(GameObject2D.Events.ADD_TO_WORLD)
+        // object.emit(GameObject2D.Events.ADD_TO_WORLD)
         object.setTransform(x, y)
         return object
     }
@@ -79,8 +79,8 @@ class WorldObjects extends GameObjects.Container {
      */
     remove(gameObject) {
         super.remove(gameObject)
-        this.scene.children.remove(gameObject)
-        gameObject.emit(GameObject2D.Events.REMOVE_FROM_WORLD)
+        // this.scene.children.remove(gameObject)
+        // gameObject.emit(GameObject2D.Events.REMOVE_FROM_WORLD)
         this.pool.release(gameObject)
     }
 
@@ -99,7 +99,10 @@ class WorldObjects extends GameObjects.Container {
 
     /** @private */
     onDestroy() {
-        // TODO: need implementation
+        this.each(child => {
+            this.pool.release(child)
+        })
+        this.removeAll()
     }
 
     /** @private */

@@ -82,7 +82,8 @@ class World extends Feature {
      * @protected
      */
     onDestroy() {
-        // TODO: need implementation
+        this.objects.onDestroy()
+        // destroy overlay
     }
 
 }
