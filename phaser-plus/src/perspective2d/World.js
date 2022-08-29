@@ -53,7 +53,8 @@ class World extends Feature {
 
         this.objects = new WorldObjects(this.scene, this.projection, this.logger)
         this.overlay = this.scene.add.container()
-        this.add(this.objects).add(this.overlay)
+        this.add(this.objects)
+            .add(this.overlay)
 
         this.path = new PathFinder(new WorldNavMesh(this.objects))
 
@@ -82,8 +83,7 @@ class World extends Feature {
      * @protected
      */
     onDestroy() {
-        this.objects.onDestroy()
-        // destroy overlay
+        this.objects.destroy()
     }
 
 }

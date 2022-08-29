@@ -5,18 +5,6 @@ import Container from './Container'
 
 class GameObject extends Container {
 
-    /** @type {Scene} */
-    scene = null
-
-    /** @type {Game} */
-    game = null
-
-    /** 
-     * @readonly
-     * @type {string}
-     */
-    key = null
-
     /**
      * 
      * @param {Scene} scene 
@@ -24,12 +12,6 @@ class GameObject extends Container {
     constructor(scene) {
         super(scene)
         this.scene = scene
-        this.game = this.scene.game
-        this.name = generateId(16)
-    }
-
-    get id() {
-        return this.name
     }
 
     /** @protected */
@@ -37,17 +19,84 @@ class GameObject extends Container {
 
     /**
      * @protected
-     * @param {GameObjects.GameObject} parent 
+     * @param {GameObject} parent 
      */
     onAdd(parent) {}
 
-    onRemove() {}
-
-    /** @protected */
+    /** 
+     * @protected
+     * @param {number} time 
+     * @param {number} delta 
+     */
     onUpdate(time, delta) {}
+
+    /**
+     * @protected
+     * @param {GameObject} parent 
+     */
+    onRemove(parent) {}
 
     /** @protected */
     onDestroy() {}
+
+    /**
+     * 
+     * @param {GameObject} child 
+     */
+    add(child) {
+        super.add(child)
+        if (child instanceof GameObject) {
+            child.onAdd(this)
+        }
+        return this
+    }
+
+    /**
+     * 
+     * @param {GameObject} child 
+     * @param {boolean} destroyChild 
+     */
+    remove(child, destroyChild = false) {
+        if (child instanceof GameObject) {
+            child.onRemove(this)
+        }
+        return super.remove(child, destroyChild)
+    }
+
+    /**
+     * @private
+     */
+    preDestroy() {
+        this.onDestroy()
+        super.preDestroy()
+    }
+
+    /**
+     * 
+     * @param {boolean} destroyChild 
+     * @returns 
+     */
+    removeAll(destroyChild = false) {
+        this.each(child => {
+            if (child instanceof GameObject) {
+                child.onRemove(this)
+            }
+        })
+        return super.removeAll(destroyChild)
+    }
+
+    /**
+     * @param {number} time 
+     * @param {number} delta 
+     */
+    doUpdate(time, delta) {
+        this.onUpdate(time, delta)
+        for (let child of this.list) {
+            if (child instanceof GameObject) {
+                child.doUpdate(time, delta)
+            }
+        }
+    }
 
     /**
      * 
@@ -58,11 +107,6 @@ class GameObject extends Container {
         return false
     }
 
-}
-
-GameObject.Events = {
-    ADD: 'GAMEOBJECT_ADD',
-    REMOVE: 'GAMEOBJECT_REMOVE'
 }
 
 export default GameObject

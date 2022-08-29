@@ -99,7 +99,7 @@ class Scene extends PhaserScene {
         this.onDestroy()
         this.features.destroyAll()
         this.flow.destroy()
-        this.pool.destroyAll()
+        this.pool.dispose()
     }
 
     /**

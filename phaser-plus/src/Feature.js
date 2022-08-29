@@ -10,12 +10,6 @@ import Scene from './Scene'
 
 class Feature extends Container {
 
-    /** 
-     * @readonly
-     * @type {string}
-     */
-    key = null
-
     /**
      * @protected
      * @type {Object<string,any>}
@@ -53,7 +47,7 @@ class Feature extends Container {
      * @param {number} time 
      * @param {number} delta 
      */
-    onUpdate() {}
+    onUpdate(time, delta) {}
 
     /** @protected */
     onDestroy() {}

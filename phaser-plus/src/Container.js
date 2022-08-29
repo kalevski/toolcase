@@ -1,13 +1,20 @@
-import { Game } from 'phaser'
+import { generateId } from '@toolcase/base'
+import { Game, GameObjects } from 'phaser'
 import Scene from './Scene'
 
-class Container {
+class Container extends GameObjects.Container {
 
     /** @type {Scene} */
     scene = null
 
     /** @type {Game} */
     game = null
+
+    /** 
+     * @readonly
+     * @type {string}
+     */
+    key = null
 
     /**
      * 
@@ -17,7 +24,7 @@ class Container {
         super(scene)
         this.scene = scene
         this.game = this.scene.game
-        this.name = generateId(20)
+        this.name = generateId(16)
     }
 
     get id() {

@@ -38,6 +38,11 @@ class GameObject2D extends GameObject {
         this.projection.translate(x, y, this)
         this.transform.set(x, y)
     }
+
+    doUpdate(time, delta) {
+        super.doUpdate(time, delta)
+        this.projection.inverse.translate(this.x, this.y, this.transform)
+    }
 }
 
 export default GameObject2D

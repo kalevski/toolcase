@@ -1,11 +1,12 @@
 import { Logger } from '@toolcase/logging'
-import { GameObjects, Time } from 'phaser'
+import { Time } from 'phaser'
 import Scene from '../Scene'
 import GameObject2D from './GameObject2D'
 import Matrix2 from '../structs/Matrix2'
 import GameObjectPool from '../structs/GameObjectPool'
+import GameObject from '../GameObject'
 
-class WorldObjects extends GameObjects.Container {
+class WorldObjects extends GameObject {
 
     /**
      * @private
@@ -47,13 +48,8 @@ class WorldObjects extends GameObjects.Container {
         })
     }
 
-    /**
-     * 
-     * @param {string} key 
-     * @param {typeof GameObject2D} gameObjectClass 
-     */
-    register(key, gameObjectClass, resetFn) {
-        this.pool.register(key, gameObjectClass, resetFn, this.createInstance)
+    register(key, gameObject2DClass) {
+        this.pool.register(key, gameObject2DClass, this.createInstance)
         return this
     }
 
@@ -66,9 +62,7 @@ class WorldObjects extends GameObjects.Container {
      */
     add(key, x, y) {
         let object = this.pool.obtain(key)
-        // object.key = key
         super.add(object)
-        // object.emit(GameObject2D.Events.ADD_TO_WORLD)
         object.setTransform(x, y)
         return object
     }
@@ -79,12 +73,10 @@ class WorldObjects extends GameObjects.Container {
      */
     remove(gameObject) {
         super.remove(gameObject)
-        // this.scene.children.remove(gameObject)
-        // gameObject.emit(GameObject2D.Events.REMOVE_FROM_WORLD)
         this.pool.release(gameObject)
+        return this
     }
 
-    
     /**
      * @private
      * @param {number} time 
@@ -92,17 +84,10 @@ class WorldObjects extends GameObjects.Container {
      */
     doUpdate(time, delta) {
         for (let gameObject of this.list) {
-            this.projection.inverse.translate(gameObject.x, gameObject.y, gameObject.transform)
-            gameObject.onUpdate(time, delta)
+            if (gameObject instanceof GameObject) {
+                gameObject.doUpdate(time, delta)
+            }
         }
-    }
-
-    /** @private */
-    onDestroy() {
-        this.each(child => {
-            this.pool.release(child)
-        })
-        this.removeAll()
     }
 
     /** @private */
@@ -111,6 +96,7 @@ class WorldObjects extends GameObjects.Container {
     }
 
     /**
+     * TODO: make sort to work for all childs
      * @private
      * @param {GameObject2D} objectA 
      * @param {GameObject2D} objectB 
@@ -128,9 +114,8 @@ class WorldObjects extends GameObjects.Container {
      * @param {typeof GameObject2D} gameObjectClass 
      * @returns {GameObject2D}
      */
-    createInstance = (gameObjectClass) => {
-        let object = new gameObjectClass(this.scene, this.projection)
-        object.onCreate()
+    createInstance = (_, gameObjectClass, scene) => {
+        let object = new gameObjectClass(scene, this.projection)
         return object
     }
 
