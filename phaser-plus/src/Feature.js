@@ -1,6 +1,6 @@
 import { EventEmitter } from '@toolcase/base'
 import logging, { Logger } from '@toolcase/logging'
-import GameObject from './GameObject'
+import Container from './Container'
 import Scene from './Scene'
 
 /**
@@ -8,13 +8,7 @@ import Scene from './Scene'
  * @param {Object<string,any>} payload
  */
 
-class Feature extends GameObject {
-
-    /** 
-     * @readonly
-     * @type {string}
-     */
-    key = null
+class Feature extends Container {
 
     /**
      * @protected
@@ -53,7 +47,7 @@ class Feature extends GameObject {
      * @param {number} time 
      * @param {number} delta 
      */
-    onUpdate() {}
+    onUpdate(time, delta) {}
 
     /** @protected */
     onDestroy() {}

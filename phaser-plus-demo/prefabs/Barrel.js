@@ -1,12 +1,15 @@
+import logging from '@toolcase/logging'
 import { GameObject, Perspective2D } from '@toolcase/phaser-plus'
+import { GameObjects } from 'phaser'
 
 class Barrel extends Perspective2D.GameObject2D {
 
     /** @type {GameObjects.Image} */
     base = null
 
-    onCreate() {
+    logger = logging.getLogger('barrel')
 
+    onCreate() {
         this.base = this.scene.add.image(0, -50, 'objects', 'barrel_vertical')
             // .setPipeline('Light2D')
         this.add(this.base)
@@ -19,9 +22,39 @@ class Barrel extends Perspective2D.GameObject2D {
         }, true)
         this.setFixedRotation()
 
-        // this.setSensorPoint('action:take', 0, -40)
+        /** @type {Barrel} */
+        let barrel = null
 
-        super.onCreate()
+        setTimeout(() => {
+            barrel = this.scene.pool.obtain('barrel2')
+            this.add(barrel)
+            barrel.setPosition(30, 30)
+        })
+
+        setTimeout(() => {
+            this.remove(barrel)
+            this.scene.pool.release(barrel)
+        }, 2000)
+
+        setTimeout(() => {
+            barrel = this.scene.pool.obtain('barrel2')
+            this.add(barrel)
+            barrel.setPosition(40, 40)
+        }, 4000)
+
+        this.logger.info('created')
+    }
+
+    onAdd() {
+        this.logger.info('added')
+    }
+
+    onRemove() {
+        this.logger.info('removed')
+    }
+
+    onDestroy() {
+        this.logger.info('destroy')
     }
 
 }

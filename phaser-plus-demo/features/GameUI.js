@@ -8,6 +8,9 @@ class GameUI extends Feature {
         this.fpsText.setFontSize(36)
         this.add(this.fpsText)
 
+        let child = this.scene.pool.obtain('test')
+        this.add(child)
+
     }
 
     onUpdate() {

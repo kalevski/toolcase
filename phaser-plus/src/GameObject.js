@@ -1,14 +1,9 @@
-import { Game, GameObjects } from 'phaser'
+import { Game } from 'phaser'
 import { generateId } from '@toolcase/base'
 import Scene from './Scene'
+import Container from './Container'
 
-class GameObject extends GameObjects.Container {
-
-    /** @type {Scene} */
-    scene = null
-
-    /** @type {Game} */
-    game = null
+class GameObject extends Container {
 
     /**
      * 
@@ -17,12 +12,99 @@ class GameObject extends GameObjects.Container {
     constructor(scene) {
         super(scene)
         this.scene = scene
-        this.game = this.scene.game
-        this.name = generateId(20)
     }
 
-    get id() {
-        return this.name
+    /** @protected */
+    onCreate() {}
+
+    /**
+     * @protected
+     * @param {GameObject} parent 
+     */
+    onAdd(parent) {}
+
+    /** 
+     * @protected
+     * @param {number} time 
+     * @param {number} delta 
+     */
+    onUpdate(time, delta) {}
+
+    /**
+     * @protected
+     * @param {GameObject} parent 
+     */
+    onRemove(parent) {}
+
+    /** @protected */
+    onDestroy() {}
+
+    /**
+     * 
+     * @param {GameObject} child 
+     */
+    add(child) {
+        super.add(child)
+        if (child instanceof GameObject) {
+            child.onAdd(this)
+        }
+        return this
+    }
+
+    /**
+     * 
+     * @param {GameObject} child 
+     * @param {boolean} destroyChild 
+     */
+    remove(child, destroyChild = false) {
+        if (child instanceof GameObject) {
+            child.onRemove(this)
+        }
+        return super.remove(child, destroyChild)
+    }
+
+    /**
+     * @private
+     */
+    preDestroy() {
+        this.onDestroy()
+        super.preDestroy()
+    }
+
+    /**
+     * 
+     * @param {boolean} destroyChild 
+     * @returns 
+     */
+    removeAll(destroyChild = false) {
+        this.each(child => {
+            if (child instanceof GameObject) {
+                child.onRemove(this)
+            }
+        })
+        return super.removeAll(destroyChild)
+    }
+
+    /**
+     * @param {number} time 
+     * @param {number} delta 
+     */
+    doUpdate(time, delta) {
+        this.onUpdate(time, delta)
+        for (let child of this.list) {
+            if (child instanceof GameObject) {
+                child.doUpdate(time, delta)
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {number} x 
+     * @param {number} y 
+     */
+    contains(x, y) {
+        return false
     }
 
 }

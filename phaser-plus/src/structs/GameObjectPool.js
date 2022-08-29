@@ -60,10 +60,9 @@ class GameObjectPool {
      * 
      * @param {string} key 
      * @param {typeof ObjectClass} gameObjectClass 
-     * @param {ResetFn} resetFn 
      * @param {InstanceFn} instanceFn
      */
-    register(key, gameObjectClass, resetFn, instanceFn = null) {
+    register(key, gameObjectClass, instanceFn = null) {
         if (this.pools.has(key)) {
             this.logger.error(`game object ${key} is already registered`)
             return this
@@ -71,7 +70,7 @@ class GameObjectPool {
         if (instanceFn === null) {
             instanceFn = this.createInstance
         }
-        let pool = new ObjectPool(gameObjectClass, resetFn, instanceFn)
+        let pool = new ObjectPool(gameObjectClass, null, gameObjectClass => instanceFn(key, gameObjectClass, this.scene))
         this.pools.set(key, pool)
         return this
     }
@@ -87,7 +86,14 @@ class GameObjectPool {
             this.logger.error(`game object ${key} is not registered`)
             return null
         }
-        return pool.obtain()
+        let object = pool.obtain()
+        if (object.key === null) {
+            object.key = key
+            object.poolable = true
+            this.scene.add.existing(object)
+            object.onCreate()
+        }
+        return object 
     }
 
     /**
@@ -95,16 +101,19 @@ class GameObjectPool {
      * @param {T} gameObject 
      */
     release(gameObject) {
-        gameObject.release()
+        if (gameObject.release !== null) {
+            this.scene.children.remove(gameObject)
+            gameObject.release()
+        } else {
+            this.logger.warning('object is not created by the pool', gameObject)
+        }
         return this
     }
 
-    destroyAll() {
-        for (let key of this.pools.keys()) {
-            let pool = this.pools.get(key)
+    dispose() {
+        this.pools.forEach(pool => {
             pool.dispose()
-            this.pools.delete(key)
-        }
+        })
     }
 
     /**
@@ -113,7 +122,6 @@ class GameObjectPool {
      */
     createInstance(_, GameObjectClass, scene) {
         let object = new GameObjectClass(scene)
-        scene.add.existing(object)
         return object
     }
 
