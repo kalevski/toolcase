@@ -1,7 +1,19 @@
+const { Serializer } = require('@toolcase/base')
 const { Level } = require('@toolcase/logging')
 const { Realtime, logging, Transports, AuthMiddleware, Room } = require('@toolcase/realtime')
 
 logging.level = Level.VERBOSE
+
+const serializer = new Serializer()
+
+serializer.define('test', [
+    { key: 'types', type: 'int32', rule: 'repeated' }
+])
+
+serializer.define('my_topic', [
+    { key: 'names', type: 'bool', rule: 'repeated' },
+    { key: 'test', type: 'test', rule: 'required' }
+])
 
 class MyRoom extends Room {
     onCreate() {
@@ -14,8 +26,12 @@ class MyRoom extends Room {
 
     /** @type {import('@toolcase/realtime').TopicListener} */
     onMyTopic(actor, payload) {
-        console.log(payload.toString())
-        actor.send('my_topic', 'hey')
+        actor.send('my_topic', serializer.encode('my_topic', {
+            names: [true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false],
+            test: {
+                types: [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]
+            }
+        }))
     }
 }
 
