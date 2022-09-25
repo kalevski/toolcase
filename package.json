@@ -9,6 +9,7 @@
         "logging",
         "phaser-plus",
         "realtime",
+        "realtime-js",
         "phaser-plus-demo",
         "realtime-demo"
     ],

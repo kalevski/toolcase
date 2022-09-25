@@ -1,30 +1,18 @@
-import { Serializer } from '@toolcase/base'
+import { WSClient } from '@toolcase/realtime.js'
 
-let serializer = new Serializer()
+const decoder = new window.TextDecoder('utf-8')
 
-serializer.define('message', [
-    { key: 'topic', type: 'string', rule: 'required' },
-    { key: 'payload', type: 'bytes', rule: 'required' },
-    { key: 'sender', type: 'string', rule: 'optional' }
-])
+const client = new WSClient('ws://localhost:3000')
+client.connect('test')
 
-serializer.define('my_data', [
-    { key: 'message', type: 'string', 'rule': 'repeated' }
-])
-
-let message = serializer.encode('my_data', {
-    message: ['test1', 'test2']
+client.on('client:connect', () => {
+    client.send('my_topic', 'test')
 })
 
-let overNetwork = serializer.encode('message', {
-    topic: 'my_topic',
-    payload: message,
-    sender: 'me'
+client.on('client:disconnect', payload => {
+    console.log('reason:', decoder.decode(payload))
 })
 
-
-let decodedTop = serializer.decode('message', overNetwork)
-console.log(decodedTop)
-
-let actualData = serializer.decode('my_data', decodedTop.payload)
-console.log(actualData)
+client.on('my_topic', (payload) => {
+    console.log(decoder.decode(payload))
+})

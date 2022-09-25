@@ -1,7 +1,8 @@
 import { Broadcast } from '@toolcase/base'
-import { WebSocket } from 'ws'
-import loggging from '../logging'
-import { decode, encode } from '../serializer'
+import logging from '@toolcase/logging'
+import { decode, encode } from './serializer'
+
+const encoder = new window.TextEncoder()
 
 /**
  * @typedef EventTypes
@@ -19,16 +20,16 @@ import { decode, encode } from '../serializer'
  */
 class WSClient extends Broadcast {
 
+    /** @private */
+    logger = logging.getLogger('ws client')
+
     /**
      * @private
      * @type {string}
      */
     baseURL = null
 
-    /** @private */
-    logger = loggging.getLogger('ws client')
-
-    /** 
+    /**
      * @private
      * @type {WebSocket}
      */
@@ -54,21 +55,21 @@ class WSClient extends Broadcast {
         if (typeof ticket !== 'string') {
             throw new Error(`ticketmust be a sting, ${ticket} provided`)
         }
-        let url = new URL(this.baseURL)
+        let url = new window.URL(this.baseURL)
         url.searchParams.append('ticket', ticket)
-        this.ws = new WebSocket(url.toString())
-        this.ws.once('open', () => this.onOpen())
-        this.ws.once('close', (code, reason) => this.onClose(code, reason))
+        this.ws = new window.WebSocket(url.toString())
+        this.ws.onopen = this.onOpen
+        this.ws.onclose = this.onClose
+        this.ws.binaryType = 'arraybuffer'
     }
 
-    disconnect() {
+    disocnnect() {
         if (!this.connected) {
             return
         }
         this.ws.close()
-        this.ws.removeAllListeners()
         this.ws = null
-        this.emit('client:disconnect', Buffer.from('terminated'))
+        this.emit('client:disconnect', encoder.encode('terminated'))
     }
 
     /**
@@ -90,36 +91,33 @@ class WSClient extends Broadcast {
         }
 
         if (typeof payload === 'string') {
-            return this.ws.send(encode(topic, Buffer.from(payload, 'utf-8')))
+            return this.ws.send(encode(topic, encoder.encode(payload)))
         }
 
         throw new Error(`send error: invalid payload=${payload}, must be a string or Buffer`)
     }
 
     /** @private */
-    onOpen() {
-        this.ws.on('message', (data, isBinary) => this.onMessage(data, isBinary))
+    onOpen = () => {
+        this.ws.onmessage = this.onMessage
         this.emit('client:connect')
     }
 
     /**
      * @private
-     * @param {Uint8Array} data 
-     * @param {boolean} isBinary 
+     * @param {MessageEvent} message 
      */
-    onMessage(data, isBinary) {
-        let { topic, payload } = decode(data)
+    onMessage = (message) => {
+        let { topic, payload } = decode(new Uint8Array(message.data))
         this.emit(topic, payload)
     }
 
     /**
      * @private
-     * @param {number} code 
-     * @param {Uint8Array} reason 
+     * @param {CloseEvent} event
      */
-    onClose(code, reason) {
-        this.emit('client:disconnect', reason)
-        this.ws.removeAllListeners()
+    onClose = (event) => {
+        this.emit('client:disconnect', encoder.encode(event.reason))
         this.ws = null
     }
 

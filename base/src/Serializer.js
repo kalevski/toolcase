@@ -55,6 +55,7 @@ class Serializer {
      * @returns {Uint8Array} 
      */
     encode(key, message) {
+        this.writer.reset()
         let type = this.getType(key)
         try {
             return type.encode(message, this.writer).finish()

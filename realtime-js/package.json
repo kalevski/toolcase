@@ -1,0 +1,47 @@
+{
+    "name": "@toolcase/realtime.js",
+    "version": "0.1.0",
+    "description": "Browser client library for @toolcase/realtime",
+    "source": "src/main.js",
+    "main": "lib/main.js",
+    "module": "lib/module.js",
+    "types": "lib/main.d.ts",
+    "scripts": {
+        "dev": "nodemon -e js -w src --exec \"npm run build\"",
+        "build": "npm run build:src && npm run build:tsd",
+        "build:src": "parcel build src/main.js --no-source-maps --no-optimize",
+        "build:tsd": "tsc -d --allowJs --types @toolcase/base,@toolcase/logging --emitDeclarationOnly --target es5 --lib ES2015,DOM,ScriptHost --outDir ./lib src/*.js"
+    },
+    "peerDependencies": {
+        "@toolcase/base": "0.x",
+        "@toolcase/logging": "0.x"
+    },
+    "targets": {
+        "types": false
+    },
+    "homepage": "https://kalevski.dev/toolcase",
+    "keywords": [
+        "realtime",
+        "websocket",
+        "multiplayer",
+        "browser"
+    ],
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "license": "MIT"
+}
