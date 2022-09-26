@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/realtime",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "🔗 Library for building real-time apps",
     "source": "src/main.js",
     "main": "lib/main.js",
@@ -21,7 +21,7 @@
         "types": false
     },
     "homepage": "https://kalevski.dev/toolcase",
-    "keywords": [],
+    "keywords": ["realtime", "websockets", "networking", "multiplayer", "netcode", "toolcase"],
     "directories": {
         "lib": "lib"
     },

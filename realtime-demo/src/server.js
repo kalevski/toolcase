@@ -16,6 +16,7 @@ serializer.define('my_topic', [
 ])
 
 class MyRoom extends Room {
+    
     onCreate() {
         this.listen('my_topic', this.onMyTopic)
     }
