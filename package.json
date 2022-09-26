@@ -10,8 +10,7 @@
         "phaser-plus",
         "realtime",
         "realtime-js",
-        "phaser-plus-demo",
-        "realtime-demo"
+        "demos/**"
     ],
     "devDependencies": {
         "@toolcase/base": "^0.17.14",
