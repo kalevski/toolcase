@@ -1,0 +1,22 @@
+{
+    "name": "@toolcase/realtime-demo",
+    "private": true,
+    "scripts": {
+        "dev": "concurrently  npm:dev:server npm:dev:client",
+        "dev:server": "nodemon -w src --exec \"node src/server.js\"",
+        "dev:client": "parcel src/webapp.html --dist-dir public"
+    },
+    "targets": {
+        "types": false
+    },
+    "homepage": "https://kalevski.dev/toolcase",
+    "keywords": [],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "license": "MIT"
+}

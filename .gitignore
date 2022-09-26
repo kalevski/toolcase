@@ -5,3 +5,7 @@ node_modules
 phaser-plus-demo/public/*
 !phaser-plus-demo/public/README.md
 !phaser-plus-demo/public/assets
+
+realtime-demo/public/*
+!realtime-demo/public/README.md
+!realtime-demo/public/assets

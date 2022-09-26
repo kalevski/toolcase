@@ -14,6 +14,7 @@ import Color from './Color'
 import JSONSchema from './JSONSchema'
 import getNumberInRange from './getNumberInRange'
 import Cache from './Cache'
+import Serializer from './Serializer'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -43,5 +44,6 @@ export {
     Color,
     JSONSchema,
     getNumberInRange,
-    Cache
+    Cache,
+    Serializer
 }

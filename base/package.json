@@ -1,18 +1,20 @@
 {
     "name": "@toolcase/base",
-    "version": "0.17.14",
+    "version": "0.18.15",
     "description": "🧬 Collection of JavaScript helper functions and structures",
     "source": "src/main.js",
     "main": "lib/main.js",
     "module": "lib/module.js",
     "types": "lib/main.d.ts",
     "scripts": {
+        "dev": "nodemon -e js -w src --exec \"npm run build\"",
         "build": "npm run build:src && npm run build:tsd",
         "build:src": "parcel build --no-source-maps",
         "build:tsd": "tsc -d --allowJs --emitDeclarationOnly --target es5 --lib ES2015 --outDir ./lib src/*.js"
     },
     "dependencies": {
-        "eventemitter3": "^4.0.7"
+        "eventemitter3": "^4.0.7",
+        "protobufjs": "^7.1.2"
     },
     "targets": {
         "types": false
