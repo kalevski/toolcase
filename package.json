@@ -17,7 +17,7 @@
         "@toolcase/logging": "^0.2.9",
         "@toolcase/phaser-plus": "^0.7.11",
         "@types/ws": "^8.5.3",
-        "concurrently": "^7.3.0",
+        "concurrently": "^7.4.0",
         "docsify-cli": "^4.4.4",
         "express": "^4.18.1",
         "nodemon": "^2.0.20",
