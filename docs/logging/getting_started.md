@@ -1,3 +1,0 @@
-# Logging
-
-[WORK IN PROGRESS]
