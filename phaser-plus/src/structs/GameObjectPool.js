@@ -114,6 +114,7 @@ class GameObjectPool {
         this.pools.forEach(pool => {
             pool.dispose()
         })
+        this.pools.clear()
     }
 
     /**
