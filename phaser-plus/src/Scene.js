@@ -95,7 +95,6 @@ class Scene extends PhaserScene {
 
     /** @private */
     destroy() {
-        this.features.off('register', this.onFeatureRegister, this)
         this.onDestroy()
         this.features.destroyAll()
         this.flow.destroy()
