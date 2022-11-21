@@ -102,7 +102,6 @@ class GameObjectPool {
      */
     release(gameObject) {
         if (gameObject.release !== null) {
-            this.scene.children.remove(gameObject)
             gameObject.release()
         } else {
             this.logger.warning('object is not created by the pool', gameObject)
