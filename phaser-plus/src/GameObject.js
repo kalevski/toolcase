@@ -40,24 +40,26 @@ class GameObject extends Container {
     onDestroy() {}
 
     /**
-     * 
+     * @override
      * @param {GameObject} child 
      */
     add(child) {
         super.add(child)
         if (child instanceof GameObject) {
+            child.setVisible(true)
             child.onAdd(this)
         }
         return this
     }
 
     /**
-     * 
+     * @override
      * @param {GameObject} child 
      * @param {boolean} destroyChild 
      */
     remove(child, destroyChild = false) {
         if (child instanceof GameObject) {
+            child.setVisible(false)
             child.onRemove(this)
         }
         return super.remove(child, destroyChild)
@@ -72,7 +74,7 @@ class GameObject extends Container {
     }
 
     /**
-     * 
+     * @override
      * @param {boolean} destroyChild 
      * @returns 
      */

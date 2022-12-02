@@ -10,4 +10,4 @@ const logging = new LoggerFactory([
 
 export default logging
 
-export { Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter }
+export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter }

@@ -5,10 +5,10 @@
  * @param {('string'|'number'|'boolean')} type
  */
  const env = (key, defaultValue = null, type = 'string') => {
-    if (typeof process === 'undefined') {
+    if (typeof globalThis.process === 'undefined') {
         throw new Error('env works only with NodeJS')
     }
-   let value = process.env[key]
+   let value = globalThis.process.env[key]
    if (type === 'number') {
        let numberValue = parseInt(value, 10)
        return numberValue.toString() === value ? numberValue : defaultValue

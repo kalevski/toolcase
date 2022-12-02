@@ -2,10 +2,10 @@ lib
 node_modules
 .parcel-cache
 
-phaser-plus-demo/public/*
-!phaser-plus-demo/public/README.md
-!phaser-plus-demo/public/assets
+demos/phaser-plus-demo/public/*
+!demos/phaser-plus-demo/public/README.md
+!demos/phaser-plus-demo/public/assets
 
-realtime-demo/public/*
-!realtime-demo/public/README.md
-!realtime-demo/public/assets
+demos/realtime-demo/public/*
+!demos/realtime-demo/public/README.md
+!demos/realtime-demo/public/assets

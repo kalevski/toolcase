@@ -1,5 +1,3 @@
-import React, { Component } from 'react'
-import { createRoot } from 'react-dom/client'
 import Feature from './Feature'
 import Scene from './Scene'
 
@@ -9,126 +7,40 @@ import Scene from './Scene'
  class DOMFeature extends Feature {
 
     /**
-     * @callback StateCallback
-     * @returns {void}
-     */
-
-    /**
      * @private
      * @type {HTMLDivElement}
      */
-    node = null
-
-    /**
-     * @private
-     * @type {import('react-dom/client').Root}
-     */
-    reactRoot = null
-
-    /**
-     * @private
-     */
-    jsxRef = React.createRef()
-
-    /**
-     * @returns {T}
-     */
-    get state() {
-        if (this.jsxRef.current === null) {
-            return null
-        } else {
-            return this.jsxRef.current.state
-        }
-    }
+    _node = null
 
     /**
      * 
      * @param {Scene} scene 
-     * @param {Map<string, any>} options 
+     * @param {Object<string,any>} options 
+     * @param {string} key 
      */
     constructor(scene, options, key) {
         super(scene, options, key)
+        let container = this.game.domContainer
+        if (container === null) {
+            throw new Error('dom container is not enabled, enable by setting dom.createContainer inside config')
+        }
         DOMFeature.setup()
+        this._node = globalThis.document.createElement('div')
+        this._node.setAttribute('id', `feature-${key}`)
+        this._node.classList.add('dom-feature')
+        this._node.classList.add(`feature-${key}`)
+        container.append(this._node)
     }
 
-    /**
-     * @private
-     * @returns {void}
-     */
-    onCreate() {
-        if (this.game.domContainer === null) {
-            this.logger.error('DOMFeature works only with domContainer enabled')
-            return
-        }
-        
-        this.node = window.document.createElement('div')
-        this.node.setAttribute('id', this.key)
-        this.node.classList.add('html-feature')
-
-        this.game.domContainer.append(this.node)
-
-        const JSXComponent = class JSXComponent extends Component {
-            constructor(props) {
-                super(props)
-                this.state = props.nodeState
-                this.render = props.onRender
-            }
-            
-        }
-
-        let nodeState = this.onStateInit()
-
-        this.reactRoot = createRoot(this.node)
-        this.reactRoot.render(<JSXComponent ref={this.jsxRef} nodeState={nodeState} onRender={() => {
-            if (this.state === null){
-                return <></>
-            } else {
-                return this.onRender()
-            }
-        }} />)
-        setTimeout(() => {
-            this.setState(nodeState)
-            this.onMount()
-        })
-
+    get node() {
+        return this._node
     }
 
-    /** @private */
-    onDestroy() {
-        this.onUnmount()
-        this.reactRoot.unmount()
-        this.node.remove()
+    preDestroy() {
+        this._node.remove()
+        this._node = null
+        super.preDestroy()
     }
-
-
-
-    /**
-     * 
-     * @param {T} state 
-     * @param {StateCallback} callback 
-     */
-    setState(state, callback) {
-        this.jsxRef.current.setState(state, callback)
-    }
-
-    /**
-     * @protected
-     * @returns {T}
-     */
-    onStateInit() {
-        return {}
-    }
-
-    /**
-     * @protected
-     */
-    onRender() {}
-
-    /** @protected */
-    onMount() {}
-
-    /** @protected */
-    onUnmount() {}
 
 }
 
@@ -140,13 +52,13 @@ DOMFeature.setup = () => {
     style = document.createElement('style')
     style.id = '@toolcase/phaser-plus'
     style.innerHTML = `
-    .html-feature {
+    .dom-feature {
         pointer-events: none;
         width: 100%;
         height: 100%;
         overflow: hidden;
     }
-    .html-feature * {
+    .dom-feature * {
         pointer-events: auto;
         user-select: none;
     }`

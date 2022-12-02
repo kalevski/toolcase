@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/logging",
-    "version": "0.2.9",
+    "version": "0.3.11",
     "description": "🏷 Lightweight logger for NodeJS and Browser",
     "source": "src/main.js",
     "main": "lib/main.js",
@@ -9,11 +9,17 @@
     "scripts": {
         "dev": "nodemon -e js -w src --exec \"npm run build\"",
         "build": "npm run build:src && npm run build:tsd",
-        "build:src": "parcel build --no-source-maps",
+        "build:src": "parcel build --no-source-maps --no-cache",
         "build:tsd": "tsc -d --allowJs --emitDeclarationOnly --target es5 --lib ES2015 --outDir ./lib src/*.js"
     },
     "targets": {
-        "types": false
+        "types": false,
+        "main": {
+            "optimize": true
+        },
+        "module": {
+            "optimize": true
+        }
     },
     "homepage": "https://kalevski.dev/toolcase",
     "keywords": [

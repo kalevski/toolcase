@@ -1,3 +1,5 @@
+import md5 from 'md5'
+
 class ServiceRegistry {
 
     /**
@@ -39,12 +41,10 @@ class ServiceRegistry {
      * @param {typeof Object} serviceClass 
      */
     getServiceType(serviceClass) {
-        try {
-            let key = serviceClass.prototype.constructor.name || null
-            return key
-        } catch (error) {
+        if (typeof serviceClass !== 'function') {
             throw new Error(`provided serviceClass is not a class`)
         }
+        return md5(serviceClass.toString())
     }
 
 }

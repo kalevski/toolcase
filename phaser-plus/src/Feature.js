@@ -1,14 +1,15 @@
 import { EventEmitter } from '@toolcase/base'
 import logging, { Logger } from '@toolcase/logging'
 import Container from './Container'
+import GameObject from './GameObject'
 import Scene from './Scene'
 
-/**
- * @callback ListenerFn
- * @param {Object<string,any>} payload
- */
-
 class Feature extends Container {
+
+    /**
+     * @callback ListenerFn
+     * @param {Object<string,any>} payload
+     */
 
     /**
      * @protected
@@ -31,6 +32,7 @@ class Feature extends Container {
      * 
      * @param {Scene} scene 
      * @param {Object<string,any>} options 
+     * @param {string} key
      */
     constructor(scene, options = {}, key = null) {
         super(scene)
@@ -51,6 +53,46 @@ class Feature extends Container {
 
     /** @protected */
     onDestroy() {}
+
+    /**
+     * @override
+     * @param {GameObject} child 
+     */
+     add(child) {
+        super.add(child)
+        if (child instanceof GameObject) {
+            child.setVisible(true)
+            child.onAdd(this)
+        }
+        return this
+    }
+
+    /**
+     * @override
+     * @param {GameObject} child 
+     * @param {boolean} destroyChild 
+     */
+    remove(child, destroyChild = false) {
+        if (child instanceof GameObject) {
+            child.setVisible(false)
+            child.onRemove(this)
+        }
+        return super.remove(child, destroyChild)
+    }
+
+    /**
+     * @override
+     * @param {boolean} destroyChild 
+     * @returns 
+     */
+    removeAll(destroyChild = false) {
+        this.each(child => {
+            if (child instanceof GameObject) {
+                child.onRemove(this)
+            }
+        })
+        return super.removeAll(destroyChild)
+    }
 
     /**
      * 

@@ -2,7 +2,7 @@
     "name": "@toolcase/root",
     "private": true,
     "scripts": {
-        
+        "build": "npm run build --workspaces"
     },
     "workspaces": [
         "base",
