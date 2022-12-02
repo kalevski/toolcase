@@ -21,35 +21,17 @@ class Barrel extends Perspective2D.GameObject2D {
             frictionAir: 1.7
         }, true)
         this.setFixedRotation()
-
-        /** @type {Barrel} */
-        let barrel = null
-
-        setTimeout(() => {
-            barrel = this.scene.pool.obtain('barrel2')
-            this.add(barrel)
-            barrel.setPosition(30, 30)
-        })
-
-        setTimeout(() => {
-            this.remove(barrel)
-            this.scene.pool.release(barrel)
-        }, 2000)
-
-        setTimeout(() => {
-            barrel = this.scene.pool.obtain('barrel2')
-            this.add(barrel)
-            barrel.setPosition(40, 40)
-        }, 4000)
-
+        this.scene.matter.world.remove(this.body)
         this.logger.info('created')
     }
 
     onAdd() {
+        this.scene.matter.world.add(this.body)
         this.logger.info('added')
     }
 
     onRemove() {
+        this.scene.matter.world.remove(this.body)
         this.logger.info('removed')
     }
 

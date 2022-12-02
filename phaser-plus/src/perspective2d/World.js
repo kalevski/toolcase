@@ -5,7 +5,6 @@ import Feature from '../Feature'
 import WorldNavMesh from './WorldNavMesh'
 import WorldObjects from './WorldObjects'
 import Matrix2 from '../structs/Matrix2'
-import PerspectiveGrid from './PerspectiveGrid'
 
 class World extends Feature {
 
@@ -33,11 +32,6 @@ class World extends Feature {
      */
     overlay = null
 
-    /**
-     * @type {PerspectiveGrid}
-     */
-    grid = null
-
     /** @protected */
     onCreate() {
 
@@ -57,9 +51,6 @@ class World extends Feature {
             .add(this.overlay)
 
         this.path = new PathFinder(new WorldNavMesh(this.objects))
-
-        this.grid = new PerspectiveGrid(this.scene, this.projection)
-        this.add(this.grid)
     }
 
     add(child) {

@@ -36,7 +36,7 @@ class Loader extends Scene {
     }
 
     onCreate() {
-        this.goTo('world')
+        this.goTo('perspective_test')
     }
 
 }

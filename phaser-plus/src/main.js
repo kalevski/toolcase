@@ -9,6 +9,7 @@ import GameObjectPool from './structs/GameObjectPool'
 import World from './perspective2d/World'
 import GameObject2D from './perspective2d/GameObject2D'
 import WorldObjects from './perspective2d/WorldObjects'
+import DebugGrid from './perspective2d/DebugGrid'
 
 import GameEvent from './flow/GameEvent'
 import SensorEvent from './flow/SensorEvent'
@@ -22,11 +23,11 @@ import PathFinder from './ai/PathFinder'
 import PathNode from './ai/PathNode'
 
 import KeyboardInput from './features/KeyboardInput'
-import SplitScreen from './features/SplitScreen'
+import ScreenLayout from './features/ScreenLayout'
 
 const Features = {
     KeyboardInput,
-    SplitScreen
+    ScreenLayout,
 }
 
 const Structs = {
@@ -37,7 +38,8 @@ const Structs = {
 const Perspective2D = {
     World,
     GameObject2D,
-    WorldObjects
+    WorldObjects,
+    DebugGrid
 }
 
 const Flow = {

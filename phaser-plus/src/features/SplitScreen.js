@@ -78,12 +78,6 @@ class SplitScreen extends Feature {
         hash: null
     }
 
-    /**
-     * @private
-     * @type {Geom.Ellipse}
-     */
-    offsetSwitch = null
-
     tempOffset = new Geom.Point(0, 0)
     
     /** @protected */
@@ -104,7 +98,6 @@ class SplitScreen extends Feature {
             this.setTo(-width / 2, height / 2, width * 1.5, height / 2)
         }
 
-        this.scene.cameras.main
         this.cameras.ui = this.scene.cameras.main.setName('ui')
         this.cameras.B = this.scene.cameras.add(0, 0, width, height, false, 'gameplay B')
         this.cameras.A = this.scene.cameras.add(0, 0, width, height, false, 'gameplay A')
