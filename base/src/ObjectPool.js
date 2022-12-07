@@ -94,7 +94,7 @@
         if (typeof object.release === 'undefined') {
             object.release = () => this.release(object)
         } else {
-            throw new Error(`object ${JSON.stringify(object)} already have release function`)
+            throw new Error(`object ${JSON.stringify(object)} already has release function`)
         }
         this.pool.push(object)
     }
