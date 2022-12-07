@@ -1,0 +1,73 @@
+import { Broadcast } from '@toolcase/base'
+import { Logger } from '@toolcase/logging'
+import { Game } from 'phaser'
+import Scene from './Scene'
+
+class Feature extends Broadcast {
+
+    /**
+     * @protected
+     * @type {Scene}
+     */
+    scene = null
+
+    /**
+     * @protected
+     * @type {Game}
+     */
+    game = null
+
+    /**
+     * @readonly
+     * @type {string}
+     */
+    key = null
+
+    /**
+     * @protected
+     * @type {Logger}
+     */
+    logger = null
+
+
+    /**
+     * 
+     * @param {Scene} scene
+     * @param {string} key 
+     */
+    constructor(scene, key) {
+        super()
+        this.scene = scene
+        this.game = scene.game
+        this.key = key
+        this.logger = this.scene.engine.getLogger(`feature=${key}`)
+    }
+
+    /** @protected */
+    onCreate() {}
+
+    /**
+     * @protected
+     * @param {number} time 
+     * @param {number} delta 
+     */
+    onUpdate(time, delta) {}
+
+    /** @protected */
+    onDestroy() {}
+
+    /**
+     * @protected
+     * @param {*} event 
+     * @param  {...any} messages 
+     */
+    emit(event, ...messages) {
+        if (this.events.listenerCount(event) === 0) {
+            return this.logger.warning(`event=(${event}) is not handled, payload sent:`, ...messages)
+        }
+        super.emit(event, ...messages)
+    }
+
+}
+
+export default Feature
