@@ -53,7 +53,7 @@ class Matrix2 extends Float32Array {
         return out
     }
 
-    set(v00, v01, v10, v11, inverse) {
+    set(v00, v01, v10, v11, inverse = null) {
         this[0] = v00
         this[1] = v01
         this[2] = v10

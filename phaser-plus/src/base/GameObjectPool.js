@@ -68,7 +68,7 @@ class GameObjectPool {
         if (instanceFn === null) {
             instanceFn = this.createInstance
         }
-        
+
         let pool = new ObjectPool(gameObjectClass, resetFn, gameObjectClass => instanceFn(key, gameObjectClass, this.scene))
         this.map.set(key, pool)
         return this
@@ -105,14 +105,14 @@ class GameObjectPool {
     }
 
     dispose() {
-        this.pools.forEach(pool => {
+        this.map.forEach(pool => {
             pool.dispose()
         })
-        this.pools.clear()
+        this.map.clear()
     }
 
     /**
-     * 
+     * @private
      * @param {string} key 
      * @param {new T} GameObjectClass 
      * @param {Scene} scene 

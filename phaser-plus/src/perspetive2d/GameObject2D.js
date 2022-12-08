@@ -1,32 +1,30 @@
-import { GameObjects, Math } from 'phaser'
-import GameObject from '../GameObject'
-import Scene from '../Scene'
-import Matrix2 from '../structs/Matrix2'
+import { Math } from 'phaser'
+import GameObject from '../base/GameObject'
+import Scene from '../base/Scene'
+import World from './World'
 
 class GameObject2D extends GameObject {
 
-    transform = new Math.Vector2(0, 0)
-
-    offset = new Math.Vector2(0, 0)
-
     /**
      * @private
-     * @type {Matrix2}
+     * @type {World}
      */
-    projection = null
+    world = null
+
+    transform = new Math.Vector2(0, 0)
 
     /**
      * 
      * @param {Scene} scene 
-     * @param {Matrix2} projection 
+     * @param {World} world 
      */
-    constructor(scene, projection) {
-        super(scene)
-        this.projection = projection
+    constructor(scene, world) {
+        super(scene, 0, 0)
+        this.world = world
     }
 
-    getProjection() {
-        return this.projection
+    get projection() {
+        return this.world.projection
     }
 
     /**
@@ -39,10 +37,16 @@ class GameObject2D extends GameObject {
         this.transform.set(x, y)
     }
 
+    /**
+     * 
+     * @param {number} time 
+     * @param {number} delta 
+     */
     doUpdate(time, delta) {
         super.doUpdate(time, delta)
         this.projection.inverse.translate(this.x, this.y, this.transform)
     }
+
 }
 
 export default GameObject2D

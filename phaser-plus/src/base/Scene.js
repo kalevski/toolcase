@@ -9,34 +9,30 @@ import GameObjectPool from './GameObjectPool'
 class Scene extends PhaserScene {
 
     /**
-     * @protected
      * @type {Engine}
      */
     engine = null
 
     /**
-     * @protected
-     * @type {Logger}
-     */
-    logger = null
-
-    /**
-     * @protected
      * @type {ServiceRegistry}
      */
     services = null
 
     /**
-     * @protected
      * @type {FeatureRegistry}
      */
     features = null
 
     /**
-     * @protected
      * @type {GameObjectPool<GameObject>}
      */
     pool = null
+
+    /**
+     * @protected
+     * @type {Logger}
+     */
+     logger = null
 
     /** @protected */
     onInit() {}
@@ -74,6 +70,9 @@ class Scene extends PhaserScene {
     }
 
     /** @private */
+    beforeInit() {}
+
+    /** @private */
     init() {
         this.engine = this.initializeEngine()
         this.events.once(Scenes.Events.DESTROY, this.doDestroy, this)
@@ -82,6 +81,7 @@ class Scene extends PhaserScene {
         this.features = new FeatureRegistry(this)
         this.pool = new GameObjectPool(this)
         this.logger.info('initialized')
+        this.beforeInit()
         this.onInit()
     }
 

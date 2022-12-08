@@ -1,70 +1,33 @@
-import Scene from './Scene'
-import GameObject from './GameObject'
-import Feature from './Feature'
-import DOMFeature from './DOMFeature'
+import Scene from './base/Scene'
+import GameObject from './base/GameObject'
+import Feature from './base/Feature'
+import GameObjectPool from './base/GameObjectPool'
+import Layer from './base/Layer'
+
+import Scene2D from './perspetive2d/Scene2D'
+import World from './perspetive2d/World'
+import GameObject2D from './perspetive2d/GameObject2D'
 
 import Matrix2 from './structs/Matrix2'
-import GameObjectPool from './structs/GameObjectPool'
 
-import World from './perspective2d/World'
-import GameObject2D from './perspective2d/GameObject2D'
-import WorldObjects from './perspective2d/WorldObjects'
-import DebugGrid from './perspective2d/DebugGrid'
 
-import GameEvent from './flow/GameEvent'
-import SensorEvent from './flow/SensorEvent'
-import TimeEvent from './flow/TimeEvent'
-import SensorProcessor from './flow/SensorProcessor'
-import MatterJSProcessor from './flow/MatterJSProcessor'
-
-import NavMesh from './ai/NavMesh'
-import Path from './ai/Path'
-import PathFinder from './ai/PathFinder'
-import PathNode from './ai/PathNode'
-
-import KeyboardInput from './features/KeyboardInput'
-import ScreenLayout from './features/ScreenLayout'
-
-const Features = {
-    KeyboardInput,
-    ScreenLayout,
+const Perspective2D = {
+    Scene2D,
+    World,
+    GameObject2D
 }
 
 const Structs = {
-    Matrix2,
-    GameObjectPool
-}
-
-const Perspective2D = {
-    World,
-    GameObject2D,
-    WorldObjects,
-    DebugGrid
-}
-
-const Flow = {
-    GameEvent,
-    SensorEvent,
-    TimeEvent,
-    SensorProcessor,
-    MatterJSProcessor
-}
-
-const AI = {
-    NavMesh,
-    Path,
-    PathFinder,
-    PathNode
+    Matrix2
 }
 
 export {
+    Perspective2D,
+    Structs,
+
     Scene,
     GameObject,
     Feature,
-    DOMFeature,
-    Features,
-    Structs,
-    Perspective2D,
-    Flow,
-    AI
+    GameObjectPool,
+    Layer
 }

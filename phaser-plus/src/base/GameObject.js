@@ -1,5 +1,5 @@
 import { generateId } from '@toolcase/base'
-import { Game, GameObjects } from 'phaser'
+import { Game, GameObjects, Math } from 'phaser'
 import Scene from './Scene'
 
 class GameObject extends GameObjects.Container {
@@ -22,6 +22,9 @@ class GameObject extends GameObjects.Container {
      */
     id = null
 
+    /** @private */
+    _abs = new Math.Vector2(0, 0)
+
     /**
      * 
      * @param {Scene} scene 
@@ -30,8 +33,20 @@ class GameObject extends GameObjects.Container {
      */
     constructor(scene, x, y) {
         super(scene, x, y)
+        this.scene = scene
         this.game = scene.game
         this.id = generateId(16)
+    }
+
+    get absolute() {
+        this._abs.set(this.x, this.y)
+        let parent = this.parentContainer
+        while(parent instanceof GameObjects.GameObject) {
+            this._abs.x += parent.x
+            this._abs.y += parent.y
+            parent = parent.parentContainer
+        }
+        return this._abs
     }
 
     /** @protected */
