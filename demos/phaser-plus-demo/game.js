@@ -1,8 +1,5 @@
 import { Game, Scale, WEBGL } from 'phaser'
-import Loader from './scenes/Loader'
-import Map from './scenes/Map'
-import PerspectiveTest from './scenes/PerspectiveTest'
-import World from './scenes/World'
+import MajorUpdate from './scenes/MajorUpdate'
 
 const screen = new Game({
     type: WEBGL,
@@ -26,8 +23,5 @@ const screen = new Game({
     height: 720
 })
 
-screen.scene.add('loader', new Loader())
-screen.scene.add('world', new World())
-screen.scene.add('perspective_test', new PerspectiveTest())
-screen.scene.add('map', new Map())
-screen.scene.start('loader')
+screen.scene.add('major_update', new MajorUpdate())
+screen.scene.start('major_update')

@@ -13,6 +13,10 @@ class GameObject2D extends GameObject {
 
     transform = new Math.Vector2(0, 0)
 
+    offset = new Math.Vector2(0, 0)
+
+    pivot = new Math.Vector2(0, 0)
+
     /**
      * 
      * @param {Scene} scene 
@@ -45,6 +49,7 @@ class GameObject2D extends GameObject {
     doUpdate(time, delta) {
         super.doUpdate(time, delta)
         this.projection.inverse.translate(this.x, this.y, this.transform)
+        this.pivot.set(this.transform.x + this.offset.x, this.transform.y, this.offset.y)
     }
 
 }

@@ -11,6 +11,8 @@ class Matrix2 extends Float32Array {
     /** @type {number} */
     determinant = 0
 
+    direction = new M.Vector2()
+
     /**
      * 
      * @param {number} v00 
@@ -65,6 +67,10 @@ class Matrix2 extends Float32Array {
         this.adjoint[3] = v00
 
         this.determinant = 1 / (this[0] * this[3] - this[1] * this[2])
+
+        this.direction = new M.Vector2(v00, v01).add(new M.Vector2(v10, v11))
+        // this.direction.x /= Math.abs(this.direction.x)
+        // this.direction.y /= Math.abs(this.direction.y)
 
         if (inverse !== null) {
             this.inverse = inverse
