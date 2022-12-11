@@ -2,6 +2,11 @@ import { Math as M } from 'phaser'
 
 class Matrix2 extends Float32Array {
 
+    /**
+     * @readonly
+     */
+    PRECISION = 10000
+
     /** @type {Float32Array} */
     adjoint = new Float32Array(4)
 
@@ -10,8 +15,6 @@ class Matrix2 extends Float32Array {
 
     /** @type {number} */
     determinant = 0
-
-    direction = new M.Vector2()
 
     /**
      * 
@@ -50,8 +53,8 @@ class Matrix2 extends Float32Array {
      * @returns {M.Vector2}
      */
     translate(x, y, out = new M.Vector2()) {
-        out.x = Math.round((x * this[0] + y * this[1]) * 10000) / 10000
-        out.y = Math.round((x * this[2] + y * this[3]) * 10000) / 10000
+        out.x = Math.round((x * this[0] + y * this[1]) * this.PRECISION) / this.PRECISION
+        out.y = Math.round((x * this[2] + y * this[3]) * this.PRECISION) / this.PRECISION
         return out
     }
 
@@ -67,10 +70,6 @@ class Matrix2 extends Float32Array {
         this.adjoint[3] = v00
 
         this.determinant = 1 / (this[0] * this[3] - this[1] * this[2])
-
-        this.direction = new M.Vector2(v00, v01).add(new M.Vector2(v10, v11))
-        // this.direction.x /= Math.abs(this.direction.x)
-        // this.direction.y /= Math.abs(this.direction.y)
 
         if (inverse !== null) {
             this.inverse = inverse
@@ -103,8 +102,8 @@ Matrix2.createISO = (size = 64) => {
  * @param {number} angleY 
  */
 Matrix2.create = (x = 1, y = 1, angleX = 0, angleY = 0) => {
-    let vectorA = new M.Vector2(1 * x, -0 * y)
-    let vectorB = new M.Vector2(0 * x, 1 * y)
+    let vectorA = new M.Vector2(x, 0)
+    let vectorB = new M.Vector2(0, y)
     vectorA.rotate(M.DegToRad(angleX))
     vectorB.rotate(M.DegToRad(angleY))
     return new Matrix2(vectorA.x, vectorA.y, vectorB.x, vectorB.y)

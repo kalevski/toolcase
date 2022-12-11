@@ -14,11 +14,13 @@ class World extends Layer {
      */
     grid = null
 
+    gridUpdate = null
+
     /**
      * @private
      * @type {Matrix2}
      */
-    _projection = Matrix2.create(32, 32, 0, 0)
+    _projection = Matrix2.create(50, 50)
 
     depth = new DepthOrder()
 
@@ -33,12 +35,16 @@ class World extends Layer {
         this.grid = new PerspectiveGrid(this.scene, 0, 0)
         this.scene.add.existing(this.grid)
         this.grid.onCreate()
+        this.grid.setScrollFactor(0)
+        this.grid.setVisible(false)
+
         super.onCreate()
         this.orderLoop = this.scene.time.addEvent({
             delay: 100,
             callback: () => this.container.list.sort(this.depth.fn),
             loop: true
         })
+        this.onLayerUpdate()
     }
 
     /**
@@ -46,15 +52,47 @@ class World extends Layer {
      * @param {number} time 
      * @param {number} delta 
      */
-    onUpdate(time, delta) {
-        super.onUpdate(time, delta)
+    onLayerUpdate(time, delta) {
+        super.onLayerUpdate(time, delta)
         this.grid.cameraFilter = this.container.cameraFilter
         this.grid.move(this.camera)
+
+        if (this.gridUpdate !== null) {
+            this.grid.setVisible(this.gridUpdate)
+            if (this.gridUpdate) {
+                this.grid.setProjection(this._projection)
+            }
+            this.gridUpdate = null
+        }
+
+        if (typeof this.scene.matter !== 'undefined') {
+            if (typeof this.scene.matter.world.debugGraphic !== 'undefined') {
+                this.scene.matter.world.debugGraphic.cameraFilter = this.container.cameraFilter
+            }
+        }
     }
 
     /** @protected */
     onDestroy() {
         super.onDestroy()
+        this.orderLoop.remove()
+        this.orderLoop.destroy()
+    }
+
+    /**
+     * 
+     * @param {boolean} flag 
+     */
+    drawGrid(flag = true) {
+        if (typeof flag !== 'boolean') {
+            return this
+        }
+        this.gridUpdate = null
+        if (this.grid.visible === flag) {
+            return this
+        }
+
+        this.gridUpdate = flag
     }
 
     /**
@@ -63,8 +101,10 @@ class World extends Layer {
      */
     set projection(matrix) {
         this._projection.set(matrix.v00, matrix.v01, matrix.v10, matrix.v11)
-        this.depth.setup(matrix)
-        this.grid.setProjection(matrix)
+        this.depth.setup(this.projection)
+        if (this.grid.visible) {
+            this.gridUpdate = true
+        }
         return this._projection
     }
 

@@ -1,4 +1,5 @@
 import { generateId } from '@toolcase/base'
+import { Time } from 'phaser'
 import Feature from './Feature'
 import GameObject from './GameObject'
 
@@ -13,6 +14,12 @@ class Layer extends Feature {
      */
     container = null
 
+    /**
+     * @private
+     * @type {Time.TimerEvent}
+     */
+    layerLoop = null
+
     /** @protected */
     onCreate() {
         if (this.scene.cameras.main.name === '') {
@@ -26,6 +33,14 @@ class Layer extends Feature {
 
         this.container = new GameObject(this.scene, 0, 0)
         this.scene.add.existing(this.container)
+
+        this.layerLoop = this.scene.time.addEvent({
+            delay: 100,
+            callback: this.onLayerUpdate,
+            callbackScope: this,
+            loop: true
+        })
+        this.onLayerUpdate()
     }
 
     /**
@@ -33,14 +48,8 @@ class Layer extends Feature {
      * @param {number} time 
      * @param {number} delta 
      */
-    onUpdate(time, delta) {
-        let cameraId = this.camera.id
-        let filter = 0
-        for (let camera of this.scene.cameras.cameras) {
-            if (camera.id === cameraId) continue
-            filter |= camera.id
-        }
-        this.container.cameraFilter = filter
+    onLayerUpdate() {
+        this.container.cameraFilter = this.cameraFilter
     }
 
     /** @protected */
@@ -53,12 +62,24 @@ class Layer extends Feature {
         } else {
             this.scene.cameras.remove(this.camera)
         }
+
+        this.layerLoop.remove()
+        this.layerLoop.destroy()
     }
 
     get camera() {
         return this.scene.cameras.getCamera(this.CAMERA_NAME)
     }
 
+    get cameraFilter() {
+        let cameraId = this.camera.id
+        let filter = 0
+        for (let camera of this.scene.cameras.cameras) {
+            if (camera.id === cameraId) continue
+            filter |= camera.id
+        }
+        return filter
+    }
 }
 
 export default Layer

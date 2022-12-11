@@ -9,26 +9,24 @@ class GameObject2D extends GameObject {
      * @private
      * @type {World}
      */
-    world = null
+    context = null
 
     transform = new Math.Vector2(0, 0)
-
-    offset = new Math.Vector2(0, 0)
 
     pivot = new Math.Vector2(0, 0)
 
     /**
      * 
      * @param {Scene} scene 
-     * @param {World} world 
+     * @param {World} context 
      */
-    constructor(scene, world) {
+    constructor(scene, context) {
         super(scene, 0, 0)
-        this.world = world
+        this.context = context
     }
 
     get projection() {
-        return this.world.projection
+        return this.context.projection
     }
 
     /**
@@ -39,6 +37,15 @@ class GameObject2D extends GameObject {
     setTransform(x, y) {
         this.projection.translate(x, y, this)
         this.transform.set(x, y)
+        return this
+    }
+
+    setTransformX(x) {
+        return this.setTransform(x, this.transform.y)
+    }
+
+    setTransformY(y) {
+        return this.setTransform(this.transform.x, y)
     }
 
     /**
@@ -49,7 +56,7 @@ class GameObject2D extends GameObject {
     doUpdate(time, delta) {
         super.doUpdate(time, delta)
         this.projection.inverse.translate(this.x, this.y, this.transform)
-        this.pivot.set(this.transform.x + this.offset.x, this.transform.y, this.offset.y)
+        this.pivot.set(this.transform.x, this.transform.y)
     }
 
 }

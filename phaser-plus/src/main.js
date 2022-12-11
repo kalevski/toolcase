@@ -6,7 +6,13 @@ import Layer from './base/Layer'
 
 import Scene2D from './perspetive2d/Scene2D'
 import World from './perspetive2d/World'
+import LayerUI from './perspetive2d/LayerUI'
 import GameObject2D from './perspetive2d/GameObject2D'
+import PerspectiveGrid from './perspetive2d/PerspectiveGrid'
+
+import Event from './flow/Event'
+import TimeEvent from './flow/TimeEvent'
+import CollisionEvent from './flow/CollisionEvent'
 
 import Matrix2 from './structs/Matrix2'
 
@@ -14,7 +20,15 @@ import Matrix2 from './structs/Matrix2'
 const Perspective2D = {
     Scene2D,
     World,
-    GameObject2D
+    LayerUI,
+    GameObject2D,
+    PerspectiveGrid
+}
+
+const Flow = {
+    Event,
+    TimeEvent,
+    CollisionEvent
 }
 
 const Structs = {
@@ -23,6 +37,7 @@ const Structs = {
 
 export {
     Perspective2D,
+    Flow,
     Structs,
 
     Scene,

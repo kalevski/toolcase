@@ -60,6 +60,16 @@ class GameObject extends GameObjects.Container {
 
     /**
      * 
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {boolean}
+     */
+    contains(x, y) {
+        return false
+    }
+
+    /**
+     * 
      * @param {number} time 
      * @param {number} delta 
      */

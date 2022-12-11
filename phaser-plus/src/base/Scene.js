@@ -5,6 +5,7 @@ import Engine from './Engine'
 import FeatureRegistry from './FeatureRegistry'
 import ServiceRegistry from './ServiceRegistry'
 import GameObjectPool from './GameObjectPool'
+import FlowEngine from '../flow/FlowEngine'
 
 class Scene extends PhaserScene {
 
@@ -22,6 +23,11 @@ class Scene extends PhaserScene {
      * @type {FeatureRegistry}
      */
     features = null
+
+    /**
+     * @type {FlowEngine}
+     */
+    flow = null
 
     /**
      * @type {GameObjectPool<GameObject>}
@@ -80,6 +86,7 @@ class Scene extends PhaserScene {
         this.services = this.engine.services
         this.features = new FeatureRegistry(this)
         this.pool = new GameObjectPool(this)
+        this.flow = new FlowEngine(this)
         this.logger.info('initialized')
         this.beforeInit()
         this.onInit()
@@ -107,11 +114,15 @@ class Scene extends PhaserScene {
                 children.doUpdate(time, delta)
             }
         }
+        this.flow.doUpdate(time, delta)
     }
 
     /** @private */
     doDestroy() {
         this.onDestroy()
+        this.features.destroyAll()
+        this.flow.destroy()
+        this.pool.dispose()
     }
 
     /**
