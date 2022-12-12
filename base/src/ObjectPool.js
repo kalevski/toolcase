@@ -11,7 +11,7 @@
 
     /**
      * @callback InstanceFn
-     * @param {typeof Object} object
+     * @param {new T} objectClass
      * @return {T}
      */
 
@@ -23,7 +23,7 @@
 
     /**
      * @private
-     * @type {typeof Object}
+     * @type {new T}
      */
     objectClass = null
 
@@ -47,7 +47,7 @@
 
     /**
      * 
-     * @param {typeof Object} objectClass 
+     * @param {new T} objectClass 
      * @param {ResetFn} resetFn 
      * @param {InstanceFn} instanceFn
      */
@@ -94,7 +94,7 @@
         if (typeof object.release === 'undefined') {
             object.release = () => this.release(object)
         } else {
-            throw new Error(`object ${JSON.stringify(object)} already have release function`)
+            throw new Error(`object ${JSON.stringify(object)} already has release function`)
         }
         this.pool.push(object)
     }

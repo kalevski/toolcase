@@ -1,47 +1,16 @@
-import { Logger } from '@toolcase/logging'
-import Scene from '../Scene'
-import GameFlow from './GameFlow'
+import Event from './Event'
 
-class TimeEvent {
+class TimeEvent extends Event {
 
-    /**
-     * @protected
-     * @type {Scene}
-     */
-    scene = null
-
-    /**
-     * @protected
-     * @type {GameFlow}
-     */
-    flow = null
- 
-    /**
-     * @protected
-     * @type {Logger}
-     */
-    logger = null
-
-    /**
-     * 
-     * @param {Scene} scene
-     * @param {GameFlow} flow 
-     * @param {Logger} logger
-     */
-    constructor(scene, flow, logger) {
-        this.scene = scene
-        this.flow = flow
-        this.logger = logger
+    get type() {
+        return 'time_event'
     }
 
-    /** @protected */
-    onCreate() {}
-
     /**
      * @protected
-     * @param {number} timesFired 
+     * @param {number} times 
      */
-    onFire(timesFired) {}
+    onFire(times) {}
 
 }
 

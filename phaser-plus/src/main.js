@@ -1,68 +1,51 @@
-import Scene from './Scene'
-import GameObject from './GameObject'
-import Feature from './Feature'
-import DOMFeature from './DOMFeature'
+import Scene from './base/Scene'
+import GameObject from './base/GameObject'
+import Feature from './base/Feature'
+import GameObjectPool from './base/GameObjectPool'
+import Layer from './base/Layer'
+
+import Scene2D from './perspetive2d/Scene2D'
+import World from './perspetive2d/World'
+import LayerUI from './perspetive2d/LayerUI'
+import GameObject2D from './perspetive2d/GameObject2D'
+import PerspectiveGrid from './perspetive2d/PerspectiveGrid'
+
+import Event from './flow/Event'
+import TimeEvent from './flow/TimeEvent'
+import CollisionEvent from './flow/CollisionEvent'
+import Job from './flow/Job'
+import FlowEngine from './flow/FlowEngine'
 
 import Matrix2 from './structs/Matrix2'
-import GameObjectPool from './structs/GameObjectPool'
 
-import World from './perspective2d/World'
-import GameObject2D from './perspective2d/GameObject2D'
-import WorldObjects from './perspective2d/WorldObjects'
-
-import GameEvent from './flow/GameEvent'
-import SensorEvent from './flow/SensorEvent'
-import TimeEvent from './flow/TimeEvent'
-import SensorProcessor from './flow/SensorProcessor'
-import MatterJSProcessor from './flow/MatterJSProcessor'
-
-import NavMesh from './ai/NavMesh'
-import Path from './ai/Path'
-import PathFinder from './ai/PathFinder'
-import PathNode from './ai/PathNode'
-
-import KeyboardInput from './features/KeyboardInput'
-import SplitScreen from './features/SplitScreen'
-
-const Features = {
-    KeyboardInput,
-    SplitScreen
-}
-
-const Structs = {
-    Matrix2,
-    GameObjectPool
-}
 
 const Perspective2D = {
+    Scene2D,
     World,
+    LayerUI,
     GameObject2D,
-    WorldObjects
+    PerspectiveGrid
 }
 
 const Flow = {
-    GameEvent,
-    SensorEvent,
+    Event,
     TimeEvent,
-    SensorProcessor,
-    MatterJSProcessor
+    CollisionEvent,
+    Job
 }
 
-const AI = {
-    NavMesh,
-    Path,
-    PathFinder,
-    PathNode
+const Structs = {
+    Matrix2
 }
 
 export {
+    Perspective2D,
+    Flow,
+    Structs,
+
     Scene,
     GameObject,
     Feature,
-    DOMFeature,
-    Features,
-    Structs,
-    Perspective2D,
-    Flow,
-    AI
+    GameObjectPool,
+    Layer
 }

@@ -1,56 +1,38 @@
-import logging from '@toolcase/logging'
-import { GameObject, Perspective2D } from '@toolcase/phaser-plus'
-import { GameObjects } from 'phaser'
+import { Perspective2D } from "@toolcase/phaser-plus";
 
 class Barrel extends Perspective2D.GameObject2D {
 
-    /** @type {GameObjects.Image} */
-    base = null
-
-    logger = logging.getLogger('barrel')
+    logger = null
 
     onCreate() {
-        this.base = this.scene.add.image(0, -50, 'objects', 'barrel_vertical')
-            // .setPipeline('Light2D')
+        this.logger = this.scene.engine.getLogger('barrel')
+        // this.logger.info('create')
+
+        this.base = this.scene.add.sprite(0, -50, 'objects', 'barrel_vertical')
+            .setOrigin(.5)
         this.add(this.base)
 
-        let shape = this.scene.cache.json.get('object_physics')
+        this.scene.matter.add.gameObject(this)
 
-        this.scene.matter.add.gameObject(this, {
-            shape: shape.barrel,
-            frictionAir: 1.7
-        }, true)
-        this.setFixedRotation()
-
-        /** @type {Barrel} */
-        let barrel = null
-
-        setTimeout(() => {
-            barrel = this.scene.pool.obtain('barrel2')
-            this.add(barrel)
-            barrel.setPosition(30, 30)
+        this.setBody({
+            type: 'rectangle',
+            width: 100,
+            height: 100
+        }, {
+            isStatic: true
         })
+    }
 
-        setTimeout(() => {
-            this.remove(barrel)
-            this.scene.pool.release(barrel)
-        }, 2000)
-
-        setTimeout(() => {
-            barrel = this.scene.pool.obtain('barrel2')
-            this.add(barrel)
-            barrel.setPosition(40, 40)
-        }, 4000)
-
-        this.logger.info('created')
+    onUpdate(time, delta) {
+        // this.setTransformY(this.transform.y + 0.005 * delta)
     }
 
     onAdd() {
-        this.logger.info('added')
+        // this.logger.info('add')
     }
 
     onRemove() {
-        this.logger.info('removed')
+        // this.logger.info('remove')
     }
 
     onDestroy() {

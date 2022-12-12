@@ -1,4 +1,4 @@
-import { EventEmitter as EventEmitter3 } from 'eventemitter3'
+import EventEmitter3 from 'eventemitter3'
 
 /**
  * @extends {EventEmitter3}
