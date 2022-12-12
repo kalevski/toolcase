@@ -13,6 +13,8 @@ import PerspectiveGrid from './perspetive2d/PerspectiveGrid'
 import Event from './flow/Event'
 import TimeEvent from './flow/TimeEvent'
 import CollisionEvent from './flow/CollisionEvent'
+import Job from './flow/Job'
+import FlowEngine from './flow/FlowEngine'
 
 import Matrix2 from './structs/Matrix2'
 
@@ -28,7 +30,8 @@ const Perspective2D = {
 const Flow = {
     Event,
     TimeEvent,
-    CollisionEvent
+    CollisionEvent,
+    Job
 }
 
 const Structs = {

@@ -1,32 +1,57 @@
-import { Broadcast } from '@toolcase/base'
+import Scene from '../base/Scene'
 import Event from './Event'
+
+/**
+ * @typedef EventNames
+ * @type {'done'|'progress'}
+ */
+
+/**
+ * @callback ListenerFn
+ * @param {Job} job
+ * @returns {void}
+ */
 
 class Job extends Event {
 
-    events = new Broadcast()
-
-    /** @private */
-    onFire() {}
-
     /**
      * @protected
-     * @param {number} time 
-     * @param {number} delta 
+     * @type {any}
      */
-    onUpdate(time, delta) {
+    payload = null
 
+    /**
+     * 
+     * @param {Scene} scene 
+     * @param {any} payload 
+     */
+    constructor(scene, payload) {
+        super(scene)
+        this.payload = payload
+    }
+
+    get type() {
+        return 'job'
     }
 
     /**
      * @protected
-     * @returns {boolean}
+     * @param {number} time 
+     * @param {number} delta
+     * @returns {boolean} 
      */
-    isDone() { return true }
+    onUpdate(time, delta) {}
 
-}
+    /**
+     * @protected
+     */
+    onComplete() {}
 
-Job.Events = {
-    ON_COMPLETE: 'on_complete'
+    /**
+     * @protected
+     */
+    onTerminate() {}
+    
 }
 
 export default Job
