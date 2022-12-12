@@ -1,6 +1,6 @@
 import { Perspective2D } from "@toolcase/phaser-plus";
 
-class Barrel extends Perspective2D.GameObject2D {
+class Barrel2 extends Perspective2D.GameObject2D {
 
     logger = null
 
@@ -19,7 +19,7 @@ class Barrel extends Perspective2D.GameObject2D {
             width: 100,
             height: 100
         }, {
-            isStatic: true
+            label: 'test_collider'
         })
     }
 
@@ -41,4 +41,4 @@ class Barrel extends Perspective2D.GameObject2D {
 
 }
 
-export default Barrel
+export default Barrel2

@@ -51,6 +51,12 @@ class Job extends Event {
      * @protected
      */
     onTerminate() {}
+
+    /** @private */
+    onFire() {}
+
+    /** @private */
+    onDestroy() {}
     
 }
 

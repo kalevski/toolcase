@@ -1,3 +1,4 @@
+import { Broadcast } from '@toolcase/base'
 import Feature from './Feature'
 import Scene from './Scene'
 
@@ -6,7 +7,7 @@ import Scene from './Scene'
  * @template {Feature} T
  */
 
-class FeatureRegistry {
+class FeatureRegistry extends Broadcast {
 
     /**
      * @private
@@ -31,6 +32,7 @@ class FeatureRegistry {
      * @param {Scene} scene 
      */
     constructor(scene) {
+        super()
         this.scene = scene
     }
 

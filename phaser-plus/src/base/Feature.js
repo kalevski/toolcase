@@ -1,9 +1,8 @@
-import { Broadcast } from '@toolcase/base'
 import { Logger } from '@toolcase/logging'
 import { Game } from 'phaser'
 import Scene from './Scene'
 
-class Feature extends Broadcast {
+class Feature {
 
     /**
      * @protected
@@ -36,7 +35,6 @@ class Feature extends Broadcast {
      * @param {string} key 
      */
     constructor(scene, key) {
-        super()
         this.scene = scene
         this.game = scene.game
         this.key = key
@@ -62,7 +60,7 @@ class Feature extends Broadcast {
      * @param  {...any} messages 
      */
     emit(event, ...messages) {
-        if (this.events.listenerCount(event) === 0) {
+        if (this.scene.features.events.listenerCount(event) === 0) {
             return this.logger.warning(`event=(${event}) is not handled, payload sent:`, ...messages)
         }
         super.emit(event, ...messages)

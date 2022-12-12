@@ -30,7 +30,7 @@ class JobProcessor extends FlowProcessor {
         try {
             signal = job.onUpdate(time, delta)
         } catch (error) {
-            return this.onTerminate(error)
+            return job.onTerminate(error)
         }
         let done = typeof signal === 'boolean' ? signal : false
         if (done === true) {

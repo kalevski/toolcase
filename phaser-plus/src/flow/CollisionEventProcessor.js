@@ -71,7 +71,7 @@ class CollisionEventProcessor extends FlowProcessor {
             this.eventMap.get(bodyA.label).onEnter(bodyA, bodyB, event)
         }
         if (this.eventMap.has(bodyB.label)) {
-            this.eventMap.get(bodyA.label).onEnter(bodyB, bodyA, event)
+            this.eventMap.get(bodyB.label).onEnter(bodyB, bodyA, event)
         }
     }
 
@@ -86,7 +86,7 @@ class CollisionEventProcessor extends FlowProcessor {
             this.eventMap.get(bodyA.label).onExit(bodyA, bodyB, event)
         }
         if (this.eventMap.has(bodyB.label)) {
-            this.eventMap.get(bodyA.label).onExit(bodyB, bodyA, event)
+            this.eventMap.get(bodyB.label).onExit(bodyB, bodyA, event)
         }
     }
 

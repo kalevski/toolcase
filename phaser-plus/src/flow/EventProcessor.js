@@ -90,7 +90,7 @@ class EventProcessor extends FlowProcessor {
      * @param {any} payload 
      * @param {number} delay
      */
-    trigger(eventName, payload = null, delay = 0) {
+    trigger(eventName, payload, delay = 0) {
         if (!this.eventMap.has(eventName)) {
             throw new Error(`event name=${eventName} is not registered`)
         }

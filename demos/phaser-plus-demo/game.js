@@ -12,7 +12,9 @@ const screen = new Game({
     physics: {
         default: 'matter',
         matter: {
-            gravity: false,
+            gravity: {
+                y: 5
+            },
             debug: true
         }
     },
