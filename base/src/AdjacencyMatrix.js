@@ -1,9 +1,14 @@
-/**
-* @typedef Matrix
-* @type {Array<Array<boolean>>}
-*/
 
+/**
+ * @template T
+ * @template K
+ */
 class AdjacencyMatrix {
+
+    /**
+    * @typedef Matrix
+    * @type {Array<Array<T|K>>}
+    */
 
     /**
      * @private
@@ -16,6 +21,28 @@ class AdjacencyMatrix {
      * @type {Array<string>}
      */
     edges = []
+
+    /**
+     * @private
+     * @type {K}
+     */
+    defaultValue = null
+
+    /**
+     * @private
+     * @type {T}
+     */
+    defaultRelation = null
+
+    /**
+     * 
+     * @param {T} defaultRelation 
+     * @param {K} defaultValue 
+     */
+    constructor(defaultRelation, defaultValue) {
+        this.defaultRelation = defaultRelation
+        this.defaultValue = defaultValue
+    }
 
     get labels() {
         let list = []
@@ -40,9 +67,9 @@ class AdjacencyMatrix {
         for (let link of this.links.keys()) {
             let matrix = this.links.get(link)
             for (let row of matrix) {
-                row.push(false)
+                row.push(this.defaultValue)
             }
-            let edgeRow = Array.from({ length: index + 1 }, () => false)
+            let edgeRow = Array.from({ length: index + 1 }, () => this.defaultValue)
             matrix.push(edgeRow)
         }
         return this
@@ -78,7 +105,7 @@ class AdjacencyMatrix {
         if (this.links.has(label)) {
             throw new Error(`link ${label} already exist`)
         }
-        let row = Array.from({ length: this.edges.length }, () => false)
+        let row = Array.from({ length: this.edges.length }, () => this.defaultValue)
         let matrix = Array.from({ length: this.edges.length }, () => Array.from(row))
         this.links.set(label, matrix)
         return this
@@ -102,9 +129,10 @@ class AdjacencyMatrix {
      * @param {string} label 
      * @param {string} edgeA 
      * @param {string} edgeB 
+     * @param {T} relation
      * @returns {this}
      */
-    link(label, edgeA, edgeB) {
+    link(label, edgeA, edgeB, relation = this.defaultRelation) {
         if (!this.links.has(label)) {
             throw new Error(`link ${label} does not exist`)
         }
@@ -118,7 +146,7 @@ class AdjacencyMatrix {
         }
 
         let matrix = this.links.get(label)
-        matrix[indexA][indexB] = true
+        matrix[indexA][indexB] = relation
         return this
     }
 
@@ -142,7 +170,7 @@ class AdjacencyMatrix {
             throw new Error(`edge ${edgeB} does not exist`)
         }
         let matrix = this.links.get(label)
-        matrix[indexA][indexB] = false
+        matrix[indexA][indexB] = this.defaultValue
         return this
     }
 
@@ -166,6 +194,29 @@ class AdjacencyMatrix {
             throw new Error(`edge ${edgeB} does not exist`)
         }
         let matrix = this.links.get(label)
+        return matrix[indexA][indexB] !== this.defaultValue
+    }
+
+    /**
+     * 
+     * @param {string} label 
+     * @param {string} edgeA 
+     * @param {string} edgeB
+     * @returns {T|K} 
+     */
+    getLink(label, edgeA, edgeB) {
+        if (!this.links.has(label)) {
+            throw new Error(`link ${label} does not exist`)
+        }
+        let indexA = this.edges.findIndex(value => value === edgeA)
+        if (indexA === -1) {
+            throw new Error(`edge ${edgeA} does not exist`)
+        }
+        let indexB = this.edges.findIndex(value => value === edgeB)
+        if (indexB === -1) {
+            throw new Error(`edge ${edgeB} does not exist`)
+        }
+        let matrix = this.links.get(label)
         return matrix[indexA][indexB]
     }
 
@@ -173,7 +224,7 @@ class AdjacencyMatrix {
      * 
      * @param {string} label 
      * @param {string} edge 
-     * @returns {Array<string>}
+     * @returns {Array<T|K>}
      */
     getLinks(label, edge) {
         if (!this.links.has(label)) {
