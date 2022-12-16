@@ -15,6 +15,7 @@ import JSONSchema from './JSONSchema'
 import getNumberInRange from './getNumberInRange'
 import Cache from './Cache'
 import Serializer from './Serializer'
+import AdjacencyMatrix from './AdjacencyMatrix'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -45,5 +46,6 @@ export {
     JSONSchema,
     getNumberInRange,
     Cache,
-    Serializer
+    Serializer,
+    AdjacencyMatrix
 }
