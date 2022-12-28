@@ -84,6 +84,15 @@ class LayerHandler extends ProxyHandler {
         }
     }
 
+    get childs() {
+        if (this.ref === null) {
+            return 0
+        }
+        return this.ref.list.length
+    }
+
+    set childs(value) {}
+
 }
 
 export default LayerHandler

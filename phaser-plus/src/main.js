@@ -17,6 +17,8 @@ import CollisionEvent from './flow/CollisionEvent'
 import Job from './flow/Job'
 import FlowEngine from './flow/FlowEngine'
 
+import Debugger from './debugger/Debugger'
+
 import Matrix2 from './structs/Matrix2'
 
 
@@ -36,6 +38,10 @@ const Flow = {
     FlowEngine
 }
 
+const Features = {
+    Debugger
+}
+
 const Structs = {
     Matrix2
 }
@@ -44,6 +50,7 @@ export {
     Perspective2D,
     Flow,
     Structs,
+    Features,
 
     Scene,
     GameObject,

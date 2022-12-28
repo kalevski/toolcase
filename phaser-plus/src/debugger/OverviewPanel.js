@@ -25,12 +25,16 @@ class OverviewPanel extends Panel {
     }
 
     draw() {
-        this.components.features = this.base.addMonitor(this.state, 'features', {
-            label: 'Features'
+        this.components.features = this.base.addInput(this.state, 'features', {
+            label: 'Features',
+            step: 1,
+            disabled: true
         })
 
-        this.components.poolInstances = this.base.addMonitor(this.state, 'poolInstances', {
-            label: 'Pool'
+        this.components.poolInstances = this.base.addInput(this.state, 'poolInstances', {
+            label: 'Pool',
+            step: 1,
+            disabled: true
         })
 
         this.components.gameObjects = this.base.addMonitor(this.state, 'gameObjects', {

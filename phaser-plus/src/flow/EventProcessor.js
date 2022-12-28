@@ -33,6 +33,13 @@ class EventProcessor extends FlowProcessor {
      */
     eventMap = new Map()
 
+    /** @type {Array<string>} */
+    get keys() {
+        let list = []
+        this.eventMap.forEach((_, key) => list.push(key))
+        return list
+    }
+
     /** @protected */
     onCreate() {}
 

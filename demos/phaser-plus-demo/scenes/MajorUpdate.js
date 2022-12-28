@@ -1,4 +1,4 @@
-import { Flow, Perspective2D, Structs } from '@toolcase/phaser-plus'
+import { Features, Perspective2D } from '@toolcase/phaser-plus'
 import MyEvent from '../events/MyEvent'
 import TestCollider from '../events/TestCollider'
 import DOMExample from '../features/DOMExample'
@@ -25,30 +25,24 @@ class MajorUpdate extends Perspective2D.Scene2D {
     
     onCreate() {
         this.world.debug()
-        this.world.projection = Structs.Matrix2.create(100, 100)
+        // this.world.projection = Structs.Matrix2.createISO(64)
 
         this.features.register('dom', DOMExample)
 
+        this.features.register('debugger', Features.Debugger)
         this.world.register('barrel', Barrel)
         this.world.register('barrel2', Barrel2)
-
-
+        
+        
         this.world.add('barrel2', 0, -10)
-
+        
         this.barrel = this.world.add('barrel', 0, 0)
         this.barrel.setName('barrel')
-
+        
         this.flow.physics.createEvent('test', TestCollider)
         this.flow.physics.setCollision('barrel1', 'barrel2', 'test')
-
-        this.flow.events.add('manual', MyEvent)
-
-        this.flow.events.triggerFn(this.destroyObject, 2, this)
-
-    }
-
-    destroyObject() {
-        // this.world.remove(this.barrel)
+        
+        this.flow.events.add('manual', MyEvent)        
     }
 
     onDestroy() {

@@ -27,11 +27,18 @@ class InspectorPanel extends Panel {
             label: 'FPS Graph',
             lineCount: 2,
         })
+        this.base.addButton({ title: 'Take screenshot' }).on('click', this.takeScreenshot)
     }
 
     measureFPS() {
         this.components.fps.end()
         this.components.fps.begin()
+    }
+
+    takeScreenshot = () => {
+        this.game.renderer.snapshot(snapshot => {
+            console.log('implement this')
+        })
     }
 
 }

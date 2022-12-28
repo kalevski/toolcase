@@ -24,11 +24,16 @@ class LayerPanel extends Panel {
     }
 
     draw() {
+        this.components.childrens = this.base.addInput(this.layerHandler, 'childs', {
+            label: 'Objects',
+            disabled: true,
+            step: 1
+        })
         this.components.visible = this.base.addInput(this.layerHandler, 'visible')
         this.components.cameraXY = this.base.addInput(this.layerHandler, 'camera', {
             label: 'Camera',
-            x: {step: 1 },
-            y: {step: 1 },
+            x: {},
+            y: {},
             expanded: false
         })
         this.components.zoom = this.base.addInput(this.layerHandler.camera, 'zoom', {
@@ -42,10 +47,10 @@ class LayerPanel extends Panel {
             view: 'list',
             label: 'Search',
             options: [
-                { text: 'Object by name', value:'name' }
+                { text: 'Object by name', value:'object_name' }
                 // { text: 'Object by ID', value:'id' }
             ],
-            value: 'name'
+            value: 'object_name'
         })
         this.components.searchInput = this.base.addBlade({
             view: 'text',
@@ -74,11 +79,7 @@ class LayerPanel extends Panel {
         this.base.title = `Layer [${key}]`
         this.layerHandler.setRef(layer)
 
-        for (let key in this.components) {
-            if (typeof this.components[key].refresh === 'function') {
-                this.components[key].refresh()
-            }
-        }
+        this.refreshComponents()
         this.components.searchInput.value = ''
     }
 
@@ -88,11 +89,25 @@ class LayerPanel extends Panel {
             return
         }
         this.state.objectOptions.push({ text: Math.random().toString(), value: '' })
+        this.refreshComponents()
+    }
+
+    /** @private */
+    refreshComponents() {
+        for (let key in this.components) {
+            if (typeof this.components[key].refresh === 'function') {
+                this.components[key].refresh()
+            }
+        }
     }
 
     onFind = () => {
-        let value = this.components.searchInput.value
-        this.emit('layer_search', this.layerHandler.getRef().key, value)
+        let inputValue = this.components.searchInput.value
+        if (inputValue === '') {
+            return
+        }
+        let searchType = this.components.searchType.value
+        this.emit('layer_search', this.layerHandler.getRef().key, searchType, inputValue)
     }
 
 }
