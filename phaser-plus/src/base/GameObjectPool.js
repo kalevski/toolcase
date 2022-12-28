@@ -10,7 +10,7 @@ class GameObjectPool {
     /**
      * @callback InstanceFn
      * @param {string} key
-     * @param {typeof GameObject} GameObjectClass
+     * @param {new GameObject} GameObjectClass
      * @param {Scene} scene
      * @returns {T}
      */
@@ -53,10 +53,18 @@ class GameObjectPool {
         return list
     }
 
+    get instances() {
+        let instances = 0
+        this.map.forEach(pool => {
+            instances += pool.instances
+        })
+        return instances
+    }
+
     /**
      * 
      * @param {string} key 
-     * @param {typeof Object<T>} gameObjectClass 
+     * @param {new T} gameObjectClass 
      * @param {InstanceFn} [instanceFn] 
      */
     register(key, gameObjectClass, instanceFn = null, resetFn = null) {
@@ -137,8 +145,6 @@ class GameObjectPool {
         }
         this.scene.add.existing(object)
     }
-
-    // resolve objects by class provided
 
 }
 

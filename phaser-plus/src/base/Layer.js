@@ -1,5 +1,5 @@
 import { generateId } from '@toolcase/base'
-import { Time } from 'phaser'
+import { GameObjects, Time } from 'phaser'
 import Feature from './Feature'
 import GameObject from './GameObject'
 
@@ -9,7 +9,7 @@ class Layer extends Feature {
     CAMERA_NAME = generateId(16)
 
     /**
-     * @protected
+     * @private
      * @type {GameObject}
      */
     container = null
@@ -41,6 +41,15 @@ class Layer extends Feature {
             loop: true
         })
         this.onLayerUpdate()
+    }
+
+    set visible(value = true) {
+        this.container.setVisible(value)
+        return this.visible
+    }
+
+    get visible() {
+        return this.container.visible
     }
 
     /**
@@ -79,6 +88,36 @@ class Layer extends Feature {
             filter |= camera.id
         }
         return filter
+    }
+
+    /**
+     * @param {GameObjects.GameObject | Array<GameObjects.GameObject>} child 
+     */
+    add(child) {
+        this.container.add(child)
+        return this
+    }
+
+    /**
+     * @param {GameObjects.GameObject | Array<GameObjects.GameObject>} child 
+     * @param {boolean} [destroyChild] 
+     */
+    remove(child, destroyChild) {
+        this.container.remove(child, destroyChild)
+        return this
+    }
+
+    get list() {
+        return this.container.list
+    }
+
+    /**
+     * @template {GameObjects.GameObject} T
+     * @param {string} name 
+     * @returns {T}
+     */
+    getByName(name) {
+        return this.container.getByName(name)
     }
 }
 

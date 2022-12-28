@@ -28,6 +28,11 @@ class FeatureRegistry extends Broadcast {
     featureKeys = []
 
     /**
+     * @private
+     */
+    dirty = false
+
+    /**
      * 
      * @param {Scene} scene 
      */
@@ -45,11 +50,6 @@ class FeatureRegistry extends Broadcast {
         this.dirty = false
         return this.featureKeys
     }
-
-    /**
-     * @private
-     */
-    dirty = false
 
     /**
      * @template T
@@ -95,6 +95,7 @@ class FeatureRegistry extends Broadcast {
         if (feature === null) {
             return
         }
+        feature.preDestroy()
         feature.onDestroy()
         this.features.delete(key)
         this.dirty = true

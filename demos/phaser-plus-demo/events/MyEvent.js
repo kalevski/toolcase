@@ -2,8 +2,8 @@ import { Flow } from "@toolcase/phaser-plus";
 
 class MyEvent extends Flow.Event {
 
-    onFire() {
-        // console.log('manual trigger')
+    onFire(payload) {
+        console.log('manual trigger', payload)
     }
 
 }

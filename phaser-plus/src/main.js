@@ -3,6 +3,7 @@ import GameObject from './base/GameObject'
 import Feature from './base/Feature'
 import GameObjectPool from './base/GameObjectPool'
 import Layer from './base/Layer'
+import HTMLFeature from './base/HTMLFeature'
 
 import Scene2D from './perspetive2d/Scene2D'
 import World from './perspetive2d/World'
@@ -31,7 +32,8 @@ const Flow = {
     Event,
     TimeEvent,
     CollisionEvent,
-    Job
+    Job,
+    FlowEngine
 }
 
 const Structs = {
@@ -47,5 +49,6 @@ export {
     GameObject,
     Feature,
     GameObjectPool,
-    Layer
+    Layer,
+    HTMLFeature
 }

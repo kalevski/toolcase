@@ -1,6 +1,5 @@
-import { Game, Scale, WEBGL } from 'phaser'
+import { AUTO, CANVAS, Game, Scale, WEBGL } from 'phaser'
 import MajorUpdate from './scenes/MajorUpdate'
-
 const screen = new Game({
     type: WEBGL,
     antialiasGL: true,
@@ -18,9 +17,11 @@ const screen = new Game({
             debug: true
         }
     },
+    // batchSize: 1,
     dom: {
         createContainer: true
     },
+    antialias: false,
     width: 1280,
     height: 720
 })

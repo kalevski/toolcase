@@ -86,8 +86,8 @@ class GameObject extends GameObjects.Container {
 
     /** @private */
     preDestroy() {
-        this.onDestroy()
         super.preDestroy()
+        this.onDestroy()
     }
 
     /**

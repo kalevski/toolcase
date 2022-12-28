@@ -52,6 +52,9 @@ class Feature {
     onUpdate(time, delta) {}
 
     /** @protected */
+    preDestroy() {}
+
+    /** @protected */
     onDestroy() {}
 
     /**

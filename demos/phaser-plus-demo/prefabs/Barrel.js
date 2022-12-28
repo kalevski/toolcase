@@ -19,8 +19,10 @@ class Barrel extends Perspective2D.GameObject2D {
             width: 100,
             height: 100
         }, {
-            isStatic: true
+            isStatic: true,
+            label: 'barrel1'
         })
+        this.scene.matter.world.remove(this.body)
     }
 
     onUpdate(time, delta) {
@@ -28,11 +30,13 @@ class Barrel extends Perspective2D.GameObject2D {
     }
 
     onAdd() {
-        // this.logger.info('add')
+        this.logger.info('add')
+        this.scene.matter.world.add(this.body)
     }
 
     onRemove() {
-        // this.logger.info('remove')
+        this.scene.matter.world.remove(this.body)
+        this.logger.info('remove')
     }
 
     onDestroy() {

@@ -21,14 +21,14 @@ class JobProcessor extends FlowProcessor {
      * @param {number} time 
      * @param {number} delta 
      */
-    onUpdate(time, delta) {
+    onUpdate(time) {
         let job = this.queue.shift() || null
         if (job === null) {
             return
         }
         let signal = null
         try {
-            signal = job.onUpdate(time, delta)
+            signal = job.onUpdate(time)
         } catch (error) {
             return job.onTerminate(error)
         }

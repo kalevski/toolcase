@@ -37,10 +37,9 @@ class Job extends Event {
     /**
      * @protected
      * @param {number} time 
-     * @param {number} delta
      * @returns {boolean} 
      */
-    onUpdate(time, delta) {}
+    onUpdate(time) {}
 
     /**
      * @protected

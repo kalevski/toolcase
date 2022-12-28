@@ -5,7 +5,7 @@ class Barrel2 extends Perspective2D.GameObject2D {
     logger = null
 
     onCreate() {
-        this.logger = this.scene.engine.getLogger('barrel')
+        this.logger = this.scene.engine.getLogger('barrel2')
         // this.logger.info('create')
 
         this.base = this.scene.add.sprite(0, -50, 'objects', 'barrel_vertical')
@@ -19,7 +19,7 @@ class Barrel2 extends Perspective2D.GameObject2D {
             width: 100,
             height: 100
         }, {
-            label: 'test_collider'
+            label: 'barrel2'
         })
     }
 
@@ -28,11 +28,11 @@ class Barrel2 extends Perspective2D.GameObject2D {
     }
 
     onAdd() {
-        // this.logger.info('add')
+        this.logger.info('add')
     }
 
     onRemove() {
-        // this.logger.info('remove')
+        this.logger.info('remove')
     }
 
     onDestroy() {

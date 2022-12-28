@@ -50,6 +50,26 @@ class GameObject2D extends GameObject {
 
     /**
      * 
+     * @param {string} tag 
+     */
+    addTag(tag) {
+
+        return this
+    }
+
+    /**
+     * 
+     * @param {string} tag 
+     */
+    removeTag(tag) {
+
+        return this
+    }
+
+    removeTags() {}
+
+    /**
+     * 
      * @param {number} time 
      * @param {number} delta 
      */

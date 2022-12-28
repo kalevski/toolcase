@@ -6,6 +6,8 @@ import FeatureRegistry from './FeatureRegistry'
 import ServiceRegistry from './ServiceRegistry'
 import GameObjectPool from './GameObjectPool'
 import FlowEngine from '../flow/FlowEngine'
+import Debugger from '../debugger/Debugger'
+import Layer from './Layer'
 
 class Scene extends PhaserScene {
 
@@ -33,6 +35,11 @@ class Scene extends PhaserScene {
      * @type {GameObjectPool<GameObject>}
      */
     pool = null
+
+    /**
+     * @type {Debugger}
+     */
+    debugger = null
 
     /**
      * @protected
@@ -88,6 +95,9 @@ class Scene extends PhaserScene {
         this.pool = new GameObjectPool(this)
         this.flow = new FlowEngine(this)
         this.logger.info('initialized')
+
+        this.debugger = this.features.register('debugger', Debugger)
+
         this.beforeInit()
         this.onInit()
     }

@@ -26,18 +26,17 @@ class PerspectiveGrid extends GameObject {
     /** @protected */
     onCreate() {
         this.TEXTURE_KEY = `@toolcase/phaser+grid-${generateId(4)}`
-        this.canvas = this.scene.add.graphics()
-        this.resetCanvasStyle()
+        
         const { width, height } = this.game.config
         
         this.gridTile = this.scene.add.tileSprite(0, 0, width, height)
             .setVisible(false)
             .setOrigin(0)
-        this.add(this.canvas).add(this.gridTile)
+        this.add(this.gridTile)
     }
 
     /** @private */
-    resetCanvasStyle() {
+    setCanvasStyle() {
         this.canvas.fillStyle(0x59758a, 1)
         this.canvas.lineStyle(1, 0xffffff, .3)
     }
@@ -52,13 +51,14 @@ class PerspectiveGrid extends GameObject {
      * @param {Matrix2} matrix 
      */
     setProjection(matrix) {
-        this.gridTile.setVisible(false)
+        this.canvas = this.scene.add.graphics()
+        this.setCanvasStyle()
+        this.add(this.canvas)
         if (this.scene.textures.exists(this.TEXTURE_KEY)) {
             this.scene.textures.remove(this.TEXTURE_KEY)
         }
-        
+        this.gridTile.setVisible(false)
         let tile = this.getProjectionTileSize(matrix)
-
         let size = 0
         for (let value of matrix) {
             size = Math.max(size, Math.abs(value))
@@ -71,6 +71,11 @@ class PerspectiveGrid extends GameObject {
         } else {
             this.drawGridTiles(matrix, tile)
         }
+        this.canvas.clear()
+        this.canvas.destroy()
+        this.gridTile.setTexture(this.TEXTURE_KEY)
+        this.gridTile.setVisible(true)
+        
     }
 
     /**
@@ -110,15 +115,10 @@ class PerspectiveGrid extends GameObject {
         }
         
         this.canvas.generateTexture(this.TEXTURE_KEY, tile.x, tile.y)
-        this.canvas.clear()
-
-        this.gridTile.setTexture(this.TEXTURE_KEY)
-        this.gridTile.setVisible(true)
     }
 
     /** @private */
     drawLinearTiles(matrix) {
-
         let crop = new M.Vector2(0, 0)
         matrix.translate(2, 2, crop)
 
@@ -133,15 +133,7 @@ class PerspectiveGrid extends GameObject {
             matrix.translate(1, .8),
             matrix.translate(1, 1.2)
         ])
-
-        this.resetCanvasStyle()
-
-        console.log(crop)
         this.canvas.generateTexture(this.TEXTURE_KEY, crop.x, crop.y)
-        this.canvas.clear()
-
-        this.gridTile.setTexture(this.TEXTURE_KEY)
-        this.gridTile.setVisible(true)
     }
 
     /** @private */
@@ -150,9 +142,6 @@ class PerspectiveGrid extends GameObject {
         this.canvas.lineStyle(1, 0xffffff, .1)
         this.canvas.strokeCircle(50, 50, 3)
         this.canvas.generateTexture(this.TEXTURE_KEY, 100, 100)
-        this.canvas.clear()
-        this.gridTile.setTexture(this.TEXTURE_KEY)
-        this.gridTile.setVisible(true)
     }
 
     /**

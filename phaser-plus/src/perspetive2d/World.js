@@ -14,6 +14,7 @@ class World extends Layer {
      */
     grid = null
 
+    /** @private */
     gridUpdate = null
 
     /**
@@ -29,6 +30,12 @@ class World extends Layer {
      * @type {Time.TimerEvent}
      */
     orderLoop = null
+
+    /**
+     * @private
+     * @type {ObjectRegistry}
+     */
+    registry = null
 
     /** @protected */
     onCreate() {
@@ -83,7 +90,7 @@ class World extends Layer {
      * 
      * @param {boolean} flag 
      */
-    drawGrid(flag = true) {
+    debug(flag = true) {
         if (typeof flag !== 'boolean') {
             return this
         }
@@ -126,6 +133,7 @@ class World extends Layer {
      * @param {string} key 
      * @param {number} x 
      * @param {number} y 
+     * @param {Array<string>} tags
      * @returns {T}
      */
     add(key, x, y) {
@@ -134,7 +142,7 @@ class World extends Layer {
         if (object === null) {
             return null
         }
-        this.container.add(object)
+        super.add(object)
         object.setTransform(x, y)
         return object
     }
@@ -144,7 +152,7 @@ class World extends Layer {
      * @param {T} gameObject 
      */
     remove(gameObject) {
-        this.container.remove(gameObject)
+        super.remove(gameObject)
         this.scene.pool.release(gameObject)
         return this
     }

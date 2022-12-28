@@ -1,16 +1,26 @@
+import { ObjectPool } from '@toolcase/base'
 import Event from './Event'
 import FlowProcessor from './FlowProcessor'
 
-/**
- * @typedef TimerDef
- * @property {Event} event
- * @property {string} name
- * @property {number} time
- * @property {any} payload
- */
+class TimerDef {
+    /** @type {Event} */
+    event = null
+    /** @type {string} */
+    name = null
+    /** @type {number} */
+    time = null
+    /** @type {any} */
+    payload = null
+}
 
 class EventProcessor extends FlowProcessor {
     
+    /** @private */
+    TIMEOUT_FN_NAME = '@toolcase/phaser-plus/timeoutFn'
+
+    /** @private */
+    timerDefPool = new ObjectPool(TimerDef)
+
     /**
      * @private
      * @type {Array<TimerDef>}
@@ -37,12 +47,18 @@ class EventProcessor extends FlowProcessor {
             let def = this.queue[index]
             def.time += delta / 1000
             if (def.time > 0) {
-                def.event.onFire(def.payload)
-                indices.unshift(index)
+                if (def.name === this.TIMEOUT_FN_NAME) {
+                    def.event.call(def.payload)
+                    indices.unshift(index)
+                } else {
+                    def.event.onFire(def.payload)
+                    indices.unshift(index)
+                }
             }
         }
-        for (let index of indices){
-            this.queue.splice(index, 1)
+        for (let index of indices) {
+            let [ removed ] = this.queue.splice(index, 1)
+            this.timerDefPool.release(removed)
         }
     }
 
@@ -99,17 +115,34 @@ class EventProcessor extends FlowProcessor {
             throw new Error(`delay must be a positive number`)
         }
 
-        if (delay === 0) {
-            this.eventMap.get(eventName).onFire(payload)
-            return this
-        }
+        let def = this.timerDefPool.obtain()
+        def.name = eventName
+        def.time = -delay
+        def.event = this.eventMap.get(eventName),
+        def.payload = payload
+        this.queue.push(def)
+        return this
+    }
 
-        this.queue.push({
-            name: eventName,
-            time: -delay,
-            event: this.eventMap.get(eventName),
-            payload: payload
-        })
+    /**
+     * 
+     * @param {Function} callbackFn 
+     * @param {number} [delay] 
+     * @returns 
+     */
+    triggerFn(callbackFn, delay = 0, context = null) {
+        if (typeof delay !== 'number' || delay < 0) {
+            throw new Error(`delay must be a positive number`)
+        }
+        if (typeof callbackFn !== 'function') {
+            throw new Error(`callbackFn must be a function`)
+        }
+        let def = this.timerDefPool.obtain()
+        def.name = this.TIMEOUT_FN_NAME
+        def.time = -delay
+        def.event = callbackFn,
+        def.payload = context
+        this.queue.push(def)
         return this
     }
 
