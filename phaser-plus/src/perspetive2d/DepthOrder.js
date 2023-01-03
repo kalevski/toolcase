@@ -11,26 +11,28 @@ import GameObject2D from './GameObject2D'
 class DepthOrder {
 
     /**
-     * 
-     * @param {Matrix2} projection 
+     * @private
+     * @type {string}
      */
-    setup(projection) {
-        this.fn = this.normalSort
+    sortFn = 'normalSort'
+
+    setup() {
+        this.sortFn = 'normalSort'
     }
 
     disable() {
-        this.fn = this.disabledSort
+        this.sortFn = 'disabledSort'
     }
 
     set(inverseX = false, inverseY = false) {
         if (!inverseX && !inverseY) {
-            this.fn = this.normalSort
+            this.sortFn = 'normalSort'
         } else if (inverseX && !inverseY) {
-            this.fn = this.inverseXSort
+            this.sortFn = 'inverseXSort'
         } else if (!inverseX && inverseY) {
-            this.fn = this.inverseYSort
+            this.sortFn = 'inverseYSort'
         } else if (inverseX && inverseY) {
-            this.fn = this.inverseSort
+            this.sortFn = 'inverseSort'
         }
     }
 
@@ -88,8 +90,9 @@ class DepthOrder {
      */
     disabledSort = () => {}
 
-    /** @type {SortFn} */
-    fn = (objectA, objectB) => {}
+    get fn() {
+        return this[this.sortFn]
+    }
 
 }
 

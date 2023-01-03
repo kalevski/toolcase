@@ -134,16 +134,24 @@ class Debugger extends HTMLFeature {
      * @returns {T}
      */
     addPanel(key, panelClass, title = null) {
-        // convert title to key
         let folder = this.pane.addFolder({
             title: title === null ? key : title
         })
+        if (typeof key !== 'string' || typeof this.panels[key] !== 'undefined') {
+            throw new Error(`panel key=${key} is laready taken`)
+        }
         let panel = new panelClass(this.scene, folder)
+        this.panels[key] = panel
         return panel
     }
 
+    /**
+     * @template {Panel} T
+     * @param {string} key 
+     * @returns {T}
+     */
     getPanel(key) {
-
+        return this.panels[key] || null
     }
 
 }

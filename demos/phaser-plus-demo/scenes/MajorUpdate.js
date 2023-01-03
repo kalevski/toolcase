@@ -1,4 +1,4 @@
-import { Features, Perspective2D } from '@toolcase/phaser-plus'
+import { Features, Perspective2D, Structs } from '@toolcase/phaser-plus'
 import MyEvent from '../events/MyEvent'
 import TestCollider from '../events/TestCollider'
 import DOMExample from '../features/DOMExample'
@@ -25,7 +25,7 @@ class MajorUpdate extends Perspective2D.Scene2D {
     
     onCreate() {
         this.world.debug()
-        // this.world.projection = Structs.Matrix2.createISO(64)
+        this.world.projection = Structs.Matrix2.create(100, 100, 11)
 
         this.features.register('dom', DOMExample)
 
@@ -34,10 +34,12 @@ class MajorUpdate extends Perspective2D.Scene2D {
         this.world.register('barrel2', Barrel2)
         
         
-        this.world.add('barrel2', 0, -10)
+        // this.world.add('barrel2', 0, -10)
         
-        this.barrel = this.world.add('barrel', 0, 0)
-        this.barrel.setName('barrel')
+        this.world.add('barrel', 0, 0).setName('barrel1')
+        this.world.add('barrel', 0, 1).setName('barrel2')
+        this.world.add('barrel', 1, 0).setName('barrel3')
+        this.world.add('barrel', 1, 1).setName('barrel4')
         
         this.flow.physics.createEvent('test', TestCollider)
         this.flow.physics.setCollision('barrel1', 'barrel2', 'test')

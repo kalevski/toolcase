@@ -41,7 +41,7 @@ class OverviewPanel extends Panel {
             view: 'graph',
             label: 'Objects',
             max: 100,
-            min: -10
+            min: 0
         })
         this.components.layerList = this.base.addBlade({
             view: 'list',
@@ -68,7 +68,6 @@ class OverviewPanel extends Panel {
                 this.state.gameObjects += feature.list.length
             }
         }
-
         this.components.features.refresh()
         this.components.gameObjects.refresh()
         this.updateLayerList(layerList)

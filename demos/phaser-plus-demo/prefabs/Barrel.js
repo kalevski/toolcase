@@ -3,6 +3,7 @@ import { Perspective2D } from "@toolcase/phaser-plus";
 class Barrel extends Perspective2D.GameObject2D {
 
     logger = null
+    direction = 1
 
     onCreate() {
         this.logger = this.scene.engine.getLogger('barrel')
@@ -26,7 +27,13 @@ class Barrel extends Perspective2D.GameObject2D {
     }
 
     onUpdate(time, delta) {
-        // this.setTransformY(this.transform.y + 0.005 * delta)
+        // if (this.transform.y > 10) {
+        //     this.direction = -1
+        // }
+        // if (this.transform.y < -10) {
+        //     this.direction = 1
+        // }
+        // this.setTransformY(this.transform.y + 0.005 * delta * this.direction)
     }
 
     onAdd() {

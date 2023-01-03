@@ -2,7 +2,7 @@ import { AUTO, CANVAS, Game, Scale, WEBGL } from 'phaser'
 import MajorUpdate from './scenes/MajorUpdate'
 const screen = new Game({
     type: WEBGL,
-    antialiasGL: true,
+    // antialiasGL: true,
     parent: 'root',
     scale: {
         mode: Scale.FIT,
@@ -21,7 +21,7 @@ const screen = new Game({
     dom: {
         createContainer: true
     },
-    antialias: false,
+    antialias: true,
     width: 1280,
     height: 720
 })

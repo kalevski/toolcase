@@ -3,7 +3,6 @@ import Layer from '../base/Layer'
 import Matrix2 from '../structs/Matrix2'
 import GameObject2D from './GameObject2D'
 import DepthOrder from './DepthOrder'
-import { Time } from 'phaser'
 import PerspectiveGrid from './PerspectiveGrid'
 
 class World extends Layer {
@@ -25,18 +24,6 @@ class World extends Layer {
 
     depth = new DepthOrder()
 
-    /**
-     * @private
-     * @type {Time.TimerEvent}
-     */
-    orderLoop = null
-
-    /**
-     * @private
-     * @type {ObjectRegistry}
-     */
-    registry = null
-
     /** @protected */
     onCreate() {
         this.grid = new PerspectiveGrid(this.scene, 0, 0)
@@ -46,11 +33,6 @@ class World extends Layer {
         this.grid.setVisible(false)
 
         super.onCreate()
-        this.orderLoop = this.scene.time.addEvent({
-            delay: 100,
-            callback: () => this.container.list.sort(this.depth.fn),
-            loop: true
-        })
         this.onLayerUpdate()
     }
 
@@ -71,6 +53,7 @@ class World extends Layer {
             }
             this.gridUpdate = null
         }
+        this.container.list.sort(this.depth.fn)
 
         if (typeof this.scene.matter !== 'undefined') {
             if (typeof this.scene.matter.world.debugGraphic !== 'undefined') {
@@ -82,8 +65,6 @@ class World extends Layer {
     /** @protected */
     onDestroy() {
         super.onDestroy()
-        this.orderLoop.remove()
-        this.orderLoop.destroy()
     }
 
     /**
@@ -108,7 +89,7 @@ class World extends Layer {
      */
     set projection(matrix) {
         this._projection.set(matrix.v00, matrix.v01, matrix.v10, matrix.v11)
-        this.depth.setup(this.projection)
+        this.depth.setup()
         if (this.grid.visible) {
             this.gridUpdate = true
         }
