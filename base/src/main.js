@@ -16,6 +16,7 @@ import getNumberInRange from './getNumberInRange'
 import Cache from './Cache'
 import Serializer from './Serializer'
 import AdjacencyMatrix from './AdjacencyMatrix'
+import State from './State'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -47,5 +48,6 @@ export {
     getNumberInRange,
     Cache,
     Serializer,
-    AdjacencyMatrix
+    AdjacencyMatrix,
+    State
 }

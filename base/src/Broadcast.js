@@ -8,7 +8,7 @@ class Broadcast {
 
     /**
      * @private
-     * @type {EventEmitter.<EventTypes,Context>}
+     * @type {EventEmitter<EventTypes,T,Context>}
      */
     events = new EventEmitter()
 
@@ -59,10 +59,22 @@ class Broadcast {
     }
 
     /**
-     * @private
+     * @param {EventEmitter.EventNames<EventTypes>} [event] 
      */
-    clearListeners() {
-        this.events.removeAllListeners()
+    removeAllListeners(event) {
+        this.events.removeAllListeners(event)
+        return this
+    }
+
+    /**
+     * @param {EventEmitter.EventNames<EventTypes>} [event] 
+     */
+    listenerCount(event) {
+        return this.events.listenerCount(event)
+    }
+
+    eventNames() {
+        return this.events.eventNames()
     }
 
 }
