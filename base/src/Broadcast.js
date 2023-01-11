@@ -1,6 +1,6 @@
 import EventEmitter from './EventEmitter'
 /**
- * @template EventTypes
+ * @template {EventEmitter.ValidEventTypes} EventTypes
  * @template T
  * @template Context
  */
@@ -59,7 +59,7 @@ class Broadcast {
     }
 
     /**
-     * @param {EventEmitter.EventNames<EventTypes>} [event] 
+     * @param {EventTypes} [event] 
      */
     removeAllListeners(event) {
         this.events.removeAllListeners(event)
@@ -67,7 +67,7 @@ class Broadcast {
     }
 
     /**
-     * @param {EventEmitter.EventNames<EventTypes>} [event] 
+     * @param {EventTypes} [event] 
      */
     listenerCount(event) {
         return this.events.listenerCount(event)

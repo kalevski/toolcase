@@ -13,7 +13,7 @@
         "build:tsd": "tsc -d --allowJs --emitDeclarationOnly --types @toolcase/base,@toolcase/logging,@types/ws --target es5 --lib ES2015 --outDir ./lib src/*.js"
     },
     "peerDependencies": {
-        "@toolcase/base": "0.x",
+        "@toolcase/base": "1.x",
         "@toolcase/logging": "0.x",
         "ws": "8.x"
     },
