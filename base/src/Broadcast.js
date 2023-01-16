@@ -16,7 +16,7 @@ class Broadcast {
      * 
      * @param {EventTypes} event 
      * @param {T} eventListener 
-     * @param {Context} context 
+     * @param {Context} [context] 
      * @returns {this}
      */
     on(event, eventListener, context) {
@@ -28,7 +28,7 @@ class Broadcast {
      * 
      * @param {EventTypes} event 
      * @param {T} eventListener 
-     * @param {Context} context 
+     * @param {Context} [context] 
      * @returns {this}
      */
     off(event, eventListener, context) {
@@ -40,7 +40,7 @@ class Broadcast {
      * 
      * @param {EventTypes} event 
      * @param {T} eventListener 
-     * @param {Context} context 
+     * @param {Context} [context] 
      * @returns {this}
      */
     once(event, eventListener, context) {
