@@ -4,7 +4,7 @@ import generateId from './generateId'
 /**
  * @typedef FieldType
  * @property {string} key
- * @property {('double'|'float'|'int32'|'uint32'|'sint32'|'fixed32'|'sfixed32'|'int64'|'uint64'|'sint64'|'fixed64'|'sfixed64'|'string'|'bool'|'bytes')} type
+ * @property {string} type
  * @property {('optional'|'required'|'repeated')} rule
  */
 
@@ -91,7 +91,24 @@ class Serializer {
             throw new Error(`type key=${key} is not defined`) 
         }
     }
+}
 
+Serializer.FieldType = {
+    DOUBLE:'double',
+    FLOAT: 'float',
+    INT32: 'int32',
+    UINT32: 'uint32',
+    SINT32: 'sint32',
+    FIXED32: 'fixed32',
+    SFIXED32: 'sfixed32',
+    INT64: 'int64',
+    UINT64: 'uint64',
+    SINT64: 'sint64',
+    FIXED64: 'fixed64',
+    SFIXED64: 'sfixed64',
+    STRING: 'string',
+    BOOL: 'bool',
+    BYTES: 'bytes'
 }
 
 export default Serializer
