@@ -51,7 +51,7 @@ class Broadcast {
     /**
      * @protected
      * @param {EventTypes} event 
-     * @param  {...T} messages 
+     * @param  {...any} messages 
      * @returns {boolean}
      */
     emit(event, ...messages) {
