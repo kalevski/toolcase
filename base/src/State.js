@@ -2,7 +2,7 @@ import Broadcast from './Broadcast'
 
 /**
  * @template T
- * @extends Broadcast<string,object,any>
+ * @augments Broadcast<string,object,any>
  */
 class State extends Broadcast {
 
@@ -66,6 +66,7 @@ class State extends Broadcast {
             }
             if (this.isObject(target[key]) && this.isObject(source[key])) {
                 this.setProperties(target[key], source[key], propertyList, emit)
+                this.emitChange(propertyList, source[key])
                 continue
             }
             if (Array.isArray(target[key]) && Array.isArray(source[key])) {
