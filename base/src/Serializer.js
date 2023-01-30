@@ -1,4 +1,4 @@
-import { Root, Type, Field, Writer, Namespace } from 'protobufjs/light'
+import { Root, Type, Field, Writer, Namespace, Message } from 'protobufjs/light'
 import generateId from './generateId'
 
 /**
@@ -6,6 +6,7 @@ import generateId from './generateId'
  * @property {string} key
  * @property {string} type
  * @property {('optional'|'required'|'repeated')} rule
+ * @property {any} [default]
  */
 
 class Serializer {
@@ -44,7 +45,11 @@ class Serializer {
     define(key, fields = []) {
         let type = new Type(key)
         for (let [index, field] of fields.entries()) {
-            type.add(new Field(field.key, index + 1, field.type, field.rule))
+            let defaultValue = typeof field.default === 'undefined' ? null : field.default
+            let fieldObject = new Field(field.key, index + 1, field.type, field.rule, undefined, {
+                default: defaultValue
+            })
+            type.add(fieldObject)
         }
         this.namespace.add(type)
     }
@@ -60,7 +65,12 @@ class Serializer {
         try {
             return type.encode(message, this.writer).finish()
         } catch (error) {
-            throw new Error(`encode error: ${error.message}`)
+            let validationError = type.verify(message)
+            if (validationError === null) {
+                throw new Error(`Serializer[${key}] encode error: ${error.message}`)
+            } else {
+                throw new Error(`Serializer[${key}] encode error: ${validationError}`)
+            }
         }
     }
 
@@ -68,12 +78,13 @@ class Serializer {
     /**
      * @param {string} key
      * @param {Uint8Array} buffer
-     * @returns {Object<string,any>} 
+     * @returns {Message<Object<string,any>>} 
      */
     decode(key, buffer) {
         let type = this.getType(key)
         try {
-            return type.decode(buffer)
+            let object = type.decode(buffer)
+            return object
         } catch (error) {
             throw new Error(`decode error: ${error.message}`)
         }
