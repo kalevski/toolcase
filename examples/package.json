@@ -1,0 +1,17 @@
+{
+    "name": "@toolcase/examples",
+    "private": true,
+    "description": "🧬 Library examples",
+    "scripts": {
+        "dev": "parcel index.html --dist-dir public"
+    },
+    "homepage": "https://kalevski.dev/toolcase",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "license": "MIT"
+}

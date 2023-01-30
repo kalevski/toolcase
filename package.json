@@ -6,7 +6,8 @@
     },
     "workspaces": [
         "base",
-        "logging"
+        "logging",
+        "examples"
     ],
     "devDependencies": {
         "concurrently": "^7.6.0",
