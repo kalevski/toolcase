@@ -1,3 +1,4 @@
+import AdjMatrixExample from './AdjMatrixExample'
 import SerializerExample from './SerializerExample'
 import StateExample from './StateExample'
 
@@ -7,6 +8,7 @@ const DEFAULT_EXAMPLE = 'StateExample'
 
 examples.set('StateExample', StateExample)
 examples.set('SerializerExample', SerializerExample)
+examples.set('AdjMatrixExample', AdjMatrixExample)
 
 let url = new window.URL(window.location.href)
 let key = url.searchParams.get('example') || DEFAULT_EXAMPLE

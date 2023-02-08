@@ -36,7 +36,7 @@ class AdjacencyMatrix {
      * @param {P} defaultPositive 
      * @param {N} defaultNegative 
      */
-    constructor(defaultPositive, defaultNegative) {
+    constructor(defaultPositive = true, defaultNegative = false) {
         this.DEFAULT.POSITIVE = defaultPositive
         this.DEFAULT.NEGATIVE = defaultNegative
     }
@@ -123,6 +123,27 @@ class AdjacencyMatrix {
         let indexA = this.vertexIndices.get(vertexA)
         let indexB = this.vertexIndices.get(vertexB)
         return this.matrix[indexA][indexB]
+    }
+
+    /**
+     * 
+     * @param {string} vertex 
+     * @returns {Array<string>}
+     */
+    getEdges(vertex) {
+        if (!this.vertexIndices.has(vertex)) {
+            return []
+        }
+        let edgeList = []
+        let indexA = this.vertexIndices.get(vertex)
+        let vertexEdges = this.matrix[indexA]
+        for (let index = 0; index < vertexEdges.length; index++) {
+            if (vertexEdges[index] === this.DEFAULT.NEGATIVE) {
+                continue
+            }
+            edgeList.push(this.vertices[index])
+        }
+        return edgeList
     }
 
     hasEdge(vertexA, vertexB) {
