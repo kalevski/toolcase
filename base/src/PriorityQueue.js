@@ -71,7 +71,7 @@
      */
     enqueue(value) {
         if (typeof value === 'undefined') {
-            console.log('here ?')
+            throw new Error('value can not be undefined')   
         }
         this.values.push(value)
         this.bubbleUp()
