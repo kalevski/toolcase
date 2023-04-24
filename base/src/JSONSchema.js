@@ -22,6 +22,10 @@
  */
 
 
+const USERNAME_REGEX = /^[A-z][A-z0-9-_]{3,23}$/
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/
+const EMAIL_REGEX = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
+
 class JSONSchema {
 
     /**
@@ -48,6 +52,8 @@ class JSONSchema {
         this.register('array', this.validateArray)
 
         this.register('email', this.validateEmail)
+        this.register('username', this.validateEmail)
+        this.register('password', this.validateEmail)
         
         this.validateSchema(schema)
         this.schema = schema
@@ -212,14 +218,42 @@ class JSONSchema {
      */
     validateEmail = (propertyName, schema, data) => {
 
-        const mailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/g
+        if (typeof data !== 'string') {
+            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
+        }
+        
+        if(!EMAIL_REGEX.test(data)) {
+            throw new Error(`property "${propertyName}" must be a valid email address, "${data}" provided`)
+        }
+    }
+
+    /**
+     * @private
+     * @type {ValidationFn}
+     */
+    validateUsername = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
             throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
         }
         
-        if(!mailRegex.test(data)) {
-            throw new Error(`property "${propertyName}" must be a valid email address, "${data}" provided`)
+        if(!USERNAME_REGEX.test(data)) {
+            throw new Error(`property "${propertyName}" must contain letter and the length must be between 3 and 23 characters, "${data}" provided`)
+        }
+    }
+
+    /**
+     * @private
+     * @type {ValidationFn}
+     */
+    validatePassword = (propertyName, schema, data) => {
+
+        if (typeof data !== 'string') {
+            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
+        }
+        
+        if(!PASSWORD_REGEX.test(data)) {
+            throw new Error(`property "${propertyName}" is to weak for password`)
         }
     }
 

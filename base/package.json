@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/base",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "description": "🧬 Collection of JavaScript helper functions and structures",
     "source": "src/main.js",
     "main": "lib/main.js",
