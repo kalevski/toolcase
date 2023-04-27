@@ -1,6 +1,6 @@
 /**
  * @typedef DataType
- * @type {('number'|'string'|'boolean'|'object'|'array'|'email')}
+ * @type {('number'|'string'|'boolean'|'object'|'array'|'email'|'username'|'password')}
  */
 
 
@@ -52,8 +52,8 @@ class JSONSchema {
         this.register('array', this.validateArray)
 
         this.register('email', this.validateEmail)
-        this.register('username', this.validateEmail)
-        this.register('password', this.validateEmail)
+        this.register('username', this.validateUsername)
+        this.register('password', this.validatePassword)
         
         this.validateSchema(schema)
         this.schema = schema
