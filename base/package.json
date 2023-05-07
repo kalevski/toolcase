@@ -13,7 +13,7 @@
         "build:tsd": "tsc -d --allowJs --emitDeclarationOnly --target es5 --lib ES2015 --outDir ./lib src/*.js"
     },
     "dependencies": {
-        "eventemitter3": "^5.0.0",
+        "eventemitter3": "^5.0.1",
         "protobufjs": "^7.2.3"
     },
     "targets": {
