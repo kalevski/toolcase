@@ -10,7 +10,7 @@
         "examples"
     ],
     "devDependencies": {
-        "concurrently": "^8.0.1",
+        "concurrently": "^8.1.0",
         "nodemon": "^2.0.22",
         "parcel": "^2.8.3",
         "typescript": "^5.0.4"
