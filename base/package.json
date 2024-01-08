@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "eventemitter3": "^5.0.0",
-        "protobufjs": "^7.2.4"
+        "protobufjs": "^7.2.5"
     },
     "targets": {
         "types": false,
