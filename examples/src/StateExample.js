@@ -5,6 +5,7 @@ class StateExample {
     state = new State({})
 
     run() {
+        this.state.on('state', (value) => console.log('changed to', value))
         console.log(JSON.stringify(this.state.get()))
         console.log('==== update 1 ====')
         this.state.set({
@@ -27,6 +28,8 @@ class StateExample {
         this.state.set({
             testObject: { testA: { childA: 2 } }
         })
+
+        this.state.empty()
         console.log(JSON.stringify(this.state.get()))
     }
 

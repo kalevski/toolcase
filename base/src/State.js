@@ -24,6 +24,9 @@ class State extends Broadcast {
         this.data = data
     }
 
+    /**
+     * @returns {Partial<T>}
+     */
     get() {
         return this.data
     }
@@ -45,6 +48,12 @@ class State extends Broadcast {
         this.emitEvent(props, this.data, emit)
         this.setProperties(this.data, data, props, emit)
         
+        return this
+    }
+
+    empty(emit = true) {
+        this.data = {}
+        this.emitEvent(['state'], undefined, emit)
         return this
     }
 
