@@ -14,7 +14,7 @@ class State extends Broadcast {
 
     /**
      * 
-     * @param {T} data 
+     * @param {Partial<T>} data 
      */
     constructor(data = {}) {
         super()
@@ -24,15 +24,16 @@ class State extends Broadcast {
         this.data = data
     }
 
+    /**
+     * @returns {Partial<T>}
+     */
     get() {
         return this.data
     }
 
     /**
      * 
-     * @param {T} data 
-     * @param {boolean} emit
-     * @returns 
+     * @param {Partial<T>} data 
      */
     set(data, emit = true) {
         if (typeof data !== 'object') {
@@ -43,11 +44,16 @@ class State extends Broadcast {
             throw new Error(`data=(${data}) must be a boolean`)
         }
 
-        this.setProperties(this.data, data, ['state'], emit)
-        if (emit) {
-            this.emit('change', data)
-        }
+        const props = ['state']
+        this.emitEvent(props, this.data, emit)
+        this.setProperties(this.data, data, props, emit)
         
+        return this
+    }
+
+    empty(emit = true) {
+        this.data = {}
+        this.emitEvent(['state'], undefined, emit)
         return this
     }
 
@@ -61,26 +67,32 @@ class State extends Broadcast {
     setProperties(target, source, properties = ['state'], emit = true) {
         for (let key of Object.keys(source)) {
             let propertyList = [...properties, key]
+            this.emitEvent(propertyList, source[key], emit)
             if (typeof target[key] === 'undefined') {
-                throw new Error(`state does not have ${key} property`)
-            }
-            if (this.isObject(target[key]) && this.isObject(source[key])) {
-                this.setProperties(target[key], source[key], propertyList, emit)
-                this.emitChange(propertyList, source[key])
+                target[key] = source[key]
                 continue
             }
+            
+            if (this.isObject(target[key]) && this.isObject(source[key])) {
+                this.setProperties(target[key], source[key], propertyList, emit)
+                continue
+            }
+            
             if (Array.isArray(target[key]) && Array.isArray(source[key])) {
                 target[key] = source[key]
                 continue
             }
+            
+            if(typeof source[key] === 'undefined') {
+                delete target[key]
+            }
+            
             if (typeof target[key] === 'object' || typeof source[key] === 'object') {
                 throw new Error(`invalid type [${propertyList.join('.')}], source=${source[key]}, target=${target[key]}`)
             }
+            
             if (target[key] !== source[key]) {
                 target[key] = source[key]
-            }
-            if (emit) {
-                this.emitChange(propertyList, source[key])
             }
         }
     }
@@ -99,7 +111,10 @@ class State extends Broadcast {
      * @param {Array<string>} properties 
      * @param {any} value 
      */
-    emitChange(properties, value) {
+    emitEvent(properties, value, canEmit = true) {
+        if (!canEmit) {
+            return
+        }
         let eventName = properties.join('.')
         this.emit(eventName, value)
     }

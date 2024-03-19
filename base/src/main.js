@@ -17,6 +17,7 @@ import Cache from './Cache'
 import Serializer from './Serializer'
 import AdjacencyMatrix from './AdjacencyMatrix'
 import State from './State'
+import retry from './retry'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -49,5 +50,6 @@ export {
     Cache,
     Serializer,
     AdjacencyMatrix,
-    State
+    State,
+    retry
 }
