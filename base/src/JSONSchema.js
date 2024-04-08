@@ -1,16 +1,16 @@
 /**
- * @typedef DataType
- * @type {('number'|'string'|'boolean'|'object'|'array'|'email'|'username'|'password'|'url')}
+ * @typedef JSONDataType
+ * @type {string}
  */
 
 
 /**
  * @typedef Schema
- * @property {DataType} type type of the property
+ * @property {JSONDataType} type type of the property 'number' 'string' 'boolean' 'object' 'array' 'email' 'username' 'password' 'url' or custom
  * @property {boolean} required is required
- * @property {Object<string,Partial<Schema>>} properties validate object properties (works only with type='object')
- * @property {boolean} flexible is object flexible (works only with type='object')
- * @property {Partial<Schema>} items type of the properties (works only with type='array')
+ * @property {Object<string,Schema>} [properties] validate object properties (works only with type='object')
+ * @property {boolean} [flexible=false] is object flexible, meaning that the object can have additional properties (works only with type='object' default=false)
+ * @property {Partial<Schema>} [items] type of the properties (works only with type='array')
  */
 
 /**
@@ -43,7 +43,7 @@ class JSONSchema {
 
     /**
      * 
-     * @param {Partial<Schema>} schema 
+     * @param {Schema} schema 
      */
     constructor(schema) {
         this.register('string', this.validateString)
@@ -89,6 +89,9 @@ class JSONSchema {
      */
     validate(data) {
         let validator = this.validators.get(this.schema.type) || null
+        if (validator === null) {
+            throw new Error(`validator for type=${this.schema.type} is not registered`)
+        }
         validator(null, this.schema, data)
     }
 
@@ -128,9 +131,8 @@ class JSONSchema {
      * @type {ValidationFn}
      */
     validateString = (propertyName, schema, data) => {
-
         if (typeof data !== 'string') {
-            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
+            throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
         }
     }
 
@@ -139,9 +141,8 @@ class JSONSchema {
      * @type {ValidationFn}
      */
     validateBoolean = (propertyName, schema, data) => {
-
         if (typeof data !== 'boolean') {
-            throw new Error(`property "${propertyName}" can be "true" or "false", "${data}" provided`)
+            throw new Error(`property=${propertyName} can be "true" or "false", value=${data} type=${typeof data} provided`)
         }
     }
 
@@ -150,11 +151,9 @@ class JSONSchema {
      * @type {ValidationFn}
      */
     validateNumber = (propertyName, schema, data) => {
-
         if (typeof data !== 'number') {
-            throw new Error(`property "${propertyName}" must be a number, "${data}" provided`)
+            throw new Error(`property=${propertyName} must be a number, value=${data} type=${typeof data} provided`)
         }
-
     }
 
     /**
@@ -163,9 +162,8 @@ class JSONSchema {
      */
     validateObject = (propertyName, schema, data) => {
 
-
         if (typeof data !== 'object') {
-            throw new Error(`property "${propertyName}" must be an object, "${data}" provided`)
+            throw new Error(`property=${propertyName} must be an object, value=${data} type=${typeof data} provided`)
         }
 
         let isStrict = schema.flexible !== true
@@ -177,7 +175,7 @@ class JSONSchema {
         for (let propName of propList) {
             let propSchema = typeof schema.properties[propName] === 'object' ? schema.properties[propName] : null
             if (propSchema === null && isStrict) {
-                throw new Error(`property "${propName}" is not expected`)
+                throw new Error(`property=${propertyName} is not expected`)
             } else if (propSchema === null && !isStrict) {
                 continue
             }
@@ -186,7 +184,10 @@ class JSONSchema {
                 continue
             }
 
-            let validator = this.validators.get(propSchema.type)
+            let validator = this.validators.get(propSchema.type) || null
+            if (validator === null) {
+                throw new Error(`validator for type=${propSchema.type} is not registered`)
+            }
             validator(propName, propSchema, data[propName])
         }
     }
@@ -198,7 +199,7 @@ class JSONSchema {
     validateArray = (propertyName, schema, data) => {
 
         if (!Array.isArray(data)) {
-            throw new Error(`property "${propertyName}" must be an array, "${data}" provided`)
+            throw new Error(`property=${propertyName} must be an array, value=${data} type=${typeof data} provided`)
         }
 
         if (typeof schema.items !== 'object') {
@@ -221,11 +222,11 @@ class JSONSchema {
     validateEmail = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
-            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
+            throw new Error(`property "${propertyName}" must be a string, value=${data} type=${typeof data} provided`)
         }
         
         if(!EMAIL_REGEX.test(data)) {
-            throw new Error(`property "${propertyName}" must be a valid email address, "${data}" provided`)
+            throw new Error(`property "${propertyName}" must be a valid email address, value=${data} type=${typeof data} provided`)
         }
     }
 
@@ -236,11 +237,11 @@ class JSONSchema {
     validateUsername = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
-            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
+            throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
         }
         
         if(!USERNAME_REGEX.test(data)) {
-            throw new Error(`property "${propertyName}" must contain letter and the length must be between 3 and 23 characters, "${data}" provided`)
+            throw new Error(`property=${propertyName} must contain letter and the length must be between 3 and 23 characters, "${data}" provided`)
         }
     }
 
@@ -251,11 +252,11 @@ class JSONSchema {
     validatePassword = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
-            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
+            throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
         }
         
         if(!PASSWORD_REGEX.test(data)) {
-            throw new Error(`property "${propertyName}" is to weak for password`)
+            throw new Error(`property=${propertyName} is to weak for password`)
         }
     }
 
@@ -265,11 +266,11 @@ class JSONSchema {
      */
     validateUrl = (propertyName, schema, data) => {
         if (typeof data !== 'string') {
-            throw new Error(`property "${propertyName}" must be a string, "${data}" provided`)
+            throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
         }
         
         if(!URL_REGEX.test(data)) {
-            throw new Error(`property "${propertyName}" is must be a valid URL`)
+            throw new Error(`property=${propertyName} is must be a valid URL`)
         }
     }
 
