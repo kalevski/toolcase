@@ -8,9 +8,9 @@
  * @typedef Schema
  * @property {DataType} type type of the property
  * @property {boolean} required is required
- * @property {Object<string,Schema>} properties validate object properties (works only with type='object')
+ * @property {Object<string,Partial<Schema>>} properties validate object properties (works only with type='object')
  * @property {boolean} flexible is object flexible (works only with type='object')
- * @property {Schema} items type of the properties (works only with type='array')
+ * @property {Partial<Schema>} items type of the properties (works only with type='array')
  */
 
 /**
@@ -43,7 +43,7 @@ class JSONSchema {
 
     /**
      * 
-     * @param {Schema} schema 
+     * @param {Partial<Schema>} schema 
      */
     constructor(schema) {
         this.register('string', this.validateString)
