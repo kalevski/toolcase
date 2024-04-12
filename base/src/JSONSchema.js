@@ -161,22 +161,23 @@ class JSONSchema {
      * @type {ValidationFn}
      */
     validateObject = (propertyName, schema, data) => {
-        console.log({ propertyName, schema, data })
 
         if (typeof data !== 'object') {
             throw new Error(`property=${propertyName} must be an object, value=${data} type=${typeof data} provided`)
         }
 
         let isStrict = schema.flexible !== true
+        const schemaProperties = schema.properties || {}
 
         let propList = new Set()
-        Object.keys(schema.properties || {}).forEach(propName => propList.add(propName))
+        Object.keys(schemaProperties).forEach(propName => propList.add(propName))
         Object.keys(data).forEach(propName => propList.add(propName))
-
         for (let propName of propList) {
-            let propSchema = typeof schema.properties[propName] === 'object' ? schema.properties[propName] : null
+
+            let propSchema = typeof schemaProperties[propName] === 'object' ? schemaProperties[propName] : null
+
             if (propSchema === null && isStrict) {
-                throw new Error(`property=${propertyName} is not expected`)
+                throw new Error(`property=${propertyName === null ? '@': propertyName}.${propName} is not expected`)
             } else if (propSchema === null && !isStrict) {
                 continue
             }
@@ -189,7 +190,11 @@ class JSONSchema {
             if (validator === null) {
                 throw new Error(`validator for type=${propSchema.type} is not registered`)
             }
-            validator(propName, propSchema, data[propName])
+            try {
+                validator(propName, propSchema, data[propName])
+            } catch (error) {
+                throw new Error(`${propertyName === null ? '@': propertyName} -> ${error.message}`)
+            }
         }
     }
 
