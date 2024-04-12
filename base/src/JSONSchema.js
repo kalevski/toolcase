@@ -7,7 +7,7 @@
 /**
  * @typedef Schema
  * @property {JSONDataType} type type of the property 'number' 'string' 'boolean' 'object' 'array' 'email' 'username' 'password' 'url' or custom
- * @property {boolean} required is required
+ * @property {boolean} [required] is required
  * @property {Object<string,Schema>} [properties] validate object properties (works only with type='object')
  * @property {boolean} [flexible=false] is object flexible, meaning that the object can have additional properties (works only with type='object' default=false)
  * @property {Partial<Schema>} [items] type of the properties (works only with type='array')
@@ -161,6 +161,7 @@ class JSONSchema {
      * @type {ValidationFn}
      */
     validateObject = (propertyName, schema, data) => {
+        console.log({ propertyName, schema, data })
 
         if (typeof data !== 'object') {
             throw new Error(`property=${propertyName} must be an object, value=${data} type=${typeof data} provided`)
@@ -169,7 +170,7 @@ class JSONSchema {
         let isStrict = schema.flexible !== true
 
         let propList = new Set()
-        Object.keys(schema.properties).forEach(propName => propList.add(propName))
+        Object.keys(schema.properties || {}).forEach(propName => propList.add(propName))
         Object.keys(data).forEach(propName => propList.add(propName))
 
         for (let propName of propList) {
@@ -179,8 +180,8 @@ class JSONSchema {
             } else if (propSchema === null && !isStrict) {
                 continue
             }
-
-            if (typeof data[propName] === 'undefined' && propSchema.required === false) {
+            const required = typeof propSchema.required === 'boolean' ? propSchema.required : false
+            if (typeof data[propName] === 'undefined' && required === false) {
                 continue
             }
 
