@@ -1,8 +1,14 @@
 /**
- * 
+ * @typedef ENVType
+ * @type {('string'|'number'|'boolean')}
+ */
+
+/**
+ * @template T
  * @param {string} key 
- * @param {string|number|boolean} defaultValue 
- * @param {('string'|'number'|'boolean')} type
+ * @param {T} defaultValue 
+ * @param {ENVType} type
+ * @returns {T}
  */
  const env = (key, defaultValue = null, type = 'string') => {
     if (typeof globalThis.process === 'undefined') {
