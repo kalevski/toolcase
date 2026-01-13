@@ -11,7 +11,7 @@ class SerializerExample {
         ])
 
 
-        let payload = serializer.encode('state', { array2: [1] })
+        let payload = serializer.encode('state', { array1: [1, 2, 3], array2: ['hello', 'world'], string1: 'custom' })
         let output = serializer.decode('state', payload)
 
         console.log(output)

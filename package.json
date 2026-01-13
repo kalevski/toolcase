@@ -10,10 +10,10 @@
         "examples"
     ],
     "devDependencies": {
-        "concurrently": "^9.1.2",
-        "nodemon": "^3.1.10",
-        "parcel": "^2.14.4",
-        "typescript": "^5.8.3"
+        "concurrently": "9.2.1",
+        "nodemon": "3.1.11",
+        "parcel": "2.16.3",
+        "typescript": "5.9.3"
     },
     "license": "MIT",
     "author": {

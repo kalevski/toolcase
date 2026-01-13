@@ -53,3 +53,29 @@ export {
     State,
     retry
 }
+
+const BASE = {
+    HTTP,
+    VectorClock,
+    EventEmitter,
+    Broadcast,
+    LSystem,
+    ObjectPool,
+    PriorityQueue,
+    env,
+    generateId,
+    toHex,
+    formatByteSize,
+    bufferToHex,
+    hexToBuffer,
+    Color,
+    JSONSchema,
+    getNumberInRange,
+    Cache,
+    Serializer,
+    AdjacencyMatrix,
+    State,
+    retry
+}
+
+export default BASE
