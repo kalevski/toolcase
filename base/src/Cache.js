@@ -70,6 +70,11 @@ class Cache {
         this.ms = ms
     }
 
+    invalidate(...args) {
+        let hash = this.getHash(args)
+        this.entiries.delete(hash)
+    }
+
     /**
      * @private
      * @returns {number}

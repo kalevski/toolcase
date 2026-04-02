@@ -11,9 +11,9 @@
     ],
     "devDependencies": {
         "concurrently": "9.2.1",
-        "nodemon": "3.1.11",
-        "parcel": "2.16.3",
-        "typescript": "5.9.3"
+        "nodemon": "3.1.14",
+        "parcel": "2.16.4",
+        "typescript": "6.0.2"
     },
     "license": "MIT",
     "author": {
