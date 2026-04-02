@@ -39,6 +39,11 @@ class LoggerFactory {
         return getLevel(this.levelOrder)
     }
 
+    /**
+     * 
+     * @param {string} scope 
+     * @returns {Logger}
+     */
     getLogger(scope = 'default') {
         if (!this.loggers.has(scope)) {
             let logger = new Logger(scope, this.onLog)
