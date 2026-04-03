@@ -80,6 +80,7 @@ export * from './Image'
 export * from './StatusDot'
 export * from './AssetBundle'
 export * from './EmptyState'
+export * from './SimpleFile'
 
 import * as Modal from './modal'
 export { Modal }

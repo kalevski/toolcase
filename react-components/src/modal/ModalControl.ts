@@ -1,4 +1,4 @@
-import toolcase from '@toolcase/base'
+import { Broadcast } from '@toolcase/base'
 
 export type ModalDef = {
 	key: string
@@ -8,7 +8,7 @@ export type ModalDef = {
 
 export const CHANGE_EVENT = 'change'
 
-export class ModalControl extends toolcase.Broadcast<string, any, any> {
+export class ModalControl extends Broadcast {
 	private defs: ModalDef[] = []
 
 	get current(): ModalDef | null {

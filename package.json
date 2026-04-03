@@ -11,6 +11,7 @@
         "base",
         "logging",
         "serializer",
+        "react-components",
         "examples"
     ],
     "devDependencies": {
