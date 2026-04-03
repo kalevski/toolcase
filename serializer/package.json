@@ -1,0 +1,43 @@
+{
+    "name": "@toolcase/serializer",
+    "version": "2.0.0",
+    "description": "Protobuf-based serializer for @toolcase",
+    "main": "lib/main.main.js",
+    "module": "lib/main.module.js",
+    "types": "lib/main.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/main.d.ts",
+            "import": "./lib/main.module.js",
+            "require": "./lib/main.main.js"
+        }
+    },
+    "sideEffects": false,
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup"
+    },
+    "dependencies": {
+        "protobufjs": "8.0.0"
+    },
+    "keywords": [
+        "serializer",
+        "protobuf",
+        "toolcase"
+    ],
+    "files": [
+        "lib"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "license": "MIT"
+}

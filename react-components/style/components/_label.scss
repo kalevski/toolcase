@@ -1,0 +1,50 @@
+// ── Label ──────────────────────────────────────────────────────────────────────
+
+.component.component-label {
+	--label-text: #1e293b;
+	--label-required: #ef4444;
+	--label-tooltip: #94a3b8;
+	--label-transition: 0.15s ease;
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	font-weight: 500;
+	font-size: 0.85rem;
+	color: var(--label-text);
+	margin-bottom: 0.35rem;
+	cursor: default;
+
+	&.component-label--small {
+		font-size: 0.75rem;
+	}
+
+	&.component-label--large {
+		font-size: 1rem;
+	}
+}
+
+.component-label__text {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.15rem;
+}
+
+.component-label__required {
+	color: var(--label-required);
+	font-weight: 600;
+	font-size: 0.9em;
+}
+
+.component-label__tooltip {
+	display: inline-flex;
+	align-items: center;
+	color: var(--label-tooltip);
+	font-size: 0.8em;
+	cursor: help;
+	transition: color var(--label-transition);
+
+	&:hover {
+		color: var(--label-text);
+	}
+}

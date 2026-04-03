@@ -1,0 +1,74 @@
+.component.component-form-input {
+	--fi-label-color: #1e293b;
+	--fi-help-color: #94a3b8;
+	--fi-help-hover: #6366f1;
+	--fi-required-color: #ef4444;
+	--fi-transition: 0.15s ease;
+
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	font-size: 0.875rem;
+	margin-bottom: 20px;
+
+	&.component-form-input--error {
+		.form-control,
+		.form-select {
+			border-color: #ef4444;
+		}
+	}
+
+	&.component-form-input--inline {
+		.component-form-input__inline-wrap {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+	}
+}
+
+.component-form-input {
+
+	.component-extended-select, .component-dropdown {
+		margin: 0;
+		width: 100%;
+    	max-width: 480px;
+	}
+
+	input:hover {
+		border-color: var(--es-muted);
+	}
+
+}
+
+.component-form-input__label {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	margin-bottom: 0.1rem;
+
+	.form-label {
+		font-weight: 600;
+		font-size: 0.8125rem;
+		color: var(--fi-label-color);
+	}
+}
+
+.component-form-input__required {
+	color: var(--fi-required-color);
+	margin-left: 0.15rem;
+	font-weight: 600;
+}
+
+.component-form-input__help {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--fi-help-color);
+	cursor: help;
+	transition: color var(--fi-transition);
+
+	&:hover {
+		color: var(--fi-help-hover);
+	}
+}

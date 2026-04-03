@@ -1,0 +1,10 @@
+.component.component-card {
+    box-shadow: none;
+}
+
+.component-card {
+    &:hover {
+        box-shadow: none;
+        transform: none;
+    }
+}

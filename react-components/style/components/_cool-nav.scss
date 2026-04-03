@@ -1,0 +1,90 @@
+.component.component-cool-nav {
+	--cool-nav-bg: rgba(255, 255, 255, 0.98);
+	--cool-nav-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+	--cool-nav-transform: none;
+	backdrop-filter: none;
+	background-color: var(--cool-nav-bg);
+	box-shadow: none;
+	padding: 1rem 1.5rem;
+	position: relative;
+	transition:
+		background-color 0.3s ease,
+		backdrop-filter 0.3s ease,
+		box-shadow 0.3s ease,
+		transform 0.3s ease,
+		padding 0.3s ease;
+	z-index: 1030;
+}
+
+.component-cool-nav--sticky {
+	position: sticky;
+	top: 0;
+	left: 0;
+	right: 0;
+}
+
+.component-cool-nav--default-bg {
+	background-color: var(--cool-nav-bg);
+}
+
+.component-cool-nav--scrolled {
+	--cool-nav-bg: rgba(255, 255, 255, 0.85);
+	backdrop-filter: blur(16px);
+	box-shadow: var(--cool-nav-shadow);
+	padding-top: 0.75rem;
+	padding-bottom: 0.75rem;
+	transform: translateY(-2px) scaleY(0.96);
+}
+
+.component-cool-nav.navbar-dark {
+	--cool-nav-bg: rgba(17, 24, 39, 0.95);
+	--cool-nav-shadow: 0 16px 40px rgba(11, 16, 28, 0.5);
+}
+
+.component-cool-nav.navbar-dark.component-cool-nav--scrolled {
+	--cool-nav-bg: rgba(17, 24, 39, 0.85);
+}
+
+.component-cool-nav__brand {
+	align-items: center;
+	display: flex;
+	font-weight: 600;
+	gap: 0.75rem;
+}
+
+.component-cool-nav__items .nav-link {
+	font-weight: 500;
+	padding: 0.5rem 1rem;
+	transition:
+		color 0.2s ease,
+		opacity 0.2s ease;
+}
+.component-cool-nav__login-action {
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.component-cool-nav__actions {
+	align-items: center;
+	gap: 0.75rem;
+}
+
+@media (max-width: 991.98px) {
+	.component-cool-nav {
+		padding: 0.75rem 1rem;
+	}
+
+	.component-cool-nav__items {
+		margin-top: 1.25rem;
+		text-align: center;
+	}
+
+	.component-cool-nav__actions {
+		justify-content: center;
+		margin-top: 1rem;
+	}
+
+	.component-cool-nav__brand {
+		margin-right: 0.5rem;
+	}
+}

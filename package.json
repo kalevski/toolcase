@@ -2,18 +2,28 @@
     "name": "@toolcase/root",
     "private": true,
     "scripts": {
-        "build": "npm run build --workspaces"
+        "build": "npm run build --workspaces",
+        "test": "vitest run",
+        "lint": "eslint .",
+        "format": "prettier --write ."
     },
     "workspaces": [
         "base",
         "logging",
+        "serializer",
+        "react-components",
         "examples"
     ],
     "devDependencies": {
+        "@eslint/js": "^10.0.1",
         "concurrently": "9.2.1",
-        "nodemon": "3.1.14",
-        "parcel": "2.16.4",
-        "typescript": "6.0.2"
+        "eslint": "^10.1.0",
+        "eslint-config-prettier": "^10.1.8",
+        "prettier": "^3.8.1",
+        "tsup": "^8.5.1",
+        "typescript": "6.0.2",
+        "typescript-eslint": "^8.58.0",
+        "vitest": "^4.1.2"
     },
     "license": "MIT",
     "author": {
@@ -25,5 +35,8 @@
     },
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "engines": {
+        "node": ">=18"
     }
 }

@@ -1,29 +1,27 @@
 {
     "name": "@toolcase/base",
-    "version": "1.0.30",
+    "version": "2.0.0",
     "description": "🧬 Collection of JavaScript helper functions and structures",
     "source": "src/main.js",
-    "main": "lib/main.js",
-    "module": "lib/module.js",
+    "main": "lib/main.main.js",
+    "module": "lib/main.module.js",
     "types": "lib/main.d.ts",
-    "scripts": {
-        "dev": "nodemon -e js -w src --exec \"npm run build\"",
-        "build": "npm run build:src && npm run build:tsd",
-        "build:src": "parcel build --no-optimize",
-        "build:tsd": "tsc -d --allowJs --emitDeclarationOnly --target es6 --lib ES2015 --outDir ./lib src/*.js"
-    },
-    "dependencies": {
-        "eventemitter3": "5.0.4",
-        "protobufjs": "8.0.0"
-    },
-    "targets": {
-        "types": false,
-        "main": {
-            "optimize": false
+    "exports": {
+        ".": {
+            "types": "./lib/main.d.ts",
+            "import": "./lib/main.module.js",
+            "require": "./lib/main.main.js"
         },
-        "module": {
-            "optimize": false
+        "./node": {
+            "types": "./lib/node.d.ts",
+            "import": "./lib/node.module.js",
+            "require": "./lib/node.main.js"
         }
+    },
+    "sideEffects": false,
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup"
     },
     "homepage": "https://kalevski.dev/toolcase",
     "keywords": [
@@ -50,6 +48,9 @@
     },
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "engines": {
+        "node": ">=18"
     },
     "license": "MIT"
 }

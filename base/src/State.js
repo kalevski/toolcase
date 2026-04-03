@@ -36,8 +36,8 @@ class State extends Broadcast {
      * @param {Partial<T>} data 
      */
     set(data, emit = true) {
-        if (typeof data !== 'object') {
-            throw new Error(`data=(${data}) must be an object`)
+        if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+            throw new Error(`data=(${data}) must be a plain object`)
         }
 
         if (typeof emit !== 'boolean') {

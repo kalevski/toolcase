@@ -18,7 +18,7 @@ class Cache {
      * @private
      * @type {Map<string,CachedEntry>}
      */
-    entiries = new Map()
+    entries = new Map()
 
     /**
      * @readonly
@@ -72,7 +72,7 @@ class Cache {
 
     invalidate(...args) {
         let hash = this.getHash(args)
-        this.entiries.delete(hash)
+        this.entries.delete(hash)
     }
 
     /**
@@ -98,10 +98,10 @@ class Cache {
      * @param {string} hash 
      */
     getEntry(hash) {
-        let entry = this.entiries.get(hash) || null
+        let entry = this.entries.get(hash) || null
         if (entry === null) {
             entry = { data: null, fetchedAt: 0 }
-            this.entiries.set(hash, entry)
+            this.entries.set(hash, entry)
         }
         return entry
     }

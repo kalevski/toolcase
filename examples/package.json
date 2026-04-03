@@ -1,10 +1,10 @@
 {
     "name": "@toolcase/examples",
     "private": true,
-    "description": "🧬 Library examples",
+    "description": "🧬 Web presentation of the @toolcase project",
     "scripts": {
-        "dev": "parcel index.html --dist-dir public",
-        "build": "echo \"not implemented\""
+        "dev": "vite",
+        "build": "vite build"
     },
     "homepage": "https://kalevski.dev/toolcase",
     "repository": {
@@ -14,5 +14,21 @@
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"
     },
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {
+        "@toolcase/base": "*",
+        "@toolcase/react-components": "*",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "react-router": "^7.5.0",
+        "bootstrap": "^5.3.3",
+        "bootstrap-icons": "^1.11.3"
+    },
+    "devDependencies": {
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.0",
+        "@vitejs/plugin-react": "^4.4.1",
+        "sass": "^1.86.3",
+        "vite": "^6.3.1"
+    }
 }

@@ -1,25 +1,22 @@
 {
     "name": "@toolcase/logging",
-    "version": "0.3.21",
+    "version": "2.0.0",
     "description": "🏷 Lightweight logger for NodeJS and Browser",
     "source": "src/main.js",
-    "main": "lib/main.js",
-    "module": "lib/module.js",
+    "main": "lib/main.main.js",
+    "module": "lib/main.module.js",
     "types": "lib/main.d.ts",
-    "scripts": {
-        "dev": "nodemon -e js -w src --exec \"npm run build\"",
-        "build": "npm run build:src && npm run build:tsd",
-        "build:src": "parcel build --no-source-maps --no-cache --no-optimize",
-        "build:tsd": "tsc -d --allowJs --emitDeclarationOnly --target es6 --lib ES2015 --outDir ./lib src/*.js"
-    },
-    "targets": {
-        "types": false,
-        "main": {
-            "optimize": false
-        },
-        "module": {
-            "optimize": false
+    "exports": {
+        ".": {
+            "types": "./lib/main.d.ts",
+            "import": "./lib/main.module.js",
+            "require": "./lib/main.main.js"
         }
+    },
+    "sideEffects": false,
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup"
     },
     "homepage": "https://kalevski.dev/toolcase",
     "keywords": [
@@ -47,6 +44,9 @@
     },
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "engines": {
+        "node": ">=18"
     },
     "license": "MIT"
 }

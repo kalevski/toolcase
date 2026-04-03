@@ -1,0 +1,66 @@
+@import '../colors';
+
+.component.component-file-dropzone {
+	& > .component-file-dropzone__dropzone {
+		cursor: pointer;
+		width: 100%;
+		padding: 40px 0;
+		border: dashed 2px #e2e8f0;
+		background: #f8fafc;
+		border-radius: 8px;
+		transition: border-color 0.15s ease, background-color 0.15s ease;
+
+		&:hover {
+			border-color: #94a3b8;
+			background: #f1f5f9;
+		}
+
+		* {
+			pointer-events: none;
+			user-select: none;
+		}
+
+		> .component-file-dropzone__upload_text {
+			text-align: center;
+			max-width: 400px;
+			margin: auto;
+			border-bottom: solid 1px #e2e8f0;
+			padding-bottom: 20px;
+			color: #64748b;
+
+			b {
+				color: #1e293b;
+			}
+		}
+
+		p {
+			margin: 0;
+			margin-top: 20px;
+			text-align: center;
+			color: #64748b;
+			padding: 5px 0;
+		}
+
+		.component-file-dropzone__supported-formats {
+			display: flex;
+			justify-content: center;
+			gap: 10px;
+		}
+	}
+
+	.component-file-dropzone__format {
+		color: #fff;
+		border-radius: 6px;
+		width: 44px;
+		max-width: 44px;
+		height: 44px;
+
+		span {
+			text-align: center;
+			width: 100%;
+			padding: 10px 0;
+			line-height: 24px;
+			display: block;
+		}
+	}
+}

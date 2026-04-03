@@ -7,17 +7,13 @@
  */
 const getNumberInRange = (value, defaultValue = 0, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
 
-    let number = null
+    let number = defaultValue
 
     if (typeof value === 'string') {
-        value = parseInt(value, 10)
-        if (Number.isNaN(value)) {
-            number = defaultValue
-        }
-    } else if (typeof value !== 'number') {
-        number = defaultValue
-    } else {
-        throw new Error(`not supported value type "${typeof value}"`)
+        const parsed = parseInt(value, 10)
+        number = Number.isNaN(parsed) ? defaultValue : parsed
+    } else if (typeof value === 'number') {
+        number = Number.isNaN(value) ? defaultValue : value
     }
 
     return Math.min(Math.max(number, min), max) 

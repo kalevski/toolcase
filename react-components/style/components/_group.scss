@@ -1,0 +1,90 @@
+@import '../colors';
+
+.component.component-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+    margin: 10px 0;
+}
+
+.component-group {
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 5px 8px;
+		border-radius: 8px;
+		background: #eef2f7;
+		user-select: none;
+	}
+
+	&__collapse {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		padding: 0;
+		border: none;
+		border-radius: 4px;
+		background: transparent;
+		color: $gray-500;
+		font-size: 0.72rem;
+		cursor: pointer;
+		transition: color 0.15s ease, background 0.15s ease;
+
+		&:hover {
+			color: $gray-800;
+			background: rgba(30, 41, 59, 0.06);
+		}
+	}
+
+	&__label {
+		font-size: 0.82rem;
+		font-weight: 600;
+		color: $gray-800;
+	}
+
+	&__badge {
+		font-size: 0.72rem;
+		font-weight: 500;
+		color: $gray-500;
+		background: #fff;
+		border: 1px solid $gray-200;
+		border-radius: 10px;
+		padding: 1px 8px;
+		line-height: 1.4;
+	}
+
+	&__add {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		margin-left: auto;
+		padding: 0;
+		border: 1px dashed $gray-300;
+		border-radius: 6px;
+		background: transparent;
+		color: $gray-500;
+		font-size: 0.72rem;
+		cursor: pointer;
+		transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+
+		&:hover {
+			color: $gray-800;
+			border-color: $gray-800;
+			background: $gray-50;
+		}
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		padding-left: 12px;
+		border-left: 2px solid $gray-200;
+		margin-left: 10px;
+	}
+}

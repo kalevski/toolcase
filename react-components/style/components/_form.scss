@@ -1,0 +1,36 @@
+.form-control {
+	display: block;
+	width: 100%;
+	max-width: 480px;
+	padding: 0.55rem 0.75rem;
+	font-size: 0.9rem;
+	border: 1px solid var(--border-color, #e2e8f0);
+	color: var(--text-color, #1e293b);
+	outline: none;
+	background: transparent;
+	transition: border-color 0.15s ease;
+
+	&::placeholder {
+		color: var(--text-muted, #94a3b8);
+	}
+
+	&:focus {
+		border-color: var(--accent-color, #1e293b);
+	}
+}
+
+.form-textarea {
+	resize: vertical;
+	min-height: 60px;
+	line-height: 1.5;
+	font-family: inherit;
+	font-size: 0.85rem;
+}
+
+.form-label-inline {
+	display: block;
+	margin-bottom: 0.35rem;
+	font-weight: 500;
+	font-size: 0.85rem;
+	color: var(--text-color, #1e293b);
+}

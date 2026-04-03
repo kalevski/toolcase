@@ -1,0 +1,82 @@
+// ── Switch ─────────────────────────────────────────────────────────────────────
+
+.component.component-switch {
+	--switch-track-w: 36px;
+	--switch-track-h: 20px;
+	--switch-knob: 16px;
+	--switch-off-bg: #e2e8f0;
+	--switch-on-bg: #1e293b;
+	--switch-transition: 0.2s ease;
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	user-select: none;
+
+	&.component-switch--small {
+		--switch-track-w: 28px;
+		--switch-track-h: 16px;
+		--switch-knob: 12px;
+	}
+
+	&.component-switch--large {
+		--switch-track-w: 44px;
+		--switch-track-h: 24px;
+		--switch-knob: 20px;
+	}
+
+	&.component-switch--disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+}
+
+.component-switch__input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+.component-switch__track {
+	position: relative;
+	display: inline-block;
+	width: var(--switch-track-w);
+	height: var(--switch-track-h);
+	background: var(--switch-off-bg);
+	transition: background-color var(--switch-transition);
+	flex-shrink: 0;
+}
+
+.component-switch__knob {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: var(--switch-knob);
+	height: var(--switch-knob);
+	background: #fff;
+	transition: transform var(--switch-transition);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.component-switch__input:checked + .component-switch__track {
+	background: var(--switch-on-bg);
+}
+
+.component-switch__input:checked + .component-switch__track .component-switch__knob {
+	transform: translateX(calc(var(--switch-track-w) - var(--switch-knob) - 4px));
+}
+
+.component-switch__input:focus-visible + .component-switch__track {
+	outline: 2px solid #1e293b;
+	outline-offset: 2px;
+}
+
+.component-switch__label {
+	font-size: 0.85rem;
+	color: #1e293b;
+	font-weight: 500;
+}

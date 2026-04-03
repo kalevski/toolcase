@@ -1,0 +1,83 @@
+.component.component-table {
+	width: 100%;
+	overflow-x: auto;
+	border: solid 1px #eaeaea;
+}
+
+.component-table {
+	&__table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+	}
+
+	&__head {
+		background: #f8fafc;
+	}
+
+	&__th {
+		padding: 12px 16px;
+		font-size: 12px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		color: #64748b;
+		border-bottom: 1px solid #e2e8f0;
+		white-space: nowrap;
+	}
+
+	&__td {
+		padding: 12px 16px;
+		font-size: 14px;
+		color: #1e293b;
+		border-bottom: 1px solid #f1f5f9;
+		vertical-align: middle;
+		min-width: 120px;
+	}
+
+	&__row {
+		background: #fff;
+		transition: background 0.1s;
+	}
+
+	&__empty {
+		padding: 40px 16px;
+		text-align: center;
+		color: #94a3b8;
+		font-size: 14px;
+	}
+
+	// -- modifiers --
+
+	&--striped &__row:nth-child(even) {
+		background: #f8fafc;
+	}
+
+	&--hoverable &__row:hover {
+		background: #f1f5f9;
+	}
+
+	&--compact &__th {
+		padding: 8px 12px;
+	}
+
+	&--compact &__td {
+		padding: 8px 12px;
+		font-size: 13px;
+	}
+
+	&--borderless &__th,
+	&--borderless &__td {
+		border-bottom: none;
+	}
+
+	&--sticky-header &__head {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+	}
+
+	&--clickable &__row {
+		cursor: pointer;
+	}
+}

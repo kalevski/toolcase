@@ -162,7 +162,7 @@ class JSONSchema {
      */
     validateObject = (propertyName, schema, data) => {
 
-        if (typeof data !== 'object') {
+        if (data === null || typeof data !== 'object' || Array.isArray(data)) {
             throw new Error(`property=${propertyName} must be an object, value=${data} type=${typeof data} provided`)
         }
 

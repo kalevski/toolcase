@@ -1,0 +1,149 @@
+.modals {
+	position: relative;
+	z-index: 1050;
+}
+
+.component-modals__render {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1050;
+	padding: 1rem;
+
+	transition: opacity 0.15s ease-in-out;
+	opacity: 1;
+
+	&--closed {
+		display: none !important;
+		opacity: 0;
+	}
+}
+
+.component-modals__window {
+	background: white;
+	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+	max-width: 500px;
+	width: 100%;
+	max-height: 90vh;
+	overflow-y: auto;
+	position: relative;
+
+	animation: modalSlideIn 0.15s ease-out;
+
+	&:focus {
+		outline: 2px solid #1e293b;
+		outline-offset: 2px;
+	}
+
+	@media (max-width: 576px) {
+		max-width: 100%;
+		margin: 0.5rem;
+		max-height: calc(100vh - 1rem);
+	}
+}
+
+@keyframes modalSlideIn {
+	from {
+		opacity: 0;
+		transform: translate3d(0, -50px, 0) scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+}
+
+.component-modals__window {
+	&--small {
+		max-width: 300px;
+	}
+
+	&--medium {
+		max-width: 500px;
+	}
+
+	&--large {
+		max-width: 800px;
+	}
+
+	&--xlarge {
+		max-width: 1200px;
+	}
+
+	&--fullscreen {
+		max-width: 100%;
+		max-height: 100%;
+		margin: 0;
+		height: 100vh;
+		width: 100vw;
+	}
+}
+
+.modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem 1.5rem;
+	border-bottom: 1px solid #e2e8f0;
+	border-top-left-radius: 12px;
+	border-top-right-radius: 12px;
+
+	.modal-title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: #1e293b;
+	}
+
+	.btn-close {
+		padding: 0.5rem;
+		margin: -0.5rem -0.5rem -0.5rem auto;
+		background: transparent;
+		border: none;
+		font-size: 1.125rem;
+		cursor: pointer;
+		color: #64748b;
+		transition: color 0.15s ease;
+
+		&:hover {
+			color: #1e293b;
+		}
+	}
+}
+
+.modal-body {
+	padding: 1.5rem;
+
+	&--scrollable {
+		max-height: 60vh;
+		overflow-y: auto;
+	}
+}
+
+.modal-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	padding: 1rem 1.5rem;
+	border-top: 1px solid #e2e8f0;
+	border-bottom-left-radius: 12px;
+	border-bottom-right-radius: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.component-modals__window {
+		animation: none;
+	}
+
+	.component-modals__render {
+		transition: none;
+	}
+}

@@ -1,0 +1,42 @@
+// ── Text ───────────────────────────────────────────────────────────────────────
+
+.component.component-text {
+	--text-color: #1e293b;
+
+	color: var(--text-color);
+	font-size: 0.875rem;
+	line-height: 1.55;
+
+	// Sizes
+	&.component-text--small {
+		font-size: 0.75rem;
+	}
+
+	&.component-text--large {
+		font-size: 1rem;
+	}
+
+	// Variants
+	&.component-text--muted {
+		--text-color: #64748b;
+	}
+
+	&.component-text--code {
+		font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+		background: #f1f5f9;
+		padding: 0.1em 0.35em;
+		font-size: 0.825em;
+		color: #0f172a;
+	}
+
+	&.component-text--mono {
+		font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	}
+
+	&.component-text--truncate {
+		display: block;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}

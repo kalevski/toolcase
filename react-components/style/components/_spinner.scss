@@ -1,0 +1,48 @@
+// ── Spinner ────────────────────────────────────────────────────────────────────
+
+@keyframes component-spinner-rotate {
+	to { transform: rotate(360deg); }
+}
+
+.component.component-spinner {
+	--spinner-size: 24px;
+	--spinner-border: 3px;
+	--spinner-color: #000;
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	&.component-spinner--small {
+		--spinner-size: 16px;
+		--spinner-border: 2px;
+	}
+
+	&.component-spinner--large {
+		--spinner-size: 36px;
+		--spinner-border: 4px;
+	}
+
+	// Variant colors
+	&.component-spinner--primary   { --spinner-color: #000; }
+	&.component-spinner--secondary { --spinner-color: #94a3b8; }
+	&.component-spinner--info      { --spinner-color: #06b6d4; }
+	&.component-spinner--success   { --spinner-color: #22c55e; }
+	&.component-spinner--warning   { --spinner-color: #f59e0b; }
+	&.component-spinner--danger    { --spinner-color: #ef4444; }
+}
+
+.component-spinner__circle {
+	display: block;
+	width: var(--spinner-size);
+	height: var(--spinner-size);
+	border: var(--spinner-border) solid #e2e8f0;
+	border-top-color: var(--spinner-color);
+	animation: component-spinner-rotate 0.7s linear infinite;
+	border-radius: 50%;
+}
+
+.component-spinner__label {
+	font-size: 0.85rem;
+	color: #64748b;
+}

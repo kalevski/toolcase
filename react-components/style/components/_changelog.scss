@@ -1,0 +1,153 @@
+@use '../colors' as *;
+
+.component.component-changelog {
+	position: relative;
+	padding: clamp(2.5rem, 5vw, 3.5rem) clamp(1.5rem, 6vw, 3.5rem);
+	background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+	border: 1px solid rgba($gray-200, 0.9);
+	box-shadow: 0 24px 40px rgba($gray-900, 0.06);
+}
+
+.component-changelog {
+	.component-changelog__inner {
+		max-width: 1100px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: clamp(1.5rem, 3vw, 2rem);
+	}
+
+	.component-changelog__header {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem 2rem;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.component-changelog__header-copy {
+		max-width: 560px;
+	}
+
+	.component-changelog__eyebrow {
+		margin: 0 0 0.5rem;
+		font-size: 0.75rem;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		font-weight: 600;
+		color: rgba($gray-600, 0.9);
+	}
+
+	.component-changelog__title {
+		margin: 0 0 0.4rem;
+		font-size: clamp(1.6rem, 3vw, 2rem);
+		font-weight: 700;
+		color: #0f172a;
+	}
+
+	.component-changelog__subtitle {
+		margin: 0;
+		font-size: 0.98rem;
+		color: rgba($gray-700, 0.72);
+	}
+
+	.component-changelog__read-more-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.65rem 1.2rem;
+		border: 1px solid rgba($gray-300, 0.9);
+		background: rgba(255, 255, 255, 0.84);
+		color: #111827;
+		font-size: 0.9rem;
+		font-weight: 600;
+		text-decoration: none;
+		letter-spacing: 0.02em;
+		box-shadow: 0 10px 20px rgba($gray-900, 0.06);
+		transition:
+			background 160ms ease,
+			box-shadow 160ms ease,
+			transform 160ms ease;
+
+		&:hover,
+		&:focus-visible {
+			background: #111827;
+			color: #f9fafb;
+			box-shadow: 0 16px 26px rgba($gray-900, 0.18);
+			transform: translateY(-1px);
+		}
+	}
+
+	.component-changelog__slider {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.component-changelog__track {
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: minmax(260px, 1fr);
+		gap: 1rem;
+		overflow-x: auto;
+		padding-bottom: 0.25rem;
+		scroll-snap-type: x mandatory;
+	}
+
+	.component-changelog__item {
+		scroll-snap-align: start;
+		background: rgba(255, 255, 255, 0.9);
+		border: 1px solid rgba($gray-200, 0.9);
+		padding: 1.1rem 1.25rem;
+		box-shadow: 0 14px 30px rgba($gray-900, 0.04);
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.component-changelog__item-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+		font-size: 0.8rem;
+	}
+
+	.component-changelog__item-date {
+		color: rgba($gray-600, 0.9);
+	}
+
+	.component-changelog__item-tag {
+		padding: 0.15rem 0.6rem;
+		background: rgba($gray-900, 0.06);
+		color: rgba($gray-900, 0.86);
+		font-weight: 500;
+	}
+
+	.component-changelog__item-title {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 600;
+		color: #0f172a;
+	}
+
+	.component-changelog__item-description {
+		margin: 0;
+		font-size: 0.92rem;
+		color: rgba($gray-700, 0.86);
+	}
+
+	@media (max-width: 768px) {
+		.changelog {
+		}
+
+		.component-changelog__header {
+			align-items: flex-start;
+		}
+
+		.component-changelog__read-more-button {
+			width: 100%;
+			justify-content: center;
+		}
+	}
+
+}

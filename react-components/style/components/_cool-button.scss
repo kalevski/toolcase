@@ -1,0 +1,50 @@
+.component.component-cool-button {
+	align-items: center;
+	display: inline-flex;
+	justify-content: center;
+	position: relative;
+}
+
+.component-cool-button {
+	.component-cool-button__inner {
+		align-items: center;
+		display: inline-flex;
+		gap: 0.75rem;
+		height: 100%;
+	}
+
+	.component-cool-button__label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.component-cool-button__addon {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.component-cool-button__separator {
+		align-self: stretch;
+		background-color: rgba(15, 23, 42, 0.18);
+		display: inline-flex;
+		width: 1px;
+	}
+
+	.component-cool-button.btn-outline-primary .component-cool-button__separator,
+	.component-cool-button.btn-outline-secondary .component-cool-button__separator,
+	.component-cool-button.btn-outline-success .component-cool-button__separator,
+	.component-cool-button.btn-outline-danger .component-cool-button__separator,
+	.component-cool-button.btn-outline-warning .component-cool-button__separator,
+	.component-cool-button.btn-outline-info .component-cool-button__separator {
+		background-color: currentColor;
+		opacity: 0.25;
+	}
+
+	.component-cool-button.btn-primary .component-cool-button__separator,
+	.component-cool-button.btn-secondary .component-cool-button__separator {
+		background-color: rgba(255, 255, 255, 0.3);
+	}
+
+}
