@@ -27,8 +27,8 @@ class RESTError extends Error {
 
 }
 
-RESTError.NOT_FOUND = new RESTError(Status.NOT_FOUND, 'resource not found')
-RESTError.NOT_IMPLEMENTED = new RESTError(Status.NOT_IMPLEMENTED, 'not implemented')
-RESTError.INTERNAL_SERVER_ERROR = new RESTError(Status.INTERNAL_SERVER_ERROR, 'internal server error')
+RESTError.notFound = (message = 'resource not found') => new RESTError(Status.NOT_FOUND, message)
+RESTError.notImplemented = (message = 'not implemented') => new RESTError(Status.NOT_IMPLEMENTED, message)
+RESTError.internalServerError = (message = 'internal server error') => new RESTError(Status.INTERNAL_SERVER_ERROR, message)
 
 export default RESTError

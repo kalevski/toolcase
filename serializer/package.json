@@ -1,8 +1,7 @@
 {
-    "name": "@toolcase/base",
-    "version": "1.0.30",
-    "description": "🧬 Collection of JavaScript helper functions and structures",
-    "source": "src/main.js",
+    "name": "@toolcase/serializer",
+    "version": "1.0.0",
+    "description": "Protobuf-based serializer for @toolcase",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",
     "types": "lib/main.d.ts",
@@ -11,11 +10,6 @@
             "types": "./lib/main.d.ts",
             "import": "./lib/main.module.js",
             "require": "./lib/main.main.js"
-        },
-        "./node": {
-            "types": "./lib/node.d.ts",
-            "import": "./lib/node.module.js",
-            "require": "./lib/node.main.js"
         }
     },
     "sideEffects": false,
@@ -23,18 +17,14 @@
         "dev": "tsup --watch",
         "build": "tsup"
     },
-    "homepage": "https://kalevski.dev/toolcase",
-    "keywords": [
-        "helpers",
-        "utils",
-        "functions",
-        "toolcase",
-        "nodejs",
-        "browser"
-    ],
-    "directories": {
-        "lib": "lib"
+    "dependencies": {
+        "protobufjs": "8.0.0"
     },
+    "keywords": [
+        "serializer",
+        "protobuf",
+        "toolcase"
+    ],
     "files": [
         "lib"
     ],
@@ -45,9 +35,6 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/kalevski/toolcase.git"
-    },
-    "bugs": {
-        "url": "https://github.com/kalevski/toolcase/issues"
     },
     "engines": {
         "node": ">=18"

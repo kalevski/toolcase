@@ -29,7 +29,7 @@ const Level = {
  * @param {LoggerLevel} level 
  */
 const getLevelOrder = (level) => {
-    let order = LevelOrder[level] || null
+    let order = LevelOrder[level] ?? null
     if (typeof order !== 'number') {
         return -1
     }

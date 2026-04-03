@@ -25,7 +25,7 @@
        else if (boolValue === 'false') return false
        else return defaultValue
    }
-   return value ? value : defaultValue
+   return value !== undefined ? value : defaultValue
 }
 
 export default env

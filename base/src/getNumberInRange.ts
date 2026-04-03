@@ -1,11 +1,4 @@
-/**
- * 
- * @param {string|number} value 
- * @param {number} defaultValue 
- * @param {number} min 
- * @param {number} max 
- */
-const getNumberInRange = (value, defaultValue = 0, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
+const getNumberInRange = (value: string | number, defaultValue: number = 0, min: number = Number.MIN_SAFE_INTEGER, max: number = Number.MAX_SAFE_INTEGER): number => {
 
     let number = defaultValue
 

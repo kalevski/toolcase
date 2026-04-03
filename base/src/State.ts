@@ -1,22 +1,10 @@
 import Broadcast from './Broadcast'
 
-/**
- * @template T
- * @augments Broadcast<string,object,any>
- */
-class State extends Broadcast {
+class State<T extends Record<string, any> = Record<string, any>> extends Broadcast {
 
-    /**
-     * @private
-     * @type {T} 
-     */
-    data = null
+    private data: Partial<T> = null as any
 
-    /**
-     * 
-     * @param {Partial<T>} data 
-     */
-    constructor(data = {}) {
+    constructor(data: Partial<T> = {} as Partial<T>) {
         super()
         if (!this.isObject(data)) {
             throw new Error('state must be an object')
@@ -24,18 +12,11 @@ class State extends Broadcast {
         this.data = data
     }
 
-    /**
-     * @returns {Partial<T>}
-     */
-    get() {
+    get(): Partial<T> {
         return this.data
     }
 
-    /**
-     * 
-     * @param {Partial<T>} data 
-     */
-    set(data, emit = true) {
+    set(data: Partial<T>, emit: boolean = true): this {
         if (data === null || typeof data !== 'object' || Array.isArray(data)) {
             throw new Error(`data=(${data}) must be a plain object`)
         }
@@ -46,27 +27,20 @@ class State extends Broadcast {
 
         const props = ['state']
         this.emitEvent(props, this.data, emit)
-        this.setProperties(this.data, data, props, emit)
+        this.setProperties(this.data as Record<string, any>, data as Record<string, any>, props, emit)
         
         return this
     }
 
-    empty(emit = true) {
-        this.data = {}
+    empty(emit: boolean = true): this {
+        this.data = {} as Partial<T>
         this.emitEvent(['state'], undefined, emit)
         return this
     }
 
-    /**
-     * @private
-     * @param {object} target
-     * @param {object} source
-     * @param {Array<string>} properties
-     * @param {boolean} emit
-     */
-    setProperties(target, source, properties = ['state'], emit = true) {
-        for (let key of Object.keys(source)) {
-            let propertyList = [...properties, key]
+    private setProperties(target: Record<string, any>, source: Record<string, any>, properties: string[] = ['state'], emit: boolean = true): void {
+        for (const key of Object.keys(source)) {
+            const propertyList = [...properties, key]
             this.emitEvent(propertyList, source[key], emit)
             if (typeof target[key] === 'undefined') {
                 target[key] = source[key]
@@ -97,25 +71,15 @@ class State extends Broadcast {
         }
     }
 
-    /**
-     * @private
-     * @param {any} value 
-     */
-    isObject(value) {
+    private isObject(value: any): boolean {
         return (value && typeof value === 'object' && !Array.isArray(value))
     }
 
-
-    /**
-     * @private
-     * @param {Array<string>} properties 
-     * @param {any} value 
-     */
-    emitEvent(properties, value, canEmit = true) {
+    private emitEvent(properties: string[], value: any, canEmit: boolean = true): void {
         if (!canEmit) {
             return
         }
-        let eventName = properties.join('.')
+        const eventName = properties.join('.')
         this.emit(eventName, value)
     }
 }

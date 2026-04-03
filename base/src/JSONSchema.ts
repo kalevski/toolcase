@@ -1,26 +1,14 @@
-/**
- * @typedef JSONDataType
- * @type {string}
- */
+type JSONDataType = string
 
+interface Schema {
+    type: JSONDataType
+    required?: boolean
+    properties?: Record<string, Schema>
+    flexible?: boolean
+    items?: Partial<Schema>
+}
 
-/**
- * @typedef Schema
- * @property {JSONDataType} type type of the property 'number' 'string' 'boolean' 'object' 'array' 'email' 'username' 'password' 'url' or custom
- * @property {boolean} [required] is required
- * @property {Object<string,Schema>} [properties] validate object properties (works only with type='object')
- * @property {boolean} [flexible=false] is object flexible, meaning that the object can have additional properties (works only with type='object' default=false)
- * @property {Partial<Schema>} [items] type of the properties (works only with type='array')
- */
-
-/**
- * @callback ValidationFn
- * @param {string} propertyName
- * @param {Schema} schema
- * @param {any} data
- * @returns {boolean|string}
- */
-
+type ValidationFn = (propertyName: string | null, schema: Schema, data: any) => boolean | string | void
 
 const USERNAME_REGEX = /^[A-z][A-z0-9-_]{3,23}$/
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/
@@ -29,23 +17,11 @@ const URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9(
 
 class JSONSchema {
 
-    /**
-     * @private
-     * @type {Map<string,ValidationFn>}
-     */
-    validators = new Map()
+    private validators: Map<string, ValidationFn> = new Map()
 
-    /**
-     * @private
-     * @type {Schema}
-     */
-    schema = null
+    private schema: Schema
 
-    /**
-     * 
-     * @param {Schema} schema 
-     */
-    constructor(schema) {
+    constructor(schema: Schema) {
         this.register('string', this.validateString)
         this.register('boolean', this.validateBoolean)
         this.register('number', this.validateNumber)
@@ -61,12 +37,7 @@ class JSONSchema {
         this.schema = schema
     }
 
-    /**
-     * 
-     * @param {string} type 
-     * @param {ValidationFn} validationFn 
-     */
-    register(type = null, validationFn = null) {
+    register(type: string, validationFn: ValidationFn): void {
         
         if (typeof type !== 'string') {
             throw new Error(`validation type must be a string, "${type}" provided`)
@@ -83,23 +54,15 @@ class JSONSchema {
         this.validators.set(type, validationFn)
     }
 
-    /**
-     * 
-     * @param {any} data 
-     */
-    validate(data) {
-        let validator = this.validators.get(this.schema.type) || null
+    validate(data: any): void {
+        const validator = this.validators.get(this.schema.type) || null
         if (validator === null) {
             throw new Error(`validator for type=${this.schema.type} is not registered`)
         }
         validator(null, this.schema, data)
     }
 
-    /**
-     * @private
-     * @param {Schema} schema 
-     */
-    validateSchema(schema) {
+    private validateSchema(schema: Schema): void {
         
         if (typeof schema !== 'object') {
             throw new Error(`schema must be an object, "${schema}" provided`)
@@ -118,91 +81,71 @@ class JSONSchema {
         }
 
         if (schema.type === 'array' && typeof schema.items === 'object') {
-            this.validateSchema(schema.items)
+            this.validateSchema(schema.items as Schema)
         }
 
-        for (let property in schema.properties) {
+        for (const property in schema.properties) {
             this.validateSchema(schema.properties[property])
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateString = (propertyName, schema, data) => {
+    private validateString: ValidationFn = (propertyName, schema, data) => {
         if (typeof data !== 'string') {
             throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateBoolean = (propertyName, schema, data) => {
+    private validateBoolean: ValidationFn = (propertyName, schema, data) => {
         if (typeof data !== 'boolean') {
             throw new Error(`property=${propertyName} can be "true" or "false", value=${data} type=${typeof data} provided`)
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateNumber = (propertyName, schema, data) => {
+    private validateNumber: ValidationFn = (propertyName, schema, data) => {
         if (typeof data !== 'number') {
             throw new Error(`property=${propertyName} must be a number, value=${data} type=${typeof data} provided`)
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateObject = (propertyName, schema, data) => {
+    private validateObject: ValidationFn = (propertyName, schema, data) => {
 
         if (data === null || typeof data !== 'object' || Array.isArray(data)) {
             throw new Error(`property=${propertyName} must be an object, value=${data} type=${typeof data} provided`)
         }
 
-        let isStrict = schema.flexible !== true
+        const isStrict = schema.flexible !== true
         const schemaProperties = schema.properties || {}
 
-        let propList = new Set()
+        const propList = new Set<string>()
         Object.keys(schemaProperties).forEach(propName => propList.add(propName))
         Object.keys(data).forEach(propName => propList.add(propName))
-        for (let propName of propList) {
+        for (const propName of propList) {
 
-            let propSchema = typeof schemaProperties[propName] === 'object' ? schemaProperties[propName] : null
+            const propSchema = typeof schemaProperties[propName] === 'object' ? schemaProperties[propName] : null
 
             if (propSchema === null && isStrict) {
                 throw new Error(`property=${propertyName === null ? '@': propertyName}.${propName} is not expected`)
             } else if (propSchema === null && !isStrict) {
                 continue
             }
-            const required = typeof propSchema.required === 'boolean' ? propSchema.required : false
+            const required = typeof propSchema!.required === 'boolean' ? propSchema!.required : false
             if (typeof data[propName] === 'undefined' && required === false) {
                 continue
             }
 
-            let validator = this.validators.get(propSchema.type) || null
+            const validator = this.validators.get(propSchema!.type) || null
             if (validator === null) {
-                throw new Error(`validator for type=${propSchema.type} is not registered`)
+                throw new Error(`validator for type=${propSchema!.type} is not registered`)
             }
             try {
-                validator(propName, propSchema, data[propName])
-            } catch (error) {
+                validator(propName, propSchema!, data[propName])
+            } catch (error: any) {
                 throw new Error(`${propertyName === null ? '@': propertyName} -> ${error.message}`)
             }
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateArray = (propertyName, schema, data) => {
+    private validateArray: ValidationFn = (propertyName, schema, data) => {
 
         if (!Array.isArray(data)) {
             throw new Error(`property=${propertyName} must be an array, value=${data} type=${typeof data} provided`)
@@ -212,20 +155,15 @@ class JSONSchema {
             return
         }
 
-        let validator = this.validators.get(schema.items.type)
+        const validator = this.validators.get(schema.items!.type!)!
 
-        for (let [ index, item ] of data.entries()) {
-            validator(`${propertyName}[${index}]`, schema.items, item)
+        for (const [ index, item ] of data.entries()) {
+            validator(`${propertyName}[${index}]`, schema.items as Schema, item)
         }
 
     }
 
-    
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateEmail = (propertyName, schema, data) => {
+    private validateEmail: ValidationFn = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
             throw new Error(`property "${propertyName}" must be a string, value=${data} type=${typeof data} provided`)
@@ -236,11 +174,7 @@ class JSONSchema {
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateUsername = (propertyName, schema, data) => {
+    private validateUsername: ValidationFn = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
             throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
@@ -251,11 +185,7 @@ class JSONSchema {
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validatePassword = (propertyName, schema, data) => {
+    private validatePassword: ValidationFn = (propertyName, schema, data) => {
 
         if (typeof data !== 'string') {
             throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
@@ -266,11 +196,7 @@ class JSONSchema {
         }
     }
 
-    /**
-     * @private
-     * @type {ValidationFn}
-     */
-    validateUrl = (propertyName, schema, data) => {
+    private validateUrl: ValidationFn = (propertyName, schema, data) => {
         if (typeof data !== 'string') {
             throw new Error(`property=${propertyName} must be a string, value=${data} type=${typeof data} provided`)
         }
