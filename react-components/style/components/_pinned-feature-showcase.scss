@@ -1,0 +1,190 @@
+@import '../colors';
+
+.component.component-pinned-feature-showcase {
+	position: relative;
+	padding: clamp(2rem, 4vw, 4rem) 0;
+	color: $dark;
+
+	.component-pinned-feature-showcase__inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+		gap: clamp(2rem, 4vw, 4rem);
+		align-items: start;
+		position: relative;
+	}
+
+	.component-pinned-feature-showcase__left {
+		position: sticky;
+		top: clamp(1.5rem, 6vh, 3rem);
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		gap: clamp(1.5rem, 3vw, 3rem);
+		min-height: calc(100vh - clamp(1.5rem, 6vh, 3rem));
+		padding-block: 0;
+	}
+
+	.component-pinned-feature-showcase__left--centered {
+		justify-content: center;
+		padding-block: clamp(1rem, 3vh, 2rem);
+	}
+
+	.component-pinned-feature-showcase__lead {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(0.75rem, 2vw, 1.25rem);
+		max-width: 520px;
+	}
+
+	.component-pinned-feature-showcase__eyebrow {
+		text-transform: uppercase;
+		font-size: 0.8rem;
+		letter-spacing: 0.18em;
+		font-weight: 600;
+		color: $primary;
+	}
+
+	.component-pinned-feature-showcase__title {
+		margin: 1.5rem 0;
+		font-size: clamp(2rem, 5vw, 3rem);
+		line-height: 1.1;
+		font-weight: 700;
+	}
+
+	.component-pinned-feature-showcase__description {
+		margin: 0;
+		font-size: clamp(1rem, 2.2vw, 1.1rem);
+		line-height: 1.6;
+		color: $gray-600;
+	}
+
+	.component-pinned-feature-showcase__actions {
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+
+	.component-pinned-feature-showcase__media {
+		position: relative;
+		overflow: hidden;
+
+		.component-pinned-feature-showcase__image {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+		}
+	}
+
+	.component-pinned-feature-showcase__right {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(1.5rem, 3vw, 2.5rem);
+	}
+
+	.component-pinned-feature-showcase__item {
+		display: flex;
+		gap: 1.25rem;
+		padding: clamp(1.25rem, 2.8vw, 1.75rem);
+		background: rgba($white, 0.9);
+		border: 1px solid rgba($gray-300, 0.4);
+		box-shadow: 0 16px 46px rgba(15, 23, 42, 0.12);
+		backdrop-filter: blur(10px);
+
+		@supports not (backdrop-filter: blur(10px)) {
+			background: $white;
+		}
+	}
+
+	.component-pinned-feature-showcase__item-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		background: rgba($primary, 0.08);
+		color: $primary;
+		font-size: 1.4rem;
+		flex-shrink: 0;
+	}
+
+	.component-pinned-feature-showcase__item-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.component-pinned-feature-showcase__item-eyebrow {
+		text-transform: uppercase;
+		font-size: 0.75rem;
+		letter-spacing: 0.16em;
+		font-weight: 600;
+		color: rgba($dark, 0.6);
+	}
+
+	.component-pinned-feature-showcase__item-title {
+		margin: 0;
+		font-size: clamp(1.1rem, 2.4vw, 1.35rem);
+		color: $dark;
+	}
+
+	.component-pinned-feature-showcase__item-description {
+		margin: 0;
+		color: $gray-600;
+		line-height: 1.6;
+	}
+
+	@media (max-width: 1024px) {
+		.component-pinned-feature-showcase__inner {
+			grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+			gap: clamp(1.75rem, 5vw, 3rem);
+		}
+
+		.component-pinned-feature-showcase__item {
+			gap: 1rem;
+			padding: clamp(1.1rem, 3vw, 1.5rem);
+		}
+
+		.component-pinned-feature-showcase__item-icon {
+			width: 44px;
+			height: 44px;
+			font-size: 1.25rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		padding: clamp(1.5rem, 4vw, 2.5rem) 0;
+
+		.component-pinned-feature-showcase__inner {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.component-pinned-feature-showcase__left {
+			position: relative;
+			top: 0;
+			min-height: auto;
+			justify-content: flex-start;
+			padding-block: 0;
+		}
+
+		.component-pinned-feature-showcase__right {
+			margin-top: 1.5rem;
+		}
+
+		.component-pinned-feature-showcase__media {
+		}
+	}
+
+	@media (max-width: 520px) {
+		.component-pinned-feature-showcase__item {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.component-pinned-feature-showcase__item-icon {
+			width: 40px;
+			height: 40px;
+			font-size: 1.1rem;
+		}
+	}
+}

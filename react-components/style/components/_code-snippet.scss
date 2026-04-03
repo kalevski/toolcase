@@ -1,0 +1,101 @@
+.component.component-code-snippet {
+	--cs-bg: #0f172a;
+	--cs-text: #e2e8f0;
+	--cs-muted: #64748b;
+	--cs-accent: #818cf8;
+	--cs-copy-bg: rgba(255, 255, 255, 0.06);
+	--cs-copy-hover: rgba(255, 255, 255, 0.12);
+	--cs-transition: 0.15s ease;
+
+	position: relative;
+	background: var(--cs-bg);
+	color: var(--cs-text);
+	font-size: 0.875rem;
+	line-height: 1.6;
+	overflow: hidden;
+}
+
+.component-code-snippet__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.75rem 1rem 0;
+}
+
+.component-code-snippet__language {
+	font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--cs-muted);
+	user-select: none;
+}
+
+.component-code-snippet__copy {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.25rem 0.6rem;
+	border: none;
+	background: var(--cs-copy-bg);
+	color: var(--cs-muted);
+	font-size: 0.7rem;
+	cursor: pointer;
+	transition: color var(--cs-transition), background-color var(--cs-transition);
+
+	&:hover {
+		color: var(--cs-text);
+		background: var(--cs-copy-hover);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--cs-accent);
+		outline-offset: -2px;
+	}
+
+	.bi-check-lg {
+		color: #34d399;
+	}
+}
+
+.component-code-snippet__copy-label {
+	font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+}
+
+.component-code-snippet__pre {
+	margin: 0;
+	padding: 0.75rem 1rem 1rem;
+	overflow-x: auto;
+	background: transparent;
+	-webkit-overflow-scrolling: touch;
+
+	&::-webkit-scrollbar {
+		height: 4px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.1);
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.2);
+		}
+	}
+}
+
+.component-code-snippet__code {
+	font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+	font-size: 0.8125rem;
+	line-height: 1.7;
+	color: var(--cs-text);
+	white-space: pre;
+	word-break: normal;
+	word-wrap: normal;
+	tab-size: 2;
+}

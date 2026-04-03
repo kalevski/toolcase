@@ -1,0 +1,61 @@
+.component.component-tab-sections {
+	display: flex;
+	flex-direction: column;
+}
+
+.component-tab-sections__header {
+	border-bottom: 1px solid var(--pw-border, #e2e8f0);
+}
+
+.component-tab-sections__tabs {
+	display: flex;
+	gap: 0;
+}
+
+.component-tab-sections__tab {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.6rem 1rem;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: var(--pw-subtle, #94a3b8);
+	font-size: 0.8rem;
+	font-weight: 500;
+	position: relative;
+	transition: color 0.15s ease;
+	white-space: nowrap;
+
+	&:hover:not(:disabled) {
+		color: var(--pw-text, #1e293b);
+	}
+}
+
+.component-tab-sections__tab--disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.component-tab-sections__tab--active {
+	color: var(--pw-accent, #1e293b);
+	font-weight: 600;
+
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: var(--pw-accent, #1e293b);
+	}
+}
+
+.component-tab-sections__tab-label {
+	line-height: 1;
+}
+
+.component-tab-sections__body {
+	padding: 1rem 0 0;
+}

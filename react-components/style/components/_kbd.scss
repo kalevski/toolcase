@@ -1,0 +1,30 @@
+// ── Kbd ────────────────────────────────────────────────────────────────────────
+
+.component.component-kbd {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2rem;
+}
+
+.component-kbd__key,
+kbd.component.component-kbd {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.5em;
+	padding: 0.15rem 0.4rem;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #475569;
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 1px 0 #cbd5e1;
+}
+
+.component-kbd__separator {
+	color: #94a3b8;
+	font-size: 0.7rem;
+	margin: 0 0.1rem;
+}

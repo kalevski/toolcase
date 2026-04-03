@@ -1,0 +1,21 @@
+.component.component-editable-text {
+	width: 100%;
+}
+
+.component-editable-text {
+	> input {
+		border: none;
+		background: none;
+		width: 100%;
+		display: block;
+		color: #1e293b;
+		font-size: 0.875rem;
+		padding: 0.15rem 0.25rem;
+		transition: background-color 0.15s ease;
+		outline: none;
+
+		&:focus-visible {
+			outline: none;
+		}
+	}
+}

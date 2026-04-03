@@ -1,0 +1,119 @@
+.component.component-vertical-item-list {
+	display: flex;
+	flex-direction: row;
+	min-height: 0;
+	width: 100%;
+
+	.component-vertical-item-list__nav {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		width: 200px;
+		max-width: 200px;
+		min-width: 200px;
+		flex-shrink: 0;
+		padding: 4px;
+		border: 1px solid #e2e8f0;
+		background: rgba(255, 255, 255, 0.5);
+		align-self: stretch;
+		overflow-y: auto;
+	}
+
+	.component-vertical-item-list__item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 8px 10px;
+		border: none;
+		background: transparent;
+		color: #475569;
+		font-size: 0.82rem;
+		font-weight: 500;
+		text-align: left;
+		cursor: pointer;
+		transition:
+			color 0.15s ease,
+			background 0.15s ease;
+
+		&:hover {
+			color: #1e293b;
+			background: #f1f5f9;
+		}
+
+		&--active {
+			color: #1e293b;
+			background: #e2e8f0;
+			font-weight: 600;
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.55;
+
+			&:hover {
+				background: transparent;
+				color: #475569;
+			}
+		}
+	}
+
+	.component-vertical-item-list__icon {
+		flex-shrink: 0;
+		font-size: 0.92rem;
+		width: 18px;
+		text-align: center;
+	}
+
+	.component-vertical-item-list__text {
+		flex: 1 1 auto;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.component-vertical-item-list__badge {
+		flex-shrink: 0;
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: #64748b;
+		background: #f1f5f9;
+		border: 1px solid #e2e8f0;
+		padding: 1px 7px;
+		line-height: 1.4;
+	}
+
+	.component-vertical-item-list__item--active .component-vertical-item-list__badge {
+		background: #fff;
+	}
+
+	.component-vertical-item-list__content {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow-y: auto;
+	}
+
+	// Mobile: stack vertically
+	@media (max-width: 767px) {
+		flex-direction: column;
+
+		.component-vertical-item-list__nav {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			overflow-y: hidden;
+			border-right: none;
+			border-bottom: 1px solid #e2e8f0;
+			padding-bottom: 6px;
+			gap: 4px;
+		}
+
+		.component-vertical-item-list__item {
+			white-space: nowrap;
+			flex-shrink: 0;
+		}
+	}
+}

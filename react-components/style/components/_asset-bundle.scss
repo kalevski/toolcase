@@ -1,0 +1,236 @@
+.component.component-asset-bundle {
+	--ab-bg: #f8f9fa;
+	--ab-border: #dee2e6;
+	--ab-text: #1e293b;
+	--ab-muted: #64748b;
+	--ab-subtle-bg: #f1f3f5;
+	--ab-accent: #000;
+	--ab-transition: 0.18s ease;
+
+	position: relative;
+	border: 1px solid var(--ab-border);
+	background: var(--ab-bg);
+	color: var(--ab-text);
+	padding: 0;
+	font-size: 0.875rem;
+	line-height: 1.55;
+	overflow: hidden;
+	transition:
+		border-color var(--ab-transition),
+		box-shadow var(--ab-transition);
+
+	&:hover {
+		border-color: #adb5bd;
+		box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.06);
+	}
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+
+.component-asset-bundle__header {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 1.1rem 1.25rem;
+	border-bottom: 1px solid var(--ab-border);
+}
+
+.component-asset-bundle__engine-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.5rem;
+	height: 2.5rem;
+	flex-shrink: 0;
+	font-size: 1.25rem;
+	background: #fff;
+	border: 1px solid var(--ab-border);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.component-asset-bundle__title-group {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex: 1;
+	min-width: 0;
+}
+
+.component-asset-bundle__name {
+	font-weight: 700;
+	font-size: 1rem;
+	color: var(--ab-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.component-asset-bundle__category {
+	flex-shrink: 0;
+}
+
+/* ── Divider ────────────────────────────────────────────── */
+
+.component-asset-bundle__divider {
+	height: 1px;
+	background: var(--ab-border);
+}
+
+/* ── Section ────────────────────────────────────────────── */
+
+.component-asset-bundle__section {
+	padding: 1rem 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+    background: #fff;
+}
+
+.component-asset-bundle__section-title {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-weight: 600;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ab-muted);
+	margin-bottom: 0.25rem;
+}
+
+/* ── Row (label + value) ────────────────────────────────── */
+
+.component-asset-bundle__row {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+}
+
+.component-asset-bundle__row-label {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex-shrink: 0;
+	width: 5.5rem;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--ab-muted);
+}
+
+.component-asset-bundle__tag-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+/* ── Build ref ──────────────────────────────────────────── */
+
+.component-asset-bundle__build-ref {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+
+	code {
+		font-size: 0.78rem;
+		font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+		padding: 0.15rem 0.45rem;
+		background: #e9ecef;
+		border: 1px solid #dee2e6;
+		color: #1e293b;
+	}
+}
+
+/* ── File counts ────────────────────────────────────────── */
+
+.component-asset-bundle__file-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.component-asset-bundle__file-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.3rem 0.6rem;
+	background: #f1f5f9;
+	border: 1px solid #e2e8f0;
+	font-size: 0.78rem;
+	line-height: 1;
+	color: #475569;
+	transition: background 0.15s ease, border-color 0.15s ease;
+
+	i {
+		font-size: 0.85rem;
+		color: #94a3b8;
+	}
+
+	&:hover {
+		background: #eef2ff;
+		border-color: #c7d2fe;
+	}
+}
+
+.component-asset-bundle__file-type {
+	font-weight: 500;
+	text-transform: capitalize;
+}
+
+.component-asset-bundle__file-count {
+	font-weight: 700;
+	color: #1e293b;
+	background: #fff;
+	border: 1px solid #e2e8f0;
+	padding: 0.05rem 0.4rem;
+	font-size: 0.7rem;
+	min-width: 1.4rem;
+	text-align: center;
+}
+
+/* ── Advanced options ───────────────────────────────────── */
+
+.component-asset-bundle__advanced {
+}
+
+.component-asset-bundle__options-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.component-asset-bundle__option {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.component-asset-bundle__option-label {
+	flex-shrink: 0;
+	width: 5.5rem;
+	font-size: 0.8rem;
+	font-weight: 500;
+	color: var(--ab-muted);
+}
+
+.component-asset-bundle__option-value {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--ab-text);
+	margin-left: 0.25rem;
+}
+
+/* ── Scale bar ──────────────────────────────────────────── */
+
+.component-asset-bundle__scale-bar {
+	flex: 1;
+	height: 6px;
+	background: #e2e8f0;
+	overflow: hidden;
+	position: relative;
+}
+
+.component-asset-bundle__scale-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #000, #000);
+	transition: width 0.3s ease;
+}

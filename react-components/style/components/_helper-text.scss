@@ -1,0 +1,40 @@
+.component.component-helper-text {
+	--ht-text: #64748b;
+	--ht-icon: #94a3b8;
+
+	display: flex;
+	align-items: flex-start;
+	gap: 0.35rem;
+	margin: 0.3rem 0 0;
+	padding: 0;
+	font-size: 0.76rem;
+	line-height: 1.45;
+	color: var(--ht-text);
+}
+
+.component-helper-text__icon {
+	flex-shrink: 0;
+	font-size: 0.78rem;
+	margin-top: 1px;
+	color: var(--ht-icon);
+}
+
+.component-helper-text__content {
+	flex: 1;
+	min-width: 0;
+}
+
+.component-helper-text--success {
+	--ht-text: #15803d;
+	--ht-icon: #16a34a;
+}
+
+.component-helper-text--warning {
+	--ht-text: #a16207;
+	--ht-icon: #ca8a04;
+}
+
+.component-helper-text--error {
+	--ht-text: #b91c1c;
+	--ht-icon: #dc2626;
+}

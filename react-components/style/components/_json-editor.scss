@@ -1,0 +1,341 @@
+.component.component-json-editor {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+
+	.component-json-editor__row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		border: 1px solid #e2e8f0;
+		padding-left: 5px;
+		background: #f8fafc;
+		transition: background 0.15s ease;
+
+		&:hover {
+			background: #f1f5f9;
+		}
+	}
+
+	.component-json-editor__key {
+		flex: 0 0 auto;
+		min-width: 80px;
+		font-size: 0.82rem;
+		font-weight: 600;
+		color: #1e293b;
+		white-space: nowrap;
+	}
+
+	.component-json-editor__input {
+		flex: 1 1 auto;
+		height: 32px;
+		padding: 4px 8px;
+		border: 0;
+		border-left: 1px solid #e2e8f0;
+		background: #fff;
+		color: #1e293b;
+		font-size: 0.82rem;
+		outline: none;
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease;
+
+		&:disabled {
+			background: #f8fafc;
+			cursor: not-allowed;
+			opacity: 0.65;
+		}
+	}
+
+	.component-json-editor__select {
+		flex: 1 1 auto;
+		height: 32px;
+		padding: 4px 8px;
+		border: none;
+		border-left: 1px solid #e2e8f0;
+		background: #fff;
+		color: #1e293b;
+		font-size: 0.82rem;
+		outline: none;
+		cursor: pointer;
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease;
+
+		&:disabled {
+			background: #f8fafc;
+			cursor: not-allowed;
+			opacity: 0.65;
+		}
+	}
+
+	// Group (array / object)
+	.component-json-editor__group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+	}
+
+	.component-json-editor__group-header {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 5px 8px;
+		background: #eef2f7;
+		user-select: none;
+	}
+
+	.component-json-editor__collapse {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: #64748b;
+		font-size: 0.72rem;
+		cursor: pointer;
+		transition:
+			color 0.15s ease,
+			background 0.15s ease;
+
+		&:hover {
+			color: #1e293b;
+			background: rgba(30, 41, 59, 0.06);
+		}
+	}
+
+	.component-json-editor__group-label {
+		font-size: 0.82rem;
+		font-weight: 600;
+		color: #1e293b;
+	}
+
+	.component-json-editor__group-badge {
+		font-size: 0.72rem;
+		font-weight: 500;
+		color: #64748b;
+		background: #fff;
+		border: 1px solid #e2e8f0;
+		padding: 1px 8px;
+		line-height: 1.4;
+	}
+
+	.component-json-editor__add-item {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		margin-left: auto;
+		padding: 0;
+		border: 1px dashed #cbd5e1;
+		background: transparent;
+		color: #64748b;
+		font-size: 0.72rem;
+		cursor: pointer;
+		transition:
+			color 0.15s ease,
+			border-color 0.15s ease,
+			background 0.15s ease;
+
+		&:hover {
+			color: #1e293b;
+			border-color: #1e293b;
+			background: #f8fafc;
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+
+			&:hover {
+				color: #64748b;
+				border-color: #cbd5e1;
+				background: transparent;
+			}
+		}
+	}
+
+	// Array items
+	.component-json-editor__array-items {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		padding-left: 12px;
+		border-left: 2px solid #e2e8f0;
+		margin-left: 10px;
+	}
+
+	.component-json-editor__array-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 6px 8px;
+		border: 1px solid #e2e8f0;
+		background: #fff;
+	}
+
+	.component-json-editor__array-item-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.component-json-editor__array-item-index {
+		font-size: 0.72rem;
+		font-weight: 600;
+		color: #94a3b8;
+		padding: 1px 6px;
+		background: #f1f5f9;
+	}
+
+	.component-json-editor__array-item-fields {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.component-json-editor__object-fields {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding-left: 12px;
+		border-left: 2px solid #e2e8f0;
+		margin-left: 10px;
+	}
+
+	.component-json-editor__remove {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		flex-shrink: 0;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: #94a3b8;
+		font-size: 0.72rem;
+		cursor: pointer;
+		transition:
+			color 0.15s ease,
+			background 0.15s ease;
+
+		&:hover {
+			color: #ef4444;
+			background: rgba(239, 68, 68, 0.08);
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+
+			&:hover {
+				color: #94a3b8;
+				background: transparent;
+			}
+		}
+	}
+
+	.component-json-editor__empty {
+		padding: 8px 12px;
+		text-align: center;
+		color: #94a3b8;
+		font-size: 0.78rem;
+		border: 1px dashed #e2e8f0;
+	}
+
+	// Primitive array (string / number / boolean)
+	.component-json-editor__primitive-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		padding: 6px 8px 6px 24px;
+	}
+
+	.component-json-editor__primitive-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0;
+		border: 1px solid #e2e8f0;
+		background: #fff;
+		transition: border-color 0.15s ease;
+
+		&:hover {
+			border-color: #cbd5e1;
+		}
+
+		&:focus-within {
+			border-color: #6366f1;
+		}
+	}
+
+	.component-json-editor__primitive-input {
+		height: 28px;
+		min-width: 60px;
+		max-width: 140px;
+		padding: 2px 8px;
+		border: none;
+		background: transparent;
+		color: #1e293b;
+		font-size: 0.78rem;
+		outline: none;
+
+		&--select {
+			cursor: pointer;
+			min-width: 56px;
+			padding-right: 4px;
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.65;
+		}
+
+		/* Remove spinner for number inputs */
+		&[type='number'] {
+			-moz-appearance: textfield;
+
+			&::-webkit-outer-spin-button,
+			&::-webkit-inner-spin-button {
+				-webkit-appearance: none;
+				margin: 0;
+			}
+		}
+	}
+
+	.component-json-editor__primitive-remove {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 28px;
+		flex-shrink: 0;
+		padding: 0;
+		border: none;
+		border-left: 1px solid #e2e8f0;
+		background: transparent;
+		color: #cbd5e1;
+		font-size: 0.7rem;
+		cursor: pointer;
+		transition: color 0.15s ease, background 0.15s ease;
+
+		&:hover {
+			color: #ef4444;
+			background: rgba(239, 68, 68, 0.06);
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+
+			&:hover {
+				color: #cbd5e1;
+				background: transparent;
+			}
+		}
+	}
+}

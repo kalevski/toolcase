@@ -1,0 +1,59 @@
+// ── Chip ───────────────────────────────────────────────────────────────────────
+
+.component.component-chip {
+	--chip-bg: #f1f5f9;
+	--chip-border: #e2e8f0;
+	--chip-text: #475569;
+	--chip-selected-bg: #1e293b;
+	--chip-selected-text: #fff;
+	--chip-transition: 0.15s ease;
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.65rem;
+	font-size: 0.8rem;
+	font-weight: 500;
+	line-height: 1.4;
+	color: var(--chip-text);
+	background: var(--chip-bg);
+	border: 1px solid var(--chip-border);
+	cursor: pointer;
+	transition: all var(--chip-transition);
+
+	&:hover {
+		border-color: #94a3b8;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #1e293b;
+		outline-offset: 2px;
+	}
+
+	&:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
+	&.component-chip--selected {
+		background: var(--chip-selected-bg);
+		border-color: var(--chip-selected-bg);
+		color: var(--chip-selected-text);
+	}
+
+	// Variants (selected state colors)
+	&.component-chip--primary.component-chip--selected   { --chip-selected-bg: #6366f1; }
+	&.component-chip--info.component-chip--selected      { --chip-selected-bg: #06b6d4; }
+	&.component-chip--success.component-chip--selected   { --chip-selected-bg: #22c55e; }
+	&.component-chip--warning.component-chip--selected   { --chip-selected-bg: #f59e0b; --chip-selected-text: #1e293b; }
+	&.component-chip--danger.component-chip--selected    { --chip-selected-bg: #ef4444; }
+}
+
+.component-chip__icon {
+	font-size: 0.85em;
+}
+
+.component-chip__label {
+	white-space: nowrap;
+}

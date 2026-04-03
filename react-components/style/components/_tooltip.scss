@@ -1,0 +1,43 @@
+// ── Tooltip ────────────────────────────────────────────────────────────────────
+
+.component.component-tooltip {
+	position: relative;
+	display: inline-flex;
+}
+
+.component-tooltip__bubble {
+	position: absolute;
+	z-index: 1000;
+	padding: 0.35rem 0.6rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	line-height: 1.4;
+	color: #fff;
+	background: #1e293b;
+	white-space: nowrap;
+	pointer-events: none;
+
+	&.component-tooltip__bubble--top {
+		bottom: calc(100% + 6px);
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	&.component-tooltip__bubble--bottom {
+		top: calc(100% + 6px);
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	&.component-tooltip__bubble--left {
+		right: calc(100% + 6px);
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	&.component-tooltip__bubble--right {
+		left: calc(100% + 6px);
+		top: 50%;
+		transform: translateY(-50%);
+	}
+}

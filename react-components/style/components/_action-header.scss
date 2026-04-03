@@ -1,0 +1,24 @@
+.component.component-action-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--bs-border-color, #dee2e6);
+	background: #f8fafc;
+	margin: 20px 0;
+}
+
+.component-action-header__content {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 500;
+}
+
+.component-action-header__actions {
+	display: flex;
+	gap: 0.35rem;
+	flex-shrink: 0;
+}

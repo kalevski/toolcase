@@ -1,0 +1,43 @@
+// ── StatusDot ──────────────────────────────────────────────────────────────────
+
+@keyframes component-status-dot-pulse {
+	0%, 100% { opacity: 1; transform: scale(1); }
+	50%      { opacity: 0.6; transform: scale(1.4); }
+}
+
+.component.component-status-dot {
+	--dot-color: #94a3b8;
+	--dot-size: 10px;
+
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+
+	// Status colors
+	&.component-status-dot--online  { --dot-color: #22c55e; }
+	&.component-status-dot--offline { --dot-color: #94a3b8; }
+	&.component-status-dot--busy    { --dot-color: #ef4444; }
+	&.component-status-dot--away    { --dot-color: #f59e0b; }
+
+	// Sizes
+	&.component-status-dot--small { --dot-size: 7px; }
+	&.component-status-dot--large { --dot-size: 14px; }
+}
+
+.component-status-dot__dot {
+	display: block;
+	width: var(--dot-size);
+	height: var(--dot-size);
+	border-radius: 50%;
+	background: var(--dot-color);
+	flex-shrink: 0;
+
+	.component-status-dot--pulse & {
+		animation: component-status-dot-pulse 1.5s ease-in-out infinite;
+	}
+}
+
+.component-status-dot__label {
+	font-size: 0.8rem;
+	color: #64748b;
+}

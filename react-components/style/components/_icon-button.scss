@@ -1,0 +1,64 @@
+// ── IconButton ─────────────────────────────────────────────────────────────────
+
+.component.component-icon-button {
+	--ib-size: 36px;
+	--ib-icon: 1rem;
+	--ib-bg: transparent;
+	--ib-border: #e2e8f0;
+	--ib-color: #475569;
+	--ib-hover-bg: #f8fafc;
+	--ib-transition: 0.15s ease;
+
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--ib-size);
+	height: var(--ib-size);
+	padding: 0;
+	border: 1px solid var(--ib-border);
+	background: var(--ib-bg);
+	color: var(--ib-color);
+	font-size: var(--ib-icon);
+	cursor: pointer;
+	transition: background-color var(--ib-transition), border-color var(--ib-transition), color var(--ib-transition);
+	flex-shrink: 0;
+
+	&:hover {
+		background: var(--ib-hover-bg);
+	}
+
+	&:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #1e293b;
+		outline-offset: 2px;
+	}
+
+	// Sizes
+	&.component-icon-button--small {
+		--ib-size: 28px;
+		--ib-icon: 0.8rem;
+	}
+
+	&.component-icon-button--large {
+		--ib-size: 44px;
+		--ib-icon: 1.2rem;
+	}
+
+	// Variant colors
+	&.component-icon-button--primary   { --ib-color: #6366f1; --ib-hover-bg: #eef2ff; }
+	&.component-icon-button--secondary { --ib-color: #475569; --ib-hover-bg: #f8fafc; }
+	&.component-icon-button--info      { --ib-color: #06b6d4; --ib-hover-bg: #ecfeff; }
+	&.component-icon-button--success   { --ib-color: #22c55e; --ib-hover-bg: #f0fdf4; }
+	&.component-icon-button--warning   { --ib-color: #f59e0b; --ib-hover-bg: #fffbeb; }
+	&.component-icon-button--danger    { --ib-color: #ef4444; --ib-hover-bg: #fef2f2; }
+
+	// Outline
+	&.component-icon-button--outline {
+		border-color: var(--ib-color);
+	}
+}

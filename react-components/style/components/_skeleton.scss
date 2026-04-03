@@ -1,0 +1,33 @@
+// ── Skeleton ───────────────────────────────────────────────────────────────────
+
+@keyframes component-skeleton-shimmer {
+	0%   { background-position: -200% 0; }
+	100% { background-position: 200% 0; }
+}
+
+.component.component-skeleton {
+	display: block;
+	background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+	background-size: 200% 100%;
+	animation: component-skeleton-shimmer 1.5s ease-in-out infinite;
+
+	&.component-skeleton--line {
+		height: 1em;
+		width: 100%;
+	}
+
+	&.component-skeleton--circle {
+		border-radius: 50%;
+	}
+
+	&.component-skeleton--rect {
+		height: 80px;
+		width: 100%;
+	}
+}
+
+.component-skeleton__group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}

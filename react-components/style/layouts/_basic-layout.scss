@@ -1,0 +1,36 @@
+.layout.layout--basic {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.layout--basic {
+	&__brand {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background: #fff;
+		border-bottom: 1px solid #e5e7eb;
+		padding: 0.75rem 0;
+
+		.container {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+
+	&__content {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem 0;
+
+		> .container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+	}
+}

@@ -1,0 +1,94 @@
+.component.component-form-wizard {
+	--fw-text: #1e293b;
+	--fw-muted: #64748b;
+	--fw-subtle: #94a3b8;
+	--fw-border: #e2e8f0;
+	--fw-hover-bg: #f1f5f9;
+	--fw-accent: #1e293b;
+	--fw-accent-text: #ffffff;
+	--fw-transition: 0.15s ease;
+	--fw-radius: 0;
+
+	// Map to shared --pw-* vars used by TabSections
+	--pw-text: var(--fw-text);
+	--pw-muted: var(--fw-muted);
+	--pw-subtle: var(--fw-subtle);
+	--pw-border: var(--fw-border);
+	--pw-hover-bg: var(--fw-hover-bg);
+	--pw-accent: var(--fw-accent);
+	--pw-accent-text: var(--fw-accent-text);
+
+	display: flex;
+	flex-direction: column;
+	color: var(--fw-text);
+	background: #fff;
+	border: 1px solid var(--fw-border);
+	overflow: hidden;
+	max-width: 860px;
+}
+
+.component-form-wizard__tabs {
+	.component-tab-sections__header {
+		padding: 1.25rem 1.5rem 0;
+	}
+
+	.component-tab-sections__body {
+		padding: 1.5rem;
+		flex: 1;
+		overflow-y: auto;
+	}
+}
+
+.component-form-wizard__footer {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 1rem 1.5rem;
+	border-top: 1px solid var(--fw-border);
+}
+
+.component-form-wizard__footer-spacer {
+	flex: 1;
+}
+
+.component-form-wizard__btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.5rem 1rem;
+	font-size: 0.82rem;
+	font-weight: 600;
+	border: none;
+	cursor: pointer;
+	transition: background-color var(--fw-transition), color var(--fw-transition), opacity var(--fw-transition);
+	white-space: nowrap;
+
+	&:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+}
+
+.component-form-wizard__btn--lg {
+	padding: 0.6rem 1.5rem;
+	font-size: 0.88rem;
+}
+
+.component-form-wizard__btn--primary {
+	background: var(--fw-accent);
+	color: var(--fw-accent-text);
+
+	&:hover:not(:disabled) {
+		opacity: 0.85;
+	}
+}
+
+.component-form-wizard__btn--ghost {
+	background: none;
+	color: var(--fw-muted);
+
+	&:hover:not(:disabled) {
+		color: var(--fw-text);
+		background: var(--fw-hover-bg);
+	}
+}

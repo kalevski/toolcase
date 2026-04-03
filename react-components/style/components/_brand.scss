@@ -1,0 +1,63 @@
+.component.component-brand {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 60px;
+	overflow: hidden;
+	flex-direction: row;
+	position: relative;
+	padding: 0 2.5rem 0 1rem;
+	text-align: center;
+}
+
+.component-brand {
+		.component-brand__text-group {
+			display: inline-block;
+			text-underline-offset: 0.18em;
+			text-decoration-thickness: 4px;
+		}
+
+		&--xlarge {
+			font-size: 2rem;
+			transform-origin: left center;
+
+			.component-brand--primaryText, .component-brand--secondaryText{
+				font-size: 2rem !important;
+			}
+
+			.component-brand--label {
+				top: 0 !important;
+				right: 0 !important;
+			}
+		}
+	.component-brand--primaryText {
+		font-size: 1rem;
+		font-weight: 700;
+		color: #1e293b;
+		user-select: none;
+	}
+
+	.component-brand--secondaryText {
+		font-size: 1rem;
+		color: #64748b;
+		user-select: none;
+	}
+
+	.component-brand--label {
+		flex: 0 0 auto;
+		position: absolute;
+		font-size: 0.75rem;
+		color: #94a3b8;
+		right: 10px;
+		top: 5px;
+
+		.badge {
+			padding: 0.35em 0.5em;
+		}
+	}
+
+	&--clickable {
+		cursor: pointer;
+		pointer-events: all;
+	}
+}

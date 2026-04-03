@@ -1,0 +1,279 @@
+@use '../colors';
+
+.component.component-node-editor {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bs-border-color, #dee2e6);
+	overflow: hidden;
+	font-size: 0.875rem;
+}
+
+/* ---- Toolbar ---- */
+.component-node-editor__toolbar {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.4rem 0.65rem;
+	background: var(--bs-tertiary-bg, #f8f9fa);
+	border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+	flex-shrink: 0;
+}
+
+.component-node-editor__toolbar-sep {
+	width: 1px;
+	height: 1.4rem;
+	background: var(--bs-border-color, #dee2e6);
+	flex-shrink: 0;
+}
+
+/* ---- Body: canvas + panel ---- */
+.component-node-editor__body {
+	display: flex;
+	min-height: 460px;
+}
+
+/* ---- Canvas ---- */
+.component-node-editor__canvas {
+	flex: 1;
+	position: relative;
+	overflow: auto;
+	background:
+		radial-gradient(circle, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+	background-size: 20px 20px;
+	cursor: default;
+}
+
+.component-node-editor__svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.component-node-editor__edge-label {
+	font-size: 0.68rem;
+	fill: var(--bs-secondary-color, #6c757d);
+	text-anchor: middle;
+	pointer-events: none;
+}
+
+/* ---- Node rectangles ---- */
+.component-node-editor__rect {
+	position: absolute;
+	border: 2px solid #6c757d;
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+	cursor: grab;
+	user-select: none;
+	transition: box-shadow 0.15s;
+	z-index: 1;
+
+	&:active {
+		cursor: grabbing;
+	}
+
+	&--selected {
+		box-shadow: 0 0 0 3px rgba(0, 0, 0, .1);
+		z-index: 2;
+	}
+}
+
+.component-node-editor__rect-header {
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.2rem 0.45rem;
+	color: #fff;
+	font-size: 0.68rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.component-node-editor__rect-initial {
+	font-size: 0.72rem;
+	margin-left: auto;
+	line-height: 1;
+}
+
+.component-node-editor__connect-handle {
+	margin-left: auto;
+	cursor: crosshair;
+	font-size: 0.5rem;
+	opacity: 0.6;
+	transition: opacity 0.15s;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	.component-node-editor__rect-initial + & {
+		margin-left: 0;
+	}
+}
+
+.component-node-editor__rect-body {
+	padding: 0.3rem 0.45rem;
+}
+
+.component-node-editor__rect-key {
+	font-weight: 600;
+	font-size: 0.78rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.component-node-editor__rect-value {
+	font-size: 0.72rem;
+	color: var(--bs-secondary-color, #6c757d);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.component-node-editor__rect-eval {
+	font-family: monospace;
+	font-size: 0.68rem;
+	color: var(--bs-secondary-color, #6c757d);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ---- Detail panel ---- */
+.component-node-editor__panel {
+	width: 280px;
+	flex-shrink: 0;
+	border-left: 1px solid var(--bs-border-color, #dee2e6);
+	overflow-y: auto;
+	background: var(--bs-body-bg, #fff);
+}
+
+.component-node-editor__panel-empty {
+	padding: 1.5rem;
+	text-align: center;
+	color: var(--bs-secondary-color, #6c757d);
+	font-size: 0.82rem;
+}
+
+.component-node-editor__panel-content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.65rem;
+}
+
+.component-node-editor__panel-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.component-node-editor__panel-title {
+	font-weight: 600;
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.component-node-editor__node-type-badge--panel {
+	display: inline-block;
+	padding: 0.1rem 0.4rem;
+	font-size: 0.68rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: #fff;
+
+	&[data-type='base']      { background: colors.$cyan-500; }      
+	&[data-type='branch']    { background: colors.$green-500; }
+	&[data-type='exec']      { background: colors.$red-500; }
+	&[data-type='condition'] { background: colors.$orange-500; }
+}
+
+.component-node-editor__panel-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.component-node-editor__panel-edges {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	border-top: 1px solid var(--bs-border-color, #dee2e6);
+	padding-top: 0.5rem;
+}
+
+/* ---- Fields (shared) ---- */
+.component-node-editor__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+
+	&--inline {
+		flex-direction: row;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
+	&--ctx {
+		flex: 1;
+		min-width: 0;
+	}
+}
+
+.component-node-editor__field-label {
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--bs-secondary-color, #6c757d);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	white-space: nowrap;
+}
+
+/* ---- Options (branch) ---- */
+.component-node-editor__options {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.component-node-editor__option-row {
+	display: flex;
+	gap: 0.35rem;
+	align-items: center;
+}
+
+/* ---- Edges ---- */
+.component-node-editor__edge-row {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.component-node-editor__edge-arrow {
+	flex-shrink: 0;
+	color: var(--bs-secondary-color, #6c757d);
+}
+
+.component-node-editor__edge-trigger {
+	max-width: 100px;
+}
+
+/* ---- Shared ---- */
+.component-node-editor__icon-btn {
+	padding: 0.15rem 0.35rem;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.component-node-editor__empty {
+	padding: 0.65rem;
+	text-align: center;
+	color: var(--bs-secondary-color, #6c757d);
+	font-size: 0.8rem;
+}
