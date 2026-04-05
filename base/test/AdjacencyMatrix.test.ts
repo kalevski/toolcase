@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import AdjacencyMatrix from '../src/AdjacencyMatrix.js'
+import AdjacencyMatrix from '../src/AdjacencyMatrix'
 
 describe('AdjacencyMatrix', () => {
     it('adds vertices', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import State from '../src/State.js'
+import State from '../src/State'
 
 describe('State', () => {
     it('initializes with data', () => {

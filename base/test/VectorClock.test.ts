@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import VectorClock from '../src/VectorClock.js'
+import VectorClock from '../src/VectorClock'
 
 describe('VectorClock', () => {
     it('initializes with nodeId', () => {
