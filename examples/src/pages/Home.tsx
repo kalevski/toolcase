@@ -3,9 +3,21 @@ import { Link } from 'react-router'
 const packages = [
     {
         name: '@toolcase/base',
-        description: 'Collection of JavaScript helper functions and structures',
+        description: 'Collection of TypeScript helper functions and data structures',
         path: '/base',
         icon: 'bi-tools',
+    },
+    {
+        name: '@toolcase/logging',
+        description: 'Lightweight logger with scoped loggers and custom reporters',
+        path: '/logging',
+        icon: 'bi-journal-text',
+    },
+    {
+        name: '@toolcase/serializer',
+        description: 'Protobuf-based binary serializer for compact encoding',
+        path: '/serializer',
+        icon: 'bi-box-seam',
     },
     {
         name: '@toolcase/react-components',

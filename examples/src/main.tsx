@@ -10,7 +10,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const root = document.getElementById('app')
     if (root) {
         createRoot(root).render(
-            <BrowserRouter basename="/toolcase">
+            <BrowserRouter basename="/">
                 <App />
             </BrowserRouter>
         )
