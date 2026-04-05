@@ -153,11 +153,15 @@ HTTP utilities for REST APIs.
 
 ### Node.js-only
 
+These utilities are available via the separate `@toolcase/base/node` subpath import, keeping Node-specific APIs out of the browser bundle.
+
 #### `env(key, defaultValue?, type?): T`
-Read environment variables with type coercion. Available via subpath import:
+Read environment variables with type coercion (supports `'string'`, `'number'`, `'boolean'`).
 ```ts
 import { env } from '@toolcase/base/node'
-const port = env('PORT', 3000, 'number')
+const port = env('PORT', 3000, 'number')   // number
+const debug = env('DEBUG', false, 'boolean') // boolean
+const host = env('HOST', 'localhost')        // string
 ```
 
 ## License

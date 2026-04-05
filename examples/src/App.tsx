@@ -2,6 +2,8 @@ import { Routes, Route, Link } from 'react-router'
 import { Home } from './pages/Home'
 import { ReactComponentsPage } from './pages/ReactComponentsPage'
 import { BaseExamplesPage } from './pages/BaseExamplesPage'
+import { LoggingExamplesPage } from './pages/LoggingExamplesPage'
+import { SerializerExamplesPage } from './pages/SerializerExamplesPage'
 import { examples } from './react-components/index'
 
 const formatLabel = (key: string) => {
@@ -14,6 +16,8 @@ const Nav = () => (
             <Link to="/" className="app-nav__brand">@toolcase</Link>
             <div className="app-nav__links">
                 <Link to="/base">Base</Link>
+                <Link to="/logging">Logging</Link>
+                <Link to="/serializer">Serializer</Link>
                 <Link to="/react-components">React Components</Link>
             </div>
         </div>
@@ -38,6 +42,8 @@ export const App = () => {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/base" element={<BaseExamplesPage />} />
+                <Route path="/logging" element={<LoggingExamplesPage />} />
+                <Route path="/serializer" element={<SerializerExamplesPage />} />
                 <Route path="/react-components" element={<ReactComponentsPage />} />
                 {examples.map((example) => (
                     <Route

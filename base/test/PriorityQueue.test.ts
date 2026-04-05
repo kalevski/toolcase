@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import PriorityQueue from '../src/PriorityQueue.js'
+import PriorityQueue from '../src/PriorityQueue'
 
 describe('PriorityQueue', () => {
     it('throws if priorityFn is not a function', () => {

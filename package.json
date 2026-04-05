@@ -5,6 +5,7 @@
         "build": "npm run build --workspaces",
         "test": "vitest run",
         "lint": "eslint .",
+        "lint:exports": "publint base && publint logging && publint serializer && publint react-components",
         "format": "prettier --write ."
     },
     "workspaces": [
@@ -20,6 +21,7 @@
         "eslint": "^10.1.0",
         "eslint-config-prettier": "^10.1.8",
         "prettier": "^3.8.1",
+        "publint": "^0.3.18",
         "tsup": "^8.5.1",
         "typescript": "6.0.2",
         "typescript-eslint": "^8.58.0",

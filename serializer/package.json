@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/serializer",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "Protobuf-based serializer for @toolcase",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",

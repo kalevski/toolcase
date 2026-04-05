@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import formatByteSize from '../src/formatByteSize.js'
+import formatByteSize from '../src/formatByteSize'
 
 describe('formatByteSize', () => {
     it('returns 0 Bytes for zero', () => {

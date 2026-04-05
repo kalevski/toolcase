@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import JSONSchema from '../src/JSONSchema.js'
+import JSONSchema from '../src/JSONSchema'
 
 describe('JSONSchema', () => {
     it('validates a string', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import Cache from '../src/Cache.js'
+import Cache from '../src/Cache'
 
 describe('Cache', () => {
     it('throws if fetchFn is not a function', () => {

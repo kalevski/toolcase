@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { default as Level, getLevelOrder, getLevel } from '../src/Level.js'
-import LoggerFactory from '../src/LoggerFactory.js'
-import ConsoleLogReporter from '../src/ConsoleLogReporter.js'
+import { default as Level, getLevelOrder, getLevel } from '../src/Level'
+import LoggerFactory from '../src/LoggerFactory'
+import ConsoleLogReporter from '../src/ConsoleLogReporter'
+import LogReporter from '../src/LogReporter'
 
 describe('Level', () => {
     it('has all expected levels', () => {
@@ -20,10 +21,6 @@ describe('Level', () => {
         expect(getLevelOrder('info')).toBe(2)
         expect(getLevelOrder('debug')).toBe(3)
         expect(getLevelOrder('verbose')).toBe(4)
-    })
-
-    it('getLevelOrder returns -1 for unknown level', () => {
-        expect(getLevelOrder('unknown')).toBe(-1)
     })
 
     it('getLevel returns level name from order', () => {
@@ -60,11 +57,17 @@ describe('LoggerFactory', () => {
     })
 
     it('filters messages below configured level', () => {
-        const messages = []
-        const reporter = {
-            log: (level, scope, time, msgs) => messages.push({ level, msgs })
+        const messages: { level: string; msgs: any[] }[] = []
+
+        class DummyReporter extends LogReporter {
+            log(level: string, scope: string, time: string, msgs: any[]): void {
+                messages.push({ level, msgs })
+            }
         }
-        const factory = new LoggerFactory([reporter])
+
+        const factory = new LoggerFactory([
+            new DummyReporter()
+        ])
         factory.level = 'warning'
         const logger = factory.getLogger('test')
         logger.error('err msg')

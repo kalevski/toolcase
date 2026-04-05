@@ -1,45 +1,165 @@
-# CONTEXT.md
+# @toolcase/react-components
 
-## Project: react-components
+[![GitHub](https://img.shields.io/github/license/kalevski/toolcase?style=for-the-badge)](https://github.com/kalevski/toolcase/blob/main/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@toolcase/react-components?color=teal&label=VERSION&style=for-the-badge)](https://www.npmjs.com/package/@toolcase/react-components)
 
-This project is a modular React component library, organized for development, demonstration, and styling. Below is an overview of the folder and file structure:
+React component library built on top of Bootstrap and `@toolcase/base`. Provides layout primitives, form controls, data display, feedback, and advanced editor components.
 
-### Root Files
+## Install
 
-- `package.json`: Project dependencies and scripts.
-- `tsconfig.json`: TypeScript configuration for the project.
+```bash
+npm install @toolcase/react-components
+```
 
-### Folders
+### Peer Dependencies
 
-#### build/
+- `react` >= 18
+- `react-dom` >= 18
+- `@toolcase/base` 2.x
 
-- Contains production build artifacts (JS, CSS, source maps, and an `index.html` for previewing the build).
+### Import Styles
 
-#### demo/
+```ts
+import '@toolcase/react-components/style.css'
+```
 
-- Contains a demo application to showcase components.
-- `index.html`: Entry point for the demo app.
-- `main.tsx`: Main React entry file for the demo.
-- `style.css`: Demo-specific styles.
-- `examples/`: Example usages of components (e.g., `Basic.tsx`, `index.tsx`).
+## Components
 
-#### src/
+### Layout
 
-- Source code for reusable React components.
-- `Button.tsx`: Button component implementation.
-- `DashboardLayout.tsx`: Dashboard layout component.
-- `index.ts`: Barrel file for exporting components.
+| Component | Description |
+|-----------|-------------|
+| `BasicLayout` | Simple page shell with header, content, and footer slots |
+| `DashboardLayout` | Sidebar + content layout for admin/dashboard UIs |
+| `DashboardCard` | Card container for dashboard widgets |
+| `SideNav` | Sidebar navigation component |
+| `CoolNav` | Stylized navigation bar |
+| `Spacer` | Spacing utility component |
+| `Divider` | Horizontal or vertical divider |
+| `Group` | Flexbox grouping container |
 
-#### style/
+### Form Controls
 
-- SCSS styles for the component library.
-- `_bootstrap.scss`: Bootstrap-related styles.
-- `_dashboard-layout.scss`: Dashboard layout styles.
-- `index.scss`: Main entry point for styles.
+| Component | Description |
+|-----------|-------------|
+| `Button` | Standard button with variants |
+| `CoolButton` | Stylized button variant |
+| `IconButton` | Icon-only button |
+| `Input` | Text input field |
+| `Textarea` | Multi-line text input |
+| `Select` | Dropdown select |
+| `ExtendedSelect` | Select with search and custom rendering |
+| `Checkbox` | Single checkbox |
+| `CheckboxGroup` | Group of checkboxes |
+| `Radio` | Single radio button |
+| `RadioGroup` | Group of radio buttons |
+| `Switch` | Toggle switch |
+| `ToggleCard` | Card-style toggle |
+| `TagInput` | Input for adding/removing tags |
+| `ColorPicker` | Color selection control |
+| `DatePicker` | Date selection control |
+| `IconPicker` | Icon selection control |
+| `Form` | Form wrapper with submit handling |
+| `FormInput` | Form-integrated input with validation |
+| `FormWizard` | Multi-step form wizard |
+| `EarlySignupForm` | Pre-built signup form |
+| `Login` | Pre-built login form |
 
-## Usage
+### Data Display
 
-- Develop components in `src/`.
-- Use `demo/` to preview and test components interactively.
-- Build outputs are generated in `build/`.
-- Styles are managed in `style/` and imported as needed.
+| Component | Description |
+|-----------|-------------|
+| `Table` | Data table |
+| `Card` | Content card container |
+| `CardOptions` | Card with selectable options |
+| `MultiCardSelect` | Multi-select card grid |
+| `SingleCardSelect` | Single-select card grid |
+| `PricingCard` | Pre-styled pricing tier card |
+| `Badge` | Status badge |
+| `Avatar` | User avatar |
+| `Icon` | Icon renderer |
+| `Tag` | Labeled tag |
+| `Chip` | Compact chip element |
+| `StatusDot` | Colored status indicator |
+| `ProgressBar` | Progress indicator bar |
+| `Timeline` | Vertical timeline |
+| `Changelog` | Changelog display |
+| `UsageSummaryPanel` | Usage statistics panel |
+
+### Text & Typography
+
+| Component | Description |
+|-----------|-------------|
+| `Heading` | Section heading |
+| `Text` | Body text |
+| `Label` | Form label |
+| `Link` | Styled anchor link |
+| `Kbd` | Keyboard shortcut display |
+| `CodeSnippet` | Code block with syntax display |
+| `HelperText` | Hint or helper text |
+
+### Feedback
+
+| Component | Description |
+|-----------|-------------|
+| `Alert` | Alert/notification banner |
+| `Spinner` | Loading spinner |
+| `Skeleton` | Loading placeholder |
+| `Tooltip` | Hover tooltip |
+| `EmptyState` | Empty state placeholder |
+| `Modal` | Modal dialog system (`Modal.Window`, `Modal.Control`, `Modal.Context`) |
+
+### File Handling
+
+| Component | Description |
+|-----------|-------------|
+| `FileDropzone` | Drag-and-drop file upload zone |
+| `File` | File display component |
+| `SimpleFile` | Simplified file display |
+| `QueuedFile` | Queued file with progress |
+| `FileTags` | File metadata tags |
+| `AssetBundle` | Asset bundle display |
+
+### Navigation & Branding
+
+| Component | Description |
+|-----------|-------------|
+| `Brand` | Logo/brand display |
+| `Hero` | Hero section |
+| `PageFooter` | Page footer |
+| `PinnedFeatureShowcase` | Feature highlight section |
+| `UserPanel` | User profile panel |
+| `Dropdown` | Dropdown menu |
+| `TabSections` | Tabbed content sections |
+| `WelcomeGuide` | Onboarding guide |
+
+### Advanced
+
+| Component | Description |
+|-----------|-------------|
+| `JSONEditor` | JSON editing widget |
+| `JSONSchemaDef` | JSON Schema definition editor |
+| `NodeEditor` | Node-based visual editor |
+| `BitmapFontGenerator` | Bitmap font preview/generator |
+| `ActionHeader` | Header with action buttons |
+| `ActionItems` | Action item list |
+| `Build` | Build status display |
+| `DangerZoneActions` | Destructive action section |
+| `VerticalItemList` | Vertical scrollable item list |
+| `EditableText` | Inline editable text |
+| `Image` | Image with loading states |
+| `VisuallyHidden` | Screen-reader-only content |
+
+## Styling
+
+Styles are built with SCSS on top of Bootstrap. Import the bundled CSS:
+
+```ts
+import '@toolcase/react-components/style.css'
+```
+
+Component styles are namespaced and can be customized by overriding CSS variables or SCSS variables before importing.
+
+## License
+
+The project is licensed under [MIT License](https://github.com/kalevski/toolcase/blob/main/LICENSE)

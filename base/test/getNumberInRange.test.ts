@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import getNumberInRange from '../src/getNumberInRange.js'
+import getNumberInRange from '../src/getNumberInRange'
 
 describe('getNumberInRange', () => {
     it('returns a number value directly', () => {

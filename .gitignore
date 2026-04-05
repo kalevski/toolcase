@@ -1,7 +1,4 @@
 lib
 node_modules
 .parcel-cache
-
-examples/public/*
-!examples/public/assets
-!examples/public/README.md
+examples/dist

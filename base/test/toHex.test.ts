@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import toHex from '../src/toHex.js'
+import toHex from '../src/toHex'
 
 describe('toHex', () => {
     it('converts number to hex with default 4 digits', () => {

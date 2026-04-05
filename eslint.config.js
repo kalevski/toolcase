@@ -7,7 +7,7 @@ export default tseslint.config(
     ...tseslint.configs.recommended,
     prettierConfig,
     {
-        ignores: ['**/lib/', '**/node_modules/', 'examples/public/'],
+        ignores: ['**/lib/', '**/node_modules/'],
     },
     {
         rules: {

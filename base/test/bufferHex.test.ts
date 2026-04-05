@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import bufferToHex from '../src/bufferToHex.js'
-import hexToBuffer from '../src/hexToBuffer.js'
+import bufferToHex from '../src/bufferToHex'
+import hexToBuffer from '../src/hexToBuffer'
 
 describe('bufferToHex', () => {
     it('converts Uint8Array to hex string', () => {
