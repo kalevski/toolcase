@@ -62,6 +62,8 @@ import { Files } from './Files'
 
 // Complex
 import TableDemo from './TableDemo'
+import AdvancedTableDemo from './AdvancedTableDemo'
+import PaginationDemo from './PaginationDemo'
 import FormWizardDemo from './FormWizardDemo'
 import JSONEditorDemo from './JSONEditorDemo'
 import JSONSchemaDefDemo from './JSONSchemaDefDemo'
@@ -191,6 +193,8 @@ export const examples: ExampleDef[] = [
 
 	// Complex — Multi-concern or data-driven
 	{ key: 'table', category: 'Complex', element: <TableDemo /> },
+	{ key: 'advanced-table', category: 'Complex', element: <AdvancedTableDemo /> },
+	{ key: 'pagination', category: 'Complex', element: <PaginationDemo /> },
 	{ key: 'form-wizard', category: 'Complex', element: <FormWizardDemo /> },
 	{ key: 'json-editor', category: 'Complex', element: <JSONEditorDemo /> },
 	{ key: 'json-schema-def', category: 'Complex', element: <JSONSchemaDefDemo /> },

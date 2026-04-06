@@ -1,0 +1,104 @@
+// ── Pagination ─────────────────────────────────────────────────────────────────
+
+.component.component-pagination {
+	--pg-accent: #1e293b;
+	--pg-accent-soft: rgba(30, 41, 59, 0.06);
+	--pg-text: #475569;
+	--pg-text-muted: #64748b;
+	--pg-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.75rem 0;
+	flex-wrap: wrap;
+}
+
+.component-pagination__summary {
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--pg-text-muted);
+	white-space: nowrap;
+	letter-spacing: 0.01em;
+	font-variant-numeric: tabular-nums;
+}
+
+.component-pagination__nav {
+	display: flex;
+	align-items: center;
+	gap: 0.125rem;
+}
+
+.component-pagination__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2rem;
+	height: 2rem;
+	padding: 0 0.375rem;
+	border: 1px solid transparent;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--pg-text);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+	transition: all var(--pg-transition);
+	user-select: none;
+
+	&:hover:not(:disabled):not(.component-pagination__btn--active) {
+		background: #f1f5f9;
+		border-color: #e2e8f0;
+		color: #1e293b;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--pg-accent);
+		outline-offset: 2px;
+	}
+
+	&:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
+
+	&--active {
+		background: var(--pg-accent);
+		color: #fff;
+		border-color: var(--pg-accent);
+		font-weight: 600;
+		box-shadow: 0 1px 3px rgba(30, 41, 59, 0.2);
+
+		&:hover {
+			background: #334155;
+			border-color: #334155;
+		}
+	}
+
+	&--prev,
+	&--next {
+		font-size: 0.875rem;
+		color: var(--pg-text-muted);
+
+		&:hover:not(:disabled) {
+			color: var(--pg-accent);
+			background: var(--pg-accent-soft);
+			border-color: transparent;
+		}
+	}
+}
+
+.component-pagination__dots {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2rem;
+	height: 2rem;
+	color: #cbd5e1;
+	font-size: 0.875rem;
+	letter-spacing: 0.1em;
+	user-select: none;
+}

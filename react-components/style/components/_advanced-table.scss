@@ -1,0 +1,159 @@
+// ── AdvancedTable ──────────────────────────────────────────────────────────────
+
+.component.component-advanced-table {
+	--at-border: #e2e8f0;
+	--at-bg: #fff;
+	--at-accent: #1e293b;
+	--at-accent-soft: rgba(30, 41, 59, 0.06);
+	--at-text: #1e293b;
+	--at-text-muted: #64748b;
+	--at-text-faint: #94a3b8;
+	--at-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+	--at-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+	--at-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+	display: flex;
+	flex-direction: column;
+}
+
+// ── Filters ────────────────────────────
+
+.component-advanced-table__filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	padding: 0 0 0.75rem;
+}
+
+.component-advanced-table__filter {
+	min-width: 160px;
+	flex: 1 1 160px;
+	max-width: 280px;
+
+	// Compact FormInput inside filters — remove default bottom margin
+	.component.component-form-input {
+		margin-bottom: 0;
+	}
+}
+
+.component-advanced-table__filter--range {
+	min-width: 180px;
+}
+
+// ── Table body wrapper ─────────────────
+
+.component-advanced-table__body {
+	position: relative;
+	overflow: hidden;
+	border: 1px solid var(--at-border);
+	background: var(--at-bg);
+	box-shadow: var(--at-shadow);
+	transition: box-shadow var(--at-transition);
+
+	&:hover {
+		box-shadow: var(--at-shadow-lg);
+	}
+
+	// remove the inner border from Table since the outer wrapper handles it
+	.component.component-table {
+		border: none;
+		border-radius: 0;
+	}
+
+	// polish inner table rows
+	.component-table__th {
+		background: #f8fafc;
+		font-size: 0.6875rem;
+		padding: 0.75rem 1rem;
+		color: var(--at-text-muted);
+		border-bottom: 1px solid var(--at-border);
+	}
+
+	.component-table__td {
+		padding: 0.75rem 1rem;
+		font-size: 0.8125rem;
+		border-bottom: 1px solid #f1f5f9;
+		color: var(--at-text);
+	}
+
+	.component-table__row {
+		transition: background var(--at-transition);
+	}
+
+	.component-table--hoverable .component-table__row:hover {
+		background: var(--at-accent-soft);
+	}
+}
+
+// ── Loading overlay ────────────────────
+
+.component-advanced-table__overlay {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.72);
+	z-index: 2;
+	backdrop-filter: blur(2px);
+	animation: advanced-table-fade-in 0.2s ease;
+}
+
+@keyframes advanced-table-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+.component-advanced-table--loading .component-advanced-table__body {
+	min-height: 140px;
+}
+
+// ── Sort button ────────────────────────
+
+.component-advanced-table__sort-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0;
+	border: none;
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-transform: inherit;
+	letter-spacing: inherit;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: color var(--at-transition);
+
+	&:hover {
+		color: var(--at-text);
+
+		.component-advanced-table__sort-icon {
+			opacity: 0.6;
+		}
+	}
+}
+
+.component-advanced-table__sort-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.125rem;
+	height: 1.125rem;
+	font-size: 0.7rem;
+	opacity: 0.2;
+	border-radius: 3px;
+	transition: opacity var(--at-transition), color var(--at-transition), background var(--at-transition);
+
+	&--active {
+		opacity: 1;
+		color: var(--at-accent);
+		background: var(--at-accent-soft);
+	}
+}
+
+// ── Pagination ─────────────────────────
+
+.component-advanced-table__pagination {
+	padding: 0.75rem 0 0;
+}
