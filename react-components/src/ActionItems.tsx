@@ -17,9 +17,7 @@ export const ActionItems: React.FC<ActionItemsProps> = ({ items, onActionClick }
 
 	return (
 		<div className="component component-action-items">
-			<span onClick={e => {
-				e.stopPropagation()
-			}}
+			<span
 				className="component-action-items__trigger"
 				data-bs-toggle="dropdown"
 				aria-expanded="false"

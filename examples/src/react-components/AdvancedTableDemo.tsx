@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { AdvancedTable, Card, CodeSnippet, Badge } from '@toolcase/react-components'
+import { AdvancedTable, Card, CodeSnippet, Badge, ActionItems } from '@toolcase/react-components'
 import type { AdvancedTableFilter, AdvancedTableSort, TableColumn } from '@toolcase/react-components'
 
 // ── Fake data ──────────────────────────────────────────────────────────────────
@@ -83,6 +83,15 @@ const columns: TableColumn<User>[] = [
 		),
 	},
 	{ key: 'age', header: 'Age', align: 'right', render: (r) => r.age },
+	{
+		key: 'actions', header: '', width: '60px', align: 'right',
+		render: (row) => <ActionItems items={[
+			{ key: 'edit', label: 'Edit' },
+			{ key: 'delete', label: 'Delete', },
+			{ key: 'view', label: 'View' },
+			{ key: 'promote', label: 'Promote to Admin' },
+		]} />,
+	},
 ]
 
 const filters: AdvancedTableFilter[] = [

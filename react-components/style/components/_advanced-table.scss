@@ -50,19 +50,21 @@
 	background: var(--at-bg);
 	box-shadow: var(--at-shadow);
 	transition: box-shadow var(--at-transition);
-	min-height: 250px;
+
+	&:has(.dropdown-menu.show) {
+		overflow: visible;
+	}
 
 	&:hover {
 		box-shadow: var(--at-shadow-lg);
 	}
 
-	// remove the inner border from Table since the outer wrapper handles it
 	.component.component-table {
 		border: none;
 		border-radius: 0;
+		overflow: visible;
 	}
 
-	// polish inner table rows
 	.component-table__th {
 		background: #f8fafc;
 		font-size: 0.6875rem;
@@ -87,8 +89,6 @@
 	}
 }
 
-// ── Loading overlay ────────────────────
-
 .component-advanced-table__overlay {
 	position: absolute;
 	inset: 0;
@@ -109,8 +109,6 @@
 .component-advanced-table--loading .component-advanced-table__body {
 	min-height: 140px;
 }
-
-// ── Sort button ────────────────────────
 
 .component-advanced-table__sort-btn {
 	display: inline-flex;
@@ -154,13 +152,9 @@
 	}
 }
 
-// ── Pagination ─────────────────────────
-
 .component-advanced-table__pagination {
 	padding: 0.75rem 0 0;
 }
-
-// ── Responsive ─────────────────────────
 
 @media (max-width: 768px) {
 	.component-advanced-table__filters {
