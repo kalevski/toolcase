@@ -50,6 +50,7 @@
 	background: var(--at-bg);
 	box-shadow: var(--at-shadow);
 	transition: box-shadow var(--at-transition);
+	min-height: 250px;
 
 	&:hover {
 		box-shadow: var(--at-shadow-lg);

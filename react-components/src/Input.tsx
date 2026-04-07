@@ -8,13 +8,13 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 export const Input: React.FC<InputProps> = ({ label, className = '', inputClassName = '', ...props }) => {
 	return (
-		<>
+		<div className={`component component-input ${className}`.trim()}>
 			{label && (
 				<label className="form-label form-label-inline" htmlFor={props.id}>
 					{label}
 				</label>
 			)}
 			<input {...props} className={`form-control ${inputClassName}`.trim()} id={props.id} />
-		</>
+		</div>
 	)
 }

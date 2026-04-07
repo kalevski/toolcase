@@ -20,7 +20,6 @@ npx sass style/index.scss:lib/index.css \
   --silence-deprecation=import \
   --silence-deprecation=color-functions \
   --silence-deprecation=global-builtin \
-  --silence-deprecation=mixed-decls \
   2>/dev/null
 
 echo "✅ Build completed successfully!"
