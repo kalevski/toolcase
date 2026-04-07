@@ -102,3 +102,25 @@
 	letter-spacing: 0.1em;
 	user-select: none;
 }
+
+@media (max-width: 576px) {
+	.component.component-pagination {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.5rem;
+	}
+
+	.component-pagination__summary {
+		text-align: center;
+	}
+
+	.component-pagination__nav {
+		justify-content: center;
+	}
+
+	.component-pagination__btn {
+		min-width: 1.75rem;
+		height: 1.75rem;
+		font-size: 0.75rem;
+	}
+}

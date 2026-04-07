@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, FC, HTMLAttributes, ReactNode } from 'react'
 import { Button } from './Button'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface PricingCardAction extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
 	label: string
@@ -28,6 +29,7 @@ export interface PricingCardProps extends HTMLAttributes<HTMLDivElement> {
 	badgeText?: ReactNode
 	featureIconName?: string
 	featureIcon?: ReactNode
+	loading?: boolean
 }
 
 export const PricingCard: FC<PricingCardProps> = ({
@@ -41,6 +43,7 @@ export const PricingCard: FC<PricingCardProps> = ({
 	badgeText = 'Recommended',
 	featureIconName = 'plus-lg',
 	featureIcon,
+	loading = false,
 	className,
 	style,
 	...rest
@@ -78,6 +81,25 @@ export const PricingCard: FC<PricingCardProps> = ({
 	const actionClassName = ['component-pricing-card__action', 'w-100', 'py-2', 'mt-auto', actionCustomClass]
 		.filter(Boolean)
 		.join(' ')
+
+	if (loading) {
+		return (
+			<div className={rootClassName} style={style} {...rest}>
+				<span className="component-pricing-card__accent position-absolute top-0 start-0 w-100" />
+				<div className="component-pricing-card__body card-body d-flex flex-column p-4 p-lg-5">
+					<div className="mb-3">
+						<Skeleton width="30%" />
+						<Skeleton width="50%" height="2.5rem" />
+					</div>
+					<Skeleton count={2} />
+					<div className="mt-4 flex-grow-1">
+						<Skeleton count={4} />
+					</div>
+					<Skeleton height="2.5rem" />
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className={rootClassName} style={style} {...rest}>

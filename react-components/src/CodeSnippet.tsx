@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import { Skeleton } from './Skeleton'
 
 export type CodeSnippetLanguage = 'javascript' | 'typescript' | 'bash'
 
@@ -8,6 +9,7 @@ export interface CodeSnippetProps extends Omit<React.HTMLAttributes<HTMLDivEleme
 	onCopy?: (code: string) => void
 	showCopyButton?: boolean
 	title?: string
+	loading?: boolean
 }
 
 const languageLabels: Record<CodeSnippetLanguage, string> = {
@@ -22,6 +24,7 @@ export const CodeSnippet: React.FC<CodeSnippetProps> = ({
 	onCopy,
 	showCopyButton = true,
 	title,
+	loading = false,
 	className = '',
 	...rest
 }) => {
@@ -35,6 +38,19 @@ export const CodeSnippet: React.FC<CodeSnippetProps> = ({
 	}, [code, onCopy])
 
 	const rootClass = `component component-code-snippet component-code-snippet--${language} ${className}`.trim()
+
+	if (loading) {
+		return (
+			<div className={rootClass} {...rest}>
+				<div className="component-code-snippet__header">
+					<Skeleton width="30%" />
+				</div>
+				<div className="component-code-snippet__body">
+					<Skeleton count={4} />
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className={rootClass} {...rest}>

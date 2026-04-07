@@ -4,6 +4,7 @@ import { ActionItems, ActionItem } from './ActionItems'
 import { Badge } from './Badge'
 import { Icon } from './Icon'
 import { Spinner } from './Spinner'
+import { Skeleton } from './Skeleton'
 
 export interface BuildTag {
 	id: string
@@ -23,6 +24,7 @@ export interface BuildProps {
 	menuItems?: ActionItem[]
 	onMenuItemClick?: (key: string) => void
 	className?: string
+	loading?: boolean
 }
 
 function formatDuration(ms: number): string {
@@ -45,12 +47,27 @@ export const Build: React.FC<BuildProps> = ({
 	menuItems = [],
 	onMenuItemClick,
 	className = '',
+	loading = false,
 }) => {
 	const rootClass = [
 		'component component-build',
 		status === 'running' ? 'component-build--running' : '',
 		className,
 	].filter(Boolean).join(' ')
+
+	if (loading) {
+		return (
+			<div className={rootClass}>
+				<Skeleton shape="circle" width="2rem" height="2rem" />
+				<div className="component-build__label">
+					<Skeleton width="40%" />
+					<Skeleton width="25%" />
+				</div>
+				<Skeleton width="4rem" />
+				<Skeleton width="4rem" />
+			</div>
+		)
+	}
 
 	return (
 		<div className={rootClass}>

@@ -15,6 +15,7 @@ import { ExtendedSelect, ExtendedSelectItem } from './ExtendedSelect'
 import { HelperText } from './HelperText'
 import { Tooltip } from './Tooltip'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export type FormInputType =
 	| 'text'
@@ -91,6 +92,7 @@ export interface FormInputProps {
 	// ExtendedSelect specific
 	searchPlaceholder?: string
 	noResultsText?: string
+	loading?: boolean
 }
 
 const isEmpty = (value: unknown): boolean => {
@@ -132,6 +134,7 @@ export const FormInput: React.FC<FormInputProps> = ({
 	items,
 	searchPlaceholder,
 	noResultsText,
+	loading = false,
 }) => {
 	const autoId = useId()
 	const inputId = id || autoId
@@ -382,6 +385,15 @@ export const FormInput: React.FC<FormInputProps> = ({
 
 	const isInlineInput = type === 'checkbox' || type === 'boolean'
 	const rootClass = `component component-form-input component-form-input--${type}${isInlineInput ? ' component-form-input--inline' : ''}${effectiveError ? ' component-form-input--error' : ''} ${className}`.trim()
+
+	if (loading) {
+		return (
+			<div className={rootClass}>
+				{label && <Skeleton width="30%" />}
+				<Skeleton height="2.5rem" />
+			</div>
+		)
+	}
 
 	return (
 		<div className={rootClass}>

@@ -1,4 +1,5 @@
 import type { CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
+import { Skeleton } from './Skeleton'
 
 export interface TimelineItem {
 	title: string
@@ -17,9 +18,31 @@ export interface TimelineItem {
 export interface TimelineProps extends HTMLAttributes<HTMLDivElement> {
 	items: TimelineItem[]
 	overlap?: number
+	loading?: boolean
+	loadingCount?: number
 }
 
-export const Timeline: FC<TimelineProps> = ({ items, overlap, className, ...rest }) => {
+export const Timeline: FC<TimelineProps> = ({ items, overlap, loading = false, loadingCount = 3, className, ...rest }) => {
+	if (loading) {
+		return (
+			<div className={['component component-timeline', className].filter(Boolean).join(' ')} {...rest}>
+				<div className="component-timeline__line" aria-hidden="true" />
+				<div className="component-timeline__items">
+					{Array.from({ length: loadingCount }, (_, i) => (
+						<div key={i} className={`component-timeline__item component-timeline__item--${i % 2 === 0 ? 'left' : 'right'}`}>
+							<div className="component-timeline__dot" aria-hidden="true" />
+							<article className="component-timeline__card card" style={{ padding: '1.25rem' }}>
+								<Skeleton width="30%" />
+								<Skeleton width="60%" height="1.25em" />
+								<Skeleton count={2} />
+							</article>
+						</div>
+					))}
+				</div>
+			</div>
+		)
+	}
+
 	return (
 		<div className={['component component-timeline', className].filter(Boolean).join(' ')} {...rest}>
 			<div className="component-timeline__line" aria-hidden="true" />

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Icon } from './Icon'
 
 export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
 	children?: React.ReactNode
@@ -27,7 +28,7 @@ export const Link: React.FC<LinkProps> = ({
 	return (
 		<a {...props} {...externalProps} className={rootClass}>
 			{children}
-			{external && <i className="bi bi-box-arrow-up-right component-link__external-icon" />}
+			{external && <Icon name="box-arrow-up-right" className="component-link__external-icon" />}
 		</a>
 	)
 }

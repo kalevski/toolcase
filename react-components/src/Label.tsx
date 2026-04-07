@@ -1,4 +1,5 @@
 import React from 'react'
+import { Icon } from './Icon'
 
 export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 	children?: React.ReactNode
@@ -29,7 +30,7 @@ export const Label: React.FC<LabelProps> = ({
 			</span>
 			{tooltip && (
 				<span className="component-label__tooltip" title={tooltip}>
-					<i className="bi bi-info-circle" />
+					<Icon name="info-circle" />
 				</span>
 			)}
 		</label>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Icon } from './Icon'
 
 export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
 	icon?: string
@@ -14,7 +15,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 	const rootClass = `component component-empty-state ${className}`.trim()
 	return (
 		<div {...props} className={rootClass}>
-			{icon && <i className={`bi bi-${icon} component-empty-state__icon`} />}
+			{icon && <Icon name={icon} className="component-empty-state__icon" />}
 			<div className="component-empty-state__content">
 				{children}
 			</div>

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Skeleton } from './Skeleton'
 
 export interface TagInputProps {
 	label?: string
@@ -11,6 +12,7 @@ export interface TagInputProps {
 	className?: string
 	allowCreate?: boolean
 	maxTags?: number
+	loading?: boolean
 }
 
 export const TagInput: React.FC<TagInputProps> = ({
@@ -24,6 +26,7 @@ export const TagInput: React.FC<TagInputProps> = ({
 	className = '',
 	allowCreate = false,
 	maxTags = 0,
+	loading = false,
 }) => {
 	const isControlled = value !== undefined
 	const [internalTags, setInternalTags] = useState<string[]>(defaultValue)
@@ -126,6 +129,17 @@ export const TagInput: React.FC<TagInputProps> = ({
 		form.addEventListener('reset', onReset)
 		return () => form.removeEventListener('reset', onReset)
 	}, [defaultValue, updateTags])
+
+	if (loading) {
+		return (
+			<div className={`component component-tag-input${className ? ` ${className}` : ''}`}>
+				{label && <label className="component-tag-input__label">{label}</label>}
+				<div className="component-tag-input__field">
+					<Skeleton />
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div ref={rootRef} className={`component component-tag-input${className ? ` ${className}` : ''}`}>

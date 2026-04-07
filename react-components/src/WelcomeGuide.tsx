@@ -1,6 +1,7 @@
 import React from 'react'
 import { Icon } from './Icon'
 import { ProgressBar } from './ProgressBar'
+import { Skeleton } from './Skeleton'
 
 export interface WelcomeGuideStep {
 	key: string
@@ -17,6 +18,7 @@ export interface WelcomeGuideProps {
 	backgroundPatternAlt?: string
 	backgroundPattern?: React.ReactNode
 	className?: string
+	loading?: boolean
 }
 
 export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({
@@ -28,6 +30,7 @@ export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({
 	backgroundPatternAlt,
 	backgroundPattern,
 	className = '',
+	loading = false,
 }) => {
 	const completedCount = steps.filter((s) => s.completed).length
 	const progress = steps.length > 0 ? Math.round((completedCount / steps.length) * 100) : 0
@@ -65,17 +68,28 @@ export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({
 				</div>
 			</div>
 			<div className="component-welcome-guide__right">
-				<ProgressBar value={progress} label={`${completedCount} of ${steps.length} complete`} variant="primary" />
-				<ul className="component-welcome-guide__steps">
-					{steps.map((step, i) => (
-						<li onClick={(e) => onStepClick?.(e, step.key)} key={step.key} className={`component-welcome-guide__step${step.completed ? ' component-welcome-guide__step--completed' : ''}`}>
-							<span className="component-welcome-guide__step-check">
-							{step.completed && <Icon name="check-lg" />}
-							</span>
-							<span className="component-welcome-guide__step-label">{step.label}</span>
-						</li>
-					))}
-				</ul>
+				{loading ? (
+					<>
+						<Skeleton height="0.5rem" />
+						<div className="component-welcome-guide__steps">
+							<Skeleton count={4} />
+						</div>
+					</>
+				) : (
+					<>
+						<ProgressBar value={progress} label={`${completedCount} of ${steps.length} complete`} variant="primary" />
+						<ul className="component-welcome-guide__steps">
+							{steps.map((step, i) => (
+								<li onClick={(e) => onStepClick?.(e, step.key)} key={step.key} className={`component-welcome-guide__step${step.completed ? ' component-welcome-guide__step--completed' : ''}`}>
+									<span className="component-welcome-guide__step-check">
+									{step.completed && <Icon name="check-lg" />}
+									</span>
+									<span className="component-welcome-guide__step-label">{step.label}</span>
+								</li>
+							))}
+						</ul>
+					</>
+				)}
 			</div>
 		</div>
 	)

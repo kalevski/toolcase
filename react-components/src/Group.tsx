@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Icon } from './Icon'
 
 export interface GroupProps {
 	label: string
@@ -30,7 +31,7 @@ export const Group: React.FC<GroupProps> = ({
 					onClick={() => setCollapsed((prev) => !prev)}
 					aria-label={collapsed ? 'Expand' : 'Collapse'}
 				>
-					<i className={`bi bi-chevron-${collapsed ? 'right' : 'down'}`}></i>
+					<Icon name={collapsed ? 'chevron-right' : 'chevron-down'} />
 				</button>
 				<span className="component-group__label">{label}</span>
 				{badge && <span className="component-group__badge">{badge}</span>}
@@ -41,7 +42,7 @@ export const Group: React.FC<GroupProps> = ({
 						onClick={onActionClick}
 						aria-label={actionLabel}
 					>
-						<i className={`bi bi-${actionIcon}`}></i>
+						<Icon name={actionIcon} />
 					</button>
 				)}
 			</div>

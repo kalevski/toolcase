@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from 'react'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface DropdownItem {
 	key: string
@@ -14,6 +15,7 @@ export interface DropdownProps extends Omit<React.HTMLAttributes<HTMLDivElement>
 	value?: string
 	onChange?: (key: string) => void
 	placeholder?: string
+	loading?: boolean
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -21,6 +23,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 	value,
 	onChange,
 	placeholder = 'Select a project',
+	loading = false,
 	className,
 	...rest
 }) => {
@@ -53,6 +56,16 @@ export const Dropdown: React.FC<DropdownProps> = ({
 			onChange(key)
 		}
 		setOpen(false)
+	}
+
+	if (loading) {
+		return (
+			<div className={rootClassName} {...rest}>
+				<div className="component-dropdown__trigger">
+					<Skeleton />
+				</div>
+			</div>
+		)
 	}
 
 	return (

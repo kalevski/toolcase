@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Icon } from './Icon'
 import { Badge } from './Badge'
+import { Skeleton } from './Skeleton'
 
 export interface VerticalItemListItem {
 	key: string
@@ -17,6 +18,8 @@ export interface VerticalItemListProps {
 	children?: React.ReactNode
 	disabled?: boolean
 	className?: string
+	loading?: boolean
+	loadingCount?: number
 }
 
 export const VerticalItemList: React.FC<VerticalItemListProps> = ({
@@ -27,6 +30,8 @@ export const VerticalItemList: React.FC<VerticalItemListProps> = ({
 	children,
 	disabled = false,
 	className = '',
+	loading = false,
+	loadingCount = 5,
 }) => {
 	const isControlled = activeKey !== undefined
 	const [internalKey, setInternalKey] = useState(defaultActiveKey ?? '')
@@ -41,7 +46,13 @@ export const VerticalItemList: React.FC<VerticalItemListProps> = ({
 	return (
 		<div className={`component component-vertical-item-list${className ? ` ${className}` : ''}`}>
 			<nav className="component-vertical-item-list__nav">
-				{items.map((item) => (
+				{loading ? (
+					Array.from({ length: loadingCount }, (_, i) => (
+						<div key={i} className="component-vertical-item-list__item" style={{ padding: '0.625rem 1rem' }}>
+							<Skeleton />
+						</div>
+					))
+				) : items.map((item) => (
 					<button
 						key={item.key}
 						type="button"

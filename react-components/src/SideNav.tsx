@@ -1,6 +1,7 @@
 import React, { useId } from 'react'
 import { Icon } from './Icon'
 import { Badge } from './Badge'
+import { Skeleton } from './Skeleton'
 
 export interface SideNavItem {
 	key?: string
@@ -23,11 +24,15 @@ export interface SideNavSection {
 export interface SideNavProps extends React.HTMLAttributes<HTMLElement> {
 	sections?: SideNavSection[]
 	onItemClick?: (event: React.MouseEvent<HTMLAnchorElement>, item: SideNavItem) => void
+	loading?: boolean
+	loadingCount?: number
 }
 
 export const SideNav: React.FC<SideNavProps> = ({
 	sections = [],
 	onItemClick,
+	loading = false,
+	loadingCount = 6,
 	className,
 	...rest
 }) => {
@@ -39,7 +44,17 @@ export const SideNav: React.FC<SideNavProps> = ({
 
 	return (
 		<nav className={navClassName} {...rest}>
-			{sections.map((section, sIndex) => {
+			{loading ? (
+				<div className="component-side-nav__section">
+					<ul className="component-side-nav__list">
+						{Array.from({ length: loadingCount }, (_, i) => (
+							<li key={i} className="component-side-nav__item" style={{ padding: '0.5rem 1rem' }}>
+								<Skeleton />
+							</li>
+						))}
+					</ul>
+				</div>
+			) : sections.map((section, sIndex) => {
 				const sectionKey = section.key || `side-nav-section-${reactId}-${sIndex}`
 				return (
 					<div key={sectionKey} className="component-side-nav__section">

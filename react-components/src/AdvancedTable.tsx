@@ -4,6 +4,7 @@ import { Pagination } from './Pagination'
 import { FormInput } from './FormInput'
 import type { FormInputType, FormInputProps } from './FormInput'
 import { Spinner } from './Spinner'
+import { Icon } from './Icon'
 
 export interface AdvancedTableFilter extends Omit<FormInputProps, 'onChange'> {
 	key: string
@@ -82,9 +83,9 @@ export function AdvancedTable<T = any>({
 					{col.header}
 					<span className={`component-advanced-table__sort-icon${isActive ? ' component-advanced-table__sort-icon--active' : ''}`}>
 						{direction === 'desc' ? (
-							<i className="bi bi-sort-down" />
+							<Icon name="sort-down" />
 						) : (
-							<i className="bi bi-sort-up" />
+							<Icon name="sort-up" />
 						)}
 					</span>
 				</button>

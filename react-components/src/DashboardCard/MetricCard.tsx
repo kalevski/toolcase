@@ -1,5 +1,6 @@
 import React from 'react'
 import { Icon } from '../Icon'
+import { Skeleton } from '../Skeleton'
 
 export interface MetricCardProps {
 	title: string
@@ -8,6 +9,7 @@ export interface MetricCardProps {
 	icon?: string
 	trend?: number[]
 	trendColor?: string
+	loading?: boolean
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -17,7 +19,22 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 	icon,
 	trend,
 	trendColor = '#6366f1',
+	loading = false,
 }) => {
+	if (loading) {
+		return (
+			<div className="component-dashboard-card__body component-dashboard-card__body--metric">
+				<div className="component-dashboard-card__metric-top">
+					<div className="component-dashboard-card__metric-info">
+						<Skeleton width="50%" />
+						<Skeleton width="30%" height="2rem" />
+					</div>
+				</div>
+				<Skeleton height="2rem" />
+			</div>
+		)
+	}
+
 	const sparkline = trend && trend.length > 1 ? buildSparklinePath(trend) : null
 
 	return (

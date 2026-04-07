@@ -1,4 +1,5 @@
 import React from 'react'
+import { Icon } from './Icon'
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	icon: string
@@ -27,7 +28,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
 
 	return (
 		<button {...props} className={rootClass} aria-label={label ?? icon}>
-			<i className={`bi bi-${icon}`} />
+			<Icon name={icon} />
 		</button>
 	)
 }

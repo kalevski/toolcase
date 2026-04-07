@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Skeleton } from './Skeleton'
 
 export interface TabSectionItem {
 	key: string
@@ -13,6 +14,7 @@ export interface TabSectionsProps {
 	activeKey?: string
 	onChange?: (key: string) => void
 	className?: string
+	loading?: boolean
 }
 
 export const TabSections: React.FC<TabSectionsProps> = ({
@@ -21,6 +23,7 @@ export const TabSections: React.FC<TabSectionsProps> = ({
 	activeKey: controlledKey,
 	onChange,
 	className = '',
+	loading = false,
 }) => {
 	const [internalKey, setInternalKey] = useState(defaultActiveKey || items[0]?.key || '')
 
@@ -52,7 +55,7 @@ export const TabSections: React.FC<TabSectionsProps> = ({
 				</div>
 			</div>
 			<div className="component-tab-sections__body">
-				{activeItem?.content}
+				{loading ? <Skeleton count={3} /> : activeItem?.content}
 			</div>
 		</div>
 	)

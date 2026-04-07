@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import { Skeleton } from './Skeleton'
 
 export type SchemaPropertyType = 'string' | 'number' | 'boolean' | 'array' | 'object'
 
@@ -24,6 +25,7 @@ export interface JSONSchemaDefProps {
 	onLabelChange?: (label: string) => void
 	disabled?: boolean
 	className?: string
+	loading?: boolean
 }
 
 const PROPERTY_TYPES: SchemaPropertyType[] = ['string', 'number', 'boolean', 'array', 'object']
@@ -60,6 +62,7 @@ export const JSONSchemaDef: React.FC<JSONSchemaDefProps> = ({
 	onChange,
 	disabled = false,
 	className = '',
+	loading = false,
 }) => {
 	const isControlled = value !== undefined
 	const [internalValue, setInternalValue] = useState<string>(defaultValue)
@@ -170,6 +173,16 @@ export const JSONSchemaDef: React.FC<JSONSchemaDefProps> = ({
 	}
 
 	const needsRef = (type: SchemaPropertyType) => type === 'array' || type === 'object'
+
+	if (loading) {
+		return (
+			<div className={`component component-json-schema-def${className ? ` ${className}` : ''}`}>
+				<div className="component-json-schema-def__properties">
+					<Skeleton count={4} />
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className={`component component-json-schema-def${className ? ` ${className}` : ''}`}>

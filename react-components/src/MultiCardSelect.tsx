@@ -1,5 +1,6 @@
 import React from 'react'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface MultiCardSelectOption {
 	key: string
@@ -13,6 +14,8 @@ export interface MultiCardSelectProps {
 	onChange?: (selected: string[]) => void
 	columns?: number
 	className?: string
+	loading?: boolean
+	loadingCount?: number
 }
 
 export const MultiCardSelect: React.FC<MultiCardSelectProps> = ({
@@ -21,6 +24,8 @@ export const MultiCardSelect: React.FC<MultiCardSelectProps> = ({
 	onChange,
 	columns,
 	className = '',
+	loading = false,
+	loadingCount = 4,
 }) => {
 	const style = columns
 		? { gridTemplateColumns: `repeat(${columns}, 1fr)` } as React.CSSProperties
@@ -31,6 +36,22 @@ export const MultiCardSelect: React.FC<MultiCardSelectProps> = ({
 			? value.filter((k) => k !== key)
 			: [...value, key]
 		onChange?.(next)
+	}
+
+	if (loading) {
+		return (
+			<div
+				className={`component component-multi-card-select${className ? ` ${className}` : ''}`}
+				style={style}
+			>
+				{Array.from({ length: loadingCount }, (_, i) => (
+					<div key={i} className="component-multi-card-select__card" style={{ padding: '1rem' }}>
+						<Skeleton width="60%" />
+						<Skeleton width="80%" />
+					</div>
+				))}
+			</div>
+		)
 	}
 
 	return (

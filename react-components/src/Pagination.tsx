@@ -1,4 +1,5 @@
 import React from 'react'
+import { Icon } from './Icon'
 
 export interface PaginationProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
 	page: number
@@ -74,7 +75,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 					onClick={() => onChange?.(page - 1)}
 					aria-label="Previous page"
 				>
-					<i className="bi bi-chevron-left" />
+					<Icon name="chevron-left" />
 				</button>
 
 				{pages.map((p, i) =>
@@ -103,7 +104,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 					onClick={() => onChange?.(page + 1)}
 					aria-label="Next page"
 				>
-					<i className="bi bi-chevron-right" />
+					<Icon name="chevron-right" />
 				</button>
 			</nav>
 		</div>

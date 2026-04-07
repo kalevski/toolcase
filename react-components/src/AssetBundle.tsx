@@ -4,6 +4,7 @@ import { Badge } from './Badge'
 import { Switch } from './Switch'
 import { Icon } from './Icon'
 import { ActionItems, ActionItem } from './ActionItems'
+import { Skeleton } from './Skeleton'
 
 export type AssetBundleEngine = 'unity' | 'godot' | 'unreal' | 'phaser' | 'pixijs' | 'custom'              // Unreal
 
@@ -47,6 +48,7 @@ export interface AssetBundleProps {
 	className?: string
 
     onBuildClick?: () => void
+	loading?: boolean
 }
 
 const engineMeta: Record<AssetBundleEngine, { label: string; icon: string; color: string }> = {
@@ -95,6 +97,7 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
 	onMenuItemClick,
 	onBuildClick,
 	className = '',
+	loading = false,
 }) => {
 	const { scale = 100, rotationEnabled = false, algorithm } = advanced
 	const fileEntries = Object.entries(counts)
@@ -104,6 +107,28 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
 		'component component-asset-bundle',
 		className,
 	].filter(Boolean).join(' ')
+
+	if (loading) {
+		return (
+			<div className={rootClass}>
+				<div className="component-asset-bundle__header">
+					<Skeleton shape="circle" width="2.5rem" height="2.5rem" />
+					<div className="component-asset-bundle__title-group">
+						<Skeleton width="50%" />
+						<Skeleton width="30%" />
+					</div>
+				</div>
+				<div className="component-asset-bundle__divider" />
+				<div className="component-asset-bundle__section">
+					<Skeleton count={3} />
+				</div>
+				<div className="component-asset-bundle__divider" />
+				<div className="component-asset-bundle__section">
+					<Skeleton count={2} />
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className={rootClass}>

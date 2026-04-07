@@ -3,6 +3,7 @@ import { Card } from './Card'
 import { Input } from './Input'
 import { Button } from './Button'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface EarlySignupFormProps {
 	title?: string
@@ -12,6 +13,7 @@ export interface EarlySignupFormProps {
 	ctaLabel?: string
 	onSubmit?: (email: string, event: React.FormEvent<HTMLFormElement>) => void
 	className?: string
+	loading?: boolean
 }
 
 export const EarlySignupForm: React.FC<EarlySignupFormProps> = ({
@@ -22,6 +24,7 @@ export const EarlySignupForm: React.FC<EarlySignupFormProps> = ({
 	ctaLabel,
 	onSubmit,
 	className = '',
+	loading = false,
 }) => {
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
@@ -32,6 +35,26 @@ export const EarlySignupForm: React.FC<EarlySignupFormProps> = ({
 		if (onSubmit) {
 			onSubmit(email, event)
 		}
+	}
+
+	if (loading) {
+		return (
+			<div className={className}>
+				<Card>
+					<div className="row g-4 align-items-center">
+						<div className="col-md-7">
+							<Skeleton width="50%" height="1.5rem" />
+							<Skeleton width="70%" />
+							<Skeleton count={3} />
+						</div>
+						<div className="col-md-5">
+							<Skeleton height="2.5rem" />
+							<Skeleton height="2.5rem" />
+						</div>
+					</div>
+				</Card>
+			</div>
+		)
 	}
 
 	return (

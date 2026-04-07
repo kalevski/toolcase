@@ -1,4 +1,5 @@
 import type { FC, HTMLAttributes } from 'react'
+import { Skeleton } from './Skeleton'
 
 export type UsageConfig = {
 	label: string
@@ -11,6 +12,8 @@ export type UsageConfig = {
 export interface UsageSummaryPanelProps extends HTMLAttributes<HTMLDivElement> {
 	usage: Array<UsageConfig>
 	title?: string
+	loading?: boolean
+	loadingCount?: number
 }
 
 const clampPercentage = (value: number) => {
@@ -30,6 +33,8 @@ const formatNumber = (value: number) => numberFormatter.format(value)
 export const UsageSummaryPanel: FC<UsageSummaryPanelProps> = ({
 	title = null,
 	usage = [],
+	loading = false,
+	loadingCount = 3,
 	className,
 	...rest
 }) => {
@@ -43,7 +48,16 @@ export const UsageSummaryPanel: FC<UsageSummaryPanelProps> = ({
 				</header>
 			)}
 
-			{usage.map(({ label, used, total, measurementUnit, warn = false }, index) => {
+			{loading ? (
+				Array.from({ length: loadingCount }, (_, i) => (
+					<section className="component-usage-summary-panel__section" key={i}>
+						<div className="component-usage-summary-panel__label">
+							<Skeleton width="40%" />
+						</div>
+						<Skeleton height="0.5rem" />
+					</section>
+				))
+			) : usage.map(({ label, used, total, measurementUnit, warn = false }, index) => {
 				
 				const percentage = clampPercentage(total > 0 ? (used / total) * 100 : 0)
 				const key = `${label}-${index}`

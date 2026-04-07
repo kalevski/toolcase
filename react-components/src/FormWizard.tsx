@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { TabSections } from './TabSections'
 import { Button } from './Button'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface FormWizardStep {
 	key: string
@@ -16,6 +17,7 @@ export interface FormWizardProps {
 	completeLabel?: React.ReactNode
 	completeIcon?: string
 	className?: string
+	loading?: boolean
 }
 
 export const FormWizard: React.FC<FormWizardProps> = ({
@@ -24,6 +26,7 @@ export const FormWizard: React.FC<FormWizardProps> = ({
 	completeLabel = 'Complete',
 	completeIcon,
 	className = '',
+	loading = false,
 }) => {
 	const [step, setStep] = useState(0)
 
@@ -46,6 +49,22 @@ export const FormWizard: React.FC<FormWizardProps> = ({
 		content: s.content,
 		disabled: i > step,
 	}))
+
+	if (loading) {
+		return (
+			<div className={`component component-form-wizard${className ? ` ${className}` : ''}`}>
+				<div className="component-form-wizard__tabs">
+					<Skeleton width="60%" />
+				</div>
+				<div style={{ padding: '1.5rem' }}>
+					<Skeleton count={4} />
+				</div>
+				<div className="component-form-wizard__footer">
+					<Skeleton width="5rem" height="2.5rem" />
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className={`component component-form-wizard${className ? ` ${className}` : ''}`}>

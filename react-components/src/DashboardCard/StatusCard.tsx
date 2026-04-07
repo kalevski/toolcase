@@ -1,5 +1,6 @@
 import React from 'react'
 import { Icon } from '../Icon'
+import { Skeleton } from '../Skeleton'
 
 export interface StatusItem {
 	label: string
@@ -10,6 +11,8 @@ export interface StatusItem {
 export interface StatusCardProps {
 	title?: string
 	items: StatusItem[]
+	loading?: boolean
+	loadingCount?: number
 }
 
 const STATUS_CONFIG: Record<StatusItem['status'], { icon: string; className: string }> = {
@@ -19,7 +22,23 @@ const STATUS_CONFIG: Record<StatusItem['status'], { icon: string; className: str
 	inactive: { icon: 'dash-circle', className: 'inactive' },
 }
 
-export const StatusCard: React.FC<StatusCardProps> = ({ title, items }) => {
+export const StatusCard: React.FC<StatusCardProps> = ({ title, items, loading = false, loadingCount = 3 }) => {
+	if (loading) {
+		return (
+			<div className="component-dashboard-card__body component-dashboard-card__body--status">
+				{title && <Skeleton width="30%" />}
+				<ul className="component-dashboard-card__status-list">
+					{Array.from({ length: loadingCount }, (_, i) => (
+						<li key={i} className="component-dashboard-card__status-item">
+							<Skeleton shape="circle" width="1rem" height="1rem" />
+							<Skeleton width="60%" />
+						</li>
+					))}
+				</ul>
+			</div>
+		)
+	}
+
 	return (
 		<div className="component-dashboard-card__body component-dashboard-card__body--status">
 			{title && <span className="component-dashboard-card__status-title">{title}</span>}

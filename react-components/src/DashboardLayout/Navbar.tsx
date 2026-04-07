@@ -10,7 +10,7 @@ export interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
 	isSidebarOpen,
-	minLeftWidth = 200,
+	minLeftWidth = 120,
 	toggleSidebar,
 	leftComponent,
 	rightComponent,

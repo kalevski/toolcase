@@ -1,5 +1,6 @@
 import React from 'react'
 import { Icon } from '../Icon'
+import { Skeleton } from '../Skeleton'
 
 export interface ActivityItem {
 	icon?: string
@@ -12,12 +13,37 @@ export interface ActivityItem {
 export interface ActivityCardProps {
 	title?: string
 	activities: ActivityItem[]
+	loading?: boolean
+	loadingCount?: number
 }
 
 export const ActivityCard: React.FC<ActivityCardProps> = ({
 	title,
 	activities,
+	loading = false,
+	loadingCount = 3,
 }) => {
+	if (loading) {
+		return (
+			<div className="component-dashboard-card__body component-dashboard-card__body--activity">
+				{title && <Skeleton width="30%" />}
+				<ul className="component-dashboard-card__activity-list">
+					{Array.from({ length: loadingCount }, (_, i) => (
+						<li key={i} className="component-dashboard-card__activity-item">
+							<div className="component-dashboard-card__activity-icon-wrap">
+								<Skeleton shape="circle" width="1.5rem" height="1.5rem" />
+							</div>
+							<div className="component-dashboard-card__activity-content">
+								<Skeleton width="70%" />
+								<Skeleton width="50%" />
+							</div>
+						</li>
+					))}
+				</ul>
+			</div>
+		)
+	}
+
 	return (
 		<div className="component-dashboard-card__body component-dashboard-card__body--activity">
 			{title && <span className="component-dashboard-card__activity-title">{title}</span>}

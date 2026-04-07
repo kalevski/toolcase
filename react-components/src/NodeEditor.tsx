@@ -1,4 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import { Icon } from './Icon'
+import { Button } from './Button'
+import { Skeleton } from './Skeleton'
 
 export type NodeType = 'base' | 'branch' | 'exec' | 'condition'
 
@@ -36,6 +39,7 @@ export interface NodeEditorProps {
 	onChange?: (value: string) => void
 	disabled?: boolean
 	className?: string
+	loading?: boolean
 }
 
 const NODE_TYPES: NodeType[] = ['base', 'branch', 'exec', 'condition']
@@ -87,6 +91,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 	onChange,
 	disabled = false,
 	className = '',
+	loading = false,
 }) => {
 	const isControlled = value !== undefined
 	const [internal, setInternal] = useState(defaultValue)
@@ -291,8 +296,8 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 				<div className="component-node-editor__panel-header">
 					<span className="component-node-editor__node-type-badge component-node-editor__node-type-badge--panel" data-type={node.type}>{node.type}</span>
 					<span className="component-node-editor__panel-title">{nodeLabel(node)}</span>
-					<button type="button" className="btn btn-outline-danger btn-sm component-node-editor__icon-btn ms-auto" disabled={disabled}
-						onClick={() => removeNode(node.id)}><i className="bi bi-trash"></i></button>
+					<Button variant="danger" outline size="small" className="component-node-editor__icon-btn ms-auto" disabled={disabled}
+						onClick={() => removeNode(node.id)}><Icon name="trash" /></Button>
 				</div>
 
 				<div className="component-node-editor__panel-fields">
@@ -338,12 +343,12 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 										onChange={e => updateOption(node.id, oi, { key: e.target.value })} />
 									<input type="text" className="form-control form-control-sm" placeholder="value" value={opt.value} disabled={disabled}
 										onChange={e => updateOption(node.id, oi, { value: e.target.value })} />
-									<button type="button" className="btn btn-outline-danger btn-sm component-node-editor__icon-btn" disabled={disabled}
-										onClick={() => removeOption(node.id, oi)}><i className="bi bi-x-lg"></i></button>
+									<Button variant="danger" outline size="small" className="component-node-editor__icon-btn" disabled={disabled}
+										onClick={() => removeOption(node.id, oi)}><Icon name="x-lg" /></Button>
 								</div>
 							))}
-							<button type="button" className="btn btn-outline-secondary btn-sm mt-1" disabled={disabled}
-								onClick={() => addOption(node.id)}><i className="bi bi-plus"></i> Option</button>
+							<Button variant="secondary" outline size="small" className="mt-1" disabled={disabled}
+								onClick={() => addOption(node.id)}><Icon name="plus" /> Option</Button>
 						</div>
 					)}
 				</div>
@@ -360,7 +365,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 									onChange={e => updateEdge(idx, { from: e.target.value })}>
 									{graph.nodes.map(n => <option key={n.id} value={n.id}>{nodeLabel(n)}</option>)}
 								</select>
-								<i className="bi bi-arrow-right component-node-editor__edge-arrow"></i>
+								<Icon name="arrow-right" className="component-node-editor__edge-arrow" />
 								<select className="form-select form-select-sm" value={edge.to} disabled={disabled}
 									onChange={e => updateEdge(idx, { to: e.target.value })}>
 									{graph.nodes.map(n => <option key={n.id} value={n.id}>{nodeLabel(n)}</option>)}
@@ -372,11 +377,24 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 										{triggers.map(t => <option key={t} value={t}>{t}</option>)}
 									</select>
 								)}
-								<button type="button" className="btn btn-outline-danger btn-sm component-node-editor__icon-btn" disabled={disabled}
-									onClick={() => removeEdge(idx)}><i className="bi bi-x-lg"></i></button>
+								<Button variant="danger" outline size="small" className="component-node-editor__icon-btn" disabled={disabled}
+									onClick={() => removeEdge(idx)}><Icon name="x-lg" /></Button>
 							</div>
 						)
 					})}
+				</div>
+			</div>
+		)
+	}
+
+	if (loading) {
+		return (
+			<div className={`component component-node-editor${className ? ` ${className}` : ''}`}>
+				<div className="component-node-editor__toolbar">
+					<Skeleton width="5rem" height="2rem" />
+				</div>
+				<div style={{ padding: '2rem' }}>
+					<Skeleton shape="rect" width="100%" height="300px" />
 				</div>
 			</div>
 		)
@@ -386,9 +404,9 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 		<div className={`component component-node-editor${className ? ` ${className}` : ''}`}>
 			{/* Toolbar */}
 			<div className="component-node-editor__toolbar">
-				<button type="button" className="btn btn-primary btn-sm" disabled={disabled} onClick={addNode}>
-					<i className="bi bi-plus-lg"></i> Node
-				</button>
+				<Button variant="primary" size="small" disabled={disabled} onClick={addNode}>
+					<Icon name="plus-lg" /> Node
+				</Button>
 				<div className="component-node-editor__toolbar-sep"></div>
 				<div className="component-node-editor__field component-node-editor__field--inline">
 					<label className="component-node-editor__field-label">Initial</label>
@@ -485,7 +503,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 										title="Drag to connect"
 										onMouseDown={e => onConnectStart(e, node.id)}
 									>
-										<i className="bi bi-circle-fill"></i>
+										<Icon name="circle-fill" />
 									</span>
 								</div>
 								<div className="component-node-editor__rect-body">

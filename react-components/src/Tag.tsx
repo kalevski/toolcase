@@ -1,4 +1,5 @@
 import React from 'react'
+import { Icon } from './Icon'
 
 export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
 	children?: React.ReactNode
@@ -33,7 +34,7 @@ export const Tag: React.FC<TagProps> = ({
 					onClick={onRemove}
 					aria-label="Remove"
 				>
-					<i className="bi bi-x" />
+					<Icon name="x" />
 				</button>
 			)}
 		</span>

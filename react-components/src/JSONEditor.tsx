@@ -1,4 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface JSONEditorSchemaProperty {
 	key: string
@@ -15,6 +17,7 @@ export interface JSONEditorProps {
 	onChange?: (value: Record<string, unknown>) => void
 	disabled?: boolean
 	className?: string
+	loading?: boolean
 }
 
 const parseSchema = (raw: string): JSONEditorSchemaProperty[] => {
@@ -63,6 +66,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 	onChange,
 	disabled = false,
 	className = '',
+	loading = false,
 }) => {
 	const schemaDef = parseSchema(schema)
 	const isControlled = value !== undefined
@@ -174,7 +178,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 							onClick={() => toggleCollapse(pathKey)}
 							aria-label={isCollapsed(pathKey) ? 'Expand' : 'Collapse'}
 						>
-							<i className={`bi bi-chevron-${isCollapsed(pathKey) ? 'right' : 'down'}`}></i>
+							<Icon name={isCollapsed(pathKey) ? 'chevron-right' : 'chevron-down'} />
 						</button>
 						<span className="component-json-editor__group-label">{prop.key}</span>
 						<span className="component-json-editor__group-badge">{items.length} items</span>
@@ -185,7 +189,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 							onClick={() => addArrayItem(path, prop.properties!)}
 							aria-label={`Add item to ${prop.key}`}
 						>
-							<i className="bi bi-plus-lg"></i>
+							<Icon name="plus-lg" />
 						</button>
 					</div>
 
@@ -202,7 +206,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 												onClick={() => toggleCollapse(itemPathKey)}
 												aria-label={isCollapsed(itemPathKey) ? 'Expand' : 'Collapse'}
 											>
-												<i className={`bi bi-chevron-${isCollapsed(itemPathKey) ? 'right' : 'down'}`}></i>
+												<Icon name={isCollapsed(itemPathKey) ? 'chevron-right' : 'chevron-down'} />
 											</button>
 											<span className="component-json-editor__array-item-index">{itemIdx}</span>
 											<button
@@ -212,7 +216,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 												onClick={() => removeArrayItem(path, itemIdx)}
 												aria-label={`Remove item ${itemIdx}`}
 											>
-												<i className="bi bi-x-lg"></i>
+												<Icon name="x-lg" />
 											</button>
 										</div>
 										{!isCollapsed(itemPathKey) && (
@@ -244,7 +248,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 							onClick={() => toggleCollapse(pathKey)}
 							aria-label={isCollapsed(pathKey) ? 'Expand' : 'Collapse'}
 						>
-							<i className={`bi bi-chevron-${isCollapsed(pathKey) ? 'right' : 'down'}`}></i>
+							<Icon name={isCollapsed(pathKey) ? 'chevron-right' : 'chevron-down'} />
 						</button>
 						<span className="component-json-editor__group-label">{prop.key}</span>
 					</div>
@@ -272,7 +276,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 							onClick={() => toggleCollapse(pathKey)}
 							aria-label={isCollapsed(pathKey) ? 'Expand' : 'Collapse'}
 						>
-							<i className={`bi bi-chevron-${isCollapsed(pathKey) ? 'right' : 'down'}`}></i>
+							<Icon name={isCollapsed(pathKey) ? 'chevron-right' : 'chevron-down'} />
 						</button>
 						<span className="component-json-editor__group-label">{prop.key}</span>
 						<span className="component-json-editor__group-badge">{items.length} items</span>
@@ -283,7 +287,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 							onClick={() => addPrimitiveArrayItem(path, prop.itemType!)}
 							aria-label={`Add item to ${prop.key}`}
 						>
-							<i className="bi bi-plus-lg"></i>
+							<Icon name="plus-lg" />
 						</button>
 					</div>
 
@@ -320,7 +324,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 										onClick={() => removeArrayItem(path, itemIdx)}
 										aria-label={`Remove item ${itemIdx}`}
 									>
-										<i className="bi bi-x"></i>
+										<Icon name="x" />
 									</button>
 								</div>
 							))}
@@ -376,6 +380,14 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 					/>
 				)
 		}
+	}
+
+	if (loading) {
+		return (
+			<div className={`component component-json-editor${className ? ` ${className}` : ''}`}>
+				<Skeleton count={5} />
+			</div>
+		)
 	}
 
 	return (

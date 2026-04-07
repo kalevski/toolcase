@@ -1,4 +1,5 @@
 import React from 'react'
+import { Icon } from './Icon'
 
 export interface ChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	children?: React.ReactNode
@@ -26,7 +27,7 @@ export const Chip: React.FC<ChipProps> = ({
 
 	return (
 		<button {...props} type={props.type ?? 'button'} className={rootClass}>
-			{icon && <i className={`bi bi-${icon} component-chip__icon`} />}
+			{icon && <Icon name={icon} className="component-chip__icon" />}
 			<span className="component-chip__label">{label ?? children}</span>
 		</button>
 	)

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { Skeleton } from '../Skeleton'
 
 export interface SliceItem {
 	value: number
@@ -11,6 +12,7 @@ export interface SlicesCardProps {
 	slices: SliceItem[]
 	size?: number
 	strokeWidth?: number
+	loading?: boolean
 }
 
 const DEFAULT_COLORS = [
@@ -22,7 +24,26 @@ export const SlicesCard: React.FC<SlicesCardProps> = ({
 	slices,
 	size = 140,
 	strokeWidth = 18,
+	loading = false,
 }) => {
+	if (loading) {
+		return (
+			<div className="component-dashboard-card__body component-dashboard-card__body--slices">
+				{title && <Skeleton width="30%" />}
+				<div className="component-dashboard-card__slices-chart">
+					<Skeleton shape="circle" width={`${size}px`} height={`${size}px`} />
+				</div>
+				<ul className="component-dashboard-card__slices-legend">
+					{Array.from({ length: 3 }, (_, i) => (
+						<li key={i} className="component-dashboard-card__slices-legend-item">
+							<Skeleton width="60%" />
+						</li>
+					))}
+				</ul>
+			</div>
+		)
+	}
+
 	const total = useMemo(() => slices.reduce((sum, s) => sum + s.value, 0), [slices])
 
 	const segments = useMemo(() => {

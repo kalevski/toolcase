@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Skeleton } from './Skeleton'
 
 export type ColorOption = {
 	hex: string
@@ -12,6 +13,7 @@ export interface ColorPickerProps {
 	onChange?: (color: string) => void
 	className?: string
 	columns?: number
+	loading?: boolean
 }
 
 function getHex(option: ColorOption | string) {
@@ -28,6 +30,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 	onChange,
 	className = '',
 	columns = 5,
+	loading = false,
 }) => {
 	const initial = value || getHex(colors[0])
 	const [selected, setSelected] = useState(initial)
@@ -54,6 +57,15 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 		setSelected(color)
 		setOpen(false)
 		if (onChange) onChange(color)
+	}
+
+	if (loading) {
+		return (
+			<div className={`component component-color-picker${className ? ` ${className}` : ''}`}>
+				{label && <label className="component-color-picker__label">{label}</label>}
+				<Skeleton shape="rect" width="3rem" height="2.5rem" />
+			</div>
+		)
 	}
 
 	return (

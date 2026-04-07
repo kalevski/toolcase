@@ -1,6 +1,7 @@
 import React from 'react'
 import { Icon } from './Icon'
 import { IconButton } from './IconButton'
+import { Skeleton } from './Skeleton'
 
 export interface AlertProps {
 	children?: React.ReactNode
@@ -11,6 +12,7 @@ export interface AlertProps {
 	dismissible?: boolean
 	onClose?: () => void
 	className?: string
+	loading?: boolean
 }
 
 export const Alert: React.FC<AlertProps> = ({
@@ -22,8 +24,20 @@ export const Alert: React.FC<AlertProps> = ({
 	dismissible = false,
 	onClose,
 	className = '',
+	loading = false,
 }) => {
 	const alertClass = `component component-alert alert alert-${variant} d-flex align-items-center justify-content-between ${className}`.trim()
+
+	if (loading) {
+		return (
+			<div className={alertClass} role="alert">
+				<div className="component-alert-content d-flex align-items-center gap-2" style={{ width: '100%' }}>
+					<Skeleton width="80%" />
+				</div>
+			</div>
+		)
+	}
+
 	return (
 		<div className={alertClass} role="alert">
 			<div className="component-alert-content d-flex align-items-center gap-2">

@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export type IconOption =
 	| {
@@ -17,6 +19,7 @@ export interface IconPickerProps {
 	columns?: number
 	triggerStyle?: React.CSSProperties
 	triggerClassName?: string
+	loading?: boolean
 }
 
 function getIcon(option: IconOption): React.ReactNode {
@@ -38,6 +41,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 	columns = 5,
 	triggerStyle,
 	triggerClassName = '',
+	loading = false,
 }) => {
 	const initial = value || getValue(icons[0])
 	const [selected, setSelected] = useState(initial)
@@ -68,6 +72,15 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 
 	const selectedOption = icons.find((i) => getValue(i) === selected) || icons[0]
 
+	if (loading) {
+		return (
+			<div className={`component component-icon-picker${className ? ` ${className}` : ''}`}>
+				{label && <label className="component-icon-picker__label">{label}</label>}
+				<Skeleton shape="rect" width="3rem" height="2.5rem" />
+			</div>
+		)
+	}
+
 	return (
 		<div className={`component component-icon-picker${className ? ` ${className}` : ''}`} ref={rootRef}>
 			{label && <label className="component-icon-picker__label">{label}</label>}
@@ -77,7 +90,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 				onClick={() => setOpen((o) => !o)}
 				style={triggerStyle}
 			>
-				<i className={'bi bi-' + getIcon(selectedOption)}></i>
+				<Icon name={String(getIcon(selectedOption))} />
 			</button>
 			{open && (
 				<div className="component-icon-picker__dropdown">
@@ -93,7 +106,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 								onClick={() => handleSelect(getValue(option))}
 								title={getLabel(option)}
 							>
-								<i className={'bi bi-' + getIcon(option)}></i>
+								<Icon name={String(getIcon(option))} />
 							</button>
 						))}
 					</div>

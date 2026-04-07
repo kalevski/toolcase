@@ -1,4 +1,5 @@
 import type { FC, HTMLAttributes, ReactNode } from 'react'
+import { Skeleton } from './Skeleton'
 
 export interface TableColumn<T = any> {
 	key: string
@@ -20,6 +21,8 @@ export interface TableProps<T = any> extends HTMLAttributes<HTMLDivElement> {
 	borderless?: boolean
 	stickyHeader?: boolean
 	onRowClick?: (row: T, index: number) => void
+	loading?: boolean
+	loadingRows?: number
 }
 
 export const Table: FC<TableProps> = ({
@@ -33,6 +36,8 @@ export const Table: FC<TableProps> = ({
 	borderless = false,
 	stickyHeader = false,
 	onRowClick,
+	loading = false,
+	loadingRows = 5,
 	className,
 	...rest
 }) => {
@@ -69,7 +74,17 @@ export const Table: FC<TableProps> = ({
 					</tr>
 				</thead>
 				<tbody className="component-table__body">
-					{data.length === 0 && emptyMessage !== undefined ? (
+					{loading ? (
+						Array.from({ length: loadingRows }, (_, i) => (
+							<tr key={`skeleton-${i}`} className="component-table__row">
+								{columns.map((col) => (
+									<td key={col.key} className="component-table__td">
+										<Skeleton />
+									</td>
+								))}
+							</tr>
+						))
+					) : data.length === 0 && emptyMessage !== undefined ? (
 						<tr>
 							<td className="component-table__empty" colSpan={columns.length}>
 								{emptyMessage}

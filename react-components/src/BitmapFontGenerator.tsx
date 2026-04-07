@@ -1,4 +1,6 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react'
+import { Icon } from './Icon'
+import { Button } from './Button'
 
 export interface BitmapFontFill {
 	type: 'solid' | 'gradient'
@@ -332,14 +334,15 @@ export const BitmapFontGenerator: React.FC<BitmapFontGeneratorProps> = ({
 	return (
 		<div className={`component component-bitmap-font-generator${className ? ` ${className}` : ''}`}>
 			<div className="component-bitmap-font-generator__toolbar">
-				<button
-					type="button"
-					className="btn btn-primary btn-sm component-bitmap-font-generator__generate-btn"
+				<Button
+					variant="primary"
+					size="small"
+					className="component-bitmap-font-generator__generate-btn"
 					disabled={disabled || generating}
 					onClick={handleGenerate}
 				>
-					<i className="bi bi-download"></i> {generating ? 'Generating…' : 'Generate'}
-				</button>
+					<Icon name="download" /> {generating ? 'Generating…' : 'Generate'}
+				</Button>
 				<span className="component-bitmap-font-generator__info">
 					{uniqueChars(glyphs).length} glyphs &middot; {fontSize}px &middot; {fontFamily}
 				</span>

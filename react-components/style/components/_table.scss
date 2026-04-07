@@ -1,6 +1,7 @@
 .component.component-table {
 	width: 100%;
 	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
 	border: solid 1px #eaeaea;
 }
 
@@ -79,5 +80,22 @@
 
 	&--clickable &__row {
 		cursor: pointer;
+	}
+}
+
+@media (max-width: 768px) {
+	.component-table__th {
+		padding: 8px 10px;
+		font-size: 11px;
+	}
+
+	.component-table__td {
+		padding: 8px 10px;
+		font-size: 13px;
+		min-width: 80px;
+	}
+
+	.component-table__empty {
+		padding: 24px 10px;
 	}
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface ToggleCardProps {
 	/** Whether the toggle is on */
@@ -18,6 +19,8 @@ export interface ToggleCardProps {
 	disabled?: boolean
 	/** Additional class names */
 	className?: string
+	/** Show skeleton loading state */
+	loading?: boolean
 }
 
 export const ToggleCard: React.FC<ToggleCardProps> = ({
@@ -29,6 +32,7 @@ export const ToggleCard: React.FC<ToggleCardProps> = ({
 	badge,
 	disabled = false,
 	className = '',
+	loading = false,
 }) => {
 	const handleClick = () => {
 		if (!disabled) {
@@ -44,6 +48,18 @@ export const ToggleCard: React.FC<ToggleCardProps> = ({
 	]
 		.filter(Boolean)
 		.join(' ')
+
+	if (loading) {
+		return (
+			<label className={rootClass}>
+				<Skeleton shape="rect" width="2rem" height="2rem" />
+				<span className="component-toggle-card__text">
+					<Skeleton width="60%" />
+					<Skeleton width="80%" />
+				</span>
+			</label>
+		)
+	}
 
 	return (
 		<label className={rootClass} onClick={handleClick}>

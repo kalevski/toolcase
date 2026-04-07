@@ -1,5 +1,6 @@
 import React from 'react'
 import { Icon } from '../Icon'
+import { Skeleton } from '../Skeleton'
 
 export interface DifferenceCardProps {
 	title: string
@@ -7,6 +8,7 @@ export interface DifferenceCardProps {
 	previousValue: number
 	period?: string
 	formatValue?: (v: number) => string
+	loading?: boolean
 }
 
 const defaultFormat = (v: number) =>
@@ -22,7 +24,19 @@ export const DifferenceCard: React.FC<DifferenceCardProps> = ({
 	previousValue,
 	period = 'period',
 	formatValue = defaultFormat,
+	loading = false,
 }) => {
+	if (loading) {
+		return (
+			<div className="component-dashboard-card__body component-dashboard-card__body--difference">
+				<Skeleton width="40%" />
+				<Skeleton width="30%" height="2rem" />
+				<Skeleton width="20%" />
+				<Skeleton width="50%" />
+			</div>
+		)
+	}
+
 	const diff = previousValue !== 0 ? ((value - previousValue) / previousValue) * 100 : 0
 	const isUp = diff > 0
 	const isDown = diff < 0

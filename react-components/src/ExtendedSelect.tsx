@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from './Icon'
+import { Skeleton } from './Skeleton'
 
 export interface ExtendedSelectItem {
 	key: string
@@ -17,6 +18,7 @@ export interface ExtendedSelectProps extends Omit<React.HTMLAttributes<HTMLDivEl
 	placeholder?: string
 	searchPlaceholder?: string
 	noResultsText?: string
+	loading?: boolean
 }
 
 export const ExtendedSelect: React.FC<ExtendedSelectProps> = ({
@@ -26,6 +28,7 @@ export const ExtendedSelect: React.FC<ExtendedSelectProps> = ({
 	placeholder = 'Select an option',
 	searchPlaceholder = 'Search...',
 	noResultsText = 'No results found',
+	loading = false,
 	className,
 	...rest
 }) => {
@@ -78,6 +81,16 @@ export const ExtendedSelect: React.FC<ExtendedSelectProps> = ({
 		}
 		setOpen(false)
 		setSearch('')
+	}
+
+	if (loading) {
+		return (
+			<div className={rootClassName} {...rest}>
+				<div className="component-extended-select__trigger">
+					<Skeleton />
+				</div>
+			</div>
+		)
 	}
 
 	return (

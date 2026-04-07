@@ -3,6 +3,7 @@ import FileTags, { FileTag } from './FileTags'
 import { ActionItems, ActionItem } from './ActionItems'
 import { Icon } from './Icon'
 import toolcase from '@toolcase/base'
+import { Skeleton } from './Skeleton'
 
 export interface FileFolder {
 	id: string | null
@@ -24,6 +25,7 @@ export interface FileProps {
 	onNameChange?: (name: string) => void
 	onTagsChange?: (tagIds: string[]) => void
 	onMenuItemClick?: (key: string) => void
+	loading?: boolean
 }
 
 export const File: React.FC<FileProps> = ({
@@ -39,7 +41,20 @@ export const File: React.FC<FileProps> = ({
 	onNameChange,
 	onTagsChange,
 	onMenuItemClick,
+	loading = false,
 }) => {
+	if (loading) {
+		return (
+			<div className="component component-file">
+				<Skeleton shape="rect" width="3rem" height="3rem" />
+				<div className="component-file__label">
+					<Skeleton width="50%" />
+					<Skeleton width="30%" />
+				</div>
+			</div>
+		)
+	}
+
 	return (
 		<div className="component component-file">
 			<div className={`component-file__type file-bg__${format}`}>

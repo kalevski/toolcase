@@ -2,6 +2,7 @@ import React from 'react'
 import { Avatar } from './Avatar'
 import { Icon } from './Icon'
 import { IconButton } from './IconButton'
+import { Skeleton } from './Skeleton'
 
 export interface UserPanelMenuItem {
 	key: string
@@ -19,6 +20,7 @@ export interface UserPanelProps extends React.HTMLAttributes<HTMLDivElement> {
 	iconHighlighted?: boolean
 	menuItems?: UserPanelMenuItem[]
 	onMenuClick?: (e: React.MouseEvent<HTMLButtonElement>, key: string) => void
+	loading?: boolean
 }
 
 export const UserPanel: React.FC<UserPanelProps> = ({
@@ -31,6 +33,7 @@ export const UserPanel: React.FC<UserPanelProps> = ({
 	iconHighlighted = false,
 	menuItems,
 	onMenuClick,
+	loading = false,
 	...props
 }) => {
 	const [menuOpen, setMenuOpen] = React.useState(false)
@@ -63,14 +66,27 @@ export const UserPanel: React.FC<UserPanelProps> = ({
 
 	return (
 		<div {...props} ref={panelRef} className={`${props.className || ''} component component-user-panel`.trim()}>
-			<Avatar src={avatarSrc} name={initials ?? username} size="small" />
-			<div className="component-user-panel__info" onClick={toggleMenu} role="button" tabIndex={0}>
-				<span className="component-user-panel__username">{username}</span>
-				<span className="component-user-panel__plan">{plan}</span>
-			</div>
-			<IconButton icon={icon} variant="secondary" size="small" className={`component-user-panel__settings${iconHighlighted ? ' text-danger' : ''}`} onClick={onIconClick} label="Settings" />
+			{loading ? (
+				<>
+					<Skeleton shape="circle" width="2rem" height="2rem" />
+					<div className="component-user-panel__info">
+						<Skeleton width="80%" />
+						<Skeleton width="40%" />
+					</div>
+				</>
+			) : (
+				<>
+					<Avatar src={avatarSrc} name={initials ?? username} size="small" />
+					<div className="component-user-panel__info" onClick={toggleMenu} role="button" tabIndex={0}>
+						<span className="component-user-panel__username">{username}</span>
+						<span className="component-user-panel__plan">{plan}</span>
+					</div>
+					<IconButton icon={icon} variant="secondary" size="small" className={`component-user-panel__settings${iconHighlighted ? ' text-danger' : ''}`} onClick={onIconClick} label="Settings" />
+				</>
 
-			{menuOpen && hasMenu && (
+			)}
+
+			{!loading && menuOpen && hasMenu && (
 				<div className={`component-user-panel__menu component-user-panel__menu--${direction}`}>
 					{menuItems.map((item, i) => (
 						<button
