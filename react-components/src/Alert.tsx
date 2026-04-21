@@ -39,7 +39,7 @@ export const Alert: React.FC<AlertProps> = ({
 	}
 
 	return (
-		<div className={alertClass} role="alert">
+		<div className={alertClass} role="alert" aria-live="polite" aria-atomic="true">
 			<div className="component-alert-content d-flex align-items-center gap-2">
 				{icon && <span className="component-alert-icon">
 					<Icon name={icon as string} />

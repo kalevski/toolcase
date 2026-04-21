@@ -65,7 +65,7 @@ export default function CardOptionsDemo() {
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { CardOptions } from '@webgame-cloud/react-components'
+						code={`import { CardOptions } from '@toolcase/react-components'
 
 <CardOptions
   options={[

@@ -45,7 +45,7 @@ const DividerDemo: React.FC = () => (
 			<h2 className="h5 mb-3">Usage</h2>
 			<CodeSnippet
 				language="typescript"
-				code={`import { Divider } from '@webgame-cloud/react-components'
+				code={`import { Divider } from '@toolcase/react-components'
 
 <Divider />
 <Divider label="OR" />

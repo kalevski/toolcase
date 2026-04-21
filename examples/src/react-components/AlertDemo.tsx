@@ -57,6 +57,32 @@ const AlertDemo: React.FC = () => {
 				</div>
 			</div>
 
+			<div className="row mb-5">
+				<div className="col-lg-8">
+					<Card>
+						<h2 className="h5 mb-3">With Icon</h2>
+						<div className="d-flex flex-column gap-3">
+							<Alert variant="info" icon="info-circle-fill" title="Information">Review the latest changes before continuing.</Alert>
+							<Alert variant="success" icon="check-circle-fill" title="Saved">Your changes have been saved successfully.</Alert>
+							<Alert variant="warning" icon="exclamation-triangle-fill" title="Warning">Your storage is almost full.</Alert>
+							<Alert variant="danger" icon="x-circle-fill" title="Error">Failed to connect. Please try again.</Alert>
+						</div>
+					</Card>
+				</div>
+			</div>
+
+			<div className="row mb-5">
+				<div className="col-lg-8">
+					<Card>
+						<h2 className="h5 mb-3">Loading</h2>
+						<div className="d-flex flex-column gap-3">
+							<Alert variant="primary" loading>Uploading your file, please wait…</Alert>
+							<Alert variant="info" loading title="Syncing">Fetching the latest data from the server.</Alert>
+						</div>
+					</Card>
+				</div>
+			</div>
+
 			{/* Usage */}
 			<div className="row mb-5">
 				<div className="col-12">
@@ -64,7 +90,7 @@ const AlertDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Alert } from '@webgame-cloud/react-components'
+							code={`import { Alert } from '@toolcase/react-components'
 
 <Alert variant="info" title="Heads up!">
   This is an informational alert.

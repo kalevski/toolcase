@@ -60,7 +60,7 @@ const LinkDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Link } from '@webgame-cloud/react-components'
+						code={`import { Link } from '@toolcase/react-components'
 
 <Link href="/docs">Documentation</Link>
 <Link href="https://example.com" external>External Link</Link>`}

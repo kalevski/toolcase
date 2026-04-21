@@ -60,8 +60,34 @@
 		border: 1px solid var(--cp-border);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 		padding: 0.5rem;
-		z-index: 20;
+		z-index: 1060; // above modal (1050)
 		animation: cp-picker-in 0.12s ease-out;
+	}
+
+	.component-color-picker__hex-input {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.35rem 0.5rem;
+		border-top: 1px solid var(--cp-border);
+		margin-top: 0.35rem;
+
+		.component-color-picker__hex-prefix {
+			font-size: 0.8rem;
+			color: var(--cp-muted);
+			font-family: monospace;
+		}
+
+		input {
+			flex: 1;
+			border: none;
+			outline: none;
+			font-size: 0.8rem;
+			font-family: monospace;
+			color: var(--cp-text);
+			background: transparent;
+			min-width: 0;
+		}
 	}
 
 	.component-color-picker__grid {
@@ -79,11 +105,20 @@
 		&:hover {
 			transform: scale(1.1);
 		}
+
+		@media (max-width: 576px) {
+			width: 44px;
+			height: 44px;
+		}
 	}
 
-	.component-color-picker__option--selected {
-		border-color: var(--cp-accent);
-		box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--cp-accent);
+	.component-color-picker__grid {
+		display: grid;
+		gap: 3px;
+
+		@media (max-width: 576px) {
+			grid-template-columns: repeat(4, 1fr) !important;
+		}
 	}
 
 	@keyframes cp-picker-in {

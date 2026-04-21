@@ -145,7 +145,7 @@ const AvatarDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Avatar } from '@webgame-cloud/react-components'
+					code={`import { Avatar } from '@toolcase/react-components'
 
 <Avatar name="Jane Doe" src="/avatar.jpg" size="md" />`}
 				/>

@@ -67,7 +67,7 @@ const KbdDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Kbd } from '@webgame-cloud/react-components'
+						code={`import { Kbd } from '@toolcase/react-components'
 
 Press <Kbd>Ctrl</Kbd> + <Kbd>S</Kbd> to save.`}
 					/>

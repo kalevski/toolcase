@@ -50,7 +50,7 @@ const VisuallyHiddenDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { VisuallyHidden } from '@webgame-cloud/react-components'
+						code={`import { VisuallyHidden } from '@toolcase/react-components'
 
 <button>
   <Icon name="trash" />

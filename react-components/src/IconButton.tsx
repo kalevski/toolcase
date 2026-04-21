@@ -9,15 +9,18 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 	label?: string
 }
 
-export const IconButton: React.FC<IconButtonProps> = ({
-	icon,
-	size = 'default',
-	variant = 'secondary',
-	outline = false,
-	label,
-	className = '',
-	...props
-}) => {
+export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>((
+	{
+		icon,
+		size = 'default',
+		variant = 'secondary',
+		outline = false,
+		label,
+		className = '',
+		...props
+	},
+	ref,
+) => {
 	const rootClass = [
 		'component component-icon-button',
 		`component-icon-button--${size}`,
@@ -27,8 +30,11 @@ export const IconButton: React.FC<IconButtonProps> = ({
 	].filter(Boolean).join(' ')
 
 	return (
-		<button {...props} className={rootClass} aria-label={label ?? icon}>
+		<button {...props} ref={ref} className={rootClass} aria-label={label ?? icon}>
 			<Icon name={icon} />
 		</button>
 	)
-}
+})
+
+IconButton.displayName = 'IconButton'
+

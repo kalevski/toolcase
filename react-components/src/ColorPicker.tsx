@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Skeleton } from './Skeleton'
+import { useClickOutside } from './hooks/useClickOutside'
 
 export type ColorOption = {
 	hex: string
@@ -35,28 +36,34 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 	const initial = value || getHex(colors[0])
 	const [selected, setSelected] = useState(initial)
 	const [open, setOpen] = useState(false)
+	const [hexInput, setHexInput] = useState(initial)
 	const rootRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		if (value !== undefined && value !== selected) {
 			setSelected(value)
+			setHexInput(value)
 		}
 	}, [value])
 
-	useEffect(() => {
-		const handler = (e: MouseEvent) => {
-			if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-				setOpen(false)
-			}
-		}
-		document.addEventListener('mousedown', handler)
-		return () => document.removeEventListener('mousedown', handler)
-	}, [])
+	useClickOutside(rootRef, () => setOpen(false))
 
 	const handleSelect = (color: string) => {
 		setSelected(color)
+		setHexInput(color)
 		setOpen(false)
 		if (onChange) onChange(color)
+	}
+
+	const handleHexCommit = () => {
+		const normalized = hexInput.trim().startsWith('#') ? hexInput.trim() : `#${hexInput.trim()}`
+		if (/^#[0-9a-fA-F]{6}$/.test(normalized)) {
+			setSelected(normalized)
+			if (onChange) onChange(normalized)
+		} else {
+			// revert on invalid input
+			setHexInput(selected)
+		}
 	}
 
 	if (loading) {
@@ -95,6 +102,20 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 								title={getLabel(option)}
 							/>
 						))}
+					</div>
+					<div className="component-color-picker__hex-input">
+						<span className="component-color-picker__hex-hash">#</span>
+						<input
+							type="text"
+							className="component-color-picker__hex-field"
+							value={hexInput.replace(/^#/, '')}
+							maxLength={6}
+							spellCheck={false}
+							onChange={(e) => setHexInput(`#${e.target.value}`)}
+							onBlur={handleHexCommit}
+							onKeyDown={(e) => { if (e.key === 'Enter') { e.currentTarget.blur() } }}
+							aria-label="Hex color value"
+						/>
 					</div>
 				</div>
 			)}

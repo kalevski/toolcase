@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Skeleton } from './Skeleton'
+import { useClickOutside } from './hooks/useClickOutside'
 
 export interface TagInputProps {
 	label?: string
@@ -111,16 +112,10 @@ export const TagInput: React.FC<TagInputProps> = ({
 		el?.scrollIntoView({ block: 'nearest' })
 	}, [highlightIdx])
 
-	useEffect(() => {
-		const handler = (e: MouseEvent) => {
-			if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-				setOpen(false)
-				setHighlightIdx(-1)
-			}
-		}
-		document.addEventListener('mousedown', handler)
-		return () => document.removeEventListener('mousedown', handler)
-	}, [])
+	useClickOutside(rootRef, () => {
+		setOpen(false)
+		setHighlightIdx(-1)
+	})
 
 	useEffect(() => {
 		const form = rootRef.current?.closest('form')
@@ -180,6 +175,22 @@ export const TagInput: React.FC<TagInputProps> = ({
 					}}
 					onKeyDown={handleKeyDown}
 					onFocus={() => setOpen(true)}
+					onPaste={(e) => {
+						const text = e.clipboardData.getData('text')
+						if (!text.includes(',')) return
+						e.preventDefault()
+						const parts = text.split(',').map((t) => t.trim()).filter(Boolean)
+						const next = [...tags]
+						for (const part of parts) {
+							if (!next.includes(part) && (maxTags === 0 || next.length < maxTags)) {
+								if (allowCreate || recommendations.includes(part)) {
+									next.push(part)
+								}
+							}
+						}
+						updateTags(next)
+						setInput('')
+					}}
 					placeholder={tags.length === 0 ? placeholder : ''}
 					disabled={disabled || atLimit}
 					autoComplete="off"

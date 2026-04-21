@@ -72,7 +72,7 @@ export const SimpleFileDemo = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { SimpleFile } from '@webgame-cloud/react-components'
+						code={`import { SimpleFile } from '@toolcase/react-components'
 
 <SimpleFile name="document.pdf" extension="pdf" />
 <SimpleFile name="main.ts" extension="ts" />`}

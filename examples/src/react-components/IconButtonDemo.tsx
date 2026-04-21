@@ -74,7 +74,7 @@ const IconButtonDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { IconButton } from '@webgame-cloud/react-components'
+						code={`import { IconButton } from '@toolcase/react-components'
 
 <IconButton icon="pencil" label="Edit" onClick={handleEdit} />
 <IconButton icon="trash" variant="danger" label="Delete" />`}

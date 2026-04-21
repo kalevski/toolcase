@@ -48,7 +48,7 @@ const HeadingDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Heading } from '@webgame-cloud/react-components'
+					code={`import { Heading } from '@toolcase/react-components'
 
 <Heading level={1}>Page Title</Heading>
 <Heading level={3} muted>Section Heading</Heading>`}

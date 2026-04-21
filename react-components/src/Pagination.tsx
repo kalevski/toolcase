@@ -2,12 +2,11 @@ import React from 'react'
 import { Icon } from './Icon'
 
 export interface PaginationProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
-	page: number
-	totalPages: number
-	totalResults?: number
-	pageSize?: number
+	limit: number
+	offset: number
+	total: number
 	siblingCount?: number
-	onChange?: (page: number) => void
+	onChange?: (offset: number) => void
 }
 
 function buildRange(start: number, end: number): number[] {
@@ -40,10 +39,9 @@ function buildPages(page: number, totalPages: number, siblings: number): (number
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
-	page,
-	totalPages,
-	totalResults,
-	pageSize,
+	limit,
+	offset,
+	total,
 	siblingCount = 1,
 	onChange,
 	className = '',
@@ -54,16 +52,18 @@ export const Pagination: React.FC<PaginationProps> = ({
 		className,
 	].filter(Boolean).join(' ')
 
+	const page = Math.floor(offset / limit) + 1
+	const totalPages = Math.max(1, Math.ceil(total / limit))
 	const pages = buildPages(page, totalPages, siblingCount)
 
-	const rangeStart = totalResults !== undefined && pageSize ? (page - 1) * pageSize + 1 : undefined
-	const rangeEnd = totalResults !== undefined && pageSize ? Math.min(page * pageSize, totalResults) : undefined
+	const rangeStart = offset + 1
+	const rangeEnd = Math.min(offset + limit, total)
 
 	return (
 		<div {...props} className={rootClass}>
-			{totalResults !== undefined && rangeStart !== undefined && rangeEnd !== undefined && (
+			{total > 0 && (
 				<span className="component-pagination__summary">
-					{rangeStart}–{rangeEnd} of {totalResults}
+					{rangeStart}–{rangeEnd} of {total}
 				</span>
 			)}
 
@@ -72,7 +72,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 					type="button"
 					className="component-pagination__btn component-pagination__btn--prev"
 					disabled={page <= 1}
-					onClick={() => onChange?.(page - 1)}
+					onClick={() => onChange?.(offset - limit)}
 					aria-label="Previous page"
 				>
 					<Icon name="chevron-left" />
@@ -90,7 +90,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 								p === page ? 'component-pagination__btn--active' : '',
 							].filter(Boolean).join(' ')}
 							aria-current={p === page ? 'page' : undefined}
-							onClick={() => onChange?.(p)}
+							onClick={() => onChange?.((p - 1) * limit)}
 						>
 							{p}
 						</button>
@@ -101,7 +101,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 					type="button"
 					className="component-pagination__btn component-pagination__btn--next"
 					disabled={page >= totalPages}
-					onClick={() => onChange?.(page + 1)}
+					onClick={() => onChange?.(offset + limit)}
 					aria-label="Next page"
 				>
 					<Icon name="chevron-right" />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Table, TableColumn, Avatar, Select, Badge, Card, CodeSnippet } from '@toolcase/react-components'
+import { Table, TableColumn, Avatar, Select, Badge, Card, CodeSnippet, Alert } from '@toolcase/react-components'
 
 interface User {
 	id: string
@@ -40,6 +40,7 @@ const formatDate = (dateStr: string) => {
 
 const TableDemo = () => {
 	const [users, setUsers] = useState<User[]>(initialUsers)
+	const [clickedRow, setClickedRow] = useState<string | null>(null)
 
 	const updateUser = (id: string, patch: Partial<User>) => {
 		setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...patch } : u)))
@@ -126,6 +127,78 @@ const TableDemo = () => {
 				</div>
 			</div>
 
+			<div className="row mt-5">
+				<div className="col-12">
+					<Card>
+						<h2 className="h5 mb-3">Hoverable + onRowClick</h2>
+						{clickedRow && (
+							<Alert variant="info" className="mb-3">Clicked row: {clickedRow}</Alert>
+						)}
+						<Table
+							columns={[
+								{ key: 'name', header: 'Name', render: (row) => row.name },
+								{ key: 'role', header: 'Role', render: (row) => row.role },
+								{ key: 'joined', header: 'Joined', render: (row) => formatDate(row.joinedAt) },
+							]}
+							data={users}
+							rowKey={(row) => row.id}
+							hoverable
+							onRowClick={(row) => setClickedRow(`${row.name} (${row.role})`)}
+						/>
+					</Card>
+				</div>
+			</div>
+
+			<div className="row mt-5">
+				<div className="col-lg-6">
+					<Card>
+						<h2 className="h5 mb-3">Compact</h2>
+						<Table
+							columns={[
+								{ key: 'name', header: 'Name', render: (row) => row.name },
+								{ key: 'email', header: 'Email', render: (row) => row.email },
+							]}
+							data={users}
+							rowKey={(row) => row.id}
+							compact
+						/>
+					</Card>
+				</div>
+				<div className="col-lg-6">
+					<Card>
+						<h2 className="h5 mb-3">Borderless</h2>
+						<Table
+							columns={[
+								{ key: 'name', header: 'Name', render: (row) => row.name },
+								{ key: 'email', header: 'Email', render: (row) => row.email },
+							]}
+							data={users}
+							rowKey={(row) => row.id}
+							borderless
+						/>
+					</Card>
+				</div>
+			</div>
+
+			<div className="row mt-5">
+				<div className="col-12">
+					<Card>
+						<h2 className="h5 mb-3">Loading State</h2>
+						<Table
+							columns={[
+								{ key: 'name', header: 'Name', render: (row) => row.name },
+								{ key: 'role', header: 'Role', render: (row) => row.role },
+								{ key: 'joined', header: 'Joined', render: (row) => formatDate(row.joinedAt) },
+							]}
+							data={[]}
+							rowKey={(row) => row.id}
+							loading
+							loadingRows={4}
+						/>
+					</Card>
+				</div>
+			</div>
+
 			{/* Usage */}
 			<div className="row mb-5">
 				<div className="col-12">
@@ -133,7 +206,7 @@ const TableDemo = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Table, TableColumn } from '@webgame-cloud/react-components'
+							code={`import { Table, TableColumn } from '@toolcase/react-components'
 
 const columns: TableColumn<User>[] = [
   { key: 'name', header: 'Name' },
@@ -141,7 +214,10 @@ const columns: TableColumn<User>[] = [
   { key: 'role', header: 'Role' },
 ]
 
-<Table columns={columns} data={users} rowKey={(r) => r.id} />`}
+<Table columns={columns} data={users} rowKey={(r) => r.id} />
+<Table columns={columns} data={users} rowKey={(r) => r.id} striped hoverable compact />
+<Table columns={columns} data={users} rowKey={(r) => r.id} onRowClick={(row) => console.log(row)} />
+<Table columns={columns} data={[]} rowKey={(r) => r.id} loading loadingRows={4} />`}
 						/>
 					</Card>
 				</div>

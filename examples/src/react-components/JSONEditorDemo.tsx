@@ -183,7 +183,7 @@ const JSONEditorDemo = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { JSONEditor } from '@webgame-cloud/react-components'
+							code={`import { JSONEditor } from '@toolcase/react-components'
 
 const schema = JSON.stringify([
   { key: 'name', type: 'string', defaultValue: '' },

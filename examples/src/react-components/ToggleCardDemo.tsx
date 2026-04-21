@@ -121,7 +121,7 @@ const ToggleCardDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { ToggleCard } from '@webgame-cloud/react-components'
+							code={`import { ToggleCard } from '@toolcase/react-components'
 
 <ToggleCard
   title="Email Notifications"

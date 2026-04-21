@@ -54,6 +54,19 @@ const ProgressBarDemo: React.FC = () => (
 			</div>
 		</div>
 
+		<div className="row mb-5">
+			<div className="col-lg-8">
+				<Card>
+					<h2 className="h5 mb-3">Indeterminate</h2>
+					<div className="d-flex flex-column gap-3">
+						<ProgressBar indeterminate variant="primary" label="Uploading..." />
+						<ProgressBar indeterminate variant="info" label="Processing..." />
+						<ProgressBar indeterminate variant="success" label="Saving..." />
+					</div>
+				</Card>
+			</div>
+		</div>
+
 		{/* Usage */}
 		<div className="row mb-5">
 			<div className="col-12">
@@ -61,10 +74,11 @@ const ProgressBarDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { ProgressBar } from '@webgame-cloud/react-components'
+						code={`import { ProgressBar } from '@toolcase/react-components'
 
 <ProgressBar value={75} variant="success" />
-<ProgressBar value={30} label="Loading..." />`}
+<ProgressBar value={30} label="Loading..." />
+<ProgressBar indeterminate variant="primary" label="Uploading..." />`}
 					/>
 				</Card>
 			</div>

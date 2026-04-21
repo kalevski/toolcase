@@ -94,7 +94,7 @@ const NodeEditorDemo = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { NodeEditor } from '@webgame-cloud/react-components'
+							code={`import { NodeEditor } from '@toolcase/react-components'
 
 const [value, setValue] = useState(initialJson)
 

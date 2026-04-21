@@ -129,8 +129,8 @@ const DashboardCardDemo = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { DashboardCard } from '@webgame-cloud/react-components'
-import type { DashboardCardProps } from '@webgame-cloud/react-components'
+							code={`import { DashboardCard } from '@toolcase/react-components'
+import type { DashboardCardProps } from '@toolcase/react-components'
 
 const card: DashboardCardProps = {
   type: 'difference',

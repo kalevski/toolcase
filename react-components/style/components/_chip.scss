@@ -57,3 +57,33 @@
 .component-chip__label {
 	white-space: nowrap;
 }
+
+.component-chip__remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 0.15rem;
+	margin-right: -0.2rem;
+	padding: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: inherit;
+	opacity: 0.6;
+	transition: opacity 0.12s ease;
+	line-height: 1;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	&:focus-visible {
+		outline: 2px solid currentColor;
+		outline-offset: 1px;
+	}
+
+	@media (max-width: 575px) {
+		min-width: 1.75rem;
+		min-height: 1.75rem;
+	}
+}

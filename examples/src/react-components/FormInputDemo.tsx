@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FormInput, FormInputValidator, Card, CodeSnippet, ColorPickerProps, ColorOption, IconOption } from '@toolcase/react-components'
+import { FormInput, FormInputValidator, Card, CodeSnippet, ColorPickerProps, ColorOption, IconOption, DropdownItem, ExtendedSelectItem } from '@toolcase/react-components'
 
 const sampleColors: ColorOption[] = [
 	{ hex: '#ef4444', label: 'Red' },
@@ -34,6 +34,25 @@ const radioOptions = [
 	{ key: 'lg', value: 'lg', label: 'Large' },
 ]
 
+const dropdownItems: DropdownItem[] = [
+	{ key: 'proj-1', name: 'Space Invaders', description: 'Arcade shooter', icon: 'rocket-takeoff' },
+	{ key: 'proj-2', name: 'Puzzle Quest', description: 'Match-3 RPG', icon: 'puzzle' },
+	{ key: 'proj-3', name: 'Pixel Runner', description: 'Platformer', icon: 'controller' },
+	{ key: 'proj-4', name: 'Strategy Master', description: 'Real-time strategy', icon: 'chess' },
+	{ key: 'proj-5', name: 'Adventure Land', description: 'Open-world adventure', icon: 'map' },
+]
+
+const extSelectItems: ExtendedSelectItem[] = [
+	{ key: 'unity', name: 'Unity', description: 'Cross-platform game engine', icon: 'box' },
+	{ key: 'godot', name: 'Godot', description: 'Open source game engine', icon: 'gem' },
+	{ key: 'unreal', name: 'Unreal Engine', description: 'High-end 3D engine', icon: 'gpu-card' },
+	{ key: 'phaser', name: 'Phaser', description: 'HTML5 game framework', icon: 'browser-safari' },
+	{ key: 'pixi', name: 'PixiJS', description: '2D WebGL renderer', icon: 'grid' },
+	{ key: 'babylon', name: 'Babylon.js', description: '3D WebGL engine', icon: 'globe' },
+	{ key: 'cocos', name: 'Cocos2d', description: 'Mobile-first 2D engine', icon: 'phone' },
+	{ key: 'love2d', name: 'LÖVE', description: '2D Lua game framework', icon: 'heart' },
+]
+
 const FormInputDemo: React.FC = () => {
 	const [textVal, setTextVal] = useState('')
 	const [emailVal, setEmailVal] = useState('')
@@ -51,6 +70,8 @@ const FormInputDemo: React.FC = () => {
 	const [boolVal, setBoolVal] = useState(true)
 	const [validatedName, setValidatedName] = useState('')
 	const [validatedAge, setValidatedAge] = useState<number | string>('')
+	const [dropdownVal, setDropdownVal] = useState<string | undefined>('proj-1')
+	const [extSelectVal, setExtSelectVal] = useState<string | undefined>('unity')
 
 	return (
 		<div className="container my-5">
@@ -227,7 +248,7 @@ const FormInputDemo: React.FC = () => {
 								type="checkbox"
 								label="I agree to the terms and conditions"
 								value={checkVal}
-								onChange={(v) => setBoolVal(v as boolean)}
+								onChange={(v) => setCheckVal(v as boolean)}
 								required
 							/>
 							<FormInput
@@ -273,6 +294,47 @@ const FormInputDemo: React.FC = () => {
 							onChange={(v) => setRadioGroupVal(v as string)}
 							inline
 						/>
+					</Card>
+				</div>
+			</div>
+
+			{/* Dropdown */}
+			<div className="row mb-5">
+				<div className="col-12">
+					<Card>
+						<h2 className="h5 mb-3">Dropdown</h2>
+						<div className="d-flex flex-column gap-4">
+							<FormInput
+								type="dropdown"
+								label="Project"
+								items={dropdownItems}
+								value={dropdownVal}
+								onChange={(v) => setDropdownVal(v as string)}
+								help="Select the project to work on."
+							/>
+						</div>
+					</Card>
+				</div>
+			</div>
+
+			{/* Extended Select */}
+			<div className="row mb-5">
+				<div className="col-12">
+					<Card>
+						<h2 className="h5 mb-3">Extended Select</h2>
+						<div className="d-flex flex-column gap-4">
+							<FormInput
+								type="extended-select"
+								label="Game Engine"
+								items={extSelectItems}
+								value={extSelectVal}
+								onChange={(v) => setExtSelectVal(v as string)}
+								placeholder="Choose an engine..."
+								searchPlaceholder="Search engines..."
+								noResultsText="No engines matched your search."
+								help="Pick the primary game engine for your project."
+							/>
+						</div>
 					</Card>
 				</div>
 			</div>
@@ -391,7 +453,7 @@ const FormInputDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { FormInput } from '@webgame-cloud/react-components'
+							code={`import { FormInput } from '@toolcase/react-components'
 
 // Text input — onChange receives (value, hasError)
 <FormInput

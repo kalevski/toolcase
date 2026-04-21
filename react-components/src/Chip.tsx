@@ -7,6 +7,7 @@ export interface ChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 	selected?: boolean
 	variant?: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
 	icon?: string
+	onRemove?: () => void
 }
 
 export const Chip: React.FC<ChipProps> = ({
@@ -15,6 +16,7 @@ export const Chip: React.FC<ChipProps> = ({
 	selected = false,
 	variant = 'secondary',
 	icon,
+	onRemove,
 	className = '',
 	...props
 }) => {
@@ -22,6 +24,7 @@ export const Chip: React.FC<ChipProps> = ({
 		'component component-chip',
 		`component-chip--${variant}`,
 		selected ? 'component-chip--selected' : '',
+		onRemove ? 'component-chip--removable' : '',
 		className,
 	].filter(Boolean).join(' ')
 
@@ -29,6 +32,18 @@ export const Chip: React.FC<ChipProps> = ({
 		<button {...props} type={props.type ?? 'button'} className={rootClass}>
 			{icon && <Icon name={icon} className="component-chip__icon" />}
 			<span className="component-chip__label">{label ?? children}</span>
+			{onRemove && (
+				<span
+					className="component-chip__remove"
+					role="button"
+					aria-label="Remove"
+					onClick={(e) => { e.stopPropagation(); onRemove() }}
+					onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onRemove() } }}
+					tabIndex={0}
+				>
+					<Icon name="x" size={12} />
+				</span>
+			)}
 		</button>
 	)
 }

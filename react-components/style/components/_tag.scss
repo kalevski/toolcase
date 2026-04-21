@@ -47,4 +47,9 @@
 	&:hover {
 		opacity: 1;
 	}
+
+	@media (max-width: 575px) {
+		min-width: 1.75rem;
+		min-height: 1.75rem;
+	}
 }

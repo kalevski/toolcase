@@ -58,7 +58,7 @@ const DatePickerDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { DatePicker } from '@webgame-cloud/react-components'
+							code={`import { DatePicker } from '@toolcase/react-components'
 
 <DatePicker label="Start Date" value={date} onChange={setDate} />`}
 						/>

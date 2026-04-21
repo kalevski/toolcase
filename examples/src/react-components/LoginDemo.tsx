@@ -67,7 +67,7 @@ const LoginDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Login } from '@webgame-cloud/react-components'
+						code={`import { Login } from '@toolcase/react-components'
 
 <Login
   logo={<Brand primaryText="webgame" secondaryText=".cloud" />}

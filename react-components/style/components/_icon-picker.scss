@@ -49,13 +49,31 @@
 	border: 1px solid var(--ip-border);
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 	padding: 0.5rem;
-	z-index: 20;
+	z-index: 1060; // above modal (1050)
 	animation: ip-picker-in 0.12s ease-out;
 }
 
-.component-icon-picker__grid {
-	display: grid;
-	gap: 2px;
+.component-icon-picker__search {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.35rem 0.5rem;
+	border-bottom: 1px solid var(--ip-border);
+	margin-bottom: 0.35rem;
+
+	input {
+		flex: 1;
+		border: none;
+		outline: none;
+		font-size: 0.8125rem;
+		color: var(--ip-text);
+		background: transparent;
+		min-width: 0;
+
+		&::placeholder {
+			color: #94a3b8;
+		}
+	}
 }
 
 .component-icon-picker__option {
@@ -72,9 +90,24 @@
 	font-family: inherit;
 	transition: background-color var(--ip-transition), color var(--ip-transition);
 
+	@media (max-width: 576px) {
+		width: 44px;
+		height: 44px;
+		font-size: 1.25rem;
+	}
+
 	&:hover {
 		background: var(--ip-hover-bg);
 		color: var(--ip-text);
+	}
+}
+
+.component-icon-picker__grid {
+	display: grid;
+	gap: 2px;
+
+	@media (max-width: 576px) {
+		grid-template-columns: repeat(4, 1fr) !important;
 	}
 }
 

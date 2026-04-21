@@ -59,6 +59,19 @@ const BadgeDemo: React.FC = () => (
 		<div className="row mb-5">
 			<div className="col-lg-8">
 				<Card>
+					<h2 className="h5 mb-3">Sizes</h2>
+					<div className="d-flex flex-wrap align-items-center gap-2">
+						<Badge variant="primary" size="sm">Small</Badge>
+						<Badge variant="primary" size="md">Medium</Badge>
+						<Badge variant="primary" size="lg">Large</Badge>
+					</div>
+				</Card>
+			</div>
+		</div>
+
+		<div className="row mb-5">
+			<div className="col-lg-8">
+				<Card>
 					<h2 className="h5 mb-3">In Context</h2>
 					<div className="d-flex flex-column gap-2">
 						<p className="mb-0">Notifications <Badge variant="danger" pill>4</Badge></p>
@@ -76,7 +89,7 @@ const BadgeDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Badge } from '@webgame-cloud/react-components'
+						code={`import { Badge } from '@toolcase/react-components'
 
 <Badge variant="primary" pill>New</Badge>`}
 					/>

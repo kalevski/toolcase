@@ -68,7 +68,7 @@ const LabelDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Label } from '@webgame-cloud/react-components'
+					code={`import { Label } from '@toolcase/react-components'
 
 <Label>Email address</Label>
 <Label htmlFor="name">Full Name</Label>`}

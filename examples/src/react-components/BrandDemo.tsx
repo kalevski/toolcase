@@ -58,7 +58,7 @@ const BrandDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Brand } from '@webgame-cloud/react-components'
+						code={`import { Brand } from '@toolcase/react-components'
 
 <Brand primaryText="webgame" secondaryText=".cloud" />
 <Brand primaryText="webgame" secondaryText=".cloud" color="#6366f1" label="beta" xlarge />`}

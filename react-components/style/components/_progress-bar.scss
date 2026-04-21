@@ -1,0 +1,18 @@
+// ── ProgressBar ────────────────────────────────────────────────────────────────
+
+@keyframes component-progress-indeterminate {
+	0%   { transform: translateX(-100%) scaleX(0.5); }
+	50%  { transform: translateX(0%) scaleX(0.4); }
+	100% { transform: translateX(100%) scaleX(0.5); }
+}
+
+.component.component-progress-bar {
+	.progress-bar {
+		transition: width 0.4s ease;
+	}
+
+	&--indeterminate .progress-bar {
+		width: 50% !important;
+		animation: component-progress-indeterminate 1.4s ease-in-out infinite;
+	}
+}

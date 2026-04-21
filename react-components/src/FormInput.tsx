@@ -36,7 +36,9 @@ export type FormInputType =
 	| 'dropdown'
 	| 'extended-select'
 
-export type FormInputValidator = (value: unknown) => unknown
+export type ValidationResult = null | undefined | string | { code: string; message: string }
+
+export type FormInputValidator = (value: unknown) => ValidationResult
 
 export interface FormInputProps {
 	type: FormInputType
@@ -48,7 +50,7 @@ export interface FormInputProps {
 
 	// Validation
 	validate?: FormInputValidator | FormInputValidator[]
-	onErrorMessage?: (validationResult: unknown) => string
+	onErrorMessage?: (validationResult: Exclude<ValidationResult, null | undefined>) => string
 
 	// Common input props
 	name?: string
@@ -146,7 +148,14 @@ export const FormInput: React.FC<FormInputProps> = ({
 			for (const validator of validators) {
 				const result = validator(newValue)
 				if (result != null) {
-					const message = onErrorMessage ? onErrorMessage(result) : String(result)
+					let message: string
+					if (onErrorMessage) {
+						message = onErrorMessage(result as Exclude<ValidationResult, null | undefined>)
+					} else if (typeof result === 'object' && 'message' in result) {
+						message = result.message
+					} else {
+						message = String(result)
+					}
 					setValidationError(message)
 					onChange?.(newValue, true)
 					return

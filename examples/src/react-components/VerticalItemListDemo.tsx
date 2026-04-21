@@ -56,7 +56,7 @@ const VerticalItemListDemo = () => {
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { VerticalItemList } from '@webgame-cloud/react-components'
+						code={`import { VerticalItemList } from '@toolcase/react-components'
 
 <VerticalItemList
   items={[

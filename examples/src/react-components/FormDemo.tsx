@@ -77,7 +77,7 @@ const FormDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Form, Input, Select, Textarea } from '@webgame-cloud/react-components'
+							code={`import { Form, Input, Select, Textarea } from '@toolcase/react-components'
 
 <Form onSubmit={handleSubmit}>
   <Input label="Name" name="name" required />

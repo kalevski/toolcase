@@ -21,4 +21,10 @@
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
 	}
+
+	@media (max-width: 575px) {
+		&.component-heading--h1 { font-size: 1.5rem; }
+		&.component-heading--h2 { font-size: 1.25rem; }
+		&.component-heading--h3 { font-size: 1.1rem; }
+	}
 }

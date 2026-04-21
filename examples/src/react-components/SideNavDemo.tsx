@@ -64,7 +64,7 @@ const SideNavDemo = () => {
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { SideNav, SideNavSection } from '@webgame-cloud/react-components'
+					code={`import { SideNav, SideNavSection } from '@toolcase/react-components'
 
 const sections: SideNavSection[] = [
   {

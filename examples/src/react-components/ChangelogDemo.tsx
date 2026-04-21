@@ -71,7 +71,7 @@ const ChangelogDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Changelog, type ChangelogEntry } from '@webgame-cloud/react-components'
+							code={`import { Changelog, type ChangelogEntry } from '@toolcase/react-components'
 
 const entries: ChangelogEntry[] = [
   { date: 'Mar 01, 2024', title: 'New feature', description: 'Added dark mode', tag: 'Feature' },

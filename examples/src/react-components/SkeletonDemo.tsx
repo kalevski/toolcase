@@ -67,7 +67,7 @@ const SkeletonDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Skeleton } from '@webgame-cloud/react-components'
+						code={`import { Skeleton } from '@toolcase/react-components'
 
 <Skeleton width="100%" height="1rem" />
 <Skeleton variant="circle" width="3rem" height="3rem" />`}

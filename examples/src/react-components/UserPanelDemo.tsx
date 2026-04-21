@@ -85,7 +85,7 @@ const UserPanelDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { UserPanel } from '@webgame-cloud/react-components'
+						code={`import { UserPanel } from '@toolcase/react-components'
 
 <UserPanel
   username="Jane Smith"

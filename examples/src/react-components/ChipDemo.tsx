@@ -3,6 +3,7 @@ import { Chip, Card, CodeSnippet } from '@toolcase/react-components'
 
 const ChipDemo: React.FC = () => {
 	const [selected, setSelected] = useState<Set<string>>(new Set(['react']))
+	const [tags, setTags] = useState(['react', 'typescript', 'vue', 'node'])
 
 	const toggle = (key: string) => {
 		setSelected((prev) => {
@@ -11,6 +12,10 @@ const ChipDemo: React.FC = () => {
 			else next.add(key)
 			return next
 		})
+	}
+
+	const removeTag = (tag: string) => {
+		setTags((prev) => prev.filter((t) => t !== tag))
 	}
 
 	return (
@@ -84,6 +89,44 @@ const ChipDemo: React.FC = () => {
 				</div>
 			</div>
 
+			<div className="row mb-5">
+				<div className="col-12">
+					<Card>
+						<h2 className="h3 mb-4">Secondary Variant</h2>
+						<div className="d-flex gap-2 flex-wrap">
+							<Chip variant="secondary">Secondary</Chip>
+							<Chip variant="secondary" selected>Selected</Chip>
+							<Chip variant="secondary" icon="tag">Tagged</Chip>
+						</div>
+					</Card>
+				</div>
+			</div>
+
+			<div className="row mb-5">
+				<div className="col-12">
+					<Card>
+						<h2 className="h3 mb-4">Removable Chips</h2>
+						<div className="d-flex gap-2 flex-wrap">
+							{tags.map((tag) => (
+								<Chip
+									key={tag}
+									variant="primary"
+									removable
+									onRemove={() => removeTag(tag)}
+								>
+									{tag}
+								</Chip>
+							))}
+							{tags.length === 0 && (
+								<button className="btn btn-sm btn-outline-secondary" onClick={() => setTags(['react', 'typescript', 'vue', 'node'])}>
+									Reset
+								</button>
+							)}
+						</div>
+					</Card>
+				</div>
+			</div>
+
 		{/* Usage */}
 		<div className="row mb-5">
 			<div className="col-12">
@@ -91,7 +134,7 @@ const ChipDemo: React.FC = () => {
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Chip } from '@webgame-cloud/react-components'
+						code={`import { Chip } from '@toolcase/react-components'
 
 <Chip>Default</Chip>
 <Chip variant="primary" removable onRemove={handleRemove}>React</Chip>`}

@@ -7,7 +7,7 @@
 
 .component-tooltip__bubble {
 	position: absolute;
-	z-index: 1000;
+	z-index: 1070; // above modals and dropdowns
 	padding: 0.35rem 0.6rem;
 	font-size: 0.75rem;
 	font-weight: 500;

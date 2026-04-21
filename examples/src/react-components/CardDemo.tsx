@@ -61,7 +61,7 @@ const CardDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Card } from '@webgame-cloud/react-components'
+					code={`import { Card } from '@toolcase/react-components'
 
 <Card header="Settings">
   Card content goes here.

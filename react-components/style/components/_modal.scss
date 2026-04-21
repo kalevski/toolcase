@@ -30,8 +30,10 @@
 	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
 	max-width: 500px;
 	width: 100%;
-	max-height: 90vh;
-	overflow-y: auto;
+	// overflow must be visible so that absolutely-positioned children
+	// (Dropdown, ExtendedSelect, ColorPicker, etc.) can render above the modal.
+	// Use .modal-body--scrollable for scrollable content inside the modal.
+	overflow: visible;
 	position: relative;
 
 	animation: modalSlideIn 0.15s ease-out;
@@ -43,8 +45,8 @@
 
 	@media (max-width: 576px) {
 		max-width: 100%;
+		width: calc(100vw - 1rem);
 		margin: 0.5rem;
-		max-height: calc(100vh - 1rem);
 	}
 }
 
@@ -123,6 +125,10 @@
 	&--scrollable {
 		max-height: 60vh;
 		overflow-y: auto;
+	}
+
+	@media (max-width: 576px) {
+		padding: 1rem;
 	}
 }
 

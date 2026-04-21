@@ -7,4 +7,10 @@
         box-shadow: none;
         transform: none;
     }
+
+    @media (max-width: 575px) {
+        .card-body {
+            padding: 0.75rem;
+        }
+    }
 }

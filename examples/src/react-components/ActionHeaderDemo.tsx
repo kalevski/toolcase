@@ -74,7 +74,7 @@ const ActionHeaderDemo = () => {
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { ActionHeader } from '@webgame-cloud/react-components'
+						code={`import { ActionHeader } from '@toolcase/react-components'
 
 <ActionHeader
   actions={[

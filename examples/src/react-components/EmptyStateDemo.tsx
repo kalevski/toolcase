@@ -81,7 +81,7 @@ const EmptyStateDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { EmptyState } from '@webgame-cloud/react-components'
+						code={`import { EmptyState } from '@toolcase/react-components'
 
 <EmptyState icon="file-earmark-code">
   <p>No schemas created yet.</p>

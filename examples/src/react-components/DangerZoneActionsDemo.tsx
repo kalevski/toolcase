@@ -81,7 +81,7 @@ const DangerZoneActionsDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { DangerZoneActions } from '@webgame-cloud/react-components'
+							code={`import { DangerZoneActions } from '@toolcase/react-components'
 
 <DangerZoneActions
   actions={[

@@ -66,7 +66,7 @@ const QueuedFileDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { QueuedFile } from '@webgame-cloud/react-components'
+						code={`import { QueuedFile } from '@toolcase/react-components'
 
 <QueuedFile
   name="hero-spritesheet.png"

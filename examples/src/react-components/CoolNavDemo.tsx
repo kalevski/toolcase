@@ -79,7 +79,7 @@ const CoolNavDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { CoolNav, Brand } from '@webgame-cloud/react-components'
+						code={`import { CoolNav, Brand } from '@toolcase/react-components'
 
 <CoolNav
   brand={<Brand primaryText="webgame" secondaryText=".cloud" />}

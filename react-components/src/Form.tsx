@@ -16,9 +16,12 @@ export const Form: React.FC<FormProps> = ({ children, header, variant = 'default
 		const form = e.currentTarget
 		const formData = new FormData(form)
 		const data: Record<string, any> = {}
-		formData.forEach((value, key) => {
-			data[key] = value
-		})
+		// Use getAll so multiple values for the same key (checkbox groups) are
+		// collected into an array instead of being overwritten.
+		for (const key of new Set(formData.keys())) {
+			const values = formData.getAll(key)
+			data[key] = values.length === 1 ? values[0] : values
+		}
 		if (onSubmit) onSubmit(data, e)
 	}
 

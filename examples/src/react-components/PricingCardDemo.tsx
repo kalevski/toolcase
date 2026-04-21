@@ -74,7 +74,7 @@ const PricingCardDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { PricingCard } from '@webgame-cloud/react-components'
+						code={`import { PricingCard } from '@toolcase/react-components'
 
 <PricingCard
   name="Pro"

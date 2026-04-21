@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Label } from './Label'
 
 export interface DatePickerProps {
@@ -22,6 +22,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
 	const [selectedDate, setSelectedDate] = useState(value || '')
 
+	// Sync internal state when the controlled `value` prop changes externally.
+	useEffect(() => {
+		if (value !== undefined) setSelectedDate(value)
+	}, [value])
+
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setSelectedDate(e.target.value)
 		onChange?.(e.target.value)
@@ -44,3 +49,4 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 }
 
 export default DatePicker
+

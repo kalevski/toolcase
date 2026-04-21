@@ -52,7 +52,7 @@ const RadioDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Radio } from '@webgame-cloud/react-components'
+						code={`import { Radio } from '@toolcase/react-components'
 
 <Radio name="plan" label="Free" value="free" checked={plan === 'free'} onChange={() => setPlan('free')} />
 <Radio name="plan" label="Pro" value="pro" checked={plan === 'pro'} onChange={() => setPlan('pro')} />`}

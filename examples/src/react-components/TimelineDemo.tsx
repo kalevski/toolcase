@@ -75,7 +75,7 @@ const TimelineDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Timeline, type TimelineItem } from '@webgame-cloud/react-components'
+							code={`import { Timeline, type TimelineItem } from '@toolcase/react-components'
 
 const items: TimelineItem[] = [
   { title: 'Created', date: 'Jan 01, 2024', description: 'Project created' },

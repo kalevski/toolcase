@@ -22,6 +22,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
 	const [sidebarOpen, setSidebarOpen] = React.useState(false)
 
+	React.useEffect(() => {
+		const handler = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && sidebarOpen) setSidebarOpen(false)
+		}
+		document.addEventListener('keydown', handler)
+		return () => document.removeEventListener('keydown', handler)
+	}, [sidebarOpen])
+
 	const toggleSidebar = () => {
 		setSidebarOpen(!sidebarOpen)
 	}

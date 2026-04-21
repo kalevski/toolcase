@@ -91,7 +91,12 @@
 		position: absolute;
 		left: 0;
 		right: 0;
-		z-index: 10;
+		z-index: 1060; // above modal (1050)
+
+		@media (max-width: 576px) {
+			right: auto;
+			min-width: 100%;
+		}
 	}
 
 	.component-extended-select__search {

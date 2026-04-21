@@ -101,7 +101,7 @@ const WelcomeGuideDemo = () => {
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { WelcomeGuide } from '@webgame-cloud/react-components'
+						code={`import { WelcomeGuide } from '@toolcase/react-components'
 
 <WelcomeGuide
   title="Getting Started"

@@ -60,7 +60,7 @@ const SpinnerDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Spinner } from '@webgame-cloud/react-components'
+					code={`import { Spinner } from '@toolcase/react-components'
 
 <Spinner />
 <Spinner size="sm" variant="primary" />`}

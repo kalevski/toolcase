@@ -92,7 +92,7 @@ const IconDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Icon } from '@webgame-cloud/react-components'
+					code={`import { Icon } from '@toolcase/react-components'
 
 <Icon name="star-fill" size="1.5rem" color="#f59e0b" />
 <Icon name="check-circle" label="Success" />`}

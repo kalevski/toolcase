@@ -48,7 +48,7 @@ const TextareaDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Textarea } from '@webgame-cloud/react-components'
+						code={`import { Textarea } from '@toolcase/react-components'
 
 <Textarea label="Description" rows={4} placeholder="Enter description..." />`}
 					/>

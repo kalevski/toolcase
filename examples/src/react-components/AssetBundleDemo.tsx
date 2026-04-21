@@ -197,7 +197,7 @@ const AssetBundleDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { AssetBundle } from '@webgame-cloud/react-components'
+						code={`import { AssetBundle } from '@toolcase/react-components'
 
 const actions = [
   { key: 'edit', icon: 'pencil', label: 'Edit Bundle' },

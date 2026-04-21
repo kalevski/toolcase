@@ -62,7 +62,7 @@ const InputDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Input } from '@webgame-cloud/react-components'
+						code={`import { Input } from '@toolcase/react-components'
 
 <Input label="Email" type="email" placeholder="you@example.com" />
 <Input label="Password" type="password" />`}

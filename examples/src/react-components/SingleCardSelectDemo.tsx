@@ -80,7 +80,7 @@ const SingleCardSelectDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { SingleCardSelect } from '@webgame-cloud/react-components'
+							code={`import { SingleCardSelect } from '@toolcase/react-components'
 
 const options = [
   { key: 'react', title: 'React', description: 'A JS library for UIs' },

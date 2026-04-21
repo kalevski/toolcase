@@ -25,11 +25,10 @@ export interface AdvancedTableProps<T = any> extends Omit<TableProps<T>, 'classN
 	sort?: AdvancedTableSort | null
 	onSortChange?: (sort: AdvancedTableSort | null) => void
 
-	page?: number
-	pageSize?: number
-	totalPages?: number
-	totalResults?: number
-	onPageChange?: (page: number) => void
+	limit?: number
+	offset?: number
+	total?: number
+	onOffsetChange?: (offset: number) => void
 
 	loading?: boolean
 
@@ -45,11 +44,10 @@ export function AdvancedTable<T = any>({
 	sort,
 	onSortChange,
 
-	page,
-	pageSize,
-	totalPages,
-	totalResults,
-	onPageChange,
+	limit,
+	offset,
+	total,
+	onOffsetChange,
 
 	loading = false,
 
@@ -70,7 +68,7 @@ export function AdvancedTable<T = any>({
 		const direction = isActive ? sort!.direction : null
 
 		const handleSort = () => {
-			if (!onSortChange) return
+			if (loading || !onSortChange) return
 			if (!isActive) return onSortChange({ key: col.key, direction: 'asc' })
 			if (direction === 'asc') return onSortChange({ key: col.key, direction: 'desc' })
 			onSortChange(null)
@@ -93,7 +91,7 @@ export function AdvancedTable<T = any>({
 		}
 	})
 
-	const hasPagination = page !== undefined && totalPages !== undefined && totalPages > 0
+	const hasPagination = limit !== undefined && offset !== undefined && total !== undefined && total > 0
 
 	return (
 		<div className={rootClass}>
@@ -108,6 +106,17 @@ export function AdvancedTable<T = any>({
 							/>
 						</div>
 					))}
+					{onFilterChange && Object.values(filterValues).some((v) => v !== '' && v !== null && v !== undefined) && (
+						<div className="component-advanced-table__filter-reset">
+							<button
+								type="button"
+								className="btn btn-sm btn-link component-advanced-table__clear-btn"
+								onClick={() => filters.forEach(({ key }) => onFilterChange(key, ''))}
+							>
+								Clear filters
+							</button>
+						</div>
+					)}
 				</div>
 			)}
 
@@ -123,11 +132,10 @@ export function AdvancedTable<T = any>({
 			{hasPagination && (
 				<Pagination
 					className="component-advanced-table__pagination"
-					page={page!}
-					totalPages={totalPages!}
-					totalResults={totalResults}
-					pageSize={pageSize}
-					onChange={onPageChange}
+					limit={limit!}
+					offset={offset!}
+					total={total!}
+					onChange={onOffsetChange}
 				/>
 			)}
 		</div>

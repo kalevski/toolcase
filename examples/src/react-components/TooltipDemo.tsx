@@ -57,7 +57,7 @@ const TooltipDemo: React.FC = () => (
 					<h2 className="h5 mb-3">Usage</h2>
 					<CodeSnippet
 						language="typescript"
-						code={`import { Tooltip } from '@webgame-cloud/react-components'
+						code={`import { Tooltip } from '@toolcase/react-components'
 
 <Tooltip content="Helpful info" position="top">
   <button>Hover me</button>

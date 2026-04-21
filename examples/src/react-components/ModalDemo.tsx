@@ -26,7 +26,7 @@ export function ModalDemo() {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Modal, Button } from '@webgame-cloud/react-components'
+							code={`import { Modal, Button } from '@toolcase/react-components'
 
 <Modal.ModalContext>
   <OpenButton />

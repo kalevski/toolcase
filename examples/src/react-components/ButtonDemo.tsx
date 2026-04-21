@@ -86,7 +86,7 @@ const ButtonDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Button } from '@webgame-cloud/react-components'
+					code={`import { Button } from '@toolcase/react-components'
 
 <Button variant="primary" onClick={handleClick}>
   Save Changes

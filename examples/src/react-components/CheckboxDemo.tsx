@@ -65,7 +65,7 @@ const CheckboxDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Checkbox } from '@webgame-cloud/react-components'
+							code={`import { Checkbox } from '@toolcase/react-components'
 
 <Checkbox label="Accept terms" checked={accepted} onChange={setAccepted} />`}
 						/>

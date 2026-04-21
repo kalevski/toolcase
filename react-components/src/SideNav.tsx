@@ -78,6 +78,7 @@ export const SideNav: React.FC<SideNavProps> = ({
 											className="component-side-nav__link"
 											href={item.disabled ? undefined : (item.href || '#')}
 											target={item.target}
+											title={typeof item.label === 'string' ? item.label : undefined}
 											rel={item.rel}
 											aria-disabled={item.disabled || undefined}
 											onClick={(event) => {

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
+import { useClickOutside } from './hooks/useClickOutside'
 
 export type IconOption =
 	| {
@@ -46,6 +47,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 	const initial = value || getValue(icons[0])
 	const [selected, setSelected] = useState(initial)
 	const [open, setOpen] = useState(false)
+	const [search, setSearch] = useState('')
 	const rootRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -54,21 +56,18 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 		}
 	}, [value])
 
-	useEffect(() => {
-		const handler = (e: MouseEvent) => {
-			if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-				setOpen(false)
-			}
-		}
-		document.addEventListener('mousedown', handler)
-		return () => document.removeEventListener('mousedown', handler)
-	}, [])
+	useClickOutside(rootRef, () => { setOpen(false); setSearch('') })
 
 	const handleSelect = (val: string) => {
 		setSelected(val)
 		setOpen(false)
+		setSearch('')
 		if (onChange) onChange(val)
 	}
+
+	const filteredIcons = search.trim()
+		? icons.filter((o) => getLabel(o).toLowerCase().includes(search.toLowerCase()) || getValue(o).toLowerCase().includes(search.toLowerCase()))
+		: icons
 
 	const selectedOption = icons.find((i) => getValue(i) === selected) || icons[0]
 
@@ -94,11 +93,24 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 			</button>
 			{open && (
 				<div className="component-icon-picker__dropdown">
+					<div className="component-icon-picker__search">
+						<input
+							type="text"
+							className="component-icon-picker__search-input"
+							placeholder="Search icons…"
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							autoFocus
+						/>
+					</div>
 					<div
 						className="component-icon-picker__grid"
 						style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
 					>
-						{icons.map((option) => (
+						{filteredIcons.length === 0 && (
+							<span className="component-icon-picker__empty">No icons found</span>
+						)}
+						{filteredIcons.map((option) => (
 							<button
 								key={getValue(option)}
 								type="button"

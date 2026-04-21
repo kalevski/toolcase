@@ -11,6 +11,11 @@
 	height: 40px;
 	font-size: 1rem;
 
+	@media (max-width: 575px) {
+		width: 36px;
+		height: 36px;
+		font-size: 0.875rem;
+	}
 }
 
 .component-avatar {

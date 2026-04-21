@@ -24,7 +24,7 @@ const createGame = (config: GameConfig): void => {
 createGame({ title: 'Space Invaders', width: 800, height: 600 })`
 
 const bashCode = `#!/bin/bash
-npm install @webgame-cloud/react-components
+npm install @toolcase/react-components
 cd my-project
 npm run build
 echo "Build complete!"`

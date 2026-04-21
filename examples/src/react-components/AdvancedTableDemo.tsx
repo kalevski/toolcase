@@ -26,7 +26,8 @@ const PAGE_SIZE = 7
 
 // Simulates a backend call
 function fetchUsers(params: {
-	page: number
+	limit: number
+	offset: number
 	filters: Record<string, any>
 	sort: AdvancedTableSort | null
 }): Promise<{ data: User[]; total: number }> {
@@ -60,8 +61,7 @@ function fetchUsers(params: {
 			}
 
 			const total = filtered.length
-			const start = (params.page - 1) * PAGE_SIZE
-			const data = filtered.slice(start, start + PAGE_SIZE)
+			const data = filtered.slice(params.offset, params.offset + params.limit)
 
 			resolve({ data, total })
 		}, 400)
@@ -119,7 +119,7 @@ const filters: AdvancedTableFilter[] = [
 ]
 
 const AdvancedTableDemo: React.FC = () => {
-	const [page, setPage] = useState(1)
+	const [offset, setOffset] = useState(0)
 	const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 	const [sort, setSort] = useState<AdvancedTableSort | null>(null)
 
@@ -129,21 +129,19 @@ const AdvancedTableDemo: React.FC = () => {
 
 	const load = useCallback(() => {
 		setLoading(true)
-		fetchUsers({ page, filters: filterValues, sort }).then(({ data, total }) => {
+		fetchUsers({ limit: PAGE_SIZE, offset, filters: filterValues, sort }).then(({ data, total }) => {
 			setData(data)
 			setTotal(total)
 			setLoading(false)
 		})
-	}, [page, filterValues, sort])
+	}, [offset, filterValues, sort])
 
 	useEffect(() => { load() }, [load])
 
 	const handleFilterChange = (key: string, value: any) => {
 		setFilterValues((prev) => ({ ...prev, [key]: value }))
-		setPage(1)
+		setOffset(0)
 	}
-
-	const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
 	return (
 		<div className="container my-5">
@@ -169,12 +167,11 @@ const AdvancedTableDemo: React.FC = () => {
 							onFilterChange={handleFilterChange}
 							sortableColumns={['name', 'email', 'age']}
 							sort={sort}
-							onSortChange={(s) => { setSort(s); setPage(1) }}
-							page={page}
-							pageSize={PAGE_SIZE}
-							totalPages={totalPages}
-							totalResults={total}
-							onPageChange={setPage}
+						onSortChange={(s) => { setSort(s); setOffset(0) }}
+						limit={PAGE_SIZE}
+						offset={offset}
+						total={total}
+						onOffsetChange={setOffset}
 							loading={loading}
 						/>
 					</Card>
@@ -211,11 +208,10 @@ const filters: AdvancedTableFilter[] = [
   sortableColumns={['name']}
   sort={sort}
   onSortChange={setSort}
-  page={page}
-  pageSize={10}
-  totalPages={totalPages}
-  totalResults={total}
-  onPageChange={setPage}
+  limit={10}
+  offset={offset}
+  total={total}
+  onOffsetChange={setOffset}
   loading={loading}
 />`}
 						/>

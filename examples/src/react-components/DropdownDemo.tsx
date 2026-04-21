@@ -71,6 +71,20 @@ const DropdownDemo: React.FC = () => {
 				</div>
 			</div>
 
+			<div className="row mb-5">
+				<div className="col-lg-6">
+					<Card>
+						<h2 className="h5 mb-3">Loading State</h2>
+						<Dropdown
+							items={[]}
+							value={undefined}
+							onChange={() => {}}
+							loading
+						/>
+					</Card>
+				</div>
+			</div>
+
 			{/* Usage */}
 			<div className="row mb-5">
 				<div className="col-12">
@@ -78,7 +92,7 @@ const DropdownDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Dropdown } from '@webgame-cloud/react-components'
+							code={`import { Dropdown } from '@toolcase/react-components'
 
 <Dropdown
   items={[

@@ -72,7 +72,7 @@ const TagDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { Tag } from '@webgame-cloud/react-components'
+							code={`import { Tag } from '@toolcase/react-components'
 
 <Tag>Default</Tag>
 <Tag variant="primary" removable onRemove={handleRemove}>React</Tag>`}

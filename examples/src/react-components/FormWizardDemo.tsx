@@ -124,7 +124,7 @@ const FormWizardDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { FormWizard, FormWizardStep } from '@webgame-cloud/react-components'
+							code={`import { FormWizard, FormWizardStep } from '@toolcase/react-components'
 
 const steps: FormWizardStep[] = [
   { key: 'info', label: 'Info', content: <InfoStep /> },

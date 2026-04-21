@@ -58,6 +58,19 @@ const ColorPickerDemo: React.FC = () => {
 				</div>
 			</div>
 
+			<div className="row mb-5">
+				<div className="col-lg-6">
+					<Card>
+						<h2 className="h5 mb-3">Loading State</h2>
+						<ColorPicker
+							label="Fetching Palette..."
+							colors={PALETTE}
+							loading
+						/>
+					</Card>
+				</div>
+			</div>
+
 			{/* Usage */}
 			<div className="row mb-5">
 				<div className="col-12">
@@ -65,7 +78,7 @@ const ColorPickerDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { ColorPicker } from '@webgame-cloud/react-components'
+							code={`import { ColorPicker } from '@toolcase/react-components'
 
 <ColorPicker label="Brand Color" value={color} onChange={setColor} />`}
 						/>

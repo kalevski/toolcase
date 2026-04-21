@@ -63,7 +63,7 @@ const TextDemo: React.FC = () => (
 				<h2 className="h5 mb-3">Usage</h2>
 				<CodeSnippet
 					language="typescript"
-					code={`import { Text } from '@webgame-cloud/react-components'
+					code={`import { Text } from '@toolcase/react-components'
 
 <Text>Default body text</Text>
 <Text muted size="sm">Secondary info</Text>`}

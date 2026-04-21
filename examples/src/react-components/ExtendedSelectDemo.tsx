@@ -140,7 +140,7 @@ const ExtendedSelectDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { ExtendedSelect, ExtendedSelectItem } from '@webgame-cloud/react-components'
+							code={`import { ExtendedSelect, ExtendedSelectItem } from '@toolcase/react-components'
 
 const items: ExtendedSelectItem[] = [
   { key: 'dashboard', name: 'Dashboard', icon: 'grid', description: 'Main overview' },

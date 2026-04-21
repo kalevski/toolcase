@@ -77,7 +77,7 @@ const CheckboxGroupDemo: React.FC = () => {
 						<h2 className="h5 mb-3">Usage</h2>
 						<CodeSnippet
 							language="typescript"
-							code={`import { CheckboxGroup } from '@webgame-cloud/react-components'
+							code={`import { CheckboxGroup } from '@toolcase/react-components'
 
 const options = [
   { label: 'React', value: 'react' },

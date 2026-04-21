@@ -1,6 +1,7 @@
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useId, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
+import { useClickOutside } from './hooks/useClickOutside'
 
 export interface DropdownItem {
 	key: string
@@ -28,20 +29,16 @@ export const Dropdown: React.FC<DropdownProps> = ({
 	...rest
 }) => {
 	const [open, setOpen] = useState(false)
+	const [activeIndex, setActiveIndex] = useState(-1)
 	const containerRef = useRef<HTMLDivElement>(null)
+	const listRef = useRef<HTMLUListElement>(null)
 	const reactId = useId()
+	const listId = `dropdown-list-${reactId.replace(/[^a-zA-Z0-9_-]/g, '')}`
 
 	const selected = items.find((item) => item.key === value)
+	const enabledItems = items.filter((item) => !item.disabled)
 
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-				setOpen(false)
-			}
-		}
-		document.addEventListener('mousedown', handleClickOutside)
-		return () => document.removeEventListener('mousedown', handleClickOutside)
-	}, [])
+	useClickOutside(containerRef, () => setOpen(false))
 
 	const rootClassName = [
 		'component component-dropdown',
@@ -56,6 +53,39 @@ export const Dropdown: React.FC<DropdownProps> = ({
 			onChange(key)
 		}
 		setOpen(false)
+		setActiveIndex(-1)
+	}
+
+	const handleTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+		if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+			e.preventDefault()
+			if (!open) {
+				setOpen(true)
+				setActiveIndex(0)
+			} else {
+				const next = e.key === 'ArrowDown'
+					? (activeIndex + 1) % enabledItems.length
+					: (activeIndex - 1 + enabledItems.length) % enabledItems.length
+				setActiveIndex(next)
+			}
+		} else if (e.key === 'Home') {
+			e.preventDefault()
+			setActiveIndex(0)
+		} else if (e.key === 'End') {
+			e.preventDefault()
+			setActiveIndex(enabledItems.length - 1)
+		} else if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault()
+			if (!open) {
+				setOpen(true)
+				setActiveIndex(0)
+			} else if (activeIndex >= 0) {
+				handleSelect(enabledItems[activeIndex].key)
+			}
+		} else if (e.key === 'Escape') {
+			setOpen(false)
+			setActiveIndex(-1)
+		}
 	}
 
 	if (loading) {
@@ -75,7 +105,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
 				className="component-dropdown__trigger"
 				aria-expanded={open}
 				aria-haspopup="listbox"
-				onClick={() => setOpen((o) => !o)}
+				aria-controls={open ? listId : undefined}
+				aria-activedescendant={open && activeIndex >= 0 ? `${listId}-${enabledItems[activeIndex]?.key}` : undefined}
+				onClick={() => { setOpen((o) => !o); setActiveIndex(0) }}
+				onKeyDown={handleTriggerKeyDown}
 			>
 				{selected ? (
 					<>
@@ -95,13 +128,16 @@ export const Dropdown: React.FC<DropdownProps> = ({
 			</button>
 
 			{open && (
-				<ul className="component-dropdown__list" role="listbox">
-					{items.map((item) => {
+				<ul ref={listRef} id={listId} className="component-dropdown__list" role="listbox">
+					{items.map((item, index) => {
+						const enabledIndex = enabledItems.findIndex((i) => i.key === item.key)
+						const isHighlighted = enabledIndex === activeIndex
 						const isActive = item.key === value
 						const itemClassName = [
 							'component-dropdown__option',
 							isActive ? 'component-dropdown__option--active' : '',
 							item.disabled ? 'component-dropdown__option--disabled' : '',
+							isHighlighted ? 'component-dropdown__option--highlighted' : '',
 						]
 							.filter(Boolean)
 							.join(' ')
@@ -109,10 +145,13 @@ export const Dropdown: React.FC<DropdownProps> = ({
 						return (
 							<li
 								key={item.key}
+								id={`${listId}-${item.key}`}
 								className={itemClassName}
 								role="option"
 								aria-selected={isActive}
+								aria-disabled={item.disabled || undefined}
 								onClick={() => !item.disabled && handleSelect(item.key)}
+								onMouseEnter={() => !item.disabled && setActiveIndex(enabledIndex)}
 							>
 								{item.icon && (
 								<span className="component-dropdown__option-icon">
