@@ -108,6 +108,7 @@ export * from './Carousel'
 export * from './ImageCrop'
 export * from './Lightbox'
 export * from './Banner'
+export * from './Chart'
 
 import * as Modal from './modal'
 export { Modal }

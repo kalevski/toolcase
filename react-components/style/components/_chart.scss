@@ -1,0 +1,250 @@
+// ── Chart ───────────────────────────────────────────────────────────────────
+
+.component.component-chart {
+    --chart-border: #e2e8f0;
+    --chart-bg: #ffffff;
+    --chart-transition: 0.15s ease;
+
+    border: 1px solid var(--chart-border);
+    background: var(--chart-bg);
+    overflow: hidden;
+}
+
+.component.component-chart--trend-indicator,
+.component.component-chart--sparkline {
+    display: inline-flex;
+    border: none;
+    background: transparent;
+    overflow: visible;
+}
+
+.component-chart {
+    &__inner {
+        padding: 1.25rem 1.25rem 0.75rem;
+    }
+
+    &__header {
+        margin-bottom: 0.875rem;
+    }
+
+    &__title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1e293b;
+        line-height: 1.4;
+    }
+
+    &__subtitle {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 0.125rem;
+        line-height: 1.4;
+    }
+
+    &__empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        font-size: 0.875rem;
+        color: #94a3b8;
+    }
+
+    // ── Legend ───────────────────────────────────────────────────────────────
+
+    &__legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+        padding: 0.375rem 0 0.5rem;
+    }
+
+    &__legend--vertical {
+        flex-direction: column;
+        gap: 0.375rem;
+        padding: 0;
+        align-self: center;
+        min-width: 120px;
+    }
+
+    &__legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.75rem;
+        color: #64748b;
+        cursor: pointer;
+        transition: color var(--chart-transition);
+
+        &--active {
+            color: #1e293b;
+            font-weight: 600;
+        }
+    }
+
+    &__legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    &__legend-label {
+        flex: 1;
+    }
+
+    &__legend-pct {
+        font-weight: 600;
+        color: #1e293b;
+        min-width: 2.5rem;
+        text-align: right;
+    }
+
+    // ── Pie / Donut ───────────────────────────────────────────────────────────
+
+    &__pie-layout {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding-bottom: 0.75rem;
+    }
+
+    // ── Trend Indicator ───────────────────────────────────────────────────────
+
+    &__trend {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 0.15rem 0.5rem;
+        font-weight: 700;
+        transition: none;
+
+        i {
+            font-size: 1.1em;
+            line-height: 1;
+        }
+
+        &--up {
+            color: #16a34a;
+            background: #dcfce7;
+        }
+
+        &--down {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+
+        &--neutral {
+            color: #64748b;
+            background: #f1f5f9;
+        }
+
+        &--size-small {
+            font-size: 0.7rem;
+        }
+
+        &--size-default {
+            font-size: 0.8125rem;
+        }
+
+        &--size-large {
+            font-size: 1rem;
+            padding: 0.25rem 0.625rem;
+        }
+    }
+
+    // ── Sparkline ─────────────────────────────────────────────────────────────
+
+    &__sparkline {
+        display: block;
+        overflow: visible;
+    }
+
+    // ── ChartContainer ────────────────────────────────────────────────────────
+
+    &__container {
+        width: 100%;
+    }
+
+    &__container-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 1rem 1.25rem 0.625rem;
+        gap: 1rem;
+    }
+
+    &__container-heading {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    &__container-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    &__container-body {
+        position: relative;
+        min-height: 80px;
+    }
+
+    &__container-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 0;
+    }
+
+    &__container-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1.25rem;
+        font-size: 0.875rem;
+        color: #94a3b8;
+        text-align: center;
+    }
+
+    &__container-legend {
+        padding: 0.625rem 1.25rem 0.875rem;
+        border-top: 1px solid #e2e8f0;
+    }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 576px) {
+    .component-chart {
+        &__pie-layout {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        &__legend--vertical {
+            min-width: unset;
+        }
+
+        &__container-header {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .component-chart {
+        &__trend {
+            transition: none;
+        }
+
+        &__legend-item {
+            transition: none;
+        }
+    }
+}

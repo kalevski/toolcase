@@ -2706,3 +2706,204 @@ import { Banner } from '@toolcase/react-components'
   New version available!
 </Banner>
 ```
+
+---
+
+## Charts
+
+All chart components are accessed via the unified `<Chart>` wrapper using a discriminated union `chart` prop.
+
+```tsx
+import { Chart } from '@toolcase/react-components'
+<Chart chart={{ type: 'bar', data: [...], title: 'Revenue' }} />
+```
+
+### Chart (wrapper)
+
+Unified chart dispatcher. Renders `<div className="component component-chart component-chart--{type}">`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `chart` | `ChartProps` | ✅ | Discriminated union — set `type` to select chart variant |
+| `className` | `string` | ❌ | Extra class on root wrapper |
+| `children` | `ReactNode` | ❌ | Forwarded to `container` type only |
+
+### TrendIndicator
+
+Inline badge showing a numeric or string trend value with directional arrow.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `number \| string` | ✅ | Display value (e.g. `12.5` or `'+ 18%'`) |
+| `direction` | `'up' \| 'down' \| 'neutral'` | ❌ | Auto-detected from numeric value if omitted |
+| `size` | `'small' \| 'default' \| 'large'` | ❌ | Text size |
+
+```tsx
+<Chart chart={{ type: 'trend-indicator', value: 12.5 }} />
+<Chart chart={{ type: 'trend-indicator', value: '+ 18%', direction: 'up', size: 'large' }} />
+```
+
+### Sparkline
+
+Compact inline SVG chart (line or bar) for showing a data trend.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `number[]` | ✅ | Data points |
+| `sparklineType` | `'line' \| 'bar'` | ❌ | Chart style (default `'line'`) |
+| `color` | `string` | ❌ | Stroke/fill color (default `'#6366f1'`) |
+| `height` | `number` | ❌ | SVG height (default `32`) |
+| `width` | `number` | ❌ | SVG width (default `120`) |
+
+```tsx
+<Chart chart={{ type: 'sparkline', data: [10, 22, 35, 28, 42] }} />
+```
+
+### BarChart
+
+Vertical or horizontal bar chart with optional hover tooltip, click handler, and loading state.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `BarChartDataItem[]` | ✅ | `{ label, value, color? }` array |
+| `title` | `string` | ❌ | Chart title |
+| `subtitle` | `string` | ❌ | Chart subtitle |
+| `orientation` | `'vertical' \| 'horizontal'` | ❌ | Default `'vertical'` |
+| `height` | `number` | ❌ | SVG height (default `260`) |
+| `showValues` | `boolean` | ❌ | Show value labels on bars |
+| `yFormatter` | `(v: number) => string` | ❌ | Y-axis label formatter |
+| `onClick` | `(item, idx) => void` | ❌ | Bar click callback |
+| `loading` | `boolean` | ❌ | Shows skeleton |
+
+```tsx
+<Chart chart={{ type: 'bar', data: [{ label: 'Jan', value: 4200 }], title: 'Revenue' }} />
+```
+
+### LineChart
+
+Multi-series line chart with grid, hover tooltips, and horizontal legend.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `series` | `LineChartSeries[]` | ✅ | `{ label, data: LineChartPoint[], color? }` |
+| `title` | `string` | ❌ | Chart title |
+| `height` | `number` | ❌ | Default `260` |
+| `showGrid` | `boolean` | ❌ | Default `true` |
+| `showLegend` | `boolean` | ❌ | Default `true` |
+| `xFormatter` | `(v) => string` | ❌ | X-axis label formatter |
+| `yFormatter` | `(v) => string` | ❌ | Y-axis label formatter |
+| `loading` | `boolean` | ❌ | Shows skeleton |
+
+```tsx
+<Chart chart={{ type: 'line', series: [{ label: 'Revenue', data: [{ x: 'Jan', y: 4200 }] }] }} />
+```
+
+### AreaChart
+
+Same as LineChart with a translucent area fill under each series line.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `series` | `LineChartSeries[]` | ✅ | Same as LineChart |
+| `title` | `string` | ❌ | Chart title |
+| `height` | `number` | ❌ | Default `260` |
+| `showGrid` | `boolean` | ❌ | Default `true` |
+| `showLegend` | `boolean` | ❌ | Default `true` |
+| `loading` | `boolean` | ❌ | Shows skeleton |
+
+```tsx
+<Chart chart={{ type: 'area', series: [...], title: 'Trend' }} />
+```
+
+### PieChart / DonutChart
+
+Pie chart with optional donut mode. Hover scales the active slice; legend shows percentages.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `PieChartSlice[]` | ✅ | `{ label, value, color? }` |
+| `title` | `string` | ❌ | Chart title |
+| `donut` | `boolean` | ❌ | Render as donut |
+| `centerLabel` | `string` | ❌ | Center text when no slice is hovered (donut only) |
+| `showLegend` | `boolean` | ❌ | Default `true` |
+| `height` | `number` | ❌ | Default `260` |
+| `loading` | `boolean` | ❌ | Shows skeleton |
+
+```tsx
+<Chart chart={{ type: 'pie', data: [...], donut: true, centerLabel: 'Total' }} />
+```
+
+### Heatmap
+
+Grid heatmap with color interpolation, row/col labels, and hover tooltip.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `HeatmapCell[]` | ✅ | `{ row, col, value }` |
+| `rows` | `(string\|number)[]` | ✅ | Row labels |
+| `cols` | `(string\|number)[]` | ✅ | Column labels |
+| `title` | `string` | ❌ | Chart title |
+| `colorScale` | `string[]` | ❌ | Color stops for interpolation |
+| `cellSize` | `number` | ❌ | Cell size in px (default `28`) |
+| `loading` | `boolean` | ❌ | Shows skeleton |
+
+```tsx
+<Chart chart={{ type: 'heatmap', data: cells, rows: ['Mon', 'Tue'], cols: ['9am', '11am'] }} />
+```
+
+### FunnelChart
+
+Trapezoid funnel chart. Each step narrower based on relative value.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `FunnelStep[]` | ✅ | `{ label, value, color? }` (ordered top→bottom) |
+| `title` | `string` | ❌ | Chart title |
+| `height` | `number` | ❌ | Default `300` |
+| `showLabels` | `boolean` | ❌ | Default `true` |
+| `onClick` | `(step, idx) => void` | ❌ | Step click callback |
+| `loading` | `boolean` | ❌ | Shows skeleton |
+
+```tsx
+<Chart chart={{ type: 'funnel', data: [{ label: 'Visitors', value: 12000 }, ...] }} />
+```
+
+### GanttChart
+
+SVG-based Gantt chart with progress bars, date markers, and alternating row stripes.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `tasks` | `GanttTask[]` | ✅ | Task objects |
+| `title` | `string` | ❌ | Chart title |
+| `startDate` | `string` | ❌ | ISO date — overrides auto-detected start |
+| `endDate` | `string` | ❌ | ISO date — overrides auto-detected end |
+| `onTaskClick` | `(task) => void` | ❌ | Task click callback |
+| `loading` | `boolean` | ❌ | Shows skeleton |
+
+`GanttTask`: `{ id, label, start (ISO), end (ISO), color?, progress? (0–100), dependencies? }`
+
+```tsx
+<Chart chart={{ type: 'gantt', tasks: [{ id: '1', label: 'Design', start: '2024-01-01', end: '2024-01-15' }] }} />
+```
+
+### ChartContainer
+
+Layout wrapper for chart content with header, actions slot, loading spinner, and empty state.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `string` | ❌ | Container title |
+| `subtitle` | `string` | ❌ | Container subtitle |
+| `children` | `ReactNode` | ❌ | Chart content |
+| `actions` | `ReactNode` | ❌ | Header actions (e.g. buttons, filters) |
+| `legend` | `ReactNode` | ❌ | Footer legend slot |
+| `loading` | `boolean` | ❌ | Shows spinner overlay |
+| `empty` | `boolean` | ❌ | Shows empty state |
+| `emptySlot` | `ReactNode` | ❌ | Custom empty content |
+
+```tsx
+<Chart chart={{ type: 'container', title: 'Overview', loading: isLoading }}>
+  <BarChart ... />
+</Chart>
+```

@@ -86,6 +86,7 @@ import BasicLayoutDemo from './BasicLayoutDemo'
 import { Files } from './Files'
 
 // Complex
+import { ChartDemo } from './ChartDemo'
 import TableDemo from './TableDemo'
 import AdvancedTableDemo from './AdvancedTableDemo'
 import PaginationDemo from './PaginationDemo'
@@ -242,6 +243,7 @@ export const examples: ExampleDef[] = [
 	{ key: 'banner', category: 'Layout / Container', element: <BannerDemo /> },
 
 	// Complex — Multi-concern or data-driven
+	{ key: 'chart', category: 'Complex', element: <ChartDemo /> },
 	{ key: 'table', category: 'Complex', element: <TableDemo /> },
 	{ key: 'advanced-table', category: 'Complex', element: <AdvancedTableDemo /> },
 	{ key: 'pagination', category: 'Complex', element: <PaginationDemo /> },

@@ -276,7 +276,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### TrendIndicator
-- [ ] implemented
+- [x] implemented
 **What it does:** An inline badge/chip showing a percentage change with an arrow icon.  
 **Key behaviors:** Positive (green arrow up), negative (red arrow down), neutral (gray dash), formatted value display, size variants.  
 **Priority:** P1
@@ -284,7 +284,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### Sparkline
-- [ ] implemented
+- [x] implemented
 **What it does:** A minimal inline chart (line or bar) without axes or labels, for use inside MetricCards or table cells.  
 **Key behaviors:** `data: number[]`, `type: 'line' | 'bar'`, `color`, `height`, `width`, SVG-based for crisp rendering, no external charting dependency.  
 **Priority:** P2
@@ -292,7 +292,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### BarChart
-- [ ] implemented
+- [x] implemented
 **What it does:** A standard vertical or horizontal bar chart.  
 **Key behaviors:** Single and grouped bars, value labels, custom colors per series, responsive sizing, animated enter, accessible data table fallback, `onClick` per bar.  
 **Priority:** P1
@@ -300,7 +300,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### LineChart
-- [ ] implemented
+- [x] implemented
 **What it does:** A single or multi-series line chart with area fill option.  
 **Key behaviors:** Multiple series, tooltip on hover, legend, grid lines, custom x/y axis formatters, zoom/pan option, animated draw-in.  
 **Priority:** P1
@@ -308,7 +308,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### PieChart / DonutChart
-- [ ] implemented
+- [x] implemented
 **What it does:** A circular chart showing proportional segments.  
 **Key behaviors:** Donut variant with center label slot, hover highlight, legend, percentage labels on segments, animated.  
 **Priority:** P2
@@ -316,7 +316,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### AreaChart
-- [ ] implemented
+- [x] implemented
 **What it does:** A stacked or overlapping area chart useful for showing cumulative trends.  
 **Key behaviors:** Stacked and unstacked mode, gradient fills, same API as LineChart.  
 **Priority:** P2
@@ -324,7 +324,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### Heatmap
-- [ ] implemented
+- [x] implemented
 **What it does:** A grid of cells colored by intensity (like a GitHub contribution graph).  
 **Key behaviors:** Custom color scale, tooltip per cell, row/column labels, configurable cell size, empty cell styling.  
 **Priority:** P3
@@ -332,7 +332,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### FunnelChart
-- [ ] implemented
+- [x] implemented
 **What it does:** A funnel showing conversion between sequential steps.  
 **Key behaviors:** Steps with labels and values, percentage drop labels between steps, horizontal and vertical orientation, clickable steps.  
 **Priority:** P3
@@ -340,7 +340,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### GanttChart
-- [ ] implemented
+- [x] implemented
 **What it does:** A time-based horizontal bar chart for project/task scheduling.  
 **Key behaviors:** Time-axis (days/weeks/months), draggable task bars to reschedule, dependency arrows, today marker, milestone diamonds, zoom levels, resource grouping.  
 **Priority:** P3
@@ -348,7 +348,7 @@ Charts and data display components critical for dashboards and analytics.
 ---
 
 ### ChartContainer
-- [ ] implemented
+- [x] implemented
 **What it does:** A standardized wrapper for any chart with a consistent title, legend, period selector, and export button.  
 **Key behaviors:** Title + subtitle, time range selector slot, legend slot, export as PNG/CSV button, loading overlay, `no data` empty state.  
 **Priority:** P2
