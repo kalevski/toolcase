@@ -50,12 +50,21 @@ import FormInputDemo from './FormInputDemo'
 
 // Layout / Container
 import Basic from './Basic'
+import { AccordionDemo } from './AccordionDemo'
+import BreadcrumbDemo from './BreadcrumbDemo'
+import { ContextMenuDemo } from './ContextMenuDemo'
+import CommandPaletteDemo from './CommandPaletteDemo'
+import PopoverDemo from './PopoverDemo'
+import { StepperDemo } from './StepperDemo'
+import { NumberInputDemo } from './NumberInputDemo'
+import { SliderDemo } from './SliderDemo'
 import { DrawerDemo } from './DrawerDemo'
 import DropdownDemo from './DropdownDemo'
 import EmptyStateDemo from './EmptyStateDemo'
 import ExtendedSelectDemo from './ExtendedSelectDemo'
 import GroupDemo from './GroupDemo'
 import { ModalDemo } from './ModalDemo'
+import { ToastDemo } from './ToastDemo'
 import { DashboardLayoutExample } from './DashboardLayoutExample'
 import DashboardCardDemo from './DashboardCardDemo'
 import BasicLayoutDemo from './BasicLayoutDemo'
@@ -184,6 +193,7 @@ export const examples: ExampleDef[] = [
 	// Layout / Container — Structural wrappers
 	{ key: 'basic', category: 'Layout / Container', element: <Basic /> },
 	{ key: 'drawer', category: 'Layout / Container', element: <DrawerDemo /> },
+	{ key: 'toast', category: 'Layout / Container', element: <ToastDemo /> },
 	{ key: 'dropdown', category: 'Layout / Container', element: <DropdownDemo /> },
 	{ key: 'group', category: 'Layout / Container', element: <GroupDemo /> },
 	{ key: 'modal', category: 'Layout / Container', element: <ModalDemo /> },
@@ -192,6 +202,14 @@ export const examples: ExampleDef[] = [
 	{ key: 'basic-layout', category: 'Layout / Container', element: <BasicLayoutDemo /> },
 	{ key: 'files', category: 'Layout / Container', element: <Files /> },
 	{ key: 'empty-state', category: 'Layout / Container', element: <EmptyStateDemo /> },
+	{ key: 'accordion', category: 'Layout / Container', element: <AccordionDemo /> },
+	{ key: 'breadcrumb', category: 'Layout / Container', element: <BreadcrumbDemo /> },
+	{ key: 'popover', category: 'Layout / Container', element: <PopoverDemo /> },
+	{ key: 'context-menu', category: 'Layout / Container', element: <ContextMenuDemo /> },
+	{ key: 'command-palette', category: 'Layout / Container', element: <CommandPaletteDemo /> },
+	{ key: 'stepper', category: 'Layout / Container', element: <StepperDemo /> },
+	{ key: 'number-input', category: 'Form', element: <NumberInputDemo /> },
+	{ key: 'slider', category: 'Form', element: <SliderDemo /> },
 
 	// Complex — Multi-concern or data-driven
 	{ key: 'table', category: 'Complex', element: <TableDemo /> },

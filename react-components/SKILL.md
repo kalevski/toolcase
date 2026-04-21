@@ -38,13 +38,22 @@ A complete guide to every component in the library. Import any component from `@
   - [Tag](#tag)
   - [Tooltip](#tooltip)
 - [Layout & Structure](#layout--structure)
+  - [Accordion](#accordion)
+  - [Breadcrumb](#breadcrumb)
   - [Card](#card)
+  - [CommandPalette](#commandpalette)
+  - [ContextMenu](#contextmenu)
   - [Divider](#divider)
   - [Drawer](#drawer)
   - [Form](#form)
   - [Group](#group)
+  - [NumberInput](#numberinput)
+  - [Popover](#popover)
+  - [Slider](#slider)
   - [Spacer](#spacer)
+  - [Stepper](#stepper)
   - [TabSections](#tabsections)
+  - [Toast](#toast)
 - [Navigation](#navigation)
   - [CoolNav](#coolnav)
   - [Pagination](#pagination)
@@ -1009,12 +1018,190 @@ const [open, setOpen] = useState(false)
 
 ---
 
-### Card
+### Toast
 
-A card container with an optional header and variant background coloring.
+Auto-dismissing notification toasts rendered in a fixed screen corner via a global imperative API. Wrap your app once in `<ToastProvider>`, then call `toast.success(...)` etc. from anywhere.
+
+#### `ToastProvider` props
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
+| `defaultDuration` | `number` | ❌ | Auto-dismiss delay in ms. `0` = persistent. Default: `4000`. |
+| `defaultPosition` | `ToastPosition` | ❌ | Default corner for toasts (default: `'top-right'`). |
+| `maxToasts` | `number` | ❌ | Max visible toasts per position group (default: `5`). |
+| `children` | `ReactNode` | ❌ | Your application tree. |
+
+#### `toast` imperative API
+
+| Call | Description |
+|------|-------------|
+| `toast.success(message, options?)` | Green success toast |
+| `toast.error(message, options?)` | Red error toast |
+| `toast.warning(message, options?)` | Yellow warning toast |
+| `toast.info(message, options?)` | Blue info toast |
+| `toast(message, { variant, ...options })` | Generic call |
+| `toast.dismiss(id)` | Dismiss by ID |
+| `toast.dismissAll()` | Dismiss all toasts |
+
+#### `ToastOptions`
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `id` | `string` | ❌ | Deduplication ID |
+| `title` | `string` | ❌ | Bold heading above the message |
+| `duration` | `number` | ❌ | Override duration for this toast |
+| `position` | `ToastPosition` | ❌ | Override position for this toast |
+
+`ToastPosition`: `'top-right' | 'top-left' | 'top-center' | 'bottom-right' | 'bottom-left' | 'bottom-center'`
+
+```tsx
+import { ToastProvider, toast } from '@toolcase/react-components'
+
+// Wrap app once
+<ToastProvider defaultPosition="top-right" defaultDuration={4000}>
+  <App />
+</ToastProvider>
+
+// Call from anywhere
+toast.success('Profile saved')
+toast.error('Something went wrong', { title: 'Error', duration: 0 })
+toast.warning('Your session is expiring soon')
+toast.info('New version available', { position: 'bottom-center' })
+```
+
+---
+
+### Accordion
+
+Collapsible content panels with animated chevrons. Supports single-open and multi-open modes, controlled and uncontrolled, and a borderless variant.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `AccordionItem[]` | ✅ | Array of `{ key, title, content, disabled? }` |
+| `multiple` | `boolean` | ❌ | Allow multiple panels open simultaneously (default: `false`) |
+| `defaultOpen` | `string[]` | ❌ | Keys open by default (uncontrolled) |
+| `open` | `string[]` | ❌ | Controlled open keys |
+| `onOpenChange` | `(keys: string[]) => void` | ❌ | Called when open state changes |
+| `variant` | `'bordered' \| 'borderless'` | ❌ | Visual style (default: `'bordered'`) |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { Accordion } from '@toolcase/react-components'
+
+const items = [
+  { key: 'a', title: 'Section A', content: <p>Content A</p> },
+  { key: 'b', title: 'Section B', content: <p>Content B</p> },
+]
+
+<Accordion items={items} defaultOpen={['a']} />
+```
+
+---
+
+### Breadcrumb
+
+Navigation trail showing hierarchy path. Supports custom separators, `href`/`onClick` items, and automatic collapse via `maxItems`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `BreadcrumbItem[]` | ✅ | Array of `{ label, href?, onClick? }` |
+| `separator` | `ReactNode` | ❌ | Separator between crumbs (default: `'/'`) |
+| `maxItems` | `number` | ❌ | Collapse middle crumbs when exceeded; ellipsis expands (default: `0`) |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { Breadcrumb } from '@toolcase/react-components'
+
+<Breadcrumb
+  items={[
+    { label: 'Home', href: '/' },
+    { label: 'Products', href: '/products' },
+    { label: 'Running Shoes' },
+  ]}
+  maxItems={3}
+/>
+```
+
+---
+
+### CommandPalette
+
+Keyboard-first search overlay with grouped results, fuzzy word matching, highlight, keyboard navigation, and focus trap.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `CommandPaletteItem[]` | ✅ | Array of `{ key, label, description?, icon?, group?, keywords? }` |
+| `open` | `boolean` | ✅ | Whether the palette is visible |
+| `onClose` | `() => void` | ✅ | Called when Esc or backdrop is clicked |
+| `onSelect` | `(item: CommandPaletteItem) => void` | ✅ | Called when an item is selected |
+| `placeholder` | `string` | ❌ | Input placeholder (default: `'Search…'`) |
+| `loading` | `boolean` | ❌ | Shows skeleton rows |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { CommandPalette } from '@toolcase/react-components'
+
+const [open, setOpen] = useState(false)
+
+<CommandPalette
+  items={items}
+  open={open}
+  onClose={() => setOpen(false)}
+  onSelect={(item) => console.log(item.key)}
+/>
+```
+
+---
+
+### ContextMenu
+
+Right-click context menu rendered via portal at cursor position. Supports submenus, disabled items, danger items, dividers, and full keyboard nav.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `ContextMenuItem[]` | ✅ | Array of `{ key, label, icon?, disabled?, danger?, divider?, items?, onClick? }` |
+| `children` | `ReactElement` | ✅ | Target element that receives the `contextmenu` event |
+| `onSelect` | `(key: string) => void` | ❌ | Called when a leaf item is selected |
+
+```tsx
+import { ContextMenu } from '@toolcase/react-components'
+
+<ContextMenu
+  items={[
+    { key: 'copy',   label: 'Copy',   icon: 'copy' },
+    { key: 'delete', label: 'Delete', icon: 'trash', danger: true },
+  ]}
+  onSelect={(key) => console.log(key)}
+>
+  <div>Right-click me</div>
+</ContextMenu>
+```
+
+---
+
+### Popover
+
+Floating panel anchored to a trigger element with 12-way placement, viewport clamping, and click-outside / Escape dismiss.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `children` | `ReactElement` | ✅ | Trigger element (must accept `ref`, `onClick`/mouse props, `aria-*`) |
+| `content` | `ReactNode` | ✅ | Content rendered inside the panel |
+| `placement` | `PopoverPlacement` | ❌ | One of 12 positions (default: `'bottom'`) |
+| `trigger` | `'click' \| 'hover'` | ❌ | How the popover opens (default: `'click'`) |
+| `open` | `boolean` | ❌ | Controlled open state |
+| `onOpenChange` | `(open: boolean) => void` | ❌ | Called when open state should change |
+| `className` | `string` | ❌ | Additional CSS class on the panel |
+
+`PopoverPlacement`: `'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end'`
+
+```tsx
+import { Popover, Button } from '@toolcase/react-components'
+
+<Popover content={<p>Hello!</p>} placement="bottom-start">
+  <Button variant="primary">Click me</Button>
+</Popover>
+```
 | `header` | `ReactNode` | ❌ | Card header content |
 | `variant` | `'default' \| 'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger'` | ❌ | Color theme (default: `'default'`) |
 | `loading` | `boolean` | ❌ | Skeleton state |
@@ -2071,5 +2258,117 @@ import { ToggleCard, Badge } from '@toolcase/react-components'
   checked={darkMode}
   onChange={setDarkMode}
   badge={<Badge variant="info" size="sm">New</Badge>}
+/>
+```
+
+---
+
+### Stepper
+
+Visual step-progress indicator for multi-step workflows. Supports horizontal and vertical orientations, auto-derived statuses from `activeStep`, explicit per-step statuses (pending/active/completed/error), and clickable steps.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `steps` | `StepItem[]` | ✅ | Array of `{ key, title, description?, status?, disabled? }` |
+| `activeStep` | `string` | ❌ | Key of the active step; auto-derives statuses from index position |
+| `orientation` | `'horizontal' \| 'vertical'` | ❌ | Layout direction (default: `'horizontal'`) |
+| `clickable` | `boolean` | ❌ | Makes completed/active steps into buttons (default: `false`) |
+| `onStepClick` | `(key: string) => void` | ❌ | Called when a clickable step is pressed |
+| `className` | `string` | ❌ | Additional CSS class |
+
+`StepStatus`: `'pending' | 'active' | 'completed' | 'error'`
+
+```tsx
+import { Stepper } from '@toolcase/react-components'
+
+const steps = [
+  { key: 'account', title: 'Account', description: 'Create your account' },
+  { key: 'profile', title: 'Profile', description: 'Set up your profile' },
+  { key: 'confirm', title: 'Confirm', description: 'Review & submit' },
+]
+
+// Auto-derive statuses
+<Stepper steps={steps} activeStep="profile" />
+
+// Clickable + vertical
+<Stepper steps={steps} activeStep={active} orientation="vertical" clickable onStepClick={setActive} />
+```
+
+---
+
+### NumberInput
+
+Numeric input with decrement/increment buttons, keyboard shortcuts (Arrow keys, Page Up/Down), mouse wheel support, min/max/step/precision constraints, and optional prefix/suffix slots.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `number \| ''` | ❌ | Controlled value; `''` represents empty |
+| `onChange` | `(value: number \| '') => void` | ❌ | Called on value change |
+| `step` | `number` | ❌ | Increment/decrement amount (default: `1`) |
+| `min` | `number` | ❌ | Minimum value |
+| `max` | `number` | ❌ | Maximum value |
+| `precision` | `number` | ❌ | Decimal places to round to |
+| `label` | `string` | ❌ | Label rendered above the control |
+| `error` | `string` | ❌ | Error message; triggers invalid state |
+| `prefix` | `ReactNode` | ❌ | Content shown before the input (e.g. `'$'`) |
+| `suffix` | `ReactNode` | ❌ | Content shown after the input (e.g. `'%'`) |
+| `className` | `string` | ❌ | Additional CSS class on the root |
+
+Also accepts all `HTMLInputElement` attributes except `type`, `value`, and `onChange`.
+
+```tsx
+import { NumberInput } from '@toolcase/react-components'
+
+const [qty, setQty] = useState<number | ''>(1)
+
+<NumberInput
+  label="Quantity"
+  value={qty}
+  onChange={setQty}
+  min={0}
+  max={99}
+  step={1}
+/>
+
+// With prefix/suffix
+<NumberInput label="Price" value={price} onChange={setPrice} prefix="$" precision={2} min={0} />
+```
+
+---
+
+### Slider
+
+Range slider with custom styling, keyboard navigation, drag tooltip, and optional tick marks. Wraps a native `<input type="range">` for accessibility.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `number` | ❌ | Controlled value |
+| `onChange` | `(value: number) => void` | ❌ | Called on value change |
+| `min` | `number` | ❌ | Minimum value (default: `0`) |
+| `max` | `number` | ❌ | Maximum value (default: `100`) |
+| `step` | `number` | ❌ | Step size (default: `1`) |
+| `ticks` | `boolean` | ❌ | Show tick marks at each step (default: `false`) |
+| `showTooltip` | `boolean` | ❌ | Show floating tooltip while dragging (default: `true`) |
+| `formatValue` | `(v: number) => string` | ❌ | Custom formatter for display labels and tooltip |
+| `label` | `string` | ❌ | Label rendered above the track with current value |
+| `error` | `string` | ❌ | Error message |
+| `disabled` | `boolean` | ❌ | Disables all interaction |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { Slider } from '@toolcase/react-components'
+
+const [volume, setVolume] = useState(60)
+
+<Slider label="Volume" value={volume} onChange={setVolume} />
+
+// With ticks and custom formatter
+<Slider
+  label="Rating"
+  value={rating}
+  onChange={setRating}
+  min={1} max={5} step={1}
+  ticks
+  formatValue={(v) => `${v}★`}
 />
 ```

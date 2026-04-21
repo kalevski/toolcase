@@ -1,0 +1,115 @@
+// ── Accordion ────────────────────────────────────────────────────────────────
+
+.component.component-accordion {
+    --ac-color: #1e293b;
+    --ac-muted: #64748b;
+    --ac-border: #e2e8f0;
+    --ac-hover-bg: #f8fafc;
+    --ac-active-bg: #f1f5f9;
+    --ac-radius: var(--rc-radius-md, 0.5rem);
+    --ac-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.component-accordion {
+    &--bordered .component-accordion__item {
+        border: 1px solid var(--ac-border);
+        border-radius: var(--ac-radius);
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    &--borderless .component-accordion__item {
+        border-bottom: 1px solid var(--ac-border);
+
+        &:first-child {
+            border-top: 1px solid var(--ac-border);
+        }
+    }
+
+    &__heading {
+        margin: 0;
+    }
+
+    &__trigger {
+        align-items: center;
+        background: transparent;
+        border: none;
+        color: var(--ac-color);
+        cursor: pointer;
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+        text-align: left;
+        transition: background-color var(--ac-transition);
+        width: 100%;
+
+        &:hover {
+            background-color: var(--ac-hover-bg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: -2px;
+        }
+
+        &:disabled {
+            color: var(--ac-muted);
+            cursor: not-allowed;
+        }
+    }
+
+    &__item--open > &__heading > &__trigger {
+        background-color: var(--ac-active-bg);
+    }
+
+    &__trigger-label {
+        flex: 1;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    &__chevron {
+        align-items: center;
+        color: var(--ac-muted);
+        display: flex;
+        flex-shrink: 0;
+        transition: transform var(--ac-transition);
+
+        .component-accordion__item--open > .component-accordion__heading > .component-accordion__trigger & {
+            transform: rotate(180deg);
+        }
+    }
+
+    &__panel {
+        overflow: hidden;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    &__content {
+        color: var(--ac-muted);
+        font-size: 0.875rem;
+        line-height: 1.6;
+        padding: 0 1rem 1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-accordion {
+        &__trigger,
+        &__chevron {
+            transition: none;
+        }
+    }
+}

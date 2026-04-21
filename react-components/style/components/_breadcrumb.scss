@@ -1,0 +1,104 @@
+// ── Breadcrumb ───────────────────────────────────────────────────────────────
+
+.component.component-breadcrumb {
+    --bc-color: #1e293b;
+    --bc-muted: #64748b;
+    --bc-link-color: #1e293b;
+    --bc-link-hover: #000000;
+    --bc-separator: #94a3b8;
+    --bc-current: #64748b;
+    --bc-font-size: 0.875rem;
+    --bc-transition: 0.15s ease;
+
+    font-size: var(--bc-font-size);
+}
+
+.component-breadcrumb {
+    &__list {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    &__item {
+        align-items: center;
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    &__link {
+        color: var(--bc-link-color);
+        text-decoration: none;
+        transition: color var(--bc-transition);
+
+        &:hover {
+            color: var(--bc-link-hover);
+            text-decoration: underline;
+        }
+
+        &:focus-visible {
+            border-radius: 2px;
+            outline: 2px solid #1e293b;
+            outline-offset: 2px;
+        }
+    }
+
+    &__label {
+        color: var(--bc-current);
+    }
+
+    &__separator {
+        color: var(--bc-separator);
+        font-size: 0.75rem;
+        user-select: none;
+    }
+
+    &__ellipsis {
+        background: transparent;
+        border: 1px solid var(--bc-separator);
+        border-radius: var(--rc-radius-sm, 0.25rem);
+        color: var(--bc-muted);
+        cursor: pointer;
+        font-size: 0.75rem;
+        line-height: 1;
+        min-height: 20px;
+        padding: 0.1rem 0.4rem;
+        transition: border-color var(--bc-transition), color var(--bc-transition);
+
+        &:hover {
+            border-color: var(--bc-link-color);
+            color: var(--bc-link-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: 2px;
+        }
+    }
+
+    // Truncate long labels on small screens
+    &__link,
+    &__label {
+        max-width: 12rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        @media (max-width: 576px) {
+            max-width: 7rem;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-breadcrumb {
+        &__link,
+        &__ellipsis {
+            transition: none;
+        }
+    }
+}

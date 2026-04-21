@@ -1,0 +1,250 @@
+// ── Toast ─────────────────────────────────────────────────────────────────────
+
+// ── Progress bar animation ────────────────────────────────────────────────────
+@keyframes toast-progress {
+    from { width: 100%; }
+    to   { width: 0%; }
+}
+
+// ── Enter animations ──────────────────────────────────────────────────────────
+@keyframes toast-enter-top {
+    from {
+        opacity: 0;
+        transform: translateY(-0.75rem) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toast-enter-bottom {
+    from {
+        opacity: 0;
+        transform: translateY(0.75rem) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+// ── Exit animation ────────────────────────────────────────────────────────────
+@keyframes toast-exit {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+// ── Container ─────────────────────────────────────────────────────────────────
+
+.component.component-toast-container {
+    --tc-gap: 0.5rem;
+
+    position: fixed;
+    z-index: 1080;
+    display: flex;
+    flex-direction: column;
+    gap: var(--tc-gap);
+    pointer-events: none; // children opt back in
+    width: min(360px, calc(100vw - 2rem));
+}
+
+.component-toast-container {
+    &--top-right    { top: 1rem;    right: 1rem; }
+    &--top-left     { top: 1rem;    left: 1rem; }
+    &--top-center   { top: 1rem;    left: 50%; transform: translateX(-50%); }
+    &--bottom-right { bottom: 1rem; right: 1rem; flex-direction: column-reverse; }
+    &--bottom-left  { bottom: 1rem; left: 1rem;  flex-direction: column-reverse; }
+    &--bottom-center { bottom: 1rem; left: 50%; transform: translateX(-50%); flex-direction: column-reverse; }
+}
+
+// ── Toast item ────────────────────────────────────────────────────────────────
+
+.component-toast-item {
+    --ti-bg:          #ffffff;
+    --ti-border:      #e2e8f0;
+    --ti-color:       #1e293b;
+    --ti-muted:       #64748b;
+    --ti-shadow:      0 4px 16px rgba(0, 0, 0, 0.10);
+    --ti-radius:      var(--rc-radius-md, 8px);
+    --ti-accent:      #64748b;   // overridden per variant
+    --ti-accent-bg:   #f8fafc;   // overridden per variant
+    --ti-close-hover: #f1f5f9;
+
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    padding-bottom: 1.25rem; // room for progress bar
+    background: var(--ti-bg);
+    border: 1px solid var(--ti-border);
+    border-left: 4px solid var(--ti-accent);
+    border-radius: var(--ti-radius);
+    box-shadow: var(--ti-shadow);
+    overflow: hidden;
+    pointer-events: auto;
+    cursor: default;
+    min-width: 0;
+    width: 100%;
+
+    // ── Enter animations ──────────────────────────────────────────────────
+
+    &--from-top {
+        animation: toast-enter-top 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    &--from-bottom {
+        animation: toast-enter-bottom 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    // ── Exit animation ────────────────────────────────────────────────────
+
+    &--exiting {
+        animation: toast-exit 0.25s ease forwards !important;
+        pointer-events: none;
+    }
+
+    // ── Variant accents ───────────────────────────────────────────────────
+
+    &--success {
+        --ti-accent:    #38a169;
+        --ti-accent-bg: #f0fff4;
+    }
+
+    &--error {
+        --ti-accent:    #e53e3e;
+        --ti-accent-bg: #fff5f5;
+    }
+
+    &--warning {
+        --ti-accent:    #d69e2e;
+        --ti-accent-bg: #fffff0;
+    }
+
+    &--info {
+        --ti-accent:    #3182ce;
+        --ti-accent-bg: #ebf8ff;
+    }
+
+    // ── Parts ─────────────────────────────────────────────────────────────
+
+    &__icon {
+        flex-shrink: 0;
+        font-size: 1.0625rem;
+        color: var(--ti-accent);
+        line-height: 1.4;
+        margin-top: 0.05rem;
+    }
+
+    &__body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__title {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--ti-color);
+        margin-bottom: 0.125rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__message {
+        font-size: 0.8125rem;
+        color: var(--ti-muted);
+        line-height: 1.45;
+        word-break: break-word;
+    }
+
+    &__close {
+        flex-shrink: 0;
+        appearance: none;
+        background: none;
+        border: none;
+        border-radius: var(--rc-radius-sm, 4px);
+        color: var(--ti-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        height: 1.5rem;
+        width: 1.5rem;
+        padding: 0;
+        margin-top: -0.125rem;
+        margin-right: -0.25rem;
+        transition: background-color 0.15s ease, color 0.15s ease;
+
+        &:hover {
+            background-color: var(--ti-close-hover);
+            color: var(--ti-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--rc-focus-ring, #1e293b);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Progress bar ──────────────────────────────────────────────────────
+
+    &__progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--ti-border);
+        overflow: hidden;
+    }
+
+    &__progress-bar {
+        height: 100%;
+        width: 100%;
+        background: var(--ti-accent);
+        animation: toast-progress linear forwards;
+        // animation-duration is set inline
+        transform-origin: left;
+    }
+}
+
+// ── Touch targets ─────────────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .component-toast-item__close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Responsive: full-width on very small screens ──────────────────────────────
+
+@media (max-width: 400px) {
+    .component.component-toast-container {
+        width: calc(100vw - 1rem);
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+        transform: none !important;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .component-toast-item {
+        animation: none;
+
+        &--exiting {
+            animation: none !important;
+        }
+    }
+}

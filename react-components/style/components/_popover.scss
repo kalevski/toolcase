@@ -1,0 +1,46 @@
+// ── Popover ───────────────────────────────────────────────────────────────────
+
+.component.component-popover {
+    --pop-bg: #ffffff;
+    --pop-border: #e2e8f0;
+    --pop-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --pop-radius: var(--rc-radius-md, 0.5rem);
+    --pop-transition: 0.15s ease;
+
+    pointer-events: auto;
+    z-index: 1060;
+}
+
+.component-popover {
+    &__panel {
+        background: var(--pop-bg);
+        border: 1px solid var(--pop-border);
+        border-radius: var(--pop-radius);
+        box-shadow: var(--pop-shadow);
+        min-width: 180px;
+        opacity: 0;
+        padding: 0.75rem;
+        transform: scale(0.97) translateY(-4px);
+        transition: opacity var(--pop-transition), transform var(--pop-transition);
+
+        &--visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-popover {
+        &__panel {
+            transition: none;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .component.component-popover {
+        // On very small screens, collapse to near full-width
+        max-width: calc(100vw - 1rem);
+    }
+}

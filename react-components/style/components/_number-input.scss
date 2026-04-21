@@ -1,0 +1,141 @@
+// ── NumberInput ───────────────────────────────────────────────────────────────
+
+.component.component-number-input {
+    --ni-color: #1e293b;
+    --ni-muted: #64748b;
+    --ni-border: #e2e8f0;
+    --ni-hover-border: #94a3b8;
+    --ni-focus-border: #1e293b;
+    --ni-bg: #ffffff;
+    --ni-btn-bg: #f8fafc;
+    --ni-btn-hover-bg: #f1f5f9;
+    --ni-error-border: #dc2626;
+    --ni-radius: var(--rc-radius-md, 0.5rem);
+    --ni-transition: 0.15s ease;
+    --ni-height: 2.5rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.component-number-input {
+    &__control {
+        align-items: stretch;
+        background: var(--ni-bg);
+        border: 1px solid var(--ni-border);
+        border-radius: var(--ni-radius);
+        display: flex;
+        overflow: hidden;
+        transition: border-color var(--ni-transition);
+
+        &:focus-within {
+            border-color: var(--ni-focus-border);
+        }
+
+        &:hover:not(:focus-within) {
+            border-color: var(--ni-hover-border);
+        }
+    }
+
+    &--error &__control {
+        border-color: var(--ni-error-border);
+    }
+
+    &__btn {
+        align-items: center;
+        background: var(--ni-btn-bg);
+        border: none;
+        color: var(--ni-muted);
+        cursor: pointer;
+        display: flex;
+        flex-shrink: 0;
+        font-size: 1.125rem;
+        justify-content: center;
+        min-height: var(--ni-height);
+        min-width: var(--ni-height);
+        padding: 0;
+        transition: background var(--ni-transition), color var(--ni-transition);
+        user-select: none;
+
+        &:hover:not(:disabled) {
+            background: var(--ni-btn-hover-bg);
+            color: var(--ni-color);
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+        &--dec {
+            border-right: 1px solid var(--ni-border);
+        }
+
+        &--inc {
+            border-left: 1px solid var(--ni-border);
+        }
+    }
+
+    &__prefix,
+    &__suffix {
+        align-items: center;
+        color: var(--ni-muted);
+        display: flex;
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        padding: 0 0.5rem;
+    }
+
+    &__prefix {
+        border-right: 1px solid var(--ni-border);
+    }
+
+    &__suffix {
+        border-left: 1px solid var(--ni-border);
+    }
+
+    &__input {
+        appearance: textfield;
+        background: transparent;
+        border: none;
+        color: var(--ni-color);
+        flex: 1;
+        font-size: 0.9375rem;
+        min-height: var(--ni-height);
+        min-width: 4rem;
+        outline: none;
+        padding: 0 0.5rem;
+        text-align: center;
+        width: 100%;
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            appearance: none;
+        }
+
+        &:disabled {
+            color: var(--ni-muted);
+        }
+    }
+
+    &--disabled {
+        opacity: 0.55;
+        pointer-events: none;
+    }
+}
+
+// Touch targets
+@media (pointer: coarse) {
+    .component-number-input__btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-number-input__btn,
+    .component-number-input__control {
+        transition: none;
+    }
+}

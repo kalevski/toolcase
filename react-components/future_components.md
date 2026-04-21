@@ -30,7 +30,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### Toast / Notification System
-- [ ] implemented
+- [x] implemented
 **What it does:** Auto-dismissing notification messages stacked in a corner of the screen.  
 **Key behaviors:** Global imperative API (`toast.success('...')`, `toast.error('...')`), configurable position (top-right, bottom-center, etc.), progress bar countdown, dismiss on click, queue management (max visible), pause on hover, accessible `role="alert"`.  
 **Priority:** P1
@@ -38,7 +38,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### Popover
-- [ ] implemented
+- [x] implemented
 **What it does:** A positioned overlay panel with an optional arrow that anchors to a trigger element.  
 **Key behaviors:** Floating positioning (using Floating UI or similar), 12-position placement (`top-start`, `bottom`, `right`, etc.), auto-flip when near viewport edge, click-outside close, delay on open/close, distinct from Tooltip (can contain interactive content).  
 **Priority:** P1
@@ -46,7 +46,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### ContextMenu
-- [ ] implemented
+- [x] implemented
 **What it does:** A right-click menu with nested submenu support.  
 **Key behaviors:** Triggers on `contextmenu` event (and optionally long-press on touch), keyboard navigation, submenu expand on hover/focus, disabling items, icons per item, dividers.  
 **Priority:** P1
@@ -54,7 +54,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### CommandPalette
-- [ ] implemented
+- [x] implemented
 **What it does:** A Cmd+K / Ctrl+K overlay for searching actions, pages, and records across the application.  
 **Key behaviors:** Global keyboard shortcut listener, fuzzy search, grouped results, keyboard-only navigation, recent/pinned items, pluggable data source, animated modal entrance.  
 **Priority:** P1
@@ -62,7 +62,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### Accordion
-- [ ] implemented
+- [x] implemented
 **What it does:** Vertically stacked collapsible sections.  
 **Key behaviors:** Single vs. multiple open mode, animated height transition, controlled/uncontrolled, chevron rotation, optional always-open first item, border and borderless variants.  
 **Priority:** P1
@@ -70,7 +70,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### Breadcrumb
-- [ ] implemented
+- [x] implemented
 **What it does:** A horizontal trail of navigation links showing the current page location.  
 **Key behaviors:** Accepts `items: { label, href }[]`, custom separator, collapse long paths with `...` ellipsis and popover for hidden items, last item non-linked (current page), `aria-label="breadcrumb"` and `aria-current="page"` on last item.  
 **Priority:** P1
@@ -78,7 +78,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### Stepper
-- [ ] implemented
+- [x] implemented
 **What it does:** A visual step-progress indicator for multi-step flows.  
 **Key behaviors:** Horizontal and vertical orientation, step states (`completed`, `active`, `error`, `pending`), optional step descriptions, clickable steps for non-linear navigation, accessible with `aria-current="step"`.  
 **Priority:** P1
@@ -86,7 +86,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### NumberInput
-- [ ] implemented
+- [x] implemented
 **What it does:** A numeric input with increment/decrement buttons and configurable step/min/max.  
 **Key behaviors:** Up/down arrow key support, mouse wheel scroll, `step`, `min`, `max` props, precision (decimal places), format display (currency, percentage), disabled state, error state.  
 **Priority:** P1
@@ -94,7 +94,7 @@ These belong in every application regardless of domain. They are the most common
 ---
 
 ### Slider
-- [ ] implemented
+- [x] implemented
 **What it does:** A single-handle range slider for selecting a value within a range.  
 **Key behaviors:** Controlled value, `min`/`max`/`step`, keyboard increment (arrow keys, Page Up/Down), visible tick marks option, value tooltip on drag, formatted display label.  
 **Priority:** P1
