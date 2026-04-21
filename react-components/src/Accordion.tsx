@@ -95,7 +95,7 @@ export const Accordion: React.FC<AccordionProps> = ({
 							role="region"
 							aria-labelledby={headingId}
 							className="component-accordion__panel"
-							hidden={!isOpen}
+							aria-hidden={!isOpen ? true : undefined}
 						>
 							<div className="component-accordion__content">
 								{item.content}

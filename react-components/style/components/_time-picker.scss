@@ -1,0 +1,212 @@
+// ── TimePicker ────────────────────────────────────────────────────────────────
+
+.component.component-time-picker {
+    --tp-border:           #e2e8f0;
+    --tp-border-focus:     #1e293b;
+    --tp-border-error:     #ef4444;
+    --tp-bg:               #ffffff;
+    --tp-hover-bg:         #f8fafc;
+    --tp-text:             #1e293b;
+    --tp-muted:            #64748b;
+    --tp-active-bg:        #f1f5f9;
+    --tp-active-color:     #1e293b;
+    --tp-transition:       0.15s ease;
+    --tp-dropdown-z:       1060;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    position: relative;
+}
+
+.component-time-picker {
+    &__label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--tp-text);
+    }
+
+    &__control {
+        display: flex;
+        align-items: center;
+        gap: 0;
+    }
+
+    &__trigger {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        padding: 0.5rem 0.75rem;
+        background: var(--tp-bg);
+        border: 1px solid var(--tp-border);
+        cursor: pointer;
+        font-size: 0.9375rem;
+        color: var(--tp-text);
+        text-align: left;
+        min-height: 44px;
+        transition: border-color var(--tp-transition);
+
+        &:hover {
+            border-color: var(--tp-border-hover, #94a3b8);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: 2px;
+        }
+
+        &[aria-expanded="true"] {
+            border-color: var(--tp-border-focus);
+        }
+
+        &[aria-invalid="true"] {
+            border-color: var(--tp-border-error);
+        }
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        color: var(--tp-muted);
+    }
+
+    &__placeholder {
+        color: var(--tp-muted);
+    }
+
+    &__clear {
+        padding: 0.25rem 0.375rem;
+        background: transparent;
+        border: none;
+        color: var(--tp-muted);
+        cursor: pointer;
+        margin-left: -2.25rem;
+        z-index: 1;
+
+        &:hover { color: var(--tp-text); }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: 2px;
+        }
+    }
+
+    &__dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: var(--tp-dropdown-z);
+        background: var(--tp-bg);
+        border: 1px solid var(--tp-border-focus);
+        border-top: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    &__columns {
+        display: flex;
+        align-items: stretch;
+    }
+
+    &__column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__column-list {
+        height: 160px;
+        overflow-y: auto;
+        list-style: none;
+        margin: 0;
+        padding: 0.25rem 0;
+        scrollbar-width: thin;
+        text-align: center;
+    }
+
+    &__column-item {
+        padding: 0.35rem 0.5rem;
+        cursor: pointer;
+        font-size: 0.9375rem;
+        color: var(--tp-text);
+        transition: background var(--tp-transition);
+        margin: 0 0.25rem;
+
+        &:hover {
+            background: var(--tp-hover-bg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: -2px;
+        }
+
+        &--selected {
+            background: var(--tp-active-bg);
+            font-weight: 600;
+            color: var(--tp-active-color);
+        }
+    }
+
+    &__sep {
+        display: flex;
+        align-items: center;
+        padding: 0 0.1rem;
+        font-weight: 600;
+        color: var(--tp-muted);
+        user-select: none;
+    }
+
+    &__period-col {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        border-left: 1px solid var(--tp-border);
+    }
+
+    &__period-btn {
+        padding: 0.3rem 0.6rem;
+        background: transparent;
+        border: 1px solid var(--tp-border);
+        cursor: pointer;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--tp-muted);
+        transition: all var(--tp-transition);
+
+        &:hover {
+            background: var(--tp-hover-bg);
+            color: var(--tp-text);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: 2px;
+        }
+
+        &--active {
+            background: #1e293b;
+            border-color: #1e293b;
+            color: #ffffff;
+        }
+    }
+
+    &--disabled {
+        opacity: 0.55;
+        pointer-events: none;
+    }
+
+    &--open > .component-time-picker__control > .component-time-picker__trigger {
+        border-color: var(--tp-border-focus);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-time-picker__trigger,
+    .component-time-picker__column-item,
+    .component-time-picker__period-btn {
+        transition: none;
+    }
+}

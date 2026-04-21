@@ -1,0 +1,100 @@
+// ── ImageCrop ─────────────────────────────────────────────────────────────────
+
+.component.component-image-crop {
+    --ic-border:          #e2e8f0;
+    --ic-bg:              #f8fafc;
+    --ic-control-gap:     0.5rem;
+    --ic-muted:           #64748b;
+    --ic-text:            #1e293b;
+    --ic-transition:      0.15s ease;
+
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    background: var(--ic-bg);
+    border: 1px solid var(--ic-border);
+    border-radius: var(--ic-radius);
+    padding: 0.75rem;
+}
+
+.component-image-crop {
+    &__canvas {
+        display: block;
+        cursor: grab;
+        touch-action: none;
+        max-width: 100%;
+
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+    &--circular .component-image-crop__canvas {
+        border-radius: 50%;
+    }
+
+    &__controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    &__zoom {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    &__zoom-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: transparent;
+        border: 1px solid var(--ic-border);
+        cursor: pointer;
+        color: var(--ic-muted);
+        font-size: 0.9rem;
+        transition: background var(--ic-transition), color var(--ic-transition), border-color var(--ic-transition);
+
+        &:hover {
+            background: #f1f5f9;
+            color: var(--ic-text);
+            border-color: #94a3b8;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--ic-text);
+            outline-offset: 2px;
+        }
+    }
+
+    &__zoom-value {
+        font-size: 0.8125rem;
+        color: var(--ic-muted);
+        min-width: 3rem;
+        text-align: center;
+    }
+
+    &__actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+}
+
+@media (pointer: coarse) {
+    .component-image-crop__zoom-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-image-crop__zoom-btn {
+        transition: none;
+    }
+}

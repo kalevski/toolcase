@@ -49,6 +49,14 @@ interface ContextMenuListProps {
 
 const ContextMenuList: React.FC<ContextMenuListProps> = ({ items, onSelect, menuId, depth = 0 }) => {
 	const [openSub, setOpenSub] = useState<string | null>(null)
+	const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+	const scheduleSubClose = () => {
+		closeTimerRef.current = setTimeout(() => setOpenSub(null), 150)
+	}
+	const cancelSubClose = () => {
+		if (closeTimerRef.current) { clearTimeout(closeTimerRef.current); closeTimerRef.current = null }
+	}
 
 	const handleItemKeyDown = (e: React.KeyboardEvent, item: ContextMenuItem) => {
 		if (item.disabled) return
@@ -95,8 +103,8 @@ const ContextMenuList: React.FC<ContextMenuListProps> = ({ items, onSelect, menu
 							item.onClick?.(item.key)
 							onSelect(item.key)
 						}}
-						onMouseEnter={() => hasSub && setOpenSub(item.key)}
-						onMouseLeave={() => hasSub && setOpenSub(null)}
+						onMouseEnter={() => { cancelSubClose(); hasSub && setOpenSub(item.key) }}
+						onMouseLeave={() => { if (hasSub) scheduleSubClose() }}
 						onKeyDown={(e) => handleItemKeyDown(e, item)}
 					>
 						{item.icon && (
@@ -111,7 +119,11 @@ const ContextMenuList: React.FC<ContextMenuListProps> = ({ items, onSelect, menu
 							</span>
 						)}
 						{hasSub && isSubOpen && (
-							<div className="component-context-menu__submenu">
+							<div
+								className="component-context-menu__submenu"
+								onMouseEnter={cancelSubClose}
+								onMouseLeave={scheduleSubClose}
+							>
 								<ContextMenuList
 									items={item.items!}
 									onSelect={onSelect}

@@ -1,5 +1,16 @@
 // ── ContextMenu ───────────────────────────────────────────────────────────────
 
+@keyframes cm-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
 .component.component-context-menu {
     --cm-bg: #ffffff;
     --cm-border: #e2e8f0;
@@ -8,19 +19,19 @@
     --cm-muted: #64748b;
     --cm-hover-bg: #f8fafc;
     --cm-active-bg: #f1f5f9;
-    --cm-danger: #dc2626;
-    --cm-radius: var(--rc-radius-md, 0.5rem);
+    --cm-danger: #ef4444;
     --cm-transition: 0.12s ease;
     --cm-item-height: 2.25rem;
 
     z-index: 1060;
+    animation: cm-appear 0.12s ease;
+    transform-origin: top left;
 }
 
 .component-context-menu {
     &__list {
         background: var(--cm-bg);
         border: 1px solid var(--cm-border);
-        border-radius: var(--cm-radius);
         box-shadow: var(--cm-shadow);
         list-style: none;
         margin: 0;
@@ -37,7 +48,6 @@
 
     &__item {
         align-items: center;
-        border-radius: calc(var(--cm-radius) - 2px);
         color: var(--cm-color);
         cursor: pointer;
         display: flex;
@@ -114,6 +124,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .component.component-context-menu {
+        animation: none;
+    }
+
     .component-context-menu__item {
         transition: none;
     }

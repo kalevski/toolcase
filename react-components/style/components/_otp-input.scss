@@ -1,0 +1,89 @@
+// ── OTPInput ──────────────────────────────────────────────────────────────────
+
+.component.component-otp-input {
+    --otp-cell-size:      2.75rem;
+    --otp-cell-font:      1.25rem;
+    --otp-border:         #e2e8f0;
+    --otp-border-focus:   #1e293b;
+    --otp-border-error:   #ef4444;
+    --otp-bg:             #ffffff;
+    --otp-filled-bg:      #f8fafc;
+    --otp-transition:     0.15s ease;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.component-otp-input {
+    &__label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    &__fields {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    &__cell {
+        width: var(--otp-cell-size);
+        height: var(--otp-cell-size);
+        text-align: center;
+        font-size: var(--otp-cell-font);
+        font-weight: 600;
+        letter-spacing: 0;
+        background: var(--otp-bg);
+        border: 2px solid var(--otp-border);
+        outline: none;
+        transition: border-color var(--otp-transition), box-shadow var(--otp-transition);
+        padding: 0;
+
+        &--filled {
+            background: var(--otp-filled-bg);
+        }
+
+        &:focus {
+            border-color: var(--otp-border-focus);
+            box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: 2px;
+        }
+
+        &.is-invalid {
+            border-color: var(--otp-border-error);
+        }
+
+        /* Remove spinner on number inputs */
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        &[type=number] { -moz-appearance: textfield; }
+    }
+
+    &--disabled .component-otp-input__cell {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f1f5f9;
+    }
+}
+
+@media (max-width: 400px) {
+    .component-otp-input {
+        --otp-cell-size: 2.25rem;
+        --otp-cell-font: 1rem;
+
+        &__fields { gap: 0.3rem; }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-otp-input__cell { transition: none; }
+}

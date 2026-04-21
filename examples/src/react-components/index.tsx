@@ -58,6 +58,21 @@ import PopoverDemo from './PopoverDemo'
 import { StepperDemo } from './StepperDemo'
 import { NumberInputDemo } from './NumberInputDemo'
 import { SliderDemo } from './SliderDemo'
+import { RangeSliderDemo } from './RangeSliderDemo'
+import { RatingDemo } from './RatingDemo'
+import { OTPInputDemo } from './OTPInputDemo'
+import { PhoneInputDemo } from './PhoneInputDemo'
+import { TreeViewDemo } from './TreeViewDemo'
+import { ScrollAreaDemo } from './ScrollAreaDemo'
+import { ResizablePanelDemo } from './ResizablePanelDemo'
+import { VirtualListDemo } from './VirtualListDemo'
+import { InfiniteScrollDemo } from './InfiniteScrollDemo'
+import { TimePickerDemo } from './TimePickerDemo'
+import { MarkdownEditorDemo } from './MarkdownEditorDemo'
+import { CarouselDemo } from './CarouselDemo'
+import { ImageCropDemo } from './ImageCropDemo'
+import { LightboxDemo } from './LightboxDemo'
+import { BannerDemo } from './BannerDemo'
 import { DrawerDemo } from './DrawerDemo'
 import DropdownDemo from './DropdownDemo'
 import EmptyStateDemo from './EmptyStateDemo'
@@ -210,6 +225,21 @@ export const examples: ExampleDef[] = [
 	{ key: 'stepper', category: 'Layout / Container', element: <StepperDemo /> },
 	{ key: 'number-input', category: 'Form', element: <NumberInputDemo /> },
 	{ key: 'slider', category: 'Form', element: <SliderDemo /> },
+	{ key: 'range-slider', category: 'Form', element: <RangeSliderDemo /> },
+	{ key: 'rating', category: 'Form', element: <RatingDemo /> },
+	{ key: 'otp-input', category: 'Form', element: <OTPInputDemo /> },
+	{ key: 'phone-input', category: 'Form', element: <PhoneInputDemo /> },
+	{ key: 'time-picker', category: 'Form', element: <TimePickerDemo /> },
+	{ key: 'markdown-editor', category: 'Form', element: <MarkdownEditorDemo /> },
+	{ key: 'image-crop', category: 'Form', element: <ImageCropDemo /> },
+	{ key: 'tree-view', category: 'Layout / Container', element: <TreeViewDemo /> },
+	{ key: 'scroll-area', category: 'Layout / Container', element: <ScrollAreaDemo /> },
+	{ key: 'resizable-panel', category: 'Layout / Container', element: <ResizablePanelDemo /> },
+	{ key: 'virtual-list', category: 'Layout / Container', element: <VirtualListDemo /> },
+	{ key: 'infinite-scroll', category: 'Layout / Container', element: <InfiniteScrollDemo /> },
+	{ key: 'carousel', category: 'Layout / Container', element: <CarouselDemo /> },
+	{ key: 'lightbox', category: 'Layout / Container', element: <LightboxDemo /> },
+	{ key: 'banner', category: 'Layout / Container', element: <BannerDemo /> },
 
 	// Complex — Multi-concern or data-driven
 	{ key: 'table', category: 'Complex', element: <TableDemo /> },

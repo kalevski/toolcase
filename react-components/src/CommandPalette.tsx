@@ -136,7 +136,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 		<div
 			className="component-command-palette__backdrop"
 			onClick={close}
-			aria-hidden="false"
+			aria-hidden="true"
 		>
 			<div
 				className={`component component-command-palette ${className}`.trim()}

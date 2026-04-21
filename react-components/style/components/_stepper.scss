@@ -9,7 +9,7 @@
     --st-active-color: #ffffff;
     --st-completed-bg: #1e293b;
     --st-completed-color: #ffffff;
-    --st-error-bg: #dc2626;
+    --st-error-bg: #ef4444;
     --st-error-color: #ffffff;
     --st-connector-color: #e2e8f0;
     --st-connector-filled: #1e293b;
@@ -113,7 +113,6 @@
         &:focus-visible {
             outline: 2px solid #1e293b;
             outline-offset: 4px;
-            border-radius: 4px;
         }
     }
 

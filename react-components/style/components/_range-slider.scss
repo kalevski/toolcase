@@ -1,0 +1,166 @@
+// ── RangeSlider ──────────────────────────────────────────────────────────────
+
+.component.component-range-slider {
+    --rs-track-height:  6px;
+    --rs-thumb-size:    18px;
+    --rs-thumb-color:   #ffffff;
+    --rs-fill-color:    #1e293b;
+    --rs-track-bg:      #e2e8f0;
+    --rs-border:        #e2e8f0;
+    --rs-label-color:   #1e293b;
+    --rs-muted:         #64748b;
+    --rs-transition:    0.12s ease;
+    --rs-disabled-bg:   #f1f5f9;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.component-range-slider {
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+
+    &__label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--rs-label-color);
+    }
+
+    &__value-badge {
+        font-size: 0.8125rem;
+        color: var(--rs-muted);
+        white-space: nowrap;
+    }
+
+    &__track-area {
+        position: relative;
+        padding: 0.75rem 0;
+    }
+
+    // Native inputs – visually hidden but accessible
+    &__native {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        opacity: 0;
+        pointer-events: none;
+        margin: 0;
+    }
+
+    &__track {
+        position: relative;
+        height: var(--rs-track-height);
+        background: var(--rs-track-bg);
+    }
+
+    &__fill {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        background: var(--rs-fill-color);
+        transition: left var(--rs-transition), width var(--rs-transition);
+    }
+
+    &__thumb {
+        position: absolute;
+        top: 50%;
+        width: var(--rs-thumb-size);
+        height: var(--rs-thumb-size);
+        margin-top: calc(var(--rs-thumb-size) / -2);
+        margin-left: calc(var(--rs-thumb-size) / -2);
+        background: var(--rs-thumb-color);
+        border: 2px solid var(--rs-fill-color);
+        border-radius: 50%;
+        cursor: grab;
+        transition: transform var(--rs-transition), box-shadow var(--rs-transition);
+        z-index: 2;
+
+        &:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.12);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: 3px;
+        }
+
+        &--dragging {
+            cursor: grabbing;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 6px rgba(30, 41, 59, 0.15);
+        }
+    }
+
+    &__tooltip {
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: #ffffff;
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    &__ticks {
+        position: relative;
+        height: 1.25rem;
+        margin-top: 0.25rem;
+    }
+
+    &__tick {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: translateX(-50%);
+
+        &::before {
+            content: '';
+            display: block;
+            width: 1px;
+            height: 5px;
+            background: var(--rs-border);
+        }
+
+        &--filled::before {
+            background: var(--rs-fill-color);
+        }
+    }
+
+    &__tick-label {
+        font-size: 0.625rem;
+        color: var(--rs-muted);
+        margin-top: 2px;
+    }
+
+    // States
+    &--disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    &--error .component-range-slider__track {
+        background: #fee2e2;
+    }
+}
+
+@media (pointer: coarse) {
+    .component-range-slider {
+        --rs-thumb-size: 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-range-slider {
+        --rs-transition: none;
+    }
+}

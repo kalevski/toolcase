@@ -26,7 +26,6 @@
     --cp-hover-bg: #f8fafc;
     --cp-active-bg: #f1f5f9;
     --cp-active-border: #1e293b;
-    --cp-radius: var(--rc-radius-lg, 0.75rem);
     --cp-transition: 0.15s ease;
     --cp-width: min(680px, calc(100vw - 2rem));
     --cp-max-height: 60vh;
@@ -34,7 +33,6 @@
     animation: cp-panel-in 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--cp-bg);
     border: 1px solid var(--cp-border);
-    border-radius: var(--cp-radius);
     box-shadow: var(--cp-shadow);
     display: flex;
     flex-direction: column;
@@ -82,7 +80,6 @@
         align-items: center;
         background: transparent;
         border: none;
-        border-radius: var(--rc-radius-sm, 0.25rem);
         color: var(--cp-muted);
         cursor: pointer;
         display: flex;
@@ -134,7 +131,6 @@
     &__item {
         align-items: center;
         border: 1px solid transparent;
-        border-radius: calc(var(--cp-radius) - 4px);
         cursor: pointer;
         display: flex;
         gap: 0.75rem;
@@ -202,7 +198,6 @@
         kbd {
             background: #f1f5f9;
             border: 1px solid var(--cp-border);
-            border-radius: 3px;
             font-family: inherit;
             font-size: 0.6875rem;
             padding: 0.1rem 0.3rem;
@@ -233,10 +228,5 @@
     .component.component-command-palette {
         --cp-width: 100vw;
         --cp-max-height: 80vh;
-
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-        border-top-left-radius: var(--cp-radius);
-        border-top-right-radius: var(--cp-radius);
     }
 }

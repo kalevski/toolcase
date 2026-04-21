@@ -9,8 +9,7 @@
     --ni-bg: #ffffff;
     --ni-btn-bg: #f8fafc;
     --ni-btn-hover-bg: #f1f5f9;
-    --ni-error-border: #dc2626;
-    --ni-radius: var(--rc-radius-md, 0.5rem);
+    --ni-error-border: #ef4444;
     --ni-transition: 0.15s ease;
     --ni-height: 2.5rem;
 
@@ -24,7 +23,6 @@
         align-items: stretch;
         background: var(--ni-bg);
         border: 1px solid var(--ni-border);
-        border-radius: var(--ni-radius);
         display: flex;
         overflow: hidden;
         transition: border-color var(--ni-transition);

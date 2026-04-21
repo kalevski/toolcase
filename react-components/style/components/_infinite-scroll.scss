@@ -1,0 +1,29 @@
+// ── InfiniteScroll ────────────────────────────────────────────────────────────
+
+.component.component-infinite-scroll {
+    --is-loader-padding: 1.5rem;
+    --is-end-padding:    1rem;
+    --is-text-color:     #64748b;
+}
+
+.component-infinite-scroll {
+    &__sentinel {
+        height: 1px;
+        visibility: hidden;
+    }
+
+    &__loader {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: var(--is-loader-padding);
+    }
+
+    &__end {
+        display: flex;
+        justify-content: center;
+        padding: var(--is-end-padding);
+        color: var(--is-text-color);
+        font-size: 0.875rem;
+    }
+}

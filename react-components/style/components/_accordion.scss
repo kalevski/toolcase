@@ -6,7 +6,6 @@
     --ac-border: #e2e8f0;
     --ac-hover-bg: #f8fafc;
     --ac-active-bg: #f1f5f9;
-    --ac-radius: var(--rc-radius-md, 0.5rem);
     --ac-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
     display: flex;
@@ -17,7 +16,6 @@
 .component-accordion {
     &--bordered .component-accordion__item {
         border: 1px solid var(--ac-border);
-        border-radius: var(--ac-radius);
         margin-bottom: 0.5rem;
         overflow: hidden;
 
@@ -90,25 +88,41 @@
     }
 
     &__panel {
-        overflow: hidden;
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows var(--ac-transition);
 
-        &[hidden] {
-            display: none;
+        &[aria-hidden="false"] {
+            grid-template-rows: 1fr;
         }
     }
 
+    &__item--open &__panel {
+        grid-template-rows: 1fr;
+    }
+
     &__content {
+        overflow: hidden;
         color: var(--ac-muted);
         font-size: 0.875rem;
         line-height: 1.6;
         padding: 0 1rem 1rem;
+        visibility: hidden;
+        transition: visibility 0s var(--ac-transition);
+    }
+
+    &__item--open &__content {
+        visibility: visible;
+        transition: visibility 0s;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .component-accordion {
         &__trigger,
-        &__chevron {
+        &__chevron,
+        &__panel,
+        &__content {
             transition: none;
         }
     }

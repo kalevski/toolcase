@@ -1,0 +1,80 @@
+// ── ResizablePanel ────────────────────────────────────────────────────────────
+
+.component.component-resizable-panel {
+    --rp-divider-size:    6px;
+    --rp-divider-bg:      #e2e8f0;
+    --rp-divider-hover:   #cbd5e1;
+    --rp-handle-color:    #94a3b8;
+    --rp-transition:      0.1s ease;
+
+    display: flex;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.component-resizable-panel {
+    &--vertical {
+        flex-direction: column;
+    }
+
+    &__pane {
+        overflow: hidden;
+        min-width: 0;
+        min-height: 0;
+        flex-shrink: 0;
+    }
+
+    &__divider {
+        flex-shrink: 0;
+        background: var(--rp-divider-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background var(--rp-transition);
+        user-select: none;
+
+        .component-resizable-panel--horizontal & {
+            width: var(--rp-divider-size);
+            height: 100%;
+            cursor: col-resize;
+        }
+
+        .component-resizable-panel--vertical & {
+            height: var(--rp-divider-size);
+            width: 100%;
+            cursor: row-resize;
+        }
+
+        &:hover,
+        &:focus-visible {
+            background: var(--rp-divider-hover);
+            outline: none;
+        }
+
+        &:focus-visible {
+            outline: 2px solid #1e293b;
+            outline-offset: 0;
+        }
+    }
+
+    &__handle {
+        background: var(--rp-handle-color);
+
+        .component-resizable-panel--horizontal & {
+            width: 2px;
+            height: 2rem;
+        }
+
+        .component-resizable-panel--vertical & {
+            height: 2px;
+            width: 2rem;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-resizable-panel__divider {
+        transition: none;
+    }
+}

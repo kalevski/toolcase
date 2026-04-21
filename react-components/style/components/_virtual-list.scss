@@ -1,0 +1,28 @@
+// ── VirtualList ───────────────────────────────────────────────────────────────
+
+.component.component-virtual-list {
+    --vl-scrollbar-w:    6px;
+    --vl-thumb-bg:       #cbd5e1;
+
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vl-thumb-bg) transparent;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+        width: var(--vl-scrollbar-w);
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: var(--vl-thumb-bg);
+        border-radius: 100px;
+    }
+}
+
+.component-virtual-list {
+    &__row {
+        box-sizing: border-box;
+    }
+}

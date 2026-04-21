@@ -166,6 +166,15 @@ Prefix all custom properties with `--{abbreviated-name}-`:
 Use the pattern `--{abbreviated}-{semantic}` where semantic is one of:
 `color`, `muted`, `border`, `bg`, `hover-bg`, `active-color`, `active-border`, `transition`, `shadow`, `radius`.
 
+### Border radius — NEVER use
+
+**Do not add `border-radius` to any component.** All elements use sharp, square corners by design. This is a hard rule, not a preference.
+
+- Do not add `border-radius` to containers, inputs, buttons, dropdowns, panels, tooltips, or any rectangular element.
+- Do not define a `--xxx-radius` CSS custom property on components.
+- Do not reference `var(--rc-radius-*)` in component files.
+- **Exception:** `border-radius: 50%` is allowed only on elements whose shape is intentionally circular (spinner rings, slider thumbs, stepper step indicators, carousel dots and arrow buttons, lightbox close/arrow buttons). These are shape-defining, not decorative rounding.
+
 ### Color values
 
 - Use the SCSS `$variable` values from `_colors.scss` inside SCSS variables and mixins.
@@ -379,6 +388,7 @@ Do not invent z-index values. Use these defined layers:
 | One SCSS file per component | Put all styles in one global file |
 | `min-height: 44px` on touch targets | Fixed `height: 36px` on interactive elements |
 | `outline: 2px solid ... ` on `:focus-visible` | `outline: none` without a replacement |
+| Sharp square corners everywhere | `border-radius` on any rectangular element |
 
 ---
 

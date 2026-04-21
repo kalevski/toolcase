@@ -13,7 +13,7 @@
     --sl-tick-color: #94a3b8;
     --sl-tooltip-bg: #1e293b;
     --sl-tooltip-color: #ffffff;
-    --sl-error-color: #dc2626;
+    --sl-error-color: #ef4444;
     --sl-transition: 0.15s ease;
 
     display: flex;
@@ -73,7 +73,6 @@
 
     &__track {
         background: var(--sl-track-bg);
-        border-radius: 9999px;
         height: var(--sl-track-height);
         position: relative;
         width: 100%;
@@ -81,7 +80,6 @@
 
     &__fill {
         background: var(--sl-fill-bg);
-        border-radius: 9999px;
         height: 100%;
         pointer-events: none;
         transition: width var(--sl-transition);
@@ -113,7 +111,6 @@
     // Tooltip above the thumb
     &__tooltip {
         background: var(--sl-tooltip-bg);
-        border-radius: 4px;
         bottom: calc(100% + 8px);
         color: var(--sl-tooltip-color);
         font-size: 0.75rem;

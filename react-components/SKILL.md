@@ -54,6 +54,21 @@ A complete guide to every component in the library. Import any component from `@
   - [Stepper](#stepper)
   - [TabSections](#tabsections)
   - [Toast](#toast)
+  - [RangeSlider](#rangeslider)
+  - [Rating](#rating)
+  - [OTPInput](#otpinput)
+  - [PhoneInput](#phoneinput)
+  - [TreeView](#treeview)
+  - [ScrollArea](#scrollarea)
+  - [ResizablePanel](#resizablepanel)
+  - [VirtualList](#virtuallist)
+  - [InfiniteScroll](#infinitescroll)
+  - [TimePicker](#timepicker)
+  - [MarkdownEditor](#markdowneditor)
+  - [Carousel](#carousel)
+  - [ImageCrop](#imagecrop)
+  - [Lightbox](#lightbox)
+  - [Banner](#banner)
 - [Navigation](#navigation)
   - [CoolNav](#coolnav)
   - [Pagination](#pagination)
@@ -2371,4 +2386,323 @@ const [volume, setVolume] = useState(60)
   ticks
   formatValue={(v) => `${v}★`}
 />
+```
+
+
+---
+
+### RangeSlider
+
+Dual-thumb range slider for selecting a numeric interval.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `[number, number]` | ✅ | Current selection |
+| `onChange` | `(v: [number, number]) => void` | ✅ | Called on thumb move |
+| `min` | `number` | ❌ | Track minimum (default: `0`) |
+| `max` | `number` | ❌ | Track maximum (default: `100`) |
+| `step` | `number` | ❌ | Step size (default: `1`) |
+| `ticks` | `boolean` | ❌ | Show tick marks |
+| `label` | `string` | ❌ | Label above track |
+| `error` | `string` | ❌ | Error message |
+| `disabled` | `boolean` | ❌ | Disables interaction |
+
+```tsx
+import { RangeSlider } from '@toolcase/react-components'
+const [range, setRange] = useState<[number, number]>([20, 80])
+<RangeSlider label="Price" value={range} onChange={setRange} min={0} max={500} />
+```
+
+---
+
+### Rating
+
+Star rating with hover preview and optional half-star support.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `number` | ✅ | Current rating |
+| `onChange` | `(v: number) => void` | ❌ | Called on selection |
+| `count` | `number` | ❌ | Total stars (default: `5`) |
+| `allowHalf` | `boolean` | ❌ | Allow half-star values |
+| `readOnly` | `boolean` | ❌ | No interaction |
+| `size` | `'small' | 'default' | 'large'` | ❌ | Icon size |
+| `label` | `string` | ❌ | Accessible group label |
+
+```tsx
+import { Rating } from '@toolcase/react-components'
+const [stars, setStars] = useState(0)
+<Rating label="Rate" value={stars} onChange={setStars} allowHalf />
+```
+
+---
+
+### OTPInput
+
+Per-digit OTP input with auto-focus, paste support, and masking.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `string` | ✅ | Controlled OTP string |
+| `onChange` | `(v: string) => void` | ✅ | Called on change |
+| `length` | `number` | ❌ | Number of cells (default: `6`) |
+| `mode` | `'numeric' | 'alphanumeric'` | ❌ | Accepted chars |
+| `masked` | `boolean` | ❌ | Password-dot rendering |
+| `label` | `string` | ❌ | Label |
+| `error` | `string` | ❌ | Error message |
+| `disabled` | `boolean` | ❌ | Disables all cells |
+
+```tsx
+import { OTPInput } from '@toolcase/react-components'
+const [otp, setOtp] = useState('')
+<OTPInput label="Code" length={6} value={otp} onChange={setOtp} />
+```
+
+---
+
+### PhoneInput
+
+Phone number field with built-in country selector (flag + dial code).
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `string` | ✅ | Controlled phone string |
+| `onChange` | `(v: string) => void` | ✅ | Called on change |
+| `defaultCountry` | `string` | ❌ | ISO-2 code (default: `'US'`) |
+| `label` | `string` | ❌ | Label |
+| `error` | `string` | ❌ | Error message |
+| `disabled` | `boolean` | ❌ | Disables input |
+
+```tsx
+import { PhoneInput } from '@toolcase/react-components'
+const [phone, setPhone] = useState('')
+<PhoneInput label="Phone" value={phone} onChange={setPhone} defaultCountry="US" />
+```
+
+---
+
+### TreeView
+
+Hierarchical collapsible tree with keyboard navigation and optional checkboxes.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `nodes` | `TreeNode[]` | ✅ | Root nodes |
+| `selected` | `string[]` | ✅ | Selected keys |
+| `onSelect` | `(keys: string[]) => void` | ✅ | Selection change |
+| `expanded` | `string[]` | ✅ | Expanded keys |
+| `onExpandChange` | `(keys: string[]) => void` | ✅ | Expand/collapse change |
+| `checkboxMode` | `boolean` | ❌ | Show checkboxes |
+
+```tsx
+import { TreeView, TreeNode } from '@toolcase/react-components'
+<TreeView nodes={nodes} selected={sel} onSelect={setSel} expanded={exp} onExpandChange={setExp} />
+```
+
+---
+
+### ScrollArea
+
+Styled scrollable container with custom thin scrollbar.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `maxHeight` | `number | string` | ❌ | Max height before scrolling |
+| `maxWidth` | `number | string` | ❌ | Max width before scrolling |
+| `axis` | `'x' | 'y' | 'both'` | ❌ | Scroll axis (default: `'y'`) |
+| `children` | `ReactNode` | ✅ | Content |
+
+```tsx
+import { ScrollArea } from '@toolcase/react-components'
+<ScrollArea maxHeight={300}>{content}</ScrollArea>
+```
+
+---
+
+### ResizablePanel
+
+Split-pane container with draggable divider; double-click resets sizes.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `children` | `[ReactNode, ReactNode]` | ✅ | Two panel contents |
+| `direction` | `'horizontal' | 'vertical'` | ❌ | Split direction |
+| `defaultSizes` | `[number, number]` | ❌ | Initial percentages |
+| `minSize` | `number` | ❌ | Min panel % (default: `10`) |
+| `storageKey` | `string` | ❌ | Persist sizes to localStorage |
+
+```tsx
+import { ResizablePanel } from '@toolcase/react-components'
+<ResizablePanel defaultSizes={[40, 60]} style={{ height: 300 }}>
+  <div>Left</div>
+  <div>Right</div>
+</ResizablePanel>
+```
+
+---
+
+### VirtualList
+
+Windowed list rendering — only visible rows are in the DOM.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `T[]` | ✅ | Full data array |
+| `itemHeight` | `number` | ✅ | Fixed row height in px |
+| `renderItem` | `(item: T, index: number) => ReactNode` | ✅ | Row renderer |
+| `height` | `number` | ✅ | Container height in px |
+| `overscan` | `number` | ❌ | Extra rows above/below |
+| `onEndReached` | `() => void` | ❌ | Called near end |
+
+```tsx
+import { VirtualList } from '@toolcase/react-components'
+<VirtualList items={data} itemHeight={60} height={400} renderItem={(item) => <div>{item.name}</div>} />
+```
+
+---
+
+### InfiniteScroll
+
+Triggers load-more via IntersectionObserver when a sentinel element enters view.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `onLoadMore` | `() => void` | ✅ | Called when more is needed |
+| `hasMore` | `boolean` | ✅ | Whether more content exists |
+| `loading` | `boolean` | ❌ | Shows loading indicator |
+| `children` | `ReactNode` | ✅ | Current list content |
+| `endSlot` | `ReactNode` | ❌ | Shown when `hasMore` is false |
+
+```tsx
+import { InfiniteScroll } from '@toolcase/react-components'
+<InfiniteScroll onLoadMore={loadMore} hasMore={hasMore} loading={loading}>
+  {items.map((i) => <div key={i.id}>{i.title}</div>)}
+</InfiniteScroll>
+```
+
+---
+
+### TimePicker
+
+Dropdown time picker with 12h/24h, minute steps, optional seconds, and clear.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `string` | ✅ | `HH:MM` or `HH:MM:SS` |
+| `onChange` | `(v: string) => void` | ✅ | Called on selection |
+| `format` | `'12h' | '24h'` | ❌ | Display format |
+| `minuteStep` | `number` | ❌ | Minute increment |
+| `showSeconds` | `boolean` | ❌ | Add seconds column |
+| `clearable` | `boolean` | ❌ | Show clear button |
+| `label` | `string` | ❌ | Label |
+| `error` | `string` | ❌ | Error message |
+| `disabled` | `boolean` | ❌ | Disables picker |
+
+```tsx
+import { TimePicker } from '@toolcase/react-components'
+const [time, setTime] = useState('09:00')
+<TimePicker label="Start" value={time} onChange={setTime} format="12h" minuteStep={15} clearable />
+```
+
+---
+
+### MarkdownEditor
+
+Write/preview Markdown editor with formatting toolbar. Preview sandboxed in iframe.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `string` | ✅ | Controlled Markdown |
+| `onChange` | `(v: string) => void` | ✅ | Called on change |
+| `height` | `number` | ❌ | Editor height in px |
+| `toolbar` | `boolean` | ❌ | Show formatting toolbar |
+| `placeholder` | `string` | ❌ | Textarea placeholder |
+| `label` | `string` | ❌ | Label |
+| `disabled` | `boolean` | ❌ | Read-only mode |
+
+```tsx
+import { MarkdownEditor } from '@toolcase/react-components'
+const [md, setMd] = useState('')
+<MarkdownEditor label="Description" value={md} onChange={setMd} height={360} toolbar />
+```
+
+---
+
+### Carousel
+
+Slide carousel with auto-play, touch/pointer swipe, dots, and arrows.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `children` | `ReactNode[]` | ✅ | Slide elements |
+| `autoPlay` | `boolean` | ❌ | Auto-advance slides |
+| `interval` | `number` | ❌ | Auto-play interval ms (default: `3000`) |
+| `showDots` | `boolean` | ❌ | Dot indicators |
+| `showArrows` | `boolean` | ❌ | Arrow buttons |
+| `loop` | `boolean` | ❌ | Wrap at ends |
+
+```tsx
+import { Carousel } from '@toolcase/react-components'
+<Carousel autoPlay loop showArrows showDots>
+  <img src="s1.jpg" alt="Slide 1" />
+  <img src="s2.jpg" alt="Slide 2" />
+</Carousel>
+```
+
+---
+
+### ImageCrop
+
+Canvas-based image cropper with pan/zoom, aspect ratio lock, and circular mask.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `src` | `string` | ✅ | Image URL |
+| `onCrop` | `(blob: Blob) => void` | ✅ | Result blob callback |
+| `aspectRatio` | `number` | ❌ | Lock aspect ratio (e.g. `16/9`) |
+| `circular` | `boolean` | ❌ | Circular crop mask |
+
+```tsx
+import { ImageCrop } from '@toolcase/react-components'
+<ImageCrop src="/photo.jpg" aspectRatio={1} circular onCrop={(b) => upload(b)} />
+```
+
+---
+
+### Lightbox
+
+Full-screen image viewer portal with keyboard navigation, thumbnails, and captions.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `images` | `LightboxImage[]` | ✅ | Array of `{ src, alt, caption? }` |
+| `open` | `boolean` | ✅ | Visibility flag |
+| `onClose` | `() => void` | ✅ | Close handler |
+| `initialIndex` | `number` | ❌ | Starting image index |
+
+```tsx
+import { Lightbox, LightboxImage } from '@toolcase/react-components'
+<Lightbox images={images} open={open} onClose={() => setOpen(false)} />
+```
+
+---
+
+### Banner
+
+Page-level informational banner with variants, dismiss, action, and localStorage persistence.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `children` | `ReactNode` | ✅ | Message content |
+| `variant` | `'info' | 'warning' | 'success' | 'error'` | ❌ | Visual style |
+| `dismissible` | `boolean` | ❌ | Show close button |
+| `storageKey` | `string` | ❌ | localStorage key to remember dismissal |
+| `action` | `ReactNode` | ❌ | Action element (e.g. a Button) |
+| `onDismiss` | `() => void` | ❌ | Called on dismiss |
+
+```tsx
+import { Banner } from '@toolcase/react-components'
+<Banner variant="info" dismissible storageKey="welcome">
+  New version available!
+</Banner>
 ```
