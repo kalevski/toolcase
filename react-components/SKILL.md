@@ -40,6 +40,7 @@ A complete guide to every component in the library. Import any component from `@
 - [Layout & Structure](#layout--structure)
   - [Card](#card)
   - [Divider](#divider)
+  - [Drawer](#drawer)
   - [Form](#form)
   - [Group](#group)
   - [Spacer](#spacer)
@@ -980,6 +981,33 @@ import { Tooltip, IconButton } from '@toolcase/react-components'
 ---
 
 ## Layout & Structure
+
+### Drawer
+
+A panel that slides in from the left, right, top, or bottom of the viewport, overlaying content. Supports focus trap, Escape to close, and an optional pinned (non-overlay) mode.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `open` | `boolean` | ✅ | Whether the drawer is visible |
+| `onClose` | `() => void` | ✅ | Called when backdrop or close button is clicked, or Escape is pressed |
+| `side` | `'left' \| 'right' \| 'top' \| 'bottom'` | ❌ | Which edge the panel slides in from (default: `'right'`) |
+| `size` | `'small' \| 'default' \| 'large'` | ❌ | Panel width (left/right) or height (top/bottom) (default: `'default'`) |
+| `title` | `string` | ❌ | Header title text; renders a header bar with a close button |
+| `pinned` | `boolean` | ❌ | Non-overlay mode: no backdrop, body scroll not locked (default: `false`) |
+| `children` | `ReactNode` | ❌ | Panel content |
+| `className` | `string` | ❌ | Additional class on the panel element |
+
+```tsx
+import { Drawer } from '@toolcase/react-components'
+
+const [open, setOpen] = useState(false)
+
+<Drawer open={open} onClose={() => setOpen(false)} title="Settings" side="right">
+  <p>Drawer content here.</p>
+</Drawer>
+```
+
+---
 
 ### Card
 

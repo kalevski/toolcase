@@ -8,6 +8,7 @@ export interface TableColumn<T = any> {
 	width?: string
 	align?: 'left' | 'center' | 'right'
 	headerAlign?: 'left' | 'center' | 'right'
+	ariaSort?: 'ascending' | 'descending' | 'none'
 }
 
 export interface TableProps<T = any> extends HTMLAttributes<HTMLDivElement> {
@@ -63,6 +64,7 @@ export const Table: FC<TableProps> = ({
 							<th
 								key={col.key}
 								className="component-table__th"
+								aria-sort={col.ariaSort}
 								style={{
 									width: col.width,
 									textAlign: col.headerAlign ?? col.align ?? 'left',

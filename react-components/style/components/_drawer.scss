@@ -1,0 +1,213 @@
+// ── Drawer ───────────────────────────────────────────────────────────────────
+
+.component-drawer {
+	--dr-bg: #ffffff;
+	--dr-border: #e2e8f0;
+	--dr-title-color: #1e293b;
+	--dr-muted: #64748b;
+	--dr-backdrop: rgba(0, 0, 0, 0.4);
+	--dr-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+	--dr-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	--dr-header-height: 3.25rem;
+
+	// Backdrop
+	position: fixed;
+	inset: 0;
+	z-index: 1050;
+	background: var(--dr-backdrop);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity var(--dr-transition);
+
+	&--open {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	// In pinned mode there is no backdrop overlay
+	&--pinned {
+		background: transparent;
+		pointer-events: none;
+	}
+}
+
+.component-drawer__panel {
+	position: fixed;
+	background: var(--dr-bg);
+	box-shadow: var(--dr-shadow);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	pointer-events: auto;
+	transition: transform var(--dr-transition);
+	will-change: transform;
+
+	// ── Side variants ──────────────────────────────────────────────────────
+
+	&--left,
+	&--right {
+		top: 0;
+		bottom: 0;
+		width: 400px; // default
+	}
+
+	&--left {
+		left: 0;
+		border-right: 1px solid var(--dr-border);
+		transform: translateX(-100%);
+
+		&.component-drawer__panel--open {
+			transform: translateX(0);
+		}
+	}
+
+	&--right {
+		right: 0;
+		border-left: 1px solid var(--dr-border);
+		transform: translateX(100%);
+
+		&.component-drawer__panel--open {
+			transform: translateX(0);
+		}
+	}
+
+	&--top,
+	&--bottom {
+		left: 0;
+		right: 0;
+		height: 320px; // default
+	}
+
+	&--top {
+		top: 0;
+		border-bottom: 1px solid var(--dr-border);
+		transform: translateY(-100%);
+
+		&.component-drawer__panel--open {
+			transform: translateY(0);
+		}
+	}
+
+	&--bottom {
+		bottom: 0;
+		border-top: 1px solid var(--dr-border);
+		transform: translateY(100%);
+
+		&.component-drawer__panel--open {
+			transform: translateY(0);
+		}
+	}
+
+	// ── Size variants (width for left/right, height for top/bottom) ────────
+
+	&--left.component-drawer__panel--small,
+	&--right.component-drawer__panel--small {
+		width: 280px;
+	}
+
+	&--left.component-drawer__panel--large,
+	&--right.component-drawer__panel--large {
+		width: 560px;
+	}
+
+	&--top.component-drawer__panel--small,
+	&--bottom.component-drawer__panel--small {
+		height: 200px;
+	}
+
+	&--top.component-drawer__panel--large,
+	&--bottom.component-drawer__panel--large {
+		height: 480px;
+	}
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+
+.component-drawer__header {
+	align-items: center;
+	border-bottom: 1px solid var(--dr-border);
+	display: flex;
+	flex-shrink: 0;
+	gap: 0.5rem;
+	height: var(--dr-header-height);
+	padding: 0 1rem;
+}
+
+.component-drawer__title {
+	color: var(--dr-title-color);
+	flex: 1;
+	font-size: 0.9375rem;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.component-drawer__close {
+	align-items: center;
+	background: none;
+	border: none;
+	border-radius: var(--rc-radius-sm, 4px);
+	color: var(--dr-muted);
+	cursor: pointer;
+	display: flex;
+	flex-shrink: 0;
+	height: 2rem;
+	justify-content: center;
+	padding: 0;
+	transition: color 0.15s ease, background-color 0.15s ease;
+	width: 2rem;
+
+	&:hover {
+		background: #f1f5f9;
+		color: var(--dr-title-color);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--rc-focus-ring, #1e293b);
+		outline-offset: 2px;
+	}
+}
+
+// ── Body ────────────────────────────────────────────────────────────────────
+
+.component-drawer__body {
+	flex: 1;
+	overflow-y: auto;
+	padding: 1rem;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+}
+
+// ── Responsive ──────────────────────────────────────────────────────────────
+
+@media (max-width: 576px) {
+	.component-drawer__panel {
+		&--left,
+		&--right {
+			width: 100% !important;
+		}
+
+		&--top,
+		&--bottom {
+			height: 75vh !important;
+		}
+	}
+}
+
+// Touch targets
+@media (pointer: coarse) {
+	.component-drawer__close {
+		min-width: 44px;
+		min-height: 44px;
+	}
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+	.component-drawer,
+	.component-drawer__panel {
+		transition: none;
+	}
+}

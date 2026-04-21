@@ -76,6 +76,7 @@ export function AdvancedTable<T = any>({
 
 		return {
 			...col,
+			ariaSort: isActive ? (direction === 'asc' ? 'ascending' : 'descending') : 'none',
 			header: (
 				<button type="button" className="component-advanced-table__sort-btn" onClick={handleSort}>
 					{col.header}

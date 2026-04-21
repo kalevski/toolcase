@@ -9,7 +9,6 @@
 
 	position: relative;
 	margin: 0.5rem;
-	max-width: 300px;
 	width: calc(100% - 1rem);
 }
 
@@ -75,7 +74,7 @@
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 		list-style: none;
 		margin: 0.25rem 0 0;
-		max-height: 240px;
+		max-height: min(240px, 60vh);
 		overflow-y: auto;
 		padding: 0.25rem;
 		position: absolute;

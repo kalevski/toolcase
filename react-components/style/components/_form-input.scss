@@ -50,7 +50,7 @@
 	.component-extended-select, .component-dropdown {
 		margin: 0;
 		width: 100%;
-    	max-width: 480px;
+    	max-width: min(480px, 100%);
 	}
 
 	input:hover {

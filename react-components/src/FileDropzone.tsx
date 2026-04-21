@@ -38,9 +38,23 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({ className = '', onFi
 		}
 	}, [accept, onFiles])
 
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault()
+			dropzoneRef.current?.click()
+		}
+	}
+
 	return (
 		<div className={`component component-file-dropzone ${className}`}>
-			<div ref={dropzoneRef} className="component-file-dropzone__dropzone">
+			<div
+				ref={dropzoneRef}
+				className="component-file-dropzone__dropzone"
+				tabIndex={0}
+				role="button"
+				aria-label="Drop files here or press Enter to upload"
+				onKeyDown={handleKeyDown}
+			>
 				<div className="component-file-dropzone__upload_text">
 					Drop files here <b>or</b> Click to upload
 				</div>

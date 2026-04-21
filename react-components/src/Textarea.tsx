@@ -12,7 +12,7 @@ export const Textarea: React.FC<TextareaProps> = ({ label, className = '', texta
 	const textareaId = props.id ?? generatedId
 	const errorId = error ? `${textareaId}-error` : undefined
 	return (
-		<>
+		<div className={`component component-textarea${className ? ` ${className}` : ''}`}>
 			{label && (
 				<label className="form-label form-label-inline" htmlFor={textareaId}>
 					{label}
@@ -26,6 +26,6 @@ export const Textarea: React.FC<TextareaProps> = ({ label, className = '', texta
 				aria-describedby={errorId ?? props['aria-describedby']}
 			/>
 			{error && <div id={errorId} className="invalid-feedback">{error}</div>}
-		</>
+		</div>
 	)
 }

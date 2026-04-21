@@ -1,286 +1,483 @@
----
-description: Creates new React components for the @toolcase/react-components package following the established project conventions, including the component source, SCSS styles, barrel export, and an example demo page.
----
+# components.agent.md — AI Guide for Generating Components
 
-# React Component Agent
-
-You are an expert at creating React components for the **@toolcase/react-components** monorepo package. You understand every convention used in this codebase and will produce consistent, production-ready output.
+This file is the authoritative guide for any AI agent generating or modifying components in `@toolcase/react-components`. Follow every rule here exactly. If something is ambiguous, choose the most conservative option and ask.
 
 ---
 
-## Project Structure
+## 1. Repository Layout
 
 ```
-react-components/
-  src/            ← Component source (.tsx)
-  style/
-    components/   ← SCSS partials (_component-name.scss)
-      index.scss  ← Barrel that @use's every partial
-  src/index.ts    ← Barrel that re-exports every component
-
-examples/
-  src/
-    react-components/   ← Demo pages (ComponentNameDemo.tsx)
-      index.tsx         ← Registry of all demos (imports + examples array)
+src/                    ← One .tsx file per component (PascalCase)
+  ComponentName.tsx
+  hooks/                ← Shared hooks (e.g. useClickOutside)
+  modal/                ← Multi-file subsystem (ModalContext, ModalRender, Window, hooks, index)
+style/
+  _brand.scss           ← Primary gradient mixin + gradient variables
+  _colors.scss          ← Full color palette ($gray-50…$gray-900, etc.)
+  _reset.scss           ← Bootstrap resets (border-radius, outline)
+  _z-index.scss         ← Z-index token map
+  components/           ← One _component-name.scss per component
+    index.scss          ← @forward / @use all component files
+  layouts/              ← One _layout-name.scss per layout
+    index.scss
+  index.scss            ← Root entry that @use all partials
 ```
+
+**Rules:**
+- Every new component = one `.tsx` in `src/` + one `_component-name.scss` in `style/components/`.
+- Add the SCSS file to `style/components/index.scss`.
+- Add the export to `src/index.ts`.
+- Never import SCSS inside `.tsx` files.
+- **Final step:** Add a demo in `examples/src/react-components/{ComponentName}Demo.tsx` and register it in `examples/src/react-components/index.tsx`.
 
 ---
 
-## Step-by-step: Creating a New Component
+## 2. TypeScript Patterns
 
-When the user asks you to create a component called **ComponentName**, carry out **all** of the following steps in order.
-
-### 1. Create the component file
-
-**File:** `react-components/src/ComponentName.tsx`
-
-Follow these conventions exactly:
-
-- **Import React** as the first line: `import React from 'react'`
-- **Export a props interface** named `ComponentNameProps`.
-  - Extend the appropriate native HTML attributes type when it makes sense (e.g. `React.HTMLAttributes<HTMLDivElement>`, `React.ButtonHTMLAttributes<HTMLButtonElement>`).
-  - Include a `className?: string` prop (or inherit it from the HTML attributes type).
-  - Include a `children?: React.ReactNode` prop when the component wraps content.
-  - For text-bearing components add a `label?: string` prop as an alternative to `children`.
-  - Add a `variant` prop typed as a string-union when colour variations make sense:
-    `variant?: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'`
-  - Add a `size` prop when size variations make sense:
-    `size?: 'small' | 'default' | 'large'`
-  - Default values go in the destructured parameter list, **not** via `defaultProps`.
-- **Export a named const** arrow-function component typed as `React.FC<ComponentNameProps>`.
-- **Build the root CSS class** using the BEM-like naming convention:
-  ```
-  component component-{kebab-name}
-  ```
-  Modifier classes follow `component-{kebab-name}--{modifier}`.
-  Child element classes follow `component-{kebab-name}__{element}`.
-- Use one of the two class-building patterns already present in the codebase:
-  - **Array + filter + join** (preferred for multiple modifiers):
-    ```ts
-    const rootClass = [
-      'component component-{kebab-name}',
-      `component-{kebab-name}--${variant}`,
-      disabled ? 'component-{kebab-name}--disabled' : '',
-      className,
-    ].filter(Boolean).join(' ')
-    ```
-  - **Template string** (OK for simple cases):
-    ```ts
-    const rootClass = `${className || ''} component component-{kebab-name} ...`.trim()
-    ```
-- **Spread remaining HTML props** onto the root element using `...props` (rest-spread from destructuring).
-- Do **not** use `forwardRef` unless the user explicitly asks for ref forwarding.
-- Use **tabs** for indentation (the project uses tabs).
-
-#### Example skeleton
+### Interface
 
 ```tsx
-import React from 'react'
-
-export interface ComponentNameProps extends React.HTMLAttributes<HTMLDivElement> {
-	children?: React.ReactNode
-	label?: string
-	variant?: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
-	size?: 'small' | 'default' | 'large'
+// ✅ Extend HTML attributes when the root element is an HTML element
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+    children?: React.ReactNode
+    variant?: 'primary' | 'secondary' | 'danger'
+    size?: 'small' | 'default' | 'large'
 }
 
-export const ComponentName: React.FC<ComponentNameProps> = ({
-	children,
-	label,
-	variant = 'primary',
-	size = 'default',
-	className = '',
-	...props
-}) => {
-	const rootClass = [
-		'component component-{kebab-name}',
-		`component-{kebab-name}--${variant}`,
-		`component-{kebab-name}--${size}`,
-		className,
-	].filter(Boolean).join(' ')
-
-	return (
-		<div {...props} className={rootClass}>
-			<span className="component-{kebab-name}__label">{label ?? children}</span>
-		</div>
-	)
+// ✅ Use Omit when overriding an existing HTML attribute with a different type
+export interface DropdownProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+    onChange?: (key: string) => void
 }
 ```
 
+### Component declaration
+
+```tsx
+// ✅ Use React.FC for components that don't need ref forwarding
+export const Badge: React.FC<BadgeProps> = ({ ... }) => { ... }
+
+// ✅ Use React.forwardRef when the root is an HTML element that callers may ref
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ ... }, ref) => { ... })
+Input.displayName = 'Input'
+```
+
+### ID generation
+
+```tsx
+// ✅ Always use useId() — never require callers to pass IDs
+const generatedId = useId()
+const inputId = props.id ?? generatedId
+const errorId = error ? `${inputId}-error` : undefined
+```
+
+### Controlled / uncontrolled
+
+- Prefer fully controlled components (`value` + `onChange`).
+- Never mix controlled and uncontrolled state in the same component.
+- `onChange` callbacks should be typed precisely — not `React.ChangeEvent<HTMLInputElement>` when the contract is `(value: string) => void`.
+
 ---
 
-### 2. Create the SCSS style partial
+## 3. CSS Class Naming Convention
 
-**File:** `react-components/style/components/_component-name.scss`
+All class names follow a strict BEM-style prefix scheme:
 
-Follow these conventions:
+```
+.component                          ← always present on the root element (joint class)
+.component-{name}                   ← root modifier namespace (joint class with .component)
+.component-{name}__{part}          ← child element
+.component-{name}--{modifier}      ← state or variant modifier on root
+.component-{name}__{part}--{state} ← state on a child
+```
 
-- Start with a section comment: `// ── ComponentName ──────…`
-- Root selector is `.component.component-{kebab-name}`.
-- Define CSS custom properties (`--{kebab-name}-*`) at the root for colours, sizes, and transitions.
-- Modifier selectors live inside the root block using `&.component-{kebab-name}--{modifier}`.
-- Child elements use separate top-level selectors: `.component-{kebab-name}__{element}`.
-- Use the colour palette already established in the project (slate/indigo tones, etc.).
+**Root element always gets two classes:**
+```tsx
+<div className={`component component-dropdown ${className || ''}`}>
+```
 
-#### Example skeleton
+**Example:**
+```html
+<div class="component component-dropdown component-dropdown--open">
+  <button class="component-dropdown__trigger">…</button>
+  <ul class="component-dropdown__list">
+    <li class="component-dropdown__option component-dropdown__option--active">…</li>
+    <li class="component-dropdown__option component-dropdown__option--disabled">…</li>
+  </ul>
+</div>
+```
+
+**Do not:**
+- Use Tailwind utility classes in component `.tsx` files
+- Use inline `style` props for anything that could be a CSS class
+- Use camelCase class names
+
+---
+
+## 4. SCSS File Structure
+
+Every component SCSS file follows this template:
 
 ```scss
-// ── ComponentName ──────────────────────────────────────────────────────────────
+// ── ComponentName ───────────────────────────────────────────────────────────
 
-.component.component-{kebab-name} {
-	--{kebab-name}-bg: #f1f5f9;
-	--{kebab-name}-border: #e2e8f0;
-	--{kebab-name}-text: #475569;
-	--{kebab-name}-transition: 0.15s ease;
+.component.component-{name} {
+    // CSS custom properties (design tokens for this component)
+    --cn-color: #1e293b;
+    --cn-muted: #64748b;
+    --cn-border: #e2e8f0;
+    --cn-hover-bg: #f8fafc;
+    --cn-transition: 0.15s ease;
 
-	display: inline-flex;
-	align-items: center;
-	// ... layout rules
-
-	&.component-{kebab-name}--primary   { /* variant overrides */ }
-	&.component-{kebab-name}--secondary { /* variant overrides */ }
-
-	&.component-{kebab-name}--small   { /* size overrides */ }
-	&.component-{kebab-name}--large   { /* size overrides */ }
-
-	&.component-{kebab-name}--disabled {
-		opacity: 0.55;
-		cursor: not-allowed;
-		pointer-events: none;
-	}
+    // Base layout for root element
+    position: relative;
 }
 
-.component-{kebab-name}__label {
-	white-space: nowrap;
+.component-{name} {
+    // All child selectors nested here
+
+    &__{part} {
+        // Child element styles
+    }
+
+    &--{modifier} {
+        // Root modifier styles
+    }
+}
+
+// Responsive overrides — mobile-first, exceptions for wider screens
+@media (max-width: 576px) {
+    .component-{name} { ... }
 }
 ```
 
+### CSS Custom Property naming
+
+Prefix all custom properties with `--{abbreviated-name}-`:
+
+| Component | Prefix |
+|-----------|--------|
+| Dropdown | `--rc-dropdown-` |
+| AdvancedTable | `--at-` |
+| Pagination | `--pg-` |
+| SideNav | `--side-nav-` |
+| FormInput | `--fi-` |
+| ExtendedSelect | `--es-` |
+
+Use the pattern `--{abbreviated}-{semantic}` where semantic is one of:
+`color`, `muted`, `border`, `bg`, `hover-bg`, `active-color`, `active-border`, `transition`, `shadow`, `radius`.
+
+### Color values
+
+- Use the SCSS `$variable` values from `_colors.scss` inside SCSS variables and mixins.
+- For CSS custom properties inside component rules, use literal hex values that correspond to the palette (they will be replaced when CSS-01 migration is complete).
+- Preferred neutral values: `#1e293b` (dark text), `#64748b` (muted), `#94a3b8` (faint), `#e2e8f0` (border), `#f8fafc` (surface), `#ffffff` (white).
+
 ---
 
-### 3. Register the SCSS partial
+## 5. Responsiveness Rules
 
-**File:** `react-components/style/components/index.scss`
+### Breakpoints
 
-Add a `@use` line at the **end** of the file:
+| Name | Value | When to use |
+|------|-------|-------------|
+| xs | 400px | Very small phones (SE, old Androids) |
+| sm | 576px | Phones in portrait |
+| md | 768px | Tablets / large phones in landscape |
+| lg | 992px | Desktop layout switch |
+| xl | 1200px | Wide desktop |
+
+Apply mobile-first: define the base style for mobile, override for larger screens.
 
 ```scss
-@use './component-name';
+// ✅ Mobile-first
+.component-card {
+    padding: 0.75rem;           // mobile
+    @media (min-width: 576px) {
+        padding: 1.25rem;       // tablet+
+    }
+}
+
+// ❌ Desktop-first (don't do this)
+.component-card {
+    padding: 1.25rem;
+    @media (max-width: 576px) {
+        padding: 0.75rem;
+    }
+}
+```
+
+### Touch targets
+
+On `@media (pointer: coarse)` all clickable/tappable elements must be `min-width: 44px; min-height: 44px` (WCAG 2.5.5).
+
+### Scrollable containers
+
+```scss
+overflow-x: auto;
+-webkit-overflow-scrolling: touch;
+scrollbar-width: thin;
 ```
 
 ---
 
-### 4. Export from the barrel
+## 6. Accessibility Requirements (Non-Negotiable)
 
-**File:** `react-components/src/index.ts`
+Every component must follow these rules before being considered complete:
 
-Add a re-export at the appropriate position (alphabetically or at the end before the Modal namespace export):
+### Form controls
+- Every input must have an associated `<label>` via `htmlFor` / `useId()`.
+- Error state: add `aria-invalid={true}` and `aria-describedby={errorId}` pointing to the error message element.
+- Required fields: add `aria-required={true}` on the input, and visually indicate with an asterisk.
 
-```ts
-export * from './ComponentName'
+### Interactive elements
+- All interactive non-button elements that act as buttons must have `role="button"` and `tabIndex={0}`.
+- All buttons must be actual `<button>` elements (not `<div>` or `<span>`).
+- Focus ring: every interactive element must have a visible `:focus-visible` style — use `outline: 2px solid #1e293b; outline-offset: 2px`.
+- Never remove focus ring without providing an equivalent visible alternative.
+
+### Dropdowns / listboxes
+```tsx
+// Trigger button
+aria-expanded={open}
+aria-haspopup="listbox"
+aria-controls={listId}
+aria-activedescendant={activeItemId}
+
+// List
+role="listbox"
+id={listId}
+
+// Item
+role="option"
+aria-selected={isActive}
+aria-disabled={isDisabled || undefined}
+```
+
+### Dialogs (Modal)
+```tsx
+role="dialog"
+aria-modal="true"
+aria-labelledby={titleId}   // ID of the modal's <h*> title element
+tabIndex={-1}               // so it can receive programmatic focus
+```
+On open: move focus into the dialog (`ref.current?.focus()`).  
+On close: return focus to the trigger element.
+
+### Sortable tables
+```tsx
+// On the <th> button when column is sortable:
+aria-sort={col.sortDir ?? 'none'}  // 'ascending' | 'descending' | 'none'
+```
+
+### Icons
+```tsx
+// Decorative icon (has adjacent text label)
+<Icon name="chevron-down" aria-hidden={true} />
+
+// Standalone icon (no text label)
+<Icon name="close" aria-label="Close" />
+```
+
+### Live regions
+```tsx
+// Status messages that update dynamically
+<div role="status" aria-live="polite">Loading…</div>
+
+// Urgent error messages
+<div role="alert" aria-live="assertive">Error occurred</div>
 ```
 
 ---
 
-### 5. Create the demo page
+## 7. State Patterns
 
-**File:** `examples/src/react-components/ComponentNameDemo.tsx`
+### Loading state
 
-Follow these conventions:
+Use the `<Skeleton />` component — not spinners — for field-level loading states.  
+Use `<Spinner />` for overlay/full-component loading.
 
-- Import React and the component (plus `Card` and `CodeSnippet`) from `@toolcase/react-components`.
-- Default-export a `React.FC` named **ComponentNameDemo**.
-- Use the standard layout structure:
-  ```tsx
-  <div className="container my-5">
-    {/* Header */}
-    <div className="row mb-4">
-      <div className="col-12">
-        <h1 className="display-4 text-gradient-primary mb-2">ComponentName</h1>
-        <p className="text-muted mb-0">Short one-line description.</p>
-      </div>
+```tsx
+if (loading) {
+    return (
+        <div className={rootClassName}>
+            <Skeleton />
+        </div>
+    )
+}
+```
+
+### Error state
+
+```tsx
+{error && (
+    <div id={errorId} className="invalid-feedback d-block">
+        {error}
     </div>
-    {/* Sections */}
-    <div className="row mb-5">
-      <div className="col-lg-8">   {/* or col-12 */}
-        <Card>
-          <h2 className="h5 mb-3">Section Title</h2>
-          {/* demo content */}
-        </Card>
-      </div>
-    </div>
-    {/* Usage code snippet at the end */}
-    <div className="row mb-5">
-      <div className="col-12">
-        <Card>
-          <h2 className="h5 mb-3">Usage</h2>
-          <CodeSnippet language="typescript" code={`import { ComponentName } from '@toolcase/react-components'\n\n<ComponentName ... />`} />
-        </Card>
-      </div>
-    </div>
-  </div>
-  ```
-- Show **all** variants, sizes, states (disabled, active, etc.) in separate `<Card>` sections.
-- If the component has interactive state (selected, checked, open), use `useState` to make the demo functional.
-- Wrap flex items in `<div className="d-flex flex-wrap gap-2">` or `gap-3` / `flex-column` as appropriate.
+)}
+```
+
+### Open/closed state (dropdowns, modals)
+
+```tsx
+const [open, setOpen] = useState(false)
+useClickOutside(containerRef, () => setOpen(false))
+```
+
+Always handle `Escape` key to close:
+```tsx
+if (e.key === 'Escape') {
+    setOpen(false)
+}
+```
 
 ---
 
-### 6. Register the demo
+## 8. Animation Rules
 
-**File:** `examples/src/react-components/index.tsx`
+- Use `transition: {property} 0.15s ease` for micro-interactions (color, border, opacity).
+- Use `transition: {property} 0.2s cubic-bezier(0.4, 0, 0.2, 1)` for layout transitions (height, width, transform).
+- Use `@keyframes` with `animation: name 0.15s ease-out` for enter animations.
+- Always include `@media (prefers-reduced-motion: reduce)` overrides:
 
-Two edits are required:
-
-1. **Add the import** in the correct category block (Simple, Form, Layout / Container, Complex, Specialized, or Advanced):
-   ```ts
-   import ComponentNameDemo from './ComponentNameDemo'
-   ```
-
-2. **Add the entry** in the `examples` array under the matching category:
-   ```ts
-   { key: 'component-name', category: '<Category>', element: <ComponentNameDemo /> },
-   ```
-   The `key` is the kebab-case name of the component. This key is used by the router to navigate to `/react-components/component-name`.
-
----
-
-## Naming Rules
-
-| What | Convention | Example |
-|---|---|---|
-| Component file | `PascalCase.tsx` | `StatusDot.tsx` |
-| Props interface | `PascalCaseProps` | `StatusDotProps` |
-| Exported component | `PascalCase` | `StatusDot` |
-| SCSS partial | `_kebab-case.scss` | `_status-dot.scss` |
-| CSS root class | `component component-kebab-case` | `component component-status-dot` |
-| CSS modifier | `component-kebab-case--modifier` | `component-status-dot--large` |
-| CSS child | `component-kebab-case__element` | `component-status-dot__pulse` |
-| Demo file | `PascalCaseDemo.tsx` | `StatusDotDemo.tsx` |
-| Demo key | `kebab-case` | `status-dot` |
+```scss
+@media (prefers-reduced-motion: reduce) {
+    .component-{name} {
+        animation: none;
+        transition: none;
+    }
+}
+```
 
 ---
 
-## Important Conventions
+## 9. Z-Index Layers
 
-- **Indentation:** Tabs (not spaces) everywhere.
-- **Semicolons:** No trailing semicolons in TypeScript (the project omits them).
-- **Quotes:** Single quotes for JS/TS strings.
-- **Imports:** Use `import React from 'react'` at the top of every component.
-- **No default exports** in component files — use **named exports** only. Demo files use **default exports**.
-- **Bootstrap utilities** are available globally (`d-flex`, `gap-2`, `mb-3`, `text-muted`, etc.).
-- **Bootstrap Icons** are available via `<i className="bi bi-{icon-name}" />` or the `<Icon>` component.
-- Component props use `variant` (not `color` or `type`) for colour variations.
-- Always spread `...props` onto the root DOM element so consumers can pass `id`, `data-*`, `aria-*`, etc.
+Do not invent z-index values. Use these defined layers:
+
+| Layer | Value | Usage |
+|-------|-------|-------|
+| Dropdown list | 1060 | Above modal (1050) |
+| Modal backdrop | 1050 | Page overlay |
+| Modal content | 1055 | Inside backdrop |
+| Sticky header | 1 | Table/nav sticky |
+| Overlay | 1000 | Sidebar overlay on mobile |
+| Tooltip | 1070 | Above dropdowns |
 
 ---
 
-## Checklist
+## 10. Do / Don't Reference
 
-Before finishing, verify all of these files have been created/updated:
+| ✅ Do | ❌ Don't |
+|-------|---------|
+| `useId()` for all generated IDs | Pass IDs from outside unless forwarding HTML props |
+| `React.forwardRef` when root is an HTML element | Use `forwardRef` on wrapper/layout components |
+| Extend HTML attributes with `extends React.{X}HTMLAttributes<{Y}>` | Write custom `onClick`, `className`, `style` props that duplicate HTML attrs |
+| Use `role`, `aria-*` attributes directly in JSX | Add accessibility as an afterthought |
+| Mobile-first SCSS (`min-width` media queries) | Desktop-first (`max-width` overrides on mobile) |
+| Semantic color tokens (`--cn-border`, `--cn-muted`) | Hardcode hex values in component JSX styles |
+| `children` as the primary content slot | Both `label` and `children` as parallel content slots |
+| One SCSS file per component | Put all styles in one global file |
+| `min-height: 44px` on touch targets | Fixed `height: 36px` on interactive elements |
+| `outline: 2px solid ... ` on `:focus-visible` | `outline: none` without a replacement |
 
-- [ ] `react-components/src/ComponentName.tsx` — component with exported interface + named export
-- [ ] `react-components/style/components/_component-name.scss` — SCSS partial with BEM classes
-- [ ] `react-components/style/components/index.scss` — `@use './component-name'` added
-- [ ] `react-components/src/index.ts` — `export * from './ComponentName'` added
-- [ ] `examples/src/react-components/ComponentNameDemo.tsx` — demo page with default export
-- [ ] `examples/src/react-components/index.tsx` — import + examples array entry added
+---
+
+## 11. SKILL.md Updates
+
+When you add or modify a component, update [SKILL.md](SKILL.md):
+
+1. Add the component to the Table of Contents under the correct category.
+2. Add a `### ComponentName` section with:
+   - One-line description
+   - Props table: `| Prop | Type | Required | Description |`
+   - Minimal usage example in a `tsx` code block
+3. Use ✅ for required props, ❌ for optional.
+4. Keep examples minimal — show the most common usage, not every prop.
+
+---
+
+## 12. Demo in @toolcase/examples (Required Final Step)
+
+Every new component **must** have a demo before it is considered done.
+
+### File location
+```
+examples/src/react-components/{ComponentName}Demo.tsx
+```
+
+### Registration
+1. Import the demo in `examples/src/react-components/index.tsx` under the correct comment group (`Simple`, `Form`, `Layout / Container`, `Complex`, etc.).
+2. Add an entry to the `examples` array:
+```tsx
+{ key: 'component-name', category: 'Layout / Container', element: <ComponentNameDemo /> },
+```
+
+### Demo structure
+- Use Bootstrap grid (`container`, `row`, `col-lg-8`) — same pattern as existing demos.
+- Wrap each variant group in a `<Card>` with a `<h2 className="h5 mb-3">` heading.
+- Show every meaningful prop variant (e.g. all `side` values, all `size` values).
+- Always include a `<CodeSnippet>` card at the bottom showing minimal usage.
+- Use `useState` for any open/close or interactive state needed to trigger the component.
+
+### Example skeleton
+```tsx
+import React, { useState } from 'react'
+import { ComponentName, Button, Card, CodeSnippet } from '@toolcase/react-components'
+
+export const ComponentNameDemo: React.FC = () => {
+    const [open, setOpen] = useState(false)
+
+    return (
+        <div className="container my-5">
+            <div className="row mb-4">
+                <div className="col-12">
+                    <h1 className="display-4 text-gradient-primary mb-2">ComponentName</h1>
+                    <p className="text-muted mb-0">One-line description.</p>
+                </div>
+            </div>
+
+            <div className="row mb-5">
+                <div className="col-lg-8">
+                    <Card>
+                        <h2 className="h5 mb-3">Default</h2>
+                        <Button variant="primary" onClick={() => setOpen(true)}>Open</Button>
+                    </Card>
+                </div>
+            </div>
+
+            <div className="row mb-5">
+                <div className="col-12">
+                    <Card>
+                        <h2 className="h5 mb-3">Usage</h2>
+                        <CodeSnippet language="typescript" code={`...`} />
+                    </Card>
+                </div>
+            </div>
+
+            <ComponentName open={open} onClose={() => setOpen(false)} />
+        </div>
+    )
+}
+```
+
+---
+
+## 13. Checklist Before Marking a Component Done
+
+- [ ] `.tsx` file exports the component and its prop interface(s)
+- [ ] Root element has `component component-{name}` classes
+- [ ] All IDs generated with `useId()`
+- [ ] All form inputs have `<label htmlFor>` connected
+- [ ] All interactive elements have `:focus-visible` styles in SCSS
+- [ ] Keyboard navigation works (Tab, Enter/Space, Escape, Arrow keys as appropriate)
+- [ ] ARIA roles and attributes are correct
+- [ ] `loading` state renders `<Skeleton />`
+- [ ] `error` state shows message with `aria-describedby`
+- [ ] Responsive at 375px, 576px, 768px, 992px
+- [ ] Touch targets ≥ 44px on `@media (pointer: coarse)`
+- [ ] `@media (prefers-reduced-motion: reduce)` overrides animations
+- [ ] SCSS file added to `style/components/index.scss`
+- [ ] Export added to `src/index.ts`
+- [ ] SKILL.md updated
+- [ ] Demo created at `examples/src/react-components/{ComponentName}Demo.tsx`
+- [ ] Demo registered in `examples/src/react-components/index.tsx`

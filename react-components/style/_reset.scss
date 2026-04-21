@@ -1,62 +1,33 @@
-// Reset border-radius for Bootstrap components
-.btn,
-.form-control,
-.form-select,
-.input-group-text,
-.card,
-.card-header,
-.card-footer,
-.card-img,
-.card-img-top,
-.card-img-bottom,
-.modal-content,
-.dropdown-menu,
-.dropdown-item,
-.alert,
-.badge,
-.breadcrumb,
-.pagination .page-link,
-.nav-link,
-.nav-tabs .nav-link,
-.nav-pills .nav-link,
-.list-group-item,
-.toast,
-.tooltip-inner,
-.popover,
-.accordion-button,
-.accordion-item,
-.progress,
-.progress-bar,
-.form-check-input,
-.form-range,
-.form-floating > .form-control,
-.form-floating > .form-select,
-.offcanvas,
-.carousel-indicators [data-bs-target],
-.table,
-.figure-img,
-.img-thumbnail,
-textarea,
-select,
-input {
-	border-radius: 0 !important;
+// Define a border-radius scale via CSS custom properties.
+// Components reference --rc-radius-* so consumers can override globally or per-component.
+:root {
+	--rc-radius-sm: 4px;
+	--rc-radius-md: 8px;
+	--rc-radius-lg: 12px;
+	--rc-radius-full: 9999px;
 }
 
-// Reset outline and focus rings for interactive Bootstrap elements
-.btn:focus,
-.btn:focus-visible,
-.btn:active:focus,
-.form-control:focus,
-.form-select:focus,
-.form-check-input:focus,
-.nav-link:focus,
-.page-link:focus,
-.accordion-button:focus,
-.dropdown-item:focus,
-.list-group-item:focus,
-input:focus,
-textarea:focus,
-select:focus {
-	outline: none !important;
-	box-shadow: none !important;
+// Reset outline and focus rings for interactive Bootstrap elements.
+// Mouse users: no ring (:focus without :focus-visible).
+// Keyboard users: visible ring via :focus-visible (not overridden here).
+.btn:focus:not(:focus-visible),
+.form-control:focus:not(:focus-visible),
+.form-select:focus:not(:focus-visible),
+.form-check-input:focus:not(:focus-visible),
+.nav-link:focus:not(:focus-visible),
+.page-link:focus:not(:focus-visible),
+.accordion-button:focus:not(:focus-visible),
+.dropdown-item:focus:not(:focus-visible),
+.list-group-item:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+	outline: none;
+	box-shadow: none;
+}
+
+// Provide a consistent focus-visible ring for keyboard navigation.
+:focus-visible {
+	outline: 2px solid var(--rc-focus-ring, #1e293b);
+	outline-offset: 2px;
 }

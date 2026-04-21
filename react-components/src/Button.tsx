@@ -2,6 +2,7 @@ import React from 'react'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	children?: React.ReactNode
+	/** @deprecated Use `children` instead. */
 	label?: string
 	outline?: boolean
 	size?: 'small' | 'default' | 'large'
@@ -28,8 +29,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>((
 
 	return (
 		<button {...props} ref={ref} className={buttonClass}>
-			{label || ''}
-			{children}
+			{children ?? label}
 		</button>
 	)
 })

@@ -50,6 +50,7 @@ import FormInputDemo from './FormInputDemo'
 
 // Layout / Container
 import Basic from './Basic'
+import { DrawerDemo } from './DrawerDemo'
 import DropdownDemo from './DropdownDemo'
 import EmptyStateDemo from './EmptyStateDemo'
 import ExtendedSelectDemo from './ExtendedSelectDemo'
@@ -182,6 +183,7 @@ export const examples: ExampleDef[] = [
 
 	// Layout / Container — Structural wrappers
 	{ key: 'basic', category: 'Layout / Container', element: <Basic /> },
+	{ key: 'drawer', category: 'Layout / Container', element: <DrawerDemo /> },
 	{ key: 'dropdown', category: 'Layout / Container', element: <DropdownDemo /> },
 	{ key: 'group', category: 'Layout / Container', element: <GroupDemo /> },
 	{ key: 'modal', category: 'Layout / Container', element: <ModalDemo /> },

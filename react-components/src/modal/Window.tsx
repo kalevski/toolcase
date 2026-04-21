@@ -1,4 +1,4 @@
-import React, { JSX, MouseEvent } from 'react'
+import React, { JSX, MouseEvent, useId } from 'react'
 
 export interface WindowProps {
 	children: React.ReactNode
@@ -12,15 +12,18 @@ export function Window({ children, size = 'medium', className = '', title }: Win
 		e.stopPropagation()
 	}
 
+	const titleId = useId()
+
 	return (
 		<div
 			className={`component-modals__window component-modals__window--${size}${className ? ` ${className}` : ''}`}
 			onClick={handleClick}
 			role="dialog"
 			aria-modal="true"
-			aria-label={title}
+			aria-labelledby={title ? titleId : undefined}
 			tabIndex={-1}
 		>
+			{title && <span id={titleId} className="visually-hidden">{title}</span>}
 			{children}
 		</div>
 	)
