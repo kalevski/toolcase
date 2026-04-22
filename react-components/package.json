@@ -1,6 +1,6 @@
 {
 	"name": "@toolcase/react-components",
-	"version": "2.2.4",
+	"version": "2.2.5",
 	"main": "lib/index.main.js",
 	"module": "lib/index.module.js",
 	"types": "lib/index.d.ts",
