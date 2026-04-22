@@ -20,6 +20,7 @@ export interface BuildProps {
 	duration?: number
 	status?: BuildStatus
 	badge?: string
+	onClick?: () => void
 	badgeVariant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info'
 	menuItems?: ActionItem[]
 	onMenuItemClick?: (key: string) => void
@@ -43,6 +44,7 @@ export const Build: React.FC<BuildProps> = ({
 	duration = 0,
 	status = 'pass',
 	badge,
+	onClick,
 	badgeVariant = 'secondary',
 	menuItems = [],
 	onMenuItemClick,
@@ -80,7 +82,7 @@ export const Build: React.FC<BuildProps> = ({
 			</div>
 			<div className="component-build__label">
 				<div className="component-build__name-row">
-					<span className="component-build__name">{name}</span>
+					<span onClick={onClick} className="component-build__name">{name}</span>
 					{badge && <Badge variant={badgeVariant} pill>{badge}</Badge>}
 				</div>
 				<div className="component-build__meta">
