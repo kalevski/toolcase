@@ -1,0 +1,70 @@
+// ── AssetRow / AssetRowList ───────────────────────────────────────────────
+// A monospace row showing an icon + name + tags + size, typically stacked
+// inside a FeatureCard visual slot.
+
+.component.component-asset-row-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border: 1px solid rgba(229, 231, 235, 0.6);
+    font-family: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 0.74rem;
+
+    .component-asset-row + .component-asset-row {
+        border-top: 1px solid rgba(229, 231, 235, 0.6);
+    }
+}
+
+.component.component-asset-row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.3rem 0.375rem;
+    color: #1e293b;
+    min-width: 0;
+}
+
+.component-asset-row {
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    &__name {
+        flex: 1 1 auto;
+        min-width: 0;
+        color: #0f172a;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__tags {
+        display: inline-flex;
+        gap: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    &__tag {
+        display: inline-flex;
+        font-size: 0.62rem;
+        padding: 0.05rem 0.375rem;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        color: #64748b;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    &__size {
+        color: #64748b;
+        font-size: 0.7rem;
+        flex-shrink: 0;
+    }
+}

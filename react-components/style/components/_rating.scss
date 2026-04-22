@@ -45,11 +45,6 @@
         &:hover {
             transform: scale(1.15);
         }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
     }
 
     &__star-inner--half {

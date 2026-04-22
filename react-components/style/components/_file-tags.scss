@@ -56,10 +56,6 @@
 				}
 			}
 
-			&:focus-visible {
-				outline: 2px solid $blue-400;
-				outline-offset: 1px;
-			}
 		}
 
 		&--add {
@@ -80,11 +76,6 @@
 				background: $green-500;
 				color: #fff;
 				transform: scale(1.1);
-			}
-
-			&:focus-visible {
-				outline: 2px solid $blue-400;
-				outline-offset: 1px;
 			}
 		}
 	}

@@ -1,0 +1,56 @@
+// ── CdnMap ────────────────────────────────────────────────────────────────
+// Grid-backed map with pulsing nodes. Positioning is percentage-based via
+// inline styles on each node.
+
+.component.component-cdn-map {
+    position: relative;
+    background: linear-gradient(180deg, #f9fafb, #ffffff);
+    border: 1px solid rgba(229, 231, 235, 0.6);
+    overflow: hidden;
+    min-height: 120px;
+}
+
+.component-cdn-map {
+    &__grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(229, 231, 235, 0.6) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(229, 231, 235, 0.6) 1px, transparent 1px);
+        background-size: 28px 28px;
+        opacity: 0.6;
+    }
+
+    &__node {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #000000;
+        transform: translate(-50%, -50%);
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, hsla(193, 90%, 55%, 0.6), transparent 70%);
+            animation: component-cdn-map-pulse 2.4s ease-in-out infinite;
+        }
+
+        &--accent::after {
+            background: radial-gradient(circle, hsla(280, 95%, 57%, 0.55), transparent 70%);
+        }
+    }
+}
+
+@keyframes component-cdn-map-pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.8);
+        opacity: 0.2;
+    }
+}

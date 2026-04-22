@@ -10,16 +10,16 @@
 	width: 100%;
 	min-height: 50px;
 
-	background: #fff;
-	border-radius: 6px;
+	background: var(--tc-surface);
+	border-radius: 0;
 
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
 	margin: 2px 0;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.5);
+		background: var(--tc-surface-hover);
 		cursor: pointer;
 	}
 
@@ -31,10 +31,10 @@
 .component-build {
 	&__status {
 		flex-shrink: 0;
-		width: 45px;
-		max-width: 45px;
-		height: 45px;
-		margin: 2px 5px;
+		width: 44px;
+		max-width: 44px;
+		height: 44px;
+		margin: 4px;
 
 		display: flex;
 		align-items: center;
@@ -64,9 +64,9 @@
 		flex: 1 1 auto;
 		flex-grow: 10;
 		min-width: 0;
-		line-height: 22px;
+		line-height: 1.4;
 		font-size: 0.875rem;
-		color: #1e293b;
+		color: var(--tc-text);
 	}
 
 	&__name-row {
@@ -86,14 +86,14 @@
 	&__meta {
 		display: flex;
 		align-items: center;
-		gap: 6px;
+		gap: 4px;
 		min-height: 20px;
 		overflow: hidden;
 	}
 
 	&__date {
 		font-size: 0.75rem;
-		color: #64748b;
+		color: var(--tc-text-muted);
 	}
 
 	&__size {
@@ -101,10 +101,9 @@
 		max-width: 90px;
 
 		text-align: right;
-		line-height: 30px;
-		padding: 10px 5px;
+		padding: 8px 4px;
 		font-size: 0.85rem;
-		color: #64748b;
+		color: var(--tc-text-muted);
 	}
 
 	&__duration {
@@ -112,9 +111,15 @@
 		max-width: 80px;
 
 		text-align: right;
-		line-height: 30px;
-		padding: 10px;
+		padding: 8px;
 		font-size: 0.85rem;
-		color: #64748b;
+		color: var(--tc-text-muted);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.component.component-build.component-build--running {
+		animation: none;
+		opacity: 1;
 	}
 }

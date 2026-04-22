@@ -3,9 +3,8 @@
 .component.component-popover {
     --pop-bg: #ffffff;
     --pop-border: #e2e8f0;
-    --pop-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    --pop-radius: var(--rc-radius-md, 0.5rem);
-    --pop-transition: 0.15s ease;
+    --pop-shadow: var(--tc-shadow-md);
+    --pop-transition: var(--tc-transition-fast);
 
     pointer-events: auto;
     z-index: 1060;
@@ -15,7 +14,7 @@
     &__panel {
         background: var(--pop-bg);
         border: 1px solid var(--pop-border);
-        border-radius: var(--pop-radius);
+        border-radius: 0;
         box-shadow: var(--pop-shadow);
         min-width: 180px;
         opacity: 0;

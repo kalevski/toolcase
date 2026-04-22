@@ -72,7 +72,6 @@
     --ti-color:       #1e293b;
     --ti-muted:       #64748b;
     --ti-shadow:      0 4px 16px rgba(0, 0, 0, 0.10);
-    --ti-radius:      var(--rc-radius-md, 8px);
     --ti-accent:      #64748b;   // overridden per variant
     --ti-accent-bg:   #f8fafc;   // overridden per variant
     --ti-close-hover: #f1f5f9;
@@ -86,7 +85,7 @@
     background: var(--ti-bg);
     border: 1px solid var(--ti-border);
     border-left: 4px solid var(--ti-accent);
-    border-radius: var(--ti-radius);
+    border-radius: 0;
     box-shadow: var(--ti-shadow);
     overflow: hidden;
     pointer-events: auto;
@@ -170,7 +169,7 @@
         appearance: none;
         background: none;
         border: none;
-        border-radius: var(--rc-radius-sm, 4px);
+        border-radius: 0;
         color: var(--ti-muted);
         cursor: pointer;
         display: flex;
@@ -187,11 +186,6 @@
         &:hover {
             background-color: var(--ti-close-hover);
             color: var(--ti-color);
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--rc-focus-ring, #1e293b);
-            outline-offset: 2px;
         }
     }
 

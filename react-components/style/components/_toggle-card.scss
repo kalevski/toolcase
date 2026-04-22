@@ -4,7 +4,6 @@
 	--tc-border: #e2e8f0;
 	--tc-hover-bg: #f8fafc;
 	--tc-accent: #1e293b;
-	--tc-radius: 8px;
 	--tc-transition: 0.15s ease;
 
 	position: relative;
@@ -103,4 +102,10 @@
 	font-size: 0.72rem;
 	color: var(--tc-muted);
 	line-height: 1.35;
+}
+
+@media (pointer: coarse) {
+	.component.component-toggle-card {
+		min-height: 44px;
+	}
 }

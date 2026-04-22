@@ -147,7 +147,7 @@
 	align-items: center;
 	background: none;
 	border: none;
-	border-radius: var(--rc-radius-sm, 4px);
+	border-radius: 0;
 	color: var(--dr-muted);
 	cursor: pointer;
 	display: flex;
@@ -161,11 +161,6 @@
 	&:hover {
 		background: #f1f5f9;
 		color: var(--dr-title-color);
-	}
-
-	&:focus-visible {
-		outline: 2px solid var(--rc-focus-ring, #1e293b);
-		outline-offset: 2px;
 	}
 }
 

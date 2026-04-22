@@ -1,183 +1,254 @@
-$pricing-card-background-default: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-$pricing-card-background-highlight: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, #ffffff 60%, #f5f6ff 100%);
-$pricing-card-accent-default: linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, #ffffff 60%, #f5f6ff 100%);
-$pricing-card-shadow-default: 0 1rem 2.5rem rgba(15, 23, 42, 0.12);
-$pricing-card-shadow-highlight: 0 1.25rem 3rem rgba(15, 23, 42, 0.25);
-$pricing-card-shadow-hover: 0 1.75rem 3.5rem rgba(15, 23, 42, 0.18);
+// ── PricingCard ───────────────────────────────────────────────────────────
+// Sharp pricing tier card modeled on the webgame.cloud `.mk-tier` pattern.
+// White → slate gradient background, 1px border, soft gradient glow on
+// hover, black border + gradient accent line for the highlighted tier.
 
 .component.component-pricing-card {
-	--pricing-card-radius: 20px;
-	--pricing-card-accent-height: 4px;
-	--pricing-card-icon-size: 34px;
-	--pricing-card-icon-bg: rgba(99, 102, 241, 0.12);
-	--pricing-card-icon-color: #4c1d95;
-	--pricing-card-text: #0f172a;
-	--pricing-card-muted: #64748b;
-	--pricing-card-primary-gradient: linear-gradient(130deg, #7c3aed 0%, #06b6d4 100%);
-	--pricing-card-gradient-opacity: 0.35;
-	--pricing-card-gradient-opacity-active: 0.55;
-	--pricing-card-background: #{$pricing-card-background-default};
-	--pricing-card-border-color: rgba(226, 232, 240, 0.9);
-	--pricing-card-shadow: #{$pricing-card-shadow-default};
-	--pricing-card-shadow-hover: #{$pricing-card-shadow-hover};
-	--pricing-card-accent-background: #{$pricing-card-accent-default};
-	position: relative;
-	isolation: isolate;
-	background-clip: padding-box;
-	background: var(--pricing-card-background);
-	border: 1px solid var(--pricing-card-border-color);
-	box-shadow: var(--pricing-card-shadow);
-	transition:
-		transform 220ms ease,
-		box-shadow 220ms ease;
-	transform: translateY(0);
+    --pc-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --pc-border: #e5e7eb;
+    --pc-text: #0f172a;
+    --pc-muted: #64748b;
+    --pc-accent: linear-gradient(90deg, hsl(280, 95%, 57%), hsl(193, 90%, 55%));
+    --pc-accent-glow-opacity: 0;
+    --pc-accent-glow-hover: 0.28;
 
-	&::before {
-		content: '';
-		position: absolute;
-		inset: -3px;
-		opacity: var(--pricing-card-gradient-opacity);
-		filter: blur(28px);
-		z-index: -1;
-		pointer-events: none;
-		transition:
-			opacity 220ms ease,
-			transform 220ms ease;
-	}
+    position: relative;
+    isolation: isolate;
+    background: var(--pc-bg);
+    border: 1px solid var(--pc-border);
+    padding: clamp(1.5rem, 3vw, 2rem) clamp(1.25rem, 2.5vw, 1.75rem);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.22s ease-in-out, box-shadow 0.22s ease-in-out,
+        border-color 0.22s ease-in-out;
 
-	&:hover,
-	&:focus-within {
-		transform: translateY(-10px);
-		box-shadow: var(--pricing-card-shadow-hover);
-	}
-
-	&:hover::before,
-	&:focus-within::before {
-		opacity: var(--pricing-card-gradient-opacity-active);
-		transform: scale(1.02);
-	}
+    &:hover,
+    &:focus-within {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1),
+            0 4px 6px -2px rgba(15, 23, 42, 0.05);
+        --pc-accent-glow-opacity: var(--pc-accent-glow-hover);
+    }
 }
 
 .component-pricing-card {
-	&__body {
-		min-height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+        flex: 1 1 auto;
+    }
 
-	&__header {
-		gap: 0.75rem;
-	}
+    // ── Header: eyebrow + optional badge ──────────────────────────────────
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.625rem;
+        min-height: 22px;
+        margin-bottom: 0.5rem;
+    }
 
-	&__eyebrow {
-		letter-spacing: 0.08em;
-	}
+    &__eyebrow {
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        color: var(--pc-muted);
+    }
 
-	&__price-row {
-		gap: 0.5rem;
-	}
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.32em 0.65em;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: #000000;
+        color: #ffffff;
+    }
 
-	&__price {
-		color: var(--pricing-card-text);
-	}
+    // ── Price row ─────────────────────────────────────────────────────────
+    &__price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 0.25rem;
+        margin-bottom: 0.375rem;
+    }
 
-	&__period {
-		color: var(--pricing-card-muted);
-		font-size: 1rem;
-	}
+    &__price {
+        font-size: clamp(2rem, 4.5vw, 2.6rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: var(--pc-text);
+        line-height: 1;
+    }
 
-	&__badge {
-		letter-spacing: 0.04em;
-	}
+    &__period {
+        color: var(--pc-muted);
+        font-size: 0.88rem;
+        margin-left: 0.25rem;
+        font-weight: 500;
+    }
 
-	&__description {
-		color: var(--pricing-card-muted);
-		line-height: 1.5;
-	}
+    &__description {
+        color: #4b5563;
+        font-size: 0.9rem;
+        margin: 0 0 1rem;
+        line-height: 1.5;
+        min-height: 2.8em;
+    }
 
-	&__features {
-		margin: 0 0 1.25rem;
-		padding: 0;
-	}
+    // ── Action button ─────────────────────────────────────────────────────
+    &__action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        width: 100%;
+        padding: 0.7rem 1.1rem;
+        margin-bottom: 1.25rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+        line-height: 1.5;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
+            background 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
 
-	&__feature {
-		color: var(--pricing-card-text);
-		min-height: 48px;
-	}
+        &--primary {
+            background: linear-gradient(135deg, #000000, #0a0a0a);
+            color: #ffffff;
+            border-color: #000000;
 
-	&__feature-icon {
-		width: var(--pricing-card-icon-size);
-		height: var(--pricing-card-icon-size);
-		background: var(--pricing-card-icon-bg);
-		color: var(--pricing-card-icon-color);
-		transition: transform 220ms ease;
-	}
+            &:hover:not(:disabled) {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+        }
 
-	&__feature-text {
-		color: var(--pricing-card-text);
-		line-height: 1.35;
-	}
+        &--outline {
+            background: #ffffff;
+            color: var(--pc-text);
+            border-color: var(--pc-border);
 
-	&__feature-helper {
-		color: var(--pricing-card-muted);
-	}
+            &:hover:not(:disabled) {
+                background: #f8fafc;
+                border-color: #000000;
+                transform: translateY(-1px);
+            }
+        }
 
-	&__action {
-		font-weight: 600;
-		letter-spacing: 0.02em;
-		box-shadow: 0 1.5rem 3rem rgba(15, 23, 42, 0.15);
-		transition:
-			box-shadow 200ms ease,
-			transform 200ms ease;
+        &:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
 
-		&:hover,
-		&:focus-visible {
-			box-shadow: 0 1.5rem 3rem rgba(15, 23, 42, 0.3);
-			transform: translateY(-1px);
-		}
-	}
+        &-arrow {
+            display: inline-flex;
+            align-items: center;
+            font-size: 1em;
+        }
+    }
 
-	&__accent {
-		display: block;
-		height: var(--pricing-card-accent-height);
-		pointer-events: none;
-		opacity: 0.95;
-		background: var(--pricing-card-accent-background);
-	}
+    // ── Features list ─────────────────────────────────────────────────────
+    &__features {
+        list-style: none;
+        padding: 1.25rem 0 0;
+        margin: 0;
+        border-top: 1px solid rgba(226, 232, 240, 0.6);
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    &__feature {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.625rem;
+        padding: 0.3rem 0;
+        font-size: 0.88rem;
+        color: var(--pc-text);
+        line-height: 1.5;
+    }
+
+    &__feature-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #10b981;
+        font-size: 1rem;
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+    }
+
+    &__feature-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__feature-label {
+        font-weight: 500;
+        color: var(--pc-text);
+    }
+
+    &__feature-helper {
+        color: var(--pc-muted);
+        font-size: 0.82rem;
+        font-weight: 400;
+    }
 }
 
+// ── Highlighted tier ──────────────────────────────────────────────────────
 .component-pricing-card--highlight {
-	--pricing-card-background: #{$pricing-card-background-highlight};
-	--pricing-card-border-color: rgba(15, 23, 42, 0.3);
-	--pricing-card-shadow: #{$pricing-card-shadow-highlight};
-	--pricing-card-gradient-opacity: 0.65;
-	--pricing-card-gradient-opacity-active: 0.9;
-	--pricing-card-accent-background: var(--pricing-card-primary-gradient);
+    --pc-border: #000000;
+    --pc-accent-glow-opacity: 0.18;
+    --pc-accent-glow-hover: 0.42;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+
+    // Gradient accent line at top
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--pc-accent);
+        z-index: 1;
+    }
 }
 
-.component-pricing-card:hover .component-pricing-card__feature-icon,
-.component-pricing-card:focus-within .component-pricing-card__feature-icon {
-	transform: scale(1.08);
+@media (pointer: coarse) {
+    .component-pricing-card__action {
+        min-height: 44px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.component-pricing-card {
-		transition: none;
-		transform: none;
+    .component.component-pricing-card {
+        transition: none;
 
-		&__action {
-			transition: none;
-		}
+        &::before {
+            transition: none;
+        }
 
-		&::before {
-			transition: none;
-			transform: none;
-		}
+        &:hover,
+        &:focus-within {
+            transform: none;
+        }
+    }
 
-		&:hover,
-		&:focus-within {
-			transform: none;
-			box-shadow: var(--pricing-card-shadow);
-		}
-	}
+    .component-pricing-card__action {
+        transition: none;
+
+        &:hover:not(:disabled) {
+            transform: none;
+        }
+    }
 }

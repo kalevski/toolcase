@@ -110,6 +110,11 @@
 		color: #94a3b8;
 		font-size: 0.82rem;
 		cursor: pointer;
+
+		@media (pointer: coarse) {
+			min-width: 44px;
+			min-height: 44px;
+		}
 		transition:
 			color 0.15s ease,
 			background 0.15s ease;

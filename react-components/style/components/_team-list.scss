@@ -1,0 +1,57 @@
+// ── TeamList ──────────────────────────────────────────────────────────────
+// Stacked member rows: gradient avatar + email + role badge.
+
+.component.component-team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.component-team-list {
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        background: #f9fafb;
+        border: 1px solid rgba(229, 231, 235, 0.6);
+    }
+
+    &__avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: 0.02em;
+        background: linear-gradient(135deg, #64748b, #475569);
+        flex-shrink: 0;
+    }
+
+    &__email {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.85rem;
+        color: #0f172a;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__role {
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.15rem 0.5rem;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        flex-shrink: 0;
+    }
+}

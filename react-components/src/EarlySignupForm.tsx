@@ -1,101 +1,143 @@
-import React from 'react'
-import { Card } from './Card'
-import { Input } from './Input'
-import { Button } from './Button'
+import React, { useState } from 'react'
 import { Icon } from './Icon'
-import { Skeleton } from './Skeleton'
 
 export interface EarlySignupFormProps {
 	title?: string
 	subtitle?: string
+	eyebrow?: string
 	benefits: string[]
 	helperText?: string
 	ctaLabel?: string
+	placeholder?: string
+	successTitle?: string
+	successMessage?: string
+	variant?: 'dark' | 'light'
 	onSubmit?: (email: string, event: React.FormEvent<HTMLFormElement>) => void
 	className?: string
 	loading?: boolean
 }
 
 export const EarlySignupForm: React.FC<EarlySignupFormProps> = ({
-	title,
+	title = 'Get early access',
 	subtitle,
+	eyebrow = 'Early access',
 	benefits,
-	helperText,
-	ctaLabel,
+	helperText = 'One email when we launch. No spam, ever.',
+	ctaLabel = 'Join the waitlist',
+	placeholder = 'you@example.com',
+	successTitle = "You're on the list.",
+	successMessage,
+	variant = 'dark',
 	onSubmit,
 	className = '',
 	loading = false,
 }) => {
+	const [email, setEmail] = useState('')
+	const [status, setStatus] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle')
+	const [error, setError] = useState('')
+
+	const rootClassName = [
+		'component',
+		'component-early-signup-form',
+		`component-early-signup-form--${variant}`,
+		className,
+	]
+		.filter(Boolean)
+		.join(' ')
+
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
-		const form = event.currentTarget
-		const formData = new FormData(form)
-		const email = (formData.get('email') || '') as string
-
+		setError('')
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			setError('Please enter a valid email.')
+			return
+		}
+		setStatus('submitting')
 		if (onSubmit) {
 			onSubmit(email, event)
 		}
-	}
-
-	if (loading) {
-		return (
-			<div className={className}>
-				<Card>
-					<div className="row g-4 align-items-center">
-						<div className="col-md-7">
-							<Skeleton width="50%" height="1.5rem" />
-							<Skeleton width="70%" />
-							<Skeleton count={3} />
-						</div>
-						<div className="col-md-5">
-							<Skeleton height="2.5rem" />
-							<Skeleton height="2.5rem" />
-						</div>
-					</div>
-				</Card>
-			</div>
-		)
+		setStatus('done')
 	}
 
 	return (
-		<div className={className}>
-			<Card>
-				<div className="row g-4 align-items-center">
-					<div className="col-md-7">
-						<h3 className="h4 fw-bold mb-2">{title}</h3>
-						{subtitle && <p className="text-muted mb-3">{subtitle}</p>}
-						<ul className="list-unstyled mb-0">
-							{benefits.map((benefit, index) => (
-								<li key={index} className="d-flex align-items-start mb-2">
-									<span className="me-2 text-success mt-1">
-										<Icon name="check2-circle" decorative />
-									</span>
-									<span className="text-muted">{benefit}</span>
-								</li>
-							))}
-						</ul>
-					</div>
-					<div className="col-md-5">
-						<form onSubmit={handleSubmit} className="d-flex flex-column gap-2">
-							<Input
-								type="email"
-								name="email"
+		<section className={rootClassName}>
+			<div className="component-early-signup-form__inner">
+				<div className="component-early-signup-form__intro">
+					{eyebrow && <span className="component-early-signup-form__eyebrow">{eyebrow}</span>}
+					<h2 className="component-early-signup-form__title">{title}</h2>
+					{subtitle && <p className="component-early-signup-form__subtitle">{subtitle}</p>}
+					<ul className="component-early-signup-form__benefits">
+						{benefits.map((benefit, index) => (
+							<li key={index} className="component-early-signup-form__benefit">
+								<span className="component-early-signup-form__benefit-icon" aria-hidden="true">
+									<Icon name="check-circle-fill" decorative />
+								</span>
+								<span className="component-early-signup-form__benefit-text">{benefit}</span>
+							</li>
+						))}
+					</ul>
+				</div>
+
+				<form className="component-early-signup-form__form" onSubmit={handleSubmit} noValidate>
+					{status === 'done' ? (
+						<div className="component-early-signup-form__success" role="status">
+							<span className="component-early-signup-form__success-icon" aria-hidden="true">
+								<Icon name="check-circle-fill" decorative />
+							</span>
+							<strong className="component-early-signup-form__success-title">{successTitle}</strong>
+							<span className="component-early-signup-form__success-message">
+								{successMessage ?? (
+									<>
+										We'll email <code>{email}</code> when access opens up.
+									</>
+								)}
+							</span>
+						</div>
+					) : (
+						<>
+							<label className="component-early-signup-form__label" htmlFor="early-signup-email">
+								Your email address
+							</label>
+							<input
 								id="early-signup-email"
-								placeholder="you@example.com"
+								name="email"
+								type="email"
+								className="component-early-signup-form__input"
+								placeholder={placeholder}
+								value={email}
+								onChange={(e) => {
+									setEmail(e.target.value)
+									setError('')
+								}}
+								disabled={loading || status === 'submitting'}
+								autoComplete="email"
 								required
-								aria-describedby="early-signup-helper"
-								label="Your email address"
 							/>
-							<Button type="submit" variant="primary" size="large" label={ctaLabel} />
-							{helperText && (
-								<p id="early-signup-helper" className="small text-muted mb-0">
-									{helperText}
+							{error && (
+								<p className="component-early-signup-form__error" role="alert">
+									<Icon name="exclamation-circle" decorative /> {error}
 								</p>
 							)}
-						</form>
-					</div>
-				</div>
-			</Card>
-		</div>
+							<button
+								type="submit"
+								className="component-early-signup-form__submit"
+								disabled={loading || status === 'submitting'}
+							>
+								{status === 'submitting' ? (
+									<>
+										<Icon name="arrow-repeat" decorative /> Joining…
+									</>
+								) : (
+									<>
+										{ctaLabel} <Icon name="arrow-right" decorative />
+									</>
+								)}
+							</button>
+							{helperText && <p className="component-early-signup-form__helper">{helperText}</p>}
+						</>
+					)}
+				</form>
+			</div>
+		</section>
 	)
 }

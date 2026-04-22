@@ -49,11 +49,6 @@
 		background: var(--cs-copy-hover);
 	}
 
-	&:focus-visible {
-		outline: 2px solid var(--cs-accent);
-		outline-offset: -2px;
-	}
-
 	.bi-check-lg {
 		color: #34d399;
 	}

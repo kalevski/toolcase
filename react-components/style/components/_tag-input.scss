@@ -91,6 +91,10 @@
 		font-size: 0.8rem;
 		color: #1e293b;
 
+		@media (pointer: coarse) {
+			min-height: 44px;
+		}
+
 		&::placeholder {
 			color: #94a3b8;
 		}

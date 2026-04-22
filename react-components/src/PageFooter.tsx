@@ -52,9 +52,9 @@ const targetProps = (external?: boolean) =>
 		: undefined
 
 export const PageFooter: FC<PageFooterProps> = ({
-	brand: _brand,
-	tagline: _tagline,
-	description: _description,
+	brand,
+	tagline,
+	description,
 	menus = [],
 	socialLinks = [],
 	legalLinks = [],
@@ -65,12 +65,20 @@ export const PageFooter: FC<PageFooterProps> = ({
 }) => {
 	const rootClassName = ['component component-page-footer', className].filter(Boolean).join(' ')
 	const hasMenus = menus.length > 0
+	const hasBrandBlock = Boolean(brand || tagline || description)
 	const hasSocial = socialLinks.length > 0
 	const hasLegal = legalLinks.length > 0 || legalText
 
 	return (
 		<footer className={rootClassName} {...rest}>
 			<div className="component-page-footer__inner">
+				{hasBrandBlock && (
+					<div className="component-page-footer__brand">
+						{brand}
+						{tagline && <p className="component-page-footer__tagline">{tagline}</p>}
+						{description && <p className="component-page-footer__description">{description}</p>}
+					</div>
+				)}
 				{hasMenus && (
 					<div className="component-page-footer__menus" aria-label="Footer navigation">
 						{menus.map((menu) => (
@@ -100,29 +108,10 @@ export const PageFooter: FC<PageFooterProps> = ({
 
 			{(hasSocial || hasLegal) && (
 				<div className="component-page-footer__bottom">
-					{hasSocial && (
-						<ul className="component-page-footer__social" aria-label="Social links">
-							{socialLinks.map((link) => (
-								<li className="component-page-footer__social-item" key={link.label}>
-									<a
-										className="component-page-footer__social-link"
-										href={link.href}
-										{...targetProps(link.external)}
-									>
-										{link.icon && (
-											<span className="component-page-footer__social-icon" aria-hidden="true">
-												{link.icon}
-											</span>
-										)}
-										<span className="component-page-footer__social-label">{link.label}</span>
-									</a>
-								</li>
-							))}
-						</ul>
-					)}
 					{hasLegal && (
 						<div className="component-page-footer__legal" aria-label="Legal navigation">
-							{hasLegal && legalLinks.length > 0 && (
+							{legalText && <p className="component-page-footer__legal-text">{legalText}</p>}
+							{legalLinks.length > 0 && (
 								<ul className="component-page-footer__legal-links">
 									{legalLinks.map((link) => (
 										<li className="component-page-footer__legal-item" key={link.label}>
@@ -137,8 +126,28 @@ export const PageFooter: FC<PageFooterProps> = ({
 									))}
 								</ul>
 							)}
-							{legalText && <p className="component-page-footer__legal-text">{legalText}</p>}
 						</div>
+					)}
+					{hasSocial && (
+						<ul className="component-page-footer__social" aria-label="Social links">
+							{socialLinks.map((link) => (
+								<li className="component-page-footer__social-item" key={link.label}>
+									<a
+										className="component-page-footer__social-link"
+										href={link.href}
+										aria-label={link.label}
+										{...targetProps(link.external)}
+									>
+										{link.icon && (
+											<span className="component-page-footer__social-icon" aria-hidden="true">
+												{link.icon}
+											</span>
+										)}
+										<span className="component-page-footer__social-label">{link.label}</span>
+									</a>
+								</li>
+							))}
+						</ul>
 					)}
 				</div>
 			)}

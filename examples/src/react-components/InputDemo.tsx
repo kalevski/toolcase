@@ -1,76 +1,102 @@
-import React from 'react'
-import { Input, Card, CodeSnippet } from '@toolcase/react-components'
+import React, { useState } from 'react'
+import { Input, CodeSnippet } from '@toolcase/react-components'
+import { DemoPage, DemoSection, DemoGrid } from './_demo'
 
-const InputDemo: React.FC = () => (
-	<div className="container my-5">
-		<div className="row mb-4">
-			<div className="col-12">
-				<h1 className="display-4 text-gradient-primary mb-2">Input</h1>
-				<p className="text-muted mb-0">A labeled text input with form-control styling.</p>
-			</div>
-		</div>
+const InputDemo: React.FC = () => {
+	const [email, setEmail] = useState('')
+	const [password, setPassword] = useState('')
+	const emailError =
+		email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+			? 'Please enter a valid email address'
+			: null
 
-		<div className="row mb-5">
-			<div className="col-lg-6">
-				<Card>
-					<h2 className="h5 mb-3">Basic</h2>
-					<div className="d-flex flex-column gap-3">
-						<Input label="Full Name" placeholder="Enter your name" />
-						<Input label="Email" type="email" placeholder="you@example.com" />
-						<Input label="Password" type="password" placeholder="••••••••" />
-					</div>
-				</Card>
-			</div>
-			<div className="col-lg-6">
-				<Card>
-					<h2 className="h5 mb-3">States</h2>
-					<div className="d-flex flex-column gap-3">
-						<Input label="Default" placeholder="Editable" />
-						<Input label="Disabled" placeholder="Cannot edit" disabled />
-						<Input label="Read-only" value="Fixed value" readOnly />
-					</div>
-				</Card>
-			</div>
-		</div>
-
-		<div className="row mb-5">
-			<div className="col-lg-6">
-				<Card>
-					<h2 className="h5 mb-3">Without Label</h2>
-					<div className="d-flex flex-column gap-3">
-						<Input placeholder="Search..." type="search" />
-						<Input placeholder="Enter a URL" type="url" />
-					</div>
-				</Card>
-			</div>
-			<div className="col-lg-6">
-				<Card>
-					<h2 className="h5 mb-3">Input Types</h2>
-					<div className="d-flex flex-column gap-3">
-						<Input label="Number" type="number" placeholder="42" />
-						<Input label="Date" type="date" />
-						<Input label="Color" type="color" defaultValue="#6366f1" />
-					</div>
-				</Card>
-			</div>
-		</div>
-
-		{/* Usage */}
-		<div className="row mb-5">
-			<div className="col-12">
-				<Card>
-					<h2 className="h5 mb-3">Usage</h2>
-					<CodeSnippet
-						language="typescript"
-						code={`import { Input } from '@toolcase/react-components'
-
-<Input label="Email" type="email" placeholder="you@example.com" />
-<Input label="Password" type="password" />`}
+	return (
+		<DemoPage
+			eyebrow="Inputs"
+			title="Input"
+			lede={
+				<>
+					A labeled single-line text field with built-in label, error, and helper-text wiring.
+					Supports every native <code>type</code> (<code>text</code>, <code>email</code>,{' '}
+					<code>password</code>, <code>url</code>, <code>number</code>, <code>date</code>,{' '}
+					<code>color</code>, …). Prefer fully controlled usage (<code>value</code> +{' '}
+					<code>onChange</code>).
+				</>
+			}
+		>
+			<DemoSection
+				eyebrow="Common types"
+				title="Sign-in form"
+				caption="The most common use case — an account form with live email validation."
+			>
+				<DemoGrid columns={2} minItemWidth={280}>
+					<Input
+						label="Email address"
+						type="email"
+						placeholder="you@webgame.cloud"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
+						autoComplete="email"
+						required
+						{...(emailError ? { error: emailError } : {})}
 					/>
-				</Card>
-			</div>
-		</div>
-	</div>
-)
+					<Input
+						label="Password"
+						type="password"
+						placeholder="At least 12 characters"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						autoComplete="current-password"
+						required
+					/>
+				</DemoGrid>
+			</DemoSection>
+
+			<DemoSection
+				eyebrow="State"
+				title="Read-only and disabled"
+				caption="Disabled inputs are non-interactive AND non-focusable. Read-only inputs keep their value selectable and copyable."
+			>
+				<DemoGrid columns={2} minItemWidth={280}>
+					<Input label="Editable" placeholder="Start typing…" defaultValue="Default value" />
+					<Input label="Read-only" value="indie-raid-game" readOnly />
+					<Input label="Disabled" placeholder="Locked" disabled />
+					<Input label="With error" placeholder="yourname" error="That handle is already taken." />
+				</DemoGrid>
+			</DemoSection>
+
+			<DemoSection
+				eyebrow="Specialized types"
+				title="Typed inputs"
+				caption="Native HTML input types give you mobile keyboards, validation, and pickers for free."
+			>
+				<DemoGrid columns={3} minItemWidth={220}>
+					<Input label="Number" type="number" placeholder="0" min={0} max={100} step={1} />
+					<Input label="Date" type="date" />
+					<Input label="Time" type="time" />
+					<Input label="URL" type="url" placeholder="https://…" />
+					<Input label="Search" type="search" placeholder="Search assets…" />
+					<Input label="Color" type="color" defaultValue="#6366f1" />
+				</DemoGrid>
+			</DemoSection>
+
+			<DemoSection eyebrow="API" title="Usage">
+				<CodeSnippet
+					language="typescript"
+					code={`import { Input } from '@toolcase/react-components'
+
+<Input
+  label="Email address"
+  type="email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  error={emailError}
+  required
+/>`}
+				/>
+			</DemoSection>
+		</DemoPage>
+	)
+}
 
 export default InputDemo

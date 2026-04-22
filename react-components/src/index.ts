@@ -109,6 +109,13 @@ export * from './ImageCrop'
 export * from './Lightbox'
 export * from './Banner'
 export * from './Chart'
+export * from './FeatureCard'
+export * from './AssetRow'
+export * from './BundleBar'
+export * from './Pipeline'
+export * from './ConfigPreview'
+export * from './TeamList'
+export * from './CdnMap'
 
 import * as Modal from './modal'
 export { Modal }

@@ -14,11 +14,6 @@
     overflow: hidden;
     user-select: none;
     outline: none;
-
-    &:focus-visible {
-        outline: 2px solid #1e293b;
-        outline-offset: 2px;
-    }
 }
 
 .component-carousel {
@@ -67,11 +62,6 @@
             transform: translateY(-50%) scale(1.05);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
-
         &:disabled {
             opacity: 0.35;
             cursor: not-allowed;
@@ -102,11 +92,6 @@
             width: var(--cr-dot-active-size);
             height: var(--cr-dot-active-size);
             background: var(--cr-dot-active-bg);
-        }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 3px;
         }
     }
 }

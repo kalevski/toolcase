@@ -40,10 +40,6 @@
             text-decoration: underline;
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
     }
 
     &__label {
@@ -72,10 +68,6 @@
             color: var(--bc-link-color);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
     }
 
     // Truncate long labels on small screens

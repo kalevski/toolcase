@@ -70,11 +70,6 @@
 	transform: translateX(calc(var(--switch-track-w) - var(--switch-knob) - 4px));
 }
 
-.component-switch__input:focus-visible + .component-switch__track {
-	outline: 2px solid #1e293b;
-	outline-offset: 2px;
-}
-
 .component-switch__label {
 	font-size: 0.85rem;
 	color: #1e293b;

@@ -1,267 +1,252 @@
-import React, { useState } from 'react'
-import { Modal, Button, IconButton, Input, Card, Alert, CodeSnippet } from '@toolcase/react-components'
+import { useState } from 'react'
+import { Modal, Button, IconButton, Input, Alert, CodeSnippet } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 export function ModalDemo() {
 	return (
-		<div className="container my-5">
-			<div className="row">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Modal System</h1>
-					<p className="text-muted mb-4">A context-based modal system supporting stacking, input payloads, and result callbacks.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Overlays"
+			title="Modal"
+			lede={
+				<>
+					A context-based modal system. Modals are declared once via <code>Modal.Window</code>,
+					opened imperatively with <code>useModalOpen(key)</code>, and can receive payloads on
+					open and return results on close. Supports nesting, focus trap, and <code>Escape</code>{' '}
+					to close.
+				</>
+			}
+		>
 			<Modal.ModalContext>
-				<div className="row">
-					<div className="col-lg-8">
-						<ModalExamples />
-					</div>
-				</div>
+				<ModalExamples />
 				<ModalDefinitions />
 			</Modal.ModalContext>
 
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { Modal, Button } from '@toolcase/react-components'
+			<DemoSection eyebrow="API" title="Usage">
+				<CodeSnippet
+					language="typescript"
+					code={`import { Modal, Button } from '@toolcase/react-components'
 
+// 1. Wrap your app (or section) in ModalContext
 <Modal.ModalContext>
   <OpenButton />
   <Modal.ModalRender>
-    <Modal.Window key="my-modal">
-      <MyModalContent />
+    <Modal.Window key="edit-user" size="medium">
+      <EditUserModal />
     </Modal.Window>
   </Modal.ModalRender>
 </Modal.ModalContext>
 
-// Inside OpenButton:
-const open = Modal.useModalOpen('my-modal')
-<Button onClick={() => open()}>Open</Button>
+// 2. Open imperatively with a payload; receive a result on close
+const openEditUser = Modal.useModalOpen('edit-user', (result) => {
+  if (result?.saved) refresh()
+})
+openEditUser({ userId: 123 })
 
-// Inside MyModalContent:
+// 3. Inside the modal, read the payload and close with a result
+const input = Modal.useModalInput<{ userId: number }>()
 const close = Modal.useModalClose()
-<Button onClick={() => close()}>Close</Button>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+close({ saved: true })`}
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 
 function ModalExamples() {
 	const [result, setResult] = useState<string>('')
 
-	const openSimpleModal = Modal.useModalOpen('simple-modal')
-
-	const openUserModal = Modal.useModalOpen('user-modal', (payload) => {
-		if (payload) {
-			setResult(`User modal result: ${JSON.stringify(payload)}`)
-		} else {
-			setResult('User modal was cancelled')
-		}
+	const openSimple = Modal.useModalOpen('demo-simple')
+	const openWithData = Modal.useModalOpen<{ saved: boolean; name?: string }>('demo-user', (payload) => {
+		setResult(
+			payload?.saved
+				? `Saved user: ${payload.name}`
+				: 'User modal was cancelled',
+		)
 	})
-
-	const openConfirmModal = Modal.useModalOpen('confirm-modal', (payload) => {
-		setResult(`Confirmation result: ${payload ? 'Confirmed' : 'Cancelled'}`)
+	const openConfirm = Modal.useModalOpen<boolean>('demo-confirm', (confirmed) => {
+		setResult(confirmed ? 'Confirmed delete' : 'Delete cancelled')
 	})
-
-	const openFirstModal = Modal.useModalOpen('first-modal')
-
-	const closeAllModals = Modal.useModalCloseAll()
+	const openNested = Modal.useModalOpen('demo-nested-a')
+	const closeAll = Modal.useModalCloseAll()
 
 	return (
-		<Card>
-			<h2 className="h5 mb-3">Interactive Examples</h2>
-
-			<div className="d-flex flex-wrap gap-2 mb-3">
-				<Button variant="primary" onClick={() => openSimpleModal()}>
-					Simple Modal
-				</Button>
-				<Button variant="secondary" onClick={() => openUserModal({ userId: 123, name: 'John Doe' })}>
-					Modal with Data
-				</Button>
-				<Button variant="warning" onClick={() => openConfirmModal()}>
-					Confirmation Modal
-				</Button>
-				<Button variant="info" onClick={() => openFirstModal()}>
-					Nested Modals
-				</Button>
-				<Button variant="danger" onClick={() => closeAllModals()}>
-					Close All
-				</Button>
-			</div>
-
-			{result && (
-				<Alert variant="info">
-					<strong>Result:</strong> {result}
-				</Alert>
-			)}
-		</Card>
+		<>
+			<DemoSection
+				eyebrow="Triggers"
+				title="Open modals imperatively"
+				caption="Each button calls a hook returned from useModalOpen(key). The hook takes an optional payload and an optional callback invoked when the modal closes."
+			>
+				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+					<Button variant="primary" onClick={() => openSimple()}>
+						Simple modal
+					</Button>
+					<Button variant="secondary" onClick={() => openWithData({ userId: 123, name: 'Rei Kuroda' })}>
+						Modal with payload
+					</Button>
+					<Button variant="danger" outline onClick={() => openConfirm()}>
+						Confirm delete
+					</Button>
+					<Button variant="info" outline onClick={() => openNested()}>
+						Nested modals
+					</Button>
+					<Button variant="secondary" outline onClick={() => closeAll()}>
+						Close all
+					</Button>
+				</div>
+				{result && (
+					<div style={{ marginTop: 12 }}>
+						<Alert variant="info">
+							<strong>Result:</strong> {result}
+						</Alert>
+					</div>
+				)}
+			</DemoSection>
+		</>
 	)
 }
 
 function ModalDefinitions() {
 	return (
 		<Modal.ModalRender>
-			<Modal.Window key="simple-modal" size="medium">
-				<SimpleModalContent />
+			<Modal.Window key="demo-simple" size="medium">
+				<SimpleModal />
 			</Modal.Window>
-
-			<Modal.Window key="user-modal" size="medium">
-				<UserModalContent />
+			<Modal.Window key="demo-user" size="medium">
+				<EditUserModal />
 			</Modal.Window>
-
-			<Modal.Window key="confirm-modal" size="small">
-				<ConfirmModalContent />
+			<Modal.Window key="demo-confirm" size="small">
+				<ConfirmDeleteModal />
 			</Modal.Window>
-
-			<Modal.Window key="first-modal" size="medium">
-				<FirstModalContent />
+			<Modal.Window key="demo-nested-a" size="medium">
+				<NestedA />
 			</Modal.Window>
-
-			<Modal.Window key="second-modal" size="large">
-				<SecondModalContent />
+			<Modal.Window key="demo-nested-b" size="large">
+				<NestedB />
 			</Modal.Window>
 		</Modal.ModalRender>
 	)
 }
 
-function SimpleModalContent() {
-	const closeModal = Modal.useModalClose()
-
+function SimpleModal() {
+	const close = Modal.useModalClose()
 	return (
 		<div>
 			<div className="modal-header">
-				<h5 className="modal-title">Simple Modal</h5>
-				<IconButton icon="x-lg" size="small" onClick={() => closeModal()} aria-label="Close" />
+				<h5 className="modal-title">Release notes</h5>
+				<IconButton icon="x-lg" size="small" onClick={() => close()} aria-label="Close" />
 			</div>
 			<div className="modal-body">
-				<p>This is a simple modal without any input data.</p>
-				<p>It demonstrates the basic modal functionality.</p>
+				<p style={{ marginTop: 0 }}>Version <code>2.3.0</code> is live.</p>
+				<ul style={{ paddingLeft: '1.25rem', marginBottom: 0, color: '#475569' }}>
+					<li>Asset bundles can now target multiple platforms in one build.</li>
+					<li>Schema editor gained an undo/redo stack.</li>
+					<li>Team roles can be scoped per project.</li>
+				</ul>
 			</div>
 			<div className="modal-footer">
-				<Button variant="secondary" onClick={() => closeModal()}>
-					Close
-				</Button>
+				<Button variant="primary" onClick={() => close()}>Got it</Button>
 			</div>
 		</div>
 	)
 }
 
-function UserModalContent() {
+function EditUserModal() {
 	const input = Modal.useModalInput<{ userId: number; name: string }>()
-	const closeModal = Modal.useModalClose()
+	const close = Modal.useModalClose()
 	const [name, setName] = useState(input?.name || '')
-
-	const handleSave = () => {
-		closeModal({
-			success: true,
-			data: { userId: input?.userId, name },
-		})
-	}
 
 	return (
 		<div>
 			<div className="modal-header">
-				<h5 className="modal-title">Edit User</h5>
-				<IconButton icon="x-lg" size="small" onClick={() => closeModal({ success: false })} aria-label="Close" />
+				<h5 className="modal-title">Edit team member</h5>
+				<IconButton icon="x-lg" size="small" onClick={() => close({ saved: false })} aria-label="Close" />
 			</div>
 			<div className="modal-body">
-				<p>
-					<strong>User ID:</strong> {input?.userId}
+				<p style={{ marginTop: 0, color: '#64748b', fontSize: '0.85rem' }}>
+					User ID: <code>{input?.userId}</code>
 				</p>
 				<Input
-					label="Name"
-					id="userName"
+					label="Display name"
+					id="demo-modal-name"
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 				/>
 			</div>
 			<div className="modal-footer">
-				<Button variant="secondary" onClick={() => closeModal({ success: false })}>
-					Cancel
-				</Button>
-				<Button variant="primary" onClick={handleSave}>
-					Save
-				</Button>
+				<Button variant="secondary" outline onClick={() => close({ saved: false })}>Cancel</Button>
+				<Button variant="primary" onClick={() => close({ saved: true, name })}>Save</Button>
 			</div>
 		</div>
 	)
 }
 
-function ConfirmModalContent() {
-	const closeModal = Modal.useModalClose()
-
+function ConfirmDeleteModal() {
+	const close = Modal.useModalClose()
 	return (
 		<div>
 			<div className="modal-header">
-				<h5 className="modal-title">Confirm Action</h5>
-				<IconButton icon="x-lg" size="small" onClick={() => closeModal(false)} aria-label="Close" />
+				<h5 className="modal-title">Delete project?</h5>
+				<IconButton icon="x-lg" size="small" onClick={() => close(false)} aria-label="Close" />
 			</div>
 			<div className="modal-body">
-				<p>Are you sure you want to proceed with this action?</p>
-				<p className="text-muted">This action cannot be undone.</p>
+				<p style={{ marginTop: 0 }}>
+					This permanently deletes <strong>indie-raid-game</strong> and all of its bundles and
+					configs.
+				</p>
+				<p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 0 }}>
+					This action cannot be undone.
+				</p>
 			</div>
 			<div className="modal-footer">
-				<Button variant="secondary" onClick={() => closeModal(false)}>
-					Cancel
-				</Button>
-				<Button variant="danger" onClick={() => closeModal(true)}>
-					Confirm
-				</Button>
+				<Button variant="secondary" outline onClick={() => close(false)}>Cancel</Button>
+				<Button variant="danger" onClick={() => close(true)}>Delete project</Button>
 			</div>
 		</div>
 	)
 }
 
-function FirstModalContent() {
-	const closeModal = Modal.useModalClose()
-	const openSecondModal = Modal.useModalOpen('second-modal')
-
+function NestedA() {
+	const close = Modal.useModalClose()
+	const openB = Modal.useModalOpen('demo-nested-b')
 	return (
 		<div>
 			<div className="modal-header">
-				<h5 className="modal-title">First Modal</h5>
-				<IconButton icon="x-lg" size="small" onClick={() => closeModal()} aria-label="Close" />
+				<h5 className="modal-title">Settings</h5>
+				<IconButton icon="x-lg" size="small" onClick={() => close()} aria-label="Close" />
 			</div>
 			<div className="modal-body">
-				<p>This is the first modal in a nested modal example.</p>
-				<p>You can open another modal on top of this one.</p>
+				<p style={{ marginTop: 0 }}>
+					Opening a second modal on top works out-of-the-box — the stack manager keeps focus
+					pinned to the topmost one.
+				</p>
 			</div>
 			<div className="modal-footer">
-				<Button variant="secondary" onClick={() => closeModal()}>
-					Close
-				</Button>
-				<Button variant="primary" onClick={() => openSecondModal()}>
-					Open Second Modal
-				</Button>
+				<Button variant="secondary" outline onClick={() => close()}>Close</Button>
+				<Button variant="primary" onClick={() => openB()}>Open detail modal</Button>
 			</div>
 		</div>
 	)
 }
 
-function SecondModalContent() {
-	const closeModal = Modal.useModalClose()
-
+function NestedB() {
+	const close = Modal.useModalClose()
 	return (
 		<div>
 			<div className="modal-header">
-				<h5 className="modal-title">Second Modal</h5>
-				<IconButton icon="x-lg" size="small" onClick={() => closeModal()} aria-label="Close" />
+				<h5 className="modal-title">Advanced settings</h5>
+				<IconButton icon="x-lg" size="small" onClick={() => close()} aria-label="Close" />
 			</div>
 			<div className="modal-body">
-				<p>This is the second modal, stacked on top of the first one.</p>
-				<p>Notice how the modal stack manages the display correctly.</p>
+				<p style={{ marginTop: 0 }}>
+					This modal is stacked on top of the first. Closing it returns focus to the original
+					modal; closing both returns focus to the trigger button.
+				</p>
 			</div>
 			<div className="modal-footer">
-				<Button variant="primary" onClick={() => closeModal()}>
-					Close
-				</Button>
+				<Button variant="primary" onClick={() => close()}>Close</Button>
 			</div>
 		</div>
 	)
 }
+
+export default ModalDemo

@@ -53,11 +53,6 @@
             background-color: var(--ac-hover-bg);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: -2px;
-        }
-
         &:disabled {
             color: var(--ac-muted);
             cursor: not-allowed;

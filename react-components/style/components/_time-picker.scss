@@ -51,11 +51,6 @@
             border-color: var(--tp-border-hover, #94a3b8);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
-
         &[aria-expanded="true"] {
             border-color: var(--tp-border-focus);
         }
@@ -84,11 +79,6 @@
         z-index: 1;
 
         &:hover { color: var(--tp-text); }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
     }
 
     &__dropdown {
@@ -136,11 +126,6 @@
             background: var(--tp-hover-bg);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: -2px;
-        }
-
         &--selected {
             background: var(--tp-active-bg);
             font-weight: 600;
@@ -179,11 +164,6 @@
         &:hover {
             background: var(--tp-hover-bg);
             color: var(--tp-text);
-        }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
         }
 
         &--active {

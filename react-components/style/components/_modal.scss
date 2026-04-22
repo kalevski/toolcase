@@ -38,11 +38,6 @@
 
 	animation: modalSlideIn 0.15s ease-out;
 
-	&:focus {
-		outline: 2px solid #1e293b;
-		outline-offset: 2px;
-	}
-
 	@media (max-width: 576px) {
 		max-width: 100%;
 		width: calc(100vw - 1rem);
@@ -93,8 +88,8 @@
 	justify-content: space-between;
 	padding: 1rem 1.5rem;
 	border-bottom: 1px solid #e2e8f0;
-	border-top-left-radius: 12px;
-	border-top-right-radius: 12px;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 
 	.modal-title {
 		margin: 0;
@@ -140,8 +135,8 @@
 	gap: 0.5rem;
 	padding: 1rem 1.5rem;
 	border-top: 1px solid #e2e8f0;
-	border-bottom-left-radius: 12px;
-	border-bottom-right-radius: 12px;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

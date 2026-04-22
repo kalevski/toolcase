@@ -1,231 +1,197 @@
+// ── WelcomeGuide ──────────────────────────────────────────────────────────
+// Onboarding card — dark gradient-glow intro panel on the left, light
+// checklist of steps on the right. Visual language follows the webgame
+// cloud waitlist/mk-hero pattern.
+
 .component.component-welcome-guide {
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	border: 1px solid #e2e8f0;
-	background: #fff;
-	overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    overflow: hidden;
+    isolation: isolate;
 
-	.component-welcome-guide__left {
-		flex: 1 1 auto;
-		position: relative;
-		overflow: hidden;
-		isolation: isolate;
-		display: flex;
-		align-items: center;
-	}
+    // ── Left panel: dark with gradient glow ───────────────────────────────
+    .component-welcome-guide__left {
+        position: relative;
+        flex: 1 1 auto;
+        background: #000000;
+        color: #ffffff;
+        overflow: hidden;
+        isolation: isolate;
+        display: flex;
+        align-items: center;
+        min-height: 220px;
 
-	.component-welcome-guide__background {
-		position: absolute;
-		inset: 0;
-		z-index: 0;
-		pointer-events: none;
-		overflow: hidden;
-	}
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 22% 20%, hsla(280, 95%, 57%, 0.38), transparent 50%),
+                radial-gradient(circle at 82% 80%, hsla(193, 90%, 55%, 0.38), transparent 50%);
+            filter: blur(60px);
+            z-index: -2;
+        }
 
-	.component-welcome-guide__background-pattern {
-		position: absolute;
-		inset: -10% -5% auto -5%;
-		width: 120%;
-		max-width: none;
-		opacity: 0.18;
-		mix-blend-mode: multiply;
-		filter: drop-shadow(0 8px 24px rgba(15, 23, 42, 0.1));
-	}
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(ellipse at center, #000, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, #000, transparent 70%);
+            z-index: -1;
+        }
+    }
 
-	.component-welcome-guide__left-content {
-		position: relative;
-		z-index: 1;
-		padding: 32px 40px;
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-		width: 100%;
-	}
+    .component-welcome-guide__background {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
 
-	.component-welcome-guide__title {
-		margin: 0;
-		font-size: 1.35rem;
-		font-weight: 700;
-		color: #0f172a;
-		text-align: center;
-	}
+    .component-welcome-guide__background-pattern {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.18;
+        mix-blend-mode: screen;
+    }
 
-	.component-welcome-guide__messages {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		text-align: center;
-		max-width: 420px;
-		margin-left: auto;
-		margin-right: auto;
-	}
+    .component-welcome-guide__left-content {
+        position: relative;
+        z-index: 1;
+        padding: clamp(1.5rem, 3vw, 2.25rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+        width: 100%;
+    }
 
-	.component-welcome-guide__message {
-		font-size: 0.88rem;
-		color: #475569;
-		line-height: 1.6;
-	}
+    .component-welcome-guide__title {
+        margin: 0;
+        font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+    }
 
-	// Right panel — modern checklist
-	.component-welcome-guide__right {
-		flex: 0 0 300px;
-		padding: 24px 28px;
-		border-left: 1px solid #e2e8f0;
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
+    .component-welcome-guide__messages {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 
-	.component-welcome-guide__progress-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-	}
+    .component-welcome-guide__message {
+        font-size: 0.88rem;
+        color: #d1d5db;
+        line-height: 1.55;
+    }
 
-	.component-welcome-guide__progress-label {
-		font-size: 0.78rem;
-		font-weight: 600;
-		color: #64748b;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-	}
+    // ── Right panel: light checklist ──────────────────────────────────────
+    .component-welcome-guide__right {
+        flex: 0 0 320px;
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+        border-left: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        background: #ffffff;
+    }
 
-	.component-welcome-guide__progress-percent {
-		font-size: 0.78rem;
-		font-weight: 700;
-		color: #0f172a;
-	}
+    .component-welcome-guide__steps {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
 
-	.component-welcome-guide__progress-track {
-		height: 6px;
-		background: #e2e8f0;
-		overflow: hidden;
-	}
+    .component-welcome-guide__step {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.625rem;
+        font-size: 0.88rem;
+        color: #334155;
+        cursor: pointer;
+        transition: background 0.15s ease;
 
-	.component-welcome-guide__progress-fill {
-		height: 100%;
-		background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
-		transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-	}
+        &:hover {
+            background: #f8fafc;
+        }
+    }
 
-	.component-welcome-guide__steps {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-	}
+    .component-welcome-guide__step-check {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border: 2px solid #cbd5e1;
+        flex-shrink: 0;
+        font-size: 0.72rem;
+        color: transparent;
+        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
 
-	.component-welcome-guide__step {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 8px 10px;
-		font-size: 0.86rem;
-		color: #334155;
-		transition: background 0.15s ease;
+    .component-welcome-guide__step-label {
+        transition: color 0.15s ease;
+        flex: 1;
+        min-width: 0;
+    }
 
-		&:hover {
-			background: rgba(0, 0, 0, 0.03);
-		}
-	}
+    .component-welcome-guide__step--completed {
+        .component-welcome-guide__step-check {
+            border-color: #10b981;
+            background: #10b981;
+            color: #ffffff;
+        }
 
-	.component-welcome-guide__step-check {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 22px;
-		height: 22px;
-		border: 2px solid #cbd5e0;
-		flex-shrink: 0;
-		font-size: 0.72rem;
-		color: transparent;
-		transition:
-			border-color 0.2s ease,
-			background 0.2s ease,
-			color 0.2s ease;
-	}
+        .component-welcome-guide__step-label {
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+    }
+}
 
-	.component-welcome-guide__step-label {
-		transition: color 0.15s ease;
-	}
+@media (max-width: 760px) {
+    .component.component-welcome-guide {
+        flex-direction: column;
 
-	.component-welcome-guide__step--completed {
-		.component-welcome-guide__step-check {
-			border-color: #22c55e;
-			background: #22c55e;
-			color: #fff;
-		}
+        .component-welcome-guide__right {
+            flex: 0 0 auto;
+            border-left: none;
+            border-top: 1px solid #e5e7eb;
+            width: 100%;
+        }
+    }
+}
 
-		.component-welcome-guide__step-label {
-			color: #94a3b8;
-			text-decoration: line-through;
-		}
-	}
-	}
+@media (pointer: coarse) {
+    .component.component-welcome-guide .component-welcome-guide__step {
+        min-height: 44px;
+    }
+}
 
-	// Responsive styles for mobile
-	@media (max-width: 700px) {
-		.component.component-welcome-guide {
-			flex-direction: column;
-			min-width: 0;
-			border-radius: 0;
-			box-shadow: none;
-		}
-
-		.component-welcome-guide__left {
-			min-width: 0;
-			padding: 0;
-			align-items: stretch;
-		}
-
-		.component-welcome-guide__left-content {
-			padding: 20px 12px 16px 12px;
-			gap: 10px;
-		}
-
-		.component-welcome-guide__title {
-			font-size: 1.1rem;
-			text-align: left;
-		}
-
-		.component-welcome-guide__messages {
-			max-width: 100%;
-			text-align: left;
-		}
-
-		.component-welcome-guide__right {
-			border-left: none;
-			border-top: 1px solid #e2e8f0;
-			flex: 0 0 auto;
-			padding: 18px 12px 18px 12px;
-			min-width: 0;
-			width: 100%;
-			box-sizing: border-box;
-		}
-
-		.component-welcome-guide__progress-header {
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: center;
-		}
-
-		.component-welcome-guide__steps {
-			gap: 2px;
-		}
-
-		.component-welcome-guide__step {
-			font-size: 0.95rem;
-			padding: 8px 4px;
-			gap: 8px;
-		}
-
-		.component-welcome-guide__background-pattern {
-			display: none;
-		}
-	}
+@media (prefers-reduced-motion: reduce) {
+    .component.component-welcome-guide {
+        .component-welcome-guide__step,
+        .component-welcome-guide__step-check,
+        .component-welcome-guide__step-label {
+            transition: none;
+        }
+    }
+}

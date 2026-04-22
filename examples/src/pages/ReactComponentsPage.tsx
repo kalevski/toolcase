@@ -2,12 +2,18 @@ import { Link } from 'react-router'
 import { examples, categories, ExampleCategory } from '../react-components/index'
 
 const categoryIcons: Record<ExampleCategory, string> = {
-    'Simple': 'bi-puzzle',
-    'Form': 'bi-input-cursor-text',
-    'Layout / Container': 'bi-layout-wtf',
-    'Complex': 'bi-diagram-3',
-    'Specialized': 'bi-star',
-    'Advanced': 'bi-rocket-takeoff',
+    'Inputs': 'bi-input-cursor-text',
+    'Buttons & Actions': 'bi-hand-index',
+    'Feedback': 'bi-bell',
+    'Overlays': 'bi-layers',
+    'Navigation': 'bi-compass',
+    'Data Display': 'bi-table',
+    'Layout & Surfaces': 'bi-layout-wtf',
+    'Typography': 'bi-type',
+    'Media & Files': 'bi-images',
+    'Editors': 'bi-code-square',
+    'Dashboard & Admin': 'bi-shield-lock',
+    'Marketing': 'bi-megaphone',
     'Full Page Demos': 'bi-window-fullscreen',
 }
 

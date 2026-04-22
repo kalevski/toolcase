@@ -1,62 +1,57 @@
 import { useState } from 'react'
-import { Table, TableColumn, Avatar, Select, Badge, Card, CodeSnippet, Alert } from '@toolcase/react-components'
+import { Table, TableColumn, Avatar, Select, Badge, Alert, CodeSnippet } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
-interface User {
+interface Member {
 	id: string
 	name: string
 	email: string
 	avatar?: string
-	role: string
+	role: 'admin' | 'editor' | 'viewer'
 	active: boolean
 	joinedAt: string
 }
 
-const initialUsers: User[] = [
-	{ id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'admin', active: true, joinedAt: '2025-01-15' },
-	{ id: '2', name: 'Bob Smith', email: 'bob@example.com', role: 'editor', active: true, joinedAt: '2025-03-08' },
-	{ id: '3', name: 'Carol Lee', email: 'carol@example.com', role: 'viewer', active: false, joinedAt: '2025-06-22' },
-	{ id: '4', name: 'Dan Miller', email: 'dan@example.com', role: 'editor', active: true, joinedAt: '2025-09-01' },
-	{ id: '5', name: 'Eva Garcia', email: 'eva@example.com', role: 'admin', active: false, joinedAt: '2026-01-10' },
+const INITIAL_MEMBERS: Member[] = [
+	{ id: '1', name: 'Rei Kuroda',   email: 'rei@orbitalgames.io',   role: 'admin',  active: true,  joinedAt: '2025-01-15' },
+	{ id: '2', name: 'Jun Sato',     email: 'jun@orbitalgames.io',   role: 'editor', active: true,  joinedAt: '2025-03-08' },
+	{ id: '3', name: 'Maya Takeda',  email: 'maya@orbitalgames.io',  role: 'viewer', active: false, joinedAt: '2025-06-22' },
+	{ id: '4', name: 'Dan Bianchi',  email: 'dan@orbitalgames.io',   role: 'editor', active: true,  joinedAt: '2025-09-01' },
+	{ id: '5', name: 'Eva Moreira',  email: 'eva@orbitalgames.io',   role: 'admin',  active: false, joinedAt: '2026-01-10' },
 ]
 
-const roleOptions = [
+const ROLE_OPTIONS = [
 	{ value: 'admin', label: 'Admin' },
 	{ value: 'editor', label: 'Editor' },
 	{ value: 'viewer', label: 'Viewer' },
 ]
 
-const activeOptions = [
+const STATUS_OPTIONS = [
 	{ value: 'true', label: 'Active' },
 	{ value: 'false', label: 'Inactive' },
 ]
 
-const formatDate = (dateStr: string) => {
-	return new Date(dateStr).toLocaleDateString(undefined, {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
-	})
-}
+const formatDate = (iso: string) =>
+	new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 
 const TableDemo = () => {
-	const [users, setUsers] = useState<User[]>(initialUsers)
-	const [clickedRow, setClickedRow] = useState<string | null>(null)
+	const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS)
+	const [clickedRow, setClickedRow] = useState<Member | null>(null)
 
-	const updateUser = (id: string, patch: Partial<User>) => {
-		setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...patch } : u)))
-	}
+	const updateMember = (id: string, patch: Partial<Member>) =>
+		setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)))
 
-	const columns: TableColumn<User>[] = [
+	const columns: TableColumn<Member>[] = [
 		{
 			key: 'user',
-			header: 'User',
-			width: '280px',
+			header: 'Member',
+			width: '260px',
 			render: (row) => (
-				<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+				<div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
 					<Avatar name={row.name} src={row.avatar} size="small" />
 					<div>
 						<div style={{ fontWeight: 500 }}>{row.name}</div>
-						<div style={{ fontSize: '12px', color: '#94a3b8' }}>{row.email}</div>
+						<div style={{ fontSize: 12, color: '#94a3b8' }}>{row.email}</div>
 					</div>
 				</div>
 			),
@@ -64,24 +59,24 @@ const TableDemo = () => {
 		{
 			key: 'role',
 			header: 'Role',
-			width: '150px',
+			width: '140px',
 			render: (row) => (
 				<Select
-					options={roleOptions}
+					options={ROLE_OPTIONS}
 					value={row.role}
-					onChange={(e) => updateUser(row.id, { role: e.target.value })}
+					onChange={(e) => updateMember(row.id, { role: e.target.value as Member['role'] })}
 				/>
 			),
 		},
 		{
-			key: 'active',
+			key: 'status',
 			header: 'Status',
 			width: '140px',
 			render: (row) => (
 				<Select
-					options={activeOptions}
+					options={STATUS_OPTIONS}
 					value={String(row.active)}
-					onChange={(e) => updateUser(row.id, { active: e.target.value === 'true' })}
+					onChange={(e) => updateMember(row.id, { active: e.target.value === 'true' })}
 				/>
 			),
 		},
@@ -91,9 +86,7 @@ const TableDemo = () => {
 			width: '100px',
 			align: 'center',
 			render: (row) => (
-				<Badge variant={row.active ? 'success' : 'danger'}>
-					{row.active ? 'Active' : 'Inactive'}
-				</Badge>
+				<Badge variant={row.active ? 'success' : 'danger'}>{row.active ? 'Active' : 'Inactive'}</Badge>
 			),
 		},
 		{
@@ -104,125 +97,143 @@ const TableDemo = () => {
 		},
 	]
 
+	const compactColumns: TableColumn<Member>[] = [
+		{ key: 'name', header: 'Name', render: (row) => row.name },
+		{ key: 'email', header: 'Email', render: (row) => row.email },
+		{ key: 'role', header: 'Role', render: (row) => row.role },
+	]
+
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Table</h1>
-					<p className="text-muted mb-4">A generic data table with typed columns, custom cell renderers, striped rows, and interactive elements.</p>
-				</div>
-			</div>
-			<div className="row">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Project Members</h2>
-						<Table
-							columns={columns}
-							data={users}
-							rowKey={(row) => row.id}
-							emptyMessage="No members found"
-							striped
-						/>
-					</Card>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Data Display"
+			title="Table"
+			lede={
+				<>
+					A generic data table with typed columns, custom cell renderers, and a handful of
+					orthogonal modifiers — <code>striped</code>, <code>hoverable</code>, <code>compact</code>,{' '}
+					<code>borderless</code>. Built-in <code>loading</code> and empty-state support; use{' '}
+					<code>AdvancedTable</code> when you need sorting, filtering, pagination, or bulk actions.
+				</>
+			}
+		>
+			<DemoSection
+				eyebrow="Realistic usage"
+				title="Project members"
+				caption="Inline editing with Select. Change role or status and the row updates in place."
+			>
+				<Table
+					columns={columns}
+					data={members}
+					rowKey={(row) => row.id}
+					emptyMessage="No members found"
+					striped
+				/>
+			</DemoSection>
 
-			<div className="row mt-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Hoverable + onRowClick</h2>
-						{clickedRow && (
-							<Alert variant="info" className="mb-3">Clicked row: {clickedRow}</Alert>
-						)}
-						<Table
-							columns={[
-								{ key: 'name', header: 'Name', render: (row) => row.name },
-								{ key: 'role', header: 'Role', render: (row) => row.role },
-								{ key: 'joined', header: 'Joined', render: (row) => formatDate(row.joinedAt) },
-							]}
-							data={users}
-							rowKey={(row) => row.id}
-							hoverable
-							onRowClick={(row) => setClickedRow(`${row.name} (${row.role})`)}
-						/>
-					</Card>
-				</div>
-			</div>
+			<DemoSection
+				eyebrow="Interaction"
+				title="Clickable rows"
+				caption="Pair hoverable + onRowClick to turn each row into a navigation target. The click handler fires once per row without disrupting interactive cells."
+			>
+				{clickedRow && (
+					<div style={{ marginBottom: 12 }}>
+						<Alert variant="info">
+							Clicked: <strong>{clickedRow.name}</strong> ({clickedRow.role})
+						</Alert>
+					</div>
+				)}
+				<Table
+					columns={compactColumns}
+					data={members}
+					rowKey={(row) => row.id}
+					hoverable
+					onRowClick={(row) => setClickedRow(row)}
+				/>
+			</DemoSection>
 
-			<div className="row mt-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Compact</h2>
-						<Table
-							columns={[
-								{ key: 'name', header: 'Name', render: (row) => row.name },
-								{ key: 'email', header: 'Email', render: (row) => row.email },
-							]}
-							data={users}
-							rowKey={(row) => row.id}
-							compact
-						/>
-					</Card>
+			<DemoSection
+				eyebrow="Density"
+				title="Compact and borderless"
+				caption="Compact reduces cell padding. Borderless strips the wrapping frame — handy when the table already sits inside another card."
+			>
+				<div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+					<div>
+						<p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+							Compact
+						</p>
+						<Table columns={compactColumns} data={members} rowKey={(row) => row.id} compact />
+					</div>
+					<div>
+						<p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+							Borderless
+						</p>
+						<Table columns={compactColumns} data={members} rowKey={(row) => row.id} borderless />
+					</div>
 				</div>
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Borderless</h2>
-						<Table
-							columns={[
-								{ key: 'name', header: 'Name', render: (row) => row.name },
-								{ key: 'email', header: 'Email', render: (row) => row.email },
-							]}
-							data={users}
-							rowKey={(row) => row.id}
-							borderless
-						/>
-					</Card>
-				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mt-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Loading State</h2>
+			<DemoSection
+				eyebrow="State"
+				title="Loading and empty"
+				caption="Show skeleton rows while fetching. Empty data falls back to emptyMessage."
+			>
+				<div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+					<div>
+						<p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+							Loading · 4 skeleton rows
+						</p>
 						<Table
-							columns={[
-								{ key: 'name', header: 'Name', render: (row) => row.name },
-								{ key: 'role', header: 'Role', render: (row) => row.role },
-								{ key: 'joined', header: 'Joined', render: (row) => formatDate(row.joinedAt) },
-							]}
+							columns={compactColumns}
 							data={[]}
 							rowKey={(row) => row.id}
 							loading
 							loadingRows={4}
 						/>
-					</Card>
+					</div>
+					<div>
+						<p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+							Empty
+						</p>
+						<Table
+							columns={compactColumns}
+							data={[]}
+							rowKey={(row) => row.id}
+							emptyMessage="No members yet — invite someone to get started."
+						/>
+					</div>
 				</div>
-			</div>
+			</DemoSection>
 
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { Table, TableColumn } from '@toolcase/react-components'
+			<DemoSection eyebrow="API" title="Usage">
+				<CodeSnippet
+					language="typescript"
+					code={`import { Table, TableColumn } from '@toolcase/react-components'
 
-const columns: TableColumn<User>[] = [
-  { key: 'name', header: 'Name' },
-  { key: 'email', header: 'Email' },
-  { key: 'role', header: 'Role' },
+const columns: TableColumn<Member>[] = [
+  { key: 'name',  header: 'Member', render: (row) => row.name },
+  { key: 'role',  header: 'Role',   render: (row) => row.role },
+  { key: 'joined', header: 'Joined', render: (row) => formatDate(row.joinedAt) },
 ]
 
-<Table columns={columns} data={users} rowKey={(r) => r.id} />
-<Table columns={columns} data={users} rowKey={(r) => r.id} striped hoverable compact />
-<Table columns={columns} data={users} rowKey={(r) => r.id} onRowClick={(row) => console.log(row)} />
-<Table columns={columns} data={[]} rowKey={(r) => r.id} loading loadingRows={4} />`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+<Table
+  columns={columns}
+  data={members}
+  rowKey={(row) => row.id}
+  striped
+  hoverable
+  onRowClick={(row) => open(row)}
+/>
+
+<Table
+  columns={columns}
+  data={[]}
+  rowKey={(row) => row.id}
+  loading
+  loadingRows={4}
+/>`}
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

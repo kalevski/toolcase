@@ -109,11 +109,6 @@
         font: inherit;
         padding: 0;
         text-align: inherit;
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 4px;
-        }
     }
 
     &__indicator {

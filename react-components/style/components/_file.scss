@@ -5,17 +5,17 @@
 	width: 100%;
 	min-height: 50px;
 
-	background: #fff;
-	border-radius: 6px;
+	background: var(--tc-surface);
+	border-radius: 0;
 
 	display: flex;
-	gap: 10px;
+	gap: 8px;
 	margin: 2px 0;
 }
 
 .component-file {
 	&:hover {
-		background: rgba(255,255,255,0.5);
+		background: var(--tc-surface-hover);
 		cursor: pointer;
 	}
 
@@ -26,30 +26,30 @@
 	&__type {
 		flex-shrink: 0;
 		user-select: none;
-		width: 50px;
-		max-width: 45px;
-		max-height: 45px;
+		width: 44px;
+		max-width: 44px;
+		max-height: 44px;
 		align-self: center;
-		margin: 2px 5px;
+		margin: 4px;
 		text-transform: uppercase;
 
 		color: #fff;
-		border-radius: 6px;
+		border-radius: 0;
 
 		span {
 			display: block;
 			width: 100%;
 			text-align: center;
-			line-height: 24px;
-			padding: 10px 0;
+			line-height: 1.5;
+			padding: 8px 0;
 		}
 	}
 
 	&__label {
 		flex-grow: 10;
-		line-height: 22px;
+		line-height: 1.4;
 		font-size: 0.875rem;
-		color: #1e293b;
+		color: var(--tc-text);
 
 		&__lists {
 			display: flex;
@@ -65,7 +65,7 @@
 
 		line-height: 1.5rem;
 		padding: 12px 0;
-		color: #64748b;
+		color: var(--tc-text-muted);
 	}
 
 	&__items a:hover * {
@@ -77,11 +77,10 @@
 		max-width: 90px;
 
 		text-align: right;
-		line-height: 30px;
-		padding: 10px 5px;
+		padding: 8px 4px;
 		font-size: 0.85rem;
 		align-self: center;
-		color: #64748b;
+		color: var(--tc-text-muted);
 	}
 
 	.file-tags {
@@ -95,10 +94,6 @@
 			input {
 				border: none;
 				padding: 0 5px;
-			}
-
-			:focus-visible {
-				outline: none;
 			}
 		}
 	}

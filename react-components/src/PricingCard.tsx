@@ -1,5 +1,4 @@
 import type { ButtonHTMLAttributes, FC, HTMLAttributes, ReactNode } from 'react'
-import { Button } from './Button'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
 
@@ -40,8 +39,8 @@ export const PricingCard: FC<PricingCardProps> = ({
 	features,
 	highlight = false,
 	action,
-	badgeText = 'Recommended',
-	featureIconName = 'plus-lg',
+	badgeText = 'Popular',
+	featureIconName = 'check-circle-fill',
 	featureIcon,
 	loading = false,
 	className,
@@ -53,7 +52,8 @@ export const PricingCard: FC<PricingCardProps> = ({
 	)
 
 	const rootClassName = [
-		'component component-pricing-card card border-0 h-100 position-relative overflow-hidden',
+		'component',
+		'component-pricing-card',
 		highlight && 'component-pricing-card--highlight',
 		className,
 	]
@@ -64,38 +64,46 @@ export const PricingCard: FC<PricingCardProps> = ({
 		if (featureItem.icon) {
 			return featureItem.icon
 		}
-
 		if (featureIcon) {
 			return featureIcon
 		}
-
-		if (!featureIconName && !featureItem.iconName) {
-			return null
-		}
-
-		return <Icon name={featureItem.iconName ?? featureIconName ?? 'plus-lg'} size={18} decorative />
+		const iconName = featureItem.iconName ?? featureIconName ?? 'check-circle-fill'
+		return <Icon name={iconName} decorative />
 	}
 
-	const { label: actionLabel, className: actionCustomClass, size: actionSize, ...actionRest } = action
+	const {
+		label: actionLabel,
+		className: actionCustomClass,
+		outline: actionOutline,
+		variant: _actionVariant,
+		size: _actionSize,
+		type: actionType = 'button',
+		...actionRest
+	} = action
 
-	const actionClassName = ['component-pricing-card__action', 'w-100', 'py-2', 'mt-auto', actionCustomClass]
+	const actionClassName = [
+		'component-pricing-card__action',
+		actionOutline ? 'component-pricing-card__action--outline' : 'component-pricing-card__action--primary',
+		actionCustomClass,
+	]
 		.filter(Boolean)
 		.join(' ')
 
 	if (loading) {
 		return (
 			<div className={rootClassName} style={style} {...rest}>
-				<span className="component-pricing-card__accent position-absolute top-0 start-0 w-100" />
-				<div className="component-pricing-card__body card-body d-flex flex-column p-4 p-lg-5">
-					<div className="mb-3">
-						<Skeleton width="30%" />
-						<Skeleton width="50%" height="2.5rem" />
+				<div className="component-pricing-card__body">
+					<div className="component-pricing-card__header">
+						<Skeleton width="40%" />
+					</div>
+					<div className="component-pricing-card__price-row">
+						<Skeleton width="50%" height="2.6rem" />
 					</div>
 					<Skeleton count={2} />
-					<div className="mt-4 flex-grow-1">
+					<div className="component-pricing-card__features">
 						<Skeleton count={4} />
 					</div>
-					<Skeleton height="2.5rem" />
+					<Skeleton height="2.75rem" />
 				</div>
 			</div>
 		)
@@ -103,54 +111,53 @@ export const PricingCard: FC<PricingCardProps> = ({
 
 	return (
 		<div className={rootClassName} style={style} {...rest}>
-			<span className="component-pricing-card__accent position-absolute top-0 start-0 w-100" />
-			<div className="component-pricing-card__body card-body d-flex flex-column p-4 p-lg-5">
-				<div className="component-pricing-card__header d-flex justify-content-between align-items-start mb-3">
-					<div>
-						<span className="component-pricing-card__eyebrow text-uppercase small fw-semibold text-primary mb-1 d-inline-block">
-							{name}
-						</span>
-						<div className="component-pricing-card__price-row d-flex align-items-baseline gap-2">
-							<span className="component-pricing-card__price display-5 fw-bold text-dark lh-1">{price}</span>
-							{period && (
-								<span className="component-pricing-card__period text-body-secondary small">/ {period}</span>
-							)}
-						</div>
-					</div>
+			<div className="component-pricing-card__body">
+				<div className="component-pricing-card__header">
+					<span className="component-pricing-card__eyebrow">{name}</span>
 					{highlight && badgeText && (
-						<span className="component-pricing-card__badge badge bg-primary text-white fw-semibold rounded-pill">
-							{badgeText}
-						</span>
+						<span className="component-pricing-card__badge">{badgeText}</span>
 					)}
 				</div>
-				<div className="component-pricing-card__description text-body-secondary mb-4">{description}</div>
-				<ul className="component-pricing-card__features list-unstyled mb-4 flex-grow-1">
+
+				<div className="component-pricing-card__price-row">
+					<span className="component-pricing-card__price">{price}</span>
+					{period && <span className="component-pricing-card__period">/ {period}</span>}
+				</div>
+
+				<p className="component-pricing-card__description">{description}</p>
+
+				<button
+					{...actionRest}
+					type={actionType}
+					className={actionClassName}
+				>
+					{actionLabel}
+					<span className="component-pricing-card__action-arrow" aria-hidden="true">
+						<Icon name="arrow-right" decorative />
+					</span>
+				</button>
+
+				<ul className="component-pricing-card__features">
 					{normalizedFeatures.map((featureItem, index) => (
 						<li
 							key={featureItem.id ?? `${name}-feature-${index}`}
-							className="component-pricing-card__feature d-flex align-items-start gap-3 mb-3 text-dark"
+							className="component-pricing-card__feature"
 						>
-							<span className="component-pricing-card__feature-icon d-inline-flex align-items-center justify-content-center rounded-circle">
+							<span className="component-pricing-card__feature-icon" aria-hidden="true">
 								{renderFeatureIcon(featureItem)}
 							</span>
-							<span className="component-pricing-card__feature-text fw-semibold">
-								{featureItem.label}
+							<span className="component-pricing-card__feature-text">
+								<span className="component-pricing-card__feature-label">{featureItem.label}</span>
 								{featureItem.helper && (
-									<span className="component-pricing-card__feature-helper d-block fw-normal text-body-secondary small mt-1">
-										{featureItem.helper}
-									</span>
+									<span className="component-pricing-card__feature-helper"> — {featureItem.helper}</span>
 								)}
 							</span>
 						</li>
 					))}
 				</ul>
-				<Button
-					{...actionRest}
-					className={actionClassName}
-					size={actionSize ?? 'default'}
-					label={actionLabel}
-				/>
 			</div>
 		</div>
 	)
 }
+
+PricingCard.displayName = 'PricingCard'

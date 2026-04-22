@@ -60,11 +60,6 @@
 
         &:hover { color: var(--me-text); }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
-
         &--active {
             color: var(--me-tab-active-text);
             border-bottom-color: #1e293b;
@@ -93,14 +88,14 @@
         font-size: 0.8125rem;
         transition: background var(--me-transition), color var(--me-transition);
 
+        @media (pointer: coarse) {
+            min-width: 44px;
+            min-height: 44px;
+        }
+
         &:hover {
             background: var(--me-border);
             color: var(--me-text);
-        }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
         }
 
         &:disabled {

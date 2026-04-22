@@ -51,11 +51,6 @@
             background: var(--rp-divider-hover);
             outline: none;
         }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 0;
-        }
     }
 
     &__handle {

@@ -1,0 +1,315 @@
+// ── EarlySignupForm ───────────────────────────────────────────────────────
+// Dark marketing CTA section with glassmorphic form — modeled on the
+// webgame.cloud waitlist pattern from design/.
+
+.component.component-early-signup-form {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    color: #ffffff;
+    padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 5vw, 3rem);
+
+    // Dark (default) — black section with violet + cyan glow
+    &--dark {
+        background: #000000;
+        color: #ffffff;
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 22% 20%, hsla(280, 95%, 57%, 0.38), transparent 50%),
+                radial-gradient(circle at 82% 80%, hsla(193, 90%, 55%, 0.38), transparent 50%);
+            filter: blur(60px);
+            z-index: -2;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(ellipse at center, #000, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, #000, transparent 70%);
+            z-index: -1;
+        }
+    }
+
+    // Light — white section for in-card use
+    &--light {
+        background: #f8fafc;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+
+        .component-early-signup-form__title,
+        .component-early-signup-form__benefit-text strong {
+            color: #0f172a;
+        }
+
+        .component-early-signup-form__subtitle,
+        .component-early-signup-form__benefit-text {
+            color: #475569;
+        }
+
+        .component-early-signup-form__form {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            backdrop-filter: none;
+        }
+
+        .component-early-signup-form__label {
+            color: #64748b;
+        }
+
+        .component-early-signup-form__input {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #0f172a;
+
+            &::placeholder {
+                color: #94a3b8;
+            }
+
+            &:focus {
+                border-color: #000000;
+                background: #ffffff;
+            }
+        }
+
+        .component-early-signup-form__submit {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+
+            &:hover:not(:disabled) {
+                background: #0a0a0a;
+            }
+        }
+
+        .component-early-signup-form__helper {
+            color: #94a3b8;
+        }
+
+        .component-early-signup-form__benefit-icon {
+            color: #10b981;
+        }
+    }
+}
+
+.component-early-signup-form {
+    &__inner {
+        position: relative;
+        max-width: 900px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: clamp(2rem, 5vw, 3.5rem);
+        align-items: center;
+    }
+
+    &__intro {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+    }
+
+    &__eyebrow {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #9ca3af;
+    }
+
+    &__title {
+        font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        line-height: 1.1;
+        margin: 0;
+        text-wrap: balance;
+    }
+
+    &__subtitle {
+        font-size: 0.98rem;
+        color: #9ca3af;
+        margin: 0;
+        line-height: 1.55;
+        text-wrap: pretty;
+    }
+
+    &__benefits {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+    }
+
+    &__benefit {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.625rem;
+        font-size: 0.88rem;
+        color: #d1d5db;
+        line-height: 1.55;
+    }
+
+    &__benefit-icon {
+        flex-shrink: 0;
+        color: #10b981;
+        margin-top: 0.15rem;
+        display: inline-flex;
+    }
+
+    &__benefit-text {
+        flex: 1;
+    }
+
+    // ── Form (glassmorphic) ───────────────────────────────────────────────
+    &__form {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+        position: relative;
+    }
+
+    &__label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #9ca3af;
+        margin-bottom: 0.5rem;
+    }
+
+    &__input {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        padding: 0.75rem 0.875rem;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: border-color 0.15s ease, background 0.15s ease;
+        margin-bottom: 0.875rem;
+
+        &::placeholder {
+            color: #6b7280;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+        }
+    }
+
+    &__error {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        color: #fca5a5;
+        font-size: 0.78rem;
+        margin: 0 0 0.625rem;
+    }
+
+    &__submit {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: #ffffff;
+        color: #000000;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        font-family: inherit;
+        border: 1px solid #ffffff;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+
+        &:hover:not(:disabled) {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        &:disabled {
+            background: #9ca3af;
+            border-color: #9ca3af;
+            cursor: not-allowed;
+        }
+    }
+
+    &__helper {
+        font-size: 0.76rem;
+        color: #6b7280;
+        text-align: center;
+        margin: 0.75rem 0 0;
+    }
+
+    // ── Success state ─────────────────────────────────────────────────────
+    &__success {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        text-align: center;
+        padding: 1.25rem 0;
+    }
+
+    &__success-icon {
+        font-size: 2rem;
+        color: #10b981;
+        display: inline-flex;
+    }
+
+    &__success-title {
+        color: #ffffff;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    &__success-message {
+        color: #9ca3af;
+        font-size: 0.85rem;
+
+        code {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #d1d5db;
+            padding: 0.1rem 0.375rem;
+            font-family: inherit;
+        }
+    }
+}
+
+@media (max-width: 720px) {
+    .component-early-signup-form {
+        &__inner {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+}
+
+@media (pointer: coarse) {
+    .component-early-signup-form__submit,
+    .component-early-signup-form__input {
+        min-height: 44px;
+    }
+}

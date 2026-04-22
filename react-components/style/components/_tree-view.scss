@@ -39,13 +39,12 @@
         user-select: none;
         min-height: 32px;
 
-        &:hover {
-            background: var(--tv-hover-bg);
+        @media (pointer: coarse) {
+            min-height: 44px;
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: -2px;
+        &:hover {
+            background: var(--tv-hover-bg);
         }
 
         &--selected {
@@ -66,11 +65,6 @@
         transition: transform var(--tv-transition), color var(--tv-transition);
 
         &:hover { color: var(--tv-text); }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
 
         &--leaf {
             visibility: hidden;

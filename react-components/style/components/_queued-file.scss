@@ -24,7 +24,7 @@
 	border: 1px solid var(--qf-border);
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
 	margin: 2px 0;
 
 	animation: queued-file-blink 1.6s ease-in-out infinite;
@@ -81,8 +81,8 @@
 		text-align: right;
 		font-size: 0.85rem;
 		color: var(--qf-muted);
-		line-height: 30px;
-		padding: 0 5px;
+		line-height: 1.5;
+		padding: 0 4px;
 	}
 
 	&__dismiss {

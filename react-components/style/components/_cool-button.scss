@@ -1,50 +1,249 @@
+// ── CoolButton ─────────────────────────────────────────────────────────────
+// Marketing button styled after the webgame.cloud landing page — sharp
+// rectangle, black-gradient primary, lift-on-hover with soft shadow.
+
 .component.component-cool-button {
-	align-items: center;
-	display: inline-flex;
-	justify-content: center;
-	position: relative;
+    --cb-bg: #000000;
+    --cb-bg-hover: #0a0a0a;
+    --cb-fg: #ffffff;
+    --cb-border: transparent;
+    --cb-separator: rgba(255, 255, 255, 0.28);
+    --cb-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.28);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    font-family: inherit;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    line-height: 1.5;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--cb-border);
+    background: var(--cb-bg);
+    color: var(--cb-fg);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
+        background 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
+
+    &:hover:not(:disabled) {
+        background: var(--cb-bg-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--cb-shadow-hover);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
 }
 
 .component-cool-button {
-	.component-cool-button__inner {
-		align-items: center;
-		display: inline-flex;
-		gap: 0.75rem;
-		height: 100%;
-	}
+    &__inner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.625rem;
+        height: 100%;
+    }
 
-	.component-cool-button__label {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.375rem;
-	}
+    &__label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
 
-	.component-cool-button__addon {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-	}
+    &__addon {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 1em;
+    }
 
-	.component-cool-button__separator {
-		align-self: stretch;
-		background-color: rgba(15, 23, 42, 0.18);
-		display: inline-flex;
-		width: 1px;
-	}
+    &__separator {
+        align-self: stretch;
+        width: 1px;
+        background-color: var(--cb-separator);
+    }
 
-	.component-cool-button.btn-outline-primary .component-cool-button__separator,
-	.component-cool-button.btn-outline-secondary .component-cool-button__separator,
-	.component-cool-button.btn-outline-success .component-cool-button__separator,
-	.component-cool-button.btn-outline-danger .component-cool-button__separator,
-	.component-cool-button.btn-outline-warning .component-cool-button__separator,
-	.component-cool-button.btn-outline-info .component-cool-button__separator {
-		background-color: currentColor;
-		opacity: 0.25;
-	}
+    // ── Sizes ─────────────────────────────────────────────────────────────
+    &--small {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+    }
 
-	.component-cool-button.btn-primary .component-cool-button__separator,
-	.component-cool-button.btn-secondary .component-cool-button__separator {
-		background-color: rgba(255, 255, 255, 0.3);
-	}
+    &--default {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
 
+    &--large {
+        padding: 0.8rem 1.35rem;
+        font-size: 0.98rem;
+    }
+
+    // ── Variants ──────────────────────────────────────────────────────────
+    // Primary = signature black with subtle gradient shimmer
+    &--primary {
+        background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
+        color: #ffffff;
+        border-color: #000000;
+        --cb-separator: rgba(255, 255, 255, 0.28);
+
+        &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #0a0a0a 0%, #141414 100%);
+        }
+    }
+
+    &--secondary {
+        background: #3f3d56;
+        color: #ffffff;
+        border-color: #3f3d56;
+        --cb-separator: rgba(255, 255, 255, 0.28);
+
+        &:hover:not(:disabled) {
+            background: #2d2b40;
+        }
+    }
+
+    &--success {
+        background: #10b981;
+        color: #ffffff;
+        border-color: #10b981;
+        --cb-separator: rgba(255, 255, 255, 0.28);
+
+        &:hover:not(:disabled) {
+            background: #0ea371;
+        }
+    }
+
+    &--danger {
+        background: #ef4444;
+        color: #ffffff;
+        border-color: #ef4444;
+        --cb-separator: rgba(255, 255, 255, 0.28);
+
+        &:hover:not(:disabled) {
+            background: #dc2626;
+        }
+    }
+
+    &--warning {
+        background: #f59e0b;
+        color: #111827;
+        border-color: #f59e0b;
+        --cb-separator: rgba(0, 0, 0, 0.18);
+
+        &:hover:not(:disabled) {
+            background: #d97706;
+        }
+    }
+
+    &--info {
+        background: #06b6d4;
+        color: #ffffff;
+        border-color: #06b6d4;
+        --cb-separator: rgba(255, 255, 255, 0.28);
+
+        &:hover:not(:disabled) {
+            background: #0891b2;
+        }
+    }
+
+    // ── Outline modifier — invert each variant ────────────────────────────
+    &--outline {
+        background: #ffffff;
+        --cb-separator: rgba(15, 23, 42, 0.18);
+
+        &.component-cool-button--primary {
+            color: #000000;
+            border-color: #e2e8f0;
+
+            &:hover:not(:disabled) {
+                background: #f8fafc;
+                border-color: #000000;
+            }
+        }
+
+        &.component-cool-button--secondary {
+            color: #3f3d56;
+            border-color: #3f3d56;
+            background: #ffffff;
+
+            &:hover:not(:disabled) {
+                background: #f3f4f6;
+            }
+        }
+
+        &.component-cool-button--success {
+            color: #10b981;
+            border-color: #10b981;
+            background: #ffffff;
+
+            &:hover:not(:disabled) {
+                background: #ecfdf5;
+            }
+        }
+
+        &.component-cool-button--danger {
+            color: #ef4444;
+            border-color: #ef4444;
+            background: #ffffff;
+
+            &:hover:not(:disabled) {
+                background: #fef2f2;
+            }
+        }
+
+        &.component-cool-button--warning {
+            color: #b45309;
+            border-color: #f59e0b;
+            background: #ffffff;
+
+            &:hover:not(:disabled) {
+                background: #fffbeb;
+            }
+        }
+
+        &.component-cool-button--info {
+            color: #06b6d4;
+            border-color: #06b6d4;
+            background: #ffffff;
+
+            &:hover:not(:disabled) {
+                background: #ecfeff;
+            }
+        }
+    }
+
+    &--loading {
+        pointer-events: none;
+        opacity: 0.75;
+    }
+}
+
+@media (pointer: coarse) {
+    .component.component-cool-button {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component.component-cool-button {
+        transition: none;
+
+        &:hover:not(:disabled) {
+            transform: none;
+        }
+    }
 }

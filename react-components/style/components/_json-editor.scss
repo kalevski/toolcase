@@ -29,6 +29,10 @@
 	.component-json-editor__input {
 		flex: 1 1 auto;
 		height: 32px;
+
+		@media (pointer: coarse) {
+			min-height: 44px;
+		}
 		padding: 4px 8px;
 		border: 0;
 		border-left: 1px solid #e2e8f0;
@@ -50,6 +54,10 @@
 	.component-json-editor__select {
 		flex: 1 1 auto;
 		height: 32px;
+
+		@media (pointer: coarse) {
+			min-height: 44px;
+		}
 		padding: 4px 8px;
 		border: none;
 		border-left: 1px solid #e2e8f0;
@@ -284,6 +292,10 @@
 		font-size: 0.78rem;
 		outline: none;
 
+		@media (pointer: coarse) {
+			min-height: 44px;
+		}
+
 		&--select {
 			cursor: pointer;
 			min-width: 56px;
@@ -322,6 +334,11 @@
 		font-size: 0.7rem;
 		cursor: pointer;
 		transition: color 0.15s ease, background 0.15s ease;
+
+		@media (pointer: coarse) {
+			min-width: 44px;
+			min-height: 44px;
+		}
 
 		&:hover {
 			color: #ef4444;

@@ -1,0 +1,89 @@
+// ── Pipeline ──────────────────────────────────────────────────────────────
+// Horizontal step-by-step grid. The active (live) step shows a gradient
+// accent bar at the bottom.
+
+.component.component-pipeline {
+    display: grid;
+    grid-template-columns: repeat(var(--pipeline-count, 5), 1fr);
+    gap: 0;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+}
+
+.component-pipeline {
+    &__step {
+        position: relative;
+        padding: 1rem;
+        background: #ffffff;
+        border-right: 1px solid #e5e7eb;
+
+        &:last-child {
+            border-right: none;
+        }
+    }
+
+    &__num {
+        font-family: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
+        font-size: 0.7rem;
+        color: #64748b;
+        letter-spacing: 0.08em;
+    }
+
+    &__title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        font-size: 1rem;
+        color: #64748b;
+    }
+
+    &__sub {
+        font-size: 0.76rem;
+        color: #64748b;
+        margin-top: 0.2rem;
+    }
+
+    &__step--live {
+        .component-pipeline__icon {
+            color: #10b981;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, hsl(280, 95%, 57%), hsl(193, 90%, 55%));
+        }
+    }
+
+    &__step--complete {
+        background: #f9fafb;
+
+        .component-pipeline__icon {
+            color: #10b981;
+        }
+    }
+}
+
+@media (max-width: 720px) {
+    .component.component-pipeline {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .component-pipeline__step {
+        border-right: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+    }
+}

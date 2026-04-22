@@ -7,27 +7,9 @@
 	--rc-radius-full: 9999px;
 }
 
-// Reset outline and focus rings for interactive Bootstrap elements.
-// Mouse users: no ring (:focus without :focus-visible).
-// Keyboard users: visible ring via :focus-visible (not overridden here).
-.btn:focus:not(:focus-visible),
-.form-control:focus:not(:focus-visible),
-.form-select:focus:not(:focus-visible),
-.form-check-input:focus:not(:focus-visible),
-.nav-link:focus:not(:focus-visible),
-.page-link:focus:not(:focus-visible),
-.accordion-button:focus:not(:focus-visible),
-.dropdown-item:focus:not(:focus-visible),
-.list-group-item:focus:not(:focus-visible),
-input:focus:not(:focus-visible),
-textarea:focus:not(:focus-visible),
-select:focus:not(:focus-visible) {
+// Suppress outlines and focus rings on all interactive elements.
+*:focus,
+*:focus-visible {
 	outline: none;
 	box-shadow: none;
-}
-
-// Provide a consistent focus-visible ring for keyboard navigation.
-:focus-visible {
-	outline: 2px solid var(--rc-focus-ring, #1e293b);
-	outline-offset: 2px;
 }

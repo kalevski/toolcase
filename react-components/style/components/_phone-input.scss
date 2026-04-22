@@ -48,12 +48,6 @@
             background: var(--ph-hover-bg);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-            z-index: 1;
-        }
-
         &--open {
             background: var(--ph-hover-bg);
         }
@@ -96,11 +90,6 @@
             box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.08);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
-
         &.is-invalid {
             border-color: var(--ph-border-error);
         }
@@ -135,11 +124,6 @@
         &:focus {
             border-color: var(--ph-border-focus);
         }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
     }
 
     &__list {
@@ -164,11 +148,6 @@
         &:hover,
         &:focus {
             background: var(--ph-hover-bg);
-        }
-
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: -2px;
         }
 
         &--selected {

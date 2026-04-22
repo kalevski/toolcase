@@ -1,105 +1,140 @@
 import React, { useState } from 'react'
-import { Alert, Card, CodeSnippet } from '@toolcase/react-components'
+import { Alert, Button, CodeSnippet } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const AlertDemo: React.FC = () => {
-	const [visible, setVisible] = useState(true)
+	const [showInfo, setShowInfo] = useState(true)
+	const [stack, setStack] = useState<number[]>([1, 2])
+
+	const addAlert = () => setStack((s) => [...s, s.length + 1])
+	const dismissAlert = (id: number) => setStack((s) => s.filter((n) => n !== id))
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Alert</h1>
-					<p className="text-muted mb-0">A dismissible alert banner with icon, title, message, and close button.</p>
+		<DemoPage
+			eyebrow="Feedback"
+			title="Alert"
+			lede={
+				<>
+					An inline status banner for page- or section-level announcements — six semantic{' '}
+					<code>variant</code>s, optional <code>title</code>, <code>icon</code>, and{' '}
+					<code>dismissible</code> behavior. Use <code>role="status"</code> for info/success and{' '}
+					<code>role="alert"</code> for warning/danger so screen readers announce correctly.
+				</>
+			}
+		>
+			<DemoSection
+				eyebrow="Semantic meaning"
+				title="Variants"
+				caption="One line of copy each. Pick the variant that matches the severity of what happened."
+			>
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+					<Alert variant="primary">A new version of webgame.cloud is available.</Alert>
+					<Alert variant="secondary">Your changes are saved to a draft automatically.</Alert>
+					<Alert variant="info">Build artifacts are kept for 30 days before being purged.</Alert>
+					<Alert variant="success">Bundle <code>mobile_lo.pack</code> published to production.</Alert>
+					<Alert variant="warning">Storage is at 82% — consider archiving old builds.</Alert>
+					<Alert variant="danger">Deployment failed: asset checksum did not match manifest.</Alert>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Variants</h2>
-						<div className="d-flex flex-column gap-3">
-							<Alert variant="primary">This is a primary alert.</Alert>
-							<Alert variant="secondary">This is a secondary alert.</Alert>
-							<Alert variant="info">This is an info alert.</Alert>
-							<Alert variant="success">This is a success alert.</Alert>
-							<Alert variant="warning">This is a warning alert.</Alert>
-							<Alert variant="danger">This is a danger alert.</Alert>
-						</div>
-					</Card>
+			<DemoSection
+				eyebrow="Anatomy"
+				title="With title"
+				caption="Lead with a one-line title that captures the state. Use the body for the action or next step."
+			>
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+					<Alert variant="success" title="Published" icon="check-circle-fill">
+						Your build is live at <code>indie-raid.webgame.cloud</code>.
+					</Alert>
+					<Alert variant="warning" title="Action required" icon="exclamation-triangle-fill">
+						Two team invites are still pending — resend them before the billing cycle closes.
+					</Alert>
+					<Alert variant="danger" title="Upload failed" icon="x-circle-fill">
+						Network dropped after 2.4 MB of 8.1 MB. Retrying will resume from where it stopped.
+					</Alert>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">With Title</h2>
-						<div className="d-flex flex-column gap-3">
-							<Alert variant="success" title="Success!">Your project has been published.</Alert>
-							<Alert variant="danger" title="Error">Failed to upload file. Please try again.</Alert>
-							<Alert variant="warning" title="Warning" message="Your storage is almost full." />
-						</div>
-					</Card>
+			<DemoSection
+				eyebrow="Interaction"
+				title="Dismissible"
+				caption="Use dismissible when the alert is informational. For error states, prefer keeping it visible until the issue is resolved."
+			>
+				{showInfo ? (
+					<Alert
+						variant="info"
+						title="Heads up"
+						icon="info-circle-fill"
+						dismissible
+						onClose={() => setShowInfo(false)}
+					>
+						You have 12 unread notifications in your project inbox.
+					</Alert>
+				) : (
+					<Button variant="secondary" outline size="small" onClick={() => setShowInfo(true)}>
+						Restore alert
+					</Button>
+				)}
+			</DemoSection>
+
+			<DemoSection
+				eyebrow="State"
+				title="Loading"
+				caption="Attach a spinner to an alert while an async operation is in flight."
+			>
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+					<Alert variant="primary" loading>Uploading <code>level-03.atlas</code> — 62% of 14.3 MB.</Alert>
+					<Alert variant="info" loading title="Syncing">
+						Pulling the latest schema from <code>prod</code>…
+					</Alert>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Dismissible</h2>
-						{visible ? (
-							<Alert variant="info" title="Heads up!" dismissible onClose={() => setVisible(false)}>
-								This alert can be closed. Click the X to dismiss it.
+			<DemoSection
+				eyebrow="Realistic usage"
+				title="Notification stack"
+				caption="Alerts composed as a feed. Add events and dismiss them individually."
+				aside={
+					<Button variant="primary" size="small" onClick={addAlert}>
+						Push event
+					</Button>
+				}
+			>
+				{stack.length === 0 ? (
+					<p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
+						All clear — no active events.
+					</p>
+				) : (
+					<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+						{stack.map((id) => (
+							<Alert
+								key={id}
+								variant={id % 3 === 0 ? 'warning' : id % 2 === 0 ? 'info' : 'success'}
+								dismissible
+								onClose={() => dismissAlert(id)}
+							>
+								Event #{id} — asset pipeline updated at {new Date().toLocaleTimeString()}
 							</Alert>
-						) : (
-							<button className="btn btn-sm btn-outline-primary" onClick={() => setVisible(true)}>Show alert again</button>
-						)}
-					</Card>
-				</div>
-			</div>
+						))}
+					</div>
+				)}
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">With Icon</h2>
-						<div className="d-flex flex-column gap-3">
-							<Alert variant="info" icon="info-circle-fill" title="Information">Review the latest changes before continuing.</Alert>
-							<Alert variant="success" icon="check-circle-fill" title="Saved">Your changes have been saved successfully.</Alert>
-							<Alert variant="warning" icon="exclamation-triangle-fill" title="Warning">Your storage is almost full.</Alert>
-							<Alert variant="danger" icon="x-circle-fill" title="Error">Failed to connect. Please try again.</Alert>
-						</div>
-					</Card>
-				</div>
-			</div>
+			<DemoSection eyebrow="API" title="Usage">
+				<CodeSnippet
+					language="typescript"
+					code={`import { Alert } from '@toolcase/react-components'
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Loading</h2>
-						<div className="d-flex flex-column gap-3">
-							<Alert variant="primary" loading>Uploading your file, please wait…</Alert>
-							<Alert variant="info" loading title="Syncing">Fetching the latest data from the server.</Alert>
-						</div>
-					</Card>
-				</div>
-			</div>
+<Alert variant="success" title="Published" icon="check-circle-fill">
+  Your build is live at indie-raid.webgame.cloud.
+</Alert>
 
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { Alert } from '@toolcase/react-components'
-
-<Alert variant="info" title="Heads up!">
-  This is an informational alert.
+<Alert variant="info" dismissible onClose={handleClose}>
+  You have 12 unread notifications.
 </Alert>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

@@ -50,11 +50,6 @@
             box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
         }
 
-        &:focus-visible {
-            outline: 2px solid #1e293b;
-            outline-offset: 2px;
-        }
-
         &.is-invalid {
             border-color: var(--otp-border-error);
         }
