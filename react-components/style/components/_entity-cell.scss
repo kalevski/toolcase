@@ -1,0 +1,113 @@
+// ── EntityCell ───────────────────────────────────────────────────────────
+// Compact table/list cell: a colored initial tile next to a two-line label.
+// Colors come from the shared `EntityColor` palette so cells stay visually
+// consistent across admin tables.
+
+.component.component-entity-cell {
+    --ec-color: #0f172a;
+    --ec-muted: #64748b;
+    --ec-focus: #1e293b;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.component-entity-cell {
+    &__tile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 0.02em;
+        flex-shrink: 0;
+        line-height: 1;
+
+        &--violet  { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+        &--cyan    { background: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
+        &--emerald { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        &--amber   { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        &--pink    { background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; }
+        &--blue    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        &--slate   { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+        &--rose    { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+    }
+
+    &__labels {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        min-width: 0;
+    }
+
+    &__name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--ec-color);
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &--button {
+            background: transparent;
+            border: 0;
+            padding: 0;
+            text-align: left;
+            cursor: pointer;
+            font: inherit;
+            color: inherit;
+
+            &:hover { text-decoration: underline; }
+
+            &:focus-visible {
+                outline: 2px solid var(--ec-focus);
+                outline-offset: 2px;
+            }
+        }
+    }
+
+    &__sub {
+        font-size: 0.78rem;
+        color: var(--ec-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &--sm {
+        gap: 0.5rem;
+
+        .component-entity-cell__tile {
+            width: 24px;
+            height: 24px;
+            font-size: 0.68rem;
+        }
+
+        .component-entity-cell__name { font-size: 0.85rem; }
+        .component-entity-cell__sub { font-size: 0.72rem; }
+    }
+
+    &--md {
+        .component-entity-cell__tile {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    &--lg {
+        gap: 0.75rem;
+
+        .component-entity-cell__tile {
+            width: 40px;
+            height: 40px;
+            font-size: 0.9rem;
+        }
+
+        .component-entity-cell__name { font-size: 0.98rem; }
+        .component-entity-cell__sub { font-size: 0.82rem; }
+    }
+}

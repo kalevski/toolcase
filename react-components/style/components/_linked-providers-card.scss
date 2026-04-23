@@ -1,0 +1,81 @@
+// ── LinkedProvidersCard ──────────────────────────────────────────────────
+// Lists third-party identity providers linked to a user. Composes
+// `SectionCard`. Provider brand colors come from a built-in map with
+// consumer-supplied overrides.
+
+.component.component-linked-providers-card {
+    --lpc-color: #0f172a;
+    --lpc-muted: #64748b;
+    --lpc-border: #e2e8f0;
+}
+
+.component-linked-providers-card {
+    &__list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0;
+        border-bottom: 1px solid var(--lpc-border);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+    }
+
+    &__tile {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        color: #ffffff;
+        font-size: 1rem;
+        flex-shrink: 0;
+        border-radius: 50%;
+    }
+
+    &__meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        min-width: 0;
+    }
+
+    &__name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--lpc-color);
+        text-transform: capitalize;
+        line-height: 1.3;
+    }
+
+    &__identifier {
+        font-size: 0.82rem;
+        color: var(--lpc-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1.5rem 0.5rem;
+        color: var(--lpc-muted);
+        font-size: 0.9rem;
+
+        i {
+            font-size: 1.1rem;
+        }
+    }
+}

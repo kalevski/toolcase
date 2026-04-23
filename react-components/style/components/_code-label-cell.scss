@@ -1,0 +1,40 @@
+// ── CodeLabelCell ────────────────────────────────────────────────────────
+// A micro-cell for tables: a short monospace code next to a longer human
+// name. Used for country codes, currency codes, IATA codes, plan keys, etc.
+
+.component.component-code-label-cell {
+    --clc-color: #0f172a;
+    --clc-muted: #64748b;
+    --clc-border: #e2e8f0;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.component-code-label-cell {
+    &__code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--clc-muted);
+        padding: 0.1rem 0.4rem;
+        background: #f8fafc;
+        border: 1px solid var(--clc-border);
+        flex-shrink: 0;
+        line-height: 1.4;
+    }
+
+    &__name {
+        color: var(--clc-color);
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+}

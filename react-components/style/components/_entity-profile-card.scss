@@ -1,0 +1,128 @@
+// ── EntityProfileCard ────────────────────────────────────────────────────
+// A profile card with a hero row (lead visual + identity) and a responsive
+// meta grid of { icon, label, value, hint } cells. Purely presentational —
+// date formatting lives in `utils/formatRelative.ts`.
+
+.component.component-entity-profile-card {
+    --epc-color: #0f172a;
+    --epc-muted: #64748b;
+    --epc-sub: #334155;
+    --epc-border: #e2e8f0;
+    --epc-surface: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: var(--epc-surface);
+    border: 1px solid var(--epc-border);
+    padding: 1.25rem;
+}
+
+.component-entity-profile-card {
+    &__hero {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--epc-border);
+    }
+
+    &__lead {
+        flex-shrink: 0;
+    }
+
+    &__identity {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    &__title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--epc-color);
+        line-height: 1.25;
+    }
+
+    &__subtitle {
+        color: var(--epc-muted);
+        font-size: 0.88rem;
+    }
+
+    &__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+    }
+
+    &__meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.875rem 1.25rem;
+    }
+
+    &__meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        min-width: 0;
+    }
+
+    &__meta-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        color: var(--epc-muted);
+    }
+
+    &__meta-icon {
+        font-size: 0.8rem;
+        color: var(--epc-muted);
+    }
+
+    &__meta-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    &__meta-value {
+        color: var(--epc-color);
+        font-size: 0.92rem;
+        font-weight: 500;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &--mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.82rem;
+            color: var(--epc-sub);
+        }
+    }
+
+    &__meta-hint {
+        color: var(--epc-muted);
+        font-size: 0.78rem;
+        line-height: 1.35;
+    }
+}
+
+@media (max-width: 576px) {
+    .component.component-entity-profile-card {
+        padding: 1rem;
+    }
+
+    .component-entity-profile-card__hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .component-entity-profile-card__meta {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,126 @@
+// ── RichPageHeader ───────────────────────────────────────────────────────
+// Page-level hero: tinted icon tile, optional chip row, title, sub, and a
+// description with a right-aligned actions slot. Stacks on narrow screens.
+
+.component.component-rich-page-header {
+    --rph-title: #0f172a;
+    --rph-muted: #64748b;
+    --rph-sub: #334155;
+    --rph-border: #e2e8f0;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--rph-border);
+    margin-bottom: 1.25rem;
+}
+
+.component-rich-page-header {
+    &__main {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid var(--rph-border);
+
+        &--violet  { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+        &--cyan    { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; }
+        &--emerald { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        &--amber   { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+        &--pink    { background: #fdf2f8; color: #be185d; border-color: #fbcfe8; }
+        &--blue    { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        &--slate   { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+        &--rose    { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 0;
+    }
+
+    &__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+        margin-bottom: 0.125rem;
+    }
+
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.5rem;
+        background: #f8fafc;
+        border: 1px solid var(--rph-border);
+        color: var(--rph-sub);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+
+        i { font-size: 0.8rem; }
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--rph-title);
+        line-height: 1.2;
+    }
+
+    &__sub {
+        color: var(--rph-sub);
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    &__description {
+        margin: 0;
+        color: var(--rph-muted);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        max-width: 64ch;
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .component.component-rich-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .component-rich-page-header__title {
+        font-size: 1.25rem;
+    }
+
+    .component-rich-page-header__actions {
+        width: 100%;
+    }
+}

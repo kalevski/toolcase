@@ -49,6 +49,8 @@ A complete guide to every component in the library. Import any component from `@
   - [Group](#group)
   - [NumberInput](#numberinput)
   - [Popover](#popover)
+  - [RichPageHeader](#richpageheader)
+  - [SectionCard](#sectioncard)
   - [Slider](#slider)
   - [Spacer](#spacer)
   - [Stepper](#stepper)
@@ -83,6 +85,11 @@ A complete guide to every component in the library. Import any component from `@
   - [IconButton](#iconbutton)
 - [Data & Tables](#data--tables)
   - [AdvancedTable](#advancedtable)
+  - [CodeLabelCell](#codelabelcell)
+  - [EntityCell](#entitycell)
+  - [EntityProfileCard](#entityprofilecard)
+  - [MetricGrid](#metricgrid)
+  - [StatCard](#statcard)
   - [Table](#table)
 - [Media & Files](#media--files)
   - [Avatar](#avatar)
@@ -100,12 +107,14 @@ A complete guide to every component in the library. Import any component from `@
   - [Text](#text)
   - [VisuallyHidden](#visuallyhidden)
 - [Complex / Domain Components](#complex--domain-components)
+  - [ActionRowList](#actionrowlist)
   - [AssetBundle](#assetbundle)
   - [BitmapFontGenerator](#bitmapfontgenerator)
   - [Build](#build)
   - [CardOptions](#cardoptions)
   - [Changelog](#changelog)
   - [Hero](#hero)
+  - [LinkedProvidersCard](#linkedproviderscard)
   - [MultiCardSelect](#multicardselect)
   - [Timeline](#timeline)
   - [ToggleCard](#togglecard)
@@ -1354,6 +1363,78 @@ const tabs: TabSectionItem[] = [
 
 ---
 
+### SectionCard
+
+A titled card for settings and detail pages. Renders an icon + title header row with an optional right-aligned action slot, and a body region filled by `children`. The `danger` variant tints the chrome red for destructive sections.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `string` | ✅ | Section heading |
+| `icon` | `string` | ❌ | Bootstrap Icon name for the header tile |
+| `action` | `ReactNode` | ❌ | Right-aligned slot (typically a `Button`) |
+| `variant` | `'default' \| 'danger'` | ❌ | Style variant (default: `'default'`) |
+| `children` | `ReactNode` | ❌ | Body content |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { SectionCard, Button } from '@toolcase/react-components'
+
+<SectionCard
+  title="API keys"
+  icon="key"
+  action={<Button size="small">New key</Button>}
+>
+  Active keys appear here.
+</SectionCard>
+
+<SectionCard
+  title="Delete workspace"
+  icon="exclamation-triangle"
+  variant="danger"
+  action={<Button variant="danger" outline size="small">Delete</Button>}
+>
+  Permanently deletes this workspace and all of its projects.
+</SectionCard>
+```
+
+---
+
+### RichPageHeader
+
+A page-level hero header: tinted icon tile, optional chip row, title, sub, description, and a right-aligned `actions` slot. Use at the top of dashboard, settings, or detail pages. Ships `RichPageHeaderChip` for consistent chip styling.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `ReactNode` | ✅ | Page title |
+| `icon` | `{ name: string; color?: EntityColor }` | ❌ | Tinted icon tile — color drawn from the shared `EntityColor` palette |
+| `chips` | `ReactNode` | ❌ | Chip row above the title (typically `RichPageHeaderChip`s) |
+| `sub` | `ReactNode` | ❌ | Secondary line under the title |
+| `description` | `ReactNode` | ❌ | Body paragraph below `sub` |
+| `actions` | `ReactNode` | ❌ | Right-aligned actions slot (buttons, etc.) |
+| `className` | `string` | ❌ | Additional CSS class |
+
+**`RichPageHeaderChip` props:** `{ icon?: string, children: ReactNode, className?: string }`
+
+```tsx
+import { RichPageHeader, RichPageHeaderChip, Button } from '@toolcase/react-components'
+
+<RichPageHeader
+  icon={{ name: 'hdd-stack', color: 'violet' }}
+  chips={
+    <>
+      <RichPageHeaderChip icon="check-circle">Active</RichPageHeaderChip>
+      <RichPageHeaderChip icon="geo-alt">us-west-2</RichPageHeaderChip>
+    </>
+  }
+  title="atlas-prod-cluster"
+  sub="Postgres 15 · 8 vCPU · 32 GB"
+  description="Primary database cluster for the Atlas production tenant."
+  actions={<Button>Deploy</Button>}
+/>
+```
+
+---
+
 ## Navigation
 
 ### CoolNav
@@ -1740,6 +1821,159 @@ const columns: TableColumn<User>[] = [
   hoverable
   onRowClick={(row) => navigate(`/users/${row.id}`)}
   emptyMessage="No users found."
+/>
+```
+
+---
+
+### StatCard
+
+A KPI tile: an eyebrow (icon + label), a large value with optional unit, and an optional footer row containing a delta chip, helper text, and a free-form slot. Purely presentational — formatting and data-fetching live upstream.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `label` | `string` | ✅ | Eyebrow label (e.g. `"Active users"`) |
+| `value` | `ReactNode` | ✅ | Large primary value |
+| `icon` | `string` | ❌ | Bootstrap Icon name in the eyebrow |
+| `unit` | `string` | ❌ | Unit suffix rendered next to the value (e.g. `"GB"`) |
+| `delta` | `string` | ❌ | Delta chip text (e.g. `"+12.4%"`) |
+| `deltaKind` | `'up' \| 'down' \| 'neutral'` | ❌ | Delta color + arrow icon (default: `'neutral'`) |
+| `helper` | `ReactNode` | ❌ | Secondary text in the footer row |
+| `footer` | `ReactNode` | ❌ | Free-form footer slot (right-aligned) |
+| `loading` | `boolean` | ❌ | Skeleton in place of content |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { StatCard } from '@toolcase/react-components'
+
+<StatCard
+  icon="graph-up-arrow"
+  label="Revenue"
+  value="$48.2k"
+  delta="+12.4%"
+  deltaKind="up"
+  helper="vs. last month"
+/>
+
+<StatCard icon="hdd" label="Storage used" value="34.2" unit="GB" />
+```
+
+---
+
+### MetricGrid
+
+A responsive grid of lightweight read-only metric tiles. Lighter than `StatCard` — no card chrome, no trend chip. Takes either an `items` array or arbitrary children. Exports `MetricTile` for the children form.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `(MetricTileProps & { key?: string })[]` | ❌ | Data-driven tile list |
+| `columns` | `2 \| 3 \| 4` | ❌ | Hard column cap (default: `3`) |
+| `children` | `ReactNode` | ❌ | Alternative to `items` — pass `MetricTile`s or custom nodes |
+| `className` | `string` | ❌ | Additional CSS class |
+
+**`MetricTileProps`:** `{ label, value, unit?, icon?, hint?, className? }`
+
+```tsx
+import { MetricGrid, MetricTile } from '@toolcase/react-components'
+
+// Data-driven
+<MetricGrid
+  columns={4}
+  items={[
+    { icon: 'hdd', label: 'Storage', value: '34.2', unit: 'GB', hint: '74% of quota' },
+    { icon: 'cloud-upload', label: 'Bundles', value: '342' },
+    { icon: 'people', label: 'Seats', value: '12', unit: 'of 25' },
+    { icon: 'activity', label: 'Requests', value: '1.2M' },
+  ]}
+/>
+
+// Children form — mix tiles with custom content
+<MetricGrid columns={3}>
+  <MetricTile icon="server" label="Uptime" value="99.98" unit="%" />
+  <MetricTile icon="lightning-charge" label="P95" value="142" unit="ms" />
+</MetricGrid>
+```
+
+---
+
+### CodeLabelCell
+
+A micro-cell for tables showing a short monospace code next to a longer human-readable name (country codes, currency codes, IATA codes, plan keys, etc.). Pure display — no interactive behavior. Names truncate with ellipsis.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `code` | `string` | ✅ | Short uppercase code (e.g. `"US"`) |
+| `name` | `string` | ✅ | Full human-readable name |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { CodeLabelCell } from '@toolcase/react-components'
+
+<CodeLabelCell code="US" name="United States" />
+<CodeLabelCell code="EUR" name="Euro" />
+```
+
+---
+
+### EntityCell
+
+Compact list/table cell: a colored initial tile next to a two-line label. Colors come from the shared `EntityColor` palette so cells stay visually consistent across admin tables. If `onClick` is passed the name renders as a button.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `name` | `string` | ✅ | Primary label |
+| `initial` | `string` | ✅ | 1–2 character initial rendered in the tile |
+| `color` | `EntityColor` | ✅ | `'violet' \| 'cyan' \| 'emerald' \| 'amber' \| 'pink' \| 'blue' \| 'slate' \| 'rose'` |
+| `subLabel` | `string` | ❌ | Secondary line under the name |
+| `size` | `'sm' \| 'md' \| 'lg'` | ❌ | Tile size (default: `'md'`) |
+| `onClick` | `() => void` | ❌ | Makes the name a clickable button |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { EntityCell } from '@toolcase/react-components'
+
+<EntityCell
+  name="Atlas Platform"
+  subLabel="atlas-prod"
+  initial="AT"
+  color="violet"
+  onClick={() => navigate('/projects/atlas-prod')}
+/>
+```
+
+---
+
+### EntityProfileCard
+
+A profile card with a hero row (lead visual + identity block) and a responsive meta grid of `{ icon, label, value, hint }` cells. Lead is a single slot — plug in an `Avatar`, an icon tile, or nothing. Meta items support a `mono` modifier for IDs.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `ReactNode` | ✅ | Primary identity |
+| `meta` | `MetaItem[]` | ✅ | Meta grid cells |
+| `lead` | `ReactNode` | ❌ | Left hero slot — typically an `Avatar` |
+| `subtitle` | `ReactNode` | ❌ | Secondary identity line |
+| `chips` | `ReactNode` | ❌ | Chip row in the identity block |
+| `loading` | `boolean` | ❌ | Skeleton for hero + meta rows |
+| `className` | `string` | ❌ | Additional CSS class |
+
+**`MetaItem`:** `{ icon?: string, label: string, value: ReactNode, hint?: ReactNode, mono?: boolean }`
+
+Presentational — date formatting lives in the companion `formatRelative(iso)` helper exported from the same package.
+
+```tsx
+import { EntityProfileCard, Avatar, Badge, formatRelative } from '@toolcase/react-components'
+
+<EntityProfileCard
+  lead={<Avatar name="Jordan Liu" size="large" />}
+  title="Jordan Liu"
+  subtitle="jordan@atlas.example.com"
+  chips={<Badge variant="success" pill>Active</Badge>}
+  meta={[
+    { icon: 'calendar-event', label: 'Joined', value: '2023-08-12' },
+    { icon: 'clock-history', label: 'Last seen', value: formatRelative(user.lastSeenAt) },
+    { icon: 'hash', label: 'User ID', value: 'usr_9a82c0f3e641', mono: true },
+  ]}
 />
 ```
 
@@ -2705,6 +2939,78 @@ import { Banner } from '@toolcase/react-components'
 <Banner variant="info" dismissible storageKey="welcome">
   New version available!
 </Banner>
+```
+
+---
+
+### ActionRowList
+
+A vertical list of action rows. Each row has an icon, title, description, and a trailing call-to-action button. The workhorse pattern for *Account*, *Security*, and *Danger Zone* pages — one row maps to one discrete admin operation. A single `onActionClick(key)` handler receives the row key.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `actions` | `ActionRow[]` | ✅ | Row definitions |
+| `onActionClick` | `(key: string) => void` | ✅ | Fires with the clicked row's `key` |
+| `outline` | `boolean` | ❌ | Render buttons as outline style (default: `true`) |
+| `trailingIcon` | `string \| null` | ❌ | Trailing icon name; pass `null` to omit (default: `'arrow-right'`) |
+| `className` | `string` | ❌ | Additional CSS class |
+
+**`ActionRow`:** `{ key, icon, title, description, buttonText, buttonVariant?, disabled? }`
+
+```tsx
+import { ActionRowList } from '@toolcase/react-components'
+
+<ActionRowList
+  onActionClick={(key) => console.log('action:', key)}
+  actions={[
+    {
+      key: '2fa',
+      icon: 'phone',
+      title: 'Two-factor authentication',
+      description: 'Add a second factor via TOTP or WebAuthn.',
+      buttonText: 'Enable',
+      buttonVariant: 'success',
+    },
+    {
+      key: 'delete',
+      icon: 'trash',
+      title: 'Delete account',
+      description: 'Permanently delete this account.',
+      buttonText: 'Delete',
+      buttonVariant: 'danger',
+    },
+  ]}
+/>
+```
+
+---
+
+### LinkedProvidersCard
+
+Lists third-party identity providers (Google, GitHub, Discord, etc.) linked to a user, with brand-tinted circular icons. Composes `SectionCard`. Ships a built-in brand-color map — extend via `brandColors` and plug in custom icon names via `iconForProvider`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `providers` | `LinkedProvider[]` | ✅ | List of linked providers |
+| `title` | `string` | ❌ | Section title (default: `'Providers'`) |
+| `brandColors` | `Record<string, string>` | ❌ | Merged over `defaultProviderBrandColors` |
+| `iconForProvider` | `(key: string) => string` | ❌ | Override the default Bootstrap-Icon name per provider |
+| `emptyLabel` | `string` | ❌ | Shown when `providers` is empty (default: `'No linked providers'`) |
+| `className` | `string` | ❌ | Additional CSS class |
+
+**`LinkedProvider`:** `{ id, provider, identifier }`
+
+Also exports `defaultProviderBrandColors` so callers can spread it when extending.
+
+```tsx
+import { LinkedProvidersCard } from '@toolcase/react-components'
+
+<LinkedProvidersCard
+  providers={[
+    { id: '1', provider: 'google', identifier: 'jordan@atlas.example.com' },
+    { id: '2', provider: 'github', identifier: '@jordanliu' },
+  ]}
+/>
 ```
 
 ---

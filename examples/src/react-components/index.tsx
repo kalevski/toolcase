@@ -74,7 +74,12 @@ import AvatarDemo from './AvatarDemo'
 import { CarouselDemo } from './CarouselDemo'
 import ChangelogDemo from './ChangelogDemo'
 import { ChartDemo } from './ChartDemo'
+import CodeLabelCellDemo from './CodeLabelCellDemo'
 import CodeSnippetDemo from './CodeSnippetDemo'
+import EntityCellDemo from './EntityCellDemo'
+import EntityProfileCardDemo from './EntityProfileCardDemo'
+import MetricGridDemo from './MetricGridDemo'
+import StatCardDemo from './StatCardDemo'
 import TableDemo from './TableDemo'
 import TimelineDemo from './TimelineDemo'
 import { TreeViewDemo } from './TreeViewDemo'
@@ -93,7 +98,9 @@ import GroupDemo from './GroupDemo'
 import HeroDemo from './HeroDemo'
 import { InfiniteScrollDemo } from './InfiniteScrollDemo'
 import { ResizablePanelDemo } from './ResizablePanelDemo'
+import RichPageHeaderDemo from './RichPageHeaderDemo'
 import { ScrollAreaDemo } from './ScrollAreaDemo'
+import SectionCardDemo from './SectionCardDemo'
 import SpacerDemo from './SpacerDemo'
 import { VirtualListDemo } from './VirtualListDemo'
 
@@ -125,7 +132,9 @@ import { MarkdownEditorDemo } from './MarkdownEditorDemo'
 import NodeEditorDemo from './NodeEditorDemo'
 
 // Dashboard & Admin
+import ActionRowListDemo from './ActionRowListDemo'
 import DangerZoneActionsDemo from './DangerZoneActionsDemo'
+import LinkedProvidersCardDemo from './LinkedProvidersCardDemo'
 import ProjectWizardDemo from './ProjectWizardDemo'
 import UsageSummaryPanelDemo from './UsageSummaryPanelDemo'
 import UserPanelDemo from './UserPanelDemo'
@@ -256,7 +265,12 @@ export const examples: ExampleDef[] = [
     { key: 'carousel', category: 'Data Display', element: <CarouselDemo /> },
     { key: 'changelog', category: 'Data Display', element: <ChangelogDemo /> },
     { key: 'chart', category: 'Data Display', element: <ChartDemo /> },
+    { key: 'code-label-cell', category: 'Data Display', element: <CodeLabelCellDemo /> },
     { key: 'code-snippet', category: 'Data Display', element: <CodeSnippetDemo /> },
+    { key: 'entity-cell', category: 'Data Display', element: <EntityCellDemo /> },
+    { key: 'entity-profile-card', category: 'Data Display', element: <EntityProfileCardDemo /> },
+    { key: 'metric-grid', category: 'Data Display', element: <MetricGridDemo /> },
+    { key: 'stat-card', category: 'Data Display', element: <StatCardDemo /> },
     { key: 'table', category: 'Data Display', element: <TableDemo /> },
     { key: 'timeline', category: 'Data Display', element: <TimelineDemo /> },
     { key: 'tree-view', category: 'Data Display', element: <TreeViewDemo /> },
@@ -275,7 +289,9 @@ export const examples: ExampleDef[] = [
     { key: 'hero', category: 'Layout & Surfaces', element: <HeroDemo /> },
     { key: 'infinite-scroll', category: 'Layout & Surfaces', element: <InfiniteScrollDemo /> },
     { key: 'resizable-panel', category: 'Layout & Surfaces', element: <ResizablePanelDemo /> },
+    { key: 'rich-page-header', category: 'Layout & Surfaces', element: <RichPageHeaderDemo /> },
     { key: 'scroll-area', category: 'Layout & Surfaces', element: <ScrollAreaDemo /> },
+    { key: 'section-card', category: 'Layout & Surfaces', element: <SectionCardDemo /> },
     { key: 'spacer', category: 'Layout & Surfaces', element: <SpacerDemo /> },
     { key: 'virtual-list', category: 'Layout & Surfaces', element: <VirtualListDemo /> },
 
@@ -307,7 +323,9 @@ export const examples: ExampleDef[] = [
     { key: 'node-editor', category: 'Editors', element: <NodeEditorDemo /> },
 
     // ── Dashboard & Admin ────────────────────────────────────────────────
+    { key: 'action-row-list', category: 'Dashboard & Admin', element: <ActionRowListDemo /> },
     { key: 'danger-zone-actions', category: 'Dashboard & Admin', element: <DangerZoneActionsDemo /> },
+    { key: 'linked-providers-card', category: 'Dashboard & Admin', element: <LinkedProvidersCardDemo /> },
     { key: 'project-wizard', category: 'Dashboard & Admin', element: <ProjectWizardDemo /> },
     { key: 'usage-summary-panel', category: 'Dashboard & Admin', element: <UsageSummaryPanelDemo /> },
     { key: 'user-panel', category: 'Dashboard & Admin', element: <UserPanelDemo /> },
