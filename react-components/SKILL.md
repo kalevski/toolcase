@@ -4,6 +4,43 @@ A complete guide to every component in the library. Import any component from `@
 
 ---
 
+## Themes
+
+Every component reads its colors from CSS custom properties. Wrap any subtree with a `theme` class to flip the palette for everything inside — components themselves stay identical.
+
+```tsx
+// Default (light) look — no wrapper needed
+<Card header="Settings">Standard card.</Card>
+
+// Neon Drift — dark navy/purple with magenta + cyan accents
+<div className="theme theme--neon">
+  <Card header="Settings">Same component, neon palette.</Card>
+</div>
+
+// Optional: add the scanline overlay modifier
+<div className="theme theme--neon theme--neon--scanlines">
+  ...
+</div>
+```
+
+Available themes:
+
+| Class | Description |
+|---|---|
+| _(none)_ | Default light theme (baseline) |
+| `theme theme--neon` | Dark navy/purple surfaces, magenta + cyan accents, glowing focus, uppercase mono eyebrows |
+| `theme theme--neon theme--neon--scanlines` | Adds a CRT scanline overlay on top of `theme--neon` |
+
+**Font expectations for `theme--neon`:** loads best with `Orbitron` (display) and `Ubuntu Mono` (mono) in the page. The theme falls back to `JetBrains Mono` / system monospace when they're absent — the look degrades gracefully but loses some of its arcade feel. Recommended:
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+```
+
+**Adding a new theme:** drop `style/themes/_{name}.scss` next to the others and `@use` it from `style/themes/index.scss`. Scope every rule under `.theme.theme--{name}` (or `.theme--{name}`) and override the library's CSS custom properties (`--tc-*`, per-component `--{abbr}-*`) plus Bootstrap tokens (`--bs-*`) as needed. The neon partial is a worked example.
+
+---
+
 ## Table of Contents
 
 - [Inputs & Forms](#inputs--forms)

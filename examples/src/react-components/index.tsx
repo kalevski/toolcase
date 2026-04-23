@@ -153,6 +153,9 @@ import WelcomeGuideDemo from './WelcomeGuideDemo'
 import { FullAppDemo } from './FullApp'
 import { FullLandingPageDemo } from './FullLandingPage'
 
+// Themes
+import NeonThemeDemo from './NeonThemeDemo'
+
 export type ExampleCategory =
     | 'Inputs'
     | 'Buttons & Actions'
@@ -166,6 +169,7 @@ export type ExampleCategory =
     | 'Editors'
     | 'Dashboard & Admin'
     | 'Marketing'
+    | 'Themes'
     | 'Full Page Demos'
 
 export type ExampleDef = {
@@ -187,6 +191,7 @@ export const categories: ExampleCategory[] = [
     'Editors',
     'Dashboard & Admin',
     'Marketing',
+    'Themes',
     'Full Page Demos',
 ]
 
@@ -339,6 +344,9 @@ export const examples: ExampleDef[] = [
     { key: 'pinned-feature-showcase', category: 'Marketing', element: <PinnedFeatureShowcaseDemo /> },
     { key: 'pricing-card', category: 'Marketing', element: <PricingCardDemo /> },
     { key: 'welcome-guide', category: 'Marketing', element: <WelcomeGuideDemo /> },
+
+    // ── Themes ───────────────────────────────────────────────────────────
+    { key: 'neon-theme', category: 'Themes', element: <NeonThemeDemo /> },
 
     // ── Full Page Demos ──────────────────────────────────────────────────
     { key: 'full-app', category: 'Full Page Demos', element: <FullAppDemo /> },
