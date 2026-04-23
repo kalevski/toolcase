@@ -1,0 +1,15 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 9 · Reduced motion — neutralize the glow transitions
+// ───────────────────────────────────────────────────────────────────────────
+// Users who prefer reduced motion shouldn't see the subtle glow / pulse
+// transitions that the theme adds on top of the library's own motion.
+
+@media (prefers-reduced-motion: reduce) {
+    .theme--neon *,
+    .theme--neon *::before,
+    .theme--neon *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

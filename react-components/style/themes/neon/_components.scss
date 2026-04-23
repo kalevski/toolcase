@@ -1,0 +1,974 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 8 · Per-component hardcoded overrides
+// ───────────────────────────────────────────────────────────────────────────
+// These components declare literal hex colors on their BEM parts instead of
+// reading from CSS variables, so token overrides don't reach them. Each
+// block below re-themes the specific selectors that hardcode light values.
+//
+// Ordered alphabetically by component for ease of scanning / editing. If
+// adding a new block, keep the neighbouring sort order.
+
+.theme--neon {
+
+    // ── ActionHeader / ActionItems ───────────────────────────────────────
+    .component-action-header {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+    }
+    .component-action-items {
+        color: var(--nd-text-dim);
+    }
+    .component-action-items__trigger:hover {
+        background: rgba(255, 43, 214, 0.1);
+        color: var(--nd-text);
+    }
+    .component-action-items .dropdown-item {
+        color: var(--nd-text);
+        background: transparent;
+    }
+    .component-action-items .dropdown-item:hover {
+        background: rgba(255, 43, 214, 0.1);
+        color: var(--nd-text);
+    }
+
+    // ── ActionRowList icon tile (hardcoded bg) ───────────────────────────
+    .component-action-row-list__icon {
+        background: rgba(138, 75, 255, 0.14);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-accent-2);
+    }
+
+    // ── Accordion ────────────────────────────────────────────────────────
+    .component-accordion__trigger {
+        color: var(--nd-text);
+        background: transparent;
+    }
+    .component-accordion__trigger:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+    .component-accordion__content,
+    .component-accordion__item {
+        border-color: var(--nd-border-soft);
+    }
+
+    // ── AssetBundle ──────────────────────────────────────────────────────
+    .component-asset-bundle,
+    .component-asset-bundle__row,
+    .component-asset-bundle__header,
+    .component-asset-bundle__footer {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-asset-bundle__row:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+
+    // ── AssetRow ─────────────────────────────────────────────────────────
+    .component-asset-row {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-asset-row:hover {
+        background: rgba(255, 43, 214, 0.06);
+        border-color: var(--nd-border);
+    }
+
+    // ── Avatar (initials bg that aren't Bootstrap bg-* variants) ─────────
+    .component-avatar.avatar-initials:not([class*="bg-"]) {
+        background: linear-gradient(135deg, var(--nd-accent), var(--nd-violet));
+        color: #0b0218;
+    }
+
+    // ── Brand / Hero / Login / FeatureCard — light surfaces → dark ──────
+    .component-brand,
+    .component-hero {
+        background: transparent;
+        color: var(--nd-text);
+    }
+    .component-login {
+        background: var(--nd-bg);
+        color: var(--nd-text);
+    }
+    .component-login__left {
+        background: linear-gradient(160deg, var(--nd-bg) 0%, var(--nd-bg-2) 100%);
+        color: var(--nd-text);
+    }
+    .component-login__right {
+        background: var(--nd-panel-solid);
+    }
+    .component-login__title {
+        color: var(--nd-text);
+    }
+    .component-login__description {
+        color: var(--nd-text-dim);
+    }
+    .component-login__connect-btn {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-login__connect-btn:hover:not(:disabled) {
+        background: rgba(255, 43, 214, 0.08);
+        border-color: var(--nd-accent);
+    }
+
+    .component-feature-card {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-feature-card:hover {
+        border-color: var(--nd-border);
+        box-shadow: 0 0 20px rgba(255, 43, 214, 0.2);
+    }
+
+    // ── Breadcrumb ───────────────────────────────────────────────────────
+    .component-breadcrumb a {
+        color: var(--nd-accent-2);
+    }
+    .component-breadcrumb__separator {
+        color: var(--nd-text-faint);
+    }
+
+    // ── BundleBar ────────────────────────────────────────────────────────
+    .component-bundle-bar {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+
+    // ── Changelog ────────────────────────────────────────────────────────
+    .component-changelog {
+        color: var(--nd-text);
+    }
+    .component-changelog__entry {
+        border-color: var(--nd-border-soft);
+        background: transparent;
+    }
+    .component-changelog__date {
+        color: var(--nd-text-dim);
+    }
+
+    // ── Chart (base chrome) ──────────────────────────────────────────────
+    .component-chart,
+    .component-chart__frame,
+    .component-chart__canvas {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-chart__grid line,
+    .component-chart__axis line,
+    .component-chart__axis path {
+        stroke: rgba(120, 80, 200, 0.25);
+    }
+    .component-chart__axis text,
+    .component-chart__label {
+        fill: var(--nd-text-dim);
+        color: var(--nd-text-dim);
+    }
+
+    // ── CodeLabelCell ────────────────────────────────────────────────────
+    .component-code-label-cell__code {
+        background: rgba(0, 229, 255, 0.08);
+        border-color: rgba(0, 229, 255, 0.35);
+        color: var(--nd-accent-2);
+    }
+    .component-code-label-cell__name {
+        color: var(--nd-text);
+    }
+
+    // ── CommandPalette kbd hints ─────────────────────────────────────────
+    .component-command-palette__footer kbd {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+
+    // ── ConfigPreview ────────────────────────────────────────────────────
+    .component-config-preview,
+    .component-config-preview__row,
+    .component-config-preview__header {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+
+    // ── CoolButton — the neon theme WANTS this glowy, don't neutralize ───
+    .component-cool-button {
+        background: linear-gradient(135deg, var(--nd-accent), var(--nd-violet));
+        color: #0b0218;
+        border-color: var(--nd-accent);
+        box-shadow: 0 0 18px rgba(255, 43, 214, 0.4);
+    }
+    .component-cool-button:hover {
+        box-shadow:
+            0 0 32px rgba(255, 43, 214, 0.7),
+            0 0 72px rgba(255, 43, 214, 0.3);
+    }
+
+    // ── DashboardCard (big offender — 47 hardcoded colors) ───────────────
+    .component-dashboard-card,
+    .component-dashboard-card__header,
+    .component-dashboard-card__body,
+    .component-dashboard-card__footer {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-dashboard-card__title {
+        color: var(--nd-text);
+    }
+    .component-dashboard-card__subtitle,
+    .component-dashboard-card__eyebrow {
+        color: var(--nd-text-dim);
+    }
+    .component-dashboard-card__metric-title,
+    .component-dashboard-card__metric-subtitle {
+        color: var(--nd-text-dim);
+    }
+    .component-dashboard-card__metric-value {
+        color: var(--nd-text);
+    }
+    .component-dashboard-card__metric-icon {
+        color: var(--nd-accent-2);
+    }
+    .component-dashboard-card__list-item {
+        border-color: var(--nd-border-soft);
+        background: transparent;
+    }
+    .component-dashboard-card__list-item:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+    .component-dashboard-card__status-label,
+    .component-dashboard-card__colored-label {
+        color: var(--nd-text);
+    }
+
+    // ── DatePicker ──────────────────────────────────────────────────────
+    .component-date-picker .form-label,
+    .component-date-picker__label {
+        color: var(--nd-text);
+    }
+    .component-date-picker .date-input,
+    .component-date-picker__input {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-date-picker .date-input:focus,
+    .component-date-picker__input:focus {
+        border-color: var(--nd-accent-2);
+    }
+    .component-date-picker .date-input:disabled {
+        background: rgba(12, 8, 32, 0.6);
+        color: var(--nd-text-faint);
+    }
+
+    // ── Drawer close button ──────────────────────────────────────────────
+    .component-drawer__close:hover {
+        background: rgba(255, 43, 214, 0.12);
+        color: var(--nd-text);
+    }
+
+    // ── Dropdown list ────────────────────────────────────────────────────
+    .component-dropdown__list {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 43, 214, 0.12);
+    }
+    .component-dropdown__item {
+        color: var(--nd-text);
+    }
+    .component-dropdown__item:hover,
+    .component-dropdown__item--active {
+        background: rgba(255, 43, 214, 0.12);
+        color: var(--nd-text);
+    }
+
+    // ── EarlySignupForm ──────────────────────────────────────────────────
+    .component-early-signup-form,
+    .component-early-signup-form__field,
+    .component-early-signup-form__input {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-early-signup-form__input:focus {
+        border-color: var(--nd-accent-2);
+    }
+    .component-early-signup-form__title,
+    .component-early-signup-form__heading {
+        color: var(--nd-text);
+    }
+    .component-early-signup-form__description,
+    .component-early-signup-form__helper {
+        color: var(--nd-text-dim);
+    }
+
+    // ── EditableText ─────────────────────────────────────────────────────
+    .component-editable-text,
+    .component-editable-text__input {
+        background: transparent;
+        color: var(--nd-text);
+        border-color: var(--nd-border-soft);
+    }
+    .component-editable-text:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+
+    // ── EntityCell ───────────────────────────────────────────────────────
+    // (Color tiles already retinted in _fine-tuning — just backstop the text)
+    .component-entity-cell__name {
+        color: var(--nd-text);
+    }
+    .component-entity-cell__sub {
+        color: var(--nd-text-dim);
+    }
+
+    // ── EntityProfileCard meta helpers ───────────────────────────────────
+    .component-entity-profile-card__meta-label {
+        color: var(--nd-text-dim);
+    }
+    .component-entity-profile-card__meta-value {
+        color: var(--nd-text);
+    }
+
+    // ── ExtendedSelect (search + options) ────────────────────────────────
+    .component-extended-select,
+    .component-extended-select__control,
+    .component-extended-select__menu {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-extended-select__option:hover,
+    .component-extended-select__option--focused {
+        background: rgba(255, 43, 214, 0.12);
+        color: var(--nd-text);
+    }
+
+    // ── File / FileDropzone ──────────────────────────────────────────────
+    .component-file,
+    .component-file-dropzone {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-file-dropzone:hover,
+    .component-file-dropzone--active {
+        border-color: var(--nd-accent-2);
+        background: rgba(0, 229, 255, 0.06);
+    }
+    .component-file__name {
+        color: var(--nd-text);
+    }
+    .component-file__meta,
+    .component-file__size {
+        color: var(--nd-text-dim);
+    }
+
+    // ── IconButton ───────────────────────────────────────────────────────
+    .component-icon-button {
+        color: var(--nd-text-dim);
+    }
+    .component-icon-button:hover:not(:disabled) {
+        background: rgba(255, 43, 214, 0.12);
+        color: var(--nd-text);
+    }
+
+    // ── InfiniteScroll sentinel ──────────────────────────────────────────
+    .component-infinite-scroll__loader,
+    .component-infinite-scroll__end {
+        color: var(--nd-text-dim);
+    }
+
+    // ── JSONEditor (35 hardcoded colors — broad sweep) ───────────────────
+    .component-json-editor,
+    .component-json-editor__row,
+    .component-json-editor__array-item,
+    .component-json-editor__primitive-item {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-json-editor__row:hover,
+    .component-json-editor__primitive-item:hover {
+        background: rgba(255, 43, 214, 0.06);
+        border-color: var(--nd-border);
+    }
+    .component-json-editor__key,
+    .component-json-editor__group-label,
+    .component-json-editor__primitive-input {
+        color: var(--nd-text);
+    }
+    .component-json-editor__input,
+    .component-json-editor__select {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-json-editor__input:disabled,
+    .component-json-editor__select:disabled {
+        background: rgba(12, 8, 32, 0.5);
+        color: var(--nd-text-faint);
+    }
+    .component-json-editor__group-header {
+        background: rgba(12, 8, 32, 0.6);
+        color: var(--nd-text);
+    }
+    .component-json-editor__group-badge {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-json-editor__collapse {
+        color: var(--nd-text-dim);
+    }
+    .component-json-editor__collapse:hover {
+        background: rgba(255, 43, 214, 0.08);
+        color: var(--nd-text);
+    }
+    .component-json-editor__add-item {
+        background: transparent;
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-json-editor__add-item:hover {
+        background: rgba(0, 229, 255, 0.06);
+        border-color: var(--nd-accent-2);
+        color: var(--nd-text);
+    }
+    .component-json-editor__array-items,
+    .component-json-editor__object-fields {
+        border-left-color: var(--nd-border-soft);
+    }
+    .component-json-editor__array-item-index {
+        background: rgba(12, 8, 32, 0.6);
+        color: var(--nd-text-faint);
+    }
+    .component-json-editor__remove,
+    .component-json-editor__primitive-remove {
+        color: var(--nd-text-faint);
+    }
+    .component-json-editor__remove:hover,
+    .component-json-editor__primitive-remove:hover {
+        color: #ff6188;
+    }
+    .component-json-editor__empty {
+        background: transparent;
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-faint);
+    }
+    .component-json-editor__primitive-remove {
+        border-left-color: var(--nd-border-soft);
+    }
+
+    // ── JSONSchemaDef ────────────────────────────────────────────────────
+    .component-json-schema-def,
+    .component-json-schema-def__row,
+    .component-json-schema-def__input,
+    .component-json-schema-def__select {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-json-schema-def__label,
+    .component-json-schema-def__key {
+        color: var(--nd-text);
+    }
+    .component-json-schema-def__hint,
+    .component-json-schema-def__placeholder {
+        color: var(--nd-text-dim);
+    }
+
+    // ── Link ─────────────────────────────────────────────────────────────
+    .component-link {
+        color: var(--nd-accent-2);
+    }
+    .component-link:hover {
+        color: var(--nd-text);
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+
+    // ── MarkdownEditor — one specific border marker ──────────────────────
+    .component-markdown-editor__tab--active {
+        border-bottom-color: var(--nd-accent) !important;
+        color: var(--nd-text) !important;
+    }
+    .component-markdown-editor--disabled .component-markdown-editor__shell {
+        background: rgba(12, 8, 32, 0.5);
+    }
+
+    // ── MetricGrid / MetricTile ──────────────────────────────────────────
+    .component-metric-tile__label {
+        color: var(--nd-text-dim);
+    }
+    .component-metric-tile__number {
+        color: var(--nd-text);
+    }
+    .component-metric-tile__hint {
+        color: var(--nd-text-faint);
+    }
+
+    // ── NumberInput ──────────────────────────────────────────────────────
+    .component-number-input {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-number-input:focus-within {
+        border-color: var(--nd-accent-2);
+    }
+    .component-number-input__btn {
+        color: var(--nd-text-dim);
+    }
+    .component-number-input__btn:hover {
+        background: rgba(255, 43, 214, 0.1);
+        color: var(--nd-text);
+    }
+
+    // ── OTPInput ─────────────────────────────────────────────────────────
+    .component-otp-input__label {
+        color: var(--nd-text);
+    }
+    .component-otp-input__cell {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-otp-input__cell:focus {
+        border-color: var(--nd-accent-2);
+        box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
+    }
+    .component-otp-input--disabled .component-otp-input__cell {
+        background: rgba(12, 8, 32, 0.5);
+        color: var(--nd-text-faint);
+    }
+
+    // ── PageFooter ───────────────────────────────────────────────────────
+    .component-page-footer {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-page-footer a {
+        color: var(--nd-text-dim);
+    }
+    .component-page-footer a:hover {
+        color: var(--nd-accent-2);
+    }
+    .component-page-footer__title,
+    .component-page-footer__heading {
+        color: var(--nd-text);
+    }
+
+    // ── Pagination ───────────────────────────────────────────────────────
+    .component-pagination__btn {
+        background: transparent;
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-pagination__btn:hover:not(:disabled):not(.component-pagination__btn--active) {
+        background: rgba(255, 43, 214, 0.1);
+        border-color: var(--nd-border);
+        color: var(--nd-text);
+    }
+    .component-pagination__btn--active {
+        background: var(--nd-accent);
+        border-color: var(--nd-accent);
+        color: #0b0218;
+    }
+    .component-pagination__btn--active:hover {
+        background: #ff5fe0;
+        border-color: #ff5fe0;
+        color: #0b0218;
+    }
+    .component-pagination__dots {
+        color: var(--nd-text-faint);
+    }
+
+    // ── PhoneInput ───────────────────────────────────────────────────────
+    .component-phone-input__option--selected {
+        background: rgba(255, 43, 214, 0.15);
+        color: var(--nd-text);
+    }
+
+    // ── PinnedFeatureShowcase ────────────────────────────────────────────
+    .component-pinned-feature-showcase,
+    .component-pinned-feature-showcase__item {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-pinned-feature-showcase__item:hover {
+        border-color: var(--nd-border);
+        box-shadow: 0 0 20px rgba(255, 43, 214, 0.18);
+    }
+
+    // ── Pipeline ─────────────────────────────────────────────────────────
+    .component-pipeline {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+    }
+    .component-pipeline__step {
+        background: transparent;
+        border-right-color: var(--nd-border-soft);
+    }
+    .component-pipeline__step--complete {
+        background: rgba(255, 43, 214, 0.06);
+    }
+    .component-pipeline__num,
+    .component-pipeline__icon,
+    .component-pipeline__sub {
+        color: var(--nd-text-dim);
+    }
+    .component-pipeline__title {
+        color: var(--nd-text);
+    }
+
+    // ── PricingCard ──────────────────────────────────────────────────────
+    .component-pricing-card {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-pricing-card__description {
+        color: var(--nd-text-dim);
+    }
+    .component-pricing-card__action--primary {
+        background: linear-gradient(135deg, var(--nd-accent), #ff5fb8);
+        color: #0b0218;
+        border-color: var(--nd-accent);
+        box-shadow: 0 0 18px rgba(255, 43, 214, 0.4);
+    }
+    .component-pricing-card__action--primary:hover {
+        box-shadow: 0 0 32px rgba(255, 43, 214, 0.7);
+    }
+    .component-pricing-card__action--outline {
+        background: transparent;
+        color: var(--nd-text);
+        border-color: var(--nd-border);
+    }
+    .component-pricing-card__action--outline:hover:not(:disabled) {
+        background: rgba(255, 43, 214, 0.08);
+        border-color: var(--nd-accent);
+        color: var(--nd-text);
+    }
+    .component-pricing-card__feature-icon {
+        color: #4ade80;
+    }
+
+    // ── RangeSlider ──────────────────────────────────────────────────────
+    .component-range-slider__tooltip {
+        background: var(--nd-panel-solid);
+        color: var(--nd-text);
+        border: 1px solid var(--nd-border);
+        box-shadow: 0 0 12px rgba(255, 43, 214, 0.3);
+    }
+
+    // ── Rating ───────────────────────────────────────────────────────────
+    .component-rating__star {
+        color: var(--nd-text-faint);
+    }
+    .component-rating__star--active,
+    .component-rating__star--hover {
+        color: #fbbf24;
+        text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    }
+
+    // ── RichPageHeader — backstop for its body copy ──────────────────────
+    .component-rich-page-header__title {
+        color: var(--nd-text);
+    }
+    .component-rich-page-header__sub {
+        color: var(--nd-text);
+    }
+    .component-rich-page-header__description {
+        color: var(--nd-text-dim);
+    }
+
+    // ── SectionCard backstop ─────────────────────────────────────────────
+    .component-section-card__heading {
+        color: var(--nd-text);
+    }
+
+    // ── SideNav ──────────────────────────────────────────────────────────
+    .component-side-nav {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-side-nav__item {
+        color: var(--nd-text-dim);
+    }
+    .component-side-nav__item:hover {
+        background: rgba(255, 43, 214, 0.08);
+        color: var(--nd-text);
+    }
+    .component-side-nav__item--active {
+        background: rgba(255, 43, 214, 0.15);
+        color: var(--nd-text);
+        box-shadow: inset 3px 0 0 var(--nd-accent);
+    }
+
+    // ── Slider ───────────────────────────────────────────────────────────
+    .component-slider__track {
+        background: rgba(12, 8, 32, 0.6);
+    }
+    .component-slider__fill {
+        background: var(--nd-accent);
+        box-shadow: 0 0 8px rgba(255, 43, 214, 0.5);
+    }
+    .component-slider__thumb {
+        background: var(--nd-accent);
+        border-color: var(--nd-bg);
+        box-shadow: 0 0 12px rgba(255, 43, 214, 0.6);
+    }
+    .component-slider__label {
+        color: var(--nd-text);
+    }
+
+    // ── Spinner ──────────────────────────────────────────────────────────
+    .component-spinner {
+        color: var(--nd-accent);
+    }
+
+    // ── StatCard backstop ────────────────────────────────────────────────
+    .component-stat-card__label {
+        color: var(--nd-text-dim);
+    }
+    .component-stat-card__number {
+        color: var(--nd-text);
+    }
+    .component-stat-card__unit,
+    .component-stat-card__helper,
+    .component-stat-card__footer-extra {
+        color: var(--nd-text-dim);
+    }
+
+    // ── StatusDot ────────────────────────────────────────────────────────
+    .component-status-dot--offline {
+        background: var(--nd-text-faint);
+    }
+
+    // ── Stepper ──────────────────────────────────────────────────────────
+    .component-stepper__step {
+        color: var(--nd-text-dim);
+    }
+    .component-stepper__step--active {
+        color: var(--nd-text);
+    }
+    .component-stepper__indicator {
+        background: rgba(12, 8, 32, 0.6);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-stepper__step--active .component-stepper__indicator {
+        background: var(--nd-accent);
+        border-color: var(--nd-accent);
+        color: #0b0218;
+    }
+    .component-stepper__step--completed .component-stepper__indicator {
+        background: rgba(255, 43, 214, 0.25);
+        border-color: var(--nd-accent);
+        color: var(--nd-text);
+    }
+    .component-stepper__connector {
+        background: var(--nd-border-soft);
+    }
+    .component-stepper__step--completed .component-stepper__connector,
+    .component-stepper__connector--filled {
+        background: var(--nd-accent);
+    }
+
+    // ── Switch ───────────────────────────────────────────────────────────
+    .component-switch__knob {
+        background: #ffffff;
+    }
+    .component-switch__label {
+        color: var(--nd-text);
+    }
+
+    // ── Tag ──────────────────────────────────────────────────────────────
+    .component-tag {
+        background: rgba(0, 229, 255, 0.1);
+        border-color: rgba(0, 229, 255, 0.35);
+        color: var(--nd-accent-2);
+    }
+
+    // ── TagInput ─────────────────────────────────────────────────────────
+    .component-tag-input {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-tag-input:focus-within {
+        border-color: var(--nd-accent-2);
+    }
+    .component-tag-input__tag {
+        background: rgba(255, 43, 214, 0.14);
+        color: var(--nd-text);
+        border-color: rgba(255, 43, 214, 0.4);
+    }
+    .component-tag-input__input {
+        background: transparent;
+        color: var(--nd-text);
+    }
+    .component-tag-input__input::placeholder {
+        color: var(--nd-text-faint);
+    }
+    .component-tag-input__recommendations,
+    .component-tag-input__dropdown {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+        color: var(--nd-text);
+    }
+    .component-tag-input__recommendation:hover {
+        background: rgba(255, 43, 214, 0.12);
+    }
+
+    // ── TeamList ─────────────────────────────────────────────────────────
+    .component-team-list,
+    .component-team-list__member {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-team-list__role {
+        color: var(--nd-text-dim);
+    }
+
+    // ── Text / Heading ───────────────────────────────────────────────────
+    .component-text {
+        color: var(--nd-text);
+    }
+    .component-text--muted {
+        color: var(--nd-text-dim);
+    }
+    .component-heading {
+        color: var(--nd-text);
+    }
+
+    // ── TimePicker ───────────────────────────────────────────────────────
+    .component-time-picker,
+    .component-time-picker__input {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-time-picker__input:focus {
+        border-color: var(--nd-accent-2);
+    }
+    .component-time-picker__segment--active {
+        background: var(--nd-accent);
+        color: #0b0218;
+    }
+
+    // ── Toast ────────────────────────────────────────────────────────────
+    .component-toast {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+        color: var(--nd-text);
+        box-shadow: 0 0 20px rgba(255, 43, 214, 0.25);
+    }
+    .component-toast__title {
+        color: var(--nd-text);
+    }
+    .component-toast__message {
+        color: var(--nd-text-dim);
+    }
+
+    // ── TreeView ─────────────────────────────────────────────────────────
+    .component-tree-view,
+    .component-tree-view__node {
+        background: transparent;
+        color: var(--nd-text);
+    }
+    .component-tree-view__node:hover {
+        background: rgba(255, 43, 214, 0.08);
+    }
+    .component-tree-view__node--selected {
+        background: rgba(0, 229, 255, 0.12);
+        color: var(--nd-text);
+    }
+    .component-tree-view__checkbox {
+        accent-color: var(--nd-accent);
+    }
+
+    // ── UserPanel ────────────────────────────────────────────────────────
+    .component-user-panel {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-user-panel__name {
+        color: var(--nd-text);
+    }
+    .component-user-panel__email,
+    .component-user-panel__role {
+        color: var(--nd-text-dim);
+    }
+    .component-user-panel__menu-item {
+        color: var(--nd-text);
+    }
+    .component-user-panel__menu-item:hover {
+        background: rgba(255, 43, 214, 0.1);
+    }
+
+    // ── VerticalItemList ─────────────────────────────────────────────────
+    .component-vertical-item-list {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+    }
+    .component-vertical-item-list__item {
+        color: var(--nd-text);
+        border-color: var(--nd-border-soft);
+    }
+    .component-vertical-item-list__item:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+    .component-vertical-item-list__item--active {
+        background: rgba(255, 43, 214, 0.12);
+        box-shadow: inset 3px 0 0 var(--nd-accent);
+    }
+
+    // ── WelcomeGuide (right-side onboarding checklist) ───────────────────
+    .component-welcome-guide {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+    }
+    .component-welcome-guide__left {
+        background: linear-gradient(160deg, var(--nd-panel-solid), var(--nd-bg));
+    }
+    .component-welcome-guide__title {
+        color: var(--nd-text);
+    }
+    .component-welcome-guide__message {
+        color: var(--nd-text-dim);
+    }
+    .component-welcome-guide__right {
+        background: transparent;
+        border-left-color: var(--nd-border-soft);
+    }
+    .component-welcome-guide__step {
+        color: var(--nd-text);
+    }
+    .component-welcome-guide__step:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+    .component-welcome-guide__step-check {
+        border-color: var(--nd-border-soft);
+        background: transparent;
+    }
+    .component-welcome-guide__step--completed .component-welcome-guide__step-check {
+        background: var(--nd-accent);
+        border-color: var(--nd-accent);
+        color: #0b0218;
+    }
+    .component-welcome-guide__step--completed .component-welcome-guide__step-label {
+        color: var(--nd-text-faint);
+    }
+}

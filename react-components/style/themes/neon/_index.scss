@@ -1,0 +1,41 @@
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  NEON theme — dark navy/purple with magenta + cyan accents               ║
+// ║                                                                          ║
+// ║  Usage: wrap any subtree with <div class="theme theme--neon">...</div>.  ║
+// ║  The default (unwrapped) look is the light toolcase baseline.            ║
+// ║                                                                          ║
+// ║  Strategy                                                                ║
+// ║  ─────────                                                               ║
+// ║  1. Re-declare `--tc-*` and Bootstrap `--bs-*` tokens inside the scope   ║
+// ║     so surface/text/accent colours flip for every component that reads   ║
+// ║     them via the cascade.                                                ║
+// ║  2. Override the per-component `--{abbr}-*` vars (--sec-*, --stat-*,     ║
+// ║     --at-*, --fi-*, ...) where those component SCSS files hard-coded    ║
+// ║     light-theme hexes.                                                   ║
+// ║  3. Fine-tune Bootstrap chrome (.btn, .card, .alert, .badge, forms,      ║
+// ║     tables) so components built on Bootstrap markup also pick up neon.   ║
+// ║  4. Layer on neon-specific flourishes: glowing focus, clip-path buttons, ║
+// ║     uppercase mono eyebrows, scanline overlay (optional).                ║
+// ║                                                                          ║
+// ║  File layout                                                             ║
+// ║  ───────────                                                             ║
+// ║  1 · _tokens.scss          CSS custom property overrides                 ║
+// ║  2 · _base.scss            wrapper bg / typography / focus               ║
+// ║  3 · _atmosphere.scss      optional scanline overlay                     ║
+// ║  4 · _typography.scss      helper classes (nd-eyebrow, nd-grad-text)     ║
+// ║  5 · _bootstrap.scss       Bootstrap chrome (btn, card, alert, table…)   ║
+// ║  6 · _fine-tuning.scss     component fine-tuning that tokens can't reach ║
+// ║  7 · _safety-net.scss      BEM-pattern fallback for hardcoded dark text  ║
+// ║  8 · _components.scss      per-component hardcoded color overrides       ║
+// ║  9 · _reduced-motion.scss  neutralize glow transitions when requested    ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+@use './tokens';
+@use './base';
+@use './atmosphere';
+@use './typography';
+@use './bootstrap';
+@use './fine-tuning';
+@use './safety-net';
+@use './components';
+@use './reduced-motion';

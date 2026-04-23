@@ -1,0 +1,493 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 5 · Bootstrap fundamentals — button, card, badge, alert, form, table
+// ───────────────────────────────────────────────────────────────────────────
+// Most components are built on Bootstrap markup (`.btn`, `.card`, `.alert`,
+// `.form-control`, `.table`, ...). This block neon-skins the Bootstrap
+// chrome so anything using it picks up the new look automatically.
+
+.theme--neon {
+    // ── Buttons ──────────────────────────────────────────────────────────
+    .btn {
+        font-family: var(--nd-font-mono);
+        font-size: 0.78rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        font-weight: 500;
+        border-radius: 0;
+        transition: all 0.15s ease-in-out;
+        position: relative;
+        clip-path: polygon(
+            10px 0,
+            100% 0,
+            100% calc(100% - 10px),
+            calc(100% - 10px) 100%,
+            0 100%,
+            0 10px
+        );
+
+        &:focus-visible {
+            box-shadow:
+                0 0 0 2px var(--nd-bg),
+                0 0 0 4px var(--nd-accent-2);
+        }
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--nd-accent), #ff5fb8);
+        border-color: var(--nd-accent);
+        color: #0b0218;
+        font-weight: 700;
+        box-shadow:
+            0 0 18px rgba(255, 43, 214, 0.45),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+
+        &:hover,
+        &:focus {
+            background: linear-gradient(135deg, #ff5fe0, var(--nd-accent));
+            border-color: var(--nd-accent);
+            color: #0b0218;
+            box-shadow:
+                0 0 32px rgba(255, 43, 214, 0.75),
+                0 0 72px rgba(255, 43, 214, 0.3);
+        }
+
+        &:disabled,
+        &.disabled {
+            background: rgba(255, 43, 214, 0.35);
+            border-color: transparent;
+            color: rgba(11, 2, 24, 0.6);
+            box-shadow: none;
+        }
+    }
+
+    .btn-secondary {
+        background: transparent;
+        border-color: var(--nd-border);
+        color: var(--nd-text);
+
+        &:hover,
+        &:focus {
+            background: rgba(255, 43, 214, 0.08);
+            border-color: var(--nd-accent);
+            color: var(--nd-text);
+            box-shadow: 0 0 18px rgba(255, 43, 214, 0.35);
+        }
+    }
+
+    .btn-info {
+        background: transparent;
+        border-color: var(--nd-accent-2);
+        color: var(--nd-accent-2);
+
+        &:hover,
+        &:focus {
+            background: rgba(0, 229, 255, 0.08);
+            color: var(--nd-text);
+            box-shadow: 0 0 22px rgba(0, 229, 255, 0.45);
+        }
+    }
+
+    .btn-success {
+        background: transparent;
+        border-color: #4ade80;
+        color: #4ade80;
+
+        &:hover,
+        &:focus {
+            background: rgba(74, 222, 128, 0.1);
+            color: #9cffb5;
+            box-shadow: 0 0 18px rgba(74, 222, 128, 0.4);
+        }
+    }
+
+    .btn-warning {
+        background: transparent;
+        border-color: #fbbf24;
+        color: #fbbf24;
+
+        &:hover,
+        &:focus {
+            background: rgba(251, 191, 36, 0.1);
+            color: #ffd95a;
+            box-shadow: 0 0 18px rgba(251, 191, 36, 0.4);
+        }
+    }
+
+    .btn-danger {
+        background: transparent;
+        border-color: #ff6188;
+        color: #ff6188;
+
+        &:hover,
+        &:focus {
+            background: rgba(255, 97, 136, 0.1);
+            color: #ff8aa6;
+            box-shadow: 0 0 18px rgba(255, 97, 136, 0.45);
+        }
+    }
+
+    // Outline variants — all ghost-style with their variant color
+    .btn-outline-primary {
+        border-color: var(--nd-accent);
+        color: var(--nd-accent);
+        background: transparent;
+
+        &:hover,
+        &:focus {
+            background: rgba(255, 43, 214, 0.08);
+            color: var(--nd-text);
+            border-color: var(--nd-accent);
+            box-shadow: 0 0 18px rgba(255, 43, 214, 0.45);
+        }
+    }
+
+    .btn-outline-secondary {
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+        background: transparent;
+
+        &:hover,
+        &:focus {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--nd-text);
+            border-color: var(--nd-accent-2);
+            box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+        }
+    }
+
+    .btn-outline-info {
+        border-color: var(--nd-accent-2);
+        color: var(--nd-accent-2);
+
+        &:hover,
+        &:focus {
+            background: rgba(0, 229, 255, 0.08);
+            color: var(--nd-text);
+            box-shadow: 0 0 18px rgba(0, 229, 255, 0.4);
+        }
+    }
+
+    .btn-outline-success {
+        border-color: #4ade80;
+        color: #4ade80;
+
+        &:hover,
+        &:focus {
+            background: rgba(74, 222, 128, 0.08);
+            color: #9cffb5;
+            box-shadow: 0 0 14px rgba(74, 222, 128, 0.35);
+        }
+    }
+
+    .btn-outline-warning {
+        border-color: #fbbf24;
+        color: #fbbf24;
+
+        &:hover,
+        &:focus {
+            background: rgba(251, 191, 36, 0.08);
+            color: #ffd95a;
+            box-shadow: 0 0 14px rgba(251, 191, 36, 0.35);
+        }
+    }
+
+    .btn-outline-danger {
+        border-color: #ff6188;
+        color: #ff6188;
+
+        &:hover,
+        &:focus {
+            background: rgba(255, 97, 136, 0.08);
+            color: #ff8aa6;
+            box-shadow: 0 0 14px rgba(255, 97, 136, 0.4);
+        }
+    }
+
+    // ── Cards ────────────────────────────────────────────────────────────
+    .card {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .card-header,
+    .card-footer {
+        background: rgba(12, 8, 32, 0.4);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+
+    .card-body {
+        color: var(--nd-text);
+    }
+
+    .card-title {
+        color: var(--nd-text);
+    }
+
+    .card-text {
+        color: var(--nd-text-dim);
+    }
+
+    // Card color variants — swap Bootstrap's bright bg for tinted panels
+    .card.bg-primary {
+        background: linear-gradient(
+            135deg,
+            rgba(255, 43, 214, 0.2),
+            rgba(138, 75, 255, 0.15)
+        );
+        border-color: var(--nd-accent);
+        box-shadow: 0 0 18px rgba(255, 43, 214, 0.25);
+    }
+    .card.bg-secondary {
+        background: rgba(12, 8, 32, 0.7);
+        border-color: var(--nd-border-soft);
+    }
+    .card.bg-info {
+        background: linear-gradient(
+            135deg,
+            rgba(0, 229, 255, 0.15),
+            rgba(138, 75, 255, 0.1)
+        );
+        border-color: var(--nd-accent-2);
+        box-shadow: 0 0 18px rgba(0, 229, 255, 0.25);
+    }
+    .card.bg-success {
+        background: rgba(74, 222, 128, 0.1);
+        border-color: rgba(74, 222, 128, 0.4);
+        box-shadow: 0 0 14px rgba(74, 222, 128, 0.2);
+    }
+    .card.bg-warning {
+        background: rgba(251, 191, 36, 0.1);
+        border-color: rgba(251, 191, 36, 0.4);
+        box-shadow: 0 0 14px rgba(251, 191, 36, 0.2);
+    }
+    .card.bg-danger {
+        background: rgba(255, 97, 136, 0.1);
+        border-color: rgba(255, 97, 136, 0.45);
+        box-shadow: 0 0 14px rgba(255, 97, 136, 0.25);
+    }
+
+    // ── Badges ────────────────────────────────────────────────────────────
+    .badge {
+        font-family: var(--nd-font-mono);
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+    }
+    .badge.bg-primary {
+        background: rgba(255, 43, 214, 0.18) !important;
+        color: var(--nd-accent);
+        border-color: rgba(255, 43, 214, 0.45);
+    }
+    .badge.bg-secondary {
+        background: rgba(138, 75, 255, 0.18) !important;
+        color: #d6b8ff;
+        border-color: rgba(138, 75, 255, 0.4);
+    }
+    .badge.bg-info {
+        background: rgba(0, 229, 255, 0.15) !important;
+        color: var(--nd-accent-2);
+        border-color: rgba(0, 229, 255, 0.4);
+    }
+    .badge.bg-success {
+        background: rgba(74, 222, 128, 0.15) !important;
+        color: #9cffb5;
+        border-color: rgba(74, 222, 128, 0.4);
+    }
+    .badge.bg-warning {
+        background: rgba(251, 191, 36, 0.15) !important;
+        color: #ffd95a;
+        border-color: rgba(251, 191, 36, 0.4);
+    }
+    .badge.bg-danger {
+        background: rgba(255, 97, 136, 0.15) !important;
+        color: #ff8aa6;
+        border-color: rgba(255, 97, 136, 0.4);
+    }
+
+    // ── Alerts ────────────────────────────────────────────────────────────
+    .alert {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+    .alert-primary {
+        background: rgba(255, 43, 214, 0.08);
+        border-color: rgba(255, 43, 214, 0.4);
+        color: #ffbdec;
+    }
+    .alert-secondary {
+        background: rgba(138, 75, 255, 0.1);
+        border-color: rgba(138, 75, 255, 0.35);
+        color: #d6b8ff;
+    }
+    .alert-info {
+        background: rgba(0, 229, 255, 0.08);
+        border-color: rgba(0, 229, 255, 0.35);
+        color: #b5f7ff;
+    }
+    .alert-success {
+        background: rgba(74, 222, 128, 0.08);
+        border-color: rgba(74, 222, 128, 0.35);
+        color: #b6ffc8;
+    }
+    .alert-warning {
+        background: rgba(251, 191, 36, 0.08);
+        border-color: rgba(251, 191, 36, 0.4);
+        color: #ffdf85;
+    }
+    .alert-danger {
+        background: rgba(255, 97, 136, 0.08);
+        border-color: rgba(255, 97, 136, 0.4);
+        color: #ffb3c4;
+    }
+
+    // ── Form controls ────────────────────────────────────────────────────
+    .form-control,
+    .form-select {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+
+        &::placeholder {
+            color: var(--nd-text-faint);
+        }
+
+        &:hover:not(:disabled):not(:focus) {
+            border-color: var(--nd-border);
+        }
+
+        &:focus {
+            background: var(--nd-panel-solid);
+            border-color: var(--nd-accent-2);
+            color: var(--nd-text);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.18);
+        }
+
+        &:disabled,
+        &[readonly] {
+            background: rgba(12, 8, 32, 0.5);
+            color: var(--nd-text-faint);
+            border-color: var(--nd-border-soft);
+        }
+
+        &.is-invalid {
+            border-color: #ff6188;
+
+            &:focus {
+                box-shadow: 0 0 0 3px rgba(255, 97, 136, 0.22);
+            }
+        }
+    }
+
+    .form-label,
+    .form-label-inline {
+        color: var(--nd-text);
+        font-family: var(--nd-font-mono);
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+    }
+
+    .form-range {
+        accent-color: var(--nd-accent);
+    }
+
+    .form-check-input {
+        background-color: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+
+        &:checked {
+            background-color: var(--nd-accent);
+            border-color: var(--nd-accent);
+        }
+
+        &:focus {
+            border-color: var(--nd-accent-2);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
+        }
+    }
+
+    .invalid-feedback {
+        color: #ff8aa6;
+    }
+
+    // ── Tables ───────────────────────────────────────────────────────────
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--nd-text);
+        --bs-table-border-color: var(--nd-border-soft);
+        --bs-table-striped-bg: rgba(255, 43, 214, 0.04);
+        --bs-table-striped-color: var(--nd-text);
+        --bs-table-hover-bg: rgba(255, 43, 214, 0.08);
+        --bs-table-hover-color: var(--nd-text);
+        color: var(--nd-text);
+        border-color: var(--nd-border-soft);
+    }
+
+    .table > :not(caption) > * > * {
+        background-color: transparent;
+        color: var(--nd-text);
+        border-bottom-color: var(--nd-border-soft);
+    }
+
+    .table > thead {
+        color: var(--nd-text-dim);
+
+        th {
+            font-family: var(--nd-font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border-bottom-color: var(--nd-border);
+            background: rgba(12, 8, 32, 0.5);
+        }
+    }
+
+    // ── Progress ─────────────────────────────────────────────────────────
+    .progress {
+        background: rgba(12, 8, 32, 0.7);
+        border: 1px solid var(--nd-border-soft);
+    }
+
+    .progress-bar {
+        box-shadow: 0 0 12px currentColor;
+    }
+    .progress-bar.bg-primary {
+        background: linear-gradient(
+            90deg,
+            var(--nd-accent),
+            var(--nd-accent-2)
+        ) !important;
+    }
+    .progress-bar.bg-info {
+        background: var(--nd-accent-2) !important;
+    }
+    .progress-bar.bg-success {
+        background: #4ade80 !important;
+    }
+    .progress-bar.bg-warning {
+        background: #fbbf24 !important;
+    }
+    .progress-bar.bg-danger {
+        background: #ff6188 !important;
+    }
+
+    // ── Utility color overrides used by `Text`, `Heading`, badges ─────────
+    .text-muted {
+        color: var(--nd-text-dim) !important;
+    }
+    .text-white {
+        color: var(--nd-text) !important;
+    }
+    .text-body {
+        color: var(--nd-text) !important;
+    }
+}
