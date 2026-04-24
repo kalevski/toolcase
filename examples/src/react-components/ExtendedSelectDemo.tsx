@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { ExtendedSelect, ExtendedSelectItem, Card, CodeSnippet } from '@toolcase/react-components'
+import { ExtendedSelect, ExtendedSelectItem } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const iconItems: ExtendedSelectItem[] = [
 	{ key: 'dashboard', name: 'Dashboard', icon: 'grid', description: 'Main overview panel' },
@@ -44,122 +45,60 @@ const ExtendedSelectDemo: React.FC = () => {
 	const [disabledValue, setDisabledValue] = useState<string>('free')
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">ExtendedSelect</h1>
-					<p className="text-muted mb-0">
-						A searchable dropdown select with support for icons and labels on each option.
-					</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Inputs"
+			title="ExtendedSelect"
+			lede="A searchable dropdown select with support for icons and labels on each option."
+		>
+			<DemoSection title="With Icons" caption="Options with Bootstrap Icons on the left side.">
+				<ExtendedSelect
+					items={iconItems}
+					value={iconValue}
+					onChange={setIconValue}
+					placeholder="Select a page"
+					searchPlaceholder="Search pages..."
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12 col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">With Icons</h2>
-						<p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-							Options with Bootstrap Icons on the left side.
-						</p>
-						<ExtendedSelect
-							items={iconItems}
-							value={iconValue}
-							onChange={setIconValue}
-							placeholder="Select a page"
-							searchPlaceholder="Search pages..."
-						/>
-					</Card>
-				</div>
-				<div className="col-12 col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">With Labels</h2>
-						<p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-							Options with short text labels on the left side.
-						</p>
-						<ExtendedSelect
-							items={labelItems}
-							value={labelValue}
-							onChange={setLabelValue}
-							placeholder="Select a language"
-							searchPlaceholder="Search languages..."
-						/>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="With Labels" caption="Options with short text labels on the left side.">
+				<ExtendedSelect
+					items={labelItems}
+					value={labelValue}
+					onChange={setLabelValue}
+					placeholder="Select a language"
+					searchPlaceholder="Search languages..."
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12 col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">Simple (no icons or labels)</h2>
-						<p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-							Plain text options with search filtering.
-						</p>
-						<ExtendedSelect
-							items={simpleItems}
-							value={simpleValue}
-							onChange={setSimpleValue}
-							placeholder="Pick a fruit"
-						/>
-					</Card>
-				</div>
-				<div className="col-12 col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">Disabled Options</h2>
-						<p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-							Some options can be disabled and are not selectable.
-						</p>
-						<ExtendedSelect
-							items={disabledItems}
-							value={disabledValue}
-							onChange={setDisabledValue}
-							placeholder="Select a plan"
-						/>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Simple (no icons or labels)" caption="Plain text options with search filtering.">
+				<ExtendedSelect
+					items={simpleItems}
+					value={simpleValue}
+					onChange={setSimpleValue}
+					placeholder="Pick a fruit"
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Custom No-Results Text</h2>
-						<p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-							Type something that doesn't match any option to see the custom empty state.
-						</p>
-						<ExtendedSelect
-							items={simpleItems}
-							placeholder="Try searching for 'xyz'"
-							noResultsText="Nothing here — try a different search."
-						/>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Disabled Options" caption="Some options can be disabled and are not selectable.">
+				<ExtendedSelect
+					items={disabledItems}
+					value={disabledValue}
+					onChange={setDisabledValue}
+					placeholder="Select a plan"
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { ExtendedSelect, ExtendedSelectItem } from '@toolcase/react-components'
-
-const items: ExtendedSelectItem[] = [
-  { key: 'dashboard', name: 'Dashboard', icon: 'grid', description: 'Main overview' },
-  { key: 'settings', name: 'Settings', icon: 'gear', description: 'Configure app' },
-  { key: 'ts', name: 'TypeScript', label: 'TS', description: 'Typed JS' },
-]
-
-<ExtendedSelect
-  items={items}
-  value={selected}
-  onChange={setSelected}
-  placeholder="Select an option"
-  searchPlaceholder="Search..."
-/>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection
+				title="Custom No-Results Text"
+				caption="Type something that doesn't match any option to see the custom empty state."
+			>
+				<ExtendedSelect
+					items={simpleItems}
+					placeholder="Try searching for 'xyz'"
+					noResultsText="Nothing here — try a different search."
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

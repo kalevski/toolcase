@@ -1,7 +1,14 @@
 .layout.layout--basic {
+	--bl-brand-bg: #ffffff;
+	--bl-brand-border: #e5e7eb;
+	--bl-content-bg: transparent;
+	--bl-text: inherit;
+
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
+	background: var(--bl-content-bg);
+	color: var(--bl-text);
 }
 
 .layout--basic {
@@ -9,8 +16,8 @@
 		position: sticky;
 		top: 0;
 		z-index: 100;
-		background: #fff;
-		border-bottom: 1px solid #e5e7eb;
+		background: var(--bl-brand-bg);
+		border-bottom: 1px solid var(--bl-brand-border);
 		padding: 0.75rem 0;
 
 		.container {

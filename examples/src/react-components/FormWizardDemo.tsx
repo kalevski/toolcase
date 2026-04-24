@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { FormWizard, FormWizardStep, Input, RadioGroup, Checkbox, Card, Button, Alert, CodeSnippet } from '@toolcase/react-components'
+import { FormWizard, FormWizardStep, Input, RadioGroup, Checkbox, Button, Alert } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const FormWizardDemo: React.FC = () => {
 	const [submitted, setSubmitted] = useState<Record<string, string> | null>(null)
@@ -75,73 +76,40 @@ const FormWizardDemo: React.FC = () => {
 	]
 
 	return (
-		<div className="container my-5">
-			<div className="row">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">FormWizard</h1>
-					<p className="text-muted mb-4">A multi-step wizard with progress navigation, step validation, and a customizable completion action.</p>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-lg-7">
-					<Card>
-						<h2 className="h5 mb-3">Interactive Wizard</h2>
-						{submitted ? (
-							<div>
-								<Alert variant="success">
-									<strong>Submitted!</strong>
-								</Alert>
-								<pre className="p-3 bg-light rounded mt-2" style={{ fontSize: '0.8rem' }}>
-									{JSON.stringify(submitted, null, 2)}
-								</pre>
-								<Button
-									variant="secondary"
-									outline
-									size="small"
-									className="mt-2"
-									onClick={() => { setSubmitted(null); setName(''); setEmail(''); setPlan(''); setAgree(false) }}
-								>
-									Reset
-								</Button>
-							</div>
-						) : (
-							<FormWizard
-								steps={steps}
-								onComplete={() => setSubmitted({ name, email, plan })}
-								completeLabel="Submit"
-								completeIcon="bi-check-lg"
-							/>
-						)}
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { FormWizard, FormWizardStep } from '@toolcase/react-components'
-
-const steps: FormWizardStep[] = [
-  { key: 'info', label: 'Info', content: <InfoStep /> },
-  { key: 'settings', label: 'Settings', content: <SettingsStep /> },
-  { key: 'review', label: 'Review', content: <ReviewStep /> },
-]
-
-<FormWizard
-  steps={steps}
-  onComplete={handleComplete}
-  completeLabel="Submit"
-/>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+		<DemoPage
+			eyebrow="Navigation"
+			title="FormWizard"
+			lede="A multi-step wizard with progress navigation, step validation, and a customizable completion action."
+		>
+			<DemoSection title="Interactive Wizard">
+				{submitted ? (
+					<div>
+						<Alert variant="success">
+							<strong>Submitted!</strong>
+						</Alert>
+						<pre className="p-3 bg-light rounded mt-2" style={{ fontSize: '0.8rem' }}>
+							{JSON.stringify(submitted, null, 2)}
+						</pre>
+						<Button
+							variant="secondary"
+							outline
+							size="small"
+							className="mt-2"
+							onClick={() => { setSubmitted(null); setName(''); setEmail(''); setPlan(''); setAgree(false) }}
+						>
+							Reset
+						</Button>
+					</div>
+				) : (
+					<FormWizard
+						steps={steps}
+						onComplete={() => setSubmitted({ name, email, plan })}
+						completeLabel="Submit"
+						completeIcon="bi-check-lg"
+					/>
+				)}
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Button, CodeSnippet } from '@toolcase/react-components'
+import { Alert, Button } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
 const AlertDemo: React.FC = () => {
@@ -118,21 +118,6 @@ const AlertDemo: React.FC = () => {
 						))}
 					</div>
 				)}
-			</DemoSection>
-
-			<DemoSection eyebrow="API" title="Usage">
-				<CodeSnippet
-					language="typescript"
-					code={`import { Alert } from '@toolcase/react-components'
-
-<Alert variant="success" title="Published" icon="check-circle-fill">
-  Your build is live at indie-raid.webgame.cloud.
-</Alert>
-
-<Alert variant="info" dismissible onClose={handleClose}>
-  You have 12 unread notifications.
-</Alert>`}
-				/>
 			</DemoSection>
 		</DemoPage>
 	)

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { JSONSchemaDef, Card, CodeSnippet } from '@toolcase/react-components'
+import { JSONSchemaDef } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const INITIAL_VALUE = JSON.stringify([
 	{ key: 'property1', type: 'string', defaultValue: 'def' },
@@ -19,85 +20,47 @@ const JSONSchemaDefDemo = () => {
 	const [label, setLabel] = useState('MySchema')
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">JSONSchemaDef</h1>
-					<p className="text-muted mb-4">Define JSON schemas with typed properties, object/array references, and editable labels.</p>
+		<DemoPage
+			eyebrow="Editors"
+			title="JSONSchemaDef"
+			lede="Define JSON schemas with typed properties, object/array references, and editable labels."
+		>
+			<DemoSection title="Controlled">
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+					<JSONSchemaDef
+						label={label}
+						value={value}
+						refList={REF_LIST}
+						onChange={setValue}
+						onLabelChange={setLabel}
+					/>
+					<div>
+						<h6 style={{ color: '#64748b', marginBottom: 8 }}>Output</h6>
+						<pre style={{ padding: 12, background: '#f8fafc', fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>
+							{JSON.stringify({ label, properties: JSON.parse(value) }, null, 2)}
+						</pre>
+					</div>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Controlled</h2>
-						<div className="row g-3">
-							<div className="col-md-6">
-								<JSONSchemaDef
-									label={label}
-									value={value}
-									refList={REF_LIST}
-									onChange={setValue}
-									onLabelChange={setLabel}
-								/>
-							</div>
-							<div className="col-md-6">
-								<h6 className="text-muted mb-2">Output</h6>
-								<pre className="p-3 bg-light rounded" style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>
-									{JSON.stringify({ label, properties: JSON.parse(value) }, null, 2)}
-								</pre>
-							</div>
-						</div>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Uncontrolled (defaultValue)">
+				<JSONSchemaDef
+					label=""
+					refList={REF_LIST}
+					defaultValue="[]"
+					onChange={(v) => console.log('uncontrolled:', v)}
+				/>
+			</DemoSection>
 
-			<div className="row mb-5 g-4">
-				<div className="col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">Uncontrolled (defaultValue)</h2>
-						<JSONSchemaDef
-							label=""
-							refList={REF_LIST}
-							defaultValue="[]"
-							onChange={(v) => console.log('uncontrolled:', v)}
-						/>
-					</Card>
-				</div>
-				<div className="col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">Disabled</h2>
-						<JSONSchemaDef
-							label="Locked"
-							value={INITIAL_VALUE}
-							refList={REF_LIST}
-							disabled
-						/>
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { JSONSchemaDef } from '@toolcase/react-components'
-
-<JSONSchemaDef
-  label="MySchema"
-  value={schemaJson}
-  refList={[{ id: 'abc', label: 'CustomType' }]}
-  onChange={setSchemaJson}
-  onLabelChange={setLabel}
-/>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Disabled">
+				<JSONSchemaDef
+					label="Locked"
+					value={INITIAL_VALUE}
+					refList={REF_LIST}
+					disabled
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

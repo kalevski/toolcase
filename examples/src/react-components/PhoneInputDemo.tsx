@@ -1,81 +1,44 @@
 import React, { useState } from 'react'
-import { PhoneInput, Card, CodeSnippet } from '@toolcase/react-components'
-
-const usageCode = `import { PhoneInput } from '@toolcase/react-components'
-
-const [phone, setPhone] = useState('')
-
-<PhoneInput
-  label="Phone number"
-  value={phone}
-  onChange={setPhone}
-  defaultCountry="US"
-/>`
+import { PhoneInput } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 export const PhoneInputDemo: React.FC = () => {
 	const [phone, setPhone]     = useState('')
 	const [mobile, setMobile]   = useState('')
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">PhoneInput</h1>
-					<p className="text-muted mb-0">Phone number input with built-in country selector and dial code prefix.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Inputs"
+			title="PhoneInput"
+			lede="Phone number input with built-in country selector and dial code prefix."
+		>
+			<DemoSection title="Default (US)">
+				<PhoneInput
+					label="Phone number"
+					value={phone}
+					onChange={setPhone}
+					defaultCountry="US"
+				/>
+				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.85rem' }}>Value: {phone || '—'}</p>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Default (US)</h2>
-						<PhoneInput
-							label="Phone number"
-							value={phone}
-							onChange={setPhone}
-							defaultCountry="US"
-						/>
-						<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.85rem' }}>Value: {phone || '—'}</p>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Default country: UK">
+				<PhoneInput
+					label="Mobile number"
+					value={mobile}
+					onChange={setMobile}
+					defaultCountry="GB"
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Default country: UK</h2>
-						<PhoneInput
-							label="Mobile number"
-							value={mobile}
-							onChange={setMobile}
-							defaultCountry="GB"
-						/>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Error state</h2>
-						<PhoneInput
-							label="Contact number"
-							value="+1555"
-							onChange={() => {}}
-							error="Please enter a valid phone number."
-						/>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet language="typescript" code={usageCode} />
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Error state">
+				<PhoneInput
+					label="Contact number"
+					value="+1555"
+					onChange={() => {}}
+					error="Please enter a valid phone number."
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }

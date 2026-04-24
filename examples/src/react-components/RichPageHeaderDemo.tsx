@@ -3,7 +3,6 @@ import {
 	RichPageHeader,
 	RichPageHeaderChip,
 	Button,
-	CodeSnippet,
 } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
@@ -97,27 +96,6 @@ const RichPageHeaderDemo: React.FC = () => (
 			caption="Every slot other than `title` is optional. Drop down to a plain title when the surrounding chrome already sets context."
 		>
 			<RichPageHeader title="Settings" />
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { RichPageHeader, RichPageHeaderChip, Button } from '@toolcase/react-components'
-
-<RichPageHeader
-  icon={{ name: 'hdd-stack', color: 'violet' }}
-  chips={
-    <>
-      <RichPageHeaderChip icon="check-circle">Active</RichPageHeaderChip>
-      <RichPageHeaderChip icon="geo-alt">us-west-2</RichPageHeaderChip>
-    </>
-  }
-  title="atlas-prod-cluster"
-  sub="Postgres 15 · 8 vCPU · 32 GB"
-  description="Primary database cluster for the Atlas production tenant."
-  actions={<Button>Deploy</Button>}
-/>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

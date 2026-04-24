@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Button, Badge, CodeSnippet } from '@toolcase/react-components'
+import { Card, Button, Badge } from '@toolcase/react-components'
 import { DemoPage, DemoSection, DemoGrid } from './_demo'
 
 const CardDemo: React.FC = () => (
@@ -94,21 +94,6 @@ const CardDemo: React.FC = () => (
 					<span style={{ color: 'inherit', opacity: 0.92 }}>Muted emphasis.</span>
 				</Card>
 			</DemoGrid>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { Card } from '@toolcase/react-components'
-
-<Card header="Project settings">
-  Card content goes here.
-</Card>
-
-<Card variant="warning" header="Storage">
-  82% of 10 GB used.
-</Card>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

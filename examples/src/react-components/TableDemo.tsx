@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Table, TableColumn, Avatar, Select, Badge, Alert, CodeSnippet } from '@toolcase/react-components'
+import { Table, TableColumn, Avatar, Select, Badge, Alert } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
 interface Member {
@@ -202,36 +202,6 @@ const TableDemo = () => {
 						/>
 					</div>
 				</div>
-			</DemoSection>
-
-			<DemoSection eyebrow="API" title="Usage">
-				<CodeSnippet
-					language="typescript"
-					code={`import { Table, TableColumn } from '@toolcase/react-components'
-
-const columns: TableColumn<Member>[] = [
-  { key: 'name',  header: 'Member', render: (row) => row.name },
-  { key: 'role',  header: 'Role',   render: (row) => row.role },
-  { key: 'joined', header: 'Joined', render: (row) => formatDate(row.joinedAt) },
-]
-
-<Table
-  columns={columns}
-  data={members}
-  rowKey={(row) => row.id}
-  striped
-  hoverable
-  onRowClick={(row) => open(row)}
-/>
-
-<Table
-  columns={columns}
-  data={[]}
-  rowKey={(row) => row.id}
-  loading
-  loadingRows={4}
-/>`}
-				/>
 			</DemoSection>
 		</DemoPage>
 	)

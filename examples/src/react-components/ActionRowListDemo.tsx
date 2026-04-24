@@ -1,5 +1,5 @@
 import React from 'react'
-import { ActionRowList, SectionCard, CodeSnippet } from '@toolcase/react-components'
+import { ActionRowList, SectionCard } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
 const ActionRowListDemo: React.FC = () => (
@@ -110,35 +110,6 @@ const ActionRowListDemo: React.FC = () => (
 					]}
 				/>
 			</SectionCard>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { ActionRowList } from '@toolcase/react-components'
-
-<ActionRowList
-  onActionClick={(key) => console.log('action:', key)}
-  actions={[
-    {
-      key: '2fa',
-      icon: 'phone',
-      title: 'Two-factor authentication',
-      description: 'Add a second factor via TOTP or WebAuthn.',
-      buttonText: 'Enable',
-      buttonVariant: 'success',
-    },
-    {
-      key: 'delete',
-      icon: 'trash',
-      title: 'Delete account',
-      description: 'Permanently delete this account.',
-      buttonText: 'Delete',
-      buttonVariant: 'danger',
-    },
-  ]}
-/>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

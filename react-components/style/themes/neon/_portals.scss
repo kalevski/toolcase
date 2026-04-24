@@ -1,0 +1,161 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 10 · Portaled-component overrides
+// ───────────────────────────────────────────────────────────────────────────
+// Several components (Toast, CommandPalette, ContextMenu, Drawer, Lightbox,
+// Popover) render into `document.body` via ReactDOM.createPortal. That means
+// their DOM escapes the `.theme--neon` wrapper and never inherits the scope
+// tokens — the `.theme--neon .component-…` rules in _components.scss can't
+// reach them.
+//
+// We use `:has(.theme--neon)` at the document root so these rules apply
+// whenever a neon subtree exists anywhere on the page, regardless of where
+// the portal mounts.
+
+html:has(.theme--neon) {
+
+    // ── Toast ────────────────────────────────────────────────────────────
+    .component-toast-item {
+        --ti-bg: #0c0820;
+        --ti-border: rgba(120, 80, 200, 0.22);
+        --ti-color: #f3e9ff;
+        --ti-muted: #9a8fc2;
+        --ti-accent: #00e5ff;
+        --ti-accent-bg: rgba(0, 229, 255, 0.08);
+        --ti-close-hover: rgba(255, 43, 214, 0.12);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 43, 214, 0.18);
+    }
+    .component-toast-item--success {
+        --ti-accent: #4ade80;
+        --ti-accent-bg: rgba(74, 222, 128, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(74, 222, 128, 0.22);
+    }
+    .component-toast-item--error {
+        --ti-accent: #ff6188;
+        --ti-accent-bg: rgba(255, 97, 136, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 97, 136, 0.22);
+    }
+    .component-toast-item--warning {
+        --ti-accent: #fbbf24;
+        --ti-accent-bg: rgba(251, 191, 36, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(251, 191, 36, 0.2);
+    }
+    .component-toast-item--info {
+        --ti-accent: #00e5ff;
+        --ti-accent-bg: rgba(0, 229, 255, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(0, 229, 255, 0.22);
+    }
+    .component-toast-item__close:hover {
+        background: rgba(255, 43, 214, 0.14);
+        color: #f3e9ff;
+    }
+    .component-toast-item__progress {
+        background: rgba(120, 80, 200, 0.18);
+    }
+
+    // ── CommandPalette ───────────────────────────────────────────────────
+    .component-command-palette__backdrop {
+        background: rgba(5, 3, 15, 0.72);
+    }
+    .component-command-palette {
+        --cp-bg: #0c0820;
+        --cp-border: rgba(255, 43, 214, 0.28);
+        --cp-color: #f3e9ff;
+        --cp-muted: #9a8fc2;
+        --cp-hover-bg: rgba(255, 43, 214, 0.08);
+        --cp-active-bg: rgba(255, 43, 214, 0.16);
+        --cp-active-border: #ff2bd6;
+        --cp-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(255, 43, 214, 0.2);
+    }
+    .component-command-palette__footer kbd {
+        background: #0c0820;
+        border-color: rgba(120, 80, 200, 0.22);
+        color: #9a8fc2;
+    }
+
+    // ── ContextMenu ──────────────────────────────────────────────────────
+    .component-context-menu {
+        --cm-bg: #0c0820;
+        --cm-border: rgba(255, 43, 214, 0.28);
+        --cm-color: #f3e9ff;
+        --cm-muted: #9a8fc2;
+        --cm-hover-bg: rgba(255, 43, 214, 0.12);
+        --cm-active-bg: rgba(255, 43, 214, 0.18);
+        --cm-danger: #ff6188;
+        --cm-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.15);
+    }
+
+    // ── Drawer ───────────────────────────────────────────────────────────
+    .component-drawer {
+        --dr-bg: #0c0820;
+        --dr-border: rgba(255, 43, 214, 0.28);
+        --dr-title-color: #f3e9ff;
+        --dr-muted: #9a8fc2;
+        --dr-backdrop: rgba(5, 3, 15, 0.72);
+        --dr-shadow:
+            0 0 48px rgba(255, 43, 214, 0.18),
+            0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .component-drawer__close:hover {
+        background: rgba(255, 43, 214, 0.12);
+        color: #f3e9ff;
+    }
+
+    // ── Popover ──────────────────────────────────────────────────────────
+    // `--pop-shadow` default resolves to `var(--tc-shadow-md)` which only
+    // exists inside the `.theme--neon` scope; outside the scope (portal),
+    // it evaluates to empty. Set the literal shadow here.
+    .component-popover {
+        --pop-bg: #0c0820;
+        --pop-border: rgba(255, 43, 214, 0.28);
+        --pop-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 43, 214, 0.18);
+        color: #f3e9ff;
+    }
+    .component-popover__panel {
+        color: #f3e9ff;
+    }
+    .component-popover__panel h1,
+    .component-popover__panel h2,
+    .component-popover__panel h3,
+    .component-popover__panel h4,
+    .component-popover__panel h5,
+    .component-popover__panel h6 {
+        color: #f3e9ff;
+    }
+    .component-popover__panel p {
+        color: #9a8fc2;
+    }
+    .component-popover__panel a {
+        color: #00e5ff;
+    }
+    .component-popover__panel a:hover {
+        color: #f3e9ff;
+    }
+    .component-popover__panel code {
+        color: #ff2bd6;
+        background: rgba(255, 43, 214, 0.08);
+        border: 1px solid rgba(120, 80, 200, 0.22);
+        padding: 0.12em 0.35em;
+    }
+
+    // ── Lightbox ─────────────────────────────────────────────────────────
+    .component-lightbox {
+        --lb-text: #f3e9ff;
+        --lb-thumb-active: #ff2bd6;
+    }
+}

@@ -3,6 +3,7 @@ import { TabSections } from './TabSections'
 import { Button } from './Button'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
+import { Spacer } from './Spacer'
 
 export interface FormWizardStep {
 	key: string
@@ -85,7 +86,7 @@ export const FormWizard: React.FC<FormWizardProps> = ({
 						Back
 					</Button>
 				)}
-				<div className="component-form-wizard__footer-spacer" />
+				<Spacer />
 				{!isLast && (
 					<Button
 						variant="primary"

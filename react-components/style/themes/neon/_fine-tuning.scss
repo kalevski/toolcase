@@ -187,11 +187,14 @@
     }
 
     // ── Modal ────────────────────────────────────────────────────────────
-    .component-modal-backdrop,
+    // Actual BEM class names: `__render` (backdrop) and `__window` (panel).
+    // Also cover Bootstrap `.modal-backdrop` / `.modal-content` for cases
+    // where markup uses Bootstrap's modal scaffolding directly.
+    .component-modals__render,
     .modal-backdrop {
-        background: rgba(5, 3, 15, 0.7);
+        background: rgba(5, 3, 15, 0.72);
     }
-    .component-modal-window,
+    .component-modals__window,
     .modal-content {
         background: var(--nd-panel-solid);
         border: 1px solid var(--nd-border);
@@ -200,9 +203,31 @@
             0 0 48px rgba(255, 43, 214, 0.18),
             0 20px 60px rgba(0, 0, 0, 0.6);
     }
+    .component-modals__window .modal-header,
+    .component-modals__window .modal-footer,
     .modal-header,
     .modal-footer {
         border-color: var(--nd-border-soft);
+    }
+    .component-modals__window .modal-header .modal-title,
+    .modal-header .modal-title {
+        color: var(--nd-text);
+    }
+    .component-modals__window .modal-body,
+    .modal-body {
+        color: var(--nd-text);
+    }
+    .component-modals__window .modal-header .btn-close,
+    .modal-header .btn-close {
+        color: var(--nd-text-dim);
+        background: transparent;
+        filter: none;
+        opacity: 0.8;
+    }
+    .component-modals__window .modal-header .btn-close:hover,
+    .modal-header .btn-close:hover {
+        color: var(--nd-text);
+        opacity: 1;
     }
 
     // ── Tooltip / Popover ────────────────────────────────────────────────
@@ -358,5 +383,50 @@
     .component.component-advanced-table tbody tr:hover {
         background: rgba(255, 43, 214, 0.08) !important;
         box-shadow: inset 3px 0 0 var(--nd-accent-2);
+    }
+
+    // ── BasicLayout ──────────────────────────────────────────────────────
+    .layout.layout--basic {
+        --bl-brand-bg: var(--nd-panel-solid);
+        --bl-brand-border: var(--nd-border);
+        --bl-content-bg: var(--nd-bg);
+        --bl-text: var(--nd-text);
+    }
+    .layout--basic__brand {
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        box-shadow: 0 0 18px rgba(255, 43, 214, 0.12);
+    }
+
+    // ── DashboardLayout ──────────────────────────────────────────────────
+    .layout.layout--dashboard {
+        --dl-navbar-bg: var(--nd-panel-solid);
+        --dl-sidebar-bg: var(--nd-panel-solid);
+        --dl-content-bg: var(--nd-bg);
+        --dl-border: var(--nd-border-soft);
+        --dl-text: var(--nd-text);
+        --dl-overlay-bg: rgba(5, 3, 15, 0.7);
+    }
+    .layout--dashboard__navbar {
+        box-shadow: 0 0 18px rgba(255, 43, 214, 0.08);
+    }
+    .layout--dashboard__overlay {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+    .layout--dashboard .navbar--toggle {
+        color: var(--nd-text-dim);
+        border-right-color: var(--nd-border-soft);
+        transition: color 0.15s ease, background 0.15s ease;
+
+        &:hover {
+            color: var(--nd-accent-2);
+            background: rgba(255, 43, 214, 0.08);
+        }
+    }
+    .layout--dashboard .navbar--brand {
+        font-family: var(--nd-font-display);
+        color: var(--nd-text);
+        text-shadow: 0 0 16px rgba(255, 43, 214, 0.3);
     }
 }

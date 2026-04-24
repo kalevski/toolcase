@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { VerticalItemList, VerticalItemListItem, Card, CodeSnippet } from '@toolcase/react-components'
+import { VerticalItemList, VerticalItemListItem } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const ITEMS: VerticalItemListItem[] = [
 	{ key: 'dashboard', icon: 'grid', text: 'Dashboard', badge: 3 },
@@ -22,57 +23,28 @@ const VerticalItemListDemo = () => {
 	const content = CONTENT[selected]
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">VerticalItemList</h1>
-					<p className="text-muted mb-0">A sidebar list with icons, badges, and active state — paired with a content panel.</p>
+		<DemoPage
+			eyebrow="Data Display"
+			title="VerticalItemList"
+			lede="A sidebar list with icons, badges, and active state — paired with a content panel."
+		>
+			<DemoSection title="Sidebar list with content panel">
+				<div style={{ border: '1px solid #e2e8f0', overflow: 'hidden', minHeight: 320 }}>
+					<VerticalItemList
+						items={ITEMS}
+						activeKey={selected}
+						onSelect={setSelected}
+					>
+						{content && (
+							<div style={{ padding: '1.5rem' }}>
+								<h4>{content.title}</h4>
+								<p style={{ color: '#64748b' }}>{content.description}</p>
+							</div>
+						)}
+					</VerticalItemList>
 				</div>
-			</div>
-
-			<div className="row mb-5">
-			<div className="col-lg-8">
-			<div className="border" style={{ overflow: 'hidden', minHeight: 320 }}>
-				<VerticalItemList
-					items={ITEMS}
-					activeKey={selected}
-					onSelect={setSelected}
-				>
-					{content && (
-						<div className="p-4">
-							<h4>{content.title}</h4>
-							<p className="text-muted">{content.description}</p>
-						</div>
-					)}
-				</VerticalItemList>
-			</div>
-			</div>
-			</div>
-
-		{/* Usage */}
-		<div className="row mb-5">
-			<div className="col-12">
-				<Card>
-					<h2 className="h5 mb-3">Usage</h2>
-					<CodeSnippet
-						language="typescript"
-						code={`import { VerticalItemList } from '@toolcase/react-components'
-
-<VerticalItemList
-  items={[
-    { key: 'dashboard', icon: 'grid', text: 'Dashboard', badge: 3 },
-    { key: 'settings', icon: 'gear', text: 'Settings' },
-  ]}
-  activeKey={selected}
-  onSelect={setSelected}
->
-  {children}
-</VerticalItemList>`}
-					/>
-				</Card>
-			</div>
-		</div>
-		</div>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

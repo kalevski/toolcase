@@ -1,5 +1,5 @@
 import React from 'react'
-import { EntityCell, Table, TableColumn, CodeSnippet } from '@toolcase/react-components'
+import { EntityCell, Table, TableColumn } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
 interface Project {
@@ -89,21 +89,6 @@ const EntityCellDemo: React.FC = () => (
 				<EntityCell name="Slate" subLabel="token" initial="SL" color="slate" />
 				<EntityCell name="Rose" subLabel="token" initial="RO" color="rose" />
 			</div>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { EntityCell } from '@toolcase/react-components'
-
-<EntityCell
-  name="Atlas Platform"
-  subLabel="atlas-prod"
-  initial="AT"
-  color="violet"
-  onClick={() => navigate('/projects/atlas-prod')}
-/>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
+import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
 import { useClickOutside } from './hooks/useClickOutside'
 
@@ -157,7 +158,7 @@ export const TagInput: React.FC<TagInputProps> = ({
 								}}
 								aria-label={`Remove ${tag}`}
 							>
-								<i className="bi bi-x" />
+								<Icon name="x" />
 							</button>
 						)}
 					</span>

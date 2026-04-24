@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Modal, Button, IconButton, Input, Alert, CodeSnippet } from '@toolcase/react-components'
+import { Modal, Button, IconButton, Input, Alert } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
 export function ModalDemo() {
@@ -20,34 +20,6 @@ export function ModalDemo() {
 				<ModalExamples />
 				<ModalDefinitions />
 			</Modal.ModalContext>
-
-			<DemoSection eyebrow="API" title="Usage">
-				<CodeSnippet
-					language="typescript"
-					code={`import { Modal, Button } from '@toolcase/react-components'
-
-// 1. Wrap your app (or section) in ModalContext
-<Modal.ModalContext>
-  <OpenButton />
-  <Modal.ModalRender>
-    <Modal.Window key="edit-user" size="medium">
-      <EditUserModal />
-    </Modal.Window>
-  </Modal.ModalRender>
-</Modal.ModalContext>
-
-// 2. Open imperatively with a payload; receive a result on close
-const openEditUser = Modal.useModalOpen('edit-user', (result) => {
-  if (result?.saved) refresh()
-})
-openEditUser({ userId: 123 })
-
-// 3. Inside the modal, read the payload and close with a result
-const input = Modal.useModalInput<{ userId: number }>()
-const close = Modal.useModalClose()
-close({ saved: true })`}
-				/>
-			</DemoSection>
 		</DemoPage>
 	)
 }

@@ -14,6 +14,7 @@ const categoryIcons: Record<ExampleCategory, string> = {
     'Editors': 'bi-code-square',
     'Dashboard & Admin': 'bi-shield-lock',
     'Marketing': 'bi-megaphone',
+    'Themes': 'bi-palette',
     'Full Page Demos': 'bi-window-fullscreen',
 }
 

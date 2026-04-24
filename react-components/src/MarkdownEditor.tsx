@@ -1,4 +1,5 @@
 import React, { useCallback, useId, useState } from 'react'
+import { Icon } from './Icon'
 
 // ── Minimal Markdown → HTML ───────────────────────────────────────────────────
 
@@ -159,7 +160,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 										applyWrap(action.wrap)
 									}}
 								>
-									<i className={`bi bi-${action.icon}`} aria-hidden="true" />
+									<Icon name={action.icon} />
 								</button>
 							))}
 						</div>

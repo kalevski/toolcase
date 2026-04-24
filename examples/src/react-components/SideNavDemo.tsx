@@ -3,7 +3,7 @@ import { SideNav, SideNavSection } from '@toolcase/react-components'
 import { DashboardLayout } from '@toolcase/react-components'
 import { Brand } from '@toolcase/react-components'
 import { Badge } from '@toolcase/react-components'
-import { Card, CodeSnippet } from '@toolcase/react-components'
+import { Card } from '@toolcase/react-components'
 
 const sections: SideNavSection[] = [
 	{
@@ -59,26 +59,6 @@ const SideNavDemo = () => {
 				<p className="card-text text-muted">
 					Click items in the sidebar to navigate.
 				</p>
-			</Card>
-			<Card className="mt-4">
-				<h2 className="h5 mb-3">Usage</h2>
-				<CodeSnippet
-					language="typescript"
-					code={`import { SideNav, SideNavSection } from '@toolcase/react-components'
-
-const sections: SideNavSection[] = [
-  {
-    title: 'Main',
-    items: [
-      { key: 'dashboard', label: 'Dashboard', icon: 'grid-1x2', active: true },
-      { key: 'projects', label: 'Projects', icon: 'folder2', badge: '3' },
-      { key: 'settings', label: 'Settings', icon: 'gear' },
-    ],
-  },
-]
-
-<SideNav sections={sections} />`}
-				/>
 			</Card>
 		</DashboardLayout>
 	)

@@ -43,7 +43,8 @@
         align-items: center;
     }
 
-    &__dismiss {
+    // Override IconButton chrome (specificity matches `.component.component-icon-button`).
+    &__dismiss.component-icon-button {
         flex-shrink: 0;
         display: flex;
         align-items: center;
@@ -88,12 +89,12 @@
 }
 
 @media (pointer: coarse) {
-    .component-banner__dismiss {
+    .component-banner__dismiss.component-icon-button {
         min-width: 44px;
         min-height: 44px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .component-banner__dismiss { transition: none; }
+    .component-banner__dismiss.component-icon-button { transition: none; }
 }

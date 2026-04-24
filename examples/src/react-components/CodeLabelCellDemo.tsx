@@ -1,5 +1,5 @@
 import React from 'react'
-import { CodeLabelCell, Table, TableColumn, CodeSnippet } from '@toolcase/react-components'
+import { CodeLabelCell, Table, TableColumn } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
 interface Country {
@@ -63,15 +63,6 @@ const CodeLabelCellDemo: React.FC = () => (
 				<CodeLabelCell code="JFK" name="New York · John F. Kennedy International" />
 				<CodeLabelCell code="PRO" name="Pro · annual · seat-based" />
 			</div>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { CodeLabelCell } from '@toolcase/react-components'
-
-<CodeLabelCell code="US" name="United States" />`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

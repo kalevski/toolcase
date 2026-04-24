@@ -1,5 +1,4 @@
 import { DashboardLayout } from '@toolcase/react-components'
-import { Card, CodeSnippet } from '@toolcase/react-components'
 import { Forms } from './Forms'
 
 export const DashboardLayoutExample = () => {
@@ -12,26 +11,6 @@ export const DashboardLayoutExample = () => {
 			}
 		>
 			<Forms />
-
-			<div className="container mt-5 mb-5">
-				<div className="row">
-					<div className="col-12">
-						<Card>
-							<h2 className="h5 mb-3">Usage</h2>
-							<CodeSnippet
-								language="typescript"
-								code={`import { DashboardLayout } from '@toolcase/react-components'
-
-<DashboardLayout
-  brandComponent={<>WEBGAME.<span>CLOUD</span></>}
->
-  <main>Dashboard content</main>
-</DashboardLayout>`}
-							/>
-						</Card>
-					</div>
-				</div>
-			</div>
 		</DashboardLayout>
 	)
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { SingleCardSelect, Card, CodeSnippet } from '@toolcase/react-components'
+import { SingleCardSelect } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const options = [
 	{ key: 'react', title: 'React', description: 'A JavaScript library for building user interfaces' },
@@ -19,85 +20,43 @@ const SingleCardSelectDemo: React.FC = () => {
 	const [sizeSelected, setSizeSelected] = useState<string | null>('medium')
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">SingleCardSelect</h1>
-					<p className="text-muted mb-0">A single-selection card grid for choosing one option from a set.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Inputs"
+			title="SingleCardSelect"
+			lede="A single-selection card grid for choosing one option from a set."
+		>
+			<DemoSection title="With Descriptions">
+				<SingleCardSelect
+					options={options}
+					value={selected}
+					onChange={setSelected}
+				/>
+				<p style={{ color: '#64748b', marginTop: 12, marginBottom: 0 }}>
+					Selected: <strong>{selected ?? 'none'}</strong>
+				</p>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">With Descriptions</h2>
-						<SingleCardSelect
-							options={options}
-							value={selected}
-							onChange={setSelected}
-						/>
-						<p className="text-muted mt-3 mb-0">
-							Selected: <strong>{selected ?? 'none'}</strong>
-						</p>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Simple Options (no descriptions)">
+				<SingleCardSelect
+					options={simpleOptions}
+					value={sizeSelected}
+					onChange={setSizeSelected}
+					columns={3}
+				/>
+				<p style={{ color: '#64748b', marginTop: 12, marginBottom: 0 }}>
+					Selected: <strong>{sizeSelected ?? 'none'}</strong>
+				</p>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Simple Options (no descriptions)</h2>
-						<SingleCardSelect
-							options={simpleOptions}
-							value={sizeSelected}
-							onChange={setSizeSelected}
-							columns={3}
-						/>
-						<p className="text-muted mt-3 mb-0">
-							Selected: <strong>{sizeSelected ?? 'none'}</strong>
-						</p>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Custom Columns</h2>
-						<SingleCardSelect
-							options={options}
-							value={selected}
-							onChange={setSelected}
-							columns={2}
-						/>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { SingleCardSelect } from '@toolcase/react-components'
-
-const options = [
-  { key: 'react', title: 'React', description: 'A JS library for UIs' },
-  { key: 'vue', title: 'Vue', description: 'The progressive framework' },
-]
-
-<SingleCardSelect
-  options={options}
-  value={selected}
-  onChange={(key) => setSelected(key)}
-  columns={2}
-/>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Custom Columns">
+				<SingleCardSelect
+					options={options}
+					value={selected}
+					onChange={setSelected}
+					columns={2}
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

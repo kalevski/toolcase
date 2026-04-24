@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { AdvancedTable, Card, CodeSnippet, Badge, ActionItems } from '@toolcase/react-components'
+import { AdvancedTable, Badge, ActionItems } from '@toolcase/react-components'
 import type { AdvancedTableFilter, AdvancedTableSort, TableColumn } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 // ── Fake data ──────────────────────────────────────────────────────────────────
 
@@ -144,81 +145,32 @@ const AdvancedTableDemo: React.FC = () => {
 	}
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">AdvancedTable</h1>
-					<p className="text-muted mb-0">A data table with filters, sortable columns, pagination, and loading state — designed for backend-driven data.</p>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Full Example</h2>
-						<AdvancedTable<User>
-							columns={columns}
-							data={data}
-							rowKey={(r) => r.id}
-							emptyMessage="No users found."
-							hoverable
-							filters={filters}
-							filterValues={filterValues}
-							onFilterChange={handleFilterChange}
-							sortableColumns={['name', 'email', 'age']}
-							sort={sort}
-						onSortChange={(s) => { setSort(s); setOffset(0) }}
-						limit={PAGE_SIZE}
-						offset={offset}
-						total={total}
-						onOffsetChange={setOffset}
-							loading={loading}
-						/>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { AdvancedTable } from '@toolcase/react-components'
-import type { AdvancedTableFilter, AdvancedTableSort, TableColumn } from '@toolcase/react-components'
-
-const columns: TableColumn<User>[] = [
-  { key: 'id', header: 'ID', render: (r) => r.id },
-  { key: 'name', header: 'Name', render: (r) => r.name },
-]
-
-const filters: AdvancedTableFilter[] = [
-  { key: 'search', type: 'text', label: 'Search' },
-  { key: 'role', type: 'dropdown', label: 'Role', options: [...] },
-  { key: 'maxAge', type: 'range', label: 'Max Age', min: 0, max: 100 },
-]
-
-<AdvancedTable
-  columns={columns}
-  data={data}
-  rowKey={(r) => r.id}
-  filters={filters}
-  filterValues={filterValues}
-  onFilterChange={(key, value) => { /* update state, re-fetch */ }}
-  sortableColumns={['name']}
-  sort={sort}
-  onSortChange={setSort}
-  limit={10}
-  offset={offset}
-  total={total}
-  onOffsetChange={setOffset}
-  loading={loading}
-/>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+		<DemoPage
+			eyebrow="Data Display"
+			title="AdvancedTable"
+			lede="A data table with filters, sortable columns, pagination, and loading state — designed for backend-driven data."
+		>
+			<DemoSection title="Full Example">
+				<AdvancedTable<User>
+					columns={columns}
+					data={data}
+					rowKey={(r) => r.id}
+					emptyMessage="No users found."
+					hoverable
+					filters={filters}
+					filterValues={filterValues}
+					onFilterChange={handleFilterChange}
+					sortableColumns={['name', 'email', 'age']}
+					sort={sort}
+					onSortChange={(s) => { setSort(s); setOffset(0) }}
+					limit={PAGE_SIZE}
+					offset={offset}
+					total={total}
+					onOffsetChange={setOffset}
+					loading={loading}
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

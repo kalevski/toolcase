@@ -5,15 +5,14 @@ import {
 	BitmapFontBorder,
 	BitmapFontDropShadow,
 	BitmapFontOutput,
-	Card,
 	Input,
 	Select,
 	Textarea,
 	Checkbox,
 	Button,
 	Icon,
-	CodeSnippet,
 } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const DEFAULT_GLYPHS =
 	'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,!?-+:;\'\"()[]{}/@#$%^&*~`<>=_\\|'
@@ -78,220 +77,194 @@ const BitmapFontGeneratorDemo = () => {
 	}, [lastOutput, fontFamily, fontSize])
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">BitmapFontGenerator</h1>
-					<p className="text-muted mb-0">Generate bitmap font spritesheets with customizable fill, border, drop shadow, and glyph sets.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Editors"
+			title="BitmapFontGenerator"
+			lede="Generate bitmap font spritesheets with customizable fill, border, drop shadow, and glyph sets."
+		>
+			<DemoSection title="Settings">
+				<div className="d-flex flex-column gap-3">
+					{/* Font */}
+					<Input
+						label="Font Family"
+						value={fontFamily}
+						onChange={(e) => setFontFamily(e.target.value)}
+					/>
+					<div>
+						<label className="form-label">Font Size: {fontSize}px</label>
+						<input
+							type="range"
+							className="form-range"
+							min={8}
+							max={128}
+							value={fontSize}
+							onChange={(e) => setFontSize(Number(e.target.value))}
+						/>
+					</div>
 
-			<div className="row g-3 mb-5">
-				{/* Controls */}
-				<div className="col-md-4">
-					<Card>
-						<div className="d-flex flex-column gap-3">
-							<h5 className="mb-0">Settings</h5>
-
-							{/* Font */}
-							<Input
-								label="Font Family"
-								value={fontFamily}
-								onChange={(e) => setFontFamily(e.target.value)}
+					{/* Fill */}
+					<Select
+						label="Fill Type"
+						value={fillType}
+						options={[
+							{ value: 'solid', label: 'Solid' },
+							{ value: 'gradient', label: 'Gradient' },
+						]}
+						onChange={(e) => setFillType(e.target.value as 'solid' | 'gradient')}
+					/>
+					{fillType === 'solid' ? (
+						<div>
+							<label className="form-label">Fill Color</label>
+							<input
+								type="color"
+								className="form-control form-control-color form-control-sm"
+								value={fillColor}
+								onChange={(e) => setFillColor(e.target.value)}
 							/>
-							<div>
-								<label className="form-label">Font Size: {fontSize}px</label>
-								<input
-									type="range"
-									className="form-range"
-									min={8}
-									max={128}
-									value={fontSize}
-									onChange={(e) => setFontSize(Number(e.target.value))}
-								/>
-							</div>
-
-							{/* Fill */}
-							<Select
-								label="Fill Type"
-								value={fillType}
-								options={[
-									{ value: 'solid', label: 'Solid' },
-									{ value: 'gradient', label: 'Gradient' },
-								]}
-								onChange={(e) => setFillType(e.target.value as 'solid' | 'gradient')}
-							/>
-							{fillType === 'solid' ? (
-								<div>
-									<label className="form-label">Fill Color</label>
+						</div>
+					) : (
+						<>
+							<div className="d-flex gap-2">
+								<div className="flex-fill">
+									<label className="form-label">Color 1</label>
 									<input
 										type="color"
 										className="form-control form-control-color form-control-sm"
-										value={fillColor}
-										onChange={(e) => setFillColor(e.target.value)}
+										value={gradColor1}
+										onChange={(e) => setGradColor1(e.target.value)}
 									/>
 								</div>
-							) : (
-								<>
-									<div className="d-flex gap-2">
-										<div className="flex-fill">
-											<label className="form-label">Color 1</label>
-											<input
-												type="color"
-												className="form-control form-control-color form-control-sm"
-												value={gradColor1}
-												onChange={(e) => setGradColor1(e.target.value)}
-											/>
-										</div>
-										<div className="flex-fill">
-											<label className="form-label">Color 2</label>
-											<input
-												type="color"
-												className="form-control form-control-color form-control-sm"
-												value={gradColor2}
-												onChange={(e) => setGradColor2(e.target.value)}
-											/>
-										</div>
-									</div>
-									<div>
-										<label className="form-label">Gradient Angle: {gradAngle}°</label>
-										<input
-											type="range"
-											className="form-range"
-											min={0}
-											max={360}
-											value={gradAngle}
-											onChange={(e) => setGradAngle(Number(e.target.value))}
-										/>
-									</div>
-								</>
-							)}
-
-							{/* Border */}
-							<Checkbox
-								label="Border"
-								checked={borderEnabled}
-								onChange={(e) => setBorderEnabled(e.target.checked)}
-							/>
-							{borderEnabled && (
-								<div className="d-flex gap-2">
-									<div>
-										<label className="form-label">Color</label>
-										<input
-											type="color"
-											className="form-control form-control-color form-control-sm"
-											value={borderColor}
-											onChange={(e) => setBorderColor(e.target.value)}
-										/>
-									</div>
-									<div className="flex-fill">
-										<label className="form-label">Thickness: {borderThickness}</label>
-										<input
-											type="range"
-											className="form-range"
-											min={1}
-											max={10}
-											value={borderThickness}
-											onChange={(e) => setBorderThickness(Number(e.target.value))}
-										/>
-									</div>
+								<div className="flex-fill">
+									<label className="form-label">Color 2</label>
+									<input
+										type="color"
+										className="form-control form-control-color form-control-sm"
+										value={gradColor2}
+										onChange={(e) => setGradColor2(e.target.value)}
+									/>
 								</div>
-							)}
-
-							{/* Drop Shadow */}
-							<Checkbox
-								label="Drop Shadow"
-								checked={shadowEnabled}
-								onChange={(e) => setShadowEnabled(e.target.checked)}
-							/>
-							{shadowEnabled && (
-								<div className="d-flex gap-2">
-									<div>
-										<label className="form-label">Color</label>
-										<input
-											type="color"
-											className="form-control form-control-color form-control-sm"
-											value={shadowColor}
-											onChange={(e) => setShadowColor(e.target.value)}
-										/>
-									</div>
-									<div className="flex-fill">
-										<label className="form-label">Size: {shadowSize}</label>
-										<input
-											type="range"
-											className="form-range"
-											min={1}
-											max={20}
-											value={shadowSize}
-											onChange={(e) => setShadowSize(Number(e.target.value))}
-										/>
-									</div>
-								</div>
-							)}
-
-							{/* Text / Glyphs */}
-							<Input
-								label="Preview Text"
-								value={text}
-								onChange={(e) => setText(e.target.value)}
-							/>
-							<Textarea
-								label="Glyphs"
-								rows={3}
-								value={glyphs}
-								onChange={(e) => setGlyphs(e.target.value)}
-							/>
-						</div>
-					</Card>
-				</div>
-
-				{/* Preview & Output */}
-				<div className="col-md-8">
-					<BitmapFontGenerator
-						fontFamily={fontFamily}
-						fontSize={fontSize}
-						fill={fill}
-						border={border}
-						dropShadow={dropShadow}
-						glyphs={glyphs}
-						text={text}
-						onGenerate={handleGenerate}
-					/>
-
-					{lastOutput && (
-						<div className="mt-3">
-							<div className="d-flex align-items-center gap-2 mb-2">
-								<h5 className="mb-0">Generated Output</h5>
-								<Button variant="primary" outline size="small" onClick={downloadOutput}>
-									<Icon name="download" /> Download
-								</Button>
 							</div>
-							<pre
-								className="p-3 bg-light rounded"
-								style={{ fontSize: '0.72rem', whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}
-							>
-								{lastOutput.xml}
-							</pre>
+							<div>
+								<label className="form-label">Gradient Angle: {gradAngle}°</label>
+								<input
+									type="range"
+									className="form-range"
+									min={0}
+									max={360}
+									value={gradAngle}
+									onChange={(e) => setGradAngle(Number(e.target.value))}
+								/>
+							</div>
+						</>
+					)}
+
+					{/* Border */}
+					<Checkbox
+						label="Border"
+						checked={borderEnabled}
+						onChange={(e) => setBorderEnabled(e.target.checked)}
+					/>
+					{borderEnabled && (
+						<div className="d-flex gap-2">
+							<div>
+								<label className="form-label">Color</label>
+								<input
+									type="color"
+									className="form-control form-control-color form-control-sm"
+									value={borderColor}
+									onChange={(e) => setBorderColor(e.target.value)}
+								/>
+							</div>
+							<div className="flex-fill">
+								<label className="form-label">Thickness: {borderThickness}</label>
+								<input
+									type="range"
+									className="form-range"
+									min={1}
+									max={10}
+									value={borderThickness}
+									onChange={(e) => setBorderThickness(Number(e.target.value))}
+								/>
+							</div>
 						</div>
 					)}
-				</div>
-			</div>
 
-		{/* Usage */}
-		<div className="row mb-5">
-			<div className="col-12">
-				<Card>
-					<h2 className="h5 mb-3">Usage</h2>
-					<CodeSnippet
-						language="typescript"
-						code={`import { BitmapFontGenerator } from '@toolcase/react-components'
-
-<BitmapFontGenerator onGenerate={handleGenerate} />`}
+					{/* Drop Shadow */}
+					<Checkbox
+						label="Drop Shadow"
+						checked={shadowEnabled}
+						onChange={(e) => setShadowEnabled(e.target.checked)}
 					/>
-				</Card>
-			</div>
-		</div>
-		</div>
+					{shadowEnabled && (
+						<div className="d-flex gap-2">
+							<div>
+								<label className="form-label">Color</label>
+								<input
+									type="color"
+									className="form-control form-control-color form-control-sm"
+									value={shadowColor}
+									onChange={(e) => setShadowColor(e.target.value)}
+								/>
+							</div>
+							<div className="flex-fill">
+								<label className="form-label">Size: {shadowSize}</label>
+								<input
+									type="range"
+									className="form-range"
+									min={1}
+									max={20}
+									value={shadowSize}
+									onChange={(e) => setShadowSize(Number(e.target.value))}
+								/>
+							</div>
+						</div>
+					)}
+
+					{/* Text / Glyphs */}
+					<Input
+						label="Preview Text"
+						value={text}
+						onChange={(e) => setText(e.target.value)}
+					/>
+					<Textarea
+						label="Glyphs"
+						rows={3}
+						value={glyphs}
+						onChange={(e) => setGlyphs(e.target.value)}
+					/>
+				</div>
+			</DemoSection>
+
+			<DemoSection title="Preview">
+				<BitmapFontGenerator
+					fontFamily={fontFamily}
+					fontSize={fontSize}
+					fill={fill}
+					border={border}
+					dropShadow={dropShadow}
+					glyphs={glyphs}
+					text={text}
+					onGenerate={handleGenerate}
+				/>
+
+				{lastOutput && (
+					<div className="mt-3">
+						<div className="d-flex align-items-center gap-2 mb-2">
+							<h5 className="mb-0">Generated Output</h5>
+							<Button variant="primary" outline size="small" onClick={downloadOutput}>
+								<Icon name="download" /> Download
+							</Button>
+						</div>
+						<pre
+							className="p-3 bg-light rounded"
+							style={{ fontSize: '0.72rem', whiteSpace: 'pre-wrap', maxHeight: 300, overflow: 'auto' }}
+						>
+							{lastOutput.xml}
+						</pre>
+					</div>
+				)}
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

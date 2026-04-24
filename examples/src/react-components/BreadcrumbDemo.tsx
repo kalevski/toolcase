@@ -1,5 +1,6 @@
 import React from 'react'
-import { Breadcrumb, Card, CodeSnippet } from '@toolcase/react-components'
+import { Breadcrumb } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const basicItems = [
 	{ label: 'Home', href: '#' },
@@ -18,68 +19,24 @@ const longItems = [
 ]
 
 export const BreadcrumbDemo: React.FC = () => {
-	const usageCode = `import { Breadcrumb } from '@toolcase/react-components'
-
-const items = [
-  { label: 'Home', href: '/' },
-  { label: 'Products', href: '/products' },
-  { label: 'Running Shoes' },
-]
-
-<Breadcrumb items={items} />
-<Breadcrumb items={items} separator=">" />
-<Breadcrumb items={items} maxItems={3} />`
-
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Breadcrumb</h1>
-					<p className="text-muted mb-0">Navigation trail showing the current page's position in the hierarchy.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Navigation"
+			title="Breadcrumb"
+			lede="Navigation trail showing the current page's position in the hierarchy."
+		>
+			<DemoSection title="Default (slash separator)">
+				<Breadcrumb items={basicItems} />
+			</DemoSection>
 
-			{/* Default */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Default (slash separator)</h2>
-						<Breadcrumb items={basicItems} />
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Custom separator">
+				<Breadcrumb items={basicItems} separator="›" />
+			</DemoSection>
 
-			{/* Custom separator */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Custom separator</h2>
-						<Breadcrumb items={basicItems} separator="›" />
-					</Card>
-				</div>
-			</div>
-
-			{/* Collapsed with maxItems */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Collapsed — maxItems=3</h2>
-						<p className="text-muted small mb-3">Click the ellipsis to expand the full path.</p>
-						<Breadcrumb items={longItems} maxItems={3} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Code */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet language="typescript" code={usageCode} />
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Collapsed — maxItems=3" caption="Click the ellipsis to expand the full path.">
+				<Breadcrumb items={longItems} maxItems={3} />
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

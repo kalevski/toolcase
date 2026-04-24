@@ -1,5 +1,6 @@
 import React from 'react'
-import { Changelog, Card, CodeSnippet, type ChangelogEntry } from '@toolcase/react-components'
+import { Changelog, type ChangelogEntry } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const entries: ChangelogEntry[] = [
 	{
@@ -36,54 +37,19 @@ const entries: ChangelogEntry[] = [
 
 const ChangelogDemo: React.FC = () => {
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-lg-8">
-					<h1 className="display-4 text-gradient-primary mb-2">Changelog</h1>
-					<p className="text-muted mb-4">
-						A horizontal scrolling changelog section showcasing recent product updates with date, tag, title, and description.
-					</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Data Display"
+			title="Changelog"
+			lede="A horizontal scrolling changelog section showcasing recent product updates with date, tag, title, and description."
+		>
+			<DemoSection title='With "Read More" Link'>
+				<Changelog entries={entries} readMoreHref="#" />
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">With "Read More" Link</h2>
-						<Changelog entries={entries} readMoreHref="#" />
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Without "Read More" Link</h2>
-						<Changelog entries={entries.slice(0, 3)} readMoreHref="#" />
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { Changelog, type ChangelogEntry } from '@toolcase/react-components'
-
-const entries: ChangelogEntry[] = [
-  { date: 'Mar 01, 2024', title: 'New feature', description: 'Added dark mode', tag: 'Feature' },
-  { date: 'Feb 15, 2024', title: 'Bug fix', description: 'Fixed login issue', tag: 'Fix' },
-]
-
-<Changelog entries={entries} readMoreHref="/changelog" />`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title='Without "Read More" Link'>
+				<Changelog entries={entries.slice(0, 3)} readMoreHref="#" />
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

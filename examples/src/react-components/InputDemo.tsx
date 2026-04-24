@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Input, CodeSnippet } from '@toolcase/react-components'
+import { Input } from '@toolcase/react-components'
 import { DemoPage, DemoSection, DemoGrid } from './_demo'
 
 const InputDemo: React.FC = () => {
@@ -78,22 +78,6 @@ const InputDemo: React.FC = () => {
 					<Input label="Search" type="search" placeholder="Search assets…" />
 					<Input label="Color" type="color" defaultValue="#6366f1" />
 				</DemoGrid>
-			</DemoSection>
-
-			<DemoSection eyebrow="API" title="Usage">
-				<CodeSnippet
-					language="typescript"
-					code={`import { Input } from '@toolcase/react-components'
-
-<Input
-  label="Email address"
-  type="email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  error={emailError}
-  required
-/>`}
-				/>
 			</DemoSection>
 		</DemoPage>
 	)

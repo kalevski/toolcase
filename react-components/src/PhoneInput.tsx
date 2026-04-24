@@ -1,4 +1,5 @@
 import React, { useId, useRef, useState } from 'react'
+import { Icon } from './Icon'
 import { useClickOutside } from './hooks/useClickOutside'
 
 // ── Country data ───────────────────────────────────────────────────────────────
@@ -135,7 +136,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
 				>
 					<span className="component-phone-input__flag">{country.flag}</span>
 					<span className="component-phone-input__dial-code">+{country.dialCode}</span>
-					<i className="bi bi-chevron-down component-phone-input__chevron" aria-hidden="true" />
+					<Icon name="chevron-down" className="component-phone-input__chevron" />
 				</button>
 
 				{/* Phone number input */}

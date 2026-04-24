@@ -336,6 +336,7 @@
     // ── FormWizard ───────────────────────────────────────────────────────
     --fw-accent: var(--nd-accent);
     --fw-accent-text: var(--nd-text);
+    --fw-bg: var(--nd-panel-solid);
     --fw-border: var(--nd-border-soft);
     --fw-hover-bg: rgba(255, 43, 214, 0.08);
     --fw-muted: var(--nd-text-dim);
@@ -396,6 +397,7 @@
     --ni-color: var(--nd-text);
     --ni-focus-border: var(--nd-accent-2);
     --ni-hover-border: var(--nd-border);
+    --ni-error-border: #ff6188;
     --ni-muted: var(--nd-text-dim);
 
     // ── OTPInput ─────────────────────────────────────────────────────────
@@ -413,6 +415,7 @@
     --ph-bg: var(--nd-panel-solid);
     --ph-border: var(--nd-border-soft);
     --ph-border-focus: var(--nd-accent-2);
+    --ph-border-error: #ff6188;
     --ph-hover-bg: rgba(255, 43, 214, 0.08);
     --ph-muted: var(--nd-text-dim);
     --ph-text: var(--nd-text);
@@ -481,7 +484,7 @@
     --st-pending-bg: rgba(12, 8, 32, 0.6);
 
     // ── Switch ───────────────────────────────────────────────────────────
-    --switch-off-bg: rgba(120, 80, 200, 0.25);
+    --switch-off-bg: rgba(138, 75, 255, 0.22);
     --switch-on-bg: var(--nd-accent);
 
     // ── TagInput ─────────────────────────────────────────────────────────

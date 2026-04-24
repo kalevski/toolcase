@@ -5,7 +5,7 @@ import { FormWizard, FormWizardStep } from '@toolcase/react-components'
 import { Input } from '@toolcase/react-components'
 import { Textarea } from '@toolcase/react-components'
 import { Select } from '@toolcase/react-components'
-import { Card, CodeSnippet } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const BasicLayoutDemo: React.FC = () => {
 	const [displayName, setDisplayName] = useState('')
@@ -153,33 +153,26 @@ const BasicLayoutDemo: React.FC = () => {
 	]
 
 	return (
-		<BasicLayout
-			brand={<Brand primaryText="webgame" secondaryText="cloud" color="#4f46e5" />}
+		<DemoPage
+			eyebrow="Layout & Surfaces"
+			title="BasicLayout"
+			lede="A centered, single-column shell for sign-in, sign-up, onboarding, and other focus-mode flows."
 		>
-			<div style={{ width: '100%', maxWidth: 640 }}>
-				<FormWizard
-					steps={steps}
-					onComplete={() => alert('Profile saved!')}
-					completeLabel="Save Profile"
-					completeIcon="bi-check-lg"
-				/>
-			</div>
-
-			<div style={{ width: '100%', maxWidth: 640, marginTop: '2rem' }}>
-				<Card>
-					<h2 className="h5 mb-3">Usage</h2>
-					<CodeSnippet
-						language="typescript"
-						code={`import { BasicLayout } from '@toolcase/react-components'
-
-<BasicLayout
-  brand={<Brand primaryText="webgame" secondaryText="cloud" />}
->
-  <main>Page content</main>
-</BasicLayout>`}
-					/>
-				</Card>
-			</div>		</BasicLayout>
+			<DemoSection title="Sign-up flow" flush>
+				<BasicLayout
+					brand={<Brand primaryText="webgame" secondaryText="cloud" color="#4f46e5" />}
+				>
+					<div style={{ width: '100%', maxWidth: 640 }}>
+						<FormWizard
+							steps={steps}
+							onComplete={() => alert('Profile saved!')}
+							completeLabel="Save Profile"
+							completeIcon="bi-check-lg"
+						/>
+					</div>
+				</BasicLayout>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

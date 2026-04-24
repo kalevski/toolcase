@@ -3,7 +3,6 @@ import {
 	EntityProfileCard,
 	Avatar,
 	Badge,
-	CodeSnippet,
 	formatRelative,
 } from '@toolcase/react-components'
 import { DemoPage, DemoSection, DemoGrid } from './_demo'
@@ -104,25 +103,6 @@ const EntityProfileCardDemo: React.FC = () => (
 			<DemoGrid columns={1} minItemWidth={320}>
 				<EntityProfileCard title="" meta={[]} loading />
 			</DemoGrid>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { EntityProfileCard, Avatar, Badge } from '@toolcase/react-components'
-
-<EntityProfileCard
-  lead={<Avatar name="Jordan Liu" size="large" />}
-  title="Jordan Liu"
-  subtitle="jordan@atlas.example.com"
-  chips={<Badge variant="success" pill>Active</Badge>}
-  meta={[
-    { icon: 'calendar-event', label: 'Joined', value: '2023-08-12' },
-    { icon: 'clock-history', label: 'Last seen', value: '3 hours ago' },
-    { icon: 'hash', label: 'User ID', value: 'usr_9a82c0f3e641', mono: true },
-  ]}
-/>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

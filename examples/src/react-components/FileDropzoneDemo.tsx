@@ -1,5 +1,6 @@
 import React from 'react'
-import { FileDropzone, Card, CodeSnippet } from '@toolcase/react-components'
+import { FileDropzone } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const FileDropzoneDemo: React.FC = () => {
 	const handleFiles = (files: File[]) => {
@@ -7,71 +8,37 @@ const FileDropzoneDemo: React.FC = () => {
 	}
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">FileDropzone</h1>
-					<p className="text-muted mb-0">A drag-and-drop file upload zone with supported format badges.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Media & Files"
+			title="FileDropzone"
+			lede="A drag-and-drop file upload zone with supported format badges."
+		>
+			<DemoSection title="Image Uploads">
+				<FileDropzone
+					onFiles={handleFiles}
+					supported={[
+						{ type: 'PNG', mimetype: 'image/png', extension: '.png' },
+						{ type: 'JPEG', mimetype: 'image/jpeg', extension: '.jpg' },
+						{ type: 'WebP', mimetype: 'image/webp', extension: '.webp' },
+					]}
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Image Uploads</h2>
-						<FileDropzone
-							onFiles={handleFiles}
-							supported={[
-								{ type: 'PNG', mimetype: 'image/png', extension: '.png' },
-								{ type: 'JPEG', mimetype: 'image/jpeg', extension: '.jpg' },
-								{ type: 'WebP', mimetype: 'image/webp', extension: '.webp' },
-							]}
-						/>
-					</Card>
-				</div>
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Data Files</h2>
-						<FileDropzone
-							onFiles={handleFiles}
-							supported={[
-								{ type: 'JSON', mimetype: 'application/json', extension: '.json' },
-								{ type: 'CSV', mimetype: 'text/csv', extension: '.csv' },
-								{ type: 'XML', mimetype: 'application/xml', extension: '.xml' },
-							]}
-						/>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Data Files">
+				<FileDropzone
+					onFiles={handleFiles}
+					supported={[
+						{ type: 'JSON', mimetype: 'application/json', extension: '.json' },
+						{ type: 'CSV', mimetype: 'text/csv', extension: '.csv' },
+						{ type: 'XML', mimetype: 'application/xml', extension: '.xml' },
+					]}
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">No Format Restrictions</h2>
-						<FileDropzone onFiles={handleFiles} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { FileDropzone } from '@toolcase/react-components'
-
-<FileDropzone
-  accept=".png,.jpg,.gif"
-  maxSize={5 * 1024 * 1024}
-  onFilesSelected={handleFiles}
-/>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="No Format Restrictions">
+				<FileDropzone onFiles={handleFiles} />
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

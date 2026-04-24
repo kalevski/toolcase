@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { NodeEditor, Card, CodeSnippet } from '@toolcase/react-components'
+import { NodeEditor } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const INITIAL_VALUE = JSON.stringify({
 	context: { points: 5 },
@@ -42,68 +43,33 @@ const NodeEditorDemo = () => {
 	}
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">NodeEditor</h1>
-					<p className="text-muted mb-4">A visual node-based editor for branching dialogues, conditions, and exec nodes with JSON output.</p>
+		<DemoPage
+			eyebrow="Editors"
+			title="NodeEditor"
+			lede="A visual node-based editor for branching dialogues, conditions, and exec nodes with JSON output."
+		>
+			<DemoSection title="Controlled">
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+					<NodeEditor value={value} onChange={setValue} />
+					<div>
+						<h6 style={{ color: '#64748b', marginBottom: 8 }}>Output</h6>
+						<pre
+							style={{ padding: 12, background: '#f8fafc', fontSize: '0.72rem', whiteSpace: 'pre-wrap', maxHeight: 600, overflow: 'auto' }}
+						>
+							{prettyJson}
+						</pre>
+					</div>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Controlled</h2>
-						<div className="row g-3">
-							<div className="col-md-6">
-								<NodeEditor value={value} onChange={setValue} />
-							</div>
-							<div className="col-md-6">
-								<h6 className="text-muted mb-2">Output</h6>
-								<pre
-									className="p-3 bg-light rounded"
-									style={{ fontSize: '0.72rem', whiteSpace: 'pre-wrap', maxHeight: 600, overflow: 'auto' }}
-								>
-									{prettyJson}
-								</pre>
-							</div>
-						</div>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Empty (uncontrolled)">
+				<NodeEditor onChange={v => console.log('uncontrolled:', v)} />
+			</DemoSection>
 
-			<div className="row mb-5 g-4">
-				<div className="col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">Empty (uncontrolled)</h2>
-						<NodeEditor onChange={v => console.log('uncontrolled:', v)} />
-					</Card>
-				</div>
-				<div className="col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">Disabled</h2>
-						<NodeEditor value={INITIAL_VALUE} disabled />
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { NodeEditor } from '@toolcase/react-components'
-
-const [value, setValue] = useState(initialJson)
-
-<NodeEditor value={value} onChange={setValue} />`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Disabled">
+				<NodeEditor value={INITIAL_VALUE} disabled />
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

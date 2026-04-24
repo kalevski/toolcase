@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Accordion, Card, CodeSnippet } from '@toolcase/react-components'
+import { Accordion } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const borderedItems = [
 	{
@@ -46,73 +47,28 @@ const multiItems = [
 export const AccordionDemo: React.FC = () => {
 	const [openKeys, setOpenKeys] = useState<string[]>(['intro'])
 
-	const usageCode = `import { Accordion } from '@toolcase/react-components'
-
-const items = [
-  { key: 'a', title: 'Section A', content: <p>Content A</p> },
-  { key: 'b', title: 'Section B', content: <p>Content B</p> },
-]
-
-// Uncontrolled, single open
-<Accordion items={items} defaultOpen={['a']} />
-
-// Controlled, multiple open
-const [open, setOpen] = useState(['a'])
-<Accordion items={items} multiple open={open} onOpenChange={setOpen} />`
-
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Accordion</h1>
-					<p className="text-muted mb-0">Collapsible content panels with keyboard navigation and ARIA support.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Layout & Surfaces"
+			title="Accordion"
+			lede="Collapsible content panels with keyboard navigation and ARIA support."
+		>
+			<DemoSection title="Bordered (default) — controlled">
+				<Accordion
+					items={borderedItems}
+					open={openKeys}
+					onOpenChange={setOpenKeys}
+				/>
+			</DemoSection>
 
-			{/* Bordered (default), controlled */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Bordered (default) — controlled</h2>
-						<Accordion
-							items={borderedItems}
-							open={openKeys}
-							onOpenChange={setOpenKeys}
-						/>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Borderless variant">
+				<Accordion items={borderedItems} variant="borderless" defaultOpen={['hooks']} />
+			</DemoSection>
 
-			{/* Borderless */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Borderless variant</h2>
-						<Accordion items={borderedItems} variant="borderless" defaultOpen={['hooks']} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Multiple open */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Multiple open panels</h2>
-						<Accordion items={multiItems} multiple defaultOpen={['one', 'two']} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Code */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet language="typescript" code={usageCode} />
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Multiple open panels">
+				<Accordion items={multiItems} multiple defaultOpen={['one', 'two']} />
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

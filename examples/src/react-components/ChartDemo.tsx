@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Chart, Card, CodeSnippet, Button } from '@toolcase/react-components'
+import { Chart, Button } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const barData = [
 	{ label: 'Jan', value: 4200 },
@@ -68,187 +69,96 @@ export const ChartDemo: React.FC = () => {
 	const [containerLoading, setContainerLoading] = useState(false)
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Chart</h1>
-					<p className="text-muted mb-0">SVG-native chart components — bar, line, area, pie/donut, heatmap, funnel, gantt, sparkline, and trend indicator.</p>
+		<DemoPage
+			eyebrow="Data Display"
+			title="Chart"
+			lede="SVG-native chart components — bar, line, area, pie/donut, heatmap, funnel, gantt, sparkline, and trend indicator."
+		>
+			<DemoSection title="Trend Indicator">
+				<div className="d-flex gap-3 flex-wrap align-items-center">
+					<Chart chart={{ type: 'trend-indicator', value: 12.5 }} />
+					<Chart chart={{ type: 'trend-indicator', value: -4.2 }} />
+					<Chart chart={{ type: 'trend-indicator', value: 0 }} />
+					<Chart chart={{ type: 'trend-indicator', value: '+ 18%', direction: 'up', size: 'large' }} />
+					<Chart chart={{ type: 'trend-indicator', value: '- 7%', direction: 'down', size: 'small' }} />
 				</div>
-			</div>
+			</DemoSection>
 
-			{/* TrendIndicator */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Trend Indicator</h2>
-						<div className="d-flex gap-3 flex-wrap align-items-center">
-							<Chart chart={{ type: 'trend-indicator', value: 12.5 }} />
-							<Chart chart={{ type: 'trend-indicator', value: -4.2 }} />
-							<Chart chart={{ type: 'trend-indicator', value: 0 }} />
-							<Chart chart={{ type: 'trend-indicator', value: '+ 18%', direction: 'up', size: 'large' }} />
-							<Chart chart={{ type: 'trend-indicator', value: '- 7%', direction: 'down', size: 'small' }} />
-						</div>
-					</Card>
+			<DemoSection title="Sparkline">
+				<div className="d-flex gap-4 flex-wrap align-items-center">
+					<div>
+						<div className="text-muted small mb-1">Line</div>
+						<Chart chart={{ type: 'sparkline', data: [10, 22, 18, 35, 28, 42, 55, 48, 62, 70], color: '#6366f1' }} />
+					</div>
+					<div>
+						<div className="text-muted small mb-1">Bar</div>
+						<Chart chart={{ type: 'sparkline', data: [10, 22, 18, 35, 28, 42, 55, 48, 62, 70], sparklineType: 'bar', color: '#10b981' }} />
+					</div>
+					<div>
+						<div className="text-muted small mb-1">Bar type larger</div>
+						<Chart chart={{ type: 'sparkline', data: [10, 22, 18, 35, 28, 42, 55], sparklineType: 'bar', color: '#f59e0b', height: 48, width: 160 }} />
+					</div>
 				</div>
-			</div>
+			</DemoSection>
 
-			{/* Sparkline */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Sparkline</h2>
-						<div className="d-flex gap-4 flex-wrap align-items-center">
-							<div>
-								<div className="text-muted small mb-1">Line</div>
-								<Chart chart={{ type: 'sparkline', data: [10, 22, 18, 35, 28, 42, 55, 48, 62, 70], color: '#6366f1' }} />
-							</div>
-							<div>
-								<div className="text-muted small mb-1">Bar</div>
-								<Chart chart={{ type: 'sparkline', data: [10, 22, 18, 35, 28, 42, 55, 48, 62, 70], sparklineType: 'bar', color: '#10b981' }} />
-							</div>
-							<div>
-								<div className="text-muted small mb-1">Bar type larger</div>
-								<Chart chart={{ type: 'sparkline', data: [10, 22, 18, 35, 28, 42, 55], sparklineType: 'bar', color: '#f59e0b', height: 48, width: 160 }} />
-							</div>
-						</div>
-					</Card>
+			<DemoSection title="Bar Chart">
+				<Chart chart={{ type: 'bar', data: barData, title: 'Monthly Revenue', subtitle: 'Jan – Jun 2024', showValues: true }} />
+			</DemoSection>
+
+			<DemoSection title="Horizontal Bar">
+				<Chart chart={{ type: 'bar', data: barData.slice(0, 4), orientation: 'horizontal', title: 'Top Months' }} />
+			</DemoSection>
+
+			<DemoSection title="Line Chart">
+				<Chart chart={{ type: 'line', series: lineSeries, title: 'Revenue vs Expenses', subtitle: 'Jan – Jun 2024' }} />
+			</DemoSection>
+
+			<DemoSection title="Area Chart">
+				<Chart chart={{ type: 'area', series: lineSeries, title: 'Trend Overview' }} />
+			</DemoSection>
+
+			<DemoSection title="Pie Chart">
+				<Chart chart={{ type: 'pie', data: pieData, title: 'Traffic Sources' }} />
+			</DemoSection>
+
+			<DemoSection title="Donut Chart">
+				<Chart chart={{ type: 'pie', data: pieData, title: 'Traffic Sources', donut: true, centerLabel: 'Total' }} />
+			</DemoSection>
+
+			<DemoSection title="Heatmap">
+				<Chart chart={{
+					type: 'heatmap',
+					data: heatmapData,
+					rows: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+					cols: ['9am', '11am', '1pm', '3pm', '5pm'],
+					title: 'Activity by Day & Hour',
+				}} />
+			</DemoSection>
+
+			<DemoSection title="Funnel Chart">
+				<Chart chart={{ type: 'funnel', data: funnelData, title: 'Sales Pipeline' }} />
+			</DemoSection>
+
+			<DemoSection title="Gantt Chart">
+				<Chart chart={{ type: 'gantt', tasks: ganttTasks, title: 'Project Timeline' }} />
+			</DemoSection>
+
+			<DemoSection title="Chart Container">
+				<div className="d-flex gap-2 mb-3">
+					<Button size="small" variant="secondary" onClick={() => setContainerLoading(v => !v)}>
+						Toggle Loading
+					</Button>
 				</div>
-			</div>
+				<Chart chart={{ type: 'container', title: 'Analytics Overview', subtitle: 'Live data', loading: containerLoading }}>
+					<div style={{ padding: '1rem 1.25rem' }}>
+						<p className="text-muted mb-0">Chart content goes here when not loading.</p>
+					</div>
+				</Chart>
+			</DemoSection>
 
-			{/* Bar Chart */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Bar Chart</h2>
-						<Chart chart={{ type: 'bar', data: barData, title: 'Monthly Revenue', subtitle: 'Jan – Jun 2024', showValues: true }} />
-					</Card>
-				</div>
-				<div className="col-lg-4">
-					<Card>
-						<h2 className="h5 mb-3">Horizontal</h2>
-						<Chart chart={{ type: 'bar', data: barData.slice(0, 4), orientation: 'horizontal', title: 'Top Months' }} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Line Chart */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Line Chart</h2>
-						<Chart chart={{ type: 'line', series: lineSeries, title: 'Revenue vs Expenses', subtitle: 'Jan – Jun 2024' }} />
-					</Card>
-				</div>
-				<div className="col-lg-4">
-					<Card>
-						<h2 className="h5 mb-3">Area Chart</h2>
-						<Chart chart={{ type: 'area', series: lineSeries, title: 'Trend Overview' }} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Pie / Donut */}
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Pie Chart</h2>
-						<Chart chart={{ type: 'pie', data: pieData, title: 'Traffic Sources' }} />
-					</Card>
-				</div>
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Donut Chart</h2>
-						<Chart chart={{ type: 'pie', data: pieData, title: 'Traffic Sources', donut: true, centerLabel: 'Total' }} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Heatmap */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Heatmap</h2>
-						<Chart chart={{
-							type: 'heatmap',
-							data: heatmapData,
-							rows: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-							cols: ['9am', '11am', '1pm', '3pm', '5pm'],
-							title: 'Activity by Day & Hour',
-						}} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Funnel Chart */}
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Funnel Chart</h2>
-						<Chart chart={{ type: 'funnel', data: funnelData, title: 'Sales Pipeline' }} />
-					</Card>
-				</div>
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Gantt Chart</h2>
-						<Chart chart={{ type: 'gantt', tasks: ganttTasks, title: 'Project Timeline' }} />
-					</Card>
-				</div>
-			</div>
-
-			{/* ChartContainer */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Chart Container</h2>
-						<div className="d-flex gap-2 mb-3">
-							<Button size="small" variant="secondary" onClick={() => setContainerLoading(v => !v)}>
-								Toggle Loading
-							</Button>
-						</div>
-						<Chart chart={{ type: 'container', title: 'Analytics Overview', subtitle: 'Live data', loading: containerLoading }}>
-							<div style={{ padding: '1rem 1.25rem' }}>
-								<p className="text-muted mb-0">Chart content goes here when not loading.</p>
-							</div>
-						</Chart>
-					</Card>
-				</div>
-				<div className="col-lg-4">
-					<Card>
-						<h2 className="h5 mb-3">Empty State</h2>
-						<Chart chart={{ type: 'container', title: 'No Data', empty: true, emptySlot: <span>No records found</span> }} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Code Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet language="typescript" code={`import { Chart } from '@toolcase/react-components'
-
-// Bar chart
-<Chart chart={{ type: 'bar', data: [{ label: 'Jan', value: 4200 }], title: 'Revenue' }} />
-
-// Line chart
-<Chart chart={{ type: 'line', series: [{ label: 'Revenue', data: [{ x: 'Jan', y: 4200 }] }] }} />
-
-// Donut chart
-<Chart chart={{ type: 'pie', data: [...], donut: true, centerLabel: 'Total' }} />
-
-// Trend indicator
-<Chart chart={{ type: 'trend-indicator', value: 12.5 }} />
-
-// Sparkline
-<Chart chart={{ type: 'sparkline', data: [10, 22, 35, 28, 42] }} />
-
-// Chart container with loading
-<Chart chart={{ type: 'container', title: 'Overview', loading: true }}>
-  <BarChart ... />
-</Chart>`} />
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Empty State">
+				<Chart chart={{ type: 'container', title: 'No Data', empty: true, emptySlot: <span>No records found</span> }} />
+			</DemoSection>
+		</DemoPage>
 	)
 }

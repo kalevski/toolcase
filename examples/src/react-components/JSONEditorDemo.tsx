@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { JSONEditor, Card, CodeSnippet } from '@toolcase/react-components'
+import { JSONEditor } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const SCHEMA = JSON.stringify([
 	{
@@ -109,93 +110,51 @@ const JSONEditorDemo = () => {
 	const [deepValues, setDeepValues] = useState(DEEP_VALUES)
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">JSONEditor</h1>
-					<p className="text-muted mb-4">A schema-driven JSON editor supporting arrays, objects, nested structures, and disabled states.</p>
+		<DemoPage
+			eyebrow="Editors"
+			title="JSONEditor"
+			lede="A schema-driven JSON editor supporting arrays, objects, nested structures, and disabled states."
+		>
+			<DemoSection title="Arrays & Primitives">
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+					<JSONEditor
+						schema={SCHEMA}
+						value={values}
+						onChange={(v) => setValues(v as typeof values)}
+					/>
+					<div>
+						<h6 style={{ color: '#64748b', marginBottom: 8 }}>Output</h6>
+						<pre style={{ padding: 12, background: '#f8fafc', fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>
+							{JSON.stringify(values, null, 2)}
+						</pre>
+					</div>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Arrays &amp; Primitives</h2>
-						<div className="row g-3">
-							<div className="col-md-6">
-								<JSONEditor
-									schema={SCHEMA}
-									value={values}
-									onChange={(v) => setValues(v as typeof values)}
-								/>
-							</div>
-							<div className="col-md-6">
-								<h6 className="text-muted mb-2">Output</h6>
-								<pre className="p-3 bg-light rounded" style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>
-									{JSON.stringify(values, null, 2)}
-								</pre>
-							</div>
-						</div>
-					</Card>
+			<DemoSection title="Deep Nesting (5 levels)">
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+					<JSONEditor
+						schema={DEEP_SCHEMA}
+						value={deepValues}
+						onChange={(v) => setDeepValues(v as typeof deepValues)}
+					/>
+					<div>
+						<h6 style={{ color: '#64748b', marginBottom: 8 }}>Output</h6>
+						<pre style={{ padding: 12, background: '#f8fafc', fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>
+							{JSON.stringify(deepValues, null, 2)}
+						</pre>
+					</div>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Deep Nesting (5 levels)</h2>
-						<div className="row g-3">
-							<div className="col-md-6">
-								<JSONEditor
-									schema={DEEP_SCHEMA}
-									value={deepValues}
-									onChange={(v) => setDeepValues(v as typeof deepValues)}
-								/>
-							</div>
-							<div className="col-md-6">
-								<h6 className="text-muted mb-2">Output</h6>
-								<pre className="p-3 bg-light rounded" style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>
-									{JSON.stringify(deepValues, null, 2)}
-								</pre>
-							</div>
-						</div>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-md-6">
-					<Card>
-						<h2 className="h5 mb-3">Disabled</h2>
-						<JSONEditor
-							schema={SCHEMA}
-							value={INITIAL_VALUES}
-							disabled
-						/>
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { JSONEditor } from '@toolcase/react-components'
-
-const schema = JSON.stringify([
-  { key: 'name', type: 'string', defaultValue: '' },
-  { key: 'score', type: 'number', defaultValue: 0 },
-])
-
-<JSONEditor schema={schema} value={values} onChange={setValues} />`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Disabled">
+				<JSONEditor
+					schema={SCHEMA}
+					value={INITIAL_VALUES}
+					disabled
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

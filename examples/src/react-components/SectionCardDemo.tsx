@@ -1,5 +1,5 @@
 import React from 'react'
-import { SectionCard, Button, CodeSnippet, FormInput } from '@toolcase/react-components'
+import { SectionCard, Button, FormInput } from '@toolcase/react-components'
 import { DemoPage, DemoSection, DemoGrid } from './_demo'
 
 const SectionCardDemo: React.FC = () => (
@@ -92,30 +92,6 @@ const SectionCardDemo: React.FC = () => (
 					Permanently deletes this workspace and all of its projects. This cannot be undone.
 				</p>
 			</SectionCard>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { SectionCard, Button } from '@toolcase/react-components'
-
-<SectionCard
-  title="API keys"
-  icon="key"
-  action={<Button size="small">New key</Button>}
->
-  Active keys appear here.
-</SectionCard>
-
-<SectionCard
-  title="Delete workspace"
-  icon="exclamation-triangle"
-  variant="danger"
-  action={<Button variant="danger" outline size="small">Delete</Button>}
->
-  Permanently deletes this workspace and all of its projects.
-</SectionCard>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

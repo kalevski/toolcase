@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { ColorPicker, Card, CodeSnippet } from '@toolcase/react-components'
+import { ColorPicker } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const PALETTE = [
 	'#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
@@ -21,71 +22,41 @@ const ColorPickerDemo: React.FC = () => {
 	const [color2, setColor2] = useState('#ef4444')
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">ColorPicker</h1>
-					<p className="text-muted mb-0">A dropdown color swatch picker with configurable palette and grid columns.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Inputs"
+			title="ColorPicker"
+			lede="A dropdown color swatch picker with configurable palette and grid columns."
+		>
+			<DemoSection title="String Colors (5 columns)">
+				<ColorPicker
+					label="Primary Color"
+					colors={PALETTE}
+					value={color1}
+					onChange={setColor1}
+					columns={5}
+				/>
+				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {color1}</p>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">String Colors (5 columns)</h2>
-						<ColorPicker
-							label="Primary Color"
-							colors={PALETTE}
-							value={color1}
-							onChange={setColor1}
-							columns={5}
-						/>
-						<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {color1}</p>
-					</Card>
-				</div>
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Labeled Colors (3 columns)</h2>
-						<ColorPicker
-							label="Accent Color"
-							colors={LABELED_COLORS}
-							value={color2}
-							onChange={setColor2}
-							columns={3}
-						/>
-						<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {color2}</p>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Labeled Colors (3 columns)">
+				<ColorPicker
+					label="Accent Color"
+					colors={LABELED_COLORS}
+					value={color2}
+					onChange={setColor2}
+					columns={3}
+				/>
+				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {color2}</p>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Loading State</h2>
-						<ColorPicker
-							label="Fetching Palette..."
-							colors={PALETTE}
-							loading
-						/>
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { ColorPicker } from '@toolcase/react-components'
-
-<ColorPicker label="Brand Color" value={color} onChange={setColor} />`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Loading State">
+				<ColorPicker
+					label="Fetching Palette..."
+					colors={PALETTE}
+					loading
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

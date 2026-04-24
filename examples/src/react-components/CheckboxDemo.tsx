@@ -1,78 +1,47 @@
 import React, { useState } from 'react'
-import { Checkbox, Card, CodeSnippet } from '@toolcase/react-components'
+import { Checkbox } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const CheckboxDemo: React.FC = () => {
 	const [checked, setChecked] = useState(true)
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Checkbox</h1>
-					<p className="text-muted mb-0">A form-check checkbox input with optional label and inline layout.</p>
+		<DemoPage
+			eyebrow="Inputs"
+			title="Checkbox"
+			lede="A form-check checkbox input with optional label and inline layout."
+		>
+			<DemoSection title="Basic">
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+					<Checkbox label="Accept terms and conditions" checked={checked} onChange={(e) => setChecked(e.target.checked)} />
+					<Checkbox label="Subscribe to newsletter" />
+					<Checkbox label="Remember me" defaultChecked />
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Basic</h2>
-						<div className="d-flex flex-column gap-2">
-							<Checkbox label="Accept terms and conditions" checked={checked} onChange={(e) => setChecked(e.target.checked)} />
-							<Checkbox label="Subscribe to newsletter" />
-							<Checkbox label="Remember me" defaultChecked />
-						</div>
-					</Card>
+			<DemoSection title="Inline">
+				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+					<Checkbox label="Option A" inline />
+					<Checkbox label="Option B" inline defaultChecked />
+					<Checkbox label="Option C" inline />
 				</div>
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Inline</h2>
-						<div className="d-flex flex-wrap gap-2">
-							<Checkbox label="Option A" inline />
-							<Checkbox label="Option B" inline defaultChecked />
-							<Checkbox label="Option C" inline />
-						</div>
-					</Card>
-				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Disabled</h2>
-						<div className="d-flex flex-column gap-2">
-							<Checkbox label="Disabled unchecked" disabled />
-							<Checkbox label="Disabled checked" disabled checked />
-						</div>
-					</Card>
+			<DemoSection title="Disabled">
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+					<Checkbox label="Disabled unchecked" disabled />
+					<Checkbox label="Disabled checked" disabled checked />
 				</div>
-				<div className="col-lg-6">
-					<Card>
-						<h2 className="h5 mb-3">Without Label</h2>
-						<div className="d-flex gap-3">
-							<Checkbox defaultChecked />
-							<Checkbox />
-							<Checkbox disabled checked />
-						</div>
-					</Card>
-				</div>
-			</div>
+			</DemoSection>
 
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { Checkbox } from '@toolcase/react-components'
-
-<Checkbox label="Accept terms" checked={accepted} onChange={setAccepted} />`}
-						/>
-					</Card>
+			<DemoSection title="Without Label">
+				<div style={{ display: 'flex', gap: 12 }}>
+					<Checkbox defaultChecked />
+					<Checkbox />
+					<Checkbox disabled checked />
 				</div>
-			</div>
-		</div>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

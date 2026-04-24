@@ -1,16 +1,6 @@
 import React, { useState } from 'react'
-import { TimePicker, Card, CodeSnippet } from '@toolcase/react-components'
-
-const usageCode = `import { TimePicker } from '@toolcase/react-components'
-
-const [time, setTime] = useState('09:00')
-
-<TimePicker
-  label="Start time"
-  value={time}
-  onChange={setTime}
-  format="12h"
-/>`
+import { TimePicker } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 export const TimePickerDemo: React.FC = () => {
 	const [time24, setTime24] = useState('')
@@ -18,84 +8,52 @@ export const TimePickerDemo: React.FC = () => {
 	const [timeSec, setTimeSec] = useState('')
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">TimePicker</h1>
-					<p className="text-muted mb-0">Dropdown-based time picker with 12h/24h format and optional seconds.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Inputs"
+			title="TimePicker"
+			lede="Dropdown-based time picker with 12h/24h format and optional seconds."
+		>
+			<DemoSection title="24-hour format">
+				<TimePicker
+					label="Start time"
+					value={time24}
+					onChange={setTime24}
+					format="24h"
+					clearable
+				/>
+				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.85rem' }}>Value: {time24 || '—'}</p>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-5">
-					<Card>
-						<h2 className="h5 mb-3">24-hour format</h2>
-						<TimePicker
-							label="Start time"
-							value={time24}
-							onChange={setTime24}
-							format="24h"
-							clearable
-						/>
-						<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.85rem' }}>Value: {time24 || '—'}</p>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="12-hour format (AM/PM)">
+				<TimePicker
+					label="Meeting time"
+					value={time12}
+					onChange={setTime12}
+					format="12h"
+					minuteStep={15}
+					clearable
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-5">
-					<Card>
-						<h2 className="h5 mb-3">12-hour format (AM/PM)</h2>
-						<TimePicker
-							label="Meeting time"
-							value={time12}
-							onChange={setTime12}
-							format="12h"
-							minuteStep={15}
-							clearable
-						/>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="With seconds">
+				<TimePicker
+					label="Precise time"
+					value={timeSec}
+					onChange={setTimeSec}
+					format="24h"
+					showSeconds
+					minuteStep={1}
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-5">
-					<Card>
-						<h2 className="h5 mb-3">With seconds</h2>
-						<TimePicker
-							label="Precise time"
-							value={timeSec}
-							onChange={setTimeSec}
-							format="24h"
-							showSeconds
-							minuteStep={1}
-						/>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-lg-5">
-					<Card>
-						<h2 className="h5 mb-3">Error state</h2>
-						<TimePicker
-							label="End time"
-							value="09:00"
-							onChange={() => {}}
-							error="End time must be after start time."
-						/>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet language="typescript" code={usageCode} />
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Error state">
+				<TimePicker
+					label="End time"
+					value="09:00"
+					onChange={() => {}}
+					error="End time must be after start time."
+				/>
+			</DemoSection>
+		</DemoPage>
 	)
 }

@@ -1,59 +1,43 @@
 import React from 'react'
-import { Card, CodeSnippet, Divider } from '@toolcase/react-components'
+import { Divider } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const DividerDemo: React.FC = () => (
-	<div style={{ maxWidth: 600, display: 'flex', flexDirection: 'column', gap: '2rem', padding: '2rem' }}>
-		<h2>Divider</h2>
-
-		<div>
-			<h5>Default (horizontal)</h5>
+	<DemoPage
+		eyebrow="Layout & Surfaces"
+		title="Divider"
+		lede="A horizontal or vertical divider line with optional label for separating content."
+	>
+		<DemoSection title="Default (horizontal)">
 			<p>Content above</p>
 			<Divider />
 			<p>Content below</p>
-		</div>
+		</DemoSection>
 
-		<div>
-			<h5>Horizontal with label</h5>
+		<DemoSection title="Horizontal with label">
 			<Divider label="or" />
-		</div>
+		</DemoSection>
 
-		<div>
-			<h5>Horizontal with longer label</h5>
+		<DemoSection title="Horizontal with longer label">
 			<Divider label="section break" />
-		</div>
+		</DemoSection>
 
-		<div>
-			<h5>Vertical</h5>
+		<DemoSection title="Vertical">
 			<div style={{ display: 'flex', alignItems: 'center', gap: '1rem', height: 80 }}>
 				<span>Left</span>
 				<Divider vertical />
 				<span>Right</span>
 			</div>
-		</div>
+		</DemoSection>
 
-		<div>
-			<h5>Vertical with label</h5>
+		<DemoSection title="Vertical with label">
 			<div style={{ display: 'flex', alignItems: 'stretch', gap: '1rem', height: 120 }}>
 				<span>Left</span>
 				<Divider vertical label="or" />
 				<span>Right</span>
 			</div>
-		</div>
-
-	<div>
-		<Card>
-			<h2 className="h5 mb-3">Usage</h2>
-			<CodeSnippet
-				language="typescript"
-				code={`import { Divider } from '@toolcase/react-components'
-
-<Divider />
-<Divider label="OR" />
-<Divider vertical />`}
-			/>
-		</Card>
-	</div>
-	</div>
+		</DemoSection>
+	</DemoPage>
 )
 
 export default DividerDemo

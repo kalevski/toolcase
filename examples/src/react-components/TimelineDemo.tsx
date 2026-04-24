@@ -1,5 +1,6 @@
 import React from 'react'
-import { Timeline, Card, CodeSnippet, type TimelineItem } from '@toolcase/react-components'
+import { Timeline, type TimelineItem } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const timelineItems: TimelineItem[] = [
 	{
@@ -39,55 +40,19 @@ const shortTimeline: TimelineItem[] = [
 
 const TimelineDemo: React.FC = () => {
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-lg-8">
-					<h1 className="display-4 text-gradient-primary mb-2">Timeline</h1>
-					<p className="text-muted mb-4">
-						A vertical timeline with alternating cards for major milestones, showing the date, title, and a
-						short description for each event.
-					</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Data Display"
+			title="Timeline"
+			lede="A vertical timeline with alternating cards for major milestones, showing the date, title, and a short description for each event."
+		>
+			<DemoSection title="Default (4 items, overlap 50)">
+				<Timeline items={timelineItems} overlap={50} />
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Default (4 items, overlap 50)</h2>
-						<Timeline items={timelineItems} overlap={50} />
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Compact (no overlap)</h2>
-						<Timeline items={shortTimeline} overlap={0} />
-					</Card>
-				</div>
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { Timeline, type TimelineItem } from '@toolcase/react-components'
-
-const items: TimelineItem[] = [
-  { title: 'Created', date: 'Jan 01, 2024', description: 'Project created' },
-  { title: 'Updated', date: 'Feb 15, 2024', description: 'Added new feature' },
-]
-
-<Timeline items={items} overlap={50} />`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			<DemoSection title="Compact (no overlap)">
+				<Timeline items={shortTimeline} overlap={0} />
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

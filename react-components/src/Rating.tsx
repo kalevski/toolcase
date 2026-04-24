@@ -1,4 +1,5 @@
 import React, { useId, useRef, useState } from 'react'
+import { Icon } from './Icon'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -130,10 +131,10 @@ export const Rating: React.FC<RatingProps> = ({
 						>
 							{fill === 'half' ? (
 								<span className="component-rating__star-inner component-rating__star-inner--half" aria-hidden="true">
-									<i className={`bi bi-star-half`} />
+									<Icon name="star-half" />
 								</span>
 							) : (
-								<i className={`bi bi-${fill === 'full' ? icon : emptyIcon}`} aria-hidden="true" />
+								<Icon name={fill === 'full' ? icon : emptyIcon} />
 							)}
 						</span>
 					)

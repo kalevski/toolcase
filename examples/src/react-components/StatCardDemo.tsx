@@ -1,5 +1,5 @@
 import React from 'react'
-import { StatCard, CodeSnippet } from '@toolcase/react-components'
+import { StatCard } from '@toolcase/react-components'
 import { DemoPage, DemoSection, DemoGrid } from './_demo'
 
 const StatCardDemo: React.FC = () => (
@@ -94,29 +94,6 @@ const StatCardDemo: React.FC = () => (
 				<StatCard label="Storage used" value="" loading />
 				<StatCard label="Teams" value="" loading />
 			</DemoGrid>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { StatCard } from '@toolcase/react-components'
-
-<StatCard
-  icon="graph-up-arrow"
-  label="Revenue"
-  value="$48.2k"
-  delta="+12.4%"
-  deltaKind="up"
-  helper="vs. last month"
-/>
-
-<StatCard
-  icon="hdd"
-  label="Storage used"
-  value="34.2"
-  unit="GB"
-/>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

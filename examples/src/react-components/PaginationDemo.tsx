@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Pagination, Card, CodeSnippet } from '@toolcase/react-components'
+import { Pagination } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const PaginationDemo: React.FC = () => {
 	const [offset1, setOffset1] = useState(0)
@@ -8,109 +9,64 @@ const PaginationDemo: React.FC = () => {
 	const [offset4, setOffset4] = useState(200)
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">Pagination</h1>
-					<p className="text-muted mb-0">Navigate between pages with numbered buttons, prev/next arrows, and result summary.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Navigation"
+			title="Pagination"
+			lede="Navigate between pages with numbered buttons, prev/next arrows, and result summary."
+		>
+			<DemoSection title="Basic">
+				<Pagination limit={10} offset={offset1} total={50} onChange={setOffset1} />
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Basic</h2>
-						<Pagination limit={10} offset={offset1} total={50} onChange={setOffset1} />
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="With Result Summary">
+				<Pagination
+					limit={10}
+					offset={offset2}
+					total={97}
+					onChange={setOffset2}
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">With Result Summary</h2>
-						<Pagination
-							limit={10}
-							offset={offset2}
-							total={97}
-							onChange={setOffset2}
-						/>
-					</Card>
+			<DemoSection title="Many Pages (Dots Truncation)">
+				<Pagination
+					limit={10}
+					offset={offset3}
+					total={500}
+					onChange={setOffset3}
+				/>
+				<div style={{ marginTop: 8 }}>
+					<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+						<button className="btn btn-sm btn-outline-secondary" onClick={() => setOffset3(0)}>Go to 1</button>
+						<button className="btn btn-sm btn-outline-secondary" onClick={() => setOffset3(240)}>Go to 25</button>
+						<button className="btn btn-sm btn-outline-secondary" onClick={() => setOffset3(490)}>Go to 50</button>
+					</div>
 				</div>
-			</div>
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Many Pages (Dots Truncation)</h2>
-						<Pagination
-							limit={10}
-							offset={offset3}
-							total={500}
-							onChange={setOffset3}
-						/>
-						<div className="mt-2">
-							<div className="d-flex flex-wrap gap-2">
-								<button className="btn btn-sm btn-outline-secondary" onClick={() => setOffset3(0)}>Go to 1</button>
-								<button className="btn btn-sm btn-outline-secondary" onClick={() => setOffset3(240)}>Go to 25</button>
-								<button className="btn btn-sm btn-outline-secondary" onClick={() => setOffset3(490)}>Go to 50</button>
-							</div>
-						</div>
-					</Card>
+			<DemoSection title="Single Page">
+				<Pagination limit={10} offset={0} total={3} />
+			</DemoSection>
+
+			<DemoSection
+				title="siblingCount Variants"
+				caption="Controls how many page numbers appear around the active page."
+			>
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+					<div>
+						<p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 4 }}>siblingCount=0 (minimal)</p>
+						<Pagination limit={10} offset={offset4} total={500} onChange={setOffset4} siblingCount={0} />
+					</div>
+					<div>
+						<p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 4 }}>siblingCount=1 (default)</p>
+						<Pagination limit={10} offset={offset4} total={500} onChange={setOffset4} siblingCount={1} />
+					</div>
+					<div>
+						<p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 4 }}>siblingCount=2 (wider)</p>
+						<Pagination limit={10} offset={offset4} total={500} onChange={setOffset4} siblingCount={2} />
+					</div>
 				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Single Page</h2>
-						<Pagination limit={10} offset={0} total={3} />
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">siblingCount Variants</h2>
-						<p className="text-muted small mb-3">Controls how many page numbers appear around the active page.</p>
-						<div className="d-flex flex-column gap-3">
-							<div>
-								<p className="text-muted small mb-1">siblingCount=0 (minimal)</p>
-								<Pagination limit={10} offset={offset4} total={500} onChange={setOffset4} siblingCount={0} />
-							</div>
-							<div>
-								<p className="text-muted small mb-1">siblingCount=1 (default)</p>
-								<Pagination limit={10} offset={offset4} total={500} onChange={setOffset4} siblingCount={1} />
-							</div>
-							<div>
-								<p className="text-muted small mb-1">siblingCount=2 (wider)</p>
-								<Pagination limit={10} offset={offset4} total={500} onChange={setOffset4} siblingCount={2} />
-							</div>
-						</div>
-					</Card>
-				</div>
-			</div>
-
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { Pagination } from '@toolcase/react-components'
-
-<Pagination
-  limit={10}
-  offset={offset}
-  total={97}
-  onChange={(newOffset) => setOffset(newOffset)}
-/>`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

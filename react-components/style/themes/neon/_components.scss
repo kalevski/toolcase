@@ -22,13 +22,43 @@
         background: rgba(255, 43, 214, 0.1);
         color: var(--nd-text);
     }
+    .component-action-items .dropdown-menu,
+    .component-action-items__dropdown {
+        background: var(--nd-panel-solid);
+        border: 1px solid var(--nd-border);
+        color: var(--nd-text);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.12);
+    }
+    .component-action-items .dropdown-divider {
+        border-top-color: var(--nd-border-soft);
+    }
     .component-action-items .dropdown-item {
         color: var(--nd-text);
         background: transparent;
     }
-    .component-action-items .dropdown-item:hover {
-        background: rgba(255, 43, 214, 0.1);
+    .component-action-items .dropdown-item:hover,
+    .component-action-items .dropdown-item:focus {
+        background: rgba(255, 43, 214, 0.12);
         color: var(--nd-text);
+    }
+    .component-action-items .dropdown-item:active,
+    .component-action-items .dropdown-item.active {
+        background: rgba(255, 43, 214, 0.2);
+        color: var(--nd-text);
+    }
+    .component-action-items .dropdown-item:disabled,
+    .component-action-items .dropdown-item.disabled {
+        color: var(--nd-text-faint);
+        background: transparent;
+    }
+    .component-action-items .dropdown-item i {
+        color: var(--nd-text-dim);
+    }
+    .component-action-items .dropdown-item:hover i,
+    .component-action-items .dropdown-item:focus i {
+        color: var(--nd-accent);
     }
 
     // ── ActionRowList icon tile (hardcoded bg) ───────────────────────────
@@ -124,6 +154,35 @@
         box-shadow: 0 0 20px rgba(255, 43, 214, 0.2);
     }
 
+    // ── Banner ───────────────────────────────────────────────────────────
+    .component-banner {
+        --bn-bg: rgba(0, 229, 255, 0.08);
+        --bn-border: rgba(0, 229, 255, 0.35);
+        --bn-text: var(--nd-text);
+        --bn-icon-color: var(--nd-accent-2);
+    }
+    .component-banner--warning {
+        --bn-bg: rgba(251, 191, 36, 0.1);
+        --bn-border: rgba(251, 191, 36, 0.45);
+        --bn-text: #fde68a;
+        --bn-icon-color: #fbbf24;
+    }
+    .component-banner--success {
+        --bn-bg: rgba(74, 222, 128, 0.1);
+        --bn-border: rgba(74, 222, 128, 0.4);
+        --bn-text: #bbf7d0;
+        --bn-icon-color: #4ade80;
+    }
+    .component-banner--error {
+        --bn-bg: rgba(255, 97, 136, 0.1);
+        --bn-border: rgba(255, 97, 136, 0.45);
+        --bn-text: #ffbcd1;
+        --bn-icon-color: #ff6188;
+    }
+    .component-banner__dismiss:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
     // ── Breadcrumb ───────────────────────────────────────────────────────
     .component-breadcrumb a {
         color: var(--nd-accent-2);
@@ -137,6 +196,34 @@
         background: var(--nd-panel);
         border-color: var(--nd-border-soft);
         color: var(--nd-text);
+    }
+
+    // ── CardOptions ──────────────────────────────────────────────────────
+    .component-card-options__card {
+        background: var(--nd-panel-solid);
+    }
+    .component-card-options__card:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+    .component-card-options__card--selected {
+        background: rgba(255, 43, 214, 0.12);
+        box-shadow: 0 0 0 1px var(--nd-accent);
+    }
+    .component-card-options__visual {
+        background: rgba(12, 8, 32, 0.6);
+    }
+    .component-card-options__title {
+        color: var(--nd-text);
+    }
+    .component-card-options__desc {
+        color: var(--nd-text-dim);
+    }
+    .component-card-options__icon {
+        color: var(--nd-text-dim);
+    }
+    .component-card-options__card--selected .component-card-options__icon,
+    .component-card-options__check {
+        color: var(--nd-accent);
     }
 
     // ── Changelog ────────────────────────────────────────────────────────
@@ -170,6 +257,71 @@
         color: var(--nd-text-dim);
     }
 
+    // ── ColorPicker ──────────────────────────────────────────────────────
+    .component-color-picker__label {
+        color: var(--nd-text);
+    }
+    .component-color-picker__trigger {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-color-picker__trigger:hover {
+        border-color: var(--nd-border);
+    }
+    .component-color-picker__hex_label {
+        color: var(--nd-text-dim);
+    }
+    .component-color-picker__dropdown {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.12);
+    }
+    .component-color-picker__hex-input {
+        border-top-color: var(--nd-border-soft);
+    }
+    .component-color-picker__hex-input input {
+        color: var(--nd-text);
+    }
+    .component-color-picker__hex-prefix {
+        color: var(--nd-text-dim);
+    }
+    .component-color-picker__option:hover {
+        box-shadow: 0 0 0 2px var(--nd-accent);
+    }
+
+    // ── Chip ─────────────────────────────────────────────────────────────
+    .component-chip {
+        --chip-bg: rgba(12, 8, 32, 0.55);
+        --chip-border: var(--nd-border-soft);
+        --chip-text: var(--nd-text);
+        --chip-selected-bg: var(--nd-accent);
+        --chip-selected-text: #0b0218;
+    }
+    .component-chip:hover {
+        border-color: var(--nd-border);
+    }
+    .component-chip.component-chip--primary.component-chip--selected {
+        --chip-selected-bg: var(--nd-accent);
+    }
+    .component-chip.component-chip--info.component-chip--selected {
+        --chip-selected-bg: var(--nd-accent-2);
+        --chip-selected-text: #0b0218;
+    }
+    .component-chip.component-chip--success.component-chip--selected {
+        --chip-selected-bg: #4ade80;
+        --chip-selected-text: #0b0218;
+    }
+    .component-chip.component-chip--warning.component-chip--selected {
+        --chip-selected-bg: #fbbf24;
+        --chip-selected-text: #0b0218;
+    }
+    .component-chip.component-chip--danger.component-chip--selected {
+        --chip-selected-bg: #ff6188;
+        --chip-selected-text: #0b0218;
+    }
+
     // ── CodeLabelCell ────────────────────────────────────────────────────
     .component-code-label-cell__code {
         background: rgba(0, 229, 255, 0.08);
@@ -180,11 +332,38 @@
         color: var(--nd-text);
     }
 
-    // ── CommandPalette kbd hints ─────────────────────────────────────────
+    // ── CommandPalette ───────────────────────────────────────────────────
+    .component-command-palette__backdrop {
+        background: rgba(5, 3, 15, 0.72);
+    }
+    .component-command-palette {
+        --cp-bg: var(--nd-panel-solid);
+        --cp-border: var(--nd-border);
+        --cp-color: var(--nd-text);
+        --cp-muted: var(--nd-text-dim);
+        --cp-hover-bg: rgba(255, 43, 214, 0.08);
+        --cp-active-bg: rgba(255, 43, 214, 0.16);
+        --cp-active-border: var(--nd-accent);
+        --cp-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(255, 43, 214, 0.2);
+    }
     .component-command-palette__footer kbd {
         background: var(--nd-panel-solid);
         border-color: var(--nd-border-soft);
         color: var(--nd-text-dim);
+    }
+
+    // ── ContextMenu ──────────────────────────────────────────────────────
+    .component-context-menu {
+        --cm-bg: var(--nd-panel-solid);
+        --cm-border: var(--nd-border);
+        --cm-color: var(--nd-text);
+        --cm-muted: var(--nd-text-dim);
+        --cm-hover-bg: rgba(255, 43, 214, 0.12);
+        --cm-active-bg: rgba(255, 43, 214, 0.18);
+        --cm-danger: #ff6188;
+        --cm-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.15);
     }
 
     // ── ConfigPreview ────────────────────────────────────────────────────
@@ -207,6 +386,96 @@
         box-shadow:
             0 0 32px rgba(255, 43, 214, 0.7),
             0 0 72px rgba(255, 43, 214, 0.3);
+    }
+
+    // ── CoolNav ──────────────────────────────────────────────────────────
+    // The component sets `--cool-nav-bg` on `.component.component-cool-nav`
+    // itself, so the `.theme--neon` scope-level token never reaches it
+    // (same specificity, element-level declaration wins). Re-declare here
+    // at a matching specificity, and cover the scrolled / navbar-dark
+    // variants that also overwrite the var.
+    // `react-components/style/_bootstrap.scss` forces every `.navbar` to
+    // `background: rgba($white, 0.95) !important`, so overriding via
+    // `--cool-nav-bg` doesn't take. Set `background` directly with
+    // `!important` at higher specificity.
+    .component.component-cool-nav,
+    .component-cool-nav.navbar-dark,
+    .component.component-cool-nav.component-cool-nav--scrolled,
+    .component-cool-nav.navbar-dark.component-cool-nav--scrolled {
+        --cool-nav-bg: rgba(5, 3, 15, 0.75);
+        --cool-nav-shadow:
+            0 0 24px rgba(255, 43, 214, 0.18),
+            0 16px 40px rgba(0, 0, 0, 0.5);
+        background: rgba(5, 3, 15, 0.75) !important;
+        color: var(--nd-text);
+    }
+    .component.component-cool-nav.component-cool-nav--scrolled,
+    .component-cool-nav.navbar-dark.component-cool-nav--scrolled {
+        background: rgba(5, 3, 15, 0.85) !important;
+        box-shadow:
+            0 0 24px rgba(255, 43, 214, 0.18),
+            0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+    .component-cool-nav--scrolled {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .component-cool-nav__brand {
+        color: var(--nd-text);
+    }
+    // Reset Bootstrap navbar-light text colors inside neon (CoolNav forces
+    // .navbar-light by default; those CSS vars would render near-black
+    // links on our dark panel).
+    .component-cool-nav.navbar-light .navbar-brand,
+    .component-cool-nav.navbar-dark .navbar-brand {
+        color: var(--nd-text);
+    }
+    .component-cool-nav .nav-link {
+        color: var(--nd-text-dim);
+        transition:
+            color 0.2s ease,
+            text-shadow 0.2s ease;
+    }
+    .component-cool-nav .nav-link:hover,
+    .component-cool-nav .nav-link:focus {
+        color: var(--nd-text);
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.45);
+    }
+    .component-cool-nav .nav-link.active {
+        color: var(--nd-text);
+    }
+    .component-cool-nav .nav-link.active::after {
+        content: '';
+        display: block;
+        height: 1px;
+        margin-top: 4px;
+        background: linear-gradient(90deg,
+            transparent,
+            var(--nd-accent),
+            transparent);
+    }
+    // Hamburger — Bootstrap renders the icon via an inline SVG encoded in
+    // the background-image. Swap it for a cyan-stroked version that reads
+    // on dark.
+    .component-cool-nav .navbar-toggler {
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-cool-nav .navbar-toggler:focus {
+        box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.22);
+    }
+    .component-cool-nav .navbar-toggler-icon {
+        // Cyan stroke (matches --nd-accent-2)
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='%2300e5ff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    }
+    // Collapsed menu on mobile — panel is the same navbar bg, but give a
+    // subtle separator between items.
+    @media (max-width: 991.98px) {
+        .component-cool-nav .navbar-collapse.show {
+            border-top: 1px solid var(--nd-border-soft);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+        }
     }
 
     // ── DashboardCard (big offender — 47 hardcoded colors) ───────────────
@@ -267,25 +536,81 @@
         color: var(--nd-text-faint);
     }
 
-    // ── Drawer close button ──────────────────────────────────────────────
+    // ── Drawer ───────────────────────────────────────────────────────────
+    .component-drawer {
+        --dr-bg: var(--nd-panel-solid);
+        --dr-border: var(--nd-border);
+        --dr-title-color: var(--nd-text);
+        --dr-muted: var(--nd-text-dim);
+        --dr-backdrop: rgba(5, 3, 15, 0.72);
+        --dr-shadow: 0 0 48px rgba(255, 43, 214, 0.18),
+            0 20px 60px rgba(0, 0, 0, 0.5);
+    }
     .component-drawer__close:hover {
         background: rgba(255, 43, 214, 0.12);
         color: var(--nd-text);
     }
 
-    // ── Dropdown list ────────────────────────────────────────────────────
+    // ── Dropdown (trigger + list + options) ──────────────────────────────
+    .component-dropdown__trigger {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-dropdown__trigger:hover {
+        border-color: var(--nd-border);
+    }
+    .component-dropdown--open .component-dropdown__trigger {
+        border-color: var(--nd-accent-2);
+    }
+    .component-dropdown__trigger:focus-visible {
+        outline: 2px solid var(--nd-accent-2);
+        outline-offset: 2px;
+    }
+    .component-dropdown__trigger-icon,
+    .component-dropdown__trigger-chevron {
+        color: var(--nd-text-dim);
+    }
+    .component-dropdown__trigger-placeholder {
+        color: var(--nd-text-faint);
+    }
     .component-dropdown__list {
         background: var(--nd-panel-solid);
         border-color: var(--nd-border);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 43, 214, 0.12);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.12);
     }
-    .component-dropdown__item {
+    .component-dropdown__option {
         color: var(--nd-text);
     }
-    .component-dropdown__item:hover,
-    .component-dropdown__item--active {
-        background: rgba(255, 43, 214, 0.12);
+    .component-dropdown__option:hover,
+    .component-dropdown__option--highlighted {
+        background-color: rgba(255, 43, 214, 0.1);
+    }
+    .component-dropdown__option--active,
+    .component-dropdown__option--active:hover,
+    .component-dropdown__option--active.component-dropdown__option--highlighted {
+        background-color: rgba(255, 43, 214, 0.18);
+    }
+    .component-dropdown__option--active .component-dropdown__option-name {
         color: var(--nd-text);
+        font-weight: 500;
+    }
+    .component-dropdown__option--disabled {
+        color: var(--nd-text-faint);
+    }
+    .component-dropdown__option-icon {
+        color: var(--nd-text-dim);
+    }
+    .component-dropdown__option--active .component-dropdown__option-icon {
+        color: var(--nd-accent-2);
+    }
+    .component-dropdown__option-name {
+        color: var(--nd-text);
+    }
+    .component-dropdown__option-desc {
+        color: var(--nd-text-dim);
     }
 
     // ── EarlySignupForm ──────────────────────────────────────────────────
@@ -336,18 +661,66 @@
         color: var(--nd-text);
     }
 
-    // ── ExtendedSelect (search + options) ────────────────────────────────
-    .component-extended-select,
-    .component-extended-select__control,
-    .component-extended-select__menu {
+    // ── ExtendedSelect (trigger + panel + options) ───────────────────────
+    .component-extended-select__trigger {
         background: var(--nd-panel-solid);
         border-color: var(--nd-border-soft);
         color: var(--nd-text);
     }
-    .component-extended-select__option:hover,
-    .component-extended-select__option--focused {
-        background: rgba(255, 43, 214, 0.12);
+    .component-extended-select__trigger:hover {
+        border-color: var(--nd-border);
+    }
+    .component-extended-select--open .component-extended-select__trigger {
+        border-color: var(--nd-accent-2);
+    }
+    .component-extended-select__trigger-label,
+    .component-extended-select__option-label {
+        background: rgba(12, 8, 32, 0.6);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-extended-select__option--active .component-extended-select__option-label {
+        background: rgba(255, 43, 214, 0.2);
+        border-color: rgba(255, 43, 214, 0.4);
         color: var(--nd-text);
+    }
+    .component-extended-select__panel {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.12);
+    }
+    .component-extended-select__search {
+        border-bottom-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-extended-select__search-input {
+        color: var(--nd-text);
+    }
+    .component-extended-select__search-input::placeholder {
+        color: var(--nd-text-faint);
+    }
+    .component-extended-select__option:hover,
+    .component-extended-select__option--active {
+        background-color: rgba(255, 43, 214, 0.12);
+    }
+    .component-extended-select__option--active .component-extended-select__option-name {
+        color: var(--nd-text);
+    }
+    .component-extended-select__option-name {
+        color: var(--nd-text);
+    }
+    .component-extended-select__option-desc {
+        color: var(--nd-text-dim);
+    }
+    .component-extended-select__option-icon {
+        color: var(--nd-text-dim);
+    }
+    .component-extended-select__option--active .component-extended-select__option-icon {
+        color: var(--nd-accent-2);
+    }
+    .component-extended-select__empty {
+        color: var(--nd-text-dim);
     }
 
     // ── File / FileDropzone ──────────────────────────────────────────────
@@ -377,6 +750,48 @@
     .component-icon-button:hover:not(:disabled) {
         background: rgba(255, 43, 214, 0.12);
         color: var(--nd-text);
+    }
+
+    // ── IconPicker ───────────────────────────────────────────────────────
+    .component-icon-picker__label {
+        color: var(--nd-text);
+    }
+    .component-icon-picker__trigger {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-icon-picker__trigger:hover {
+        background: rgba(255, 43, 214, 0.08);
+        border-color: var(--nd-border);
+        color: var(--nd-text);
+    }
+    .component-icon-picker__dropdown {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.12);
+    }
+    .component-icon-picker__search {
+        border-bottom-color: var(--nd-border-soft);
+    }
+    .component-icon-picker__search input {
+        color: var(--nd-text);
+    }
+    .component-icon-picker__search input::placeholder {
+        color: var(--nd-text-faint);
+    }
+    .component-icon-picker__option {
+        color: var(--nd-text-dim);
+    }
+    .component-icon-picker__option:hover {
+        background: rgba(255, 43, 214, 0.08);
+        color: var(--nd-text);
+    }
+    .component-icon-picker__option--selected,
+    .component-icon-picker__option--selected:hover {
+        background: var(--nd-accent);
+        color: #0b0218;
     }
 
     // ── InfiniteScroll sentinel ──────────────────────────────────────────
@@ -513,21 +928,86 @@
         color: var(--nd-text-faint);
     }
 
-    // ── NumberInput ──────────────────────────────────────────────────────
-    .component-number-input {
+    // ── MultiCardSelect ──────────────────────────────────────────────────
+    .component-multi-card-select__card {
         background: var(--nd-panel-solid);
         border-color: var(--nd-border-soft);
         color: var(--nd-text);
     }
-    .component-number-input:focus-within {
-        border-color: var(--nd-accent-2);
+    .component-multi-card-select__card:hover {
+        background: rgba(255, 43, 214, 0.06);
+        border-color: var(--nd-border);
     }
-    .component-number-input__btn {
+    .component-multi-card-select__card--selected {
+        background: rgba(255, 43, 214, 0.14);
+        border-color: var(--nd-accent);
+    }
+    .component-multi-card-select__title {
+        color: var(--nd-text);
+    }
+    .component-multi-card-select__desc {
         color: var(--nd-text-dim);
     }
-    .component-number-input__btn:hover {
-        background: rgba(255, 43, 214, 0.1);
+    .component-multi-card-select__check {
+        color: var(--nd-text-faint);
+    }
+    .component-multi-card-select__card--selected .component-multi-card-select__check {
+        color: var(--nd-accent);
+    }
+
+    // ── NumberInput ──────────────────────────────────────────────────────
+    .component-number-input__control {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .component-number-input__control:hover:not(:focus-within) {
+        border-color: var(--nd-border);
+    }
+    .component-number-input__control:focus-within {
+        border-color: var(--nd-accent-2);
+        box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.22);
+    }
+    .component-number-input--error .component-number-input__control {
+        border-color: #ff6188;
+    }
+    .component-number-input--error .component-number-input__control:focus-within {
+        border-color: #ff6188;
+        box-shadow: 0 0 0 3px rgba(255, 97, 136, 0.25);
+    }
+    .component-number-input__btn {
+        background: transparent;
+        color: var(--nd-text-dim);
+    }
+    .component-number-input__btn--dec {
+        border-right-color: var(--nd-border-soft);
+    }
+    .component-number-input__btn--inc {
+        border-left-color: var(--nd-border-soft);
+    }
+    .component-number-input__btn:hover:not(:disabled) {
+        background: rgba(255, 43, 214, 0.12);
         color: var(--nd-text);
+    }
+    .component-number-input__input {
+        background: transparent;
+        color: var(--nd-text);
+    }
+    .component-number-input__input::placeholder {
+        color: var(--nd-text-faint);
+    }
+    .component-number-input__input:disabled {
+        color: var(--nd-text-faint);
+    }
+    .component-number-input__prefix,
+    .component-number-input__suffix {
+        color: var(--nd-text-dim);
+    }
+    .component-number-input__prefix {
+        border-right-color: var(--nd-border-soft);
+    }
+    .component-number-input__suffix {
+        border-left-color: var(--nd-border-soft);
     }
 
     // ── OTPInput ─────────────────────────────────────────────────────────
@@ -591,9 +1071,81 @@
     }
 
     // ── PhoneInput ───────────────────────────────────────────────────────
-    .component-phone-input__option--selected {
-        background: rgba(255, 43, 214, 0.15);
+    .component-phone-input__label {
         color: var(--nd-text);
+    }
+    .component-phone-input__country-btn {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-phone-input__country-btn:hover {
+        background: rgba(255, 43, 214, 0.08);
+        border-color: var(--nd-border);
+    }
+    .component-phone-input__country-btn--open {
+        background: rgba(255, 43, 214, 0.12);
+        border-color: var(--nd-accent-2);
+        color: var(--nd-text);
+    }
+    .component-phone-input__wrapper:focus-within .component-phone-input__country-btn {
+        border-color: var(--nd-accent-2);
+    }
+    .component-phone-input__dial-code,
+    .component-phone-input__chevron {
+        color: var(--nd-text-dim);
+    }
+    .component-phone-input__input {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-phone-input__input::placeholder {
+        color: var(--nd-text-faint);
+    }
+    .component-phone-input__input:focus {
+        border-color: var(--nd-accent-2);
+        box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.22);
+    }
+    .component-phone-input__input.is-invalid,
+    .component-phone-input__input.is-invalid:focus {
+        border-color: #ff6188;
+        box-shadow: 0 0 0 3px rgba(255, 97, 136, 0.22);
+    }
+    .component-phone-input__dropdown {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.12);
+    }
+    .component-phone-input__search-wrapper {
+        border-bottom-color: var(--nd-border-soft);
+    }
+    .component-phone-input__search {
+        background: rgba(12, 8, 32, 0.6);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-phone-input__search::placeholder {
+        color: var(--nd-text-faint);
+    }
+    .component-phone-input__search:focus {
+        border-color: var(--nd-accent-2);
+        box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.18);
+    }
+    .component-phone-input__option {
+        color: var(--nd-text);
+    }
+    .component-phone-input__option:hover,
+    .component-phone-input__option:focus {
+        background: rgba(255, 43, 214, 0.1);
+    }
+    .component-phone-input__option--selected {
+        background: rgba(255, 43, 214, 0.18);
+        color: var(--nd-text);
+    }
+    .component-phone-input__option-dial {
+        color: var(--nd-text-dim);
     }
 
     // ── PinnedFeatureShowcase ────────────────────────────────────────────
@@ -662,11 +1214,39 @@
     }
 
     // ── RangeSlider ──────────────────────────────────────────────────────
+    .component-range-slider__track {
+        background: rgba(12, 8, 32, 0.6);
+    }
+    .component-range-slider__fill {
+        background: var(--nd-accent);
+        box-shadow: 0 0 8px rgba(255, 43, 214, 0.5);
+    }
+    .component-range-slider__thumb {
+        background: var(--nd-accent);
+        border-color: var(--nd-bg);
+        box-shadow: 0 0 12px rgba(255, 43, 214, 0.6);
+    }
     .component-range-slider__tooltip {
         background: var(--nd-panel-solid);
         color: var(--nd-text);
         border: 1px solid var(--nd-border);
         box-shadow: 0 0 12px rgba(255, 43, 214, 0.3);
+    }
+    .component-range-slider__label {
+        color: var(--nd-text);
+    }
+    .component-range-slider__value-badge,
+    .component-range-slider__tick-label {
+        color: var(--nd-text-dim);
+    }
+    .component-range-slider__tick::before {
+        background: var(--nd-text-faint);
+    }
+    .component-range-slider__tick--filled::before {
+        background: var(--nd-accent);
+    }
+    .component-range-slider--error .component-range-slider__track {
+        background: rgba(255, 97, 136, 0.18);
     }
 
     // ── Rating ───────────────────────────────────────────────────────────
@@ -714,6 +1294,30 @@
         box-shadow: inset 3px 0 0 var(--nd-accent);
     }
 
+    // ── SingleCardSelect ─────────────────────────────────────────────────
+    .component-single-card-select__card {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-single-card-select__card:hover {
+        background: rgba(255, 43, 214, 0.06);
+        border-color: var(--nd-border);
+    }
+    .component-single-card-select__card--selected,
+    .component-single-card-select__card--selected:hover {
+        background: rgba(255, 43, 214, 0.14);
+        border-color: var(--nd-accent);
+        box-shadow: 0 0 0 1px var(--nd-accent),
+            0 0 12px rgba(255, 43, 214, 0.25);
+    }
+    .component-single-card-select__title {
+        color: var(--nd-text);
+    }
+    .component-single-card-select__desc {
+        color: var(--nd-text-dim);
+    }
+
     // ── Slider ───────────────────────────────────────────────────────────
     .component-slider__track {
         background: rgba(12, 8, 32, 0.6);
@@ -735,6 +1339,22 @@
     .component-spinner {
         color: var(--nd-accent);
     }
+    .component-spinner__circle {
+        border-color: rgba(120, 80, 200, 0.25);
+        border-top-color: var(--spinner-color, var(--nd-accent));
+    }
+    .component-spinner.component-spinner--primary {
+        --spinner-color: var(--nd-accent);
+    }
+    .component-spinner.component-spinner--secondary {
+        --spinner-color: var(--nd-text-dim);
+    }
+    .component-spinner.component-spinner--info {
+        --spinner-color: var(--nd-accent-2);
+    }
+    .component-spinner__label {
+        color: var(--nd-text-dim);
+    }
 
     // ── StatCard backstop ────────────────────────────────────────────────
     .component-stat-card__label {
@@ -750,8 +1370,28 @@
     }
 
     // ── StatusDot ────────────────────────────────────────────────────────
-    .component-status-dot--offline {
-        background: var(--nd-text-faint);
+    .component-status-dot {
+        --dot-color: var(--nd-text-faint);
+        box-shadow: none;
+    }
+    .component-status-dot.component-status-dot--online {
+        --dot-color: #4ade80;
+    }
+    .component-status-dot.component-status-dot--busy {
+        --dot-color: #ff6188;
+    }
+    .component-status-dot.component-status-dot--away {
+        --dot-color: #fbbf24;
+    }
+    .component-status-dot.component-status-dot--offline {
+        --dot-color: var(--nd-text-faint);
+    }
+    .component-status-dot__dot {
+        background: var(--dot-color);
+        box-shadow: none;
+    }
+    .component-status-dot__label {
+        color: var(--nd-text-dim);
     }
 
     // ── Stepper ──────────────────────────────────────────────────────────
@@ -785,8 +1425,45 @@
     }
 
     // ── Switch ───────────────────────────────────────────────────────────
+    // NOTE: use inset box-shadow instead of `border` for the track outline.
+    // Bootstrap sets `box-sizing: border-box` globally, and the knob is
+    // absolutely positioned with `top/left: 2px` against the padding box —
+    // adding a real border steals 1px off every side and throws the knob
+    // off-center.
+    .component-switch__track {
+        background: rgba(12, 8, 32, 0.7);
+        box-shadow: inset 0 0 0 1px var(--nd-border-soft);
+        transition:
+            background-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+    .component-switch:hover .component-switch__track {
+        box-shadow: inset 0 0 0 1px var(--nd-border);
+    }
     .component-switch__knob {
+        background: var(--nd-text-dim);
+        box-shadow: none;
+        transition:
+            background-color 0.2s ease,
+            transform var(--switch-transition);
+    }
+    .component-switch__input:checked + .component-switch__track {
+        background: var(--nd-accent);
+        box-shadow:
+            inset 0 0 0 1px var(--nd-accent),
+            0 0 10px rgba(255, 43, 214, 0.45);
+    }
+    .component-switch__input:checked
+        + .component-switch__track
+        .component-switch__knob {
         background: #ffffff;
+    }
+    .component-switch__input:focus-visible + .component-switch__track {
+        outline: 2px solid var(--nd-accent-2);
+        outline-offset: 2px;
+    }
+    .component-switch--disabled .component-switch__track {
+        opacity: 0.55;
     }
     .component-switch__label {
         color: var(--nd-text);
@@ -853,31 +1530,165 @@
     }
 
     // ── TimePicker ───────────────────────────────────────────────────────
-    .component-time-picker,
-    .component-time-picker__input {
+    .component-time-picker__label {
+        color: var(--nd-text);
+    }
+    .component-time-picker__trigger {
         background: var(--nd-panel-solid);
         border-color: var(--nd-border-soft);
         color: var(--nd-text);
     }
-    .component-time-picker__input:focus {
+    .component-time-picker__trigger:hover {
+        border-color: var(--nd-border);
+    }
+    .component-time-picker__trigger[aria-expanded="true"] {
         border-color: var(--nd-accent-2);
     }
-    .component-time-picker__segment--active {
+    .component-time-picker__icon,
+    .component-time-picker__placeholder,
+    .component-time-picker__sep,
+    .component-time-picker__clear {
+        color: var(--nd-text-dim);
+    }
+    .component-time-picker__dropdown {
+        background: var(--nd-panel-solid);
+        border-color: var(--nd-accent-2);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(0, 229, 255, 0.18);
+    }
+    .component-time-picker__column-item {
+        color: var(--nd-text);
+    }
+    .component-time-picker__column-item:hover {
+        background: rgba(255, 43, 214, 0.08);
+    }
+    .component-time-picker__column-item--selected {
+        background: rgba(255, 43, 214, 0.2);
+        color: var(--nd-text);
+    }
+    .component-time-picker__period-col {
+        border-left-color: var(--nd-border-soft);
+    }
+    .component-time-picker__period-btn {
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text-dim);
+    }
+    .component-time-picker__period-btn:hover {
+        background: rgba(255, 43, 214, 0.08);
+        color: var(--nd-text);
+    }
+    .component-time-picker__period-btn--active {
         background: var(--nd-accent);
+        border-color: var(--nd-accent);
         color: #0b0218;
     }
 
     // ── Toast ────────────────────────────────────────────────────────────
-    .component-toast {
+    .component-toast-item {
+        --ti-bg: var(--nd-panel-solid);
+        --ti-border: var(--nd-border-soft);
+        --ti-color: var(--nd-text);
+        --ti-muted: var(--nd-text-dim);
+        --ti-accent: var(--nd-accent-2);
+        --ti-accent-bg: rgba(0, 229, 255, 0.08);
+        --ti-close-hover: rgba(255, 43, 214, 0.12);
+        // Set box-shadow directly (rather than through the --ti-shadow token)
+        // so the halo always lands — some var() + multi-layer box-shadow
+        // combinations can fail to substitute in older engines.
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 43, 214, 0.18);
+    }
+    .component-toast-item--success {
+        --ti-accent: #4ade80;
+        --ti-accent-bg: rgba(74, 222, 128, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(74, 222, 128, 0.22);
+    }
+    .component-toast-item--error {
+        --ti-accent: #ff6188;
+        --ti-accent-bg: rgba(255, 97, 136, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 97, 136, 0.22);
+    }
+    .component-toast-item--warning {
+        --ti-accent: #fbbf24;
+        --ti-accent-bg: rgba(251, 191, 36, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(251, 191, 36, 0.2);
+    }
+    .component-toast-item--info {
+        --ti-accent: var(--nd-accent-2);
+        --ti-accent-bg: rgba(0, 229, 255, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(0, 229, 255, 0.22);
+    }
+    .component-toast-item__close:hover {
+        background: rgba(255, 43, 214, 0.14);
+        color: var(--nd-text);
+    }
+    .component-toast-item__progress {
+        background: rgba(120, 80, 200, 0.18);
+    }
+
+    // ── ToggleCard ───────────────────────────────────────────────────────
+    // ToggleCard uses a `--tc-*` prefix that collides with the global
+    // toolcase design tokens, so its hard-coded defaults shadow them.
+    // Re-declare the collision set on the component itself.
+    .component.component-toggle-card {
+        --tc-text: var(--nd-text);
+        --tc-muted: var(--nd-text-dim);
+        --tc-border: var(--nd-border-soft);
+        --tc-hover-bg: rgba(255, 43, 214, 0.06);
+        --tc-accent: var(--nd-accent);
         background: var(--nd-panel-solid);
+    }
+    .component.component-toggle-card:hover {
         border-color: var(--nd-border);
-        color: var(--nd-text);
-        box-shadow: 0 0 20px rgba(255, 43, 214, 0.25);
     }
-    .component-toast__title {
+    .component-toggle-card--on {
+        background: rgba(255, 43, 214, 0.1);
+        border-color: var(--nd-accent);
+        box-shadow: 0 0 0 1px var(--nd-accent),
+            0 0 12px rgba(255, 43, 214, 0.25);
+    }
+    .component-toggle-card__icon {
+        color: var(--nd-text-dim);
+    }
+    .component-toggle-card--on .component-toggle-card__icon {
+        color: var(--nd-accent);
+    }
+    // Same inset-shadow trick as Switch — see note above.
+    .component-toggle-card__switch {
+        background: rgba(12, 8, 32, 0.7);
+        box-shadow: inset 0 0 0 1px var(--nd-border-soft);
+        transition:
+            background-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+    .component-toggle-card--on .component-toggle-card__switch {
+        background: var(--nd-accent);
+        box-shadow:
+            inset 0 0 0 1px var(--nd-accent),
+            0 0 10px rgba(255, 43, 214, 0.45);
+    }
+    .component-toggle-card__knob {
+        background: var(--nd-text-dim);
+        transition:
+            background-color 0.2s ease,
+            transform 0.2s ease;
+    }
+    .component-toggle-card--on .component-toggle-card__knob {
+        background: #ffffff;
+    }
+    .component-toggle-card__label {
         color: var(--nd-text);
     }
-    .component-toast__message {
+    .component-toggle-card__hint {
         color: var(--nd-text-dim);
     }
 
@@ -970,5 +1781,382 @@
     }
     .component-welcome-guide__step--completed .component-welcome-guide__step-label {
         color: var(--nd-text-faint);
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    //  Sweep — previously-missed component overrides
+    // ═════════════════════════════════════════════════════════════════════
+
+    // ── Alert (variant-local --alert-* tokens shadow any outer override) ─
+    .component-alert {
+        --alert-bg: var(--nd-panel);
+        --alert-border: var(--nd-border-soft);
+        --alert-text: var(--nd-text);
+        --alert-icon: var(--nd-accent-2);
+        --alert-title: var(--nd-text);
+    }
+    .component-alert.alert-primary {
+        --alert-bg: rgba(255, 43, 214, 0.08);
+        --alert-border: rgba(255, 43, 214, 0.35);
+        --alert-text: var(--nd-text);
+        --alert-icon: var(--nd-accent);
+        --alert-title: var(--nd-text);
+    }
+    .component-alert.alert-secondary {
+        --alert-bg: rgba(12, 8, 32, 0.6);
+        --alert-border: var(--nd-border-soft);
+        --alert-text: var(--nd-text-dim);
+        --alert-icon: var(--nd-text-dim);
+        --alert-title: var(--nd-text);
+    }
+    .component-alert.alert-info {
+        --alert-bg: rgba(0, 229, 255, 0.08);
+        --alert-border: rgba(0, 229, 255, 0.35);
+        --alert-text: var(--nd-text);
+        --alert-icon: var(--nd-accent-2);
+        --alert-title: var(--nd-text);
+    }
+    .component-alert.alert-success {
+        --alert-bg: rgba(74, 222, 128, 0.08);
+        --alert-border: rgba(74, 222, 128, 0.35);
+        --alert-text: #bbf7d0;
+        --alert-icon: #4ade80;
+        --alert-title: #dcfce7;
+    }
+    .component-alert.alert-warning {
+        --alert-bg: rgba(251, 191, 36, 0.08);
+        --alert-border: rgba(251, 191, 36, 0.4);
+        --alert-text: #fde68a;
+        --alert-icon: #fbbf24;
+        --alert-title: #fef3c7;
+    }
+    .component-alert.alert-danger {
+        --alert-bg: rgba(255, 97, 136, 0.08);
+        --alert-border: rgba(255, 97, 136, 0.4);
+        --alert-text: #ffbcd1;
+        --alert-icon: #ff6188;
+        --alert-title: #ffd7e3;
+    }
+
+    // ── Carousel (arrow / dot bgs hardcoded white) ───────────────────────
+    .component-carousel__arrow {
+        background: rgba(12, 8, 32, 0.7);
+        color: var(--nd-text);
+        box-shadow: 0 0 0 1px var(--nd-border-soft),
+            0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .component-carousel__arrow:hover {
+        background: rgba(255, 43, 214, 0.2);
+        box-shadow: 0 0 0 1px var(--nd-accent),
+            0 0 16px rgba(255, 43, 214, 0.35);
+    }
+    .component-carousel__dot {
+        background: rgba(255, 255, 255, 0.25);
+    }
+    .component-carousel__dot--active {
+        background: var(--nd-accent);
+        box-shadow: 0 0 8px rgba(255, 43, 214, 0.6);
+    }
+
+    // ── DangerZoneActions ────────────────────────────────────────────────
+    .component-danger-zone-actions {
+        border-color: #ff6188;
+    }
+    .component-danger-zone-actions__item:not(:last-child) {
+        border-bottom-color: rgba(255, 97, 136, 0.4);
+    }
+    .component-danger-zone-actions__text {
+        color: var(--nd-text-dim);
+    }
+
+    // ── Divider ──────────────────────────────────────────────────────────
+    .component-divider.component-divider--horizontal::before,
+    .component-divider.component-divider--horizontal::after,
+    .component-divider.component-divider--vertical::before,
+    .component-divider.component-divider--vertical::after {
+        background-color: var(--nd-border-soft);
+    }
+    .component-divider__label {
+        color: var(--nd-text-dim);
+    }
+
+    // ── EmptyState ───────────────────────────────────────────────────────
+    .component-empty-state {
+        --es-text: var(--nd-text-dim);
+        --es-icon: var(--nd-text-faint);
+    }
+
+    // ── FileTags (Sass vars for badge bg/text) ───────────────────────────
+    .component-file-tags .badge--tag {
+        background: rgba(12, 8, 32, 0.7);
+        color: var(--nd-text-dim);
+    }
+    .component-file-tags .badge--tag:hover {
+        background: rgba(255, 43, 214, 0.15);
+        color: var(--nd-text);
+    }
+    .component-file-tags .badge--tag::after {
+        background: #ff6188;
+    }
+    .component-file-tags .badge--add {
+        background: rgba(12, 8, 32, 0.7);
+        color: var(--nd-text-dim);
+    }
+    .component-file-tags .badge--add:hover {
+        background: #4ade80;
+        color: #0b0218;
+    }
+    .component-file-tags__dropdown {
+        background: var(--nd-panel-solid);
+        border: 1px solid var(--nd-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(255, 43, 214, 0.12);
+    }
+    .component-file-tags__dropdown .dropdown-item {
+        color: var(--nd-text);
+    }
+    .component-file-tags__dropdown .dropdown-item:hover {
+        background: rgba(255, 43, 214, 0.12);
+        color: var(--nd-text);
+    }
+    .component-file-tags__divider {
+        background: var(--nd-border-soft);
+    }
+    .component-file-tags__search input {
+        background: rgba(12, 8, 32, 0.6);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+    }
+    .component-file-tags__search input::placeholder {
+        color: var(--nd-text-faint);
+    }
+    .component-file-tags__search input:focus {
+        border-color: var(--nd-accent-2);
+    }
+    .component-file-tags__empty {
+        color: var(--nd-text-faint);
+    }
+
+    // ── Kbd ──────────────────────────────────────────────────────────────
+    .component-kbd__key,
+    kbd.component.component-kbd {
+        background: rgba(12, 8, 32, 0.7);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+        box-shadow: 0 1px 0 rgba(255, 43, 214, 0.25);
+        font-family: var(--nd-font-mono);
+    }
+    .component-kbd__separator {
+        color: var(--nd-text-faint);
+    }
+
+    // ── QueuedFile (hardcoded --qf-* defaults + Sass vars) ───────────────
+    .component-queued-file {
+        --qf-bg: var(--nd-panel);
+        --qf-border: var(--nd-border-soft);
+        --qf-text: var(--nd-text);
+        --qf-muted: var(--nd-text-dim);
+    }
+    .component-queued-file:hover {
+        background: rgba(255, 43, 214, 0.06);
+    }
+
+    // ── Skeleton (gradient locked to light) ──────────────────────────────
+    .component-skeleton {
+        background: linear-gradient(
+            90deg,
+            rgba(120, 80, 200, 0.1) 25%,
+            rgba(255, 43, 214, 0.14) 50%,
+            rgba(120, 80, 200, 0.1) 75%
+        );
+        background-size: 200% 100%;
+    }
+
+    // ── TabSections (hardcoded --pw-* fallbacks) ─────────────────────────
+    .component-tab-sections__header {
+        border-bottom-color: var(--nd-border-soft);
+    }
+    .component-tab-sections__tab {
+        color: var(--nd-text-dim);
+    }
+    .component-tab-sections__tab:hover:not(:disabled) {
+        color: var(--nd-text);
+    }
+    .component-tab-sections__tab--active {
+        color: var(--nd-text);
+    }
+    .component-tab-sections__tab--active::after {
+        background: var(--nd-accent);
+        box-shadow: 0 0 8px rgba(255, 43, 214, 0.5);
+    }
+
+    // ── Table (everything hardcoded, needs full sweep) ───────────────────
+    .component-table {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        // Clear the Bootstrap-style light "edge fade" background-image —
+        // it paints solid white stripes otherwise.
+        background-image: none;
+    }
+    .component-table__head {
+        background: rgba(12, 8, 32, 0.6);
+    }
+    .component-table__th {
+        color: var(--nd-text-dim);
+        border-bottom-color: var(--nd-border-soft);
+    }
+    .component-table__td {
+        color: var(--nd-text);
+        border-bottom-color: var(--nd-border-soft);
+    }
+    .component-table__row {
+        background: transparent;
+    }
+    .component-table__empty {
+        color: var(--nd-text-faint);
+    }
+    .component-table--striped .component-table__row:nth-child(even) {
+        background: rgba(255, 43, 214, 0.04);
+    }
+    .component-table--hoverable .component-table__row:hover {
+        background: rgba(255, 43, 214, 0.1);
+    }
+
+    // ── Timeline (Sass-var-driven; override by selector) ─────────────────
+    .component-timeline__line {
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(255, 43, 214, 0.1) 18%,
+            rgba(255, 43, 214, 0.45) 55%,
+            rgba(255, 43, 214, 0.1) 82%,
+            transparent 100%
+        );
+        box-shadow:
+            0 0 0 1px rgba(255, 43, 214, 0.1),
+            0 20px 60px rgba(255, 43, 214, 0.15);
+    }
+    .component-timeline__dot {
+        background: var(--nd-accent);
+        box-shadow:
+            0 0 0 6px rgba(255, 43, 214, 0.15),
+            0 8px 28px rgba(255, 43, 214, 0.35);
+    }
+    .component-timeline__card {
+        background: var(--nd-panel);
+        border-color: var(--nd-border-soft);
+        color: var(--nd-text);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4),
+            0 0 16px rgba(255, 43, 214, 0.1);
+    }
+    .component-timeline__title {
+        color: var(--nd-text);
+    }
+    .component-timeline__subtitle {
+        color: var(--nd-text-dim);
+    }
+    .component-timeline__description {
+        color: var(--nd-text-dim);
+    }
+    .component-timeline__date,
+    .component-timeline__meta-text {
+        color: var(--nd-text-faint);
+    }
+    .component-timeline__badge,
+    .component-timeline__icon {
+        background: rgba(255, 43, 214, 0.08);
+        color: var(--nd-accent-2);
+    }
+    .component-timeline__item--completed .component-timeline__dot {
+        background: #4ade80;
+        box-shadow:
+            0 0 0 6px rgba(74, 222, 128, 0.15),
+            0 10px 30px rgba(74, 222, 128, 0.3);
+    }
+    .component-timeline__item--upcoming .component-timeline__dot {
+        background: rgba(120, 80, 200, 0.4);
+        box-shadow: 0 0 0 6px rgba(120, 80, 200, 0.1);
+    }
+
+    // ── Tooltip (hardcoded dark-on-white, swap for neon panel) ───────────
+    .component-tooltip__bubble {
+        background: var(--nd-panel-solid);
+        color: var(--nd-text);
+        border: 1px solid var(--nd-border);
+        box-shadow: 0 0 12px rgba(255, 43, 214, 0.3);
+    }
+
+    // ── UsageSummaryPanel (Sass-var driven) ──────────────────────────────
+    .component-usage-summary-panel__header h3,
+    .component-usage-summary-panel__label {
+        color: var(--nd-text-dim);
+    }
+    .component-usage-summary-panel__progress {
+        background: rgba(12, 8, 32, 0.6);
+    }
+    .component-usage-summary-panel__progress-bar {
+        background: var(--nd-accent);
+        box-shadow: 0 0 8px rgba(255, 43, 214, 0.5);
+    }
+    .component-usage-summary-panel__progress-bar--warning {
+        background: #ff6188;
+        box-shadow: 0 0 8px rgba(255, 97, 136, 0.5);
+    }
+    .component-usage-summary-panel__assistive-text {
+        color: var(--nd-text-faint);
+    }
+
+    // ── NodeEditor (canvas dot pattern on white bg) ──────────────────────
+    .component-node-editor {
+        border-color: var(--nd-border-soft);
+    }
+    .component-node-editor__toolbar {
+        background: rgba(12, 8, 32, 0.5);
+        border-bottom-color: var(--nd-border-soft);
+    }
+    .component-node-editor__toolbar-sep {
+        background: var(--nd-border-soft);
+    }
+    .component-node-editor__canvas {
+        background:
+            radial-gradient(circle,
+                rgba(138, 75, 255, 0.22) 1px,
+                transparent 1px);
+    }
+
+    // ── CdnMap (light panel + grid + dark dots) ──────────────────────────
+    .component-cdn-map {
+        background: linear-gradient(
+            180deg,
+            var(--nd-bg-2) 0%,
+            var(--nd-bg) 100%
+        );
+        border-color: var(--nd-border-soft);
+    }
+    .component-cdn-map__grid {
+        background-image:
+            linear-gradient(
+                rgba(120, 80, 200, 0.18) 1px,
+                transparent 1px),
+            linear-gradient(
+                90deg,
+                rgba(120, 80, 200, 0.18) 1px,
+                transparent 1px);
+    }
+    .component-cdn-map__node {
+        background: var(--nd-accent-2);
+        box-shadow: 0 0 6px rgba(0, 229, 255, 0.6);
+    }
+    .component-cdn-map__node--accent {
+        background: var(--nd-accent);
+        box-shadow: 0 0 6px rgba(255, 43, 214, 0.6);
+    }
+
+    // ── ImageCrop (--ic-* hardcoded light defaults) ──────────────────────
+    .component-image-crop {
+        --ic-bg: var(--nd-panel);
+        --ic-border: var(--nd-border-soft);
+        --ic-muted: var(--nd-text-dim);
+        --ic-text: var(--nd-text);
     }
 }

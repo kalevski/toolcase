@@ -1,6 +1,13 @@
 @import '../colors';
 
 .layout.layout--dashboard {
+	--dl-navbar-bg: #{$white};
+	--dl-sidebar-bg: #{$white};
+	--dl-content-bg: #{$gray-50};
+	--dl-border: #{$gray-200};
+	--dl-text: #{$dark};
+	--dl-overlay-bg: rgba(0, 0, 0, 0.5);
+
 	display: block;
 	width: 100vw;
 	height: 100vh;
@@ -67,7 +74,7 @@
 		left: 0;
 		width: 100%;
 		height: calc(100% - 60px);
-		background: rgba(0, 0, 0, 0.5);
+		background: var(--dl-overlay-bg);
 		z-index: 1;
 		backdrop-filter: blur(2px);
 	}
@@ -104,21 +111,21 @@
 	}
 
 	&__light {
-		color: $dark;
+		color: var(--dl-text);
 
 		& .layout--dashboard__navbar {
-			background: $white;
-			border-bottom: solid 1px $gray-200;
+			background: var(--dl-navbar-bg);
+			border-bottom: solid 1px var(--dl-border);
 			padding-right: 10px;
 		}
 
 		& .layout--dashboard__sidebar {
-			background: $white;
-			border-right: solid 1px $gray-200;
+			background: var(--dl-sidebar-bg);
+			border-right: solid 1px var(--dl-border);
 		}
 
 		& .layout--dashboard__content {
-			background: $gray-50;
+			background: var(--dl-content-bg);
 		}
 	}
 }
@@ -149,7 +156,7 @@
 			width: 60px;
 			height: 60px;
 			display: block;
-			border-right: solid 1px $gray-200;
+			border-right: solid 1px var(--dl-border);
 			font-size: 24px;
 			line-height: 55px;
 			text-align: center;
@@ -191,12 +198,12 @@
 				&__branding {
 					width: 100%;
 					height: 60px;
-					border-bottom: solid 1px $gray-200;
+					border-bottom: solid 1px var(--dl-border);
 				}
 
 				&__panel {
 					width: 100%;
-					border-top: solid 1px $gray-200;
+					border-top: solid 1px var(--dl-border);
 					overflow: visible;
 					position: relative;
 				}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Icon } from './Icon'
+import { IconButton } from './IconButton'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -83,14 +84,12 @@ export const Banner: React.FC<BannerProps> = ({
 			)}
 
 			{dismissible && (
-				<button
-					type="button"
+				<IconButton
+					icon="x"
+					label="Dismiss notification"
 					className="component-banner__dismiss"
-					aria-label="Dismiss notification"
 					onClick={handleDismiss}
-				>
-					<Icon name="x" />
-				</button>
+				/>
 			)}
 		</div>
 	)

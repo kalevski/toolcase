@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { MultiCardSelect, MultiCardSelectOption } from '@toolcase/react-components'
-import { Card, CodeSnippet } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const CATEGORY_OPTIONS: MultiCardSelectOption[] = [
 	{ key: 'sprites', title: 'Sprites', description: 'Player, enemies, items, NPCs' },
@@ -27,63 +27,26 @@ export default function MultiCardSelectDemo() {
 	const [features, setFeatures] = useState<string[]>([])
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">MultiCardSelect</h1>
-					<p className="text-muted mb-4">A multi-select card grid allowing users to toggle multiple options on and off.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Inputs"
+			title="MultiCardSelect"
+			lede="A multi-select card grid allowing users to toggle multiple options on and off."
+		>
+			<DemoSection title="Asset Categories (with descriptions)">
+				<MultiCardSelect options={CATEGORY_OPTIONS} value={categories} onChange={setCategories} />
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Asset Categories (with descriptions)</h2>
-						<MultiCardSelect options={CATEGORY_OPTIONS} value={categories} onChange={setCategories} />
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Features (3 columns, no descriptions)">
+				<MultiCardSelect options={FEATURE_OPTIONS} value={features} onChange={setFeatures} columns={3} />
+			</DemoSection>
 
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Features (3 columns, no descriptions)</h2>
-						<MultiCardSelect options={FEATURE_OPTIONS} value={features} onChange={setFeatures} columns={3} />
-					</Card>
-				</div>
-			</div>
-
-			<div className="row">
-				<div className="col-12">
-					<p className="text-muted" style={{ fontSize: '0.85rem' }}>
-						Categories: <strong>{categories.join(', ') || '–'}</strong>
-						<br />
-						Features: <strong>{features.join(', ') || '–'}</strong>
-					</p>
-				</div>
-			</div>
-
-		{/* Usage */}
-		<div className="row mb-5">
-			<div className="col-12">
-				<Card>
-					<h2 className="h5 mb-3">Usage</h2>
-					<CodeSnippet
-						language="typescript"
-						code={`import { MultiCardSelect } from '@toolcase/react-components'
-
-<MultiCardSelect
-  options={[
-    { key: 'sprites', title: 'Sprites', description: 'Player, enemies, items' },
-    { key: 'audio', title: 'Audio', description: 'Music, sound effects' },
-  ]}
-  value={selected}
-  onChange={setSelected}
-/>`}
-					/>
-				</Card>
-			</div>
-		</div>
-		</div>
+			<DemoSection title="Selection state">
+				<p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
+					Categories: <strong>{categories.join(', ') || '–'}</strong>
+					<br />
+					Features: <strong>{features.join(', ') || '–'}</strong>
+				</p>
+			</DemoSection>
+		</DemoPage>
 	)
 }

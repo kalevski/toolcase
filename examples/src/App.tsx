@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { Routes, Route, Link } from 'react-router'
+import { ExtendedSelect, type ExtendedSelectItem } from '@toolcase/react-components'
 import { Home } from './pages/Home'
 import { ReactComponentsPage } from './pages/ReactComponentsPage'
 import { BaseExamplesPage } from './pages/BaseExamplesPage'
@@ -6,9 +8,22 @@ import { LoggingExamplesPage } from './pages/LoggingExamplesPage'
 import { SerializerExamplesPage } from './pages/SerializerExamplesPage'
 import { examples } from './react-components/index'
 
-const formatLabel = (key: string) => {
-    return key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-}
+const THEME_STORAGE_KEY = 'toolcase.examples.theme'
+
+const themeOptions: ExtendedSelectItem[] = [
+    {
+        key: 'default',
+        name: 'Default',
+        description: 'Light toolcase baseline',
+        icon: 'sun',
+    },
+    {
+        key: 'neon',
+        name: 'Neon Drift',
+        description: 'Dark synthwave override',
+        icon: 'lightning-charge',
+    },
+]
 
 const Nav = () => (
     <nav className="app-nav">
@@ -24,16 +39,44 @@ const Nav = () => (
     </nav>
 )
 
-const ExampleWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="example">
-        <div className="example__back">
-            <Link to="/react-components">
-                <i className="bi bi-arrow-left"></i> All Components
-            </Link>
+const ExampleWrapper = ({ children }: { children: React.ReactNode }) => {
+    const [theme, setTheme] = useState<string>(() => {
+        const stored = localStorage.getItem(THEME_STORAGE_KEY)
+        return themeOptions.some((o) => o.key === stored) ? (stored as string) : 'default'
+    })
+    useEffect(() => {
+        localStorage.setItem(THEME_STORAGE_KEY, theme)
+    }, [theme])
+    const isNeon = theme === 'neon'
+    const canvasClass = [
+        'example__canvas',
+        `example__canvas--${isNeon ? 'dark' : 'light'}`,
+        isNeon ? `theme theme--${theme}` : '',
+    ]
+        .filter(Boolean)
+        .join(' ')
+    return (
+        <div className="example">
+            <div className="example__back">
+                <Link to="/react-components">
+                    <i className="bi bi-arrow-left"></i> All Components
+                </Link>
+                <div className="example__theme">
+                    <span className="example__theme-label">Theme</span>
+                    <ExtendedSelect
+                        items={themeOptions}
+                        value={theme}
+                        onChange={setTheme}
+                        placeholder="Select theme"
+                    />
+                </div>
+            </div>
+            <div className={canvasClass}>
+                {children}
+            </div>
         </div>
-        {children}
-    </div>
-)
+    )
+}
 
 export const App = () => {
     return (

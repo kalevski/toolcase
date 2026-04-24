@@ -1,6 +1,7 @@
 import React from 'react'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
+import { Switch } from './Switch'
 
 export interface ToggleCardProps {
 	/** Whether the toggle is on */
@@ -51,18 +52,35 @@ export const ToggleCard: React.FC<ToggleCardProps> = ({
 
 	if (loading) {
 		return (
-			<label className={rootClass}>
+			<div className={rootClass}>
 				<Skeleton shape="rect" width="2rem" height="2rem" />
 				<span className="component-toggle-card__text">
 					<Skeleton width="60%" />
 					<Skeleton width="80%" />
 				</span>
-			</label>
+			</div>
 		)
 	}
 
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+		if (disabled) return
+		if (e.key === ' ' || e.key === 'Enter') {
+			e.preventDefault()
+			handleClick()
+		}
+	}
+
 	return (
-		<label className={rootClass} onClick={handleClick}>
+		<div
+			className={rootClass}
+			onClick={handleClick}
+			onKeyDown={handleKeyDown}
+			role="switch"
+			aria-checked={checked}
+			aria-disabled={disabled || undefined}
+			aria-label={label}
+			tabIndex={disabled ? -1 : 0}
+		>
 			{badge && <span className="component-toggle-card__badge">{badge}</span>}
 
 			{icon && (
@@ -71,14 +89,14 @@ export const ToggleCard: React.FC<ToggleCardProps> = ({
 				</span>
 			)}
 
-			<span className="component-toggle-card__switch">
-				<span className="component-toggle-card__knob" />
+			<span className="component-toggle-card__switch-wrap" aria-hidden="true">
+				<Switch checked={checked} disabled={disabled} tabIndex={-1} readOnly />
 			</span>
 
 			<span className="component-toggle-card__text">
 				<span className="component-toggle-card__label">{label}</span>
 				{hint && <span className="component-toggle-card__hint">{hint}</span>}
 			</span>
-		</label>
+		</div>
 	)
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { WelcomeGuide, WelcomeGuideStep, Button, Card, CodeSnippet } from '@toolcase/react-components'
+import { WelcomeGuide, WelcomeGuideStep, Button } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const INITIAL_STEPS: WelcomeGuideStep[] = [
 	{ label: 'Create your first project', completed: true },
@@ -37,39 +38,33 @@ const WelcomeGuideDemo = () => {
 	}
 
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">WelcomeGuide</h1>
-					<p className="text-muted mb-0">An onboarding card with step progress, messages carousel, and optional background pattern.</p>
-				</div>
-			</div>
+		<DemoPage
+			eyebrow="Marketing"
+			title="WelcomeGuide"
+			lede="An onboarding card with step progress, messages carousel, and optional background pattern."
+		>
+			<DemoSection title="With background pattern">
+				<WelcomeGuide
+					title="Getting Started"
+					messages={MESSAGES}
+					steps={steps}
+					backgroundPattern={showPattern ? <DotPattern /> : undefined}
+				/>
+			</DemoSection>
 
-			<div className="row mb-5">
-			<div className="col-12">
-			<h5 className="text-muted mb-3">With background pattern</h5>
-			<WelcomeGuide
-				title="Getting Started"
-				messages={MESSAGES}
-				steps={steps}
-				backgroundPattern={showPattern ? <DotPattern /> : undefined}
-			/>
+			<DemoSection title="Without background pattern">
+				<WelcomeGuide
+					title="Getting Started"
+					messages={MESSAGES}
+					steps={steps}
+				/>
+			</DemoSection>
 
-			<h5 className="text-muted mb-3 mt-5">Without background pattern</h5>
-			<WelcomeGuide
-				title="Getting Started"
-				messages={MESSAGES}
-				steps={steps}
-			/>
-			</div>
-			</div>
-
-			<div className="row mb-5">
-			<div className="col-lg-8">
-			<Card>
-				<h5 className="mb-3">Toggle Steps</h5>
-				<p className="text-muted mb-3">Click to toggle step completion and see the guide update.</p>
-				<div className="d-flex flex-wrap gap-2">
+			<DemoSection
+				title="Toggle Steps"
+				caption="Click to toggle step completion and see the guide update."
+			>
+				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					{steps.map((step, i) => (
 						<Button
 							key={i}
@@ -90,32 +85,8 @@ const WelcomeGuideDemo = () => {
 						{showPattern ? 'Hide' : 'Show'} Pattern
 					</Button>
 				</div>
-			</Card>
-			</div>
-			</div>
-
-		{/* Usage */}
-		<div className="row mb-5">
-			<div className="col-12">
-				<Card>
-					<h2 className="h5 mb-3">Usage</h2>
-					<CodeSnippet
-						language="typescript"
-						code={`import { WelcomeGuide } from '@toolcase/react-components'
-
-<WelcomeGuide
-  title="Getting Started"
-  messages={['Welcome!', 'Follow the steps to get started.']}
-  steps={[
-    { label: 'Create a project', completed: true },
-    { label: 'Upload an asset', completed: false },
-  ]}
-/>`}
-					/>
-				</Card>
-			</div>
-		</div>
-		</div>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

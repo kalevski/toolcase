@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
 
 export type CodeSnippetLanguage = 'javascript' | 'typescript' | 'bash'
@@ -65,7 +66,7 @@ export const CodeSnippet: React.FC<CodeSnippetProps> = ({
 						onClick={handleCopy}
 						aria-label="Copy code"
 					>
-						<i className={`bi ${copied ? 'bi-check-lg' : 'bi-clipboard'}`} />
+						<Icon name={copied ? 'check-lg' : 'clipboard'} />
 						<span className="component-code-snippet__copy-label">
 							{copied ? 'Copied!' : 'Copy'}
 						</span>

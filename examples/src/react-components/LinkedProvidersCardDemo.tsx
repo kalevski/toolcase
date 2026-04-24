@@ -1,5 +1,5 @@
 import React from 'react'
-import { LinkedProvidersCard, CodeSnippet } from '@toolcase/react-components'
+import { LinkedProvidersCard } from '@toolcase/react-components'
 import { DemoPage, DemoSection, DemoGrid } from './_demo'
 
 const LinkedProvidersCardDemo: React.FC = () => (
@@ -56,27 +56,6 @@ const LinkedProvidersCardDemo: React.FC = () => (
 					iconForProvider={(key) => (key === 'okta' ? 'shield-lock' : 'box-arrow-up-right')}
 				/>
 			</DemoGrid>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { LinkedProvidersCard } from '@toolcase/react-components'
-
-<LinkedProvidersCard
-  providers={[
-    { id: '1', provider: 'google', identifier: 'jordan@atlas.example.com' },
-    { id: '2', provider: 'github', identifier: '@jordanliu' },
-  ]}
-/>
-
-// Extend the defaults
-<LinkedProvidersCard
-  providers={providers}
-  brandColors={{ okta: '#007dc1' }}
-  iconForProvider={(key) => (key === 'okta' ? 'shield-lock' : undefined)}
-/>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )

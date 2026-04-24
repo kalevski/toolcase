@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { CommandPalette, Button, Card, CodeSnippet } from '@toolcase/react-components'
+import { CommandPalette, Button } from '@toolcase/react-components'
 import type { CommandPaletteItem } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const allItems: CommandPaletteItem[] = [
 	// Navigation
@@ -27,95 +28,43 @@ export const CommandPaletteDemo: React.FC = () => {
 		setOpen(false)
 	}
 
-	const usageCode = `import { CommandPalette } from '@toolcase/react-components'
-import type { CommandPaletteItem } from '@toolcase/react-components'
-
-const items: CommandPaletteItem[] = [
-  { key: 'home', label: 'Go to Home', icon: 'house', group: 'Navigation' },
-  { key: 'settings', label: 'Open Settings', icon: 'gear', group: 'Navigation' },
-]
-
-const [open, setOpen] = useState(false)
-
-<button onClick={() => setOpen(true)}>Open palette</button>
-
-<CommandPalette
-  items={items}
-  open={open}
-  onClose={() => setOpen(false)}
-  onSelect={(item) => console.log(item.key)}
-  placeholder="Search commands…"
-/>`
-
 	return (
-		<div className="container my-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">CommandPalette</h1>
-					<p className="text-muted mb-0">
-						Keyboard-first search overlay with grouped results, fuzzy matching, and full ARIA support.
-					</p>
-				</div>
-			</div>
-
+		<DemoPage
+			eyebrow="Overlays"
+			title="CommandPalette"
+			lede="Keyboard-first search overlay with grouped results, fuzzy matching, and full ARIA support."
+		>
 			{lastSelected && (
-				<div className="row mb-3">
-					<div className="col-lg-8">
-						<div className="alert alert-info py-2">
-							Selected: <strong>{lastSelected}</strong>
-						</div>
-					</div>
+				<div className="alert alert-info py-2">
+					Selected: <strong>{lastSelected}</strong>
 				</div>
 			)}
 
-			{/* Main demo */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Default</h2>
-						<p className="text-muted small mb-3">10 items across 3 groups. Type to filter.</p>
-						<Button variant="primary" onClick={() => setOpen(true)}>
-							Open Command Palette
-						</Button>
-					</Card>
-				</div>
-			</div>
+			<DemoSection title="Default" caption="10 items across 3 groups. Type to filter.">
+				<Button variant="primary" onClick={() => setOpen(true)}>
+					Open Command Palette
+				</Button>
+			</DemoSection>
 
-			{/* Tips */}
-			<div className="row mb-5">
-				<div className="col-lg-8">
-					<Card>
-						<h2 className="h5 mb-3">Keyboard shortcuts</h2>
-						<div className="d-flex flex-column gap-2">
-							<div className="d-flex justify-content-between align-items-center">
-								<span className="text-muted small">Navigate up / down</span>
-								<span>
-									<kbd className="badge bg-light text-dark border me-1">↑</kbd>
-									<kbd className="badge bg-light text-dark border">↓</kbd>
-								</span>
-							</div>
-							<div className="d-flex justify-content-between align-items-center">
-								<span className="text-muted small">Select item</span>
-								<kbd className="badge bg-light text-dark border">Enter</kbd>
-							</div>
-							<div className="d-flex justify-content-between align-items-center">
-								<span className="text-muted small">Close palette</span>
-								<kbd className="badge bg-light text-dark border">Esc</kbd>
-							</div>
-						</div>
-					</Card>
+			<DemoSection title="Keyboard shortcuts">
+				<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+					<div className="d-flex justify-content-between align-items-center">
+						<span className="text-muted small">Navigate up / down</span>
+						<span>
+							<kbd className="badge bg-light text-dark border me-1">↑</kbd>
+							<kbd className="badge bg-light text-dark border">↓</kbd>
+						</span>
+					</div>
+					<div className="d-flex justify-content-between align-items-center">
+						<span className="text-muted small">Select item</span>
+						<kbd className="badge bg-light text-dark border">Enter</kbd>
+					</div>
+					<div className="d-flex justify-content-between align-items-center">
+						<span className="text-muted small">Close palette</span>
+						<kbd className="badge bg-light text-dark border">Esc</kbd>
+					</div>
 				</div>
-			</div>
-
-			{/* Code */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet language="typescript" code={usageCode} />
-					</Card>
-				</div>
-			</div>
+			</DemoSection>
 
 			<CommandPalette
 				items={allItems}
@@ -124,7 +73,7 @@ const [open, setOpen] = useState(false)
 				onSelect={handleSelect}
 				placeholder="Search commands…"
 			/>
-		</div>
+		</DemoPage>
 	)
 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, CodeSnippet } from '@toolcase/react-components'
+import { Button } from '@toolcase/react-components'
 import { DemoPage, DemoSection, DemoRow } from './_demo'
 
 const ButtonDemo: React.FC = () => {
@@ -97,21 +97,6 @@ const ButtonDemo: React.FC = () => {
 						Cancel was clicked — in a real dialog this would call <code>onClose()</code>.
 					</p>
 				)}
-			</DemoSection>
-
-			<DemoSection eyebrow="API" title="Usage">
-				<CodeSnippet
-					language="typescript"
-					code={`import { Button } from '@toolcase/react-components'
-
-<Button variant="primary" onClick={handleSave}>
-  Save changes
-</Button>
-
-<Button variant="danger" outline size="small" disabled>
-  Delete
-</Button>`}
-				/>
 			</DemoSection>
 		</DemoPage>
 	)

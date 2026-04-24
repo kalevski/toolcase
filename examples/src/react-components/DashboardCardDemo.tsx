@@ -1,6 +1,6 @@
-import React from 'react'
-import { DashboardCard, Card, CodeSnippet } from '@toolcase/react-components'
+import { DashboardCard } from '@toolcase/react-components'
 import type { DashboardCardProps } from '@toolcase/react-components'
+import { DemoPage, DemoSection } from './_demo'
 
 const cards: DashboardCardProps[] = [
 	{
@@ -109,43 +109,19 @@ const cards: DashboardCardProps[] = [
 
 const DashboardCardDemo = () => {
 	return (
-		<div className="container py-5">
-			<div className="row mb-4">
-				<div className="col-12">
-					<h1 className="display-4 text-gradient-primary mb-2">DashboardCard</h1>
-					<p className="text-muted mb-4">A versatile card component supporting basic, difference, metric, slices, list, status, activity, and colored variants for dashboard layouts.</p>
+		<DemoPage
+			eyebrow="Layout & Surfaces"
+			title="DashboardCard"
+			lede="A versatile card component supporting basic, difference, metric, slices, list, status, activity, and colored variants for dashboard layouts."
+		>
+			<DemoSection title="All variants">
+				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+					{cards.map((card, i) => (
+						<DashboardCard onClick={() => console.log('clicked', card.type)} key={i} card={card} />
+					))}
 				</div>
-			</div>
-			<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-				{cards.map((card, i) => (
-					<DashboardCard onClick={() => console.log('clicked', card.type)} key={i} card={card} />
-				))}
-			</div>
-
-			{/* Usage */}
-			<div className="row mb-5">
-				<div className="col-12">
-					<Card>
-						<h2 className="h5 mb-3">Usage</h2>
-						<CodeSnippet
-							language="typescript"
-							code={`import { DashboardCard } from '@toolcase/react-components'
-import type { DashboardCardProps } from '@toolcase/react-components'
-
-const card: DashboardCardProps = {
-  type: 'difference',
-  title: 'Revenue',
-  value: 8400,
-  previousValue: 6200,
-  period: 'month',
-}
-
-<DashboardCard card={card} onClick={() => console.log('clicked')} />`}
-						/>
-					</Card>
-				</div>
-			</div>
-		</div>
+			</DemoSection>
+		</DemoPage>
 	)
 }
 

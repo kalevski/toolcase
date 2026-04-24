@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
 
 export type SchemaPropertyType = 'string' | 'number' | 'boolean' | 'array' | 'object'
@@ -235,7 +236,7 @@ export const JSONSchemaDef: React.FC<JSONSchemaDefProps> = ({
 							onClick={() => removeProperty(index)}
 							aria-label={`Remove ${prop.key}`}
 						>
-							<i className="bi bi-x-lg"></i>
+							<Icon name="x-lg" />
 						</button>
 					</div>
 				))}
@@ -247,7 +248,7 @@ export const JSONSchemaDef: React.FC<JSONSchemaDefProps> = ({
 				disabled={disabled}
 				onClick={addProperty}
 			>
-				<i className="bi bi-plus-lg"></i> Add property
+				<Icon name="plus-lg" /> Add property
 			</button>
 		</div>
 	)

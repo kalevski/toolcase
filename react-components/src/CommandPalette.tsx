@@ -1,6 +1,8 @@
 import React, { useId, useRef, useState, useEffect, useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import { Icon } from './Icon'
+import { IconButton } from './IconButton'
+import { Kbd } from './Kbd'
 import { Skeleton } from './Skeleton'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -168,14 +170,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 						spellCheck={false}
 					/>
 					{query && (
-						<button
-							type="button"
+						<IconButton
+							icon="x"
+							label="Clear search"
 							className="component-command-palette__clear"
-							aria-label="Clear search"
 							onClick={() => { setQuery(''); inputRef.current?.focus() }}
-						>
-							<Icon name="x" aria-hidden={true} />
-						</button>
+						/>
 					)}
 				</div>
 
@@ -245,9 +245,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
 				{/* Footer hint */}
 				<div className="component-command-palette__footer" aria-hidden="true">
-					<span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
-					<span><kbd>↵</kbd> select</span>
-					<span><kbd>Esc</kbd> close</span>
+					<span><Kbd>↑</Kbd><Kbd>↓</Kbd> navigate</span>
+					<span><Kbd>↵</Kbd> select</span>
+					<span><Kbd>Esc</Kbd> close</span>
 				</div>
 			</div>
 		</div>,

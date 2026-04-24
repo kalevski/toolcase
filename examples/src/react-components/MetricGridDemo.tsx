@@ -1,5 +1,5 @@
 import React from 'react'
-import { MetricGrid, MetricTile, Skeleton, CodeSnippet } from '@toolcase/react-components'
+import { MetricGrid, MetricTile, Skeleton } from '@toolcase/react-components'
 import { DemoPage, DemoSection } from './_demo'
 
 const MetricGridDemo: React.FC = () => (
@@ -85,30 +85,6 @@ const MetricGridDemo: React.FC = () => (
 					]}
 				/>
 			</div>
-		</DemoSection>
-
-		<DemoSection eyebrow="API" title="Usage">
-			<CodeSnippet
-				language="typescript"
-				code={`import { MetricGrid, MetricTile } from '@toolcase/react-components'
-
-// Data-driven
-<MetricGrid
-  columns={4}
-  items={[
-    { icon: 'hdd', label: 'Storage', value: '34.2', unit: 'GB' },
-    { icon: 'cloud-upload', label: 'Bundles', value: '342' },
-    { icon: 'people', label: 'Seats', value: '12', unit: 'of 25' },
-    { icon: 'activity', label: 'Requests', value: '1.2M' },
-  ]}
-/>
-
-// Children form
-<MetricGrid columns={3}>
-  <MetricTile icon="server" label="Uptime" value="99.98" unit="%" />
-  <MetricTile icon="lightning-charge" label="P95" value="142" unit="ms" />
-</MetricGrid>`}
-			/>
 		</DemoSection>
 	</DemoPage>
 )
