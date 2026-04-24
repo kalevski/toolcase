@@ -21,6 +21,7 @@ export type TcIconName =
     | 'block-stun'
     | 'board-game'
     | 'buff'
+    | 'bug'
     | 'bullet-hell'
     | 'camping'
     | 'card-game'
@@ -30,11 +31,15 @@ export type TcIconName =
     | 'city-building'
     | 'clicker'
     | 'clipping'
+    | 'coin'
     | 'collectible-card-game'
     | 'collision-detection'
     | 'combo-system'
+    | 'console'
     | 'construction-and-management'
     | 'cooldown'
+    | 'coop'
+    | 'crafting'
     | 'creative'
     | 'culling'
     | 'daily-quest'
@@ -53,6 +58,7 @@ export type TcIconName =
     | 'exploration'
     | 'extraction-shooter'
     | 'farming-simulation'
+    | 'fast-travel'
     | 'fighting'
     | 'first-person-shooter'
     | 'fitness'
@@ -61,10 +67,14 @@ export type TcIconName =
     | 'frag'
     | 'frame-data'
     | 'gacha'
+    | 'gamepad'
     | 'gank'
+    | 'gem'
     | 'grand-strategy'
     | 'grinding'
     | 'hack-and-slash'
+    | 'headset'
+    | 'health'
     | 'hero-shooter'
     | 'hit-scan'
     | 'hit-stun'
@@ -78,16 +88,22 @@ export type TcIconName =
     | 'immersive-sim'
     | 'input-lag'
     | 'interactive-fiction'
+    | 'inventory'
     | 'invincibility-frames'
     | 'jrpg'
+    | 'key'
+    | 'keyboard'
     | 'kiting'
     | 'level-streaming'
+    | 'level-up'
     | 'life-simulation'
     | 'lightmap'
+    | 'live-stream'
     | 'lobby'
     | 'lod'
     | 'loot-box'
     | 'loot-table'
+    | 'mana'
     | 'matchmaking'
     | 'metroidvania'
     | 'microtransactions'
@@ -95,6 +111,8 @@ export type TcIconName =
     | 'mmr'
     | 'mob'
     | 'moba'
+    | 'mouse'
+    | 'multiplayer'
     | 'music'
     | 'narrative'
     | 'navmesh'
@@ -103,12 +121,15 @@ export type TcIconName =
     | 'npc'
     | 'open-world'
     | 'parallax-scrolling'
+    | 'particle-system'
     | 'party'
+    | 'pathfinding'
     | 'permadeath'
     | 'physics-based'
     | 'physics-engine'
     | 'platformer'
     | 'playtesting'
+    | 'potion'
     | 'proc'
     | 'procedural-generation'
     | 'procedural-world'
@@ -116,10 +137,12 @@ export type TcIconName =
     | 'projectile-weapon'
     | 'puzzle'
     | 'puzzle-platformer'
+    | 'pvp'
     | 'questline'
     | 'racing'
     | 'ragdoll'
     | 'ranked-queue'
+    | 'replay'
     | 'respawn'
     | 'rhythm'
     | 'roguelike'
@@ -130,6 +153,7 @@ export type TcIconName =
     | 'save-scumming'
     | 'screen-shake'
     | 'season-pass'
+    | 'shader'
     | 'shoot-em-up'
     | 'shooter'
     | 'simulation'
@@ -138,6 +162,7 @@ export type TcIconName =
     | 'souls-like'
     | 'spawn-camping'
     | 'spawn-point'
+    | 'spectator'
     | 'sports'
     | 'sprite-sheet'
     | 'stealth'
@@ -153,15 +178,21 @@ export type TcIconName =
     | 'third-person-shooter'
     | 'tilemap'
     | 'tower-defense'
+    | 'treasure-chest'
     | 'trivia'
+    | 'trophy'
     | 'turn-based-strategy'
     | 'tycoon'
     | 'unranked'
     | 'vehicle-simulation'
     | 'visual-novel'
+    | 'voice-chat'
+    | 'vr-headset'
     | 'walking-simulator'
     | 'weekly-reset'
     | 'word-game'
+    | 'world-map'
+    | 'xp-bar'
 
 export const tcIcons: Record<TcIconName, string> = {
     '4x-strategy': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="9" cy="10" r="4"/>
@@ -228,6 +259,13 @@ export const tcIcons: Record<TcIconName, string> = {
     <circle fill="currentColor" cx="18" cy="6" r="1.4"/>`,
     'buff': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 17 V7 M8 11 L12 7 L16 11"/>`,
+    'bug': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 9 A4 4 0 0 1 16 9 V14 A4 4 0 0 1 8 14 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 9 V18"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 6 L11 8 M15 6 L13 8"/>
+    <circle fill="currentColor" cx="10.5" cy="11" r="0.6"/>
+    <circle fill="currentColor" cx="13.5" cy="11" r="0.6"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 11 L8 11 M3 14 L8 13 M5 17 L9 15"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M21 11 L16 11 M21 14 L16 13 M19 17 L15 15"/>`,
     'bullet-hell': `<circle fill="currentColor" cx="5" cy="5" r="1"/>
     <circle fill="currentColor" cx="12" cy="4" r="1"/>
     <circle fill="currentColor" cx="19" cy="5" r="1"/>
@@ -276,6 +314,9 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 20 L6 17 L7 15 M11 15 L13 17 L14 20"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 6 V20"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 9 L17 9"/>`,
+    'coin': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="8"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="5"/>
+    <path fill="currentColor" d="M12 9 L13 11 L15 11.2 L13.5 12.6 L14 14.8 L12 13.6 L10 14.8 L10.5 12.6 L9 11.2 L11 11 Z"/>`,
     'collectible-card-game': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="8" y="4" width="10" height="14" rx="0.8" transform="rotate(-8 13 11)"/>
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="7" y="5" width="10" height="14" rx="0.8"/>
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="5" y="7" width="10" height="14" rx="0.8" transform="rotate(8 10 14)"/>
@@ -290,6 +331,11 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 16 L8 18 M8 16 L6 18"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 15 L15 18 M15 15 L12 18"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 15 L20 18 M20 15 L17 18"/>`,
+    'console': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="3" y="8" width="18" height="9" rx="0.8"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="8" cy="12.5" r="1.8"/>
+    <circle fill="currentColor" cx="8" cy="12.5" r="0.5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M13 11 H17 M13 13 H17 M13 15 H16"/>
+    <circle fill="currentColor" cx="19" cy="10" r="0.5"/>`,
     'construction-and-management': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 20 H20"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 20 V8 L15 8 L15 20"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 11 H15 M8 14 H15 M8 17 H15 M11 8 V20"/>
@@ -298,16 +344,28 @@ export const tcIcons: Record<TcIconName, string> = {
     'cooldown': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="8"/>
     <path fill="currentColor" d="M12 12 L12 4 A8 8 0 0 1 19 8.5 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 7 V12 L15 14"/>`,
+    'coop': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="7" cy="9" r="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 19 V16 A3 3 0 0 1 11 16 V19"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="17" cy="9" r="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M13 19 V16 A3 3 0 0 1 21 16 V19"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 8 L12 5 L15 8"/>
+    <path fill="currentColor" d="M11 4 L13 4 L13 6 L11 6 Z"/>`,
+    'crafting': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 14 H11 V12 H14 V14 H21"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 14 V18 H14 V14"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 18 H16"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 8 L18 12"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M16 4 L20 8 L18 10 L14 6 Z"/>`,
     'creative': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 4 A8 8 0 0 0 12 20 C14 20 14 18 13 17 C12 16 13 14 15 14 L19 14 A1 1 0 0 0 20 13 A8 8 0 0 0 12 4 Z"/>
     <circle fill="currentColor" cx="8" cy="10" r="1"/>
     <circle fill="currentColor" cx="11" cy="7" r="1"/>
     <circle fill="currentColor" cx="15" cy="7" r="1"/>
     <circle fill="currentColor" cx="17.5" cy="10" r="1"/>`,
-    'culling': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 6 L10 10 L10 18 L4 22 Z"/>
-    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="14" cy="10" r="1.5"/>
-    <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="12" y="14" width="3" height="3" stroke-dasharray="2 2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 8 A1.5 1.5 0 0 0 17 11 A1.5 1.5 0 0 0 17 8 Z" stroke-dasharray="2 2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 16 L19 18 L17 20 L15 18 Z" stroke-dasharray="2 2"/>`,
+    'culling': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 7 L9 11 L9 13 L3 17 Z"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="14" cy="9" r="1.5"/>
+    <rect fill="currentColor" x="13" y="13" width="3" height="3"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="20" cy="6" r="1.2" stroke-dasharray="1.5 1.5"/>
+    <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="18" y="17" width="3" height="3" stroke-dasharray="1.5 1.5"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 11 L20 6 M9 13 L20 18" opacity="0.3"/>`,
     'daily-quest': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="4" y="5" width="16" height="15" rx="0.8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 9 H20 M8 3 V7 M16 3 V7"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 14 L11 17 L16 12"/>`,
@@ -370,6 +428,9 @@ export const tcIcons: Record<TcIconName, string> = {
     <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="9" cy="19" r="1.3"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 14 H13 L14 11 L16 11 L17 14 H19"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M18 10 C18 6 20 5 20 5 C20 5 22 7 20 9 C21 9 21 11 19 11"/>`,
+    'fast-travel': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 3 C8 3 5 6 5 10 C5 15 12 21 12 21 C12 21 19 15 19 10 C19 6 16 3 12 3 Z"/>
+    <path fill="currentColor" d="M9 7.5 L9 12.5 L15 10 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 6 L4 6 M3 10 L5 10 M2 14 L4 14"/>`,
     'fighting': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 10 A3 3 0 0 1 8 7 H10 V14 H8 A3 3 0 0 1 5 11 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M19 14 A3 3 0 0 1 16 17 H14 V10 H16 A3 3 0 0 1 19 13 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 10 H14 M10 14 H14"/>`,
@@ -405,6 +466,12 @@ export const tcIcons: Record<TcIconName, string> = {
     <circle fill="currentColor" cx="14" cy="10" r="1"/>
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="9" y="13" width="6" height="4"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 17 V20 M14 17 V20 M9 20 H15"/>`,
+    'gamepad': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 10 A3 3 0 0 1 8 7 H16 A3 3 0 0 1 19 10 V14 A3 3 0 0 1 16 17 L14 14 H10 L8 17 A3 3 0 0 1 5 14 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 11 V13 M6 12 H8"/>
+    <circle fill="currentColor" cx="15" cy="11" r="0.7"/>
+    <circle fill="currentColor" cx="17" cy="12.5" r="0.7"/>
+    <circle fill="currentColor" cx="15" cy="14" r="0.7"/>
+    <circle fill="currentColor" cx="13" cy="12.5" r="0.7"/>`,
     'gank': `<circle fill="currentColor" cx="12" cy="12" r="1.2"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 4 L9 9"/>
     <path fill="currentColor" d="M9 9 L7.5 7.5 L7.5 10 L9.5 10 Z"/>
@@ -414,6 +481,11 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="currentColor" d="M9 15 L7.5 14 L7.5 16.5 L9.5 16.5 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M20 20 L15 15"/>
     <path fill="currentColor" d="M15 15 L16.5 14 L16.5 16.5 L14.5 16.5 Z"/>`,
+    'gem': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 4 H17 L21 9 L12 21 L3 9 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 9 H21"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 4 L11 9 L12 21"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 4 L13 9 L12 21"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 9 L13 9"/>`,
     'grand-strategy': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="11" cy="12" r="7"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 12 H18 M11 5 C8 8 8 16 11 19 M11 5 C14 8 14 16 11 19"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M19 10 V3 L22 4 L19 5"/>`,
@@ -423,6 +495,13 @@ export const tcIcons: Record<TcIconName, string> = {
     'hack-and-slash': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 20 C8 16 14 10 20 4"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M16 4 H20 V8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 18 L9 15 L7 13 L4 16 Z"/>`,
+    'headset': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 13 V11 A7 7 0 0 1 19 11 V13"/>
+    <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="3" y="13" width="3" height="6" rx="0.6"/>
+    <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="18" y="13" width="3" height="6" rx="0.6"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 19 H10 V21"/>
+    <circle fill="currentColor" cx="10" cy="21.5" r="0.7"/>`,
+    'health': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 20 C7 16 4 13 4 9.5 A3.5 3.5 0 0 1 12 7.5 A3.5 3.5 0 0 1 20 9.5 C20 13 17 16 12 20 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 12 H8 L9 10 L11 13 L13 11 L14 12 H19"/>`,
     'hero-shooter': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 10 A5 5 0 0 1 17 10 V13 A5 5 0 0 1 7 13 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 12 H17"/>
     <path fill="currentColor" d="M9 11.3 L11 11.3 L10 12.6 Z"/>
@@ -481,6 +560,10 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 8 L13 8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 11 L7 13 M7 13 L5 14 M7 13 L9 14"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 11 L17 13 M17 13 L15 14 M17 13 L19 14"/>`,
+    'inventory': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 9 H17 V19 A2 2 0 0 1 15 21 H9 A2 2 0 0 1 7 19 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 9 V7 A3 3 0 0 1 15 7 V9"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 13 H15 V17 H9 Z"/>
+    <path fill="currentColor" d="M11.5 14.5 L12.5 14.5 L12.5 15.5 L11.5 15.5 Z"/>`,
     'invincibility-frames': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5 A2 2 0 0 0 12 9 A2 2 0 0 0 12 5 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 13 L12 9 L15 13 L15 17 L13 17 L13 20 L11 20 L11 17 L9 17 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 7 L2 7 M20 7 L22 7 M4 17 L2 17 M20 17 L22 17"/>
@@ -491,6 +574,14 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 14 L8 20 H16 L16 14 A4 4 0 0 0 8 14 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 16 L10 20 M14 16 L14 20"/>
     <path fill="currentColor" d="M11 8 L13 8 L12 9.5 Z"/>`,
+    'key': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="7" cy="12" r="3.5"/>
+    <circle fill="currentColor" cx="7" cy="12" r="1"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10.5 12 H21"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M16 12 V15 M19 12 V16"/>`,
+    'keyboard': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="3" y="7" width="18" height="11" rx="1"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 9 H6 M8 9 H9 M11 9 H12 M14 9 H15 M17 9 H19"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 12 H6 M8 12 H9 M11 12 H12 M14 12 H15 M17 12 H19"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 16 H16"/>`,
     'kiting': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="8" cy="6" r="1.5"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 7.5 L8 14 L5 20 M8 14 L11 16 M8 11 L11 9"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 9 L17 9"/>
@@ -502,6 +593,8 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 12 L10 12 M14 12 L17 12"/>
     <path fill="currentColor" d="M10 12 L8.5 11 L8.5 13 Z"/>
     <path fill="currentColor" d="M17 12 L15.5 11 L15.5 13 Z"/>`,
+    'level-up': `<path fill="currentColor" d="M12 3 L13 5 L15 5 L13.5 6.5 L14 8.5 L12 7.5 L10 8.5 L10.5 6.5 L9 5 L11 5 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 12 V21 M8 16 L12 12 L16 16"/>`,
     'life-simulation': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 12 L12 5 L20 12"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 11 V20 H18 V11"/>
     <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="10" cy="15" r="1.2"/>
@@ -511,6 +604,11 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 16 L20 16"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 16 L8 20 L20 20 L16 16"/>
     <path fill="currentColor" d="M8 17 L16 17 L14 19 L10 19 Z" opacity="0.3"/>`,
+    'live-stream': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="3" y="6" width="13" height="11" rx="0.8"/>
+    <path fill="currentColor" d="M7 9 L11 11.5 L7 14 Z"/>
+    <circle fill="currentColor" cx="13" cy="13" r="1"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M19 8 A3.5 3.5 0 0 1 19 16"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M21 6 A6 6 0 0 1 21 18"/>`,
     'lobby': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="3" y="7" width="18" height="12" rx="0.8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 10 H21"/>
     <circle fill="currentColor" cx="7" cy="14" r="1"/>
@@ -536,6 +634,9 @@ export const tcIcons: Record<TcIconName, string> = {
     <circle fill="currentColor" cx="12.5" cy="9" r="0.5"/>
     <circle fill="currentColor" cx="12.5" cy="13" r="0.5"/>
     <circle fill="currentColor" cx="12.5" cy="17" r="0.5"/>`,
+    'mana': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 3 C9 8 6 11 6 14 A6 6 0 0 0 18 14 C18 11 15 8 12 3 Z"/>
+    <path fill="currentColor" d="M14 11 L14.5 12.2 L15.7 12.5 L14.7 13.4 L15 14.7 L14 14 L13 14.7 L13.3 13.4 L12.3 12.5 L13.5 12.2 Z"/>
+    <circle fill="currentColor" cx="10" cy="13" r="0.5"/>`,
     'matchmaking': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="7" cy="9" r="2"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 18 V15 A3 3 0 0 1 10 15 V18"/>
     <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="17" cy="9" r="2"/>
@@ -568,6 +669,16 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 20 L20 7"/>
     <circle fill="currentColor" cx="5" cy="19" r="1"/>
     <circle fill="currentColor" cx="19" cy="5" r="1"/>`,
+    'mouse': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 5 A4 4 0 0 0 6 9 V15 A6 6 0 0 0 18 15 V9 A4 4 0 0 0 14 5 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5 V11"/>
+    <rect fill="currentColor" x="11.4" y="7.5" width="1.2" height="2.5" rx="0.4"/>`,
+    'multiplayer': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="6" cy="9" r="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 17 V15 A2.5 2.5 0 0 1 9 15 V17"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="6" r="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 14 V12 A2.5 2.5 0 0 1 15 12 V14"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="18" cy="9" r="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M15 17 V15 A2.5 2.5 0 0 1 21 15 V17"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 20 H21"/>`,
     'music': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 5 V16"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 5 L18 3 V14"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 7 L18 5"/>
@@ -580,12 +691,11 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 10 L14 13 L20 12 M14 7 L14 13 L17 20 M4 20 L14 13"/>`,
     'nerf': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 7 V17 M8 13 L12 17 L16 13"/>`,
-    'noclip': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 7 H12" stroke-dasharray="2 2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 10 A2 2 0 0 0 9 14 A2 2 0 0 0 9 14 Z" stroke-dasharray="2 2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 14 L8 18 M11 18 L13 14" stroke-dasharray="2 2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 4 L14 20"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 4 L18 8 M14 12 L18 16 M14 20 L18 16 Z" opacity="0"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 4 L20 8 L20 20 L14 20"/>`,
+    'noclip': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="13" y="4" width="7" height="16"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 6 V18 M16 6 V18 M18 6 V18" opacity="0.35"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="8" cy="9" r="2" stroke-dasharray="2 2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 18 V14 A3 3 0 0 1 11 14 V18" stroke-dasharray="2 2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 12 H17" stroke-dasharray="2 2"/>`,
     'npc': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="10" cy="8" r="2.5"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 19 V16 A4 4 0 0 1 14 16 V19"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 5 H21 V11 H18 L16 13 V11 H14 Z"/>
@@ -603,6 +713,15 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M2 7 L4 9 M20 7 L22 9"/>
     <path fill="currentColor" d="M2 7 L4 9 L3 10 L1 8 Z" opacity="0"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 8 L2 6 M2 10 L4 12 M20 8 L22 6 M20 12 L22 10"/>`,
+    'particle-system': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="6" cy="18" r="1.8"/>
+    <circle fill="currentColor" cx="9" cy="14" r="0.8"/>
+    <circle fill="currentColor" cx="13" cy="11" r="0.7"/>
+    <circle fill="currentColor" cx="16" cy="8" r="0.6"/>
+    <circle fill="currentColor" cx="11" cy="9" r="0.5"/>
+    <circle fill="currentColor" cx="14" cy="14" r="0.5"/>
+    <circle fill="currentColor" cx="19" cy="6" r="0.5"/>
+    <circle fill="currentColor" cx="6" cy="11" r="0.4"/>
+    <circle fill="currentColor" cx="9" cy="6" r="0.4"/>`,
     'party': `<ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="8" cy="9" rx="2.5" ry="3"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 12 L8 21"/>
     <ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="16" cy="7" rx="2.5" ry="3"/>
@@ -611,6 +730,11 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="currentColor" d="M20 16 L21 14 L19 15 Z"/>
     <circle fill="currentColor" cx="13" cy="18" r="0.6"/>
     <circle fill="currentColor" cx="6" cy="15" r="0.6"/>`,
+    'pathfinding': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="3" y="3" width="18" height="18"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 9 H21 M3 15 H21 M9 3 V21 M15 3 V21" opacity="0.35"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 19 L8 15 L12 17 L15 11 L19 5" stroke-dasharray="2 2"/>
+    <circle fill="currentColor" cx="5" cy="19" r="1.2"/>
+    <circle fill="currentColor" cx="19" cy="5" r="1.2"/>`,
     'permadeath': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 8 A5 5 0 0 1 17 8 V12 A5 5 0 0 1 13 17 H11 A5 5 0 0 1 7 12 Z"/>
     <circle fill="currentColor" cx="10" cy="10" r="1"/>
     <circle fill="currentColor" cx="14" cy="10" r="1"/>
@@ -635,6 +759,11 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 13 H13"/>
     <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="17" cy="8" r="3.5"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5 L22 13"/>`,
+    'potion': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 3 H14 V6 L16 9 V18 A2 2 0 0 1 14 20 H10 A2 2 0 0 1 8 18 V9 L10 6 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9.5 6 H14.5"/>
+    <path fill="currentColor" d="M8.5 13 H15.5 V18 A1.5 1.5 0 0 1 14 19.5 H10 A1.5 1.5 0 0 1 8.5 18 Z" opacity="0.3"/>
+    <circle fill="currentColor" cx="11" cy="16" r="0.5"/>
+    <circle fill="currentColor" cx="13" cy="14" r="0.4"/>`,
     'proc': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 3 V8 M12 16 V21 M3 12 H8 M16 12 H21"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 6 L9 9 M15 9 L18 6 M6 18 L9 15 M15 15 L18 18"/>
     <circle fill="currentColor" cx="12" cy="12" r="2"/>`,
@@ -659,6 +788,11 @@ export const tcIcons: Record<TcIconName, string> = {
     'puzzle': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 5 H10 V7 A1.5 1.5 0 0 0 13 7 V5 H18 V10 A1.5 1.5 0 0 1 16 10 H14 V14 H16 A1.5 1.5 0 0 1 18 15.5 V19 H13 V17 A1.5 1.5 0 0 0 10 17 V19 H5 V14 H7 A1.5 1.5 0 0 0 7 11 H5 Z"/>`,
     'puzzle-platformer': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 19 H20"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 15 H11 V13.5 A1 1 0 0 1 13 13.5 V15 H16 V17 A1 1 0 0 1 14.5 17 H13.5 V19 H10.5 V17 H9.5 A1 1 0 0 1 8 17 Z"/>`,
+    'pvp': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="6" cy="8" r="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 18 V14 A3 3 0 0 1 9 14 V18"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="18" cy="8" r="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M15 18 V14 A3 3 0 0 1 21 14 V18"/>
+    <path fill="currentColor" d="M13 6 L11 11 L12.5 11 L11 16 L13.5 10.5 L12 10.5 Z"/>`,
     'questline': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 3 H18 V21 H8 A1 1 0 0 1 8 19 H16 A1 1 0 0 0 16 17 H8 A1 1 0 0 1 8 15 H16 A1 1 0 0 0 16 13 H8 A1 1 0 0 1 8 3 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 8 L13 8 M11 8 L11 11 M13 8 L15 10"/>`,
     'racing': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 4 V20"/>
@@ -666,15 +800,19 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="currentColor" d="M5 4 H9 V6 H7 V8 H9 V10 H7 V12 H5 Z"/>
     <path fill="currentColor" d="M13 4 H17 V6 H15 V8 H17 V10 H15 V12 H13 V10 H11 V8 H13 V6 H11 V4 Z" opacity="0"/>
     <path fill="currentColor" d="M9 6 H11 V8 H9 Z M13 6 H15 V8 H13 Z M9 10 H11 V12 H9 Z M13 10 H15 V12 H13 Z M11 4 H13 V6 H11 Z M11 8 H13 V10 H11 Z"/>`,
-    'ragdoll': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="7" cy="6" r="2"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 8 L8 13 L11 14 L14 12 L18 13"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M11 14 L10 18 L13 19"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 13 L5 16 L6 19"/>`,
+    'ragdoll': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 19 H21"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="6" cy="14" r="1.8"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.5 L11 16 L18 17"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 14 L12 11 L15 13"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 17 L13 19 M17 17 L19 19"/>`,
     'ranked-queue': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 20 H19"/>
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="6" y="14" width="4" height="6"/>
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="10" y="10" width="4" height="10"/>
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="14" y="6" width="4" height="14"/>
     <path fill="currentColor" d="M15 7 L17 7 L17 9 L15 9 Z"/>`,
+    'replay': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M19 12 A7 7 0 1 1 12 5 H15"/>
+    <path fill="currentColor" d="M14 7 L17 5 L14 3 Z"/>
+    <path fill="currentColor" d="M10 9 L14 12 L10 15 Z"/>`,
     'respawn': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="7" stroke-dasharray="2 2"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 8 A1.5 1.5 0 0 0 12 11 A1.5 1.5 0 0 0 12 8 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 15 L12 11 L14 15 L14 17 L13 17 L13 19 L11 19 L11 17 L10 17 Z"/>
@@ -719,6 +857,10 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 12 L10 10 L12 13 L14 11 L16 12"/>`,
     'season-pass': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 8 V16 L7 14 L10 16 L13 14 L16 16 L20 16 V8 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 11 H15 M7 13 H13"/>`,
+    'shader': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="11" cy="13" r="7"/>
+    <path fill="currentColor" d="M14 8 A5 5 0 0 0 7 16" opacity="0.35"/>
+    <circle fill="currentColor" cx="9" cy="11" r="1.2"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M18 6 L20 4 M16 5 L17 3 M19 8 L21 7"/>`,
     'shoot-em-up': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 4 L15 9 H9 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 9 L7 12 H17 L15 9"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 12 V14 M11 14 V16 M13 14 V16 M12 18 V20"/>`,
@@ -753,6 +895,9 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M18 5.5 V7 M18 11 V12.5 M14.5 9 H16 M20 9 H21.5 M16 7 L17 8 M20 11 L19 10"/>`,
     'spawn-point': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 3 C8 3 5 6 5 10 C5 15 12 21 12 21 C12 21 19 15 19 10 C19 6 16 3 12 3 Z"/>
     <circle fill="currentColor" cx="12" cy="10" r="2"/>`,
+    'spectator': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 12 C5 7 9 5 12 5 C15 5 19 7 21 12 C19 17 15 19 12 19 C9 19 5 17 3 12 Z"/>
+    <circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="3"/>
+    <circle fill="currentColor" cx="12" cy="12" r="1.4"/>`,
     'sports': `<circle fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="9" cy="13" r="6"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 10 C8 12 10 12 13 10 M5 16 C8 14 10 14 13 16 M9 7 V19"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M16 5 L20 5 L20 9 L18 11 M17 10 A2 2 0 0 1 20 10"/>`,
@@ -818,9 +963,20 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="currentColor" d="M11 8 L13 8 L13 6 L11 6 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M15 9 Q19 10 20 14"/>
     <path fill="currentColor" d="M20 14 L19 12 L21 13 Z"/>`,
+    'treasure-chest': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 11 H20 V19 H4 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 11 V8 A1 1 0 0 1 5 7 H19 A1 1 0 0 1 20 8 V11"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 14 H20"/>
+    <rect fill="currentColor" x="11" y="12" width="2" height="3"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M6 8 V11 M18 8 V11"/>`,
     'trivia': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 10 A4 4 0 0 1 16 10 C16 12 13 13 13 15"/>
     <circle fill="currentColor" cx="13" cy="18" r="0.9"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 4 L6 6 M20 4 L18 6 M4 12 H6 M18 12 H20"/>`,
+    'trophy': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 4 H17 V9 A5 5 0 0 1 7 9 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 5 H4 V8 A3 3 0 0 0 7 11"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 5 H20 V8 A3 3 0 0 1 17 11"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 14 V17"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 17 H15 V19 H9 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M8 21 H16"/>`,
     'turn-based-strategy': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 8 L5 13 A2 2 0 0 0 7 15 L11 15"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 8 H7 M3 8 H5 M5 6 V8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 8 C16 8 16 11 14 11 V14 H17 V11 C19 11 19 8 17 8 Z"/>
@@ -843,14 +999,20 @@ export const tcIcons: Record<TcIconName, string> = {
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 12 H11 M5 15 H9"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M14 5 H21 V12 H18 L15 15 V12 H14 Z"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M16 8 H19 M16 10 H19"/>`,
-    'walking-simulator': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M7 4 A1 1 0 0 0 7 6 A1 1 0 0 0 7 4 Z"/>
-    <ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="7" cy="8" rx="1.6" ry="1"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10 8 A1 1 0 0 0 10 10 A1 1 0 0 0 10 8 Z"/>
-    <ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="10" cy="12" rx="1.6" ry="1"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M13 12 A1 1 0 0 0 13 14 A1 1 0 0 0 13 12 Z"/>
-    <ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="13" cy="16" rx="1.6" ry="1"/>
-    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M16 16 A1 1 0 0 0 16 18 A1 1 0 0 0 16 16 Z"/>
-    <ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="16" cy="20" rx="1.6" ry="1"/>`,
+    'voice-chat': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="9" y="4" width="6" height="11" rx="3"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 11 V12 A7 7 0 0 0 19 12 V11"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M12 19 V21 M9 21 H15"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M10.5 7 H13.5 M10.5 10 H13.5"/>`,
+    'vr-headset': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 9 H21 V16 H17 L15 14 H9 L7 16 H3 Z"/>
+    <circle fill="currentColor" cx="8" cy="12.5" r="1"/>
+    <circle fill="currentColor" cx="16" cy="12.5" r="1"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 9 V7 H19 V9"/>`,
+    'walking-simulator': `<ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="6" cy="18" rx="1.4" ry="2.2" transform="rotate(-25 6 18)"/>
+    <circle fill="currentColor" cx="4.5" cy="16" r="0.4"/>
+    <ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="11" cy="13" rx="1.4" ry="2.2" transform="rotate(-25 11 13)"/>
+    <circle fill="currentColor" cx="9.5" cy="11" r="0.4"/>
+    <ellipse fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" cx="16" cy="8" rx="1.4" ry="2.2" transform="rotate(-25 16 8)"/>
+    <circle fill="currentColor" cx="14.5" cy="6" r="0.4"/>`,
     'weekly-reset': `<rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="4" y="5" width="16" height="15" rx="0.8"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M4 9 H20 M8 3 V7 M16 3 V7"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M15 13 A3 3 0 1 0 15 17"/>
@@ -861,4 +1023,12 @@ export const tcIcons: Record<TcIconName, string> = {
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="7" y="13" width="5" height="5"/>
     <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="13" y="13" width="5" height="5"/>
     <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5.5 10 V7.5 L7.5 7.5 M11.5 10 V7.5 M11.5 7.5 H13 M11.5 9 H13 M17.5 10 V7.5 L19.5 10 V7.5 M9 17 L9.5 14 L10 17 M8.8 16 H10.2 M14.5 17 V14.5 H16 V16 H14.5"/>`,
+    'world-map': `<path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M3 6 L9 4 L15 6 L21 4 V18 L15 20 L9 18 L3 20 Z"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M9 4 V18 M15 6 V20"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5 8 C7 9 8 11 7 13"/>
+    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 8 C18 10 18 12 16 14"/>
+    <path fill="currentColor" d="M11 9 A1.5 1.5 0 0 1 14 9 C14 11 12.5 14 12.5 14 C12.5 14 11 11 11 9 Z"/>`,
+    'xp-bar': `<path fill="currentColor" d="M12 3 L13 5.5 L15.5 5.8 L13.5 7.5 L14 10 L12 8.7 L10 10 L10.5 7.5 L8.5 5.8 L11 5.5 Z"/>
+    <rect fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" x="3" y="13" width="18" height="6" rx="1"/>
+    <rect fill="currentColor" x="4" y="14" width="11" height="4" rx="0.5"/>`,
 }
