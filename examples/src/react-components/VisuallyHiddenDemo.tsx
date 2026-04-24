@@ -1,33 +1,39 @@
 import React from 'react'
-import { VisuallyHidden } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	VisuallyHidden
+} from '@toolcase/react-components'
 
 const VisuallyHiddenDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Typography"
-		title="VisuallyHidden"
-		lede="Hides content visually while keeping it accessible to screen readers. Use the browser dev tools or a screen reader to confirm the hidden text is in the DOM."
-	>
-		<DemoSection
-			title="Hidden Label for Icon Button"
-			caption="The button below only shows an icon, but has an accessible label for screen readers."
-		>
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Typography</RichPageHeaderChip>}
+				title="VisuallyHidden"
+				description="Hides content visually while keeping it accessible to screen readers. Use the browser dev tools or a screen reader to confirm the hidden text is in the DOM."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Hidden Label for Icon Button">
 			<button className="btn btn-outline-secondary">
 				<i className="bi bi-heart-fill" />
 				<VisuallyHidden>Add to favorites</VisuallyHidden>
 			</button>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			title="Skip Link"
-			caption="A common pattern for skip-navigation links. The text below is invisible but present in the DOM."
-		>
+		<SectionCard title="Skip Link">
 			<VisuallyHidden as="div">
 				Skip to main content
 			</VisuallyHidden>
 			<p>The hidden text &quot;Skip to main content&quot; exists in the DOM above this paragraph—inspect to verify.</p>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default VisuallyHiddenDemo

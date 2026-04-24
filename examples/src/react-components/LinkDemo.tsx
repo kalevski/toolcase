@@ -1,14 +1,22 @@
 import React from 'react'
-import { Link } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Link,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const LinkDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Buttons & Actions"
-		title="Link"
-		lede="Styled anchor element with variant colors, underline control, and external link indicator."
-	>
-		<DemoSection title="Variants">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Buttons & Actions</RichPageHeaderChip>}
+				title="Link"
+				description="Styled anchor element with variant colors, underline control, and external link indicator."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Variants">
 			<div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
 				<Link href="#" variant="primary">Primary</Link>
 				<Link href="#" variant="secondary">Secondary</Link>
@@ -17,23 +25,27 @@ const LinkDemo: React.FC = () => (
 				<Link href="#" variant="warning">Warning</Link>
 				<Link href="#" variant="danger">Danger</Link>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Underline">
+		<SectionCard title="Underline">
 			<div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
 				<Link href="#" underline="always">Always underlined</Link>
 				<Link href="#" underline="hover">Underline on hover</Link>
 				<Link href="#" underline="none">No underline</Link>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="External">
+		<SectionCard title="External">
 			<div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
 				<Link href="https://example.com" external>External Link</Link>
 				<Link href="https://example.com" external variant="info">External Info</Link>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default LinkDemo

@@ -1,18 +1,26 @@
 import React, { useState } from 'react'
-import { Switch } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Switch
+} from '@toolcase/react-components'
 
 const SwitchDemo: React.FC = () => {
 	const [notifications, setNotifications] = useState(true)
 	const [darkMode, setDarkMode] = useState(false)
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="Switch"
-			lede="Toggle switch for on/off states with size variants and optional label."
-		>
-			<DemoSection title="Basic">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="Switch"
+				description="Toggle switch for on/off states with size variants and optional label."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Basic">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Switch
 						label="Enable notifications"
@@ -25,25 +33,29 @@ const SwitchDemo: React.FC = () => {
 						onChange={(e) => setDarkMode(e.target.checked)}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Sizes">
+			<SectionCard title="Sizes">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Switch size="small" label="Small" defaultChecked />
 					<Switch size="default" label="Default" defaultChecked />
 					<Switch size="large" label="Large" defaultChecked />
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="States">
+			<SectionCard title="States">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Switch label="Checked" defaultChecked />
 					<Switch label="Unchecked" />
 					<Switch label="Disabled (on)" defaultChecked disabled />
 					<Switch label="Disabled (off)" disabled />
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

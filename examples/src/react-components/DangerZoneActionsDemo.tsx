@@ -1,17 +1,26 @@
 import React, { useState } from 'react'
-import { DangerZoneActions, Alert } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Alert,
+	DangerZoneActions,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const DangerZoneActionsDemo: React.FC = () => {
 	const [lastAction, setLastAction] = useState<string | null>(null)
 
 	return (
-		<DemoPage
-			eyebrow="Dashboard & Admin"
-			title="DangerZoneActions"
-			lede="A settings section for destructive or irreversible actions with labels, descriptions, and danger buttons."
-		>
-			<DemoSection title="Project Settings">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Dashboard & Admin</RichPageHeaderChip>}
+				title="DangerZoneActions"
+				description="A settings section for destructive or irreversible actions with labels, descriptions, and danger buttons."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Project Settings">
 				{lastAction && (
 					<Alert variant="warning" className="mb-3">
 						Action triggered: <strong>{lastAction}</strong>
@@ -40,9 +49,9 @@ const DangerZoneActionsDemo: React.FC = () => {
 					]}
 					onActionClick={setLastAction}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Account Settings">
+			<SectionCard title="Account Settings">
 				<DangerZoneActions
 					actions={[
 						{
@@ -60,8 +69,12 @@ const DangerZoneActionsDemo: React.FC = () => {
 					]}
 					onActionClick={setLastAction}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { TreeView, TreeNode } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	TreeNode,
+	TreeView
+} from '@toolcase/react-components'
 
 const treeData: TreeNode[] = [
 	{
@@ -47,12 +52,16 @@ export const TreeViewDemo: React.FC = () => {
 	const [exp2,      setExp2]      = useState<string[]>([])
 
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="TreeView"
-			lede="Hierarchical collapsible tree with keyboard navigation and optional checkboxes."
-		>
-			<DemoSection title="File Tree">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="TreeView"
+				description="Hierarchical collapsible tree with keyboard navigation and optional checkboxes."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="File Tree">
 				<TreeView
 					nodes={treeData}
 					selected={selected}
@@ -63,9 +72,9 @@ export const TreeViewDemo: React.FC = () => {
 				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.85rem' }}>
 					Selected: {selected.join(', ') || '—'}
 				</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Checkbox Mode">
+			<SectionCard title="Checkbox Mode">
 				<TreeView
 					nodes={treeData}
 					selected={checked}
@@ -74,7 +83,11 @@ export const TreeViewDemo: React.FC = () => {
 					onExpandChange={setExp2}
 					checkboxMode
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

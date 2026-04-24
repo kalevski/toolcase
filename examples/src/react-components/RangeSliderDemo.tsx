@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { RangeSlider } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RangeSlider,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export const RangeSliderDemo: React.FC = () => {
 	const [price,    setPrice]    = useState<[number, number]>([20, 80])
@@ -9,12 +13,16 @@ export const RangeSliderDemo: React.FC = () => {
 	const [ticked,   setTicked]   = useState<[number, number]>([2, 7])
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="RangeSlider"
-			lede="Dual-handle range input with keyboard support and optional tick marks."
-		>
-			<DemoSection title="Price Range">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="RangeSlider"
+				description="Dual-handle range input with keyboard support and optional tick marks."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Price Range">
 				<RangeSlider
 					label="Price range"
 					value={price}
@@ -24,9 +32,9 @@ export const RangeSliderDemo: React.FC = () => {
 					step={5}
 					formatValue={(v) => `$${v}`}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Temperature">
+			<SectionCard title="Temperature">
 				<RangeSlider
 					label="Temperature (°C)"
 					value={temp}
@@ -36,9 +44,9 @@ export const RangeSliderDemo: React.FC = () => {
 					step={1}
 					formatValue={(v) => `${v}°`}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Ticks">
+			<SectionCard title="With Ticks">
 				<RangeSlider
 					label="Rating range"
 					value={ticked}
@@ -48,9 +56,9 @@ export const RangeSliderDemo: React.FC = () => {
 					step={1}
 					ticks
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Year Range">
+			<SectionCard title="Year Range">
 				<RangeSlider
 					label="Year range"
 					value={year}
@@ -60,7 +68,11 @@ export const RangeSliderDemo: React.FC = () => {
 					step={1}
 					formatValue={(v) => `${v}`}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { Chart, Button } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Button,
+	Chart,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const barData = [
 	{ label: 'Jan', value: 4200 },
@@ -69,12 +74,16 @@ export const ChartDemo: React.FC = () => {
 	const [containerLoading, setContainerLoading] = useState(false)
 
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="Chart"
-			lede="SVG-native chart components — bar, line, area, pie/donut, heatmap, funnel, gantt, sparkline, and trend indicator."
-		>
-			<DemoSection title="Trend Indicator">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="Chart"
+				description="SVG-native chart components — bar, line, area, pie/donut, heatmap, funnel, gantt, sparkline, and trend indicator."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Trend Indicator">
 				<div className="d-flex gap-3 flex-wrap align-items-center">
 					<Chart chart={{ type: 'trend-indicator', value: 12.5 }} />
 					<Chart chart={{ type: 'trend-indicator', value: -4.2 }} />
@@ -82,9 +91,9 @@ export const ChartDemo: React.FC = () => {
 					<Chart chart={{ type: 'trend-indicator', value: '+ 18%', direction: 'up', size: 'large' }} />
 					<Chart chart={{ type: 'trend-indicator', value: '- 7%', direction: 'down', size: 'small' }} />
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Sparkline">
+			<SectionCard title="Sparkline">
 				<div className="d-flex gap-4 flex-wrap align-items-center">
 					<div>
 						<div className="text-muted small mb-1">Line</div>
@@ -99,33 +108,33 @@ export const ChartDemo: React.FC = () => {
 						<Chart chart={{ type: 'sparkline', data: [10, 22, 18, 35, 28, 42, 55], sparklineType: 'bar', color: '#f59e0b', height: 48, width: 160 }} />
 					</div>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Bar Chart">
+			<SectionCard title="Bar Chart">
 				<Chart chart={{ type: 'bar', data: barData, title: 'Monthly Revenue', subtitle: 'Jan – Jun 2024', showValues: true }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Horizontal Bar">
+			<SectionCard title="Horizontal Bar">
 				<Chart chart={{ type: 'bar', data: barData.slice(0, 4), orientation: 'horizontal', title: 'Top Months' }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Line Chart">
+			<SectionCard title="Line Chart">
 				<Chart chart={{ type: 'line', series: lineSeries, title: 'Revenue vs Expenses', subtitle: 'Jan – Jun 2024' }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Area Chart">
+			<SectionCard title="Area Chart">
 				<Chart chart={{ type: 'area', series: lineSeries, title: 'Trend Overview' }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Pie Chart">
+			<SectionCard title="Pie Chart">
 				<Chart chart={{ type: 'pie', data: pieData, title: 'Traffic Sources' }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Donut Chart">
+			<SectionCard title="Donut Chart">
 				<Chart chart={{ type: 'pie', data: pieData, title: 'Traffic Sources', donut: true, centerLabel: 'Total' }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Heatmap">
+			<SectionCard title="Heatmap">
 				<Chart chart={{
 					type: 'heatmap',
 					data: heatmapData,
@@ -133,17 +142,17 @@ export const ChartDemo: React.FC = () => {
 					cols: ['9am', '11am', '1pm', '3pm', '5pm'],
 					title: 'Activity by Day & Hour',
 				}} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Funnel Chart">
+			<SectionCard title="Funnel Chart">
 				<Chart chart={{ type: 'funnel', data: funnelData, title: 'Sales Pipeline' }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Gantt Chart">
+			<SectionCard title="Gantt Chart">
 				<Chart chart={{ type: 'gantt', tasks: ganttTasks, title: 'Project Timeline' }} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Chart Container">
+			<SectionCard title="Chart Container">
 				<div className="d-flex gap-2 mb-3">
 					<Button size="small" variant="secondary" onClick={() => setContainerLoading(v => !v)}>
 						Toggle Loading
@@ -154,11 +163,15 @@ export const ChartDemo: React.FC = () => {
 						<p className="text-muted mb-0">Chart content goes here when not loading.</p>
 					</div>
 				</Chart>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Empty State">
+			<SectionCard title="Empty State">
 				<Chart chart={{ type: 'container', title: 'No Data', empty: true, emptySlot: <span>No records found</span> }} />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

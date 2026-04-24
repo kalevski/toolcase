@@ -1,6 +1,10 @@
-import { DashboardCard } from '@toolcase/react-components'
+import {
+	DashboardCard,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 import type { DashboardCardProps } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 const cards: DashboardCardProps[] = [
 	{
@@ -109,19 +113,27 @@ const cards: DashboardCardProps[] = [
 
 const DashboardCardDemo = () => {
 	return (
-		<DemoPage
-			eyebrow="Layout & Surfaces"
-			title="DashboardCard"
-			lede="A versatile card component supporting basic, difference, metric, slices, list, status, activity, and colored variants for dashboard layouts."
-		>
-			<DemoSection title="All variants">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="DashboardCard"
+				description="A versatile card component supporting basic, difference, metric, slices, list, status, activity, and colored variants for dashboard layouts."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="All variants">
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
 					{cards.map((card, i) => (
 						<DashboardCard onClick={() => console.log('clicked', card.type)} key={i} card={card} />
 					))}
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { ExtendedSelect, ExtendedSelectItem } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ExtendedSelect,
+	ExtendedSelectItem,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const iconItems: ExtendedSelectItem[] = [
 	{ key: 'dashboard', name: 'Dashboard', icon: 'grid', description: 'Main overview panel' },
@@ -45,12 +50,16 @@ const ExtendedSelectDemo: React.FC = () => {
 	const [disabledValue, setDisabledValue] = useState<string>('free')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="ExtendedSelect"
-			lede="A searchable dropdown select with support for icons and labels on each option."
-		>
-			<DemoSection title="With Icons" caption="Options with Bootstrap Icons on the left side.">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="ExtendedSelect"
+				description="A searchable dropdown select with support for icons and labels on each option."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="With Icons">
 				<ExtendedSelect
 					items={iconItems}
 					value={iconValue}
@@ -58,9 +67,9 @@ const ExtendedSelectDemo: React.FC = () => {
 					placeholder="Select a page"
 					searchPlaceholder="Search pages..."
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Labels" caption="Options with short text labels on the left side.">
+			<SectionCard title="With Labels">
 				<ExtendedSelect
 					items={labelItems}
 					value={labelValue}
@@ -68,37 +77,38 @@ const ExtendedSelectDemo: React.FC = () => {
 					placeholder="Select a language"
 					searchPlaceholder="Search languages..."
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Simple (no icons or labels)" caption="Plain text options with search filtering.">
+			<SectionCard title="Simple (no icons or labels)">
 				<ExtendedSelect
 					items={simpleItems}
 					value={simpleValue}
 					onChange={setSimpleValue}
 					placeholder="Pick a fruit"
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled Options" caption="Some options can be disabled and are not selectable.">
+			<SectionCard title="Disabled Options">
 				<ExtendedSelect
 					items={disabledItems}
 					value={disabledValue}
 					onChange={setDisabledValue}
 					placeholder="Select a plan"
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				title="Custom No-Results Text"
-				caption="Type something that doesn't match any option to see the custom empty state."
-			>
+			<SectionCard title="Custom No-Results Text">
 				<ExtendedSelect
 					items={simpleItems}
 					placeholder="Try searching for 'xyz'"
 					noResultsText="Nothing here — try a different search."
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

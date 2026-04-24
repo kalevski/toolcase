@@ -1,18 +1,26 @@
 import React, { useState } from 'react'
-import { RadioGroup } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RadioGroup,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const RadioGroupDemo: React.FC = () => {
 	const [plan, setPlan] = useState('pro')
 	const [region, setRegion] = useState('eu')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="RadioGroup"
-			lede="A labeled group of radio buttons for single-select from an options array."
-		>
-			<DemoSection title="Vertical">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="RadioGroup"
+				description="A labeled group of radio buttons for single-select from an options array."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Vertical">
 				<RadioGroup
 					label="Plan"
 					options={[
@@ -24,9 +32,9 @@ const RadioGroupDemo: React.FC = () => {
 					onChange={setPlan}
 				/>
 				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.8rem' }}>Selected: {plan}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Inline">
+			<SectionCard title="Inline">
 				<RadioGroup
 					label="Region"
 					options={[
@@ -39,9 +47,9 @@ const RadioGroupDemo: React.FC = () => {
 					inline
 				/>
 				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.8rem' }}>Selected: {region}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Disabled Option">
+			<SectionCard title="With Disabled Option">
 				<RadioGroup
 					label="Environment"
 					options={[
@@ -52,8 +60,12 @@ const RadioGroupDemo: React.FC = () => {
 					value="dev"
 					onChange={() => {}}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

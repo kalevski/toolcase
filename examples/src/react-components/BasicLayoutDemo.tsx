@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
-import { BasicLayout } from '@toolcase/react-components'
+import {
+	BasicLayout,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 import { Brand } from '@toolcase/react-components'
 import { FormWizard, FormWizardStep } from '@toolcase/react-components'
 import { Input } from '@toolcase/react-components'
 import { Textarea } from '@toolcase/react-components'
 import { Select } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 const BasicLayoutDemo: React.FC = () => {
 	const [displayName, setDisplayName] = useState('')
@@ -153,12 +157,16 @@ const BasicLayoutDemo: React.FC = () => {
 	]
 
 	return (
-		<DemoPage
-			eyebrow="Layout & Surfaces"
-			title="BasicLayout"
-			lede="A centered, single-column shell for sign-in, sign-up, onboarding, and other focus-mode flows."
-		>
-			<DemoSection title="Sign-up flow" flush>
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="BasicLayout"
+				description="A centered, single-column shell for sign-in, sign-up, onboarding, and other focus-mode flows."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Sign-up flow">
 				<BasicLayout
 					brand={<Brand primaryText="webgame" secondaryText="cloud" color="#4f46e5" />}
 				>
@@ -171,8 +179,12 @@ const BasicLayoutDemo: React.FC = () => {
 						/>
 					</div>
 				</BasicLayout>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

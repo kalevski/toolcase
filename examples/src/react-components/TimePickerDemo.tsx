@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { TimePicker } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	TimePicker
+} from '@toolcase/react-components'
 
 export const TimePickerDemo: React.FC = () => {
 	const [time24, setTime24] = useState('')
@@ -8,12 +12,16 @@ export const TimePickerDemo: React.FC = () => {
 	const [timeSec, setTimeSec] = useState('')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="TimePicker"
-			lede="Dropdown-based time picker with 12h/24h format and optional seconds."
-		>
-			<DemoSection title="24-hour format">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="TimePicker"
+				description="Dropdown-based time picker with 12h/24h format and optional seconds."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="24-hour format">
 				<TimePicker
 					label="Start time"
 					value={time24}
@@ -22,9 +30,9 @@ export const TimePickerDemo: React.FC = () => {
 					clearable
 				/>
 				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.85rem' }}>Value: {time24 || '—'}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="12-hour format (AM/PM)">
+			<SectionCard title="12-hour format (AM/PM)">
 				<TimePicker
 					label="Meeting time"
 					value={time12}
@@ -33,9 +41,9 @@ export const TimePickerDemo: React.FC = () => {
 					minuteStep={15}
 					clearable
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With seconds">
+			<SectionCard title="With seconds">
 				<TimePicker
 					label="Precise time"
 					value={timeSec}
@@ -44,16 +52,20 @@ export const TimePickerDemo: React.FC = () => {
 					showSeconds
 					minuteStep={1}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Error state">
+			<SectionCard title="Error state">
 				<TimePicker
 					label="End time"
 					value="09:00"
 					onChange={() => {}}
 					error="End time must be after start time."
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

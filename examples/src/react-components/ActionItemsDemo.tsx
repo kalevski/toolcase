@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { ActionItems } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ActionItems,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ActionItemsDemo: React.FC = () => {
 	const [log, setLog] = useState<string[]>([])
@@ -10,12 +14,16 @@ const ActionItemsDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Buttons & Actions"
-			title="ActionItems"
-			lede="A kebab menu (three-dot) dropdown for contextual actions on rows or cards."
-		>
-			<DemoSection title="With Icons" caption="Typical file or row action menu.">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Buttons & Actions</RichPageHeaderChip>}
+				title="ActionItems"
+				description="A kebab menu (three-dot) dropdown for contextual actions on rows or cards."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="With Icons">
 				<div className="d-flex align-items-center gap-3">
 					<span className="text-muted">document.pdf</span>
 					<ActionItems
@@ -28,9 +36,9 @@ const ActionItemsDemo: React.FC = () => {
 						onActionClick={handleClick}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Without Icons" caption="Text-only menu items.">
+			<SectionCard title="Without Icons">
 				<div className="d-flex align-items-center gap-3">
 					<span className="text-muted">settings.json</span>
 					<ActionItems
@@ -42,9 +50,9 @@ const ActionItemsDemo: React.FC = () => {
 						onActionClick={handleClick}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="In a List Context">
+			<SectionCard title="In a List Context">
 				<ul className="list-group list-group-flush">
 					{['player.png', 'enemy.png', 'tilemap.json'].map((name) => (
 						<li key={name} className="list-group-item d-flex align-items-center justify-content-between">
@@ -60,14 +68,18 @@ const ActionItemsDemo: React.FC = () => {
 						</li>
 					))}
 				</ul>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Event Log">
+			<SectionCard title="Event Log">
 				<pre className="p-3 bg-light rounded" style={{ fontSize: '0.78rem', minHeight: 150 }}>
 					{log.length ? log.join('\n') : '(click any action)'}
 				</pre>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

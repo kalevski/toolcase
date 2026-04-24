@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { InfiniteScroll } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	InfiniteScroll,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export const InfiniteScrollDemo: React.FC = () => {
 	const [items, setItems] = useState<number[]>(Array.from({ length: 20 }, (_, i) => i + 1))
@@ -22,12 +26,16 @@ export const InfiniteScrollDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Layout & Surfaces"
-			title="InfiniteScroll"
-			lede="Automatically loads more content when the user scrolls to the bottom."
-		>
-			<DemoSection title="Load more on scroll">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="InfiniteScroll"
+				description="Automatically loads more content when the user scrolls to the bottom."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Load more on scroll">
 				<div style={{ maxHeight: 400, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 8 }}>
 					<InfiniteScroll
 						onLoadMore={loadMore}
@@ -52,7 +60,11 @@ export const InfiniteScrollDemo: React.FC = () => {
 				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.85rem' }}>
 					{items.length} items loaded
 				</p>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

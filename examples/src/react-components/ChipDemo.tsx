@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { Chip } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Chip,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ChipDemo: React.FC = () => {
 	const [selected, setSelected] = useState<Set<string>>(new Set(['react']))
@@ -20,12 +24,16 @@ const ChipDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Buttons & Actions"
-			title="Chip"
-			lede="Selectable pill-shaped button with icon, variant, and selected state."
-		>
-			<DemoSection title="Selectable">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Buttons & Actions</RichPageHeaderChip>}
+				title="Chip"
+				description="Selectable pill-shaped button with icon, variant, and selected state."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Selectable">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					{['react', 'vue', 'angular', 'svelte'].map((fw) => (
 						<Chip
@@ -38,9 +46,9 @@ const ChipDemo: React.FC = () => {
 						</Chip>
 					))}
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Variants (selected)">
+			<SectionCard title="Variants (selected)">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					<Chip variant="primary" selected>Primary</Chip>
 					<Chip variant="info" selected>Info</Chip>
@@ -48,32 +56,32 @@ const ChipDemo: React.FC = () => {
 					<Chip variant="warning" selected>Warning</Chip>
 					<Chip variant="danger" selected>Danger</Chip>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Icon">
+			<SectionCard title="With Icon">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					<Chip icon="star">Favorites</Chip>
 					<Chip icon="clock-history">Recent</Chip>
 					<Chip icon="tag" variant="info" selected>Tagged</Chip>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled">
+			<SectionCard title="Disabled">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					<Chip disabled>Disabled</Chip>
 					<Chip disabled selected variant="primary">Disabled Selected</Chip>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Secondary Variant">
+			<SectionCard title="Secondary Variant">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					<Chip variant="secondary">Secondary</Chip>
 					<Chip variant="secondary" selected>Selected</Chip>
 					<Chip variant="secondary" icon="tag">Tagged</Chip>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Removable Chips">
+			<SectionCard title="Removable Chips">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					{tags.map((tag) => (
 						<Chip
@@ -91,8 +99,12 @@ const ChipDemo: React.FC = () => {
 						</button>
 					)}
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

@@ -1,13 +1,24 @@
 import { useState } from 'react'
-import { Modal, Button, IconButton, Input, Alert } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Alert,
+	Button,
+	IconButton,
+	Input,
+	Modal,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export function ModalDemo() {
 	return (
-		<DemoPage
-			eyebrow="Overlays"
-			title="Modal"
-			lede={
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Overlays</RichPageHeaderChip>}
+				title="Modal"
+				description={
 				<>
 					A context-based modal system. Modals are declared once via <code>Modal.Window</code>,
 					opened imperatively with <code>useModalOpen(key)</code>, and can receive payloads on
@@ -15,12 +26,16 @@ export function ModalDemo() {
 					to close.
 				</>
 			}
-		>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
 			<Modal.ModalContext>
 				<ModalExamples />
 				<ModalDefinitions />
 			</Modal.ModalContext>
-		</DemoPage>
+		</div>
+			</div>
+		</div>
+	</div>
 	)
 }
 
@@ -43,11 +58,7 @@ function ModalExamples() {
 
 	return (
 		<>
-			<DemoSection
-				eyebrow="Triggers"
-				title="Open modals imperatively"
-				caption="Each button calls a hook returned from useModalOpen(key). The hook takes an optional payload and an optional callback invoked when the modal closes."
-			>
+			<SectionCard title="Open modals imperatively">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					<Button variant="primary" onClick={() => openSimple()}>
 						Simple modal
@@ -72,7 +83,7 @@ function ModalExamples() {
 						</Alert>
 					</div>
 				)}
-			</DemoSection>
+			</SectionCard>
 		</>
 	)
 }

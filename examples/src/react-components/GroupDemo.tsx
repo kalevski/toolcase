@@ -1,14 +1,22 @@
 import React from 'react'
-import { Group } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Group,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const GroupDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Layout & Surfaces"
-		title="Group"
-		lede="A collapsible section with label, badge, and optional action button."
-	>
-		<DemoSection title="Default (Expanded)">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="Group"
+				description="A collapsible section with label, badge, and optional action button."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Default (Expanded)">
 			<Group label="Sprites" badge="3">
 				<div className="p-2">
 					<p className="mb-1" style={{ fontSize: '0.85rem' }}>player.png</p>
@@ -16,9 +24,9 @@ const GroupDemo: React.FC = () => (
 					<p className="mb-0" style={{ fontSize: '0.85rem' }}>background.png</p>
 				</div>
 			</Group>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Collapsed by Default">
+		<SectionCard title="Collapsed by Default">
 			<Group label="Audio Files" badge="5" defaultCollapsed>
 				<div className="p-2">
 					<p className="mb-1" style={{ fontSize: '0.85rem' }}>theme.mp3</p>
@@ -26,9 +34,9 @@ const GroupDemo: React.FC = () => (
 					<p className="mb-0" style={{ fontSize: '0.85rem' }}>explosion.wav</p>
 				</div>
 			</Group>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Action Button">
+		<SectionCard title="With Action Button">
 			<Group
 				label="Scenes"
 				badge="2"
@@ -41,16 +49,20 @@ const GroupDemo: React.FC = () => (
 					<p className="mb-0" style={{ fontSize: '0.85rem' }}>Level1.scene</p>
 				</div>
 			</Group>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Without Badge">
+		<SectionCard title="Without Badge">
 			<Group label="Configuration">
 				<div className="p-2">
 					<p className="mb-0" style={{ fontSize: '0.85rem' }}>settings.json</p>
 				</div>
 			</Group>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default GroupDemo

@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { ActionHeader, ActionHeaderAction } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ActionHeader,
+	ActionHeaderAction,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ACTIONS: ActionHeaderAction[] = [
 	{ key: 'edit', icon: 'pencil', label: 'Edit', alt: 'Edit the file', disabled: true },
@@ -25,39 +30,47 @@ const ActionHeaderDemo = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Buttons & Actions"
-			title="ActionHeader"
-			lede="A header bar with a title slot and a row of icon-based action buttons with tooltips and disabled states."
-		>
-			<DemoSection title="With title">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Buttons & Actions</RichPageHeaderChip>}
+				title="ActionHeader"
+				description="A header bar with a title slot and a row of icon-based action buttons with tooltips and disabled states."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="With title">
 				<ActionHeader actions={ACTIONS} onExec={handleExec}>
 					document.txt
 				</ActionHeader>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Icon-only actions">
+			<SectionCard title="Icon-only actions">
 				<ActionHeader actions={ICON_ONLY_ACTIONS} onExec={handleExec}>
 					Formatting toolbar
 				</ActionHeader>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="No children">
+			<SectionCard title="No children">
 				<ActionHeader actions={ACTIONS.slice(0, 3)} onExec={handleExec} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled">
+			<SectionCard title="Disabled">
 				<ActionHeader actions={ACTIONS} onExec={handleExec} disabled>
 					All disabled
 				</ActionHeader>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Event Log">
+			<SectionCard title="Event Log">
 				<pre className="p-3 bg-light rounded" style={{ fontSize: '0.78rem', minHeight: 200 }}>
 					{log.length ? log.join('\n') : '(click an action)'}
 				</pre>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

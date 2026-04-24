@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { Pagination } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Pagination,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const PaginationDemo: React.FC = () => {
 	const [offset1, setOffset1] = useState(0)
@@ -9,25 +13,29 @@ const PaginationDemo: React.FC = () => {
 	const [offset4, setOffset4] = useState(200)
 
 	return (
-		<DemoPage
-			eyebrow="Navigation"
-			title="Pagination"
-			lede="Navigate between pages with numbered buttons, prev/next arrows, and result summary."
-		>
-			<DemoSection title="Basic">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Navigation</RichPageHeaderChip>}
+				title="Pagination"
+				description="Navigate between pages with numbered buttons, prev/next arrows, and result summary."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Basic">
 				<Pagination limit={10} offset={offset1} total={50} onChange={setOffset1} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Result Summary">
+			<SectionCard title="With Result Summary">
 				<Pagination
 					limit={10}
 					offset={offset2}
 					total={97}
 					onChange={setOffset2}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Many Pages (Dots Truncation)">
+			<SectionCard title="Many Pages (Dots Truncation)">
 				<Pagination
 					limit={10}
 					offset={offset3}
@@ -41,16 +49,13 @@ const PaginationDemo: React.FC = () => {
 						<button className="btn btn-sm btn-outline-secondary" onClick={() => setOffset3(490)}>Go to 50</button>
 					</div>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Single Page">
+			<SectionCard title="Single Page">
 				<Pagination limit={10} offset={0} total={3} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				title="siblingCount Variants"
-				caption="Controls how many page numbers appear around the active page."
-			>
+			<SectionCard title="siblingCount Variants">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<div>
 						<p style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: 4 }}>siblingCount=0 (minimal)</p>
@@ -65,8 +70,12 @@ const PaginationDemo: React.FC = () => {
 						<Pagination limit={10} offset={offset4} total={500} onChange={setOffset4} siblingCount={2} />
 					</div>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

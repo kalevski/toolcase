@@ -1,15 +1,24 @@
 import React from 'react'
-import { Popover, Button } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Button,
+	Popover,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export const PopoverDemo: React.FC = () => {
 	return (
-		<DemoPage
-			eyebrow="Overlays"
-			title="Popover"
-			lede="Floating content panel anchored to a trigger element, with automatic viewport-edge detection."
-		>
-			<DemoSection title="Placements">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Overlays</RichPageHeaderChip>}
+				title="Popover"
+				description="Floating content panel anchored to a trigger element, with automatic viewport-edge detection."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Placements">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					{(['top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left', 'right'] as const).map((placement) => (
 						<Popover
@@ -26,9 +35,9 @@ export const PopoverDemo: React.FC = () => {
 						</Popover>
 					))}
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Hover trigger">
+			<SectionCard title="Hover trigger">
 				<Popover
 					trigger="hover"
 					placement="right"
@@ -41,9 +50,9 @@ export const PopoverDemo: React.FC = () => {
 				>
 					<Button variant="primary">Hover me</Button>
 				</Popover>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Rich content">
+			<SectionCard title="Rich content">
 				<Popover
 					placement="bottom-start"
 					content={
@@ -56,8 +65,12 @@ export const PopoverDemo: React.FC = () => {
 				>
 					<Button variant="primary">View user</Button>
 				</Popover>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

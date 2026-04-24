@@ -1,17 +1,25 @@
 import React, { useState } from 'react'
-import { Select } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Select
+} from '@toolcase/react-components'
 
 const SelectDemo: React.FC = () => {
 	const [engine, setEngine] = useState('unity')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="Select"
-			lede="A labeled dropdown select with options array."
-		>
-			<DemoSection title="Basic">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="Select"
+				description="A labeled dropdown select with options array."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Basic">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Select
 						label="Game Engine"
@@ -33,9 +41,9 @@ const SelectDemo: React.FC = () => {
 						]}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="States">
+			<SectionCard title="States">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Select
 						label="Enabled"
@@ -52,9 +60,9 @@ const SelectDemo: React.FC = () => {
 						disabled
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Without Label">
+			<SectionCard title="Without Label">
 				<Select
 					options={[
 						{ value: 'asc', label: 'Sort: A → Z' },
@@ -62,8 +70,12 @@ const SelectDemo: React.FC = () => {
 						{ value: 'date', label: 'Sort: Newest' },
 					]}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

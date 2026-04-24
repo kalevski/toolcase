@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
-import { ContextMenu } from '@toolcase/react-components'
+import {
+	ContextMenu,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 import type { ContextMenuItem } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 const fileMenuItems: ContextMenuItem[] = [
 	{ key: 'open', label: 'Open', icon: 'folder2-open' },
@@ -33,18 +37,22 @@ export const ContextMenuDemo: React.FC = () => {
 	const [lastAction, setLastAction] = useState<string>('')
 
 	return (
-		<DemoPage
-			eyebrow="Overlays"
-			title="ContextMenu"
-			lede="Appears on right-click with keyboard navigation, nested submenus, and ARIA roles."
-		>
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Overlays</RichPageHeaderChip>}
+				title="ContextMenu"
+				description="Appears on right-click with keyboard navigation, nested submenus, and ARIA roles."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
 			{lastAction && (
 				<div className="alert alert-info py-2">
 					Last action: <strong>{lastAction}</strong>
 				</div>
 			)}
 
-			<DemoSection title="File operations (with submenu)">
+			<SectionCard title="File operations (with submenu)">
 				<ContextMenu items={fileMenuItems} onSelect={setLastAction}>
 					<div
 						style={{
@@ -61,9 +69,9 @@ export const ContextMenuDemo: React.FC = () => {
 						<p className="text-muted mt-2 mb-0 small">Right-click for file options</p>
 					</div>
 				</ContextMenu>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Table row actions (with disabled item)">
+			<SectionCard title="Table row actions (with disabled item)">
 				<ContextMenu items={tableRowItems} onSelect={setLastAction}>
 					<div
 						style={{
@@ -84,8 +92,12 @@ export const ContextMenuDemo: React.FC = () => {
 						</div>
 					</div>
 				</ContextMenu>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

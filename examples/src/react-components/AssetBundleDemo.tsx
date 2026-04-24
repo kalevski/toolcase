@@ -1,6 +1,10 @@
 import React from 'react'
-import { AssetBundle } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	AssetBundle,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const bundleActions = [
 	{ key: 'edit', icon: 'pencil', label: 'Edit Bundle' },
@@ -11,12 +15,16 @@ const bundleActions = [
 ]
 
 const AssetBundleDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Editors"
-		title="AssetBundle"
-		lede="A modern card representing a single asset bundle configuration for a game build — showing target engine, categories, tag filters, file counts, action menus, and advanced packing options."
-	>
-		<DemoSection title="Unity — Full Configuration">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Editors</RichPageHeaderChip>}
+				title="AssetBundle"
+				description="A modern card representing a single asset bundle configuration for a game build — showing target engine, categories, tag filters, file counts, action menus, and advanced packing options."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Unity — Full Configuration">
 			<AssetBundle
 				name="UI Sprites"
 				target="unity"
@@ -35,9 +43,9 @@ const AssetBundleDemo: React.FC = () => (
 				latestBuildRef='213123'
 				buildTag='v2.1-release'
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Unity — Minimal">
+		<SectionCard title="Unity — Minimal">
 			<AssetBundle
 				name="Environment Tiles"
 				target="unity"
@@ -46,9 +54,9 @@ const AssetBundleDemo: React.FC = () => (
 				counts={{ textures: 256, maps: 12 }}
 				advanced={{ scale: 100, algorithm: 'basic' }}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Godot — Character Pack">
+		<SectionCard title="Godot — Character Pack">
 			<AssetBundle
 				name="Character Sprites"
 				target="godot"
@@ -65,9 +73,9 @@ const AssetBundleDemo: React.FC = () => (
 					algorithm: 'guillotine',
 				}}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Godot — All Categories">
+		<SectionCard title="Godot — All Categories">
 			<AssetBundle
 				name="Full Atlas"
 				target="godot"
@@ -79,9 +87,9 @@ const AssetBundleDemo: React.FC = () => (
 					algorithm: 'skyline',
 				}}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Unreal — Weapons">
+		<SectionCard title="Unreal — Weapons">
 			<AssetBundle
 				name="Weapon Textures"
 				target="unreal"
@@ -98,9 +106,9 @@ const AssetBundleDemo: React.FC = () => (
 					algorithm: 'octree',
 				}}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Custom Engine">
+		<SectionCard title="Custom Engine">
 			<AssetBundle
 				name="Particle Effects"
 				target="custom"
@@ -114,9 +122,9 @@ const AssetBundleDemo: React.FC = () => (
 					algorithm: 'shelf',
 				}}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Rich File Counts">
+		<SectionCard title="Rich File Counts">
 			<AssetBundle
 				name="Full Game Assets"
 				target="unity"
@@ -139,16 +147,20 @@ const AssetBundleDemo: React.FC = () => (
 				onMenuItemClick={(key) => alert(`Action: ${key}`)}
 				advanced={{ scale: 100, rotationEnabled: true, algorithm: 'maxrects' }}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Defaults Only">
+		<SectionCard title="Defaults Only">
 			<AssetBundle
 				name="Quick Bundle"
 				target="unity"
 				defaultBuildTag="dev"
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default AssetBundleDemo

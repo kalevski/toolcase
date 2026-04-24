@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { Accordion } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Accordion,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const borderedItems = [
 	{
@@ -48,27 +52,35 @@ export const AccordionDemo: React.FC = () => {
 	const [openKeys, setOpenKeys] = useState<string[]>(['intro'])
 
 	return (
-		<DemoPage
-			eyebrow="Layout & Surfaces"
-			title="Accordion"
-			lede="Collapsible content panels with keyboard navigation and ARIA support."
-		>
-			<DemoSection title="Bordered (default) — controlled">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="Accordion"
+				description="Collapsible content panels with keyboard navigation and ARIA support."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Bordered (default) — controlled">
 				<Accordion
 					items={borderedItems}
 					open={openKeys}
 					onOpenChange={setOpenKeys}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Borderless variant">
+			<SectionCard title="Borderless variant">
 				<Accordion items={borderedItems} variant="borderless" defaultOpen={['hooks']} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Multiple open panels">
+			<SectionCard title="Multiple open panels">
 				<Accordion items={multiItems} multiple defaultOpen={['one', 'two']} />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

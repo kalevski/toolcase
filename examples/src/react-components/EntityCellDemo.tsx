@@ -1,6 +1,12 @@
 import React from 'react'
-import { EntityCell, Table, TableColumn } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	EntityCell,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Table,
+	TableColumn
+} from '@toolcase/react-components'
 
 interface Project {
 	id: string
@@ -19,22 +25,22 @@ const projects: Project[] = [
 ]
 
 const EntityCellDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Data Display"
-		title="EntityCell"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="EntityCell"
+				description={
 			<>
 				A compact list/table cell: a colored initial tile next to a two-line label. Colors
 				come from the shared <code>EntityColor</code> palette so cells stay visually consistent
 				across tables.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="Default"
-			title="In a table"
-			caption="The archetypal use: the left-most cell of an admin table. The tile color is a data attribute, not arbitrary CSS."
-		>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="In a table">
 			<Table
 				columns={[
 					{
@@ -60,25 +66,17 @@ const EntityCellDemo: React.FC = () => (
 				data={projects}
 				rowKey={(r) => r.id}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Sizes"
-			title="sm · md · lg"
-			caption="Three sizes. `sm` fits dense tables; `lg` anchors profile headers."
-		>
+		<SectionCard title="sm · md · lg">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 				<EntityCell size="sm" name="Atlas Platform" subLabel="atlas-prod" initial="AT" color="violet" />
 				<EntityCell size="md" name="Atlas Platform" subLabel="atlas-prod" initial="AT" color="violet" />
 				<EntityCell size="lg" name="Atlas Platform" subLabel="atlas-prod" initial="AT" color="violet" />
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Palette"
-			title="Color tokens"
-			caption="All eight `EntityColor` values. Reserve a color per entity so users can learn to recognize records visually."
-		>
+		<SectionCard title="Color tokens">
 			<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
 				<EntityCell name="Violet" subLabel="token" initial="VI" color="violet" />
 				<EntityCell name="Cyan" subLabel="token" initial="CY" color="cyan" />
@@ -89,8 +87,12 @@ const EntityCellDemo: React.FC = () => (
 				<EntityCell name="Slate" subLabel="token" initial="SL" color="slate" />
 				<EntityCell name="Rose" subLabel="token" initial="RO" color="rose" />
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default EntityCellDemo

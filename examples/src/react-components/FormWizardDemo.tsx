@@ -1,6 +1,16 @@
 import React, { useState } from 'react'
-import { FormWizard, FormWizardStep, Input, RadioGroup, Checkbox, Button, Alert } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Alert,
+	Button,
+	Checkbox,
+	FormWizard,
+	FormWizardStep,
+	Input,
+	RadioGroup,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const FormWizardDemo: React.FC = () => {
 	const [submitted, setSubmitted] = useState<Record<string, string> | null>(null)
@@ -76,12 +86,16 @@ const FormWizardDemo: React.FC = () => {
 	]
 
 	return (
-		<DemoPage
-			eyebrow="Navigation"
-			title="FormWizard"
-			lede="A multi-step wizard with progress navigation, step validation, and a customizable completion action."
-		>
-			<DemoSection title="Interactive Wizard">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Navigation</RichPageHeaderChip>}
+				title="FormWizard"
+				description="A multi-step wizard with progress navigation, step validation, and a customizable completion action."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Interactive Wizard">
 				{submitted ? (
 					<div>
 						<Alert variant="success">
@@ -108,8 +122,12 @@ const FormWizardDemo: React.FC = () => {
 						completeIcon="bi-check-lg"
 					/>
 				)}
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

@@ -1,23 +1,31 @@
 import React from 'react'
-import { Kbd } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Kbd,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const KbdDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Typography"
-		title="Kbd"
-		lede="Displays keyboard shortcuts with styled key caps. Supports single keys and multi-key combos."
-	>
-		<DemoSection title="Single Key">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Typography</RichPageHeaderChip>}
+				title="Kbd"
+				description="Displays keyboard shortcuts with styled key caps. Supports single keys and multi-key combos."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Single Key">
 			<div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
 				<Kbd>Enter</Kbd>
 				<Kbd>Esc</Kbd>
 				<Kbd>Tab</Kbd>
 				<Kbd>Space</Kbd>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Key Combinations">
+		<SectionCard title="Key Combinations">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 				<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
 					<Kbd keys={['Ctrl', 'C']} /> <span style={{ color: '#64748b' }}>— Copy</span>
@@ -32,15 +40,19 @@ const KbdDemo: React.FC = () => (
 					<Kbd keys={['⌘', 'K']} /> <span style={{ color: '#64748b' }}>— Quick Open (macOS)</span>
 				</div>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Inline Usage">
+		<SectionCard title="Inline Usage">
 			<p>
 				Press <Kbd keys={['Ctrl', 'S']} /> to save. Use <Kbd>F2</Kbd> to rename.
 				Hold <Kbd keys={['Shift', 'Alt']} /> and click to multi-select.
 			</p>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default KbdDemo

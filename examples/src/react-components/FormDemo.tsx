@@ -1,6 +1,14 @@
 import React from 'react'
-import { Form, Input, Select, Checkbox, Button } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Button,
+	Checkbox,
+	Form,
+	Input,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Select
+} from '@toolcase/react-components'
 
 const FormDemo: React.FC = () => {
 	const handleSubmit = (data: Record<string, any>) => {
@@ -8,12 +16,16 @@ const FormDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="Form"
-			lede="A form wrapper that auto-collects FormData on submit with optional Card wrapper and header."
-		>
-			<DemoSection title="With Card Wrapper (default)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="Form"
+				description="A form wrapper that auto-collects FormData on submit with optional Card wrapper and header."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="With Card Wrapper (default)">
 				<Form header="Create Project" onSubmit={handleSubmit}>
 					<div className="d-flex flex-column gap-3">
 						<Input label="Project Name" name="name" placeholder="My Game" />
@@ -30,9 +42,9 @@ const FormDemo: React.FC = () => {
 						<Button type="submit" variant="primary">Create</Button>
 					</div>
 				</Form>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Without Card Wrapper">
+			<SectionCard title="Without Card Wrapper">
 				<Form wrapper={false} onSubmit={handleSubmit}>
 					<div className="d-flex flex-column gap-3">
 						<Input label="Email" name="email" type="email" placeholder="you@example.com" />
@@ -40,9 +52,9 @@ const FormDemo: React.FC = () => {
 						<Button type="submit" variant="primary">Sign In</Button>
 					</div>
 				</Form>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Variant Colors">
+			<SectionCard title="Variant Colors">
 				<div className="d-flex flex-column gap-3">
 					<Form header="Default" variant="default" wrapper>
 						<p className="mb-0 text-muted" style={{ fontSize: '0.85rem' }}>Default variant card</p>
@@ -54,8 +66,12 @@ const FormDemo: React.FC = () => {
 						<p className="mb-0">Danger variant card</p>
 					</Form>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

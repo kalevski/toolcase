@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { Slider } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Slider
+} from '@toolcase/react-components'
 
 export const SliderDemo: React.FC = () => {
 	const [volume,    setVolume]    = useState(60)
@@ -10,12 +14,16 @@ export const SliderDemo: React.FC = () => {
 	const [year,      setYear]      = useState(2020)
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="Slider"
-			lede="Range input with keyboard support, tick marks, and drag tooltip."
-		>
-			<DemoSection title="Basic">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="Slider"
+				description="Range input with keyboard support, tick marks, and drag tooltip."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Basic">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 					<Slider
 						label="Volume"
@@ -29,9 +37,9 @@ export const SliderDemo: React.FC = () => {
 						formatValue={(v) => `${v}%`}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Tick Marks">
+			<SectionCard title="Tick Marks">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 40, paddingBottom: 12 }}>
 					<Slider
 						label="Rating"
@@ -54,9 +62,9 @@ export const SliderDemo: React.FC = () => {
 						formatValue={(v) => String(v)}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Custom Formatter">
+			<SectionCard title="Custom Formatter">
 				<Slider
 					label="Budget"
 					value={budget}
@@ -66,16 +74,20 @@ export const SliderDemo: React.FC = () => {
 					step={100}
 					formatValue={(v) => `$${v.toLocaleString()}`}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled">
+			<SectionCard title="Disabled">
 				<Slider
 					label="Locked value"
 					value={40}
 					onChange={() => {}}
 					disabled
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

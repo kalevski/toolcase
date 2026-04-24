@@ -1,12 +1,20 @@
 import React from 'react'
-import { SectionCard, Button, FormInput } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoGrid } from './_demo'
+import {
+	Button,
+	FormInput,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const SectionCardDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Layout & Surfaces"
-		title="SectionCard"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="SectionCard"
+				description={
 			<>
 				An opinionated titled card for settings and detail pages. The header row holds an icon
 				tile, a title, and an optional <code>action</code> slot (usually a button). The body is a
@@ -14,13 +22,10 @@ const SectionCardDemo: React.FC = () => (
 				destructive zones.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="Default"
-			title="Titled card with icon"
-			caption="The workhorse — group a single concern behind an icon + title header."
-		>
-			<DemoGrid columns={2} minItemWidth={320}>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Titled card with icon">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))'}}>
 				<SectionCard title="Account details" icon="person-circle">
 					<p style={{ margin: 0, color: '#475569' }}>
 						Your profile information is visible to anyone you share a workspace with.
@@ -31,14 +36,10 @@ const SectionCardDemo: React.FC = () => (
 						Choose when we email you. You can always mute individual projects.
 					</p>
 				</SectionCard>
-			</DemoGrid>
-		</DemoSection>
+			</div>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="With action"
-			title="Header-right control"
-			caption="Pass a Button (or any node) into the `action` slot — it sits flush to the right of the title."
-		>
+		<SectionCard title="Header-right control">
 			<SectionCard
 				title="API keys"
 				icon="key"
@@ -48,13 +49,9 @@ const SectionCardDemo: React.FC = () => (
 					Active keys appear here. Rotating a key invalidates the previous value immediately.
 				</p>
 			</SectionCard>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Body composition"
-			title="Forms inside"
-			caption="The body is a plain slot — drop form inputs, lists, or any other content directly in."
-		>
+		<SectionCard title="Forms inside">
 			<SectionCard
 				title="Workspace profile"
 				icon="building"
@@ -75,13 +72,9 @@ const SectionCardDemo: React.FC = () => (
 					/>
 				</div>
 			</SectionCard>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Danger variant"
-			title="Destructive zone"
-			caption="Reserve the `danger` variant for irreversible actions. Pair with an outline danger button."
-		>
+		<SectionCard title="Destructive zone">
 			<SectionCard
 				title="Delete workspace"
 				icon="exclamation-triangle"
@@ -92,8 +85,12 @@ const SectionCardDemo: React.FC = () => (
 					Permanently deletes this workspace and all of its projects. This cannot be undone.
 				</p>
 			</SectionCard>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default SectionCardDemo

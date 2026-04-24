@@ -1,21 +1,26 @@
 import React from 'react'
 import {
-	FeatureCard,
 	AssetRow,
 	AssetRowList,
 	BundleBar,
-	Pipeline,
-	ConfigPreview,
-	TeamList,
 	CdnMap,
+	ConfigPreview,
+	FeatureCard,
+	Pipeline,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	TeamList
 } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 const FeatureCardDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Layout & Surfaces"
-		title="FeatureCard"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="FeatureCard"
+				description={
 			<>
 				Chrome for a marketing feature tile. Takes an icon, eyebrow, title, description, and a
 				free-form <code>visual</code> slot — compose with one of the included primitives
@@ -23,8 +28,9 @@ const FeatureCardDemo: React.FC = () => (
 				<code>ConfigPreview</code>, <code>TeamList</code>, <code>CdnMap</code>) or supply your own.
 			</>
 		}
-	>
-		<DemoSection title="Feature grid — all seven tiles">
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Feature grid — all seven tiles">
 			<div className="component-feature-card-grid">
 				<FeatureCard
 					size="wide"
@@ -174,17 +180,9 @@ const FeatureCardDemo: React.FC = () => (
 					}
 				/>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			title="Size variants"
-			caption={
-				<>
-					<code>size="default"</code> spans 4 columns, <code>size="wide"</code> spans 6,{' '}
-					<code>size="full"</code> spans all 12. The grid collapses to a single column below 960 px.
-				</>
-			}
-		>
+		<SectionCard title="Size variants">
 			<div className="component-feature-card-grid">
 				<FeatureCard
 					icon={<i className="bi bi-grid-1x2" />}
@@ -207,8 +205,12 @@ const FeatureCardDemo: React.FC = () => (
 					description="Stretches the full row — use for hero-style features, pipelines, or long descriptions."
 				/>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default FeatureCardDemo

@@ -1,40 +1,48 @@
 import React from 'react'
-import { EmptyState } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	EmptyState,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const EmptyStateDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Feedback"
-		title="EmptyState"
-		lede="A placeholder shown when a list or section has no content yet."
-	>
-		<DemoSection title="Basic">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Feedback</RichPageHeaderChip>}
+				title="EmptyState"
+				description="A placeholder shown when a list or section has no content yet."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Basic">
 			<EmptyState icon="inbox">
 				<p>No items found.</p>
 			</EmptyState>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Guidance Text">
+		<SectionCard title="With Guidance Text">
 			<EmptyState icon="file-earmark-code">
 				<p>No schemas created yet.</p>
 				<p>Click the <strong>Add</strong> button to create a new schema.</p>
 			</EmptyState>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Without Icon">
+		<SectionCard title="Without Icon">
 			<EmptyState>
 				<p>Nothing to display.</p>
 			</EmptyState>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Custom Children">
+		<SectionCard title="Custom Children">
 			<EmptyState icon="cloud-upload">
 				<p>No files uploaded.</p>
 				<button className="btn btn-sm btn-primary mt-2">Upload File</button>
 			</EmptyState>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Various Icons">
+		<SectionCard title="Various Icons">
 			<div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
 				<EmptyState icon="people">
 					<p>No members</p>
@@ -46,8 +54,12 @@ const EmptyStateDemo: React.FC = () => (
 					<p>No configs</p>
 				</EmptyState>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default EmptyStateDemo

@@ -1,6 +1,15 @@
 import { useState } from 'react'
-import { Table, TableColumn, Avatar, Select, Badge, Alert } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Alert,
+	Avatar,
+	Badge,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Select,
+	Table,
+	TableColumn
+} from '@toolcase/react-components'
 
 interface Member {
 	id: string
@@ -104,10 +113,13 @@ const TableDemo = () => {
 	]
 
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="Table"
-			lede={
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="Table"
+				description={
 				<>
 					A generic data table with typed columns, custom cell renderers, and a handful of
 					orthogonal modifiers — <code>striped</code>, <code>hoverable</code>, <code>compact</code>,{' '}
@@ -115,12 +127,9 @@ const TableDemo = () => {
 					<code>AdvancedTable</code> when you need sorting, filtering, pagination, or bulk actions.
 				</>
 			}
-		>
-			<DemoSection
-				eyebrow="Realistic usage"
-				title="Project members"
-				caption="Inline editing with Select. Change role or status and the row updates in place."
-			>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Project members">
 				<Table
 					columns={columns}
 					data={members}
@@ -128,13 +137,9 @@ const TableDemo = () => {
 					emptyMessage="No members found"
 					striped
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Interaction"
-				title="Clickable rows"
-				caption="Pair hoverable + onRowClick to turn each row into a navigation target. The click handler fires once per row without disrupting interactive cells."
-			>
+			<SectionCard title="Clickable rows">
 				{clickedRow && (
 					<div style={{ marginBottom: 12 }}>
 						<Alert variant="info">
@@ -149,13 +154,9 @@ const TableDemo = () => {
 					hoverable
 					onRowClick={(row) => setClickedRow(row)}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Density"
-				title="Compact and borderless"
-				caption="Compact reduces cell padding. Borderless strips the wrapping frame — handy when the table already sits inside another card."
-			>
+			<SectionCard title="Compact and borderless">
 				<div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
 					<div>
 						<p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -170,13 +171,9 @@ const TableDemo = () => {
 						<Table columns={compactColumns} data={members} rowKey={(row) => row.id} borderless />
 					</div>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="State"
-				title="Loading and empty"
-				caption="Show skeleton rows while fetching. Empty data falls back to emptyMessage."
-			>
+			<SectionCard title="Loading and empty">
 				<div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
 					<div>
 						<p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -202,8 +199,12 @@ const TableDemo = () => {
 						/>
 					</div>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

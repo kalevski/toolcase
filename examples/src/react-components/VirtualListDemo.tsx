@@ -1,6 +1,10 @@
 import React from 'react'
-import { VirtualList } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	VirtualList
+} from '@toolcase/react-components'
 
 interface Item {
 	id: number
@@ -16,12 +20,16 @@ const ITEMS: Item[] = Array.from({ length: 10000 }, (_, i) => ({
 
 export const VirtualListDemo: React.FC = () => {
 	return (
-		<DemoPage
-			eyebrow="Layout & Surfaces"
-			title="VirtualList"
-			lede="Renders 10,000 items — only the visible rows are in the DOM."
-		>
-			<DemoSection title="10,000 rows (fixed height)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="VirtualList"
+				description="Renders 10,000 items — only the visible rows are in the DOM."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="10,000 rows (fixed height)">
 				<VirtualList
 					items={ITEMS}
 					itemHeight={64}
@@ -43,7 +51,11 @@ export const VirtualListDemo: React.FC = () => {
 						</div>
 					)}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

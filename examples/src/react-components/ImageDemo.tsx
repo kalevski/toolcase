@@ -1,14 +1,22 @@
 import React from 'react'
-import { Image } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Image,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ImageDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Media & Files"
-		title="Image"
-		lede="Enhanced img element with loading shimmer, fallback placeholder, aspect ratio, and object-fit support."
-	>
-		<DemoSection title="Basic">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Media & Files</RichPageHeaderChip>}
+				title="Image"
+				description="Enhanced img element with loading shimmer, fallback placeholder, aspect ratio, and object-fit support."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Basic">
 			<div style={{ maxWidth: 400 }}>
 				<Image
 					src="https://picsum.photos/seed/wg1/600/400"
@@ -16,9 +24,9 @@ const ImageDemo: React.FC = () => (
 					aspectRatio="3/2"
 				/>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Object Fit">
+		<SectionCard title="Object Fit">
 			<div className="d-flex gap-3 flex-wrap">
 				{(['cover', 'contain', 'fill'] as const).map((fit) => (
 					<div key={fit}>
@@ -33,9 +41,9 @@ const ImageDemo: React.FC = () => (
 					</div>
 				))}
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Fallback on Error">
+		<SectionCard title="Fallback on Error">
 			<div style={{ maxWidth: 300 }}>
 				<Image
 					src="https://invalid-url-that-will-fail.test/nope.png"
@@ -44,9 +52,9 @@ const ImageDemo: React.FC = () => (
 					aspectRatio="16/9"
 				/>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Aspect Ratios">
+		<SectionCard title="Aspect Ratios">
 			<div className="d-flex gap-3 flex-wrap">
 				{['1/1', '4/3', '16/9', '21/9'].map((ratio) => (
 					<div key={ratio}>
@@ -60,8 +68,12 @@ const ImageDemo: React.FC = () => (
 					</div>
 				))}
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default ImageDemo

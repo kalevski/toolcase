@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { ToggleCard, Badge } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Badge,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	ToggleCard
+} from '@toolcase/react-components'
 
 const ToggleCardDemo: React.FC = () => {
 	const [notifications, setNotifications] = useState(true)
@@ -9,12 +14,16 @@ const ToggleCardDemo: React.FC = () => {
 	const [betaFeatures, setBetaFeatures] = useState(false)
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="ToggleCard"
-			lede="A card-style toggle switch with icon, label, hint text, badge, and disabled state."
-		>
-			<DemoSection title="Basic Toggles">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="ToggleCard"
+				description="A card-style toggle switch with icon, label, hint text, badge, and disabled state."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Basic Toggles">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<ToggleCard
 						label="Notifications"
@@ -38,9 +47,9 @@ const ToggleCardDemo: React.FC = () => {
 						onChange={setAnalytics}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Badge">
+			<SectionCard title="With Badge">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<ToggleCard
 						label="Beta Features"
@@ -59,9 +68,9 @@ const ToggleCardDemo: React.FC = () => {
 						onChange={() => {}}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled">
+			<SectionCard title="Disabled">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<ToggleCard
 						label="Two-Factor Auth"
@@ -78,9 +87,9 @@ const ToggleCardDemo: React.FC = () => {
 						disabled
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="No Icon">
+			<SectionCard title="No Icon">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<ToggleCard
 						label="Auto-save"
@@ -94,8 +103,12 @@ const ToggleCardDemo: React.FC = () => {
 						onChange={() => {}}
 					/>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

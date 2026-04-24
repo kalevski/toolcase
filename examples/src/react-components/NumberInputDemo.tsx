@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { NumberInput } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	NumberInput,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export const NumberInputDemo: React.FC = () => {
 	const [qty,     setQty]     = useState<number | ''>(1)
@@ -10,12 +14,16 @@ export const NumberInputDemo: React.FC = () => {
 	const [temp,    setTemp]    = useState<number | ''>(21)
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="NumberInput"
-			lede="Numeric input field with increment/decrement controls, keyboard support, and mouse wheel interaction."
-		>
-			<DemoSection title="Basic">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="NumberInput"
+				description="Numeric input field with increment/decrement controls, keyboard support, and mouse wheel interaction."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Basic">
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
 					<NumberInput
 						label="Quantity"
@@ -36,9 +44,9 @@ export const NumberInputDemo: React.FC = () => {
 						suffix="°C"
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Prefix & Suffix">
+			<SectionCard title="Prefix & Suffix">
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
 					<NumberInput
 						label="Price"
@@ -58,9 +66,9 @@ export const NumberInputDemo: React.FC = () => {
 						max={100}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Error state">
+			<SectionCard title="Error state">
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
 					<NumberInput
 						label="Age"
@@ -77,7 +85,11 @@ export const NumberInputDemo: React.FC = () => {
 						disabled
 					/>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

@@ -1,14 +1,22 @@
 import React from 'react'
-import { TabSections } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	TabSections
+} from '@toolcase/react-components'
 
 const TabSectionsDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Navigation"
-		title="TabSections"
-		lede="A tabbed content panel with keyboard-navigable tabs, default active keys, and rich content support."
-	>
-		<DemoSection title="Basic">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Navigation</RichPageHeaderChip>}
+				title="TabSections"
+				description="A tabbed content panel with keyboard-navigable tabs, default active keys, and rich content support."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Basic">
 			<TabSections
 				items={[
 					{ key: 'overview', label: 'Overview', content: <div style={{ padding: '0.5rem 0' }}>This is the overview panel with general project information.</div> },
@@ -16,9 +24,9 @@ const TabSectionsDemo: React.FC = () => (
 					{ key: 'members', label: 'Members', content: <div style={{ padding: '0.5rem 0' }}>Manage team members and permissions.</div> },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Default Active Tab">
+		<SectionCard title="With Default Active Tab">
 			<TabSections
 				defaultActiveKey="billing"
 				items={[
@@ -27,9 +35,9 @@ const TabSectionsDemo: React.FC = () => (
 					{ key: 'notifications', label: 'Notifications', content: <div style={{ padding: '0.5rem 0' }}>Choose which notifications you receive.</div> },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Rich Content">
+		<SectionCard title="Rich Content">
 			<TabSections
 				items={[
 					{
@@ -74,8 +82,12 @@ const TabSectionsDemo: React.FC = () => (
 					},
 				]}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default TabSectionsDemo

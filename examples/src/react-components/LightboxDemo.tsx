@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { Lightbox, LightboxImage } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Lightbox,
+	LightboxImage,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const GALLERY: LightboxImage[] = [
 	{ src: 'https://picsum.photos/seed/a1/800/600', alt: 'Mountains', caption: 'Majestic mountain range at sunrise' },
@@ -20,12 +25,16 @@ export const LightboxDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Overlays"
-			title="Lightbox"
-			lede="Full-screen image viewer with keyboard/swipe navigation, thumbnails, and captions."
-		>
-			<DemoSection title="Gallery">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Overlays</RichPageHeaderChip>}
+				title="Lightbox"
+				description="Full-screen image viewer with keyboard/swipe navigation, thumbnails, and captions."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Gallery">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
 					{GALLERY.map((img, i) => (
 						<button
@@ -50,7 +59,7 @@ export const LightboxDemo: React.FC = () => {
 				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.85rem' }}>
 					Click any image to open the lightbox.
 				</p>
-			</DemoSection>
+			</SectionCard>
 
 			<Lightbox
 				images={GALLERY}
@@ -58,6 +67,10 @@ export const LightboxDemo: React.FC = () => {
 				initialIndex={initial}
 				onClose={() => setOpen(false)}
 			/>
-		</DemoPage>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

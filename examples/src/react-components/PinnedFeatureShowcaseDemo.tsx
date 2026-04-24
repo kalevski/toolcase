@@ -1,14 +1,22 @@
 import React from 'react'
-import { PinnedFeatureShowcase } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	PinnedFeatureShowcase,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const PinnedFeatureShowcaseDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Marketing"
-		title="PinnedFeatureShowcase"
-		lede="A sticky-scrolling feature showcase with pinned media and scrollable feature items."
-	>
-		<DemoSection title="Default">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Marketing</RichPageHeaderChip>}
+				title="PinnedFeatureShowcase"
+				description="A sticky-scrolling feature showcase with pinned media and scrollable feature items."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Default">
 			<PinnedFeatureShowcase
 				eyebrow="Why choose us"
 				title="Built for game developers"
@@ -57,9 +65,9 @@ const PinnedFeatureShowcaseDemo: React.FC = () => (
 					</div>
 				}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Fewer Items (No Eyebrow)">
+		<SectionCard title="Fewer Items (No Eyebrow)">
 			<PinnedFeatureShowcase
 				title="Core Features"
 				description="Everything you need to ship your game."
@@ -76,8 +84,12 @@ const PinnedFeatureShowcaseDemo: React.FC = () => (
 					},
 				]}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default PinnedFeatureShowcaseDemo

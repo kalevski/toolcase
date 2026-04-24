@@ -1,14 +1,23 @@
 import React from 'react'
-import { CoolNav, Brand } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Brand,
+	CoolNav,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const CoolNavDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Navigation"
-		title="CoolNav"
-		lede="A responsive navigation bar with brand, nav items, login action, and theme support."
-	>
-		<DemoSection title="Light Theme">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Navigation</RichPageHeaderChip>}
+				title="CoolNav"
+				description="A responsive navigation bar with brand, nav items, login action, and theme support."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Light Theme">
 			<CoolNav
 				brand={<Brand primaryText="webgame" secondaryText=".cloud" color="#6366f1" />}
 				items={[
@@ -22,9 +31,9 @@ const CoolNavDemo: React.FC = () => (
 				sticky={false}
 				theme="light"
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Dark Theme">
+		<SectionCard title="Dark Theme">
 			<div style={{ background: '#1e293b', padding: '1rem', borderRadius: '0' }}>
 				<CoolNav
 					brand={<Brand primaryText="pixel" secondaryText="forge" color="#f59e0b" />}
@@ -41,9 +50,9 @@ const CoolNavDemo: React.FC = () => (
 					theme="dark"
 				/>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Minimal (No Login)">
+		<SectionCard title="Minimal (No Login)">
 			<CoolNav
 				brand={<Brand primaryText="docs" secondaryText=".dev" />}
 				items={[
@@ -53,8 +62,12 @@ const CoolNavDemo: React.FC = () => (
 				]}
 				sticky={false}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default CoolNavDemo

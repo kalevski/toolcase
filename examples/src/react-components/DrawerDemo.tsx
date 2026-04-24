@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { Drawer, Button } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Button,
+	Drawer,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export const DrawerDemo: React.FC = () => {
 	const [rightOpen, setRightOpen] = useState(false)
@@ -12,34 +17,35 @@ export const DrawerDemo: React.FC = () => {
 	const [noTitleOpen, setNoTitleOpen] = useState(false)
 
 	return (
-		<DemoPage
-			eyebrow="Overlays"
-			title="Drawer"
-			lede="A panel that slides in from any edge of the viewport. Supports focus trap, Escape to close, and size variants."
-		>
-			<DemoSection title="Side">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Overlays</RichPageHeaderChip>}
+				title="Drawer"
+				description="A panel that slides in from any edge of the viewport. Supports focus trap, Escape to close, and size variants."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Side">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					<Button variant="primary" onClick={() => setRightOpen(true)}>Right (default)</Button>
 					<Button variant="secondary" onClick={() => setLeftOpen(true)}>Left</Button>
 					<Button variant="info" onClick={() => setTopOpen(true)}>Top</Button>
 					<Button variant="secondary" onClick={() => setBottomOpen(true)}>Bottom</Button>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Size">
+			<SectionCard title="Size">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					<Button variant="primary" onClick={() => setSmallOpen(true)}>Small</Button>
 					<Button variant="primary" onClick={() => setRightOpen(true)}>Default</Button>
 					<Button variant="primary" onClick={() => setLargeOpen(true)}>Large</Button>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				title="Without header"
-				caption={<>Omit the <code>title</code> prop to render content only, no header bar.</>}
-			>
+			<SectionCard title="Without header">
 				<Button variant="secondary" onClick={() => setNoTitleOpen(true)}>Open (no title)</Button>
-			</DemoSection>
+			</SectionCard>
 
 			{/* Drawers */}
 			<Drawer open={rightOpen} onClose={() => setRightOpen(false)} side="right" title="Right Drawer">
@@ -77,7 +83,11 @@ export const DrawerDemo: React.FC = () => {
 				<p className="text-muted mb-3">No header — content only.</p>
 				<Button variant="secondary" onClick={() => setNoTitleOpen(false)}>Close</Button>
 			</Drawer>
-		</DemoPage>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

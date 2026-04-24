@@ -1,14 +1,22 @@
 import React from 'react'
-import { Icon } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Icon,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const IconDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Media & Files"
-		title="Icon"
-		lede="Renders Bootstrap Icons with configurable size, color, and accessibility labels."
-	>
-		<DemoSection title="Common Icons">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Media & Files</RichPageHeaderChip>}
+				title="Icon"
+				description="Renders Bootstrap Icons with configurable size, color, and accessibility labels."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Common Icons">
 			<div className="d-flex flex-wrap gap-4">
 				{['house', 'gear', 'person', 'folder', 'file-earmark', 'search', 'bell', 'star',
 				  'heart', 'trash', 'pencil', 'download', 'upload', 'play', 'pause', 'check-circle'].map((name) => (
@@ -18,9 +26,9 @@ const IconDemo: React.FC = () => (
 					</div>
 				))}
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Sizes">
+		<SectionCard title="Sizes">
 			<div className="d-flex align-items-end gap-4">
 				<div className="d-flex flex-column align-items-center gap-1">
 					<Icon name="star-fill" size={14} />
@@ -43,9 +51,9 @@ const IconDemo: React.FC = () => (
 					<span className="text-muted" style={{ fontSize: '0.75rem' }}>56px</span>
 				</div>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Colors">
+		<SectionCard title="Colors">
 			<div className="d-flex flex-wrap gap-3">
 				<Icon name="circle-fill" size={24} color="#6366f1" />
 				<Icon name="circle-fill" size={24} color="#22c55e" />
@@ -54,15 +62,19 @@ const IconDemo: React.FC = () => (
 				<Icon name="circle-fill" size={24} color="#06b6d4" />
 				<Icon name="circle-fill" size={24} color="#64748b" />
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Accessible Label">
+		<SectionCard title="With Accessible Label">
 			<div className="d-flex gap-3 align-items-center">
 				<Icon name="exclamation-triangle-fill" size={24} color="#f59e0b" label="Warning" />
 				<span className="text-muted">This icon has an accessible label: "Warning"</span>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default IconDemo

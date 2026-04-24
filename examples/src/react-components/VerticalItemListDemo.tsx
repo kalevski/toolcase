@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { VerticalItemList, VerticalItemListItem } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	VerticalItemList,
+	VerticalItemListItem
+} from '@toolcase/react-components'
 
 const ITEMS: VerticalItemListItem[] = [
 	{ key: 'dashboard', icon: 'grid', text: 'Dashboard', badge: 3 },
@@ -23,12 +28,16 @@ const VerticalItemListDemo = () => {
 	const content = CONTENT[selected]
 
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="VerticalItemList"
-			lede="A sidebar list with icons, badges, and active state — paired with a content panel."
-		>
-			<DemoSection title="Sidebar list with content panel">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="VerticalItemList"
+				description="A sidebar list with icons, badges, and active state — paired with a content panel."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Sidebar list with content panel">
 				<div style={{ border: '1px solid #e2e8f0', overflow: 'hidden', minHeight: 320 }}>
 					<VerticalItemList
 						items={ITEMS}
@@ -43,8 +52,12 @@ const VerticalItemListDemo = () => {
 						)}
 					</VerticalItemList>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

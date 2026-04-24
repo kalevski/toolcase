@@ -1,14 +1,22 @@
 import React from 'react'
-import { UsageSummaryPanel } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	UsageSummaryPanel
+} from '@toolcase/react-components'
 
 const UsageSummaryPanelDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Dashboard & Admin"
-		title="UsageSummaryPanel"
-		lede="A usage breakdown panel with labeled progress meters and warning thresholds."
-	>
-		<DemoSection title="Default">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Dashboard & Admin</RichPageHeaderChip>}
+				title="UsageSummaryPanel"
+				description="A usage breakdown panel with labeled progress meters and warning thresholds."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Default">
 			<UsageSummaryPanel
 				title="Project Usage"
 				usage={[
@@ -17,9 +25,9 @@ const UsageSummaryPanelDemo: React.FC = () => (
 					{ label: 'Builds', used: 42, total: 100, measurementUnit: 'builds' },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Warnings">
+		<SectionCard title="With Warnings">
 			<UsageSummaryPanel
 				title="Account Limits"
 				usage={[
@@ -28,9 +36,9 @@ const UsageSummaryPanelDemo: React.FC = () => (
 					{ label: 'Projects', used: 3, total: 10, measurementUnit: 'projects' },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Empty / Zero Usage">
+		<SectionCard title="Empty / Zero Usage">
 			<UsageSummaryPanel
 				title="New Account"
 				usage={[
@@ -38,8 +46,12 @@ const UsageSummaryPanelDemo: React.FC = () => (
 					{ label: 'Bandwidth', used: 0, total: 10, measurementUnit: 'GB' },
 				]}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default UsageSummaryPanelDemo

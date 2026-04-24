@@ -1,5 +1,10 @@
-import { Build, Group } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Build,
+	Group,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const menuItems = [
 	{ key: 'download', icon: 'download', label: 'Download' },
@@ -9,12 +14,16 @@ const menuItems = [
 
 const BuildDemo = () => {
 	return (
-		<DemoPage
-			eyebrow="Editors"
-			title="Build"
-			lede="Displays build metadata with status indicators, file size, duration, and context menu actions."
-		>
-			<DemoSection title="Production">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Editors</RichPageHeaderChip>}
+				title="Build"
+				description="Displays build metadata with status indicators, file size, duration, and context menu actions."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Production">
 				<Group label="Production" badge="3 builds" actionIcon="play" onActionClick={() => {}}>
 					<Build
 						name="release-v2.4.0"
@@ -48,9 +57,9 @@ const BuildDemo = () => {
 						onMenuItemClick={(key) => console.log('action', key)}
 					/>
 				</Group>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Staging">
+			<SectionCard title="Staging">
 				<Group label="Staging" badge="2 builds">
 					<Build
 						name="staging-abc1234"
@@ -71,8 +80,12 @@ const BuildDemo = () => {
 						status="running"
 					/>
 				</Group>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

@@ -1,6 +1,10 @@
 import React from 'react'
-import { FileDropzone } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	FileDropzone,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const FileDropzoneDemo: React.FC = () => {
 	const handleFiles = (files: File[]) => {
@@ -8,12 +12,16 @@ const FileDropzoneDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Media & Files"
-			title="FileDropzone"
-			lede="A drag-and-drop file upload zone with supported format badges."
-		>
-			<DemoSection title="Image Uploads">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Media & Files</RichPageHeaderChip>}
+				title="FileDropzone"
+				description="A drag-and-drop file upload zone with supported format badges."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Image Uploads">
 				<FileDropzone
 					onFiles={handleFiles}
 					supported={[
@@ -22,9 +30,9 @@ const FileDropzoneDemo: React.FC = () => {
 						{ type: 'WebP', mimetype: 'image/webp', extension: '.webp' },
 					]}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Data Files">
+			<SectionCard title="Data Files">
 				<FileDropzone
 					onFiles={handleFiles}
 					supported={[
@@ -33,12 +41,16 @@ const FileDropzoneDemo: React.FC = () => {
 						{ type: 'XML', mimetype: 'application/xml', extension: '.xml' },
 					]}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="No Format Restrictions">
+			<SectionCard title="No Format Restrictions">
 				<FileDropzone onFiles={handleFiles} />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

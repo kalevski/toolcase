@@ -1,15 +1,23 @@
 import React from 'react'
-import { PricingCard } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoGrid } from './_demo'
+import {
+	PricingCard,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const PricingCardDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Marketing"
-		title="PricingCard"
-		lede="A pricing tier card with name, price, features list, highlight badge, and action button."
-	>
-		<DemoSection title="Tiers">
-			<DemoGrid minItemWidth={260}>
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Marketing</RichPageHeaderChip>}
+				title="PricingCard"
+				description="A pricing tier card with name, price, features list, highlight badge, and action button."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Tiers">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))'}}>
 				<PricingCard
 					name="Free"
 					price="$0"
@@ -49,9 +57,13 @@ const PricingCardDemo: React.FC = () => (
 					]}
 					action={{ label: 'Contact Sales', variant: 'info', outline: true }}
 				/>
-			</DemoGrid>
-		</DemoSection>
-	</DemoPage>
+			</div>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default PricingCardDemo

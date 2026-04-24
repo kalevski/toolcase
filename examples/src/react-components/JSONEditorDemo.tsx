@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { JSONEditor } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	JSONEditor,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const SCHEMA = JSON.stringify([
 	{
@@ -110,12 +114,16 @@ const JSONEditorDemo = () => {
 	const [deepValues, setDeepValues] = useState(DEEP_VALUES)
 
 	return (
-		<DemoPage
-			eyebrow="Editors"
-			title="JSONEditor"
-			lede="A schema-driven JSON editor supporting arrays, objects, nested structures, and disabled states."
-		>
-			<DemoSection title="Arrays & Primitives">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Editors</RichPageHeaderChip>}
+				title="JSONEditor"
+				description="A schema-driven JSON editor supporting arrays, objects, nested structures, and disabled states."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Arrays & Primitives">
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
 					<JSONEditor
 						schema={SCHEMA}
@@ -129,9 +137,9 @@ const JSONEditorDemo = () => {
 						</pre>
 					</div>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Deep Nesting (5 levels)">
+			<SectionCard title="Deep Nesting (5 levels)">
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
 					<JSONEditor
 						schema={DEEP_SCHEMA}
@@ -145,16 +153,20 @@ const JSONEditorDemo = () => {
 						</pre>
 					</div>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled">
+			<SectionCard title="Disabled">
 				<JSONEditor
 					schema={SCHEMA}
 					value={INITIAL_VALUES}
 					disabled
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

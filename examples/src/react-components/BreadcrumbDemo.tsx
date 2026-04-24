@@ -1,6 +1,10 @@
 import React from 'react'
-import { Breadcrumb } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Breadcrumb,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const basicItems = [
 	{ label: 'Home', href: '#' },
@@ -20,23 +24,31 @@ const longItems = [
 
 export const BreadcrumbDemo: React.FC = () => {
 	return (
-		<DemoPage
-			eyebrow="Navigation"
-			title="Breadcrumb"
-			lede="Navigation trail showing the current page's position in the hierarchy."
-		>
-			<DemoSection title="Default (slash separator)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Navigation</RichPageHeaderChip>}
+				title="Breadcrumb"
+				description="Navigation trail showing the current page's position in the hierarchy."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Default (slash separator)">
 				<Breadcrumb items={basicItems} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Custom separator">
+			<SectionCard title="Custom separator">
 				<Breadcrumb items={basicItems} separator="›" />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Collapsed — maxItems=3" caption="Click the ellipsis to expand the full path.">
+			<SectionCard title="Collapsed — maxItems=3">
 				<Breadcrumb items={longItems} maxItems={3} />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

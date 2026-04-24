@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { Input } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoGrid } from './_demo'
+import {
+	Input,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const InputDemo: React.FC = () => {
 	const [email, setEmail] = useState('')
@@ -11,10 +15,13 @@ const InputDemo: React.FC = () => {
 			: null
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="Input"
-			lede={
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="Input"
+				description={
 				<>
 					A labeled single-line text field with built-in label, error, and helper-text wiring.
 					Supports every native <code>type</code> (<code>text</code>, <code>email</code>,{' '}
@@ -23,13 +30,10 @@ const InputDemo: React.FC = () => {
 					<code>onChange</code>).
 				</>
 			}
-		>
-			<DemoSection
-				eyebrow="Common types"
-				title="Sign-in form"
-				caption="The most common use case — an account form with live email validation."
-			>
-				<DemoGrid columns={2} minItemWidth={280}>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Sign-in form">
+				<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))'}}>
 					<Input
 						label="Email address"
 						type="email"
@@ -49,37 +53,33 @@ const InputDemo: React.FC = () => {
 						autoComplete="current-password"
 						required
 					/>
-				</DemoGrid>
-			</DemoSection>
+				</div>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="State"
-				title="Read-only and disabled"
-				caption="Disabled inputs are non-interactive AND non-focusable. Read-only inputs keep their value selectable and copyable."
-			>
-				<DemoGrid columns={2} minItemWidth={280}>
+			<SectionCard title="Read-only and disabled">
+				<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))'}}>
 					<Input label="Editable" placeholder="Start typing…" defaultValue="Default value" />
 					<Input label="Read-only" value="indie-raid-game" readOnly />
 					<Input label="Disabled" placeholder="Locked" disabled />
 					<Input label="With error" placeholder="yourname" error="That handle is already taken." />
-				</DemoGrid>
-			</DemoSection>
+				</div>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Specialized types"
-				title="Typed inputs"
-				caption="Native HTML input types give you mobile keyboards, validation, and pickers for free."
-			>
-				<DemoGrid columns={3} minItemWidth={220}>
+			<SectionCard title="Typed inputs">
+				<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))'}}>
 					<Input label="Number" type="number" placeholder="0" min={0} max={100} step={1} />
 					<Input label="Date" type="date" />
 					<Input label="Time" type="time" />
 					<Input label="URL" type="url" placeholder="https://…" />
 					<Input label="Search" type="search" placeholder="Search assets…" />
 					<Input label="Color" type="color" defaultValue="#6366f1" />
-				</DemoGrid>
-			</DemoSection>
-		</DemoPage>
+				</div>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

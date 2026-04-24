@@ -1,25 +1,31 @@
 import React from 'react'
-import { Card, Button, Badge } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoGrid } from './_demo'
+import {
+	Badge,
+	Button,
+	Card,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const CardDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Layout & Surfaces"
-		title="Card"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="Card"
+				description={
 			<>
 				A neutral surface container with an optional <code>header</code> and a semantic{' '}
 				<code>variant</code>. Cards hold a single concern — settings group, a metric, a form
 				section — and compose naturally in grids and dashboards.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="Default"
-			title="Plain content"
-			caption="The bread-and-butter use: a neutral 1px-bordered surface to group related content."
-		>
-			<DemoGrid columns={2} minItemWidth={280}>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Plain content">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))'}}>
 				<Card>
 					<p style={{ margin: 0 }}>
 						A plain card without a header. Use this when the heading is already established by
@@ -31,14 +37,10 @@ const CardDemo: React.FC = () => (
 						Headered cards are the workhorse — they call out the concern the card handles.
 					</p>
 				</Card>
-			</DemoGrid>
-		</DemoSection>
+			</div>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Composition"
-			title="With controls"
-			caption="Cards compose with any other component. Here a header names the section, the body holds the detail, and a footer-shaped row closes with actions."
-		>
+		<SectionCard title="With controls">
 			<Card header="API key · rotation">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<p style={{ margin: 0, color: '#475569', fontSize: '0.9rem' }}>
@@ -67,14 +69,10 @@ const CardDemo: React.FC = () => (
 					</div>
 				</div>
 			</Card>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Semantics"
-			title="Colored variants"
-			caption="Colored variants emphasize a card's severity. Reserve for at-a-glance dashboards — most cards should stay neutral."
-		>
-			<DemoGrid minItemWidth={180}>
+		<SectionCard title="Colored variants">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))'}}>
 				<Card variant="primary" header="Primary">
 					<span style={{ color: 'inherit', opacity: 0.92 }}>Headline metric or CTA.</span>
 				</Card>
@@ -93,9 +91,13 @@ const CardDemo: React.FC = () => (
 				<Card variant="secondary" header="Secondary">
 					<span style={{ color: 'inherit', opacity: 0.92 }}>Muted emphasis.</span>
 				</Card>
-			</DemoGrid>
-		</DemoSection>
-	</DemoPage>
+			</div>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default CardDemo

@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { NodeEditor } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	NodeEditor,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const INITIAL_VALUE = JSON.stringify({
 	context: { points: 5 },
@@ -43,12 +47,16 @@ const NodeEditorDemo = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Editors"
-			title="NodeEditor"
-			lede="A visual node-based editor for branching dialogues, conditions, and exec nodes with JSON output."
-		>
-			<DemoSection title="Controlled">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Editors</RichPageHeaderChip>}
+				title="NodeEditor"
+				description="A visual node-based editor for branching dialogues, conditions, and exec nodes with JSON output."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Controlled">
 				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
 					<NodeEditor value={value} onChange={setValue} />
 					<div>
@@ -60,16 +68,20 @@ const NodeEditorDemo = () => {
 						</pre>
 					</div>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Empty (uncontrolled)">
+			<SectionCard title="Empty (uncontrolled)">
 				<NodeEditor onChange={v => console.log('uncontrolled:', v)} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled">
+			<SectionCard title="Disabled">
 				<NodeEditor value={INITIAL_VALUE} disabled />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

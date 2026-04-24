@@ -1,25 +1,29 @@
 import React from 'react'
-import { LinkedProvidersCard } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoGrid } from './_demo'
+import {
+	LinkedProvidersCard,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const LinkedProvidersCardDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Dashboard & Admin"
-		title="LinkedProvidersCard"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Dashboard & Admin</RichPageHeaderChip>}
+				title="LinkedProvidersCard"
+				description={
 			<>
 				Lists third-party identity providers (Google, GitHub, Discord, etc.) linked to the
 				current user. Composes <code>SectionCard</code>. Provider brand colors come from a
 				built-in map that callers can override or extend.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="Default"
-			title="Connected accounts"
-			caption="A read-only list. Connect / disconnect affordances live in a separate wrapper."
-		>
-			<DemoGrid columns={1} minItemWidth={360}>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Connected accounts">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(1, minmax(0, 1fr))'}}>
 				<LinkedProvidersCard
 					providers={[
 						{ id: '1', provider: 'google', identifier: 'jordan@atlas.example.com' },
@@ -27,25 +31,17 @@ const LinkedProvidersCardDemo: React.FC = () => (
 						{ id: '3', provider: 'discord', identifier: 'jordanliu#4281' },
 					]}
 				/>
-			</DemoGrid>
-		</DemoSection>
+			</div>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Empty"
-			title="No providers linked"
-			caption="When the list is empty, the card renders a centered empty state with the supplied label."
-		>
-			<DemoGrid columns={1} minItemWidth={360}>
+		<SectionCard title="No providers linked">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(1, minmax(0, 1fr))'}}>
 				<LinkedProvidersCard providers={[]} />
-			</DemoGrid>
-		</DemoSection>
+			</div>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Custom brand"
-			title="Override colors & icons"
-			caption="Pass a `brandColors` map (merged over the defaults) and an `iconForProvider` function for non-default icon names."
-		>
-			<DemoGrid columns={1} minItemWidth={360}>
+		<SectionCard title="Override colors & icons">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(1, minmax(0, 1fr))'}}>
 				<LinkedProvidersCard
 					title="Linked accounts"
 					providers={[
@@ -55,9 +51,13 @@ const LinkedProvidersCardDemo: React.FC = () => (
 					brandColors={{ okta: '#007dc1' }}
 					iconForProvider={(key) => (key === 'okta' ? 'shield-lock' : 'box-arrow-up-right')}
 				/>
-			</DemoGrid>
-		</DemoSection>
-	</DemoPage>
+			</div>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default LinkedProvidersCardDemo

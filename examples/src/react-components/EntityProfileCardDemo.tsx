@@ -1,31 +1,33 @@
 import React from 'react'
 import {
-	EntityProfileCard,
 	Avatar,
 	Badge,
-	formatRelative,
+	EntityProfileCard,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	formatRelative
 } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoGrid } from './_demo'
 
 const now = Date.now()
 
 const EntityProfileCardDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Data Display"
-		title="EntityProfileCard"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="EntityProfileCard"
+				description={
 			<>
 				A profile card with a hero row (lead visual + identity block) and a responsive meta
 				grid of <code>{'{'} icon, label, value, hint {'}'}</code> cells. Lead is a single slot
 				— plug in an <code>Avatar</code>, an icon tile, or nothing.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="User profile"
-			title="Avatar + chips + meta"
-			caption="The flagship use: a user/member profile. Meta items render with an icon eyebrow, primary value, and optional hint."
-		>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Avatar + chips + meta">
 			<EntityProfileCard
 				lead={<Avatar name="Jordan Liu" size="large" />}
 				title="Jordan Liu"
@@ -65,13 +67,9 @@ const EntityProfileCardDemo: React.FC = () => (
 					},
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Subscription"
-			title="Generic entity"
-			caption="The same primitive covers subscriptions, licenses, or any other record with an identity + metadata shape."
-		>
+		<SectionCard title="Generic entity">
 			<EntityProfileCard
 				lead={<Avatar name="AC" variant="info" size="large" />}
 				title="Atlas Cloud · Pro"
@@ -93,18 +91,18 @@ const EntityProfileCardDemo: React.FC = () => (
 					{ icon: 'hash', label: 'Subscription ID', value: 'sub_7b21', mono: true },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Loading"
-			title="Skeleton state"
-			caption="Set `loading` while fetching — both the hero and meta rows render as skeletons in place."
-		>
-			<DemoGrid columns={1} minItemWidth={320}>
+		<SectionCard title="Skeleton state">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(1, minmax(0, 1fr))'}}>
 				<EntityProfileCard title="" meta={[]} loading />
-			</DemoGrid>
-		</DemoSection>
-	</DemoPage>
+			</div>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default EntityProfileCardDemo

@@ -1,24 +1,28 @@
 import React from 'react'
-import { ActionRowList, SectionCard } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ActionRowList,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ActionRowListDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Dashboard & Admin"
-		title="ActionRowList"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Dashboard & Admin</RichPageHeaderChip>}
+				title="ActionRowList"
+				description={
 			<>
 				A vertical list of action rows. Each row has an icon, title, description, and a
 				trailing call-to-action button. The workhorse pattern for <em>Account</em>,{' '}
 				<em>Security</em>, and <em>Danger Zone</em> pages.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="Default"
-			title="Security actions"
-			caption="Every row maps to one discrete admin operation. A single `onActionClick(key)` handler receives the row key."
-		>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Security actions">
 			<SectionCard title="Security" icon="shield-lock">
 				<ActionRowList
 					onActionClick={(key) => console.log('action:', key)}
@@ -48,13 +52,9 @@ const ActionRowListDemo: React.FC = () => (
 					]}
 				/>
 			</SectionCard>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Danger zone"
-			title="Solid buttons, no trailing arrow"
-			caption="Opt out of the default outline/arrow treatment per section — solid buttons read with more weight for destructive operations."
-		>
+		<SectionCard title="Solid buttons, no trailing arrow">
 			<SectionCard title="Danger zone" icon="exclamation-triangle" variant="danger">
 				<ActionRowList
 					outline={false}
@@ -81,13 +81,9 @@ const ActionRowListDemo: React.FC = () => (
 					]}
 				/>
 			</SectionCard>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Disabled"
-			title="Per-row disabled"
-			caption="Any row can be disabled individually — useful when an action is gated on a separate state."
-		>
+		<SectionCard title="Per-row disabled">
 			<SectionCard title="Integrations" icon="puzzle">
 				<ActionRowList
 					onActionClick={(key) => console.log('action:', key)}
@@ -110,8 +106,12 @@ const ActionRowListDemo: React.FC = () => (
 					]}
 				/>
 			</SectionCard>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default ActionRowListDemo

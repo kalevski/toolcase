@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { CardOptions, CardOption } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	CardOption,
+	CardOptions,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ENGINE_OPTIONS: CardOption[] = [
 	{ key: 'phaser', icon: 'controller', title: 'Phaser', description: 'A fast, free, and fun open-source framework for Canvas and WebGL games.' },
@@ -22,26 +27,34 @@ export default function CardOptionsDemo() {
 	const [theme, setTheme] = useState<string | null>(null)
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="CardOptions"
-			lede="A single-select card grid for choosing one option from a set, with icons, titles, and descriptions."
-		>
-			<DemoSection title="Game Engine (default columns)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="CardOptions"
+				description="A single-select card grid for choosing one option from a set, with icons, titles, and descriptions."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Game Engine (default columns)">
 				<CardOptions options={ENGINE_OPTIONS} value={engine} onChange={setEngine} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Theme (3 columns)">
+			<SectionCard title="Theme (3 columns)">
 				<CardOptions options={THEME_OPTIONS} value={theme} onChange={setTheme} columns={3} />
-			</DemoSection>
+			</SectionCard>
 
 			{(engine || theme) && (
-				<DemoSection title="Selection">
+				<SectionCard title="Selection">
 					<p className="text-muted" style={{ fontSize: '0.85rem' }}>
 						Selected: engine=<strong>{engine || '–'}</strong>, theme=<strong>{theme || '–'}</strong>
 					</p>
-				</DemoSection>
+				</SectionCard>
 			)}
-		</DemoPage>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

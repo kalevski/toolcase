@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { ImageCrop } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ImageCrop,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const DEMO_IMAGE = 'https://picsum.photos/seed/toolcase/800/600'
 
@@ -15,12 +19,16 @@ export const ImageCropDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Media & Files"
-			title="ImageCrop"
-			lede="Pan, zoom, and crop images with optional aspect ratio and circular mask."
-		>
-			<DemoSection title="Free-form crop">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Media & Files</RichPageHeaderChip>}
+				title="ImageCrop"
+				description="Pan, zoom, and crop images with optional aspect ratio and circular mask."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Free-form crop">
 				<ImageCrop
 					src={DEMO_IMAGE}
 					onCrop={handleCrop((url) => setCroppedFree(url))}
@@ -31,9 +39,9 @@ export const ImageCropDemo: React.FC = () => {
 						<img src={croppedFree} alt="Cropped result" style={{ maxWidth: '100%', borderRadius: 8 }} />
 					</div>
 				)}
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="16:9 aspect ratio">
+			<SectionCard title="16:9 aspect ratio">
 				<ImageCrop
 					src={DEMO_IMAGE}
 					aspectRatio={16 / 9}
@@ -44,9 +52,9 @@ export const ImageCropDemo: React.FC = () => {
 						<img src={croppedWide} alt="Cropped 16:9" style={{ maxWidth: '100%', borderRadius: 8 }} />
 					</div>
 				)}
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Circular crop (avatar)">
+			<SectionCard title="Circular crop (avatar)">
 				<ImageCrop
 					src={DEMO_IMAGE}
 					aspectRatio={1}
@@ -62,7 +70,11 @@ export const ImageCropDemo: React.FC = () => {
 						/>
 					</div>
 				)}
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

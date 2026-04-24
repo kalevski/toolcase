@@ -1,6 +1,11 @@
 import React from 'react'
-import { Changelog, type ChangelogEntry } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Changelog,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	type ChangelogEntry
+} from '@toolcase/react-components'
 
 const entries: ChangelogEntry[] = [
 	{
@@ -37,19 +42,27 @@ const entries: ChangelogEntry[] = [
 
 const ChangelogDemo: React.FC = () => {
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="Changelog"
-			lede="A horizontal scrolling changelog section showcasing recent product updates with date, tag, title, and description."
-		>
-			<DemoSection title='With "Read More" Link'>
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="Changelog"
+				description="A horizontal scrolling changelog section showcasing recent product updates with date, tag, title, and description."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title={'With "Read More" Link'}>
 				<Changelog entries={entries} readMoreHref="#" />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title='Without "Read More" Link'>
+			<SectionCard title={'Without "Read More" Link'}>
 				<Changelog entries={entries.slice(0, 3)} readMoreHref="#" />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

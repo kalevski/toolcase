@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { OTPInput } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	OTPInput,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export const OTPInputDemo: React.FC = () => {
 	const [otp,     setOtp]     = useState('')
@@ -9,12 +13,16 @@ export const OTPInputDemo: React.FC = () => {
 	const [alpha,   setAlpha]   = useState('')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="OTPInput"
-			lede="One-time password / PIN input with auto-focus, paste support, and masking."
-		>
-			<DemoSection title="6-digit OTP">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="OTPInput"
+				description="One-time password / PIN input with auto-focus, paste support, and masking."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="6-digit OTP">
 				<OTPInput
 					label="Verification code"
 					length={6}
@@ -22,18 +30,18 @@ export const OTPInputDemo: React.FC = () => {
 					onChange={setOtp}
 				/>
 				<p style={{ color: '#64748b', marginTop: 8, marginBottom: 0, fontSize: '0.85rem' }}>Value: {otp || '—'}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="4-digit PIN">
+			<SectionCard title="4-digit PIN">
 				<OTPInput
 					label="PIN"
 					length={4}
 					value={pin}
 					onChange={setPin}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Masked (password dots)">
+			<SectionCard title="Masked (password dots)">
 				<OTPInput
 					label="Secret code"
 					length={6}
@@ -41,9 +49,9 @@ export const OTPInputDemo: React.FC = () => {
 					onChange={setMasked}
 					masked
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Alphanumeric">
+			<SectionCard title="Alphanumeric">
 				<OTPInput
 					label="Invite code"
 					length={8}
@@ -51,9 +59,9 @@ export const OTPInputDemo: React.FC = () => {
 					onChange={setAlpha}
 					mode="alphanumeric"
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Error state">
+			<SectionCard title="Error state">
 				<OTPInput
 					label="Code"
 					length={6}
@@ -61,7 +69,11 @@ export const OTPInputDemo: React.FC = () => {
 					onChange={() => {}}
 					error="Invalid code. Please try again."
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

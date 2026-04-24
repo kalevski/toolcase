@@ -1,6 +1,11 @@
 import React from 'react'
-import { Timeline, type TimelineItem } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Timeline,
+	type TimelineItem
+} from '@toolcase/react-components'
 
 const timelineItems: TimelineItem[] = [
 	{
@@ -40,19 +45,27 @@ const shortTimeline: TimelineItem[] = [
 
 const TimelineDemo: React.FC = () => {
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="Timeline"
-			lede="A vertical timeline with alternating cards for major milestones, showing the date, title, and a short description for each event."
-		>
-			<DemoSection title="Default (4 items, overlap 50)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="Timeline"
+				description="A vertical timeline with alternating cards for major milestones, showing the date, title, and a short description for each event."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Default (4 items, overlap 50)">
 				<Timeline items={timelineItems} overlap={50} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Compact (no overlap)">
+			<SectionCard title="Compact (no overlap)">
 				<Timeline items={shortTimeline} overlap={0} />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

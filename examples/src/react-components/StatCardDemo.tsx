@@ -1,37 +1,37 @@
 import React from 'react'
-import { StatCard } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoGrid } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	StatCard
+} from '@toolcase/react-components'
 
 const StatCardDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Data Display"
-		title="StatCard"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="StatCard"
+				description={
 			<>
 				A KPI tile: a label, a large numeric <code>value</code> with optional <code>unit</code>,
 				and a footer row with a delta chip, helper text, and a free-form <code>footer</code>{' '}
 				slot. Purely presentational — data fetching and formatting live upstream.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="Default"
-			title="Plain metric"
-			caption="The minimum: a label and a value. Add an `icon` to anchor the eyebrow."
-		>
-			<DemoGrid columns={3} minItemWidth={220}>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Plain metric">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))'}}>
 				<StatCard label="Active users" value="12,480" />
 				<StatCard icon="hdd" label="Storage used" value="34.2" unit="GB" />
 				<StatCard icon="people" label="Teams" value="86" />
-			</DemoGrid>
-		</DemoSection>
+			</div>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="With delta"
-			title="Up / down / neutral"
-			caption="The delta chip accepts any string — usually a percentage change or a raw delta. Kind picks the color and arrow icon."
-		>
-			<DemoGrid columns={3} minItemWidth={220}>
+		<SectionCard title="Up / down / neutral">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))'}}>
 				<StatCard
 					icon="graph-up-arrow"
 					label="Revenue"
@@ -57,15 +57,11 @@ const StatCardDemo: React.FC = () => (
 					deltaKind="neutral"
 					helper="flat week-on-week"
 				/>
-			</DemoGrid>
-		</DemoSection>
+			</div>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Footer slot"
-			title="Free-form footer"
-			caption="Use the `footer` slot for supplementary info that doesn't fit the delta/helper pattern — a link, a tiny sparkline, a timestamp."
-		>
-			<DemoGrid columns={2} minItemWidth={260}>
+		<SectionCard title="Free-form footer">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))'}}>
 				<StatCard
 					icon="cloud-upload"
 					label="Bundles shipped"
@@ -81,21 +77,21 @@ const StatCardDemo: React.FC = () => (
 					unit="hrs"
 					helper="74% of monthly quota"
 				/>
-			</DemoGrid>
-		</DemoSection>
+			</div>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Loading"
-			title="Skeleton state"
-			caption="Set `loading` while fetching — the layout stays stable and renders skeletons in place of each row."
-		>
-			<DemoGrid columns={3} minItemWidth={220}>
+		<SectionCard title="Skeleton state">
+			<div style={{display: 'grid', gap: 16, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))'}}>
 				<StatCard label="Active users" value="" loading />
 				<StatCard label="Storage used" value="" loading />
 				<StatCard label="Teams" value="" loading />
-			</DemoGrid>
-		</DemoSection>
-	</DemoPage>
+			</div>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default StatCardDemo

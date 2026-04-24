@@ -1,7 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { AdvancedTable, Badge, ActionItems } from '@toolcase/react-components'
+import {
+	ActionItems,
+	AdvancedTable,
+	Badge,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 import type { AdvancedTableFilter, AdvancedTableSort, TableColumn } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 // ── Fake data ──────────────────────────────────────────────────────────────────
 
@@ -145,12 +151,16 @@ const AdvancedTableDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="AdvancedTable"
-			lede="A data table with filters, sortable columns, pagination, and loading state — designed for backend-driven data."
-		>
-			<DemoSection title="Full Example">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="AdvancedTable"
+				description="A data table with filters, sortable columns, pagination, and loading state — designed for backend-driven data."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Full Example">
 				<AdvancedTable<User>
 					columns={columns}
 					data={data}
@@ -169,8 +179,12 @@ const AdvancedTableDemo: React.FC = () => {
 					onOffsetChange={setOffset}
 					loading={loading}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

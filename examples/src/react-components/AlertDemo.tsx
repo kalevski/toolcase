@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { Alert, Button } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Alert,
+	Button,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const AlertDemo: React.FC = () => {
 	const [showInfo, setShowInfo] = useState(true)
@@ -10,10 +15,13 @@ const AlertDemo: React.FC = () => {
 	const dismissAlert = (id: number) => setStack((s) => s.filter((n) => n !== id))
 
 	return (
-		<DemoPage
-			eyebrow="Feedback"
-			title="Alert"
-			lede={
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Feedback</RichPageHeaderChip>}
+				title="Alert"
+				description={
 				<>
 					An inline status banner for page- or section-level announcements — six semantic{' '}
 					<code>variant</code>s, optional <code>title</code>, <code>icon</code>, and{' '}
@@ -21,12 +29,9 @@ const AlertDemo: React.FC = () => {
 					<code>role="alert"</code> for warning/danger so screen readers announce correctly.
 				</>
 			}
-		>
-			<DemoSection
-				eyebrow="Semantic meaning"
-				title="Variants"
-				caption="One line of copy each. Pick the variant that matches the severity of what happened."
-			>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Variants">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Alert variant="primary">A new version of webgame.cloud is available.</Alert>
 					<Alert variant="secondary">Your changes are saved to a draft automatically.</Alert>
@@ -35,13 +40,9 @@ const AlertDemo: React.FC = () => {
 					<Alert variant="warning">Storage is at 82% — consider archiving old builds.</Alert>
 					<Alert variant="danger">Deployment failed: asset checksum did not match manifest.</Alert>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Anatomy"
-				title="With title"
-				caption="Lead with a one-line title that captures the state. Use the body for the action or next step."
-			>
+			<SectionCard title="With title">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Alert variant="success" title="Published" icon="check-circle-fill">
 						Your build is live at <code>indie-raid.webgame.cloud</code>.
@@ -53,13 +54,9 @@ const AlertDemo: React.FC = () => {
 						Network dropped after 2.4 MB of 8.1 MB. Retrying will resume from where it stopped.
 					</Alert>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Interaction"
-				title="Dismissible"
-				caption="Use dismissible when the alert is informational. For error states, prefer keeping it visible until the issue is resolved."
-			>
+			<SectionCard title="Dismissible">
 				{showInfo ? (
 					<Alert
 						variant="info"
@@ -75,31 +72,22 @@ const AlertDemo: React.FC = () => {
 						Restore alert
 					</Button>
 				)}
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="State"
-				title="Loading"
-				caption="Attach a spinner to an alert while an async operation is in flight."
-			>
+			<SectionCard title="Loading">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Alert variant="primary" loading>Uploading <code>level-03.atlas</code> — 62% of 14.3 MB.</Alert>
 					<Alert variant="info" loading title="Syncing">
 						Pulling the latest schema from <code>prod</code>…
 					</Alert>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Realistic usage"
-				title="Notification stack"
-				caption="Alerts composed as a feed. Add events and dismiss them individually."
-				aside={
+			<SectionCard title="Notification stack" action={
 					<Button variant="primary" size="small" onClick={addAlert}>
 						Push event
 					</Button>
-				}
-			>
+				}>
 				{stack.length === 0 ? (
 					<p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
 						All clear — no active events.
@@ -118,8 +106,12 @@ const AlertDemo: React.FC = () => {
 						))}
 					</div>
 				)}
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

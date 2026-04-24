@@ -1,6 +1,14 @@
 import React, { useState } from 'react'
-import { FormInput, ColorOption, IconOption, DropdownItem, ExtendedSelectItem } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ColorOption,
+	DropdownItem,
+	ExtendedSelectItem,
+	FormInput,
+	IconOption,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const sampleColors: ColorOption[] = [
 	{ hex: '#ef4444', label: 'Red' },
@@ -75,17 +83,21 @@ const FormInputDemo: React.FC = () => {
 	const [extSelectVal, setExtSelectVal] = useState<string | undefined>('unity')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="FormInput"
-			lede={
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="FormInput"
+				description={
 				<>
 					A unified form input component that renders the correct input type based on a single <code>type</code> prop.
 					Supports 15 input types with consistent label, help tooltip, helper text, and error handling.
 				</>
 			}
-		>
-			<DemoSection title="Text Inputs">
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Text Inputs">
 				<div className="d-flex flex-column gap-4">
 					<FormInput
 						type="text"
@@ -123,9 +135,9 @@ const FormInputDemo: React.FC = () => {
 						help="Enter a value between 0 and 100."
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Range">
+			<SectionCard title="Range">
 				<FormInput
 					type="range"
 					label={`Volume: ${rangeVal}`}
@@ -135,9 +147,9 @@ const FormInputDemo: React.FC = () => {
 					value={rangeVal}
 					onChange={(v) => setRangeVal(v as number)}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Textarea">
+			<SectionCard title="Textarea">
 				<FormInput
 					type="textarea"
 					label="Description"
@@ -147,9 +159,9 @@ const FormInputDemo: React.FC = () => {
 					onChange={(v) => setTextareaVal(v as string)}
 					helper="Markdown is supported."
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Date">
+			<SectionCard title="Date">
 				<FormInput
 					type="date"
 					label="Start Date"
@@ -157,9 +169,9 @@ const FormInputDemo: React.FC = () => {
 					onChange={(v) => setDateVal(v as string)}
 					help="When should the project begin?"
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Color">
+			<SectionCard title="Color">
 				<FormInput
 					type="color"
 					label="Theme Color"
@@ -168,9 +180,9 @@ const FormInputDemo: React.FC = () => {
 					value={colorVal}
 					onChange={(v) => setColorVal(v as string)}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Icon">
+			<SectionCard title="Icon">
 				<FormInput
 					type="icon"
 					label="Project Icon"
@@ -180,9 +192,9 @@ const FormInputDemo: React.FC = () => {
 					onChange={(v) => setIconVal(v as string)}
 					help="Choose an icon to represent this project."
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Tags">
+			<SectionCard title="Tags">
 				<FormInput
 					type="tag"
 					label="Technologies"
@@ -194,9 +206,9 @@ const FormInputDemo: React.FC = () => {
 					maxTags={8}
 					helper="Press Enter to add a tag."
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Checkbox & Boolean">
+			<SectionCard title="Checkbox & Boolean">
 				<div className="d-flex flex-column gap-4">
 					<FormInput
 						type="checkbox"
@@ -213,9 +225,9 @@ const FormInputDemo: React.FC = () => {
 						help="Toggle push notifications."
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Checkbox Group">
+			<SectionCard title="Checkbox Group">
 				<FormInput
 					type="checkbox-group"
 					label="Skills"
@@ -225,9 +237,9 @@ const FormInputDemo: React.FC = () => {
 					inline
 					helper="Select all that apply."
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Radio Group">
+			<SectionCard title="Radio Group">
 				<FormInput
 					type="radio-group"
 					label="Size"
@@ -236,9 +248,9 @@ const FormInputDemo: React.FC = () => {
 					onChange={(v) => setRadioGroupVal(v as string)}
 					inline
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Dropdown">
+			<SectionCard title="Dropdown">
 				<div className="d-flex flex-column gap-4">
 					<FormInput
 						type="dropdown"
@@ -249,9 +261,9 @@ const FormInputDemo: React.FC = () => {
 						help="Select the project to work on."
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Extended Select">
+			<SectionCard title="Extended Select">
 				<div className="d-flex flex-column gap-4">
 					<FormInput
 						type="extended-select"
@@ -265,18 +277,9 @@ const FormInputDemo: React.FC = () => {
 						help="Pick the primary game engine for your project."
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				title="Validation"
-				caption={
-					<>
-						When a validator returns a non-null value, an error message is shown.
-						The second argument of <code>onChange</code> indicates whether the value has an error.
-						Use <code>onErrorMessage</code> to convert the validator result into a display string.
-					</>
-				}
-			>
+			<SectionCard title="Validation">
 				<div className="d-flex flex-column gap-4">
 					<FormInput
 						type="text"
@@ -321,9 +324,9 @@ const FormInputDemo: React.FC = () => {
 						helper={`Current value: "${validatedAge}"`}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Error State">
+			<SectionCard title="Error State">
 				<div className="d-flex flex-column gap-4">
 					<FormInput
 						type="email"
@@ -341,9 +344,9 @@ const FormInputDemo: React.FC = () => {
 						error="Username must be at least 3 characters."
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Disabled State">
+			<SectionCard title="Disabled State">
 				<div className="d-flex flex-column gap-4">
 					<FormInput
 						type="text"
@@ -358,8 +361,12 @@ const FormInputDemo: React.FC = () => {
 						disabled
 					/>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

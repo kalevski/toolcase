@@ -1,14 +1,23 @@
 import React from 'react'
-import { Brand, Login } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Brand,
+	Login,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const LoginDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Marketing"
-		title="Login"
-		lede="A branded sign-in screen with social provider buttons, title, and description."
-	>
-		<DemoSection title="Default — Three Providers">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Marketing</RichPageHeaderChip>}
+				title="Login"
+				description="A branded sign-in screen with social provider buttons, title, and description."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Default — Three Providers">
 			<Login
 				logo={<Brand primaryText="webgame" secondaryText=".cloud" label="beta" />}
 				title="Sign in to your account"
@@ -20,9 +29,9 @@ const LoginDemo: React.FC = () => (
 					{ id: 'google', label: 'Continue with Google', color: 'red', icon: 'google' },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Single Provider">
+		<SectionCard title="Single Provider">
 			<Login
 				logo={<Brand primaryText="GAME" secondaryText="HUB" color="#22c55e" />}
 				title="Welcome back"
@@ -32,9 +41,9 @@ const LoginDemo: React.FC = () => (
 					{ id: 'github', label: 'Sign in with GitHub', color: '#24292f', icon: 'github' },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Custom Branding">
+		<SectionCard title="Custom Branding">
 			<Login
 				logo={<Brand primaryText="PIXEL" secondaryText="FORGE" color="#6366f1" />}
 				title="Creator Portal"
@@ -45,8 +54,12 @@ const LoginDemo: React.FC = () => (
 					{ id: 'google', label: 'Continue with Google', color: '#ea4335', icon: 'google' },
 				]}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default LoginDemo

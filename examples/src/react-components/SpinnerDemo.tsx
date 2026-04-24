@@ -1,14 +1,22 @@
 import React from 'react'
-import { Spinner } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Spinner
+} from '@toolcase/react-components'
 
 const SpinnerDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Feedback"
-		title="Spinner"
-		lede="A loading indicator with variant colors, sizes, and optional label."
-	>
-		<DemoSection title="Variants">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Feedback</RichPageHeaderChip>}
+				title="Spinner"
+				description="A loading indicator with variant colors, sizes, and optional label."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Variants">
 			<div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
 				<Spinner variant="primary" />
 				<Spinner variant="secondary" />
@@ -17,23 +25,27 @@ const SpinnerDemo: React.FC = () => (
 				<Spinner variant="warning" />
 				<Spinner variant="danger" />
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Sizes">
+		<SectionCard title="Sizes">
 			<div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
 				<Spinner size="small" />
 				<Spinner size="default" />
 				<Spinner size="large" />
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Label">
+		<SectionCard title="With Label">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 				<Spinner label="Loading data…" />
 				<Spinner variant="success" label="Saving changes…" size="large" />
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default SpinnerDemo

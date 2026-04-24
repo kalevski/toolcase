@@ -1,6 +1,10 @@
 import React from 'react'
-import { Carousel } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Carousel,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const slides = [
 	{ bg: '#dbeafe', label: 'Slide 1 — Ocean Blue' },
@@ -29,26 +33,34 @@ const SlideContent: React.FC<{ bg: string; label: string }> = ({ bg, label }) =>
 
 export const CarouselDemo: React.FC = () => {
 	return (
-		<DemoPage
-			eyebrow="Data Display"
-			title="Carousel"
-			lede="Slide carousel with auto-play, keyboard navigation, swipe support, dots, and arrows."
-		>
-			<DemoSection title="Auto-play (3 s interval)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="Carousel"
+				description="Slide carousel with auto-play, keyboard navigation, swipe support, dots, and arrows."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Auto-play (3 s interval)">
 				<Carousel autoPlay interval={3000} loop showArrows showDots>
 					{slides.map((s) => (
 						<SlideContent key={s.label} bg={s.bg} label={s.label} />
 					))}
 				</Carousel>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Manual / No dots">
+			<SectionCard title="Manual / No dots">
 				<Carousel showArrows loop>
 					{slides.map((s) => (
 						<SlideContent key={s.label} bg={s.bg} label={s.label} />
 					))}
 				</Carousel>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

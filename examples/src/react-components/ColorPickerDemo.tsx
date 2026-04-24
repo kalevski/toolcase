@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { ColorPicker } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ColorPicker,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const PALETTE = [
 	'#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
@@ -22,12 +26,16 @@ const ColorPickerDemo: React.FC = () => {
 	const [color2, setColor2] = useState('#ef4444')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="ColorPicker"
-			lede="A dropdown color swatch picker with configurable palette and grid columns."
-		>
-			<DemoSection title="String Colors (5 columns)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="ColorPicker"
+				description="A dropdown color swatch picker with configurable palette and grid columns."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="String Colors (5 columns)">
 				<ColorPicker
 					label="Primary Color"
 					colors={PALETTE}
@@ -36,9 +44,9 @@ const ColorPickerDemo: React.FC = () => {
 					columns={5}
 				/>
 				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {color1}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Labeled Colors (3 columns)">
+			<SectionCard title="Labeled Colors (3 columns)">
 				<ColorPicker
 					label="Accent Color"
 					colors={LABELED_COLORS}
@@ -47,16 +55,20 @@ const ColorPickerDemo: React.FC = () => {
 					columns={3}
 				/>
 				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {color2}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Loading State">
+			<SectionCard title="Loading State">
 				<ColorPicker
 					label="Fetching Palette..."
 					colors={PALETTE}
 					loading
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

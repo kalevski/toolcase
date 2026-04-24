@@ -1,17 +1,25 @@
 import React, { useState } from 'react'
-import { Tag } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Tag
+} from '@toolcase/react-components'
 
 const TagDemo: React.FC = () => {
 	const [tags, setTags] = useState(['React', 'TypeScript', 'SCSS', 'Bootstrap'])
 
 	return (
-		<DemoPage
-			eyebrow="Buttons & Actions"
-			title="Tag"
-			lede="Small label with optional variant color and removable support."
-		>
-			<DemoSection title="Variants">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Buttons & Actions</RichPageHeaderChip>}
+				title="Tag"
+				description="Small label with optional variant color and removable support."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Variants">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					<Tag variant="primary">Primary</Tag>
 					<Tag variant="secondary">Secondary</Tag>
@@ -20,9 +28,9 @@ const TagDemo: React.FC = () => {
 					<Tag variant="warning">Warning</Tag>
 					<Tag variant="danger">Danger</Tag>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Removable">
+			<SectionCard title="Removable">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					{tags.map((t) => (
 						<Tag
@@ -36,16 +44,20 @@ const TagDemo: React.FC = () => {
 					))}
 					{tags.length === 0 && <span style={{ color: '#64748b' }}>All tags removed</span>}
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Using label prop">
+			<SectionCard title="Using label prop">
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 					<Tag label="v1.0.0" variant="info" />
 					<Tag label="stable" variant="success" />
 					<Tag label="deprecated" variant="danger" />
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

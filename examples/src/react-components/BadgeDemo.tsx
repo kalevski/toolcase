@@ -1,14 +1,22 @@
 import React from 'react'
-import { Badge } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Badge,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const BadgeDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Feedback"
-		title="Badge"
-		lede="A small colored label for status indicators, counts, and tags."
-	>
-		<DemoSection title="Variants">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Feedback</RichPageHeaderChip>}
+				title="Badge"
+				description="A small colored label for status indicators, counts, and tags."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Variants">
 			<div className="d-flex flex-wrap gap-2">
 				<Badge variant="primary">Primary</Badge>
 				<Badge variant="secondary">Secondary</Badge>
@@ -17,9 +25,9 @@ const BadgeDemo: React.FC = () => (
 				<Badge variant="warning">Warning</Badge>
 				<Badge variant="info">Info</Badge>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Pill">
+		<SectionCard title="Pill">
 			<div className="d-flex flex-wrap gap-2">
 				<Badge variant="primary" pill>Primary</Badge>
 				<Badge variant="secondary" pill>Secondary</Badge>
@@ -28,33 +36,37 @@ const BadgeDemo: React.FC = () => (
 				<Badge variant="warning" pill>Warning</Badge>
 				<Badge variant="info" pill>Info</Badge>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Label Prop">
+		<SectionCard title="With Label Prop">
 			<div className="d-flex flex-wrap gap-2">
 				<Badge variant="primary" label="v2.4.0" />
 				<Badge variant="info" label="New" pill />
 				<Badge variant="success" label="Active" />
 				<Badge variant="danger" label="3 errors" pill />
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Sizes">
+		<SectionCard title="Sizes">
 			<div className="d-flex flex-wrap align-items-center gap-2">
 				<Badge variant="primary" size="sm">Small</Badge>
 				<Badge variant="primary" size="md">Medium</Badge>
 				<Badge variant="primary" size="lg">Large</Badge>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="In Context">
+		<SectionCard title="In Context">
 			<div className="d-flex flex-column gap-2">
 				<p className="mb-0">Notifications <Badge variant="danger" pill>4</Badge></p>
 				<p className="mb-0">Build Status: <Badge variant="success">Passing</Badge></p>
 				<p className="mb-0">Environment: <Badge variant="warning">Staging</Badge></p>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default BadgeDemo

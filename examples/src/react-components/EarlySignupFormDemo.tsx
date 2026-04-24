@@ -1,14 +1,22 @@
 import React from 'react'
-import { EarlySignupForm } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	EarlySignupForm,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const EarlySignupFormDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Marketing"
-		title="EarlySignupForm"
-		lede="An email signup form with benefits list, helper text, and custom CTA label."
-	>
-		<DemoSection title="Default">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Marketing</RichPageHeaderChip>}
+				title="EarlySignupForm"
+				description="An email signup form with benefits list, helper text, and custom CTA label."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Default">
 			<EarlySignupForm
 				title="Get Early Access"
 				subtitle="Be among the first to try webgame.cloud and shape the future of browser game hosting."
@@ -22,9 +30,9 @@ const EarlySignupFormDemo: React.FC = () => (
 				ctaLabel="Request Access"
 				onSubmit={(email) => alert(`Signed up: ${email}`)}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Minimal">
+		<SectionCard title="Minimal">
 			<EarlySignupForm
 				title="Join the Waitlist"
 				benefits={[
@@ -34,8 +42,12 @@ const EarlySignupFormDemo: React.FC = () => (
 				ctaLabel="Sign Up"
 				onSubmit={(email) => alert(`Joined: ${email}`)}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default EarlySignupFormDemo

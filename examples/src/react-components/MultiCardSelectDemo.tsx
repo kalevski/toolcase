@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { MultiCardSelect, MultiCardSelectOption } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	MultiCardSelect,
+	MultiCardSelectOption,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const CATEGORY_OPTIONS: MultiCardSelectOption[] = [
 	{ key: 'sprites', title: 'Sprites', description: 'Player, enemies, items, NPCs' },
@@ -27,26 +32,34 @@ export default function MultiCardSelectDemo() {
 	const [features, setFeatures] = useState<string[]>([])
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="MultiCardSelect"
-			lede="A multi-select card grid allowing users to toggle multiple options on and off."
-		>
-			<DemoSection title="Asset Categories (with descriptions)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="MultiCardSelect"
+				description="A multi-select card grid allowing users to toggle multiple options on and off."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Asset Categories (with descriptions)">
 				<MultiCardSelect options={CATEGORY_OPTIONS} value={categories} onChange={setCategories} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Features (3 columns, no descriptions)">
+			<SectionCard title="Features (3 columns, no descriptions)">
 				<MultiCardSelect options={FEATURE_OPTIONS} value={features} onChange={setFeatures} columns={3} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Selection state">
+			<SectionCard title="Selection state">
 				<p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
 					Categories: <strong>{categories.join(', ') || '–'}</strong>
 					<br />
 					Features: <strong>{features.join(', ') || '–'}</strong>
 				</p>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

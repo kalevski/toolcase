@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
-import { WelcomeGuide, WelcomeGuideStep, Button } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Button,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	WelcomeGuide,
+	WelcomeGuideStep
+} from '@toolcase/react-components'
 
 const INITIAL_STEPS: WelcomeGuideStep[] = [
 	{ label: 'Create your first project', completed: true },
@@ -38,32 +44,33 @@ const WelcomeGuideDemo = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Marketing"
-			title="WelcomeGuide"
-			lede="An onboarding card with step progress, messages carousel, and optional background pattern."
-		>
-			<DemoSection title="With background pattern">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Marketing</RichPageHeaderChip>}
+				title="WelcomeGuide"
+				description="An onboarding card with step progress, messages carousel, and optional background pattern."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="With background pattern">
 				<WelcomeGuide
 					title="Getting Started"
 					messages={MESSAGES}
 					steps={steps}
 					backgroundPattern={showPattern ? <DotPattern /> : undefined}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Without background pattern">
+			<SectionCard title="Without background pattern">
 				<WelcomeGuide
 					title="Getting Started"
 					messages={MESSAGES}
 					steps={steps}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection
-				title="Toggle Steps"
-				caption="Click to toggle step completion and see the guide update."
-			>
+			<SectionCard title="Toggle Steps">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					{steps.map((step, i) => (
 						<Button
@@ -85,8 +92,12 @@ const WelcomeGuideDemo = () => {
 						{showPattern ? 'Hide' : 'Show'} Pattern
 					</Button>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

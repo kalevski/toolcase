@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { IconPicker } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	IconPicker,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ICON_OPTIONS = [
 	{ icon: 'house', label: 'Home', value: 'house' },
@@ -30,12 +34,16 @@ const IconPickerDemo: React.FC = () => {
 	const [selected2, setSelected2] = useState('house')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="IconPicker"
-			lede="A dropdown icon picker with configurable grid columns and selectable icon options."
-		>
-			<DemoSection title="Default (5 columns)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="IconPicker"
+				description="A dropdown icon picker with configurable grid columns and selectable icon options."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Default (5 columns)">
 				<IconPicker
 					label="Select Icon"
 					icons={ICON_OPTIONS}
@@ -43,9 +51,9 @@ const IconPickerDemo: React.FC = () => {
 					onChange={setSelected}
 				/>
 				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {selected}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="4 Columns">
+			<SectionCard title="4 Columns">
 				<IconPicker
 					label="Choose an Icon"
 					icons={ICON_OPTIONS}
@@ -53,24 +61,28 @@ const IconPickerDemo: React.FC = () => {
 					onChange={setSelected2}
 					columns={4}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="String Array">
+			<SectionCard title="String Array">
 				<IconPicker
 					label="Simple Strings"
 					icons={['house', 'gear', 'star', 'heart', 'bell', 'rocket-takeoff', 'envelope', 'folder', 'trash']}
 					columns={3}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Loading State">
+			<SectionCard title="Loading State">
 				<IconPicker
 					label="Loading..."
 					icons={ICON_OPTIONS}
 					loading
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

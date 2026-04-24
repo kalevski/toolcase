@@ -1,14 +1,22 @@
 import React from 'react'
-import { Hero } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Hero,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const HeroDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Layout & Surfaces"
-		title="Hero"
-		lede="A landing page hero section with eyebrow, actions, stat cards, and metrics."
-	>
-		<DemoSection title="Full Featured">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="Hero"
+				description="A landing page hero section with eyebrow, actions, stat cards, and metrics."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Full Featured">
 			<Hero
 				eyebrow="Now in public beta"
 				title="Ship your web games faster"
@@ -26,16 +34,20 @@ const HeroDemo: React.FC = () => (
 					{ label: 'uptime', value: '99.99%', helper: 'multi-region' },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Minimal (No Stats)">
+		<SectionCard title="Minimal (No Stats)">
 			<Hero
 				title="Build amazing games"
 				description="Everything you need to create, test, and publish browser-based games."
 				primaryAction={{ label: 'Start Building', variant: 'primary' }}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default HeroDemo

@@ -1,14 +1,23 @@
 import React from 'react'
-import { PageFooter, Brand } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Brand,
+	PageFooter,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const PageFooterDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Marketing"
-		title="PageFooter"
-		lede="A page footer with navigation menus, social links, legal links, and optional CTA."
-	>
-		<DemoSection title="Full Featured">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Marketing</RichPageHeaderChip>}
+				title="PageFooter"
+				description="A page footer with navigation menus, social links, legal links, and optional CTA."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Full Featured">
 			<PageFooter
 				brand={<Brand primaryText="webgame" secondaryText=".cloud" color="#6366f1" />}
 				tagline="Ship web games faster"
@@ -50,9 +59,9 @@ const PageFooterDemo: React.FC = () => (
 				]}
 				legalText="© 2025 webgame.cloud. All rights reserved."
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Minimal">
+		<SectionCard title="Minimal">
 			<PageFooter
 				menus={[
 					{
@@ -65,8 +74,12 @@ const PageFooterDemo: React.FC = () => (
 				]}
 				legalText="© 2025 Example Inc."
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default PageFooterDemo

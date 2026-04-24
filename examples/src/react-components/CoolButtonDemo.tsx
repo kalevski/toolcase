@@ -1,14 +1,22 @@
 import React from 'react'
-import { CoolButton } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	CoolButton,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const CoolButtonDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Marketing"
-		title="CoolButton"
-		lede="An enhanced button with addon element, separator, and position control."
-	>
-		<DemoSection title="With Addon (Right)">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Marketing</RichPageHeaderChip>}
+				title="CoolButton"
+				description="An enhanced button with addon element, separator, and position control."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="With Addon (Right)">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
 				<CoolButton variant="primary" addon={<i className="bi bi-arrow-right" />}>
 					Get Started
@@ -20,9 +28,9 @@ const CoolButtonDemo: React.FC = () => (
 					Delete
 				</CoolButton>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="With Addon (Left)">
+		<SectionCard title="With Addon (Left)">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
 				<CoolButton variant="primary" addon={<i className="bi bi-rocket-takeoff" />} addonPosition="left">
 					Launch
@@ -31,9 +39,9 @@ const CoolButtonDemo: React.FC = () => (
 					Search
 				</CoolButton>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Without Separator">
+		<SectionCard title="Without Separator">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
 				<CoolButton variant="primary" addon={<i className="bi bi-arrow-right" />} showSeparator={false}>
 					Continue
@@ -42,24 +50,28 @@ const CoolButtonDemo: React.FC = () => (
 					Settings
 				</CoolButton>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Sizes">
+		<SectionCard title="Sizes">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
 				<CoolButton variant="primary" size="small" addon={<i className="bi bi-plus" />}>Small</CoolButton>
 				<CoolButton variant="primary" addon={<i className="bi bi-plus" />}>Default</CoolButton>
 				<CoolButton variant="primary" size="large" addon={<i className="bi bi-plus" />}>Large</CoolButton>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="No Addon (plain)">
+		<SectionCard title="No Addon (plain)">
 			<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 				<CoolButton variant="primary">Primary</CoolButton>
 				<CoolButton variant="secondary">Secondary</CoolButton>
 				<CoolButton variant="warning" outline>Warning Outline</CoolButton>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default CoolButtonDemo

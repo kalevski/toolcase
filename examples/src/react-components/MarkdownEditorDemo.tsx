@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { MarkdownEditor } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	MarkdownEditor,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const SAMPLE = `# Hello World
 
@@ -21,12 +25,16 @@ export const MarkdownEditorDemo: React.FC = () => {
 	const [minimal, setMinimal] = useState('')
 
 	return (
-		<DemoPage
-			eyebrow="Editors"
-			title="MarkdownEditor"
-			lede="Split-pane editor with write/preview tabs and a formatting toolbar."
-		>
-			<DemoSection title="With Toolbar">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Editors</RichPageHeaderChip>}
+				title="MarkdownEditor"
+				description="Split-pane editor with write/preview tabs and a formatting toolbar."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="With Toolbar">
 				<MarkdownEditor
 					label="Content"
 					value={content}
@@ -34,9 +42,9 @@ export const MarkdownEditorDemo: React.FC = () => {
 					height={360}
 					toolbar
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="No Toolbar">
+			<SectionCard title="No Toolbar">
 				<MarkdownEditor
 					label="Notes"
 					value={minimal}
@@ -45,7 +53,11 @@ export const MarkdownEditorDemo: React.FC = () => {
 					toolbar={false}
 					placeholder="Plain textarea with preview tab…"
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

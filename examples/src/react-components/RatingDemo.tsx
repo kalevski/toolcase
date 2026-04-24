@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { Rating } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Rating,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 export const RatingDemo: React.FC = () => {
 	const [score, setScore]   = useState(0)
@@ -8,28 +12,32 @@ export const RatingDemo: React.FC = () => {
 	const [heart, setHeart]   = useState(2)
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="Rating"
-			lede="Interactive star (or custom icon) rating component with half-star support."
-		>
-			<DemoSection title="Default">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="Rating"
+				description="Interactive star (or custom icon) rating component with half-star support."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Default">
 				<Rating label="Your rating" value={score} onChange={setScore} />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Half-star">
+			<SectionCard title="Half-star">
 				<Rating label="Precision rating" value={half} onChange={setHalf} allowHalf />
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Sizes">
+			<SectionCard title="Sizes">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 					<Rating label="Small" value={3} readOnly size="small" />
 					<Rating label="Default" value={4} readOnly size="default" />
 					<Rating label="Large" value={5} readOnly size="large" />
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Heart icon">
+			<SectionCard title="Heart icon">
 				<Rating
 					label="Like it?"
 					value={heart}
@@ -38,11 +46,15 @@ export const RatingDemo: React.FC = () => {
 					emptyIcon="heart"
 					count={5}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Read-only">
+			<SectionCard title="Read-only">
 				<Rating value={4.5} readOnly allowHalf />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

@@ -1,18 +1,26 @@
 import React, { useState } from 'react'
-import { Dropdown } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Dropdown,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const DropdownDemo: React.FC = () => {
 	const [selected, setSelected] = useState('proj-1')
 	const [selected2, setSelected2] = useState<string | undefined>(undefined)
 
 	return (
-		<DemoPage
-			eyebrow="Buttons & Actions"
-			title="Dropdown"
-			lede="A custom dropdown selector with icon, name, and description per item."
-		>
-			<DemoSection title="Basic">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Buttons & Actions</RichPageHeaderChip>}
+				title="Dropdown"
+				description="A custom dropdown selector with icon, name, and description per item."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Basic">
 				<Dropdown
 					items={[
 						{ key: 'proj-1', name: 'Space Invaders', description: 'Arcade shooter', icon: 'rocket-takeoff' },
@@ -30,9 +38,9 @@ const DropdownDemo: React.FC = () => {
 					onChange={setSelected}
 				/>
 				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {selected}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Placeholder">
+			<SectionCard title="With Placeholder">
 				<Dropdown
 					items={[
 						{ key: 'unity', name: 'Unity', icon: 'box' },
@@ -43,9 +51,9 @@ const DropdownDemo: React.FC = () => {
 					onChange={setSelected2}
 					placeholder="Choose an engine..."
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Disabled Items">
+			<SectionCard title="With Disabled Items">
 				<Dropdown
 					items={[
 						{ key: 'free', name: 'Free', description: 'Basic features' },
@@ -55,17 +63,21 @@ const DropdownDemo: React.FC = () => {
 					value="free"
 					onChange={() => {}}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Loading State">
+			<SectionCard title="Loading State">
 				<Dropdown
 					items={[]}
 					value={undefined}
 					onChange={() => {}}
 					loading
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

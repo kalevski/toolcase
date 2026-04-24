@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { SingleCardSelect } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	SingleCardSelect
+} from '@toolcase/react-components'
 
 const options = [
 	{ key: 'react', title: 'React', description: 'A JavaScript library for building user interfaces' },
@@ -20,12 +24,16 @@ const SingleCardSelectDemo: React.FC = () => {
 	const [sizeSelected, setSizeSelected] = useState<string | null>('medium')
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="SingleCardSelect"
-			lede="A single-selection card grid for choosing one option from a set."
-		>
-			<DemoSection title="With Descriptions">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="SingleCardSelect"
+				description="A single-selection card grid for choosing one option from a set."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="With Descriptions">
 				<SingleCardSelect
 					options={options}
 					value={selected}
@@ -34,9 +42,9 @@ const SingleCardSelectDemo: React.FC = () => {
 				<p style={{ color: '#64748b', marginTop: 12, marginBottom: 0 }}>
 					Selected: <strong>{selected ?? 'none'}</strong>
 				</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Simple Options (no descriptions)">
+			<SectionCard title="Simple Options (no descriptions)">
 				<SingleCardSelect
 					options={simpleOptions}
 					value={sizeSelected}
@@ -46,17 +54,21 @@ const SingleCardSelectDemo: React.FC = () => {
 				<p style={{ color: '#64748b', marginTop: 12, marginBottom: 0 }}>
 					Selected: <strong>{sizeSelected ?? 'none'}</strong>
 				</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Custom Columns">
+			<SectionCard title="Custom Columns">
 				<SingleCardSelect
 					options={options}
 					value={selected}
 					onChange={setSelected}
 					columns={2}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

@@ -1,14 +1,22 @@
 import React from 'react'
-import { Skeleton } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Skeleton
+} from '@toolcase/react-components'
 
 const SkeletonDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Feedback"
-		title="Skeleton"
-		lede="Shimmer placeholder for loading states. Supports line, circle, and rectangle shapes."
-	>
-		<DemoSection title="Shapes">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Feedback</RichPageHeaderChip>}
+				title="Skeleton"
+				description="Shimmer placeholder for loading states. Supports line, circle, and rectangle shapes."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Shapes">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 				<div>
 					<strong style={{ display: 'block', marginBottom: 8 }}>Line (default)</strong>
@@ -23,13 +31,13 @@ const SkeletonDemo: React.FC = () => (
 					<Skeleton shape="rect" width="100%" height={120} />
 				</div>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Multiple Lines">
+		<SectionCard title="Multiple Lines">
 			<Skeleton count={4} />
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Card Placeholder">
+		<SectionCard title="Card Placeholder">
 			<div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
 				<Skeleton shape="circle" width={48} height={48} />
 				<div style={{ flex: 1 }}>
@@ -39,8 +47,12 @@ const SkeletonDemo: React.FC = () => (
 					</div>
 				</div>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default SkeletonDemo

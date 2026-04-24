@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
-import { Button } from '@toolcase/react-components'
-import { DemoPage, DemoSection, DemoRow } from './_demo'
+import {
+	Button,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const ButtonDemo: React.FC = () => {
 	const [saving, setSaving] = useState(false)
@@ -12,10 +16,13 @@ const ButtonDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Buttons & Actions"
-			title="Button"
-			lede={
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Buttons & Actions</RichPageHeaderChip>}
+				title="Button"
+				description={
 				<>
 					The workhorse action element. Six semantic <code>variant</code>s, three{' '}
 					<code>size</code>s, optional <code>outline</code> modifier, plus <code>disabled</code> and
@@ -23,69 +30,54 @@ const ButtonDemo: React.FC = () => {
 					(and <code>aria-*</code>) works.
 				</>
 			}
-		>
-			<DemoSection
-				eyebrow="Semantic meaning"
-				title="Variants"
-				caption="Each variant carries a different semantic weight. Prefer primary for the single most important action on a surface, danger for destructive ones, and secondary for neutral actions."
-			>
-				<DemoRow label="Solid">
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Variants">
+				<div>
 					<Button variant="primary">Save changes</Button>
 					<Button variant="secondary">Cancel</Button>
 					<Button variant="success">Publish</Button>
 					<Button variant="info">View details</Button>
 					<Button variant="warning">Unsaved</Button>
 					<Button variant="danger">Delete project</Button>
-				</DemoRow>
-				<DemoRow label="Outline">
+				</div>
+				<div>
 					<Button variant="primary" outline>Save changes</Button>
 					<Button variant="secondary" outline>Cancel</Button>
 					<Button variant="success" outline>Publish</Button>
 					<Button variant="info" outline>View details</Button>
 					<Button variant="warning" outline>Unsaved</Button>
 					<Button variant="danger" outline>Delete project</Button>
-				</DemoRow>
-			</DemoSection>
+				</div>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Form density"
-				title="Sizes"
-				caption="Match the input scale around the button. Small for dense tables, default for most forms, large for hero CTAs."
-			>
-				<DemoRow label="Small">
+			<SectionCard title="Sizes">
+				<div>
 					<Button variant="primary" size="small">Save</Button>
 					<Button variant="secondary" size="small" outline>Cancel</Button>
-				</DemoRow>
-				<DemoRow label="Default">
+				</div>
+				<div>
 					<Button variant="primary">Save</Button>
 					<Button variant="secondary" outline>Cancel</Button>
-				</DemoRow>
-				<DemoRow label="Large">
+				</div>
+				<div>
 					<Button variant="primary" size="large">Save</Button>
 					<Button variant="secondary" size="large" outline>Cancel</Button>
-				</DemoRow>
-			</DemoSection>
+				</div>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="State"
-				title="Disabled"
-				caption="Disabled buttons are non-interactive and non-focusable. Use when the action isn't available yet — not to hide it from the user."
-			>
-				<DemoRow label="Solid">
+			<SectionCard title="Disabled">
+				<div>
 					<Button variant="primary" disabled>Save changes</Button>
 					<Button variant="danger" disabled>Delete</Button>
-				</DemoRow>
-				<DemoRow label="Outline">
+				</div>
+				<div>
 					<Button variant="primary" outline disabled>Save changes</Button>
 					<Button variant="danger" outline disabled>Delete</Button>
-				</DemoRow>
-			</DemoSection>
+				</div>
+			</SectionCard>
 
-			<DemoSection
-				eyebrow="Realistic usage"
-				title="Save flow"
-				caption="A pair of buttons in a dialog footer. Click “Save” to simulate a 1.2s async request — the button disables while the save is in flight."
-			>
+			<SectionCard title="Save flow">
 				<div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
 					<Button variant="secondary" outline onClick={() => setConfirmed(false)}>Cancel</Button>
 					<Button variant="primary" onClick={simulateSave} disabled={saving}>
@@ -97,8 +89,12 @@ const ButtonDemo: React.FC = () => {
 						Cancel was clicked — in a real dialog this would call <code>onClose()</code>.
 					</p>
 				)}
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

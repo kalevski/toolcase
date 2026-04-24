@@ -1,18 +1,26 @@
 import React, { useState } from 'react'
-import { CheckboxGroup } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	CheckboxGroup,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const CheckboxGroupDemo: React.FC = () => {
 	const [features, setFeatures] = useState<string[]>(['multiplayer', 'leaderboards'])
 	const [inline, setInline] = useState<string[]>(['sm'])
 
 	return (
-		<DemoPage
-			eyebrow="Inputs"
-			title="CheckboxGroup"
-			lede="A labeled group of checkboxes for multi-select from an options array."
-		>
-			<DemoSection title="Vertical">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Inputs</RichPageHeaderChip>}
+				title="CheckboxGroup"
+				description="A labeled group of checkboxes for multi-select from an options array."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Vertical">
 				<CheckboxGroup
 					label="Game Features"
 					options={[
@@ -25,9 +33,9 @@ const CheckboxGroupDemo: React.FC = () => {
 					onChange={setFeatures}
 				/>
 				<p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Selected: {features.join(', ') || 'none'}</p>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Inline">
+			<SectionCard title="Inline">
 				<CheckboxGroup
 					label="Screen Sizes"
 					options={[
@@ -40,9 +48,9 @@ const CheckboxGroupDemo: React.FC = () => {
 					onChange={setInline}
 					inline
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With Disabled Option">
+			<SectionCard title="With Disabled Option">
 				<CheckboxGroup
 					label="Platforms"
 					options={[
@@ -54,8 +62,12 @@ const CheckboxGroupDemo: React.FC = () => {
 					value={['web']}
 					onChange={() => {}}
 				/>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

@@ -1,18 +1,20 @@
 import React, { useState, useCallback } from 'react'
 import {
-	BitmapFontGenerator,
-	BitmapFontFill,
 	BitmapFontBorder,
 	BitmapFontDropShadow,
+	BitmapFontFill,
+	BitmapFontGenerator,
 	BitmapFontOutput,
-	Input,
-	Select,
-	Textarea,
-	Checkbox,
 	Button,
+	Checkbox,
 	Icon,
+	Input,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Select,
+	Textarea
 } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 const DEFAULT_GLYPHS =
 	'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,!?-+:;\'\"()[]{}/@#$%^&*~`<>=_\\|'
@@ -77,12 +79,16 @@ const BitmapFontGeneratorDemo = () => {
 	}, [lastOutput, fontFamily, fontSize])
 
 	return (
-		<DemoPage
-			eyebrow="Editors"
-			title="BitmapFontGenerator"
-			lede="Generate bitmap font spritesheets with customizable fill, border, drop shadow, and glyph sets."
-		>
-			<DemoSection title="Settings">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Editors</RichPageHeaderChip>}
+				title="BitmapFontGenerator"
+				description="Generate bitmap font spritesheets with customizable fill, border, drop shadow, and glyph sets."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Settings">
 				<div className="d-flex flex-column gap-3">
 					{/* Font */}
 					<Input
@@ -233,9 +239,9 @@ const BitmapFontGeneratorDemo = () => {
 						onChange={(e) => setGlyphs(e.target.value)}
 					/>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Preview">
+			<SectionCard title="Preview">
 				<BitmapFontGenerator
 					fontFamily={fontFamily}
 					fontSize={fontSize}
@@ -263,8 +269,12 @@ const BitmapFontGeneratorDemo = () => {
 						</pre>
 					</div>
 				)}
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

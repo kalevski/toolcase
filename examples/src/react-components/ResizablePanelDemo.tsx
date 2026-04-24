@@ -1,6 +1,10 @@
 import React from 'react'
-import { ResizablePanel } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	ResizablePanel,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const panelStyle: React.CSSProperties = {
 	padding: '1rem',
@@ -11,12 +15,16 @@ const panelStyle: React.CSSProperties = {
 
 export const ResizablePanelDemo: React.FC = () => {
 	return (
-		<DemoPage
-			eyebrow="Layout & Surfaces"
-			title="ResizablePanel"
-			lede="Split-pane layout with a draggable divider. Double-click the handle to reset sizes."
-		>
-			<DemoSection title="Horizontal split">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="ResizablePanel"
+				description="Split-pane layout with a draggable divider. Double-click the handle to reset sizes."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Horizontal split">
 				<ResizablePanel
 					defaultSizes={[40, 60]}
 					direction="horizontal"
@@ -31,9 +39,9 @@ export const ResizablePanelDemo: React.FC = () => {
 						<p style={{ color: '#64748b', fontSize: '0.85rem' }}>Content here.</p>
 					</div>
 				</ResizablePanel>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Vertical split">
+			<SectionCard title="Vertical split">
 				<ResizablePanel
 					defaultSizes={[50, 50]}
 					direction="vertical"
@@ -46,7 +54,11 @@ export const ResizablePanelDemo: React.FC = () => {
 						<strong>Bottom Panel</strong>
 					</div>
 				</ResizablePanel>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

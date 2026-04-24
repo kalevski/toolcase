@@ -1,7 +1,13 @@
 import React from 'react'
-import { ToastProvider, toast, Button } from '@toolcase/react-components'
+import {
+	Button,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	ToastProvider,
+	toast
+} from '@toolcase/react-components'
 import type { ToastPosition } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 const POSITIONS: ToastPosition[] = [
 	'top-right',
@@ -14,18 +20,22 @@ const POSITIONS: ToastPosition[] = [
 
 function ToastDemoInner() {
 	return (
-		<DemoPage
-			eyebrow="Feedback"
-			title="Toast"
-			lede={
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Feedback</RichPageHeaderChip>}
+				title="Toast"
+				description={
 				<>
 					Auto-dismissing notification toasts with a global imperative API.
 					Wrap your app in <code>ToastProvider</code> once, then call{' '}
 					<code>toast.success()</code> from anywhere.
 				</>
 			}
-		>
-			<DemoSection title="Variants">
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Variants">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					<Button variant="success" onClick={() => toast.success('Profile saved successfully!')}>
 						Success
@@ -40,9 +50,9 @@ function ToastDemoInner() {
 						Info
 					</Button>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="With title">
+			<SectionCard title="With title">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					<Button
 						variant="success"
@@ -64,9 +74,9 @@ function ToastDemoInner() {
 						Persistent error
 					</Button>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Positions">
+			<SectionCard title="Positions">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					{POSITIONS.map((pos) => (
 						<Button
@@ -80,9 +90,9 @@ function ToastDemoInner() {
 						</Button>
 					))}
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Dismiss all">
+			<SectionCard title="Dismiss all">
 				<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
 					<Button
 						variant="primary"
@@ -98,8 +108,12 @@ function ToastDemoInner() {
 						Dismiss all
 					</Button>
 				</div>
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

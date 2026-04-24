@@ -1,7 +1,12 @@
 import React, { useState } from 'react'
-import { CommandPalette, Button } from '@toolcase/react-components'
+import {
+	Button,
+	CommandPalette,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 import type { CommandPaletteItem } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
 
 const allItems: CommandPaletteItem[] = [
 	// Navigation
@@ -29,24 +34,28 @@ export const CommandPaletteDemo: React.FC = () => {
 	}
 
 	return (
-		<DemoPage
-			eyebrow="Overlays"
-			title="CommandPalette"
-			lede="Keyboard-first search overlay with grouped results, fuzzy matching, and full ARIA support."
-		>
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Overlays</RichPageHeaderChip>}
+				title="CommandPalette"
+				description="Keyboard-first search overlay with grouped results, fuzzy matching, and full ARIA support."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
 			{lastSelected && (
 				<div className="alert alert-info py-2">
 					Selected: <strong>{lastSelected}</strong>
 				</div>
 			)}
 
-			<DemoSection title="Default" caption="10 items across 3 groups. Type to filter.">
+			<SectionCard title="Default">
 				<Button variant="primary" onClick={() => setOpen(true)}>
 					Open Command Palette
 				</Button>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Keyboard shortcuts">
+			<SectionCard title="Keyboard shortcuts">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 					<div className="d-flex justify-content-between align-items-center">
 						<span className="text-muted small">Navigate up / down</span>
@@ -64,7 +73,7 @@ export const CommandPaletteDemo: React.FC = () => {
 						<kbd className="badge bg-light text-dark border">Esc</kbd>
 					</div>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
 			<CommandPalette
 				items={allItems}
@@ -73,7 +82,11 @@ export const CommandPaletteDemo: React.FC = () => {
 				onSelect={handleSelect}
 				placeholder="Search commands…"
 			/>
-		</DemoPage>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }
 

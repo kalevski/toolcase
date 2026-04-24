@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
-import { Stepper, StepItem } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	StepItem,
+	Stepper
+} from '@toolcase/react-components'
 
 const horizontalSteps: StepItem[] = [
 	{ key: 'account',  title: 'Account',   description: 'Create your account' },
@@ -31,12 +36,16 @@ export const StepperDemo: React.FC = () => {
 	const hIdx = hKeys.indexOf(horizontalActive)
 
 	return (
-		<DemoPage
-			eyebrow="Navigation"
-			title="Stepper"
-			lede="Visual step-progress indicator for multi-step workflows."
-		>
-			<DemoSection title="Horizontal (clickable)">
+		<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Navigation</RichPageHeaderChip>}
+				title="Stepper"
+				description="Visual step-progress indicator for multi-step workflows."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+			<SectionCard title="Horizontal (clickable)">
 				<Stepper
 					steps={horizontalSteps}
 					activeStep={horizontalActive}
@@ -59,9 +68,9 @@ export const StepperDemo: React.FC = () => {
 						Next →
 					</button>
 				</div>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Vertical (clickable)">
+			<SectionCard title="Vertical (clickable)">
 				<Stepper
 					steps={verticalSteps}
 					activeStep={verticalActive}
@@ -69,11 +78,15 @@ export const StepperDemo: React.FC = () => {
 					clickable
 					onStepClick={setVerticalActive}
 				/>
-			</DemoSection>
+			</SectionCard>
 
-			<DemoSection title="Explicit Statuses (with error)">
+			<SectionCard title="Explicit Statuses (with error)">
 				<Stepper steps={errorSteps} orientation="vertical" />
-			</DemoSection>
-		</DemoPage>
+			</SectionCard>
+		</div>
+		
+			</div>
+		</div>
+	</div>
 	)
 }

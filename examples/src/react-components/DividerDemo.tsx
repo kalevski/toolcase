@@ -1,43 +1,55 @@
 import React from 'react'
-import { Divider } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	Divider,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const DividerDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Layout & Surfaces"
-		title="Divider"
-		lede="A horizontal or vertical divider line with optional label for separating content."
-	>
-		<DemoSection title="Default (horizontal)">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Layout & Surfaces</RichPageHeaderChip>}
+				title="Divider"
+				description="A horizontal or vertical divider line with optional label for separating content."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Default (horizontal)">
 			<p>Content above</p>
 			<Divider />
 			<p>Content below</p>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Horizontal with label">
+		<SectionCard title="Horizontal with label">
 			<Divider label="or" />
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Horizontal with longer label">
+		<SectionCard title="Horizontal with longer label">
 			<Divider label="section break" />
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Vertical">
+		<SectionCard title="Vertical">
 			<div style={{ display: 'flex', alignItems: 'center', gap: '1rem', height: 80 }}>
 				<span>Left</span>
 				<Divider vertical />
 				<span>Right</span>
 			</div>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Vertical with label">
+		<SectionCard title="Vertical with label">
 			<div style={{ display: 'flex', alignItems: 'stretch', gap: '1rem', height: 120 }}>
 				<span>Left</span>
 				<Divider vertical label="or" />
 				<span>Right</span>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default DividerDemo

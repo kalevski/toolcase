@@ -1,6 +1,12 @@
 import React from 'react'
-import { CodeLabelCell, Table, TableColumn } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	CodeLabelCell,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Table,
+	TableColumn
+} from '@toolcase/react-components'
 
 interface Country {
 	code: string
@@ -17,22 +23,22 @@ const countries: Country[] = [
 ]
 
 const CodeLabelCellDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Data Display"
-		title="CodeLabelCell"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="CodeLabelCell"
+				description={
 			<>
 				A micro-cell for tables: a short monospace <strong>code</strong> alongside a longer
 				human-readable <strong>name</strong>. Use for country codes, currency codes, IATA
 				codes, plan keys — anywhere a record has both a compact identifier and a display name.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="In a table"
-			title="Countries"
-			caption="Pure display — no interactive behavior. Names truncate with ellipsis when the column is narrow."
-		>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Countries">
 			<Table
 				columns={[
 					{
@@ -49,13 +55,9 @@ const CodeLabelCellDemo: React.FC = () => (
 				data={countries}
 				rowKey={(r) => r.code}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Variety"
-			title="Other codes"
-			caption="Plan keys, currency codes, IATA codes — the same micro-cell fits them all."
-		>
+		<SectionCard title="Other codes">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 				<CodeLabelCell code="USD" name="United States Dollar" />
 				<CodeLabelCell code="EUR" name="Euro" />
@@ -63,8 +65,12 @@ const CodeLabelCellDemo: React.FC = () => (
 				<CodeLabelCell code="JFK" name="New York · John F. Kennedy International" />
 				<CodeLabelCell code="PRO" name="Pro · annual · seat-based" />
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default CodeLabelCellDemo

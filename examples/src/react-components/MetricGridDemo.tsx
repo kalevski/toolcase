@@ -1,24 +1,30 @@
 import React from 'react'
-import { MetricGrid, MetricTile, Skeleton } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	MetricGrid,
+	MetricTile,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard,
+	Skeleton
+} from '@toolcase/react-components'
 
 const MetricGridDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Data Display"
-		title="MetricGrid"
-		lede={
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="MetricGrid"
+				description={
 			<>
 				A dense grid of read-only metric tiles. Lighter than <code>StatCard</code> — no card
 				chrome, no trend chip. Use it when you want a compact read-out of related numbers, or as
 				a secondary row below a <code>StatCard</code>.
 			</>
 		}
-	>
-		<DemoSection
-			eyebrow="Items prop"
-			title="Data-driven"
-			caption="Pass an array of tile definitions via `items`. Columns default to 3 and collapse to 2 / 1 as the viewport narrows."
-		>
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Data-driven">
 			<MetricGrid
 				columns={4}
 				items={[
@@ -28,13 +34,9 @@ const MetricGridDemo: React.FC = () => (
 					{ icon: 'activity', label: 'Requests', value: '1.2M', hint: 'this month' },
 				]}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Children form"
-			title="Mixed content"
-			caption="When you need to mix plain tiles with loaders or custom nodes, pass children directly."
-		>
+		<SectionCard title="Mixed content">
 			<MetricGrid columns={3}>
 				<MetricTile icon="server" label="Uptime" value="99.98" unit="%" />
 				<MetricTile icon="lightning-charge" label="P95 latency" value="142" unit="ms" hint="last hour" />
@@ -52,13 +54,9 @@ const MetricGridDemo: React.FC = () => (
 					<Skeleton width="60%" height="1.25rem" />
 				</div>
 			</MetricGrid>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection
-			eyebrow="Columns"
-			title="2 · 3 · 4"
-			caption="The `columns` prop hard-caps the grid. Tiles collapse to 2-up on tablet and 1-up on narrow phones automatically."
-		>
+		<SectionCard title="2 · 3 · 4">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 				<MetricGrid
 					columns={2}
@@ -85,8 +83,12 @@ const MetricGridDemo: React.FC = () => (
 					]}
 				/>
 			</div>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default MetricGridDemo

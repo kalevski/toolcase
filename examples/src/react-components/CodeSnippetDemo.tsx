@@ -1,6 +1,10 @@
 import React from 'react'
-import { CodeSnippet } from '@toolcase/react-components'
-import { DemoPage, DemoSection } from './_demo'
+import {
+	CodeSnippet,
+	RichPageHeader,
+	RichPageHeaderChip,
+	SectionCard
+} from '@toolcase/react-components'
 
 const jsCode = `function greet(name) {
   console.log(\`Hello, \${name}!\`)
@@ -31,52 +35,60 @@ npm run build
 echo "Build complete!"`
 
 const CodeSnippetDemo: React.FC = () => (
-	<DemoPage
-		eyebrow="Data Display"
-		title="CodeSnippet"
-		lede="A code display block with language label and copy button. Supports JavaScript, TypeScript, and Bash."
-	>
-		<DemoSection title="JavaScript">
+	<div className="container py-4">
+		<div className="row">
+			<div className="col-12">
+				<RichPageHeader
+				chips={<RichPageHeaderChip>Data Display</RichPageHeaderChip>}
+				title="CodeSnippet"
+				description="A code display block with language label and copy button. Supports JavaScript, TypeScript, and Bash."
+			/>
+				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="JavaScript">
 			<CodeSnippet
 				code={jsCode}
 				language="javascript"
 				onCopy={(code) => alert(`Copied JavaScript:\n${code.slice(0, 40)}…`)}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="TypeScript">
+		<SectionCard title="TypeScript">
 			<CodeSnippet
 				code={tsCode}
 				language="typescript"
 				onCopy={(code) => alert(`Copied TypeScript:\n${code.slice(0, 40)}…`)}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Bash">
+		<SectionCard title="Bash">
 			<CodeSnippet
 				code={bashCode}
 				language="bash"
 				onCopy={(code) => alert(`Copied Bash:\n${code.slice(0, 40)}…`)}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="Custom Title">
+		<SectionCard title="Custom Title">
 			<CodeSnippet
 				code={`npm install react react-dom`}
 				language="bash"
 				title="Install"
 				onCopy={(code) => alert(`Copied: ${code}`)}
 			/>
-		</DemoSection>
+		</SectionCard>
 
-		<DemoSection title="No Copy Button">
+		<SectionCard title="No Copy Button">
 			<CodeSnippet
 				code={`const x = 42`}
 				language="javascript"
 				showCopyButton={false}
 			/>
-		</DemoSection>
-	</DemoPage>
+		</SectionCard>
+	</div>
+		
+			</div>
+		</div>
+	</div>
 )
 
 export default CodeSnippetDemo
