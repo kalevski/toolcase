@@ -2,3 +2,4 @@ lib
 node_modules
 .parcel-cache
 examples/dist
+!examples/dist/CNAME
