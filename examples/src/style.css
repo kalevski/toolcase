@@ -1,219 +1,82 @@
-/* ── Global — modern dark chrome ─────────────────────────────────────── */
-
-:root {
-    --app-bg: #0a0f1c;
-    --app-bg-elev: #0f172a;
-    --app-surface: #111a2e;
-    --app-surface-2: #17233d;
-    --app-surface-hover: #1c2a47;
-    --app-border: #1e2a44;
-    --app-border-strong: #2a3a5c;
-    --app-text: #e2e8f0;
-    --app-text-muted: #94a3b8;
-    --app-text-faint: #64748b;
-    --app-accent: #60a5fa;
-    --app-accent-soft: rgba(96, 165, 250, 0.12);
-    --app-accent-glow: 0 0 0 1px rgba(96, 165, 250, 0.35), 0 6px 24px rgba(96, 165, 250, 0.15);
-    --app-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-}
+/* Shell overrides left after migrating to @toolcase/react-components. */
 
 body,
 html {
-    background: var(--app-bg);
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: var(--app-text);
     min-height: 100%;
 }
 
-body {
-    background:
-        radial-gradient(1200px 600px at 15% -10%, rgba(96, 165, 250, 0.08), transparent 60%),
-        radial-gradient(900px 500px at 110% 0%, rgba(168, 85, 247, 0.07), transparent 55%),
-        var(--app-bg);
-    background-attachment: fixed;
+/* App root — theme applies here and propagates to everything below */
+
+.app {
+    min-height: 100vh;
 }
 
-/* ── Top Navigation ── */
-
-.app-nav {
-    background: rgba(10, 15, 28, 0.72);
-    -webkit-backdrop-filter: saturate(140%) blur(12px);
-    backdrop-filter: saturate(140%) blur(12px);
-    border-bottom: 1px solid var(--app-border);
-    position: sticky;
-    top: 0;
-    z-index: 10001;
+.app--light {
+    background: #f8fafc;
+    color: #1e293b;
 }
 
-.app-nav__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    height: 60px;
-    gap: 32px;
+.app--dark {
+    background: #0a0815;
+    color: #f3e9ff;
 }
 
-.app-nav__brand {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--app-text);
+/* Theme selector in the top nav */
+
+.app-theme {
+    min-width: 200px;
+}
+
+.app-theme .component-extended-select {
+    width: 100%;
+}
+
+/* Make router Links inside Brand look like plain anchors */
+.app-brand-link,
+.app-brand-link:hover,
+.app-brand-link:focus {
+    color: inherit;
     text-decoration: none;
-    letter-spacing: -0.3px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
 }
 
-.app-nav__brand::before {
-    content: '';
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
-    display: inline-block;
-    transform: rotate(45deg);
-}
-
-.app-nav__links {
-    display: flex;
-    gap: 4px;
-}
-
-.app-nav__links a {
-    color: var(--app-text-muted);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 8px 12px;
-    transition: color 0.15s ease, background 0.15s ease;
-}
-
-.app-nav__links a:hover {
-    color: var(--app-text);
-    background: var(--app-surface);
-}
-
-/* ── Home Page ── */
-
-.home {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 80px 24px;
-}
-
-.home__header {
-    margin-bottom: 48px;
-}
-
-.home__header h1 {
-    margin: 0 0 12px;
-    font-size: clamp(32px, 4vw, 44px);
-    font-weight: 800;
-    color: var(--app-text);
-    letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.home__header p {
-    margin: 0;
-    font-size: 17px;
-    color: var(--app-text-muted);
-    max-width: 60ch;
-    line-height: 1.55;
-}
-
-.home__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-}
-
-.home__card {
+/* Home page package cards — let Card keep its styling, add link reset */
+.home-link,
+.home-link:hover,
+.home-link:focus {
     display: block;
-    position: relative;
-    padding: 28px 24px;
-    background: var(--app-surface);
-    border: 1px solid var(--app-border);
+    color: inherit;
     text-decoration: none;
-    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-    overflow: hidden;
-}
-
-.home__card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(96, 165, 250, 0.08), rgba(168, 85, 247, 0.06));
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-}
-
-.home__card:hover {
-    border-color: var(--app-border-strong);
-    background: var(--app-surface-2);
-    transform: translateY(-2px);
-}
-
-.home__card:hover::before {
-    opacity: 1;
-}
-
-.home__card-icon {
-    font-size: 22px;
-    color: var(--app-accent);
-    margin-bottom: 14px;
-    display: block;
-    position: relative;
-}
-
-.home__card h2 {
-    margin: 0 0 6px;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--app-text);
-    position: relative;
-}
-
-.home__card p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--app-text-muted);
-    line-height: 1.55;
-    position: relative;
+    height: 100%;
 }
 
 /* ── Example page (individual demo) ── */
 
 .example {
-    width: 100vw;
-    min-height: 100vh;
-    background: var(--app-bg);
+    width: 100%;
 }
 
 .example__back {
-    position: sticky;
-    top: 60px;
-    z-index: 10000;
-    background: rgba(10, 15, 28, 0.8);
-    -webkit-backdrop-filter: saturate(140%) blur(12px);
-    backdrop-filter: saturate(140%) blur(12px);
-    border-bottom: 1px solid var(--app-border);
     padding: 10px 24px;
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
 }
 
-.example__back a {
-    color: var(--app-text-muted);
+.example__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.example__back-link,
+.example__back-link:hover,
+.example__back-link:focus {
+    color: inherit;
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
@@ -221,207 +84,25 @@ body {
     align-items: center;
     gap: 6px;
     padding: 6px 10px;
-    transition: color 0.15s ease, background 0.15s ease;
 }
 
-.example__back a:hover {
-    color: var(--app-text);
-    background: var(--app-surface);
-}
-
-.example__theme {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 240px;
-}
-
-.example__theme-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--app-text-faint);
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.example__theme .component-extended-select {
-    min-width: 180px;
-    flex: 1;
-}
-
-/* Canvas where the example renders — follows selected theme */
-
-.example__canvas {
-    min-height: calc(100vh - 60px - 53px);
-}
-
-.example__canvas--light {
-    background: #f8fafc;
-    color: #1e293b;
-}
-
-.example__canvas--dark {
-    background: #0a0815;
-    color: #f3e9ff;
-}
-
-/* ── Menu / listing page ── */
-
-.example-menu {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 56px 24px 80px;
-}
-
-.example-menu__header {
-    margin-bottom: 40px;
-}
-
-.example-menu__header h1 {
-    margin: 0 0 6px;
-    font-size: clamp(28px, 3vw, 34px);
-    font-weight: 800;
-    color: var(--app-text);
-    letter-spacing: -0.025em;
-}
-
-.example-menu__header p {
-    margin: 0;
-    font-size: 14px;
-    color: var(--app-text-faint);
-    font-weight: 500;
-}
-
-.example-menu__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 10px;
-}
-
-.example-menu__category {
-    margin-bottom: 40px;
-}
-
-.example-menu__category-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--app-border);
-}
-
-.example-menu__category-header i {
-    font-size: 15px;
-    color: var(--app-accent);
-}
-
-.example-menu__category-header h2 {
-    margin: 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--app-text);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.example-menu__category-count {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--app-text-muted);
-    background: var(--app-surface);
-    border: 1px solid var(--app-border);
-    padding: 2px 8px;
-    margin-left: auto;
-}
-
-.example-menu__card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    background: var(--app-surface);
-    border: 1px solid var(--app-border);
-    text-decoration: none;
-    color: var(--app-text);
-    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.example-menu__card:hover {
-    border-color: var(--app-accent);
-    background: var(--app-surface-hover);
-    color: var(--app-text);
-    transform: translateY(-1px);
-    box-shadow: var(--app-accent-glow);
-}
-
-.example-menu__card-label {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.example-menu__card-arrow {
-    color: var(--app-text-faint);
-    font-size: 13px;
-    transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.example-menu__card:hover .example-menu__card-arrow {
-    color: var(--app-accent);
-    transform: translateX(3px);
-}
-
-/* ── Base Examples ── */
-
-.base-examples__tabs {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-
-.base-examples__tab {
-    padding: 7px 14px;
-    border: 1px solid var(--app-border);
-    background: var(--app-surface);
-    color: var(--app-text-muted);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
-}
-
-.base-examples__tab:hover {
-    border-color: var(--app-border-strong);
-    background: var(--app-surface-hover);
-    color: var(--app-text);
-}
-
-.base-examples__tab--active,
-.base-examples__tab--active:hover {
-    background: var(--app-accent);
-    border-color: var(--app-accent);
-    color: #0a0f1c;
-}
-
-.base-examples__tab:focus-visible {
-    outline: 2px solid var(--app-accent);
+.example__back-link:focus-visible {
+    outline: 2px solid currentColor;
     outline-offset: 2px;
 }
 
-.base-examples__content {
-    background: var(--app-surface);
-    border: 1px solid var(--app-border);
-    padding: 24px;
+.example__canvas {
+    min-height: calc(100vh - 120px);
 }
+
+/* Console output for @toolcase/base, logging and serializer demos */
 
 .console-output {
     margin-top: 16px;
     padding: 16px;
     background: #020617;
     color: #e2e8f0;
-    border: 1px solid var(--app-border);
+    border: 1px solid #1e2a44;
     font-size: 13px;
     line-height: 1.6;
     overflow-x: auto;
@@ -430,106 +111,17 @@ body {
 }
 
 .console-time {
-    color: var(--app-text-faint);
+    color: #64748b;
     margin-right: 8px;
 }
 
-/* ── Code Block ── */
+.console-level--error { color: #f87171; }
+.console-level--warning { color: #fbbf24; }
+.console-level--info { color: #e2e8f0; }
+.console-level--debug { color: #67e8f9; }
+.console-level--verbose { color: #a78bfa; }
 
-.code-block {
-    margin: 12px 0;
-    padding: 16px;
-    background: #020617;
-    color: #a5f3fc;
-    border: 1px solid var(--app-border);
-    font-size: 13px;
-    line-height: 1.6;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    font-family: 'Ubuntu Mono', 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
-}
-
-/* ── Example Section ── */
-
-.example-section {
-    margin-bottom: 32px;
-}
-
-.example-section h3 {
-    margin: 0 0 4px;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--app-text);
-}
-
-.example-section > p {
-    margin: 0 0 12px;
-    font-size: 14px;
-    color: var(--app-text-muted);
-    line-height: 1.5;
-}
-
-/* ── Category headers in base examples ── */
-
-.base-examples__category {
-    margin-bottom: 12px;
-}
-
-.base-examples__category-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--app-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.base-examples__category-header i {
-    font-size: 13px;
-    color: var(--app-accent);
-}
-
-.base-examples__tabs-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 8px;
-}
-
-/* ── Level selector ── */
-
-.level-selector {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 8px 0;
-}
-
-/* ── Console level colors ── */
-
-.console-level--error {
-    color: #f87171;
-}
-
-.console-level--warning {
-    color: #fbbf24;
-}
-
-.console-level--info {
-    color: #e2e8f0;
-}
-
-.console-level--debug {
-    color: #67e8f9;
-}
-
-.console-level--verbose {
-    color: #a78bfa;
-}
-
+/* Shown in some bootstrap-component demos */
 .source-button {
     display: none !important;
 }
@@ -538,57 +130,13 @@ body {
     margin-top: 1rem !important;
 }
 
-/* ── Focus visibility (global chrome) ── */
-
-.app-nav__links a:focus-visible,
-.app-nav__brand:focus-visible,
-.home__card:focus-visible,
-.example-menu__card:focus-visible,
-.example__back a:focus-visible {
-    outline: 2px solid var(--app-accent);
-    outline-offset: 2px;
-}
-
-/* ── Reduced motion ── */
-
-@media (prefers-reduced-motion: reduce) {
-    .home__card,
-    .home__card::before,
-    .example-menu__card,
-    .example-menu__card-arrow,
-    .base-examples__tab,
-    .app-nav__links a,
-    .example__back a {
-        transition: none;
-    }
-
-    .home__card:hover,
-    .example-menu__card:hover {
-        transform: none;
-    }
-}
-
-/* ── Responsive ── */
-
 @media (max-width: 720px) {
-    .app-nav__inner {
-        padding: 0 16px;
-        gap: 16px;
-    }
-
-    .home,
-    .example-menu {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-
     .example__back {
         padding: 10px 16px;
         flex-wrap: wrap;
     }
 
-    .example__theme {
-        min-width: 0;
-        flex: 1;
+    .app-theme {
+        min-width: 160px;
     }
 }

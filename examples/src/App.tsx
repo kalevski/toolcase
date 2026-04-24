@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, Link } from 'react-router'
-import { ExtendedSelect, type ExtendedSelectItem } from '@toolcase/react-components'
+import { Routes, Route, useNavigate, useLocation, Link as RouterLink } from 'react-router'
+import {
+    Brand,
+    CoolNav,
+    type CoolNavItem,
+    ExtendedSelect,
+    type ExtendedSelectItem,
+    Icon,
+    Kbd,
+    Text,
+} from '@toolcase/react-components'
 import { Home } from './pages/Home'
 import { ReactComponentsPage } from './pages/ReactComponentsPage'
 import { BaseExamplesPage } from './pages/BaseExamplesPage'
@@ -25,53 +34,104 @@ const themeOptions: ExtendedSelectItem[] = [
     },
 ]
 
-const Nav = () => (
-    <nav className="app-nav">
-        <div className="app-nav__inner">
-            <Link to="/" className="app-nav__brand">@toolcase</Link>
-            <div className="app-nav__links">
-                <Link to="/base">Base</Link>
-                <Link to="/logging">Logging</Link>
-                <Link to="/serializer">Serializer</Link>
-                <Link to="/react-components">React Components</Link>
-            </div>
-        </div>
-    </nav>
-)
+interface NavProps {
+    theme: string
+    onThemeChange: (key: string) => void
+}
 
-const ExampleWrapper = ({ children }: { children: React.ReactNode }) => {
-    const [theme, setTheme] = useState<string>(() => {
-        const stored = localStorage.getItem(THEME_STORAGE_KEY)
-        return themeOptions.some((o) => o.key === stored) ? (stored as string) : 'default'
-    })
-    useEffect(() => {
-        localStorage.setItem(THEME_STORAGE_KEY, theme)
-    }, [theme])
-    const isNeon = theme === 'neon'
-    const canvasClass = [
-        'example__canvas',
-        `example__canvas--${isNeon ? 'dark' : 'light'}`,
-        isNeon ? `theme theme--${theme}` : '',
+const Nav = ({ theme, onThemeChange }: NavProps) => {
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    const go = (path: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+        event.preventDefault()
+        navigate(path)
+    }
+
+    const items: CoolNavItem[] = [
+        { key: 'base', label: 'Base', href: '/base', active: location.pathname.startsWith('/base'), onClick: go('/base') },
+        { key: 'logging', label: 'Logging', href: '/logging', active: location.pathname.startsWith('/logging'), onClick: go('/logging') },
+        { key: 'serializer', label: 'Serializer', href: '/serializer', active: location.pathname.startsWith('/serializer'), onClick: go('/serializer') },
+        { key: 'rc', label: 'React Components', href: '/react-components', active: location.pathname.startsWith('/react-components'), onClick: go('/react-components') },
     ]
-        .filter(Boolean)
-        .join(' ')
+
+    const brand = (
+        <a
+            href="/"
+            onClick={go('/')}
+            className="app-brand-link"
+        >
+            <Brand primaryText="@toolcase" label="v2" />
+        </a>
+    )
+
+    const themeSelect = (
+        <div className="app-theme">
+            <ExtendedSelect
+                items={themeOptions}
+                value={theme}
+                onChange={onThemeChange}
+                placeholder="Theme"
+            />
+        </div>
+    )
+
+    return (
+        <CoolNav
+            brand={brand}
+            items={items}
+            rightEl={themeSelect}
+            theme="light"
+        />
+    )
+}
+
+interface ExampleWrapperProps {
+    children: React.ReactNode
+    exampleKey: string
+}
+
+const isEditableTarget = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false
+    const tag = target.tagName
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true
+    if (target.isContentEditable) return true
+    return false
+}
+
+const ExampleWrapper = ({ children, exampleKey }: ExampleWrapperProps) => {
+    const navigate = useNavigate()
+    const index = examples.findIndex(e => e.key === exampleKey)
+    const prev = index > 0 ? examples[index - 1] : null
+    const next = index < examples.length - 1 ? examples[index + 1] : null
+
+    useEffect(() => {
+        const onKey = (event: KeyboardEvent) => {
+            if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+            if (isEditableTarget(event.target)) return
+            if (event.key === 'ArrowLeft' && prev) {
+                event.preventDefault()
+                navigate(`/react-components/${prev.key}`)
+            } else if (event.key === 'ArrowRight' && next) {
+                event.preventDefault()
+                navigate(`/react-components/${next.key}`)
+            }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [navigate, prev, next])
+
     return (
         <div className="example">
             <div className="example__back">
-                <Link to="/react-components">
-                    <i className="bi bi-arrow-left"></i> All Components
-                </Link>
-                <div className="example__theme">
-                    <span className="example__theme-label">Theme</span>
-                    <ExtendedSelect
-                        items={themeOptions}
-                        value={theme}
-                        onChange={setTheme}
-                        placeholder="Select theme"
-                    />
-                </div>
+                <RouterLink to="/react-components" className="example__back-link">
+                    <Icon name="arrow-left" /> All Components
+                </RouterLink>
+                <Text as="span" variant="muted" size="small" className="example__hint">
+                    <Kbd>←</Kbd> <Kbd>→</Kbd> to navigate
+                </Text>
             </div>
-            <div className={canvasClass}>
+            <div className="example__canvas">
                 {children}
             </div>
         </div>
@@ -79,9 +139,26 @@ const ExampleWrapper = ({ children }: { children: React.ReactNode }) => {
 }
 
 export const App = () => {
+    const [theme, setTheme] = useState<string>(() => {
+        const stored = localStorage.getItem(THEME_STORAGE_KEY)
+        return themeOptions.some((o) => o.key === stored) ? (stored as string) : 'default'
+    })
+    useEffect(() => {
+        localStorage.setItem(THEME_STORAGE_KEY, theme)
+    }, [theme])
+
+    const isNeon = theme === 'neon'
+    const appClass = [
+        'app',
+        `app--${isNeon ? 'dark' : 'light'}`,
+        isNeon ? `theme theme--${theme}` : '',
+    ]
+        .filter(Boolean)
+        .join(' ')
+
     return (
-        <>
-            <Nav />
+        <div className={appClass}>
+            <Nav theme={theme} onThemeChange={setTheme} />
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/base" element={<BaseExamplesPage />} />
@@ -92,10 +169,14 @@ export const App = () => {
                     <Route
                         key={example.key}
                         path={`/react-components/${example.key}`}
-                        element={<ExampleWrapper>{example.element}</ExampleWrapper>}
+                        element={
+                            <ExampleWrapper exampleKey={example.key}>
+                                {example.element}
+                            </ExampleWrapper>
+                        }
                     />
                 ))}
             </Routes>
-        </>
+        </div>
     )
 }

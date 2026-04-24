@@ -2175,25 +2175,28 @@ import { Heading } from '@toolcase/react-components'
 
 ### Icon
 
-A Bootstrap Icons wrapper with automatic accessibility attributes.
+An icon wrapper that supports two sets: Bootstrap Icons (`bi`, default) and the in-house toolcase SVG catalog (`tc`). Accessibility attributes are applied automatically.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `name` | `string` | ✅ | Bootstrap Icon name (without `bi-` prefix) |
-| `as` | `React.ElementType` | ❌ | Rendered element (default: `'i'`) |
-| `size` | `number \| string` | ❌ | Font size override |
-| `color` | `string` | ❌ | Color override |
+| `name` | `string` | ✅ | Icon slug. For `bi`: Bootstrap Icon name without `bi-` prefix. For `tc`: a key from the toolcase catalog (e.g. `action`, `rts`, `tower-defense`) |
+| `set` | `'bi' \| 'tc'` | ❌ | Icon set. Default: `'bi'`. Use `'tc'` for the toolcase SVG catalog |
+| `as` | `React.ElementType` | ❌ | Rendered element for the `bi` set (default: `'i'`). Ignored for `tc` — always renders `<svg>` |
+| `size` | `number \| string` | ❌ | Font-size-based size (icon scales with `1em`) |
+| `color` | `string` | ❌ | Color override (applied via `currentColor`) |
 | `label` | `string` | ❌ | Accessible label (makes the icon semantic) |
 | `decorative` | `boolean` | ❌ | Force `aria-hidden="true"` |
 
 ```tsx
 import { Icon } from '@toolcase/react-components'
 
-// Decorative icon (aria-hidden automatically applied when no label)
+// Bootstrap Icons (default)
 <Icon name="star" size="1.5rem" color="#f59e0b" />
-
-// Semantic icon with accessible label
 <Icon name="check-circle" label="Verified" />
+
+// Toolcase SVG catalog — opt-in via `set="tc"`
+<Icon set="tc" name="action" size={32} />
+<Icon set="tc" name="tower-defense" label="Tower defense" />
 ```
 
 ---

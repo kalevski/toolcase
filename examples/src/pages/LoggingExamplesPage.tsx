@@ -1,11 +1,16 @@
 import { useState } from 'react'
-import { LoggerFactory, ConsoleLogReporter, Level } from '@toolcase/logging'
+import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
+import {
+    Button,
+    Card,
+    CodeSnippet,
+    Heading,
+    Select,
+    TabSections,
+    Text,
+} from '@toolcase/react-components'
 
 type LogEntry = { time: string; text: string; level?: string }
-
-const CodeBlock = ({ code }: { code: string }) => (
-    <pre className="code-block">{code.trim()}</pre>
-)
 
 const ConsoleOutput = ({ logs }: { logs: LogEntry[] }) => (
     logs.length > 0 ? (
@@ -58,10 +63,10 @@ const BasicLoggingExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Basic Usage</h3>
-            <p>Create a logger factory, get a scoped logger, and log at different levels.</p>
-            <CodeBlock code={`import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
+        <Card>
+            <Heading as="h3">Basic Usage</Heading>
+            <Text as="p" variant="muted">Create a logger factory, get a scoped logger, and log at different levels.</Text>
+            <CodeSnippet language="typescript" code={`import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
 
 const factory = new LoggerFactory([new ConsoleLogReporter()])
 factory.level = 'verbose'
@@ -73,13 +78,22 @@ logger.debug('Loading configuration...')
 logger.warning('Disk space below 10%')
 logger.error('Connection to database failed')
 logger.verbose('Request payload:', { method: 'GET', path: '/api/users' })`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
 // ─── Log Levels ────────────────────────────────────
+const levelOptions = [
+    { value: 'silent', label: 'silent' },
+    { value: 'error', label: 'error' },
+    { value: 'warning', label: 'warning' },
+    { value: 'info', label: 'info' },
+    { value: 'debug', label: 'debug' },
+    { value: 'verbose', label: 'verbose' },
+]
+
 const LogLevelExample = () => {
     const [logs, setLogs] = useState<LogEntry[]>([])
     const [level, setLevel] = useState<string>('info')
@@ -121,11 +135,13 @@ const LogLevelExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Log Levels</h3>
-            <p>Set the factory level to filter messages. Only levels at or below the threshold are emitted.</p>
-            <p>Order: <code>silent</code> → <code>error</code> → <code>warning</code> → <code>info</code> → <code>debug</code> → <code>verbose</code></p>
-            <CodeBlock code={`const factory = new LoggerFactory([new ConsoleLogReporter()])
+        <Card>
+            <Heading as="h3">Log Levels</Heading>
+            <Text as="p" variant="muted">Set the factory level to filter messages. Only levels at or below the threshold are emitted.</Text>
+            <Text as="p" variant="muted">
+                Order: <code>silent</code> → <code>error</code> → <code>warning</code> → <code>info</code> → <code>debug</code> → <code>verbose</code>
+            </Text>
+            <CodeSnippet language="typescript" code={`const factory = new LoggerFactory([new ConsoleLogReporter()])
 factory.level = '${level}'  // only ${level} and below will show
 
 logger.error('...')    // ${['error','warning','info','debug','verbose'].indexOf(level) >= 0 ? '✓' : '✗'}
@@ -133,20 +149,17 @@ logger.warning('...')  // ${['warning','info','debug','verbose'].indexOf(level) 
 logger.info('...')     // ${['info','debug','verbose'].indexOf(level) >= 0 ? '✓' : '✗'}
 logger.debug('...')    // ${['debug','verbose'].indexOf(level) >= 0 ? '✓' : '✗'}
 logger.verbose('...')  // ${level === 'verbose' ? '✓' : '✗'}`} />
-            <div className="level-selector">
-                {['silent', 'error', 'warning', 'info', 'debug', 'verbose'].map(l => (
-                    <button
-                        key={l}
-                        className={`base-examples__tab ${level === l ? 'base-examples__tab--active' : ''}`}
-                        onClick={() => setLevel(l)}
-                    >
-                        {l}
-                    </button>
-                ))}
+            <div className="mb-2" style={{ maxWidth: 240 }}>
+                <Select
+                    label="Level"
+                    options={levelOptions}
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value)}
+                />
             </div>
-            <button className="btn btn-primary btn-sm" onClick={run} style={{ marginTop: 8 }}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
@@ -184,10 +197,10 @@ const MultipleScopesExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Multiple Scopes</h3>
-            <p>Use different scopes to identify log sources. Each scope creates a reusable logger instance.</p>
-            <CodeBlock code={`const factory = new LoggerFactory([new ConsoleLogReporter()])
+        <Card>
+            <Heading as="h3">Multiple Scopes</Heading>
+            <Text as="p" variant="muted">Use different scopes to identify log sources. Each scope creates a reusable logger instance.</Text>
+            <CodeSnippet language="typescript" code={`const factory = new LoggerFactory([new ConsoleLogReporter()])
 
 const authLogger = factory.getLogger('auth')
 const dbLogger = factory.getLogger('database')
@@ -200,9 +213,9 @@ apiLogger.info('GET /api/users → 200')
 // Console output includes scope:
 // INFO [...] | auth: User login: alice@example.com
 // DEBUG [...] | database: Query: SELECT * FROM users`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
@@ -215,7 +228,7 @@ const CustomReporterExample = () => {
 
         const factory = new LoggerFactory([
             {
-                log(level: string, scope: string, time: string, messages: any[]) {
+                log(level: string, scope: string, _time: string, messages: any[]) {
                     entries.push({
                         time: ts(),
                         text: `[Custom] ${level.toUpperCase()} | ${scope} | ${messages.join(' ')}`,
@@ -235,10 +248,12 @@ const CustomReporterExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Custom Reporter</h3>
-            <p>Extend <code>LogReporter</code> to send logs anywhere — files, remote APIs, or custom formats.</p>
-            <CodeBlock code={`import { LogReporter, LoggerFactory } from '@toolcase/logging'
+        <Card>
+            <Heading as="h3">Custom Reporter</Heading>
+            <Text as="p" variant="muted">
+                Extend <code>LogReporter</code> to send logs anywhere — files, remote APIs, or custom formats.
+            </Text>
+            <CodeSnippet language="typescript" code={`import { LogReporter, LoggerFactory } from '@toolcase/logging'
 
 class RemoteReporter extends LogReporter {
   log(level, scope, time, messages) {
@@ -253,46 +268,27 @@ const factory = new LoggerFactory([
   new ConsoleLogReporter(),  // logs to console
   new RemoteReporter()       // also sends to API
 ])`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
-// ─── Page ──────────────────────────────────────────
-const loggingExamples = [
-    { key: 'basic', label: 'Basic Usage', element: <BasicLoggingExample /> },
-    { key: 'levels', label: 'Log Levels', element: <LogLevelExample /> },
-    { key: 'scopes', label: 'Multiple Scopes', element: <MultipleScopesExample /> },
-    { key: 'reporter', label: 'Custom Reporter', element: <CustomReporterExample /> },
-]
-
 export const LoggingExamplesPage = () => {
-    const [active, setActive] = useState('basic')
-    const current = loggingExamples.find(e => e.key === active)
+    const items = [
+        { key: 'basic', label: 'Basic Usage', content: <BasicLoggingExample /> },
+        { key: 'levels', label: 'Log Levels', content: <LogLevelExample /> },
+        { key: 'scopes', label: 'Multiple Scopes', content: <MultipleScopesExample /> },
+        { key: 'reporter', label: 'Custom Reporter', content: <CustomReporterExample /> },
+    ]
 
     return (
-        <div className="example-menu">
-            <div className="example-menu__header">
-                <h1>@toolcase/logging</h1>
-                <p>Lightweight logger for Node.js and Browser — zero dependencies</p>
+        <div className="container py-5">
+            <div className="mb-4">
+                <Heading as="h1">@toolcase/logging</Heading>
+                <Text as="p" variant="muted">Lightweight logger for Node.js and Browser — zero dependencies</Text>
             </div>
-            <div className="base-examples">
-                <div className="base-examples__tabs-row">
-                    {loggingExamples.map(ex => (
-                        <button
-                            key={ex.key}
-                            className={`base-examples__tab ${active === ex.key ? 'base-examples__tab--active' : ''}`}
-                            onClick={() => setActive(ex.key)}
-                        >
-                            {ex.label}
-                        </button>
-                    ))}
-                </div>
-                <div className="base-examples__content">
-                    {current?.element}
-                </div>
-            </div>
+            <TabSections items={items} defaultActiveKey="basic" />
         </div>
     )
 }

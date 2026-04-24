@@ -127,6 +127,7 @@ export * from './EntityCell'
 export * from './LinkedProvidersCard'
 export * from './CodeLabelCell'
 export * from './utils'
+export * from './tc-icons'
 
 import * as Modal from './modal'
 export { Modal }

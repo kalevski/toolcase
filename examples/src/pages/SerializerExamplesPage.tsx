@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import Serializer from '@toolcase/serializer'
+import {
+    Button,
+    Card,
+    CodeSnippet,
+    Heading,
+    TabSections,
+    Text,
+} from '@toolcase/react-components'
 
 type LogEntry = { time: string; text: string }
 
 const ts = () => new Date().toLocaleTimeString()
-
-const CodeBlock = ({ code }: { code: string }) => (
-    <pre className="code-block">{code.trim()}</pre>
-)
 
 const ConsoleOutput = ({ logs }: { logs: LogEntry[] }) => (
     logs.length > 0 ? (
@@ -52,10 +56,10 @@ const BasicExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Basic Encode / Decode</h3>
-            <p>Define a message schema, encode to binary, and decode back. Typically much smaller than JSON.</p>
-            <CodeBlock code={`import Serializer from '@toolcase/serializer'
+        <Card>
+            <Heading as="h3">Basic Encode / Decode</Heading>
+            <Text as="p" variant="muted">Define a message schema, encode to binary, and decode back. Typically much smaller than JSON.</Text>
+            <CodeSnippet language="typescript" code={`import Serializer from '@toolcase/serializer'
 
 const serializer = new Serializer()
 
@@ -68,9 +72,9 @@ serializer.define('Player', [
 const buffer = serializer.encode('Player', { name: 'Alice', score: 42 })
 const decoded = serializer.decode('Player', buffer)
 // { name: 'Alice', score: 42, alive: true }`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
@@ -115,10 +119,12 @@ const FieldTypesExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Field Types</h3>
-            <p>All 15 protobuf field types are supported via <code>Serializer.FieldType</code> constants.</p>
-            <CodeBlock code={`Serializer.FieldType.STRING   // 'string'
+        <Card>
+            <Heading as="h3">Field Types</Heading>
+            <Text as="p" variant="muted">
+                All 15 protobuf field types are supported via <code>Serializer.FieldType</code> constants.
+            </Text>
+            <CodeSnippet language="typescript" code={`Serializer.FieldType.STRING   // 'string'
 Serializer.FieldType.INT32    // 'int32'
 Serializer.FieldType.INT64    // 'int64'
 Serializer.FieldType.FLOAT    // 'float'
@@ -127,9 +133,9 @@ Serializer.FieldType.BOOL     // 'bool'
 Serializer.FieldType.UINT32   // 'uint32'
 Serializer.FieldType.BYTES    // 'bytes'
 // ... and SINT32, FIXED32, SFIXED32, UINT64, SINT64, FIXED64, SFIXED64`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
@@ -168,10 +174,12 @@ const RepeatedFieldsExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Repeated Fields (Arrays)</h3>
-            <p>Use <code>rule: 'repeated'</code> to encode arrays of values.</p>
-            <CodeBlock code={`serializer.define('Inventory', [
+        <Card>
+            <Heading as="h3">Repeated Fields (Arrays)</Heading>
+            <Text as="p" variant="muted">
+                Use <code>rule: 'repeated'</code> to encode arrays of values.
+            </Text>
+            <CodeSnippet language="typescript" code={`serializer.define('Inventory', [
   { key: 'owner', type: Serializer.FieldType.STRING, rule: 'required' },
   { key: 'items', type: Serializer.FieldType.STRING, rule: 'repeated' },
   { key: 'quantities', type: Serializer.FieldType.INT32, rule: 'repeated' },
@@ -185,9 +193,9 @@ const inventory = {
 
 const buffer = serializer.encode('Inventory', inventory)
 const decoded = serializer.decode('Inventory', buffer)`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
@@ -235,10 +243,10 @@ const MultipleTypesExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Multiple Message Types</h3>
-            <p>Define multiple message types on a single serializer — like a protocol schema for networking or storage.</p>
-            <CodeBlock code={`const serializer = new Serializer('game-protocol')
+        <Card>
+            <Heading as="h3">Multiple Message Types</Heading>
+            <Text as="p" variant="muted">Define multiple message types on a single serializer — like a protocol schema for networking or storage.</Text>
+            <CodeSnippet language="typescript" code={`const serializer = new Serializer('game-protocol')
 
 serializer.define('JoinRequest', [
   { key: 'playerName', type: Serializer.FieldType.STRING, rule: 'required' },
@@ -259,9 +267,9 @@ serializer.define('Position', [
 
 const buffer = serializer.encode('Position', { x: 1.5, y: 3.7, z: -0.2 })
 const decoded = serializer.decode('Position', buffer)`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
@@ -281,21 +289,18 @@ const ErrorHandlingExample = () => {
                 { key: 'name', type: Serializer.FieldType.STRING, rule: 'required' },
             ])
 
-            // 1. Encoding with undefined type
             try {
                 serializer.encode('UnknownType', { name: 'test' })
             } catch (e: any) {
                 console.log('✗ Unknown type:', e.message)
             }
 
-            // 2. Decoding garbage
             try {
                 serializer.decode('User', new Uint8Array([255, 255, 255]))
             } catch (e: any) {
                 console.log('✗ Bad buffer:', e.message)
             }
 
-            // 3. Success case
             try {
                 const buf = serializer.encode('User', { name: 'Alice' })
                 const dec = serializer.decode('User', buf)
@@ -308,10 +313,12 @@ const ErrorHandlingExample = () => {
     }
 
     return (
-        <div className="example-section">
-            <h3>Error Handling</h3>
-            <p>The serializer throws descriptive errors for undefined types, validation failures, and malformed buffers.</p>
-            <CodeBlock code={`try {
+        <Card>
+            <Heading as="h3">Error Handling</Heading>
+            <Text as="p" variant="muted">
+                The serializer throws descriptive errors for undefined types, validation failures, and malformed buffers.
+            </Text>
+            <CodeSnippet language="typescript" code={`try {
   serializer.encode('UnknownType', data)
 } catch (e) {
   // Error: type key=UnknownType is not defined
@@ -322,47 +329,28 @@ try {
 } catch (e) {
   // Error: decode error: ...
 }`} />
-            <button className="btn btn-primary btn-sm" onClick={run}>Run</button>
+            <Button size="small" onClick={run}>Run</Button>
             <ConsoleOutput logs={logs} />
-        </div>
+        </Card>
     )
 }
 
-// ─── Page ──────────────────────────────────────────
-const serializerExamples = [
-    { key: 'basic', label: 'Basic', element: <BasicExample /> },
-    { key: 'field-types', label: 'Field Types', element: <FieldTypesExample /> },
-    { key: 'repeated', label: 'Repeated Fields', element: <RepeatedFieldsExample /> },
-    { key: 'multiple', label: 'Multiple Types', element: <MultipleTypesExample /> },
-    { key: 'errors', label: 'Error Handling', element: <ErrorHandlingExample /> },
-]
-
 export const SerializerExamplesPage = () => {
-    const [active, setActive] = useState('basic')
-    const current = serializerExamples.find(e => e.key === active)
+    const items = [
+        { key: 'basic', label: 'Basic', content: <BasicExample /> },
+        { key: 'field-types', label: 'Field Types', content: <FieldTypesExample /> },
+        { key: 'repeated', label: 'Repeated Fields', content: <RepeatedFieldsExample /> },
+        { key: 'multiple', label: 'Multiple Types', content: <MultipleTypesExample /> },
+        { key: 'errors', label: 'Error Handling', content: <ErrorHandlingExample /> },
+    ]
 
     return (
-        <div className="example-menu">
-            <div className="example-menu__header">
-                <h1>@toolcase/serializer</h1>
-                <p>Protobuf-based binary serializer — compact and fast</p>
+        <div className="container py-5">
+            <div className="mb-4">
+                <Heading as="h1">@toolcase/serializer</Heading>
+                <Text as="p" variant="muted">Protobuf-based binary serializer — compact and fast</Text>
             </div>
-            <div className="base-examples">
-                <div className="base-examples__tabs-row">
-                    {serializerExamples.map(ex => (
-                        <button
-                            key={ex.key}
-                            className={`base-examples__tab ${active === ex.key ? 'base-examples__tab--active' : ''}`}
-                            onClick={() => setActive(ex.key)}
-                        >
-                            {ex.label}
-                        </button>
-                    ))}
-                </div>
-                <div className="base-examples__content">
-                    {current?.element}
-                </div>
-            </div>
+            <TabSections items={items} defaultActiveKey="basic" />
         </div>
     )
 }

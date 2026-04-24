@@ -1,10 +1,18 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import {
     State, retry, EventEmitter, Broadcast, ObjectPool, PriorityQueue,
     Cache, VectorClock, AdjacencyMatrix, LSystem, Color,
     generateId, formatByteSize, toHex, bufferToHex, hexToBuffer,
     getNumberInRange, JSONSchema
 } from '@toolcase/base'
+import {
+    Button,
+    Card,
+    CodeSnippet,
+    Heading,
+    Icon,
+    Text,
+} from '@toolcase/react-components'
 
 type LogEntry = { time: string; text: string }
 
@@ -23,10 +31,6 @@ const captureConsole = (fn: () => void): LogEntry[] => {
     return logs
 }
 
-const CodeBlock = ({ code }: { code: string }) => (
-    <pre className="code-block">{code.trim()}</pre>
-)
-
 const ConsoleOutput = ({ logs }: { logs: LogEntry[] }) => (
     logs.length > 0 ? (
         <pre className="console-output">
@@ -39,15 +43,15 @@ const ExampleSection = ({ title, description, code, onRun, logs, running }: {
     title: string; description: string; code: string
     onRun: () => void; logs: LogEntry[]; running?: boolean
 }) => (
-    <div className="example-section">
-        <h3>{title}</h3>
-        <p>{description}</p>
-        <CodeBlock code={code} />
-        <button className="btn btn-primary btn-sm" onClick={onRun} disabled={running}>
+    <Card>
+        <Heading as="h3">{title}</Heading>
+        <Text as="p" variant="muted">{description}</Text>
+        <CodeSnippet code={code.trim()} language="typescript" />
+        <Button size="small" onClick={onRun} disabled={running}>
             {running ? 'Running...' : 'Run'}
-        </button>
+        </Button>
         <ConsoleOutput logs={logs} />
-    </div>
+    </Card>
 )
 
 // ─── EventEmitter ──────────────────────────────────
@@ -546,11 +550,11 @@ getNumberInRange('42', 0, 0, 100)   // 42
 getNumberInRange('999', 0, 0, 100)  // 100 (clamped)`} onRun={run} logs={logs} />
 }
 
-// ─── All examples ──────────────────────────────────
-const categories = [
+// ─── Categories ────────────────────────────────────
+const categoryGroups = [
     {
         name: 'Events & State',
-        icon: 'bi-broadcast',
+        icon: 'broadcast',
         examples: [
             { key: 'event-emitter', label: 'EventEmitter', element: <EventEmitterExample /> },
             { key: 'broadcast', label: 'Broadcast', element: <BroadcastExample /> },
@@ -559,7 +563,7 @@ const categories = [
     },
     {
         name: 'Data Structures',
-        icon: 'bi-diagram-3',
+        icon: 'diagram-3',
         examples: [
             { key: 'cache', label: 'Cache', element: <CacheExample /> },
             { key: 'priority-queue', label: 'PriorityQueue', element: <PriorityQueueExample /> },
@@ -570,7 +574,7 @@ const categories = [
     },
     {
         name: 'Generation & Validation',
-        icon: 'bi-gear',
+        icon: 'gear',
         examples: [
             { key: 'lsystem', label: 'LSystem', element: <LSystemExample /> },
             { key: 'json-schema', label: 'JSONSchema', element: <JSONSchemaExample /> },
@@ -579,7 +583,7 @@ const categories = [
     },
     {
         name: 'Utilities & Colors',
-        icon: 'bi-palette',
+        icon: 'palette',
         examples: [
             { key: 'utilities', label: 'Utility Functions', element: <UtilityFunctionsExample /> },
             { key: 'color', label: 'Color', element: <ColorExample /> },
@@ -587,42 +591,41 @@ const categories = [
     },
 ]
 
-const allExamples = categories.flatMap(c => c.examples)
+const allExamples = categoryGroups.flatMap(c => c.examples)
 
 export const BaseExamplesPage = () => {
     const [active, setActive] = useState('event-emitter')
     const current = allExamples.find(e => e.key === active)
 
     return (
-        <div className="example-menu">
-            <div className="example-menu__header">
-                <h1>@toolcase/base</h1>
-                <p>Helper functions and data structures — zero dependencies</p>
+        <div className="container py-5">
+            <div className="mb-4">
+                <Heading as="h1">@toolcase/base</Heading>
+                <Text as="p" variant="muted">Helper functions and data structures — zero dependencies</Text>
             </div>
-            <div className="base-examples">
-                {categories.map(cat => (
-                    <div key={cat.name} className="base-examples__category">
-                        <div className="base-examples__category-header">
-                            <i className={`bi ${cat.icon}`}></i>
-                            <span>{cat.name}</span>
-                        </div>
-                        <div className="base-examples__tabs-row">
+            <div className="d-flex flex-column gap-3 mb-4">
+                {categoryGroups.map(cat => (
+                    <div key={cat.name}>
+                        <Text as="div" size="small" variant="muted" className="d-flex align-items-center gap-2 mb-2 text-uppercase fw-semibold">
+                            <Icon name={cat.icon} /> {cat.name}
+                        </Text>
+                        <div className="d-flex flex-wrap gap-2">
                             {cat.examples.map(ex => (
-                                <button
+                                <Button
                                     key={ex.key}
-                                    className={`base-examples__tab ${active === ex.key ? 'base-examples__tab--active' : ''}`}
+                                    size="small"
+                                    variant={active === ex.key ? 'primary' : 'secondary'}
+                                    outline={active !== ex.key}
                                     onClick={() => setActive(ex.key)}
                                 >
                                     {ex.label}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>
                 ))}
-                <div className="base-examples__content">
-                    {current?.element}
-                </div>
             </div>
+            {current?.element}
         </div>
     )
 }

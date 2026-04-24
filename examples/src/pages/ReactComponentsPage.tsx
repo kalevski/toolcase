@@ -1,21 +1,12 @@
-import { Link } from 'react-router'
+import { useNavigate } from 'react-router'
+import { Badge, Button, Heading, Icon, SectionCard, Text } from '@toolcase/react-components'
 import { examples, categories, ExampleCategory } from '../react-components/index'
 
 const categoryIcons: Record<ExampleCategory, string> = {
-    'Inputs': 'bi-input-cursor-text',
-    'Buttons & Actions': 'bi-hand-index',
-    'Feedback': 'bi-bell',
-    'Overlays': 'bi-layers',
-    'Navigation': 'bi-compass',
-    'Data Display': 'bi-table',
-    'Layout & Surfaces': 'bi-layout-wtf',
-    'Typography': 'bi-type',
-    'Media & Files': 'bi-images',
-    'Editors': 'bi-code-square',
-    'Dashboard & Admin': 'bi-shield-lock',
-    'Marketing': 'bi-megaphone',
-    'Themes': 'bi-palette',
-    'Full Page Demos': 'bi-window-fullscreen',
+    'Primitives': 'circle',
+    'Basic Components': 'square',
+    'Composite Components': 'grid-3x3-gap',
+    'Advanced Systems': 'diagram-3',
 }
 
 const formatLabel = (key: string) => {
@@ -23,30 +14,40 @@ const formatLabel = (key: string) => {
 }
 
 export const ReactComponentsPage = () => {
+    const navigate = useNavigate()
+
     return (
-        <div className="example-menu">
-            <div className="example-menu__header">
-                <h1>React Components</h1>
-                <p>{examples.length} components</p>
+        <div className="container py-5">
+            <div className="mb-4">
+                <Heading as="h1">React Components</Heading>
+                <Text as="p" variant="muted">{examples.length} components</Text>
             </div>
             {categories.map((category) => {
                 const items = examples.filter((e) => e.category === category)
                 if (items.length === 0) return null
                 return (
-                    <div key={category} className="example-menu__category">
-                        <div className="example-menu__category-header">
-                            <i className={`bi ${categoryIcons[category]}`}></i>
-                            <h2>{category}</h2>
-                            <span className="example-menu__category-count">{items.length}</span>
-                        </div>
-                        <div className="example-menu__grid">
-                            {items.map((example) => (
-                                <Link key={example.key} className="example-menu__card" to={`/react-components/${example.key}`}>
-                                    <span className="example-menu__card-label">{formatLabel(example.key)}</span>
-                                    <i className="bi bi-arrow-right example-menu__card-arrow"></i>
-                                </Link>
-                            ))}
-                        </div>
+                    <div key={category} className="mb-4">
+                        <SectionCard
+                            title={category}
+                            icon={categoryIcons[category]}
+                            action={<Badge variant="secondary">{items.length}</Badge>}
+                        >
+                            <div className="row g-2">
+                                {items.map((example) => (
+                                    <div key={example.key} className="col-sm-6 col-lg-4">
+                                        <Button
+                                            variant="secondary"
+                                            outline
+                                            className="w-100 d-flex align-items-center justify-content-between"
+                                            onClick={() => navigate(`/react-components/${example.key}`)}
+                                        >
+                                            <span>{formatLabel(example.key)}</span>
+                                            <Icon name="arrow-right" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </SectionCard>
                     </div>
                 )
             })}
