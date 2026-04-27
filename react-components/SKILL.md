@@ -1,4 +1,9 @@
-# @toolcase/react-components — Component Reference
+---
+name: react-components
+description: Use when building UI with @toolcase/react-components — picking the right component, looking up props, or composing landing pages, dashboards, forms, and code/docs surfaces. Covers 160+ components across typography, inputs/forms, buttons, layout, navigation, overlays, data display, charts, media, identity, marketing/landing, and code/docs.
+---
+
+# react-components — Component Reference
 
 A complete guide to every component in the library. Import any component from `@toolcase/react-components`.
 
@@ -150,6 +155,7 @@ Available themes:
   - [Build](#build)
   - [CardOptions](#cardoptions)
   - [Changelog](#changelog)
+  - [Comparator](#comparator)
   - [Hero](#hero)
   - [LinkedProvidersCard](#linkedproviderscard)
   - [MultiCardSelect](#multicardselect)
@@ -2425,6 +2431,47 @@ const entries: ChangelogEntry[] = [
 
 ---
 
+### Comparator
+
+Compact side-by-side comparison of two technologies across multiple features. Auto-detects winners from booleans (`true` > `false`) and numbers (higher wins by default; `lowerIsBetter` flips it). Winners are conveyed visually only — green tint + border on winning cells, a colored bottom-accent on the leading tech header, and a green-bordered card in the optional summary footer (no "Winner" text). Screen-reader-only "Better option" / "Leading overall" labels keep it accessible. Mobile-first: feature info stacks above the two value cells under 768px; aligns into 3-column grid above.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `left` | `ComparatorTechnology` | ✅ | Left-side technology card |
+| `right` | `ComparatorTechnology` | ✅ | Right-side technology card |
+| `features` | `ComparatorFeature[]` | ✅ | Comparison rows |
+| `title` | `string` | ❌ | Heading above the comparison |
+| `description` | `string` | ❌ | Subheading text |
+| `showSummary` | `boolean` | ❌ | Render aggregate win-count footer (default: `false`) |
+| `loading` | `boolean` | ❌ | Skeleton state |
+| `loadingCount` | `number` | ❌ | Skeleton row count (default: `4`) |
+
+**`ComparatorTechnology`:** `{ name, tagline?, icon?: ReactNode, iconName?: string, accentColor?: string }`
+
+**`ComparatorFeature`:** `{ id?, name, description?, left, right, winner?: 'left' | 'right' | 'tie', leftLabel?, rightLabel?, highlight?, lowerIsBetter? }`
+
+`left`/`right` accept `boolean | number | string | ReactNode`. Booleans render as a check/x icon with "Yes"/"No". Use `leftLabel`/`rightLabel` to override the rendered text (handy for numeric values: `left: 44, leftLabel: '44 KB'`).
+
+```tsx
+import { Comparator, type ComparatorFeature } from '@toolcase/react-components'
+
+const features: ComparatorFeature[] = [
+  { name: 'Bundle size', left: 44, right: 34, lowerIsBetter: true, leftLabel: '44 KB', rightLabel: '34 KB' },
+  { name: 'Built-in store', left: false, right: true },
+  { name: 'TypeScript DX', left: true, right: true },
+]
+
+<Comparator
+  title="React vs Vue"
+  left={{ name: 'React', iconName: 'lightning-charge-fill', accentColor: '#61dafb' }}
+  right={{ name: 'Vue', iconName: 'gem', accentColor: '#42b883' }}
+  features={features}
+  showSummary
+/>
+```
+
+---
+
 ### Hero
 
 A full-width landing page hero with eyebrow text, title, description, CTA buttons, stat cards, and decorative background icons.
@@ -2496,27 +2543,31 @@ const features: MultiCardSelectOption[] = [
 
 ### Timeline
 
-A vertical alternating timeline with status states, side placement, and skeleton loading.
+A vertical timeline with status states, card variants, animated hover/active dots, and skeleton loading. Mobile-first: single-column under 768px, alternating two-column above.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `items` | `TimelineItem[]` | ✅ | Timeline entries (see below) |
+| `variant` | `'default' \| 'glass' \| 'outlined' \| 'elevated' \| 'minimal'` | ❌ | Card style (default: `'default'`) |
+| `connector` | `'gradient' \| 'solid' \| 'dashed'` | ❌ | Rail style (default: `'gradient'`) |
 | `overlap` | `number` | ❌ | Global card overlap offset in px |
 | `loading` | `boolean` | ❌ | Skeleton cards |
 | `loadingCount` | `number` | ❌ | Number of skeleton cards (default: `3`) |
 
-**`TimelineItem`:** `{ title, date, description?, side?: 'left' | 'right', subtitle?, badge?, meta?, icon?, actions?, status?: 'completed' | 'active' | 'upcoming', overlap? }`
+**`TimelineItem`:** `{ title, date, description?, side?: 'left' | 'right', subtitle?, badge?, meta?, icon?, actions?, status?: 'completed' | 'active' | 'upcoming', overlap?, tags?: string[], progress?: number, accentColor?: string }`
+
+`progress` (0–100) renders a bar at the bottom of the card. `accentColor` overrides the dot/badge/icon hue per item. Active items pulse continuously; dots scale + glow on hover/focus.
 
 ```tsx
 import { Timeline, TimelineItem } from '@toolcase/react-components'
 
 const items: TimelineItem[] = [
-  { title: 'Project created', date: '2025-01-01', status: 'completed', side: 'left' },
-  { title: 'First build', date: '2025-02-15', status: 'completed', side: 'right', description: 'Initial release' },
-  { title: 'Launch', date: '2026-01-01', status: 'upcoming', side: 'left', badge: 'Planned' },
+  { title: 'Project created', date: '2025-01-01', status: 'completed', tags: ['Planning'] },
+  { title: 'Beta', date: '2025-02-15', status: 'active', progress: 62, description: 'Initial release' },
+  { title: 'Launch', date: '2026-01-01', status: 'upcoming', badge: 'Planned' },
 ]
 
-<Timeline items={items} />
+<Timeline items={items} variant="glass" connector="dashed" />
 ```
 
 ---

@@ -1,0 +1,60 @@
+.component.component-download-stats {
+	--ds-color: #1e293b;
+	--ds-muted: #64748b;
+	--ds-border: #e2e8f0;
+	--ds-accent: #6366f1;
+	background: #ffffff;
+	border: 1px solid var(--ds-border);
+	padding: 1rem 1.1rem;
+	color: var(--ds-color);
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+}
+
+.component-download-stats {
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--ds-muted);
+	}
+
+	&__registry {
+		font-weight: 700;
+		color: var(--ds-accent);
+	}
+
+	&__numbers {
+		display: flex;
+		gap: 1.25rem;
+		flex-wrap: wrap;
+	}
+
+	&__stat {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__value {
+		font-size: 1.5rem;
+		font-weight: 800;
+		line-height: 1;
+		color: var(--ds-color);
+	}
+
+	&__label {
+		font-size: 0.72rem;
+		color: var(--ds-muted);
+		margin-top: 0.2rem;
+	}
+
+	&__sparkline {
+		width: 100%;
+		height: 28px;
+		color: var(--ds-accent);
+	}
+}

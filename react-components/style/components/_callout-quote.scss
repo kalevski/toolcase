@@ -1,0 +1,57 @@
+.component.component-callout-quote {
+	--cq-color: #1e293b;
+	--cq-muted: #64748b;
+	--cq-accent: #6366f1;
+	margin: 0;
+	padding: 1.5rem 1.25rem;
+	background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+	border-left: 4px solid var(--cq-accent);
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+.component-callout-quote {
+	&__mark {
+		font-size: 2rem;
+		color: var(--cq-accent);
+		opacity: 0.3;
+		line-height: 0.6;
+	}
+
+	&__text {
+		margin: 0;
+		font-size: 1.1rem;
+		line-height: 1.55;
+		color: var(--cq-color);
+		font-weight: 500;
+	}
+
+	&__caption {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		align-items: baseline;
+		font-size: 0.85rem;
+		color: var(--cq-muted);
+	}
+
+	&__author {
+		font-style: normal;
+		font-weight: 700;
+		color: var(--cq-color);
+	}
+
+	&__source {
+		color: var(--cq-muted);
+		text-decoration: none;
+		&:hover { text-decoration: underline; }
+
+		&::before { content: '— '; color: var(--cq-muted); }
+	}
+}
+
+@media (min-width: 768px) {
+	.component.component-callout-quote { padding: 2rem 1.75rem; }
+	.component-callout-quote__text { font-size: 1.25rem; }
+}

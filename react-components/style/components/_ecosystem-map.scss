@@ -1,0 +1,125 @@
+.component.component-ecosystem-map {
+	--em-color: #1e293b;
+	--em-muted: #64748b;
+	--em-border: #e2e8f0;
+	--em-accent: #6366f1;
+	--em-size: 480px;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.component-ecosystem-map {
+	&__title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--em-color);
+		text-align: center;
+	}
+
+	&__radial {
+		display: none;
+	}
+
+	&__node {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.35rem 0.7rem;
+		background: #ffffff;
+		border: 1px solid var(--em-border);
+		color: var(--em-color);
+		font-size: 0.78rem;
+		font-weight: 600;
+		text-decoration: none;
+		white-space: nowrap;
+		box-shadow: 0 4px 12px rgba(30, 41, 59, 0.06);
+		transition: transform 0.15s ease, border-color 0.15s ease;
+
+		&:hover {
+			transform: translateY(-1px);
+			border-color: var(--em-node-accent, var(--em-accent));
+		}
+
+		&--core {
+			background: var(--em-color);
+			color: #ffffff;
+			padding: 0.5rem 1rem;
+			font-size: 0.95rem;
+			border-color: var(--em-color);
+		}
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	&__list-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+	}
+
+	&__list-label {
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--em-muted);
+	}
+
+	&__list-items {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+}
+
+@media (min-width: 768px) {
+	.component-ecosystem-map__radial {
+		display: block;
+		position: relative;
+		width: var(--em-size);
+		height: var(--em-size);
+		max-width: 100%;
+		margin: 0 auto;
+	}
+
+	.component-ecosystem-map__center {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.3rem;
+		z-index: 2;
+	}
+
+	.component-ecosystem-map__center-label {
+		font-size: 0.65rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--em-muted);
+	}
+
+	.component-ecosystem-map__ring {
+		position: absolute;
+		inset: 0;
+		border: 1px dashed var(--em-border);
+		border-radius: 50%;
+		width: calc(var(--em-radius) * 200%);
+		height: calc(var(--em-radius) * 200%);
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+	.component-ecosystem-map__list {
+		display: none;
+	}
+}

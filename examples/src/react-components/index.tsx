@@ -30,6 +30,39 @@ import ChipDemo from './ChipDemo'
 import CodeLabelCellDemo from './CodeLabelCellDemo'
 import CodeSnippetDemo from './CodeSnippetDemo'
 import ColorPickerDemo from './ColorPickerDemo'
+import ComparatorDemo from './ComparatorDemo'
+import AnnouncementBarDemo from './AnnouncementBarDemo'
+import BadgeRowDemo from './BadgeRowDemo'
+import TerminalWindowDemo from './TerminalWindowDemo'
+import InstallTabsDemo from './InstallTabsDemo'
+import QuickStartDemo from './QuickStartDemo'
+import CodeWithOutputDemo from './CodeWithOutputDemo'
+import DiffViewerDemo from './DiffViewerDemo'
+import LogoCloudDemo from './LogoCloudDemo'
+import TestimonialCarouselDemo from './TestimonialCarouselDemo'
+import DownloadStatsDemo from './DownloadStatsDemo'
+import GithubStarsCardDemo from './GithubStarsCardDemo'
+import ContributorWallDemo from './ContributorWallDemo'
+import SponsorWallDemo from './SponsorWallDemo'
+import FeatureMatrixDemo from './FeatureMatrixDemo'
+import CompatibilityMatrixDemo from './CompatibilityMatrixDemo'
+import ApiReferenceTableDemo from './ApiReferenceTableDemo'
+import CommandReferenceDemo from './CommandReferenceDemo'
+import CookbookGridDemo from './CookbookGridDemo'
+import CommunityLinksDemo from './CommunityLinksDemo'
+import MaintainerCardDemo from './MaintainerCardDemo'
+import PluginGridDemo from './PluginGridDemo'
+import EcosystemMapDemo from './EcosystemMapDemo'
+import GoodFirstIssuesDemo from './GoodFirstIssuesDemo'
+import BenchmarkChartDemo from './BenchmarkChartDemo'
+import RoadmapDemo from './RoadmapDemo'
+import VersionPickerDemo from './VersionPickerDemo'
+import MigrationGuideDemo from './MigrationGuideDemo'
+import NewsletterSignupDemo from './NewsletterSignupDemo'
+import SocialLinksDemo from './SocialLinksDemo'
+import VideoEmbedDemo from './VideoEmbedDemo'
+import FAQListDemo from './FAQListDemo'
+import CalloutQuoteDemo from './CalloutQuoteDemo'
 import CommandPaletteDemo from './CommandPaletteDemo'
 import ConfigPreviewDemo from './ConfigPreviewDemo'
 import { ContextMenuDemo } from './ContextMenuDemo'
@@ -131,10 +164,18 @@ import VisuallyHiddenDemo from './VisuallyHiddenDemo'
 import WelcomeGuideDemo from './WelcomeGuideDemo'
 
 export type ExampleCategory =
-    | 'Primitives'
-    | 'Basic Components'
-    | 'Composite Components'
-    | 'Advanced Systems'
+    | 'Typography & Decoration'
+    | 'Inputs & Forms'
+    | 'Buttons & Actions'
+    | 'Layout & Structure'
+    | 'Navigation'
+    | 'Overlays & Feedback'
+    | 'Data Display'
+    | 'Charts & Metrics'
+    | 'Media & Files'
+    | 'Identity & People'
+    | 'Marketing & Landing'
+    | 'Code & Docs'
 
 export type ExampleDef = {
     key: string
@@ -143,149 +184,206 @@ export type ExampleDef = {
 }
 
 export const categories: ExampleCategory[] = [
-    'Primitives',
-    'Basic Components',
-    'Composite Components',
-    'Advanced Systems',
+    'Typography & Decoration',
+    'Inputs & Forms',
+    'Buttons & Actions',
+    'Layout & Structure',
+    'Navigation',
+    'Overlays & Feedback',
+    'Data Display',
+    'Charts & Metrics',
+    'Media & Files',
+    'Identity & People',
+    'Marketing & Landing',
+    'Code & Docs',
 ]
 
-// Demos are ordered by implementation complexity (source LOC as a proxy),
-// ascending within each tier so prev/next navigation flows simple → complex.
+// Demos are grouped by purpose. Within each category, items are roughly
+// ordered light → heavy so prev/next navigation flows simple → complex.
 export const examples: ExampleDef[] = [
-    // ── Primitives (small, stateless display) ─────────────────────────
-    { key: 'code-label-cell', category: 'Primitives', element: <CodeLabelCellDemo /> },
-    { key: 'visually-hidden', category: 'Primitives', element: <VisuallyHiddenDemo /> },
-    { key: 'simple-file', category: 'Primitives', element: <SimpleFileDemo /> },
-    { key: 'badge', category: 'Primitives', element: <BadgeDemo /> },
-    { key: 'divider', category: 'Primitives', element: <DividerDemo /> },
-    { key: 'empty-state', category: 'Primitives', element: <EmptyStateDemo /> },
-    { key: 'spacer', category: 'Primitives', element: <SpacerDemo /> },
-    { key: 'basic-layout', category: 'Primitives', element: <BasicLayoutDemo /> },
-    { key: 'heading', category: 'Primitives', element: <HeadingDemo /> },
-    { key: 'checkbox', category: 'Primitives', element: <CheckboxDemo /> },
-    { key: 'kbd', category: 'Primitives', element: <KbdDemo /> },
-    { key: 'radio', category: 'Primitives', element: <RadioDemo /> },
-    { key: 'text', category: 'Primitives', element: <TextDemo /> },
-    { key: 'input', category: 'Primitives', element: <InputDemo /> },
-    { key: 'switch', category: 'Primitives', element: <SwitchDemo /> },
-    { key: 'textarea', category: 'Primitives', element: <TextareaDemo /> },
-    { key: 'card', category: 'Primitives', element: <CardDemo /> },
-    { key: 'status-dot', category: 'Primitives', element: <StatusDotDemo /> },
-    { key: 'helper-text', category: 'Primitives', element: <HelperTextDemo /> },
-    { key: 'spinner', category: 'Primitives', element: <SpinnerDemo /> },
-    { key: 'link', category: 'Primitives', element: <LinkDemo /> },
+    // ── Typography & Decoration ──────────────────────────────────────
+    { key: 'visually-hidden', category: 'Typography & Decoration', element: <VisuallyHiddenDemo /> },
+    { key: 'divider', category: 'Typography & Decoration', element: <DividerDemo /> },
+    { key: 'spacer', category: 'Typography & Decoration', element: <SpacerDemo /> },
+    { key: 'kbd', category: 'Typography & Decoration', element: <KbdDemo /> },
+    { key: 'link', category: 'Typography & Decoration', element: <LinkDemo /> },
+    { key: 'text', category: 'Typography & Decoration', element: <TextDemo /> },
+    { key: 'heading', category: 'Typography & Decoration', element: <HeadingDemo /> },
+    { key: 'status-dot', category: 'Typography & Decoration', element: <StatusDotDemo /> },
+    { key: 'brand', category: 'Typography & Decoration', element: <BrandDemo /> },
+    { key: 'badge', category: 'Typography & Decoration', element: <BadgeDemo /> },
+    { key: 'tag', category: 'Typography & Decoration', element: <TagDemo /> },
+    { key: 'chip', category: 'Typography & Decoration', element: <ChipDemo /> },
+    { key: 'icon', category: 'Typography & Decoration', element: <IconDemo /> },
+    { key: 'toolcase-icons', category: 'Typography & Decoration', element: <ToolcaseIconsDemo /> },
 
-    // ── Basic Components (single-purpose, minimal state) ──────────────
-    { key: 'button', category: 'Basic Components', element: <ButtonDemo /> },
-    { key: 'form', category: 'Basic Components', element: <FormDemo /> },
-    { key: 'label', category: 'Basic Components', element: <LabelDemo /> },
-    { key: 'icon-button', category: 'Basic Components', element: <IconButtonDemo /> },
-    { key: 'team-list', category: 'Basic Components', element: <TeamListDemo /> },
-    { key: 'cdn-map', category: 'Basic Components', element: <CdnMapDemo /> },
-    { key: 'section-card', category: 'Basic Components', element: <SectionCardDemo /> },
-    { key: 'skeleton', category: 'Basic Components', element: <SkeletonDemo /> },
-    { key: 'tag', category: 'Basic Components', element: <TagDemo /> },
-    { key: 'danger-zone-actions', category: 'Basic Components', element: <DangerZoneActionsDemo /> },
-    { key: 'select', category: 'Basic Components', element: <SelectDemo /> },
-    { key: 'asset-row', category: 'Basic Components', element: <AssetRowDemo /> },
-    { key: 'action-items', category: 'Basic Components', element: <ActionItemsDemo /> },
-    { key: 'queued-file', category: 'Basic Components', element: <QueuedFileDemo /> },
-    { key: 'action-header', category: 'Basic Components', element: <ActionHeaderDemo /> },
-    { key: 'chip', category: 'Basic Components', element: <ChipDemo /> },
-    { key: 'entity-cell', category: 'Basic Components', element: <EntityCellDemo /> },
-    { key: 'pipeline', category: 'Basic Components', element: <PipelineDemo /> },
-    { key: 'brand', category: 'Basic Components', element: <BrandDemo /> },
-    { key: 'date-picker', category: 'Basic Components', element: <DatePickerDemo /> },
-    { key: 'progress-bar', category: 'Basic Components', element: <ProgressBarDemo /> },
-    { key: 'radio-group', category: 'Basic Components', element: <RadioGroupDemo /> },
-    { key: 'scroll-area', category: 'Basic Components', element: <ScrollAreaDemo /> },
-    { key: 'icon', category: 'Basic Components', element: <IconDemo /> },
-    { key: 'toolcase-icons', category: 'Basic Components', element: <ToolcaseIconsDemo /> },
-    { key: 'alert', category: 'Basic Components', element: <AlertDemo /> },
-    { key: 'checkbox-group', category: 'Basic Components', element: <CheckboxGroupDemo /> },
-    { key: 'group', category: 'Basic Components', element: <GroupDemo /> },
-    { key: 'feature-card', category: 'Basic Components', element: <FeatureCardDemo /> },
+    // ── Inputs & Forms ───────────────────────────────────────────────
+    { key: 'helper-text', category: 'Inputs & Forms', element: <HelperTextDemo /> },
+    { key: 'label', category: 'Inputs & Forms', element: <LabelDemo /> },
+    { key: 'checkbox', category: 'Inputs & Forms', element: <CheckboxDemo /> },
+    { key: 'radio', category: 'Inputs & Forms', element: <RadioDemo /> },
+    { key: 'switch', category: 'Inputs & Forms', element: <SwitchDemo /> },
+    { key: 'input', category: 'Inputs & Forms', element: <InputDemo /> },
+    { key: 'textarea', category: 'Inputs & Forms', element: <TextareaDemo /> },
+    { key: 'select', category: 'Inputs & Forms', element: <SelectDemo /> },
+    { key: 'checkbox-group', category: 'Inputs & Forms', element: <CheckboxGroupDemo /> },
+    { key: 'radio-group', category: 'Inputs & Forms', element: <RadioGroupDemo /> },
+    { key: 'date-picker', category: 'Inputs & Forms', element: <DatePickerDemo /> },
+    { key: 'form', category: 'Inputs & Forms', element: <FormDemo /> },
+    { key: 'single-card-select', category: 'Inputs & Forms', element: <SingleCardSelectDemo /> },
+    { key: 'multi-card-select', category: 'Inputs & Forms', element: <MultiCardSelectDemo /> },
+    { key: 'card-options', category: 'Inputs & Forms', element: <CardOptionsDemo /> },
+    { key: 'toggle-card', category: 'Inputs & Forms', element: <ToggleCardDemo /> },
+    { key: 'rating', category: 'Inputs & Forms', element: <RatingDemo /> },
+    { key: 'slider', category: 'Inputs & Forms', element: <SliderDemo /> },
+    { key: 'range-slider', category: 'Inputs & Forms', element: <RangeSliderDemo /> },
+    { key: 'number-input', category: 'Inputs & Forms', element: <NumberInputDemo /> },
+    { key: 'otp-input', category: 'Inputs & Forms', element: <OTPInputDemo /> },
+    { key: 'phone-input', category: 'Inputs & Forms', element: <PhoneInputDemo /> },
+    { key: 'time-picker', category: 'Inputs & Forms', element: <TimePickerDemo /> },
+    { key: 'tag-input', category: 'Inputs & Forms', element: <TagInputDemo /> },
+    { key: 'color-picker', category: 'Inputs & Forms', element: <ColorPickerDemo /> },
+    { key: 'icon-picker', category: 'Inputs & Forms', element: <IconPickerDemo /> },
+    { key: 'extended-select', category: 'Inputs & Forms', element: <ExtendedSelectDemo /> },
+    { key: 'dropdown', category: 'Inputs & Forms', element: <DropdownDemo /> },
+    { key: 'form-input', category: 'Inputs & Forms', element: <FormInputDemo /> },
+    { key: 'form-wizard', category: 'Inputs & Forms', element: <FormWizardDemo /> },
 
-    // ── Composite Components (multi-part with internal state) ─────────
-    { key: 'image', category: 'Composite Components', element: <ImageDemo /> },
-    { key: 'tab-sections', category: 'Composite Components', element: <TabSectionsDemo /> },
-    { key: 'card-options', category: 'Composite Components', element: <CardOptionsDemo /> },
-    { key: 'metric-grid', category: 'Composite Components', element: <MetricGridDemo /> },
-    { key: 'rich-page-header', category: 'Composite Components', element: <RichPageHeaderDemo /> },
-    { key: 'config-preview', category: 'Composite Components', element: <ConfigPreviewDemo /> },
-    { key: 'avatar', category: 'Composite Components', element: <AvatarDemo /> },
-    { key: 'tooltip', category: 'Composite Components', element: <TooltipDemo /> },
-    { key: 'single-card-select', category: 'Composite Components', element: <SingleCardSelectDemo /> },
-    { key: 'vertical-item-list', category: 'Composite Components', element: <VerticalItemListDemo /> },
-    { key: 'file-dropzone', category: 'Composite Components', element: <FileDropzoneDemo /> },
-    { key: 'action-row-list', category: 'Composite Components', element: <ActionRowListDemo /> },
-    { key: 'bundle-bar', category: 'Composite Components', element: <BundleBarDemo /> },
-    { key: 'code-snippet', category: 'Composite Components', element: <CodeSnippetDemo /> },
-    { key: 'stat-card', category: 'Composite Components', element: <StatCardDemo /> },
-    { key: 'infinite-scroll', category: 'Composite Components', element: <InfiniteScrollDemo /> },
-    { key: 'multi-card-select', category: 'Composite Components', element: <MultiCardSelectDemo /> },
-    { key: 'cool-button', category: 'Composite Components', element: <CoolButtonDemo /> },
-    { key: 'changelog', category: 'Composite Components', element: <ChangelogDemo /> },
-    { key: 'usage-summary-panel', category: 'Composite Components', element: <UsageSummaryPanelDemo /> },
-    { key: 'file', category: 'Composite Components', element: <FileDemo /> },
-    { key: 'entity-profile-card', category: 'Composite Components', element: <EntityProfileCardDemo /> },
-    { key: 'banner', category: 'Composite Components', element: <BannerDemo /> },
-    { key: 'welcome-guide', category: 'Composite Components', element: <WelcomeGuideDemo /> },
-    { key: 'build', category: 'Composite Components', element: <BuildDemo /> },
-    { key: 'linked-providers-card', category: 'Composite Components', element: <LinkedProvidersCardDemo /> },
-    { key: 'login', category: 'Composite Components', element: <LoginDemo /> },
-    { key: 'toggle-card', category: 'Composite Components', element: <ToggleCardDemo /> },
-    { key: 'timeline', category: 'Composite Components', element: <TimelineDemo /> },
-    { key: 'user-panel', category: 'Composite Components', element: <UserPanelDemo /> },
-    { key: 'virtual-list', category: 'Composite Components', element: <VirtualListDemo /> },
-    { key: 'breadcrumb', category: 'Composite Components', element: <BreadcrumbDemo /> },
+    // ── Buttons & Actions ────────────────────────────────────────────
+    { key: 'button', category: 'Buttons & Actions', element: <ButtonDemo /> },
+    { key: 'icon-button', category: 'Buttons & Actions', element: <IconButtonDemo /> },
+    { key: 'cool-button', category: 'Buttons & Actions', element: <CoolButtonDemo /> },
+    { key: 'action-items', category: 'Buttons & Actions', element: <ActionItemsDemo /> },
+    { key: 'action-header', category: 'Buttons & Actions', element: <ActionHeaderDemo /> },
+    { key: 'action-row-list', category: 'Buttons & Actions', element: <ActionRowListDemo /> },
+    { key: 'danger-zone-actions', category: 'Buttons & Actions', element: <DangerZoneActionsDemo /> },
 
-    // ── Advanced Systems (heavy composites, layouts, editors) ─────────
-    { key: 'file-tags', category: 'Advanced Systems', element: <FileTagsDemo /> },
-    { key: 'pagination', category: 'Advanced Systems', element: <PaginationDemo /> },
-    { key: 'form-wizard', category: 'Advanced Systems', element: <FormWizardDemo /> },
-    { key: 'accordion', category: 'Advanced Systems', element: <AccordionDemo /> },
-    { key: 'table', category: 'Advanced Systems', element: <TableDemo /> },
-    { key: 'dashboard-layout', category: 'Advanced Systems', element: <DashboardLayoutExample /> },
-    { key: 'side-nav', category: 'Advanced Systems', element: <SideNavDemo /> },
-    { key: 'color-picker', category: 'Advanced Systems', element: <ColorPickerDemo /> },
-    { key: 'icon-picker', category: 'Advanced Systems', element: <IconPickerDemo /> },
-    { key: 'pinned-feature-showcase', category: 'Advanced Systems', element: <PinnedFeatureShowcaseDemo /> },
-    { key: 'early-signup-form', category: 'Advanced Systems', element: <EarlySignupFormDemo /> },
-    { key: 'otp-input', category: 'Advanced Systems', element: <OTPInputDemo /> },
-    { key: 'advanced-table', category: 'Advanced Systems', element: <AdvancedTableDemo /> },
-    { key: 'drawer', category: 'Advanced Systems', element: <DrawerDemo /> },
-    { key: 'resizable-panel', category: 'Advanced Systems', element: <ResizablePanelDemo /> },
-    { key: 'stepper', category: 'Advanced Systems', element: <StepperDemo /> },
-    { key: 'rating', category: 'Advanced Systems', element: <RatingDemo /> },
-    { key: 'page-footer', category: 'Advanced Systems', element: <PageFooterDemo /> },
-    { key: 'carousel', category: 'Advanced Systems', element: <CarouselDemo /> },
-    { key: 'pricing-card', category: 'Advanced Systems', element: <PricingCardDemo /> },
-    { key: 'popover', category: 'Advanced Systems', element: <PopoverDemo /> },
-    { key: 'dropdown', category: 'Advanced Systems', element: <DropdownDemo /> },
-    { key: 'image-crop', category: 'Advanced Systems', element: <ImageCropDemo /> },
-    { key: 'lightbox', category: 'Advanced Systems', element: <LightboxDemo /> },
-    { key: 'number-input', category: 'Advanced Systems', element: <NumberInputDemo /> },
-    { key: 'phone-input', category: 'Advanced Systems', element: <PhoneInputDemo /> },
-    { key: 'context-menu', category: 'Advanced Systems', element: <ContextMenuDemo /> },
-    { key: 'markdown-editor', category: 'Advanced Systems', element: <MarkdownEditorDemo /> },
-    { key: 'cool-nav', category: 'Advanced Systems', element: <CoolNavDemo /> },
-    { key: 'hero', category: 'Advanced Systems', element: <HeroDemo /> },
-    { key: 'tree-view', category: 'Advanced Systems', element: <TreeViewDemo /> },
-    { key: 'slider', category: 'Advanced Systems', element: <SliderDemo /> },
-    { key: 'time-picker', category: 'Advanced Systems', element: <TimePickerDemo /> },
-    { key: 'extended-select', category: 'Advanced Systems', element: <ExtendedSelectDemo /> },
-    { key: 'tag-input', category: 'Advanced Systems', element: <TagInputDemo /> },
-    { key: 'range-slider', category: 'Advanced Systems', element: <RangeSliderDemo /> },
-    { key: 'json-schema-def', category: 'Advanced Systems', element: <JSONSchemaDefDemo /> },
-    { key: 'command-palette', category: 'Advanced Systems', element: <CommandPaletteDemo /> },
-    { key: 'asset-bundle', category: 'Advanced Systems', element: <AssetBundleDemo /> },
-    { key: 'toast', category: 'Advanced Systems', element: <ToastDemo /> },
-    { key: 'modal', category: 'Advanced Systems', element: <ModalDemo /> },
-    { key: 'bitmap-font-generator', category: 'Advanced Systems', element: <BitmapFontGeneratorDemo /> },
-    { key: 'json-editor', category: 'Advanced Systems', element: <JSONEditorDemo /> },
-    { key: 'form-input', category: 'Advanced Systems', element: <FormInputDemo /> },
-    { key: 'node-editor', category: 'Advanced Systems', element: <NodeEditorDemo /> },
-    { key: 'dashboard-card', category: 'Advanced Systems', element: <DashboardCardDemo /> },
-    { key: 'chart', category: 'Advanced Systems', element: <ChartDemo /> },
+    // ── Layout & Structure ───────────────────────────────────────────
+    { key: 'card', category: 'Layout & Structure', element: <CardDemo /> },
+    { key: 'section-card', category: 'Layout & Structure', element: <SectionCardDemo /> },
+    { key: 'group', category: 'Layout & Structure', element: <GroupDemo /> },
+    { key: 'basic-layout', category: 'Layout & Structure', element: <BasicLayoutDemo /> },
+    { key: 'scroll-area', category: 'Layout & Structure', element: <ScrollAreaDemo /> },
+    { key: 'stepper', category: 'Layout & Structure', element: <StepperDemo /> },
+    { key: 'dashboard-card', category: 'Layout & Structure', element: <DashboardCardDemo /> },
+    { key: 'resizable-panel', category: 'Layout & Structure', element: <ResizablePanelDemo /> },
+    { key: 'dashboard-layout', category: 'Layout & Structure', element: <DashboardLayoutExample /> },
+
+    // ── Navigation ───────────────────────────────────────────────────
+    { key: 'breadcrumb', category: 'Navigation', element: <BreadcrumbDemo /> },
+    { key: 'vertical-item-list', category: 'Navigation', element: <VerticalItemListDemo /> },
+    { key: 'social-links', category: 'Navigation', element: <SocialLinksDemo /> },
+    { key: 'version-picker', category: 'Navigation', element: <VersionPickerDemo /> },
+    { key: 'pagination', category: 'Navigation', element: <PaginationDemo /> },
+    { key: 'cool-nav', category: 'Navigation', element: <CoolNavDemo /> },
+    { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
+    { key: 'page-footer', category: 'Navigation', element: <PageFooterDemo /> },
+    { key: 'command-palette', category: 'Navigation', element: <CommandPaletteDemo /> },
+
+    // ── Overlays & Feedback ──────────────────────────────────────────
+    { key: 'empty-state', category: 'Overlays & Feedback', element: <EmptyStateDemo /> },
+    { key: 'spinner', category: 'Overlays & Feedback', element: <SpinnerDemo /> },
+    { key: 'skeleton', category: 'Overlays & Feedback', element: <SkeletonDemo /> },
+    { key: 'progress-bar', category: 'Overlays & Feedback', element: <ProgressBarDemo /> },
+    { key: 'alert', category: 'Overlays & Feedback', element: <AlertDemo /> },
+    { key: 'announcement-bar', category: 'Overlays & Feedback', element: <AnnouncementBarDemo /> },
+    { key: 'tooltip', category: 'Overlays & Feedback', element: <TooltipDemo /> },
+    { key: 'popover', category: 'Overlays & Feedback', element: <PopoverDemo /> },
+    { key: 'toast', category: 'Overlays & Feedback', element: <ToastDemo /> },
+    { key: 'context-menu', category: 'Overlays & Feedback', element: <ContextMenuDemo /> },
+    { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
+    { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
+    { key: 'modal', category: 'Overlays & Feedback', element: <ModalDemo /> },
+
+    // ── Data Display ─────────────────────────────────────────────────
+    { key: 'pipeline', category: 'Data Display', element: <PipelineDemo /> },
+    { key: 'tab-sections', category: 'Data Display', element: <TabSectionsDemo /> },
+    { key: 'accordion', category: 'Data Display', element: <AccordionDemo /> },
+    { key: 'faq-list', category: 'Data Display', element: <FAQListDemo /> },
+    { key: 'feature-matrix', category: 'Data Display', element: <FeatureMatrixDemo /> },
+    { key: 'compatibility-matrix', category: 'Data Display', element: <CompatibilityMatrixDemo /> },
+    { key: 'good-first-issues', category: 'Data Display', element: <GoodFirstIssuesDemo /> },
+    { key: 'changelog', category: 'Data Display', element: <ChangelogDemo /> },
+    { key: 'timeline', category: 'Data Display', element: <TimelineDemo /> },
+    { key: 'roadmap', category: 'Data Display', element: <RoadmapDemo /> },
+    { key: 'build', category: 'Data Display', element: <BuildDemo /> },
+    { key: 'infinite-scroll', category: 'Data Display', element: <InfiniteScrollDemo /> },
+    { key: 'virtual-list', category: 'Data Display', element: <VirtualListDemo /> },
+    { key: 'tree-view', category: 'Data Display', element: <TreeViewDemo /> },
+    { key: 'table', category: 'Data Display', element: <TableDemo /> },
+    { key: 'advanced-table', category: 'Data Display', element: <AdvancedTableDemo /> },
+
+    // ── Charts & Metrics ─────────────────────────────────────────────
+    { key: 'badge-row', category: 'Charts & Metrics', element: <BadgeRowDemo /> },
+    { key: 'stat-card', category: 'Charts & Metrics', element: <StatCardDemo /> },
+    { key: 'metric-grid', category: 'Charts & Metrics', element: <MetricGridDemo /> },
+    { key: 'bundle-bar', category: 'Charts & Metrics', element: <BundleBarDemo /> },
+    { key: 'usage-summary-panel', category: 'Charts & Metrics', element: <UsageSummaryPanelDemo /> },
+    { key: 'download-stats', category: 'Charts & Metrics', element: <DownloadStatsDemo /> },
+    { key: 'benchmark-chart', category: 'Charts & Metrics', element: <BenchmarkChartDemo /> },
+    { key: 'chart', category: 'Charts & Metrics', element: <ChartDemo /> },
+
+    // ── Media & Files ────────────────────────────────────────────────
+    { key: 'code-label-cell', category: 'Media & Files', element: <CodeLabelCellDemo /> },
+    { key: 'simple-file', category: 'Media & Files', element: <SimpleFileDemo /> },
+    { key: 'asset-row', category: 'Media & Files', element: <AssetRowDemo /> },
+    { key: 'queued-file', category: 'Media & Files', element: <QueuedFileDemo /> },
+    { key: 'file', category: 'Media & Files', element: <FileDemo /> },
+    { key: 'file-tags', category: 'Media & Files', element: <FileTagsDemo /> },
+    { key: 'file-dropzone', category: 'Media & Files', element: <FileDropzoneDemo /> },
+    { key: 'image', category: 'Media & Files', element: <ImageDemo /> },
+    { key: 'video-embed', category: 'Media & Files', element: <VideoEmbedDemo /> },
+    { key: 'image-crop', category: 'Media & Files', element: <ImageCropDemo /> },
+    { key: 'asset-bundle', category: 'Media & Files', element: <AssetBundleDemo /> },
+    { key: 'cdn-map', category: 'Media & Files', element: <CdnMapDemo /> },
+
+    // ── Identity & People ────────────────────────────────────────────
+    { key: 'entity-cell', category: 'Identity & People', element: <EntityCellDemo /> },
+    { key: 'avatar', category: 'Identity & People', element: <AvatarDemo /> },
+    { key: 'team-list', category: 'Identity & People', element: <TeamListDemo /> },
+    { key: 'user-panel', category: 'Identity & People', element: <UserPanelDemo /> },
+    { key: 'contributor-wall', category: 'Identity & People', element: <ContributorWallDemo /> },
+    { key: 'maintainer-card', category: 'Identity & People', element: <MaintainerCardDemo /> },
+    { key: 'entity-profile-card', category: 'Identity & People', element: <EntityProfileCardDemo /> },
+    { key: 'linked-providers-card', category: 'Identity & People', element: <LinkedProvidersCardDemo /> },
+    { key: 'login', category: 'Identity & People', element: <LoginDemo /> },
+
+    // ── Marketing & Landing ──────────────────────────────────────────
+    { key: 'callout-quote', category: 'Marketing & Landing', element: <CalloutQuoteDemo /> },
+    { key: 'feature-card', category: 'Marketing & Landing', element: <FeatureCardDemo /> },
+    { key: 'banner', category: 'Marketing & Landing', element: <BannerDemo /> },
+    { key: 'logo-cloud', category: 'Marketing & Landing', element: <LogoCloudDemo /> },
+    { key: 'sponsor-wall', category: 'Marketing & Landing', element: <SponsorWallDemo /> },
+    { key: 'github-stars-card', category: 'Marketing & Landing', element: <GithubStarsCardDemo /> },
+    { key: 'comparator', category: 'Marketing & Landing', element: <ComparatorDemo /> },
+    { key: 'plugin-grid', category: 'Marketing & Landing', element: <PluginGridDemo /> },
+    { key: 'ecosystem-map', category: 'Marketing & Landing', element: <EcosystemMapDemo /> },
+    { key: 'community-links', category: 'Marketing & Landing', element: <CommunityLinksDemo /> },
+    { key: 'testimonial-carousel', category: 'Marketing & Landing', element: <TestimonialCarouselDemo /> },
+    { key: 'carousel', category: 'Marketing & Landing', element: <CarouselDemo /> },
+    { key: 'rich-page-header', category: 'Marketing & Landing', element: <RichPageHeaderDemo /> },
+    { key: 'newsletter-signup', category: 'Marketing & Landing', element: <NewsletterSignupDemo /> },
+    { key: 'early-signup-form', category: 'Marketing & Landing', element: <EarlySignupFormDemo /> },
+    { key: 'quick-start', category: 'Marketing & Landing', element: <QuickStartDemo /> },
+    { key: 'welcome-guide', category: 'Marketing & Landing', element: <WelcomeGuideDemo /> },
+    { key: 'pinned-feature-showcase', category: 'Marketing & Landing', element: <PinnedFeatureShowcaseDemo /> },
+    { key: 'pricing-card', category: 'Marketing & Landing', element: <PricingCardDemo /> },
+    { key: 'hero', category: 'Marketing & Landing', element: <HeroDemo /> },
+
+    // ── Code & Docs ──────────────────────────────────────────────────
+    { key: 'terminal-window', category: 'Code & Docs', element: <TerminalWindowDemo /> },
+    { key: 'install-tabs', category: 'Code & Docs', element: <InstallTabsDemo /> },
+    { key: 'code-snippet', category: 'Code & Docs', element: <CodeSnippetDemo /> },
+    { key: 'code-with-output', category: 'Code & Docs', element: <CodeWithOutputDemo /> },
+    { key: 'diff-viewer', category: 'Code & Docs', element: <DiffViewerDemo /> },
+    { key: 'config-preview', category: 'Code & Docs', element: <ConfigPreviewDemo /> },
+    { key: 'cookbook-grid', category: 'Code & Docs', element: <CookbookGridDemo /> },
+    { key: 'api-reference-table', category: 'Code & Docs', element: <ApiReferenceTableDemo /> },
+    { key: 'command-reference', category: 'Code & Docs', element: <CommandReferenceDemo /> },
+    { key: 'migration-guide', category: 'Code & Docs', element: <MigrationGuideDemo /> },
+    { key: 'json-schema-def', category: 'Code & Docs', element: <JSONSchemaDefDemo /> },
+    { key: 'markdown-editor', category: 'Code & Docs', element: <MarkdownEditorDemo /> },
+    { key: 'json-editor', category: 'Code & Docs', element: <JSONEditorDemo /> },
+    { key: 'bitmap-font-generator', category: 'Code & Docs', element: <BitmapFontGeneratorDemo /> },
+    { key: 'node-editor', category: 'Code & Docs', element: <NodeEditorDemo /> },
 ]

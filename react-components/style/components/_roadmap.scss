@@ -1,0 +1,129 @@
+.component.component-roadmap {
+	--rm-color: #1e293b;
+	--rm-muted: #64748b;
+	--rm-border: #e2e8f0;
+	--rm-shipped: #10b981;
+	--rm-progress: #6366f1;
+	--rm-planned: #f59e0b;
+	--rm-considering: #94a3b8;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.component-roadmap {
+	&__title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--rm-color);
+	}
+
+	&__columns {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+
+	&__column {
+		--rm-col-accent: var(--rm-muted);
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
+		background: #f8fafc;
+		border: 1px solid var(--rm-border);
+		padding: 0.85rem;
+
+		&--shipped { --rm-col-accent: var(--rm-shipped); }
+		&--in-progress { --rm-col-accent: var(--rm-progress); }
+		&--planned { --rm-col-accent: var(--rm-planned); }
+		&--considering { --rm-col-accent: var(--rm-considering); }
+	}
+
+	&__column-head {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--rm-color);
+	}
+
+	&__status-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: var(--rm-col-accent);
+	}
+
+	&__column-title { flex: 1 1 auto; }
+
+	&__column-count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 22px;
+		height: 22px;
+		background: #ffffff;
+		font-size: 0.72rem;
+		color: var(--rm-muted);
+		padding: 0 0.4rem;
+	}
+
+	&__items {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	&__item {
+		background: #ffffff;
+		border-left: 3px solid var(--rm-col-accent);
+		padding: 0.6rem 0.75rem;
+
+		a {
+			color: var(--rm-color);
+			text-decoration: none;
+			display: block;
+		}
+	}
+
+	&__item-title {
+		font-weight: 600;
+		font-size: 0.88rem;
+		color: var(--rm-color);
+	}
+
+	&__item-eta {
+		float: right;
+		font-size: 0.72rem;
+		color: var(--rm-muted);
+		font-weight: 500;
+	}
+
+	&__item-description {
+		margin: 0.3rem 0 0;
+		font-size: 0.8rem;
+		color: var(--rm-muted);
+		line-height: 1.5;
+	}
+
+	&--stacked .component-roadmap__columns { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 768px) {
+	.component-roadmap--kanban .component-roadmap__columns {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 992px) {
+	.component-roadmap--kanban .component-roadmap__columns {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}

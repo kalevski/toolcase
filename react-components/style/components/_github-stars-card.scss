@@ -1,0 +1,79 @@
+.component.component-github-stars-card {
+	--gh-color: #1e293b;
+	--gh-muted: #64748b;
+	--gh-border: #e2e8f0;
+	--gh-accent: #1e293b;
+	background: #ffffff;
+	border: 1px solid var(--gh-border);
+	padding: 1rem 1.1rem;
+	color: var(--gh-color);
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+.component-github-stars-card {
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	&__logo {
+		font-size: 1.2rem;
+		color: var(--gh-color);
+	}
+
+	&__repo {
+		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--gh-color);
+		text-decoration: none;
+		&:hover { text-decoration: underline; }
+	}
+
+	&__stats {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.6rem 1rem;
+	}
+
+	&__stat {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.85rem;
+		color: var(--gh-color);
+
+		.bi { color: var(--gh-muted); }
+	}
+
+	&__value {
+		font-weight: 700;
+	}
+
+	&__label {
+		color: var(--gh-muted);
+		font-size: 0.78rem;
+	}
+
+	&__cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		padding: 0.5rem 0.85rem;
+		background: var(--gh-accent);
+		color: #ffffff;
+		font-weight: 600;
+		font-size: 0.85rem;
+		text-decoration: none;
+		transition: background 0.15s ease;
+		&:hover { background: #0f172a; }
+	}
+}
+
+@media (min-width: 576px) {
+	.component-github-stars-card__stats { grid-template-columns: repeat(4, 1fr); }
+}

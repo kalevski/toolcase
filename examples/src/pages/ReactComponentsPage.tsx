@@ -3,10 +3,18 @@ import { Badge, Button, Heading, Icon, SectionCard, Text } from '@toolcase/react
 import { examples, categories, ExampleCategory } from '../react-components/index'
 
 const categoryIcons: Record<ExampleCategory, string> = {
-    'Primitives': 'circle',
-    'Basic Components': 'square',
-    'Composite Components': 'grid-3x3-gap',
-    'Advanced Systems': 'diagram-3',
+    'Typography & Decoration': 'type',
+    'Inputs & Forms': 'input-cursor-text',
+    'Buttons & Actions': 'cursor-fill',
+    'Layout & Structure': 'columns-gap',
+    'Navigation': 'compass',
+    'Overlays & Feedback': 'window-stack',
+    'Data Display': 'table',
+    'Charts & Metrics': 'bar-chart-line',
+    'Media & Files': 'images',
+    'Identity & People': 'people',
+    'Marketing & Landing': 'megaphone',
+    'Code & Docs': 'code-slash',
 }
 
 const formatLabel = (key: string) => {

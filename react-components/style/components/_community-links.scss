@@ -1,0 +1,87 @@
+.component.component-community-links {
+	--cl-color: #1e293b;
+	--cl-muted: #64748b;
+	--cl-border: #e2e8f0;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.component-community-links {
+	&__title {
+		margin: 0;
+		font-size: 1.05rem;
+		font-weight: 700;
+		color: var(--cl-color);
+	}
+
+	&__grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 0.6rem;
+	}
+
+	&__card {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+		padding: 0.75rem 0.95rem;
+		background: #ffffff;
+		border: 1px solid var(--cl-border);
+		text-decoration: none;
+		color: var(--cl-color);
+		transition: border-color 0.15s ease, transform 0.15s ease;
+
+		&:hover {
+			border-color: var(--cl-color);
+			transform: translateY(-1px);
+		}
+
+		&--github { --cl-icon: #1e293b; }
+		&--discord { --cl-icon: #5865f2; }
+		&--slack { --cl-icon: #611f69; }
+		&--x { --cl-icon: #000000; }
+		&--mastodon { --cl-icon: #6364ff; }
+		&--rss { --cl-icon: #f97316; }
+		&--mail { --cl-icon: #1e293b; }
+		&--youtube { --cl-icon: #ff0000; }
+		&--discussions { --cl-icon: #6366f1; }
+	}
+
+	&__icon {
+		font-size: 1.4rem;
+		color: var(--cl-icon, var(--cl-color));
+		flex-shrink: 0;
+	}
+
+	&__body {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	&__label {
+		font-weight: 600;
+		font-size: 0.92rem;
+	}
+
+	&__description {
+		font-size: 0.78rem;
+		color: var(--cl-muted);
+	}
+
+	&__count {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--cl-muted);
+	}
+}
+
+@media (min-width: 576px) {
+	.component-community-links__grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 992px) {
+	.component-community-links__grid { grid-template-columns: repeat(3, 1fr); }
+}

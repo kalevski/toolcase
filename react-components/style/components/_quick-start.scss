@@ -1,0 +1,84 @@
+.component.component-quick-start {
+	--qs-color: #1e293b;
+	--qs-muted: #64748b;
+	--qs-accent: #1e293b;
+	--qs-border: #e2e8f0;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.component-quick-start {
+	&__title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--qs-color);
+	}
+
+	&__steps {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	&__step {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.85rem;
+		align-items: flex-start;
+	}
+
+	&__index {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		background: var(--qs-accent);
+		color: #ffffff;
+		font-weight: 700;
+		font-size: 0.85rem;
+		flex-shrink: 0;
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		min-width: 0;
+	}
+
+	&__step-title {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--qs-color);
+	}
+
+	&__description {
+		color: var(--qs-muted);
+		line-height: 1.55;
+		font-size: 0.92rem;
+	}
+
+	&__code,
+	&__output { width: 100%; min-width: 0; }
+
+	&__output {
+		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+		font-size: 0.82rem;
+		color: var(--qs-muted);
+		background: #f8fafc;
+		border: 1px solid var(--qs-border);
+		padding: 0.6rem 0.85rem;
+		white-space: pre-wrap;
+	}
+}
+
+@media (min-width: 768px) {
+	.component-quick-start__index { width: 36px; height: 36px; font-size: 0.95rem; }
+}

@@ -1,0 +1,66 @@
+.component.component-announcement-bar {
+	--ab-bg: #1e293b;
+	--ab-color: #ffffff;
+	--ab-accent: #818cf8;
+	width: 100%;
+	background: var(--ab-bg);
+	color: var(--ab-color);
+	font-size: 0.85rem;
+
+	&--success { --ab-bg: #047857; --ab-accent: #6ee7b7; }
+	&--warning { --ab-bg: #b45309; --ab-accent: #fde68a; }
+	&--announce { --ab-bg: #4f46e5; --ab-accent: #c4b5fd; }
+}
+
+.component-announcement-bar {
+	&__inner {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		padding: 0.5rem 0.85rem;
+		max-width: 1200px;
+		margin: 0 auto;
+		flex-wrap: wrap;
+	}
+	&__icon {
+		display: inline-flex;
+		color: var(--ab-accent);
+		font-size: 1rem;
+	}
+	&__message {
+		flex: 1 1 auto;
+		min-width: 0;
+		line-height: 1.4;
+	}
+	&__cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.25rem 0.6rem;
+		font-weight: 600;
+		color: var(--ab-color);
+		background: rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		text-decoration: none;
+		font-size: 0.8rem;
+		transition: background 0.15s ease;
+		&:hover { background: rgba(255, 255, 255, 0.2); }
+	}
+	&__dismiss {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.25rem;
+		background: transparent;
+		border: none;
+		color: var(--ab-color);
+		opacity: 0.75;
+		cursor: pointer;
+		transition: opacity 0.15s ease;
+		&:hover { opacity: 1; }
+	}
+}
+
+@media (min-width: 768px) {
+	.component-announcement-bar__inner { padding: 0.55rem 1.5rem; }
+}

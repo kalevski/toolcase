@@ -1,0 +1,80 @@
+.component.component-install-tabs {
+	--it-bg: #0f172a;
+	--it-tab-bg: #1e293b;
+	--it-tab-active: #0f172a;
+	--it-text: #e2e8f0;
+	--it-muted: #64748b;
+	background: var(--it-bg);
+	color: var(--it-text);
+	overflow: hidden;
+	font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+}
+
+.component-install-tabs {
+	&__tabs {
+		display: flex;
+		background: var(--it-tab-bg);
+		gap: 0;
+	}
+
+	&__tab {
+		flex: 0 0 auto;
+		padding: 0.55rem 1rem;
+		background: transparent;
+		border: none;
+		color: var(--it-muted);
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: lowercase;
+		cursor: pointer;
+		font-family: inherit;
+		transition: color 0.15s ease, background 0.15s ease;
+
+		&:hover { color: var(--it-text); }
+
+		&--active {
+			background: var(--it-tab-active);
+			color: var(--it-text);
+		}
+
+		&:focus-visible {
+			outline: 2px solid #818cf8;
+			outline-offset: -2px;
+		}
+	}
+
+	&__body {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		padding: 0.7rem 0.95rem;
+	}
+
+	&__command {
+		flex: 1 1 auto;
+		font-size: 0.85rem;
+		color: var(--it-text);
+		white-space: pre;
+		overflow-x: auto;
+		min-width: 0;
+	}
+
+	&__copy {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		background: rgba(255, 255, 255, 0.06);
+		border: none;
+		color: var(--it-muted);
+		cursor: pointer;
+		transition: background 0.15s ease, color 0.15s ease;
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.12);
+			color: var(--it-text);
+		}
+	}
+}

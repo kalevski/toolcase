@@ -7,6 +7,17 @@
 	--cs-copy-hover: rgba(255, 255, 255, 0.12);
 	--cs-transition: 0.15s ease;
 
+	--cs-token-comment: #64748b;
+	--cs-token-string: #86efac;
+	--cs-token-keyword: #c4b5fd;
+	--cs-token-literal: #fb923c;
+	--cs-token-number: #fb923c;
+	--cs-token-function: #7dd3fc;
+	--cs-token-variable: #fcd34d;
+	--cs-token-flag: #fcd34d;
+	--cs-token-operator: #f472b6;
+	--cs-token-punctuation: #94a3b8;
+
 	position: relative;
 	background: var(--cs-bg);
 	color: var(--cs-text);
@@ -93,4 +104,47 @@
 	word-break: normal;
 	word-wrap: normal;
 	tab-size: 2;
+}
+
+.component-code-snippet__token {
+	&--comment {
+		color: var(--cs-token-comment);
+		font-style: italic;
+	}
+
+	&--string {
+		color: var(--cs-token-string);
+	}
+
+	&--keyword {
+		color: var(--cs-token-keyword);
+	}
+
+	&--literal {
+		color: var(--cs-token-literal);
+	}
+
+	&--number {
+		color: var(--cs-token-number);
+	}
+
+	&--function {
+		color: var(--cs-token-function);
+	}
+
+	&--variable {
+		color: var(--cs-token-variable);
+	}
+
+	&--flag {
+		color: var(--cs-token-flag);
+	}
+
+	&--operator {
+		color: var(--cs-token-operator);
+	}
+
+	&--punctuation {
+		color: var(--cs-token-punctuation);
+	}
 }

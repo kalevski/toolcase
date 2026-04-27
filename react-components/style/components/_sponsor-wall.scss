@@ -1,0 +1,59 @@
+.component.component-sponsor-wall {
+	--sw-color: #1e293b;
+	--sw-muted: #64748b;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.component-sponsor-wall {
+	&__title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--sw-color);
+		text-align: center;
+	}
+
+	&__tier {
+		display: flex;
+		flex-direction: column;
+		gap: 0.7rem;
+		align-items: center;
+	}
+
+	&__tier-label {
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--sw-muted);
+	}
+
+	&__logos {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem 1.5rem;
+		align-items: center;
+		justify-content: center;
+	}
+
+	&__link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0.85;
+		transition: opacity 0.15s ease, transform 0.15s ease;
+
+		&:hover { opacity: 1; transform: translateY(-1px); }
+	}
+
+	&__logo {
+		object-fit: contain;
+	}
+
+	&__tier--xl .component-sponsor-wall__logo { max-height: 80px; max-width: 220px; }
+	&__tier--lg .component-sponsor-wall__logo { max-height: 60px; max-width: 180px; }
+	&__tier--md .component-sponsor-wall__logo { max-height: 44px; max-width: 140px; }
+	&__tier--sm .component-sponsor-wall__logo { max-height: 32px; max-width: 110px; }
+}

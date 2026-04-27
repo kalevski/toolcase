@@ -2,15 +2,34 @@
 
 $timeline-color: $black !default;
 
+// ── Timeline ──────────────────────────────────────────────────────────────
 .component.component-timeline {
-	position: relative;
-	padding: 2.5rem 0;
-	isolation: isolate;
+	--tl-color: #1e293b;
+	--tl-muted: #64748b;
+	--tl-faint: #94a3b8;
+	--tl-border: #e2e8f0;
+	--tl-bg: #ffffff;
+	--tl-surface: #f8fafc;
+	--tl-accent: #1e293b;
+	--tl-line-width: 4px;
+	--tl-rail-offset: 18px;
+	--tl-dot-size: 16px;
+	--tl-dot-ring: 6px;
+	--tl-card-gap: 1.25rem;
+	--tl-transition: 0.15s ease;
 
-	.component-timeline__line {
+	position: relative;
+	padding: 1.5rem 0;
+	isolation: isolate;
+}
+
+.component-timeline {
+	&__line {
 		position: absolute;
-		inset: 0 auto 0 50%;
-		width: 4px;
+		top: 0;
+		bottom: 0;
+		left: var(--tl-rail-offset);
+		width: var(--tl-line-width);
 		transform: translateX(-50%);
 		background: linear-gradient(
 			180deg,
@@ -20,168 +39,375 @@ $timeline-color: $black !default;
 			rgba($timeline-color, 0.1) 82%,
 			rgba($timeline-color, 0) 100%
 		);
-		box-shadow:
-			0 0 0 1px rgba($timeline-color, 0.08),
-			0 20px 60px rgba($timeline-color, 0.1);
 	}
 
-	.component-timeline__items {
+	&__items {
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		gap: 2rem;
+		gap: 1.25rem;
 	}
 
-	.component-timeline__item {
+	&__item {
 		--timeline-item-overlap: 0px;
+		--tl-item-accent: var(--tl-accent);
 		position: relative;
 		display: flex;
 		width: 100%;
-		min-height: 120px;
+		min-height: 80px;
 		align-items: flex-start;
-		transition:
-			transform 180ms ease,
-			opacity 180ms ease;
-		margin-top: 0;
+		padding-left: calc(var(--tl-rail-offset) + 28px);
+		transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 1;
 
 		&:hover {
 			transform: translateY(-2px);
 		}
-	}
 
-	.component-timeline__item--overlap {
-		margin-top: calc(-1 * var(--timeline-item-overlap));
-	}
-
-	.component-timeline__dot {
-		position: absolute;
-		left: 50%;
-		top: 1.25rem;
-		transform: translate(-50%, -50%);
-		width: 16px;
-		height: 16px;
-		background: $timeline-color;
-		box-shadow:
-			0 0 0 6px rgba($timeline-color, 0.1),
-			0 8px 28px rgba($timeline-color, 0.14);
-		z-index: 2;
-
-		&::after {
-			content: '';
-			position: absolute;
-			inset: -6px;
-			background: radial-gradient(circle, rgba($timeline-color, 0.14) 0%, rgba($timeline-color, 0) 70%);
-			opacity: 0;
-			transition: opacity 200ms ease;
+		&--overlap {
+			margin-top: calc(-1 * var(--timeline-item-overlap));
 		}
 	}
 
-	.component-timeline__card {
+	&__dot {
+		position: absolute;
+		left: var(--tl-rail-offset);
+		top: 1.4rem;
+		transform: translate(-50%, -50%);
+		width: var(--tl-dot-size);
+		height: var(--tl-dot-size);
+		border-radius: 50%;
+		background: var(--tl-item-accent);
+		box-shadow:
+			0 0 0 var(--tl-dot-ring) rgba(30, 41, 59, 0.1),
+			0 8px 24px rgba(30, 41, 59, 0.14);
+		z-index: 2;
+		transition:
+			transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+			box-shadow var(--tl-transition);
+		cursor: pointer;
+	}
+
+	&__dot-pulse,
+	&__dot-ring {
+		position: absolute;
+		inset: 0;
+		border-radius: 50%;
+		pointer-events: none;
+	}
+
+	&__dot-pulse {
+		background: var(--tl-item-accent);
+		opacity: 0;
+		transform: scale(1);
+		transition:
+			transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.3s ease;
+	}
+
+	&__dot-ring {
+		inset: -10px;
+		background: radial-gradient(circle, var(--tl-item-accent) 0%, transparent 70%);
+		opacity: 0;
+		transform: scale(0.8);
+		transition:
+			transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.3s ease;
+	}
+
+	&__card {
 		position: relative;
-		width: min(460px, calc(50% - 48px));
+		width: 100%;
 		margin: 0;
-		background: linear-gradient(145deg, rgba($white, 0.94), rgba($white, 0.86));
-		border: 1px solid rgba($timeline-color, 0.1);
-		box-shadow: 0 18px 42px rgba($timeline-color, 0.08);
-		padding: 1.35rem 1.5rem;
+		padding: 1.1rem 1.25rem;
+		background: var(--tl-bg);
+		border: 1px solid var(--tl-border);
+		box-shadow: 0 12px 32px rgba(30, 41, 59, 0.06);
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		backdrop-filter: blur(12px);
-
-		@supports not (backdrop-filter: blur(12px)) {
-			background: $white;
-		}
+		gap: 0.85rem;
+		transition:
+			border-color var(--tl-transition),
+			box-shadow var(--tl-transition),
+			transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
-	.component-timeline__header {
+	&__header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 1rem;
+		gap: 0.75rem;
+		flex-wrap: wrap;
 	}
 
-	.component-timeline__meta {
+	&__meta {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem 0.75rem;
+		gap: 0.4rem 0.7rem;
 		align-items: center;
 	}
 
-	.component-timeline__date {
-		font-size: 0.85rem;
+	&__date {
+		font-size: 0.78rem;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
-		color: $gray-500;
+		color: var(--tl-muted);
 		font-weight: 700;
 	}
 
-	.component-timeline__meta-text {
-		font-size: 0.85rem;
-		color: $gray-500;
+	&__meta-text {
+		font-size: 0.8rem;
+		color: var(--tl-muted);
 	}
 
-	.component-timeline__badge {
+	&__badge {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.3rem 0.6rem;
-		font-size: 0.75rem;
+		padding: 0.25rem 0.55rem;
+		font-size: 0.7rem;
 		font-weight: 600;
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
-		background: rgba($timeline-color, 0.06);
-		color: $timeline-color;
+		background: rgba(30, 41, 59, 0.06);
+		color: var(--tl-item-accent);
 	}
 
-	.component-timeline__title-group {
+	&__title-group {
 		display: flex;
 		align-items: flex-start;
-		gap: 1rem;
+		gap: 0.85rem;
 	}
 
-	.component-timeline__icon {
+	&__icon {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 42px;
-		height: 42px;
-		background: rgba($timeline-color, 0.06);
-		color: $timeline-color;
+		width: 38px;
+		height: 38px;
+		background: rgba(30, 41, 59, 0.06);
+		color: var(--tl-item-accent);
 		flex-shrink: 0;
-		font-size: 1.25rem;
+		font-size: 1.15rem;
 	}
 
-	.component-timeline__titles {
+	&__titles {
 		display: flex;
 		flex-direction: column;
 		gap: 0.2rem;
+		min-width: 0;
 	}
 
-	.component-timeline__title {
-		font-size: 1.2rem;
+	&__title {
+		font-size: 1.05rem;
 		margin: 0;
-		color: $timeline-color;
+		color: var(--tl-color);
+		line-height: 1.35;
 	}
 
-	.component-timeline__subtitle {
+	&__subtitle {
 		margin: 0;
-		color: rgba($timeline-color, 0.6);
-		font-size: 0.95rem;
+		color: var(--tl-muted);
+		font-size: 0.9rem;
 	}
 
-	.component-timeline__description {
+	&__description {
 		margin: 0;
-		color: $gray-600;
-		line-height: 1.65;
+		color: #475569;
+		line-height: 1.6;
+		font-size: 0.92rem;
 	}
 
-	.component-timeline__actions {
-		margin-top: 0.2rem;
+	&__tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	&__tag {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.2rem 0.55rem;
+		font-size: 0.72rem;
+		font-weight: 500;
+		letter-spacing: 0.02em;
+		background: rgba(30, 41, 59, 0.05);
+		color: var(--tl-muted);
+		border: 1px solid rgba(30, 41, 59, 0.06);
+	}
+
+	&__progress {
+		position: relative;
+		width: 100%;
+		height: 4px;
+		background: rgba(30, 41, 59, 0.06);
+		overflow: hidden;
+	}
+
+	&__progress-bar {
+		height: 100%;
+		background: var(--tl-item-accent);
+		transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	&__actions {
+		margin-top: 0.1rem;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
+	}
+}
+
+// ── Dot hover/focus interaction ──────────────────────────────────────────
+.component-timeline__item:hover .component-timeline__dot,
+.component-timeline__item:focus-within .component-timeline__dot,
+.component-timeline__dot:hover {
+	transform: translate(-50%, -50%) scale(1.2);
+	box-shadow:
+		0 0 0 calc(var(--tl-dot-ring) + 3px) rgba(30, 41, 59, 0.16),
+		0 14px 36px rgba(30, 41, 59, 0.22);
+}
+
+.component-timeline__item:hover .component-timeline__dot-ring,
+.component-timeline__item:focus-within .component-timeline__dot-ring,
+.component-timeline__dot:hover .component-timeline__dot-ring {
+	opacity: 0.35;
+	transform: scale(1.3);
+}
+
+// ── Active state: continuous pulse ───────────────────────────────────────
+.component-timeline__item--active .component-timeline__dot-pulse {
+	animation: tl-dot-pulse 2.2s ease-out infinite;
+}
+
+@keyframes tl-dot-pulse {
+	0% {
+		opacity: 0.5;
+		transform: scale(1);
+	}
+	70% {
+		opacity: 0;
+		transform: scale(2);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(2);
+	}
+}
+
+// ── Status colors ────────────────────────────────────────────────────────
+.component-timeline__item--completed {
+	--tl-item-accent: #475569;
+}
+
+.component-timeline__item--active {
+	--tl-item-accent: #1e293b;
+}
+
+.component-timeline__item--upcoming {
+	--tl-item-accent: rgba(30, 41, 59, 0.4);
+
+	.component-timeline__card {
+		opacity: 0.92;
+	}
+}
+
+.component-timeline__item--upcoming:hover .component-timeline__card {
+	opacity: 1;
+}
+
+// ── Card-level state polish ──────────────────────────────────────────────
+.component-timeline__item--active .component-timeline__card {
+	border-color: rgba(30, 41, 59, 0.18);
+	box-shadow: 0 18px 42px rgba(30, 41, 59, 0.12);
+}
+
+// ── Connector variants ───────────────────────────────────────────────────
+.component-timeline--connector-solid .component-timeline__line {
+	background: var(--tl-border);
+}
+
+.component-timeline--connector-dashed .component-timeline__line {
+	background: transparent;
+	background-image: repeating-linear-gradient(
+		to bottom,
+		var(--tl-faint) 0,
+		var(--tl-faint) 6px,
+		transparent 6px,
+		transparent 12px
+	);
+}
+
+// ── Card variants ────────────────────────────────────────────────────────
+.component-timeline--glass .component-timeline__card {
+	background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.82));
+	backdrop-filter: blur(14px);
+	border-color: rgba(30, 41, 59, 0.08);
+	box-shadow: 0 18px 44px rgba(30, 41, 59, 0.08);
+
+	@supports not (backdrop-filter: blur(14px)) {
+		background: #ffffff;
+	}
+}
+
+.component-timeline--outlined .component-timeline__card {
+	background: transparent;
+	border-width: 1.5px;
+	box-shadow: none;
+}
+
+.component-timeline--outlined .component-timeline__item:hover .component-timeline__card {
+	border-color: var(--tl-item-accent);
+	box-shadow: 0 8px 22px rgba(30, 41, 59, 0.06);
+}
+
+.component-timeline--elevated .component-timeline__card {
+	background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+	border: 1px solid rgba(30, 41, 59, 0.08);
+	box-shadow: 0 24px 56px rgba(30, 41, 59, 0.1);
+}
+
+.component-timeline--elevated .component-timeline__item:hover .component-timeline__card {
+	box-shadow: 0 30px 64px rgba(30, 41, 59, 0.16);
+}
+
+.component-timeline--minimal .component-timeline__card {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0.4rem 0;
+	gap: 0.6rem;
+}
+
+// ── Mobile-first: single column. Tablet+: alternating layout. ────────────
+@media (min-width: 768px) {
+	.component.component-timeline {
+		--tl-rail-offset: 50%;
+		padding: 2.5rem 0;
+	}
+
+	.component-timeline__items {
+		gap: 1.75rem;
+	}
+
+	.component-timeline__item {
+		min-height: 120px;
+		padding-left: 0;
+	}
+
+	.component-timeline__card {
+		width: calc(50% - 48px);
+		padding: 1.3rem 1.5rem;
+	}
+
+	.component-timeline__title {
+		font-size: 1.15rem;
+	}
+
+	.component-timeline__icon {
+		width: 42px;
+		height: 42px;
+		font-size: 1.25rem;
 	}
 
 	.component-timeline__item--left .component-timeline__card {
@@ -191,107 +417,33 @@ $timeline-color: $black !default;
 	.component-timeline__item--right .component-timeline__card {
 		margin-left: auto;
 	}
+}
 
-	.component-timeline__item:hover .component-timeline__dot::after,
-	.component-timeline__item[aria-current='step'] .component-timeline__dot::after {
-		opacity: 1;
+@media (min-width: 992px) {
+	.component-timeline__card {
+		width: min(460px, calc(50% - 56px));
 	}
 
-	$timeline-state-colors: (
-		completed: $gray-700,
-		active: $timeline-color,
-		upcoming: rgba($timeline-color, 0.35),
-	);
+	.component-timeline__items {
+		gap: 2rem;
+	}
+}
 
-	@each $state, $color in $timeline-state-colors {
-		.component-timeline__item--#{$state} {
-			.component-timeline__dot {
-				background: $color;
-				box-shadow:
-					0 0 0 6px rgba($color, 0.12),
-					0 10px 30px rgba($color, 0.14);
+// ── Touch targets and reduced motion ────────────────────────────────────
+@media (pointer: coarse) {
+	.component-timeline__dot {
+		--tl-dot-size: 20px;
+	}
+}
 
-				&::after {
-					background: radial-gradient(circle, rgba($color, 0.18) 0%, rgba($color, 0) 70%);
-				}
-			}
-
-			.component-timeline__card {
-				border-color: rgba($color, 0.18);
-				box-shadow: 0 18px 42px rgba($color, 0.1);
-			}
-
-			.component-timeline__badge {
-				background: rgba($color, 0.08);
-				color: $color;
-			}
-
-			.component-timeline__icon {
-				background: rgba($color, 0.08);
-				color: $color;
-			}
-
-			.component-timeline__date {
-				color: rgba($color, 0.75);
-			}
-		}
+@media (prefers-reduced-motion: reduce) {
+	.component.component-timeline,
+	.component.component-timeline * {
+		animation: none !important;
+		transition: none !important;
 	}
 
-	@media (max-width: 1024px) {
-		padding: 2.25rem 0;
-
-		.component-timeline__card {
-			width: calc(50% - 36px);
-		}
-	}
-
-	@media (max-width: 768px) {
-		padding: 1.75rem 0;
-
-		.component-timeline__line {
-			left: 18px;
-			transform: none;
-		}
-
-		.component-timeline__items {
-			gap: 1.75rem;
-		}
-
-		.component-timeline__item {
-			padding-left: 56px;
-		}
-
-		.component-timeline__dot {
-			left: 18px;
-			top: 1.1rem;
-		}
-
-		.component-timeline__card {
-			width: 100%;
-			padding: 1.2rem 1.4rem;
-		}
-
-		.component-timeline__item--left .component-timeline__card,
-		.component-timeline__item--right .component-timeline__card {
-			margin: 0;
-		}
-	}
-
-	@media (max-width: 520px) {
-		padding: 1.75rem 0;
-
-		.component-timeline__item {
-			padding-left: 52px;
-		}
-
-		.component-timeline__icon {
-			width: 34px;
-			height: 34px;
-			font-size: 1rem;
-		}
-
-		.component-timeline__title {
-			font-size: 1.05rem;
-		}
+	.component-timeline__item:hover {
+		transform: none;
 	}
 }

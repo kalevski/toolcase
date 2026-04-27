@@ -1,0 +1,39 @@
+.component.component-badge-row {
+	--bdr-bg-label: #1e293b;
+	--bdr-bg-value: #475569;
+	--bdr-color: #ffffff;
+	--bdr-accent: #1e293b;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.component-badge-row {
+	&__item {
+		display: inline-flex;
+		align-items: stretch;
+		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-decoration: none;
+		overflow: hidden;
+		line-height: 1.4;
+		transition: transform 0.15s ease;
+		&:hover { transform: translateY(-1px); }
+	}
+
+	&__label {
+		padding: 0.25rem 0.55rem;
+		background: var(--bdr-bg-label);
+		color: var(--bdr-color);
+	}
+
+	&__value {
+		padding: 0.25rem 0.55rem;
+		background: var(--bdr-accent);
+		color: var(--bdr-color);
+	}
+
+	&--sm .component-badge-row__item { font-size: 0.65rem; }
+	&--md .component-badge-row__item { font-size: 0.72rem; }
+}

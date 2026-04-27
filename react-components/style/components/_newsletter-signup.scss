@@ -1,0 +1,101 @@
+.component.component-newsletter-signup {
+	--ns-color: #1e293b;
+	--ns-muted: #64748b;
+	--ns-border: #e2e8f0;
+	--ns-accent: #1e293b;
+	--ns-success: #10b981;
+	--ns-error: #ef4444;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.component-newsletter-signup {
+	&__title {
+		margin: 0;
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: var(--ns-color);
+	}
+
+	&__description {
+		margin: 0;
+		color: var(--ns-muted);
+		font-size: 0.92rem;
+		line-height: 1.55;
+	}
+
+	&__form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	&__label {
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		font-weight: 700;
+		color: var(--ns-muted);
+	}
+
+	&__row {
+		display: flex;
+		gap: 0;
+	}
+
+	&__input {
+		flex: 1 1 auto;
+		padding: 0.65rem 0.85rem;
+		background: #ffffff;
+		border: 1px solid var(--ns-border);
+		font-size: 0.92rem;
+		color: var(--ns-color);
+		min-width: 0;
+
+		&:focus-visible {
+			outline: 2px solid var(--ns-accent);
+			outline-offset: -2px;
+		}
+	}
+
+	&__cta {
+		flex: 0 0 auto;
+		padding: 0.65rem 1.1rem;
+		background: var(--ns-accent);
+		color: #ffffff;
+		border: none;
+		font-weight: 600;
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: opacity 0.15s ease;
+
+		&:hover:not(:disabled) { opacity: 0.9; }
+		&:disabled { opacity: 0.6; cursor: not-allowed; }
+	}
+
+	&__privacy {
+		margin: 0;
+		font-size: 0.75rem;
+		color: var(--ns-muted);
+
+		a { color: inherit; text-decoration: underline; }
+	}
+
+	&__success {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.7rem 0.95rem;
+		background: rgba(16, 185, 129, 0.1);
+		color: var(--ns-success);
+		font-weight: 600;
+		font-size: 0.92rem;
+	}
+
+	&__error {
+		margin: 0;
+		font-size: 0.82rem;
+		color: var(--ns-error);
+	}
+}
