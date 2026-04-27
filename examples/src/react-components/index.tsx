@@ -70,7 +70,7 @@ import CoolButtonDemo from './CoolButtonDemo'
 import CoolNavDemo from './CoolNavDemo'
 import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 import DashboardCardDemo from './DashboardCardDemo'
-import { DashboardLayoutExample } from './DashboardLayoutExample'
+import { DashboardLayoutDemo } from './DashboardLayoutDemo'
 import DatePickerDemo from './DatePickerDemo'
 import DividerDemo from './DividerDemo'
 import { DrawerDemo } from './DrawerDemo'
@@ -267,7 +267,7 @@ export const examples: ExampleDef[] = [
     { key: 'stepper', category: 'Layout & Structure', element: <StepperDemo /> },
     { key: 'dashboard-card', category: 'Layout & Structure', element: <DashboardCardDemo /> },
     { key: 'resizable-panel', category: 'Layout & Structure', element: <ResizablePanelDemo /> },
-    { key: 'dashboard-layout', category: 'Layout & Structure', element: <DashboardLayoutExample /> },
+    { key: 'dashboard-layout', category: 'Layout & Structure', element: <DashboardLayoutDemo /> },
 
     // ── Navigation ───────────────────────────────────────────────────
     { key: 'breadcrumb', category: 'Navigation', element: <BreadcrumbDemo /> },

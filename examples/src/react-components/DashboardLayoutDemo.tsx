@@ -1,6 +1,6 @@
 import { DashboardLayout, Card, Heading, Text } from '@toolcase/react-components'
 
-export const DashboardLayoutExample = () => {
+export const DashboardLayoutDemo = () => {
 	return (
 		<DashboardLayout
 			brandComponent={
