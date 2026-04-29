@@ -34,7 +34,7 @@ html:has(.theme--neon) {
             0 0 20px rgba(74, 222, 128, 0.22);
     }
     .component-toast-item--error {
-        --ti-accent: #ff6188;
+        --ti-accent: var(--nd-red);
         --ti-accent-bg: rgba(255, 97, 136, 0.1);
         box-shadow:
             0 12px 32px rgba(0, 0, 0, 0.5),
@@ -92,7 +92,7 @@ html:has(.theme--neon) {
         --cm-muted: #9a8fc2;
         --cm-hover-bg: rgba(255, 43, 214, 0.12);
         --cm-active-bg: rgba(255, 43, 214, 0.18);
-        --cm-danger: #ff6188;
+        --cm-danger: var(--nd-red);
         --cm-shadow:
             0 12px 32px rgba(0, 0, 0, 0.4),
             0 0 20px rgba(255, 43, 214, 0.15);

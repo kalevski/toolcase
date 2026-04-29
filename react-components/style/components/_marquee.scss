@@ -1,0 +1,61 @@
+// ── Marquee ────────────────────────────────────────────────────────────────────
+.component.component-marquee {
+    --mq-bg: var(--tc-surface-muted);
+    --mq-color: var(--tc-text);
+    --mq-border: var(--tc-border);
+    --mq-gap: 32px;
+    --mq-pad-y: 12px;
+
+    overflow: hidden;
+    background: var(--mq-bg);
+    border-top: 1px solid var(--mq-border);
+    border-bottom: 1px solid var(--mq-border);
+    color: var(--mq-color);
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-sm);
+    font-weight: var(--tc-font-weight-medium);
+    letter-spacing: 0.04em;
+}
+
+.component-marquee__track {
+    display: flex;
+    width: max-content;
+    animation: component-marquee-tick linear infinite;
+    will-change: transform;
+}
+
+.component-marquee--right .component-marquee__track {
+    animation-direction: reverse;
+}
+
+.component-marquee--pause-hover:hover .component-marquee__track {
+    animation-play-state: paused;
+}
+
+.component-marquee__run {
+    display: flex;
+    gap: var(--mq-gap);
+    padding: var(--mq-pad-y) var(--mq-gap) var(--mq-pad-y) 0;
+    white-space: nowrap;
+    flex: none;
+}
+
+.component-marquee__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.component-marquee__sep {
+    color: var(--tc-text-faint);
+    align-self: center;
+}
+
+@keyframes component-marquee-tick {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-marquee__track { animation: none; }
+}

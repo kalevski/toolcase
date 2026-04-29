@@ -1,0 +1,86 @@
+// ── ScoringRules ───────────────────────────────────────────────────────────────
+.component.component-scoring-rules {
+    --sr-bg: var(--tc-surface);
+    --sr-border: var(--tc-border);
+    --sr-text: var(--tc-text);
+    --sr-muted: var(--tc-text-muted);
+    --sr-faint: var(--tc-text-faint);
+    --sr-accent: var(--tc-accent);
+    --sr-info: var(--tc-info);
+    --sr-success: var(--tc-success);
+    --sr-warning: var(--tc-warning);
+    --sr-danger: var(--tc-danger);
+
+    border: 1px solid var(--sr-border);
+    background: var(--sr-bg);
+}
+
+.component-scoring-rules__row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--sr-border);
+    align-items: center;
+
+    &:last-child { border-bottom: none; }
+}
+
+.component-scoring-rules__icon {
+    font-family: var(--tc-font-family-sans);
+    font-size: 1.25rem;
+    color: var(--sr-accent);
+    text-align: center;
+    line-height: 1;
+}
+
+.component-scoring-rules__title {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-md);
+    font-weight: var(--tc-font-weight-semibold);
+    color: var(--sr-text);
+    letter-spacing: 0.02em;
+}
+
+.component-scoring-rules__desc {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-sm);
+    color: var(--sr-muted);
+    margin-top: 2px;
+    line-height: 1.45;
+}
+
+.component-scoring-rules__pts {
+    text-align: right;
+    font-family: var(--tc-font-family-mono);
+    font-size: 1rem;
+    font-weight: var(--tc-font-weight-bold);
+    color: var(--sr-text);
+    letter-spacing: -0.01em;
+}
+
+.component-scoring-rules__suffix {
+    font-family: var(--tc-font-family-sans);
+    font-style: normal;
+    font-size: 0.75rem;
+    font-weight: var(--tc-font-weight-medium);
+    color: var(--sr-faint);
+    margin-left: 3px;
+}
+
+.component-scoring-rules__row--pink   .component-scoring-rules__icon { color: var(--sr-accent); }
+.component-scoring-rules__row--yellow .component-scoring-rules__icon { color: var(--sr-warning); }
+.component-scoring-rules__row--cyan   .component-scoring-rules__icon { color: var(--sr-info); }
+.component-scoring-rules__row--green  .component-scoring-rules__icon { color: var(--sr-success); }
+.component-scoring-rules__row--red    .component-scoring-rules__icon { color: var(--sr-danger); }
+
+@media (max-width: 576px) {
+    .component-scoring-rules__row {
+        grid-template-columns: 32px 1fr;
+        padding: 14px 16px;
+    }
+    .component-scoring-rules__pts {
+        grid-column: 1 / -1;
+        text-align: right;
+    }
+}

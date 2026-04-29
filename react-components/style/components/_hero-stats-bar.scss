@@ -1,0 +1,80 @@
+// ── HeroStatsBar ───────────────────────────────────────────────────────────────
+.component.component-hero-stats-bar {
+    --hsb-bg: var(--tc-surface);
+    --hsb-border: var(--tc-border);
+    --hsb-text: var(--tc-text);
+    --hsb-muted: var(--tc-text-muted);
+    --hsb-faint: var(--tc-text-faint);
+    --hsb-accent: var(--tc-accent);
+    --hsb-danger: var(--tc-danger);
+
+    display: grid;
+    border: 1px solid var(--hsb-border);
+    background: var(--hsb-bg);
+    margin-top: 16px;
+}
+
+.component-hero-stats-bar__cell {
+    padding: 18px 16px;
+    border-right: 1px solid var(--hsb-border);
+    text-align: center;
+
+    &:last-child { border-right: none; }
+}
+
+.component-hero-stats-bar__key {
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.7rem;
+    font-weight: var(--tc-font-weight-semibold);
+    color: var(--hsb-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.component-hero-stats-bar__value {
+    font-family: var(--tc-font-family-mono);
+    font-size: 2.5rem;
+    font-weight: var(--tc-font-weight-bold);
+    line-height: 1;
+    color: var(--hsb-text);
+    margin-top: 8px;
+    letter-spacing: -0.02em;
+}
+
+.component-hero-stats-bar__unit {
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.7rem;
+    font-weight: var(--tc-font-weight-medium);
+    color: var(--hsb-faint);
+    margin-left: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.component-hero-stats-bar__cell--zero .component-hero-stats-bar__value {
+    color: var(--hsb-danger);
+}
+
+@media (max-width: 768px) {
+    .component-hero-stats-bar {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .component-hero-stats-bar__cell {
+        border-bottom: 1px solid var(--hsb-border);
+
+        &:nth-last-child(-n+2) { border-bottom: none; }
+        &:nth-child(2n) { border-right: none; }
+    }
+}
+
+@media (max-width: 480px) {
+    .component-hero-stats-bar {
+        grid-template-columns: 1fr !important;
+    }
+    .component-hero-stats-bar__cell {
+        border-right: none;
+        border-bottom: 1px solid var(--hsb-border);
+
+        &:last-child { border-bottom: none; }
+    }
+}

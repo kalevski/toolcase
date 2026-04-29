@@ -1,0 +1,89 @@
+// ── CountdownTimer ─────────────────────────────────────────────────────────────
+.component.component-countdown {
+    --cd-color: var(--tc-text);
+    --cd-color-lead: var(--tc-accent);
+    --cd-bg: var(--tc-surface);
+    --cd-border: var(--tc-border);
+    --cd-muted: var(--tc-text-muted);
+    --cd-pad-x: 20px;
+    --cd-pad-y: 16px;
+    --cd-gap: 16px;
+    --cd-num-size: 2.5rem;
+    --cd-unit-size: 0.7rem;
+
+    text-align: center;
+}
+
+.component-countdown__label {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-sm);
+    font-weight: var(--tc-font-weight-semibold);
+    color: var(--tc-text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.component-countdown__grid {
+    display: inline-grid;
+    gap: var(--cd-gap);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(96px, 1fr);
+}
+
+.component-countdown__cell {
+    border: 1px solid var(--cd-border);
+    padding: var(--cd-pad-y) var(--cd-pad-x);
+    background: var(--cd-bg);
+    min-width: 96px;
+}
+
+.component-countdown__num {
+    font-family: var(--tc-font-family-mono);
+    font-size: var(--cd-num-size);
+    font-weight: var(--tc-font-weight-bold);
+    color: var(--cd-color);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.component-countdown__cell--lead .component-countdown__num {
+    color: var(--cd-color-lead);
+}
+
+.component-countdown__unit {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--cd-unit-size);
+    font-weight: var(--tc-font-weight-semibold);
+    color: var(--cd-muted);
+    margin-top: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.component-countdown__sub {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-sm);
+    margin-top: 16px;
+    color: var(--tc-text-muted);
+}
+
+.component-countdown--compact {
+    --cd-pad-x: 12px;
+    --cd-pad-y: 10px;
+    --cd-num-size: 1.5rem;
+    --cd-unit-size: 0.65rem;
+    --cd-gap: 10px;
+}
+
+@media (max-width: 576px) {
+    .component-countdown__grid {
+        grid-auto-columns: minmax(64px, 1fr);
+        gap: 8px;
+    }
+    .component-countdown__cell {
+        min-width: 0;
+        padding: 12px 8px;
+    }
+    .component-countdown__num { font-size: 1.75rem; }
+}

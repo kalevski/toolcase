@@ -1,0 +1,100 @@
+// ── ChipGroup ──────────────────────────────────────────────────────────────────
+.component.component-chip-group {
+    --cg-bg: var(--tc-surface);
+    --cg-bg-active: var(--tc-accent);
+    --cg-border: var(--tc-border);
+    --cg-border-strong: var(--tc-border-strong);
+    --cg-text: var(--tc-text);
+    --cg-muted: var(--tc-text-muted);
+    --cg-faint: var(--tc-text-faint);
+    --cg-accent: var(--tc-accent);
+    --cg-accent-contrast: var(--tc-accent-contrast);
+}
+
+.component-chip-group--bordered {
+    border: 1px solid var(--cg-border);
+    background: var(--cg-bg);
+    padding: 20px;
+}
+
+.component-chip-group__title {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-md);
+    font-weight: var(--tc-font-weight-semibold);
+    color: var(--cg-text);
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+}
+
+.component-chip-group__sub {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-sm);
+    color: var(--cg-muted);
+    margin-bottom: 14px;
+}
+
+.component-chip-group__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.component-chip-group__chip {
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.75rem;
+    font-weight: var(--tc-font-weight-medium);
+    letter-spacing: 0.04em;
+    padding: 6px 10px;
+    border: 1px solid var(--cg-border);
+    background: var(--cg-bg);
+    color: var(--cg-muted);
+    cursor: pointer;
+    transition: color var(--tc-transition-fast),
+                border-color var(--tc-transition-fast),
+                background var(--tc-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    &:hover:not(:disabled) {
+        color: var(--cg-text);
+        border-color: var(--cg-border-strong);
+    }
+
+    &:focus-visible {
+        outline: var(--tc-focus-outline);
+        outline-offset: var(--tc-focus-offset);
+    }
+}
+
+.component-chip-group__chip--on {
+    border-color: var(--cg-accent);
+    background: var(--cg-accent);
+    color: var(--cg-accent-contrast);
+
+    &:hover:not(:disabled) {
+        color: var(--cg-accent-contrast);
+        border-color: var(--cg-accent);
+    }
+}
+
+.component-chip-group__chip--off,
+.component-chip-group__chip:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.component-chip-group__chip-count {
+    font-family: var(--tc-font-family-mono);
+    font-size: 0.7rem;
+    color: currentColor;
+    opacity: 0.7;
+    letter-spacing: 0;
+}
+
+@media (pointer: coarse) {
+    .component-chip-group__chip {
+        min-height: 44px;
+        padding: 10px 14px;
+    }
+}

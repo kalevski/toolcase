@@ -163,6 +163,27 @@ import { VirtualListDemo } from './VirtualListDemo'
 import VisuallyHiddenDemo from './VisuallyHiddenDemo'
 import WelcomeGuideDemo from './WelcomeGuideDemo'
 
+// Game Jam / Arcade demos
+import MarqueeDemo from './MarqueeDemo'
+import CountdownTimerDemo from './CountdownTimerDemo'
+import CycleWheelDemo from './CycleWheelDemo'
+import SprintChainDemo from './SprintChainDemo'
+import BriefCardDemo from './BriefCardDemo'
+import StateMachineDemo from './StateMachineDemo'
+import ChipGroupDemo from './ChipGroupDemo'
+import PhaseGridDemo from './PhaseGridDemo'
+import ScoringRulesDemo from './ScoringRulesDemo'
+import TierLadderDemo from './TierLadderDemo'
+import LeaderboardDemo from './LeaderboardDemo'
+import LeaderboardTrendDemo from './LeaderboardTrendDemo'
+import RankCellDemo from './RankCellDemo'
+import StampDemo from './StampDemo'
+import GameShowcaseCardDemo from './GameShowcaseCardDemo'
+import LiveFeedDemo from './LiveFeedDemo'
+import PulseIndicatorDemo from './PulseIndicatorDemo'
+import SectionFlagDemo from './SectionFlagDemo'
+import HeroStatsBarDemo from './HeroStatsBarDemo'
+
 export type ExampleCategory =
     | 'Typography & Decoration'
     | 'Inputs & Forms'
@@ -176,6 +197,7 @@ export type ExampleCategory =
     | 'Identity & People'
     | 'Marketing & Landing'
     | 'Code & Docs'
+    | 'Game Jam / Arcade'
 
 export type ExampleDef = {
     key: string
@@ -196,6 +218,7 @@ export const categories: ExampleCategory[] = [
     'Identity & People',
     'Marketing & Landing',
     'Code & Docs',
+    'Game Jam / Arcade',
 ]
 
 // Demos are grouped by purpose. Within each category, items are roughly
@@ -386,4 +409,25 @@ export const examples: ExampleDef[] = [
     { key: 'json-editor', category: 'Code & Docs', element: <JSONEditorDemo /> },
     { key: 'bitmap-font-generator', category: 'Code & Docs', element: <BitmapFontGeneratorDemo /> },
     { key: 'node-editor', category: 'Code & Docs', element: <NodeEditorDemo /> },
+
+    // ── Game Jam / Arcade ────────────────────────────────────────────
+    { key: 'section-flag', category: 'Game Jam / Arcade', element: <SectionFlagDemo /> },
+    { key: 'pulse-indicator', category: 'Game Jam / Arcade', element: <PulseIndicatorDemo /> },
+    { key: 'rank-cell', category: 'Game Jam / Arcade', element: <RankCellDemo /> },
+    { key: 'leaderboard-trend', category: 'Game Jam / Arcade', element: <LeaderboardTrendDemo /> },
+    { key: 'stamp', category: 'Game Jam / Arcade', element: <StampDemo /> },
+    { key: 'marquee', category: 'Game Jam / Arcade', element: <MarqueeDemo /> },
+    { key: 'hero-stats-bar', category: 'Game Jam / Arcade', element: <HeroStatsBarDemo /> },
+    { key: 'countdown-timer', category: 'Game Jam / Arcade', element: <CountdownTimerDemo /> },
+    { key: 'sprint-chain', category: 'Game Jam / Arcade', element: <SprintChainDemo /> },
+    { key: 'state-machine', category: 'Game Jam / Arcade', element: <StateMachineDemo /> },
+    { key: 'chip-group', category: 'Game Jam / Arcade', element: <ChipGroupDemo /> },
+    { key: 'tier-ladder', category: 'Game Jam / Arcade', element: <TierLadderDemo /> },
+    { key: 'scoring-rules', category: 'Game Jam / Arcade', element: <ScoringRulesDemo /> },
+    { key: 'brief-card', category: 'Game Jam / Arcade', element: <BriefCardDemo /> },
+    { key: 'phase-grid', category: 'Game Jam / Arcade', element: <PhaseGridDemo /> },
+    { key: 'cycle-wheel', category: 'Game Jam / Arcade', element: <CycleWheelDemo /> },
+    { key: 'live-feed', category: 'Game Jam / Arcade', element: <LiveFeedDemo /> },
+    { key: 'leaderboard', category: 'Game Jam / Arcade', element: <LeaderboardDemo /> },
+    { key: 'game-showcase-card', category: 'Game Jam / Arcade', element: <GameShowcaseCardDemo /> },
 ]

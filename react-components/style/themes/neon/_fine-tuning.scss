@@ -156,7 +156,7 @@
             color: #2b1e00 !important;
         }
         &.bg-danger {
-            background: #ff6188 !important;
+            background: var(--nd-red) !important;
             color: #2b0010 !important;
         }
     }

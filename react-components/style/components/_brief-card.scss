@@ -1,0 +1,102 @@
+// ── BriefCard ──────────────────────────────────────────────────────────────────
+.component.component-brief-card {
+    --bc-bg: var(--tc-surface);
+    --bc-border: var(--tc-border);
+    --bc-text: var(--tc-text);
+    --bc-muted: var(--tc-text-muted);
+    --bc-faint: var(--tc-text-faint);
+    --bc-easy: var(--tc-info);
+    --bc-medium: var(--tc-warning);
+    --bc-hard: var(--tc-danger);
+
+    --bc-accent: var(--bc-easy);
+
+    border: 1px solid var(--bc-border);
+    border-top: 3px solid var(--bc-accent);
+    padding: 24px 22px;
+    background: var(--bc-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+    min-height: 320px;
+    position: relative;
+    transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+}
+
+.component-brief-card--medium { --bc-accent: var(--bc-medium); }
+.component-brief-card--hard   { --bc-accent: var(--bc-hard); }
+
+.component-brief-card--interactive {
+    cursor: pointer;
+
+    &:hover {
+        box-shadow: var(--tc-shadow-md);
+    }
+
+    &:focus-visible {
+        outline: var(--tc-focus-outline);
+        outline-offset: var(--tc-focus-offset);
+    }
+}
+
+.component-brief-card__icon {
+    font-family: var(--tc-font-family-sans);
+    font-size: 1.75rem;
+    color: var(--bc-accent);
+    margin: 4px 0;
+}
+
+.component-brief-card__id {
+    font-family: var(--tc-font-family-mono);
+    font-size: 0.7rem;
+    font-weight: var(--tc-font-weight-medium);
+    color: var(--bc-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.component-brief-card__diff {
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.7rem;
+    font-weight: var(--tc-font-weight-semibold);
+    letter-spacing: 0.1em;
+    color: var(--bc-accent);
+    align-self: center;
+    padding: 4px 10px;
+    border: 1px solid var(--bc-accent);
+    text-transform: uppercase;
+}
+
+.component-brief-card__title {
+    font-family: var(--tc-font-family-sans);
+    font-size: 1.125rem;
+    font-weight: var(--tc-font-weight-bold);
+    color: var(--bc-text);
+    line-height: 1.35;
+    margin-top: 4px;
+}
+
+.component-brief-card__body {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-md);
+    color: var(--bc-muted);
+    line-height: 1.5;
+}
+
+.component-brief-card__meta {
+    margin-top: auto;
+    font-family: var(--tc-font-family-mono);
+    font-size: 0.7rem;
+    color: var(--bc-faint);
+    letter-spacing: 0.08em;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--bc-border);
+    padding-top: 12px;
+    text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-brief-card { transition: none; }
+}

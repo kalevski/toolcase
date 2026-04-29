@@ -1,0 +1,160 @@
+// ── Leaderboard ────────────────────────────────────────────────────────────────
+.component.component-leaderboard {
+    --lb-bg: var(--tc-surface);
+    --lb-bg-hover: var(--tc-surface-hover);
+    --lb-bg-me: var(--tc-surface-muted);
+    --lb-border: var(--tc-border);
+    --lb-text: var(--tc-text);
+    --lb-muted: var(--tc-text-muted);
+    --lb-faint: var(--tc-text-faint);
+    --lb-accent: var(--tc-accent);
+    --lb-info: var(--tc-info);
+    --lb-warning: var(--tc-warning);
+    --lb-success: var(--tc-success);
+    --lb-danger: var(--tc-danger);
+
+    border: 1px solid var(--lb-border);
+    background: var(--lb-bg);
+}
+
+.component-leaderboard__head {
+    display: grid;
+    grid-template-columns: 50px 1fr 110px 70px 80px 100px;
+    gap: 14px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--lb-border);
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.7rem;
+    font-weight: var(--tc-font-weight-semibold);
+    color: var(--lb-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.component-leaderboard__row {
+    display: grid;
+    grid-template-columns: 50px 1fr 110px 70px 80px 100px;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--lb-border);
+    align-items: center;
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-md);
+    transition: background var(--tc-transition-fast);
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: var(--lb-bg-hover); }
+}
+
+.component-leaderboard__row--me {
+    background: var(--lb-bg-me);
+    border-left: 2px solid var(--lb-accent);
+    padding-left: 18px;
+}
+
+.component-leaderboard__name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.component-leaderboard__avatar {
+    width: 28px;
+    height: 28px;
+    background: var(--lb-bg-me);
+    border: 1px solid var(--lb-border);
+    color: var(--lb-text);
+    display: grid;
+    place-items: center;
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.7rem;
+    font-weight: var(--tc-font-weight-bold);
+    flex: none;
+}
+
+.component-leaderboard__row--top1 .component-leaderboard__avatar {
+    border-color: var(--lb-warning);
+    color: var(--lb-warning);
+}
+
+.component-leaderboard__row--top2 .component-leaderboard__avatar {
+    border-color: var(--lb-info);
+    color: var(--lb-info);
+}
+
+.component-leaderboard__row--top3 .component-leaderboard__avatar {
+    border-color: var(--lb-accent);
+    color: var(--lb-accent);
+}
+
+.component-leaderboard__handle {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-sm);
+    color: var(--lb-faint);
+    line-height: 1.25;
+
+    b {
+        font-family: var(--tc-font-family-sans);
+        font-size: var(--tc-font-md);
+        font-weight: var(--tc-font-weight-semibold);
+        color: var(--lb-text);
+    }
+}
+
+.component-leaderboard__sub {
+    margin-top: 2px;
+}
+
+.component-leaderboard__tier {
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.65rem;
+    font-weight: var(--tc-font-weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border: 1px solid currentColor;
+    color: var(--lb-muted);
+    width: fit-content;
+    display: inline-block;
+}
+
+.component-leaderboard__tier--cyan   { color: var(--lb-info); }
+.component-leaderboard__tier--yellow { color: var(--lb-warning); }
+.component-leaderboard__tier--pink   { color: var(--lb-accent); }
+.component-leaderboard__tier--red    { color: var(--lb-danger); }
+.component-leaderboard__tier--gray   { color: var(--lb-muted); }
+
+.component-leaderboard__spr {
+    font-family: var(--tc-font-family-mono);
+    color: var(--lb-muted);
+    text-align: center;
+}
+
+.component-leaderboard__trend {
+    font-family: var(--tc-font-family-mono);
+    font-size: 0.8rem;
+    color: var(--lb-faint);
+}
+
+.component-leaderboard__pts {
+    font-family: var(--tc-font-family-mono);
+    font-size: var(--tc-font-md);
+    font-weight: var(--tc-font-weight-bold);
+    color: var(--lb-text);
+    text-align: right;
+    letter-spacing: -0.01em;
+}
+
+@media (max-width: 768px) {
+    .component-leaderboard__head,
+    .component-leaderboard__row {
+        grid-template-columns: 40px 1fr 80px;
+        font-size: var(--tc-font-sm);
+    }
+    .component-leaderboard__head > div:nth-child(n+4),
+    .component-leaderboard__row > div:nth-child(n+4) {
+        display: none;
+    }
+}

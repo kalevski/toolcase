@@ -1,0 +1,36 @@
+// ── PulseIndicator ─────────────────────────────────────────────────────────────
+.component.component-pulse-indicator {
+    --pi-color: var(--tc-text);
+
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--pi-color);
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.75rem;
+    font-weight: var(--tc-font-weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.component-pulse-indicator__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: component-pulse-indicator-blink 1.2s steps(2) infinite;
+    display: inline-block;
+    flex: none;
+}
+
+.component-pulse-indicator--paused .component-pulse-indicator__dot {
+    animation: none;
+}
+
+@keyframes component-pulse-indicator-blink {
+    50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-pulse-indicator__dot { animation: none; }
+}

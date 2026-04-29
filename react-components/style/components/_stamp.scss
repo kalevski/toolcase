@@ -1,0 +1,33 @@
+// ── Stamp ──────────────────────────────────────────────────────────────────────
+.component.component-stamp {
+    --st-bg: var(--tc-accent);
+    --st-color: var(--tc-accent-contrast);
+
+    font-family: var(--tc-font-family-sans);
+    font-size: 0.65rem;
+    font-weight: var(--tc-font-weight-semibold);
+    background: var(--st-bg);
+    color: var(--st-color);
+    padding: 4px 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.component-stamp--pink   { --st-bg: var(--tc-accent); --st-color: var(--tc-accent-contrast); }
+.component-stamp--yellow { --st-bg: var(--tc-warning); --st-color: var(--tc-text-inverse); }
+.component-stamp--red    { --st-bg: var(--tc-danger); --st-color: var(--tc-text-inverse); }
+.component-stamp--cyan   { --st-bg: var(--tc-info); --st-color: var(--tc-text-inverse); }
+.component-stamp--green  { --st-bg: var(--tc-success); --st-color: var(--tc-text-inverse); }
+
+.component-stamp--tl,
+.component-stamp--tr,
+.component-stamp--bl,
+.component-stamp--br {
+    position: absolute;
+}
+
+.component-stamp--tl { top: 8px; left: 8px; }
+.component-stamp--tr { top: 8px; right: 8px; }
+.component-stamp--bl { bottom: 8px; left: 8px; }
+.component-stamp--br { bottom: 8px; right: 8px; }

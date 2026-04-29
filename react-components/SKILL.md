@@ -36,10 +36,10 @@ Available themes:
 | `theme theme--neon` | Dark navy/purple surfaces, magenta + cyan accents, glowing focus, uppercase mono eyebrows |
 | `theme theme--neon theme--neon--scanlines` | Adds a CRT scanline overlay on top of `theme--neon` |
 
-**Font expectations for `theme--neon`:** loads best with `Orbitron` (display) and `Ubuntu Mono` (mono) in the page. The theme falls back to `JetBrains Mono` / system monospace when they're absent — the look degrades gracefully but loses some of its arcade feel. Recommended:
+**Font expectations for `theme--neon`:** the arcade voice loads best with `Press Start 2P` (pixel — headings, labels, buttons, numerals), `VT323` (flavor — body copy, large flavor numerals) and `DM Mono` (mono — code, table cells, timestamps). Falls back to `Orbitron` / `Ubuntu Mono` / system monospace when absent — the look degrades gracefully but loses the arcade feel. Note: `Press Start 2P` and `VT323` are latin-only; Cyrillic / non-latin scripts fall through to system monospace. `Press Start 2P` only ships at weight 400 — any `font-weight: 600/700` rule will be faked by the browser and break the pixel grid; rely on size + uppercase + letter-spacing for emphasis instead. Recommended:
 
 ```html
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 ```
 
 **Adding a new theme:** drop `style/themes/_{name}.scss` next to the others and `@use` it from `style/themes/index.scss`. Scope every rule under `.theme.theme--{name}` (or `.theme--{name}`) and override the library's CSS custom properties (`--tc-*`, per-component `--{abbr}-*`) plus Bootstrap tokens (`--bs-*`) as needed. The neon partial is a worked example.
@@ -161,6 +161,26 @@ Available themes:
   - [MultiCardSelect](#multicardselect)
   - [Timeline](#timeline)
   - [ToggleCard](#togglecard)
+- [Game Jam / Arcade](#game-jam--arcade)
+  - [BriefCard](#briefcard)
+  - [ChipGroup](#chipgroup)
+  - [CountdownTimer](#countdowntimer)
+  - [CycleWheel](#cyclewheel)
+  - [GameShowcaseCard](#gameshowcasecard)
+  - [HeroStatsBar](#herostatsbar)
+  - [Leaderboard](#leaderboard)
+  - [LeaderboardTrend](#leaderboardtrend)
+  - [LiveFeed](#livefeed)
+  - [Marquee](#marquee)
+  - [PhaseGrid](#phasegrid)
+  - [PulseIndicator](#pulseindicator)
+  - [RankCell](#rankcell)
+  - [ScoringRules](#scoringrules)
+  - [SectionFlag](#sectionflag)
+  - [SprintChain](#sprintchain)
+  - [Stamp](#stamp)
+  - [StateMachine](#statemachine)
+  - [TierLadder](#tierladder)
 
 ---
 
@@ -3303,4 +3323,394 @@ Layout wrapper for chart content with header, actions slot, loading spinner, and
 <Chart chart={{ type: 'container', title: 'Overview', loading: isLoading }}>
   <BarChart ... />
 </Chart>
+```
+
+---
+
+## Game Jam / Arcade
+
+Components built for retro / arcade-style sprint hubs. Use the dark "neon" theme palette (pink / yellow / cyan / dashed borders / pixel fonts) — see `gamejam_template/styleguide.md`. Loaded fonts expected: `Press Start 2P`, `VT323`, `DM Mono`.
+
+### BriefCard
+
+Centered "challenge" card with icon, ID, difficulty pill, title, body, footer meta. Difficulty drives accent color across border, title, and pill.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `id` | `string` | ✅ | Identifier label, e.g. `BRIEF · 047-A` |
+| `icon` | `ReactNode` | ❌ | Decorative glyph above ID |
+| `difficulty` | `'easy' \| 'medium' \| 'hard'` | ✅ | Accent palette |
+| `title` | `ReactNode` | ✅ | Brief title |
+| `body` | `ReactNode` | ✅ | Description |
+| `metaLeft` | `ReactNode` | ❌ | Footer left text |
+| `metaRight` | `ReactNode` | ❌ | Footer right text |
+| `onClick` | `() => void` | ❌ | Makes the whole card a button |
+
+```tsx
+<BriefCard
+    id="BRIEF · 047-A"
+    icon="▼"
+    difficulty="easy"
+    title="COOPERATE WITHOUT SPEAKING"
+    body="Two or more players must achieve something together — design forbids verbal or text communication."
+    metaLeft="↳ 14 ATTESTS"
+    metaRight="0 FLAGS"
+/>
+```
+
+### ChipGroup
+
+Wrapping container of toggleable chips. Each item supports `active`, `disabled`, and `count` suffix.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `ReactNode` | ❌ | Group title |
+| `subtitle` | `ReactNode` | ❌ | Group subtitle |
+| `items` | `ChipGroupItem[]` | ✅ | `{ id, label, active?, disabled?, count? }` |
+| `onToggle` | `(id: string) => void` | ❌ | Controlled toggle |
+| `border` | `boolean` | ❌ | Wraps in dashed surface card |
+
+```tsx
+<ChipGroup
+    title="ALLOWED GENRES"
+    subtitle="SprintPool · 8 of 14 enabled"
+    border
+    items={[
+        { id: 'rogue', label: 'ROGUELIKE', active: true, count: 11 },
+        { id: 'puzzle', label: 'PUZZLE', active: true, count: 9 },
+        { id: 'rts', label: 'RTS', disabled: true },
+    ]}
+    onToggle={(id) => console.log(id)}
+/>
+```
+
+### CountdownTimer
+
+DD/HH/MM/SS grid that counts down to a target Date. Pauses interval when tab hidden.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `target` | `Date \| number` | ✅ | Target time (epoch ms or `Date`) |
+| `units` | `('days'\|'hours'\|'minutes'\|'seconds')[]` | ❌ | Visible cells; default all four |
+| `label` | `ReactNode` | ❌ | Top label |
+| `subLabel` | `ReactNode` | ❌ | Footer line |
+| `onExpire` | `() => void` | ❌ | Fires when target reached |
+| `compact` | `boolean` | ❌ | Smaller variant |
+
+```tsx
+<CountdownTimer
+    target={Date.now() + 11 * 86400000}
+    label="« DROP DEADLINE — SPRINT 047 ENDS IN »"
+    subLabel="…then sprint 048 auto-rolls."
+/>
+```
+
+### CycleWheel
+
+Rotating SVG ring with phase labels and a center "now" core. Decorative; pause-able.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `phases` | `string[]` | ✅ | Labels around the ring |
+| `currentIndex` | `number` | ✅ | Index of the active phase |
+| `centerLabel` | `ReactNode` | ❌ | Top line in core |
+| `centerValue` | `ReactNode` | ✅ | Big numeral / id |
+| `centerPill` | `ReactNode` | ❌ | Status pill |
+| `centerSub` | `ReactNode` | ❌ | Sub line below pill |
+| `spinSeconds` | `number` | ❌ | Full rotation in seconds (default 60) |
+| `paused` | `boolean` | ❌ | Stops rotation |
+
+```tsx
+<CycleWheel
+    phases={['ROLL', 'BUILD', 'ATTEST', 'SHIP', 'CLOSE']}
+    currentIndex={1}
+    centerLabel="↻ NOW · СПРИНТ"
+    centerValue="047"
+    centerPill="OPEN"
+    centerSub={<>DAY <b>03</b> / 14</>}
+/>
+```
+
+### GameShowcaseCard
+
+Game preview card with art slot, corner stamps, meta line, title, pitch, tags, and compliance dots.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `art` | `ReactNode` | ❌ | Image / preview slot |
+| `artPlaceholder` | `ReactNode` | ❌ | Placeholder when no `art` |
+| `stamps` | `{ label, color? }[]` | ❌ | Top-left corner badges |
+| `metaLeft` | `ReactNode` | ❌ | Top meta line left |
+| `metaRight` | `ReactNode` | ❌ | Top meta line right |
+| `title` | `ReactNode` | ✅ | Game title |
+| `pitch` | `ReactNode` | ✅ | One-line pitch |
+| `tags` | `string[]` | ❌ | Footer tags |
+| `compliance` | `('yes'\|'no'\|'flag')[]` | ❌ | Compliance dots |
+| `onClick` | `() => void` | ❌ | Whole card click |
+
+```tsx
+<GameShowcaseCard
+    stamps={[{ label: 'FEATURED · +50', color: 'yellow' }]}
+    metaLeft="VEX.KBD · #047-S12"
+    metaRight="SPRINT 5/5"
+    title="HUSH TOWER"
+    pitch="A two-player co-op stacker where speaking aloud knocks the tower over."
+    tags={['puzzle', 'silence']}
+    compliance={['yes', 'yes', 'no']}
+/>
+```
+
+### HeroStatsBar
+
+Equal-width bordered cells with small uppercase key + huge VT323 value + small inline unit.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `stats` | `HeroStat[]` | ✅ | `{ key, value, unit?, zero? }` |
+
+```tsx
+<HeroStatsBar stats={[
+    { key: 'CYCLE', value: 14, unit: 'DAYS' },
+    { key: 'SHIPPED', value: 46, unit: 'SPRINTS' },
+    { key: 'OFF-SEASON', value: 0, unit: 'EVER', zero: true },
+]} />
+```
+
+### Leaderboard
+
+Ranked dev table: rank, avatar+handle, tier badge, sprints, 7-day trend, points. Highlight rows via `highlight: true`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `entries` | `LeaderboardEntry[]` | ✅ | Row data |
+| `columns` | `{ rank?, dev?, tier?, sprints?, trend?, points? }` | ❌ | Header label overrides |
+
+`LeaderboardEntry`: `{ id, rank, displayName, handle?, avatar?, tierLabel?, tierColor?, sprints?, trendValue?, trendDirection?, points, highlight? }`
+
+```tsx
+<Leaderboard entries={[
+    { id: '1', rank: 1, displayName: 'vex.kbd', handle: '@vex_kbd', avatar: 'VK', tierLabel: 'ARCHITECT', tierColor: 'red', sprints: 22, trendValue: 84, trendDirection: 'up', points: '2,148' },
+    { id: 'me', rank: 7, displayName: 'YOU', avatar: 'YO', tierLabel: 'JOURNEY', tierColor: 'yellow', sprints: 5, trendValue: 63, trendDirection: 'up', points: 412, highlight: true },
+]} />
+```
+
+### LeaderboardTrend
+
+Inline trend pill with up / down / flat arrow.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `value` | `ReactNode` | ✅ | Trend value (e.g. `84`) |
+| `direction` | `'up' \| 'down' \| 'flat'` | ✅ | Arrow + color |
+
+```tsx
+<LeaderboardTrend value={84} direction="up" />
+```
+
+### LiveFeed
+
+Log-style timestamped event list. Header has optional "REC" pulsing indicator.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `events` | `FeedEvent[]` | ✅ | `{ id, time, actor?, message, tags? }` |
+| `header` | `ReactNode` | ❌ | Title (default `// LIVE FEED`) |
+| `recording` | `boolean` | ❌ | Pulses REC dot |
+| `maxRows` | `number` | ❌ | Cap visible rows |
+| `autoScroll` | `boolean` | ❌ | Scroll to top on update |
+
+`FeedEvent.tags`: `{ label, variant?: 'default' \| 'acid' \| 'red' \| 'cyan' }[]`
+
+```tsx
+<LiveFeed
+    recording
+    events={[
+        { id: '1', time: '14:42', actor: 'vex.kbd', message: <>auto-featured <i>Hush Tower</i> · 27 unique reactors</>, tags: [{ label: '+50', variant: 'acid' }] },
+        { id: '2', time: '14:31', actor: 'aft.fern', message: <>registered <i>Soft Static</i> in sprint 047</>, tags: [{ label: 'REGISTER' }] },
+    ]}
+/>
+```
+
+### Marquee
+
+Continuously scrolling banner. Duplicates content twice for seamless loop.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `ReactNode[]` | ✅ | Items rendered with separator between |
+| `separator` | `ReactNode` | ❌ | Default `↻` |
+| `speed` | `number` | ❌ | Loop seconds (default 50) |
+| `direction` | `'left' \| 'right'` | ❌ | Scroll direction |
+| `pauseOnHover` | `boolean` | ❌ | Pauses on hover |
+
+```tsx
+<Marquee items={[
+    <>« THE JAM <span className="pink">NEVER STOPS</span> »</>,
+    'EVERY 14 DAYS',
+    'SPRINT 047 OPEN',
+]} />
+```
+
+### PhaseGrid
+
+Grid of phase cells with ordinal number, title, body, side tag, optional command. Status drives styling.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `phases` | `PhaseItem[]` | ✅ | `{ num, title, body, tag?, command?, status? }` |
+| `columns` | `number` | ❌ | Default 4 |
+
+`status ∈ 'done' | 'lit' | 'upcoming' | 'continuous'`.
+
+```tsx
+<PhaseGrid phases={[
+    { num: '01', title: 'SPRINT OPEN', body: 'Fresh Sprint row in state announce.', tag: 'DONE ✓', command: '/sprint open', status: 'done' },
+    { num: '04', title: 'REGISTER · SUBMIT', body: 'Devs register games, submit builds.', tag: '▸ NOW', command: '/register-game', status: 'lit' },
+]} />
+```
+
+### PulseIndicator
+
+Inline blinking dot + label ("LIVE · 142 ONLINE"). Color customizable.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `label` | `ReactNode` | ✅ | Text after dot |
+| `color` | `string` | ❌ | CSS color (default pink) |
+| `paused` | `boolean` | ❌ | Stops blinking |
+
+```tsx
+<PulseIndicator label="LIVE · 142 ONLINE" />
+```
+
+### RankCell
+
+Rank numeral with top-3 color tint (top1 yellow / top2 cyan / top3 pink).
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `rank` | `number` | ✅ | 1-based rank |
+| `pad` | `number` | ❌ | Zero-pad width (default 2) |
+
+```tsx
+<RankCell rank={1} />
+```
+
+### ScoringRules
+
+Vertical stack of scoring rule rows: `icon | title + description | points`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `rules` | `ScoringRule[]` | ✅ | `{ icon?, title, description, points, suffix?, accent? }` |
+
+`accent ∈ 'pink' | 'yellow' | 'cyan' | 'green' | 'red'`.
+
+```tsx
+<ScoringRules rules={[
+    { icon: '¶', title: 'GENERAL MSG · ≥40 CHARS', description: 'Substantive participation.', points: '+1', suffix: 'pt' },
+    { icon: '★', title: 'SHOWCASE REACTIONS', description: 'Logarithmic scaling.', points: '≤30', suffix: 'pts' },
+]} />
+```
+
+### SectionFlag
+
+Pink Press Start title wrapped in `«…»` guillemets, with optional VT323 sub-line.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `ReactNode` | ✅ | Title text |
+| `subtitle` | `ReactNode` | ❌ | Subtitle line |
+| `align` | `'left' \| 'center'` | ❌ | Default center |
+
+```tsx
+<SectionFlag
+    title="3 БРИФА · ROLLED FOR SPRINT 047"
+    subtitle="Seeded RNG drew one easy + one medium + one hard."
+/>
+```
+
+### SprintChain
+
+Horizontal track of equal-width cells (past / now / future) with auto-derived state.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `items` | `SprintChainItem[]` | ✅ | `{ id, label, tag?, state? }` |
+| `currentId` | `string` | ✅ | Item id that is `now` |
+| `columns` | `number` | ❌ | Default = items.length |
+| `header` | `ReactNode` | ❌ | Header start |
+| `headerEnd` | `ReactNode` | ❌ | Header end |
+
+```tsx
+<SprintChain
+    currentId="047"
+    header="« THE CHAIN — past · future »"
+    headerEnd="EVERY 14 DAYS · ∞"
+    items={[
+        { id: '045', label: '045', tag: 'closed ✓' },
+        { id: '046', label: '046', tag: 'closed ✓' },
+        { id: '047', label: '047', tag: '▸ OPEN' },
+        { id: '048', label: '048', tag: 'queued' },
+    ]}
+/>
+```
+
+### Stamp
+
+Solid colored corner badge — Press Start 8px. Position-able on parent corners.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `label` | `ReactNode` | ✅ | Stamp text |
+| `color` | `'pink'\|'yellow'\|'red'\|'cyan'\|'green'` | ❌ | Default pink |
+| `position` | `'tl'\|'tr'\|'bl'\|'br'` | ❌ | Absolute-positions when set |
+
+```tsx
+<Stamp label="FEATURED · +50" color="yellow" position="tl" />
+```
+
+### StateMachine
+
+Horizontal flat row of state cells. Variants: `done` / `active` / `reserved` / `future`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `states` | `StateMachineItem[]` | ✅ | `{ id, label, note?, status? }` |
+| `compact` | `boolean` | ❌ | Smaller padding |
+
+```tsx
+<StateMachine states={[
+    { id: 'announce', label: 'announce', note: 'briefs rolled', status: 'done' },
+    { id: 'open', label: 'open', note: 'accepting builds', status: 'active' },
+    { id: 'voting', label: 'voting', note: 'reserved', status: 'reserved' },
+]} />
+```
+
+### TierLadder
+
+Ranked tier list — colored dot + name + range. Highlights `currentTierId` row.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `title` | `ReactNode` | ❌ | Top label |
+| `tiers` | `TierItem[]` | ✅ | `{ id, name, range, color? }` |
+| `currentTierId` | `string` | ❌ | Highlights "you" row |
+| `summary` | `ReactNode` | ❌ | Footer summary line |
+
+`color ∈ 'gray' | 'cyan' | 'yellow' | 'pink' | 'red'`.
+
+```tsx
+<TierLadder
+    title="TIER LADDER · 90D ROLLING"
+    currentTierId="journ"
+    tiers={[
+        { id: 'recruit', name: 'RECRUIT', range: '0 — 99', color: 'gray' },
+        { id: 'appr', name: 'APPRENTICE', range: '100 — 299', color: 'cyan' },
+        { id: 'journ', name: 'JOURNEYMAN', range: '300 — 699', color: 'yellow' },
+        { id: 'mason', name: 'MASON', range: '700 — 1499', color: 'pink' },
+        { id: 'arch', name: 'ARCHITECT', range: '1500+', color: 'red' },
+    ]}
+    summary={<>▸ You: <b>412 pts</b> · 90d rolling</>}
+/>
 ```

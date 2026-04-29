@@ -10,26 +10,39 @@
     // ── Neon palette ──────────────────────────────────────────────────────
     --nd-bg: #05030f;
     --nd-bg-2: #0a0720;
+    --nd-bg-3: #1b1638;
     --nd-panel: rgba(12, 8, 32, 0.72);
     --nd-panel-solid: #0c0820;
     --nd-border: rgba(255, 43, 214, 0.28);
     --nd-border-soft: rgba(120, 80, 200, 0.22);
     --nd-magenta: #ff2bd6;
+    --nd-pink: var(--nd-magenta);
+    --nd-pink-alt: #ff3c8a;
     --nd-cyan: #00e5ff;
+    --nd-cyan-alt: #7df9ff;
     --nd-violet: #8a4bff;
-    --nd-lime: #b6ff3c;
+    --nd-yellow: #ffd83c;
+    --nd-yellow-soft: rgba(255, 216, 60, 0.4);
+    --nd-red: #ff5454;
+    --nd-green: #5dff9a;
+    --nd-lime: var(--nd-green);
     --nd-accent: var(--nd-magenta);
     --nd-accent-2: var(--nd-cyan);
     --nd-text: #f3e9ff;
     --nd-text-dim: #9a8fc2;
     --nd-text-faint: #6a5e93;
+    --nd-rule: rgba(255, 60, 138, 0.45);
+    --nd-rule-soft: rgba(154, 147, 200, 0.18);
     --nd-shadow: 0 0 18px rgba(255, 43, 214, 0.35);
     --nd-shadow-cyan: 0 0 18px rgba(0, 229, 255, 0.35);
 
-    --nd-font-display:
-        'Orbitron', 'Ubuntu Mono', 'JetBrains Mono', monospace;
+    --nd-font-pixel:
+        'Press Start 2P', 'Pixelify Sans', 'Orbitron', monospace;
+    --nd-font-flavor:
+        'VT323', 'Ubuntu Mono', monospace;
     --nd-font-mono:
-        'Ubuntu Mono', 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+        'DM Mono', 'Ubuntu Mono', 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+    --nd-font-display: var(--nd-font-pixel);
 
     // ── toolcase design tokens (override baseline) ────────────────────────
     --tc-bg: var(--nd-bg);
@@ -53,7 +66,7 @@
     --tc-success-bg: rgba(74, 222, 128, 0.08);
     --tc-warning: #fbbf24;
     --tc-warning-bg: rgba(251, 191, 36, 0.08);
-    --tc-danger: #ff6188;
+    --tc-danger: var(--nd-red);
     --tc-danger-bg: rgba(255, 97, 136, 0.08);
 
     --tc-shadow-sm: 0 0 8px rgba(255, 43, 214, 0.15);
@@ -84,7 +97,7 @@
     --sec-border: var(--nd-border);
     --sec-surface: var(--nd-panel-solid);
     --sec-danger-title: #ffbcd1;
-    --sec-danger-icon: #ff6188;
+    --sec-danger-icon: var(--nd-red);
     --sec-danger-border: rgba(255, 97, 136, 0.5);
     --sec-danger-bg: rgba(255, 97, 136, 0.1);
     --sec-danger-icon-bg: rgba(255, 97, 136, 0.18);
@@ -96,7 +109,7 @@
     --stat-surface: var(--nd-panel);
     --stat-up: #4ade80;
     --stat-up-bg: rgba(74, 222, 128, 0.12);
-    --stat-down: #ff6188;
+    --stat-down: var(--nd-red);
     --stat-down-bg: rgba(255, 97, 136, 0.12);
     --stat-neutral: var(--nd-text-dim);
     --stat-neutral-bg: rgba(138, 75, 255, 0.15);
@@ -397,7 +410,7 @@
     --ni-color: var(--nd-text);
     --ni-focus-border: var(--nd-accent-2);
     --ni-hover-border: var(--nd-border);
-    --ni-error-border: #ff6188;
+    --ni-error-border: var(--nd-red);
     --ni-muted: var(--nd-text-dim);
 
     // ── OTPInput ─────────────────────────────────────────────────────────
@@ -415,7 +428,7 @@
     --ph-bg: var(--nd-panel-solid);
     --ph-border: var(--nd-border-soft);
     --ph-border-focus: var(--nd-accent-2);
-    --ph-border-error: #ff6188;
+    --ph-border-error: var(--nd-red);
     --ph-hover-bg: rgba(255, 43, 214, 0.08);
     --ph-muted: var(--nd-text-dim);
     --ph-text: var(--nd-text);
@@ -479,7 +492,7 @@
     --st-completed-color: var(--nd-text);
     --st-connector-color: var(--nd-border-soft);
     --st-connector-filled: var(--nd-accent);
-    --st-error-color: #ff6188;
+    --st-error-color: var(--nd-red);
     --st-muted: var(--nd-text-dim);
     --st-pending-bg: rgba(12, 8, 32, 0.6);
 

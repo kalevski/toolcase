@@ -1,0 +1,34 @@
+// ── SectionFlag ────────────────────────────────────────────────────────────────
+.component.component-section-flag {
+    --sf-text: var(--tc-text);
+    --sf-muted: var(--tc-text-muted);
+
+    margin-bottom: 24px;
+}
+
+.component-section-flag--center { text-align: center; }
+.component-section-flag--left   { text-align: left; }
+
+.component-section-flag__title {
+    display: inline-block;
+    font-family: var(--tc-font-family-sans);
+    font-size: 1.25rem;
+    font-weight: var(--tc-font-weight-bold);
+    color: var(--sf-text);
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+}
+
+.component-section-flag__sub {
+    font-family: var(--tc-font-family-sans);
+    font-size: var(--tc-font-md);
+    color: var(--sf-muted);
+    margin-top: 8px;
+    line-height: 1.5;
+    max-width: 60ch;
+}
+
+.component-section-flag--center .component-section-flag__sub {
+    margin-left: auto;
+    margin-right: auto;
+}
