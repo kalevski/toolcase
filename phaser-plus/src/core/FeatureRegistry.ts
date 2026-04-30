@@ -2,11 +2,9 @@ import { Broadcast } from '@toolcase/base'
 import Feature from './Feature'
 import type Scene from './Scene'
 
-type Listener = (...args: any[]) => void
-
 type FeatureClass<T extends Feature> = new (scene: Scene, key: string) => T
 
-export default class FeatureRegistry extends Broadcast<string, Listener, unknown> {
+export default class FeatureRegistry extends Broadcast {
 
     private readonly scene: Scene
 

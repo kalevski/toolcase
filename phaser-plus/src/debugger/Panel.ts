@@ -6,7 +6,7 @@ export type PanelHost = any
 
 type Listener = (...args: any[]) => void
 
-export default class Panel extends Broadcast<string, Listener, unknown> {
+export default class Panel extends Broadcast {
 
     protected readonly scene: Scene
 
