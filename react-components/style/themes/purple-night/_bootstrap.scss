@@ -1,0 +1,445 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 5 · Bootstrap fundamentals — button, card, badge, alert, form, table
+// ───────────────────────────────────────────────────────────────────────────
+// Most components are built on Bootstrap markup (`.btn`, `.card`, `.alert`,
+// `.form-control`, `.table`, ...). This block dark-skins the Bootstrap chrome
+// so anything using it picks up the new look automatically. We preserve the
+// default toolcase shape language (sharp corners, default fonts, single
+// solid borders) and only flip surface/text/border colors.
+
+.theme--purple-night {
+    // ── Buttons ──────────────────────────────────────────────────────────
+    .btn {
+        border-radius: 0;
+        border-width: 1px;
+        border-style: solid;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+        &:focus-visible {
+            outline: 2px solid var(--pn-accent-2);
+            outline-offset: 2px;
+        }
+
+        &:disabled,
+        &.disabled {
+            opacity: 0.45;
+        }
+    }
+
+    .btn-primary {
+        background: var(--pn-accent);
+        border-color: var(--pn-accent);
+        color: var(--pn-text);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #a48bff;
+            border-color: #a48bff;
+            color: var(--pn-text);
+        }
+    }
+
+    .btn-secondary {
+        background: var(--pn-bg-2);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: var(--pn-bg-3);
+            border-color: var(--pn-border);
+            color: var(--pn-text);
+        }
+    }
+
+    .btn-warning {
+        background: var(--pn-yellow);
+        border-color: var(--pn-yellow);
+        color: #08090c;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #ffd58a;
+            border-color: #ffd58a;
+            color: #08090c;
+        }
+    }
+
+    .btn-info {
+        background: var(--pn-cyan);
+        border-color: var(--pn-cyan);
+        color: #08090c;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: var(--pn-cyan-alt);
+            border-color: var(--pn-cyan-alt);
+            color: #08090c;
+        }
+    }
+
+    .btn-success {
+        background: var(--pn-green);
+        border-color: var(--pn-green);
+        color: #08090c;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #6fe09b;
+            border-color: #6fe09b;
+            color: #08090c;
+        }
+    }
+
+    .btn-danger {
+        background: var(--pn-red);
+        border-color: var(--pn-red);
+        color: #08090c;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #ffa3b1;
+            border-color: #ffa3b1;
+            color: #08090c;
+        }
+    }
+
+    // Outline / ghost variants
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-info,
+    .btn-outline-success,
+    .btn-outline-warning,
+    .btn-outline-danger {
+        background: transparent;
+    }
+
+    .btn-outline-primary {
+        border-color: var(--pn-accent);
+        color: var(--pn-accent);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(124, 92, 255, 0.12);
+            color: var(--pn-text);
+        }
+    }
+
+    .btn-outline-secondary {
+        border-color: var(--pn-text-dim);
+        color: var(--pn-text-dim);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(139, 145, 156, 0.1);
+            color: var(--pn-text);
+            border-color: var(--pn-text);
+        }
+    }
+
+    .btn-outline-info {
+        border-color: var(--pn-cyan);
+        color: var(--pn-cyan);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(164, 139, 255, 0.1);
+            color: var(--pn-text);
+        }
+    }
+
+    .btn-outline-success {
+        border-color: var(--pn-green);
+        color: var(--pn-green);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--pn-text);
+        }
+    }
+
+    .btn-outline-warning {
+        border-color: var(--pn-yellow);
+        color: var(--pn-yellow);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(255, 181, 71, 0.1);
+            color: var(--pn-text);
+        }
+    }
+
+    .btn-outline-danger {
+        border-color: var(--pn-red);
+        color: var(--pn-red);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(255, 84, 112, 0.1);
+            color: var(--pn-text);
+        }
+    }
+
+    // ── Cards ────────────────────────────────────────────────────────────
+    .card {
+        background: var(--pn-panel);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-text);
+    }
+
+    .card-header,
+    .card-footer {
+        background: transparent;
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+
+    .card-body {
+        color: var(--pn-text);
+    }
+
+    .card-title {
+        color: var(--pn-text);
+    }
+
+    .card-text {
+        color: var(--pn-text-dim);
+    }
+
+    .card.bg-primary {
+        background: rgba(124, 92, 255, 0.12);
+        border-color: rgba(124, 92, 255, 0.4);
+    }
+    .card.bg-secondary {
+        background: rgba(8, 9, 12, 0.7);
+        border-color: var(--pn-border-soft);
+    }
+    .card.bg-info {
+        background: rgba(164, 139, 255, 0.1);
+        border-color: rgba(164, 139, 255, 0.4);
+    }
+    .card.bg-success {
+        background: rgba(46, 204, 113, 0.1);
+        border-color: rgba(46, 204, 113, 0.4);
+    }
+    .card.bg-warning {
+        background: rgba(255, 181, 71, 0.1);
+        border-color: rgba(255, 181, 71, 0.4);
+    }
+    .card.bg-danger {
+        background: rgba(255, 84, 112, 0.1);
+        border-color: rgba(255, 84, 112, 0.4);
+    }
+
+    // ── Badges ───────────────────────────────────────────────────────────
+    .badge {
+        border-radius: 0;
+    }
+    .badge.bg-primary {
+        background: rgba(124, 92, 255, 0.18) !important;
+        color: var(--pn-accent);
+        border: 1px solid rgba(124, 92, 255, 0.45);
+    }
+    .badge.bg-secondary {
+        background: rgba(124, 92, 255, 0.18) !important;
+        color: #c4b5fd;
+        border: 1px solid rgba(124, 92, 255, 0.4);
+    }
+    .badge.bg-info {
+        background: rgba(164, 139, 255, 0.15) !important;
+        color: var(--pn-accent-2);
+        border: 1px solid rgba(164, 139, 255, 0.4);
+    }
+    .badge.bg-success {
+        background: rgba(46, 204, 113, 0.15) !important;
+        color: #bbf7d0;
+        border: 1px solid rgba(46, 204, 113, 0.4);
+    }
+    .badge.bg-warning {
+        background: rgba(255, 181, 71, 0.15) !important;
+        color: #ffd58a;
+        border: 1px solid rgba(255, 181, 71, 0.4);
+    }
+    .badge.bg-danger {
+        background: rgba(255, 84, 112, 0.15) !important;
+        color: #ffa3b1;
+        border: 1px solid rgba(255, 84, 112, 0.4);
+    }
+
+    // ── Alerts ───────────────────────────────────────────────────────────
+    .alert {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-text);
+    }
+    .alert-primary {
+        background: rgba(124, 92, 255, 0.08);
+        border-color: rgba(124, 92, 255, 0.45);
+        color: var(--pn-text);
+    }
+    .alert-secondary {
+        background: rgba(139, 145, 156, 0.08);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .alert-info {
+        background: rgba(164, 139, 255, 0.06);
+        border-color: rgba(164, 139, 255, 0.4);
+        color: var(--pn-text);
+    }
+    .alert-success {
+        background: rgba(46, 204, 113, 0.06);
+        border-color: rgba(46, 204, 113, 0.4);
+        color: var(--pn-text);
+    }
+    .alert-warning {
+        background: rgba(255, 181, 71, 0.06);
+        border-color: rgba(255, 181, 71, 0.4);
+        color: var(--pn-text);
+    }
+    .alert-danger {
+        background: rgba(255, 84, 112, 0.06);
+        border-color: rgba(255, 84, 112, 0.45);
+        color: var(--pn-text);
+    }
+
+    // ── Form controls ────────────────────────────────────────────────────
+    .form-control,
+    .form-select {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-text);
+
+        &::placeholder {
+            color: var(--pn-text-faint);
+        }
+
+        &:hover:not(:disabled):not(:focus) {
+            border-color: var(--pn-border);
+        }
+
+        &:focus {
+            background: var(--pn-panel-solid);
+            border-color: var(--pn-accent-2);
+            color: var(--pn-text);
+            box-shadow: 0 0 0 2px rgba(164, 139, 255, 0.18);
+        }
+
+        &:disabled,
+        &[readonly] {
+            background: rgba(8, 9, 12, 0.5);
+            color: var(--pn-text-faint);
+            border-color: var(--pn-border-soft);
+        }
+
+        &.is-invalid {
+            border-color: var(--pn-red);
+
+            &:focus {
+                box-shadow: 0 0 0 2px rgba(255, 84, 112, 0.22);
+            }
+        }
+    }
+
+    .form-label,
+    .form-label-inline {
+        color: var(--pn-text);
+    }
+
+    .form-range {
+        accent-color: var(--pn-accent);
+    }
+
+    .form-check-input {
+        background-color: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+
+        &[type='radio'] {
+            border-radius: 50%;
+        }
+
+        &:checked {
+            background-color: var(--pn-accent);
+            border-color: var(--pn-accent);
+        }
+
+        &:focus {
+            border-color: var(--pn-accent-2);
+            box-shadow: 0 0 0 2px rgba(164, 139, 255, 0.2);
+        }
+    }
+
+    .invalid-feedback {
+        color: var(--pn-red);
+    }
+
+    // ── Tables ───────────────────────────────────────────────────────────
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--pn-text);
+        --bs-table-border-color: var(--pn-border-soft);
+        --bs-table-striped-bg: rgba(124, 92, 255, 0.04);
+        --bs-table-striped-color: var(--pn-text);
+        --bs-table-hover-bg: rgba(124, 92, 255, 0.08);
+        --bs-table-hover-color: var(--pn-text);
+        color: var(--pn-text);
+        border-color: var(--pn-border-soft);
+    }
+
+    .table > :not(caption) > * > * {
+        background-color: transparent;
+        color: var(--pn-text);
+        border-bottom: 1px solid var(--pn-border-soft);
+    }
+
+    .table > thead {
+        color: var(--pn-text);
+
+        th {
+            border-bottom: 1px solid var(--pn-border);
+            background: transparent;
+        }
+    }
+
+    // ── Progress ─────────────────────────────────────────────────────────
+    .progress {
+        background: rgba(8, 9, 12, 0.7);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+    }
+
+    .progress-bar {
+        border-radius: 0;
+    }
+    .progress-bar.bg-primary {
+        background: var(--pn-accent) !important;
+    }
+    .progress-bar.bg-info {
+        background: var(--pn-accent-2) !important;
+    }
+    .progress-bar.bg-success {
+        background: var(--pn-green) !important;
+    }
+    .progress-bar.bg-warning {
+        background: var(--pn-yellow) !important;
+    }
+    .progress-bar.bg-danger {
+        background: var(--pn-red) !important;
+    }
+
+    // ── Utility color overrides ──────────────────────────────────────────
+    .text-muted {
+        color: var(--pn-text-dim) !important;
+    }
+    .text-white {
+        color: var(--pn-text) !important;
+    }
+    .text-body {
+        color: var(--pn-text) !important;
+    }
+}

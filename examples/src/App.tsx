@@ -38,6 +38,12 @@ const themeOptions: ExtendedSelectItem[] = [
         description: 'Dark synthwave override',
         icon: 'lightning-charge',
     },
+    {
+        key: 'purple-night',
+        name: 'Purple Night',
+        description: 'Moody dark with purple accent',
+        icon: 'stars',
+    },
 ]
 
 interface NavProps {
@@ -153,7 +159,7 @@ export const App = () => {
         localStorage.setItem(THEME_STORAGE_KEY, theme)
     }, [theme])
 
-    const isDarkScope = theme === 'neon' || theme === 'dark'
+    const isDarkScope = theme === 'neon' || theme === 'dark' || theme === 'purple-night'
     const appClass = [
         'app',
         `app--${isDarkScope ? 'dark' : 'light'}`,

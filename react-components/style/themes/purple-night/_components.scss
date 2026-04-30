@@ -1,0 +1,4079 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 8 · Per-component hardcoded overrides
+// ───────────────────────────────────────────────────────────────────────────
+// These components declare literal hex colors on their BEM parts instead of
+// reading from CSS variables, so token overrides don't reach them. Each
+// block below re-themes the specific selectors that hardcode light values.
+//
+// Ordered alphabetically by component for ease of scanning / editing. If
+// adding a new block, keep the neighbouring sort order.
+
+@use './placeholders' as *;
+
+.theme--purple-night {
+
+    // ── ActionHeader / ActionItems ───────────────────────────────────────
+    .component-action-header {
+        background: var(--pn-panel);
+        border: 1px solid var(--pn-rule-soft);
+        border-radius: 0;
+    }
+    .component-action-header__title,
+    .component-action-header__heading {
+        font-size: 0.75rem;
+        color: var(--pn-text);
+    }
+    .component-action-items {
+        color: var(--pn-text-dim);
+        font-family: var(--pn-font-mono);
+    }
+    .component-action-items__trigger:hover {
+        background: rgba(124, 92, 255, 0.1);
+        color: var(--pn-text);
+    }
+    .component-action-items .dropdown-menu,
+    .component-action-items__dropdown {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        color: var(--pn-text);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 24px rgba(124, 92, 255, 0.15);
+        font-family: var(--pn-font-mono);
+    }
+    .component-action-items .dropdown-divider {
+        border-top: 1px solid var(--pn-rule-soft);
+    }
+    .component-action-items .dropdown-item {
+        color: var(--pn-text);
+        background: transparent;
+    }
+    .component-action-items .dropdown-item:hover,
+    .component-action-items .dropdown-item:focus {
+        background: rgba(124, 92, 255, 0.12);
+        color: var(--pn-text);
+    }
+    .component-action-items .dropdown-item:active,
+    .component-action-items .dropdown-item.active {
+        background: rgba(124, 92, 255, 0.2);
+        color: var(--pn-text);
+    }
+    .component-action-items .dropdown-item:disabled,
+    .component-action-items .dropdown-item.disabled {
+        color: var(--pn-text-faint);
+        background: transparent;
+    }
+    .component-action-items .dropdown-item i {
+        color: var(--pn-text-dim);
+    }
+    .component-action-items .dropdown-item:hover i,
+    .component-action-items .dropdown-item:focus i {
+        color: var(--pn-accent);
+    }
+
+    // ── ActionRowList ────────────────────────────────────────────────────
+    .component-action-row-list__row {
+        border-bottom: 1px solid var(--pn-rule-soft);
+    }
+    .component-action-row-list__icon {
+        background: var(--pn-bg-3);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-accent-2);
+        background-image:
+            repeating-linear-gradient(
+                45deg,
+                transparent 0 4px,
+                rgba(124, 92, 255, 0.18) 4px 5px
+            );
+    }
+    .component-action-row-list__title {
+        font-size: 0.7rem;
+        color: var(--pn-text);
+    }
+    .component-action-row-list__description,
+    .component-action-row-list__meta {
+        font-size: 1rem;
+        color: var(--pn-text-dim);
+    }
+
+    // ── Accordion ────────────────────────────────────────────────────────
+    .component-accordion__trigger {
+        color: var(--pn-text);
+        background: transparent;
+    }
+    .component-accordion__trigger:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+    .component-accordion__content,
+    .component-accordion__item {
+        border-color: var(--pn-border-soft);
+    }
+
+    // ── AssetBundle ──────────────────────────────────────────────────────
+    .component-asset-bundle,
+    .component-asset-bundle__row,
+    .component-asset-bundle__header,
+    .component-asset-bundle__footer {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-asset-bundle__row:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+
+    // ── AssetRow ─────────────────────────────────────────────────────────
+    .component-asset-row {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-asset-row:hover {
+        background: rgba(124, 92, 255, 0.06);
+        border-color: var(--pn-border);
+    }
+
+    // ── Avatar (initials bg that aren't Bootstrap bg-* variants) ─────────
+    .component-avatar.avatar-initials:not([class*="bg-"]) {
+        background: linear-gradient(135deg, var(--pn-accent), var(--pn-violet));
+        color: #08090c;
+    }
+
+    // ── Brand / Hero / Login / FeatureCard — light surfaces → dark ──────
+    .component-brand,
+    .component-hero {
+        background: transparent;
+        color: var(--pn-text);
+    }
+    .component-login {
+        background: var(--pn-bg);
+        color: var(--pn-text);
+    }
+    .component-login__left {
+        background: linear-gradient(160deg, var(--pn-bg) 0%, var(--pn-bg-2) 100%);
+        color: var(--pn-text);
+    }
+    .component-login__right {
+        background: var(--pn-panel-solid);
+    }
+    .component-login__title {
+        color: var(--pn-text);
+    }
+    .component-login__description {
+        color: var(--pn-text-dim);
+    }
+    .component-login__connect-btn {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-login__connect-btn:hover:not(:disabled) {
+        background: rgba(124, 92, 255, 0.08);
+        border-color: var(--pn-accent);
+    }
+
+    .component-feature-card {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-feature-card:hover {
+        border-color: var(--pn-border);
+        box-shadow: 0 0 20px rgba(124, 92, 255, 0.2);
+    }
+
+    // ── Banner ───────────────────────────────────────────────────────────
+    .component-banner {
+        --bn-bg: rgba(164, 139, 255, 0.08);
+        --bn-border: rgba(164, 139, 255, 0.35);
+        --bn-text: var(--pn-text);
+        --bn-icon-color: var(--pn-accent-2);
+    }
+    .component-banner--warning {
+        --bn-bg: rgba(255, 181, 71, 0.1);
+        --bn-border: rgba(255, 181, 71, 0.45);
+        --bn-text: #ffd58a;
+        --bn-icon-color: #ffb547;
+    }
+    .component-banner--success {
+        --bn-bg: rgba(46, 204, 113, 0.1);
+        --bn-border: rgba(46, 204, 113, 0.4);
+        --bn-text: #bbf7d0;
+        --bn-icon-color: #2ecc71;
+    }
+    .component-banner--error {
+        --bn-bg: rgba(255, 84, 112, 0.1);
+        --bn-border: rgba(255, 84, 112, 0.45);
+        --bn-text: #fecaca;
+        --bn-icon-color: var(--pn-red);
+    }
+    .component-banner__dismiss:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    // ── Breadcrumb ───────────────────────────────────────────────────────
+    .component-breadcrumb a {
+        color: var(--pn-accent-2);
+    }
+    .component-breadcrumb__separator {
+        color: var(--pn-text-faint);
+    }
+
+    // ── BundleBar ────────────────────────────────────────────────────────
+    .component-bundle-bar {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+
+    // ── CardOptions ──────────────────────────────────────────────────────
+    .component-card-options__card {
+        background: var(--pn-panel-solid);
+    }
+    .component-card-options__card:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+    .component-card-options__card--selected {
+        background: rgba(124, 92, 255, 0.12);
+        box-shadow: 0 0 0 1px var(--pn-accent);
+    }
+    .component-card-options__visual {
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-card-options__title {
+        color: var(--pn-text);
+    }
+    .component-card-options__desc {
+        color: var(--pn-text-dim);
+    }
+    .component-card-options__icon {
+        color: var(--pn-text-dim);
+    }
+    .component-card-options__card--selected .component-card-options__icon,
+    .component-card-options__check {
+        color: var(--pn-accent);
+    }
+
+    // ── Changelog ────────────────────────────────────────────────────────
+    .component-changelog {
+        color: var(--pn-text);
+    }
+    .component-changelog__entry {
+        border-color: var(--pn-border-soft);
+        background: transparent;
+    }
+    .component-changelog__date {
+        color: var(--pn-text-dim);
+    }
+
+    // ── Chart (base chrome) ──────────────────────────────────────────────
+    .component-chart,
+    .component-chart__frame,
+    .component-chart__canvas {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-chart__grid line,
+    .component-chart__axis line,
+    .component-chart__axis path {
+        stroke: rgba(90, 96, 107, 0.25);
+    }
+    .component-chart__axis text,
+    .component-chart__label {
+        fill: var(--pn-text-dim);
+        color: var(--pn-text-dim);
+    }
+
+    // ── ColorPicker ──────────────────────────────────────────────────────
+    .component-color-picker__label {
+        color: var(--pn-text);
+    }
+    .component-color-picker__trigger {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-color-picker__trigger:hover {
+        border-color: var(--pn-border);
+    }
+    .component-color-picker__hex_label {
+        color: var(--pn-text-dim);
+    }
+    .component-color-picker__dropdown {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(124, 92, 255, 0.12);
+    }
+    .component-color-picker__hex-input {
+        border-top-color: var(--pn-border-soft);
+    }
+    .component-color-picker__hex-input input {
+        color: var(--pn-text);
+    }
+    .component-color-picker__hex-prefix {
+        color: var(--pn-text-dim);
+    }
+    .component-color-picker__option:hover {
+        box-shadow: 0 0 0 2px var(--pn-accent);
+    }
+
+    // ── Chip ─────────────────────────────────────────────────────────────
+    .component-chip {
+        --chip-bg: rgba(8, 9, 12, 0.55);
+        --chip-border: var(--pn-border-soft);
+        --chip-text: var(--pn-text);
+        --chip-selected-bg: var(--pn-accent);
+        --chip-selected-text: #08090c;
+    }
+    .component-chip:hover {
+        border-color: var(--pn-border);
+    }
+    .component-chip.component-chip--primary.component-chip--selected {
+        --chip-selected-bg: var(--pn-accent);
+    }
+    .component-chip.component-chip--info.component-chip--selected {
+        --chip-selected-bg: var(--pn-accent-2);
+        --chip-selected-text: #08090c;
+    }
+    .component-chip.component-chip--success.component-chip--selected {
+        --chip-selected-bg: #2ecc71;
+        --chip-selected-text: #08090c;
+    }
+    .component-chip.component-chip--warning.component-chip--selected {
+        --chip-selected-bg: #ffb547;
+        --chip-selected-text: #08090c;
+    }
+    .component-chip.component-chip--danger.component-chip--selected {
+        --chip-selected-bg: var(--pn-red);
+        --chip-selected-text: #08090c;
+    }
+
+    // ── CodeLabelCell ────────────────────────────────────────────────────
+    .component-code-label-cell__code {
+        background: rgba(164, 139, 255, 0.08);
+        border-color: rgba(164, 139, 255, 0.35);
+        color: var(--pn-accent-2);
+    }
+    .component-code-label-cell__name {
+        color: var(--pn-text);
+    }
+
+    // ── CommandPalette ───────────────────────────────────────────────────
+    .component-command-palette__backdrop {
+        background: rgba(0, 0, 0, 0.72);
+    }
+    .component-command-palette {
+        --cp-bg: var(--pn-panel-solid);
+        --cp-border: var(--pn-border);
+        --cp-color: var(--pn-text);
+        --cp-muted: var(--pn-text-dim);
+        --cp-hover-bg: rgba(124, 92, 255, 0.08);
+        --cp-active-bg: rgba(124, 92, 255, 0.16);
+        --cp-active-border: var(--pn-accent);
+        --cp-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+            0 0 30px rgba(124, 92, 255, 0.2);
+    }
+    .component-command-palette__footer kbd {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+
+    // ── ContextMenu ──────────────────────────────────────────────────────
+    .component-context-menu {
+        --cm-bg: var(--pn-panel-solid);
+        --cm-border: var(--pn-border);
+        --cm-color: var(--pn-text);
+        --cm-muted: var(--pn-text-dim);
+        --cm-hover-bg: rgba(124, 92, 255, 0.12);
+        --cm-active-bg: rgba(124, 92, 255, 0.18);
+        --cm-danger: var(--pn-red);
+        --cm-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(124, 92, 255, 0.15);
+    }
+
+    // ── ConfigPreview ────────────────────────────────────────────────────
+    .component-config-preview,
+    .component-config-preview__row,
+    .component-config-preview__header {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+
+    // ── CoolButton — pixel font + sharp corners + glow ───────────────────
+    .component-cool-button {
+        background: linear-gradient(135deg, var(--pn-accent), var(--pn-violet));
+        color: var(--pn-bg);
+        border-color: var(--pn-accent);
+        border-radius: 0;
+        font-size: 0.7rem;
+        font-weight: 400;
+        box-shadow:
+            4px 4px 0 var(--pn-bg-2),
+            0 0 18px rgba(124, 92, 255, 0.4);
+    }
+    .component-cool-button:hover {
+        box-shadow:
+            6px 6px 0 var(--pn-bg-2),
+            0 0 32px rgba(124, 92, 255, 0.7);
+    }
+
+    // ── CoolNav ──────────────────────────────────────────────────────────
+    // The component sets `--cool-nav-bg` on `.component.component-cool-nav`
+    // itself, so the `.theme--purple-night` scope-level token never reaches it
+    // (same specificity, element-level declaration wins). Re-declare here
+    // at a matching specificity, and cover the scrolled / navbar-dark
+    // variants that also overwrite the var.
+    // `react-components/style/_bootstrap.scss` forces every `.navbar` to
+    // `background: rgba($white, 0.95) !important`, so overriding via
+    // `--cool-nav-bg` doesn't take. Set `background` directly with
+    // `!important` at higher specificity.
+    .component.component-cool-nav,
+    .component-cool-nav.navbar-dark,
+    .component.component-cool-nav.component-cool-nav--scrolled,
+    .component-cool-nav.navbar-dark.component-cool-nav--scrolled {
+        --cool-nav-bg: rgba(0, 0, 0, 0.75);
+        --cool-nav-shadow:
+            0 0 24px rgba(124, 92, 255, 0.18),
+            0 16px 40px rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.75) !important;
+        color: var(--pn-text);
+    }
+    .component.component-cool-nav.component-cool-nav--scrolled,
+    .component-cool-nav.navbar-dark.component-cool-nav--scrolled {
+        background: rgba(0, 0, 0, 0.85) !important;
+        box-shadow:
+            0 0 24px rgba(124, 92, 255, 0.18),
+            0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+    .component-cool-nav--scrolled {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .component-cool-nav__brand {
+        color: var(--pn-text);
+    }
+    // Reset Bootstrap navbar-light text colors inside neon (CoolNav forces
+    // .navbar-light by default; those CSS vars would render near-black
+    // links on our dark panel).
+    .component-cool-nav.navbar-light .navbar-brand,
+    .component-cool-nav.navbar-dark .navbar-brand {
+        color: var(--pn-text);
+    }
+    .component-cool-nav .nav-link {
+        color: var(--pn-text-dim);
+        transition:
+            color 0.2s ease,
+            text-shadow 0.2s ease;
+    }
+    .component-cool-nav .nav-link:hover,
+    .component-cool-nav .nav-link:focus {
+        color: var(--pn-text);
+        text-shadow: 0 0 10px rgba(164, 139, 255, 0.45);
+    }
+    .component-cool-nav .nav-link.active {
+        color: var(--pn-text);
+    }
+    .component-cool-nav .nav-link.active::after {
+        content: '';
+        display: block;
+        height: 1px;
+        margin-top: 4px;
+        background: linear-gradient(90deg,
+            transparent,
+            var(--pn-accent),
+            transparent);
+    }
+    // Hamburger — Bootstrap renders the icon via an inline SVG encoded in
+    // the background-image. Swap it for a cyan-stroked version that reads
+    // on dark.
+    .component-cool-nav .navbar-toggler {
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-cool-nav .navbar-toggler:focus {
+        box-shadow: 0 0 0 3px rgba(164, 139, 255, 0.22);
+    }
+    .component-cool-nav .navbar-toggler-icon {
+        // Cyan stroke (matches --pn-accent-2)
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='%2300e5ff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    }
+    // Collapsed menu on mobile — panel is the same navbar bg, but give a
+    // subtle separator between items.
+    @media (max-width: 991.98px) {
+        .component-cool-nav .navbar-collapse.show {
+            border-top: 1px solid var(--pn-border-soft);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+        }
+    }
+
+    // ── DashboardCard (big offender — 47 hardcoded colors) ───────────────
+    .component-dashboard-card,
+    .component-dashboard-card__header,
+    .component-dashboard-card__body,
+    .component-dashboard-card__footer {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-dashboard-card__title {
+        color: var(--pn-text);
+    }
+    .component-dashboard-card__subtitle,
+    .component-dashboard-card__eyebrow {
+        color: var(--pn-text-dim);
+    }
+    .component-dashboard-card__metric-title,
+    .component-dashboard-card__metric-subtitle {
+        color: var(--pn-text-dim);
+    }
+    .component-dashboard-card__metric-value {
+        color: var(--pn-text);
+    }
+    .component-dashboard-card__metric-icon {
+        color: var(--pn-accent-2);
+    }
+    .component-dashboard-card__list-item {
+        border-color: var(--pn-border-soft);
+        background: transparent;
+    }
+    .component-dashboard-card__list-item:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+    .component-dashboard-card__status-label,
+    .component-dashboard-card__colored-label {
+        color: var(--pn-text);
+    }
+
+    // ── DatePicker ──────────────────────────────────────────────────────
+    .component-date-picker .form-label,
+    .component-date-picker__label {
+        color: var(--pn-text);
+    }
+    .component-date-picker .date-input,
+    .component-date-picker__input {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-date-picker .date-input:focus,
+    .component-date-picker__input:focus {
+        border-color: var(--pn-accent-2);
+    }
+    .component-date-picker .date-input:disabled {
+        background: rgba(8, 9, 12, 0.6);
+        color: var(--pn-text-faint);
+    }
+
+    // ── Drawer ───────────────────────────────────────────────────────────
+    .component-drawer {
+        --dr-bg: var(--pn-panel-solid);
+        --dr-border: var(--pn-border);
+        --dr-title-color: var(--pn-text);
+        --dr-muted: var(--pn-text-dim);
+        --dr-backdrop: rgba(0, 0, 0, 0.72);
+        --dr-shadow: 0 0 48px rgba(124, 92, 255, 0.18),
+            0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .component-drawer__close:hover {
+        background: rgba(124, 92, 255, 0.12);
+        color: var(--pn-text);
+    }
+
+    // ── Dropdown (trigger + list + options) ──────────────────────────────
+    .component-dropdown__trigger {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-dropdown__trigger:hover {
+        border-color: var(--pn-border);
+    }
+    .component-dropdown--open .component-dropdown__trigger {
+        border-color: var(--pn-accent-2);
+    }
+    .component-dropdown__trigger:focus-visible {
+        outline: 2px solid var(--pn-accent-2);
+        outline-offset: 2px;
+    }
+    .component-dropdown__trigger-icon,
+    .component-dropdown__trigger-chevron {
+        color: var(--pn-text-dim);
+    }
+    .component-dropdown__trigger-placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-dropdown__list {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(124, 92, 255, 0.12);
+    }
+    .component-dropdown__option {
+        color: var(--pn-text);
+    }
+    .component-dropdown__option:hover,
+    .component-dropdown__option--highlighted {
+        background-color: rgba(124, 92, 255, 0.1);
+    }
+    .component-dropdown__option--active,
+    .component-dropdown__option--active:hover,
+    .component-dropdown__option--active.component-dropdown__option--highlighted {
+        background-color: rgba(124, 92, 255, 0.18);
+    }
+    .component-dropdown__option--active .component-dropdown__option-name {
+        color: var(--pn-text);
+        font-weight: 500;
+    }
+    .component-dropdown__option--disabled {
+        color: var(--pn-text-faint);
+    }
+    .component-dropdown__option-icon {
+        color: var(--pn-text-dim);
+    }
+    .component-dropdown__option--active .component-dropdown__option-icon {
+        color: var(--pn-accent-2);
+    }
+    .component-dropdown__option-name {
+        color: var(--pn-text);
+    }
+    .component-dropdown__option-desc {
+        color: var(--pn-text-dim);
+    }
+
+    // ── EarlySignupForm ──────────────────────────────────────────────────
+    .component-early-signup-form,
+    .component-early-signup-form__field,
+    .component-early-signup-form__input {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-early-signup-form__input:focus {
+        border-color: var(--pn-accent-2);
+    }
+    .component-early-signup-form__title,
+    .component-early-signup-form__heading {
+        color: var(--pn-text);
+    }
+    .component-early-signup-form__description,
+    .component-early-signup-form__helper {
+        color: var(--pn-text-dim);
+    }
+
+    // ── EditableText ─────────────────────────────────────────────────────
+    .component-editable-text,
+    .component-editable-text__input {
+        background: transparent;
+        color: var(--pn-text);
+        border-color: var(--pn-border-soft);
+    }
+    .component-editable-text:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+
+    // ── EntityCell ───────────────────────────────────────────────────────
+    // (Color tiles already retinted in _fine-tuning — just backstop the text)
+    .component-entity-cell__name {
+        color: var(--pn-text);
+    }
+    .component-entity-cell__sub {
+        color: var(--pn-text-dim);
+    }
+
+    // ── EntityProfileCard meta helpers ───────────────────────────────────
+    .component-entity-profile-card__meta-label {
+        color: var(--pn-text-dim);
+    }
+    .component-entity-profile-card__meta-value {
+        color: var(--pn-text);
+    }
+
+    // ── ExtendedSelect (trigger + panel + options) ───────────────────────
+    .component-extended-select__trigger {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-extended-select__trigger:hover {
+        border-color: var(--pn-border);
+    }
+    .component-extended-select--open .component-extended-select__trigger {
+        border-color: var(--pn-accent-2);
+    }
+    .component-extended-select__trigger-label,
+    .component-extended-select__option-label {
+        background: rgba(8, 9, 12, 0.6);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-extended-select__option--active .component-extended-select__option-label {
+        background: rgba(124, 92, 255, 0.2);
+        border-color: rgba(124, 92, 255, 0.4);
+        color: var(--pn-text);
+    }
+    .component-extended-select__panel {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(124, 92, 255, 0.12);
+    }
+    .component-extended-select__search {
+        border-bottom-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-extended-select__search-input {
+        color: var(--pn-text);
+    }
+    .component-extended-select__search-input::placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-extended-select__option:hover,
+    .component-extended-select__option--active {
+        background-color: rgba(124, 92, 255, 0.12);
+    }
+    .component-extended-select__option--active .component-extended-select__option-name {
+        color: var(--pn-text);
+    }
+    .component-extended-select__option-name {
+        color: var(--pn-text);
+    }
+    .component-extended-select__option-desc {
+        color: var(--pn-text-dim);
+    }
+    .component-extended-select__option-icon {
+        color: var(--pn-text-dim);
+    }
+    .component-extended-select__option--active .component-extended-select__option-icon {
+        color: var(--pn-accent-2);
+    }
+    .component-extended-select__empty {
+        color: var(--pn-text-dim);
+    }
+
+    // ── File / FileDropzone ──────────────────────────────────────────────
+    .component-file,
+    .component-file-dropzone {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-file-dropzone:hover,
+    .component-file-dropzone--active {
+        border-color: var(--pn-accent-2);
+        background: rgba(164, 139, 255, 0.06);
+    }
+    .component-file__name {
+        color: var(--pn-text);
+    }
+    .component-file__meta,
+    .component-file__size {
+        color: var(--pn-text-dim);
+    }
+
+    // ── IconButton ───────────────────────────────────────────────────────
+    .component-icon-button {
+        color: var(--pn-text-dim);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: transparent;
+    }
+    .component-icon-button:hover:not(:disabled) {
+        background: rgba(124, 92, 255, 0.1);
+        border-color: var(--pn-cyan);
+        color: var(--pn-text);
+    }
+    .component-icon-button:focus-visible {
+        outline: 2px solid var(--pn-cyan);
+        outline-offset: 2px;
+    }
+
+    // ── IconPicker ───────────────────────────────────────────────────────
+    .component-icon-picker__label {
+        color: var(--pn-text);
+    }
+    .component-icon-picker__trigger {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-icon-picker__trigger:hover {
+        background: rgba(124, 92, 255, 0.08);
+        border-color: var(--pn-border);
+        color: var(--pn-text);
+    }
+    .component-icon-picker__dropdown {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(124, 92, 255, 0.12);
+    }
+    .component-icon-picker__search {
+        border-bottom-color: var(--pn-border-soft);
+    }
+    .component-icon-picker__search input {
+        color: var(--pn-text);
+    }
+    .component-icon-picker__search input::placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-icon-picker__option {
+        color: var(--pn-text-dim);
+    }
+    .component-icon-picker__option:hover {
+        background: rgba(124, 92, 255, 0.08);
+        color: var(--pn-text);
+    }
+    .component-icon-picker__option--selected,
+    .component-icon-picker__option--selected:hover {
+        background: var(--pn-accent);
+        color: #08090c;
+    }
+
+    // ── InfiniteScroll sentinel ──────────────────────────────────────────
+    .component-infinite-scroll__loader,
+    .component-infinite-scroll__end {
+        color: var(--pn-text-dim);
+    }
+
+    // ── JSONEditor (35 hardcoded colors — broad sweep) ───────────────────
+    .component-json-editor,
+    .component-json-editor__row,
+    .component-json-editor__array-item,
+    .component-json-editor__primitive-item {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-json-editor__row:hover,
+    .component-json-editor__primitive-item:hover {
+        background: rgba(124, 92, 255, 0.06);
+        border-color: var(--pn-border);
+    }
+    .component-json-editor__key,
+    .component-json-editor__group-label,
+    .component-json-editor__primitive-input {
+        color: var(--pn-text);
+    }
+    .component-json-editor__input,
+    .component-json-editor__select {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-json-editor__input:disabled,
+    .component-json-editor__select:disabled {
+        background: rgba(8, 9, 12, 0.5);
+        color: var(--pn-text-faint);
+    }
+    .component-json-editor__group-header {
+        background: rgba(8, 9, 12, 0.6);
+        color: var(--pn-text);
+    }
+    .component-json-editor__group-badge {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-json-editor__collapse {
+        color: var(--pn-text-dim);
+    }
+    .component-json-editor__collapse:hover {
+        background: rgba(124, 92, 255, 0.08);
+        color: var(--pn-text);
+    }
+    .component-json-editor__add-item {
+        background: transparent;
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-json-editor__add-item:hover {
+        background: rgba(164, 139, 255, 0.06);
+        border-color: var(--pn-accent-2);
+        color: var(--pn-text);
+    }
+    .component-json-editor__array-items,
+    .component-json-editor__object-fields {
+        border-left-color: var(--pn-border-soft);
+    }
+    .component-json-editor__array-item-index {
+        background: rgba(8, 9, 12, 0.6);
+        color: var(--pn-text-faint);
+    }
+    .component-json-editor__remove,
+    .component-json-editor__primitive-remove {
+        color: var(--pn-text-faint);
+    }
+    .component-json-editor__remove:hover,
+    .component-json-editor__primitive-remove:hover {
+        color: var(--pn-red);
+    }
+    .component-json-editor__empty {
+        background: transparent;
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-faint);
+    }
+    .component-json-editor__primitive-remove {
+        border-left-color: var(--pn-border-soft);
+    }
+
+    // ── JSONSchemaDef ────────────────────────────────────────────────────
+    .component-json-schema-def,
+    .component-json-schema-def__row,
+    .component-json-schema-def__input,
+    .component-json-schema-def__select {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-json-schema-def__label,
+    .component-json-schema-def__key {
+        color: var(--pn-text);
+    }
+    .component-json-schema-def__hint,
+    .component-json-schema-def__placeholder {
+        color: var(--pn-text-dim);
+    }
+
+    // ── Link ─────────────────────────────────────────────────────────────
+    .component-link {
+        color: var(--pn-accent-2);
+    }
+    .component-link:hover {
+        color: var(--pn-text);
+        text-shadow: 0 0 10px rgba(164, 139, 255, 0.5);
+    }
+
+    // ── MarkdownEditor — one specific border marker ──────────────────────
+    .component-markdown-editor__tab--active {
+        border-bottom-color: var(--pn-accent) !important;
+        color: var(--pn-text) !important;
+    }
+    .component-markdown-editor--disabled .component-markdown-editor__shell {
+        background: rgba(8, 9, 12, 0.5);
+    }
+
+    // ── MetricGrid / MetricTile ──────────────────────────────────────────
+    .component-metric-tile__label {
+        color: var(--pn-text-dim);
+    }
+    .component-metric-tile__number {
+        color: var(--pn-text);
+    }
+    .component-metric-tile__hint {
+        color: var(--pn-text-faint);
+    }
+
+    // ── MultiCardSelect ──────────────────────────────────────────────────
+    .component-multi-card-select__card {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-multi-card-select__card:hover {
+        background: rgba(124, 92, 255, 0.06);
+        border-color: var(--pn-border);
+    }
+    .component-multi-card-select__card--selected {
+        background: rgba(124, 92, 255, 0.14);
+        border-color: var(--pn-accent);
+    }
+    .component-multi-card-select__title {
+        color: var(--pn-text);
+    }
+    .component-multi-card-select__desc {
+        color: var(--pn-text-dim);
+    }
+    .component-multi-card-select__check {
+        color: var(--pn-text-faint);
+    }
+    .component-multi-card-select__card--selected .component-multi-card-select__check {
+        color: var(--pn-accent);
+    }
+
+    // ── NumberInput ──────────────────────────────────────────────────────
+    .component-number-input__control {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .component-number-input__control:hover:not(:focus-within) {
+        border-color: var(--pn-border);
+    }
+    .component-number-input__control:focus-within {
+        border-color: var(--pn-accent-2);
+        box-shadow: 0 0 0 3px rgba(164, 139, 255, 0.22);
+    }
+    .component-number-input--error .component-number-input__control {
+        border-color: var(--pn-red);
+    }
+    .component-number-input--error .component-number-input__control:focus-within {
+        border-color: var(--pn-red);
+        box-shadow: 0 0 0 3px rgba(255, 84, 112, 0.25);
+    }
+    .component-number-input__btn {
+        background: transparent;
+        color: var(--pn-text-dim);
+    }
+    .component-number-input__btn--dec {
+        border-right-color: var(--pn-border-soft);
+    }
+    .component-number-input__btn--inc {
+        border-left-color: var(--pn-border-soft);
+    }
+    .component-number-input__btn:hover:not(:disabled) {
+        background: rgba(124, 92, 255, 0.12);
+        color: var(--pn-text);
+    }
+    .component-number-input__input {
+        background: transparent;
+        color: var(--pn-text);
+    }
+    .component-number-input__input::placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-number-input__input:disabled {
+        color: var(--pn-text-faint);
+    }
+    .component-number-input__prefix,
+    .component-number-input__suffix {
+        color: var(--pn-text-dim);
+    }
+    .component-number-input__prefix {
+        border-right-color: var(--pn-border-soft);
+    }
+    .component-number-input__suffix {
+        border-left-color: var(--pn-border-soft);
+    }
+
+    // ── OTPInput ─────────────────────────────────────────────────────────
+    .component-otp-input__label {
+        color: var(--pn-text);
+    }
+    .component-otp-input__cell {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-otp-input__cell:focus {
+        border-color: var(--pn-accent-2);
+        box-shadow: 0 0 0 3px rgba(164, 139, 255, 0.2);
+    }
+    .component-otp-input--disabled .component-otp-input__cell {
+        background: rgba(8, 9, 12, 0.5);
+        color: var(--pn-text-faint);
+    }
+
+    // ── PageFooter ───────────────────────────────────────────────────────
+    .component-page-footer {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-page-footer a {
+        color: var(--pn-text-dim);
+    }
+    .component-page-footer a:hover {
+        color: var(--pn-accent-2);
+    }
+    .component-page-footer__title,
+    .component-page-footer__heading {
+        color: var(--pn-text);
+    }
+
+    // ── Pagination ───────────────────────────────────────────────────────
+    .component-pagination__btn {
+        background: transparent;
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-pagination__btn:hover:not(:disabled):not(.component-pagination__btn--active) {
+        background: rgba(124, 92, 255, 0.1);
+        border-color: var(--pn-border);
+        color: var(--pn-text);
+    }
+    .component-pagination__btn--active {
+        background: var(--pn-accent);
+        border-color: var(--pn-accent);
+        color: #08090c;
+    }
+    .component-pagination__btn--active:hover {
+        background: #a48bff;
+        border-color: #a48bff;
+        color: #08090c;
+    }
+    .component-pagination__dots {
+        color: var(--pn-text-faint);
+    }
+
+    // ── PhoneInput ───────────────────────────────────────────────────────
+    .component-phone-input__label {
+        color: var(--pn-text);
+    }
+    .component-phone-input__country-btn {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-phone-input__country-btn:hover {
+        background: rgba(124, 92, 255, 0.08);
+        border-color: var(--pn-border);
+    }
+    .component-phone-input__country-btn--open {
+        background: rgba(124, 92, 255, 0.12);
+        border-color: var(--pn-accent-2);
+        color: var(--pn-text);
+    }
+    .component-phone-input__wrapper:focus-within .component-phone-input__country-btn {
+        border-color: var(--pn-accent-2);
+    }
+    .component-phone-input__dial-code,
+    .component-phone-input__chevron {
+        color: var(--pn-text-dim);
+    }
+    .component-phone-input__input {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-phone-input__input::placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-phone-input__input:focus {
+        border-color: var(--pn-accent-2);
+        box-shadow: 0 0 0 3px rgba(164, 139, 255, 0.22);
+    }
+    .component-phone-input__input.is-invalid,
+    .component-phone-input__input.is-invalid:focus {
+        border-color: var(--pn-red);
+        box-shadow: 0 0 0 3px rgba(255, 84, 112, 0.22);
+    }
+    .component-phone-input__dropdown {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(124, 92, 255, 0.12);
+    }
+    .component-phone-input__search-wrapper {
+        border-bottom-color: var(--pn-border-soft);
+    }
+    .component-phone-input__search {
+        background: rgba(8, 9, 12, 0.6);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-phone-input__search::placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-phone-input__search:focus {
+        border-color: var(--pn-accent-2);
+        box-shadow: 0 0 0 2px rgba(164, 139, 255, 0.18);
+    }
+    .component-phone-input__option {
+        color: var(--pn-text);
+    }
+    .component-phone-input__option:hover,
+    .component-phone-input__option:focus {
+        background: rgba(124, 92, 255, 0.1);
+    }
+    .component-phone-input__option--selected {
+        background: rgba(124, 92, 255, 0.18);
+        color: var(--pn-text);
+    }
+    .component-phone-input__option-dial {
+        color: var(--pn-text-dim);
+    }
+
+    // ── PinnedFeatureShowcase ────────────────────────────────────────────
+    .component-pinned-feature-showcase,
+    .component-pinned-feature-showcase__item {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-pinned-feature-showcase__item:hover {
+        border-color: var(--pn-border);
+        box-shadow: 0 0 20px rgba(124, 92, 255, 0.18);
+    }
+
+    // ── Pipeline ─────────────────────────────────────────────────────────
+    .component-pipeline {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+    }
+    .component-pipeline__step {
+        background: transparent;
+        border-right-color: var(--pn-border-soft);
+    }
+    .component-pipeline__step--complete {
+        background: rgba(124, 92, 255, 0.06);
+    }
+    .component-pipeline__num,
+    .component-pipeline__icon,
+    .component-pipeline__sub {
+        color: var(--pn-text-dim);
+    }
+    .component-pipeline__title {
+        color: var(--pn-text);
+    }
+
+    // ── PricingCard ──────────────────────────────────────────────────────
+    .component-pricing-card {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-pricing-card__description {
+        color: var(--pn-text-dim);
+    }
+    .component-pricing-card__action--primary {
+        background: linear-gradient(135deg, var(--pn-accent), #ff5fb8);
+        color: #08090c;
+        border-color: var(--pn-accent);
+        box-shadow: 0 0 18px rgba(124, 92, 255, 0.4);
+    }
+    .component-pricing-card__action--primary:hover {
+        box-shadow: 0 0 32px rgba(124, 92, 255, 0.7);
+    }
+    .component-pricing-card__action--outline {
+        background: transparent;
+        color: var(--pn-text);
+        border-color: var(--pn-border);
+    }
+    .component-pricing-card__action--outline:hover:not(:disabled) {
+        background: rgba(124, 92, 255, 0.08);
+        border-color: var(--pn-accent);
+        color: var(--pn-text);
+    }
+    .component-pricing-card__feature-icon {
+        color: #2ecc71;
+    }
+
+    // ── RangeSlider ──────────────────────────────────────────────────────
+    .component-range-slider__track {
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-range-slider__fill {
+        background: var(--pn-accent);
+        box-shadow: 0 0 8px rgba(124, 92, 255, 0.5);
+    }
+    .component-range-slider__thumb {
+        background: var(--pn-accent);
+        border-color: var(--pn-bg);
+        box-shadow: 0 0 12px rgba(124, 92, 255, 0.6);
+    }
+    .component-range-slider__tooltip {
+        background: var(--pn-panel-solid);
+        color: var(--pn-text);
+        border: 1px solid var(--pn-border);
+        box-shadow: 0 0 12px rgba(124, 92, 255, 0.3);
+    }
+    .component-range-slider__label {
+        color: var(--pn-text);
+    }
+    .component-range-slider__value-badge,
+    .component-range-slider__tick-label {
+        color: var(--pn-text-dim);
+    }
+    .component-range-slider__tick::before {
+        background: var(--pn-text-faint);
+    }
+    .component-range-slider__tick--filled::before {
+        background: var(--pn-accent);
+    }
+    .component-range-slider--error .component-range-slider__track {
+        background: rgba(255, 84, 112, 0.18);
+    }
+
+    // ── Rating ───────────────────────────────────────────────────────────
+    .component-rating__star {
+        color: var(--pn-text-faint);
+    }
+    .component-rating__star--active,
+    .component-rating__star--hover {
+        color: #ffb547;
+        text-shadow: 0 0 10px rgba(255, 181, 71, 0.5);
+    }
+
+    // ── RichPageHeader — backstop for its body copy ──────────────────────
+    .component-rich-page-header__title {
+        color: var(--pn-text);
+    }
+    .component-rich-page-header__sub {
+        color: var(--pn-text);
+    }
+    .component-rich-page-header__description {
+        color: var(--pn-text-dim);
+    }
+
+    // ── SectionCard backstop ─────────────────────────────────────────────
+    .component-section-card__heading {
+        color: var(--pn-text);
+    }
+
+    // ── SideNav ──────────────────────────────────────────────────────────
+    .component-side-nav {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-side-nav__item {
+        color: var(--pn-text-dim);
+    }
+    .component-side-nav__item:hover {
+        background: rgba(124, 92, 255, 0.08);
+        color: var(--pn-text);
+    }
+    .component-side-nav__item--active {
+        background: rgba(124, 92, 255, 0.15);
+        color: var(--pn-text);
+        box-shadow: inset 3px 0 0 var(--pn-accent);
+    }
+
+    // ── SingleCardSelect ─────────────────────────────────────────────────
+    .component-single-card-select__card {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-single-card-select__card:hover {
+        background: rgba(124, 92, 255, 0.06);
+        border-color: var(--pn-border);
+    }
+    .component-single-card-select__card--selected,
+    .component-single-card-select__card--selected:hover {
+        background: rgba(124, 92, 255, 0.14);
+        border-color: var(--pn-accent);
+        box-shadow: 0 0 0 1px var(--pn-accent),
+            0 0 12px rgba(124, 92, 255, 0.25);
+    }
+    .component-single-card-select__title {
+        color: var(--pn-text);
+    }
+    .component-single-card-select__desc {
+        color: var(--pn-text-dim);
+    }
+
+    // ── Slider ───────────────────────────────────────────────────────────
+    .component-slider__track {
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-slider__fill {
+        background: var(--pn-accent);
+        box-shadow: 0 0 8px rgba(124, 92, 255, 0.5);
+    }
+    .component-slider__thumb {
+        background: var(--pn-accent);
+        border-color: var(--pn-bg);
+        box-shadow: 0 0 12px rgba(124, 92, 255, 0.6);
+    }
+    .component-slider__label {
+        color: var(--pn-text);
+    }
+
+    // ── Spinner ──────────────────────────────────────────────────────────
+    .component-spinner {
+        color: var(--pn-accent);
+    }
+    .component-spinner__circle {
+        border-color: rgba(90, 96, 107, 0.25);
+        border-top-color: var(--spinner-color, var(--pn-accent));
+    }
+    .component-spinner.component-spinner--primary {
+        --spinner-color: var(--pn-accent);
+    }
+    .component-spinner.component-spinner--secondary {
+        --spinner-color: var(--pn-text-dim);
+    }
+    .component-spinner.component-spinner--info {
+        --spinner-color: var(--pn-accent-2);
+    }
+    .component-spinner__label {
+        color: var(--pn-text-dim);
+    }
+
+    // ── StatCard backstop ────────────────────────────────────────────────
+    .component-stat-card__label {
+        color: var(--pn-text-dim);
+    }
+    .component-stat-card__number {
+        color: var(--pn-text);
+    }
+    .component-stat-card__unit,
+    .component-stat-card__helper,
+    .component-stat-card__footer-extra {
+        color: var(--pn-text-dim);
+    }
+
+    // ── StatusDot ────────────────────────────────────────────────────────
+    .component-status-dot {
+        --dot-color: var(--pn-text-faint);
+        box-shadow: none;
+    }
+    .component-status-dot.component-status-dot--online {
+        --dot-color: #2ecc71;
+    }
+    .component-status-dot.component-status-dot--busy {
+        --dot-color: var(--pn-red);
+    }
+    .component-status-dot.component-status-dot--away {
+        --dot-color: #ffb547;
+    }
+    .component-status-dot.component-status-dot--offline {
+        --dot-color: var(--pn-text-faint);
+    }
+    .component-status-dot__dot {
+        background: var(--dot-color);
+        box-shadow: none;
+    }
+    .component-status-dot__label {
+        color: var(--pn-text-dim);
+    }
+
+    // ── Stepper ──────────────────────────────────────────────────────────
+    .component-stepper__step {
+        color: var(--pn-text-dim);
+    }
+    .component-stepper__step--active {
+        color: var(--pn-text);
+    }
+    .component-stepper__indicator {
+        background: rgba(8, 9, 12, 0.6);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-stepper__step--active .component-stepper__indicator {
+        background: var(--pn-accent);
+        border-color: var(--pn-accent);
+        color: #08090c;
+    }
+    .component-stepper__step--completed .component-stepper__indicator {
+        background: rgba(124, 92, 255, 0.25);
+        border-color: var(--pn-accent);
+        color: var(--pn-text);
+    }
+    .component-stepper__connector {
+        background: var(--pn-border-soft);
+    }
+    .component-stepper__step--completed .component-stepper__connector,
+    .component-stepper__connector--filled {
+        background: var(--pn-accent);
+    }
+
+    // ── Switch ───────────────────────────────────────────────────────────
+    // NOTE: use inset box-shadow instead of `border` for the track outline.
+    // Bootstrap sets `box-sizing: border-box` globally, and the knob is
+    // absolutely positioned with `top/left: 2px` against the padding box —
+    // adding a real border steals 1px off every side and throws the knob
+    // off-center.
+    .component-switch__track {
+        background: rgba(8, 9, 12, 0.7);
+        box-shadow: inset 0 0 0 1px var(--pn-border-soft);
+        transition:
+            background-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+    .component-switch:hover .component-switch__track {
+        box-shadow: inset 0 0 0 1px var(--pn-border);
+    }
+    .component-switch__knob {
+        background: var(--pn-text-dim);
+        box-shadow: none;
+        transition:
+            background-color 0.2s ease,
+            transform var(--switch-transition);
+    }
+    .component-switch__input:checked + .component-switch__track {
+        background: var(--pn-accent);
+        box-shadow:
+            inset 0 0 0 1px var(--pn-accent),
+            0 0 10px rgba(124, 92, 255, 0.45);
+    }
+    .component-switch__input:checked
+        + .component-switch__track
+        .component-switch__knob {
+        background: #ffffff;
+    }
+    .component-switch__input:focus-visible + .component-switch__track {
+        outline: 2px solid var(--pn-accent-2);
+        outline-offset: 2px;
+    }
+    .component-switch--disabled .component-switch__track {
+        opacity: 0.55;
+    }
+    .component-switch__label {
+        color: var(--pn-text);
+    }
+
+    // ── Tag ──────────────────────────────────────────────────────────────
+    .component-tag {
+        background: rgba(164, 139, 255, 0.1);
+        border-color: rgba(164, 139, 255, 0.35);
+        color: var(--pn-accent-2);
+    }
+
+    // ── TagInput ─────────────────────────────────────────────────────────
+    .component-tag-input {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-tag-input:focus-within {
+        border-color: var(--pn-accent-2);
+    }
+    .component-tag-input__tag {
+        background: rgba(124, 92, 255, 0.14);
+        color: var(--pn-text);
+        border-color: rgba(124, 92, 255, 0.4);
+    }
+    .component-tag-input__input {
+        background: transparent;
+        color: var(--pn-text);
+    }
+    .component-tag-input__input::placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-tag-input__recommendations,
+    .component-tag-input__dropdown {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border);
+        color: var(--pn-text);
+    }
+    .component-tag-input__recommendation:hover {
+        background: rgba(124, 92, 255, 0.12);
+    }
+
+    // ── TeamList ─────────────────────────────────────────────────────────
+    .component-team-list,
+    .component-team-list__member {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-team-list__role {
+        color: var(--pn-text-dim);
+    }
+
+    // ── Text / Heading ───────────────────────────────────────────────────
+    .component-text {
+        color: var(--pn-text);
+    }
+    .component-text--muted {
+        color: var(--pn-text-dim);
+    }
+    .component-heading {
+        color: var(--pn-text);
+    }
+
+    // ── TimePicker ───────────────────────────────────────────────────────
+    .component-time-picker__label {
+        color: var(--pn-text);
+    }
+    .component-time-picker__trigger {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-time-picker__trigger:hover {
+        border-color: var(--pn-border);
+    }
+    .component-time-picker__trigger[aria-expanded="true"] {
+        border-color: var(--pn-accent-2);
+    }
+    .component-time-picker__icon,
+    .component-time-picker__placeholder,
+    .component-time-picker__sep,
+    .component-time-picker__clear {
+        color: var(--pn-text-dim);
+    }
+    .component-time-picker__dropdown {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-accent-2);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(164, 139, 255, 0.18);
+    }
+    .component-time-picker__column-item {
+        color: var(--pn-text);
+    }
+    .component-time-picker__column-item:hover {
+        background: rgba(124, 92, 255, 0.08);
+    }
+    .component-time-picker__column-item--selected {
+        background: rgba(124, 92, 255, 0.2);
+        color: var(--pn-text);
+    }
+    .component-time-picker__period-col {
+        border-left-color: var(--pn-border-soft);
+    }
+    .component-time-picker__period-btn {
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text-dim);
+    }
+    .component-time-picker__period-btn:hover {
+        background: rgba(124, 92, 255, 0.08);
+        color: var(--pn-text);
+    }
+    .component-time-picker__period-btn--active {
+        background: var(--pn-accent);
+        border-color: var(--pn-accent);
+        color: #08090c;
+    }
+
+    // ── Toast ────────────────────────────────────────────────────────────
+    .component-toast-item {
+        --ti-bg: var(--pn-panel-solid);
+        --ti-border: var(--pn-border-soft);
+        --ti-color: var(--pn-text);
+        --ti-muted: var(--pn-text-dim);
+        --ti-accent: var(--pn-accent-2);
+        --ti-accent-bg: rgba(164, 139, 255, 0.08);
+        --ti-close-hover: rgba(124, 92, 255, 0.12);
+        // Set box-shadow directly (rather than through the --ti-shadow token)
+        // so the halo always lands — some var() + multi-layer box-shadow
+        // combinations can fail to substitute in older engines.
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(124, 92, 255, 0.18);
+    }
+    .component-toast-item--success {
+        --ti-accent: #2ecc71;
+        --ti-accent-bg: rgba(46, 204, 113, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(46, 204, 113, 0.22);
+    }
+    .component-toast-item--error {
+        --ti-accent: var(--pn-red);
+        --ti-accent-bg: rgba(255, 84, 112, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 84, 112, 0.22);
+    }
+    .component-toast-item--warning {
+        --ti-accent: #ffb547;
+        --ti-accent-bg: rgba(255, 181, 71, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 181, 71, 0.2);
+    }
+    .component-toast-item--info {
+        --ti-accent: var(--pn-accent-2);
+        --ti-accent-bg: rgba(164, 139, 255, 0.1);
+        box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(164, 139, 255, 0.22);
+    }
+    .component-toast-item__close:hover {
+        background: rgba(124, 92, 255, 0.14);
+        color: var(--pn-text);
+    }
+    .component-toast-item__progress {
+        background: rgba(90, 96, 107, 0.18);
+    }
+
+    // ── ToggleCard ───────────────────────────────────────────────────────
+    // ToggleCard uses a `--tc-*` prefix that collides with the global
+    // toolcase design tokens, so its hard-coded defaults shadow them.
+    // Re-declare the collision set on the component itself.
+    .component.component-toggle-card {
+        --tc-text: var(--pn-text);
+        --tc-muted: var(--pn-text-dim);
+        --tc-border: var(--pn-border-soft);
+        --tc-hover-bg: rgba(124, 92, 255, 0.06);
+        --tc-accent: var(--pn-accent);
+        background: var(--pn-panel-solid);
+    }
+    .component.component-toggle-card:hover {
+        border-color: var(--pn-border);
+    }
+    .component-toggle-card--on {
+        background: rgba(124, 92, 255, 0.1);
+        border-color: var(--pn-accent);
+        box-shadow: 0 0 0 1px var(--pn-accent),
+            0 0 12px rgba(124, 92, 255, 0.25);
+    }
+    .component-toggle-card__icon {
+        color: var(--pn-text-dim);
+    }
+    .component-toggle-card--on .component-toggle-card__icon {
+        color: var(--pn-accent);
+    }
+    // Same inset-shadow trick as Switch — see note above.
+    .component-toggle-card__switch {
+        background: rgba(8, 9, 12, 0.7);
+        box-shadow: inset 0 0 0 1px var(--pn-border-soft);
+        transition:
+            background-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+    .component-toggle-card--on .component-toggle-card__switch {
+        background: var(--pn-accent);
+        box-shadow:
+            inset 0 0 0 1px var(--pn-accent),
+            0 0 10px rgba(124, 92, 255, 0.45);
+    }
+    .component-toggle-card__knob {
+        background: var(--pn-text-dim);
+        transition:
+            background-color 0.2s ease,
+            transform 0.2s ease;
+    }
+    .component-toggle-card--on .component-toggle-card__knob {
+        background: #ffffff;
+    }
+    .component-toggle-card__label {
+        color: var(--pn-text);
+    }
+    .component-toggle-card__hint {
+        color: var(--pn-text-dim);
+    }
+
+    // ── TreeView ─────────────────────────────────────────────────────────
+    .component-tree-view,
+    .component-tree-view__node {
+        background: transparent;
+        color: var(--pn-text);
+    }
+    .component-tree-view__node:hover {
+        background: rgba(124, 92, 255, 0.08);
+    }
+    .component-tree-view__node--selected {
+        background: rgba(164, 139, 255, 0.12);
+        color: var(--pn-text);
+    }
+    .component-tree-view__checkbox {
+        accent-color: var(--pn-accent);
+    }
+
+    // ── UserPanel ────────────────────────────────────────────────────────
+    .component-user-panel {
+        background: var(--pn-panel-solid);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-user-panel__name {
+        color: var(--pn-text);
+    }
+    .component-user-panel__email,
+    .component-user-panel__role {
+        color: var(--pn-text-dim);
+    }
+    .component-user-panel__menu-item {
+        color: var(--pn-text);
+    }
+    .component-user-panel__menu-item:hover {
+        background: rgba(124, 92, 255, 0.1);
+    }
+
+    // ── VerticalItemList ─────────────────────────────────────────────────
+    .component-vertical-item-list {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+    }
+    .component-vertical-item-list__item {
+        color: var(--pn-text);
+        border-color: var(--pn-border-soft);
+    }
+    .component-vertical-item-list__item:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+    .component-vertical-item-list__item--active {
+        background: rgba(124, 92, 255, 0.12);
+        box-shadow: inset 3px 0 0 var(--pn-accent);
+    }
+
+    // ── WelcomeGuide (right-side onboarding checklist) ───────────────────
+    .component-welcome-guide {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+    }
+    .component-welcome-guide__left {
+        background: linear-gradient(160deg, var(--pn-panel-solid), var(--pn-bg));
+    }
+    .component-welcome-guide__title {
+        color: var(--pn-text);
+    }
+    .component-welcome-guide__message {
+        color: var(--pn-text-dim);
+    }
+    .component-welcome-guide__right {
+        background: transparent;
+        border-left-color: var(--pn-border-soft);
+    }
+    .component-welcome-guide__step {
+        color: var(--pn-text);
+    }
+    .component-welcome-guide__step:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+    .component-welcome-guide__step-check {
+        border-color: var(--pn-border-soft);
+        background: transparent;
+    }
+    .component-welcome-guide__step--completed .component-welcome-guide__step-check {
+        background: var(--pn-accent);
+        border-color: var(--pn-accent);
+        color: #08090c;
+    }
+    .component-welcome-guide__step--completed .component-welcome-guide__step-label {
+        color: var(--pn-text-faint);
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    //  Sweep — previously-missed component overrides
+    // ═════════════════════════════════════════════════════════════════════
+
+    // ── Alert (variant-local --alert-* tokens shadow any outer override) ─
+    .component-alert {
+        --alert-bg: var(--pn-panel);
+        --alert-border: var(--pn-border-soft);
+        --alert-text: var(--pn-text);
+        --alert-icon: var(--pn-accent-2);
+        --alert-title: var(--pn-text);
+    }
+    .component-alert.alert-primary {
+        --alert-bg: rgba(124, 92, 255, 0.08);
+        --alert-border: rgba(124, 92, 255, 0.35);
+        --alert-text: var(--pn-text);
+        --alert-icon: var(--pn-accent);
+        --alert-title: var(--pn-text);
+    }
+    .component-alert.alert-secondary {
+        --alert-bg: rgba(8, 9, 12, 0.6);
+        --alert-border: var(--pn-border-soft);
+        --alert-text: var(--pn-text-dim);
+        --alert-icon: var(--pn-text-dim);
+        --alert-title: var(--pn-text);
+    }
+    .component-alert.alert-info {
+        --alert-bg: rgba(164, 139, 255, 0.08);
+        --alert-border: rgba(164, 139, 255, 0.35);
+        --alert-text: var(--pn-text);
+        --alert-icon: var(--pn-accent-2);
+        --alert-title: var(--pn-text);
+    }
+    .component-alert.alert-success {
+        --alert-bg: rgba(46, 204, 113, 0.08);
+        --alert-border: rgba(46, 204, 113, 0.35);
+        --alert-text: #bbf7d0;
+        --alert-icon: #2ecc71;
+        --alert-title: #dcfce7;
+    }
+    .component-alert.alert-warning {
+        --alert-bg: rgba(255, 181, 71, 0.08);
+        --alert-border: rgba(255, 181, 71, 0.4);
+        --alert-text: #ffd58a;
+        --alert-icon: #ffb547;
+        --alert-title: #fef3c7;
+    }
+    .component-alert.alert-danger {
+        --alert-bg: rgba(255, 84, 112, 0.08);
+        --alert-border: rgba(255, 84, 112, 0.4);
+        --alert-text: #fecaca;
+        --alert-icon: var(--pn-red);
+        --alert-title: #ffd7e3;
+    }
+
+    // ── Carousel (arrow / dot bgs hardcoded white) ───────────────────────
+    .component-carousel__arrow {
+        background: rgba(8, 9, 12, 0.7);
+        color: var(--pn-text);
+        box-shadow: 0 0 0 1px var(--pn-border-soft),
+            0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+    .component-carousel__arrow:hover {
+        background: rgba(124, 92, 255, 0.2);
+        box-shadow: 0 0 0 1px var(--pn-accent),
+            0 0 16px rgba(124, 92, 255, 0.35);
+    }
+    .component-carousel__dot {
+        background: rgba(255, 255, 255, 0.25);
+    }
+    .component-carousel__dot--active {
+        background: var(--pn-accent);
+        box-shadow: 0 0 8px rgba(124, 92, 255, 0.6);
+    }
+
+    // ── DangerZoneActions ────────────────────────────────────────────────
+    .component-danger-zone-actions {
+        border: 1px solid var(--pn-red);
+        border-radius: 0;
+        background: rgba(255, 84, 112, 0.04);
+    }
+    .component-danger-zone-actions__header,
+    .component-danger-zone-actions__title {
+        font-size: 0.75rem;
+        color: var(--pn-red);
+        text-shadow: 0 0 12px rgba(255, 84, 112, 0.45);
+    }
+    .component-danger-zone-actions__item:not(:last-child) {
+        border-bottom: 1px solid rgba(255, 84, 112, 0.4);
+    }
+    .component-danger-zone-actions__text {
+        color: var(--pn-text-dim);
+        font-size: 1.05rem;
+    }
+
+    // ── Divider ──────────────────────────────────────────────────────────
+    .component-divider.component-divider--horizontal::before,
+    .component-divider.component-divider--horizontal::after,
+    .component-divider.component-divider--vertical::before,
+    .component-divider.component-divider--vertical::after {
+        background-color: var(--pn-border-soft);
+    }
+    .component-divider__label {
+        color: var(--pn-text-dim);
+    }
+
+    // ── EmptyState ───────────────────────────────────────────────────────
+    .component-empty-state {
+        --es-text: var(--pn-text-dim);
+        --es-icon: var(--pn-text-faint);
+    }
+
+    // ── FileTags (Sass vars for badge bg/text) ───────────────────────────
+    .component-file-tags .badge--tag {
+        background: rgba(8, 9, 12, 0.7);
+        color: var(--pn-text-dim);
+    }
+    .component-file-tags .badge--tag:hover {
+        background: rgba(124, 92, 255, 0.15);
+        color: var(--pn-text);
+    }
+    .component-file-tags .badge--tag::after {
+        background: var(--pn-red);
+    }
+    .component-file-tags .badge--add {
+        background: rgba(8, 9, 12, 0.7);
+        color: var(--pn-text-dim);
+    }
+    .component-file-tags .badge--add:hover {
+        background: #2ecc71;
+        color: #08090c;
+    }
+    .component-file-tags__dropdown {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4),
+            0 0 20px rgba(124, 92, 255, 0.12);
+    }
+    .component-file-tags__dropdown .dropdown-item {
+        color: var(--pn-text);
+    }
+    .component-file-tags__dropdown .dropdown-item:hover {
+        background: rgba(124, 92, 255, 0.12);
+        color: var(--pn-text);
+    }
+    .component-file-tags__divider {
+        background: var(--pn-border-soft);
+    }
+    .component-file-tags__search input {
+        background: rgba(8, 9, 12, 0.6);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+    }
+    .component-file-tags__search input::placeholder {
+        color: var(--pn-text-faint);
+    }
+    .component-file-tags__search input:focus {
+        border-color: var(--pn-accent-2);
+    }
+    .component-file-tags__empty {
+        color: var(--pn-text-faint);
+    }
+
+    // ── Kbd ──────────────────────────────────────────────────────────────
+    .component-kbd__key,
+    kbd.component.component-kbd {
+        background: rgba(8, 9, 12, 0.7);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+        box-shadow: 0 1px 0 rgba(124, 92, 255, 0.25);
+        font-family: var(--pn-font-mono);
+    }
+    .component-kbd__separator {
+        color: var(--pn-text-faint);
+    }
+
+    // ── QueuedFile (hardcoded --qf-* defaults + Sass vars) ───────────────
+    .component-queued-file {
+        --qf-bg: var(--pn-panel);
+        --qf-border: var(--pn-border-soft);
+        --qf-text: var(--pn-text);
+        --qf-muted: var(--pn-text-dim);
+    }
+    .component-queued-file:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+
+    // ── Skeleton (gradient locked to light) ──────────────────────────────
+    .component-skeleton {
+        background: linear-gradient(
+            90deg,
+            rgba(90, 96, 107, 0.1) 25%,
+            rgba(124, 92, 255, 0.14) 50%,
+            rgba(90, 96, 107, 0.1) 75%
+        );
+        background-size: 200% 100%;
+    }
+
+    // ── TabSections (hardcoded --pw-* fallbacks) ─────────────────────────
+    .component-tab-sections__header {
+        border-bottom-color: var(--pn-border-soft);
+    }
+    .component-tab-sections__tab {
+        color: var(--pn-text-dim);
+    }
+    .component-tab-sections__tab:hover:not(:disabled) {
+        color: var(--pn-text);
+    }
+    .component-tab-sections__tab--active {
+        color: var(--pn-text);
+    }
+    .component-tab-sections__tab--active::after {
+        background: var(--pn-accent);
+        box-shadow: 0 0 8px rgba(124, 92, 255, 0.5);
+    }
+
+    // ── Table (everything hardcoded, needs full sweep) ───────────────────
+    .component-table {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        // Clear the Bootstrap-style light "edge fade" background-image —
+        // it paints solid white stripes otherwise.
+        background-image: none;
+    }
+    .component-table__head {
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-table__th {
+        color: var(--pn-text-dim);
+        border-bottom-color: var(--pn-border-soft);
+    }
+    .component-table__td {
+        color: var(--pn-text);
+        border-bottom-color: var(--pn-border-soft);
+    }
+    .component-table__row {
+        background: transparent;
+    }
+    .component-table__empty {
+        color: var(--pn-text-faint);
+    }
+    .component-table--striped .component-table__row:nth-child(even) {
+        background: rgba(124, 92, 255, 0.04);
+    }
+    .component-table--hoverable .component-table__row:hover {
+        background: rgba(124, 92, 255, 0.1);
+    }
+
+    // ── Timeline (Sass-var-driven; override by selector) ─────────────────
+    .component-timeline__line {
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(124, 92, 255, 0.1) 18%,
+            rgba(124, 92, 255, 0.45) 55%,
+            rgba(124, 92, 255, 0.1) 82%,
+            transparent 100%
+        );
+        box-shadow:
+            0 0 0 1px rgba(124, 92, 255, 0.1),
+            0 20px 60px rgba(124, 92, 255, 0.15);
+    }
+    .component-timeline__dot {
+        background: var(--pn-accent);
+        box-shadow:
+            0 0 0 6px rgba(124, 92, 255, 0.15),
+            0 8px 28px rgba(124, 92, 255, 0.35);
+    }
+    .component-timeline__card {
+        background: var(--pn-panel);
+        border-color: var(--pn-border-soft);
+        color: var(--pn-text);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4),
+            0 0 16px rgba(124, 92, 255, 0.1);
+    }
+    .component-timeline__title {
+        color: var(--pn-text);
+    }
+    .component-timeline__subtitle {
+        color: var(--pn-text-dim);
+    }
+    .component-timeline__description {
+        color: var(--pn-text-dim);
+    }
+    .component-timeline__date,
+    .component-timeline__meta-text {
+        color: var(--pn-text-faint);
+    }
+    .component-timeline__badge,
+    .component-timeline__icon {
+        background: rgba(124, 92, 255, 0.08);
+        color: var(--pn-accent-2);
+    }
+    .component-timeline__item--completed .component-timeline__dot {
+        background: #2ecc71;
+        box-shadow:
+            0 0 0 6px rgba(46, 204, 113, 0.15),
+            0 10px 30px rgba(46, 204, 113, 0.3);
+    }
+    .component-timeline__item--upcoming .component-timeline__dot {
+        background: rgba(90, 96, 107, 0.4);
+        box-shadow: 0 0 0 6px rgba(90, 96, 107, 0.1);
+    }
+
+    // ── Tooltip (hardcoded dark-on-white, swap for neon panel) ───────────
+    .component-tooltip__bubble {
+        background: var(--pn-panel-solid);
+        color: var(--pn-text);
+        border: 1px solid var(--pn-border);
+        box-shadow: 0 0 12px rgba(124, 92, 255, 0.3);
+    }
+
+    // ── UsageSummaryPanel (Sass-var driven) ──────────────────────────────
+    .component-usage-summary-panel__header h3,
+    .component-usage-summary-panel__label {
+        color: var(--pn-text-dim);
+    }
+    .component-usage-summary-panel__progress {
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-usage-summary-panel__progress-bar {
+        background: var(--pn-accent);
+        box-shadow: 0 0 8px rgba(124, 92, 255, 0.5);
+    }
+    .component-usage-summary-panel__progress-bar--warning {
+        background: var(--pn-red);
+        box-shadow: 0 0 8px rgba(255, 84, 112, 0.5);
+    }
+    .component-usage-summary-panel__assistive-text {
+        color: var(--pn-text-faint);
+    }
+
+    // ── NodeEditor (canvas dot pattern on white bg) ──────────────────────
+    .component-node-editor {
+        border-color: var(--pn-border-soft);
+    }
+    .component-node-editor__toolbar {
+        background: rgba(8, 9, 12, 0.5);
+        border-bottom-color: var(--pn-border-soft);
+    }
+    .component-node-editor__toolbar-sep {
+        background: var(--pn-border-soft);
+    }
+    .component-node-editor__canvas {
+        background:
+            radial-gradient(circle,
+                rgba(124, 92, 255, 0.22) 1px,
+                transparent 1px);
+    }
+
+    // ── CdnMap (light panel + grid + dark dots) ──────────────────────────
+    .component-cdn-map {
+        background: linear-gradient(
+            180deg,
+            var(--pn-bg-2) 0%,
+            var(--pn-bg) 100%
+        );
+        border-color: var(--pn-border-soft);
+    }
+    .component-cdn-map__grid {
+        background-image:
+            linear-gradient(
+                rgba(90, 96, 107, 0.18) 1px,
+                transparent 1px),
+            linear-gradient(
+                90deg,
+                rgba(90, 96, 107, 0.18) 1px,
+                transparent 1px);
+    }
+    .component-cdn-map__node {
+        background: var(--pn-accent-2);
+        box-shadow: 0 0 6px rgba(164, 139, 255, 0.6);
+    }
+    .component-cdn-map__node--accent {
+        background: var(--pn-accent);
+        box-shadow: 0 0 6px rgba(124, 92, 255, 0.6);
+    }
+
+    // ── ImageCrop (--ic-* hardcoded light defaults) ──────────────────────
+    .component-image-crop {
+        --ic-bg: var(--pn-panel);
+        --ic-border: var(--pn-border-soft);
+        --ic-muted: var(--pn-text-dim);
+        --ic-text: var(--pn-text);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Game Jam / Arcade neon overrides
+    // ═══════════════════════════════════════════════════════════════════════
+    // Default look is flat / light. Neon scope reapplies dashed borders,
+    // glowing accents, mono display fonts to land on a coherent dark arcade
+    // aesthetic.
+
+    // ── Marquee ──────────────────────────────────────────────────────────
+    .component-marquee {
+        --mq-bg: var(--pn-panel);
+        --mq-color: var(--pn-magenta);
+        --mq-border: var(--pn-border);
+        border-top-style: solid;
+        border-bottom-style: solid;
+    }
+    .component-marquee__sep {
+        color: var(--pn-cyan);
+    }
+
+    // ── CountdownTimer ───────────────────────────────────────────────────
+    .component-countdown {
+        --cd-color: var(--pn-magenta);
+        --cd-color-lead: var(--pn-cyan);
+        --cd-bg: var(--pn-panel-solid);
+        --cd-border: var(--pn-border);
+        --cd-muted: var(--pn-text-dim);
+    }
+    .component-countdown__cell { border-style: solid; }
+    .component-countdown__num {
+        text-shadow: var(--pn-shadow);
+    }
+    .component-countdown__cell--lead .component-countdown__num {
+        text-shadow: var(--pn-shadow-cyan);
+    }
+    .component-countdown__label {
+        color: var(--pn-magenta);
+        font-family: var(--pn-font-mono);
+    }
+
+    // ── CycleWheel ───────────────────────────────────────────────────────
+    .component-cycle-wheel {
+        --cw-accent: var(--pn-magenta);
+        --cw-value: var(--pn-cyan);
+        --cw-bg: var(--pn-panel-solid);
+        --cw-text: var(--pn-text);
+        --cw-muted: var(--pn-magenta);
+        --cw-border: var(--pn-magenta);
+        --cw-pill-bg: var(--pn-lime);
+        --cw-pill-color: #08090c;
+    }
+    .component-cycle-wheel__core {
+        border-style: solid;
+        box-shadow: inset 0 0 32px rgba(124, 92, 255, 0.18);
+    }
+    .component-cycle-wheel__core-value {
+        text-shadow: var(--pn-shadow-cyan);
+    }
+    .component-cycle-wheel__ring text {
+        font-family: var(--pn-font-mono);
+        fill: var(--pn-magenta);
+    }
+
+    // ── SprintChain ──────────────────────────────────────────────────────
+    .component-sprint-chain {
+        --sc-bg: var(--pn-panel-solid);
+        --sc-bg-muted: rgba(124, 92, 255, 0.06);
+        --sc-border: var(--pn-border);
+        --sc-text: var(--pn-text);
+        --sc-muted: var(--pn-text-dim);
+        --sc-faint: var(--pn-text-faint);
+        --sc-accent: var(--pn-magenta);
+        --sc-success: var(--pn-lime);
+        --sc-info: var(--pn-cyan);
+    }
+    .component-sprint-chain__header {
+        color: var(--pn-magenta);
+        font-family: var(--pn-font-mono);
+    }
+    .component-sprint-chain__track { border-style: solid; }
+    .component-sprint-chain__cell {
+        border-right-style: solid;
+        font-family: var(--pn-font-mono);
+    }
+    .component-sprint-chain__cell--past {
+        background: repeating-linear-gradient(135deg, transparent 0 4px, rgba(124, 92, 255, 0.06) 4px 5px);
+    }
+    .component-sprint-chain__cell--now {
+        box-shadow: inset 0 0 24px rgba(124, 92, 255, 0.18);
+
+        .component-sprint-chain__num { text-shadow: var(--pn-shadow-cyan); color: var(--pn-cyan); }
+
+        &::after {
+            content: "▼";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--pn-magenta);
+            font-size: 10px;
+            background: none;
+            height: auto;
+            right: auto;
+        }
+    }
+
+    // ── BriefCard ────────────────────────────────────────────────────────
+    .component-brief-card {
+        --bc-bg: var(--pn-panel-solid);
+        --bc-border: var(--pn-border);
+        --bc-text: var(--pn-text);
+        --bc-muted: var(--pn-text-dim);
+        --bc-faint: var(--pn-text-faint);
+        --bc-easy: var(--pn-magenta);
+        --bc-medium: var(--pn-lime);
+        --bc-hard: var(--pn-red);
+
+        border-style: solid;
+        border-top: 1px solid var(--bc-accent);
+    }
+    .component-brief-card:hover {
+        box-shadow: 0 0 32px rgba(124, 92, 255, 0.22);
+    }
+    .component-brief-card__id { font-family: var(--pn-font-mono); }
+    .component-brief-card__diff {
+        border-style: solid;
+        font-family: var(--pn-font-mono);
+    }
+    .component-brief-card__title {
+        color: var(--bc-accent);
+    }
+    .component-brief-card__meta {
+        border-top-style: solid;
+        font-family: var(--pn-font-mono);
+    }
+
+    // ── StateMachine ─────────────────────────────────────────────────────
+    .component-state-machine {
+        --sm-bg: var(--pn-panel-solid);
+        --sm-bg-active: rgba(124, 92, 255, 0.08);
+        --sm-border: var(--pn-border);
+        --sm-text: var(--pn-text);
+        --sm-muted: var(--pn-text-dim);
+        --sm-faint: var(--pn-text-faint);
+        --sm-accent: var(--pn-cyan);
+        --sm-success: var(--pn-lime);
+        --sm-info: var(--pn-cyan);
+
+        border-style: solid;
+    }
+    .component-state-machine__cell { border-right-style: solid; }
+    .component-state-machine__cell--active {
+        .component-state-machine__name { text-shadow: var(--pn-shadow-cyan); }
+
+        &::before { box-shadow: var(--pn-shadow-cyan); }
+    }
+    .component-state-machine__cell--reserved .component-state-machine__name::after {
+        content: " ⌁";
+        color: var(--pn-magenta);
+    }
+
+    // ── ChipGroup ────────────────────────────────────────────────────────
+    .component-chip-group {
+        --cg-bg: var(--pn-panel-solid);
+        --cg-border: var(--pn-border-soft);
+        --cg-border-strong: var(--pn-magenta);
+        --cg-text: var(--pn-text);
+        --cg-muted: var(--pn-text-dim);
+        --cg-faint: var(--pn-text-faint);
+        --cg-accent: var(--pn-magenta);
+        --cg-accent-contrast: #08090c;
+    }
+    .component-chip-group--bordered { border-style: solid; }
+    .component-chip-group__title {
+        color: var(--pn-cyan);
+    }
+    .component-chip-group__chip {
+        border-style: solid;
+        font-family: var(--pn-font-mono);
+
+        &:hover:not(:disabled) {
+            color: var(--pn-cyan);
+            border-color: var(--pn-cyan);
+            background: var(--pn-panel-solid);
+        }
+    }
+
+    // ── PhaseGrid ────────────────────────────────────────────────────────
+    .component-phase-grid {
+        --pg-bg: var(--pn-panel-solid);
+        --pg-bg-lit: rgba(164, 139, 255, 0.06);
+        --pg-border: var(--pn-border);
+        --pg-text: var(--pn-text);
+        --pg-muted: var(--pn-text-dim);
+        --pg-faint: var(--pn-text-faint);
+        --pg-accent: var(--pn-cyan);
+        --pg-success: var(--pn-lime);
+        --pg-info: var(--pn-cyan);
+        --pg-info-bg: rgba(164, 139, 255, 0.08);
+
+        border-style: solid;
+    }
+    .component-phase-grid__cell {
+        border-right-style: solid;
+        border-bottom-style: solid;
+    }
+    .component-phase-grid__title {
+        color: var(--pn-magenta);
+    }
+    .component-phase-grid__cmd {
+        font-family: var(--pn-font-mono);
+        border-style: solid;
+    }
+
+    // ── ScoringRules ─────────────────────────────────────────────────────
+    .component-scoring-rules {
+        --sr-bg: var(--pn-panel-solid);
+        --sr-border: var(--pn-border);
+        --sr-text: var(--pn-text);
+        --sr-muted: var(--pn-text-dim);
+        --sr-faint: var(--pn-text-faint);
+        --sr-accent: var(--pn-magenta);
+        --sr-info: var(--pn-cyan);
+        --sr-success: var(--pn-lime);
+        --sr-warning: #ffb547;
+        --sr-danger: var(--pn-red);
+
+        border-style: solid;
+    }
+    .component-scoring-rules__row { border-bottom-style: solid; }
+    .component-scoring-rules__title {
+    }
+    .component-scoring-rules__pts {
+        color: var(--pn-cyan);
+    }
+
+    // ── TierLadder ───────────────────────────────────────────────────────
+    .component-tier-ladder {
+        --tl-bg: var(--pn-panel-solid);
+        --tl-bg-current: rgba(164, 139, 255, 0.08);
+        --tl-border: var(--pn-border);
+        --tl-text: var(--pn-text);
+        --tl-muted: var(--pn-text-dim);
+        --tl-faint: var(--pn-text-faint);
+        --tl-accent: var(--pn-magenta);
+        --tl-info: var(--pn-cyan);
+        --tl-warning: var(--pn-lime);
+        --tl-success: var(--pn-lime);
+        --tl-danger: var(--pn-red);
+
+        border: 1px solid var(--pn-magenta);
+    }
+    .component-tier-ladder__title {
+        color: var(--pn-magenta);
+    }
+    .component-tier-ladder__row { border-bottom-style: solid; }
+    .component-tier-ladder__name {
+    }
+    .component-tier-ladder__row--current {
+        .component-tier-ladder__name { color: var(--pn-cyan); }
+        .component-tier-ladder__range { color: var(--pn-cyan); }
+    }
+    .component-tier-ladder__dot { box-shadow: 0 0 8px currentColor; }
+    .component-tier-ladder__summary { border-top-style: solid; }
+
+    // ── Leaderboard ──────────────────────────────────────────────────────
+    .component-leaderboard {
+        --lb-bg: var(--pn-panel-solid);
+        --lb-bg-hover: rgba(124, 92, 255, 0.06);
+        --lb-bg-me: rgba(164, 139, 255, 0.08);
+        --lb-border: var(--pn-border);
+        --lb-text: var(--pn-text);
+        --lb-muted: var(--pn-text-dim);
+        --lb-faint: var(--pn-text-faint);
+        --lb-accent: var(--pn-magenta);
+        --lb-info: var(--pn-cyan);
+        --lb-warning: var(--pn-lime);
+        --lb-success: var(--pn-lime);
+        --lb-danger: var(--pn-red);
+
+        border-style: solid;
+    }
+    .component-leaderboard__head {
+        border-bottom: 1px solid var(--pn-magenta);
+        color: var(--pn-magenta);
+        font-family: var(--pn-font-mono);
+    }
+    .component-leaderboard__row { border-bottom-style: solid; }
+    .component-leaderboard__row--me { border-left-color: var(--pn-cyan); }
+    .component-leaderboard__avatar {
+        border-style: solid;
+    }
+    .component-leaderboard__tier {
+        border-style: solid;
+        font-family: var(--pn-font-mono);
+    }
+    .component-leaderboard__pts {
+        color: var(--pn-cyan);
+    }
+    .component-leaderboard__row--top1 .component-rank-cell {
+        text-shadow: 0 0 12px var(--pn-lime);
+    }
+
+    // ── LeaderboardTrend ─────────────────────────────────────────────────
+    .component-leaderboard-trend {
+        --lbt-up: var(--pn-lime);
+        --lbt-down: var(--pn-red);
+        --lbt-flat: var(--pn-text-faint);
+    }
+
+    // ── RankCell ─────────────────────────────────────────────────────────
+    .component-rank-cell {
+        --rc-rest: var(--pn-text-dim);
+        --rc-top1: var(--pn-lime);
+        --rc-top2: var(--pn-cyan);
+        --rc-top3: var(--pn-magenta);
+    }
+    .component-rank-cell--top1 { text-shadow: 0 0 12px var(--pn-lime); }
+
+    // ── Stamp ────────────────────────────────────────────────────────────
+    .component-stamp {
+        --st-bg: var(--pn-magenta);
+        --st-color: #08090c;
+    }
+    .component-stamp--pink   { --st-bg: var(--pn-magenta); --st-color: #08090c; }
+    .component-stamp--yellow { --st-bg: var(--pn-lime); --st-color: #08090c; }
+    .component-stamp--red    { --st-bg: var(--pn-red); --st-color: #08090c; }
+    .component-stamp--cyan   { --st-bg: var(--pn-cyan); --st-color: #08090c; }
+    .component-stamp--green  { --st-bg: var(--pn-lime); --st-color: #08090c; }
+
+    // ── GameShowcaseCard ─────────────────────────────────────────────────
+    .component-game-showcase {
+        --gs-bg: var(--pn-panel-solid);
+        --gs-bg-art: var(--pn-bg-2);
+        --gs-border: var(--pn-border);
+        --gs-text: var(--pn-cyan);
+        --gs-muted: var(--pn-text-dim);
+        --gs-faint: var(--pn-text-faint);
+        --gs-success: var(--pn-lime);
+        --gs-success-bg: rgba(182, 255, 60, 0.08);
+        --gs-danger: var(--pn-red);
+        --gs-danger-bg: rgba(255, 84, 112, 0.08);
+
+        border-style: solid;
+    }
+    .component-game-showcase__art {
+        border-bottom-style: solid;
+        background:
+            repeating-linear-gradient(45deg, rgba(124, 92, 255, 0.08) 0 4px, transparent 4px 10px),
+            var(--pn-bg-2);
+    }
+    .component-game-showcase__placeholder {
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text-faint);
+    }
+    .component-game-showcase__title {
+    }
+    .component-game-showcase__foot { border-top-style: solid; }
+    .component-game-showcase__comp {
+        border-style: solid;
+
+        &--yes { box-shadow: 0 0 6px var(--pn-lime); }
+        &--flag { box-shadow: 0 0 6px var(--pn-red); }
+    }
+
+    // ── LiveFeed ─────────────────────────────────────────────────────────
+    .component-live-feed {
+        --lf-bg: var(--pn-panel-solid);
+        --lf-border: var(--pn-border);
+        --lf-text: var(--pn-text);
+        --lf-muted: var(--pn-text-dim);
+        --lf-faint: var(--pn-text-faint);
+        --lf-accent: var(--pn-magenta);
+        --lf-info: var(--pn-cyan);
+        --lf-warning: var(--pn-lime);
+        --lf-danger: var(--pn-red);
+
+        border-style: solid;
+    }
+    .component-live-feed__head {
+        border-bottom: 1px solid var(--pn-magenta);
+        color: var(--pn-magenta);
+        font-family: var(--pn-font-mono);
+    }
+    .component-live-feed__dot { box-shadow: 0 0 12px currentColor; }
+    .component-live-feed__row { border-bottom-style: solid; }
+    .component-live-feed__msg {
+        b { color: var(--pn-cyan); }
+        i { color: var(--pn-magenta); }
+    }
+    .component-live-feed__actor { color: var(--pn-cyan); }
+    .component-live-feed__tag {
+        border-style: solid;
+        font-family: var(--pn-font-mono);
+    }
+
+    // ── PulseIndicator ───────────────────────────────────────────────────
+    .component-pulse-indicator {
+        --pi-color: var(--pn-magenta);
+        font-family: var(--pn-font-mono);
+    }
+    .component-pulse-indicator__dot { box-shadow: 0 0 12px currentColor; }
+
+    // ── SectionFlag ──────────────────────────────────────────────────────
+    .component-section-flag {
+        --sf-text: var(--pn-magenta);
+        --sf-muted: var(--pn-text-dim);
+    }
+    .component-section-flag__title {
+        padding: 0 8px;
+
+        &::before { content: "« "; }
+        &::after  { content: " »"; }
+    }
+    .component-section-flag__sub {
+        font-family: var(--pn-font-mono);
+    }
+
+    // ── HeroStatsBar ─────────────────────────────────────────────────────
+    .component-hero-stats-bar {
+        --hsb-bg: transparent;
+        --hsb-border: var(--pn-border);
+        --hsb-text: var(--pn-cyan);
+        --hsb-muted: var(--pn-magenta);
+        --hsb-faint: var(--pn-text-dim);
+        --hsb-accent: var(--pn-magenta);
+        --hsb-danger: var(--pn-red);
+
+        border-style: solid;
+    }
+    .component-hero-stats-bar__cell { border-right-style: solid; }
+    .component-hero-stats-bar__key { font-family: var(--pn-font-mono); }
+    .component-hero-stats-bar__value {
+        text-shadow: var(--pn-shadow-cyan);
+    }
+    .component-hero-stats-bar__cell--zero .component-hero-stats-bar__value {
+        text-shadow: 0 0 16px rgba(255, 84, 112, 0.4);
+    }
+
+    // ╔═══════════════════════════════════════════════════════════════════╗
+    // ║  ARCADE FORMS SWEEP (§2.2)                                         ║
+    // ║  Force dashed borders, sharp corners, mono input font + pixel     ║
+    // ║  labels for every form-shaped component the library ships.        ║
+    // ╚═══════════════════════════════════════════════════════════════════╝
+
+    // Inputs / textareas / selects / number / phone / time / tag / color /
+    // dropdown trigger surfaces — share the same arcade chrome.
+    .component-input,
+    .component-input__input,
+    .component-textarea,
+    .component-textarea__input,
+    .component-form-input__control,
+    .component-select,
+    .component-select__trigger,
+    .component-number-input,
+    .component-number-input__input,
+    .component-otp-input__cell,
+    .component-phone-input,
+    .component-phone-input__input,
+    .component-time-picker__field,
+    .component-date-picker__field,
+    .component-tag-input,
+    .component-tag-input__input,
+    .component-color-picker__field,
+    .component-icon-picker__trigger,
+    .component-extended-select__trigger,
+    .component-dropdown__trigger,
+    .component-dropdown__control {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-text);
+        font-family: var(--pn-font-mono);
+    }
+
+    .component-input__input:focus,
+    .component-textarea__input:focus,
+    .component-form-input__control:focus,
+    .component-select__trigger:focus,
+    .component-number-input__input:focus,
+    .component-phone-input__input:focus,
+    .component-time-picker__field:focus,
+    .component-date-picker__field:focus,
+    .component-tag-input__input:focus,
+    .component-color-picker__field:focus,
+    .component-icon-picker__trigger:focus,
+    .component-extended-select__trigger:focus,
+    .component-dropdown__trigger:focus,
+    .component-dropdown__control:focus,
+    .component-input--focus,
+    .component-textarea--focus,
+    .component-tag-input--focus,
+    .component-phone-input--focus {
+        border-color: var(--pn-cyan);
+        box-shadow: 0 0 0 2px rgba(164, 139, 255, 0.18);
+        outline: none;
+    }
+
+    .component-input__input::placeholder,
+    .component-textarea__input::placeholder,
+    .component-form-input__control::placeholder,
+    .component-number-input__input::placeholder,
+    .component-phone-input__input::placeholder,
+    .component-tag-input__input::placeholder {
+        color: var(--pn-text-faint);
+    }
+
+    // Dropdown / ExtendedSelect listbox panels — dashed border + neon glow.
+    .component-dropdown__menu,
+    .component-extended-select__menu,
+    .component-extended-select__panel,
+    .component-select__menu,
+    .component-icon-picker__panel,
+    .component-color-picker__panel,
+    .component-time-picker__panel,
+    .component-date-picker__panel {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        box-shadow:
+            0 24px 48px rgba(0, 0, 0, 0.5),
+            0 0 24px rgba(124, 92, 255, 0.15);
+        font-family: var(--pn-font-mono);
+    }
+
+    // Caret / arrow icons inside form triggers tint magenta.
+    .component-select__caret,
+    .component-extended-select__caret,
+    .component-dropdown__caret,
+    .component-time-picker__caret,
+    .component-date-picker__caret,
+    .component-icon-picker__caret {
+        color: var(--pn-magenta);
+    }
+
+    // Checkbox / Radio — square dashed box (radio still circular).
+    .component-checkbox__box,
+    .component-checkbox-group__option-box {
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        background: var(--pn-panel-solid);
+    }
+    .component-checkbox--checked .component-checkbox__box,
+    .component-checkbox__input:checked + .component-checkbox__box,
+    .component-checkbox-group__option--checked .component-checkbox-group__option-box {
+        background: var(--pn-magenta);
+        border-color: var(--pn-magenta);
+        border-style: solid;
+        box-shadow: 0 0 8px rgba(124, 92, 255, 0.6);
+    }
+    .component-radio__circle,
+    .component-radio-group__option-circle {
+        border: 1px solid var(--pn-border);
+        border-radius: 50%;
+        background: var(--pn-panel-solid);
+    }
+    .component-radio--checked .component-radio__circle,
+    .component-radio__input:checked + .component-radio__circle,
+    .component-radio-group__option--checked .component-radio-group__option-circle {
+        border-color: var(--pn-magenta);
+        border-style: solid;
+        box-shadow: 0 0 8px rgba(124, 92, 255, 0.6);
+    }
+
+    // Switch — pill shape kept (50% on track), dashed border, cyan glow on.
+    .component-switch__track {
+        border: 1px solid var(--pn-border);
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-switch--on .component-switch__track,
+    .component-switch__input:checked + .component-switch__track {
+        background: var(--pn-magenta);
+        border-style: solid;
+        border-color: var(--pn-magenta);
+    }
+    .component-switch--on .component-switch__thumb,
+    .component-switch__input:checked + .component-switch__track .component-switch__thumb {
+        box-shadow: 0 0 8px var(--pn-cyan);
+    }
+
+    // Range / slider tracks — dashed outline, magenta filled segment.
+    .component-range-slider__track,
+    .component-slider__track {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-range-slider__fill,
+    .component-slider__fill,
+    .component-slider__progress {
+        background: var(--pn-magenta);
+        box-shadow: 0 0 12px rgba(124, 92, 255, 0.55);
+        border-radius: 0;
+    }
+    .component-range-slider__thumb,
+    .component-slider__thumb {
+        background: var(--pn-magenta);
+        border: 1px solid var(--pn-bg);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--pn-magenta);
+    }
+
+    // Rating — keep stars as-is; just colour them.
+    .component-rating__star--filled {
+        color: var(--pn-yellow);
+        text-shadow: 0 0 12px rgba(255, 216, 60, 0.5);
+    }
+
+    // Labels / helpers / form sections.
+    .component-label,
+    .component-form-input__label,
+    .component-tag-input__label,
+    .component-checkbox-group__label,
+    .component-radio-group__label,
+    .component-multi-card-select__label,
+    .component-single-card-select__label,
+    .component-card-options__label,
+    .component-toggle-card__label,
+    .component-form__section-title {
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: var(--pn-pink-alt);
+    }
+    .component-helper-text {
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text-dim);
+    }
+    .component-helper-text--error {
+        color: var(--pn-red);
+        border-left: 2px solid var(--pn-red);
+        padding-left: 0.5rem;
+    }
+    .component-form__divider,
+    .component-form-section__divider {
+        border: 0;
+        border-top: 1px solid var(--pn-border);
+    }
+
+    // FormWizard — dashed step rail + active step ▼ ribbon.
+    .component-form-wizard__step {
+        font-size: 0.65rem;
+        border-radius: 0;
+    }
+    .component-form-wizard__step--active {
+        position: relative;
+    }
+    .component-form-wizard__step--active::before {
+        content: '▼';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--pn-yellow);
+        text-shadow: 0 0 8px rgba(255, 216, 60, 0.6);
+    }
+
+    // Card-style selectors — dashed border, square, mono labels, magenta on.
+    .component-multi-card-select__option,
+    .component-single-card-select__option,
+    .component-card-options__option,
+    .component-toggle-card {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: var(--pn-panel);
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text);
+    }
+    .component-multi-card-select__option--selected,
+    .component-single-card-select__option--selected,
+    .component-card-options__option--selected,
+    .component-toggle-card--checked {
+        border-color: var(--pn-pink-alt);
+        background: rgba(255, 84, 112, 0.08);
+        box-shadow: 0 0 16px rgba(124, 92, 255, 0.25);
+    }
+    .component-multi-card-select__option--selected .component-multi-card-select__check,
+    .component-single-card-select__option--selected .component-single-card-select__check,
+    .component-card-options__option--selected .component-card-options__check,
+    .component-toggle-card--checked .component-toggle-card__check {
+        color: var(--pn-yellow);
+    }
+
+    // Dropzone / File rows.
+    .component-file-dropzone,
+    .component-dropzone {
+        border: 2px solid var(--pn-magenta);
+        border-radius: 0;
+        background:
+            repeating-linear-gradient(
+                135deg,
+                transparent 0 4px,
+                rgba(139, 145, 156, 0.04) 4px 5px
+            ),
+            var(--pn-panel-solid);
+        color: var(--pn-text);
+        font-family: var(--pn-font-mono);
+    }
+    .component-file-dropzone--active,
+    .component-file-dropzone--dragover,
+    .component-dropzone--active {
+        border-color: var(--pn-cyan);
+        box-shadow: 0 0 24px rgba(164, 139, 255, 0.35);
+    }
+    .component-file,
+    .component-simple-file,
+    .component-queued-file,
+    .component-asset-row {
+        border-bottom: 1px solid var(--pn-border-soft);
+        background: var(--pn-panel);
+        color: var(--pn-text);
+    }
+    .component-file__name,
+    .component-simple-file__name,
+    .component-queued-file__name,
+    .component-asset-row__name {
+        font-family: var(--pn-font-mono);
+    }
+    .component-file__size,
+    .component-simple-file__size,
+    .component-queued-file__size,
+    .component-asset-row__size,
+    .component-asset-row__meta {
+        color: var(--pn-text-dim);
+        font-family: var(--pn-font-mono);
+    }
+
+    // FileTags — Stamp-style solid blocks.
+    .component-file-tags__tag {
+        border: 1px solid var(--pn-magenta);
+        border-radius: 0;
+        background: var(--pn-magenta);
+        color: var(--pn-bg);
+        font-size: 0.55rem;
+        padding: 0.25rem 0.45rem;
+    }
+    .component-file-tags__tag--cyan { background: var(--pn-cyan); border-color: var(--pn-cyan); }
+    .component-file-tags__tag--yellow { background: var(--pn-yellow); border-color: var(--pn-yellow); }
+    .component-file-tags__tag--green { background: var(--pn-green); border-color: var(--pn-green); }
+    .component-file-tags__tag--red { background: var(--pn-red); border-color: var(--pn-red); }
+
+    // Editor surfaces — Markdown / JSON / Schema / Node / BitmapFont.
+    .component-markdown-editor,
+    .component-json-editor,
+    .component-jsonschema-def,
+    .component-node-editor,
+    .component-bitmap-font-generator {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: var(--pn-bg-2);
+        color: var(--pn-text);
+        font-family: var(--pn-font-mono);
+    }
+    .component-markdown-editor__toolbar,
+    .component-json-editor__toolbar,
+    .component-jsonschema-def__toolbar,
+    .component-node-editor__toolbar,
+    .component-bitmap-font-generator__toolbar {
+        border-bottom: 1px solid var(--pn-border-soft);
+    }
+    .component-markdown-editor__tab,
+    .component-json-editor__tab,
+    .component-jsonschema-def__tab,
+    .component-node-editor__tab {
+        font-size: 0.65rem;
+        border-radius: 0;
+    }
+    .component-markdown-editor__tab--active,
+    .component-json-editor__tab--active,
+    .component-jsonschema-def__tab--active,
+    .component-node-editor__tab--active {
+        color: var(--pn-magenta);
+        border-bottom: 2px solid var(--pn-magenta);
+    }
+    .component-node-editor__canvas {
+        background:
+            radial-gradient(circle, rgba(124, 92, 255, 0.18) 1px, transparent 1px) 0 0/24px 24px,
+            var(--pn-bg-2);
+    }
+    .component-node-editor__node {
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        background: var(--pn-panel-solid);
+    }
+
+    // ╔═══════════════════════════════════════════════════════════════════╗
+    // ║  ARCADE DISPLAY & FEEDBACK SWEEP (§2.3)                            ║
+    // ╚═══════════════════════════════════════════════════════════════════╝
+
+    // Component-Alert (in addition to Bootstrap .alert chrome).
+    .component-alert {
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        background: var(--pn-panel-solid);
+    }
+    .component-alert--info { border-color: var(--pn-cyan); }
+    .component-alert--success { border-color: var(--pn-green); }
+    .component-alert--warning { border-color: var(--pn-yellow); }
+    .component-alert--danger { border-color: var(--pn-red); }
+    .component-alert__title {
+        font-size: 0.75rem;
+        color: var(--pn-text);
+    }
+    .component-alert__body,
+    .component-alert__description {
+        font-size: 1.05rem;
+        color: var(--pn-text);
+    }
+
+    // Banner / AnnouncementBar — marquee styling.
+    .component-banner,
+    .component-announcement-bar {
+        border-top: 1px solid var(--pn-border);
+        border-bottom: 1px solid var(--pn-border);
+        border-radius: 0;
+        background: var(--pn-panel-solid);
+        font-size: 0.7rem;
+        color: var(--pn-magenta);
+    }
+    .component-announcement-bar__close {
+        color: var(--pn-text-dim);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+    }
+    .component-announcement-bar__close:hover {
+        border-color: var(--pn-cyan);
+        color: var(--pn-text);
+    }
+
+    // Badge / Tag / Chip / BadgeRow — square pixel-tiny.
+    .component-badge,
+    .component-tag,
+    .component-chip {
+        border-radius: 0;
+        border-style: solid;
+        border-width: 1px;
+        font-size: 0.6rem;
+        font-weight: 400;
+        padding: 0.35em 0.55em;
+    }
+    .component-chip__count {
+        font-family: var(--pn-font-mono);
+        margin-left: 0.35em;
+    }
+
+    // Tooltip / Popover — dashed border + glow + flavor body.
+    .component-tooltip,
+    .component-tooltip__content,
+    .component-popover,
+    .component-popover__content {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        color: var(--pn-text);
+        font-size: 1rem;
+        box-shadow:
+            0 16px 40px rgba(0, 0, 0, 0.55),
+            0 0 24px rgba(124, 92, 255, 0.18);
+    }
+    .component-tooltip__title,
+    .component-popover__title {
+        font-size: 0.65rem;
+    }
+    .component-tooltip__arrow,
+    .component-popover__arrow {
+        background: var(--pn-magenta);
+        filter: drop-shadow(0 0 6px rgba(124, 92, 255, 0.6));
+    }
+
+    // EmptyState — pixel title, flavor description.
+    .component-empty-state__title {
+        font-size: 0.85rem;
+        color: var(--pn-text);
+    }
+    .component-empty-state__description {
+        font-size: 1.4rem;
+        color: var(--pn-text-dim);
+    }
+
+    // Spinner — magenta + cyan stroke + glow.
+    .component-spinner,
+    .component-spinner__ring {
+        border-radius: 50%;
+        box-shadow: 0 0 12px var(--pn-magenta);
+    }
+    .component-spinner__ring {
+        border-top-color: var(--pn-magenta);
+        border-right-color: var(--pn-cyan);
+    }
+
+    // Skeleton — palette swap + sharp corners.
+    .component-skeleton {
+        border-radius: 0;
+        background:
+            linear-gradient(
+                90deg,
+                var(--pn-bg-2) 0%,
+                rgba(124, 92, 255, 0.12) 50%,
+                var(--pn-bg-2) 100%
+            );
+        background-size: 200% 100%;
+    }
+
+    // ProgressBar — dashed track + magenta fill + pixel label.
+    .component-progress-bar,
+    .component-progress-bar__track {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: rgba(8, 9, 12, 0.7);
+    }
+    .component-progress-bar__fill {
+        background: var(--pn-magenta);
+        box-shadow: 0 0 12px rgba(124, 92, 255, 0.55);
+        border-radius: 0;
+    }
+    .component-progress-bar__label,
+    .component-progress-bar__value {
+        font-size: 0.65rem;
+        color: var(--pn-yellow);
+    }
+
+    // StatusDot — circular but glow.
+    .component-status-dot {
+        border-radius: 50%;
+        box-shadow: 0 0 8px currentColor;
+    }
+
+    // Toast — severity dashed border.
+    .component-toast {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        color: var(--pn-text);
+        font-size: 1.05rem;
+        box-shadow:
+            0 24px 48px rgba(0, 0, 0, 0.55),
+            0 0 24px rgba(124, 92, 255, 0.2);
+    }
+    .component-toast--info { border-color: var(--pn-cyan); }
+    .component-toast--success { border-color: var(--pn-green); }
+    .component-toast--warning { border-color: var(--pn-yellow); }
+    .component-toast--danger { border-color: var(--pn-red); }
+    .component-toast__title {
+        font-size: 0.7rem;
+    }
+
+    // Drawer / Modal / Lightbox — dashed border, sharp corners.
+    .component-drawer,
+    .component-drawer__panel,
+    .component-modal,
+    .component-modal__window,
+    .component-modal__content,
+    .component-lightbox,
+    .component-lightbox__content {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        color: var(--pn-text);
+    }
+    .component-modal__title,
+    .component-drawer__title,
+    .component-lightbox__title {
+        font-size: 0.85rem;
+        color: var(--pn-text);
+    }
+    .component-modal__close,
+    .component-drawer__close,
+    .component-lightbox__close {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-text-dim);
+        background: transparent;
+    }
+    .component-modal__close:hover,
+    .component-drawer__close:hover,
+    .component-lightbox__close:hover {
+        border-color: var(--pn-cyan);
+        color: var(--pn-text);
+    }
+    .component-lightbox__arrow,
+    .component-lightbox__nav {
+        color: var(--pn-cyan);
+        text-shadow: 0 0 12px rgba(164, 139, 255, 0.6);
+        border-radius: 50%;
+    }
+    .component-lightbox__dot--active {
+        background: var(--pn-cyan);
+        box-shadow: 0 0 10px var(--pn-cyan);
+        border-radius: 50%;
+    }
+
+    // ╔═══════════════════════════════════════════════════════════════════╗
+    // ║  ARCADE NAVIGATION SWEEP (§2.4)                                    ║
+    // ╚═══════════════════════════════════════════════════════════════════╝
+
+    // Breadcrumb — ▸ separator, pixel font, magenta active.
+    .component-breadcrumb {
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text-dim);
+    }
+    .component-breadcrumb__separator {
+        color: var(--pn-text-faint);
+    }
+    .component-breadcrumb__separator::before,
+    .component-breadcrumb__separator-icon {
+        content: '▸';
+    }
+    .component-breadcrumb__item--current,
+    .component-breadcrumb__current {
+        font-size: 0.7rem;
+        color: var(--pn-magenta);
+    }
+    .component-breadcrumb__link:hover {
+        color: var(--pn-cyan);
+    }
+
+    // SideNav / VerticalItemList — pink left bar + yellow text on active.
+    .component-side-nav__item,
+    .component-vertical-item-list__item {
+        font-size: 0.65rem;
+        color: var(--pn-text-dim);
+        border-radius: 0;
+    }
+    .component-side-nav__item--active,
+    .component-vertical-item-list__item--active {
+        position: relative;
+        color: var(--pn-yellow);
+        text-shadow: 0 0 12px rgba(255, 216, 60, 0.4);
+        background: rgba(255, 84, 112, 0.1);
+    }
+    .component-side-nav__item--active::before,
+    .component-vertical-item-list__item--active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--pn-pink-alt);
+        box-shadow: 0 0 12px rgba(255, 84, 112, 0.6);
+    }
+    .component-side-nav__section-title,
+    .component-side-nav__group-title,
+    .component-vertical-item-list__group-title {
+        font-size: 0.6rem;
+        color: var(--pn-text-faint);
+        border-bottom: 1px solid var(--pn-border-soft);
+        padding-bottom: 0.35rem;
+    }
+
+    // CoolNav — already glowy; reinforce dashed bottom border + pixel brand.
+    .component-cool-nav {
+        border-bottom: 1px solid var(--pn-border);
+    }
+    .component-cool-nav__brand,
+    .component-cool-nav__logo-text {
+        font-size: 0.85rem;
+        color: var(--pn-yellow);
+    }
+    .component-cool-nav__link {
+        font-size: 0.6rem;
+    }
+
+    // Pagination — dashed buttons, pixel font, hard-pixel shadow on active.
+    .component-pagination__item,
+    .component-pagination__page,
+    .component-pagination__prev,
+    .component-pagination__next {
+        font-size: 0.65rem;
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-text);
+        background: transparent;
+    }
+    .component-pagination__item:hover,
+    .component-pagination__page:hover {
+        border-color: var(--pn-cyan);
+    }
+    .component-pagination__item--active,
+    .component-pagination__page--active {
+        background: var(--pn-magenta);
+        border-color: var(--pn-magenta);
+        border-style: solid;
+        color: var(--pn-bg);
+        box-shadow: 4px 4px 0 var(--pn-bg-2);
+    }
+
+    // PageFooter — top dashed border + brand pixel + flavor meta.
+    .component-page-footer {
+        border-top: 1px solid var(--pn-border);
+        background: transparent;
+        color: var(--pn-text-dim);
+    }
+    .component-page-footer__brand,
+    .component-page-footer__title {
+        font-size: 0.85rem;
+        color: var(--pn-yellow);
+    }
+    .component-page-footer__meta {
+        font-size: 1rem;
+    }
+    .component-page-footer__rotor {
+        animation: nd-page-footer-rotor 6s linear infinite;
+        display: inline-block;
+        color: var(--pn-magenta);
+    }
+    @keyframes nd-page-footer-rotor {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    // CommandPalette — modal panel + arcade rows.
+    .component-command-palette,
+    .component-command-palette__panel {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        color: var(--pn-text);
+        box-shadow:
+            0 24px 64px rgba(0, 0, 0, 0.6),
+            0 0 32px rgba(124, 92, 255, 0.2);
+    }
+    .component-command-palette__input {
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text);
+    }
+    .component-command-palette__item,
+    .component-command-palette__row {
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text);
+        border-radius: 0;
+    }
+    .component-command-palette__shortcut,
+    .component-command-palette__keys {
+        font-size: 0.6rem;
+        color: var(--pn-yellow);
+    }
+    .component-command-palette__item--active,
+    .component-command-palette__row--active {
+        background: var(--pn-magenta);
+        color: var(--pn-bg);
+    }
+
+    // Tabs / TabSections — dashed bottom border, magenta active indicator.
+    .component-tabs,
+    .component-tab-sections {
+    }
+    .component-tabs__list,
+    .component-tab-sections__list {
+        border-bottom: 1px solid var(--pn-border);
+    }
+    .component-tabs__tab,
+    .component-tab-sections__tab {
+        font-size: 0.65rem;
+        color: var(--pn-text-dim);
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        font-weight: 400;
+    }
+    .component-tabs__tab--active,
+    .component-tab-sections__tab--active {
+        color: var(--pn-magenta);
+        border-bottom: 2px solid var(--pn-magenta);
+    }
+
+    // ╔═══════════════════════════════════════════════════════════════════╗
+    // ║  ARCADE LAYOUT & STRUCTURE SWEEP (§2.5)                            ║
+    // ╚═══════════════════════════════════════════════════════════════════╝
+
+    // Card family — dashed border, sharp, panel bg, pixel titles.
+    .component-card,
+    .component-section-card,
+    .component-feature-card,
+    .component-dashboard-card,
+    .component-rich-page-header,
+    .component-entity-profile-card,
+    .component-linked-providers-card,
+    .component-maintainer-card,
+    .component-github-stars-card,
+    .component-pricing-card {
+        border: 1px solid var(--pn-rule-soft);
+        border-radius: 0;
+        background: var(--pn-panel-solid);
+        color: var(--pn-text);
+    }
+    .component-card__title,
+    .component-section-card__title,
+    .component-feature-card__title,
+    .component-dashboard-card__title,
+    .component-rich-page-header__title,
+    .component-entity-profile-card__title,
+    .component-linked-providers-card__title,
+    .component-maintainer-card__title,
+    .component-github-stars-card__title,
+    .component-pricing-card__title,
+    .component-pricing-card__tier-name {
+        font-size: 0.85rem;
+        color: var(--pn-magenta);
+        font-weight: 400;
+    }
+    .component-card__subtitle,
+    .component-section-card__subtitle,
+    .component-feature-card__description,
+    .component-dashboard-card__description,
+    .component-rich-page-header__subtitle,
+    .component-entity-profile-card__bio,
+    .component-pricing-card__description {
+        font-size: 1.2rem;
+        color: var(--pn-text-dim);
+    }
+    .component-card__footer,
+    .component-section-card__footer,
+    .component-feature-card__footer,
+    .component-pricing-card__footer {
+        border-top: 1px solid var(--pn-rule-soft);
+    }
+
+    // DashboardCard metric — pixel + yellow + glow.
+    .component-dashboard-card__metric,
+    .component-dashboard-card__value,
+    .component-stat-card__value,
+    .component-metric-grid__value {
+        font-size: 1.5rem;
+        color: var(--pn-yellow);
+        text-shadow: 0 0 20px rgba(255, 216, 60, 0.4);
+        font-weight: 400;
+    }
+
+    // Pricing — featured tier ▼ ribbon + magenta dashed.
+    .component-pricing-card--featured {
+        border: 1px solid var(--pn-magenta);
+        position: relative;
+    }
+    .component-pricing-card--featured::before {
+        content: '▼';
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.85rem;
+        color: var(--pn-yellow);
+        text-shadow: 0 0 10px rgba(255, 216, 60, 0.6);
+    }
+    .component-pricing-card__price {
+        font-size: 2rem;
+        color: var(--pn-yellow);
+        text-shadow: 0 0 24px rgba(255, 216, 60, 0.4);
+    }
+
+    // Hero — dashed pink eyebrow, pixel huge title, flavor subtitle.
+    .component-hero {
+        border-bottom: 1px solid var(--pn-rule);
+    }
+    .component-hero__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.65rem;
+        color: var(--pn-pink-alt);
+        border: 1px solid var(--pn-pink-alt);
+        padding: 0.45rem 0.7rem;
+        border-radius: 0;
+    }
+    .component-hero__title {
+        font-size: clamp(28px, 6vw, 76px);
+        line-height: 1.08;
+        color: var(--pn-yellow);
+        text-shadow:
+            0 0 24px rgba(255, 216, 60, 0.4),
+            0 0 64px rgba(255, 84, 112, 0.2);
+        font-weight: 400;
+    }
+    .component-hero__subtitle,
+    .component-hero__description {
+        font-size: clamp(20px, 2.5vw, 28px);
+        color: var(--pn-text-dim);
+        line-height: 1.45;
+    }
+
+    // Login / WelcomeGuide — dashed surfaces.
+    .component-login,
+    .component-login__panel,
+    .component-welcome-guide,
+    .component-welcome-guide__panel {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+    }
+    .component-welcome-guide__step-number,
+    .component-welcome-guide__ordinal {
+        font-size: 0.85rem;
+        color: var(--pn-yellow);
+        text-shadow: 0 0 12px rgba(255, 216, 60, 0.5);
+    }
+    .component-welcome-guide__bullet::before {
+        content: '▸';
+        color: var(--pn-magenta);
+        margin-right: 0.4em;
+    }
+
+    // Group / Spacer / Divider.
+    .component-group--bordered,
+    .component-group--outlined {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: var(--pn-panel);
+    }
+    .component-divider,
+    .component-divider__line {
+        border-top-style: solid;
+        border-bottom-style: solid;
+        border-color: var(--pn-border-soft);
+    }
+
+    // Drawer / ResizablePanel / ScrollArea.
+    .component-resizable-panel__handle,
+    .component-resizable-panel__divider {
+        background: rgba(124, 92, 255, 0.4);
+        background-image:
+            repeating-linear-gradient(
+                to bottom,
+                transparent 0 4px,
+                var(--pn-magenta) 4px 5px
+            );
+    }
+    .component-resizable-panel__handle:hover {
+        box-shadow: 0 0 12px var(--pn-magenta);
+    }
+    .component-scroll-area {
+        scrollbar-color: var(--pn-magenta) var(--pn-bg-2);
+        scrollbar-width: thin;
+    }
+    .component-scroll-area::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .component-scroll-area::-webkit-scrollbar-track {
+        background: var(--pn-bg-2);
+    }
+    .component-scroll-area::-webkit-scrollbar-thumb {
+        background: var(--pn-magenta);
+        box-shadow: inset 0 0 4px rgba(124, 92, 255, 0.6);
+    }
+
+    // ╔═══════════════════════════════════════════════════════════════════╗
+    // ║  ARCADE DATA DISPLAY SWEEP (§2.6)                                  ║
+    // ╚═══════════════════════════════════════════════════════════════════╝
+
+    // Tables — pixel headers, dashed rows, mono cells, hover tint.
+    .component-table,
+    .component-advanced-table,
+    .component-api-reference-table,
+    .component-compatibility-matrix,
+    .component-feature-matrix,
+    .component-command-reference,
+    .component-cookbook-grid,
+    .component-plugin-grid,
+    .component-ecosystem-map,
+    .component-good-first-issues,
+    .component-benchmark-chart {
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text);
+        border-radius: 0;
+    }
+    .component-table thead th,
+    .component-advanced-table thead th,
+    .component-api-reference-table thead th,
+    .component-compatibility-matrix thead th,
+    .component-feature-matrix thead th,
+    .component-command-reference thead th,
+    .component-table__header,
+    .component-advanced-table__header {
+        font-size: 0.65rem;
+        font-weight: 400;
+        color: var(--pn-pink-alt);
+        border-bottom: 1px solid var(--pn-pink-alt);
+        background: transparent;
+    }
+    .component-table tbody tr,
+    .component-advanced-table tbody tr,
+    .component-table__row,
+    .component-advanced-table__row {
+        border-bottom: 1px solid var(--pn-rule-soft);
+    }
+    .component-table tbody tr:hover,
+    .component-advanced-table tbody tr:hover,
+    .component-table__row:hover,
+    .component-advanced-table__row:hover {
+        background: rgba(124, 92, 255, 0.06);
+    }
+    .component-table__cell,
+    .component-advanced-table__cell {
+        font-family: var(--pn-font-mono);
+        font-size: 0.78rem;
+    }
+    .component-table__sort-icon::before,
+    .component-advanced-table__sort-asc::before {
+        content: '▲';
+    }
+    .component-advanced-table__sort-desc::before {
+        content: '▼';
+    }
+    .component-table__row--highlighted,
+    .component-advanced-table__row--me,
+    .component-advanced-table__row--highlighted {
+        position: relative;
+        background: rgba(255, 216, 60, 0.06);
+    }
+    .component-table__row--highlighted::before,
+    .component-advanced-table__row--me::before,
+    .component-advanced-table__row--highlighted::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--pn-yellow);
+        box-shadow: 0 0 12px rgba(255, 216, 60, 0.6);
+    }
+
+    // MetricGrid / StatCard — pixel-tiny labels above arcade values.
+    .component-metric-grid,
+    .component-stat-card {
+        border: 1px solid var(--pn-rule-soft);
+        border-radius: 0;
+        background: var(--pn-panel-solid);
+    }
+    .component-metric-grid__cell {
+        border: 1px solid var(--pn-rule-soft);
+        border-radius: 0;
+    }
+    .component-metric-grid__label,
+    .component-stat-card__label {
+        font-size: 0.55rem;
+        color: var(--pn-text-dim);
+    }
+
+    // Pipeline / Stepper / Roadmap / Changelog / Timeline — connector dashed.
+    .component-pipeline,
+    .component-stepper,
+    .component-roadmap,
+    .component-changelog,
+    .component-timeline {
+        font-family: var(--pn-font-mono);
+    }
+    .component-pipeline__connector,
+    .component-stepper__connector,
+    .component-roadmap__connector,
+    .component-timeline__connector,
+    .component-changelog__connector {
+        border-color: var(--pn-rule-soft);
+        border-style: solid;
+        background: transparent;
+    }
+    .component-pipeline__step,
+    .component-stepper__step,
+    .component-roadmap__step,
+    .component-timeline__item,
+    .component-changelog__item {
+        border-radius: 0;
+    }
+    .component-pipeline__step--done,
+    .component-stepper__step--completed,
+    .component-roadmap__step--done,
+    .component-changelog__item--done {
+        opacity: 0.7;
+        background:
+            repeating-linear-gradient(
+                135deg,
+                transparent 0 4px,
+                rgba(139, 145, 156, 0.04) 4px 5px
+            );
+    }
+    .component-pipeline__step--future,
+    .component-stepper__step--pending,
+    .component-roadmap__step--future {
+        opacity: 0.45;
+    }
+    .component-pipeline__step--active,
+    .component-stepper__step--active,
+    .component-roadmap__step--active,
+    .component-changelog__item--current {
+        position: relative;
+        border: 1px solid var(--pn-magenta);
+        background: rgba(124, 92, 255, 0.08);
+    }
+    .component-pipeline__step--active::before,
+    .component-stepper__step--active::before,
+    .component-roadmap__step--active::before,
+    .component-changelog__item--current::before {
+        content: '▼';
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.7rem;
+        color: var(--pn-yellow);
+        text-shadow: 0 0 8px rgba(255, 216, 60, 0.6);
+    }
+    .component-pipeline__step--active .component-pipeline__number,
+    .component-stepper__step--active .component-stepper__number,
+    .component-roadmap__step--active .component-roadmap__number {
+        color: var(--pn-yellow);
+        text-shadow: 0 0 16px rgba(255, 216, 60, 0.5);
+    }
+    .component-timeline__marker,
+    .component-changelog__marker {
+        border-radius: 50%;
+        background: var(--pn-cyan);
+        box-shadow: 0 0 10px var(--pn-cyan);
+    }
+
+    // CommandReference rows — $ prefix mono cyan.
+    .component-command-reference__name,
+    .component-command-reference__cmd {
+        font-family: var(--pn-font-mono);
+        color: var(--pn-cyan);
+    }
+    .component-command-reference__name::before,
+    .component-command-reference__prefix {
+        content: '$ ';
+        color: var(--pn-magenta);
+    }
+    .component-command-reference__description,
+    .component-command-reference__desc {
+        font-size: 1rem;
+        color: var(--pn-text-dim);
+    }
+
+    // BenchmarkChart bars — magenta primary, cyan secondary.
+    .component-benchmark-chart__bar {
+        border-radius: 0;
+        box-shadow: 0 0 12px currentColor;
+    }
+    .component-benchmark-chart__bar--primary {
+        background: var(--pn-magenta);
+        color: var(--pn-magenta);
+    }
+    .component-benchmark-chart__bar--secondary {
+        background: var(--pn-cyan);
+        color: var(--pn-cyan);
+    }
+
+    // Chart — dashed gridlines + axis labels.
+    .component-chart {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+    }
+    .component-chart__axis-label,
+    .component-chart__tick-label {
+        font-size: 0.55rem;
+        fill: var(--pn-text-dim);
+        color: var(--pn-text-dim);
+    }
+    .component-chart__gridline {
+        stroke: var(--pn-border-soft);
+        stroke-dasharray: 4 4;
+    }
+
+    // Accordion / FAQList / TreeView.
+    .component-accordion__header,
+    .component-faq-list__header {
+        font-size: 0.75rem;
+        color: var(--pn-magenta);
+    }
+    .component-accordion__caret::before,
+    .component-faq-list__caret::before {
+        content: '▸';
+        color: var(--pn-magenta);
+        display: inline-block;
+        transition: transform 0.15s ease;
+    }
+    .component-accordion__item--open .component-accordion__caret::before,
+    .component-accordion__trigger[aria-expanded='true'] .component-accordion__caret::before,
+    .component-faq-list__item--open .component-faq-list__caret::before {
+        content: '▾';
+    }
+    .component-accordion__body,
+    .component-faq-list__body {
+        font-size: 1.1rem;
+        color: var(--pn-text);
+    }
+    .component-tree-view__line,
+    .component-tree-view__guide {
+        border-color: var(--pn-rule-soft);
+        border-style: solid;
+    }
+
+    // ╔═══════════════════════════════════════════════════════════════════╗
+    // ║  ARCADE DOMAIN + UTILITY SWEEP (§2.7 / §2.8)                       ║
+    // ╚═══════════════════════════════════════════════════════════════════╝
+
+    // BundleBar — magenta filled segments, dashed empty.
+    .component-bundle-bar__track {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: rgba(8, 9, 12, 0.6);
+    }
+    .component-bundle-bar__segment {
+        background: var(--pn-magenta);
+        box-shadow: 0 0 12px rgba(124, 92, 255, 0.5);
+        border-radius: 0;
+    }
+    .component-bundle-bar__name,
+    .component-asset-bundle__pack-name {
+        font-size: 0.65rem;
+    }
+
+    // ConfigPreview — code listing + cyan live dot.
+    .component-config-preview {
+        font-family: var(--pn-font-mono);
+        background: var(--pn-bg-2);
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        color: var(--pn-text);
+    }
+    .component-config-preview__row--live::before {
+        content: '●';
+        color: var(--pn-cyan);
+        text-shadow: 0 0 8px var(--pn-cyan);
+        margin-right: 0.5em;
+    }
+
+    // TeamList — circular avatar + pixel-tiny role.
+    .component-team-list__role {
+        font-size: 0.55rem;
+        color: var(--pn-text-faint);
+    }
+
+    // CdnMap — magenta + cyan dots, dashed outline.
+    .component-cdn-map__outline {
+        stroke: var(--pn-border);
+        stroke-dasharray: 4 4;
+        fill: transparent;
+    }
+    .component-cdn-map__dot {
+        fill: var(--pn-magenta);
+        filter: drop-shadow(0 0 6px var(--pn-magenta));
+    }
+    .component-cdn-map__dot--secondary {
+        fill: var(--pn-cyan);
+        filter: drop-shadow(0 0 6px var(--pn-cyan));
+    }
+
+    // Brand — pixel logotype.
+    .component-brand,
+    .component-brand__name,
+    .component-brand__wordmark {
+    }
+    .component-brand__dot {
+        background: var(--pn-magenta);
+        box-shadow: 0 0 12px var(--pn-magenta);
+        border-radius: 50%;
+    }
+
+    // Carousel — magenta dots + cyan arrows.
+    .component-carousel__arrow,
+    .component-testimonial-carousel__arrow {
+        border-radius: 50%;
+        border: 1px solid var(--pn-border);
+        color: var(--pn-cyan);
+        background: var(--pn-panel-solid);
+    }
+    .component-carousel__arrow:hover,
+    .component-testimonial-carousel__arrow:hover {
+        border-color: var(--pn-cyan);
+        box-shadow: 0 0 12px var(--pn-cyan);
+    }
+    .component-carousel__dot,
+    .component-testimonial-carousel__dot {
+        border-radius: 50%;
+        background: var(--pn-bg-2);
+        border: 1px solid var(--pn-border-soft);
+    }
+    .component-carousel__dot--active,
+    .component-testimonial-carousel__dot--active {
+        background: var(--pn-magenta);
+        border: 0;
+        box-shadow: 0 0 10px var(--pn-magenta);
+    }
+
+    // TerminalWindow — dashed border, mono body, ■ traffic lights.
+    .component-terminal-window {
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+        background: var(--pn-bg-2);
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text);
+    }
+    .component-terminal-window__title-bar {
+        font-size: 0.6rem;
+        border-bottom: 1px solid var(--pn-border-soft);
+        background: transparent;
+    }
+    .component-terminal-window__traffic-light {
+        border-radius: 0;
+        font-family: var(--pn-font-mono);
+        background: transparent;
+        color: var(--pn-text-dim);
+    }
+    .component-terminal-window__traffic-light::before {
+        content: '■';
+    }
+
+    // CodeSnippet / CodeWithOutput / DiffViewer — dashed mono, syntax map.
+    .component-code-snippet,
+    .component-code-with-output,
+    .component-diff-viewer {
+        border: 1px solid var(--pn-border-soft);
+        border-radius: 0;
+        background: var(--pn-bg-2);
+        font-family: var(--pn-font-mono);
+        color: var(--pn-text);
+    }
+    .component-code-snippet__line-number,
+    .component-code-with-output__line-number,
+    .component-diff-viewer__line-number {
+        color: var(--pn-magenta);
+        font-family: var(--pn-font-mono);
+    }
+    .component-code-snippet__token--string,
+    .component-code-with-output__token--string {
+        color: var(--pn-cyan);
+    }
+    .component-code-snippet__token--keyword,
+    .component-code-with-output__token--keyword {
+        color: var(--pn-yellow);
+    }
+    .component-diff-viewer__line--add {
+        background: rgba(46, 204, 113, 0.08);
+        color: var(--pn-green);
+    }
+    .component-diff-viewer__line--remove {
+        background: rgba(255, 84, 112, 0.08);
+        color: var(--pn-red);
+    }
+
+    // Kbd — solid magenta + dark ink + hard-pixel shadow.
+    .component-kbd,
+    kbd.component-kbd {
+        background: var(--pn-magenta);
+        color: var(--pn-bg);
+        border: 0;
+        border-radius: 0;
+        font-size: 0.6rem;
+        padding: 0.25rem 0.45rem;
+        box-shadow: 2px 2px 0 var(--pn-violet);
+    }
+
+    // Comparator — dashed magenta divider.
+    .component-comparator__divider {
+        border-color: var(--pn-magenta);
+        border-style: solid;
+        background: transparent;
+    }
+    .component-comparator__divider-handle {
+        background: var(--pn-magenta);
+        box-shadow: 0 0 12px var(--pn-magenta);
+        border-radius: 50%;
+    }
+
+    // CalloutQuote — dashed left border + flavor body.
+    .component-callout-quote {
+        border-left: 4px solid var(--pn-magenta);
+        border-radius: 0;
+        background: var(--pn-panel);
+        padding-left: 1.25rem;
+        font-size: 1.5rem;
+        color: var(--pn-text);
+    }
+    .component-callout-quote__attribution {
+        font-size: 0.6rem;
+        color: var(--pn-text-faint);
+    }
+
+    // BasicLayout / DashboardLayout — backplane, sticky header, sidebar.
+    .component-basic-layout,
+    .component-dashboard-layout {
+        background: var(--pn-bg);
+        background-image:
+            radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(255, 84, 112, 0.18) 0%, transparent 60%),
+            radial-gradient(ellipse 800px 400px at 100% 50%, rgba(164, 139, 255, 0.1) 0%, transparent 60%),
+            radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        background-size: auto, auto, 3px 3px;
+    }
+    .component-basic-layout__header,
+    .component-dashboard-layout__header {
+        border-bottom: 1px solid var(--pn-border);
+        background: rgba(0, 0, 0, 0.85);
+    }
+    .component-basic-layout__header-brand,
+    .component-dashboard-layout__header-brand {
+    }
+    .component-dashboard-layout__sidebar {
+        border-right: 1px solid var(--pn-border-soft);
+    }
+
+    // Avatar — circular default; square stamp variant.
+    .component-avatar {
+        border-radius: 50%;
+    }
+    .component-avatar--square,
+    .component-avatar--initials,
+    .component-avatar--stamp {
+        border-radius: 0;
+        border: 1px solid var(--pn-pink-alt);
+        font-size: 0.55rem;
+        background: var(--pn-panel-solid);
+        color: var(--pn-text);
+    }
+
+    // UserPanel pop-out.
+    .component-user-panel,
+    .component-user-panel__panel,
+    .component-user-panel__menu {
+        background: var(--pn-panel-solid);
+        border: 1px solid var(--pn-border);
+        border-radius: 0;
+    }
+
+    // EntityProfileCard meta lines + tag micro-badges.
+    .component-entity-profile-card__meta,
+    .component-entity-profile-card__role {
+        font-size: 0.55rem;
+        color: var(--pn-cyan);
+    }
+
+    // ── Utility / atomic ─────────────────────────────────────────────────
+    h1.component-heading,
+    h2.component-heading,
+    .component-heading--h1,
+    .component-heading--h2 {
+        font-weight: 400;
+        color: var(--pn-text);
+    }
+    h3.component-heading,
+    h4.component-heading,
+    h5.component-heading,
+    h6.component-heading,
+    .component-heading--h3,
+    .component-heading--h4,
+    .component-heading--h5,
+    .component-heading--h6 {
+        color: var(--pn-text);
+    }
+    .component-text {
+        font-size: 1.2rem;
+    }
+    .component-text--muted { color: var(--pn-text-dim); }
+    .component-text--faint { color: var(--pn-text-faint); }
+    .component-link {
+        color: var(--pn-cyan);
+        text-decoration: underline;
+        font-style: normal;
+    }
+    .component-link:hover {
+        color: var(--pn-yellow);
+        text-shadow: 0 0 8px rgba(255, 216, 60, 0.4);
+    }
+}

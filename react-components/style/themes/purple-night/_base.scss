@@ -1,0 +1,46 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 2 · Scope base — background, text, focus on the wrapper itself
+// ───────────────────────────────────────────────────────────────────────────
+// The wrapper `.theme--purple-night` gets the dark bg, the default text color, plus
+// baseline rules for headings / links / code / focus inside the scope.
+
+.theme--purple-night {
+    background: var(--pn-bg);
+    color: var(--pn-text);
+    font-family: var(--tc-font-family-sans, 'Inter', sans-serif);
+
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--pn-text);
+    }
+
+    p {
+        color: var(--pn-text-dim);
+    }
+
+    a {
+        color: var(--pn-accent-2);
+        text-decoration: none;
+
+        &:hover {
+            color: var(--pn-accent);
+        }
+    }
+
+    code {
+        color: var(--pn-accent);
+        background: rgba(124, 92, 255, 0.08);
+        padding: 0.12em 0.35em;
+        border: 1px solid var(--pn-border-soft);
+        font-family: var(--pn-font-mono);
+    }
+
+    ::selection {
+        background: rgba(124, 92, 255, 0.35);
+        color: var(--pn-text);
+    }
+
+    *:focus-visible {
+        outline: 2px solid var(--pn-accent-2);
+        outline-offset: 2px;
+    }
+}

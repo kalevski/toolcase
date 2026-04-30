@@ -1,0 +1,44 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 4 · Typography helpers — optional utility classes that match the neon DS
+// ───────────────────────────────────────────────────────────────────────────
+// Lifted from neon_theme/neon.css. Apply these by hand to pull bits of the
+// arcade voice into your own content — `pn-eyebrow` for section labels,
+// `pn-grad-text` for gradient headlines, `pn-glow-text` for glowy copy.
+
+.theme--purple-night .pn-eyebrow {
+    font-family: var(--pn-font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--pn-accent-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    &::before {
+        content: '';
+        width: 22px;
+        height: 1px;
+        background: var(--pn-accent-2);
+        box-shadow: 0 0 10px var(--pn-accent-2);
+    }
+}
+
+.theme--purple-night .pn-grad-text {
+    background: linear-gradient(
+        92deg,
+        var(--pn-accent) 0%,
+        #a48bff 45%,
+        var(--pn-accent-2) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.theme--purple-night .pn-glow-text {
+    color: var(--pn-text);
+    text-shadow:
+        0 0 6px rgba(124, 92, 255, 0.55),
+        0 0 22px rgba(124, 92, 255, 0.35);
+}
