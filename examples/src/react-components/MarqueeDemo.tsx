@@ -49,6 +49,11 @@ const MarqueeDemo: React.FC = () => (
 							<Marquee items={items} />
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark">
+							<Marquee items={items} />
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

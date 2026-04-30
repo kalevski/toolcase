@@ -27,6 +27,12 @@ const themeOptions: ExtendedSelectItem[] = [
         icon: 'sun',
     },
     {
+        key: 'dark',
+        name: 'Dark',
+        description: 'Dark toolcase baseline',
+        icon: 'moon',
+    },
+    {
         key: 'neon',
         name: 'Neon Drift',
         description: 'Dark synthwave override',
@@ -147,11 +153,11 @@ export const App = () => {
         localStorage.setItem(THEME_STORAGE_KEY, theme)
     }, [theme])
 
-    const isNeon = theme === 'neon'
+    const isDarkScope = theme === 'neon' || theme === 'dark'
     const appClass = [
         'app',
-        `app--${isNeon ? 'dark' : 'light'}`,
-        isNeon ? `theme theme--${theme}` : '',
+        `app--${isDarkScope ? 'dark' : 'light'}`,
+        isDarkScope ? `theme theme--${theme}` : '',
     ]
         .filter(Boolean)
         .join(' ')

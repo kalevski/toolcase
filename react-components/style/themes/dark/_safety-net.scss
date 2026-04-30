@@ -1,0 +1,65 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 7 · Safety net — BEM foreground patterns
+// ───────────────────────────────────────────────────────────────────────────
+// Many component SCSS files hardcode light-theme hexes (color: #1e293b,
+// #64748b, #0f172a, ...) directly on BEM children rather than reading from
+// a CSS variable. We can't theme those via tokens, so this block catches
+// the common __title / __label / __value / __description patterns and
+// forces them to neon foreground/muted.
+
+.theme--dark {
+    // Strong foreground (headings, titles, values, names, labels).
+    [class*="__title"],
+    [class*="__heading"],
+    [class*="__label"],
+    [class*="__name"],
+    [class*="__value"],
+    [class*="__eyebrow"],
+    [class*="__number"],
+    [class*="__primary"] {
+        color: var(--td-text);
+    }
+
+    // Muted foreground (descriptions, hints, subs, metadata, captions).
+    [class*="__description"],
+    [class*="__subtitle"],
+    [class*="__sub"]:not([class*="__submit"]):not([class*="__subtle"]),
+    [class*="__hint"],
+    [class*="__caption"],
+    [class*="__helper"],
+    [class*="__meta-label"],
+    [class*="__muted"],
+    [class*="__secondary"] {
+        color: var(--td-text-dim);
+    }
+
+    // Monospace / code values — cyan so they still read as data.
+    [class*="__mono"],
+    [class*="__code"],
+    [class*="--mono"] {
+        color: var(--td-accent-2);
+    }
+
+    // Explicit dark-text utilities need flipping too.
+    .text-dark,
+    .text-black {
+        color: var(--td-text) !important;
+    }
+
+    // Placeholder text across all inputs.
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--td-text-faint);
+        opacity: 1;
+    }
+
+    // Re-assert muted utility — some components declare this at a high
+    // specificity and would otherwise override our section-5 override.
+    .text-muted {
+        color: var(--td-text-dim) !important;
+    }
+
+    small {
+        color: var(--td-text-dim);
+    }
+}

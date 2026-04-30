@@ -1,0 +1,44 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 4 · Typography helpers — optional utility classes that match the neon DS
+// ───────────────────────────────────────────────────────────────────────────
+// Lifted from neon_theme/neon.css. Apply these by hand to pull bits of the
+// arcade voice into your own content — `td-eyebrow` for section labels,
+// `td-grad-text` for gradient headlines, `td-glow-text` for glowy copy.
+
+.theme--dark .td-eyebrow {
+    font-family: var(--td-font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--td-accent-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    &::before {
+        content: '';
+        width: 22px;
+        height: 1px;
+        background: var(--td-accent-2);
+        box-shadow: 0 0 10px var(--td-accent-2);
+    }
+}
+
+.theme--dark .td-grad-text {
+    background: linear-gradient(
+        92deg,
+        var(--td-accent) 0%,
+        #60a5fa 45%,
+        var(--td-accent-2) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.theme--dark .td-glow-text {
+    color: var(--td-text);
+    text-shadow:
+        0 0 6px rgba(59, 130, 246, 0.55),
+        0 0 22px rgba(59, 130, 246, 0.35);
+}

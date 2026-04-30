@@ -34,6 +34,11 @@ const ScoringRulesDemo: React.FC = () => (
 							<ScoringRules rules={rules} />
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>
+							<ScoringRules rules={rules} />
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

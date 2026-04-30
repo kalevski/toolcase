@@ -37,6 +37,9 @@ const LeaderboardTrendDemo: React.FC = () => (
 					<SectionCard title="Neon theme">
 						<div className="theme theme--neon" style={{ padding: 32 }}>{trio}</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 32 }}>{trio}</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

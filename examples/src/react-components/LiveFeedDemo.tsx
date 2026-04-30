@@ -49,6 +49,11 @@ const LiveFeedDemo: React.FC = () => (
 							<LiveFeed recording events={events} />
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>
+							<LiveFeed recording events={events} />
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

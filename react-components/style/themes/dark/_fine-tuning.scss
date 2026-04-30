@@ -1,0 +1,420 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 6 · Component-specific fine-tuning (where tokens alone aren't enough)
+// ───────────────────────────────────────────────────────────────────────────
+// Tokens + Bootstrap overrides get ~80% of the way. This block handles the
+// remaining cases: color palettes that need re-tinting for dark surfaces,
+// translucent panel + backdrop-blur treatments, neon-glow hover effects,
+// and components whose SCSS hard-codes colors on BEM children.
+//
+// See also: _components.scss for larger per-component hardcoded overrides
+// (this file handles surface-level touches, that one is the bulk sweep).
+
+.theme--dark {
+    // ── SectionCard — emphasize translucent header ───────────────────────
+    .component-section-card {
+        .card-header {
+            background: rgba(59, 130, 246, 0.06);
+        }
+
+        &--danger {
+            box-shadow: 0 0 18px rgba(248, 113, 113, 0.15);
+        }
+    }
+
+    // ── StatCard / MetricTile — glowing edge on hover ────────────────────
+    .component.component-stat-card {
+        background: var(--td-panel);
+        border-color: var(--td-border-soft);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            border-color: var(--td-border);
+            box-shadow: 0 0 22px rgba(59, 130, 246, 0.18);
+        }
+    }
+    .component-stat-card__label {
+        font-family: var(--td-font-mono);
+    }
+    .component-stat-card__number {
+    }
+
+    .component.component-metric-tile {
+        background: var(--td-panel);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+    .component-metric-tile__label {
+        font-family: var(--td-font-mono);
+    }
+    .component-metric-tile__number {
+    }
+
+    // ── RichPageHeader — neon hero vibe ──────────────────────────────────
+    .component.component-rich-page-header {
+        border-bottom-color: var(--td-border);
+    }
+    .component-rich-page-header__title {
+        color: var(--td-text);
+        text-shadow: 0 0 24px rgba(59, 130, 246, 0.3);
+    }
+    .component-rich-page-header__chip {
+        background: rgba(34, 211, 238, 0.06);
+        border-color: rgba(34, 211, 238, 0.3);
+        color: var(--td-accent-2);
+        font-family: var(--td-font-mono);
+    }
+    // Re-tint the icon palette for the dark scope
+    .component-rich-page-header__icon {
+        background: rgba(139, 92, 246, 0.1);
+        border-color: var(--td-border-soft);
+        color: var(--td-accent-2);
+        box-shadow: 0 0 18px rgba(139, 92, 246, 0.25);
+
+        &--violet  { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 0 18px rgba(139, 92, 246, 0.4); }
+        &--cyan    { background: rgba(34, 211, 238, 0.12);  color: var(--td-accent-2); border-color: rgba(34, 211, 238, 0.45); box-shadow: 0 0 18px rgba(34, 211, 238, 0.35); }
+        &--emerald { background: rgba(74, 222, 128, 0.12); color: #bbf7d0; border-color: rgba(74, 222, 128, 0.45); box-shadow: 0 0 18px rgba(74, 222, 128, 0.3); }
+        &--amber   { background: rgba(251, 191, 36, 0.12); color: #fde68a; border-color: rgba(251, 191, 36, 0.45); box-shadow: 0 0 18px rgba(251, 191, 36, 0.3); }
+        &--pink    { background: rgba(59, 130, 246, 0.14); color: var(--td-accent); border-color: rgba(59, 130, 246, 0.45); box-shadow: 0 0 18px rgba(59, 130, 246, 0.4); }
+        &--blue    { background: rgba(56, 189, 248, 0.14);  color: #bae6fd; border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 0 18px rgba(56, 189, 248, 0.3); }
+        &--slate   { background: rgba(100, 116, 139, 0.12); color: var(--td-text); border-color: var(--td-border-soft); }
+        &--rose    { background: rgba(248, 113, 113, 0.12); color: #fca5a5; border-color: rgba(248, 113, 113, 0.45); box-shadow: 0 0 18px rgba(248, 113, 113, 0.35); }
+    }
+
+    // ── EntityProfileCard ────────────────────────────────────────────────
+    .component.component-entity-profile-card {
+        background: var(--td-panel);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+    .component-entity-profile-card__title {
+    }
+    .component-entity-profile-card__meta-label {
+        font-family: var(--td-font-mono);
+    }
+    .component-entity-profile-card__meta-value--mono {
+        color: var(--td-accent-2);
+    }
+
+    // ── EntityCell — retint the palette on dark bg ───────────────────────
+    .component-entity-cell__tile {
+        &--violet  { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border-color: rgba(139, 92, 246, 0.5); }
+        &--cyan    { background: rgba(34, 211, 238, 0.12);  color: var(--td-accent-2); border-color: rgba(34, 211, 238, 0.45); }
+        &--emerald { background: rgba(74, 222, 128, 0.12); color: #bbf7d0; border-color: rgba(74, 222, 128, 0.45); }
+        &--amber   { background: rgba(251, 191, 36, 0.12); color: #fde68a; border-color: rgba(251, 191, 36, 0.45); }
+        &--pink    { background: rgba(59, 130, 246, 0.14); color: #bfdbfe; border-color: rgba(59, 130, 246, 0.45); }
+        &--blue    { background: rgba(56, 189, 248, 0.14);  color: #bae6fd; border-color: rgba(56, 189, 248, 0.4); }
+        &--slate   { background: rgba(100, 116, 139, 0.12); color: var(--td-text); border-color: var(--td-border-soft); }
+        &--rose    { background: rgba(248, 113, 113, 0.12); color: #fca5a5; border-color: rgba(248, 113, 113, 0.45); }
+    }
+
+    // ── ActionRowList — icon tile tint ───────────────────────────────────
+    .component-action-row-list__icon {
+        background: rgba(59, 130, 246, 0.08);
+        border-color: var(--td-border-soft);
+        color: var(--td-accent-2);
+    }
+
+    // ── LinkedProvidersCard — contrast the brand tile ring ───────────────
+    .component-linked-providers-card__tile {
+        box-shadow: 0 0 12px currentColor;
+    }
+
+    // ── CodeLabelCell — mono code chip reads like a terminal tag ─────────
+    .component-code-label-cell__code {
+        background: rgba(34, 211, 238, 0.08);
+        border-color: rgba(34, 211, 238, 0.35);
+        color: var(--td-accent-2);
+    }
+
+    // ── Avatar — tint initials variants ──────────────────────────────────
+    .component-avatar.avatar-initials {
+        &.bg-primary {
+            background: linear-gradient(135deg, var(--td-accent), var(--td-violet)) !important;
+            color: #0f172a !important;
+        }
+        &.bg-secondary {
+            background: rgba(139, 92, 246, 0.4) !important;
+            color: var(--td-text) !important;
+        }
+        &.bg-info {
+            background: var(--td-accent-2) !important;
+            color: #0f172a !important;
+        }
+        &.bg-success {
+            background: #4ade80 !important;
+            color: #022c22 !important;
+        }
+        &.bg-warning {
+            background: #fbbf24 !important;
+            color: #451a03 !important;
+        }
+        &.bg-danger {
+            background: var(--td-red) !important;
+            color: #450a0a !important;
+        }
+    }
+
+    // ── Spinner — neon magenta ───────────────────────────────────────────
+    .component-spinner,
+    .spinner-border,
+    .spinner-grow {
+        color: var(--td-accent);
+    }
+
+    // ── Skeleton shimmer — match dark palette ────────────────────────────
+    .component.component-skeleton {
+        background: linear-gradient(
+            90deg,
+            rgba(139, 92, 246, 0.08) 0%,
+            rgba(59, 130, 246, 0.18) 50%,
+            rgba(139, 92, 246, 0.08) 100%
+        );
+        background-size: 200% 100%;
+    }
+
+    // ── Divider ──────────────────────────────────────────────────────────
+    .component-divider,
+    hr {
+        border-color: var(--td-border-soft);
+        color: var(--td-border-soft);
+    }
+
+    // ── Modal ────────────────────────────────────────────────────────────
+    // Actual BEM class names: `__render` (backdrop) and `__window` (panel).
+    // Also cover Bootstrap `.modal-backdrop` / `.modal-content` for cases
+    // where markup uses Bootstrap's modal scaffolding directly.
+    .component-modals__render,
+    .modal-backdrop {
+        background: rgba(2, 6, 23, 0.72);
+    }
+    .component-modals__window,
+    .modal-content {
+        background: var(--td-panel-solid);
+        border: 1px solid var(--td-border);
+        color: var(--td-text);
+        box-shadow:
+            0 0 48px rgba(59, 130, 246, 0.18),
+            0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .component-modals__window .modal-header,
+    .component-modals__window .modal-footer,
+    .modal-header,
+    .modal-footer {
+        border-color: var(--td-border-soft);
+    }
+    .component-modals__window .modal-header .modal-title,
+    .modal-header .modal-title {
+        color: var(--td-text);
+    }
+    .component-modals__window .modal-body,
+    .modal-body {
+        color: var(--td-text);
+    }
+    .component-modals__window .modal-header .btn-close,
+    .modal-header .btn-close {
+        color: var(--td-text-dim);
+        background: transparent;
+        filter: none;
+        opacity: 0.8;
+    }
+    .component-modals__window .modal-header .btn-close:hover,
+    .modal-header .btn-close:hover {
+        color: var(--td-text);
+        opacity: 1;
+    }
+
+    // ── Tooltip / Popover ────────────────────────────────────────────────
+    .tooltip-inner,
+    .component-tooltip__content {
+        background: var(--td-panel-solid);
+        border: 1px solid var(--td-border);
+        color: var(--td-text);
+        box-shadow: 0 0 16px rgba(59, 130, 246, 0.25);
+    }
+
+    // ── StatusDot — keep the neon glow ───────────────────────────────────
+    .component-status-dot {
+        box-shadow: 0 0 8px currentColor;
+    }
+
+    // ── Kbd ──────────────────────────────────────────────────────────────
+    kbd,
+    .component-kbd {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid var(--td-border-soft);
+        color: var(--td-text);
+        font-family: var(--td-font-mono);
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.15);
+    }
+
+    // ── Table (component-table) ──────────────────────────────────────────
+    // The base _table.scss hardcodes white-gradient overflow shadows and
+    // white row backgrounds, so Bootstrap-scoped overrides alone don't
+    // reach it. We rewrite the surface here.
+    .component.component-table {
+        background: var(--td-panel);
+        background-image:
+            // Edge fades now tint through to the dark bg instead of white:
+            linear-gradient(to right, var(--td-panel-solid), transparent),
+            linear-gradient(to left, var(--td-panel-solid), transparent),
+            linear-gradient(to right, rgba(59, 130, 246, 0.18), transparent),
+            linear-gradient(to left, rgba(34, 211, 238, 0.18), transparent);
+        background-position: left center, right center, left center, right center;
+        background-repeat: no-repeat;
+        background-size: 20px 100%, 20px 100%, 10px 100%, 10px 100%;
+        background-attachment: local, local, scroll, scroll;
+        border-color: var(--td-border-soft);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(59, 130, 246, 0.35) transparent;
+
+        // Webkit scrollbar styling for the horizontal overflow
+        &::-webkit-scrollbar { height: 8px; }
+        &::-webkit-scrollbar-track { background: transparent; }
+        &::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.35);
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background: var(--td-accent);
+        }
+    }
+
+    // Write compound BEM selectors without `&`-nesting so they don't pick
+    // up the outer `.theme--dark` twice.
+    .component-table__head {
+        background: linear-gradient(
+            180deg,
+            rgba(15, 23, 42, 0.8) 0%,
+            rgba(15, 23, 42, 0.5) 100%
+        );
+    }
+
+    .component-table__th {
+        color: var(--td-accent-2);
+        font-family: var(--td-font-mono);
+        font-size: 0.72rem;
+        font-weight: 600;
+        border-bottom: 1px solid var(--td-border);
+        text-shadow: 0 0 10px rgba(34, 211, 238, 0.35);
+    }
+
+    .component-table__td {
+        color: var(--td-text);
+        border-bottom: 1px solid var(--td-border-soft);
+        background: transparent;
+    }
+
+    .component-table__row {
+        background: transparent;
+        transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .component-table__empty {
+        color: var(--td-text-dim);
+        font-family: var(--td-font-mono);
+        font-size: 0.8rem;
+        padding: 48px 16px;
+        background: transparent;
+    }
+
+    .component-table--striped .component-table__row:nth-child(even) {
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .component-table--hoverable .component-table__row:hover {
+        background: rgba(59, 130, 246, 0.1);
+        box-shadow: inset 3px 0 0 var(--td-accent-2);
+    }
+
+    .component-table--clickable .component-table__row:hover {
+        background: rgba(34, 211, 238, 0.08);
+        box-shadow:
+            inset 3px 0 0 var(--td-accent),
+            inset 0 0 0 1px rgba(34, 211, 238, 0.18);
+    }
+
+    .component-table--sticky-header .component-table__head {
+        background: var(--td-panel-solid);
+        box-shadow: 0 1px 0 var(--td-border);
+    }
+
+    // ── AdvancedTable (--at-*) — one holdout needs a hardcoded override ──
+    // The base SCSS sets a literal #f8fafc on __head which overrides our
+    // --at-bg token. Re-assert it with the neon-tuned header gradient.
+    .component-advanced-table__head,
+    .component.component-advanced-table thead,
+    .component.component-advanced-table thead tr {
+        background: linear-gradient(
+            180deg,
+            rgba(15, 23, 42, 0.8) 0%,
+            rgba(15, 23, 42, 0.5) 100%
+        ) !important;
+    }
+
+    .component-advanced-table__th,
+    .component.component-advanced-table th {
+        color: var(--td-accent-2);
+        font-family: var(--td-font-mono);
+        text-shadow: 0 0 10px rgba(34, 211, 238, 0.35);
+        border-bottom-color: var(--td-border) !important;
+    }
+
+    .component-advanced-table__td,
+    .component.component-advanced-table td {
+        color: var(--td-text);
+        border-color: var(--td-border-soft) !important;
+    }
+
+    .component-advanced-table__row:hover,
+    .component.component-advanced-table tbody tr:hover {
+        background: rgba(59, 130, 246, 0.08) !important;
+        box-shadow: inset 3px 0 0 var(--td-accent-2);
+    }
+
+    // ── BasicLayout ──────────────────────────────────────────────────────
+    .layout.layout--basic {
+        --bl-brand-bg: var(--td-panel-solid);
+        --bl-brand-border: var(--td-border);
+        --bl-content-bg: var(--td-bg);
+        --bl-text: var(--td-text);
+    }
+    .layout--basic__brand {
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        box-shadow: 0 0 18px rgba(59, 130, 246, 0.12);
+    }
+
+    // ── DashboardLayout ──────────────────────────────────────────────────
+    .layout.layout--dashboard {
+        --dl-navbar-bg: var(--td-panel-solid);
+        --dl-sidebar-bg: var(--td-panel-solid);
+        --dl-content-bg: var(--td-bg);
+        --dl-border: var(--td-border-soft);
+        --dl-text: var(--td-text);
+        --dl-overlay-bg: rgba(2, 6, 23, 0.7);
+    }
+    .layout--dashboard__navbar {
+        box-shadow: 0 0 18px rgba(59, 130, 246, 0.08);
+    }
+    .layout--dashboard__overlay {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+    .layout--dashboard .navbar--toggle {
+        color: var(--td-text-dim);
+        border-right-color: var(--td-border-soft);
+        transition: color 0.15s ease, background 0.15s ease;
+
+        &:hover {
+            color: var(--td-accent-2);
+            background: rgba(59, 130, 246, 0.08);
+        }
+    }
+    .layout--dashboard .navbar--brand {
+        color: var(--td-text);
+        text-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+    }
+}

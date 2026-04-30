@@ -63,6 +63,16 @@ const SprintChainDemo: React.FC = () => (
 							/>
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>
+							<SprintChain
+								currentId="047"
+								header="« THE CHAIN — past · future »"
+								headerEnd="EVERY 14 DAYS · ∞"
+								items={items}
+							/>
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

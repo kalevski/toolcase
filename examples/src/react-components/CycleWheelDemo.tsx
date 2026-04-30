@@ -70,6 +70,21 @@ const CycleWheelDemo: React.FC = () => {
 								</div>
 							</div>
 						</SectionCard>
+						<SectionCard title="Dark theme">
+							<div className="theme theme--dark" style={{ padding: 24 }}>
+								<div style={{ maxWidth: 420, margin: '0 auto' }}>
+									<CycleWheel
+										phases={phases}
+										currentIndex={current}
+										paused={paused}
+										centerLabel="↻ NOW · СПРИНТ"
+										centerValue="047"
+										centerPill="OPEN"
+										centerSub={<>DAY <b>03</b> / 14</>}
+									/>
+								</div>
+							</div>
+						</SectionCard>
 					</div>
 				</div>
 			</div>

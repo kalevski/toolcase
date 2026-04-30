@@ -67,6 +67,18 @@ const TierLadderDemo: React.FC = () => (
 							</div>
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>
+							<div style={{ maxWidth: 480 }}>
+								<TierLadder
+									title="TIER LADDER · 90D ROLLING"
+									currentTierId="journ"
+									tiers={tiers}
+									summary={summary}
+								/>
+							</div>
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

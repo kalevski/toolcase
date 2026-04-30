@@ -43,6 +43,14 @@ const SectionFlagDemo: React.FC = () => (
 							/>
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 32 }}>
+							<SectionFlag
+								title="3 БРИФА · ROLLED FOR SPRINT 047"
+								subtitle="Seeded RNG drew one easy + one medium + one hard from the master pool."
+							/>
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

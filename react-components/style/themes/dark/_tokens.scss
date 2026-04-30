@@ -1,0 +1,531 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 1 · Scope tokens — read by components that reference --tc-* / --bs-*
+// ───────────────────────────────────────────────────────────────────────────
+// Every CSS custom property the library reads gets re-declared inside the
+// `.theme--dark` scope. Components read via the cascade, so most of the
+// library flips to dark without any component-specific SCSS changes.
+
+.theme.theme--dark,
+.theme--dark {
+    // ── Dark palette (neutral slate) ─────────────────────────────────────
+    --td-bg: #0f172a;
+    --td-bg-2: #1e293b;
+    --td-bg-3: #334155;
+    --td-panel: rgba(30, 41, 59, 0.72);
+    --td-panel-solid: #1e293b;
+    --td-border: rgba(148, 163, 184, 0.28);
+    --td-border-soft: rgba(100, 116, 139, 0.22);
+    --td-magenta: #3b82f6;
+    --td-pink: var(--td-magenta);
+    --td-pink-alt: #f87171;
+    --td-cyan: #22d3ee;
+    --td-cyan-alt: #67e8f9;
+    --td-violet: #8b5cf6;
+    --td-yellow: #fbbf24;
+    --td-yellow-soft: rgba(251, 191, 36, 0.4);
+    --td-red: #f87171;
+    --td-green: #4ade80;
+    --td-lime: var(--td-green);
+    --td-accent: #3b82f6;
+    --td-accent-2: #22d3ee;
+    --td-text: #f1f5f9;
+    --td-text-dim: #94a3b8;
+    --td-text-faint: #64748b;
+    --td-rule: rgba(148, 163, 184, 0.45);
+    --td-rule-soft: rgba(100, 116, 139, 0.18);
+    --td-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    --td-shadow-cyan: 0 2px 8px rgba(0, 0, 0, 0.5);
+
+    // Dark theme keeps default toolcase typography — no arcade fonts.
+    --td-font-pixel: var(--tc-font-family-sans, 'Inter', sans-serif);
+    --td-font-flavor: var(--tc-font-family-sans, 'Inter', sans-serif);
+    --td-font-mono: var(--tc-font-family-mono, 'JetBrains Mono', monospace);
+    --td-font-display: var(--tc-font-family-sans, 'Inter', sans-serif);
+
+    // ── toolcase design tokens (override baseline) ────────────────────────
+    --tc-bg: var(--td-bg);
+    --tc-surface: var(--td-panel-solid);
+    --tc-surface-muted: rgba(15, 23, 42, 0.6);
+    --tc-surface-hover: rgba(59, 130, 246, 0.06);
+    --tc-border: var(--td-border-soft);
+    --tc-border-strong: var(--td-border);
+    --tc-text: var(--td-text);
+    --tc-text-muted: var(--td-text-dim);
+    --tc-text-faint: var(--td-text-faint);
+    --tc-text-inverse: #0f172a;
+
+    --tc-accent: var(--td-accent);
+    --tc-accent-hover: #60a5fa;
+    --tc-accent-contrast: #0f172a;
+
+    --tc-info: var(--td-cyan);
+    --tc-info-bg: rgba(34, 211, 238, 0.1);
+    --tc-success: #4ade80;
+    --tc-success-bg: rgba(74, 222, 128, 0.1);
+    --tc-warning: #fbbf24;
+    --tc-warning-bg: rgba(251, 191, 36, 0.1);
+    --tc-danger: var(--td-red);
+    --tc-danger-bg: rgba(248, 113, 113, 0.1);
+
+    --tc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --tc-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.5);
+
+    --tc-focus-outline: 2px solid var(--td-accent-2);
+
+    // ── Bootstrap tokens (bs-*) ───────────────────────────────────────────
+    --bs-body-bg: var(--td-bg);
+    --bs-body-color: var(--td-text);
+    --bs-border-color: var(--td-border-soft);
+    --bs-border-color-translucent: var(--td-border-soft);
+    --bs-secondary-bg: var(--td-panel-solid);
+    --bs-tertiary-bg: rgba(15, 23, 42, 0.4);
+    --bs-emphasis-color: var(--td-text);
+    --bs-secondary-color: var(--td-text-dim);
+    --bs-tertiary-color: var(--td-text-faint);
+    --bs-link-color: var(--td-accent-2);
+    --bs-link-hover-color: var(--td-accent);
+    --bs-heading-color: var(--td-text);
+    --bs-code-color: var(--td-accent);
+
+    // ── Per-component token overrides (cover the library) ────────────────
+    // SectionCard
+    --sec-title: var(--td-text);
+    --sec-muted: var(--td-text-dim);
+    --sec-icon: var(--td-accent-2);
+    --sec-border: var(--td-border);
+    --sec-surface: var(--td-panel-solid);
+    --sec-danger-title: #fecaca;
+    --sec-danger-icon: var(--td-red);
+    --sec-danger-border: rgba(248, 113, 113, 0.5);
+    --sec-danger-bg: rgba(248, 113, 113, 0.1);
+    --sec-danger-icon-bg: rgba(248, 113, 113, 0.18);
+
+    // StatCard
+    --stat-color: var(--td-text);
+    --stat-muted: var(--td-text-dim);
+    --stat-border: var(--td-border-soft);
+    --stat-surface: var(--td-panel);
+    --stat-up: #4ade80;
+    --stat-up-bg: rgba(74, 222, 128, 0.12);
+    --stat-down: var(--td-red);
+    --stat-down-bg: rgba(248, 113, 113, 0.12);
+    --stat-neutral: var(--td-text-dim);
+    --stat-neutral-bg: rgba(139, 92, 246, 0.15);
+
+    // MetricTile
+    --mt-color: var(--td-text);
+    --mt-muted: var(--td-text-dim);
+    --mt-border: var(--td-border-soft);
+    --mt-surface: var(--td-panel);
+
+    // RichPageHeader
+    --rph-title: var(--td-text);
+    --rph-muted: var(--td-text-dim);
+    --rph-sub: var(--td-text);
+    --rph-border: var(--td-border-soft);
+
+    // EntityProfileCard
+    --epc-color: var(--td-text);
+    --epc-muted: var(--td-text-dim);
+    --epc-sub: var(--td-text);
+    --epc-border: var(--td-border-soft);
+    --epc-surface: var(--td-panel);
+
+    // EntityCell
+    --ec-color: var(--td-text);
+    --ec-muted: var(--td-text-dim);
+    --ec-focus: var(--td-accent-2);
+
+    // ActionRowList
+    --arl-color: var(--td-text);
+    --arl-muted: var(--td-text-dim);
+    --arl-border: var(--td-border-soft);
+    --arl-surface: var(--td-panel);
+
+    // LinkedProvidersCard
+    --lpc-color: var(--td-text);
+    --lpc-muted: var(--td-text-dim);
+    --lpc-border: var(--td-border-soft);
+
+    // CodeLabelCell
+    --clc-color: var(--td-text);
+    --clc-muted: var(--td-text-dim);
+    --clc-border: var(--td-border-soft);
+
+    // AdvancedTable
+    --at-bg: var(--td-panel);
+    --at-border: var(--td-border-soft);
+    --at-text: var(--td-text);
+    --at-text-muted: var(--td-text-dim);
+    --at-text-faint: var(--td-text-faint);
+    --at-accent: var(--td-accent-2);
+    --at-accent-soft: rgba(34, 211, 238, 0.1);
+    --at-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --at-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    // FormInput
+    --fi-bg: var(--td-panel-solid);
+    --fi-bg-hover: rgba(15, 23, 42, 0.85);
+    --fi-border: var(--td-border-soft);
+    --fi-border-hover: var(--td-border);
+    --fi-border-focus: var(--td-accent-2);
+    --fi-text: var(--td-text);
+    --fi-text-muted: var(--td-text-dim);
+    --fi-text-placeholder: var(--td-text-faint);
+    --fi-shadow-focus: 0 0 0 3px rgba(34, 211, 238, 0.18);
+
+    // Pagination
+    --pg-bg: var(--td-panel);
+    --pg-border: var(--td-border-soft);
+    --pg-text: var(--td-text);
+    --pg-text-muted: var(--td-text-dim);
+    --pg-accent: var(--td-accent);
+    --pg-accent-text: #0f172a;
+    --pg-hover: rgba(59, 130, 246, 0.1);
+
+    // Dropdown
+    --rc-dropdown-bg: var(--td-panel-solid);
+    --rc-dropdown-border: var(--td-border);
+    --rc-dropdown-text: var(--td-text);
+    --rc-dropdown-hover: rgba(59, 130, 246, 0.12);
+    --rc-dropdown-muted: var(--td-text-dim);
+    --es-bg: var(--td-panel-solid);
+    --es-border: var(--td-border);
+    --es-text: var(--td-text);
+    --es-hover: rgba(59, 130, 246, 0.12);
+    --es-muted: var(--td-text-dim);
+
+    // IconButton
+    --ib-bg: transparent;
+    --ib-color: var(--td-text-dim);
+    --ib-hover-bg: rgba(59, 130, 246, 0.15);
+    --ib-hover-color: var(--td-text);
+
+    // Alert
+    --alert-bg: var(--td-panel);
+    --alert-border: var(--td-border);
+    --alert-text: var(--td-text);
+    --alert-title: var(--td-text);
+    --alert-icon: var(--td-accent);
+
+    // Chip
+    --chip-bg: rgba(15, 23, 42, 0.55);
+    --chip-border: var(--td-border-soft);
+    --chip-text: var(--td-text);
+    --chip-selected-bg: rgba(59, 130, 246, 0.18);
+    --chip-selected-text: var(--td-text);
+
+    // Tag
+    --tag-bg: rgba(34, 211, 238, 0.1);
+    --tag-border: var(--td-border-soft);
+    --tag-text: var(--td-accent-2);
+
+    // Drawer
+    --dr-bg: var(--td-panel-solid);
+    --dr-border: var(--td-border);
+    --dr-backdrop: rgba(2, 6, 23, 0.7);
+    --dr-title-color: var(--td-text);
+    --dr-muted: var(--td-text-dim);
+    --dr-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+
+    // Timeline
+    --timeline-item-overlap: 0;
+
+    // Text
+    --text-color: var(--td-text);
+
+    // Side nav
+    --side-nav-bg: var(--td-panel-solid);
+    --side-nav-border: var(--td-border-soft);
+    --side-nav-text: var(--td-text-dim);
+    --side-nav-text-active: var(--td-text);
+    --side-nav-hover: rgba(59, 130, 246, 0.1);
+    --side-nav-active-bg: rgba(59, 130, 246, 0.18);
+
+    // Cool nav
+    --cool-nav-bg: rgba(15, 23, 42, 0.85);
+    --cool-nav-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+    // Misc panels
+    --co-border: var(--td-border-soft);
+    --co-hover-bg: rgba(59, 130, 246, 0.08);
+    --co-light-bg: rgba(34, 211, 238, 0.06);
+    --co-text: var(--td-text);
+    --co-muted: var(--td-text-dim);
+    --co-accent: var(--td-accent-2);
+    --co-accent-text: var(--td-text);
+    --cs-bg: var(--td-panel-solid);
+    --cs-text: var(--td-text);
+    --cs-muted: var(--td-text-dim);
+    --cs-accent: var(--td-accent-2);
+    --cs-copy-bg: rgba(34, 211, 238, 0.08);
+    --cs-copy-hover: rgba(34, 211, 238, 0.18);
+
+    // ── Typography primitives — Text, Heading, Label, Link, HelperText ───
+    --heading-text: var(--td-text);
+    --label-text: var(--td-text);
+    --label-tooltip: var(--td-text-dim);
+    --link-color: var(--td-accent-2);
+    --link-hover: var(--td-text);
+    --ht-text: var(--td-text-dim);
+    --ht-icon: var(--td-accent);
+    --is-text-color: var(--td-text);
+
+    // ── FormInput + child form pieces ────────────────────────────────────
+    --fi-label-color: var(--td-text);
+    --fi-help-color: var(--td-text-faint);
+
+    // ── ExtendedSelect / Dropdown extras ─────────────────────────────────
+    --es-color: var(--td-text);
+    --es-icon: var(--td-accent-2);
+    --es-hover-bg: rgba(59, 130, 246, 0.1);
+    --rc-dropdown-color: var(--td-text);
+    --rc-dropdown-hover-bg: rgba(59, 130, 246, 0.12);
+
+    // ── Accordion ────────────────────────────────────────────────────────
+    --ac-color: var(--td-text);
+    --ac-muted: var(--td-text-dim);
+    --ac-border: var(--td-border-soft);
+    --ac-hover-bg: rgba(59, 130, 246, 0.06);
+    --ac-active-bg: rgba(59, 130, 246, 0.12);
+
+    // ── Breadcrumb ───────────────────────────────────────────────────────
+    --bc-color: var(--td-text);
+    --bc-muted: var(--td-text-dim);
+    --bc-current: var(--td-text);
+    --bc-link-color: var(--td-accent-2);
+    --bc-separator: var(--td-text-faint);
+
+    // ── Banner ───────────────────────────────────────────────────────────
+    --bn-bg: var(--td-panel);
+
+    // ── AssetBundle ──────────────────────────────────────────────────────
+    --ab-accent: var(--td-accent-2);
+    --ab-bg: var(--td-panel);
+    --ab-border: var(--td-border-soft);
+    --ab-muted: var(--td-text-dim);
+    --ab-subtle-bg: rgba(59, 130, 246, 0.06);
+    --ab-text: var(--td-text);
+
+    // ── Checkbox ─────────────────────────────────────────────────────────
+    --cb-fg: var(--td-text);
+
+    // ── Chart ────────────────────────────────────────────────────────────
+    --chart-bg: var(--td-panel);
+    --chart-border: var(--td-border-soft);
+
+    // ── CommandPalette ───────────────────────────────────────────────────
+    --cm-bg: var(--td-panel-solid);
+    --cm-border: var(--td-border);
+    --cm-color: var(--td-text);
+    --cm-muted: var(--td-text-dim);
+    --cm-hover-bg: rgba(59, 130, 246, 0.1);
+    --cm-active-bg: rgba(59, 130, 246, 0.16);
+
+    // ── CardOptions ──────────────────────────────────────────────────────
+    --cp-bg: var(--td-panel);
+    --cp-border: var(--td-border-soft);
+    --cp-color: var(--td-text);
+    --cp-muted: var(--td-text-dim);
+    --cp-hover-bg: rgba(59, 130, 246, 0.06);
+    --cp-active-bg: rgba(59, 130, 246, 0.14);
+    --cp-active-border: var(--td-accent);
+    --cp-text: var(--td-text);
+    --cp-accent: var(--td-accent-2);
+    --cp-accent-text: var(--td-text);
+    --cp-light-bg: rgba(34, 211, 238, 0.06);
+
+    // ── Carousel ─────────────────────────────────────────────────────────
+    --cr-dot-active-bg: var(--td-accent);
+
+    // ── FormWizard ───────────────────────────────────────────────────────
+    --fw-accent: var(--td-accent);
+    --fw-accent-text: var(--td-text);
+    --fw-bg: var(--td-panel-solid);
+    --fw-border: var(--td-border-soft);
+    --fw-hover-bg: rgba(59, 130, 246, 0.08);
+    --fw-muted: var(--td-text-dim);
+    --fw-subtle: rgba(34, 211, 238, 0.06);
+    --fw-text: var(--td-text);
+
+    // ── IconPicker ───────────────────────────────────────────────────────
+    --ip-accent: var(--td-accent);
+    --ip-accent-text: var(--td-text);
+    --ip-border: var(--td-border-soft);
+    --ip-hover-bg: rgba(59, 130, 246, 0.08);
+    --ip-light-bg: rgba(34, 211, 238, 0.05);
+    --ip-muted: var(--td-text-dim);
+    --ip-subtle: rgba(15, 23, 42, 0.4);
+    --ip-text: var(--td-text);
+
+    // ── Icon tile ────────────────────────────────────────────────────────
+    --ic-bg: var(--td-panel);
+    --ic-border: var(--td-border-soft);
+    --ic-muted: var(--td-text-dim);
+    --ic-text: var(--td-text);
+
+    // ── IconButton extras ────────────────────────────────────────────────
+    --ib-border: var(--td-border-soft);
+
+    // ── Lightbox ─────────────────────────────────────────────────────────
+    --lb-text: var(--td-text);
+    --lb-thumb-active: var(--td-accent);
+
+    // ── Login ────────────────────────────────────────────────────────────
+    --login-btn-color: var(--td-text);
+
+    // ── MarkdownEditor ───────────────────────────────────────────────────
+    --me-bg: var(--td-panel-solid);
+    --me-border: var(--td-border-soft);
+    --me-border-focus: var(--td-accent-2);
+    --me-muted: var(--td-text-dim);
+    --me-tab-active-bg: rgba(59, 130, 246, 0.12);
+    --me-tab-active-text: var(--td-text);
+    --me-tab-bg: transparent;
+    --me-text: var(--td-text);
+    --me-toolbar-bg: rgba(15, 23, 42, 0.5);
+
+    // ── MultiCardSelect ──────────────────────────────────────────────────
+    --mcs-accent: var(--td-accent);
+    --mcs-border: var(--td-border-soft);
+    --mcs-hover-bg: rgba(59, 130, 246, 0.08);
+    --mcs-light-bg: rgba(34, 211, 238, 0.05);
+    --mcs-muted: var(--td-text-dim);
+    --mcs-subtle: rgba(15, 23, 42, 0.4);
+    --mcs-text: var(--td-text);
+
+    // ── NumberInput ──────────────────────────────────────────────────────
+    --ni-bg: var(--td-panel-solid);
+    --ni-border: var(--td-border-soft);
+    --ni-btn-bg: transparent;
+    --ni-btn-hover-bg: rgba(59, 130, 246, 0.12);
+    --ni-color: var(--td-text);
+    --ni-focus-border: var(--td-accent-2);
+    --ni-hover-border: var(--td-border);
+    --ni-error-border: var(--td-red);
+    --ni-muted: var(--td-text-dim);
+
+    // ── OTPInput ─────────────────────────────────────────────────────────
+    --otp-bg: var(--td-panel-solid);
+    --otp-border: var(--td-border-soft);
+    --otp-border-focus: var(--td-accent-2);
+    --otp-filled-bg: rgba(59, 130, 246, 0.08);
+
+    // ── PricingCard ──────────────────────────────────────────────────────
+    --pc-bg: var(--td-panel);
+    --pc-muted: var(--td-text-dim);
+    --pc-text: var(--td-text);
+
+    // ── PhoneInput ───────────────────────────────────────────────────────
+    --ph-bg: var(--td-panel-solid);
+    --ph-border: var(--td-border-soft);
+    --ph-border-focus: var(--td-accent-2);
+    --ph-border-error: var(--td-red);
+    --ph-hover-bg: rgba(59, 130, 246, 0.08);
+    --ph-muted: var(--td-text-dim);
+    --ph-text: var(--td-text);
+
+    // ── Popover ──────────────────────────────────────────────────────────
+    --pop-bg: var(--td-panel-solid);
+    --pop-border: var(--td-border);
+
+    // ── QueuedFile ───────────────────────────────────────────────────────
+    --qf-bg: var(--td-panel);
+    --qf-muted: var(--td-text-dim);
+    --qf-text: var(--td-text);
+
+    // ── ResizablePanel ───────────────────────────────────────────────────
+    --rp-divider-bg: var(--td-border-soft);
+    --rp-divider-hover: var(--td-accent-2);
+    --rp-handle-color: var(--td-text-dim);
+
+    // ── RangeSlider ──────────────────────────────────────────────────────
+    --rs-border: var(--td-border-soft);
+    --rs-disabled-bg: rgba(15, 23, 42, 0.5);
+    --rs-fill-color: var(--td-accent);
+    --rs-label-color: var(--td-text);
+    --rs-muted: var(--td-text-dim);
+    --rs-thumb-color: var(--td-accent);
+    --rs-track-bg: rgba(15, 23, 42, 0.6);
+
+    // ── Rating ───────────────────────────────────────────────────────────
+    --rt-label-color: var(--td-text);
+    --rt-muted: var(--td-text-dim);
+
+    // ── ScrollArea ───────────────────────────────────────────────────────
+    --sa-thumb-bg: rgba(148, 163, 184, 0.4);
+    --sa-thumb-hover: var(--td-accent-2);
+
+    // ── SingleCardSelect ─────────────────────────────────────────────────
+    --scs-accent: var(--td-accent);
+    --scs-border: var(--td-border-soft);
+    --scs-hover-bg: rgba(59, 130, 246, 0.08);
+    --scs-light-bg: rgba(34, 211, 238, 0.05);
+    --scs-muted: var(--td-text-dim);
+    --scs-text: var(--td-text);
+
+    // ── Slider ───────────────────────────────────────────────────────────
+    --sl-color: var(--td-text);
+    --sl-fill-bg: var(--td-accent);
+    --sl-muted: var(--td-text-dim);
+    --sl-thumb-bg: var(--td-accent);
+    --sl-thumb-border: var(--td-bg);
+    --sl-tick-color: var(--td-text-faint);
+    --sl-tooltip-bg: var(--td-panel-solid);
+    --sl-tooltip-color: var(--td-text);
+    --sl-track-bg: rgba(15, 23, 42, 0.6);
+
+    // ── Stepper ──────────────────────────────────────────────────────────
+    --st-active-bg: var(--td-accent);
+    --st-active-color: #0f172a;
+    --st-border: var(--td-border-soft);
+    --st-color: var(--td-text);
+    --st-completed-bg: rgba(59, 130, 246, 0.2);
+    --st-completed-color: var(--td-text);
+    --st-connector-color: var(--td-border-soft);
+    --st-connector-filled: var(--td-accent);
+    --st-error-color: var(--td-red);
+    --st-muted: var(--td-text-dim);
+    --st-pending-bg: rgba(15, 23, 42, 0.6);
+
+    // ── Switch ───────────────────────────────────────────────────────────
+    --switch-off-bg: rgba(100, 116, 139, 0.45);
+    --switch-on-bg: var(--td-accent);
+
+    // ── TagInput ─────────────────────────────────────────────────────────
+    --ti-accent: var(--td-accent);
+    --ti-accent-bg: rgba(59, 130, 246, 0.14);
+    --ti-bg: var(--td-panel-solid);
+    --ti-border: var(--td-border-soft);
+    --ti-close-hover: var(--td-text);
+    --ti-color: var(--td-text);
+    --ti-muted: var(--td-text-dim);
+
+    // ── TimePicker ───────────────────────────────────────────────────────
+    --tp-active-bg: var(--td-accent);
+    --tp-active-color: #0f172a;
+    --tp-bg: var(--td-panel-solid);
+    --tp-border: var(--td-border-soft);
+    --tp-border-focus: var(--td-accent-2);
+    --tp-hover-bg: rgba(59, 130, 246, 0.08);
+    --tp-muted: var(--td-text-dim);
+    --tp-text: var(--td-text);
+
+    // ── TreeView ─────────────────────────────────────────────────────────
+    --tv-active-bg: rgba(59, 130, 246, 0.14);
+    --tv-border: var(--td-border-soft);
+    --tv-hover-bg: rgba(59, 130, 246, 0.08);
+    --tv-muted: var(--td-text-dim);
+    --tv-selected-bg: rgba(34, 211, 238, 0.12);
+    --tv-selected-color: var(--td-text);
+    --tv-text: var(--td-text);
+
+    // ── VirtualList ──────────────────────────────────────────────────────
+    --vl-thumb-bg: rgba(148, 163, 184, 0.4);
+
+    // ── Misc leftovers ───────────────────────────────────────────────────
+    --dot-color: var(--td-accent-2);
+    --pg-text-muted: var(--td-text-dim);
+    --side-nav-muted: var(--td-text-dim);
+    --side-nav-section-title: var(--td-text-faint);
+}

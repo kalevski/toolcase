@@ -41,6 +41,11 @@ const HeroStatsBarDemo: React.FC = () => (
 							<HeroStatsBar stats={stats} />
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>
+							<HeroStatsBar stats={stats} />
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

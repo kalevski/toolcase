@@ -51,6 +51,11 @@ const PhaseGridDemo: React.FC = () => (
 							<PhaseGrid phases={phases} />
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>
+							<PhaseGrid phases={phases} />
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

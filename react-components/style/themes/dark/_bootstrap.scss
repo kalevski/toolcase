@@ -1,0 +1,445 @@
+// ───────────────────────────────────────────────────────────────────────────
+// 5 · Bootstrap fundamentals — button, card, badge, alert, form, table
+// ───────────────────────────────────────────────────────────────────────────
+// Most components are built on Bootstrap markup (`.btn`, `.card`, `.alert`,
+// `.form-control`, `.table`, ...). This block dark-skins the Bootstrap chrome
+// so anything using it picks up the new look automatically. We preserve the
+// default toolcase shape language (sharp corners, default fonts, single
+// solid borders) and only flip surface/text/border colors.
+
+.theme--dark {
+    // ── Buttons ──────────────────────────────────────────────────────────
+    .btn {
+        border-radius: 0;
+        border-width: 1px;
+        border-style: solid;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+        &:focus-visible {
+            outline: 2px solid var(--td-accent-2);
+            outline-offset: 2px;
+        }
+
+        &:disabled,
+        &.disabled {
+            opacity: 0.45;
+        }
+    }
+
+    .btn-primary {
+        background: var(--td-accent);
+        border-color: var(--td-accent);
+        color: var(--td-text);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #60a5fa;
+            border-color: #60a5fa;
+            color: var(--td-text);
+        }
+    }
+
+    .btn-secondary {
+        background: var(--td-bg-2);
+        border-color: var(--td-border-soft);
+        color: var(--td-text);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: var(--td-bg-3);
+            border-color: var(--td-border);
+            color: var(--td-text);
+        }
+    }
+
+    .btn-warning {
+        background: var(--td-yellow);
+        border-color: var(--td-yellow);
+        color: #0f172a;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #fde68a;
+            border-color: #fde68a;
+            color: #0f172a;
+        }
+    }
+
+    .btn-info {
+        background: var(--td-cyan);
+        border-color: var(--td-cyan);
+        color: #0f172a;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: var(--td-cyan-alt);
+            border-color: var(--td-cyan-alt);
+            color: #0f172a;
+        }
+    }
+
+    .btn-success {
+        background: var(--td-green);
+        border-color: var(--td-green);
+        color: #0f172a;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #86efac;
+            border-color: #86efac;
+            color: #0f172a;
+        }
+    }
+
+    .btn-danger {
+        background: var(--td-red);
+        border-color: var(--td-red);
+        color: #0f172a;
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: #fca5a5;
+            border-color: #fca5a5;
+            color: #0f172a;
+        }
+    }
+
+    // Outline / ghost variants
+    .btn-outline-primary,
+    .btn-outline-secondary,
+    .btn-outline-info,
+    .btn-outline-success,
+    .btn-outline-warning,
+    .btn-outline-danger {
+        background: transparent;
+    }
+
+    .btn-outline-primary {
+        border-color: var(--td-accent);
+        color: var(--td-accent);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--td-text);
+        }
+    }
+
+    .btn-outline-secondary {
+        border-color: var(--td-text-dim);
+        color: var(--td-text-dim);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--td-text);
+            border-color: var(--td-text);
+        }
+    }
+
+    .btn-outline-info {
+        border-color: var(--td-cyan);
+        color: var(--td-cyan);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(34, 211, 238, 0.1);
+            color: var(--td-text);
+        }
+    }
+
+    .btn-outline-success {
+        border-color: var(--td-green);
+        color: var(--td-green);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--td-text);
+        }
+    }
+
+    .btn-outline-warning {
+        border-color: var(--td-yellow);
+        color: var(--td-yellow);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--td-text);
+        }
+    }
+
+    .btn-outline-danger {
+        border-color: var(--td-red);
+        color: var(--td-red);
+
+        &:hover:not(:disabled),
+        &:focus:not(:disabled) {
+            background: rgba(248, 113, 113, 0.1);
+            color: var(--td-text);
+        }
+    }
+
+    // ── Cards ────────────────────────────────────────────────────────────
+    .card {
+        background: var(--td-panel);
+        border: 1px solid var(--td-border-soft);
+        border-radius: 0;
+        color: var(--td-text);
+    }
+
+    .card-header,
+    .card-footer {
+        background: transparent;
+        border-color: var(--td-border-soft);
+        color: var(--td-text);
+    }
+
+    .card-body {
+        color: var(--td-text);
+    }
+
+    .card-title {
+        color: var(--td-text);
+    }
+
+    .card-text {
+        color: var(--td-text-dim);
+    }
+
+    .card.bg-primary {
+        background: rgba(59, 130, 246, 0.12);
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    .card.bg-secondary {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: var(--td-border-soft);
+    }
+    .card.bg-info {
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.4);
+    }
+    .card.bg-success {
+        background: rgba(74, 222, 128, 0.1);
+        border-color: rgba(74, 222, 128, 0.4);
+    }
+    .card.bg-warning {
+        background: rgba(251, 191, 36, 0.1);
+        border-color: rgba(251, 191, 36, 0.4);
+    }
+    .card.bg-danger {
+        background: rgba(248, 113, 113, 0.1);
+        border-color: rgba(248, 113, 113, 0.4);
+    }
+
+    // ── Badges ───────────────────────────────────────────────────────────
+    .badge {
+        border-radius: 0;
+    }
+    .badge.bg-primary {
+        background: rgba(59, 130, 246, 0.18) !important;
+        color: var(--td-accent);
+        border: 1px solid rgba(59, 130, 246, 0.45);
+    }
+    .badge.bg-secondary {
+        background: rgba(139, 92, 246, 0.18) !important;
+        color: #c4b5fd;
+        border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+    .badge.bg-info {
+        background: rgba(34, 211, 238, 0.15) !important;
+        color: var(--td-accent-2);
+        border: 1px solid rgba(34, 211, 238, 0.4);
+    }
+    .badge.bg-success {
+        background: rgba(74, 222, 128, 0.15) !important;
+        color: #bbf7d0;
+        border: 1px solid rgba(74, 222, 128, 0.4);
+    }
+    .badge.bg-warning {
+        background: rgba(251, 191, 36, 0.15) !important;
+        color: #fde68a;
+        border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+    .badge.bg-danger {
+        background: rgba(248, 113, 113, 0.15) !important;
+        color: #fca5a5;
+        border: 1px solid rgba(248, 113, 113, 0.4);
+    }
+
+    // ── Alerts ───────────────────────────────────────────────────────────
+    .alert {
+        background: var(--td-panel-solid);
+        border: 1px solid var(--td-border-soft);
+        border-radius: 0;
+        color: var(--td-text);
+    }
+    .alert-primary {
+        background: rgba(59, 130, 246, 0.08);
+        border-color: rgba(59, 130, 246, 0.45);
+        color: var(--td-text);
+    }
+    .alert-secondary {
+        background: rgba(148, 163, 184, 0.08);
+        border-color: var(--td-border-soft);
+        color: var(--td-text);
+    }
+    .alert-info {
+        background: rgba(34, 211, 238, 0.06);
+        border-color: rgba(34, 211, 238, 0.4);
+        color: var(--td-text);
+    }
+    .alert-success {
+        background: rgba(74, 222, 128, 0.06);
+        border-color: rgba(74, 222, 128, 0.4);
+        color: var(--td-text);
+    }
+    .alert-warning {
+        background: rgba(251, 191, 36, 0.06);
+        border-color: rgba(251, 191, 36, 0.4);
+        color: var(--td-text);
+    }
+    .alert-danger {
+        background: rgba(248, 113, 113, 0.06);
+        border-color: rgba(248, 113, 113, 0.45);
+        color: var(--td-text);
+    }
+
+    // ── Form controls ────────────────────────────────────────────────────
+    .form-control,
+    .form-select {
+        background: var(--td-panel-solid);
+        border: 1px solid var(--td-border-soft);
+        border-radius: 0;
+        color: var(--td-text);
+
+        &::placeholder {
+            color: var(--td-text-faint);
+        }
+
+        &:hover:not(:disabled):not(:focus) {
+            border-color: var(--td-border);
+        }
+
+        &:focus {
+            background: var(--td-panel-solid);
+            border-color: var(--td-accent-2);
+            color: var(--td-text);
+            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.18);
+        }
+
+        &:disabled,
+        &[readonly] {
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--td-text-faint);
+            border-color: var(--td-border-soft);
+        }
+
+        &.is-invalid {
+            border-color: var(--td-red);
+
+            &:focus {
+                box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.22);
+            }
+        }
+    }
+
+    .form-label,
+    .form-label-inline {
+        color: var(--td-text);
+    }
+
+    .form-range {
+        accent-color: var(--td-accent);
+    }
+
+    .form-check-input {
+        background-color: var(--td-panel-solid);
+        border: 1px solid var(--td-border);
+        border-radius: 0;
+
+        &[type='radio'] {
+            border-radius: 50%;
+        }
+
+        &:checked {
+            background-color: var(--td-accent);
+            border-color: var(--td-accent);
+        }
+
+        &:focus {
+            border-color: var(--td-accent-2);
+            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+        }
+    }
+
+    .invalid-feedback {
+        color: var(--td-red);
+    }
+
+    // ── Tables ───────────────────────────────────────────────────────────
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--td-text);
+        --bs-table-border-color: var(--td-border-soft);
+        --bs-table-striped-bg: rgba(59, 130, 246, 0.04);
+        --bs-table-striped-color: var(--td-text);
+        --bs-table-hover-bg: rgba(59, 130, 246, 0.08);
+        --bs-table-hover-color: var(--td-text);
+        color: var(--td-text);
+        border-color: var(--td-border-soft);
+    }
+
+    .table > :not(caption) > * > * {
+        background-color: transparent;
+        color: var(--td-text);
+        border-bottom: 1px solid var(--td-border-soft);
+    }
+
+    .table > thead {
+        color: var(--td-text);
+
+        th {
+            border-bottom: 1px solid var(--td-border);
+            background: transparent;
+        }
+    }
+
+    // ── Progress ─────────────────────────────────────────────────────────
+    .progress {
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid var(--td-border-soft);
+        border-radius: 0;
+    }
+
+    .progress-bar {
+        border-radius: 0;
+    }
+    .progress-bar.bg-primary {
+        background: var(--td-accent) !important;
+    }
+    .progress-bar.bg-info {
+        background: var(--td-accent-2) !important;
+    }
+    .progress-bar.bg-success {
+        background: var(--td-green) !important;
+    }
+    .progress-bar.bg-warning {
+        background: var(--td-yellow) !important;
+    }
+    .progress-bar.bg-danger {
+        background: var(--td-red) !important;
+    }
+
+    // ── Utility color overrides ──────────────────────────────────────────
+    .text-muted {
+        color: var(--td-text-dim) !important;
+    }
+    .text-white {
+        color: var(--td-text) !important;
+    }
+    .text-body {
+        color: var(--td-text) !important;
+    }
+}

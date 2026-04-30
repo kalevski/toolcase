@@ -55,6 +55,15 @@ const CountdownTimerDemo: React.FC = () => {
 								/>
 							</div>
 						</SectionCard>
+						<SectionCard title="Dark theme">
+							<div className="theme theme--dark" style={{ padding: 24, textAlign: 'center' }}>
+								<CountdownTimer
+									target={target}
+									label="« DROP DEADLINE — SPRINT 047 ENDS IN »"
+									subLabel="…then sprint 048 auto-rolls."
+								/>
+							</div>
+						</SectionCard>
 					</div>
 				</div>
 			</div>

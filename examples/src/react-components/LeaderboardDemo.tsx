@@ -39,6 +39,11 @@ const LeaderboardDemo: React.FC = () => (
 							<Leaderboard entries={entries} />
 						</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>
+							<Leaderboard entries={entries} />
+						</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

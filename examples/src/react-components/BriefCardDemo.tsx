@@ -68,6 +68,9 @@ const BriefCardDemo: React.FC = () => (
 					<SectionCard title="Neon theme">
 						<div className="theme theme--neon" style={{ padding: 24 }}>{briefs}</div>
 					</SectionCard>
+					<SectionCard title="Dark theme">
+						<div className="theme theme--dark" style={{ padding: 24 }}>{briefs}</div>
+					</SectionCard>
 				</div>
 			</div>
 		</div>

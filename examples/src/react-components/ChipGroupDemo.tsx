@@ -83,6 +83,17 @@ const ChipGroupDemo: React.FC = () => {
 								/>
 							</div>
 						</SectionCard>
+						<SectionCard title="Dark theme">
+							<div className="theme theme--dark" style={{ padding: 24 }}>
+								<ChipGroup
+									title="ALLOWED GENRES"
+									subtitle={`SprintPool · ${enabled.size} of ${ALL_GENRES.length + DISABLED.length} enabled`}
+									border
+									items={items}
+									onToggle={toggle}
+								/>
+							</div>
+						</SectionCard>
 					</div>
 				</div>
 			</div>
