@@ -1,0 +1,72 @@
+{
+    "name": "@toolcase/phaser-plus",
+    "version": "2.0.0",
+    "description": "🎮 Unified runtime for PhaserJS — scenes, features, debugger and 2D perspective in one package",
+    "type": "module",
+    "source": "src/main.ts",
+    "main": "lib/main.js",
+    "module": "lib/main.js",
+    "types": "lib/main.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/main.d.ts",
+            "import": "./lib/main.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.build.json",
+        "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "homepage": "https://kalevski.dev/toolcase",
+    "keywords": [
+        "phaser",
+        "phaser4",
+        "framework",
+        "scenes",
+        "features",
+        "debugger",
+        "isometric",
+        "perspective",
+        "games",
+        "html5",
+        "gamedev",
+        "browser",
+        "typescript"
+    ],
+    "dependencies": {
+        "@tweakpane/plugin-essentials": "^0.1.8",
+        "tweakpane": "^3.1.7"
+    },
+    "peerDependencies": {
+        "phaser": "4.x",
+        "@toolcase/base": "2.x",
+        "@toolcase/logging": "2.x"
+    },
+    "devDependencies": {
+        "@toolcase/base": "*",
+        "@toolcase/logging": "*",
+        "phaser": "^4.0.0"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "license": "MIT"
+}

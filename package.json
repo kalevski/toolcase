@@ -5,7 +5,7 @@
         "build": "npm run build --workspaces",
         "test": "vitest run",
         "lint": "eslint .",
-        "lint:exports": "publint base && publint logging && publint serializer && publint react-components",
+        "lint:exports": "publint base && publint logging && publint serializer && publint react-components && publint phaser-plus",
         "format": "prettier --write ."
     },
     "workspaces": [
@@ -13,6 +13,7 @@
         "logging",
         "serializer",
         "react-components",
+        "phaser-plus",
         "examples"
     ],
     "devDependencies": {
@@ -20,6 +21,7 @@
         "concurrently": "9.2.1",
         "eslint": "^10.1.0",
         "eslint-config-prettier": "^10.1.8",
+        "phaser": "^4.1.0",
         "prettier": "^3.8.1",
         "publint": "^0.3.18",
         "tsup": "^8.5.1",

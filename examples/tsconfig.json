@@ -2,7 +2,11 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "jsx": "react-jsx",
-        "noEmit": true
+        "noEmit": true,
+        "baseUrl": ".",
+        "paths": {
+            "@toolcase/phaser-plus": ["../phaser-plus/src/main.ts"]
+        }
     },
     "include": ["src"]
 }

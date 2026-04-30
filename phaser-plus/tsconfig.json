@@ -1,0 +1,14 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "./src",
+        "noEmit": true,
+        "allowJs": false,
+        "checkJs": false,
+        "strict": true,
+        "noImplicitAny": false,
+        "strictNullChecks": false,
+        "types": ["@toolcase/base", "@toolcase/logging", "phaser"]
+    },
+    "include": ["src/**/*.ts"]
+}

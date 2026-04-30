@@ -26,6 +26,12 @@ const packages = [
         path: '/react-components',
         icon: 'grid-3x3-gap',
     },
+    {
+        name: '@toolcase/phaser-plus',
+        description: 'Unified runtime for Phaser — Scenes, Features, Debugger, Perspective2D and Effects',
+        path: '/phaser-plus',
+        icon: 'controller',
+    },
 ]
 
 export const Home = () => {

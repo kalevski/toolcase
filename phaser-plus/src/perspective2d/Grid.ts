@@ -1,0 +1,162 @@
+import { generateId } from '@toolcase/base'
+import { Cameras, GameObjects, Math as M } from 'phaser'
+import GameObject from '../core/GameObject'
+import Matrix2 from '../core/structs/Matrix2'
+
+export default class Grid extends GameObject {
+
+    STYLE = {
+        GRID: 0x59758a,
+        LINES: 0xffffff
+    }
+
+    private TEXTURE_KEY: string = ''
+
+    private readonly TILE_PRECISION: number = 7
+
+    private canvas!: GameObjects.Graphics
+
+    private gridTile!: GameObjects.TileSprite
+
+    override onCreate(): void {
+        this.TEXTURE_KEY = `@phaser-plus/reef/grid-${generateId(4)}`
+
+        const { width, height } = this.game.config
+
+        this.gridTile = this.scene.add.tileSprite(0, 0, width as number, height as number, '')
+            .setVisible(false)
+            .setOrigin(0)
+        this.add(this.gridTile)
+    }
+
+    setColors(gridColor: number, lineColor: number): void {
+        if (typeof gridColor !== 'number' || typeof lineColor !== 'number') return
+        this.STYLE.GRID = gridColor
+        this.STYLE.LINES = lineColor
+    }
+
+    private setCanvasStyle(): void {
+        this.canvas.fillStyle(this.STYLE.GRID, 1)
+        this.canvas.lineStyle(1, this.STYLE.LINES, 0.3)
+    }
+
+    override onDestroy(): void {}
+
+    setProjection(matrix: Matrix2): void {
+        this.canvas = this.scene.add.graphics()
+        this.setCanvasStyle()
+        this.add(this.canvas)
+        if (this.scene.textures.exists(this.TEXTURE_KEY)) {
+            this.scene.textures.remove(this.TEXTURE_KEY)
+        }
+        this.gridTile.setVisible(false)
+        const tile = this.getProjectionTileSize(matrix)
+        let size = 0
+        for (let i = 0; i < 4; i++) {
+            size = Math.max(size, Math.abs((matrix as unknown as Float32Array)[i] as number))
+        }
+
+        if (size < 25) this.drawBackground()
+        else if (tile.x === 0 || tile.y === 0) this.drawLinearTiles(matrix)
+        else this.drawGridTiles(matrix, tile)
+
+        this.canvas.clear()
+        this.canvas.destroy()
+        this.gridTile.setTexture(this.TEXTURE_KEY)
+        this.gridTile.setVisible(true)
+    }
+
+    move(camera: Cameras.Scene2D.Camera): void {
+        this.gridTile.setTilePosition(camera.scrollX, camera.scrollY)
+    }
+
+    private drawGridTiles(matrix: Matrix2, tile: M.Vector2): void {
+        const polygons = this.TILE_PRECISION
+        const pointA = new M.Vector2(0, 0)
+        const pointB = new M.Vector2(0, 0)
+        const pointC = new M.Vector2(0, 0)
+        const pointD = new M.Vector2(0, 0)
+
+        this.canvas.fillRect(0, 0, tile.x, tile.y)
+        for (let x = -polygons; x < polygons; x++) {
+            for (let y = -polygons; y < polygons; y++) {
+                matrix.translate(x, y, pointA)
+                matrix.translate(x, y + 1, pointB)
+                matrix.translate(x + 1, y, pointC)
+                matrix.translate(x + 1, y + 1, pointD)
+                this.canvas.beginPath()
+                this.canvas.moveTo(pointA.x, pointA.y)
+                this.canvas.lineTo(pointB.x, pointB.y)
+                this.canvas.lineTo(pointD.x, pointD.y)
+                this.canvas.strokePath()
+            }
+        }
+
+        this.canvas.generateTexture(this.TEXTURE_KEY, tile.x, tile.y)
+    }
+
+    private drawLinearTiles(matrix: Matrix2): void {
+        const crop = new M.Vector2(0, 0)
+        matrix.translate(2, 2, crop)
+
+        this.canvas.fillRect(0, 0, crop.x, crop.y)
+        this.canvas.lineStyle(1, 0xffffff, 0.2)
+
+        this.canvas.strokePoints([
+            matrix.translate(0.8, 1),
+            matrix.translate(1.2, 1)
+        ])
+        this.canvas.strokePoints([
+            matrix.translate(1, 0.8),
+            matrix.translate(1, 1.2)
+        ])
+        this.canvas.generateTexture(this.TEXTURE_KEY, crop.x, crop.y)
+    }
+
+    private drawBackground(): void {
+        this.canvas.fillRect(0, 0, 100, 100)
+        this.canvas.lineStyle(1, 0xffffff, 0.1)
+        this.canvas.strokeCircle(50, 50, 3)
+        this.canvas.generateTexture(this.TEXTURE_KEY, 100, 100)
+    }
+
+    private getProjectionTileSize(matrix: Matrix2): M.Vector2 {
+        const refPoint = new M.Vector2(matrix.translate(1, 0).x, matrix.translate(0, 1).y)
+        refPoint.x = Math.abs(refPoint.x)
+        refPoint.y = Math.abs(refPoint.y)
+
+        const point = new M.Vector2()
+        const tempPoint = new M.Vector2()
+
+        let x = 0
+        let shiftX = 0
+        while (shiftX < this.TILE_PRECISION) {
+            x += refPoint.x
+            shiftX++
+            matrix.inverse.translate(x, 0, tempPoint)
+            tempPoint.x = Math.round(tempPoint.x * 10) / 10
+            tempPoint.y = Math.round(tempPoint.y * 10) / 10
+            if (tempPoint.y % 1 === 0) {
+                point.x = Math.round(x)
+                break
+            }
+        }
+
+        let y = 0
+        let shiftY = 0
+        while (shiftY < this.TILE_PRECISION) {
+            y += refPoint.y
+            shiftY++
+            matrix.inverse.translate(0, y, tempPoint)
+            tempPoint.x = Math.round(tempPoint.x * 10) / 10
+            tempPoint.y = Math.round(tempPoint.y * 10) / 10
+            if (tempPoint.x % 1 === 0 && tempPoint.y % 1 === 0) {
+                point.y = Math.round(y)
+                break
+            }
+        }
+
+        return point
+    }
+
+}

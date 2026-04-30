@@ -15,7 +15,9 @@ import { ReactComponentsPage } from './pages/ReactComponentsPage'
 import { BaseExamplesPage } from './pages/BaseExamplesPage'
 import { LoggingExamplesPage } from './pages/LoggingExamplesPage'
 import { SerializerExamplesPage } from './pages/SerializerExamplesPage'
+import { PhaserPlusPage } from './pages/PhaserPlusPage'
 import { examples } from './react-components/index'
+import { phaserExamples } from './phaser-plus/index'
 
 const THEME_STORAGE_KEY = 'toolcase.examples.theme'
 
@@ -65,6 +67,7 @@ const Nav = ({ theme, onThemeChange }: NavProps) => {
         { key: 'logging', label: 'Logging', href: '/logging', active: location.pathname.startsWith('/logging'), onClick: go('/logging') },
         { key: 'serializer', label: 'Serializer', href: '/serializer', active: location.pathname.startsWith('/serializer'), onClick: go('/serializer') },
         { key: 'rc', label: 'React Components', href: '/react-components', active: location.pathname.startsWith('/react-components'), onClick: go('/react-components') },
+        { key: 'phaser', label: 'Phaser+', href: '/phaser-plus', active: location.pathname.startsWith('/phaser-plus'), onClick: go('/phaser-plus') },
     ]
 
     const brand = (
@@ -150,6 +153,56 @@ const ExampleWrapper = ({ children, exampleKey }: ExampleWrapperProps) => {
     )
 }
 
+interface PhaserExampleWrapperProps {
+    children: React.ReactNode
+    exampleKey: string
+}
+
+const PhaserExampleWrapper = ({ children, exampleKey }: PhaserExampleWrapperProps) => {
+    const navigate = useNavigate()
+    const index = phaserExamples.findIndex(e => e.key === exampleKey)
+    const prev = index > 0 ? phaserExamples[index - 1] : null
+    const next = index < phaserExamples.length - 1 ? phaserExamples[index + 1] : null
+    const current = phaserExamples[index]
+
+    useEffect(() => {
+        const onKey = (event: KeyboardEvent) => {
+            if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+            if (isEditableTarget(event.target)) return
+            if (event.key === 'ArrowLeft' && prev) {
+                event.preventDefault()
+                navigate(`/phaser-plus/${prev.key}`)
+            } else if (event.key === 'ArrowRight' && next) {
+                event.preventDefault()
+                navigate(`/phaser-plus/${next.key}`)
+            }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [navigate, prev, next])
+
+    return (
+        <div className="example">
+            <div className="example__back">
+                <RouterLink to="/phaser-plus" className="example__back-link">
+                    <Icon name="arrow-left" /> All Phaser+ Demos
+                </RouterLink>
+                {current && (
+                    <Text as="span" variant="muted" size="small">
+                        {current.title} — <code>{current.sceneFile}</code>
+                    </Text>
+                )}
+                <Text as="span" variant="muted" size="small" className="example__hint">
+                    <Kbd>←</Kbd> <Kbd>→</Kbd> to navigate
+                </Text>
+            </div>
+            <div className="example__canvas phaser-canvas-wrapper">
+                {children}
+            </div>
+        </div>
+    )
+}
+
 export const App = () => {
     const [theme, setTheme] = useState<string>(() => {
         const stored = localStorage.getItem(THEME_STORAGE_KEY)
@@ -177,6 +230,7 @@ export const App = () => {
                 <Route path="/logging" element={<LoggingExamplesPage />} />
                 <Route path="/serializer" element={<SerializerExamplesPage />} />
                 <Route path="/react-components" element={<ReactComponentsPage />} />
+                <Route path="/phaser-plus" element={<PhaserPlusPage />} />
                 {examples.map((example) => (
                     <Route
                         key={example.key}
@@ -185,6 +239,17 @@ export const App = () => {
                             <ExampleWrapper exampleKey={example.key}>
                                 {example.element}
                             </ExampleWrapper>
+                        }
+                    />
+                ))}
+                {phaserExamples.map((example) => (
+                    <Route
+                        key={example.key}
+                        path={`/phaser-plus/${example.key}`}
+                        element={
+                            <PhaserExampleWrapper exampleKey={example.key}>
+                                {example.element}
+                            </PhaserExampleWrapper>
                         }
                     />
                 ))}

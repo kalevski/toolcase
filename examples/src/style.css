@@ -95,6 +95,24 @@ html {
     min-height: calc(100vh - 120px);
 }
 
+/* Phaser+ demo canvas — single fullbleed game container */
+
+.tp-dfwv {
+    top: 150px !important;
+    z-index: 5000;
+}
+
+.phaser-canvas-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.phaser-canvas {
+    width: 100%;
+    max-width: 1280px;
+}
 /* Console output for @toolcase/base, logging and serializer demos */
 
 .console-output {
