@@ -394,7 +394,7 @@ Do not invent z-index values. Use these defined layers:
 
 ## 11. SKILL.md Updates
 
-When you add or modify a component, update [SKILL.md](SKILL.md):
+When you add or modify a component, update [examples/public/SKILL.md](../../examples/public/SKILL.md):
 
 1. Add the component to the Table of Contents under the correct category.
 2. Add a `### ComponentName` section with:
@@ -488,6 +488,6 @@ export const ComponentNameDemo: React.FC = () => {
 - [ ] `@media (prefers-reduced-motion: reduce)` overrides animations
 - [ ] SCSS file added to `style/components/index.scss`
 - [ ] Export added to `src/index.ts`
-- [ ] SKILL.md updated
+- [ ] examples/public/SKILL.md updated
 - [ ] Demo created at `examples/src/react-components/{ComponentName}Demo.tsx`
 - [ ] Demo registered in `examples/src/react-components/index.tsx`

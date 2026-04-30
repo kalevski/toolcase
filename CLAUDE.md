@@ -56,7 +56,7 @@ Every publishable package uses the same tsup pattern (`{pkg}/tsup.config.js`):
 - Style entry `style/index.scss` `@use`s `_bootstrap`, `_reset`, `layouts`, `components`. Each component has a `style/components/_{name}.scss` partial that must be added to `style/components/index.scss`.
 - Every component is one `.tsx` in `src/` exported from `src/index.ts`. Nested multi-file subsystems live in folders (`BasicLayout/`, `DashboardLayout/`, `DashboardCard/`, `Chart/`, `modal/`) with their own `index.tsx`/`index.ts`.
 - Modal system is namespace-exported: `import { Modal } from '@toolcase/react-components'` → `Modal.Window`, `Modal.Context`, `Modal.Control`, hooks.
-- `SKILL.md` is the human-facing component catalog (prop tables + minimal examples). **Keep it in sync** when adding/changing components.
+- `examples/public/SKILL.md` is the human-facing component catalog (prop tables + minimal examples). It is served by the examples site so users can install it as a Claude Code skill. **Keep it in sync** when adding/changing components.
 
 `.github/agents/components.agent.md` is the authoritative style/a11y/SCSS/demo rulebook. The rules below are condensed from it — read the full file before generating or deeply modifying a component.
 
@@ -179,7 +179,7 @@ Naming scheme:
 4. IDs via `useId()`; labels wired via `htmlFor`; `:focus-visible` styles exist; keyboard nav (Tab, Enter/Space, Escape, arrows) works; ARIA is correct.
 5. `loading` renders `<Skeleton />`; `error` renders with `aria-describedby`.
 6. Responsive at 375 / 576 / 768 / 992 px; touch targets ≥44px on `pointer: coarse`; `prefers-reduced-motion` overrides animations.
-7. `SKILL.md` updated — add to the correct Table of Contents category, add a `### ComponentName` section with a one-line description, a props table (✅ required / ❌ optional), and a minimal `tsx` example.
+7. `examples/public/SKILL.md` updated — add to the correct Table of Contents category, add a `### ComponentName` section with a one-line description, a props table (✅ required / ❌ optional), and a minimal `tsx` example.
 8. Demo at `examples/src/react-components/{ComponentName}Demo.tsx`, registered in `examples/src/react-components/index.tsx` under the correct category with a `{ key, category, element }` entry. Demos use Bootstrap grid (`container`, `row`, `col-lg-8`), wrap each variant group in a `<Card>` with an `<h2 className="h5 mb-3">`, show every meaningful prop variant, and end with a `<CodeSnippet>` card showing minimal usage.
 
 ### Examples app
