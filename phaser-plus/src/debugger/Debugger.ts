@@ -1,17 +1,17 @@
 import type { GameObjects, Time } from 'phaser'
 import { Pane } from 'tweakpane'
 import * as EssentialsPlugin from '@tweakpane/plugin-essentials'
-import HTMLFeature from '../core/HTMLFeature'
-import GameObjectPanel from './GameObjectPanel'
-import InspectorPanel from './InspectorPanel'
-import OverviewPanel from './OverviewPanel'
-import LayerPanel from './LayerPanel'
-import FlowPanel from './FlowPanel'
+import HTMLFeature from '../features/HTMLFeature'
+import GameObjectPanel from './panels/GameObjectPanel'
+import InspectorPanel from './panels/InspectorPanel'
+import OverviewPanel from './panels/OverviewPanel'
+import LayerPanel from './panels/LayerPanel'
+import FlowPanel from './panels/FlowPanel'
 import Panel from './Panel'
 
 const BUILT_IN_KEYS = new Set(['inspector', 'overview', 'flow', 'layer', 'gameObject'])
 
-type PanelClass<T extends Panel> = new (scene: import('../core/Scene').default, base: any) => T
+type PanelClass<T extends Panel> = new (scene: import('../engine/Scene').default, base: any) => T
 
 export default class Debugger extends HTMLFeature {
 

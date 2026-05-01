@@ -9,7 +9,8 @@ const categoryIcons: Record<PhaserCategory, string> = {
     'Debugging': 'bug',
     'Flow': 'arrow-repeat',
     'Perspective2D': 'grid-3x3',
-    'Effects': 'magic'
+    'Effects': 'magic',
+    'AI': 'compass'
 }
 
 export const PhaserPlusPage = () => {

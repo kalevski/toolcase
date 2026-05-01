@@ -1,6 +1,6 @@
 import { Broadcast } from '@toolcase/base'
 import type { Game } from 'phaser'
-import type Scene from '../core/Scene'
+import type Scene from '../engine/Scene'
 
 export type PanelHost = any
 

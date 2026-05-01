@@ -40,7 +40,11 @@ export default class EffectManager {
         const game = (this.target as any).scene?.game ?? camera.scene?.game
         if (game) ensureEffectRegistered(game, EffectClass)
         const effect = new EffectClass(camera)
-        if (params) Object.assign(effect, params)
+        if (params) {
+            for (const key of Object.keys(params) as Array<keyof T>) {
+                (effect as any)[key] = (params as any)[key]
+            }
+        }
         list.add(effect as any)
         return effect
     }

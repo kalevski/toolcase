@@ -1,5 +1,5 @@
-import ObjectLayer from '../core/ObjectLayer'
-import Scene from '../core/Scene'
+import ObjectLayer from '../features/ObjectLayer'
+import Scene from '../engine/Scene'
 import World from './World'
 
 export default class Scene2D extends Scene {

@@ -1,16 +1,16 @@
 {
     "name": "@toolcase/phaser-plus",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "🎮 Unified runtime for PhaserJS — scenes, features, debugger and 2D perspective in one package",
     "type": "module",
-    "source": "src/main.ts",
-    "main": "lib/main.js",
-    "module": "lib/main.js",
-    "types": "lib/main.d.ts",
+    "source": "src/index.ts",
+    "main": "lib/index.js",
+    "module": "lib/index.js",
+    "types": "lib/index.d.ts",
     "exports": {
         ".": {
-            "types": "./lib/main.d.ts",
-            "import": "./lib/main.js"
+            "types": "./lib/index.d.ts",
+            "import": "./lib/index.js"
         }
     },
     "scripts": {
@@ -35,8 +35,8 @@
         "typescript"
     ],
     "dependencies": {
-        "@tweakpane/plugin-essentials": "^0.1.8",
-        "tweakpane": "^3.1.7"
+        "@tweakpane/plugin-essentials": "^0.2.1",
+        "tweakpane": "^4.0.5"
     },
     "peerDependencies": {
         "phaser": "4.x",

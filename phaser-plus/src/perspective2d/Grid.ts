@@ -1,7 +1,7 @@
 import { generateId } from '@toolcase/base'
 import { Cameras, GameObjects, Math as M } from 'phaser'
-import GameObject from '../core/GameObject'
-import Matrix2 from '../core/structs/Matrix2'
+import GameObject from '../engine/GameObject'
+import Matrix2 from '../math/Matrix2'
 
 export default class Grid extends GameObject {
 

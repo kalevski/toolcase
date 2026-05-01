@@ -10,7 +10,7 @@ export default defineConfig({
     base: '/',
     resolve: {
         alias: {
-            '@toolcase/phaser-plus': resolve(__dirname, '../phaser-plus/src/main.ts'),
+            '@toolcase/phaser-plus': resolve(__dirname, '../phaser-plus/src/index.ts'),
         },
     },
     build: {

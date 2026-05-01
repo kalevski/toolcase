@@ -1,6 +1,6 @@
 import { Math as M } from 'phaser'
-import type Scene from '../core/Scene'
-import GameObject from '../core/GameObject'
+import type Scene from '../engine/Scene'
+import GameObject from '../engine/GameObject'
 import type World from './World'
 
 export default class GameObject2D extends GameObject {

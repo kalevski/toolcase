@@ -5,7 +5,7 @@
         "noEmit": true,
         "baseUrl": ".",
         "paths": {
-            "@toolcase/phaser-plus": ["../phaser-plus/src/main.ts"]
+            "@toolcase/phaser-plus": ["../phaser-plus/src/index.ts"]
         }
     },
     "include": ["src"]
