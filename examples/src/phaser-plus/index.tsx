@@ -35,6 +35,18 @@ import ISOMovement from './scenes/ISOMovement.js'
 import WorldReset from './scenes/WorldReset.js'
 import Effects from './scenes/Effects.js'
 import PathFinderDemo from './scenes/PathFinderDemo.js'
+import StateMachineDemo from './scenes/StateMachineDemo.js'
+import BehaviorTreeDemo from './scenes/BehaviorTreeDemo.js'
+import ReplayRecorderDemo from './scenes/ReplayRecorderDemo.js'
+import CameraDirectorDemo from './scenes/CameraDirectorDemo.js'
+import ScreenShakeDemo from './scenes/ScreenShakeDemo.js'
+import ParallaxLayerDemo from './scenes/ParallaxLayerDemo.js'
+import LetterboxDemo from './scenes/LetterboxDemo.js'
+import InputFeatureDemo from './scenes/InputFeatureDemo.js'
+import VirtualJoystickDemo from './scenes/VirtualJoystickDemo.js'
+import GestureRecognizerDemo from './scenes/GestureRecognizerDemo.js'
+import GamepadDemo from './scenes/GamepadDemo.js'
+import InputBufferDemo from './scenes/InputBufferDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -45,6 +57,8 @@ export type PhaserCategory =
     | 'Perspective2D'
     | 'Effects'
     | 'AI'
+    | 'Cinema'
+    | 'Input'
 
 export type PhaserExampleDef = {
     key: string
@@ -63,7 +77,9 @@ export const phaserCategories: PhaserCategory[] = [
     'Flow',
     'Perspective2D',
     'Effects',
-    'AI'
+    'AI',
+    'Cinema',
+    'Input'
 ]
 
 export const phaserExamples: PhaserExampleDef[] = [
@@ -346,5 +362,104 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Time-sliced incremental A* over a grid NavMesh: click to walk, right-click to toggle walls.',
         sceneFile: 'PathFinderDemo.js',
         element: <PhaserCanvas sceneClass={PathFinderDemo} />
+    },
+
+    {
+        key: 'state-machine',
+        title: 'State Machine',
+        category: 'Flow',
+        description: 'StateMachine feature: idle/run/jump with signal- and guard-based transitions.',
+        sceneFile: 'StateMachineDemo.js',
+        element: <PhaserCanvas sceneClass={StateMachineDemo} />
+    },
+    {
+        key: 'behavior-tree',
+        title: 'Behavior Tree',
+        category: 'Flow',
+        description: 'Selector(chase, patrol) with Sequence + Action + Condition nodes.',
+        sceneFile: 'BehaviorTreeDemo.js',
+        element: <PhaserCanvas sceneClass={BehaviorTreeDemo} />
+    },
+    {
+        key: 'replay-recorder',
+        title: 'Replay Recorder',
+        category: 'Flow',
+        description: 'Record arrow-key inputs at fixed step then play them back deterministically.',
+        sceneFile: 'ReplayRecorderDemo.js',
+        element: <PhaserCanvas sceneClass={ReplayRecorderDemo} />
+    },
+
+    {
+        key: 'camera-director',
+        title: 'Camera Director',
+        category: 'Cinema',
+        description: 'Queueable shots: pan, zoom, fit-bounds, follow target, Catmull-Rom spline.',
+        sceneFile: 'CameraDirectorDemo.js',
+        element: <PhaserCanvas sceneClass={CameraDirectorDemo} />
+    },
+    {
+        key: 'screen-shake',
+        title: 'Screen Shake',
+        category: 'Cinema',
+        description: 'Trauma-based stacking shake. Click for small bumps, Shift+Click for big.',
+        sceneFile: 'ScreenShakeDemo.js',
+        element: <PhaserCanvas sceneClass={ScreenShakeDemo} />
+    },
+    {
+        key: 'parallax-layer',
+        title: 'Parallax Layers',
+        category: 'Cinema',
+        description: 'Three ParallaxLayers with different scroll factors driven by main camera.',
+        sceneFile: 'ParallaxLayerDemo.js',
+        element: <PhaserCanvas sceneClass={ParallaxLayerDemo} />
+    },
+    {
+        key: 'letterbox',
+        title: 'Letterbox / Pillarbox',
+        category: 'Cinema',
+        description: 'LetterboxFeature applies black bars when canvas aspect ≠ target aspect.',
+        sceneFile: 'LetterboxDemo.js',
+        element: <PhaserCanvas sceneClass={LetterboxDemo} />
+    },
+
+    {
+        key: 'input-feature',
+        title: 'Action Map',
+        category: 'Input',
+        description: 'InputFeature unifies WASD + Arrows + Space into named actions with hold timing.',
+        sceneFile: 'InputFeatureDemo.js',
+        element: <PhaserCanvas sceneClass={InputFeatureDemo} />
+    },
+    {
+        key: 'virtual-joystick',
+        title: 'Virtual Joystick',
+        category: 'Input',
+        description: 'Touch joystick + on-screen buttons feeding InputFeature virtual bindings.',
+        sceneFile: 'VirtualJoystickDemo.js',
+        element: <PhaserCanvas sceneClass={VirtualJoystickDemo} />
+    },
+    {
+        key: 'gesture-recognizer',
+        title: 'Gesture Recognizer',
+        category: 'Input',
+        description: 'Tap, double-tap, long-press, swipe, two-finger pinch on Scene pointer events.',
+        sceneFile: 'GestureRecognizerDemo.js',
+        element: <PhaserCanvas sceneClass={GestureRecognizerDemo} />
+    },
+    {
+        key: 'gamepad',
+        title: 'Gamepad',
+        category: 'Input',
+        description: 'Hot-plug, deadzone, dual-stick visualization, rumble on button press.',
+        sceneFile: 'GamepadDemo.js',
+        element: <PhaserCanvas sceneClass={GamepadDemo} />
+    },
+    {
+        key: 'input-buffer',
+        title: 'Input Buffer / Combos',
+        category: 'Input',
+        description: 'Ring buffer of recent inputs; consumeMatch detects fighting-game combos.',
+        sceneFile: 'InputBufferDemo.js',
+        element: <PhaserCanvas sceneClass={InputBufferDemo} />
     }
 ]

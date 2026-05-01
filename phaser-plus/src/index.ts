@@ -22,13 +22,42 @@ import TimeEvent from './flow/TimeEvent'
 import CollisionEvent from './flow/CollisionEvent'
 import Job from './flow/Job'
 import FlowEngine from './flow/FlowEngine'
+import StateMachine from './flow/StateMachine'
+import BehaviorTreeProcessor, {
+    BTNode,
+    Action as BTAction,
+    Condition as BTCondition,
+    Sequence,
+    Selector,
+    Parallel,
+    Inverter,
+    Repeater,
+    AlwaysSucceed,
+    AlwaysFail
+} from './flow/BehaviorTree'
+import ReplayRecorder from './flow/ReplayRecorder'
 
 const Flow = {
     Event,
     TimeEvent,
     CollisionEvent,
     Job,
-    FlowEngine
+    FlowEngine,
+    StateMachine,
+    BehaviorTreeProcessor,
+    ReplayRecorder,
+    BT: {
+        Node: BTNode,
+        Action: BTAction,
+        Condition: BTCondition,
+        Sequence,
+        Selector,
+        Parallel,
+        Inverter,
+        Repeater,
+        AlwaysSucceed,
+        AlwaysFail
+    }
 }
 
 const Structs = {
@@ -59,3 +88,6 @@ export * from './debugger'
 export * from './perspective2d'
 export * from './effects'
 export * from './ai'
+export * from './cinema'
+export * from './input'
+export * from './flow'

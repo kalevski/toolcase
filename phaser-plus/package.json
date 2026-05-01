@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/phaser-plus",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "🎮 Unified runtime for PhaserJS — scenes, features, debugger and 2D perspective in one package",
     "type": "module",
     "source": "src/index.ts",
