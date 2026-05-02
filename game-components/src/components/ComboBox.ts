@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ComboBox.styles.js'
+import stylesText from '../../style/ComboBox.scss'
 
 export interface ComboOption { value: string; label: string; keywords?: string[] }
 
 @customElement('gc-combo-box')
 export class ComboBox extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) options: ComboOption[] = []
     @property() value = ''

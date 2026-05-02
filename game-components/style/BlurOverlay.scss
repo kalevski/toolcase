@@ -5,7 +5,7 @@
     position: fixed;
     inset: 0;
     z-index: 9300;
-    background: var(--gc-bg, rgba(0, 0, 0, 0.3));
+    background: var(--gc-bg, rgba(10, 6, 4, 0.55));
     backdrop-filter: blur(var(--gc-blur, 8px));
     -webkit-backdrop-filter: blur(var(--gc-blur, 8px));
 }

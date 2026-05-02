@@ -5,6 +5,8 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: var(--gc-color, #{$gc-gold});
-    font-size: var(--gc-font-size, 16px);
+    color: var(--gc-color, var(--fg-gold-bright));
+    font-family: $gc-font-mono;
+    font-size: var(--gc-font-size, 14px);
+    text-shadow: 0 1px 2px #000;
 }

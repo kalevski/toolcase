@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ResultScreen.styles.js'
+import stylesText from '../../style/ResultScreen.scss'
 
 export interface ResultStat { label: string; value: string }
 export interface ResultReward { label: string; value?: string; icon?: string }
@@ -9,7 +9,7 @@ export interface ResultAction { id: string; label: string; primary?: boolean; da
 
 @customElement('gc-result-screen')
 export class ResultScreen extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ attribute: 'title-text' }) titleText = ''
     @property() subtitle = ''

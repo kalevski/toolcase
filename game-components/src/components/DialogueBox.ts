@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/DialogueBox.styles.js'
+import stylesText from '../../style/DialogueBox.scss'
 
 export interface DialogueChoice { id: string; label: string; disabled?: boolean }
 
 @customElement('gc-dialogue-box')
 export class DialogueBox extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() speaker = ''
     @property() text = ''

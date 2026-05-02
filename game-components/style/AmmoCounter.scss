@@ -5,33 +5,44 @@
     display: inline-flex;
     flex-direction: column;
     align-items: flex-end;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    text-shadow: 0 2px 6px #000;
 }
 
 .weapon-name {
-    font-size: 12px;
-    opacity: 0.7;
+    font-family: $gc-font-display;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch-3);
 }
+
 .row {
     display: flex;
     align-items: baseline;
     gap: 8px;
 }
+
 .mag {
+    font-family: $gc-font-display;
     font-size: 36px;
     font-weight: 700;
-    font-family: monospace;
+    color: var(--fg-gold-bright);
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 0 #000, 0 0 12px rgba(232, 200, 120, 0.4);
 
-    &.low { color: $gc-danger; }
-    &.reloading { color: $gc-warning; }
+    &.low { color: var(--fg-blood-bright); text-shadow: 0 1px 0 #000, 0 0 12px rgba(212, 74, 58, 0.5); }
+    &.reloading { color: var(--fg-legendary); }
 }
+
 .max {
+    font-family: $gc-font-mono;
     font-size: 14px;
-    opacity: 0.5;
+    color: var(--fg-parch-3);
 }
+
 .reserve {
+    font-family: $gc-font-mono;
     font-size: 18px;
-    opacity: 0.7;
+    color: var(--fg-parch);
     margin-left: 4px;
-    font-family: monospace;
 }

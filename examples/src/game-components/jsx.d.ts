@@ -114,6 +114,34 @@ declare module 'react' {
             'gc-platform-icon': GCAttrs
             'gc-version-label': GCAttrs
             'gc-debug-overlay': GCAttrs
+            // Atoms
+            'gc-eyebrow': GCAttrs
+            'gc-title': GCAttrs
+            'gc-divider': GCAttrs
+            'gc-lore-text': GCAttrs
+            'gc-panel-header': GCAttrs
+            'gc-scroll-text': GCAttrs
+            'gc-key': GCAttrs
+            'gc-toggle': GCAttrs
+            'gc-check': GCAttrs
+            'gc-portrait': GCAttrs
+            'gc-buff-icon': GCAttrs
+            'gc-gilded-frame': GCAttrs
+            'gc-rune-corner': GCAttrs
+            'gc-metal-button': GCAttrs
+            'gc-icon-badge': GCAttrs
+            'gc-stat-row': GCAttrs
+            'gc-tab-bar': GCAttrs
+            'gc-list-row': GCAttrs
+            'gc-rarity-chip': GCAttrs
+            'gc-currency-chip': GCAttrs
+            'gc-menu-item': GCAttrs
+            // Composites
+            'gc-player-frame': GCAttrs
+            'gc-hotbar': GCAttrs
+            'gc-level-header': GCAttrs
+            'gc-boss-bar': GCAttrs
+            'gc-artboard-backdrop': GCAttrs
         }
     }
 }

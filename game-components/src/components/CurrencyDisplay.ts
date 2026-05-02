@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/CurrencyDisplay.styles.js'
+import stylesText from '../../style/CurrencyDisplay.scss'
 
 @customElement('gc-currency-display')
 export class CurrencyDisplay extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) amount = 0
     @property({ attribute: 'currency-icon' }) currencyIcon = '💰'

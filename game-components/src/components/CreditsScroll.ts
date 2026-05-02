@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/CreditsScroll.styles.js'
+import stylesText from '../../style/CreditsScroll.scss'
 
 export interface CreditsSection { role: string; names: string[] }
 
 @customElement('gc-credits-scroll')
 export class CreditsScroll extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) sections: CreditsSection[] = []
     @property({ type: Number }) speed = 60

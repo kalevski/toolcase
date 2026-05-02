@@ -1,43 +1,91 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
     display: inline-block;
     min-width: 280px;
+    @include gc-panel;
 }
-.head { padding: 8px 10px; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-ul { list-style: none; padding: 0; margin: 0; }
+
+.head {
+    padding: 10px 14px;
+    @include gc-eyebrow;
+    border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
 li {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 10px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
+    transition: background 0.15s ease;
 
-    &.offline { opacity: 0.6; }
+    &:hover { background: rgba(201, 169, 97, 0.08); }
+    &.offline { opacity: 0.5; }
 }
+
 .avatar {
     position: relative;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.4);
+    width: 36px;
+    height: 36px;
+    background: radial-gradient(70% 70% at 50% 30%, #6a4a2a, #2a1a0a 80%);
+    border: 1px solid var(--fg-gold-deep);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--fg-gold-bright);
+    font-family: $gc-font-display;
     flex-shrink: 0;
 }
+
 .dot {
     position: absolute;
-    right: -1px;
-    bottom: -1px;
+    right: -2px;
+    bottom: -2px;
     width: 10px;
     height: 10px;
-    border-radius: 50%;
-    border: 2px solid #0a0c10;
+    border: 2px solid var(--fg-ink);
+    box-shadow: 0 0 4px currentColor;
 }
+
 .info { flex: 1; min-width: 0; }
-.name { display: flex; align-items: center; gap: 4px; }
-.activity { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.actions button { background: transparent; border: none; color: $gc-fg; font-size: 14px; }
-.actions .invite { color: $gc-accent; }
+
+.name {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: $gc-font-display;
+    color: var(--fg-parch);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+}
+
+.activity {
+    @include gc-mono-label;
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.actions button {
+    background: transparent;
+    border: 1px solid var(--fg-gold-deep);
+    color: var(--fg-parch-3);
+    font-size: 13px;
+    padding: 4px 8px;
+    cursor: pointer;
+
+    &:hover { color: var(--fg-gold-bright); border-color: var(--fg-gold); }
+}
+
+.actions .invite { color: var(--fg-gold-bright); }

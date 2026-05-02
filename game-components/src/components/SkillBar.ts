@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/SkillBar.styles.js'
+import stylesText from '../../style/SkillBar.scss'
 
 export interface SkillSlot {
     id: string
@@ -16,7 +16,7 @@ export interface SkillSlot {
 
 @customElement('gc-skill-bar')
 export class SkillBar extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) slots: SkillSlot[] = []
     @property({ type: Number, attribute: 'slot-size' }) slotSize = 56

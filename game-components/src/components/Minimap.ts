@@ -1,13 +1,13 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/Minimap.styles.js'
+import stylesText from '../../style/Minimap.scss'
 
 export interface MinimapMarker { id: string; x: number; y: number; color?: string; size?: number }
 
 @customElement('gc-minimap')
 export class Minimap extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number, attribute: 'world-x' }) worldX = 0
     @property({ type: Number, attribute: 'world-y' }) worldY = 0

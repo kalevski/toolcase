@@ -3,13 +3,50 @@
 :host {
     @include gc-host;
     display: inline-block;
-    color: $gc-gold;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 0 #000, 0 0 12px rgba(232, 200, 120, 0.4);
     text-align: right;
 }
-.label { font-size: calc(var(--gc-font-size, 36px) * 0.4); opacity: 0.8; }
-.num { font-size: var(--gc-font-size, 36px); font-weight: 800; line-height: 1; animation: pop 240ms ease-out; }
-.x { font-size: calc(var(--gc-font-size, 36px) * 0.6); }
-@keyframes pop { 0% { transform: scale(1.4); } 100% { transform: scale(1); } }
-.bar { width: 80px; height: 3px; background: rgba(0, 0, 0, 0.4); margin-left: auto; margin-top: 4px; }
-.bar > div { height: 100%; background: $gc-gold; transition: width 100ms linear; }
+
+.label {
+    font-family: $gc-font-display;
+    font-size: calc(var(--gc-font-size, 36px) * 0.32);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch-3);
+}
+
+.num {
+    font-family: $gc-font-display;
+    font-size: var(--gc-font-size, 36px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    animation: pop 240ms ease-out;
+}
+
+.x {
+    font-family: $gc-font-display;
+    font-size: calc(var(--gc-font-size, 36px) * 0.6);
+}
+
+@keyframes pop {
+    0% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+.bar {
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(180deg, #0a0705, #1a120a);
+    border: 1px solid var(--fg-gold-deep);
+    margin-left: auto;
+    margin-top: 4px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.bar > div {
+    height: 100%;
+    background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transition: width 100ms linear;
+}

@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ReportPlayerDialog.styles.js'
+import stylesText from '../../style/ReportPlayerDialog.scss'
 
 const DEFAULT_REASONS = [
     { id: 'cheating', label: 'Cheating' },
@@ -13,7 +13,7 @@ const DEFAULT_REASONS = [
 
 @customElement('gc-report-player-dialog')
 export class ReportPlayerDialog extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) open = false
     @property({ attribute: 'player-name' }) playerName = ''

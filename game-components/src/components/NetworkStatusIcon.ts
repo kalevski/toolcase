@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/NetworkStatusIcon.styles.js'
+import stylesText from '../../style/NetworkStatusIcon.scss'
 
 @customElement('gc-network-status-icon')
 export class NetworkStatusIcon extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) ping: number | null = null
     @property({ type: Number }) loss = 0

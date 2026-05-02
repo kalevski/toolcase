@@ -1,4 +1,5 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
 
 :host {
     @include gc-host;
@@ -8,11 +9,15 @@
 
 .panel {
     padding: var(--gc-padding, 16px);
-    background: $gc-bg;
+    position: relative;
 
     &.bordered {
-        border: 1px solid $gc-border;
-        border-radius: 8px;
+        @include gc-panel;
+        &.with-corners { @include gc-panel-corners; }
+    }
+
+    &.parchment {
+        @include gc-parchment;
     }
 
     &.nine-slice {

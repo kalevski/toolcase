@@ -1,0 +1,6 @@
+@use 'tokens' as *;
+@use 'mixins/divider' as *;
+
+:host { @include gc-host; display: block; }
+.divider { @include gc-divider; }
+.diamond { @include gc-diamond; }

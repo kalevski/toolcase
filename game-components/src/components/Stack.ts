@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/Stack.styles.js'
+import stylesText from '../../style/Stack.scss'
 
 @customElement('gc-stack')
 export class Stack extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() direction: 'vertical' | 'horizontal' = 'vertical'
     @property() gap = '8px'

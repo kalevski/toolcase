@@ -1,14 +1,14 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/LegalScreen.styles.js'
+import stylesText from '../../style/LegalScreen.scss'
 import './NavButton.js'
 
 export interface LegalSection { id: string; title: string; body: string }
 
 @customElement('gc-legal-screen')
 export class LegalScreen extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) sections: LegalSection[] = []
     @property({ attribute: 'initial-section' }) initialSection = ''

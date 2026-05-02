@@ -1,10 +1,11 @@
+import { css, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import { ResultScreen } from './ResultScreen.js'
-import { styles } from '../styles/GameOverScreen.styles.js'
+import stylesText from '../../style/GameOverScreen.scss'
 
 @customElement('gc-game-over-screen')
 export class GameOverScreen extends ResultScreen {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     constructor() {
         super()

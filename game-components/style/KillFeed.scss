@@ -11,12 +11,16 @@
 .entry {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    font-family: $gc-font-body;
     font-size: 13px;
-    background: rgba(0, 0, 0, 0.45);
-    padding: 4px 8px;
-    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(20, 12, 8, 0.85), rgba(20, 12, 8, 0.3));
+    border-left: 2px solid var(--gc-feed-accent, var(--fg-gold));
+    padding: 5px 10px;
+    color: var(--fg-parch);
 }
-.killer { font-weight: 600; }
-.victim { font-weight: 600; }
-.headshot { color: $gc-gold; }
+
+.killer { color: var(--fg-gold-bright); font-weight: 600; }
+.weapon { color: var(--gc-feed-accent, var(--fg-gold)); font-size: 14px; }
+.victim { color: var(--fg-parch-3); font-weight: 600; }
+.headshot { color: #ffd25a; }

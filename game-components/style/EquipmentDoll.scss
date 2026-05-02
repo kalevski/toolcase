@@ -1,4 +1,5 @@
 @use 'tokens' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
@@ -6,8 +7,6 @@
     display: inline-block;
     width: var(--gc-width, 280px);
     height: var(--gc-height, 380px);
-    background: rgba(15, 18, 24, 0.5);
-    border-radius: 6px;
 }
 
 .silhouette {
@@ -16,16 +15,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.3;
-    font-size: 120px;
+    background: radial-gradient(50% 60% at 50% 40%, rgba(201, 169, 97, 0.08), transparent 70%);
+    border: 1px dashed rgba(201, 169, 97, 0.3);
+    font-family: $gc-font-display;
+    font-size: 80px;
+    color: rgba(201, 169, 97, 0.18);
 }
+
 .slot {
     position: absolute;
     transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
 }
+
 .label {
-    font-size: 10px;
-    opacity: 0.6;
+    @include gc-mono-label;
+    font-size: 9px;
     text-align: center;
     margin-top: 2px;
 }

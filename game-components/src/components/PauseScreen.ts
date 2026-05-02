@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PauseScreen.styles.js'
+import stylesText from '../../style/PauseScreen.scss'
 import './MainMenu.js'
 import type { MainMenuItem } from './MainMenu.js'
 
@@ -13,7 +13,7 @@ const DEFAULT_ITEMS: MainMenuItem[] = [
 
 @customElement('gc-pause-screen')
 export class PauseScreen extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) open = false
     @property({ attribute: 'screen-title' }) screenTitle = 'Paused'

@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/MainMenu.styles.js'
+import stylesText from '../../style/MainMenu.scss'
 
 export interface MainMenuItem { id: string; label: string; disabled?: boolean; badge?: string }
 
 @customElement('gc-main-menu')
 export class MainMenu extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) items: MainMenuItem[] = []
     @property({ attribute: 'selected-id' }) selectedId = ''

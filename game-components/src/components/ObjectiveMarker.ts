@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ObjectiveMarker.styles.js'
+import stylesText from '../../style/ObjectiveMarker.scss'
 
 @customElement('gc-objective-marker')
 export class ObjectiveMarker extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) x = 0
     @property({ type: Number }) y = 0

@@ -1,11 +1,12 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
     display: block;
-    padding: 12px;
-    background: rgba(15, 18, 24, 0.5);
-    border-radius: 4px;
+    padding: 14px;
+    @include gc-panel;
 }
 
 .test {
@@ -15,7 +16,38 @@
     justify-content: center;
     background: #000;
     margin: 8px 0;
-    color: #1c1f24;
+    color: rgba(232, 220, 196, 0.06);
+    font-family: $gc-font-display;
+    font-style: italic;
     filter: brightness(var(--gc-brightness, 1));
 }
-input { width: 100%; }
+
+input[type='range'] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: linear-gradient(90deg, #000, var(--fg-gold-bright));
+    border: 1px solid var(--fg-gold-deep);
+    cursor: pointer;
+    outline: none;
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        transform: rotate(45deg);
+        cursor: pointer;
+        box-shadow: 0 0 0 1px #000;
+    }
+
+    &::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        transform: rotate(45deg);
+        cursor: pointer;
+        border: 1px solid #000;
+    }
+}

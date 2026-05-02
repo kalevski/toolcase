@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PartyPanel.styles.js'
+import stylesText from '../../style/PartyPanel.scss'
 
 export interface PartyMember {
     id: string
@@ -13,7 +13,7 @@ export interface PartyMember {
 
 @customElement('gc-party-panel')
 export class PartyPanel extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) members: PartyMember[] = []
     @property({ type: Number }) capacity = 4

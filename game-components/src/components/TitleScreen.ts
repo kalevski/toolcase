@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/TitleScreen.styles.js'
+import stylesText from '../../style/TitleScreen.scss'
 
 @customElement('gc-title-screen')
 export class TitleScreen extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ attribute: 'title-text' }) titleText = ''
     @property() subtitle = ''

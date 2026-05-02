@@ -1,9 +1,10 @@
+import { css, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import { ToggleRow } from './ToggleRow.js'
-import { styles } from '../styles/FullscreenToggle.styles.js'
+import stylesText from '../../style/FullscreenToggle.scss'
 
 @customElement('gc-fullscreen-toggle')
 export class FullscreenToggle extends ToggleRow {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
     constructor() { super(); this.rowLabel = 'Fullscreen' }
 }

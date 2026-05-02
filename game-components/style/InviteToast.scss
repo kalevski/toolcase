@@ -1,28 +1,53 @@
 @use 'tokens' as *;
+@use 'mixins/button' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
     display: inline-block;
     width: 320px;
-    padding: 12px;
-    background: rgba(15, 18, 24, 0.95);
-    border: 1px solid rgba(106, 169, 255, 0.4);
-    border-radius: 6px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    padding: 14px;
+    background: linear-gradient(180deg, rgba(20, 12, 8, 0.95), rgba(10, 6, 4, 0.95));
+    border: 1px solid var(--fg-gold);
+    box-shadow:
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        0 0 0 1px #000,
+        0 8px 24px rgba(0, 0, 0, 0.6),
+        0 0 16px rgba(232, 200, 120, 0.2);
 }
 
 .head { display: flex; gap: 10px; align-items: center; }
+
 .avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.4);
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(70% 70% at 50% 30%, #6a4a2a, #2a1a0a 80%);
+    border: 2px solid var(--fg-gold-deep);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--fg-gold-bright);
+    font-family: $gc-font-display;
 }
-.body-text { font-size: 12px; opacity: 0.7; }
-.actions { display: flex; gap: 6px; margin-top: 10px; }
-button { flex: 1; padding: 6px 10px; border-radius: 3px; font-size: 12px; font-weight: 600; }
-.accept { background: $gc-success; color: #fff; border: none; }
-.decline { background: transparent; color: $gc-fg; border: 1px solid $gc-border; }
+
+.title {
+    @include gc-eyebrow;
+}
+
+.body-text {
+    @include gc-body;
+    font-size: 12px;
+    color: var(--fg-parch-2);
+    margin-top: 2px;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+button { @include gc-btn; flex: 1; padding: 6px 10px; font-size: 11px; }
+
+.accept { @include gc-btn-primary; }
+.decline { @include gc-btn-ghost; }

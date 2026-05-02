@@ -1,12 +1,12 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/CreditsList.styles.js'
+import stylesText from '../../style/CreditsList.scss'
 import type { CreditsSection } from './CreditsScroll.js'
 
 @customElement('gc-credits-list')
 export class CreditsList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) sections: CreditsSection[] = []
 

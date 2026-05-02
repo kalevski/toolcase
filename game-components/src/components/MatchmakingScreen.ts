@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/MatchmakingScreen.styles.js'
+import stylesText from '../../style/MatchmakingScreen.scss'
 
 const STATE_TEXT: Record<string, string> = { searching: 'Searching for match', connecting: 'Connecting...', failed: 'Matchmaking failed', idle: 'Idle' }
 
@@ -9,7 +9,7 @@ const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).p
 
 @customElement('gc-matchmaking-screen')
 export class MatchmakingScreen extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() state: 'searching' | 'connecting' | 'found' | 'failed' | 'idle' = 'searching'
     @property({ type: Number }) elapsed = 0

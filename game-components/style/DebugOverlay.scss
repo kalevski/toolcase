@@ -3,15 +3,16 @@
 :host {
     @include gc-host;
     display: inline-block;
-    padding: 6px;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    font-family: monospace;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--fg-parch-3);
+    font-family: $gc-font-mono;
     font-size: 11px;
-    border-radius: 3px;
+    line-height: 1.5;
+    border: 1px solid var(--fg-gold-deep);
     min-width: 140px;
-    line-height: 1.4;
 }
 
-.row { display: flex; justify-content: space-between; gap: 8px; }
-.label { opacity: 0.7; }
+.row { display: flex; justify-content: space-between; gap: 12px; }
+.label { color: var(--fg-parch-dim); }
+.value { color: var(--fg-gold-bright); }

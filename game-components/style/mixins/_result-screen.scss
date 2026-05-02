@@ -1,0 +1,87 @@
+@use '../tokens' as *;
+@use 'typography' as *;
+@use 'button' as *;
+
+@mixin result-screen {
+    @include gc-host;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    min-height: 480px;
+    padding: 40px 30px;
+    background: radial-gradient(60% 50% at 50% 30%, var(--gc-bg-color, #3a2a18) 0%, #0a0604 80%);
+    border: 1px solid var(--gc-border-color, var(--fg-gold-deep));
+    text-align: center;
+
+    h1 {
+        margin: 0;
+        font-family: $gc-font-display;
+        font-size: 56px;
+        font-weight: 700;
+        color: var(--gc-title-color, var(--fg-gold-bright));
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        text-shadow: 0 2px 0 #000, 0 0 24px var(--gc-glow, rgba(232, 200, 120, 0.4));
+    }
+
+    .subtitle {
+        @include gc-lore;
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: var(--gc-stat-cols, repeat(4, 1fr));
+        gap: 16px;
+        min-width: 480px;
+    }
+
+    .stat {
+        text-align: center;
+        padding: 14px;
+        background: linear-gradient(180deg, rgba(20, 12, 8, 0.6), rgba(10, 6, 4, 0.7));
+        border: 1px solid var(--fg-gold-deep);
+    }
+
+    .stat .label { @include gc-mono-label; }
+
+    .stat .value {
+        font-family: $gc-font-display;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--fg-gold-bright);
+        margin-top: 4px;
+        letter-spacing: 0.04em;
+    }
+
+    .rewards {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .reward {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        background: linear-gradient(180deg, rgba(232, 162, 58, 0.12), rgba(232, 162, 58, 0.04));
+        border: 1px solid var(--fg-legendary);
+        color: var(--fg-legendary);
+        font-family: $gc-font-mono;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .actions { display: flex; gap: 10px; }
+
+    button { @include gc-btn; }
+    .primary { @include gc-btn-primary; }
+    .danger { @include gc-btn-danger; }
+    .secondary { @include gc-btn-ghost; }
+}

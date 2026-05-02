@@ -1,9 +1,13 @@
+@use 'tokens' as *;
 @use 'setting-row' as *;
+@use 'mixins/button' as *;
 
 :host { @include setting-row; }
 
-.row { display: flex; gap: 6px; }
-button { padding: 6px 10px; border-radius: 4px; }
-.reset { background: transparent; color: $gc-danger; border: 1px solid $gc-danger; }
-.confirm { background: $gc-danger; color: #fff; border: none; }
-.cancel { background: transparent; color: $gc-fg; border: 1px solid $gc-border; }
+.row { display: flex; gap: 8px; }
+
+button { @include gc-btn; padding: 6px 14px; font-size: 11px; }
+
+.reset { @include gc-btn-danger; }
+.confirm { @include gc-btn-danger; }
+.cancel { @include gc-btn-ghost; }

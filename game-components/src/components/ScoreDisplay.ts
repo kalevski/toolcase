@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ScoreDisplay.styles.js'
+import stylesText from '../../style/ScoreDisplay.scss'
 
 @customElement('gc-score-display')
 export class ScoreDisplay extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) score = 0
     @property({ type: Number }) multiplier: number | null = null

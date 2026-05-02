@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/MuteList.styles.js'
+import stylesText from '../../style/MuteList.scss'
 
 export interface MutedPlayer { id: string; name: string; mutedAt?: string; reason?: string }
 
 @customElement('gc-mute-list')
 export class MuteList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) players: MutedPlayer[] = []
 

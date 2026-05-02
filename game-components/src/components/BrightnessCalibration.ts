@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/BrightnessCalibration.styles.js'
+import stylesText from '../../style/BrightnessCalibration.scss'
 
 @customElement('gc-brightness-calibration')
 export class BrightnessCalibration extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) value = 1
 

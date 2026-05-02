@@ -1,52 +1,104 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/list-row' as *;
+@use 'mixins/button' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 240px 1fr;
     gap: 12px;
 }
+
 ul {
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 2px;
     max-height: 360px;
     overflow-y: auto;
+    @include gc-panel;
+    padding: 4px 0;
 }
+
 ul button {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px;
+    padding: 10px 14px;
     background: transparent;
-    color: $gc-fg;
+    color: var(--fg-parch);
     border: none;
+    border-left: 2px solid transparent;
+    font-family: $gc-font-body;
     text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
 
-    &.active { background: rgba(255, 255, 255, 0.08); }
+    &:hover { background: rgba(201, 169, 97, 0.08); }
+    &.active {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        border-left-color: var(--fg-gold);
+        color: var(--fg-gold-bright);
+    }
 }
-.detail { padding: 12px; background: rgba(15, 18, 24, 0.5); border-radius: 4px; }
-h3 { margin: 0 0 12px; }
-.recipe { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
-.label { font-size: 11px; opacity: 0.6; margin-bottom: 4px; }
-.inputs { display: flex; gap: 4px; }
-.input { display: flex; flex-direction: column; align-items: center; }
-.input span { font-size: 11px; }
-.enough { color: $gc-success; }
-.missing { color: $gc-danger; }
-.arrow { font-size: 24px; opacity: 0.6; }
-.craft {
-    width: 100%;
-    padding: 8px 12px;
-    background: $gc-accent;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-weight: 600;
 
-    &:disabled { background: #1a1c20; cursor: not-allowed; }
+.detail {
+    padding: 14px;
+    @include gc-panel;
+}
+
+h3 {
+    font-family: $gc-font-display;
+    font-size: 18px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-gold-bright);
+    margin: 0 0 12px;
+}
+
+.recipe {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.label {
+    @include gc-mono-label;
+    margin-bottom: 4px;
+}
+
+.inputs { display: flex; gap: 4px; }
+.input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: $gc-font-mono;
+    font-size: 11px;
+}
+
+.enough { color: var(--fg-stamina-bright); }
+.missing { color: var(--fg-blood-bright); }
+
+.arrow {
+    font-family: $gc-font-display;
+    font-size: 24px;
+    color: var(--fg-gold);
+}
+
+.craft {
+    @include gc-btn;
+    @include gc-btn-primary;
+    width: 100%;
+    margin-top: 8px;
+
+    &:disabled {
+        @include gc-btn-ghost;
+        color: var(--fg-parch-dim);
+        cursor: not-allowed;
+    }
 }

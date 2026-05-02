@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PlatformIcon.styles.js'
+import stylesText from '../../style/PlatformIcon.scss'
 
 const MAP: Record<string, string> = { pc: '🖥', ps: '🎮', xbox: '🎮', switch: '🎮', mobile: '📱', web: '🌐', mac: '', linux: '🐧' }
 
 @customElement('gc-platform-icon')
 export class PlatformIcon extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() platform = 'pc'
     @property({ type: Number }) size = 16

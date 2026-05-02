@@ -1,4 +1,5 @@
 @use 'tokens' as *;
+@use 'mixins/slot' as *;
 
 :host {
     @include gc-host;
@@ -10,30 +11,52 @@ button {
     position: relative;
     width: var(--gc-size, 56px);
     height: var(--gc-size, 56px);
-    background: rgba(15, 18, 24, 0.7);
-    border: 1px solid $gc-border;
-    border-radius: 4px;
+    @include gc-slot;
     padding: 0;
-    color: $gc-fg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: var(--fg-parch);
     overflow: hidden;
 
-    &.selected { border-color: $gc-accent; }
+    &.selected {
+        border-color: var(--fg-gold-bright);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 0 12px rgba(232, 200, 120, 0.4);
+    }
     &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
-.icon { font-size: calc(var(--gc-size, 56px) * 0.5); }
+
+.icon { font-size: calc(var(--gc-size, 56px) * 0.42); }
+
 .cooldown { position: absolute; inset: 0; pointer-events: none; }
+
 .remaining {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-family: $gc-font-mono;
     font-size: calc(var(--gc-size, 56px) * 0.32);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    color: var(--fg-parch);
+    text-shadow: 0 1px 2px #000, 0 0 3px #000;
 }
-.hotkey { position: absolute; top: 2px; left: 4px; font-size: 10px; opacity: 0.7; }
-.charges { position: absolute; bottom: 2px; right: 4px; font-size: 11px; font-weight: 700; color: $gc-gold; }
+
+.hotkey {
+    position: absolute;
+    top: 1px;
+    left: 3px;
+    font-family: $gc-font-mono;
+    font-size: 10px;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}
+
+.charges {
+    position: absolute;
+    bottom: 1px;
+    right: 3px;
+    font-family: $gc-font-mono;
+    font-size: 11px;
+    color: var(--fg-parch);
+    text-shadow: 0 1px 2px #000, 0 0 3px #000;
+}

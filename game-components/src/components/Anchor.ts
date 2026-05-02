@@ -1,7 +1,7 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/Anchor.styles.js'
+import stylesText from '../../style/Anchor.scss'
 
 export type AnchorPosition =
     | 'top-left' | 'top' | 'top-right'
@@ -10,7 +10,7 @@ export type AnchorPosition =
 
 @customElement('gc-anchor')
 export class Anchor extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ reflect: true }) position: AnchorPosition = 'top-left'
     @property() inset = '16px'

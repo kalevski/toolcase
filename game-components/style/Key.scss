@@ -1,0 +1,5 @@
+@use 'tokens' as *;
+@use 'mixins/key' as *;
+
+:host { @include gc-host; display: inline-block; }
+.key { @include gc-key; }

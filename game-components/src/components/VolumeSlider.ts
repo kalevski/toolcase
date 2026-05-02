@@ -1,11 +1,11 @@
-import { html, type TemplateResult } from 'lit'
+import { html, type TemplateResult, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { SettingRowBase } from './_setting-row-base.js'
-import { styles } from '../styles/VolumeSlider.styles.js'
+import stylesText from '../../style/VolumeSlider.scss'
 
 @customElement('gc-volume-slider')
 export class VolumeSlider extends SettingRowBase {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) value = 1
     @property({ type: Boolean }) muted = false

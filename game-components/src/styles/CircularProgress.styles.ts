@@ -1,2 +1,0 @@
-import { css } from 'lit'
-export const styles = css`:host{color:#e6e8ec;font-family:system-ui,-apple-system,sans-serif;box-sizing:border-box}:host *,:host *::before,:host *::after{box-sizing:inherit}:host button{font-family:inherit;cursor:pointer}:host{position:relative;width:var(--gc-size, 48px);height:var(--gc-size, 48px);display:inline-flex;align-items:center;justify-content:center}svg{position:absolute;inset:0;transform:rotate(-90deg)}.label{position:relative;font-size:calc(var(--gc-size, 48px)*.28);font-weight:600}`

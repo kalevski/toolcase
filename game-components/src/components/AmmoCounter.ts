@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/AmmoCounter.styles.js'
+import stylesText from '../../style/AmmoCounter.scss'
 
 @customElement('gc-ammo-counter')
 export class AmmoCounter extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) mag = 0
     @property({ type: Number, attribute: 'mag-max' }) magMax: number | null = null

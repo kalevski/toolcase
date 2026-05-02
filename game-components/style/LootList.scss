@@ -1,33 +1,62 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/list-row' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
     display: inline-block;
     min-width: 240px;
-    padding: 10px;
-    background: $gc-bg-strong;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    padding: 12px;
+    @include gc-panel;
 }
 
-.head { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.all { background: transparent; color: $gc-accent; border: none; cursor: pointer; font-size: 12px; }
-ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
-li {
+.head {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    padding: 6px;
-    border-radius: 3px;
+    margin-bottom: 8px;
+}
+
+.all {
+    font-family: $gc-font-display;
+    color: var(--fg-gold-bright);
+    background: transparent;
+    border: 1px solid var(--fg-gold-deep);
+    padding: 4px 10px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     cursor: pointer;
 }
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+li {
+    @include gc-row;
+    padding: 8px 10px;
+}
+
 .icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 2px;
+    background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+    border: 1px solid var(--fg-gold-deep);
+    font-size: 16px;
 }
-.name { flex: 1; }
+
+.name {
+    flex: 1;
+    font-family: $gc-font-body;
+    color: var(--fg-parch);
+}

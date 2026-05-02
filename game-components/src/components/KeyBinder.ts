@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/KeyBinder.styles.js'
+import stylesText from '../../style/KeyBinder.scss'
 
 @customElement('gc-key-binder')
 export class KeyBinder extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() value = ''
     @property() placeholder = 'Click to bind'

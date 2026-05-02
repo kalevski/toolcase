@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
-import { GameElement, rarityVar, type ItemRarity } from '../base.js'
-import { styles } from '../styles/ItemSlot.styles.js'
+import { GameElement, type ItemRarity } from '../base.js'
+import stylesText from '../../style/ItemSlot.scss'
 
 export interface InventoryItem {
     id: string
@@ -19,22 +19,24 @@ export interface InventoryItem {
 
 @customElement('gc-item-slot')
 export class ItemSlot extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Object }) item: InventoryItem | null = null
     @property({ type: Boolean }) selected = false
     @property({ type: Number }) size = 56
+    @property() hotkey = ''
 
     render() {
-        const color = this.item?.rarity ? rarityVar(this.item.rarity) : 'var(--gc-border)'
         const cursor = this.item ? 'pointer' : 'default'
-        return html`<style>:host { --gc-size: ${this.size}px; --gc-color: ${color}; --gc-cursor: ${cursor}; }</style>
-            <div class="slot ${this.selected ? 'selected' : ''}" @click=${() => this.item && this.emit('click', { item: this.item })}>
+        const rarity = this.item?.rarity ?? ''
+        return html`<style>:host { --gc-size: ${this.size}px; --gc-cursor: ${cursor}; }</style>
+            <div class="slot ${rarity ? `r-${rarity}` : ''} ${this.selected ? 'selected' : ''} ${!this.item ? 'is-empty' : ''}" @click=${() => this.item && this.emit('click', { item: this.item })}>
+                ${this.hotkey ? html`<span class="hotkey">${this.hotkey}</span>` : nothing}
                 ${this.item?.icon ?? ''}
                 ${this.item?.equipped ? html`<span class="equipped">E</span>` : nothing}
-                ${this.item?.locked ? html`<span class="locked">🔒</span>` : nothing}
                 ${this.item?.qty && this.item.qty > 1 ? html`<span class="qty">${this.item.qty}</span>` : nothing}
-                ${this.item?.cooldown !== undefined && this.item.cooldown < 1 ? html`<div class="cooldown" style="background: conic-gradient(rgba(0,0,0,0.5) ${(1 - this.item.cooldown) * 360}deg, transparent 0deg);"></div>` : nothing}
+                ${this.item?.cooldown !== undefined && this.item.cooldown < 1 ? html`<div class="cooldown" style="background: conic-gradient(from -90deg, rgba(0,0,0,0.75) ${(1 - this.item.cooldown) * 360}deg, transparent 0deg);">${Math.ceil(this.item.cooldown * 10)}</div>` : nothing}
+                ${this.item?.locked ? html`<div class="locked">⚿</div>` : nothing}
             </div>`
     }
 }

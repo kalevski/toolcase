@@ -1,0 +1,5 @@
+@use 'tokens' as *;
+@use 'mixins/typography' as *;
+
+:host { @include gc-host; display: block; }
+.lore { @include gc-lore; }

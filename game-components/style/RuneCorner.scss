@@ -1,0 +1,16 @@
+@use 'tokens' as *;
+
+:host { @include gc-host; display: block; position: absolute; }
+
+.corner {
+    width: var(--gc-rune-size, 14px);
+    height: var(--gc-rune-size, 14px);
+    pointer-events: none;
+    background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+
+    &.pos-tl { top: -1px; left: -1px; }
+    &.pos-tr { top: -1px; right: -1px; transform: scaleX(-1); }
+    &.pos-bl { bottom: -1px; left: -1px; transform: scaleY(-1); }
+    &.pos-br { bottom: -1px; right: -1px; transform: scale(-1, -1); }
+}

@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/SkillTree.styles.js'
+import stylesText from '../../style/SkillTree.scss'
 
 export interface SkillNode {
     id: string
@@ -19,7 +19,7 @@ export interface SkillEdge { from: string; to: string }
 
 @customElement('gc-skill-tree')
 export class SkillTree extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) nodes: SkillNode[] = []
     @property({ type: Array }) edges: SkillEdge[] = []

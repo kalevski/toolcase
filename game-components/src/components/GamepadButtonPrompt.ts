@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/GamepadButtonPrompt.styles.js'
+import stylesText from '../../style/GamepadButtonPrompt.scss'
 
 const MAP: Record<string, [string, string]> = {
     A: ['A', '#3aa256'], B: ['B', '#d23a3a'], X: ['X', '#3a72d2'], Y: ['Y', '#d2b73a'],
@@ -14,7 +14,7 @@ const MAP: Record<string, [string, string]> = {
 
 @customElement('gc-gamepad-button-prompt')
 export class GamepadButtonPrompt extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() glyph = 'A'
     @property() label = ''

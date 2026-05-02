@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/DebugOverlay.styles.js'
+import stylesText from '../../style/DebugOverlay.scss'
 
 @customElement('gc-debug-overlay')
 export class DebugOverlay extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) fps: number | null = null
     @property({ type: Number, attribute: 'draw-calls' }) drawCalls: number | null = null

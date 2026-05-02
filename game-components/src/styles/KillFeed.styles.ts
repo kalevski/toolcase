@@ -1,2 +1,0 @@
-import { css } from 'lit'
-export const styles = css`:host{color:#e6e8ec;font-family:system-ui,-apple-system,sans-serif;box-sizing:border-box}:host *,:host *::before,:host *::after{box-sizing:inherit}:host button{font-family:inherit;cursor:pointer}:host{display:flex;flex-direction:column;gap:4px;align-items:flex-end}.entry{display:flex;align-items:center;gap:6px;font-size:13px;background:rgba(0,0,0,.45);padding:4px 8px;border-radius:3px}.killer{font-weight:600}.victim{font-weight:600}.headshot{color:#ffd35a}`

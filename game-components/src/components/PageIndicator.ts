@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PageIndicator.styles.js'
+import stylesText from '../../style/PageIndicator.scss'
 
 @customElement('gc-page-indicator')
 export class PageIndicator extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) count = 0
     @property({ type: Number }) index = 0

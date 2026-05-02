@@ -5,12 +5,13 @@
     display: inline-block;
     position: relative;
     width: var(--gc-width, 360px);
-    height: var(--gc-height, 28px);
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid $gc-border;
-    border-radius: 4px;
+    height: var(--gc-height, 32px);
+    background: linear-gradient(180deg, rgba(10, 6, 4, 0.9), rgba(20, 12, 8, 0.7));
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.2);
     overflow: hidden;
-    font-size: 12px;
+    font-family: $gc-font-display;
+    font-size: 11px;
 }
 
 .cardinal, .marker {
@@ -20,18 +21,21 @@
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-}
-.cardinal {
     justify-content: center;
-    opacity: 0.85;
-    font-weight: 600;
+    color: var(--fg-gold-bright);
+    letter-spacing: 0.08em;
 }
+
+.cardinal.north { color: var(--fg-blood-bright); }
+
 .center-line {
     position: absolute;
+    top: -1px;
     left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: rgba(255, 255, 255, 0.6);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--fg-blood-bright);
     transform: translateX(-50%);
 }

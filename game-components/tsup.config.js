@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup'
+import { sassPlugin } from 'esbuild-sass-plugin'
 
 export default defineConfig({
     entry: ['src/index.ts'],
@@ -12,4 +13,7 @@ export default defineConfig({
             js: format === 'esm' ? '.module.js' : '.main.js',
         }
     },
+    esbuildPlugins: [
+        sassPlugin({ type: 'css-text', loadPaths: ['style'] }),
+    ],
 })

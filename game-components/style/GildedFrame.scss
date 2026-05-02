@@ -1,0 +1,16 @@
+@use 'tokens' as *;
+@use 'mixins/panel' as *;
+
+:host { @include gc-host; display: block; }
+
+.frame {
+    padding: var(--gc-frame-padding, 0);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12);
+
+    &.tone-dark { background: linear-gradient(180deg, #1a1308 0%, #0e0905 100%); }
+    &.tone-leather { background: linear-gradient(180deg, #2a1f14, #1a1308); }
+    &.tone-transparent { background: transparent; }
+}

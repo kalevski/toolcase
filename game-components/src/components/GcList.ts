@@ -1,7 +1,7 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/GcList.styles.js'
+import stylesText from '../../style/GcList.scss'
 
 export interface GcListItem {
     id: string
@@ -13,7 +13,7 @@ export interface GcListItem {
 
 @customElement('gc-list')
 export class GcList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) items: GcListItem[] = []
     @property({ attribute: 'selected-id' }) selectedId = ''

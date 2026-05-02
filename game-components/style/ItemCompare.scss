@@ -7,5 +7,18 @@
     gap: 12px;
     align-items: flex-start;
 }
-.arrow { align-self: center; font-size: 24px; color: $gc-gold; }
-.empty { padding: 10px; opacity: 0.5; text-align: center; }
+
+.arrow {
+    align-self: center;
+    font-family: $gc-font-display;
+    font-size: 24px;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 0 8px rgba(232, 200, 120, 0.4);
+}
+
+.empty {
+    padding: 14px;
+    color: var(--fg-parch-dim);
+    font-style: italic;
+    text-align: center;
+}

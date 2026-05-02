@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/LoadingOverlay.styles.js'
+import stylesText from '../../style/LoadingOverlay.scss'
 
 @customElement('gc-loading-overlay')
 export class LoadingOverlay extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) open = false
     @property({ type: Number }) progress: number | null = null

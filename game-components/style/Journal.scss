@@ -1,4 +1,6 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
@@ -7,46 +9,105 @@
     gap: 12px;
     height: 100%;
 }
-ul { list-style: none; padding: 0; margin: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    @include gc-panel;
+    padding: 4px 0;
+}
+
 ul button {
     width: 100%;
     text-align: left;
-    padding: 10px;
+    padding: 10px 14px;
     background: transparent;
-    color: $gc-fg;
+    color: var(--fg-parch);
     border: none;
     border-left: 2px solid transparent;
+    font-family: $gc-font-body;
+    cursor: pointer;
+    transition: background 0.15s ease;
 
-    &.active { background: rgba(255, 255, 255, 0.08); border-left-color: $gc-gold; }
-}
-.title { font-weight: 600; }
-.state { font-size: 11px; opacity: 0.6; text-transform: uppercase; }
-.detail { padding: 16px; overflow-y: auto; }
-h2 { margin: 0 0 4px; }
-.objs { list-style: none; padding: 0; margin: 12px 0; }
-.objs li {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-
-    &.done { text-decoration: line-through; opacity: 0.5; }
-}
-.dot {
-    width: 10px;
-    height: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 2px;
-
-    &.completed {
-        background: $gc-success;
-        border-color: $gc-success;
+    &:hover { background: rgba(201, 169, 97, 0.08); }
+    &.active {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        border-left-color: var(--fg-gold);
+        color: var(--fg-gold-bright);
     }
 }
-.body { margin-top: 12px; font-size: 14px; line-height: 1.6; }
+
+.title {
+    font-family: $gc-font-display;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+}
+
+.state {
+    @include gc-mono-label;
+    font-size: 9px;
+}
+
+.detail {
+    padding: 18px;
+    @include gc-panel;
+    overflow-y: auto;
+}
+
+h2 {
+    @include gc-title(20px);
+    margin: 0 0 6px;
+}
+
+.objs {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+    @include gc-panel;
+    background: none;
+    box-shadow: none;
+}
+
+.objs li {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
+    color: var(--fg-parch);
+
+    &.done {
+        text-decoration: line-through;
+        color: var(--fg-parch-dim);
+    }
+}
+
+.dot {
+    width: 12px;
+    color: var(--fg-gold);
+    text-align: center;
+
+    &.completed { color: var(--fg-stamina); }
+}
+
+.body {
+    @include gc-body;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
 .rewards {
     margin-top: 16px;
-    padding: 8px;
-    background: rgba(255, 211, 90, 0.1);
-    border: 1px solid rgba(255, 211, 90, 0.3);
-    border-radius: 4px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(232, 162, 58, 0.12), rgba(20, 12, 8, 0.6));
+    border: 1px solid var(--fg-legendary);
+    color: var(--fg-legendary);
+    font-family: $gc-font-mono;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
 }

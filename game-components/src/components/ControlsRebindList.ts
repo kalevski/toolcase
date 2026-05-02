@@ -1,13 +1,13 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ControlsRebindList.styles.js'
+import stylesText from '../../style/ControlsRebindList.scss'
 
 export interface ControlBinding { id: string; action: string; key?: string }
 
 @customElement('gc-controls-rebind-list')
 export class ControlsRebindList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) bindings: ControlBinding[] = []
 

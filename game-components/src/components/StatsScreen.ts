@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/StatsScreen.styles.js'
+import stylesText from '../../style/StatsScreen.scss'
 
 export interface StatsSection { title: string; stats: Array<{ label: string; value: string; icon?: string }> }
 
 @customElement('gc-stats-screen')
 export class StatsScreen extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) sections: StatsSection[] = []
     @property({ attribute: 'screen-title' }) screenTitle = ''

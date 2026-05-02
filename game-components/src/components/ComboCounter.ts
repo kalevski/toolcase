@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ComboCounter.styles.js'
+import stylesText from '../../style/ComboCounter.scss'
 
 @customElement('gc-combo-counter')
 export class ComboCounter extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) combo = 0
     @property() label = 'Combo'

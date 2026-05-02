@@ -6,9 +6,9 @@
     display: inline-block;
     width: var(--gc-width, 800px);
     height: var(--gc-height, 500px);
-    background: #0d1014;
+    background: radial-gradient(70% 60% at 50% 40%, #2a1f10 0%, #0a0604 80%);
+    border: 1px solid var(--fg-gold-deep);
     overflow: auto;
-    border-radius: 6px;
 }
 
 svg { position: absolute; inset: 0; pointer-events: none; }
@@ -19,15 +19,31 @@ button {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    color: #fff;
-    border: 3px solid rgba(0, 0, 0, 0.6);
+    background: radial-gradient(70% 70% at 50% 30%, #6a4a2a, #2a1a0a 80%);
+    color: var(--fg-gold-bright);
+    border: 2px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px var(--fg-gold-bright),
+        inset 0 0 12px rgba(0, 0, 0, 0.6),
+        0 0 0 1px #000;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: $gc-font-display;
     font-weight: 700;
+    cursor: pointer;
 
-    &.selected { border-color: $gc-gold; }
+    &.selected {
+        border-color: var(--fg-legendary);
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-bright),
+            inset 0 0 16px rgba(232, 162, 58, 0.4),
+            0 0 12px rgba(232, 162, 58, 0.5);
+    }
+
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
+
 .stars {
     position: absolute;
     bottom: -16px;
@@ -36,6 +52,6 @@ button {
     display: flex;
     justify-content: center;
     gap: 1px;
-    color: $gc-gold;
+    color: var(--fg-legendary);
     font-size: 11px;
 }

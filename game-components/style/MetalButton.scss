@@ -1,0 +1,13 @@
+@use 'tokens' as *;
+@use 'mixins/button' as *;
+
+:host { @include gc-host; display: inline-block; }
+
+.btn {
+    @include gc-btn;
+    &.v-primary { @include gc-btn-primary; }
+    &.v-danger { @include gc-btn-danger; }
+    &.v-ghost { @include gc-btn-ghost; }
+    &.s-sm { @include gc-btn-size-sm; }
+    &.s-lg { @include gc-btn-size-lg; }
+}

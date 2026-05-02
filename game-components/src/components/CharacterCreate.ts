@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/CharacterCreate.styles.js'
+import stylesText from '../../style/CharacterCreate.scss'
 
 export interface CharacterCreateField {
     id: string
@@ -14,7 +14,7 @@ export interface CharacterCreateField {
 
 @customElement('gc-character-create')
 export class CharacterCreate extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) fields: CharacterCreateField[] = []
     @property({ type: Object }) values: Record<string, string | number> = {}

@@ -1,0 +1,25 @@
+@use 'tokens' as *;
+@use 'mixins/typography' as *;
+
+:host { @include gc-host; display: block; }
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 3px 0;
+}
+
+.label { @include gc-mono-label; }
+
+.value {
+    font-family: $gc-font-mono;
+    font-size: 13px;
+    color: var(--gc-stat-accent, var(--fg-gold-bright));
+}
+
+.trend {
+    color: var(--gc-stat-trend);
+    margin-left: 6px;
+    font-size: 11px;
+}

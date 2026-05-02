@@ -1,13 +1,13 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ParticleEmitter.styles.js'
+import stylesText from '../../style/ParticleEmitter.scss'
 
 interface Particle { x: number; y: number; vx: number; vy: number; life: number; max: number; size: number; color: string }
 
 @customElement('gc-particle-emitter')
 export class ParticleEmitter extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() burst = ''
     @property({ type: Number }) count = 24

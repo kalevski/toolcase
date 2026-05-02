@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/BattlePass.styles.js'
+import stylesText from '../../style/BattlePass.scss'
 
 export interface BattlePassTier {
     level: number
@@ -12,7 +12,7 @@ export interface BattlePassTier {
 
 @customElement('gc-battle-pass')
 export class BattlePass extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) tiers: BattlePassTier[] = []
     @property({ type: Number, attribute: 'current-level' }) currentLevel = 1

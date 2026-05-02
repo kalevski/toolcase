@@ -32,6 +32,12 @@ const packages = [
         path: '/phaser-plus',
         icon: 'controller',
     },
+    {
+        name: '@toolcase/game-components',
+        description: 'Collection of Web Components for game UIs and effects, built with Lit',
+        path: '/game-components',
+        icon: 'puzzle',
+    },
 ]
 
 export const Home = () => {

@@ -1,21 +1,73 @@
 @use 'tokens' as *;
+@use 'mixins/typography' as *;
+@use 'mixins/divider' as *;
 
 :host {
     @include gc-host;
     display: inline-block;
-    min-width: 220px;
+    min-width: 240px;
     max-width: 320px;
-    padding: 10px;
-    background: $gc-bg-strong;
-    border: 1px solid var(--gc-color, #{$gc-fg});
-    border-radius: 4px;
-    font-size: 12px;
+    padding: 14px;
+    background: linear-gradient(180deg, rgba(20, 12, 8, 0.97), rgba(10, 6, 4, 0.97));
+    border: 1px solid var(--gc-color, var(--fg-gold));
+    box-shadow:
+        0 0 0 1px #000,
+        0 0 24px var(--gc-glow, rgba(232, 162, 58, 0.35)),
+        0 12px 30px rgba(0, 0, 0, 0.7);
+    font-family: $gc-font-body;
 }
 
-.name { font-weight: 700; color: var(--gc-color, #{$gc-fg}); font-size: 14px; }
-.rarity { font-size: 11px; opacity: 0.6; text-transform: capitalize; margin-bottom: 6px; }
-ul { list-style: none; padding: 0; margin: 6px 0; }
-li { display: flex; justify-content: space-between; }
-.delta-up { color: $gc-success; margin-left: 6px; }
-.delta-down { color: $gc-danger; margin-left: 6px; }
-.lore { font-style: italic; opacity: 0.6; margin-top: 6px; font-size: 11px; }
+.name {
+    font-family: $gc-font-display;
+    color: var(--gc-color, var(--fg-gold));
+    font-size: 17px;
+    letter-spacing: 0.04em;
+}
+
+.rarity {
+    @include gc-mono-label;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    margin-top: 2px;
+}
+
+.divider {
+    @include gc-divider;
+    margin: 10px 0;
+}
+.diamond { @include gc-diamond; }
+
+.description {
+    color: var(--fg-parch-2);
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 10px;
+    font-size: 13px;
+}
+
+li {
+    display: contents;
+}
+
+.stat-label { color: var(--fg-parch-3); }
+.stat-value { font-family: $gc-font-mono; color: var(--fg-parch); text-align: right; }
+
+.delta-up { color: var(--fg-stamina-bright); margin-left: 6px; }
+.delta-down { color: var(--fg-blood-bright); margin-left: 6px; }
+
+.lore {
+    @include gc-lore;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(201, 169, 97, 0.2);
+    font-size: 12px;
+}

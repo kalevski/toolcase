@@ -1,0 +1,14 @@
+@use 'tokens' as *;
+@use 'mixins/tab-bar' as *;
+
+:host { @include gc-host; display: block; }
+
+.bar {
+    display: flex;
+    gap: 0;
+
+    &.s-sm .tab { font-size: 10px; }
+}
+
+.tab { @include gc-tab; }
+.icon { font-size: 13px; }

@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/AspectRatioBox.styles.js'
+import stylesText from '../../style/AspectRatioBox.scss'
 
 @customElement('gc-aspect-ratio-box')
 export class AspectRatioBox extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() ratio = '16 / 9'
 

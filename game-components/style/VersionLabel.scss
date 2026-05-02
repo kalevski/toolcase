@@ -3,7 +3,9 @@
 :host {
     @include gc-host;
     display: inline-block;
-    font-family: monospace;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    font-family: $gc-font-mono;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
 }

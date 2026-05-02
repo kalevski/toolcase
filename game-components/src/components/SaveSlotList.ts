@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/SaveSlotList.styles.js'
+import stylesText from '../../style/SaveSlotList.scss'
 
 export interface SaveSlot {
     id: string
@@ -16,7 +16,7 @@ export interface SaveSlot {
 
 @customElement('gc-save-slot-list')
 export class SaveSlotList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) slots: SaveSlot[] = []
     @property({ attribute: 'selected-id' }) selectedId = ''

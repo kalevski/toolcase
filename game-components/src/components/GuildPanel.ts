@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/GuildPanel.styles.js'
+import stylesText from '../../style/GuildPanel.scss'
 
 export interface GuildMember {
     id: string
@@ -13,7 +13,7 @@ export interface GuildMember {
 
 @customElement('gc-guild-panel')
 export class GuildPanel extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ attribute: 'guild-name' }) guildName = ''
     @property() tag = ''

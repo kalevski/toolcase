@@ -1,4 +1,5 @@
 @use 'tokens' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
@@ -7,6 +8,23 @@
     gap: 24px;
     padding: 24px;
 }
-.role { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.6; margin-bottom: 6px; }
-ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
-li { font-size: 16px; }
+
+.role {
+    @include gc-eyebrow;
+    margin-bottom: 6px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+li {
+    font-family: $gc-font-body;
+    font-size: 16px;
+    color: var(--fg-parch);
+}

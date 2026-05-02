@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/FriendsList.styles.js'
+import stylesText from '../../style/FriendsList.scss'
 
 export type PresenceStatus = 'online' | 'away' | 'busy' | 'offline' | 'in-game'
 
@@ -19,7 +19,7 @@ export interface Friend {
 
 @customElement('gc-friends-list')
 export class FriendsList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) friends: Friend[] = []
     @property({ attribute: 'list-title' }) listTitle = 'Friends'

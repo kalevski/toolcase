@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/AbilityCard.styles.js'
+import stylesText from '../../style/AbilityCard.scss'
 
 const RARITY_VARS: Record<string, string> = {
     common: 'var(--gc-rarity-common)', uncommon: 'var(--gc-rarity-uncommon)',
@@ -10,7 +10,7 @@ const RARITY_VARS: Record<string, string> = {
 
 @customElement('gc-ability-card')
 export class AbilityCard extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ attribute: 'ability-name' }) abilityName = ''
     @property() icon = ''

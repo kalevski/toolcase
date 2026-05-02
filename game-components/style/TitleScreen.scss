@@ -1,4 +1,5 @@
 @use 'tokens' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
@@ -10,10 +11,11 @@
     width: 100%;
     height: 100%;
     min-height: 480px;
-    background: #0a0c10;
-    color: #fff;
+    background: radial-gradient(70% 50% at 50% 25%, #3a2a18 0%, #0a0604 70%);
+    color: var(--fg-parch);
     overflow: hidden;
 }
+
 .center {
     position: relative;
     z-index: 1;
@@ -21,30 +23,40 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
 }
+
 h1 {
+    @include gc-display;
     font-size: 80px;
     margin: 0;
-    letter-spacing: 6px;
-    text-shadow: 0 6px 30px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-shadow: 0 4px 0 #000, 0 0 30px rgba(232, 200, 120, 0.5);
 }
+
 .subtitle {
-    font-size: 18px;
-    opacity: 0.8;
-    letter-spacing: 2px;
+    @include gc-eyebrow;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    color: var(--fg-parch-dim);
 }
+
 .footer {
     position: absolute;
     bottom: 16px;
     left: 16px;
     right: 16px;
-    font-size: 11px;
-    opacity: 0.5;
+    font-family: $gc-font-mono;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
     display: flex;
     justify-content: space-between;
     z-index: 1;
 }
+
 ::slotted([slot='backdrop']) {
     position: absolute;
     inset: 0;

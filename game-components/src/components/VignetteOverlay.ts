@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/VignetteOverlay.styles.js'
+import stylesText from '../../style/VignetteOverlay.scss'
 
 @customElement('gc-vignette-overlay')
 export class VignetteOverlay extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) intensity = 0.4
     @property({ attribute: 'vignette-color' }) vignetteColor = ''

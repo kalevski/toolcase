@@ -1,14 +1,14 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state, query } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ChatWindow.styles.js'
+import stylesText from '../../style/ChatWindow.scss'
 
 export interface ChatMessage { id: string; channel?: string; sender: string; body: string; color?: string; system?: boolean }
 export interface ChatChannel { id: string; label: string; color?: string }
 
 @customElement('gc-chat-window')
 export class ChatWindow extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) messages: ChatMessage[] = []
     @property({ type: Array }) channels: ChatChannel[] = []

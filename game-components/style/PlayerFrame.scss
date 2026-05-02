@@ -1,0 +1,46 @@
+@use 'tokens' as *;
+@use 'mixins/panel' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    width: 320px;
+}
+
+.frame {
+    @include gc-panel;
+    @include gc-panel-corners;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.name {
+    font-family: $gc-font-display;
+    color: var(--fg-gold-bright);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+}
+
+.class {
+    font-family: $gc-font-mono;
+    font-size: 10px;
+    color: var(--fg-parch-3);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}

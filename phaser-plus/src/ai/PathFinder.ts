@@ -16,7 +16,7 @@ interface Pendable { release(): void }
 export default class PathFinder extends Feature {
 
     /** Per-tick wall-clock budget in milliseconds. Default 2 ms. */
-    budgetMs: number = 2
+    budgetMs: number = 0.1
 
     private mesh: NavMesh | null = null
 

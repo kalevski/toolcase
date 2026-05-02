@@ -79,7 +79,7 @@ class PathFinderDemo extends Scene {
     requestPath(ex, ey) {
         this.status = 'searching...'
         this.waypoints = []
-        const path = this.finder.findPath(this.cellX, this.cellY, ex, ey, 4000)
+        const path = this.finder.findPath(this.cellX, this.cellY, ex, ey, 1000)
         path.on(PATH_FOUND, (points) => {
             this.waypoints = points.slice(1)
             this.status = `found (${points.length} cells)`

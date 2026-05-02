@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/VersionLabel.styles.js'
+import stylesText from '../../style/VersionLabel.scss'
 
 @customElement('gc-version-label')
 export class VersionLabel extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() version = '0.0.0'
     @property() build = ''

@@ -5,7 +5,7 @@
     position: fixed;
     inset: 0;
     z-index: 9600;
-    background: var(--gc-color, #000);
+    background: var(--gc-color, var(--fg-ink));
     pointer-events: none;
 }
 

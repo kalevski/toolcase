@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property, query } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ShakeContainer.styles.js'
+import stylesText from '../../style/ShakeContainer.scss'
 
 @customElement('gc-shake-container')
 export class ShakeContainer extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() trigger = ''
     @property({ type: Number }) intensity = 6

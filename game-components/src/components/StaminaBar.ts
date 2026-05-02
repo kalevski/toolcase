@@ -1,8 +1,9 @@
+import { css, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import { ResourceBarBase } from './_resource-bar-base.js'
-import { styles } from '../styles/StaminaBar.styles.js'
+import stylesText from '../../style/StaminaBar.scss'
 
 @customElement('gc-stamina-bar')
 export class StaminaBar extends ResourceBarBase {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 }

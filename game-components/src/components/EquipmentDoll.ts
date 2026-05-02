@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/EquipmentDoll.styles.js'
+import stylesText from '../../style/EquipmentDoll.scss'
 import './ItemSlot.js'
 import type { InventoryItem } from './ItemSlot.js'
 
@@ -15,7 +15,7 @@ export interface EquipmentSlotConfig {
 
 @customElement('gc-equipment-doll')
 export class EquipmentDoll extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) slots: EquipmentSlotConfig[] = []
     @property() silhouette = '👤'

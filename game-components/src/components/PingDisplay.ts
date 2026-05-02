@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PingDisplay.styles.js'
+import stylesText from '../../style/PingDisplay.scss'
 
 @customElement('gc-ping-display')
 export class PingDisplay extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) ping: number | null = null
 

@@ -1,15 +1,17 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/LoadingScreen.styles.js'
+import stylesText from '../../style/LoadingScreen.scss'
 
 @customElement('gc-loading-screen')
 export class LoadingScreen extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) progress: number | null = null
     @property() label = 'Loading...'
+    @property() eyebrow = ''
     @property({ attribute: 'title-text' }) titleText = ''
+    @property({ attribute: 'tip-title' }) tipTitle = 'Wisdom of the road'
     @property({ type: Array }) tips: string[] = []
     @property({ type: Number, attribute: 'tip-interval' }) tipInterval = 5000
 
@@ -30,9 +32,13 @@ export class LoadingScreen extends GameElement {
         return html`
             <slot name="art"></slot>
             <div class="footer">
+                ${this.eyebrow ? html`<div class="eyebrow">${this.eyebrow}</div>` : nothing}
                 ${this.titleText ? html`<div class="title">${this.titleText}</div>` : nothing}
-                ${tip ? html`<div class="tip">💡 ${tip}</div>` : nothing}
-                <div class="meta"><span>${this.label}</span>${pct !== null ? html`<span>${Math.round(pct * 100)}%</span>` : nothing}</div>
+                ${tip ? html`<div class="tip-card">
+                    <div class="tip-title">✦ ${this.tipTitle}</div>
+                    <div class="tip">${tip}</div>
+                </div>` : nothing}
+                <div class="meta"><span>${this.label}</span>${pct !== null ? html`<span class="pct">${Math.round(pct * 100)}%</span>` : nothing}</div>
                 <div class="bar"><div class="fill ${pct === null ? 'indet' : ''}" style="width: ${pct !== null ? pct * 100 : 30}%"></div></div>
             </div>`
     }

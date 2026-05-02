@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/HitMarker.styles.js'
+import stylesText from '../../style/HitMarker.scss'
 
 @customElement('gc-hit-marker')
 export class HitMarker extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) show = false
     @property({ type: Boolean }) crit = false
@@ -23,7 +23,7 @@ export class HitMarker extends GameElement {
     }
 
     render() {
-        const color = this.kill ? 'var(--gc-danger, #d23a3a)' : this.crit ? 'var(--gc-gold, #ffd35a)' : '#fff'
+        const color = this.kill ? 'var(--fg-blood-bright)' : this.crit ? 'var(--fg-gold-bright)' : 'var(--fg-parch)'
         return html`<style>:host { --gc-color: ${color}; transition-duration: ${this.duration}ms; }</style>
             ${[45, -45, 135, -135].map((angle) => html`
                 <div class="line" style="width: ${this.size * 0.5}px; height: 2px; transform: rotate(${angle}deg) translateX(${this.size * 0.5}px);"></div>

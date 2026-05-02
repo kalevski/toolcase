@@ -1,0 +1,18 @@
+@use 'tokens' as *;
+
+@mixin gc-row {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover { background: rgba(201, 169, 97, 0.08); }
+
+    &.is-selected, &.selected, &[selected] {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        box-shadow: inset 3px 0 0 var(--fg-gold);
+    }
+}

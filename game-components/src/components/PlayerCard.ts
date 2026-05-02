@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PlayerCard.styles.js'
+import stylesText from '../../style/PlayerCard.scss'
 import type { PresenceStatus } from './FriendsList.js'
 
 const COLORS: Record<string, string> = {
@@ -10,7 +10,7 @@ const COLORS: Record<string, string> = {
 
 @customElement('gc-player-card')
 export class PlayerCard extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ attribute: 'player-name' }) playerName = ''
     @property({ attribute: 'card-title' }) cardTitle = ''

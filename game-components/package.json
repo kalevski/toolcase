@@ -15,10 +15,9 @@
         }
     },
     "scripts": {
-        "build:styles": "node scripts/build-styles.js",
-        "build": "npm run build:styles && tsup",
-        "dev": "npm run build:styles && tsup --watch",
-        "typecheck": "npm run build:styles && tsc --noEmit -p tsconfig.json"
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "typecheck": "tsc --noEmit -p tsconfig.json"
     },
     "keywords": [
         "game",
@@ -40,6 +39,7 @@
         "lit": "^3.2.0"
     },
     "devDependencies": {
+        "esbuild-sass-plugin": "^3.7.0",
         "sass": "^1.86.3"
     },
     "directories": {

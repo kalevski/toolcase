@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/Journal.styles.js'
+import stylesText from '../../style/Journal.scss'
 
 export interface JournalEntry {
     id: string
@@ -15,7 +15,7 @@ export interface JournalEntry {
 
 @customElement('gc-journal')
 export class Journal extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) entries: JournalEntry[] = []
     @property({ attribute: 'selected-id' }) selectedId = ''

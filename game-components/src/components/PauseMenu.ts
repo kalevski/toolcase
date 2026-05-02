@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PauseMenu.styles.js'
+import stylesText from '../../style/PauseMenu.scss'
 import './MainMenu.js'
 import type { MainMenuItem } from './MainMenu.js'
 
 @customElement('gc-pause-menu')
 export class PauseMenu extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) open = false
     @property({ type: Array }) items: MainMenuItem[] = []

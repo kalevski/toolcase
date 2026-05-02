@@ -1,0 +1,21 @@
+@use 'tokens' as *;
+@use 'mixins/typography' as *;
+
+:host { @include gc-host; display: block; }
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.left { display: flex; flex-direction: column; gap: 4px; }
+
+.eyebrow { @include gc-eyebrow; }
+.title {
+    @include gc-title;
+    font-size: var(--gc-title-size, 18px);
+}
+
+.right { display: flex; align-items: center; gap: 8px; }

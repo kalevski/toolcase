@@ -1,17 +1,1 @@
-@use 'tokens' as *;
-
-:host {
-    @include gc-host;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.row {
-    display: grid;
-    grid-template-columns: 1fr 240px;
-    gap: 16px;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-input { width: 100%; }
+@use 'VolumeSlider';

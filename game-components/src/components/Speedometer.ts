@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/Speedometer.styles.js'
+import stylesText from '../../style/Speedometer.scss'
 
 @customElement('gc-speedometer')
 export class Speedometer extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) value = 0
     @property({ type: Number }) max = 220

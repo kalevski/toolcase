@@ -3,9 +3,12 @@
 :host {
     @include gc-host;
     display: inline-block;
-    color: #fff;
-    font-size: 18px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    font-family: $gc-font-display;
+    color: var(--fg-gold-bright);
+    font-size: 14px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px #000, 0 0 12px rgba(232, 200, 120, 0.4);
     cursor: pointer;
     animation: pakBlink 1.5s infinite;
 }

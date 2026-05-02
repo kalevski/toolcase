@@ -1,12 +1,12 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement, rarityVar } from '../base.js'
-import { styles } from '../styles/LootList.styles.js'
+import stylesText from '../../style/LootList.scss'
 import type { InventoryItem } from './ItemSlot.js'
 
 @customElement('gc-loot-list')
 export class LootList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) items: Array<{ item: InventoryItem; qty?: number }> = []
     @property({ attribute: 'list-title' }) listTitle = 'Loot'

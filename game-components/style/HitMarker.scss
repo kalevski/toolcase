@@ -15,7 +15,7 @@
 
 .line {
     position: absolute;
-    background: var(--gc-color, #fff);
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    background: var(--gc-color, var(--fg-gold-bright));
+    box-shadow: 0 0 6px var(--gc-color, var(--fg-gold-bright)), 0 0 4px #000;
     transform-origin: 0 0;
 }

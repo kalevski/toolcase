@@ -1,13 +1,13 @@
-import { html, type TemplateResult } from 'lit'
+import { html, type TemplateResult, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { SettingRowBase } from './_setting-row-base.js'
-import { styles } from '../styles/SelectRow.styles.js'
+import stylesText from '../../style/SelectRow.scss'
 
 export interface SelectOption { value: string | number; label: string }
 
 @customElement('gc-select-row')
 export class SelectRow extends SettingRowBase {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() value: string | number = ''
     @property({ type: Array }) options: SelectOption[] = []

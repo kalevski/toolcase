@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/Subtitle.styles.js'
+import stylesText from '../../style/Subtitle.scss'
 
 @customElement('gc-subtitle')
 export class Subtitle extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() text = ''
     @property() speaker = ''

@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/NavButton.styles.js'
+import stylesText from '../../style/NavButton.scss'
 
 @customElement('gc-nav-button')
 export class NavButton extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() kind: 'back' | 'close' = 'back'
     @property() label = ''

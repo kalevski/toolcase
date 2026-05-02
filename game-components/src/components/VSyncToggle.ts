@@ -1,9 +1,10 @@
+import { css, unsafeCSS } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import { ToggleRow } from './ToggleRow.js'
-import { styles } from '../styles/VSyncToggle.styles.js'
+import stylesText from '../../style/VSyncToggle.scss'
 
 @customElement('gc-vsync-toggle')
 export class VSyncToggle extends ToggleRow {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
     constructor() { super(); this.rowLabel = 'V-Sync' }
 }

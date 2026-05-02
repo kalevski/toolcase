@@ -1,11 +1,15 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/typography' as *;
+@use 'mixins/button' as *;
+@use 'mixins/divider' as *;
 
 :host([open]) {
     @include gc-host;
     position: fixed;
     inset: 0;
     z-index: 9100;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(8, 6, 4, 0.7);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -16,45 +20,42 @@
 .box {
     min-width: 360px;
     max-width: 480px;
-    background: #13161d;
-    color: $gc-fg;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    @include gc-panel;
+    @include gc-panel-corners;
+    padding: 16px 20px;
+    text-align: center;
+}
+
+.eyebrow {
+    @include gc-eyebrow;
+    margin-bottom: 6px;
 }
 
 h3 {
-    margin: 0 0 8px;
-    font-size: 18px;
+    @include gc-title(22px);
+    margin: 0 0 12px;
 }
 
+.divider {
+    @include gc-divider;
+    margin: 8px 0;
+}
+.diamond { @include gc-diamond; }
+
 .message {
-    opacity: 0.8;
-    margin-bottom: 16px;
+    @include gc-body;
+    color: var(--fg-parch-2);
+    margin: 12px 0 16px;
 }
 
 .actions {
     display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+    gap: 10px;
+    justify-content: center;
 }
 
-button {
-    padding: 8px 14px;
-    border-radius: 6px;
-}
+button { @include gc-btn; }
 
-.cancel {
-    background: transparent;
-    color: $gc-fg;
-    border: 1px solid $gc-border;
-}
-
-.confirm {
-    background: $gc-accent;
-    color: #fff;
-    border: none;
-
-    &.danger { background: $gc-danger; }
-}
+.cancel { @include gc-btn-ghost; }
+.confirm { @include gc-btn-primary; }
+.confirm.danger { @include gc-btn-danger; }

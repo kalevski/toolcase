@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/BuffBar.styles.js'
+import stylesText from '../../style/BuffBar.scss'
 
 export interface BuffEntry {
     id: string
@@ -15,7 +15,7 @@ export interface BuffEntry {
 
 @customElement('gc-buff-bar')
 export class BuffBar extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) buffs: BuffEntry[] = []
     @property({ type: Number, attribute: 'icon-size' }) iconSize = 32

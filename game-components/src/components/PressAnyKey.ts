@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PressAnyKey.styles.js'
+import stylesText from '../../style/PressAnyKey.scss'
 
 @customElement('gc-press-any-key')
 export class PressAnyKey extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() text = 'Press any key to continue'
 

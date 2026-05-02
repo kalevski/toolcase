@@ -1,11 +1,11 @@
-import { html, type TemplateResult } from 'lit'
+import { html, type TemplateResult, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { SettingRowBase } from './_setting-row-base.js'
-import { styles } from '../styles/FOVSlider.styles.js'
+import stylesText from '../../style/FOVSlider.scss'
 
 @customElement('gc-fov-slider')
 export class FOVSlider extends SettingRowBase {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) value = 90
     @property({ type: Number }) min = 60

@@ -6,7 +6,7 @@
     inset: 0;
     pointer-events: none;
     z-index: 9400;
-    background: radial-gradient(ellipse at center, transparent 30%, var(--gc-color, #{$gc-danger}) 120%);
+    background: radial-gradient(ellipse at center, transparent 30%, var(--gc-color, var(--fg-blood)) 120%);
     opacity: var(--gc-intensity, 0.4);
     transition: opacity 200ms;
 }

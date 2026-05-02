@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/LevelSelect.styles.js'
+import stylesText from '../../style/LevelSelect.scss'
 
 export interface LevelNode {
     id: string
@@ -19,7 +19,7 @@ export interface LevelEdge { from: string; to: string }
 
 @customElement('gc-level-select')
 export class LevelSelect extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) nodes: LevelNode[] = []
     @property({ type: Array }) edges: LevelEdge[] = []

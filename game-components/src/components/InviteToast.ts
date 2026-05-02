@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/InviteToast.styles.js'
+import stylesText from '../../style/InviteToast.scss'
 
 @customElement('gc-invite-toast')
 export class InviteToast extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) open = false
     @property() inviter = ''

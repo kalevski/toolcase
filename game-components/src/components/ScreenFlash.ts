@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ScreenFlash.styles.js'
+import stylesText from '../../style/ScreenFlash.scss'
 
 @customElement('gc-screen-flash')
 export class ScreenFlash extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ attribute: 'flash-color' }) flashColor = '#ff5a5a'
     @property({ type: Number, attribute: 'flash-opacity' }) flashOpacity = 0.4

@@ -1,24 +1,57 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/typography' as *;
 
 :host {
     @include gc-host;
     display: block;
 }
+
 .head {
-    padding: 12px;
-    background: rgba(15, 18, 24, 0.85);
-    border-radius: 4px;
+    padding: 14px;
+    @include gc-panel;
     margin-bottom: 8px;
 }
-h2 { margin: 0; }
-.motto { font-size: 13px; font-style: italic; opacity: 0.7; margin-top: 4px; }
-.meta { font-size: 12px; opacity: 0.6; margin-top: 6px; }
-ul { list-style: none; padding: 0; margin: 0; }
+
+h2 {
+    @include gc-title(20px);
+    margin: 0;
+}
+
+.motto {
+    @include gc-lore;
+    margin-top: 6px;
+}
+
+.meta {
+    @include gc-mono-label;
+    font-size: 11px;
+    margin-top: 8px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    @include gc-panel;
+    padding: 0;
+}
+
 li {
     display: flex;
-    gap: 10px;
-    padding: 6px 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    gap: 12px;
+    padding: 8px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
     align-items: center;
+    font-family: $gc-font-body;
+
+    &:first-child { border-top: none; }
+    &:hover { background: rgba(201, 169, 97, 0.08); }
 }
-.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    box-shadow: 0 0 4px currentColor;
+}

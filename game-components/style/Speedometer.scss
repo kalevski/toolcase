@@ -7,7 +7,9 @@
     width: var(--gc-size, 180px);
     height: var(--gc-size, 180px);
 }
+
 svg { position: absolute; inset: 0; }
+
 .info {
     position: absolute;
     inset: 0;
@@ -17,6 +19,27 @@ svg { position: absolute; inset: 0; }
     justify-content: center;
     pointer-events: none;
 }
-.value { font-size: calc(var(--gc-size, 180px) * 0.22); font-weight: 700; font-family: monospace; }
-.unit { font-size: calc(var(--gc-size, 180px) * 0.07); opacity: 0.7; }
-.gear { font-size: calc(var(--gc-size, 180px) * 0.16); font-weight: 700; color: $gc-gold; margin-top: 4px; }
+
+.value {
+    font-family: $gc-font-mono;
+    font-size: calc(var(--gc-size, 180px) * 0.22);
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000, 0 0 8px rgba(232, 200, 120, 0.4);
+}
+
+.unit {
+    font-family: $gc-font-display;
+    font-size: calc(var(--gc-size, 180px) * 0.07);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch-3);
+}
+
+.gear {
+    font-family: $gc-font-display;
+    font-size: calc(var(--gc-size, 180px) * 0.16);
+    font-weight: 700;
+    color: var(--fg-blood-bright);
+    margin-top: 4px;
+    text-shadow: 0 0 8px rgba(212, 74, 58, 0.5);
+}

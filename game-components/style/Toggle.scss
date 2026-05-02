@@ -1,0 +1,5 @@
+@use 'tokens' as *;
+@use 'mixins/toggle' as *;
+
+:host { @include gc-host; display: inline-block; }
+.toggle { @include gc-toggle; }

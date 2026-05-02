@@ -1,0 +1,11 @@
+@use 'tokens' as *;
+@use 'mixins/list-row' as *;
+
+:host { @include gc-host; display: block; }
+.row {
+    @include gc-row;
+    &.selected {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        box-shadow: inset 3px 0 0 var(--gc-row-accent, var(--fg-gold));
+    }
+}

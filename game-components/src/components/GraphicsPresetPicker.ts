@@ -1,13 +1,13 @@
-import { html, type TemplateResult } from 'lit'
+import { html, type TemplateResult, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { SettingRowBase } from './_setting-row-base.js'
-import { styles } from '../styles/GraphicsPresetPicker.styles.js'
+import stylesText from '../../style/GraphicsPresetPicker.scss'
 
 const PRESETS = ['low', 'medium', 'high', 'ultra', 'custom']
 
 @customElement('gc-graphics-preset-picker')
 export class GraphicsPresetPicker extends SettingRowBase {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() value = 'medium'
 

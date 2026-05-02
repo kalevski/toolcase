@@ -12,11 +12,26 @@
 
 .line {
     position: absolute;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 4px #000;
 }
+
 .ring {
     position: absolute;
     border-radius: 50%;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 0 1px #000;
     transform: translate(-50%, -50%);
+}
+
+.diamond {
+    position: absolute;
+    transform: translate(-50%, -50%) rotate(45deg);
+    border: 1px solid var(--fg-gold);
+    box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+}
+
+.center-dot {
+    position: absolute;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background: var(--fg-blood-bright);
+    box-shadow: 0 0 6px var(--fg-blood-bright);
 }

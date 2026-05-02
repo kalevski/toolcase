@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/Grid.styles.js'
+import stylesText from '../../style/Grid.scss'
 
 @customElement('gc-grid')
 export class Grid extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property() columns = '4'
     @property() rows = ''

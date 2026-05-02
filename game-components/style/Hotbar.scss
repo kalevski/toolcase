@@ -1,0 +1,14 @@
+@use 'tokens' as *;
+@use 'mixins/panel' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+}
+
+.bar {
+    @include gc-panel;
+    padding: 10px;
+    display: inline-flex;
+    gap: 6px;
+}

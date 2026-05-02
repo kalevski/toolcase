@@ -1,5 +1,1 @@
-@use 'setting-row' as *;
-
-:host { @include setting-row; }
-
-input { width: 100%; }
+@use 'VolumeSlider';

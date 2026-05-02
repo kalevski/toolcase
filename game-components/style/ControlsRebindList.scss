@@ -1,25 +1,32 @@
 @use 'tokens' as *;
+@use 'mixins/panel' as *;
+@use 'mixins/key' as *;
 
 :host {
     @include gc-host;
     display: flex;
     flex-direction: column;
+    @include gc-panel;
+    padding: 4px 0;
 }
 
 .row {
     display: grid;
     grid-template-columns: 1fr 240px;
     gap: 16px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 10px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
     align-items: center;
+    font-family: $gc-font-body;
+
+    &:first-child { border-top: none; }
 }
+
 button {
+    @include gc-key;
     min-width: 120px;
-    padding: 6px 10px;
-    background: rgba(15, 18, 24, 0.7);
-    color: $gc-fg;
-    border: 1px solid $gc-border;
-    border-radius: 4px;
-    font-family: monospace;
+    padding: 6px 12px;
+    cursor: pointer;
+
+    &:hover { filter: brightness(1.15); }
 }

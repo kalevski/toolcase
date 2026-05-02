@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/SafeArea.styles.js'
+import stylesText from '../../style/SafeArea.scss'
 
 @customElement('gc-safe-area')
 export class SafeArea extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Number }) extra = 0
 

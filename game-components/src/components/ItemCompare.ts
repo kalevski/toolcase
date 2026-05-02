@@ -1,13 +1,13 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/ItemCompare.styles.js'
+import stylesText from '../../style/ItemCompare.scss'
 import './ItemTooltip.js'
 import type { InventoryItem } from './ItemSlot.js'
 
 @customElement('gc-item-compare')
 export class ItemCompare extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Object }) current: InventoryItem | null = null
     @property({ type: Object }) candidate: InventoryItem | null = null

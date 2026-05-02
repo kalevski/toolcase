@@ -1,1 +1,27 @@
-@use 'SelectRow';
+@use 'tokens' as *;
+@use 'setting-row' as *;
+
+:host { @include setting-row; }
+
+.presets { display: flex; gap: 4px; }
+
+button {
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #2a1f14, #0a0604);
+    color: var(--fg-parch);
+    border: 1px solid var(--fg-gold-deep);
+    font-family: $gc-font-display;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: filter 0.12s ease;
+
+    &:hover { filter: brightness(1.15); }
+
+    &.selected {
+        background: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        color: var(--fg-gold-bright);
+        border-color: var(--fg-gold);
+    }
+}

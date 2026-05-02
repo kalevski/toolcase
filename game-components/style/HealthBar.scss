@@ -1,8 +1,10 @@
+@use 'tokens' as *;
 @use 'resource-bar' as *;
 
 :host {
-    --gc-bar-color: #3aa256;
-    --gc-ghost-color: #d23a3a;
-    --gc-bar-height: 10px;
+    --c-base: var(--fg-blood);
+    --c-bright: var(--fg-blood-bright);
+    --c-shadow: #5a1410;
+    --gc-bar-height: 12px;
     @include resource-bar;
 }

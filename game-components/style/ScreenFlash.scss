@@ -6,7 +6,7 @@
     inset: 0;
     pointer-events: none;
     z-index: 9500;
-    background: var(--gc-color, #ff5a5a);
+    background: var(--gc-color, var(--fg-blood-bright));
     opacity: 0;
     transition: opacity var(--gc-duration, 250ms) ease-out;
 }

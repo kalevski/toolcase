@@ -1,13 +1,13 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/RadialWheel.styles.js'
+import stylesText from '../../style/RadialWheel.scss'
 
 export interface RadialOption { id: string; icon?: string; label?: string; color?: string; disabled?: boolean }
 
 @customElement('gc-radial-wheel')
 export class RadialWheel extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) options: RadialOption[] = []
     @property({ type: Boolean, reflect: true }) open = false

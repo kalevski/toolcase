@@ -1,13 +1,13 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/InventoryGrid.styles.js'
+import stylesText from '../../style/InventoryGrid.scss'
 import './ItemSlot.js'
 import type { InventoryItem } from './ItemSlot.js'
 
 @customElement('gc-inventory-grid')
 export class InventoryGrid extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) items: Array<InventoryItem | null> = []
     @property({ type: Number }) columns = 8

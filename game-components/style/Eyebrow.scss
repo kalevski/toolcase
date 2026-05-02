@@ -1,0 +1,5 @@
+@use 'tokens' as *;
+@use 'mixins/typography' as *;
+
+:host { @include gc-host; display: inline-block; }
+.eyebrow { @include gc-eyebrow; }

@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/PerkPicker.styles.js'
+import stylesText from '../../style/PerkPicker.scss'
 
 export interface Perk {
     id: string
@@ -14,7 +14,7 @@ export interface Perk {
 
 @customElement('gc-perk-picker')
 export class PerkPicker extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) perks: Perk[] = []
     @property({ type: Number }) columns = 3

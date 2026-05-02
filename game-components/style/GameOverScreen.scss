@@ -1,2 +1,10 @@
-// Inherits ResultScreen styles via Lit composition; component sets default colors.
-@use 'ResultScreen';
+@use 'tokens' as *;
+@use 'mixins/result-screen' as *;
+
+:host {
+    --gc-title-color: var(--fg-blood-bright);
+    --gc-bg-color: #3a0a08;
+    --gc-border-color: var(--fg-blood);
+    --gc-glow: rgba(212, 74, 58, 0.6);
+    @include result-screen;
+}

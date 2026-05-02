@@ -1,7 +1,7 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/AchievementList.styles.js'
+import stylesText from '../../style/AchievementList.scss'
 
 export interface Achievement {
     id: string
@@ -17,7 +17,7 @@ export interface Achievement {
 
 @customElement('gc-achievement-list')
 export class AchievementList extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Array }) achievements: Achievement[] = []
 

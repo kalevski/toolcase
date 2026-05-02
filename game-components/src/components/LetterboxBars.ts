@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/LetterboxBars.styles.js'
+import stylesText from '../../style/LetterboxBars.scss'
 
 @customElement('gc-letterbox-bars')
 export class LetterboxBars extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) show = false
     @property({ attribute: 'bar-height' }) barHeight = '12%'

@@ -1,11 +1,11 @@
-import { html } from 'lit'
+import { html, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/TransitionWipe.styles.js'
+import stylesText from '../../style/TransitionWipe.scss'
 
 @customElement('gc-transition-wipe')
 export class TransitionWipe extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean, reflect: true }) show = false
     @property({ reflect: true }) direction: 'fade' | 'left' | 'right' | 'up' | 'down' | 'iris' = 'fade'

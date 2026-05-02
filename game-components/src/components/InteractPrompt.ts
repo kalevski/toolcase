@@ -1,11 +1,11 @@
-import { html, nothing } from 'lit'
+import { html, nothing, css, unsafeCSS } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { GameElement } from '../base.js'
-import { styles } from '../styles/InteractPrompt.styles.js'
+import stylesText from '../../style/InteractPrompt.scss'
 
 @customElement('gc-interact-prompt')
 export class InteractPrompt extends GameElement {
-    static styles = styles
+    static styles = css`${unsafeCSS(stylesText)}`
 
     @property({ type: Boolean }) show = false
     @property({ attribute: 'key-label' }) keyLabel = 'E'

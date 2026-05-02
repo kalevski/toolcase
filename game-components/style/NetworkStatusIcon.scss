@@ -5,9 +5,20 @@
     display: inline-flex;
     align-items: flex-end;
     gap: 1px;
-    color: var(--gc-color, #{$gc-success});
+    color: var(--gc-color, var(--fg-stamina-bright));
 }
 
-.bar { background: rgba(255, 255, 255, 0.15); border-radius: 1px; }
-.bar.active { background: var(--gc-color, #{$gc-success}); }
-.label { margin-left: 4px; font-family: monospace; }
+.bar {
+    background: rgba(184, 164, 126, 0.25);
+}
+
+.bar.active {
+    background: var(--gc-color, var(--fg-stamina-bright));
+    box-shadow: 0 0 4px currentColor;
+}
+
+.label {
+    margin-left: 4px;
+    font-family: $gc-font-mono;
+    font-size: 11px;
+}
