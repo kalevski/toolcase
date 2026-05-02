@@ -1,0 +1,68 @@
+gc-panel {
+    display: block;
+    position: relative;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+    padding: var(--gc-panel-padding, 14px);
+}
+
+gc-panel[bordered] {
+    background:
+        linear-gradient(180deg, rgba(232,220,196,0.04), rgba(0,0,0,0.18)),
+        radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,0.6),
+        inset 0 0 0 2px var(--fg-gold-deep),
+        inset 0 0 0 3px var(--fg-gold-shadow),
+        0 8px 24px rgba(0,0,0,0.6),
+        0 2px 0 rgba(255,220,150,0.08) inset;
+}
+
+gc-panel[parchment] {
+    background:
+        radial-gradient(120% 100% at 30% 10%, rgba(255,240,200,0.12), transparent 60%),
+        radial-gradient(80% 60% at 80% 90%, rgba(120,80,30,0.18), transparent 70%),
+        linear-gradient(180deg, #e8dcc4 0%, #d6c5a3 100%);
+    color: var(--fg-ink);
+}
+
+gc-panel[nine-slice] {
+    border-image: var(--gc-panel-nine-slice) 30 round;
+}
+
+gc-panel[nine-slice][nine-slice-fill] {
+    border-image: var(--gc-panel-nine-slice) 30 fill round;
+}
+
+gc-panel > .gc-panel-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+    pointer-events: none;
+}
+
+gc-panel > .gc-panel-corner.tl {
+    top: -1px;
+    left: -1px;
+}
+
+gc-panel > .gc-panel-corner.tr {
+    top: -1px;
+    right: -1px;
+    transform: scaleX(-1);
+}
+
+gc-panel > .gc-panel-corner.bl {
+    bottom: -1px;
+    left: -1px;
+    transform: scaleY(-1);
+}
+
+gc-panel > .gc-panel-corner.br {
+    bottom: -1px;
+    right: -1px;
+    transform: scale(-1, -1);
+}

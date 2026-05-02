@@ -1,59 +1,30 @@
 {
-    "name": "@toolcase/game-components",
-    "version": "0.1.0",
-    "description": "🕹 Game UI primitives as Lit-based Web Components",
-    "type": "module",
-    "source": "src/index.ts",
-    "main": "lib/index.main.js",
-    "module": "lib/index.module.js",
-    "types": "lib/index.d.ts",
-    "exports": {
-        ".": {
-            "types": "./lib/index.d.ts",
-            "import": "./lib/index.module.js",
-            "require": "./lib/index.main.js"
-        }
-    },
-    "scripts": {
-        "build": "tsup",
-        "dev": "tsup --watch",
-        "typecheck": "tsc --noEmit -p tsconfig.json"
-    },
-    "keywords": [
-        "game",
-        "ui",
-        "lit",
-        "web-components",
-        "custom-elements",
-        "shadow-dom",
-        "hud",
-        "menu"
-    ],
-    "homepage": "https://kalevski.dev/toolcase",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/kalevski/toolcase.git"
-    },
-    "license": "MIT",
-    "dependencies": {
-        "lit": "^3.2.0"
-    },
-    "devDependencies": {
-        "esbuild-sass-plugin": "^3.7.0",
-        "sass": "^1.86.3"
-    },
-    "directories": {
-        "lib": "lib"
-    },
-    "files": [
-        "lib",
-        "style"
-    ],
-    "publishConfig": {
-        "access": "public",
-        "registry": "https://registry.npmjs.org/"
-    },
-    "engines": {
-        "node": ">=18"
-    }
+	"name": "@toolcase/game-components",
+	"version": "0.1.0",
+	"main": "lib/index.main.js",
+	"module": "lib/index.module.js",
+	"types": "lib/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.module.js",
+			"require": "./lib/index.main.js"
+		},
+		"./style.css": "./lib/index.css"
+	},
+	"sideEffects": ["*.css", "lib/index.main.js", "lib/index.module.js"],
+	"scripts": {
+		"dev": "tsup --watch",
+		"build": "tsup && sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import --silence-deprecation=color-functions --silence-deprecation=global-builtin",
+		"build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import --silence-deprecation=color-functions --silence-deprecation=global-builtin"
+	},
+	"peerDependencies": {
+		"@toolcase/base": "2.x.x"
+	},
+	"directories": {
+		"lib": "lib"
+	},
+	"files": [
+		"lib"
+	]
 }

@@ -1,37 +1,100 @@
-import { GcPage, GcSection, GcRow } from './_demo'
+import React from 'react'
+import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
-export const StackDemo = () => (
-    <GcPage category="Layout" title="gc-stack" lede="A flexbox row or column with a uniform gap between slotted children.">
-        <GcSection title="Direction">
-            <GcRow label="Horizontal">
-                <gc-stack direction="horizontal" gap="8px">
-                    {['A', 'B', 'C', 'D'].map((l) => (
-                        <span key={l} style={{ padding: '6px 12px', background: 'rgba(106,169,255,0.15)', color: '#e6e8ec', borderRadius: 3 }}>{l}</span>
-                    ))}
-                </gc-stack>
-            </GcRow>
-            <GcRow label="Vertical">
-                <gc-stack direction="vertical" gap="6px">
-                    {['Item 1', 'Item 2', 'Item 3'].map((l) => (
-                        <span key={l} style={{ padding: '6px 12px', background: 'rgba(106,169,255,0.15)', color: '#e6e8ec', borderRadius: 3 }}>{l}</span>
-                    ))}
-                </gc-stack>
-            </GcRow>
-        </GcSection>
-        <GcSection title="Gap sizes">
-            <GcRow label="gap 4px">
-                <gc-stack direction="horizontal" gap="4px">
-                    {[1, 2, 3].map((n) => <span key={n} style={{ width: 24, height: 24, background: 'rgba(255,255,255,0.1)', display: 'inline-block' }} />)}
-                </gc-stack>
-            </GcRow>
-            <GcRow label="gap 16px">
-                <gc-stack direction="horizontal" gap="16px">
-                    {[1, 2, 3].map((n) => <span key={n} style={{ width: 24, height: 24, background: 'rgba(255,255,255,0.1)', display: 'inline-block' }} />)}
-                </gc-stack>
-            </GcRow>
-        </GcSection>
-    </GcPage>
+const Box = ({ label }: { label: string }) => (
+    <div style={{
+        padding: '8px 14px',
+        background: 'linear-gradient(180deg, #2e2418 0%, #1a130c 70%)',
+        border: '1px solid var(--fg-gold-deep, #8b6f3a)',
+        color: 'var(--fg-parch, #e8dcc4)',
+        fontFamily: 'var(--fg-display, serif)',
+        fontSize: '11px',
+        letterSpacing: '0.18em',
+        textTransform: 'uppercase' as const,
+        boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.6), inset 0 1px 0 rgba(232,200,120,0.12)',
+        minWidth: '60px',
+        textAlign: 'center' as const,
+    }}>
+        {label}
+    </div>
+)
+
+const StackDemo: React.FC = () => (
+    <div className="container py-4">
+        <div className="row">
+            <div className="col-12">
+                <RichPageHeader
+                    chips={<RichPageHeaderChip>Game Components</RichPageHeaderChip>}
+                    title="Stack"
+                    description="Layout primitive. Flex container with direction, gap, align, justify, wrap, and inline props."
+                />
+                <div className="d-flex flex-column gap-4 mt-4">
+                    <SectionCard title="Vertical (default)">
+                        {/* @ts-ignore */}
+                        <gc-stack gap="8px">
+                            <Box label="Item A" />
+                            <Box label="Item B" />
+                            <Box label="Item C" />
+                            {/* @ts-ignore */}
+                        </gc-stack>
+                    </SectionCard>
+
+                    <SectionCard title="Horizontal">
+                        {/* @ts-ignore */}
+                        <gc-stack direction="horizontal" gap="8px">
+                            <Box label="Item A" />
+                            <Box label="Item B" />
+                            <Box label="Item C" />
+                            {/* @ts-ignore */}
+                        </gc-stack>
+                    </SectionCard>
+
+                    <SectionCard title="Horizontal — center aligned">
+                        {/* @ts-ignore */}
+                        <gc-stack direction="horizontal" gap="12px" align="center">
+                            <Box label="Short" />
+                            <div style={{ height: '56px', padding: '8px 14px', background: 'linear-gradient(180deg, #2e2418 0%, #1a130c 70%)', border: '1px solid var(--fg-gold-deep, #8b6f3a)', color: 'var(--fg-parch, #e8dcc4)', fontFamily: 'var(--fg-display, serif)', fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.6), inset 0 1px 0 rgba(232,200,120,0.12)' }}>Tall</div>
+                            <Box label="Short" />
+                            {/* @ts-ignore */}
+                        </gc-stack>
+                    </SectionCard>
+
+                    <SectionCard title="Horizontal — space-between justified">
+                        {/* @ts-ignore */}
+                        <gc-stack direction="horizontal" gap="8px" justify="space-between" style={{ width: '100%' }}>
+                            <Box label="Left" />
+                            <Box label="Middle" />
+                            <Box label="Right" />
+                            {/* @ts-ignore */}
+                        </gc-stack>
+                    </SectionCard>
+
+                    <SectionCard title="Wrap">
+                        {/* @ts-ignore */}
+                        <gc-stack direction="horizontal" gap="6px" wrap style={{ maxWidth: '260px' }}>
+                            {['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta'].map(label => (
+                                <Box key={label} label={label} />
+                            ))}
+                            {/* @ts-ignore */}
+                        </gc-stack>
+                    </SectionCard>
+
+                    <SectionCard title="Inline">
+                        <span style={{ color: 'var(--fg-parch-3, #b8a47e)', fontFamily: 'var(--fg-body, serif)', fontSize: '14px' }}>
+                            Inline stack:{' '}
+                        </span>
+                        {/* @ts-ignore */}
+                        <gc-stack inline direction="horizontal" gap="6px" align="center">
+                            <Box label="A" />
+                            <Box label="B" />
+                            {/* @ts-ignore */}
+                        </gc-stack>
+                    </SectionCard>
+                </div>
+            </div>
+        </div>
+    </div>
 )
 
 export default StackDemo

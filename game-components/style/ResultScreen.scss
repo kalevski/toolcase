@@ -1,4 +1,0 @@
-@use 'tokens' as *;
-@use 'mixins/result-screen' as *;
-
-:host { @include result-screen; }

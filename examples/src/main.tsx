@@ -4,6 +4,7 @@ import { App } from './App'
 import 'bootstrap/dist/js/bootstrap.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import '@toolcase/react-components/style.css'
+import '@toolcase/game-components/style.css'
 import './style.css'
 
 window.addEventListener('DOMContentLoaded', () => {

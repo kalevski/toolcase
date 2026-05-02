@@ -16,7 +16,7 @@ import { BaseExamplesPage } from './pages/BaseExamplesPage'
 import { LoggingExamplesPage } from './pages/LoggingExamplesPage'
 import { SerializerExamplesPage } from './pages/SerializerExamplesPage'
 import { PhaserPlusPage } from './pages/PhaserPlusPage'
-import { GameComponentsPage } from './game-components/GameComponentsPage'
+import { GameComponentsPage } from './pages/GameComponentsPage'
 import { examples } from './react-components/index'
 import { phaserExamples } from './phaser-plus/index'
 import { gameComponentExamples } from './game-components/index'
@@ -69,8 +69,8 @@ const Nav = ({ theme, onThemeChange }: NavProps) => {
         { key: 'logging', label: 'Logging', href: '/logging', active: location.pathname.startsWith('/logging'), onClick: go('/logging') },
         { key: 'serializer', label: 'Serializer', href: '/serializer', active: location.pathname.startsWith('/serializer'), onClick: go('/serializer') },
         { key: 'rc', label: 'React Components', href: '/react-components', active: location.pathname.startsWith('/react-components'), onClick: go('/react-components') },
+        { key: 'gc', label: 'Game Components', href: '/game-components', active: location.pathname.startsWith('/game-components'), onClick: go('/game-components') },
         { key: 'phaser', label: 'Phaser+', href: '/phaser-plus', active: location.pathname.startsWith('/phaser-plus'), onClick: go('/phaser-plus') },
-        { key: 'gc', label: 'Game Components', href: '/game-components', active: location.pathname.startsWith('/game-components'), onClick: go('/game-components') },   
     ]
 
     const brand = (
@@ -166,6 +166,45 @@ interface GameComponentExampleWrapperProps {
     exampleKey: string
 }
 
+const GameComponentExampleWrapper = ({ children, exampleKey }: GameComponentExampleWrapperProps) => {
+    const navigate = useNavigate()
+    const index = gameComponentExamples.findIndex(e => e.key === exampleKey)
+    const prev = index > 0 ? gameComponentExamples[index - 1] : null
+    const next = index < gameComponentExamples.length - 1 ? gameComponentExamples[index + 1] : null
+
+    useEffect(() => {
+        const onKey = (event: KeyboardEvent) => {
+            if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+            if (isEditableTarget(event.target)) return
+            if (event.key === 'ArrowLeft' && prev) {
+                event.preventDefault()
+                navigate(`/game-components/${prev.key}`)
+            } else if (event.key === 'ArrowRight' && next) {
+                event.preventDefault()
+                navigate(`/game-components/${next.key}`)
+            }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [navigate, prev, next])
+
+    return (
+        <div className="example">
+            <div className="example__back">
+                <RouterLink to="/game-components" className="example__back-link">
+                    <Icon name="arrow-left" /> All Game Components
+                </RouterLink>
+                <Text as="span" variant="muted" size="small" className="example__hint">
+                    <Kbd>←</Kbd> <Kbd>→</Kbd> to navigate
+                </Text>
+            </div>
+            <div className="example__canvas">
+                {children}
+            </div>
+        </div>
+    )
+}
+
 const PhaserExampleWrapper = ({ children, exampleKey }: PhaserExampleWrapperProps) => {
     const navigate = useNavigate()
     const index = phaserExamples.findIndex(e => e.key === exampleKey)
@@ -205,45 +244,6 @@ const PhaserExampleWrapper = ({ children, exampleKey }: PhaserExampleWrapperProp
                 </Text>
             </div>
             <div className="example__canvas phaser-canvas-wrapper">
-                {children}
-            </div>
-        </div>
-    )
-}
-
-const GameComponentExampleWrapper = ({ children, exampleKey }: GameComponentExampleWrapperProps) => {
-    const navigate = useNavigate()
-    const index = gameComponentExamples.findIndex((e) => e.key === exampleKey)
-    const prev = index > 0 ? gameComponentExamples[index - 1] : null
-    const next = index < gameComponentExamples.length - 1 ? gameComponentExamples[index + 1] : null
-
-    useEffect(() => {
-        const onKey = (event: KeyboardEvent) => {
-            if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
-            if (isEditableTarget(event.target)) return
-            if (event.key === 'ArrowLeft' && prev) {
-                event.preventDefault()
-                navigate(`/game-components/${prev.key}`)
-            } else if (event.key === 'ArrowRight' && next) {
-                event.preventDefault()
-                navigate(`/game-components/${next.key}`)
-            }
-        }
-        window.addEventListener('keydown', onKey)
-        return () => window.removeEventListener('keydown', onKey)
-    }, [navigate, prev, next])
-
-    return (
-        <div className="example">
-            <div className="example__back">
-                <RouterLink to="/game-components" className="example__back-link">
-                    <Icon name="arrow-left" /> All Game Components
-                </RouterLink>
-                <Text as="span" variant="muted" size="small" className="example__hint">
-                    <Kbd>←</Kbd> <Kbd>→</Kbd> to navigate
-                </Text>
-            </div>
-            <div className="example__canvas">
                 {children}
             </div>
         </div>
@@ -290,17 +290,6 @@ export const App = () => {
                         }
                     />
                 ))}
-                {phaserExamples.map((example) => (
-                    <Route
-                        key={example.key}
-                        path={`/phaser-plus/${example.key}`}
-                        element={
-                            <PhaserExampleWrapper exampleKey={example.key}>
-                                {example.element}
-                            </PhaserExampleWrapper>
-                        }
-                    />
-                ))}
                 {gameComponentExamples.map((example) => (
                     <Route
                         key={example.key}
@@ -309,6 +298,17 @@ export const App = () => {
                             <GameComponentExampleWrapper exampleKey={example.key}>
                                 {example.element}
                             </GameComponentExampleWrapper>
+                        }
+                    />
+                ))}
+                {phaserExamples.map((example) => (
+                    <Route
+                        key={example.key}
+                        path={`/phaser-plus/${example.key}`}
+                        element={
+                            <PhaserExampleWrapper exampleKey={example.key}>
+                                {example.element}
+                            </PhaserExampleWrapper>
                         }
                     />
                 ))}

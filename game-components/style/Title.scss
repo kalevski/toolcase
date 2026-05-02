@@ -1,9 +1,0 @@
-@use 'tokens' as *;
-@use 'mixins/typography' as *;
-
-:host { @include gc-host; display: block; }
-
-.title {
-    @include gc-title;
-    font-size: var(--gc-title-size, 18px);
-}
