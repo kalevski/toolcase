@@ -1,0 +1,31 @@
+gc-currency-display {
+    --gc-currency-display-color: var(--fg-gold-bright);
+    --gc-currency-display-font-size: 18px;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--gc-currency-display-color);
+    line-height: 1;
+}
+
+gc-currency-display .gc-currency-display-label {
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+}
+
+gc-currency-display .gc-currency-display-icon {
+    font-size: var(--gc-currency-display-font-size);
+    line-height: 1;
+    color: inherit;
+}
+
+gc-currency-display .gc-currency-display-amount {
+    font-family: var(--fg-mono);
+    font-size: var(--gc-currency-display-font-size);
+    letter-spacing: 0.04em;
+    color: inherit;
+    text-shadow: 0 1px 2px #000;
+}

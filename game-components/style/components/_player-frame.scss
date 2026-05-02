@@ -1,0 +1,57 @@
+gc-player-frame {
+    display: inline-block;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    color: var(--fg-parch);
+    min-width: 280px;
+}
+
+gc-player-frame .gc-player-frame-root {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+gc-player-frame .gc-player-frame-portrait {
+    flex: 0 0 auto;
+}
+
+gc-player-frame .gc-player-frame-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+gc-player-frame .gc-player-frame-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+gc-player-frame .gc-player-frame-name {
+    font-family: var(--fg-display);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-gold-bright);
+}
+
+gc-player-frame .gc-player-frame-class {
+    font-family: var(--fg-display);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+}
+
+gc-player-frame .gc-player-frame-bar {
+    display: block;
+}

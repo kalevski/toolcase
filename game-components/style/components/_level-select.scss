@@ -1,0 +1,134 @@
+gc-level-select {
+    display: inline-block;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+}
+
+gc-level-select .gc-level-select-canvas {
+    position: relative;
+    box-sizing: border-box;
+    background:
+        radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+        linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12);
+}
+
+gc-level-select .gc-level-select-edges {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+gc-level-select .gc-level-select-edge {
+    stroke: var(--fg-gold-shadow);
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+}
+
+gc-level-select .gc-level-select-edge.is-completed {
+    stroke: var(--fg-gold-bright);
+    stroke-dasharray: none;
+    stroke-width: 2;
+}
+
+gc-level-select .gc-level-select-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 1;
+}
+
+gc-level-select .gc-level-select-glyph {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--fg-display);
+    font-size: 18px;
+    color: var(--fg-gold-bright);
+    background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 2px #000;
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+gc-level-select .gc-level-select-node:hover .gc-level-select-glyph {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+gc-level-select .gc-level-select-node.is-completed .gc-level-select-glyph {
+    border-color: var(--fg-gold-bright);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.25),
+        0 0 12px rgba(232, 200, 120, 0.4);
+    color: var(--fg-stamina-bright);
+}
+
+gc-level-select .gc-level-select-node.is-locked {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+gc-level-select .gc-level-select-node.is-locked .gc-level-select-glyph {
+    color: var(--fg-gold-deep);
+}
+
+gc-level-select .gc-level-select-node.is-selected .gc-level-select-glyph {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.25),
+        0 0 12px rgba(232, 200, 120, 0.5);
+}
+
+gc-level-select .gc-level-select-node:focus-visible .gc-level-select-glyph {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-level-select .gc-level-select-node:focus:not(:focus-visible) {
+    outline: none;
+}
+
+gc-level-select .gc-level-select-label {
+    font-family: var(--fg-display);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-level-select .gc-level-select-stars {
+    display: flex;
+    gap: 1px;
+}
+
+gc-level-select .gc-level-select-star {
+    font-family: var(--fg-display);
+    font-size: 10px;
+    color: var(--fg-gold-deep);
+    line-height: 1;
+}
+
+gc-level-select .gc-level-select-star.is-filled {
+    color: var(--fg-gold-bright);
+    text-shadow: 0 0 6px rgba(232, 200, 120, 0.6);
+}

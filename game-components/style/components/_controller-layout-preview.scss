@@ -1,0 +1,61 @@
+gc-controller-layout-preview {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.18);
+    color: var(--fg-parch);
+}
+
+gc-controller-layout-preview .gc-controller-layout-preview-body {
+    width: 240px;
+    height: 140px;
+}
+
+gc-controller-layout-preview .gc-controller-layout-preview-buttons {
+    position: absolute;
+    top: 38px;
+    right: 36px;
+    width: 56px;
+    height: 56px;
+}
+
+gc-controller-layout-preview .gc-controller-layout-preview-btn {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+    border: 1px solid var(--gc-controller-layout-preview-btn-color, var(--fg-gold-deep));
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        0 0 6px var(--gc-controller-layout-preview-btn-color, rgba(232, 200, 120, 0.35));
+    color: var(--gc-controller-layout-preview-btn-color, var(--fg-gold-bright));
+    border-radius: 50%;
+    font-family: var(--fg-display);
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-controller-layout-preview .gc-controller-layout-preview-btn-top { top: 0; left: 50%; transform: translateX(-50%); }
+gc-controller-layout-preview .gc-controller-layout-preview-btn-right { right: 0; top: 50%; transform: translateY(-50%); }
+gc-controller-layout-preview .gc-controller-layout-preview-btn-bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
+gc-controller-layout-preview .gc-controller-layout-preview-btn-left { left: 0; top: 50%; transform: translateY(-50%); }
+
+gc-controller-layout-preview .gc-controller-layout-preview-label {
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}

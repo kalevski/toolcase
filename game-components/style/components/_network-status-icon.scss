@@ -1,0 +1,72 @@
+gc-network-status-icon {
+    --gc-network-status-icon-size: 16px;
+    --gc-network-status-icon-color: var(--fg-stamina-bright);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+}
+
+gc-network-status-icon[data-tier="bad"] {
+    --gc-network-status-icon-color: var(--fg-blood-bright);
+}
+
+gc-network-status-icon[data-tier="warning"] {
+    --gc-network-status-icon-color: var(--fg-legendary);
+}
+
+gc-network-status-icon[data-tier="ok"] {
+    --gc-network-status-icon-color: var(--fg-gold-bright);
+}
+
+gc-network-status-icon[data-tier="good"] {
+    --gc-network-status-icon-color: var(--fg-stamina-bright);
+}
+
+gc-network-status-icon[data-tier="offline"] {
+    --gc-network-status-icon-color: var(--fg-gold-shadow);
+}
+
+gc-network-status-icon .gc-network-status-icon-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: calc(var(--gc-network-status-icon-size) * 0.12);
+    height: var(--gc-network-status-icon-size);
+}
+
+gc-network-status-icon .gc-network-status-icon-bar {
+    display: inline-block;
+    width: calc(var(--gc-network-status-icon-size) * 0.18);
+    background: var(--fg-gold-shadow);
+    opacity: 0.55;
+    border: 1px solid #000;
+    box-sizing: border-box;
+}
+
+gc-network-status-icon .gc-network-status-icon-bar[data-step="1"] {
+    height: 30%;
+}
+gc-network-status-icon .gc-network-status-icon-bar[data-step="2"] {
+    height: 55%;
+}
+gc-network-status-icon .gc-network-status-icon-bar[data-step="3"] {
+    height: 78%;
+}
+gc-network-status-icon .gc-network-status-icon-bar[data-step="4"] {
+    height: 100%;
+}
+
+gc-network-status-icon .gc-network-status-icon-bar.is-active {
+    background: var(--gc-network-status-icon-color);
+    opacity: 1;
+    box-shadow: 0 0 4px var(--gc-network-status-icon-color);
+}
+
+gc-network-status-icon .gc-network-status-icon-label {
+    font-family: var(--fg-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gc-network-status-icon-color);
+    text-shadow: 0 1px 2px #000;
+}

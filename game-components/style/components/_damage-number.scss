@@ -1,0 +1,56 @@
+@keyframes gc-damage-number-float-up {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-12px) scale(1.1);
+    }
+    100% {
+        transform: translateY(-60px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+gc-damage-number {
+    --gc-damage-number-duration: 700ms;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    line-height: 1;
+}
+
+gc-damage-number .gc-damage-number-text {
+    font-family: var(--fg-mono);
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: var(--fg-parch);
+    text-shadow: 0 1px 2px #000, 0 0 4px #000;
+    animation: gc-damage-number-float-up var(--gc-damage-number-duration) ease-out forwards;
+    will-change: transform, opacity;
+}
+
+gc-damage-number .gc-damage-number-text[data-variant="crit"] {
+    color: var(--fg-blood-bright);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-shadow: 0 1px 2px #000, 0 0 8px rgba(212, 74, 58, 0.7);
+}
+
+gc-damage-number .gc-damage-number-text[data-variant="heal"] {
+    color: var(--fg-stamina-bright);
+    text-shadow: 0 1px 2px #000, 0 0 6px rgba(168, 214, 90, 0.6);
+}
+
+gc-damage-number .gc-damage-number-text[data-variant="miss"] {
+    font-family: var(--fg-display);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 13px;
+    color: var(--fg-parch-dim);
+    text-shadow: 0 1px 2px #000;
+}

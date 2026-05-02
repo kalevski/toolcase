@@ -1,0 +1,156 @@
+gc-player-card {
+    display: inline-block;
+    box-sizing: border-box;
+    width: min(360px, 100%);
+    padding: 16px 18px;
+    background: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    color: var(--fg-parch);
+}
+
+gc-player-card .gc-player-card-root {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+gc-player-card .gc-player-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+gc-player-card .gc-player-card-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+gc-player-card .gc-player-card-name {
+    font-family: var(--fg-display);
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-gold-bright);
+}
+
+gc-player-card .gc-player-card-title {
+    font-family: var(--fg-body);
+    font-style: italic;
+    font-size: 12px;
+    color: var(--fg-parch-3);
+}
+
+gc-player-card .gc-player-card-presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--fg-gold-deep);
+    font-family: var(--fg-display);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+gc-player-card .gc-player-card-pip {
+    width: 6px;
+    height: 6px;
+    background: var(--fg-parch-dim);
+    box-shadow: 0 0 6px var(--fg-parch-dim);
+}
+
+gc-player-card .gc-player-card-presence[data-status="online"] .gc-player-card-pip { background: var(--fg-stamina-bright); box-shadow: 0 0 6px var(--fg-stamina-bright); }
+gc-player-card .gc-player-card-presence[data-status="online"] .gc-player-card-status-label { color: var(--fg-stamina-bright); }
+gc-player-card .gc-player-card-presence[data-status="in-game"] .gc-player-card-pip { background: var(--fg-gold-bright); box-shadow: 0 0 6px var(--fg-gold-bright); }
+gc-player-card .gc-player-card-presence[data-status="in-game"] .gc-player-card-status-label { color: var(--fg-gold-bright); }
+gc-player-card .gc-player-card-presence[data-status="away"] .gc-player-card-pip { background: var(--fg-fire); box-shadow: 0 0 6px var(--fg-fire); }
+gc-player-card .gc-player-card-presence[data-status="away"] .gc-player-card-status-label { color: var(--fg-fire); }
+gc-player-card .gc-player-card-presence[data-status="busy"] .gc-player-card-pip { background: var(--fg-blood); box-shadow: 0 0 6px var(--fg-blood); }
+gc-player-card .gc-player-card-presence[data-status="busy"] .gc-player-card-status-label { color: var(--fg-blood-bright); }
+gc-player-card .gc-player-card-presence[data-status="offline"] .gc-player-card-pip { background: var(--fg-parch-dim); box-shadow: none; }
+gc-player-card .gc-player-card-presence[data-status="offline"] .gc-player-card-status-label { color: var(--fg-parch-dim); }
+
+gc-player-card .gc-player-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+gc-player-card .gc-player-card-rank {
+    color: var(--fg-gold);
+}
+
+gc-player-card .gc-player-card-level {
+    font-family: var(--fg-mono);
+    font-size: 12px;
+    color: var(--fg-gold-bright);
+}
+
+gc-player-card .gc-player-card-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+gc-player-card .gc-player-card-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fg-gold-deep) 30%, var(--fg-gold) 50%, var(--fg-gold-deep) 70%, transparent);
+}
+
+gc-player-card .gc-player-card-diamond {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transform: rotate(45deg);
+    box-shadow: 0 0 4px rgba(232, 200, 120, 0.4);
+}
+
+gc-player-card .gc-player-card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+}
+
+gc-player-card .gc-player-card-stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(201, 169, 97, 0.15);
+}
+
+gc-player-card .gc-player-card-stat-label {
+    font-family: var(--fg-display);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+}
+
+gc-player-card .gc-player-card-stat-value {
+    font-family: var(--fg-mono);
+    font-size: 12px;
+    color: var(--fg-parch);
+}
+
+gc-player-card .gc-player-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}

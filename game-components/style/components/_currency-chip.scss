@@ -1,0 +1,20 @@
+gc-currency-chip {
+    --gc-currency-chip-color: var(--fg-gold-bright);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--fg-mono);
+    font-size: 13px;
+    color: var(--gc-currency-chip-color);
+    line-height: 1;
+}
+
+gc-currency-chip .gc-currency-chip-glyph {
+    font-size: 1em;
+    line-height: 1;
+}
+
+gc-currency-chip .gc-currency-chip-amount {
+    font-size: 1em;
+    letter-spacing: 0.04em;
+}

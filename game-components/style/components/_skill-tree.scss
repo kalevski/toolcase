@@ -1,0 +1,133 @@
+gc-skill-tree {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 8px;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+}
+
+gc-skill-tree .gc-skill-tree-points {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--fg-gold-deep);
+    align-self: flex-start;
+}
+
+gc-skill-tree .gc-skill-tree-points-value {
+    font-family: var(--fg-mono);
+    font-size: 14px;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-skill-tree .gc-skill-tree-canvas {
+    position: relative;
+    box-sizing: border-box;
+    background:
+        radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+        linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12);
+}
+
+gc-skill-tree .gc-skill-tree-edges {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+gc-skill-tree .gc-skill-tree-edge {
+    stroke: var(--fg-gold-shadow);
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+}
+
+gc-skill-tree .gc-skill-tree-edge.is-unlocked {
+    stroke: var(--fg-gold-bright);
+    stroke-dasharray: none;
+}
+
+gc-skill-tree .gc-skill-tree-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 1;
+}
+
+gc-skill-tree .gc-skill-tree-glyph {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--fg-display);
+    font-size: 16px;
+    color: var(--fg-parch-3);
+    background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 2px #000;
+    transform: rotate(45deg);
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+gc-skill-tree .gc-skill-tree-glyph::before {
+    transform: rotate(-45deg);
+    display: inline-block;
+}
+
+gc-skill-tree .gc-skill-tree-node.is-unlocked .gc-skill-tree-glyph {
+    color: var(--fg-gold-bright);
+    border-color: var(--fg-gold);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.25),
+        0 0 12px rgba(232, 200, 120, 0.4);
+}
+
+gc-skill-tree .gc-skill-tree-node.is-locked {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+gc-skill-tree .gc-skill-tree-node.is-selected .gc-skill-tree-glyph {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-skill-tree .gc-skill-tree-node:focus-visible .gc-skill-tree-glyph {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-skill-tree .gc-skill-tree-label {
+    font-family: var(--fg-display);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+    text-shadow: 0 1px 2px #000;
+    margin-top: 6px;
+}
+
+gc-skill-tree .gc-skill-tree-rank {
+    font-family: var(--fg-mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}

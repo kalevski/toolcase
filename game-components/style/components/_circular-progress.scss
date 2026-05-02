@@ -1,0 +1,47 @@
+gc-circular-progress {
+    --gc-circular-progress-size: 64px;
+    --gc-circular-progress-color: var(--fg-gold-bright);
+    --gc-circular-progress-bg: var(--fg-gold-shadow);
+    display: inline-flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    width: var(--gc-circular-progress-size);
+    height: var(--gc-circular-progress-size);
+    line-height: 0;
+}
+
+gc-circular-progress .gc-circular-progress-svg {
+    transform: rotate(-90deg);
+    overflow: visible;
+}
+
+gc-circular-progress .gc-circular-progress-svg.is-reverse {
+    transform: rotate(-90deg) scaleX(-1);
+}
+
+gc-circular-progress .gc-circular-progress-track {
+    stroke: var(--gc-circular-progress-bg);
+    opacity: 0.6;
+}
+
+gc-circular-progress .gc-circular-progress-fill {
+    stroke: var(--gc-circular-progress-color);
+    stroke-linecap: square;
+    filter: drop-shadow(0 0 4px rgba(232, 200, 120, 0.4));
+    transition: stroke-dashoffset 0.4s ease-out;
+}
+
+gc-circular-progress .gc-circular-progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--fg-mono);
+    font-size: calc(var(--gc-circular-progress-size) * 0.22);
+    letter-spacing: 0.06em;
+    color: var(--fg-parch);
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+}

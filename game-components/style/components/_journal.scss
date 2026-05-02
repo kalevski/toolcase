@@ -1,0 +1,205 @@
+gc-journal {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 2fr;
+    gap: 0;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+    background:
+        linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+        radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px var(--fg-gold-deep),
+        inset 0 0 0 3px var(--fg-gold-shadow),
+        inset 0 2px 0 rgba(255, 220, 150, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+gc-journal .gc-journal-list {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(201, 169, 97, 0.25);
+    overflow-y: auto;
+    max-height: 460px;
+}
+
+gc-journal .gc-journal-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+gc-journal .gc-journal-row:first-child {
+    border-top: 0;
+}
+
+gc-journal .gc-journal-row:hover {
+    background: rgba(201, 169, 97, 0.08);
+}
+
+gc-journal .gc-journal-row.is-selected {
+    background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+    box-shadow: inset 3px 0 0 var(--fg-gold);
+    color: var(--fg-gold-bright);
+}
+
+gc-journal .gc-journal-row.is-inactive {
+    opacity: 0.55;
+}
+
+gc-journal .gc-journal-row.is-completed .gc-journal-row-title {
+    text-decoration: line-through;
+    color: var(--fg-parch-3);
+}
+
+gc-journal .gc-journal-row.is-failed .gc-journal-row-title {
+    color: var(--fg-blood-bright);
+}
+
+gc-journal .gc-journal-row-state-pip {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    box-shadow: 0 0 0 1px #000;
+    background: var(--fg-gold-bright);
+}
+
+gc-journal .gc-journal-row.is-completed .gc-journal-row-state-pip {
+    background: var(--fg-stamina-bright);
+    box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-stamina-bright);
+}
+
+gc-journal .gc-journal-row.is-failed .gc-journal-row-state-pip {
+    background: var(--fg-blood-bright);
+    box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-blood-bright);
+}
+
+gc-journal .gc-journal-row.is-inactive .gc-journal-row-state-pip {
+    background: var(--fg-parch-dim);
+}
+
+gc-journal .gc-journal-row-title {
+    font-family: var(--fg-display);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+gc-journal .gc-journal-row:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: -2px;
+}
+
+gc-journal .gc-journal-row:focus:not(:focus-visible) {
+    outline: none;
+}
+
+gc-journal .gc-journal-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 20px;
+    overflow-y: auto;
+    max-height: 460px;
+}
+
+gc-journal .gc-journal-detail-empty {
+    font-family: var(--fg-body);
+    font-style: italic;
+    color: var(--fg-parch-3);
+    font-size: 14px;
+}
+
+gc-journal .gc-journal-detail-description {
+    font-family: var(--fg-body);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg-parch);
+    margin: 0;
+}
+
+gc-journal .gc-journal-detail-body {
+    font-family: var(--fg-body);
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--fg-parch-3);
+    margin: 0;
+}
+
+gc-journal .gc-journal-detail-objectives {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+gc-journal .gc-journal-detail-objective {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--fg-body);
+    font-size: 13px;
+    color: var(--fg-parch);
+}
+
+gc-journal .gc-journal-detail-objective.is-completed {
+    color: var(--fg-stamina-bright);
+}
+
+gc-journal .gc-journal-detail-objective.is-completed .gc-journal-detail-objective-label {
+    text-decoration: line-through;
+}
+
+gc-journal .gc-journal-detail-objective.is-optional .gc-journal-detail-objective-label::after {
+    content: ' (Optional)';
+    color: var(--fg-parch-dim);
+    font-style: italic;
+}
+
+gc-journal .gc-journal-detail-objective-check {
+    font-family: var(--fg-mono);
+    font-size: 14px;
+    color: var(--fg-gold-bright);
+}
+
+gc-journal .gc-journal-detail-rewards {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+gc-journal .gc-journal-detail-reward {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+gc-journal .gc-journal-detail-reward-icon {
+    font-size: 14px;
+    color: var(--fg-gold-bright);
+}
+
+gc-journal .gc-journal-detail-reward-label {
+    flex: 1 1 auto;
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch-3);
+}
+
+gc-journal .gc-journal-detail-reward-value {
+    font-family: var(--fg-mono);
+    font-size: 12px;
+    color: var(--fg-gold-bright);
+}
+
+gc-journal .gc-journal-detail-state.is-completed { color: var(--fg-stamina-bright); }
+gc-journal .gc-journal-detail-state.is-failed { color: var(--fg-blood-bright); }
+gc-journal .gc-journal-detail-state.is-inactive { color: var(--fg-parch-dim); }

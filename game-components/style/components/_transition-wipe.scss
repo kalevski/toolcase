@@ -1,0 +1,70 @@
+gc-transition-wipe {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1085;
+    display: block;
+}
+
+gc-transition-wipe[show] {
+    pointer-events: auto;
+}
+
+gc-transition-wipe .gc-transition-wipe-fill {
+    --gc-transition-wipe-duration: 400ms;
+    position: absolute;
+    inset: 0;
+    background: #0a0604;
+    transition:
+        opacity var(--gc-transition-wipe-duration) ease-in-out,
+        transform var(--gc-transition-wipe-duration) ease-in-out,
+        clip-path var(--gc-transition-wipe-duration) ease-in-out;
+}
+
+gc-transition-wipe .gc-transition-wipe-fill[data-direction="fade"] {
+    opacity: 0;
+}
+
+gc-transition-wipe[show] .gc-transition-wipe-fill[data-direction="fade"] {
+    opacity: 1;
+}
+
+gc-transition-wipe .gc-transition-wipe-fill[data-direction="left"] {
+    transform: translateX(-100%);
+}
+
+gc-transition-wipe[show] .gc-transition-wipe-fill[data-direction="left"] {
+    transform: translateX(0);
+}
+
+gc-transition-wipe .gc-transition-wipe-fill[data-direction="right"] {
+    transform: translateX(100%);
+}
+
+gc-transition-wipe[show] .gc-transition-wipe-fill[data-direction="right"] {
+    transform: translateX(0);
+}
+
+gc-transition-wipe .gc-transition-wipe-fill[data-direction="up"] {
+    transform: translateY(-100%);
+}
+
+gc-transition-wipe[show] .gc-transition-wipe-fill[data-direction="up"] {
+    transform: translateY(0);
+}
+
+gc-transition-wipe .gc-transition-wipe-fill[data-direction="down"] {
+    transform: translateY(100%);
+}
+
+gc-transition-wipe[show] .gc-transition-wipe-fill[data-direction="down"] {
+    transform: translateY(0);
+}
+
+gc-transition-wipe .gc-transition-wipe-fill[data-direction="iris"] {
+    clip-path: circle(150% at 50% 50%);
+}
+
+gc-transition-wipe[show] .gc-transition-wipe-fill[data-direction="iris"] {
+    clip-path: circle(0% at 50% 50%);
+}

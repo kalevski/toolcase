@@ -1,0 +1,86 @@
+gc-compass-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    box-sizing: border-box;
+    width: var(--gc-compass-bar-width, 320px);
+    color: var(--fg-parch);
+    font-family: var(--fg-display);
+}
+
+gc-compass-bar .gc-compass-bar-track {
+    position: relative;
+    width: 100%;
+    height: var(--gc-compass-bar-height, 28px);
+    box-sizing: border-box;
+    background:
+        linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.4)),
+        linear-gradient(180deg, #1a1308, #0a0604);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+gc-compass-bar .gc-compass-bar-cardinal {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--fg-gold-bright);
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+}
+
+gc-compass-bar .gc-compass-bar-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--gc-compass-bar-marker-color, var(--fg-parch));
+    pointer-events: none;
+}
+
+gc-compass-bar .gc-compass-bar-marker-icon {
+    font-size: 12px;
+    line-height: 1;
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-compass-bar .gc-compass-bar-marker-label {
+    font-family: var(--fg-mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch-3);
+    text-shadow: 0 1px 2px #000;
+    margin-top: 2px;
+}
+
+gc-compass-bar .gc-compass-bar-pointer {
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    transform: translateX(-50%);
+    color: var(--fg-gold-bright);
+    font-size: 12px;
+    line-height: 1;
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+}
+
+gc-compass-bar .gc-compass-bar-heading {
+    font-family: var(--fg-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}

@@ -1,0 +1,211 @@
+gc-crafting-panel {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 1.4fr;
+    gap: 0;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+    background:
+        linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+        radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px var(--fg-gold-deep),
+        inset 0 0 0 3px var(--fg-gold-shadow),
+        inset 0 2px 0 rgba(255, 220, 150, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+gc-crafting-panel .gc-crafting-panel-list {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(201, 169, 97, 0.25);
+    overflow-y: auto;
+    max-height: 460px;
+}
+
+gc-crafting-panel .gc-crafting-panel-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+gc-crafting-panel .gc-crafting-panel-row:first-child {
+    border-top: 0;
+}
+
+gc-crafting-panel .gc-crafting-panel-row:hover {
+    background: rgba(201, 169, 97, 0.08);
+}
+
+gc-crafting-panel .gc-crafting-panel-row.is-selected {
+    background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+    box-shadow: inset 3px 0 0 var(--fg-gold);
+    color: var(--fg-gold-bright);
+}
+
+gc-crafting-panel .gc-crafting-panel-row.is-unaffordable {
+    color: var(--fg-parch-3);
+    opacity: 0.75;
+}
+
+gc-crafting-panel .gc-crafting-panel-row-icon {
+    font-family: var(--fg-display);
+    font-size: 16px;
+    color: var(--fg-gold-bright);
+    width: 24px;
+    text-align: center;
+}
+
+gc-crafting-panel .gc-crafting-panel-row-name {
+    font-family: var(--fg-display);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+gc-crafting-panel .gc-crafting-panel-row:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: -2px;
+}
+
+gc-crafting-panel .gc-crafting-panel-row:focus:not(:focus-visible) {
+    outline: none;
+}
+
+gc-crafting-panel .gc-crafting-panel-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 20px;
+}
+
+gc-crafting-panel .gc-crafting-panel-detail-empty {
+    font-family: var(--fg-body);
+    font-style: italic;
+    color: var(--fg-parch-3);
+    font-size: 14px;
+}
+
+gc-crafting-panel .gc-crafting-panel-output {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--fg-gold);
+    box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.2);
+}
+
+gc-crafting-panel .gc-crafting-panel-output-icon {
+    font-family: var(--fg-display);
+    font-size: 22px;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-crafting-panel .gc-crafting-panel-output-name {
+    flex: 1 1 auto;
+    font-family: var(--fg-display);
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-gold-bright);
+}
+
+gc-crafting-panel .gc-crafting-panel-output-qty {
+    font-family: var(--fg-mono);
+    font-size: 13px;
+    color: var(--fg-parch);
+}
+
+gc-crafting-panel .gc-crafting-panel-ingredients {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+gc-crafting-panel .gc-crafting-panel-ingredient {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border: 1px solid rgba(201, 169, 97, 0.2);
+    background: rgba(0, 0, 0, 0.25);
+}
+
+gc-crafting-panel .gc-crafting-panel-ingredient.is-insufficient {
+    border-color: var(--fg-blood);
+    background: rgba(168, 48, 42, 0.12);
+}
+
+gc-crafting-panel .gc-crafting-panel-ingredient-icon {
+    font-family: var(--fg-display);
+    font-size: 14px;
+    color: var(--fg-gold-bright);
+    width: 20px;
+    text-align: center;
+}
+
+gc-crafting-panel .gc-crafting-panel-ingredient-name {
+    flex: 1 1 auto;
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+}
+
+gc-crafting-panel .gc-crafting-panel-ingredient-qty {
+    font-family: var(--fg-mono);
+    font-size: 11px;
+    color: var(--fg-parch);
+}
+
+gc-crafting-panel .gc-crafting-panel-ingredient.is-insufficient .gc-crafting-panel-ingredient-qty {
+    color: var(--fg-blood-bright);
+}
+
+gc-crafting-panel .gc-crafting-panel-craft {
+    align-self: flex-end;
+    font-family: var(--fg-display);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 10px 22px;
+    background: linear-gradient(180deg, #5a3a18, #2a1a0a);
+    color: var(--fg-gold-bright);
+    border: 1px solid var(--fg-gold);
+    box-shadow:
+        inset 0 1px 0 rgba(232, 200, 120, 0.25),
+        inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+        0 2px 0 rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+gc-crafting-panel .gc-crafting-panel-craft:hover:not(:disabled) {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+gc-crafting-panel .gc-crafting-panel-craft:active:not(:disabled) {
+    transform: translateY(1px);
+    filter: brightness(0.9);
+}
+
+gc-crafting-panel .gc-crafting-panel-craft:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-crafting-panel .gc-crafting-panel-craft:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

@@ -17,6 +17,14 @@ Do not paraphrase from memory. Open the file. Copy the gradient strings, box-sha
 
 `style_guidelines.md` is authoritative for the look.
 
+**You MUST also read `.claude/skills/gc-component/components.md`** before writing the component. It is the inventory of every existing `gc-*` primitive (tag, attrs, props, slots, events, "use when" / "skip when"). Treat those primitives as building blocks: when scaffolding a new component, compose existing ones inside the shadow DOM or recommend them in the demo rather than re-implementing layout, framing, typography, or anchoring from scratch.
+
+Rules:
+- Before authoring markup, scan `components.md` for any primitive that already covers part of the new component (layout → `gc-stack`/`gc-grid`/`gc-anchor`; framing → `gc-panel`/`gc-gilded-frame`/`gc-artboard-backdrop`; text → `gc-title`/`gc-subtitle`/`gc-eyebrow`/`gc-lore-text`/`gc-scroll-text`/`gc-key`/`gc-version-label`).
+- Reuse them via the new component's shadow DOM (e.g. `<gc-panel><slot></slot></gc-panel>`) or via the host page composition shown in the demo.
+- Only hand-roll markup (raw `div` + SCSS) when no existing primitive fits, or when reusing one would force a worse visual contract than the spec requires.
+- If `components.md` is missing a primitive that clearly exists in `game-components/src/index.ts`, treat the doc as stale and update it as part of the task.
+
 ## When to use
 
 Trigger on requests like:
@@ -54,6 +62,7 @@ For a new component named `<Name>` (PascalCase), tag `gc-<kebab>`:
 2. **`game-components/style/components/_<kebab>.scss`** — all component styles (shadow DOM + light DOM). Contains the full visual contract from `style_guidelines.md`. This is the single source of truth for the component's appearance.
 3. **`game-components/style/components/index.scss`** — append `@use './<kebab>';`.
 4. **`game-components/src/index.ts`** — append `export * from './<Name>'`.
+5. **`.claude/skills/gc-component/components.md`** — append a new section for the component following the existing entry pattern (tag/class heading, attribute/prop table with types and defaults, slot/event behavior, "use when" / "skip when"). Also add a row to the **Decision quick map** table and update the slot-only list in **Composition notes** if applicable.
 
 **Style injection pattern**: The compiled `.scss` files flow into `lib/index.css`. Import that CSS in your host app or inject it into the shadow root via adopted stylesheets / CSS string import at component load time. Do not write CSS inside the `.ts` file.
 
@@ -170,9 +179,10 @@ Props, events, states, and ARIA must be defined per the component's spec. Do not
 4. Create `game-components/style/components/_<kebab>.scss`.
 5. Append `@use './<kebab>';` to `game-components/style/components/index.scss`.
 6. Append `export * from './<Name>'` to `game-components/src/index.ts`.
-7. Cross-check the finished component against `style_guidelines.md` §19 (authoring rules) and §20 (Yes/No quick reference) before reporting done.
-8. Verify with `cd game-components && npm run build` — tsup must succeed (sass step may fail in the local env; that is pre-existing and not blocking).
-9. **Add a demo to the examples app** — two files, one registration:
+7. **Update `.claude/skills/gc-component/components.md`**: append a new section for the component matching the existing entry shape — heading `### \`gc-<kebab>\` — \`<Name>\``, one-line description, attribute/prop table (cols: Attribute / Prop, Type, Default, Notes), slot/event lines, **Use when** and **Skip when** bullets. Place it under the appropriate `##` group (Layout primitives / Containers / Typography / etc., adding a new group if none fits). Also add a row to the **Decision quick map** table and, if the component has no attrs/props/events, add it to the slot-only list in **Composition notes**.
+8. Cross-check the finished component against `style_guidelines.md` §19 (authoring rules) and §20 (Yes/No quick reference) before reporting done.
+9. Verify with `cd game-components && npm run build` — tsup must succeed (sass step may fail in the local env; that is pre-existing and not blocking).
+10. **Add a demo to the examples app** — two files, one registration:
 
    **`examples/src/game-components/<Name>Demo.tsx`** — React functional component that exercises all key props/states. Pattern:
    ```tsx

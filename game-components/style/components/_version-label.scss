@@ -1,0 +1,27 @@
+gc-version-label {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--fg-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch-3);
+    line-height: 1;
+}
+
+gc-version-label .gc-version-label-version {
+    color: var(--fg-parch);
+}
+
+gc-version-label .gc-version-label-build {
+    color: var(--fg-parch-3);
+}
+
+gc-version-label .gc-version-label-branch {
+    color: var(--fg-gold);
+}
+
+gc-version-label .gc-version-label-sep {
+    color: var(--fg-gold-deep);
+    margin: 0 6px;
+}

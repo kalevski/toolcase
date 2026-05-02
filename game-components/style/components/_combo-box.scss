@@ -1,0 +1,159 @@
+gc-combo-box {
+    display: inline-block;
+    position: relative;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+    font-family: var(--fg-display);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    min-width: 180px;
+}
+
+gc-combo-box .gc-combo-box-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #3a2a1a, #1f1610);
+    color: var(--fg-gold-bright);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 1px 0 rgba(232, 200, 120, 0.25),
+        inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+        0 2px 0 rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    user-select: none;
+    text-align: left;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: filter 0.12s ease;
+}
+
+gc-combo-box .gc-combo-box-button:hover:not(.is-disabled) {
+    filter: brightness(1.15);
+}
+
+gc-combo-box .gc-combo-box-button.is-placeholder {
+    color: var(--fg-parch-3);
+}
+
+gc-combo-box .gc-combo-box-button.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+gc-combo-box .gc-combo-box-button-label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+gc-combo-box .gc-combo-box-button-caret {
+    font-family: var(--fg-mono);
+    color: var(--fg-gold);
+    font-size: 11px;
+    line-height: 1;
+}
+
+gc-combo-box .gc-combo-box-button:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-combo-box .gc-combo-box-button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+gc-combo-box .gc-combo-box-popover {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1080;
+    background: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12),
+        0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+gc-combo-box .gc-combo-box-search {
+    padding: 8px;
+    border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+gc-combo-box .gc-combo-box-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--fg-parch);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+    font-family: var(--fg-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    outline: none;
+}
+
+gc-combo-box .gc-combo-box-input:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: -1px;
+}
+
+gc-combo-box .gc-combo-box-list {
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+gc-combo-box .gc-combo-box-option {
+    box-sizing: border-box;
+    padding: 8px 12px;
+    color: var(--fg-parch);
+    background: transparent;
+    border-top: 1px solid rgba(201, 169, 97, 0.12);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+gc-combo-box .gc-combo-box-option:first-child {
+    border-top: 0;
+}
+
+gc-combo-box .gc-combo-box-option:hover {
+    color: var(--fg-gold-bright);
+    background: rgba(201, 169, 97, 0.1);
+}
+
+gc-combo-box .gc-combo-box-option.is-selected {
+    color: var(--fg-gold-bright);
+    background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+    box-shadow: inset 3px 0 0 var(--fg-gold);
+}
+
+gc-combo-box .gc-combo-box-option:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: -2px;
+}
+
+gc-combo-box .gc-combo-box-option:focus:not(:focus-visible) {
+    outline: none;
+}
+
+gc-combo-box .gc-combo-box-empty {
+    padding: 10px 12px;
+    font-family: var(--fg-body);
+    font-style: italic;
+    color: var(--fg-parch-3);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+}

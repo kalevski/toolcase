@@ -1,0 +1,64 @@
+gc-title-screen {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 60px 32px;
+    text-align: center;
+    color: var(--fg-parch);
+    background:
+        radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+        linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+}
+
+gc-title-screen .gc-title-screen-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+}
+
+gc-title-screen .gc-title-screen-eyebrow {
+    display: block;
+    color: var(--fg-parch-dim);
+    letter-spacing: 0.5em;
+    font-size: 12px;
+}
+
+gc-title-screen .gc-title-screen-title {
+    display: block;
+    --gc-title-size: 44px;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 2px 0 #000, 0 0 24px rgba(232, 200, 120, 0.35);
+}
+
+gc-title-screen .gc-title-screen-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: min(420px, 80%);
+}
+
+gc-title-screen .gc-title-screen-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fg-gold-deep) 30%, var(--fg-gold) 50%, var(--fg-gold-deep) 70%, transparent);
+}
+
+gc-title-screen .gc-title-screen-diamond {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transform: rotate(45deg);
+    box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+}
+
+gc-title-screen .gc-title-screen-subtitle {
+    font-family: var(--fg-body);
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg-parch-3);
+    max-width: 520px;
+}

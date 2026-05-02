@@ -1,0 +1,29 @@
+gc-ping-display {
+    --gc-ping-color: var(--fg-parch-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--fg-mono);
+    font-size: 11px;
+    color: var(--gc-ping-color);
+    line-height: 1;
+    letter-spacing: 0.08em;
+}
+
+gc-ping-display .gc-ping-display-pip {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--gc-ping-color);
+    box-shadow: 0 0 6px var(--gc-ping-color);
+}
+
+gc-ping-display .gc-ping-display-value {
+    color: inherit;
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-ping-display[data-tier="success"] { --gc-ping-color: var(--fg-stamina-bright); }
+gc-ping-display[data-tier="warning"] { --gc-ping-color: var(--fg-legendary); }
+gc-ping-display[data-tier="danger"]  { --gc-ping-color: var(--fg-blood-bright); }
+gc-ping-display[data-tier="unknown"] { --gc-ping-color: var(--fg-parch-dim); }

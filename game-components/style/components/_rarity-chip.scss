@@ -1,0 +1,22 @@
+gc-rarity-chip {
+    --gc-rarity-color: var(--fg-common);
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 2px 6px;
+    font-family: var(--fg-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gc-rarity-color);
+    border: 1px solid var(--gc-rarity-color);
+    background: rgba(0, 0, 0, 0.4);
+    line-height: 1.4;
+}
+
+gc-rarity-chip[rarity="common"]    { --gc-rarity-color: var(--fg-common); }
+gc-rarity-chip[rarity="uncommon"]  { --gc-rarity-color: var(--fg-uncommon); }
+gc-rarity-chip[rarity="rare"]      { --gc-rarity-color: var(--fg-rare); }
+gc-rarity-chip[rarity="epic"]      { --gc-rarity-color: var(--fg-epic); }
+gc-rarity-chip[rarity="legendary"] { --gc-rarity-color: var(--fg-legendary); }
+gc-rarity-chip[rarity="mythic"]    { --gc-rarity-color: var(--fg-mythic); }

@@ -1,0 +1,145 @@
+gc-matchmaking-screen {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 48px 32px;
+    color: var(--fg-parch);
+    background:
+        radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    max-width: 560px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-ring {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    background: radial-gradient(70% 70% at 50% 30%, #2a1f14, #0e0905);
+    border: 2px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 0 12px rgba(0, 0, 0, 0.6),
+        0 4px 10px rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-ring-inner {
+    font-family: var(--fg-display);
+    font-weight: 700;
+    font-size: 38px;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-ring.is-spin {
+    animation: gc-matchmaking-screen-spin 1.4s linear infinite;
+    border-color: var(--fg-gold);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 0 12px rgba(0, 0, 0, 0.6),
+        0 0 18px rgba(232, 200, 120, 0.3);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-ring.is-spin .gc-matchmaking-screen-ring-inner {
+    animation: gc-matchmaking-screen-counter-spin 1.4s linear infinite;
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-ring.is-found {
+    border-color: var(--fg-gold-bright);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 0 14px rgba(232, 200, 120, 0.4),
+        0 0 22px rgba(232, 200, 120, 0.5);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-ring.is-failed {
+    border-color: var(--fg-blood);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 0 14px rgba(168, 48, 42, 0.4),
+        0 0 22px rgba(168, 48, 42, 0.5);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-ring.is-failed .gc-matchmaking-screen-ring-inner {
+    color: var(--fg-blood-bright);
+}
+
+@keyframes gc-matchmaking-screen-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes gc-matchmaking-screen-counter-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-eyebrow {
+    display: block;
+    color: var(--fg-parch-dim);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-title {
+    display: block;
+    --gc-title-size: 26px;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 0 #000, 0 0 18px rgba(232, 200, 120, 0.35);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-root[data-state="failed"] .gc-matchmaking-screen-title {
+    color: var(--fg-blood-bright);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 24px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-meta-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 72px;
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-meta-label {
+    font-family: var(--fg-display);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-meta-value {
+    font-family: var(--fg-mono);
+    font-size: 14px;
+    color: var(--fg-gold-bright);
+}
+
+gc-matchmaking-screen .gc-matchmaking-screen-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+}

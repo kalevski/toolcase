@@ -1,0 +1,42 @@
+gc-page-indicator {
+    --gc-page-indicator-size: 8px;
+    --gc-page-indicator-gap: 8px;
+    --gc-page-indicator-color: var(--fg-gold-deep);
+    --gc-page-indicator-active-color: var(--fg-gold-bright);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gc-page-indicator-gap);
+    line-height: 0;
+}
+
+gc-page-indicator .gc-page-indicator-dot {
+    width: var(--gc-page-indicator-size);
+    height: var(--gc-page-indicator-size);
+    padding: 0;
+    background: var(--gc-page-indicator-color);
+    border: 1px solid #000;
+    box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.18);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+    transform: rotate(45deg);
+}
+
+gc-page-indicator .gc-page-indicator-dot:hover {
+    background: var(--gc-page-indicator-active-color);
+}
+
+gc-page-indicator .gc-page-indicator-dot.is-active {
+    background: var(--gc-page-indicator-active-color);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 6px rgba(232, 200, 120, 0.5);
+}
+
+gc-page-indicator .gc-page-indicator-dot:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-page-indicator .gc-page-indicator-dot:focus:not(:focus-visible) {
+    outline: none;
+}

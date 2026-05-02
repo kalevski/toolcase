@@ -1,0 +1,97 @@
+gc-brightness-calibration {
+    --gc-brightness-gamma: brightness(1);
+    display: block;
+    color: var(--fg-parch);
+}
+
+gc-brightness-calibration .gc-brightness-calibration-preview {
+    display: flex;
+    height: 80px;
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+    filter: var(--gc-brightness-gamma);
+}
+
+gc-brightness-calibration .gc-brightness-calibration-band {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 6px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+gc-brightness-calibration .gc-brightness-calibration-dark {
+    background: linear-gradient(180deg, #050302, #1a1208);
+}
+
+gc-brightness-calibration .gc-brightness-calibration-mid {
+    background: linear-gradient(180deg, #2a1f14, #4a3422);
+}
+
+gc-brightness-calibration .gc-brightness-calibration-bright {
+    background: linear-gradient(180deg, #c5a060, #f0d27a);
+    color: rgba(0, 0, 0, 0.65);
+}
+
+gc-brightness-calibration .gc-brightness-calibration-label {
+    font-family: var(--fg-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+gc-brightness-calibration .gc-brightness-calibration-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+gc-brightness-calibration .gc-brightness-calibration-row-label {
+    font-family: var(--fg-display);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+    min-width: 100px;
+}
+
+gc-brightness-calibration .gc-brightness-calibration-input {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 1;
+    height: 8px;
+    background: linear-gradient(180deg, #0e0905, #1a120a);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+}
+
+gc-brightness-calibration .gc-brightness-calibration-input::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transform: rotate(45deg);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: 0 0 0 1px #000;
+}
+
+gc-brightness-calibration .gc-brightness-calibration-input::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transform: rotate(45deg);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: 0 0 0 1px #000;
+}
+
+gc-brightness-calibration .gc-brightness-calibration-row-value {
+    font-family: var(--fg-mono);
+    font-size: 11px;
+    color: var(--fg-gold-bright);
+    min-width: 48px;
+    text-align: right;
+}

@@ -4,6 +4,29 @@ import { gameComponentExamples, categories, GameComponentCategory } from '../gam
 
 const categoryIcons: Record<GameComponentCategory, string> = {
 	'Basic Components': 'cube',
+	'Layout Primitives': 'grid-3x3',
+	'Surfaces': 'square',
+	'Typography': 'type',
+	'Visual Indicators & Badges': 'gem',
+	'Buttons & Navigation': 'mouse',
+	'Lists & Selection': 'list-ul',
+	'Dialogs & Modals': 'chat-square-text',
+	'Progress & Status': 'reception-4',
+	'Overlays & Effects': 'stars',
+	'Resource Bars': 'heart-pulse',
+	'Settings': 'sliders',
+	'Visualization': 'bar-chart',
+	'Character Management': 'person-circle',
+	'Game Screens': 'window-stack',
+	'Inventory & Items': 'box-seam',
+	'Ability & Skills': 'lightning',
+	'Input & Binding': 'keyboard',
+	'Map & Navigation': 'map',
+	'Social & Communication': 'chat-dots',
+	'Progression & Content': 'trophy',
+	'Gameplay Panels': 'hammer',
+	'Social Panels': 'people',
+	'UI Utilities & Specialized': 'tools',
 }
 
 const formatLabel = (key: string) => {

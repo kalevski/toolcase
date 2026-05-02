@@ -1,0 +1,46 @@
+gc-gamepad-button-prompt {
+    --gc-gamepad-button-size: 24px;
+    --gc-gamepad-button-glyph-size: 14px;
+    --gc-gamepad-button-color: var(--fg-gold-bright);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+}
+
+gc-gamepad-button-prompt .gc-gamepad-button-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--gc-gamepad-button-size);
+    height: var(--gc-gamepad-button-size);
+    border-radius: 50%;
+    background: linear-gradient(180deg, #3a2a1c, #1a120a);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 1px 0 rgba(232, 200, 120, 0.25),
+        0 1px 0 rgba(0, 0, 0, 0.6);
+    font-family: var(--fg-display);
+    font-weight: 700;
+    font-size: var(--gc-gamepad-button-glyph-size);
+    color: var(--gc-gamepad-button-color);
+    text-shadow: 0 1px 2px #000;
+}
+
+gc-gamepad-button-prompt .gc-gamepad-button-label {
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+}
+
+gc-gamepad-button-prompt[data-button="A"] { --gc-gamepad-button-color: var(--fg-stamina-bright); }
+gc-gamepad-button-prompt[data-button="B"] { --gc-gamepad-button-color: var(--fg-blood-bright); }
+gc-gamepad-button-prompt[data-button="X"] { --gc-gamepad-button-color: var(--fg-mana-bright); }
+gc-gamepad-button-prompt[data-button="Y"] { --gc-gamepad-button-color: var(--fg-legendary); }
+gc-gamepad-button-prompt[data-button="LB"],
+gc-gamepad-button-prompt[data-button="RB"],
+gc-gamepad-button-prompt[data-button="LT"],
+gc-gamepad-button-prompt[data-button="RT"] { --gc-gamepad-button-color: var(--fg-parch); }

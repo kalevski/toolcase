@@ -1,0 +1,103 @@
+gc-speedometer {
+    --gc-speedo-size: 160px;
+    display: inline-block;
+    position: relative;
+    box-sizing: border-box;
+    width: var(--gc-speedo-size);
+    height: calc(var(--gc-speedo-size) * 0.7);
+    color: var(--fg-parch);
+}
+
+gc-speedometer .gc-speedometer-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+gc-speedometer .gc-speedometer-track {
+    fill: none;
+    stroke: var(--fg-gold-shadow);
+    stroke-linecap: square;
+    opacity: 0.85;
+    filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6));
+}
+
+gc-speedometer .gc-speedometer-fill {
+    fill: none;
+    stroke: var(--fg-gold-bright);
+    stroke-linecap: square;
+    filter: drop-shadow(0 0 4px rgba(232, 200, 120, 0.45));
+    transition: stroke 0.2s ease, d 0.4s ease-out;
+}
+
+gc-speedometer[data-danger="true"] .gc-speedometer-fill {
+    stroke: var(--fg-blood-bright);
+    filter: drop-shadow(0 0 6px rgba(212, 74, 58, 0.55));
+}
+
+gc-speedometer .gc-speedometer-tick {
+    stroke: var(--fg-gold);
+    stroke-width: 0.6;
+    opacity: 0.7;
+}
+
+gc-speedometer[data-danger="true"] .gc-speedometer-tick:nth-last-child(-n+2) {
+    stroke: var(--fg-blood-bright);
+    opacity: 1;
+}
+
+gc-speedometer .gc-speedometer-readout {
+    position: absolute;
+    left: 50%;
+    bottom: 6%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+    pointer-events: none;
+}
+
+gc-speedometer .gc-speedometer-gear {
+    font-family: var(--fg-display);
+    font-weight: 600;
+    font-size: calc(var(--gc-speedo-size) * 0.09);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-gold-bright);
+    line-height: 1;
+}
+
+gc-speedometer .gc-speedometer-value {
+    font-family: var(--fg-mono);
+    font-weight: 700;
+    font-size: calc(var(--gc-speedo-size) * 0.22);
+    color: var(--fg-parch);
+    line-height: 1;
+    text-shadow: 0 1px 2px #000, 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+gc-speedometer[data-danger="true"] .gc-speedometer-value {
+    color: var(--fg-blood-bright);
+    text-shadow: 0 1px 2px #000, 0 0 8px rgba(212, 74, 58, 0.5);
+}
+
+gc-speedometer .gc-speedometer-unit {
+    font-family: var(--fg-display);
+    font-size: calc(var(--gc-speedo-size) * 0.07);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+    line-height: 1;
+}
+
+gc-speedometer .gc-speedometer-rpm {
+    font-family: var(--fg-mono);
+    font-size: calc(var(--gc-speedo-size) * 0.07);
+    letter-spacing: 0.16em;
+    color: var(--fg-gold);
+    line-height: 1;
+    margin-top: 2px;
+}

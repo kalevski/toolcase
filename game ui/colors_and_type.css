@@ -1,0 +1,291 @@
+/* ============================================================================
+ * toolcase Design System — colors, type, spacing, shadows, radii
+ * Extracted from @toolcase/react-components SCSS source.
+ *
+ * Import order:
+ *   <link rel="stylesheet" href="colors_and_type.css" />
+ *   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+ *   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+ *
+ * Fonts: toolcase ships no webfonts — bootstrap.scss declares Inter + JetBrains
+ * Mono in the font-family stack. Inter is pulled from Google Fonts. The mono
+ * family has been SUBSTITUTED with Ubuntu Mono (brand upload) in place of
+ * JetBrains Mono — document this with the team if a stricter match is needed.
+ * ========================================================================== */
+
+@font-face {
+  font-family: 'Ubuntu Mono';
+  src: url('fonts/UbuntuMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ── Color: Neutrals (bootstrap.scss palette — the one actually compiled) */
+  --tc-white: #ffffff;
+  --tc-gray-50: #f9fafb;
+  --tc-gray-100: #f3f4f6;
+  --tc-gray-200: #e5e7eb;
+  --tc-gray-300: #d1d5db;
+  --tc-gray-400: #9ca3af;
+  --tc-gray-500: #6b7280;
+  --tc-gray-600: #4b5563;
+  --tc-gray-700: #374151;
+  --tc-gray-800: #1f2937;
+  --tc-gray-900: #111827;
+  --tc-black: #000000;
+
+  /* ── Color: Semantic (Bootstrap theme colors) */
+  --tc-primary: #000000;              /* black — NOT the gradient; btn-primary uses this */
+  --tc-secondary: #3f3d56;
+  --tc-success: #10b981;
+  --tc-info: #06b6d4;
+  --tc-warning: #f59e0b;
+  --tc-danger: #ef4444;
+  --tc-light: #f9fafb;
+  --tc-dark: #1f2937;
+
+  /* ── Color: "primary gradient" — used decoratively (hero titles, accents) */
+  --tc-gradient-start: hsla(280, 95%, 57%, 1);   /* violet */
+  --tc-gradient-end: hsla(193, 90%, 55%, 1);     /* cyan */
+  --tc-gradient-angle: 90deg;
+  --tc-gradient: linear-gradient(var(--tc-gradient-angle), var(--tc-gradient-start) 0%, var(--tc-gradient-end) 100%);
+
+  /* ── Color: Extended palette from _colors.scss (brighter, Chakra-style).
+        Used by badges, charts, alerts-variant dashboards. */
+  --tc-red-500: #e53e3e;
+  --tc-orange-500: #dd6b20;
+  --tc-yellow-500: #d69e2e;
+  --tc-green-500: #38a169;
+  --tc-teal-500: #319795;
+  --tc-blue-500: #3182ce;
+  --tc-cyan-500: #00b5d8;
+  --tc-purple-500: #805ad5;
+  --tc-pink-500: #d53f8c;
+
+  /* ── Soft alert tints (extracted from _alert.scss) */
+  --tc-alert-primary-bg:  #eef2ff;  --tc-alert-primary-border:  #c7d2fe;  --tc-alert-primary-text:  #312e81;
+  --tc-alert-info-bg:     #ecfeff;  --tc-alert-info-border:     #a5f3fc;  --tc-alert-info-text:     #155e75;
+  --tc-alert-success-bg:  #f0fdf4;  --tc-alert-success-border:  #bbf7d0;  --tc-alert-success-text:  #166534;
+  --tc-alert-warning-bg:  #fffbeb;  --tc-alert-warning-border:  #fde68a;  --tc-alert-warning-text:  #854d0e;
+  --tc-alert-danger-bg:   #fef2f2;  --tc-alert-danger-border:   #fecaca;  --tc-alert-danger-text:   #991b1b;
+
+  /* ── Surfaces */
+  --tc-bg: var(--tc-white);
+  --tc-bg-subtle: var(--tc-gray-50);
+  --tc-surface: var(--tc-white);
+  --tc-border: var(--tc-gray-200);
+  --tc-border-soft: rgba(229, 231, 235, 0.6);
+  --tc-text: var(--tc-gray-800);
+  --tc-text-muted: #64748b;          /* slate-500; common muted throughout */
+  --tc-text-strong: #0f172a;         /* slate-900; common "heavy" value color */
+
+  /* ── Type: Families */
+  --tc-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --tc-font-mono: 'Ubuntu Mono', 'JetBrains Mono', 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', 'Source Code Pro', monospace;
+
+  /* ── Type: Scale */
+  --tc-font-size-base: 0.925rem;     /* ≈14.8px — bootstrap.scss override of Bootstrap's 1rem */
+  --tc-font-size-sm: 0.809rem;
+  --tc-font-size-lg: 1.041rem;
+  --tc-line-height-base: 1.6;
+  --tc-line-height-sm: 1.4;
+  --tc-line-height-lg: 1.8;
+
+  /* Bootstrap $display-font-sizes (used in hero, pricing cards, big stats) */
+  --tc-display-1: 3.5rem;
+  --tc-display-2: 3rem;
+  --tc-display-3: 2.5rem;
+  --tc-display-4: 2rem;
+  --tc-display-5: 1.75rem;
+  --tc-display-6: 1.5rem;
+
+  /* Heading scale — Bootstrap defaults, fw 600 / lh 1.3 */
+  --tc-h1: 2.5rem;
+  --tc-h2: 2rem;
+  --tc-h3: 1.75rem;
+  --tc-h4: 1.5rem;
+  --tc-h5: 1.25rem;
+  --tc-h6: 1rem;
+
+  /* ── Type: Weights */
+  --tc-fw-light: 300;
+  --tc-fw-normal: 400;
+  --tc-fw-medium: 500;
+  --tc-fw-semibold: 600;
+  --tc-fw-bold: 700;
+  --tc-fw-extrabold: 800;      /* used for big metric/stat values */
+
+  /* ── Type: Letter-spacing (repeated "eyebrow" motif) */
+  --tc-ls-tight: -0.01em;       /* hero titles */
+  --tc-ls-wide: 0.025em;        /* btn, badge */
+  --tc-ls-wider: 0.05em;        /* section titles in side nav */
+  --tc-ls-uppercase: 0.08em;    /* eyebrows, labels */
+  --tc-ls-eyebrow-hero: 0.35em; /* hero eyebrows — very spaced */
+
+  /* ── Spacing (Bootstrap $spacers — rem-based) */
+  --tc-space-0: 0;
+  --tc-space-1: 0.25rem;
+  --tc-space-2: 0.5rem;
+  --tc-space-3: 1rem;
+  --tc-space-4: 1.5rem;
+  --tc-space-5: 3rem;
+  --tc-space-6: 4rem;
+
+  /* ── Radii — toolcase's signature: ZERO by default for Bootstrap elements.
+        Cards, buttons, badges, alerts are all square.
+        The --rc-radius tokens below exist for opt-in rounding (come from _reset.scss) */
+  --tc-radius-none: 0;
+  --rc-radius-sm: 4px;
+  --rc-radius-md: 8px;
+  --rc-radius-lg: 12px;
+  --rc-radius-full: 9999px;
+
+  /* ── Shadows (Tailwind-style layered) */
+  --tc-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --tc-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --tc-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --tc-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --tc-shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --tc-shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --tc-shadow-strong: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --tc-shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --tc-shadow-card-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --tc-shadow-btn-primary-hover: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+  /* ── Motion */
+  --tc-ease-out: ease-out;
+  --tc-ease-in-out: ease-in-out;
+  --tc-duration-fast: 0.15s;
+  --tc-duration-base: 0.2s;
+  --tc-duration-slow: 0.3s;
+
+  /* ── Focus (_reset.scss) */
+  --rc-focus-ring: #1e293b;
+
+  /* ── Z-index layers (_z-index.scss typical) */
+  --tc-z-dropdown: 1000;
+  --tc-z-sticky: 1020;
+  --tc-z-navbar: 1030;
+  --tc-z-modal-backdrop: 1040;
+  --tc-z-modal: 1050;
+  --tc-z-tooltip: 1080;
+}
+
+/* ============================================================================
+ * Semantic / element styles — apply to bare h1…h6, p, code, etc.
+ * Keeps unstyled HTML looking on-brand by default.
+ * ========================================================================== */
+
+html {
+  font-size: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 transparent;
+}
+
+body {
+  font-family: var(--tc-font-sans);
+  font-size: var(--tc-font-size-base);
+  line-height: var(--tc-line-height-base);
+  color: var(--tc-text);
+  background: var(--tc-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--tc-font-sans);
+  font-weight: var(--tc-fw-semibold);
+  line-height: 1.3;
+  color: var(--tc-text-strong);
+  margin: 0 0 0.75rem;
+}
+h1 { font-size: var(--tc-h1); }
+h2 { font-size: var(--tc-h2); }
+h3 { font-size: var(--tc-h3); }
+h4 { font-size: var(--tc-h4); }
+h5 { font-size: var(--tc-h5); }
+h6 { font-size: var(--tc-h6); }
+
+.tc-display-1 { font-size: var(--tc-display-1); font-weight: var(--tc-fw-bold); line-height: 1.3; letter-spacing: var(--tc-ls-tight); }
+.tc-display-2 { font-size: var(--tc-display-2); font-weight: var(--tc-fw-bold); line-height: 1.3; letter-spacing: var(--tc-ls-tight); }
+.tc-display-3 { font-size: var(--tc-display-3); font-weight: var(--tc-fw-bold); line-height: 1.3; }
+.tc-display-4 { font-size: var(--tc-display-4); font-weight: var(--tc-fw-bold); line-height: 1.3; }
+.tc-display-5 { font-size: var(--tc-display-5); font-weight: var(--tc-fw-bold); line-height: 1.3; }
+.tc-display-6 { font-size: var(--tc-display-6); font-weight: var(--tc-fw-bold); line-height: 1.3; }
+
+p {
+  margin: 0 0 1rem;
+  line-height: var(--tc-line-height-base);
+}
+
+code, kbd, pre, samp {
+  font-family: var(--tc-font-mono);
+  font-size: 0.9em;
+}
+
+code {
+  padding: 0.125em 0.375em;
+  background: var(--tc-gray-100);
+  color: var(--tc-text-strong);
+  border: 1px solid var(--tc-border);
+}
+
+small, .tc-text-sm {
+  font-size: var(--tc-font-size-sm);
+  line-height: var(--tc-line-height-sm);
+}
+
+.tc-text-muted { color: var(--tc-text-muted); }
+.tc-text-strong { color: var(--tc-text-strong); }
+
+/* Eyebrow — the most distinctive text pattern in the system. Used everywhere. */
+.tc-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: var(--tc-ls-uppercase);
+  font-size: 0.78rem;
+  font-weight: var(--tc-fw-semibold);
+  color: var(--tc-text-muted);
+}
+
+.tc-eyebrow-hero {
+  text-transform: uppercase;
+  letter-spacing: var(--tc-ls-eyebrow-hero);
+  font-size: 0.75rem;
+  font-weight: var(--tc-fw-semibold);
+}
+
+/* Stat-value — the big-number pattern seen on dashboard cards + hero metrics */
+.tc-stat-value {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: var(--tc-fw-extrabold);
+  line-height: 1;
+  color: var(--tc-text-strong);
+}
+
+/* Gradient text — hero title / accent headings */
+.tc-text-gradient {
+  background: var(--tc-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Selection */
+::selection {
+  background: rgba(128, 90, 213, 0.25);
+  color: var(--tc-text-strong);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 12px; background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: #a0a0a0; }
+::-webkit-scrollbar-track { background: transparent; }

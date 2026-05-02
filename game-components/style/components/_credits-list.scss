@@ -1,0 +1,36 @@
+gc-credits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+    text-align: center;
+}
+
+gc-credits-list .gc-credits-list-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+gc-credits-list .gc-credits-list-role {
+    font-family: var(--fg-display);
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+}
+
+gc-credits-list .gc-credits-list-names {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+gc-credits-list .gc-credits-list-name {
+    font-family: var(--fg-display);
+    font-size: 16px;
+    letter-spacing: 0.12em;
+    color: var(--fg-gold-bright);
+    text-shadow: 0 1px 2px #000;
+}

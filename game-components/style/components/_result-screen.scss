@@ -1,0 +1,217 @@
+gc-result-screen,
+gc-game-over-screen,
+gc-victory-screen {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 48px 32px;
+    color: var(--fg-parch);
+    background:
+        radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+}
+
+gc-result-screen .gc-result-screen-root,
+gc-game-over-screen .gc-result-screen-root,
+gc-victory-screen .gc-result-screen-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+gc-result-screen .gc-result-screen-eyebrow,
+gc-game-over-screen .gc-result-screen-eyebrow,
+gc-victory-screen .gc-result-screen-eyebrow {
+    display: block;
+    color: var(--fg-parch-dim);
+}
+
+gc-result-screen .gc-result-screen-title,
+gc-game-over-screen .gc-result-screen-title,
+gc-victory-screen .gc-result-screen-title {
+    display: block;
+    --gc-title-size: 38px;
+    text-shadow: 0 2px 0 #000, 0 0 22px rgba(232, 200, 120, 0.35);
+}
+
+gc-result-screen .gc-result-screen-root[data-title-color="gold"] .gc-result-screen-title,
+gc-game-over-screen .gc-result-screen-root[data-title-color="gold"] .gc-result-screen-title,
+gc-victory-screen .gc-result-screen-root[data-title-color="gold"] .gc-result-screen-title {
+    color: var(--fg-gold-bright);
+}
+
+gc-result-screen .gc-result-screen-root[data-title-color="danger"] .gc-result-screen-title,
+gc-game-over-screen .gc-result-screen-root[data-title-color="danger"] .gc-result-screen-title,
+gc-victory-screen .gc-result-screen-root[data-title-color="danger"] .gc-result-screen-title {
+    color: var(--fg-blood-bright);
+    text-shadow: 0 2px 0 #000, 0 0 22px rgba(212, 74, 58, 0.45);
+}
+
+gc-result-screen .gc-result-screen-root[data-title-color="parch"] .gc-result-screen-title,
+gc-game-over-screen .gc-result-screen-root[data-title-color="parch"] .gc-result-screen-title,
+gc-victory-screen .gc-result-screen-root[data-title-color="parch"] .gc-result-screen-title {
+    color: var(--fg-parch);
+}
+
+gc-result-screen .gc-result-screen-divider,
+gc-game-over-screen .gc-result-screen-divider,
+gc-victory-screen .gc-result-screen-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: min(420px, 80%);
+}
+
+gc-result-screen .gc-result-screen-rule,
+gc-game-over-screen .gc-result-screen-rule,
+gc-victory-screen .gc-result-screen-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fg-gold-deep) 30%, var(--fg-gold) 50%, var(--fg-gold-deep) 70%, transparent);
+}
+
+gc-result-screen .gc-result-screen-diamond,
+gc-game-over-screen .gc-result-screen-diamond,
+gc-victory-screen .gc-result-screen-diamond {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transform: rotate(45deg);
+    box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+}
+
+gc-result-screen .gc-result-screen-subtitle,
+gc-game-over-screen .gc-result-screen-subtitle,
+gc-victory-screen .gc-result-screen-subtitle {
+    font-family: var(--fg-body);
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg-parch-3);
+    max-width: 560px;
+}
+
+gc-result-screen .gc-result-screen-stats,
+gc-game-over-screen .gc-result-screen-stats,
+gc-victory-screen .gc-result-screen-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px 16px;
+    width: 100%;
+    max-width: 560px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(232, 200, 120, 0.12);
+}
+
+gc-result-screen .gc-result-screen-stat,
+gc-game-over-screen .gc-result-screen-stat,
+gc-victory-screen .gc-result-screen-stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(201, 169, 97, 0.15);
+}
+
+gc-result-screen .gc-result-screen-stat-label,
+gc-game-over-screen .gc-result-screen-stat-label,
+gc-victory-screen .gc-result-screen-stat-label {
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+}
+
+gc-result-screen .gc-result-screen-stat-value,
+gc-game-over-screen .gc-result-screen-stat-value,
+gc-victory-screen .gc-result-screen-stat-value {
+    font-family: var(--fg-mono);
+    font-size: 14px;
+    color: var(--fg-gold-bright);
+}
+
+gc-result-screen .gc-result-screen-rewards,
+gc-game-over-screen .gc-result-screen-rewards,
+gc-victory-screen .gc-result-screen-rewards {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+gc-result-screen .gc-result-screen-rewards-eyebrow,
+gc-game-over-screen .gc-result-screen-rewards-eyebrow,
+gc-victory-screen .gc-result-screen-rewards-eyebrow {
+    display: block;
+    color: var(--fg-parch-dim);
+}
+
+gc-result-screen .gc-result-screen-rewards-list,
+gc-game-over-screen .gc-result-screen-rewards-list,
+gc-victory-screen .gc-result-screen-rewards-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+gc-result-screen .gc-result-screen-reward,
+gc-game-over-screen .gc-result-screen-reward,
+gc-victory-screen .gc-result-screen-reward {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, #2a1f14, #0a0604);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18);
+}
+
+gc-result-screen .gc-result-screen-reward-glyph,
+gc-game-over-screen .gc-result-screen-reward-glyph,
+gc-victory-screen .gc-result-screen-reward-glyph {
+    color: var(--fg-gold-bright);
+    font-size: 14px;
+}
+
+gc-result-screen .gc-result-screen-reward-label,
+gc-game-over-screen .gc-result-screen-reward-label,
+gc-victory-screen .gc-result-screen-reward-label {
+    font-family: var(--fg-display);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+}
+
+gc-result-screen .gc-result-screen-reward-amount,
+gc-game-over-screen .gc-result-screen-reward-amount,
+gc-victory-screen .gc-result-screen-reward-amount {
+    font-family: var(--fg-mono);
+    font-size: 13px;
+    color: var(--fg-gold-bright);
+}
+
+gc-result-screen .gc-result-screen-actions,
+gc-game-over-screen .gc-result-screen-actions,
+gc-victory-screen .gc-result-screen-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+}

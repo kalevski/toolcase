@@ -1,0 +1,130 @@
+gc-pause-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+}
+
+gc-pause-screen[open] {
+    display: block;
+}
+
+gc-pause-screen .gc-pause-screen-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+}
+
+gc-pause-screen .gc-pause-screen-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+    box-sizing: border-box;
+    width: min(420px, calc(100vw - 32px));
+    padding: 30px 24px;
+    background: linear-gradient(180deg, rgba(20, 12, 8, 0.96), rgba(10, 6, 4, 0.96));
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px var(--fg-gold-shadow),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        0 20px 50px rgba(0, 0, 0, 0.8);
+    color: var(--fg-parch);
+    text-align: center;
+}
+
+gc-pause-screen .gc-pause-screen-eyebrow {
+    display: block;
+    color: var(--fg-parch-dim);
+    margin-bottom: 6px;
+}
+
+gc-pause-screen .gc-pause-screen-title {
+    display: block;
+    margin-bottom: 14px;
+}
+
+gc-pause-screen .gc-pause-screen-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin: 0 0 18px 0;
+}
+
+gc-pause-screen .gc-pause-screen-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fg-gold-deep) 30%, var(--fg-gold) 50%, var(--fg-gold-deep) 70%, transparent);
+}
+
+gc-pause-screen .gc-pause-screen-diamond {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transform: rotate(45deg);
+    box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+}
+
+gc-pause-screen .gc-pause-screen-items {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+gc-pause-screen .gc-pause-screen-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    font-family: var(--fg-display);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+    background: transparent;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+gc-pause-screen .gc-pause-screen-item:hover:not(.is-disabled) {
+    color: var(--fg-gold-bright);
+    background: rgba(201, 169, 97, 0.08);
+}
+
+gc-pause-screen .gc-pause-screen-item.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+gc-pause-screen .gc-pause-screen-label {
+    flex: 1 1 auto;
+}
+
+gc-pause-screen .gc-pause-screen-badge {
+    margin-left: auto;
+    font-family: var(--fg-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-gold-bright);
+    border: 1px solid var(--fg-gold-deep);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 2px 6px;
+}
+
+gc-pause-screen .gc-pause-screen-item:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: -2px;
+}
+
+gc-pause-screen .gc-pause-screen-item:focus:not(:focus-visible) {
+    outline: none;
+}

@@ -1,0 +1,137 @@
+gc-codex {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 2fr;
+    gap: 0;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+    background:
+        linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+        radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px var(--fg-gold-deep),
+        inset 0 0 0 3px var(--fg-gold-shadow),
+        inset 0 2px 0 rgba(255, 220, 150, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+gc-codex .gc-codex-list {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(201, 169, 97, 0.25);
+    overflow-y: auto;
+    max-height: 460px;
+}
+
+gc-codex .gc-codex-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+gc-codex .gc-codex-row:first-child {
+    border-top: 0;
+}
+
+gc-codex .gc-codex-row:hover {
+    background: rgba(201, 169, 97, 0.08);
+}
+
+gc-codex .gc-codex-row.is-selected {
+    background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+    box-shadow: inset 3px 0 0 var(--fg-gold);
+    color: var(--fg-gold-bright);
+}
+
+gc-codex .gc-codex-row.is-undiscovered {
+    color: var(--fg-parch-dim);
+    font-style: italic;
+}
+
+gc-codex .gc-codex-row-glyph {
+    font-family: var(--fg-display);
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+    color: var(--fg-gold-bright);
+}
+
+gc-codex .gc-codex-row.is-undiscovered .gc-codex-row-glyph {
+    color: var(--fg-parch-dim);
+}
+
+gc-codex .gc-codex-row-name {
+    font-family: var(--fg-display);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+gc-codex .gc-codex-row:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: -2px;
+}
+
+gc-codex .gc-codex-row:focus:not(:focus-visible) {
+    outline: none;
+}
+
+gc-codex .gc-codex-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    max-height: 460px;
+}
+
+gc-codex .gc-codex-detail-empty {
+    font-family: var(--fg-body);
+    font-style: italic;
+    color: var(--fg-parch-3);
+    font-size: 14px;
+}
+
+gc-codex .gc-codex-detail-description {
+    font-family: var(--fg-body);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg-parch);
+    margin: 0;
+}
+
+gc-codex .gc-codex-detail-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(201, 169, 97, 0.25);
+}
+
+gc-codex .gc-codex-detail-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+}
+
+gc-codex .gc-codex-detail-stat-label {
+    font-family: var(--fg-display);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-parch-3);
+}
+
+gc-codex .gc-codex-detail-stat-value {
+    font-family: var(--fg-mono);
+    font-size: 12px;
+    color: var(--fg-gold-bright);
+}

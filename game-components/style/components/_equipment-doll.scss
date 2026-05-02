@@ -1,0 +1,54 @@
+gc-equipment-doll {
+    --gc-equipment-doll-width: 240px;
+    --gc-equipment-doll-height: 360px;
+    --gc-equipment-doll-slot-size: 56px;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+gc-equipment-doll .gc-equipment-doll-canvas {
+    position: relative;
+    box-sizing: border-box;
+    width: var(--gc-equipment-doll-width);
+    height: var(--gc-equipment-doll-height);
+    background:
+        radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+        linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        0 6px 16px rgba(0, 0, 0, 0.7);
+}
+
+gc-equipment-doll .gc-equipment-doll-silhouette {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    color: rgba(201, 169, 97, 0.16);
+    font-family: var(--fg-display);
+    font-size: calc(var(--gc-equipment-doll-height) * 0.4);
+    text-shadow: 0 0 24px rgba(232, 200, 120, 0.25);
+}
+
+gc-equipment-doll .gc-equipment-doll-anchor {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+gc-equipment-doll .gc-equipment-doll-slot-label {
+    font-family: var(--fg-display);
+    font-size: 9px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--fg-parch-dim);
+    text-shadow: 0 1px 2px #000;
+    text-align: center;
+}

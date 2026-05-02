@@ -1,0 +1,15 @@
+gc-screen-flash {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1090;
+    display: block;
+}
+
+gc-screen-flash .gc-screen-flash-fill {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: #ffffff;
+    mix-blend-mode: screen;
+}

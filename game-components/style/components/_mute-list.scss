@@ -1,0 +1,90 @@
+gc-mute-list {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    color: var(--fg-parch);
+}
+
+gc-mute-list .gc-mute-list-empty {
+    padding: 18px 14px;
+    font-family: var(--fg-body);
+    font-style: italic;
+    color: var(--fg-parch-3);
+    font-size: 13px;
+    text-align: center;
+}
+
+gc-mute-list .gc-mute-list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
+}
+
+gc-mute-list .gc-mute-list-row:first-child {
+    border-top: 0;
+}
+
+gc-mute-list .gc-mute-list-text {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+gc-mute-list .gc-mute-list-name {
+    font-family: var(--fg-display);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-parch);
+}
+
+gc-mute-list .gc-mute-list-reason {
+    font-family: var(--fg-body);
+    font-size: 11px;
+    color: var(--fg-parch-3);
+    font-style: italic;
+}
+
+gc-mute-list .gc-mute-list-time {
+    font-family: var(--fg-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--fg-parch-dim);
+}
+
+gc-mute-list .gc-mute-list-unmute {
+    font-family: var(--fg-display);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 10px;
+    padding: 6px 12px;
+    background: linear-gradient(180deg, #3a2a1a, #1f1610);
+    color: var(--fg-gold-bright);
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 1px 0 rgba(232, 200, 120, 0.25),
+        inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+        0 2px 0 rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+gc-mute-list .gc-mute-list-unmute:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+gc-mute-list .gc-mute-list-unmute:active {
+    transform: translateY(1px);
+    filter: brightness(0.9);
+}
+
+gc-mute-list .gc-mute-list-unmute:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
