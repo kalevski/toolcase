@@ -108,10 +108,6 @@ export class Anchor extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, Anchor)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: Anchor

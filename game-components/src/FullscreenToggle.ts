@@ -10,10 +10,6 @@ export class FullscreenToggle extends ToggleRow {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, FullscreenToggle)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: FullscreenToggle

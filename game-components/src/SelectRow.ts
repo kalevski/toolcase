@@ -50,10 +50,6 @@ export class SelectRow extends SettingRowBase {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, SelectRow)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: SelectRow

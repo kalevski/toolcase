@@ -20,10 +20,6 @@ export class FPSCapSelect extends SelectRow {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, FPSCapSelect)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: FPSCapSelect

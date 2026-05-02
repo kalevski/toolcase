@@ -104,10 +104,6 @@ export class AmmoCounter extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, AmmoCounter)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: AmmoCounter

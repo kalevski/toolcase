@@ -172,10 +172,6 @@ export class MatchmakingScreen extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, MatchmakingScreen)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: MatchmakingScreen

@@ -106,10 +106,6 @@ export class BuffBar extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, BuffBar)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: BuffBar

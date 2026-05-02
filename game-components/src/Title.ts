@@ -45,10 +45,6 @@ export class Title extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, Title)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: Title

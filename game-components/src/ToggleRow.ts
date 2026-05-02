@@ -38,10 +38,6 @@ export class ToggleRow extends SettingRowBase {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, ToggleRow)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: ToggleRow

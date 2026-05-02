@@ -191,10 +191,6 @@ export class DialogueBox extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, DialogueBox)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: DialogueBox

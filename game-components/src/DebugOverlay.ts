@@ -121,10 +121,6 @@ export class DebugOverlay extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, DebugOverlay)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: DebugOverlay

@@ -60,10 +60,6 @@ export class LetterboxBars extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, LetterboxBars)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: LetterboxBars

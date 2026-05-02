@@ -113,10 +113,6 @@ export class ItemCompare extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, ItemCompare)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: ItemCompare

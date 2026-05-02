@@ -164,10 +164,6 @@ export class CompassBar extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, CompassBar)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: CompassBar

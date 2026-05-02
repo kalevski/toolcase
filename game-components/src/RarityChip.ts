@@ -65,10 +65,6 @@ export class RarityChip extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, RarityChip)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: RarityChip

@@ -151,10 +151,6 @@ export class PageIndicator extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, PageIndicator)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: PageIndicator

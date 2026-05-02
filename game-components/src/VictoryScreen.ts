@@ -17,10 +17,6 @@ export class VictoryScreen extends ResultScreen {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, VictoryScreen)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: VictoryScreen

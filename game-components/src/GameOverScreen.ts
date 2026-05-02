@@ -17,10 +17,6 @@ export class GameOverScreen extends ResultScreen {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, GameOverScreen)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: GameOverScreen

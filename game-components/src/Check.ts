@@ -86,10 +86,6 @@ export class Check extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, Check)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: Check

@@ -224,10 +224,6 @@ export class ComboBox extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, ComboBox)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: ComboBox

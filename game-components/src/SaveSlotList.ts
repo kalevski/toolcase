@@ -163,10 +163,6 @@ export class SaveSlotList extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, SaveSlotList)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: SaveSlotList

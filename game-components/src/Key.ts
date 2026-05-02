@@ -16,10 +16,6 @@ export class Key extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, Key)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: Key

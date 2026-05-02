@@ -133,10 +133,6 @@ export class GuildPanel extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, GuildPanel)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: GuildPanel

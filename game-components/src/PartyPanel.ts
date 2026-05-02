@@ -114,10 +114,6 @@ export class PartyPanel extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, PartyPanel)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: PartyPanel

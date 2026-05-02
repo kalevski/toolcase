@@ -106,10 +106,6 @@ export class LootList extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, LootList)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: LootList

@@ -100,10 +100,6 @@ export class LoadingOverlay extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, LoadingOverlay)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: LoadingOverlay

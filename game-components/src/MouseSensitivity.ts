@@ -72,10 +72,6 @@ export class MouseSensitivity extends SettingRowBase {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, MouseSensitivity)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: MouseSensitivity

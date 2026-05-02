@@ -145,10 +145,6 @@ export class Speedometer extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, Speedometer)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: Speedometer

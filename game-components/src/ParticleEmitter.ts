@@ -212,10 +212,6 @@ export class ParticleEmitter extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, ParticleEmitter)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: ParticleEmitter

@@ -48,10 +48,6 @@ export class ScrollText extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, ScrollText)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: ScrollText

@@ -179,10 +179,6 @@ export class RadialWheel extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, RadialWheel)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: RadialWheel

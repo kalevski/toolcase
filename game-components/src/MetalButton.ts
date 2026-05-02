@@ -84,10 +84,6 @@ export class MetalButton extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, MetalButton)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: MetalButton

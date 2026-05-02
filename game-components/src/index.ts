@@ -1,3 +1,4 @@
+export { register } from './register'
 export * from './Stack'
 export * from './Grid'
 export * from './Anchor'

@@ -77,10 +77,6 @@ export class ControlsRebindList extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, ControlsRebindList)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: ControlsRebindList

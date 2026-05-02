@@ -10,10 +10,6 @@ export class InvertAxisToggle extends ToggleRow {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, InvertAxisToggle)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: InvertAxisToggle

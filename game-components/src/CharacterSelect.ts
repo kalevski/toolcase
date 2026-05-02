@@ -153,10 +153,6 @@ export class CharacterSelect extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, CharacterSelect)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: CharacterSelect

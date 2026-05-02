@@ -44,10 +44,6 @@ export class Panel extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, Panel)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: Panel

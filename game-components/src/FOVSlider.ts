@@ -68,10 +68,6 @@ export class FOVSlider extends SettingRowBase {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, FOVSlider)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: FOVSlider

@@ -92,10 +92,6 @@ export class StatRow extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, StatRow)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: StatRow
