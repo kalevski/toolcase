@@ -13,6 +13,7 @@
         "logging",
         "serializer",
         "react-components",
+        "game-components",
         "phaser-plus",
         "examples"
     ],

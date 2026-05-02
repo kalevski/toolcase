@@ -1,0 +1,14 @@
+@use 'tokens' as *;
+
+@mixin setting-row {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    align-items: center;
+
+    .desc { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+    .control { display: flex; justify-content: flex-end; }
+}

@@ -1,0 +1,25 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+    height: 100%;
+}
+ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+button {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: transparent;
+    color: $gc-fg;
+    border: none;
+    border-left: 2px solid transparent;
+    text-align: left;
+
+    &.active { background: rgba(255, 255, 255, 0.08); border-left-color: $gc-accent; }
+}
+.body { overflow-y: auto; padding: 8px; }

@@ -1,0 +1,9 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    color: var(--gc-color, #5a5f68);
+    font-family: monospace;
+    font-size: 12px;
+}

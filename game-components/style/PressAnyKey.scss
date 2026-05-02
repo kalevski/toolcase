@@ -1,0 +1,16 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    color: #fff;
+    font-size: 18px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    animation: pakBlink 1.5s infinite;
+}
+
+@keyframes pakBlink {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}

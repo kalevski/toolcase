@@ -183,3 +183,5 @@ export * from './tc-icons'
 
 import * as Modal from './modal'
 export { Modal }
+
+export * from './game'

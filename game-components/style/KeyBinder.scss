@@ -1,0 +1,22 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+}
+
+button {
+    min-width: 120px;
+    padding: 8px 12px;
+    background: $gc-bg;
+    color: $gc-fg;
+    border: 1px solid $gc-border;
+    border-radius: 6px;
+    font-family: monospace;
+
+    &.capturing {
+        background: rgba(106, 169, 255, 0.2);
+        color: $gc-accent;
+        border-color: $gc-accent;
+    }
+}

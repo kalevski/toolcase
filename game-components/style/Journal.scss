@@ -1,0 +1,52 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 12px;
+    height: 100%;
+}
+ul { list-style: none; padding: 0; margin: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+ul button {
+    width: 100%;
+    text-align: left;
+    padding: 10px;
+    background: transparent;
+    color: $gc-fg;
+    border: none;
+    border-left: 2px solid transparent;
+
+    &.active { background: rgba(255, 255, 255, 0.08); border-left-color: $gc-gold; }
+}
+.title { font-weight: 600; }
+.state { font-size: 11px; opacity: 0.6; text-transform: uppercase; }
+.detail { padding: 16px; overflow-y: auto; }
+h2 { margin: 0 0 4px; }
+.objs { list-style: none; padding: 0; margin: 12px 0; }
+.objs li {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+
+    &.done { text-decoration: line-through; opacity: 0.5; }
+}
+.dot {
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 2px;
+
+    &.completed {
+        background: $gc-success;
+        border-color: $gc-success;
+    }
+}
+.body { margin-top: 12px; font-size: 14px; line-height: 1.6; }
+.rewards {
+    margin-top: 16px;
+    padding: 8px;
+    background: rgba(255, 211, 90, 0.1);
+    border: 1px solid rgba(255, 211, 90, 0.3);
+    border-radius: 4px;
+}

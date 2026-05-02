@@ -1,0 +1,33 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    min-width: 240px;
+    padding: 10px;
+    background: $gc-bg-strong;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.head { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.all { background: transparent; color: $gc-accent; border: none; cursor: pointer; font-size: 12px; }
+ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+}
+.name { flex: 1; }

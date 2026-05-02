@@ -1,0 +1,28 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: repeat(var(--gc-cols, 3), 1fr);
+    gap: 8px;
+}
+button {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    background: rgba(15, 18, 24, 0.7);
+    color: $gc-fg;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    text-align: left;
+
+    &.selected {
+        background: rgba(106, 169, 255, 0.15);
+        border-color: $gc-accent;
+    }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+.head { display: flex; align-items: center; gap: 6px; }
+.icon { font-size: 24px; }
+.desc { font-size: 12px; opacity: 0.8; }

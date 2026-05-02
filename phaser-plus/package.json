@@ -41,7 +41,17 @@
     "peerDependencies": {
         "phaser": "4.x",
         "@toolcase/base": "2.x",
-        "@toolcase/logging": "2.x"
+        "@toolcase/logging": "2.x",
+        "react": ">=18",
+        "react-dom": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "react": {
+            "optional": true
+        },
+        "react-dom": {
+            "optional": true
+        }
     },
     "devDependencies": {
         "@toolcase/base": "*",

@@ -1,0 +1,12 @@
+@use 'setting-row' as *;
+
+:host { @include setting-row; }
+
+select {
+    width: 100%;
+    padding: 6px 8px;
+    background: rgba(15, 18, 24, 0.7);
+    color: $gc-fg;
+    border: 1px solid $gc-border;
+    border-radius: 4px;
+}

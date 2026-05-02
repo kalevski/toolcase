@@ -1,0 +1,14 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9500;
+    background: var(--gc-color, #ff5a5a);
+    opacity: 0;
+    transition: opacity var(--gc-duration, 250ms) ease-out;
+}
+
+:host([active]) { opacity: var(--gc-opacity, 0.4); }

@@ -1,0 +1,57 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto 1fr auto;
+    gap: 12px;
+    padding: 16px;
+    height: 100%;
+    background: #0a0c10;
+}
+.head {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(15, 18, 24, 0.7);
+    border-radius: 4px;
+}
+.slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; align-content: flex-start; }
+.slot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(15, 18, 24, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    min-height: 56px;
+}
+.empty { opacity: 0.4; }
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.host { color: $gc-gold; }
+.rank { font-size: 11px; opacity: 0.6; }
+.ready-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+
+    &.ready { background: $gc-success; }
+}
+::slotted([slot='chat']) { background: rgba(15, 18, 24, 0.7); border-radius: 4px; }
+.actions { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; }
+button { padding: 8px 14px; border-radius: 4px; }
+.leave { background: transparent; color: $gc-fg; border: 1px solid $gc-border; }
+.ready-btn { background: rgba(15, 18, 24, 0.7); color: #fff; border: 1px solid $gc-border; &.ready { background: $gc-success; } }
+.start { background: rgba(15, 18, 24, 0.5); color: #fff; border: none; &.can { background: $gc-accent; } &:disabled { cursor: not-allowed; } }

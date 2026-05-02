@@ -1,0 +1,15 @@
+@use 'tokens' as *;
+
+:host([open]) {
+    @include gc-host;
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: rgba(8, 10, 14, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host(:not([open])) { display: none; }

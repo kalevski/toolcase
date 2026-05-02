@@ -1,0 +1,13 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1px;
+    color: var(--gc-color, #{$gc-success});
+}
+
+.bar { background: rgba(255, 255, 255, 0.15); border-radius: 1px; }
+.bar.active { background: var(--gc-color, #{$gc-success}); }
+.label { margin-left: 4px; font-family: monospace; }

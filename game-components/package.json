@@ -1,0 +1,59 @@
+{
+    "name": "@toolcase/game-components",
+    "version": "0.1.0",
+    "description": "🕹 Game UI primitives as Lit-based Web Components",
+    "type": "module",
+    "source": "src/index.ts",
+    "main": "lib/index.main.js",
+    "module": "lib/index.module.js",
+    "types": "lib/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/index.d.ts",
+            "import": "./lib/index.module.js",
+            "require": "./lib/index.main.js"
+        }
+    },
+    "scripts": {
+        "build:styles": "node scripts/build-styles.js",
+        "build": "npm run build:styles && tsup",
+        "dev": "npm run build:styles && tsup --watch",
+        "typecheck": "npm run build:styles && tsc --noEmit -p tsconfig.json"
+    },
+    "keywords": [
+        "game",
+        "ui",
+        "lit",
+        "web-components",
+        "custom-elements",
+        "shadow-dom",
+        "hud",
+        "menu"
+    ],
+    "homepage": "https://kalevski.dev/toolcase",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "lit": "^3.2.0"
+    },
+    "devDependencies": {
+        "sass": "^1.86.3"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib",
+        "style"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}

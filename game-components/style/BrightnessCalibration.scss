@@ -1,0 +1,21 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: block;
+    padding: 12px;
+    background: rgba(15, 18, 24, 0.5);
+    border-radius: 4px;
+}
+
+.test {
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    margin: 8px 0;
+    color: #1c1f24;
+    filter: brightness(var(--gc-brightness, 1));
+}
+input { width: 100%; }

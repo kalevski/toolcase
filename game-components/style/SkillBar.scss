@@ -1,0 +1,39 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-flex;
+    gap: var(--gc-gap, 4px);
+}
+
+button {
+    position: relative;
+    width: var(--gc-size, 56px);
+    height: var(--gc-size, 56px);
+    background: rgba(15, 18, 24, 0.7);
+    border: 1px solid $gc-border;
+    border-radius: 4px;
+    padding: 0;
+    color: $gc-fg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    &.selected { border-color: $gc-accent; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+.icon { font-size: calc(var(--gc-size, 56px) * 0.5); }
+.cooldown { position: absolute; inset: 0; pointer-events: none; }
+.remaining {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: calc(var(--gc-size, 56px) * 0.32);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+.hotkey { position: absolute; top: 2px; left: 4px; font-size: 10px; opacity: 0.7; }
+.charges { position: absolute; bottom: 2px; right: 4px; font-size: 11px; font-weight: 700; color: $gc-gold; }

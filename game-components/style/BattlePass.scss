@@ -1,0 +1,41 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: block;
+    padding: 12px;
+}
+
+.head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+h2 { margin: 0; }
+.level { font-size: 28px; font-weight: 700; }
+.xp { font-size: 11px; opacity: 0.6; }
+.xp-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-bottom: 12px;
+}
+.xp-fill { height: 100%; background: $gc-gold; border-radius: 2px; }
+.row { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 8px; }
+.tier {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 80px;
+
+    &.locked { opacity: 0.6; }
+}
+.tier-label { text-align: center; font-size: 11px; opacity: 0.7; }
+.tier button {
+    padding: 8px;
+    border: 1px solid;
+    border-radius: 4px;
+    color: $gc-fg;
+}
+.tier .free { background: rgba(106, 169, 255, 0.1); border-color: rgba(106, 169, 255, 0.4); }
+.tier .premium { background: rgba(255, 168, 58, 0.15); border-color: rgba(255, 168, 58, 0.5); }
+.tier .claimed { border-color: $gc-success; }
+.tier .icon { font-size: 24px; }
+.tier .lb { font-size: 10px; margin-top: 2px; }
+.tier .ok { font-size: 9px; color: $gc-success; }

@@ -19,7 +19,7 @@ export default class Grid extends GameObject {
     private gridTile!: GameObjects.TileSprite
 
     override onCreate(): void {
-        this.TEXTURE_KEY = `@phaser-plus/reef/grid-${generateId(4)}`
+        this.TEXTURE_KEY = `@toolcase/phaser-plus/grid-${generateId(4)}`
 
         const { width, height } = this.game.config
 

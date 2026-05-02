@@ -21,7 +21,7 @@ export default class Engine {
         return this
     }
 
-    getLogger(scope: string = '@phaser-plus/reef'): Logger {
+    getLogger(scope: string = '@toolcase/phaser-plus'): Logger {
         return this.logging.getLogger(scope)
     }
 

@@ -1,0 +1,52 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 480px;
+    background: #0a0c10;
+    color: #fff;
+    overflow: hidden;
+}
+.center {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+h1 {
+    font-size: 80px;
+    margin: 0;
+    letter-spacing: 6px;
+    text-shadow: 0 6px 30px rgba(0, 0, 0, 0.8);
+}
+.subtitle {
+    font-size: 18px;
+    opacity: 0.8;
+    letter-spacing: 2px;
+}
+.footer {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    font-size: 11px;
+    opacity: 0.5;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1;
+}
+::slotted([slot='backdrop']) {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}

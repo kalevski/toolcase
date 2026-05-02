@@ -1,0 +1,23 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    position: relative;
+    width: var(--gc-size, 48px);
+    height: var(--gc-size, 48px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+svg {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+}
+
+.label {
+    position: relative;
+    font-size: calc(var(--gc-size, 48px) * 0.28);
+    font-weight: 600;
+}

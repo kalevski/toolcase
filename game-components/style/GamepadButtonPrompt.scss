@@ -1,0 +1,28 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.icon {
+    width: var(--gc-size, 28px);
+    height: var(--gc-size, 28px);
+    border-radius: 50%;
+    background: var(--gc-color-bg);
+    border: 2px solid var(--gc-color);
+    color: var(--gc-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--gc-size, 28px) * 0.5);
+    font-weight: 700;
+    font-family: monospace;
+    line-height: 1;
+}
+
+.label {
+    font-size: calc(var(--gc-size, 28px) * 0.5);
+}

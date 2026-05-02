@@ -1,0 +1,22 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    position: relative;
+    display: inline-block;
+    width: var(--gc-size, 180px);
+    height: var(--gc-size, 180px);
+}
+svg { position: absolute; inset: 0; }
+.info {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+.value { font-size: calc(var(--gc-size, 180px) * 0.22); font-weight: 700; font-family: monospace; }
+.unit { font-size: calc(var(--gc-size, 180px) * 0.07); opacity: 0.7; }
+.gear { font-size: calc(var(--gc-size, 180px) * 0.16); font-weight: 700; color: $gc-gold; margin-top: 4px; }

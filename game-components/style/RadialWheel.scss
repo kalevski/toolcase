@@ -1,0 +1,49 @@
+@use 'tokens' as *;
+
+:host([open]) {
+    @include gc-host;
+    position: fixed;
+    inset: 0;
+    z-index: 9300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+:host(:not([open])) { display: none; }
+
+.wheel {
+    position: relative;
+    width: var(--gc-diameter, 320px);
+    height: var(--gc-diameter, 320px);
+}
+
+.center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: $gc-fg;
+    font-size: 14px;
+    opacity: 0.7;
+    text-align: center;
+}
+
+button {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(15, 18, 24, 0.85);
+    color: var(--gc-color, #{$gc-accent});
+    border: 2px solid var(--gc-color, #{$gc-accent});
+    padding: 0;
+    width: var(--gc-option-size, 56px);
+    height: var(--gc-option-size, 56px);
+    font-size: calc(var(--gc-option-size, 56px) * 0.4);
+
+    &:hover:not(:disabled) {
+        background: var(--gc-color, #{$gc-accent});
+        color: #fff;
+    }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+}

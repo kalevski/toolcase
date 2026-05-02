@@ -1,0 +1,52 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 12px;
+}
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+ul button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background: transparent;
+    color: $gc-fg;
+    border: none;
+    text-align: left;
+
+    &.active { background: rgba(255, 255, 255, 0.08); }
+}
+.detail { padding: 12px; background: rgba(15, 18, 24, 0.5); border-radius: 4px; }
+h3 { margin: 0 0 12px; }
+.recipe { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.label { font-size: 11px; opacity: 0.6; margin-bottom: 4px; }
+.inputs { display: flex; gap: 4px; }
+.input { display: flex; flex-direction: column; align-items: center; }
+.input span { font-size: 11px; }
+.enough { color: $gc-success; }
+.missing { color: $gc-danger; }
+.arrow { font-size: 24px; opacity: 0.6; }
+.craft {
+    width: 100%;
+    padding: 8px 12px;
+    background: $gc-accent;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+
+    &:disabled { background: #1a1c20; cursor: not-allowed; }
+}

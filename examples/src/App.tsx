@@ -16,6 +16,7 @@ import { BaseExamplesPage } from './pages/BaseExamplesPage'
 import { LoggingExamplesPage } from './pages/LoggingExamplesPage'
 import { SerializerExamplesPage } from './pages/SerializerExamplesPage'
 import { PhaserPlusPage } from './pages/PhaserPlusPage'
+import { GameComponentsPage } from './game-components/GameComponentsPage'
 import { examples } from './react-components/index'
 import { phaserExamples } from './phaser-plus/index'
 
@@ -230,6 +231,7 @@ export const App = () => {
                 <Route path="/logging" element={<LoggingExamplesPage />} />
                 <Route path="/serializer" element={<SerializerExamplesPage />} />
                 <Route path="/react-components" element={<ReactComponentsPage />} />
+                <Route path="/game-components" element={<GameComponentsPage />} />
                 <Route path="/phaser-plus" element={<PhaserPlusPage />} />
                 {examples.map((example) => (
                     <Route

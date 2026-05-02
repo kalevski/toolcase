@@ -1,0 +1,2 @@
+import { css } from 'lit'
+export const styles = css`:host{color:#e6e8ec;font-family:system-ui,-apple-system,sans-serif;box-sizing:border-box}:host *,:host *::before,:host *::after{box-sizing:inherit}:host button{font-family:inherit;cursor:pointer}:host{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}.line{position:absolute;box-shadow:0 0 0 1px rgba(0,0,0,.6)}.ring{position:absolute;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.6);transform:translate(-50%, -50%)}`

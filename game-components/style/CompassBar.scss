@@ -1,0 +1,37 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    position: relative;
+    width: var(--gc-width, 360px);
+    height: var(--gc-height, 28px);
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid $gc-border;
+    border-radius: 4px;
+    overflow: hidden;
+    font-size: 12px;
+}
+
+.cardinal, .marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+}
+.cardinal {
+    justify-content: center;
+    opacity: 0.85;
+    font-weight: 600;
+}
+.center-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateX(-50%);
+}

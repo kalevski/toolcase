@@ -1,0 +1,25 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    align-items: center;
+}
+button {
+    min-width: 120px;
+    padding: 6px 10px;
+    background: rgba(15, 18, 24, 0.7);
+    color: $gc-fg;
+    border: 1px solid $gc-border;
+    border-radius: 4px;
+    font-family: monospace;
+}

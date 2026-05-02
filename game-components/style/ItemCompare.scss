@@ -1,0 +1,11 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: flex-start;
+}
+.arrow { align-self: center; font-size: 24px; color: $gc-gold; }
+.empty { padding: 10px; opacity: 0.5; text-align: center; }

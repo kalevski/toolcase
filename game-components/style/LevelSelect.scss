@@ -1,0 +1,41 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    position: relative;
+    display: inline-block;
+    width: var(--gc-width, 800px);
+    height: var(--gc-height, 500px);
+    background: #0d1014;
+    overflow: auto;
+    border-radius: 6px;
+}
+
+svg { position: absolute; inset: 0; pointer-events: none; }
+
+button {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    color: #fff;
+    border: 3px solid rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+
+    &.selected { border-color: $gc-gold; }
+}
+.stars {
+    position: absolute;
+    bottom: -16px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1px;
+    color: $gc-gold;
+    font-size: 11px;
+}

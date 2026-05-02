@@ -1,0 +1,23 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9500;
+}
+
+.top, .bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--gc-bar-height, 12%);
+    background: var(--gc-bar-color, #000);
+    transition: transform var(--gc-duration, 600ms) ease-in-out;
+}
+.top { top: 0; transform: translateY(-100%); }
+.bottom { bottom: 0; transform: translateY(100%); }
+
+:host([show]) .top { transform: translateY(0); }
+:host([show]) .bottom { transform: translateY(0); }

@@ -1,0 +1,56 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    padding: 24px;
+    height: 100%;
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: 8px;
+    align-content: flex-start;
+}
+.grid button {
+    position: relative;
+    aspect-ratio: 1;
+    background: rgba(15, 18, 24, 0.7);
+    border: 2px solid $gc-border;
+    border-radius: 4px;
+    padding: 0;
+    color: $gc-fg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+
+    &.selected { border-color: $gc-accent; }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+.lock { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; }
+aside {
+    background: rgba(15, 18, 24, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 16px;
+}
+h2 { margin: 0 0 4px; font-size: 24px; }
+.role { opacity: 0.7; margin-bottom: 12px; }
+.desc { font-size: 13px; opacity: 0.85; margin-bottom: 16px; line-height: 1.5; }
+.stats { display: flex; flex-direction: column; gap: 6px; }
+.stat-row { display: flex; justify-content: space-between; font-size: 12px; }
+.bar { height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; }
+.fill { height: 100%; background: $gc-accent; border-radius: 2px; }
+.confirm {
+    margin-top: 18px;
+    width: 100%;
+    padding: 10px 14px;
+    background: $gc-accent;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+}

@@ -1,0 +1,10 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+}
+.ring {
+    transition: transform 150ms;
+    transform-origin: center;
+}

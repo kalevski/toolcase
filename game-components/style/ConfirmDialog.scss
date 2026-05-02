@@ -1,0 +1,60 @@
+@use 'tokens' as *;
+
+:host([open]) {
+    @include gc-host;
+    position: fixed;
+    inset: 0;
+    z-index: 9100;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host(:not([open])) { display: none; }
+
+.box {
+    min-width: 360px;
+    max-width: 480px;
+    background: #13161d;
+    color: $gc-fg;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.message {
+    opacity: 0.8;
+    margin-bottom: 16px;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+button {
+    padding: 8px 14px;
+    border-radius: 6px;
+}
+
+.cancel {
+    background: transparent;
+    color: $gc-fg;
+    border: 1px solid $gc-border;
+}
+
+.confirm {
+    background: $gc-accent;
+    color: #fff;
+    border: none;
+
+    &.danger { background: $gc-danger; }
+}

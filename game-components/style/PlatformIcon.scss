@@ -1,0 +1,15 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--gc-size, 16px);
+}
+
+.label {
+    font-size: calc(var(--gc-size, 16px) * 0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

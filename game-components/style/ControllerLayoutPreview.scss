@@ -1,0 +1,12 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: block;
+    padding: 24px;
+    background: rgba(15, 18, 24, 0.5);
+    border-radius: 4px;
+    text-align: center;
+}
+.icon { font-size: 48px; opacity: 0.5; }
+.label { font-size: 12px; opacity: 0.6; margin-top: 4px; text-transform: capitalize; }

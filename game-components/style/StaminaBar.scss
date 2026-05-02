@@ -1,0 +1,8 @@
+@use 'resource-bar' as *;
+
+:host {
+    --gc-bar-color: #d2b73a;
+    --gc-ghost-color: #88a4d8;
+    --gc-bar-height: 6px;
+    @include resource-bar;
+}

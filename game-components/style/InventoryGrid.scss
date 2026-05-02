@@ -1,0 +1,8 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-grid;
+    grid-template-columns: repeat(var(--gc-cols, 8), var(--gc-slot, 56px));
+    gap: 4px;
+}

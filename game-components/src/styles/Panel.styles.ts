@@ -1,0 +1,2 @@
+import { css } from 'lit'
+export const styles = css`:host{color:#e6e8ec;font-family:system-ui,-apple-system,sans-serif;box-sizing:border-box}:host *,:host *::before,:host *::after{box-sizing:inherit}:host button{font-family:inherit;cursor:pointer}:host{display:block;position:relative}.panel{padding:var(--gc-padding, 16px);background:rgba(15,18,24,.85)}.panel.bordered{border:1px solid hsla(0,0%,100%,.15);border-radius:8px}.panel.nine-slice{background:rgba(0,0,0,0);border-style:solid;border-image-repeat:stretch}`

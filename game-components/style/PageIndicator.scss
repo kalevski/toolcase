@@ -1,0 +1,23 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gc-gap, 8px);
+}
+
+button {
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: width 200ms, background 200ms;
+    border-radius: var(--gc-size, 8px);
+    height: var(--gc-size, 8px);
+    background: var(--gc-color, rgba(255, 255, 255, 0.25));
+
+    &.active {
+        width: calc(var(--gc-size, 8px) * 2.5);
+        background: var(--gc-active, #{$gc-accent});
+    }
+}

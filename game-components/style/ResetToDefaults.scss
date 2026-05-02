@@ -1,0 +1,9 @@
+@use 'setting-row' as *;
+
+:host { @include setting-row; }
+
+.row { display: flex; gap: 6px; }
+button { padding: 6px 10px; border-radius: 4px; }
+.reset { background: transparent; color: $gc-danger; border: 1px solid $gc-danger; }
+.confirm { background: $gc-danger; color: #fff; border: none; }
+.cancel { background: transparent; color: $gc-fg; border: 1px solid $gc-border; }

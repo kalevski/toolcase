@@ -1,0 +1,23 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: block;
+    position: relative;
+}
+
+.panel {
+    padding: var(--gc-padding, 16px);
+    background: $gc-bg;
+
+    &.bordered {
+        border: 1px solid $gc-border;
+        border-radius: 8px;
+    }
+
+    &.nine-slice {
+        background: transparent;
+        border-style: solid;
+        border-image-repeat: stretch;
+    }
+}

@@ -1,0 +1,2 @@
+import { css } from 'lit'
+export const styles = css`:host([open]){color:#e6e8ec;font-family:system-ui,-apple-system,sans-serif;box-sizing:border-box}:host([open]) *,:host([open]) *::before,:host([open]) *::after{box-sizing:inherit}:host([open]) button{font-family:inherit;cursor:pointer}:host([open]){position:fixed;inset:0;z-index:9000;background:rgba(8,10,14,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center}:host(:not([open])){display:none}`

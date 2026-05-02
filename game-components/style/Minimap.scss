@@ -1,0 +1,27 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    position: relative;
+    display: inline-block;
+    width: var(--gc-size, 200px);
+    height: var(--gc-size, 200px);
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: #0d1014;
+}
+
+.inner {
+    position: absolute;
+    inset: 0;
+    transform: rotate(var(--gc-rotation, 0deg));
+    background-image: var(--gc-bg, none);
+    background-size: cover;
+    background-position: center;
+}
+
+.marker {
+    position: absolute;
+    border-radius: 50%;
+}

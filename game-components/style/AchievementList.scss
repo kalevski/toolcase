@@ -1,0 +1,41 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+ul { padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+li {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(15, 18, 24, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    list-style: none;
+
+    &.unlocked { border-color: rgba(255, 211, 90, 0.4); }
+    &.locked { opacity: 0.7; }
+}
+.icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+
+    &.unlocked { color: $gc-gold; }
+}
+.info { flex: 1; }
+.name { font-weight: 600; }
+.desc { font-size: 12px; opacity: 0.7; }
+.bar { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.bar > div { flex: 1; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; }
+.bar > div > div { height: 100%; background: $gc-gold; border-radius: 2px; }
+.points { align-self: center; color: $gc-gold; font-weight: 700; }

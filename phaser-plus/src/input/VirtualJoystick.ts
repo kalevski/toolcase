@@ -23,7 +23,7 @@ export const VIRTUAL_AXIS_X = 'virtual.joystick.x'
 
 export const VIRTUAL_AXIS_Y = 'virtual.joystick.y'
 
-const STYLE_ID = '@phaser-plus/reef/virtual-joystick'
+const STYLE_ID = '@toolcase/phaser-plus/virtual-joystick'
 
 let injected = false
 

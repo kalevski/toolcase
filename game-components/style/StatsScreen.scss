@@ -1,0 +1,15 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: block;
+    padding: 16px;
+}
+h2 { margin: 0 0 4px; }
+.summary { opacity: 0.7; margin-bottom: 16px; }
+section { margin-bottom: 12px; }
+.title { font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px; }
+.stat { padding: 8px; background: rgba(15, 18, 24, 0.7); border-radius: 4px; }
+.label { font-size: 11px; opacity: 0.6; display: flex; align-items: center; gap: 4px; }
+.value { font-size: 18px; font-weight: 700; margin-top: 2px; }

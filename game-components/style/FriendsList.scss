@@ -1,0 +1,43 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    min-width: 280px;
+}
+.head { padding: 8px 10px; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+ul { list-style: none; padding: 0; margin: 0; }
+li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+    &.offline { opacity: 0.6; }
+}
+.avatar {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.dot {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #0a0c10;
+}
+.info { flex: 1; min-width: 0; }
+.name { display: flex; align-items: center; gap: 4px; }
+.activity { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.actions button { background: transparent; border: none; color: $gc-fg; font-size: 14px; }
+.actions .invite { color: $gc-accent; }

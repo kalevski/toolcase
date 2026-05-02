@@ -2,7 +2,7 @@ import { ObjectPool } from '@toolcase/base'
 import Event from './Event'
 import FlowProcessor from './FlowProcessor'
 
-const TIMEOUT_FN_NAME = '@phaser-plus/reef/timeoutFn'
+const TIMEOUT_FN_NAME = '@toolcase/phaser-plus/timeoutFn'
 
 class TimerDef {
     event: Event<unknown> | Function | null = null

@@ -1,0 +1,50 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    padding: 24px;
+    height: 100%;
+}
+.preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 6px;
+    min-height: 320px;
+}
+.fields { display: flex; flex-direction: column; gap: 12px; }
+input[type='text'], input[type='range'] {
+    padding: 10px 12px;
+    background: rgba(15, 18, 24, 0.7);
+    border: 1px solid $gc-border;
+    border-radius: 4px;
+    color: $gc-fg;
+    font-size: 16px;
+    outline: none;
+}
+input[type='range'] { padding: 0; }
+label { font-size: 12px; opacity: 0.7; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.options { display: flex; gap: 6px; flex-wrap: wrap; }
+.options button {
+    padding: 6px 10px;
+    background: rgba(15, 18, 24, 0.7);
+    color: $gc-fg;
+    border: 1px solid $gc-border;
+    border-radius: 4px;
+
+    &.selected { background: $gc-accent; color: #fff; }
+}
+.create {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: $gc-accent;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+}

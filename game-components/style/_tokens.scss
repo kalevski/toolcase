@@ -1,0 +1,27 @@
+@use 'sass:color';
+
+$gc-bg: rgba(15, 18, 24, 0.85);
+$gc-bg-strong: rgba(8, 10, 14, 0.95);
+$gc-fg: #e6e8ec;
+$gc-fg-muted: rgba(230, 232, 236, 0.6);
+$gc-border: rgba(255, 255, 255, 0.15);
+$gc-accent: #6aa9ff;
+$gc-success: #3aa256;
+$gc-warning: #d2b73a;
+$gc-danger: #d23a3a;
+$gc-gold: #ffd35a;
+
+$gc-rarity-common: #9aa3ad;
+$gc-rarity-uncommon: #3aa256;
+$gc-rarity-rare: #6aa9ff;
+$gc-rarity-epic: #c93ad2;
+$gc-rarity-legendary: #ffa83a;
+$gc-rarity-mythic: #ff5a8a;
+
+@mixin gc-host {
+    color: $gc-fg;
+    font-family: system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    *, *::before, *::after { box-sizing: inherit; }
+    button { font-family: inherit; cursor: pointer; }
+}

@@ -1,0 +1,46 @@
+@use 'tokens' as *;
+
+@mixin resource-bar {
+    @include gc-host;
+    display: block;
+
+    .head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+    .bar {
+        position: relative;
+        width: 100%;
+        height: var(--gc-bar-height, 10px);
+        background: #1a1c20;
+        border-radius: 2px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+    }
+    .fill {
+        height: 100%;
+        background: var(--gc-bar-color, #{$gc-success});
+        transition: width 150ms ease-out;
+    }
+    .ghost {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: var(--gc-ghost-color, #{$gc-danger});
+        transition: left 400ms ease-out, width 400ms ease-out;
+    }
+    .segs {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        pointer-events: none;
+    }
+    .seg {
+        flex: 1;
+        border-right: 1px solid rgba(0, 0, 0, 0.4);
+
+        &:last-child { border-right: 0; }
+    }
+}

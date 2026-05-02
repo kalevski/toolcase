@@ -1,0 +1,43 @@
+@use 'tokens' as *;
+
+:host([open]) {
+    @include gc-host;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host(:not([open])) { display: none; }
+
+.box {
+    width: 420px;
+    padding: 18px;
+    background: #13161d;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+h3 { margin: 0 0 4px; }
+.player-name { font-size: 13px; opacity: 0.7; margin-bottom: 12px; }
+.reasons { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+textarea {
+    width: 100%;
+    min-height: 70px;
+    padding: 8px;
+    background: rgba(15, 18, 24, 0.7);
+    color: $gc-fg;
+    border: 1px solid $gc-border;
+    border-radius: 4px;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+button { padding: 8px 14px; border-radius: 4px; }
+.cancel { background: transparent; color: $gc-fg; border: 1px solid $gc-border; }
+.submit { background: $gc-danger; color: #fff; border: none; }

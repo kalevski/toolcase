@@ -1,0 +1,36 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: block;
+    max-width: 280px;
+    font-size: 12px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+.title { font-weight: 700; margin-bottom: 6px; opacity: 0.8; }
+.quest { margin-bottom: 10px; }
+.quest-name { font-weight: 600; color: $gc-gold; }
+ul { list-style: none; padding: 0; margin: 0; }
+li {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+
+    &.done { text-decoration: line-through; opacity: 0.5; }
+}
+.dot {
+    width: 10px;
+    height: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: transparent;
+    display: inline-block;
+    border-radius: 2px;
+
+    &.completed {
+        background: $gc-success;
+        border-color: $gc-success;
+    }
+}
+.text { flex: 1; }
+.progress { opacity: 0.7; }
+em { opacity: 0.5; }

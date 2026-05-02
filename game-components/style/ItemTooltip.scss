@@ -1,0 +1,21 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    min-width: 220px;
+    max-width: 320px;
+    padding: 10px;
+    background: $gc-bg-strong;
+    border: 1px solid var(--gc-color, #{$gc-fg});
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.name { font-weight: 700; color: var(--gc-color, #{$gc-fg}); font-size: 14px; }
+.rarity { font-size: 11px; opacity: 0.6; text-transform: capitalize; margin-bottom: 6px; }
+ul { list-style: none; padding: 0; margin: 6px 0; }
+li { display: flex; justify-content: space-between; }
+.delta-up { color: $gc-success; margin-left: 6px; }
+.delta-down { color: $gc-danger; margin-left: 6px; }
+.lore { font-style: italic; opacity: 0.6; margin-top: 6px; font-size: 11px; }

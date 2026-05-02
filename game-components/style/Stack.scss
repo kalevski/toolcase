@@ -1,0 +1,11 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: var(--gc-display, flex);
+    flex-direction: var(--gc-direction, column);
+    gap: var(--gc-gap, 8px);
+    align-items: var(--gc-align, stretch);
+    justify-content: var(--gc-justify, flex-start);
+    flex-wrap: var(--gc-wrap, nowrap);
+}

@@ -1,0 +1,29 @@
+@use 'tokens' as *;
+
+:host {
+    @include gc-host;
+    display: inline-block;
+    max-width: var(--gc-max-width, 720px);
+    color: #fff;
+    font-size: var(--gc-font-size, 18px);
+    text-align: var(--gc-align, center);
+    line-height: 1.4;
+}
+
+:host(:not([boxed])) { text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95); }
+
+.speaker {
+    font-size: calc(var(--gc-font-size, 18px) * 0.7);
+    color: $gc-gold;
+    margin-bottom: 4px;
+}
+.body {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+:host(:not([boxed])) .body {
+    background: transparent;
+    padding: 0;
+}
