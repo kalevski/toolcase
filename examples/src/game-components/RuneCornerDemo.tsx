@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const FrameBox: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
@@ -25,7 +25,10 @@ const RuneCornerDemo: React.FC = () => (
                     description="Decorative gilded corner glyph for framed surfaces. Props: at (tl|tr|bl|br), size."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="All four corners on a frame">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="All four corners on a frame" />
                         <FrameBox>
                             {/* @ts-ignore */}
                             <gc-rune-corner at="tl" />
@@ -36,16 +39,24 @@ const RuneCornerDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-rune-corner at="br" />
                         </FrameBox>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Larger size">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Larger size" />
                         <FrameBox>
                             {/* @ts-ignore */}
                             <gc-rune-corner at="tl" size="22" />
                             {/* @ts-ignore */}
                             <gc-rune-corner at="tr" size="22" />
                         </FrameBox>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

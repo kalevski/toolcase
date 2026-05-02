@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const Chip = ({ label }: { label: string }) => (
@@ -54,7 +54,10 @@ const AnchorDemo: React.FC = () => (
                     description="Layout primitive. Positions child absolutely within a relative parent using position and inset props."
                 />
                 <div className="d-flex flex-wrap gap-4 mt-4">
-                    <SectionCard title="Corner positions">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Corner positions" />
                         <div className="d-flex flex-wrap gap-4">
                             <Arena title="top-left">
                                 {/* @ts-ignore */}
@@ -85,9 +88,16 @@ const AnchorDemo: React.FC = () => (
                                 </gc-anchor>
                             </Arena>
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Edge centers + center">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Edge centers + center" />
                         <div className="d-flex flex-wrap gap-4">
                             <Arena title="top">
                                 {/* @ts-ignore */}
@@ -125,9 +135,16 @@ const AnchorDemo: React.FC = () => (
                                 </gc-anchor>
                             </Arena>
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="All 9 positions — inset 12px">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="All 9 positions — inset 12px" />
                         <div style={{ position: 'relative', width: '320px', height: '220px', background: 'radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%)', border: '1px solid var(--fg-gold-deep, #8b6f3a)', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.6)' }}>
                             {(['top-left', 'top', 'top-right', 'left', 'center', 'right', 'bottom-left', 'bottom', 'bottom-right'] as const).map(pos => (
                                 <React.Fragment key={pos}>
@@ -139,7 +156,8 @@ const AnchorDemo: React.FC = () => (
                                 </React.Fragment>
                             ))}
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

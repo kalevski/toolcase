@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const DividerDemo: React.FC = () => {
@@ -13,14 +13,22 @@ const DividerDemo: React.FC = () => {
                         description="Gold gradient rule with optional diamond ornament."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default (with diamond)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default (with diamond)" />
                             {/* @ts-ignore */}
                             <gc-divider />
-                        </SectionCard>
-                        <SectionCard title="No diamond">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="No diamond" />
                             {/* @ts-ignore */}
                             <gc-divider no-diamond />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

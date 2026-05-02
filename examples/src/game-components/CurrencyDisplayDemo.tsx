@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CurrencyDisplayDemo: React.FC = () => (
@@ -12,17 +12,34 @@ const CurrencyDisplayDemo: React.FC = () => (
                     description="HUD-scale currency readout with optional eyebrow label. Props: amount, currencyIcon, label, color, fontSize."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default" />
                         {/* @ts-ignore */}
                         <gc-currency-display amount="42500" currency-icon="◈" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="With label">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="With label" />
                         {/* @ts-ignore */}
                         <gc-currency-display amount="1024000" currency-icon="◈" label="Gold" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Custom color + larger font">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Custom color + larger font" />
                         {/* @ts-ignore */}
                         <gc-currency-display
                             amount="78"
@@ -31,7 +48,8 @@ const CurrencyDisplayDemo: React.FC = () => (
                             color="var(--fg-arcane-bright)"
                             font-size="26"
                         />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

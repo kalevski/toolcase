@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const DebugOverlayDemo: React.FC = () => {
@@ -24,22 +24,38 @@ const DebugOverlayDemo: React.FC = () => {
                         description="Compact dev HUD. FPS color-coded (good/warning/danger). Custom rows via 'rows' prop."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Healthy 60 FPS">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Healthy 60 FPS" />
                             {/* @ts-ignore */}
                             <gc-debug-overlay fps="60" draw-calls="124" triangles="48230" mem-mb="412" />
-                        </SectionCard>
-                        <SectionCard title="Warning (40 FPS)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Warning (40 FPS)" />
                             {/* @ts-ignore */}
                             <gc-debug-overlay fps="40" draw-calls="380" triangles="92140" mem-mb="892" />
-                        </SectionCard>
-                        <SectionCard title="Danger (22 FPS)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Danger (22 FPS)" />
                             {/* @ts-ignore */}
                             <gc-debug-overlay fps="22" draw-calls="612" triangles="184320" mem-mb="1340" />
-                        </SectionCard>
-                        <SectionCard title="Custom rows">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Custom rows" />
                             {/* @ts-ignore */}
                             <gc-debug-overlay ref={ref} fps="58" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

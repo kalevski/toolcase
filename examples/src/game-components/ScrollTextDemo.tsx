@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ScrollTextDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const ScrollTextDemo: React.FC = () => (
                     description="Vertical lore block with optional gold scrollTitle. Slot for body."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="With scrollTitle">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="With scrollTitle" />
                         {/* @ts-ignore */}
                         <gc-scroll-text scroll-title="Codex Entry">
                             The Wyrmking sleeps beneath the salt flats, his breath the slow tide
@@ -20,17 +23,31 @@ const ScrollTextDemo: React.FC = () => (
                             twins above the Watchtower does he stir.
                         {/* @ts-ignore */}
                         </gc-scroll-text>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="No title">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="No title" />
                         {/* @ts-ignore */}
                         <gc-scroll-text>
                             A pact written in iron cannot be unwritten in flesh.
                         {/* @ts-ignore */}
                         </gc-scroll-text>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Long body">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Long body" />
                         {/* @ts-ignore */}
                         <gc-scroll-text scroll-title="The Long Dusk">
                             They named the river for the blood it carried, and the bridge for the
@@ -39,7 +56,8 @@ const ScrollTextDemo: React.FC = () => (
                             ended. The dead, it is said, do not require new titles.
                         {/* @ts-ignore */}
                         </gc-scroll-text>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 type Pop = { id: number; value: string; crit?: boolean; heal?: boolean; miss?: boolean }
@@ -34,7 +34,10 @@ const DamageNumberDemo: React.FC = () => {
                         description="Floating combat text. Variants: normal (parch), crit (blood bright + larger), heal (stamina + leading +), miss (display italic). Animates up and fades, emits 'done' after `duration` ms."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Variants (always-on)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Variants (always-on)" />
                             <div className="d-flex align-items-end gap-5" style={{ background: 'var(--fg-ink)', padding: 32 }}>
                                 {/* @ts-ignore */}
                                 <gc-damage-number value="42" duration="999999" />
@@ -45,9 +48,16 @@ const DamageNumberDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-damage-number miss duration="999999" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Interactive (spawn + auto-cleanup on 'done')">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Interactive (spawn + auto-cleanup on 'done')" />
                             <div className="d-flex flex-wrap gap-3 mb-3">
                                 {/* @ts-ignore */}
                                 <gc-metal-button onClick={() => fire('normal')}>Hit</gc-metal-button>
@@ -90,7 +100,8 @@ const DamageNumberDemo: React.FC = () => {
                             <div className="mt-3" style={{ fontFamily: 'var(--fg-mono)', color: 'var(--fg-gold-bright)' }}>
                                 'done' fired: {doneCount}
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

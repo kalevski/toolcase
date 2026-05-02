@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ScreenFlashDemo: React.FC = () => {
@@ -33,7 +33,10 @@ const ScreenFlashDemo: React.FC = () => {
                         description="Full-bleed overlay flash. Fires on `trigger` attribute change, fades over `duration`, emits 'done'."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Trigger">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Trigger" />
                             <div className="d-flex align-items-center gap-3 flex-wrap">
                                 {/* @ts-ignore */}
                                 <gc-metal-button onClick={() => fire('#ffffff')}>White flash</gc-metal-button>
@@ -47,7 +50,8 @@ const ScreenFlashDemo: React.FC = () => {
                             </div>
                             {/* @ts-ignore */}
                             <gc-screen-flash ref={flashRef} flash-opacity="0.6" duration="220" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

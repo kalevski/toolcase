@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const MARKERS = [
@@ -27,14 +27,22 @@ const MinimapDemo: React.FC = () => {
                         description="Square framed minimap projecting world coordinates and markers around player."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="With markers">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="With markers" />
                             {/* @ts-ignore */}
                             <gc-minimap ref={ref} world-x="0" world-y="0" world-width="100" world-height="100" size="220" />
-                        </SectionCard>
-                        <SectionCard title="Rotated">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Rotated" />
                             {/* @ts-ignore */}
                             <gc-minimap world-x="0" world-y="0" world-width="100" world-height="100" size="180" rotation="45" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

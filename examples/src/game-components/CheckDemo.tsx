@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CheckDemo: React.FC = () => {
@@ -24,26 +24,38 @@ const CheckDemo: React.FC = () => {
                         description="Square checkbox. Emits 'change' on click or Space/Enter."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Interactive — state: ${on ? 'on' : 'off'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Interactive — state: ${on ? 'on' : 'off'}`} />
                             {/* @ts-ignore */}
                             <gc-check ref={ref} {...(on ? { on: '' } : {})} />
-                        </SectionCard>
-                        <SectionCard title="Default off / on">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default off / on" />
                             <div className="d-flex gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-check />
                                 {/* @ts-ignore */}
                                 <gc-check on />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Disabled">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Disabled" />
                             <div className="d-flex gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-check disabled />
                                 {/* @ts-ignore */}
                                 <gc-check on disabled />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const NetworkStatusIconDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const NetworkStatusIconDemo: React.FC = () => (
                     description="4-bar wifi-style indicator. Quality from ping + loss + connected. Tiers: good (4), ok (3), warning (2), bad (1), offline (0)."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Quality tiers (with label)">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Quality tiers (with label)" />
                         <div className="d-flex align-items-center gap-4">
                             {/* @ts-ignore */}
                             <gc-network-status-icon connected ping="24" show-label />
@@ -25,9 +28,16 @@ const NetworkStatusIconDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-network-status-icon show-label />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Without label (HUD-compact)">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Without label (HUD-compact)" />
                         <div className="d-flex align-items-center gap-4">
                             {/* @ts-ignore */}
                             <gc-network-status-icon connected ping="24" />
@@ -40,9 +50,16 @@ const NetworkStatusIconDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-network-status-icon />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Loss-driven downgrade (good ping, high loss)">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Loss-driven downgrade (good ping, high loss)" />
                         <div className="d-flex align-items-center gap-4">
                             {/* @ts-ignore */}
                             <gc-network-status-icon connected ping="30" loss="0" show-label />
@@ -53,9 +70,16 @@ const NetworkStatusIconDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-network-status-icon connected ping="30" loss="6" show-label />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Sizes">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Sizes" />
                         <div className="d-flex align-items-center gap-4">
                             {/* @ts-ignore */}
                             <gc-network-status-icon connected ping="50" size="12" />
@@ -66,7 +90,8 @@ const NetworkStatusIconDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-network-status-icon connected ping="50" size="36" show-label />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

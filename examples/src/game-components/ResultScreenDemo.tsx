@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const STATS = [
@@ -69,18 +69,30 @@ const ResultScreenDemo: React.FC = () => {
                         description="Round-end summary with stats, rewards, and action row. Game Over and Victory variants extend it."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Generic — last action: ${last || '—'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Generic — last action: ${last || '—'}`} />
                             {/* @ts-ignore */}
                             <gc-result-screen ref={refResult} title-text="Round Complete" subtitle="A clean run through the cinder gates." />
-                        </SectionCard>
-                        <SectionCard title="Victory variant">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Victory variant" />
                             {/* @ts-ignore */}
                             <gc-victory-screen ref={refVictory} subtitle="The flame-warden falls, and the gates yield." />
-                        </SectionCard>
-                        <SectionCard title="Game Over variant">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Game Over variant" />
                             {/* @ts-ignore */}
                             <gc-game-over-screen ref={refGameOver} subtitle="Your name is added to the chapel's stone." />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

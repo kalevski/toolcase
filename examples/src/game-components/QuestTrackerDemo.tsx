@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const QUESTS = [
@@ -40,12 +40,16 @@ const QuestTrackerDemo: React.FC = () => {
                         description="HUD-side quest tracker showing active quests and per-objective progress."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Active quests">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Active quests" />
                             <div style={{ maxWidth: 360 }}>
                                 {/* @ts-ignore */}
                                 <gc-quest-tracker ref={ref} tracker-title="Active Quests" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

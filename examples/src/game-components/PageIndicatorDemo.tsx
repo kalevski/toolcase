@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const PageIndicatorDemo: React.FC = () => {
@@ -31,12 +31,22 @@ const PageIndicatorDemo: React.FC = () => {
                         description="Diamond-shaped page dots. Click emits 'select' with {index}. Props: count, index, size, gap, color, activeColor."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default (5 pages, index 2)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default (5 pages, index 2)" />
                             {/* @ts-ignore */}
                             <gc-page-indicator count="5" index="2" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Interactive (click a dot)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Interactive (click a dot)" />
                             <div className="d-flex align-items-center gap-3">
                                 {/* @ts-ignore */}
                                 <gc-page-indicator ref={ref} count="7" index={activeIndex} />
@@ -44,9 +54,16 @@ const PageIndicatorDemo: React.FC = () => {
                                     page {activeIndex + 1} / 7
                                 </span>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Custom colors + larger size">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Custom colors + larger size" />
                             {/* @ts-ignore */}
                             <gc-page-indicator
                                 count="6"
@@ -56,7 +73,8 @@ const PageIndicatorDemo: React.FC = () => {
                                 color="var(--fg-gold-shadow)"
                                 active-color="var(--fg-mythic)"
                             />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

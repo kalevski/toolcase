@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const WaypointMarkerDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const WaypointMarkerDemo: React.FC = () => (
                     description="Static waypoint marker with custom icon, label, and distance readout."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Variants">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Variants" />
                         <div style={{ position: 'relative', height: 220, background: 'rgba(0,0,0,0.4)', border: '1px solid var(--fg-gold-deep)' }}>
                             {/* @ts-ignore */}
                             <gc-waypoint-marker x="100" y="160" label="Camp" distance="64" icon="🏕" />
@@ -21,7 +24,8 @@ const WaypointMarkerDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-waypoint-marker x="420" y="150" label="Quest" distance="2400" icon="❖" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

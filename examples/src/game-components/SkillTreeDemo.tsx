@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const NODES = [
@@ -54,10 +54,14 @@ const SkillTreeDemo: React.FC = () => {
                         description="Talent tree with diamond-rotated nodes, unlock edges, ranks, and remaining-points readout."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last — ${last}`} />
                             {/* @ts-ignore */}
                             <gc-skill-tree ref={ref} selected-id="s4" points="3" width="620" height="380" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

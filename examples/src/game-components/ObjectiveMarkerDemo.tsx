@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ObjectiveMarkerDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const ObjectiveMarkerDemo: React.FC = () => (
                     description="Pulsing diamond marker with label and distance, anchored to absolute world-space coordinates."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Static + pulsing">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Static + pulsing" />
                         <div style={{ position: 'relative', height: 220, background: 'rgba(0,0,0,0.4)', border: '1px solid var(--fg-gold-deep)' }}>
                             {/* @ts-ignore */}
                             <gc-objective-marker x="120" y="180" label="Capture" distance="42" pulse />
@@ -21,7 +24,8 @@ const ObjectiveMarkerDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-objective-marker x="440" y="200" label="Boss" distance="1240" color="#d44a3a" pulse />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

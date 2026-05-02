@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const TIERS = Array.from({ length: 12 }, (_, i) => {
@@ -40,12 +40,16 @@ const BattlePassDemo: React.FC = () => {
                         description="Free/premium reward track with XP progress, season header, and per-tier claim cells."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last — ${last}`} />
                             <div style={{ maxWidth: 760 }}>
                                 {/* @ts-ignore */}
                                 <gc-battle-pass ref={ref} season-name="Season of Embers" season-end="2 weeks" current-level="5" current-xp="640" has-premium />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

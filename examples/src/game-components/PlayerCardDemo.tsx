@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const STATS = [
@@ -46,14 +46,22 @@ const PlayerCardDemo: React.FC = () => {
                         description="Friend / roster card with rank, level, stat grid, presence, and action row."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Online — last action: ${last || '—'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Online — last action: ${last || '—'}`} />
                             {/* @ts-ignore */}
                             <gc-player-card ref={ref} player-name="Veyra Stormwake" card-title="Sworn of the Cinder Court" rank="Grandmaster" level={142} online-status="in-game" />
-                        </SectionCard>
-                        <SectionCard title="Offline">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Offline" />
                             {/* @ts-ignore */}
                             <gc-player-card player-name="Lir of Ashvale" card-title="Wandering Skald" rank="Veteran" level={88} online-status="offline" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

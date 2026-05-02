@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ShakeContainerDemo: React.FC = () => {
@@ -22,7 +22,10 @@ const ShakeContainerDemo: React.FC = () => {
                         description="rAF-driven randomized offset wrapper. Re-shakes when `trigger` attribute changes; intensity decays over `duration`."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Light shake (intensity 4, duration 250)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Light shake (intensity 4, duration 250)" />
                             <div className="d-flex align-items-center gap-3 flex-wrap">
                                 {/* @ts-ignore */}
                                 <gc-metal-button onClick={() => fire(lightRef)}>Shake</gc-metal-button>
@@ -38,9 +41,16 @@ const ShakeContainerDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                 </gc-shake-container>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Heavy shake (intensity 14, duration 600)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Heavy shake (intensity 14, duration 600)" />
                             <div className="d-flex align-items-center gap-3 flex-wrap">
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="danger" onClick={() => fire(heavyRef)}>Boss slam</gc-metal-button>
@@ -56,7 +66,8 @@ const ShakeContainerDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                 </gc-shake-container>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

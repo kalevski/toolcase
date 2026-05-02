@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const PressAnyKeyDemo: React.FC = () => {
@@ -24,12 +24,16 @@ const PressAnyKeyDemo: React.FC = () => {
                         description="Pulsing prompt that emits continue on any keydown or mousedown. Use on splash/title screens."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last — ${last}`} />
                             <div style={{ padding: 60, textAlign: 'center', background: 'radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%)', border: '1px solid var(--fg-gold-deep)' }}>
                                 {/* @ts-ignore */}
                                 <gc-press-any-key ref={ref} text="Press Any Key" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

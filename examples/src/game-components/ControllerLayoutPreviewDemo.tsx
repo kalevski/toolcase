@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ControllerLayoutPreviewDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const ControllerLayoutPreviewDemo: React.FC = () => (
                     description="Stylised controller silhouette with layout-specific face button glyphs and colors."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="All layouts">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="All layouts" />
                         <div className="d-flex flex-wrap gap-3">
                             {/* @ts-ignore */}
                             <gc-controller-layout-preview layout="xbox" />
@@ -23,7 +26,8 @@ const ControllerLayoutPreviewDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-controller-layout-preview layout="generic" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

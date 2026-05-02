@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const LevelHeaderDemo: React.FC = () => (
@@ -12,12 +12,16 @@ const LevelHeaderDemo: React.FC = () => (
                     description="Account/character level badge with title, XP bar, and next-unlock label."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default" />
                         <div style={{ maxWidth: 520, background: 'rgba(0,0,0,0.3)', border: '1px solid var(--fg-gold-deep)' }}>
                             {/* @ts-ignore */}
                             <gc-level-header level="42" title="Aldric of the Vale" xp="6480" xp-max="9000" next-label="Mystic Blade" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

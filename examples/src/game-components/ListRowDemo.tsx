@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 type Server = { id: string; name: string; region: string; ping: number }
@@ -37,7 +37,10 @@ const ListRowDemo: React.FC = () => {
                         description="Selectable list row. Reflects selected attribute. Optional accent color for the left edge stripe. Click/Enter/Space emits 'select'."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Plain rows">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Plain rows" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
@@ -60,9 +63,16 @@ const ListRowDemo: React.FC = () => {
                                 </gc-list-row>
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Selected with custom accent">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Selected with custom accent" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
@@ -82,9 +92,16 @@ const ListRowDemo: React.FC = () => {
                                 </gc-list-row>
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Interactive (server browser)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Interactive (server browser)" />
                             <div ref={containerRef}>
                                 {/* @ts-ignore */}
                                 <gc-panel bordered>
@@ -108,7 +125,8 @@ const ListRowDemo: React.FC = () => {
                             <div className="mt-3" style={{ fontFamily: 'var(--fg-mono)', color: 'var(--fg-gold-bright)' }}>
                                 selected: {selected}
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

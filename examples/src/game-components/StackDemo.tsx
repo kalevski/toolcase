@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const Box = ({ label }: { label: string }) => (
@@ -30,7 +30,10 @@ const StackDemo: React.FC = () => (
                     description="Layout primitive. Flex container with direction, gap, align, justify, wrap, and inline props."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Vertical (default)">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Vertical (default)" />
                         {/* @ts-ignore */}
                         <gc-stack gap="8px">
                             <Box label="Item A" />
@@ -38,9 +41,16 @@ const StackDemo: React.FC = () => (
                             <Box label="Item C" />
                             {/* @ts-ignore */}
                         </gc-stack>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Horizontal">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Horizontal" />
                         {/* @ts-ignore */}
                         <gc-stack direction="horizontal" gap="8px">
                             <Box label="Item A" />
@@ -48,9 +58,16 @@ const StackDemo: React.FC = () => (
                             <Box label="Item C" />
                             {/* @ts-ignore */}
                         </gc-stack>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Horizontal — center aligned">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Horizontal — center aligned" />
                         {/* @ts-ignore */}
                         <gc-stack direction="horizontal" gap="12px" align="center">
                             <Box label="Short" />
@@ -58,9 +75,16 @@ const StackDemo: React.FC = () => (
                             <Box label="Short" />
                             {/* @ts-ignore */}
                         </gc-stack>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Horizontal — space-between justified">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Horizontal — space-between justified" />
                         {/* @ts-ignore */}
                         <gc-stack direction="horizontal" gap="8px" justify="space-between" style={{ width: '100%' }}>
                             <Box label="Left" />
@@ -68,9 +92,16 @@ const StackDemo: React.FC = () => (
                             <Box label="Right" />
                             {/* @ts-ignore */}
                         </gc-stack>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Wrap">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Wrap" />
                         {/* @ts-ignore */}
                         <gc-stack direction="horizontal" gap="6px" wrap style={{ maxWidth: '260px' }}>
                             {['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta'].map(label => (
@@ -78,9 +109,16 @@ const StackDemo: React.FC = () => (
                             ))}
                             {/* @ts-ignore */}
                         </gc-stack>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Inline">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Inline" />
                         <span style={{ color: 'var(--fg-parch-3, #b8a47e)', fontFamily: 'var(--fg-body, serif)', fontSize: '14px' }}>
                             Inline stack:{' '}
                         </span>
@@ -90,7 +128,8 @@ const StackDemo: React.FC = () => (
                             <Box label="B" />
                             {/* @ts-ignore */}
                         </gc-stack>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

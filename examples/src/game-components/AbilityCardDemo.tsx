@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const AbilityCardDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const AbilityCardDemo: React.FC = () => (
                     description="Rarity-tinted card showing ability icon, name, description, cooldown/cost/range, keybind."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Common">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Common" />
                         {/* @ts-ignore */}
                         <gc-ability-card
                             ability-name="Slash"
@@ -24,8 +27,12 @@ const AbilityCardDemo: React.FC = () => (
                             keybind="1"
                             rarity="common"
                         />
-                    </SectionCard>
-                    <SectionCard title="Rare">
+                    {/* @ts-ignore */}
+                    </gc-panel>
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Rare" />
                         {/* @ts-ignore */}
                         <gc-ability-card
                             ability-name="Fireball"
@@ -37,8 +44,12 @@ const AbilityCardDemo: React.FC = () => (
                             keybind="Q"
                             rarity="rare"
                         />
-                    </SectionCard>
-                    <SectionCard title="Epic">
+                    {/* @ts-ignore */}
+                    </gc-panel>
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Epic" />
                         {/* @ts-ignore */}
                         <gc-ability-card
                             ability-name="Frost Nova"
@@ -50,8 +61,12 @@ const AbilityCardDemo: React.FC = () => (
                             keybind="E"
                             rarity="epic"
                         />
-                    </SectionCard>
-                    <SectionCard title="Legendary">
+                    {/* @ts-ignore */}
+                    </gc-panel>
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Legendary" />
                         {/* @ts-ignore */}
                         <gc-ability-card
                             ability-name="Wrath of the Sun"
@@ -63,7 +78,8 @@ const AbilityCardDemo: React.FC = () => (
                             keybind="R"
                             rarity="legendary"
                         />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

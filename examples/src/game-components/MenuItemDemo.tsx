@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const items = ['Continue', 'New Game', 'Load', 'Settings', 'Quit']
@@ -29,7 +29,10 @@ const MenuItemDemo: React.FC = () => {
                         description="Menu row with optional caret marker, icon, label, hotkey. Selected reflects to attribute. Click/Enter/Space emits 'select' with {label}."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Plain items">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Plain items" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
@@ -42,9 +45,16 @@ const MenuItemDemo: React.FC = () => {
                                 <gc-menu-item label="Quit" disabled />
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="With icons + hotkeys">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="With icons + hotkeys" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
@@ -57,9 +67,16 @@ const MenuItemDemo: React.FC = () => {
                                 <gc-menu-item label="Quest Log" icon="bi-journal-text" hotkey="J" />
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Interactive selection">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Interactive selection" />
                             <div ref={containerRef}>
                                 {/* @ts-ignore */}
                                 <gc-panel bordered>
@@ -77,7 +94,8 @@ const MenuItemDemo: React.FC = () => {
                             <div className="mt-3" style={{ fontFamily: 'var(--fg-mono)', color: 'var(--fg-gold-bright)' }}>
                                 active: {active}
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

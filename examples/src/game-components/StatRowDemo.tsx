@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const StatRowDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const StatRowDemo: React.FC = () => (
                     description="Single label/value row with optional accent color and trend (up/down) glyph + delta."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default" />
                         <div style={{ maxWidth: 360, padding: 12, background: 'rgba(0,0,0,0.4)' }}>
                             {/* @ts-ignore */}
                             <gc-stat-row label="Strength" value="48" trend="3" />
@@ -23,7 +26,8 @@ const StatRowDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-stat-row label="Crit Rate" value="14%" accent="#d44a3a" trend="1" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

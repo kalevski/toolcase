@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CHANNELS = [
@@ -53,10 +53,14 @@ const ChatWindowDemo: React.FC = () => {
                         description="Multi-channel chat panel with tabs, message log, and compose input."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last — ${last}`} />
                             {/* @ts-ignore */}
                             <gc-chat-window ref={ref} active-channel="all" width="420" height="320" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 import type { TransitionWipeDirection } from '@toolcase/game-components'
 
@@ -39,7 +39,10 @@ const TransitionWipeDemo: React.FC = () => {
                         description="Full-screen scene transition. Wipes in by direction, emits 'complete' after duration."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Direction variants">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Direction variants" />
                             <div className="d-flex flex-wrap gap-2 align-items-center">
                                 {directions.map(d => (
                                     /* @ts-ignore */
@@ -51,7 +54,8 @@ const TransitionWipeDemo: React.FC = () => {
                             </div>
                             {/* @ts-ignore */}
                             <gc-transition-wipe ref={wipeRef} duration="500" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

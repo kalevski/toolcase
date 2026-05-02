@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SettingRowsDemo: React.FC = () => {
@@ -30,7 +30,10 @@ const SettingRowsDemo: React.FC = () => {
                         description="Setting list components extending SettingRowBase: sliders, toggles, selects, preset picker, reset."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Sliders">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Sliders" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
@@ -43,9 +46,16 @@ const SettingRowsDemo: React.FC = () => {
                                 <gc-mouse-sensitivity value="2.4" ads="1.2" description="Camera pan rate per pixel of mouse delta." onChange={onChange('Mouse')} />
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Toggles">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Toggles" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
@@ -58,9 +68,16 @@ const SettingRowsDemo: React.FC = () => {
                                 <gc-toggle-row row-label="Motion blur" description="Adds per-object motion blur to fast objects." onChange={onChange('Motion blur')} />
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Selects & preset">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Selects & preset" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
@@ -71,20 +88,35 @@ const SettingRowsDemo: React.FC = () => {
                                 <gc-graphics-preset-picker value="high" description="Quick set of all graphics options." onChange={onChange('Quality')} />
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Reset to defaults">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Reset to defaults" />
                             {/* @ts-ignore */}
                             <gc-panel bordered>
                                 {/* @ts-ignore */}
                                 <gc-reset-to-defaults description="Returns all settings to factory values." onReset={() => setLastChange('Reset → defaults')} />
                                 {/* @ts-ignore */}
                             </gc-panel>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Last event">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Last event" />
                             <div style={{ fontFamily: 'var(--fg-mono)', color: 'var(--fg-gold-bright)' }}>{lastChange}</div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const BossBarDemo: React.FC = () => {
@@ -21,7 +21,10 @@ const BossBarDemo: React.FC = () => {
                         description="Wide HP bar with name, epithet, phase indicator and phase-tick notches."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default" />
                             <div style={{ width: 520 }}>
                                 {/* @ts-ignore */}
                                 <gc-boss-bar
@@ -32,9 +35,16 @@ const BossBarDemo: React.FC = () => {
                                     hp-max="5000"
                                 />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="With phase ticks (0.25, 0.5, 0.75)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="With phase ticks (0.25, 0.5, 0.75)" />
                             <div style={{ width: 520 }}>
                                 {/* @ts-ignore */}
                                 <gc-boss-bar
@@ -46,9 +56,16 @@ const BossBarDemo: React.FC = () => {
                                     hp-max="4000"
                                 />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Near-death (sliver of HP)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Near-death (sliver of HP)" />
                             <div style={{ width: 520 }}>
                                 {/* @ts-ignore */}
                                 <gc-boss-bar
@@ -59,7 +76,8 @@ const BossBarDemo: React.FC = () => {
                                     hp-max="6000"
                                 />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

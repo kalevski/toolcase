@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const BuffsDemo: React.FC = () => {
@@ -27,7 +27,10 @@ const BuffsDemo: React.FC = () => {
                         description="Single buff icon (gc-buff-icon) and bar of multiple (gc-buff-bar) with cooldown overlay + stack count."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Single icon — buff vs debuff">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Single icon — buff vs debuff" />
                             <div className="d-flex gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-buff-icon kind="buff" glyph="⚡" time="18s" />
@@ -38,9 +41,16 @@ const BuffsDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-buff-icon kind="debuff" glyph="🔥" time="3s" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Sizes (24, 36, 56)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Sizes (24, 36, 56)" />
                             <div className="d-flex gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-buff-icon kind="buff" glyph="⚕" time="10s" size="24" />
@@ -49,12 +59,20 @@ const BuffsDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-buff-icon kind="buff" glyph="⚕" time="10s" size="56" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Bar with cooldown overlay + stacks">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Bar with cooldown overlay + stacks" />
                             {/* @ts-ignore */}
                             <gc-buff-bar ref={barRef} icon-size="40" gap="8px" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

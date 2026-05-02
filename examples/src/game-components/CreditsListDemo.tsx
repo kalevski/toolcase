@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SECTIONS = [
@@ -28,12 +28,16 @@ const CreditsListDemo: React.FC = () => {
                         description="Static credits roster with role headings and names."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default" />
                             <div style={{ maxWidth: 480, padding: 24, background: 'rgba(0,0,0,0.4)' }}>
                                 {/* @ts-ignore */}
                                 <gc-credits-list ref={ref} />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const OPTIONS = [
@@ -42,15 +42,26 @@ const ComboBoxDemo: React.FC = () => {
                         description="Searchable dropdown. Filter by label/value/keywords. Emits change."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Default — value: ${value}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Default — value: ${value}`} />
                             {/* @ts-ignore */}
                             <gc-combo-box ref={refDefault} value={value} placeholder="Choose race…" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Disabled">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Disabled" />
                             {/* @ts-ignore */}
                             <gc-combo-box ref={refDisabled} disabled placeholder="Locked" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

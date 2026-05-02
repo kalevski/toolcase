@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const NODES = [
@@ -51,10 +51,14 @@ const LevelSelectDemo: React.FC = () => {
                         description="World map with level nodes, connecting edges, locked/completed states, and star ratings."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last — ${last}`} />
                             {/* @ts-ignore */}
                             <gc-level-select ref={ref} selected-id="n3" width="640" height="320" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const RarityChipDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const RarityChipDemo: React.FC = () => (
                     description="Mono uppercase chip colored by item rarity. Prop: rarity (common|uncommon|rare|epic|legendary|mythic)."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="All rarities">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="All rarities" />
                         <div className="d-flex flex-wrap gap-2">
                             {/* @ts-ignore */}
                             <gc-rarity-chip rarity="common" />
@@ -27,7 +30,8 @@ const RarityChipDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-rarity-chip rarity="mythic" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

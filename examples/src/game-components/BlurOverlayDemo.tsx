@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const stageStyle: React.CSSProperties = {
@@ -34,25 +34,37 @@ const BlurOverlayDemo: React.FC = () => {
                         description="Backdrop-filter blur overlay for pause/menu defocus effects."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default (8px / dark tint)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default (8px / dark tint)" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-blur-overlay />
                                 <div style={labelStyle}>Paused</div>
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Strong blur (16px)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Strong blur (16px)" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-blur-overlay blur-amount="16px" />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Clear tint">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Clear tint" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-blur-overlay blur-amount="4px" background="transparent" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

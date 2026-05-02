@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ScoreDisplayDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const ScoreDisplayDemo: React.FC = () => (
                     description="Score readout with optional eyebrow label, multiplier badge (shown when ≠1), and alignment. Score formatted with toLocaleString."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Plain (no label, no multiplier)">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Plain (no label, no multiplier)" />
                         <div className="d-flex gap-5">
                             {/* @ts-ignore */}
                             <gc-score-display score="1240" />
@@ -21,9 +24,16 @@ const ScoreDisplayDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-score-display score="9999999" font-size="44" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="With label">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="With label" />
                         <div className="d-flex gap-5">
                             {/* @ts-ignore */}
                             <gc-score-display label="Score" score="42180" />
@@ -32,9 +42,16 @@ const ScoreDisplayDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-score-display label="Round" score="500" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="With multiplier">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="With multiplier" />
                         <div className="d-flex gap-5">
                             {/* @ts-ignore */}
                             <gc-score-display label="Score" score="1240" multiplier="2" />
@@ -46,9 +63,16 @@ const ScoreDisplayDemo: React.FC = () => (
                                 ← multiplier=1 hides the badge
                             </span>
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Alignment">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Alignment" />
                         <div className="d-flex flex-column gap-3" style={{ background: 'var(--fg-ink)', padding: 16 }}>
                             {/* @ts-ignore */}
                             <gc-score-display label="Left" score="12345" align="left" style={{ width: '100%' }} />
@@ -57,7 +81,8 @@ const ScoreDisplayDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-score-display label="Right" score="12345" align="right" style={{ width: '100%' }} />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

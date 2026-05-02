@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const TitleDemo: React.FC = () => (
@@ -12,25 +12,50 @@ const TitleDemo: React.FC = () => (
                     description="Display caps title in gold-bright. Prop: size (px)."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default (18px)">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default (18px)" />
                         {/* @ts-ignore */}
                         <gc-title>Inventory</gc-title>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Size 14">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Size 14" />
                         {/* @ts-ignore */}
                         <gc-title size={14}>Stats</gc-title>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Size 26">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Size 26" />
                         {/* @ts-ignore */}
                         <gc-title size={26}>Realm of Embers</gc-title>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Size 36">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Size 36" />
                         {/* @ts-ignore */}
                         <gc-title size={36}>Codex Arcana</gc-title>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

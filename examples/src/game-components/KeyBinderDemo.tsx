@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const KeyBinderDemo: React.FC = () => {
@@ -29,22 +29,38 @@ const KeyBinderDemo: React.FC = () => {
                         description="Click to capture next keystroke. Escape cancels. Emits 'change' or 'cancel'."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Interactive — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Interactive — ${last}`} />
                             {/* @ts-ignore */}
                             <gc-key-binder ref={ref} />
-                        </SectionCard>
-                        <SectionCard title="Pre-bound">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Pre-bound" />
                             {/* @ts-ignore */}
                             <gc-key-binder value="W" />
-                        </SectionCard>
-                        <SectionCard title="Empty / placeholder">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Empty / placeholder" />
                             {/* @ts-ignore */}
                             <gc-key-binder placeholder="Press to bind…" />
-                        </SectionCard>
-                        <SectionCard title="Disabled">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Disabled" />
                             {/* @ts-ignore */}
                             <gc-key-binder value="Space" disabled />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

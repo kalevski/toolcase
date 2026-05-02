@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const LINES = [
@@ -52,12 +52,22 @@ const DialogueBoxDemo: React.FC = () => {
                         description="Typing-animated dialogue. Click skips/advances. Choices replace advance."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Click-to-advance">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Click-to-advance" />
                             {/* @ts-ignore */}
                             <gc-dialogue-box ref={refLine} speaker={line.speaker} text={line.text} typing-speed="40" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title={`With choices — picked: ${picked || '—'}`}>
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title={`With choices — picked: ${picked || '—'}`} />
                             {/* @ts-ignore */}
                             <gc-dialogue-box
                                 ref={refChoice}
@@ -65,7 +75,8 @@ const DialogueBoxDemo: React.FC = () => {
                                 text="The path forks here, traveller. Choose carefully."
                                 typing-speed="50"
                             />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

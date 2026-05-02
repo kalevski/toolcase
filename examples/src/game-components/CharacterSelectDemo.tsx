@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CHARACTERS = [
@@ -85,10 +85,14 @@ const CharacterSelectDemo: React.FC = () => {
                         description="Roster grid with portrait + role tile, side-detail panel, lock state, click to select / dblclick to confirm."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Selected: ${selected} — confirmed: ${confirmed || '—'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Selected: ${selected} — confirmed: ${confirmed || '—'}`} />
                             {/* @ts-ignore */}
                             <gc-character-select ref={ref} selected-id={selected} />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

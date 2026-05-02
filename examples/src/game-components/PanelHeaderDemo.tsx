@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const PanelHeaderDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const PanelHeaderDemo: React.FC = () => (
                     description="Canonical eyebrow + title + diamond divider header for any framed panel or screen."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Sizes">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Sizes" />
                         <div className="d-flex flex-column gap-3" style={{ maxWidth: 480 }}>
                             {/* @ts-ignore */}
                             <gc-panel-header eyebrow="Chapter I" header-title="The Long Road" title-size="sm" />
@@ -23,7 +26,8 @@ const PanelHeaderDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-panel-header eyebrow="Chapter IV" header-title="The Long Road" title-size="xl" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

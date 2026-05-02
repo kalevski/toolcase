@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SLOTS = [
@@ -41,10 +41,14 @@ const EquipmentDollDemo: React.FC = () => {
                         description="Character paper-doll with absolute-positioned gc-item-slot anchors at percent coords."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Selected: ${selectedId}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Selected: ${selectedId}`} />
                             {/* @ts-ignore */}
                             <gc-equipment-doll ref={ref} width="280" height="400" slot-size="56" selected-id={selectedId} silhouette="🛡" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

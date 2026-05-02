@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const OPTIONS = [
@@ -54,7 +54,10 @@ const RadialWheelDemo: React.FC = () => {
                         description="Modal radial menu with hover label, disabled options, Escape and backdrop close."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last — ${last}`} />
                             <button
                                 type="button"
                                 onClick={() => setOpen(true)}
@@ -74,7 +77,8 @@ const RadialWheelDemo: React.FC = () => {
                             </button>
                             {/* @ts-ignore */}
                             <gc-radial-wheel ref={ref} radius="100" option-size="56" center-label="Choose" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

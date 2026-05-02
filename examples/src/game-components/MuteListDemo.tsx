@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const PLAYERS = [
@@ -43,18 +43,26 @@ const MuteListDemo: React.FC = () => {
                         description="List of muted players with reason, timestamp, and per-row unmute action."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Populated — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Populated — ${last}`} />
                             <div style={{ maxWidth: 460, background: 'rgba(0,0,0,0.3)' }}>
                                 {/* @ts-ignore */}
                                 <gc-mute-list ref={ref} />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Empty">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Empty" />
                             <div style={{ maxWidth: 460, background: 'rgba(0,0,0,0.3)' }}>
                                 {/* @ts-ignore */}
                                 <gc-mute-list ref={emptyRef} />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

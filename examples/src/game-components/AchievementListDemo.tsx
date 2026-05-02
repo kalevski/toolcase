@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ACHIEVEMENTS = [
@@ -28,12 +28,16 @@ const AchievementListDemo: React.FC = () => {
                         description="Achievement list with unlocked, in-progress (with bar), locked, and secret rows."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default" />
                             <div style={{ maxWidth: 540, background: 'rgba(0,0,0,0.3)' }}>
                                 {/* @ts-ignore */}
                                 <gc-achievement-list ref={ref} />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SECTIONS = [
@@ -38,12 +38,16 @@ const CreditsScrollDemo: React.FC = () => {
                         description="Auto-scrolling end-credits with click-to-pause; emits complete when track passes the viewport."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last — ${last}`} />
                             <div style={{ width: 480, height: 320, border: '1px solid var(--fg-gold-deep)' }}>
                                 {/* @ts-ignore */}
                                 <gc-credits-scroll ref={ref} speed="40" scroll-title="Toolcase Studio" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

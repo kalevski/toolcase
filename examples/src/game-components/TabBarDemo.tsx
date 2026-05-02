@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 type TabItem = { id: string, label: string, icon?: string }
@@ -41,15 +41,26 @@ const TabBarDemo: React.FC = () => {
                         description="Horizontal tab navigation. Sizes sm/md, emits change."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Default (md) — active: ${active}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Default (md) — active: ${active}`} />
                             {/* @ts-ignore */}
                             <gc-tab-bar ref={ref} active-id={active} />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Small">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Small" />
                             {/* @ts-ignore */}
                             <gc-tab-bar ref={refSm} size="sm" active-id="audio" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

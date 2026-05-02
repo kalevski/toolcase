@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'] as const
@@ -48,10 +48,14 @@ const InventoryGridDemo: React.FC = () => {
                         description="Uniform grid of gc-item-slot — empty cells, rarity ladder, qty stacks, selectable."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Selected: ${selectedId} — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Selected: ${selectedId} — ${last}`} />
                             {/* @ts-ignore */}
                             <gc-inventory-grid ref={ref} columns="6" slot-size="56" selected-id={selectedId} />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

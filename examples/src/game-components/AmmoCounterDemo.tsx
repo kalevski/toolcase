@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const AmmoCounterDemo: React.FC = () => (
@@ -12,25 +12,50 @@ const AmmoCounterDemo: React.FC = () => (
                     description="Weapon ammo readout. Low (<20% magMax) turns blood-bright; reloading dims and shows label."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default" />
                         {/* @ts-ignore */}
                         <gc-ammo-counter weapon-name="Riftwalker" mag="24" mag-max="30" reserve="120" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Low ammo (<20%)">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Low ammo (<20%)" />
                         {/* @ts-ignore */}
                         <gc-ammo-counter weapon-name="Lichbreaker" mag="4" mag-max="30" reserve="60" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Reloading">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Reloading" />
                         {/* @ts-ignore */}
                         <gc-ammo-counter weapon-name="Stormcaller" mag="0" mag-max="30" reserve="120" reloading />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="No weapon name">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="No weapon name" />
                         {/* @ts-ignore */}
                         <gc-ammo-counter mag="12" mag-max="40" reserve="80" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

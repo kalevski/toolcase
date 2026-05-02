@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const MARKERS = [
@@ -32,7 +32,10 @@ const CompassBarDemo: React.FC = () => {
                         description="Horizontal heading strip with cardinal labels and FOV-culled markers."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Live (drag slider)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Live (drag slider)" />
                             <div className="d-flex flex-column gap-3 align-items-start">
                                 {/* @ts-ignore */}
                                 <gc-compass-bar ref={ref} fov="120" width="360" show-cardinals />
@@ -45,11 +48,16 @@ const CompassBarDemo: React.FC = () => {
                                     style={{ width: 360 }}
                                 />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Without cardinals">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Without cardinals" />
                             {/* @ts-ignore */}
                             <gc-compass-bar heading="45" fov="90" width="320" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

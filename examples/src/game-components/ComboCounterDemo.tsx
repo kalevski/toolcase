@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ComboCounterDemo: React.FC = () => {
@@ -36,7 +36,10 @@ const ComboCounterDemo: React.FC = () => {
                         description="Combo readout with eyebrow label + mono number + optional countdown bar. Hidden when combo ≤ 1."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Combo levels (no timer)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Combo levels (no timer)" />
                             <div className="d-flex align-items-end gap-5" style={{ background: 'var(--fg-ink)', padding: 24 }}>
                                 {/* @ts-ignore */}
                                 <gc-combo-counter combo="2" />
@@ -47,9 +50,16 @@ const ComboCounterDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-combo-counter combo="50" font-size="56" label="Mastery" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="With static timer bar">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="With static timer bar" />
                             <div className="d-flex align-items-end gap-5" style={{ background: 'var(--fg-ink)', padding: 24 }}>
                                 {/* @ts-ignore */}
                                 <gc-combo-counter combo="3" timer="0.85" />
@@ -58,9 +68,16 @@ const ComboCounterDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-combo-counter combo="20" timer="0.15" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Interactive (timer drains, hit to refresh)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Interactive (timer drains, hit to refresh)" />
                             <div className="d-flex flex-wrap gap-3 mb-3">
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="primary" onClick={hit}>Hit</gc-metal-button>
@@ -74,15 +91,23 @@ const ComboCounterDemo: React.FC = () => {
                             <div className="mt-3" style={{ fontFamily: 'var(--fg-mono)', color: 'var(--fg-gold-bright)' }}>
                                 combo: x{combo} · timer: {timer.toFixed(2)}
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="combo = 1 (hidden)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="combo = 1 (hidden)" />
                             <div style={{ background: 'var(--fg-ink)', padding: 24 }}>
                                 {/* @ts-ignore */}
                                 <gc-combo-counter combo="1" />
                                 <span style={{ fontFamily: 'var(--fg-mono)', color: 'var(--fg-parch-dim)' }}>(nothing rendered)</span>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

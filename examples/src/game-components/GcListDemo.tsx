@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ITEMS = [
@@ -37,12 +37,16 @@ const GcListDemo: React.FC = () => {
                         description="Generic selectable list with icon/label/meta cells. Emits select."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Selected: ${selected}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Selected: ${selected}`} />
                             <div style={{ maxWidth: 420, background: 'rgba(0,0,0,0.3)' }}>
                                 {/* @ts-ignore */}
                                 <gc-list ref={ref} selected-id={selected} />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ResourceBarsDemo: React.FC = () => {
@@ -25,7 +25,10 @@ const ResourceBarsDemo: React.FC = () => {
                         description="HP / MP / Stamina bars sharing ResourceBarBase. Props: value, max, ghost, segments, showText, label."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Basic">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Basic" />
                             <div style={{ width: 320, display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {/* @ts-ignore */}
                                 <gc-health-bar value={hp} max="100" />
@@ -34,9 +37,16 @@ const ResourceBarsDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-stamina-bar value={stam} max="100" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Labelled (label prop)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Labelled (label prop)" />
                             <div style={{ width: 320, display: 'flex', flexDirection: 'column', gap: 14 }}>
                                 {/* @ts-ignore */}
                                 <gc-health-bar value="320" max="500" label="Health" />
@@ -45,16 +55,30 @@ const ResourceBarsDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-stamina-bar value="80" max="100" label="Stamina" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="showText (centered)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="showText (centered)" />
                             <div style={{ width: 320, display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {/* @ts-ignore */}
                                 <gc-health-bar value="180" max="250" show-text />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Ghost overlay (recent damage)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Ghost overlay (recent damage)" />
                             <div style={{ width: 320, display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {/* @ts-ignore */}
                                 <gc-health-bar value={hp} max="100" ghost={ghost ?? undefined} label="HP" />
@@ -65,14 +89,22 @@ const ResourceBarsDemo: React.FC = () => {
                                     <gc-metal-button size="sm" onClick={() => { setHp(100); setGhost(null) }}>Reset</gc-metal-button>
                                 </div>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Segmented (segments=4)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Segmented (segments=4)" />
                             <div style={{ width: 320 }}>
                                 {/* @ts-ignore */}
                                 <gc-stamina-bar value="65" max="100" segments="4" label="Stamina" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

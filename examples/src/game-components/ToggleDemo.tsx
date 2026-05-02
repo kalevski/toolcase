@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ToggleDemo: React.FC = () => {
@@ -24,26 +24,42 @@ const ToggleDemo: React.FC = () => {
                         description="Two-state switch. Emits 'change' on click or Space/Enter."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Interactive — state: ${on ? 'on' : 'off'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Interactive — state: ${on ? 'on' : 'off'}`} />
                             {/* @ts-ignore */}
                             <gc-toggle ref={ref} {...(on ? { on: '' } : {})} />
-                        </SectionCard>
-                        <SectionCard title="Default off">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default off" />
                             {/* @ts-ignore */}
                             <gc-toggle />
-                        </SectionCard>
-                        <SectionCard title="Default on">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default on" />
                             {/* @ts-ignore */}
                             <gc-toggle on />
-                        </SectionCard>
-                        <SectionCard title="Disabled">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Disabled" />
                             <div className="d-flex gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-toggle disabled />
                                 {/* @ts-ignore */}
                                 <gc-toggle on disabled />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

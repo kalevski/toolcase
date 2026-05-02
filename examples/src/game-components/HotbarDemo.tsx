@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SLOTS = [
@@ -45,10 +45,14 @@ const HotbarDemo: React.FC = () => {
                         description="Inline strip of gc-item-slot. Selected slot highlighted via selected-id."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Selected: ${selectedId} — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Selected: ${selectedId} — ${last}`} />
                             {/* @ts-ignore */}
                             <gc-hotbar ref={ref} slot-size="56" selected-id={selectedId} />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

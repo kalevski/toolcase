@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const IconBadgeDemo: React.FC = () => (
@@ -12,12 +12,22 @@ const IconBadgeDemo: React.FC = () => (
                     description="Square gilded badge holding a single glyph. Props: glyph, size, color, bg."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default" />
                         {/* @ts-ignore */}
                         <gc-icon-badge glyph="✦" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Sizes">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Sizes" />
                         <div className="d-flex align-items-center gap-3">
                             {/* @ts-ignore */}
                             <gc-icon-badge glyph="⚔" size="20" />
@@ -28,9 +38,16 @@ const IconBadgeDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-icon-badge glyph="⚔" size="56" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Custom color">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Custom color" />
                         <div className="d-flex gap-3">
                             {/* @ts-ignore */}
                             <gc-icon-badge glyph="🔥" color="var(--fg-fire)" />
@@ -41,9 +58,16 @@ const IconBadgeDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-icon-badge glyph="⚡" color="var(--fg-arcane-bright)" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Custom bg + color">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Custom bg + color" />
                         {/* @ts-ignore */}
                         <gc-icon-badge
                             glyph="◆"
@@ -51,7 +75,8 @@ const IconBadgeDemo: React.FC = () => (
                             color="var(--fg-gold-bright)"
                             bg="linear-gradient(180deg, #5a3a18, #2a1a0a)"
                         />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

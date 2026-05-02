@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const Cell = ({ label }: { label: string }) => (
@@ -29,37 +29,62 @@ const GridDemo: React.FC = () => (
                     description="Layout primitive. CSS grid container with columns, rows, gap, and cellSize props."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="3 columns — fixed cell size">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="3 columns — fixed cell size" />
                         {/* @ts-ignore */}
                         <gc-grid columns="3" cell-size="80px" gap="6px">
                             {['A', 'B', 'C', 'D', 'E', 'F'].map(l => <Cell key={l} label={l} />)}
                             {/* @ts-ignore */}
                         </gc-grid>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="4 columns — 1fr (fluid)">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="4 columns — 1fr (fluid)" />
                         {/* @ts-ignore */}
                         <gc-grid columns="4" gap="8px">
                             {['Sword', 'Shield', 'Helm', 'Boots', 'Gloves', 'Cloak', 'Ring', 'Amulet'].map(l => <Cell key={l} label={l} />)}
                             {/* @ts-ignore */}
                         </gc-grid>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="3×3 grid — fixed cell size">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="3×3 grid — fixed cell size" />
                         {/* @ts-ignore */}
                         <gc-grid columns="3" rows="3" cell-size="64px" gap="4px">
                             {Array.from({ length: 9 }, (_, i) => <Cell key={i} label={String(i + 1)} />)}
                             {/* @ts-ignore */}
                         </gc-grid>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="2 columns — 12px gap">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="2 columns — 12px gap" />
                         {/* @ts-ignore */}
                         <gc-grid columns="2" gap="12px">
                             {['Alpha', 'Beta', 'Gamma', 'Delta'].map(l => <Cell key={l} label={l} />)}
                             {/* @ts-ignore */}
                         </gc-grid>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

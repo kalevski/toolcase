@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ConfirmDialogDemo: React.FC = () => {
@@ -31,14 +31,18 @@ const ConfirmDialogDemo: React.FC = () => {
                         description="Modal yes/no dialog. Enter confirms, Escape cancels."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Action — last: ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Action — last: ${last}`} />
                             <div className="d-flex gap-3">
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="primary" onClick={() => { setDanger(false); setOpen(true) }}>Open primary</gc-metal-button>
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="danger" onClick={() => { setDanger(true); setOpen(true) }}>Open danger</gc-metal-button>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

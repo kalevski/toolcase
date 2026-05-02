@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CURRENT = {
@@ -57,14 +57,22 @@ const ItemCompareDemo: React.FC = () => {
                         description="Two-tooltip comparison with delta column highlighting up/down stat differences."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Equipped vs Candidate">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Equipped vs Candidate" />
                             {/* @ts-ignore */}
                             <gc-item-compare ref={refBoth} />
-                        </SectionCard>
-                        <SectionCard title="No candidate">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="No candidate" />
                             {/* @ts-ignore */}
                             <gc-item-compare ref={refOne} />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

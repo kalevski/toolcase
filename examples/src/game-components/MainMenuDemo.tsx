@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 type Item = { id: string, label: string, disabled?: boolean, badge?: string }
@@ -42,7 +42,10 @@ const MainMenuDemo: React.FC = () => {
                         description="Title screen menu list with arrow-key nav. Selected highlights gold; Enter emits select."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Hover/click to select — last activated: ${lastChoice || '—'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Hover/click to select — last activated: ${lastChoice || '—'}`} />
                             <div style={{ maxWidth: 360, padding: 24, background: 'radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%)' }}>
                                 {/* @ts-ignore */}
                                 <gc-main-menu
@@ -56,7 +59,8 @@ const MainMenuDemo: React.FC = () => {
                                     }}
                                 />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

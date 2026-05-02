@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ENTRIES = [
@@ -27,12 +27,16 @@ const KillFeedDemo: React.FC = () => {
                         description="Stack of recent kill notifications with optional headshot indicator."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default" />
                             <div style={{ minHeight: 140, padding: 12, background: 'rgba(0,0,0,0.3)' }}>
                                 {/* @ts-ignore */}
                                 <gc-kill-feed ref={ref} max-visible="5" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

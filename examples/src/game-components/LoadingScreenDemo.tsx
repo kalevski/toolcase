@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const TIPS = [
@@ -38,14 +38,22 @@ const LoadingScreenDemo: React.FC = () => {
                         description="Progress bar with eyebrow, title, label row, and cycling tips."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Determinate (${Math.round(progress * 100)}%)`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Determinate (${Math.round(progress * 100)}%)`} />
                             {/* @ts-ignore */}
                             <gc-loading-screen ref={refTips} title-text="Realm of Ash" eyebrow="Loading" label="Loading shards" progress={progress} tip-title="Wisdom" />
-                        </SectionCard>
-                        <SectionCard title="Indeterminate">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Indeterminate" />
                             {/* @ts-ignore */}
                             <gc-loading-screen title-text="Connecting" eyebrow="Travelling" label="Resolving sigils" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

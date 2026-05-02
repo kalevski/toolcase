@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SECTIONS = [
@@ -44,15 +44,26 @@ const LegalScreenDemo: React.FC = () => {
                         description="Multi-section legal viewer with sidebar nav and optional accept action."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Read-only">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Read-only" />
                             {/* @ts-ignore */}
                             <gc-legal-screen ref={refDefault} screen-title="Legal Notices" initial-section="eula" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title={`With Accept — last: ${last || '—'}`}>
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title={`With Accept — last: ${last || '—'}`} />
                             {/* @ts-ignore */}
                             <gc-legal-screen ref={refAccept} screen-title="Terms of Service" initial-section="privacy" show-accept />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

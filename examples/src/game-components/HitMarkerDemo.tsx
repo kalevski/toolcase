@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const HitMarkerDemo: React.FC = () => {
@@ -34,7 +34,10 @@ const HitMarkerDemo: React.FC = () => {
                         description="FPS-style crosshair X marker. Variants: normal (parch), crit (blood-bright), kill (blood + skull). Auto-hides after `duration` ms and emits 'done'."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Variants (always-on)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Variants (always-on)" />
                             <div className="d-flex align-items-center gap-4" style={{ background: 'var(--fg-ink)', padding: 24 }}>
                                 {/* @ts-ignore */}
                                 <gc-hit-marker show size="36" duration="999999" />
@@ -43,9 +46,16 @@ const HitMarkerDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-hit-marker show kill size="36" duration="999999" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Sizes">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Sizes" />
                             <div className="d-flex align-items-center gap-4" style={{ background: 'var(--fg-ink)', padding: 24 }}>
                                 {/* @ts-ignore */}
                                 <gc-hit-marker show size="16" duration="999999" />
@@ -56,9 +66,16 @@ const HitMarkerDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-hit-marker show kill size="64" duration="999999" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Interactive (auto-hide + 'done' event)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Interactive (auto-hide + 'done' event)" />
                             <div className="d-flex align-items-center gap-3 flex-wrap">
                                 {/* @ts-ignore */}
                                 <gc-metal-button onClick={() => trigger('normal')}>Hit</gc-metal-button>
@@ -74,7 +91,8 @@ const HitMarkerDemo: React.FC = () => {
                                     'done' fired: {doneCount}
                                 </span>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

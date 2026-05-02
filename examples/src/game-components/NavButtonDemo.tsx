@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const NavButtonDemo: React.FC = () => (
@@ -12,26 +12,50 @@ const NavButtonDemo: React.FC = () => (
                     description="Square gilded nav button. Kinds: back (←), close (✕). Sets aria-label automatically."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default kind=back">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default kind=back" />
                         {/* @ts-ignore */}
                         <gc-nav-button />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Kind=close">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Kind=close" />
                         {/* @ts-ignore */}
                         <gc-nav-button kind="close" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="With explicit label (aria-label override)">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="With explicit label (aria-label override)" />
                         <div className="d-flex gap-3 align-items-center">
                             {/* @ts-ignore */}
                             <gc-nav-button kind="back" label="Return to menu" />
                             {/* @ts-ignore */}
                             <gc-nav-button kind="close" label="Dismiss dialog" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Sizes (24, 36, 48, 64)">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Sizes (24, 36, 48, 64)" />
                         <div className="d-flex gap-3 align-items-center">
                             {/* @ts-ignore */}
                             <gc-nav-button kind="back" size="24" />
@@ -42,7 +66,8 @@ const NavButtonDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-nav-button kind="close" size="64" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

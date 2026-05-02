@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const PingDisplayDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const PingDisplayDemo: React.FC = () => (
                     description="Network latency readout. Color tiers: <60 success, <200 warning, else danger. Null shows em-dash."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Tiers">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Tiers" />
                         <div className="d-flex flex-column gap-2">
                             {/* @ts-ignore */}
                             <gc-ping-display ping="22" />
@@ -27,12 +30,20 @@ const PingDisplayDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-ping-display ping="999" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Unknown (no ping attribute)">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Unknown (no ping attribute)" />
                         {/* @ts-ignore */}
                         <gc-ping-display />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

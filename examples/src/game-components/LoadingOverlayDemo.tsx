@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const LoadingOverlayDemo: React.FC = () => {
@@ -27,14 +27,18 @@ const LoadingOverlayDemo: React.FC = () => {
                         description="Modal busy spinner + bar. Indeterminate when progress is null."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Determinate (auto-cycles)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Determinate (auto-cycles)" />
                             <div className="d-flex gap-3">
                                 {/* @ts-ignore */}
                                 <gc-metal-button onClick={() => { setProgress(0); setOpen(true) }}>Open</gc-metal-button>
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="ghost" onClick={() => setOpen(false)}>Close</gc-metal-button>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

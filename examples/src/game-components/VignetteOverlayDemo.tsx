@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const stageStyle: React.CSSProperties = {
@@ -21,30 +21,46 @@ const VignetteOverlayDemo: React.FC = () => {
                         description="Radial darkening overlay for cinematic frames or low-HP effect."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default (intensity 0.6)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default (intensity 0.6)" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-vignette-overlay />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Soft (0.3)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Soft (0.3)" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-vignette-overlay intensity="0.3" />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Heavy (1.0)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Heavy (1.0)" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-vignette-overlay intensity="1" />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Blood tint (low HP)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Blood tint (low HP)" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-vignette-overlay intensity="0.8" vignette-color="#a8302a" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

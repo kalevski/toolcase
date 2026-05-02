@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const rowStyle: React.CSSProperties = {
@@ -23,7 +23,10 @@ const KeyDemo: React.FC = () => (
                     description="Mono key cap badge. Slot-based — drop a single key or short combo."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Single keys">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Single keys" />
                         <div style={{ display: 'flex', gap: 8 }}>
                             {/* @ts-ignore */}
                             <gc-key>W</gc-key>
@@ -34,9 +37,16 @@ const KeyDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-key>D</gc-key>
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Wide keys">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Wide keys" />
                         <div style={{ display: 'flex', gap: 8 }}>
                             {/* @ts-ignore */}
                             <gc-key>Esc</gc-key>
@@ -47,9 +57,16 @@ const KeyDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-key>Space</gc-key>
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Hint row">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Hint row" />
                         <div style={rowStyle}>
                             {/* @ts-ignore */}
                             <gc-key>E</gc-key>
@@ -61,7 +78,8 @@ const KeyDemo: React.FC = () => (
                             <gc-key>M</gc-key>
                             <span>Map</span>
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

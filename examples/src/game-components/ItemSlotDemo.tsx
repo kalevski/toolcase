@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ItemSlotDemo: React.FC = () => {
@@ -48,7 +48,10 @@ const ItemSlotDemo: React.FC = () => {
                         description="Square framed slot — rarity ring, hotkey, qty, equipped marker, cooldown overlay, locked state."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Last click — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Last click — ${last}`} />
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <gc-item-slot ref={refs.sword} hotkey="1" />
@@ -57,8 +60,12 @@ const ItemSlotDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-item-slot ref={refs.potion} hotkey="3" />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Rarity ladder">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Rarity ladder" />
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <gc-item-slot ref={refs.rare} />
@@ -69,8 +76,12 @@ const ItemSlotDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-item-slot ref={refs.mythic} />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Cooldown / equipped / locked / empty / selected">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Cooldown / equipped / locked / empty / selected" />
                             <div className="d-flex flex-wrap gap-2 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-item-slot ref={refs.cooldown} />
@@ -83,7 +94,8 @@ const ItemSlotDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-item-slot selected size="72" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

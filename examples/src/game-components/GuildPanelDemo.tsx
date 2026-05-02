@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const MEMBERS = [
@@ -29,12 +29,16 @@ const GuildPanelDemo: React.FC = () => {
                         description="Guild header with name, tag, motto, level, and online roster."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default" />
                             <div style={{ maxWidth: 560 }}>
                                 {/* @ts-ignore */}
                                 <gc-guild-panel ref={ref} guild-name="Order of the Ember" tag="EMB" motto="By flame and faith." level="14" member-cap="50" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

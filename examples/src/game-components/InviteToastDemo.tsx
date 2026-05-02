@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const InviteToastDemo: React.FC = () => {
@@ -30,10 +30,14 @@ const InviteToastDemo: React.FC = () => {
                         description="Top-right party invite with countdown. Auto-decline on timer expiry."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Show toast — last: ${last || '—'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Show toast — last: ${last || '—'}`} />
                             {/* @ts-ignore */}
                             <gc-metal-button variant="primary" onClick={() => { setLast(''); setOpen(true) }}>Receive Invite</gc-metal-button>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const ITEMS = [
@@ -48,10 +48,14 @@ const PauseScreenDemo: React.FC = () => {
                         description="Modal pause overlay. Resume/restart/quit fire dedicated events."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Open — last action: ${last || '—'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Open — last action: ${last || '—'}`} />
                             {/* @ts-ignore */}
                             <gc-metal-button variant="primary" onClick={() => setOpen(true)}>Pause</gc-metal-button>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

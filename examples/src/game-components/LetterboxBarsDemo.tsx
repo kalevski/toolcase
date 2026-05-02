@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const stageStyle: React.CSSProperties = {
@@ -23,7 +23,10 @@ const LetterboxBarsDemo: React.FC = () => {
                         description="Animated cinematic bars at top/bottom. Toggle 'show' to slide in/out."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Toggle — show: ${show}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Toggle — show: ${show}`} />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-letterbox-bars {...(show ? { show: '' } : {})} />
@@ -32,13 +35,18 @@ const LetterboxBarsDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-metal-button onClick={() => setShow((v) => !v)}>Toggle</gc-metal-button>
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Tall bars (140px)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Tall bars (140px)" />
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
                                 <gc-letterbox-bars show bar-height="140px" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

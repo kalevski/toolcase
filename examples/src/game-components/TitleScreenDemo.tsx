@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const TitleScreenDemo: React.FC = () => (
@@ -12,14 +12,22 @@ const TitleScreenDemo: React.FC = () => (
                     description="Top-level title card with display title and italic subtitle."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default" />
                         {/* @ts-ignore */}
                         <gc-title-screen title-text="Realm of Ash" subtitle="Where embers remember the names of the fallen kings." />
-                    </SectionCard>
-                    <SectionCard title="Title only">
+                    {/* @ts-ignore */}
+                    </gc-panel>
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Title only" />
                         {/* @ts-ignore */}
                         <gc-title-screen title-text="Wyrmsong" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

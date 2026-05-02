@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 type State = 'searching' | 'connecting' | 'found' | 'failed' | 'idle'
@@ -37,7 +37,10 @@ const MatchmakingScreenDemo: React.FC = () => {
                         description="State machine: searching → connecting → found / failed. Spinner ring + meta + accept/cancel."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`State: ${state} — last: ${last || '—'}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`State: ${state} — last: ${last || '—'}`} />
                             <div className="d-flex flex-wrap gap-2 mb-3">
                                 {(['idle', 'searching', 'connecting', 'found', 'failed'] as State[]).map((s) => (
                                     /* @ts-ignore */
@@ -58,7 +61,8 @@ const MatchmakingScreenDemo: React.FC = () => {
                                     el.addEventListener('cancel', () => { setLast('cancel'); setState('idle') })
                                 }}
                             />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const InteractPromptDemo: React.FC = () => {
@@ -41,12 +41,22 @@ const InteractPromptDemo: React.FC = () => {
                         description="In-world interact prompt — key glyph + uppercase text, optional hold-fill bar."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Tap (no hold)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Tap (no hold)" />
                             {/* @ts-ignore */}
                             <gc-interact-prompt show key-label="E" text="Open chest" />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Hold (interactive)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Hold (interactive)" />
                             <div className="d-flex align-items-center gap-3 flex-wrap">
                                 {/* @ts-ignore */}
                                 <gc-interact-prompt
@@ -64,15 +74,23 @@ const InteractPromptDemo: React.FC = () => {
                                     Press &amp; hold
                                 </gc-metal-button>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Hidden (show=false)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Hidden (show=false)" />
                             {/* @ts-ignore */}
                             <gc-interact-prompt key-label="X" text="Hidden when !show" />
                             <div style={{ fontFamily: 'var(--fg-mono)', color: 'var(--fg-parch-3)', fontSize: 12 }}>
                                 (renders nothing without `show` attribute)
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

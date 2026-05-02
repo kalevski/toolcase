@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CurrencyChipDemo: React.FC = () => (
@@ -12,12 +12,22 @@ const CurrencyChipDemo: React.FC = () => (
                     description="Inline glyph + numeric amount in mono. Props: glyph, amount, color."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Default (gold)">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Default (gold)" />
                         {/* @ts-ignore */}
                         <gc-currency-chip glyph="◈" amount="1234" />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Currencies">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Currencies" />
                         <div className="d-flex gap-3 align-items-center">
                             {/* @ts-ignore */}
                             <gc-currency-chip glyph="◈" amount="42500" />
@@ -28,7 +38,8 @@ const CurrencyChipDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-currency-chip glyph="⛁" amount="1024000" color="var(--fg-silver)" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

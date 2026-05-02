@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CATS = [
@@ -37,7 +37,10 @@ const SettingsCategoryListDemo: React.FC = () => {
                         description="Settings sidebar with a slotted content area on the right."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Active: ${selected}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Active: ${selected}`} />
                             <div style={{ background: 'rgba(0,0,0,0.3)', minHeight: 280 }}>
                                 {/* @ts-ignore */}
                                 <gc-settings-category-list ref={ref} selected-id={selected}>
@@ -50,7 +53,8 @@ const SettingsCategoryListDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                 </gc-settings-category-list>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

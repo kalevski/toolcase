@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const MetalButtonDemo: React.FC = () => {
@@ -15,7 +15,10 @@ const MetalButtonDemo: React.FC = () => {
                         description="Gilded fantasy button. Variants: default, primary, danger, ghost. Sizes: sm, md, lg. Native click event."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Variants (md)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Variants (md)" />
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-metal-button>Default</gc-metal-button>
@@ -26,9 +29,16 @@ const MetalButtonDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="ghost">Ghost</gc-metal-button>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Sizes">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Sizes" />
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-metal-button size="sm" variant="primary">Small</gc-metal-button>
@@ -37,9 +47,16 @@ const MetalButtonDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-metal-button size="lg" variant="primary">Large</gc-metal-button>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Disabled">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Disabled" />
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-metal-button disabled>Default</gc-metal-button>
@@ -48,9 +65,16 @@ const MetalButtonDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="danger" disabled>Danger</gc-metal-button>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Interactive (click counter)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Interactive (click counter)" />
                             <div className="d-flex align-items-center gap-3">
                                 {/* @ts-ignore */}
                                 <gc-metal-button variant="primary" onClick={() => setCount(c => c + 1)}>
@@ -60,7 +84,8 @@ const MetalButtonDemo: React.FC = () => {
                                     strikes: {count}
                                 </span>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const PlatformIconDemo: React.FC = () => (
@@ -12,7 +12,10 @@ const PlatformIconDemo: React.FC = () => (
                     description="Platform glyph with optional label. Props: platform, size, label."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Glyph only">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Glyph only" />
                         <div className="d-flex gap-3">
                             {/* @ts-ignore */}
                             <gc-platform-icon platform="pc" />
@@ -29,9 +32,16 @@ const PlatformIconDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-platform-icon platform="web" />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="With label">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="With label" />
                         <div className="d-flex flex-column gap-2">
                             {/* @ts-ignore */}
                             <gc-platform-icon platform="pc" label />
@@ -40,9 +50,16 @@ const PlatformIconDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-platform-icon platform="steam" label />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Sizes">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Sizes" />
                         <div className="d-flex align-items-center gap-3">
                             {/* @ts-ignore */}
                             <gc-platform-icon platform="steam" size="14" label />
@@ -51,7 +68,8 @@ const PlatformIconDemo: React.FC = () => (
                             {/* @ts-ignore */}
                             <gc-platform-icon platform="steam" size="28" label />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>

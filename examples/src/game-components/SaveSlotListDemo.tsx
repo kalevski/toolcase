@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SLOTS = [
@@ -49,18 +49,26 @@ const SaveSlotListDemo: React.FC = () => {
                         description="Save/load slot list with autosave and empty states. Mode flips between load and save buttons."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title={`Load mode — ${last}`}>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title={`Load mode — ${last}`} />
                             <div style={{ maxWidth: 640 }}>
                                 {/* @ts-ignore */}
                                 <gc-save-slot-list ref={loadRef} mode="load" selected-id="s1" />
                             </div>
-                        </SectionCard>
-                        <SectionCard title="Save mode">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Save mode" />
                             <div style={{ maxWidth: 640 }}>
                                 {/* @ts-ignore */}
                                 <gc-save-slot-list ref={saveRef} mode="save" selected-id="s3" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

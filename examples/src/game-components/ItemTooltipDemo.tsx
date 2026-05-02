@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const SWORD = {
@@ -62,23 +62,39 @@ const ItemTooltipDemo: React.FC = () => {
                         description="Rarity-tinted gilded panel — header (type, name, rarity chip), stat rows, requirements, italic flavor."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Legendary">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Legendary" />
                             {/* @ts-ignore */}
                             <gc-item-tooltip ref={refs.legendary} />
-                        </SectionCard>
-                        <SectionCard title="Rare">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Rare" />
                             {/* @ts-ignore */}
                             <gc-item-tooltip ref={refs.rare} />
-                        </SectionCard>
-                        <SectionCard title="Common">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Common" />
                             {/* @ts-ignore */}
                             <gc-item-tooltip ref={refs.common} />
-                        </SectionCard>
-                        <SectionCard title="Empty (hidden)">
+                        {/* @ts-ignore */}
+                        </gc-panel>
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Empty (hidden)" />
                             {/* @ts-ignore */}
                             <gc-item-tooltip ref={refs.empty} />
                             <div className="text-muted small mt-2">Element renders display:none when item is null.</div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

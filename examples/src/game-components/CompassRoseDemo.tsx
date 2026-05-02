@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const CompassRoseDemo: React.FC = () => {
@@ -22,12 +22,22 @@ const CompassRoseDemo: React.FC = () => {
                         description="Cardinal compass with rotating needle. Props: heading (degrees), size."
                     />
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default (heading 0)">
+                        {/* @ts-ignore */}
+                        <gc-panel bordered>
+                            {/* @ts-ignore */}
+                            <gc-panel-header header-title="Default (heading 0)" />
                             {/* @ts-ignore */}
                             <gc-compass-rose />
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Static headings">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Static headings" />
                             <div className="d-flex gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-compass-rose heading="0" />
@@ -40,9 +50,16 @@ const CompassRoseDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <gc-compass-rose heading="270" />
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
 
-                        <SectionCard title="Live (drag slider)">
+                        {/* @ts-ignore */}
+
+                        <gc-panel bordered>
+
+                            {/* @ts-ignore */}
+
+                            <gc-panel-header header-title="Live (drag slider)" />
                             <div className="d-flex gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <gc-compass-rose ref={ref} size="96" />
@@ -58,7 +75,8 @@ const CompassRoseDemo: React.FC = () => {
                                     {heading}°
                                 </span>
                             </div>
-                        </SectionCard>
+                        {/* @ts-ignore */}
+                        </gc-panel>
                     </div>
                 </div>
             </div>

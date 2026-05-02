@@ -1,5 +1,5 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+import { RichPageHeader, RichPageHeaderChip } from '@toolcase/react-components'
 import '@toolcase/game-components'
 
 const sceneStyle: React.CSSProperties = {
@@ -21,14 +21,24 @@ const SubtitleDemo: React.FC = () => (
                     description="Cinematic caption / dialogue. Props: text, speaker, boxed, align, fontSize, maxWidth."
                 />
                 <div className="d-flex flex-column gap-4 mt-4">
-                    <SectionCard title="Text only">
+                    {/* @ts-ignore */}
+                    <gc-panel bordered>
+                        {/* @ts-ignore */}
+                        <gc-panel-header header-title="Text only" />
                         <div style={sceneStyle}>
                             {/* @ts-ignore */}
                             <gc-subtitle text="The wind carries voices older than the stones." />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="With speaker">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="With speaker" />
                         <div style={sceneStyle}>
                             {/* @ts-ignore */}
                             <gc-subtitle
@@ -36,18 +46,32 @@ const SubtitleDemo: React.FC = () => (
                                 text="Tread softly, stranger — the stones beneath you keep older debts than mine."
                             />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Boxed variant">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Boxed variant" />
                         {/* @ts-ignore */}
                         <gc-subtitle
                             boxed
                             speaker="Mira"
                             text="They came at dawn. We had no time to bury our dead."
                         />
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Align left, narrower">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Align left, narrower" />
                         <div style={sceneStyle}>
                             {/* @ts-ignore */}
                             <gc-subtitle
@@ -58,9 +82,16 @@ const SubtitleDemo: React.FC = () => (
                                 max-width={360}
                             />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Align right">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Align right" />
                         <div style={sceneStyle}>
                             {/* @ts-ignore */}
                             <gc-subtitle
@@ -69,15 +100,23 @@ const SubtitleDemo: React.FC = () => (
                                 font-size={20}
                             />
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
 
-                    <SectionCard title="Hidden when text empty">
+                    {/* @ts-ignore */}
+
+                    <gc-panel bordered>
+
+                        {/* @ts-ignore */}
+
+                        <gc-panel-header header-title="Hidden when text empty" />
                         {/* @ts-ignore */}
                         <gc-subtitle />
                         <div style={{ fontFamily: 'var(--fg-mono)', fontSize: 11, color: 'var(--fg-parch-3)' }}>
                             Above renders nothing — element collapses when text is empty.
                         </div>
-                    </SectionCard>
+                    {/* @ts-ignore */}
+                    </gc-panel>
                 </div>
             </div>
         </div>
