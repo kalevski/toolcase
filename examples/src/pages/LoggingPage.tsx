@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router'
-import { Badge, Button, Heading, Icon, SectionCard, Text } from '@toolcase/react-components'
+import { Badge, Button, Icon, InstallTabs, RichPageHeader, SectionCard } from '@toolcase/react-components'
 import { loggingExamples } from '../logging/index'
 
 export const LoggingPage = () => {
@@ -7,11 +7,23 @@ export const LoggingPage = () => {
 
     return (
         <div className="container py-5">
+            <RichPageHeader
+                icon={{ name: 'journal-text', color: 'emerald' }}
+                title="@toolcase/logging"
+                sub="Lightweight logger for Node.js and Browser"
+                description="Scoped loggers, custom reporters, log levels — zero dependencies."
+                chips={
+                    <>
+                        <Badge variant="secondary">Node.js</Badge>
+                        <Badge variant="secondary">Browser</Badge>
+                        <Badge variant="secondary">Zero deps</Badge>
+                    </>
+                }
+            />
             <div className="mb-4">
-                <Heading as="h1">@toolcase/logging</Heading>
-                <Text as="p" variant="muted">
-                    Lightweight logger for Node.js and Browser — zero dependencies
-                </Text>
+                <SectionCard title="Install" icon="download">
+                    <InstallTabs package="@toolcase/logging" />
+                </SectionCard>
             </div>
             <SectionCard
                 title="Examples"

@@ -1,5 +1,5 @@
 import { Link as RouterLink } from 'react-router'
-import { Card, Heading, Icon, Text } from '@toolcase/react-components'
+import { FeatureCard, Hero, Icon, SectionCard, Text } from '@toolcase/react-components'
 
 const packages = [
     {
@@ -22,7 +22,7 @@ const packages = [
     },
     {
         name: '@toolcase/react-components',
-        description: '81+ React UI components built on Bootstrap 5',
+        description: '180+ React UI components built on Bootstrap 5',
         path: '/react-components',
         icon: 'grid-3x3-gap',
     },
@@ -34,7 +34,7 @@ const packages = [
     },
     {
         name: '@toolcase/game-components',
-        description: 'Collection of Web Components for game UIs and effects, built with Lit',
+        description: 'Web Components for game UIs and effects, built with Lit',
         path: '/game-components',
         icon: 'puzzle',
     },
@@ -42,29 +42,23 @@ const packages = [
 
 export const Home = () => {
     return (
-        <div className="container py-5">
-            <div className="mb-5">
-                <Heading as="h1" gradient>@toolcase</Heading>
-                <Text as="p" variant="muted" size="large">
-                    A modular TypeScript toolkit — utilities, components, and more.
-                </Text>
-            </div>
-            <div className="row g-3">
-                {packages.map((pkg) => (
-                    <div key={pkg.name} className="col-md-6 col-lg-6">
-                        <RouterLink to={pkg.path} className="home-link">
-                            <Card>
-                                <div className="d-flex align-items-start gap-3">
-                                    <Icon name={pkg.icon} size={28} className="text-primary" />
-                                    <div>
-                                        <Heading as="h3">{pkg.name}</Heading>
-                                        <Text as="p" variant="muted">{pkg.description}</Text>
-                                    </div>
-                                </div>
-                            </Card>
-                        </RouterLink>
+        <div>
+            <div id="packages" className="container py-5">
+                <SectionCard title="Packages" icon="boxes">
+                    <div className="row g-3">
+                        {packages.map((pkg) => (
+                            <div key={pkg.name} className="col-md-4">
+                                <RouterLink to={pkg.path} className="home-link">
+                                    <FeatureCard
+                                        icon={<Icon name={pkg.icon} size={28} />}
+                                        title={pkg.name}
+                                        description={pkg.description}
+                                    />
+                                </RouterLink>
+                            </div>
+                        ))}
                     </div>
-                ))}
+                </SectionCard>
             </div>
         </div>
     )

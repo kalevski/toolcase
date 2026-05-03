@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router'
-import { Badge, Button, Heading, Icon, SectionCard, Text } from '@toolcase/react-components'
+import { Badge, Button, Icon, InstallTabs, RichPageHeader, SectionCard } from '@toolcase/react-components'
 import { baseExamples, baseCategories, type BaseCategory } from '../base/index'
 
 const categoryIcons: Record<BaseCategory, string> = {
@@ -14,11 +14,23 @@ export const BasePage = () => {
 
     return (
         <div className="container py-5">
+            <RichPageHeader
+                icon={{ name: 'tools', color: 'blue' }}
+                title="@toolcase/base"
+                sub="Helpers and data structures — zero dependencies"
+                description={`${baseExamples.length} examples covering events, state, data structures, generation, validation, and color utilities.`}
+                chips={
+                    <>
+                        <Badge variant="secondary">TypeScript</Badge>
+                        <Badge variant="secondary">Zero deps</Badge>
+                        <Badge variant="secondary">Tree-shakeable</Badge>
+                    </>
+                }
+            />
             <div className="mb-4">
-                <Heading as="h1">@toolcase/base</Heading>
-                <Text as="p" variant="muted">
-                    {baseExamples.length} helpers and data structures — zero dependencies
-                </Text>
+                <SectionCard title="Install" icon="download">
+                    <InstallTabs package="@toolcase/base" />
+                </SectionCard>
             </div>
             {baseCategories.map((category) => {
                 const items = baseExamples.filter((e) => e.category === category)

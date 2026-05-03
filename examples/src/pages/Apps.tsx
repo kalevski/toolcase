@@ -1,4 +1,4 @@
-import { Card, EmptyState, Heading, Text } from '@toolcase/react-components'
+import { Badge, Card, EmptyState, FeatureCard, Heading, Icon, RichPageHeader, Text } from '@toolcase/react-components'
 
 type AppEntry = {
     name: string
@@ -12,12 +12,13 @@ const apps: AppEntry[] = []
 export const Apps = () => {
     return (
         <div className="container py-5">
-            <div className="mb-5">
-                <Heading as="h1" gradient>Apps</Heading>
-                <Text as="p" variant="muted" size="large">
-                    Standalone applications built with @toolcase packages.
-                </Text>
-            </div>
+            <RichPageHeader
+                icon={{ name: 'boxes', color: 'cyan' }}
+                title="Apps"
+                sub="Standalone applications"
+                description="Apps developed inside the toolcase monorepo built on top of @toolcase packages."
+                chips={<Badge variant="secondary">{apps.length} apps</Badge>}
+            />
             {apps.length === 0 ? (
                 <Card>
                     <EmptyState icon="boxes">
@@ -30,12 +31,13 @@ export const Apps = () => {
             ) : (
                 <div className="row g-3">
                     {apps.map((app) => (
-                        <div key={app.name} className="col-md-6 col-lg-6">
+                        <div key={app.name} className="col-md-6">
                             <a href={app.path} className="home-link">
-                                <Card>
-                                    <Heading as="h3">{app.name}</Heading>
-                                    <Text as="p" variant="muted">{app.description}</Text>
-                                </Card>
+                                <FeatureCard
+                                    icon={<Icon name={app.icon} size={28} />}
+                                    title={app.name}
+                                    description={app.description}
+                                />
                             </a>
                         </div>
                     ))}

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router'
-import { Badge, Button, Heading, Icon, SectionCard, Text } from '@toolcase/react-components'
+import { Badge, Button, Icon, InstallTabs, RichPageHeader, SectionCard } from '@toolcase/react-components'
 import { serializerExamples } from '../serializer/index'
 
 export const SerializerPage = () => {
@@ -7,11 +7,23 @@ export const SerializerPage = () => {
 
     return (
         <div className="container py-5">
+            <RichPageHeader
+                icon={{ name: 'box-seam', color: 'amber' }}
+                title="@toolcase/serializer"
+                sub="Protobuf-based binary serializer"
+                description="Compact binary encoding with schema-driven (de)serialization. Fast under load."
+                chips={
+                    <>
+                        <Badge variant="secondary">Binary</Badge>
+                        <Badge variant="secondary">Protobuf</Badge>
+                        <Badge variant="secondary">Compact</Badge>
+                    </>
+                }
+            />
             <div className="mb-4">
-                <Heading as="h1">@toolcase/serializer</Heading>
-                <Text as="p" variant="muted">
-                    Protobuf-based binary serializer — compact and fast
-                </Text>
+                <SectionCard title="Install" icon="download">
+                    <InstallTabs package="@toolcase/serializer" />
+                </SectionCard>
             </div>
             <SectionCard
                 title="Examples"

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router'
-import { Badge, Button, Heading, Icon, SectionCard, Text } from '@toolcase/react-components'
+import { Badge, Button, Icon, InstallTabs, RichPageHeader, SectionCard } from '@toolcase/react-components'
 import { phaserExamples, phaserCategories, PhaserCategory } from '../phaser-plus/index'
 
 const categoryIcons: Record<PhaserCategory, string> = {
@@ -20,11 +20,23 @@ export const PhaserPlusPage = () => {
 
     return (
         <div className="container py-5">
+            <RichPageHeader
+                icon={{ name: 'controller', color: 'rose' }}
+                title="@toolcase/phaser-plus"
+                sub="Unified runtime for Phaser"
+                description={`${phaserExamples.length} runnable scenes — Scenes, Features, Debugger, Perspective2D, and Effects.`}
+                chips={
+                    <>
+                        <Badge variant="secondary">Phaser 4</Badge>
+                        <Badge variant="secondary">TypeScript</Badge>
+                        <Badge variant="secondary">2D Engine</Badge>
+                    </>
+                }
+            />
             <div className="mb-4">
-                <Heading as="h1">@toolcase/phaser-plus</Heading>
-                <Text as="p" variant="muted">
-                    {phaserExamples.length} runnable Phaser scenes — Scenes, Features, Debugger, Perspective2D and Effects.
-                </Text>
+                <SectionCard title="Install" icon="download">
+                    <InstallTabs package="@toolcase/phaser-plus" />
+                </SectionCard>
             </div>
             {phaserCategories.map((category) => {
                 const items = phaserExamples.filter((e) => e.category === category)

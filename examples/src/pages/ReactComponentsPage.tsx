@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router'
-import { Badge, Button, CodeSnippet, Heading, Icon, Link, SectionCard, Text } from '@toolcase/react-components'
+import { Badge, Button, CodeSnippet, Heading, Icon, InstallTabs, Link, RichPageHeader, SectionCard, Text } from '@toolcase/react-components'
 import { examples, categories, ExampleCategory } from '../react-components/index'
 
 const SKILL_URL = 'https://toolcase.kalevski.dev/SKILL.md'
@@ -23,6 +23,7 @@ const categoryIcons: Record<ExampleCategory, string> = {
     'Identity & People': 'people',
     'Marketing & Landing': 'megaphone',
     'Code & Docs': 'code-slash',
+    'Game Jam / Arcade': 'controller',
 }
 
 const formatLabel = (key: string) => {
@@ -34,9 +35,23 @@ export const ReactComponentsPage = () => {
 
     return (
         <div className="container py-5">
+            <RichPageHeader
+                icon={{ name: 'grid-3x3-gap', color: 'violet' }}
+                title="@toolcase/react-components"
+                sub="React UI components built on Bootstrap 5"
+                description={`${examples.length} components — typography, inputs, layout, navigation, charts, data display, and more.`}
+                chips={
+                    <>
+                        <Badge variant="secondary">React 18+</Badge>
+                        <Badge variant="secondary">Bootstrap 5</Badge>
+                        <Badge variant="secondary">TypeScript</Badge>
+                    </>
+                }
+            />
             <div className="mb-4">
-                <Heading as="h1">React Components</Heading>
-                <Text as="p" variant="muted">{examples.length} components</Text>
+                <SectionCard title="Install" icon="download">
+                    <InstallTabs package="@toolcase/react-components" />
+                </SectionCard>
             </div>
             <div className="mb-4">
                 <SectionCard
