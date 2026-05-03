@@ -1,6 +1,7 @@
 {
     "name": "@toolcase/root",
     "private": true,
+    "description": "Toolcase monorepo — JavaScript utilities, logging, serializer, React + Web Component UI, and Phaser game runtime.",
     "scripts": {
         "build": "npm run build --workspaces",
         "test": "vitest run",
@@ -32,8 +33,10 @@
     },
     "license": "MIT",
     "author": {
-        "name": "Daniel Kalevski"
+        "name": "Daniel Kalevski",
+        "url": "https://kalevski.dev"
     },
+    "homepage": "https://toolcase.kalevski.dev",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/kalevski/toolcase.git"

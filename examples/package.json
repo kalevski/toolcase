@@ -1,15 +1,20 @@
 {
     "name": "@toolcase/examples",
     "private": true,
-    "description": "🧬 Web presentation of the @toolcase project",
+    "description": "Demo site showcasing every @toolcase package — runs at toolcase.kalevski.dev.",
     "scripts": {
         "dev": "vite",
         "build": "vite build"
     },
-    "homepage": "https://kalevski.dev/toolcase",
+    "author": {
+        "name": "Daniel Kalevski",
+        "url": "https://kalevski.dev"
+    },
+    "homepage": "https://toolcase.kalevski.dev",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kalevski/toolcase.git"
+        "url": "git+https://github.com/kalevski/toolcase.git",
+        "directory": "examples"
     },
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"

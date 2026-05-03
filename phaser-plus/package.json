@@ -1,7 +1,7 @@
 {
     "name": "@toolcase/phaser-plus",
     "version": "2.0.2",
-    "description": "🎮 Unified runtime for PhaserJS — scenes, features, debugger and 2D perspective in one package",
+    "description": "Opinionated runtime for Phaser 4 — scene lifecycle, feature modules, isometric camera, and a Tweakpane debugger in one package.",
     "type": "module",
     "source": "src/index.ts",
     "main": "lib/index.js",
@@ -18,19 +18,27 @@
         "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
         "typecheck": "tsc --noEmit -p tsconfig.json"
     },
-    "homepage": "https://kalevski.dev/toolcase",
+    "author": {
+        "name": "Daniel Kalevski",
+        "url": "https://kalevski.dev"
+    },
+    "homepage": "https://toolcase.kalevski.dev",
     "keywords": [
+        "toolcase",
         "phaser",
         "phaser4",
-        "framework",
+        "phaserjs",
+        "game-engine",
+        "game-framework",
         "scenes",
         "features",
         "debugger",
+        "tweakpane",
         "isometric",
         "perspective",
-        "games",
-        "html5",
+        "2d",
         "gamedev",
+        "html5",
         "browser",
         "typescript"
     ],
@@ -70,7 +78,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kalevski/toolcase.git"
+        "url": "git+https://github.com/kalevski/toolcase.git",
+        "directory": "phaser-plus"
     },
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"

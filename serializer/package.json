@@ -1,7 +1,7 @@
 {
     "name": "@toolcase/serializer",
     "version": "2.0.2",
-    "description": "Protobuf-based serializer for @toolcase",
+    "description": "Compact protobuf-based binary serializer — fast schema-driven encode/decode for Node.js and the browser.",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",
     "types": "lib/main.d.ts",
@@ -20,10 +20,25 @@
     "dependencies": {
         "protobufjs": "^8.0.1"
     },
+    "author": {
+        "name": "Daniel Kalevski",
+        "url": "https://kalevski.dev"
+    },
+    "homepage": "https://toolcase.kalevski.dev",
     "keywords": [
+        "toolcase",
         "serializer",
+        "serialization",
         "protobuf",
-        "toolcase"
+        "protocol-buffers",
+        "binary",
+        "encode",
+        "decode",
+        "schema",
+        "typescript",
+        "esm",
+        "nodejs",
+        "browser"
     ],
     "files": [
         "lib"
@@ -34,7 +49,11 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kalevski/toolcase.git"
+        "url": "git+https://github.com/kalevski/toolcase.git",
+        "directory": "serializer"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
     },
     "engines": {
         "node": ">=18"

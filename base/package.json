@@ -1,7 +1,7 @@
 {
     "name": "@toolcase/base",
     "version": "2.0.1",
-    "description": "🧬 Collection of JavaScript helper functions and structures",
+    "description": "Zero-dep JavaScript helpers and data structures for Node.js and the browser — events, async, collections, math, and more.",
     "source": "src/main.js",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",
@@ -23,14 +23,27 @@
         "dev": "tsup --watch",
         "build": "tsup"
     },
-    "homepage": "https://kalevski.dev/toolcase",
+    "author": {
+        "name": "Daniel Kalevski",
+        "url": "https://kalevski.dev"
+    },
+    "homepage": "https://toolcase.kalevski.dev",
     "keywords": [
+        "toolcase",
         "helpers",
         "utils",
-        "functions",
-        "toolcase",
+        "utilities",
+        "data-structures",
+        "events",
+        "emitter",
+        "async",
+        "collections",
+        "math",
+        "typescript",
+        "esm",
         "nodejs",
-        "browser"
+        "browser",
+        "zero-dependency"
     ],
     "directories": {
         "lib": "lib"
@@ -44,7 +57,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kalevski/toolcase.git"
+        "url": "git+https://github.com/kalevski/toolcase.git",
+        "directory": "base"
     },
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"

@@ -1,7 +1,7 @@
 {
     "name": "@toolcase/logging",
     "version": "2.0.1",
-    "description": "🏷 Lightweight logger for NodeJS and Browser",
+    "description": "Tiny isomorphic logger for Node.js and the browser — colored output, log levels, named reporters, zero dependencies.",
     "source": "src/main.js",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",
@@ -18,15 +18,27 @@
         "dev": "tsup --watch",
         "build": "tsup"
     },
-    "homepage": "https://kalevski.dev/toolcase",
+    "author": {
+        "name": "Daniel Kalevski",
+        "url": "https://kalevski.dev"
+    },
+    "homepage": "https://toolcase.kalevski.dev",
     "keywords": [
-        "console",
+        "toolcase",
         "logger",
+        "logging",
+        "console",
+        "log",
         "reporter",
-        "lightweight",
+        "isomorphic",
         "universal",
+        "lightweight",
+        "tiny",
+        "typescript",
+        "esm",
         "nodejs",
-        "browser"
+        "browser",
+        "zero-dependency"
     ],
     "directories": {
         "lib": "lib"
@@ -40,7 +52,8 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/kalevski/toolcase.git"
+        "url": "git+https://github.com/kalevski/toolcase.git",
+        "directory": "logging"
     },
     "bugs": {
         "url": "https://github.com/kalevski/toolcase/issues"
