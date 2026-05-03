@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router'
 import { Badge, Button, CodeSnippet, Heading, Icon, InstallTabs, Link, RichPageHeader, SectionCard, Text } from '@toolcase/react-components'
 import { examples, categories, ExampleCategory } from '../react-components/index'
 
-const SKILL_URL = 'https://toolcase.kalevski.dev/SKILL.md'
+const SKILL_URL = 'https://toolcase.kalevski.dev/react-components/SKILL.md'
 
 const projectInstallCmd = `mkdir -p .claude/skills/react-components && \\
   curl -fsSL ${SKILL_URL} -o .claude/skills/react-components/SKILL.md`

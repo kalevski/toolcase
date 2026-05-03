@@ -1,6 +1,14 @@
 import { useNavigate } from 'react-router'
-import { Badge, Button, Icon, InstallTabs, RichPageHeader, SectionCard } from '@toolcase/react-components'
+import { Badge, Button, CodeSnippet, Heading, Icon, InstallTabs, Link, RichPageHeader, SectionCard, Text } from '@toolcase/react-components'
 import { phaserExamples, phaserCategories, PhaserCategory } from '../phaser-plus/index'
+
+const SKILL_URL = 'https://toolcase.kalevski.dev/phaser-plus/SKILL.md'
+
+const projectInstallCmd = `mkdir -p .claude/skills/phaser-plus && \\
+    curl -fsSL ${SKILL_URL} -o .claude/skills/phaser-plus/SKILL.md`
+
+const userInstallCmd = `mkdir -p ~/.claude/skills/phaser-plus && \\
+    curl -fsSL ${SKILL_URL} -o ~/.claude/skills/phaser-plus/SKILL.md`
 
 const categoryIcons: Record<PhaserCategory, string> = {
     'Core': 'box-seam',
@@ -36,6 +44,43 @@ export const PhaserPlusPage = () => {
             <div className="mb-4">
                 <SectionCard title="Install" icon="download">
                     <InstallTabs package="@toolcase/phaser-plus" />
+                </SectionCard>
+            </div>
+            <div className="mb-4">
+                <SectionCard
+                    title="Install as a Claude Code skill"
+                    icon="robot"
+                    action={
+                        <Link href={SKILL_URL} external>
+                            <Icon name="download" /> SKILL.md
+                        </Link>
+                    }
+                >
+                    <Text as="p" variant="muted" className="mb-3">
+                        <code>SKILL.md</code> is a focused reference for <code>@toolcase/phaser-plus</code> that
+                        Claude Code loads as a skill. Install it once and Claude can pick scene helpers,
+                        compose runtime flows, and wire effects with less manual guidance.
+                    </Text>
+                    <div className="row g-3">
+                        <div className="col-lg-6">
+                            <Heading as="h4" className="mb-2">Project-level</Heading>
+                            <Text as="p" variant="muted" size="small" className="mb-2">
+                                Run from the project root. Available only inside this repository.
+                            </Text>
+                            <CodeSnippet language="bash" code={projectInstallCmd} />
+                        </div>
+                        <div className="col-lg-6">
+                            <Heading as="h4" className="mb-2">User-level</Heading>
+                            <Text as="p" variant="muted" size="small" className="mb-2">
+                                Available in every Claude Code session on this machine.
+                            </Text>
+                            <CodeSnippet language="bash" code={userInstallCmd} />
+                        </div>
+                    </div>
+                    <Text as="p" variant="muted" size="small" className="mt-3 mb-0">
+                        Restart Claude Code (or run <code>/skills</code>) after installing. The skill auto-loads
+                        whenever you work with <code>@toolcase/phaser-plus</code>.
+                    </Text>
                 </SectionCard>
             </div>
             {phaserCategories.map((category) => {
