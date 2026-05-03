@@ -44,21 +44,19 @@ export const Home = () => {
     return (
         <div>
             <div id="packages" className="container py-5">
-                <SectionCard title="Packages" icon="boxes">
-                    <div className="row g-3">
-                        {packages.map((pkg) => (
-                            <div key={pkg.name} className="col-md-4">
-                                <RouterLink to={pkg.path} className="home-link">
-                                    <FeatureCard
-                                        icon={<Icon name={pkg.icon} size={28} />}
-                                        title={pkg.name}
-                                        description={pkg.description}
-                                    />
-                                </RouterLink>
-                            </div>
-                        ))}
-                    </div>
-                </SectionCard>
+                <div className="row g-3">
+                    {packages.map((pkg) => (
+                        <div key={pkg.name} className="col-md-4">
+                            <RouterLink to={pkg.path} className="home-link">
+                                <FeatureCard
+                                    icon={<Icon name={pkg.icon} size={28} />}
+                                    title={pkg.name}
+                                    description={pkg.description}
+                                />
+                            </RouterLink>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )
