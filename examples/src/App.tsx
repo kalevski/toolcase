@@ -43,7 +43,7 @@ const Nav = ({ theme, onThemeChange }: NavProps) => {
 
     const brand = (
         <a href="/" onClick={go('/')} className="app-brand-link">
-            <Brand primaryText="@toolcase" label="v2" />
+            <Brand primaryText="@toolcase" label="library" />
         </a>
     )
 
