@@ -87,7 +87,6 @@ const ChipDemo: React.FC = () => {
 						<Chip
 							key={tag}
 							variant="primary"
-							removable
 							onRemove={() => removeTag(tag)}
 						>
 							{tag}

@@ -1,10 +1,6 @@
 type ColorType = 'white' | 'red' | 'pink' | 'purple' | 'deep_purple' | 'indigo' | 'blue' | 'light_blue' | 'cyan' | 'teal' | 'green' | 'light_green' | 'lime' | 'yellow' | 'amber' | 'orange' | 'deep_orange' | 'brown' | 'grey' | 'blue_grey' | 'black'
 
-const Color: Record<string, string | ((...args: any[]) => any)> & {
-    getHex: (color: ColorType) => string | null
-    toNumber: (color: ColorType) => number
-    getRandomHex: () => string
-} = {
+const PALETTE: Record<string, string> = {
     RED: '#f44336',
     PINK: '#e91e63',
     PURPLE: '#9c27b0',
@@ -21,10 +17,18 @@ const Color: Record<string, string | ((...args: any[]) => any)> & {
     AMBER: '#ffc107',
     ORANGE: '#ff9800',
     DEEP_ORANGE: '#ff5722',
+}
+
+const Color: Record<string, string | ((...args: any[]) => any)> & {
+    getHex: (color: ColorType) => string | null
+    toNumber: (color: ColorType) => number
+    getRandomHex: () => string
+} = {
+    ...PALETTE,
 
     getHex: (color: ColorType): string | null => {
         const key = color.toUpperCase()
-        return (Color[key] as string) || null
+        return PALETTE[key] || null
     },
 
     toNumber: (color: ColorType): number => {
@@ -36,10 +40,9 @@ const Color: Record<string, string | ((...args: any[]) => any)> & {
     },
 
     getRandomHex: (): string => {
-        const keys = Object.keys(Color).filter(key => typeof Color[key] === 'string')
+        const keys = Object.keys(PALETTE)
         const index = Math.floor(Math.random() * keys.length)
-        const color = keys[index]
-        return Color[color] as string
+        return PALETTE[keys[index]]
     }
 }
 

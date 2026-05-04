@@ -70,7 +70,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 		return (
 			<div className={`component component-color-picker${className ? ` ${className}` : ''}`}>
 				{label && <label className="component-color-picker__label">{label}</label>}
-				<Skeleton shape="rect" width="3rem" height="2.5rem" />
+				<Skeleton variant="rect" width="3rem" height="2.5rem" />
 			</div>
 		)
 	}

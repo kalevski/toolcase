@@ -59,7 +59,7 @@ class JSONSchema {
         if (validator === null) {
             throw new Error(`validator for type=${this.schema.type} is not registered`)
         }
-        validator(null, this.schema, data)
+        validator('@', this.schema, data)
     }
 
     private validateSchema(schema: Schema): void {
@@ -109,8 +109,10 @@ class JSONSchema {
 
     private validateObject: ValidationFn = (propertyName, schema, data) => {
 
+        const here = propertyName ?? '@'
+
         if (data === null || typeof data !== 'object' || Array.isArray(data)) {
-            throw new Error(`property=${propertyName} must be an object, value=${data} type=${typeof data} provided`)
+            throw new Error(`property=${here} must be an object, value=${data} type=${typeof data} provided`)
         }
 
         const isStrict = schema.flexible !== true
@@ -121,10 +123,11 @@ class JSONSchema {
         Object.keys(data).forEach(propName => propList.add(propName))
         for (const propName of propList) {
 
+            const childPath = here === '@' ? propName : `${here}.${propName}`
             const propSchema = typeof schemaProperties[propName] === 'object' ? schemaProperties[propName] : null
 
             if (propSchema === null && isStrict) {
-                throw new Error(`property=${propertyName === null ? '@': propertyName}.${propName} is not expected`)
+                throw new Error(`property=${childPath} is not expected`)
             } else if (propSchema === null && !isStrict) {
                 continue
             }
@@ -137,18 +140,16 @@ class JSONSchema {
             if (validator === null) {
                 throw new Error(`validator for type=${propSchema!.type} is not registered`)
             }
-            try {
-                validator(propName, propSchema!, data[propName])
-            } catch (error: any) {
-                throw new Error(`${propertyName === null ? '@': propertyName} -> ${error.message}`)
-            }
+            validator(childPath, propSchema!, data[propName])
         }
     }
 
     private validateArray: ValidationFn = (propertyName, schema, data) => {
 
+        const here = propertyName ?? '@'
+
         if (!Array.isArray(data)) {
-            throw new Error(`property=${propertyName} must be an array, value=${data} type=${typeof data} provided`)
+            throw new Error(`property=${here} must be an array, value=${data} type=${typeof data} provided`)
         }
 
         if (typeof schema.items !== 'object') {
@@ -158,7 +159,8 @@ class JSONSchema {
         const validator = this.validators.get(schema.items!.type!)!
 
         for (const [ index, item ] of data.entries()) {
-            validator(`${propertyName}[${index}]`, schema.items as Schema, item)
+            const itemPath = here === '@' ? `[${index}]` : `${here}[${index}]`
+            validator(itemPath, schema.items as Schema, item)
         }
 
     }

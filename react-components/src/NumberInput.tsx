@@ -2,25 +2,22 @@ import React, { useId, useCallback, useRef } from 'react'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-export interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type' | 'prefix'> {
+export type NumberInputSize = 'small' | 'default' | 'large'
+
+export interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'type' | 'prefix' | 'size'> {
 	value?: number | ''
 	onChange?: (value: number | '') => void
-	/** Step amount for increment/decrement. Default: 1. */
 	step?: number
 	min?: number
 	max?: number
-	/** Decimal precision for rounding. Unset = no rounding. */
 	precision?: number
-	/** Optional label rendered above the input. */
 	label?: string
-	/** Error message. Shows invalid state + message. */
 	error?: string
-	/** Prefix string or element (e.g. '$', '€'). */
 	prefix?: React.ReactNode
-	/** Suffix string or element (e.g. '%', 'kg'). */
 	suffix?: React.ReactNode
 	className?: string
 	inputClassName?: string
+	size?: NumberInputSize
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -53,6 +50,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 	className = '',
 	inputClassName = '',
 	disabled,
+	size = 'default',
 	...rest
 }, ref) => {
 	const generatedId = useId()
@@ -110,6 +108,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
 	const rootClass = [
 		'component component-number-input',
+		size !== 'default' ? `component-number-input--${size}` : '',
 		error    ? 'component-number-input--error'    : '',
 		disabled ? 'component-number-input--disabled' : '',
 		className,

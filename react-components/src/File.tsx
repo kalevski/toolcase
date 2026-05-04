@@ -46,7 +46,7 @@ export const File: React.FC<FileProps> = ({
 	if (loading) {
 		return (
 			<div className="component component-file">
-				<Skeleton shape="rect" width="3rem" height="3rem" />
+				<Skeleton variant="rect" width="3rem" height="3rem" />
 				<div className="component-file__label">
 					<Skeleton width="50%" />
 					<Skeleton width="30%" />

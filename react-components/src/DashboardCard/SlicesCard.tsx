@@ -31,7 +31,7 @@ export const SlicesCard: React.FC<SlicesCardProps> = ({
 			<div className="component-dashboard-card__body component-dashboard-card__body--slices">
 				{title && <Skeleton width="30%" />}
 				<div className="component-dashboard-card__slices-chart">
-					<Skeleton shape="circle" width={`${size}px`} height={`${size}px`} />
+					<Skeleton variant="circle" width={`${size}px`} height={`${size}px`} />
 				</div>
 				<ul className="component-dashboard-card__slices-legend">
 					{Array.from({ length: 3 }, (_, i) => (

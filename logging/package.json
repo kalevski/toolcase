@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/logging",
-    "version": "2.0.1",
+    "version": "3.0.0",
     "description": "Tiny isomorphic logger for Node.js and the browser — colored output, log levels, named reporters, zero dependencies.",
     "source": "src/main.js",
     "main": "lib/main.main.js",
@@ -11,6 +11,11 @@
             "types": "./lib/main.d.ts",
             "import": "./lib/main.module.js",
             "require": "./lib/main.main.js"
+        },
+        "./node": {
+            "types": "./lib/node.d.ts",
+            "import": "./lib/node.module.js",
+            "require": "./lib/node.main.js"
         }
     },
     "sideEffects": false,

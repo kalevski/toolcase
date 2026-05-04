@@ -31,7 +31,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({
 					{Array.from({ length: loadingCount }, (_, i) => (
 						<li key={i} className="component-dashboard-card__activity-item">
 							<div className="component-dashboard-card__activity-icon-wrap">
-								<Skeleton shape="circle" width="1.5rem" height="1.5rem" />
+								<Skeleton variant="circle" width="1.5rem" height="1.5rem" />
 							</div>
 							<div className="component-dashboard-card__activity-content">
 								<Skeleton width="70%" />

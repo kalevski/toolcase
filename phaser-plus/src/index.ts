@@ -36,6 +36,10 @@ import BehaviorTreeProcessor, {
     AlwaysFail
 } from './flow/BehaviorTree'
 import ReplayRecorder from './flow/ReplayRecorder'
+import Timer from './flow/Timer'
+import ParallelRunner from './flow/Parallel'
+import throttle from './flow/throttle'
+import debounce from './flow/debounce'
 
 const Flow = {
     Event,
@@ -46,6 +50,10 @@ const Flow = {
     StateMachine,
     BehaviorTreeProcessor,
     ReplayRecorder,
+    Timer,
+    Parallel: ParallelRunner,
+    throttle,
+    debounce,
     BT: {
         Node: BTNode,
         Action: BTAction,

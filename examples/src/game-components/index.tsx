@@ -28,6 +28,7 @@ import NavButtonDemo from './NavButtonDemo'
 import MenuItemDemo from './MenuItemDemo'
 import ListRowDemo from './ListRowDemo'
 import CircularProgressDemo from './CircularProgressDemo'
+import CooldownBadgeDemo from './CooldownBadgeDemo'
 import HitMarkerDemo from './HitMarkerDemo'
 import DamageNumberDemo from './DamageNumberDemo'
 import NetworkStatusIconDemo from './NetworkStatusIconDemo'
@@ -103,6 +104,7 @@ import BattlePassDemo from './BattlePassDemo'
 import CraftingPanelDemo from './CraftingPanelDemo'
 import ShopPanelDemo from './ShopPanelDemo'
 import LootListDemo from './LootListDemo'
+import LootPopupDemo from './LootPopupDemo'
 import GuildPanelDemo from './GuildPanelDemo'
 import PartyPanelDemo from './PartyPanelDemo'
 import LobbyDemo from './LobbyDemo'
@@ -181,6 +183,7 @@ export const gameComponentExamples: GameComponentDef[] = [
 	{ key: 'menu-item', category: 'Buttons & Navigation', element: <MenuItemDemo /> },
 	{ key: 'list-row', category: 'Buttons & Navigation', element: <ListRowDemo /> },
 	{ key: 'circular-progress', category: 'Progress & Status', element: <CircularProgressDemo /> },
+	{ key: 'cooldown-badge', category: 'Progress & Status', element: <CooldownBadgeDemo /> },
 	{ key: 'hit-marker', category: 'Progress & Status', element: <HitMarkerDemo /> },
 	{ key: 'damage-number', category: 'Progress & Status', element: <DamageNumberDemo /> },
 	{ key: 'network-status-icon', category: 'Progress & Status', element: <NetworkStatusIconDemo /> },
@@ -256,6 +259,7 @@ export const gameComponentExamples: GameComponentDef[] = [
 	{ key: 'crafting-panel', category: 'Gameplay Panels', element: <CraftingPanelDemo /> },
 	{ key: 'shop-panel', category: 'Gameplay Panels', element: <ShopPanelDemo /> },
 	{ key: 'loot-list', category: 'Gameplay Panels', element: <LootListDemo /> },
+	{ key: 'loot-popup', category: 'Gameplay Panels', element: <LootPopupDemo /> },
 	{ key: 'guild-panel', category: 'Social Panels', element: <GuildPanelDemo /> },
 	{ key: 'party-panel', category: 'Social Panels', element: <PartyPanelDemo /> },
 	{ key: 'lobby', category: 'Social Panels', element: <LobbyDemo /> },

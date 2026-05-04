@@ -13,22 +13,22 @@ const SkeletonDemo: React.FC = () => (
 				<RichPageHeader
 				chips={<RichPageHeaderChip>Feedback</RichPageHeaderChip>}
 				title="Skeleton"
-				description="Shimmer placeholder for loading states. Supports line, circle, and rectangle shapes."
+				description="Shimmer placeholder for loading states. Supports text, circle, and rectangle variants."
 			/>
 				<div className="d-flex flex-column gap-4 mt-4">
-		<SectionCard title="Shapes">
+		<SectionCard title="Variants">
 			<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 				<div>
-					<strong style={{ display: 'block', marginBottom: 8 }}>Line (default)</strong>
+					<strong style={{ display: 'block', marginBottom: 8 }}>Text (default)</strong>
 					<Skeleton />
 				</div>
 				<div>
 					<strong style={{ display: 'block', marginBottom: 8 }}>Circle</strong>
-					<Skeleton shape="circle" />
+					<Skeleton variant="circle" />
 				</div>
 				<div>
 					<strong style={{ display: 'block', marginBottom: 8 }}>Rectangle</strong>
-					<Skeleton shape="rect" width="100%" height={120} />
+					<Skeleton variant="rect" width="100%" height={120} />
 				</div>
 			</div>
 		</SectionCard>
@@ -39,7 +39,7 @@ const SkeletonDemo: React.FC = () => (
 
 		<SectionCard title="Card Placeholder">
 			<div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-				<Skeleton shape="circle" width={48} height={48} />
+				<Skeleton variant="circle" width={48} height={48} />
 				<div style={{ flex: 1 }}>
 					<Skeleton width="60%" height="1.2em" />
 					<div style={{ marginTop: 8 }}>

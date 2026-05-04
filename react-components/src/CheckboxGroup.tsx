@@ -16,6 +16,11 @@ export interface CheckboxGroupProps {
 	inline?: boolean
 	className?: string
 	name?: string
+	id?: string
+	required?: boolean
+	'aria-describedby'?: string
+	'aria-labelledby'?: string
+	'aria-invalid'?: boolean
 }
 
 export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
@@ -26,6 +31,11 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
 	inline = false,
 	className = '',
 	name,
+	id,
+	required,
+	'aria-describedby': ariaDescribedBy,
+	'aria-labelledby': ariaLabelledBy,
+	'aria-invalid': ariaInvalid,
 }) => {
 	const handleCheckboxChange = (optionValue: string, checked: boolean) => {
 		if (!onChange) return
@@ -36,7 +46,15 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
 	}
 
 	return (
-		<div className={`component component-checkbox-group ${className}`.trim()}>
+		<div
+			id={id}
+			role="group"
+			aria-required={required ? true : undefined}
+			aria-describedby={ariaDescribedBy}
+			aria-labelledby={ariaLabelledBy}
+			aria-invalid={ariaInvalid}
+			className={`component component-checkbox-group ${className}`.trim()}
+		>
 			{label && <Label className="d-block mb-2">{label}</Label>}
 			{options.map((option, index) => (
 				<Checkbox

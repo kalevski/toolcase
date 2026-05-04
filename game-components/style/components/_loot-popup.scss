@@ -1,0 +1,88 @@
+gc-loot-popup {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+}
+
+gc-loot-popup[open] {
+    display: block;
+}
+
+gc-loot-popup .gc-loot-popup-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+}
+
+gc-loot-popup .gc-loot-popup-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+    box-sizing: border-box;
+    width: min(420px, calc(100vw - 32px));
+    padding: 24px;
+    background: linear-gradient(180deg, rgba(20, 12, 8, 0.96), rgba(10, 6, 4, 0.96));
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow:
+        inset 0 0 0 1px var(--fg-gold-shadow),
+        inset 0 1px 0 rgba(232, 200, 120, 0.18),
+        0 20px 50px rgba(0, 0, 0, 0.8);
+    color: var(--fg-parch);
+    text-align: center;
+}
+
+gc-loot-popup .gc-loot-popup-eyebrow {
+    display: block;
+    color: var(--fg-parch-dim);
+    margin-bottom: 6px;
+}
+
+gc-loot-popup .gc-loot-popup-title {
+    display: block;
+    margin-bottom: 14px;
+}
+
+gc-loot-popup .gc-loot-popup-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin: 0 0 14px 0;
+}
+
+gc-loot-popup .gc-loot-popup-rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fg-gold-deep) 30%, var(--fg-gold) 50%, var(--fg-gold-deep) 70%, transparent);
+}
+
+gc-loot-popup .gc-loot-popup-diamond {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    transform: rotate(45deg);
+    box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+}
+
+gc-loot-popup .gc-loot-popup-list {
+    display: block;
+    text-align: left;
+    margin-bottom: 18px;
+}
+
+gc-loot-popup .gc-loot-popup-list .gc-loot-list-header {
+    display: none;
+}
+
+gc-loot-popup .gc-loot-popup-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}

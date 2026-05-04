@@ -16,10 +16,13 @@ import Cache from './Cache'
 import AdjacencyMatrix from './AdjacencyMatrix'
 import State from './State'
 import retry from './retry'
+import WeightedRandom from './WeightedRandom'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
 import RESTResponse from './http/RESTResponse'
+
+import Packing from './packing'
 
 
 const HTTP = {
@@ -28,8 +31,26 @@ const HTTP = {
     RESTResponse
 }
 
+export type {
+    Size as PackingSize,
+    Rect as PackingRect,
+    PlacedRect as PackingPlacedRect,
+    Sprite as PackingSprite,
+    PreparedSprite as PackingPreparedSprite,
+    PlacedSprite as PackingPlacedSprite,
+    PackedPage as PackingPackedPage,
+    PackResult as PackingResult,
+    POTMode as PackingPOTMode,
+    AlgorithmOptions as PackingAlgorithmOptions,
+    AlgorithmKind as PackingAlgorithmKind,
+    MemoryBudget as PackingMemoryBudget,
+    SortStrategy as PackingSortStrategy,
+    PackerOptions as PackingPackerOptions
+} from './packing/types'
+
 export {
     HTTP,
+    Packing,
     VectorClock,
     EventEmitter,
     Broadcast,
@@ -47,11 +68,13 @@ export {
     Cache,
     AdjacencyMatrix,
     State,
-    retry
+    retry,
+    WeightedRandom
 }
 
 const BASE = {
     HTTP,
+    Packing,
     VectorClock,
     EventEmitter,
     Broadcast,
@@ -69,7 +92,8 @@ const BASE = {
     Cache,
     AdjacencyMatrix,
     State,
-    retry
+    retry,
+    WeightedRandom
 }
 
 export default BASE

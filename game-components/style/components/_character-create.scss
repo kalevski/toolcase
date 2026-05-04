@@ -54,6 +54,19 @@ gc-character-create .gc-character-create-name:focus {
     border-color: var(--fg-gold-bright);
 }
 
+gc-character-create .gc-character-create-name:focus-visible,
+gc-character-create .gc-character-create-control:focus-visible,
+gc-character-create .gc-character-create-range:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-character-create .gc-character-create-name:focus:not(:focus-visible),
+gc-character-create .gc-character-create-control:focus:not(:focus-visible),
+gc-character-create .gc-character-create-range:focus:not(:focus-visible) {
+    outline: none;
+}
+
 gc-character-create .gc-character-create-fields {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

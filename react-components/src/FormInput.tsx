@@ -140,6 +140,8 @@ export const FormInput: React.FC<FormInputProps> = ({
 }) => {
 	const autoId = useId()
 	const inputId = id || autoId
+	const errorId = `${inputId}-error`
+	const helperId = `${inputId}-helper`
 	const [validationError, setValidationError] = useState<string | null>(null)
 
 	const handleChange = useCallback((newValue: unknown) => {
@@ -195,10 +197,12 @@ export const FormInput: React.FC<FormInputProps> = ({
 	const renderFooter = () => {
 		if (!effectiveError && !helper) return null
 		if (effectiveError) {
-			return <HelperText variant="error" text={effectiveError} />
+			return <HelperText id={errorId} variant="error" text={effectiveError} />
 		}
-		return <HelperText variant="default" text={helper} />
+		return <HelperText id={helperId} variant="default" text={helper} />
 	}
+
+	const describedBy = effectiveError ? errorId : (helper ? helperId : undefined)
 
 	const renderInput = () => {
 		switch (type) {
@@ -222,6 +226,9 @@ export const FormInput: React.FC<FormInputProps> = ({
 						step={step}
 						className={effectiveError ? 'is-invalid' : ''}
 						inputClassName={effectiveError ? 'is-invalid' : ''}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
@@ -239,6 +246,9 @@ export const FormInput: React.FC<FormInputProps> = ({
 						min={min}
 						max={max}
 						step={step}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
@@ -255,6 +265,9 @@ export const FormInput: React.FC<FormInputProps> = ({
 						onChange={(e) => handleChange(e.target.value)}
 						rows={rows}
 						textareaClassName={effectiveError ? 'is-invalid' : ''}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
@@ -310,21 +323,29 @@ export const FormInput: React.FC<FormInputProps> = ({
 						name={name}
 						label={undefined}
 						disabled={disabled}
+						required={required}
 						checked={value as boolean | undefined}
 						defaultChecked={defaultValue as boolean | undefined}
 						onChange={(e) => handleChange(e.target.checked)}
 						inline={inline}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
 			case 'checkbox-group':
 				return (
 					<CheckboxGroup
+						id={inputId}
 						options={options as CheckboxGroupOption[] || []}
 						value={value as string[] | undefined}
 						onChange={(vals) => handleChange(vals)}
 						inline={inline}
 						name={name}
+						required={required}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
@@ -335,21 +356,29 @@ export const FormInput: React.FC<FormInputProps> = ({
 						name={name}
 						label={undefined}
 						disabled={disabled}
+						required={required}
 						checked={value as boolean | undefined}
 						defaultChecked={defaultValue as boolean | undefined}
 						onChange={(e) => handleChange(e.target.checked)}
 						inline={inline}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
 			case 'radio-group':
 				return (
 					<RadioGroup
+						id={inputId}
 						options={options as RadioGroupOption[] || []}
 						value={value as string | undefined}
 						onChange={(val) => handleChange(val)}
 						inline={inline}
 						name={name}
+						required={required}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
@@ -362,6 +391,9 @@ export const FormInput: React.FC<FormInputProps> = ({
 						checked={value as boolean | undefined}
 						defaultChecked={defaultValue as boolean | undefined}
 						onChange={(e) => handleChange(e.target.checked)}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
@@ -372,6 +404,9 @@ export const FormInput: React.FC<FormInputProps> = ({
 						value={value as string | undefined}
 						onChange={(key) => handleChange(key)}
 						placeholder={placeholder}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 
@@ -384,6 +419,9 @@ export const FormInput: React.FC<FormInputProps> = ({
 						placeholder={placeholder}
 						searchPlaceholder={searchPlaceholder}
 						noResultsText={noResultsText}
+						aria-required={required ? true : undefined}
+						aria-describedby={describedBy}
+						aria-invalid={effectiveError ? true : undefined}
 					/>
 				)
 

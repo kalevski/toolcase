@@ -12,6 +12,8 @@ import JSONSchemaDemo from './JSONSchemaDemo'
 import RetryDemo from './RetryDemo'
 import ColorDemo from './ColorDemo'
 import UtilitiesDemo from './UtilitiesDemo'
+import PackingDemo from './PackingDemo'
+import WeightedRandomDemo from './WeightedRandomDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -43,10 +45,12 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'vector-clock', label: 'VectorClock', category: 'Data Structures', element: <VectorClockDemo /> },
     { key: 'adjacency-matrix', label: 'AdjacencyMatrix', category: 'Data Structures', element: <AdjacencyMatrixDemo /> },
     { key: 'object-pool', label: 'ObjectPool', category: 'Data Structures', element: <ObjectPoolDemo /> },
+    { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
 
     { key: 'lsystem', label: 'LSystem', category: 'Generation & Validation', element: <LSystemDemo /> },
     { key: 'json-schema', label: 'JSONSchema', category: 'Generation & Validation', element: <JSONSchemaDemo /> },
     { key: 'retry', label: 'retry', category: 'Generation & Validation', element: <RetryDemo /> },
+    { key: 'packing', label: 'Packing', category: 'Generation & Validation', element: <PackingDemo /> },
 
     { key: 'utilities', label: 'Utility Functions', category: 'Utilities & Colors', element: <UtilitiesDemo /> },
     { key: 'color', label: 'Color', category: 'Utilities & Colors', element: <ColorDemo /> },

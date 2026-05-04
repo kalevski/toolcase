@@ -60,7 +60,7 @@ export const Build: React.FC<BuildProps> = ({
 	if (loading) {
 		return (
 			<div className={rootClass}>
-				<Skeleton shape="circle" width="2rem" height="2rem" />
+				<Skeleton variant="circle" width="2rem" height="2rem" />
 				<div className="component-build__label">
 					<Skeleton width="40%" />
 					<Skeleton width="25%" />

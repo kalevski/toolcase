@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/game-components",
-    "version": "1.0.0",
+    "version": "3.0.0",
     "description": "Framework-free Web Components for game UIs — HUDs, menus, dialogs, inventories, minimaps, and more, built on Shadow DOM.",
     "main": "lib/index.main.js",
     "module": "lib/index.module.js",
@@ -24,7 +24,7 @@
         "build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import --silence-deprecation=color-functions --silence-deprecation=global-builtin"
     },
     "peerDependencies": {
-        "@toolcase/base": "2.x.x"
+        "@toolcase/base": "3.x.x"
     },
     "author": {
         "name": "Daniel Kalevski",

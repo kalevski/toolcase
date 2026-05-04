@@ -112,7 +112,7 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
 		return (
 			<div className={rootClass}>
 				<div className="component-asset-bundle__header">
-					<Skeleton shape="circle" width="2.5rem" height="2.5rem" />
+					<Skeleton variant="circle" width="2.5rem" height="2.5rem" />
 					<div className="component-asset-bundle__title-group">
 						<Skeleton width="50%" />
 						<Skeleton width="30%" />
@@ -171,7 +171,7 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
 							<Icon name="tag-fill" />
 							Build Tag
 						</span>
-						<Tag variant="primary" label={defaultBuildTag} />
+						<Tag variant="primary">{defaultBuildTag}</Tag>
 					</div>
 				)}
 
@@ -182,7 +182,7 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
                     </span>
                     <div className="component-asset-bundle__tag-list">
                         {includedTags.map((t) => (
-                            <Tag key={t} variant="success" label={t} />
+                            <Tag key={t} variant="success">{t}</Tag>
                         ))}
                     </div>
                 </div>
@@ -194,7 +194,7 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
                     </span>
                     <div className="component-asset-bundle__tag-list">
                         {excludedTags.map((t) => (
-                            <Tag key={t} variant="danger" label={t} />
+                            <Tag key={t} variant="danger">{t}</Tag>
                         ))}
                     </div>
                 </div>
@@ -206,7 +206,7 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
                     </span>
                     <span className="component-asset-bundle__build-ref">
                         <code>{latestBuildRef}</code>
-                        {buildTag && <Tag variant="info" label={buildTag} />}
+                        {buildTag && <Tag variant="info">{buildTag}</Tag>}
                     </span>
                 </div>
 			</div>

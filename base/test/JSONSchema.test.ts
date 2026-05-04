@@ -83,4 +83,89 @@ describe('JSONSchema', () => {
         })
         expect(() => schema.validate({ name: 'Alice', extra: true })).not.toThrow()
     })
+
+    it('nested object error includes the full dotted path', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            properties: {
+                user: {
+                    type: 'object',
+                    properties: {
+                        profile: {
+                            type: 'object',
+                            properties: {
+                                age: { type: 'number' }
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        try {
+            schema.validate({ user: { profile: { age: 'twenty' } } })
+            expect.unreachable()
+        } catch (e: any) {
+            expect(e.message).toContain('user.profile.age')
+            expect(e.message).toContain('must be a number')
+        }
+    })
+
+    it('array item error includes the index path', () => {
+        const schema = new JSONSchema({
+            type: 'array',
+            items: { type: 'number' }
+        })
+        try {
+            schema.validate([1, 2, 'oops', 4])
+            expect.unreachable()
+        } catch (e: any) {
+            expect(e.message).toContain('[2]')
+            expect(e.message).toContain('must be a number')
+        }
+    })
+
+    it('object containing array of objects threads dotted + index paths', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            properties: {
+                tags: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            name: { type: 'string', required: true }
+                        }
+                    }
+                }
+            }
+        })
+        try {
+            schema.validate({ tags: [{ name: 'a' }, { name: 42 }] })
+            expect.unreachable()
+        } catch (e: any) {
+            expect(e.message).toContain('tags[1].name')
+            expect(e.message).toContain('must be a string')
+        }
+    })
+
+    it('strict mode error names the unexpected nested property by dotted path', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            properties: {
+                user: {
+                    type: 'object',
+                    properties: {
+                        name: { type: 'string' }
+                    }
+                }
+            }
+        })
+        try {
+            schema.validate({ user: { name: 'a', oops: true } })
+            expect.unreachable()
+        } catch (e: any) {
+            expect(e.message).toContain('user.oops')
+            expect(e.message).toContain('is not expected')
+        }
+    })
 })

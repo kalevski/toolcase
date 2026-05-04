@@ -73,7 +73,7 @@ export const PieChart: React.FC<PieChartProps> = ({
 			<div className={`component-chart__inner component-chart__inner--pie${className ? ` ${className}` : ''}`}>
 				{title && <div className="component-chart__header"><Skeleton width="40%" /></div>}
 				<div style={{ display: 'flex', justifyContent: 'center' }}>
-					<Skeleton shape="circle" width={height * 0.7} height={height * 0.7} />
+					<Skeleton variant="circle" width={height * 0.7} height={height * 0.7} />
 				</div>
 			</div>
 		)

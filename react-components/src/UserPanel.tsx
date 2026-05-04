@@ -68,7 +68,7 @@ export const UserPanel: React.FC<UserPanelProps> = ({
 		<div {...props} ref={panelRef} className={`${props.className || ''} component component-user-panel`.trim()}>
 			{loading ? (
 				<>
-					<Skeleton shape="circle" width="2rem" height="2rem" />
+					<Skeleton variant="circle" width="2rem" height="2rem" />
 					<div className="component-user-panel__info">
 						<Skeleton width="80%" />
 						<Skeleton width="40%" />

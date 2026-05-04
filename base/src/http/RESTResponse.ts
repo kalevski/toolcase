@@ -15,11 +15,14 @@ class RESTResponse<T = any> {
     }
 
     toJSON() {
-        return {
+        const result: { status: string, count?: number, data: T } = {
             status: 'OK',
-            count: this.count === undefined ? undefined : this.count,
             data: this.data,
         }
+        if (this.count !== undefined) {
+            result.count = this.count
+        }
+        return result
     }
 
 }

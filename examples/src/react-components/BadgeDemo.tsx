@@ -38,15 +38,6 @@ const BadgeDemo: React.FC = () => (
 			</div>
 		</SectionCard>
 
-		<SectionCard title="With Label Prop">
-			<div className="d-flex flex-wrap gap-2">
-				<Badge variant="primary" label="v2.4.0" />
-				<Badge variant="info" label="New" pill />
-				<Badge variant="success" label="Active" />
-				<Badge variant="danger" label="3 errors" pill />
-			</div>
-		</SectionCard>
-
 		<SectionCard title="Sizes">
 			<div className="d-flex flex-wrap align-items-center gap-2">
 				<Badge variant="primary" size="sm">Small</Badge>

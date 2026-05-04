@@ -53,7 +53,7 @@ export const ToggleCard: React.FC<ToggleCardProps> = ({
 	if (loading) {
 		return (
 			<div className={rootClass}>
-				<Skeleton shape="rect" width="2rem" height="2rem" />
+				<Skeleton variant="rect" width="2rem" height="2rem" />
 				<span className="component-toggle-card__text">
 					<Skeleton width="60%" />
 					<Skeleton width="80%" />

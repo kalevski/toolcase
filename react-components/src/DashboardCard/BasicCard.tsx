@@ -13,7 +13,7 @@ export const BasicCard: React.FC<BasicCardProps> = ({ textA, textB, icon, loadin
 	if (loading) {
 		return (
 			<div className="component-dashboard-card__body component-dashboard-card__body--basic">
-				<Skeleton shape="circle" width="2.5rem" height="2.5rem" />
+				<Skeleton variant="circle" width="2.5rem" height="2.5rem" />
 				<div className="component-dashboard-card__basic-text">
 					<Skeleton width="50%" />
 					<Skeleton width="30%" height="1.5em" />

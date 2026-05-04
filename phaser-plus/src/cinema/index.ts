@@ -14,12 +14,18 @@ import type {
     Shot
 } from './CameraDirector'
 import ScreenShake from './ScreenShake'
+import type { ShakeMode } from './ScreenShake'
+import CameraFlash from './CameraFlash'
+import DialogCameraCue from './DialogCameraCue'
+import type { DialogFrame, DialogCueOpts } from './DialogCameraCue'
 import ParallaxLayer from './ParallaxLayer'
 import LetterboxFeature from './LetterboxFeature'
 
 export {
     CameraDirector,
     ScreenShake,
+    CameraFlash,
+    DialogCameraCue,
     ParallaxLayer,
     LetterboxFeature,
     EASE_LINEAR,
@@ -35,5 +41,8 @@ export type {
     ZoomShot,
     BoundsShot,
     SplineShot,
-    Shot
+    Shot,
+    ShakeMode,
+    DialogFrame,
+    DialogCueOpts
 }

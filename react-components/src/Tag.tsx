@@ -3,7 +3,6 @@ import { Icon } from './Icon'
 
 export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
 	children?: React.ReactNode
-	label?: string
 	variant?: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
 	removable?: boolean
 	onRemove?: () => void
@@ -11,7 +10,6 @@ export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 export const Tag: React.FC<TagProps> = ({
 	children,
-	label,
 	variant = 'secondary',
 	removable = false,
 	onRemove,
@@ -26,7 +24,7 @@ export const Tag: React.FC<TagProps> = ({
 
 	return (
 		<span {...props} className={rootClass}>
-			<span className="component-tag__label">{label ?? children}</span>
+			<span className="component-tag__label">{children}</span>
 			{removable && (
 				<button
 					type="button"

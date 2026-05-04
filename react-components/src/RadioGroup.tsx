@@ -16,6 +16,11 @@ export interface RadioGroupProps {
 	inline?: boolean
 	className?: string
 	name?: string
+	id?: string
+	required?: boolean
+	'aria-describedby'?: string
+	'aria-labelledby'?: string
+	'aria-invalid'?: boolean
 }
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
@@ -26,6 +31,11 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 	inline = false,
 	className = '',
 	name,
+	id,
+	required,
+	'aria-describedby': ariaDescribedBy,
+	'aria-labelledby': ariaLabelledBy,
+	'aria-invalid': ariaInvalid,
 }) => {
 	const handleRadioChange = (optionValue: string) => {
 		if (!onChange) return
@@ -33,7 +43,15 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 	}
 
 	return (
-		<div className={`component component-radio-group ${className}`.trim()}>
+		<div
+			id={id}
+			role="radiogroup"
+			aria-required={required ? true : undefined}
+			aria-describedby={ariaDescribedBy}
+			aria-labelledby={ariaLabelledBy}
+			aria-invalid={ariaInvalid}
+			className={`component component-radio-group ${className}`.trim()}
+		>
 			{label && <Label className="d-block mb-2">{label}</Label>}
 			{options.map((option) => (
 				<Radio

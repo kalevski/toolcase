@@ -7,18 +7,26 @@ class LSystem {
 
     private config: LSystemConfig
 
-    readonly state: string = ''
+    private _state: string
 
-    readonly iteration: number = 0
+    private _iteration: number = 0
 
     constructor(config: LSystemConfig) {
         this.config = config
-        this.state += config.axiom
+        this._state = config.axiom
+    }
+
+    get state(): string {
+        return this._state
+    }
+
+    get iteration(): number {
+        return this._iteration
     }
 
     iterate(): string {
         let sequence = ''
-        for (const rule of this.state.split('')) {
+        for (const rule of this._state.split('')) {
             const resolved = this.config.rules[rule]
             if (typeof resolved !== 'string') {
                 sequence += rule
@@ -26,8 +34,8 @@ class LSystem {
             }
             sequence += resolved
         }
-        ;(this as any).iteration++
-        ;(this as any).state = sequence
+        this._iteration++
+        this._state = sequence
         return sequence
     }
 }

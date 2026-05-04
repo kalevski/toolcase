@@ -35,7 +35,7 @@ export const EntityProfileCard: React.FC<EntityProfileCardProps> = ({
 		return (
 			<div className={rootClass}>
 				<div className="component-entity-profile-card__hero">
-					<Skeleton shape="circle" width={56} height={56} />
+					<Skeleton variant="circle" width={56} height={56} />
 					<div className="component-entity-profile-card__identity">
 						<Skeleton width="40%" height="1.25rem" />
 						<Skeleton width="30%" />

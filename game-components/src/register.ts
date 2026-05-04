@@ -15,6 +15,7 @@ import { CharacterSelect } from './CharacterSelect'
 import { ChatWindow } from './ChatWindow'
 import { Check } from './Check'
 import { CircularProgress } from './CircularProgress'
+import { CooldownBadge } from './CooldownBadge'
 import { Codex } from './Codex'
 import { ComboBox } from './ComboBox'
 import { ComboCounter } from './ComboCounter'
@@ -71,6 +72,7 @@ import { LoadingOverlay } from './LoadingOverlay'
 import { LoadingScreen } from './LoadingScreen'
 import { Lobby } from './Lobby'
 import { LootList } from './LootList'
+import { LootPopup } from './LootPopup'
 import { LoreText } from './LoreText'
 import { MainMenu } from './MainMenu'
 import { ManaBar } from './ManaBar'
@@ -152,6 +154,7 @@ export function register(): void {
     customElements.define('gc-chat-window', ChatWindow)
     customElements.define('gc-check', Check)
     customElements.define('gc-circular-progress', CircularProgress)
+    customElements.define('gc-cooldown-badge', CooldownBadge)
     customElements.define('gc-codex', Codex)
     customElements.define('gc-combo-box', ComboBox)
     customElements.define('gc-combo-counter', ComboCounter)
@@ -208,6 +211,7 @@ export function register(): void {
     customElements.define('gc-loading-screen', LoadingScreen)
     customElements.define('gc-lobby', Lobby)
     customElements.define('gc-loot-list', LootList)
+    customElements.define('gc-loot-popup', LootPopup)
     customElements.define('gc-lore-text', LoreText)
     customElements.define('gc-main-menu', MainMenu)
     customElements.define('gc-mana-bar', ManaBar)

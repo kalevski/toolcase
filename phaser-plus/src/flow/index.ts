@@ -30,6 +30,14 @@ import ReplayRecorder, {
     REPLAY_END
 } from './ReplayRecorder'
 import type { ReplayFrame, ReplaySession, ReplayMode } from './ReplayRecorder'
+import Timer from './Timer'
+import type { TimerHandle, SequenceStep } from './Timer'
+import ParallelRunner from './Parallel'
+import type { ParallelTask, ParallelHandle } from './Parallel'
+import throttle from './throttle'
+import type { ThrottleOptions } from './throttle'
+import debounce from './debounce'
+import type { DebounceOptions } from './debounce'
 
 export {
     Event,
@@ -57,7 +65,11 @@ export {
     RUNNING,
     ReplayRecorder,
     REPLAY_FRAME,
-    REPLAY_END
+    REPLAY_END,
+    Timer,
+    ParallelRunner,
+    throttle,
+    debounce
 }
 
 export type {
@@ -69,5 +81,11 @@ export type {
     TickContext,
     ReplayFrame,
     ReplaySession,
-    ReplayMode
+    ReplayMode,
+    TimerHandle,
+    SequenceStep,
+    ParallelTask,
+    ParallelHandle,
+    ThrottleOptions,
+    DebounceOptions
 }

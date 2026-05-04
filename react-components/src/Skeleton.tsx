@@ -1,14 +1,14 @@
 import React from 'react'
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-	shape?: 'line' | 'circle' | 'rect'
+	variant?: 'text' | 'circle' | 'rect'
 	width?: string | number
 	height?: string | number
 	count?: number
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
-	shape = 'line',
+	variant = 'text',
 	width,
 	height,
 	count = 1,
@@ -17,13 +17,13 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 }) => {
 	const rootClass = [
 		'component component-skeleton',
-		`component-skeleton--${shape}`,
+		`component-skeleton--${variant}`,
 		className,
 	].filter(Boolean).join(' ')
 
 	const style: React.CSSProperties = {
-		width: width ?? (shape === 'circle' ? height ?? 40 : '100%'),
-		height: height ?? (shape === 'line' ? '1em' : shape === 'circle' ? width ?? 40 : 80),
+		width: width ?? (variant === 'circle' ? height ?? 40 : '100%'),
+		height: height ?? (variant === 'text' ? '1em' : variant === 'circle' ? width ?? 40 : 80),
 		...props.style,
 	}
 

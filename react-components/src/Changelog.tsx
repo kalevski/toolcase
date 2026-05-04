@@ -74,7 +74,7 @@ export const Changelog: FC<ChangelogProps> = ({
 							<article key={entry.id ?? `${entry.date}-${index}`} className="component-changelog__item">
 								<div className="component-changelog__item-meta">
 									<span className="component-changelog__item-date">{entry.date}</span>
-								{entry.tag && <Tag label={entry.tag} variant="primary" />}
+								{entry.tag && <Tag variant="primary">{entry.tag}</Tag>}
 								</div>
 								<h3 className="component-changelog__item-title">{entry.title}</h3>
 								<p className="component-changelog__item-description">{entry.description}</p>

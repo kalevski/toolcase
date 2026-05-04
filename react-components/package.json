@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/react-components",
-    "version": "2.6.2",
+    "version": "3.0.0",
     "description": "Practical React UI components — forms, dropzone, layout, and dashboard pieces — styled and ready to drop in.",
     "main": "lib/index.main.js",
     "module": "lib/index.module.js",
@@ -22,7 +22,7 @@
         "build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import --silence-deprecation=color-functions --silence-deprecation=global-builtin"
     },
     "peerDependencies": {
-        "@toolcase/base": "2.x.x",
+        "@toolcase/base": "3.x.x",
         "react": ">=18",
         "react-dom": ">=18"
     },

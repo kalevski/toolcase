@@ -46,13 +46,6 @@ const TagDemo: React.FC = () => {
 				</div>
 			</SectionCard>
 
-			<SectionCard title="Using label prop">
-				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-					<Tag label="v1.0.0" variant="info" />
-					<Tag label="stable" variant="success" />
-					<Tag label="deprecated" variant="danger" />
-				</div>
-			</SectionCard>
 		</div>
 		
 			</div>

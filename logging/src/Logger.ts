@@ -1,15 +1,18 @@
-import { LoggerLevel } from './Level'
+import { LoggerLevel, getLevel, getLevelOrder } from './Level'
 
-export type LogMessageFn = (level: LoggerLevel, scope: string, time: string, messages: any[]) => void
+export type LogMessageFn = (level: LoggerLevel, scope: string, time: string, messages: any[], overrideOrder?: number | null) => void
 
 class Logger {
 
     private scope: string
     private logMessageFn: LogMessageFn
+    private levelOverride: number | null = null
+    private context: Record<string, any> | null
 
-    constructor(scope: string, logMessage: LogMessageFn) {
+    constructor(scope: string, logMessage: LogMessageFn, context: Record<string, any> | null = null) {
         this.scope = scope
         this.logMessageFn = logMessage
+        this.context = context
     }
 
     error(...args: any[]): void {
@@ -34,7 +37,23 @@ class Logger {
 
     log(level: LoggerLevel, ...args: any[]): void {
         const time = new Date().toISOString()
-        this.logMessageFn(level, this.scope, time, args)
+        const messages = this.context === null ? args : [this.context, ...args]
+        this.logMessageFn(level, this.scope, time, messages, this.levelOverride)
+    }
+
+    setLevel(level: LoggerLevel | null): void {
+        this.levelOverride = level === null ? null : getLevelOrder(level)
+    }
+
+    getLevel(): LoggerLevel | null {
+        return this.levelOverride === null ? null : getLevel(this.levelOverride)
+    }
+
+    withContext(context: Record<string, any>): Logger {
+        const merged = { ...(this.context ?? {}), ...context }
+        const child = new Logger(this.scope, this.logMessageFn, merged)
+        child.levelOverride = this.levelOverride
+        return child
     }
 
 }

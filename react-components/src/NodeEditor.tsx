@@ -394,7 +394,7 @@ export const NodeEditor: React.FC<NodeEditorProps> = ({
 					<Skeleton width="5rem" height="2rem" />
 				</div>
 				<div style={{ padding: '2rem' }}>
-					<Skeleton shape="rect" width="100%" height="300px" />
+					<Skeleton variant="rect" width="100%" height="300px" />
 				</div>
 			</div>
 		)

@@ -121,6 +121,42 @@
         opacity: 0.55;
         pointer-events: none;
     }
+
+    &--small {
+        --ni-height: 1.875rem;
+    }
+
+    &--small &__btn {
+        font-size: 0.9375rem;
+    }
+
+    &--small &__input {
+        font-size: 0.8125rem;
+    }
+
+    &--small &__prefix,
+    &--small &__suffix {
+        font-size: 0.75rem;
+        padding: 0 0.375rem;
+    }
+
+    &--large {
+        --ni-height: 3rem;
+    }
+
+    &--large &__btn {
+        font-size: 1.25rem;
+    }
+
+    &--large &__input {
+        font-size: 1.0625rem;
+    }
+
+    &--large &__prefix,
+    &--large &__suffix {
+        font-size: 1rem;
+        padding: 0 0.625rem;
+    }
 }
 
 // Touch targets

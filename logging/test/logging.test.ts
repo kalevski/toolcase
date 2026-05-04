@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { default as Level, getLevelOrder, getLevel } from '../src/Level'
+import Logger from '../src/Logger'
 import LoggerFactory from '../src/LoggerFactory'
 import ConsoleLogReporter from '../src/ConsoleLogReporter'
 import LogReporter from '../src/LogReporter'
+import JSONLineReporter from '../src/JSONLineReporter'
+import FileLogReporter from '../src/FileLogReporter'
+import BufferedReporter from '../src/BufferedReporter'
 
 describe('Level', () => {
     it('has all expected levels', () => {
@@ -80,10 +84,365 @@ describe('LoggerFactory', () => {
     })
 })
 
+describe('Logger', () => {
+    it('passes scope, time, and args through dispatch fn', () => {
+        const captures: any[] = []
+        const logger = new Logger('billing', (level, scope, time, messages) => {
+            captures.push({ level, scope, time, messages })
+        })
+        logger.info('hello', 42)
+        expect(captures).toHaveLength(1)
+        expect(captures[0].level).toBe('info')
+        expect(captures[0].scope).toBe('billing')
+        expect(captures[0].messages).toEqual(['hello', 42])
+        expect(typeof captures[0].time).toBe('string')
+    })
+
+    it('exposes a method per level', () => {
+        const captures: string[] = []
+        const logger = new Logger('s', (level) => { captures.push(level) })
+        logger.error('e')
+        logger.warning('w')
+        logger.info('i')
+        logger.debug('d')
+        logger.verbose('v')
+        expect(captures).toEqual(['error', 'warning', 'info', 'debug', 'verbose'])
+    })
+
+    it('log() accepts arbitrary level token', () => {
+        const captures: string[] = []
+        const logger = new Logger('s', (level) => { captures.push(level) })
+        logger.log('verbose', 'msg')
+        expect(captures).toEqual(['verbose'])
+    })
+})
+
+describe('Logger.setLevel (per-logger override)', () => {
+    it('narrows: logger override blocks below-threshold messages even when factory is verbose', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'verbose'
+        const logger = factory.getLogger('svc')
+        logger.setLevel('warning')
+        logger.error('e')
+        logger.warning('w')
+        logger.info('i')
+        logger.debug('d')
+        expect(captured).toEqual(['error', 'warning'])
+    })
+
+    it('widens: logger override permits below-factory messages', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        const noisy = factory.getLogger('noisy')
+        noisy.setLevel('verbose')
+        noisy.info('i')
+        noisy.debug('d')
+        noisy.verbose('v')
+        expect(captured).toEqual(['info', 'debug', 'verbose'])
+    })
+
+    it('null clears the override (defers back to factory)', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'error'
+        const log = factory.getLogger('s')
+        log.setLevel('verbose')
+        log.info('shown')
+        log.setLevel(null)
+        captured.length = 0
+        log.info('dropped')
+        log.error('shown')
+        expect(captured).toEqual(['error'])
+    })
+
+    it('getLevel reports the override or null', () => {
+        const factory = new LoggerFactory([])
+        const log = factory.getLogger('x')
+        expect(log.getLevel()).toBeNull()
+        log.setLevel('debug')
+        expect(log.getLevel()).toBe('debug')
+        log.setLevel(null)
+        expect(log.getLevel()).toBeNull()
+    })
+
+    it('per-logger override is scope-local', () => {
+        const captured: { scope: string, level: string }[] = []
+        class R extends LogReporter { log(level: any, scope: string) { captured.push({ level, scope }) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        const a = factory.getLogger('a')
+        const b = factory.getLogger('b')
+        a.setLevel('verbose')
+        a.debug('a-debug')
+        b.debug('b-debug')
+        expect(captured).toEqual([{ scope: 'a', level: 'debug' }])
+    })
+})
+
+describe('Logger.withContext (structured context binding)', () => {
+    it('returns a child logger that injects context as the first message arg', () => {
+        const captured: any[][] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]) { captured.push(msgs) } }
+        const factory = new LoggerFactory([new R()])
+        const log = factory.getLogger('svc')
+        const req = log.withContext({ requestId: 'r1' })
+        req.info('start')
+        req.info('done', 42)
+        expect(captured).toEqual([
+            [{ requestId: 'r1' }, 'start'],
+            [{ requestId: 'r1' }, 'done', 42]
+        ])
+    })
+
+    it('does not mutate the parent logger', () => {
+        const captured: any[][] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]) { captured.push(msgs) } }
+        const factory = new LoggerFactory([new R()])
+        const parent = factory.getLogger('svc')
+        parent.withContext({ x: 1 })
+        parent.info('hi')
+        expect(captured).toEqual([['hi']])
+    })
+
+    it('nested withContext merges context, child wins on key conflict', () => {
+        const captured: any[][] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]) { captured.push(msgs) } }
+        const factory = new LoggerFactory([new R()])
+        const log = factory.getLogger('svc')
+        const a = log.withContext({ requestId: 'r1', userId: 7 })
+        const b = a.withContext({ userId: 9, sessionId: 's' })
+        b.info('event')
+        expect(captured).toEqual([
+            [{ requestId: 'r1', userId: 9, sessionId: 's' }, 'event']
+        ])
+    })
+
+    it('inherits parent level override', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        const log = factory.getLogger('svc')
+        log.setLevel('verbose')
+        const child = log.withContext({ requestId: 'r1' })
+        child.debug('d')
+        expect(captured).toEqual(['debug'])
+    })
+})
+
 describe('ConsoleLogReporter', () => {
     it('can be instantiated', () => {
         const reporter = new ConsoleLogReporter()
         expect(reporter).toBeDefined()
         expect(typeof reporter.log).toBe('function')
+    })
+
+    it('routes error level to console.error', () => {
+        const reporter = new ConsoleLogReporter()
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        reporter.log('error', 'svc', '2026-01-01T00:00:00Z', ['boom'])
+        expect(spy).toHaveBeenCalledTimes(1)
+        const call = spy.mock.calls[0].join(' ')
+        expect(call).toContain('ERROR')
+        expect(call).toContain('svc')
+        expect(call).toContain('boom')
+        spy.mockRestore()
+    })
+
+    it('routes warning level to console.warn', () => {
+        const reporter = new ConsoleLogReporter()
+        const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        reporter.log('warning', 'svc', 't', ['heads up'])
+        expect(spy).toHaveBeenCalledTimes(1)
+        spy.mockRestore()
+    })
+
+    it('routes info/debug/verbose to console.log', () => {
+        const reporter = new ConsoleLogReporter()
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 's', 't', ['x'])
+        reporter.log('debug', 's', 't', ['x'])
+        reporter.log('verbose', 's', 't', ['x'])
+        expect(spy).toHaveBeenCalledTimes(3)
+        spy.mockRestore()
+    })
+})
+
+describe('JSONLineReporter', () => {
+    it('emits a JSON line with level/scope/time/messages', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        reporter.log('info', 'auth', '2026-01-01T00:00:00Z', ['ok', { id: 7 }])
+        expect(lines).toHaveLength(1)
+        const parsed = JSON.parse(lines[0])
+        expect(parsed).toEqual({
+            level: 'info',
+            scope: 'auth',
+            time: '2026-01-01T00:00:00Z',
+            messages: ['ok', { id: 7 }]
+        })
+    })
+
+    it('serializes Error instances with stack', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        reporter.log('error', 's', 't', [new Error('boom')])
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.messages[0].name).toBe('Error')
+        expect(parsed.messages[0].message).toBe('boom')
+        expect(typeof parsed.messages[0].stack).toBe('string')
+    })
+
+    it('merges static extras into each record', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({
+            write: line => lines.push(line),
+            extra: { service: 'api', region: 'eu' }
+        })
+        reporter.log('info', 's', 't', ['ok'])
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.service).toBe('api')
+        expect(parsed.region).toBe('eu')
+    })
+
+    it('falls back when message contains a circular ref', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        const cyc: any = {}
+        cyc.self = cyc
+        reporter.log('info', 's', 't', [cyc])
+        expect(lines).toHaveLength(1)
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.messages).toEqual(['<unserializable>'])
+    })
+})
+
+describe('BufferedReporter', () => {
+    it('flushes when maxSize is reached', () => {
+        const captured: string[][] = []
+        class R extends LogReporter { log(level: any) { captured.push([level]) } }
+        const buf = new BufferedReporter(new R(), { maxSize: 3, flushInterval: 0 })
+        buf.log('info', 's', 't', ['a'])
+        buf.log('info', 's', 't', ['b'])
+        expect(captured).toHaveLength(0)
+        buf.log('info', 's', 't', ['c'])
+        expect(captured).toHaveLength(3)
+    })
+
+    it('flushes after flushInterval ms', () => {
+        vi.useFakeTimers()
+        const captured: number[] = []
+        class R extends LogReporter { log() { captured.push(1) } }
+        const buf = new BufferedReporter(new R(), { maxSize: 100, flushInterval: 500 })
+        buf.log('info', 's', 't', ['a'])
+        buf.log('info', 's', 't', ['b'])
+        expect(captured).toHaveLength(0)
+        vi.advanceTimersByTime(500)
+        expect(captured).toHaveLength(2)
+        vi.useRealTimers()
+    })
+
+    it('flush() drains immediately and cancels the timer', () => {
+        vi.useFakeTimers()
+        const captured: number[] = []
+        class R extends LogReporter { log() { captured.push(1) } }
+        const buf = new BufferedReporter(new R(), { maxSize: 100, flushInterval: 1000 })
+        buf.log('info', 's', 't', ['a'])
+        buf.flush()
+        expect(captured).toHaveLength(1)
+        vi.advanceTimersByTime(2000)
+        expect(captured).toHaveLength(1)
+        vi.useRealTimers()
+    })
+
+    it('close() flushes pending entries and clears the timer', () => {
+        vi.useFakeTimers()
+        const captured: number[] = []
+        class R extends LogReporter { log() { captured.push(1) } }
+        const buf = new BufferedReporter(new R(), { maxSize: 100, flushInterval: 1000 })
+        buf.log('info', 's', 't', ['a'])
+        buf.log('info', 's', 't', ['b'])
+        buf.close()
+        expect(captured).toHaveLength(2)
+        vi.advanceTimersByTime(2000)
+        expect(captured).toHaveLength(2)
+        vi.useRealTimers()
+    })
+
+    it('onFlush handler receives the batch (no inner reporter required)', () => {
+        const batches: any[][] = []
+        const buf = new BufferedReporter(null, {
+            maxSize: 2,
+            flushInterval: 0,
+            onFlush: entries => batches.push(entries)
+        })
+        buf.log('info', 's', 't', ['a'])
+        buf.log('warning', 's', 't', ['b'])
+        expect(batches).toHaveLength(1)
+        expect(batches[0]).toHaveLength(2)
+        expect(batches[0][0].level).toBe('info')
+        expect(batches[0][1].level).toBe('warning')
+    })
+
+    it('throws when neither inner reporter nor onFlush is provided', () => {
+        expect(() => new BufferedReporter(null, {})).toThrow(/inner reporter or an onFlush/)
+    })
+
+    it('size() reports buffered entry count', () => {
+        const buf = new BufferedReporter(null, { onFlush: () => {}, maxSize: 100, flushInterval: 0 })
+        expect(buf.size()).toBe(0)
+        buf.log('info', 's', 't', ['a'])
+        buf.log('info', 's', 't', ['b'])
+        expect(buf.size()).toBe(2)
+        buf.flush()
+        expect(buf.size()).toBe(0)
+    })
+
+    it('flush on empty buffer is a no-op', () => {
+        let calls = 0
+        const buf = new BufferedReporter(null, { onFlush: () => { calls++ }, maxSize: 10, flushInterval: 0 })
+        buf.flush()
+        expect(calls).toBe(0)
+    })
+})
+
+describe('FileLogReporter', () => {
+    it('writes formatted lines to a file', async () => {
+        const { mkdtempSync, readFileSync } = await import('node:fs')
+        const { tmpdir } = await import('node:os')
+        const { join } = await import('node:path')
+        const dir = mkdtempSync(join(tmpdir(), 'tc-log-'))
+        const file = join(dir, 'app.log')
+        const reporter = new FileLogReporter(file)
+        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', ['hello', { k: 1 }])
+        reporter.log('error', 'svc', '2026-01-01T00:00:01Z', [new Error('boom')])
+        await reporter.close()
+        const content = readFileSync(file, 'utf8')
+        expect(content).toContain('INFO')
+        expect(content).toContain('svc')
+        expect(content).toContain('hello')
+        expect(content).toContain('{"k":1}')
+        expect(content).toContain('ERROR')
+        expect(content).toContain('boom')
+    })
+
+    it('honors custom formatter', async () => {
+        const { mkdtempSync, readFileSync } = await import('node:fs')
+        const { tmpdir } = await import('node:os')
+        const { join } = await import('node:path')
+        const dir = mkdtempSync(join(tmpdir(), 'tc-log-'))
+        const file = join(dir, 'app.log')
+        const reporter = new FileLogReporter(file, {
+            formatter: (level, _scope, _time, messages) => `[${level}] ${messages.join('|')}`
+        })
+        reporter.log('warning', 's', 't', ['a', 'b'])
+        await reporter.close()
+        const content = readFileSync(file, 'utf8').trim()
+        expect(content).toBe('[warning] a|b')
     })
 })

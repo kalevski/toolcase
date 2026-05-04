@@ -75,7 +75,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 		return (
 			<div className={`component component-icon-picker${className ? ` ${className}` : ''}`}>
 				{label && <label className="component-icon-picker__label">{label}</label>}
-				<Skeleton shape="rect" width="3rem" height="2.5rem" />
+				<Skeleton variant="rect" width="3rem" height="2.5rem" />
 			</div>
 		)
 	}

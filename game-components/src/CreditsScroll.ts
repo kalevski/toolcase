@@ -18,20 +18,30 @@ export class CreditsScroll extends HTMLElement {
     private rafId: number | null = null
     private lastTs = 0
     private clickHandler = () => this.togglePlay()
+    private keyHandler = (event: KeyboardEvent): void => {
+        if (event.key !== ' ' && event.key !== 'Enter') return
+        event.preventDefault()
+        this.togglePlay()
+    }
 
     constructor() {
         super()
     }
 
     connectedCallback(): void {
-        if (!this.hasAttribute('role')) this.setAttribute('role', 'group')
+        if (!this.hasAttribute('role')) this.setAttribute('role', 'button')
+        if (!this.hasAttribute('tabindex')) this.setAttribute('tabindex', '0')
+        if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', 'Credits — Space or Enter to pause/play')
+        this.setAttribute('aria-pressed', String(!this._playing))
         this.addEventListener('click', this.clickHandler)
+        this.addEventListener('keydown', this.keyHandler)
         this.render()
         this.startLoop()
     }
 
     disconnectedCallback(): void {
         this.removeEventListener('click', this.clickHandler)
+        this.removeEventListener('keydown', this.keyHandler)
         this.stopLoop()
     }
 
@@ -84,6 +94,7 @@ export class CreditsScroll extends HTMLElement {
 
     private togglePlay(): void {
         this._playing = !this._playing
+        this.setAttribute('aria-pressed', String(!this._playing))
         const indicator = this.querySelector('.gc-credits-scroll-indicator') as HTMLElement | null
         if (indicator) indicator.textContent = this._playing ? '' : '⏸'
         if (this._playing) this.startLoop()

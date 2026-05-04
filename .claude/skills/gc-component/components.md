@@ -838,6 +838,26 @@ Events: none.
 
 ---
 
+### `gc-cooldown-badge` — `CooldownBadge`
+
+Item-slot-styled circular cooldown badge (32–64px). Uses a conic-gradient sweep over a slot-bevelled background, plus optional mono center label that auto-formats remaining time. Drops the dark sweep and adds a gold ready-glow once the cooldown finishes.
+
+| Attribute / Prop | Type | Default | Notes |
+|---|---|---|---|
+| `value` | number | `0` | time remaining (or any unit); clamped to `[0, max]` |
+| `max` | number | `1` | total duration; cleared if `<= 0` |
+| `size` | number (px) | `48` | clamped to `[32, 64]` |
+| `label` | string | `''` | static center text; if set, overrides auto-formatted countdown |
+| `show-label` / `showLabel` | boolean attr | absent | enables auto-formatted countdown when no `label` is set |
+
+Slot: none (re-renders innerHTML).
+Events: none.
+
+**Use when:** cooldown overlay on top of `gc-item-slot`, ability bar pulse beside `gc-ability-card`, generic timed-effect ring (≤ 64px).
+**Skip when:** large radial progress (use `gc-circular-progress`), or non-timed percent fills.
+
+---
+
 ### `gc-hit-marker` — `HitMarker`
 
 FPS-style 4-corner crosshair X marker. Auto-hides after `duration` and emits `done`.
@@ -1963,8 +1983,29 @@ Type: `LootEntry` exported. Reuses `InventoryItem`.
 Slot: none (re-renders innerHTML).
 Events: `take` → `{id}` on per-row take; `take-all` → `void` on take-all click. Take-all disabled when empty.
 
-**Use when:** chest / corpse loot popup.
-**Skip when:** sortable inventory grid (use `gc-inventory-grid`).
+**Use when:** inline loot list inside an existing panel.
+**Skip when:** modal popup framing required (use `gc-loot-popup`) or sortable inventory grid (use `gc-inventory-grid`).
+
+---
+
+### `gc-loot-popup` — `LootPopup`
+
+Modal-framed wrapper around `gc-loot-list` with backdrop, Take-All / Discard buttons, Esc-to-close, and an optional auto-fade timer.
+
+| Attribute / Prop | Type | Default | Notes |
+|---|---|---|---|
+| `open` | boolean attr | absent | reflected; show/hide modal |
+| `popup-title` / `popupTitle` | string | `'Loot'` | dialog title (display caps) |
+| `eyebrow` | string | `'Acquired'` | small label above title; pass empty string to hide |
+| `discard-label` / `discardLabel` | string | `'Discard'` | ghost button label |
+| `auto-fade-ms` / `autoFadeMs` | number | `0` | when > 0 + `open`, emits `close` after that many ms; resets on `take` |
+| `items` (prop) | `LootEntry[]` | `[]` | forwarded to inner `gc-loot-list` |
+
+Slot: none (re-renders innerHTML).
+Events: `take` → `{id}` (forwarded from inner list); `take-all` → `void`; `discard` → `void`; `close` → `void` (Esc key, backdrop click, or auto-fade expiry).
+
+**Use when:** chest / corpse / kill loot pickup modal.
+**Skip when:** loot list lives inside a larger always-on panel (use `gc-loot-list`).
 
 ---
 
@@ -2247,6 +2288,7 @@ Events: none.
 | timed party invite toast | `gc-invite-toast` |
 | multi-section legal viewer | `gc-legal-screen` |
 | ring progress / cooldown ring | `gc-circular-progress` |
+| 32–64px slot-styled cooldown badge | `gc-cooldown-badge` |
 | FPS hit confirmation marker | `gc-hit-marker` |
 | floating damage / heal / miss text | `gc-damage-number` |
 | 4-bar net quality icon | `gc-network-status-icon` |
@@ -2301,7 +2343,8 @@ Events: none.
 | seasonal battle pass track | `gc-battle-pass` |
 | crafting workbench panel | `gc-crafting-panel` |
 | vendor / shop panel | `gc-shop-panel` |
-| loot pickup list | `gc-loot-list` |
+| loot pickup list (inline) | `gc-loot-list` |
+| loot pickup modal with Take-All / Discard / auto-fade | `gc-loot-popup` |
 | guild / clan home panel | `gc-guild-panel` |
 | in-world party widget | `gc-party-panel` |
 | pre-match lobby with start | `gc-lobby` |

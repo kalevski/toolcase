@@ -30,7 +30,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({ title, items, loading = 
 				<ul className="component-dashboard-card__status-list">
 					{Array.from({ length: loadingCount }, (_, i) => (
 						<li key={i} className="component-dashboard-card__status-item">
-							<Skeleton shape="circle" width="1rem" height="1rem" />
+							<Skeleton variant="circle" width="1rem" height="1rem" />
 							<Skeleton width="60%" />
 						</li>
 					))}

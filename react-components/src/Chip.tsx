@@ -3,7 +3,6 @@ import { Icon } from './Icon'
 
 export interface ChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	children?: React.ReactNode
-	label?: string
 	selected?: boolean
 	variant?: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
 	icon?: string
@@ -13,7 +12,6 @@ export interface ChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export const Chip: React.FC<ChipProps> = ({
 	children,
-	label,
 	selected = false,
 	variant = 'secondary',
 	icon,
@@ -35,7 +33,7 @@ export const Chip: React.FC<ChipProps> = ({
 	return (
 		<button {...props} disabled={disabled} type={props.type ?? 'button'} className={rootClass}>
 			{icon && <Icon name={icon} className="component-chip__icon" />}
-			<span className="component-chip__label">{label ?? children}</span>
+			<span className="component-chip__label">{children}</span>
 			{count !== undefined && <span className="component-chip__count">×{count}</span>}
 			{onRemove && (
 				<span

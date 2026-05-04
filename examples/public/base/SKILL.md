@@ -36,6 +36,7 @@ import { env } from '@toolcase/base/node'
   - [State](#state)
   - [AdjacencyMatrix](#adjacencymatrix)
   - [ObjectPool](#objectpool)
+  - [WeightedRandom](#weightedrandom)
 - [Events](#events)
   - [EventEmitter](#eventemitter)
   - [Broadcast](#broadcast)
@@ -79,7 +80,7 @@ const u = await userCache.get('42')
 userCache.invalidate('42')
 ```
 
-`ms = 0` ⇒ every call re-fetches (cache always stale). Constructor throws if `fetchFn` is not a function.
+`ms = 0` ⇒ effectively no caching across millisecond boundaries (entries expire when `now > fetchedAt`). Two calls within the same millisecond still share a result; in practice this means each call re-fetches. Use `setMS(0)` to force-stale a cache; use `invalidate(...args)` to drop a single entry. Constructor throws if `fetchFn` is not a function.
 
 ### PriorityQueue
 
@@ -196,6 +197,49 @@ class Bullet { x = 0; y = 0 }
 const pool = new ObjectPool(Bullet, b => { b.x = 0; b.y = 0 })
 const b = pool.obtain()
 b.release() // returns to pool
+```
+
+### WeightedRandom
+
+Weighted random selection with O(log n) picks. Builds a cumulative-weight table once and binary-searches a uniform random sample on each pick.
+
+```ts
+new WeightedRandom<T>(
+    items: Iterable<T>,
+    weightFn: (item: T) => number,
+    random: () => number = Math.random
+)
+```
+
+- `length: number` — items kept (zero-weight items are dropped at construction).
+- `totalWeight: number` — sum of positive weights.
+- `pick(): T` — single weighted draw.
+- `pickMany(count: number): T[]` — `count` independent draws (with replacement). Throws if `count` is not a non-negative integer.
+- `probabilityOf(predicate: (item: T) => boolean): number` — share of total weight matching the predicate, in `[0, 1]`.
+
+Constructor throws when `weightFn`/`random` are not functions, when any weight is negative or non-finite (`Infinity`/`NaN`), or when no item has a positive weight. Items with `weight === 0` are silently skipped.
+
+```ts
+const loot = new WeightedRandom(
+    [
+        { id: 'common', weight: 70 },
+        { id: 'rare',   weight: 25 },
+        { id: 'epic',   weight: 5  }
+    ],
+    (entry) => entry.weight
+)
+
+loot.pick().id            // probably 'common'
+loot.pickMany(3)          // 3 independent draws
+loot.probabilityOf(e => e.id === 'epic') // 0.05
+```
+
+Pass a seeded `random` for deterministic tests:
+
+```ts
+let s = 1
+const seeded = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
+const wr = new WeightedRandom(['a', 'b'], (k) => k === 'a' ? 1 : 9, seeded)
 ```
 
 ---
@@ -445,6 +489,234 @@ Throws `'env works only with NodeJS'` if `globalThis.process` is undefined. Keep
 import { env } from '@toolcase/base/node'
 const port  = env('PORT', 3000, 'number')
 const debug = env('DEBUG', false, 'boolean')
+```
+
+---
+
+## Recipes
+
+End-to-end examples that combine multiple primitives.
+
+### Cached + retried HTTP fetch
+
+```ts
+import { Cache, retry, HTTP } from '@toolcase/base'
+
+const userCache = new Cache(async (id: string) => {
+    return retry(async () => {
+        const r = await fetch(`/api/users/${id}`)
+        if (!r.ok) throw new HTTP.RESTError(r.status, `users/${id} ${r.statusText}`)
+        return r.json()
+    }, { retries: 4, minTimeout: 250, factor: 2, maxTimeout: 4000 })
+}, 60_000)
+
+const user = await userCache.get('42')
+```
+
+### Observable game state with `State` + `EventEmitter`
+
+```ts
+import { State } from '@toolcase/base'
+
+const game = new State<{ score: number, lives: number }>({ score: 0, lives: 3 })
+game.on('state.score', s => updateHUD('score', s))
+game.on('state.lives', l => l <= 0 && gameOver())
+
+game.set({ score: 100 })  // fires 'state.score'
+game.set({ lives: 2 })    // fires 'state.lives'
+```
+
+### Throttled work via `PriorityQueue` + `retry`
+
+```ts
+import { PriorityQueue, retry } from '@toolcase/base'
+
+interface Job { id: string, run: () => Promise<void>, weight: number }
+
+const jobs = new PriorityQueue<Job>(j => j.weight, j => j.id)
+
+async function pump() {
+    const job = jobs.dequeue()
+    if (job === null) return
+    await retry(job.run, { retries: 3 })
+    return pump()
+}
+
+jobs.enqueue({ id: 'a', weight: 1, run: () => sendBeacon() })
+jobs.enqueue({ id: 'b', weight: 5, run: () => uploadCrash() })
+pump()
+```
+
+### Distributed counter with `VectorClock`
+
+```ts
+import { VectorClock } from '@toolcase/base'
+
+const a = new VectorClock('node-a')
+const b = new VectorClock('node-b')
+
+a.increment()           // a saw event
+b.update(a)             // b learns of a
+b.increment()           // b adds its own
+VectorClock.compare(a, b)  // -1  → a is before b
+VectorClock.compare(b, a)  //  1  → b is after a
+```
+
+### LSystem-driven procedural map seed
+
+```ts
+import { LSystem } from '@toolcase/base'
+
+const ls = new LSystem({
+    axiom: 'F',
+    rules: { F: 'F[+F]F[-F]F' }   // branching tree
+})
+for (let i = 0; i < 4; i++) ls.iterate()
+drawTurtle(ls.state)
+```
+
+### Build a REST handler with `RESTResponse` / `RESTError`
+
+```ts
+import { HTTP } from '@toolcase/base'
+
+async function handler(req: Request) {
+    try {
+        const data = await getData(req)
+        return Response.json(new HTTP.RESTResponse(HTTP.Status.OK, data, data.length))
+    } catch (err) {
+        if (err instanceof HTTP.RESTError) {
+            return Response.json(err, { status: err.status })
+        }
+        const fallback = HTTP.RESTError.internalServerError(err.message)
+        return Response.json(fallback, { status: fallback.status })
+    }
+}
+```
+
+`RESTResponse.toJSON()` always emits `status: 'OK'`; `RESTError.toJSON()` emits `status: 'rejected'` plus `cause`. Pair with `JSONSchema` on the request side:
+
+```ts
+import { JSONSchema, HTTP } from '@toolcase/base'
+
+const createUser = new JSONSchema({
+    type: 'object',
+    properties: {
+        email: { type: 'email', required: true },
+        password: { type: 'password', required: true }
+    }
+})
+
+async function POST(req: Request) {
+    try { createUser.validate(await req.json()) }
+    catch (err: any) {
+        const e = new HTTP.RESTError(HTTP.Status.BAD_REQUEST, err.message)
+        return Response.json(e, { status: e.status })
+    }
+    /* ... */
+}
+```
+
+### Frame budgeting with `getNumberInRange` + `formatByteSize`
+
+```ts
+import { getNumberInRange, formatByteSize } from '@toolcase/base'
+
+const fps = getNumberInRange(query.get('fps') ?? '60', 60, 15, 240)
+console.log(`bandwidth budget: ${formatByteSize(fps * 1024)}/sec`)  // e.g. "60 KB/sec"
+```
+
+### `ObjectPool` for bullets / particles
+
+```ts
+import { ObjectPool } from '@toolcase/base'
+
+class Particle {
+    x = 0; y = 0; vx = 0; vy = 0; life = 0
+    update(dt: number) { this.x += this.vx * dt; this.y += this.vy * dt; this.life -= dt }
+}
+
+const pool = new ObjectPool(Particle, p => { p.x = p.y = p.vx = p.vy = p.life = 0 })
+
+function spawn(x: number, y: number) {
+    const p = pool.obtain()
+    p.x = x; p.y = y; p.vx = Math.random() * 2 - 1; p.vy = -1; p.life = 1
+    return p
+}
+
+function tick(dt: number, list: Particle[]) {
+    for (const p of list) {
+        p.update(dt)
+        if (p.life <= 0) (p as any).release()  // pool wires release() onto each instance
+    }
+}
+```
+
+### Color palette for tagging
+
+```ts
+import { Color } from '@toolcase/base'
+
+const TAG_COLORS = ['red', 'blue', 'green', 'amber', 'purple']
+
+function tagColor(name: string): string {
+    const i = [...name].reduce((a, c) => a + c.charCodeAt(0), 0) % TAG_COLORS.length
+    return Color.getHex(TAG_COLORS[i]) ?? '#888'
+}
+```
+
+### Graph traversal with `AdjacencyMatrix`
+
+```ts
+import { AdjacencyMatrix } from '@toolcase/base'
+
+const g = new AdjacencyMatrix<number, null>(1, null)
+;['A', 'B', 'C', 'D'].forEach(v => g.addVertex(v))
+g.addEdge('A', 'B', 2)
+g.addEdge('B', 'C', 5)
+g.addEdge('A', 'C', 9)
+g.addEdge('C', 'D', 1)
+
+// Naive BFS
+function shortestHops(start: string, end: string): string[] | null {
+    const visited = new Set<string>([start])
+    const queue: { node: string, path: string[] }[] = [{ node: start, path: [start] }]
+    while (queue.length > 0) {
+        const { node, path } = queue.shift()!
+        if (node === end) return path
+        for (const next of g.getEdges(node)) {
+            if (!visited.has(next)) {
+                visited.add(next)
+                queue.push({ node: next, path: [...path, next] })
+            }
+        }
+    }
+    return null
+}
+
+shortestHops('A', 'D') // ['A', 'B', 'C', 'D']  (or via 'A' → 'C' → 'D' depending on order)
+```
+
+### Hex helpers — cryptographic ids
+
+```ts
+import { generateId, bufferToHex, hexToBuffer } from '@toolcase/base'
+
+const sessionId = generateId(32)               // 32-char hex
+const bytes = hexToBuffer(sessionId)           // back to Uint8Array
+const roundTrip = bufferToHex(bytes) === sessionId
+```
+
+### Env-driven config (Node)
+
+```ts
+import { env } from '@toolcase/base/node'
+import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
+
+const factory = new LoggerFactory([new ConsoleLogReporter()])
+factory.level = env('LOG_LEVEL', 'info') as any
+const port    = env('PORT', 3000, 'number')
+const debug   = env('DEBUG', false, 'boolean')
 ```
 
 ---

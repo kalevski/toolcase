@@ -293,10 +293,18 @@ hotbar.addEventListener('select', e => use(e.detail.item))
 | `gc-speedometer` | `Speedometer` |
 | `gc-buff-icon` | `BuffIcon` |
 | `gc-circular-progress` | `CircularProgress` |
+| `gc-cooldown-badge` | `CooldownBadge` (32–64px ring + countdown label) |
 | `gc-particle-emitter` | `ParticleEmitter` |
 | `gc-shake-container` | `ShakeContainer` (camera-shake wrapper) |
 | `gc-screen-flash` | `ScreenFlash` |
 | `gc-transition-wipe` | `TransitionWipe` |
+
+```html
+<gc-cooldown-badge size="48" value="2.4" max="6"></gc-cooldown-badge>
+<gc-cooldown-badge size="40" value="0" max="8" label="READY"></gc-cooldown-badge>
+```
+
+`size` clamps to 32–64. `value` is time remaining (or any unit) and `max` is the total. The conic-gradient ring fills the remaining proportion; when `value <= 0` the ring drops in favour of a gold ready-glow. Pass `label` for a static center text or `show-label` to auto-format the remaining seconds (mm:ss above 60s, integer above 10s, one decimal otherwise).
 
 ---
 
@@ -336,6 +344,7 @@ hotbar.addEventListener('select', e => use(e.detail.item))
 | Tag | Class | Notes |
 |-----|-------|-------|
 | `gc-confirm-dialog` | `ConfirmDialog` | yes/no modal |
+| `gc-loot-popup` | `LootPopup` | modal-framed loot list with Take-All / Discard + optional auto-fade |
 | `gc-dialogue-box` | `DialogueBox` | NPC dialogue / typewriter text |
 | `gc-combo-box` | `ComboBox` | dropdown input |
 | `gc-toggle` | `Toggle` | bool switch (atomic) |
@@ -343,6 +352,21 @@ hotbar.addEventListener('select', e => use(e.detail.item))
 | `gc-key-binder` | `KeyBinder` | capture next key/button press |
 | `gc-report-player-dialog` | `ReportPlayerDialog` | moderation modal |
 | `gc-invite-toast` | `InviteToast` | transient invite popup |
+
+```ts
+const popup = document.querySelector<LootPopup>('gc-loot-popup')!
+popup.items = [
+    { item: { id: 'gold', name: 'Gold', icon: '◆' }, qty: 320 },
+    { item: { id: 'sword', name: 'Iron Sword', icon: '⚔', rarity: 'uncommon' } }
+]
+popup.popupTitle = 'Treasure Found'
+popup.autoFadeMs = 4000
+popup.open = true
+popup.addEventListener('take', (e) => console.log('took', e.detail.id))
+popup.addEventListener('take-all', () => popup.open = false)
+popup.addEventListener('discard', () => popup.open = false)
+popup.addEventListener('close', () => popup.open = false)
+```
 
 ---
 
@@ -441,6 +465,475 @@ Web Components work in React 19+ natively. For React 18 use `ref` callbacks to s
 
 ```tsx
 <gc-hotbar ref={el => { if (el) el.slots = slots }} slot-size="64" />
+```
+
+---
+
+## Examples
+
+Worked examples per category. Every snippet assumes `register()` ran once and the bundled stylesheet is loaded.
+
+### Layout — center HUD with corner anchors
+
+```html
+<gc-anchor>
+    <gc-stack slot="top-left" direction="vertical" gap="6px">
+        <gc-health-bar value="80" max="100" show-text label="HP"></gc-health-bar>
+        <gc-mana-bar value="40" max="100" show-text label="MP"></gc-mana-bar>
+    </gc-stack>
+    <gc-stack slot="top-right" direction="horizontal" gap="8px">
+        <gc-currency-chip>235</gc-currency-chip>
+        <gc-ping-display>32 ms</gc-ping-display>
+    </gc-stack>
+    <gc-hotbar slot="bottom" id="bar"></gc-hotbar>
+</gc-anchor>
+```
+
+`gc-anchor` keeps slotted children pinned to corners/edges. Combine with `gc-safe-area` on consoles/mobile.
+
+### Layout — responsive grid
+
+```html
+<gc-grid columns="3" gap="8px" cell-size="160px">
+    <gc-card>One</gc-card>
+    <gc-card>Two</gc-card>
+    <gc-card>Three</gc-card>
+</gc-grid>
+```
+
+### Resource bars — full HUD strip
+
+```html
+<gc-stack direction="vertical" gap="4px">
+    <gc-health-bar  value="62" max="100" ghost="80" segments="4" show-text label="HP"></gc-health-bar>
+    <gc-mana-bar    value="30" max="100" segments="3" label="MP"></gc-mana-bar>
+    <gc-stamina-bar value="90" max="100" label="ST"></gc-stamina-bar>
+    <gc-buff-bar id="buffs"></gc-buff-bar>
+</gc-stack>
+<script type="module">
+    document.getElementById('buffs').buffs = [
+        { id: 'haste', icon: '⚡', duration: 12 },
+        { id: 'shield', icon: '🛡', duration: 5 }
+    ]
+</script>
+```
+
+`ghost` paints a translucent overlay between `value` and `ghost` — use it to preview incoming damage:
+
+```ts
+healthBar.value = hp
+healthBar.ghost = hp - predictedHit  // ghost shows where the bar will land
+```
+
+### Boss bar with stage segments
+
+```html
+<gc-boss-bar value="73" max="100" segments="4" show-text label="ANCIENT WYRM"></gc-boss-bar>
+```
+
+### Buttons & menus — pause menu
+
+```html
+<gc-pause-menu>
+    <gc-menu-item label="Resume" hotkey="R" selected></gc-menu-item>
+    <gc-menu-item label="Settings" hotkey="S"></gc-menu-item>
+    <gc-menu-item label="Quit" hotkey="Q"></gc-menu-item>
+</gc-pause-menu>
+<script type="module">
+    document.querySelectorAll('gc-menu-item').forEach(el => {
+        el.addEventListener('select', e => onMenu(e.detail.label))
+    })
+</script>
+```
+
+`select` fires on click, Enter, or Space. Items expose `selected` / `disabled` attributes plus a `hotkey` glyph.
+
+### Inventory grid + tooltip
+
+```html
+<gc-inventory-grid id="bag" rows="6" columns="8"></gc-inventory-grid>
+<gc-item-tooltip id="tip" hidden></gc-item-tooltip>
+
+<script type="module">
+    const bag = document.getElementById('bag')
+    const tip = document.getElementById('tip')
+    bag.items = inventory.map(it => ({ id: it.uid, name: it.name, icon: it.icon, qty: it.qty, rarity: it.rarity }))
+
+    bag.addEventListener('item-hover', e => {
+        if (e.detail.item) {
+            tip.item = e.detail.item
+            tip.hidden = false
+        } else {
+            tip.hidden = true
+        }
+    })
+    bag.addEventListener('item-click', e => useItem(e.detail.item))
+</script>
+```
+
+### Hotbar bound to game state
+
+```ts
+import type { Hotbar, InventoryItem } from '@toolcase/game-components'
+import { State } from '@toolcase/base'
+
+const hud = new State<{ slots: { item: InventoryItem | null, hotkey: string }[] }>({
+    slots: [
+        { item: { id: 'sword', name: 'Sword', icon: '⚔️' }, hotkey: '1' },
+        { item: { id: 'potion', name: 'Potion', icon: '🧪', qty: 3 }, hotkey: '2' },
+        { item: null, hotkey: '3' }
+    ]
+})
+
+const bar = document.querySelector<Hotbar>('gc-hotbar')!
+hud.on('state.slots', slots => { bar.slots = slots })
+bar.slots = hud.get().slots!
+bar.addEventListener('select', e => activate(e.detail.item, e.detail.index))
+```
+
+### Settings rows — graphics panel
+
+```html
+<gc-stack direction="vertical" gap="6px">
+    <gc-graphics-preset-picker preset="high"></gc-graphics-preset-picker>
+    <gc-fps-cap-select value="60"></gc-fps-cap-select>
+    <gc-fov-slider value="90" min="60" max="120"></gc-fov-slider>
+    <gc-vsync-toggle checked></gc-vsync-toggle>
+    <gc-fullscreen-toggle></gc-fullscreen-toggle>
+    <gc-reset-to-defaults></gc-reset-to-defaults>
+</gc-stack>
+```
+
+Each row dispatches a `change` event with the new value:
+
+```ts
+document.querySelectorAll('[gc-]').forEach(el => {
+    el.addEventListener('change', e => settings.apply(el.tagName, e.detail.value))
+})
+```
+
+### Dialogs — confirm before quit
+
+```html
+<gc-confirm-dialog
+    id="quit"
+    title="Leave game?"
+    message="Unsaved progress will be lost."
+    confirm-label="Quit"
+    cancel-label="Stay">
+</gc-confirm-dialog>
+<script type="module">
+    const dlg = document.getElementById('quit')
+    function ask() {
+        dlg.open = true
+        dlg.addEventListener('confirm', () => process.exit(0), { once: true })
+        dlg.addEventListener('cancel',  () => dlg.open = false, { once: true })
+    }
+</script>
+```
+
+### NPC dialogue with typewriter + branching
+
+```html
+<gc-dialogue-box id="d" speaker="Old Man" typewriter="40">
+    "The path ahead is treacherous. Will you turn back?"
+</gc-dialogue-box>
+<gc-stack direction="vertical">
+    <gc-menu-item label="Push on" hotkey="1"></gc-menu-item>
+    <gc-menu-item label="Turn back" hotkey="2"></gc-menu-item>
+</gc-stack>
+```
+
+`typewriter` is the chars/sec rate. The box exposes `skip()` and `complete` events.
+
+### HUD — combat feedback
+
+```html
+<gc-crosshair></gc-crosshair>
+<gc-hit-marker id="hit"></gc-hit-marker>
+<gc-damage-number id="dmg"></gc-damage-number>
+<gc-combo-counter id="combo" value="3"></gc-combo-counter>
+<gc-screen-flash id="flash"></gc-screen-flash>
+
+<script type="module">
+    function onHit(amount, x, y, isCrit) {
+        document.getElementById('hit').show(isCrit ? 'crit' : 'normal')
+        document.getElementById('dmg').show(amount, x, y, { crit: isCrit })
+        if (isCrit) document.getElementById('flash').flash('#fff', 80)
+    }
+</script>
+```
+
+### Lobby + party panels
+
+```html
+<gc-stack direction="horizontal" gap="12px">
+    <gc-party-panel id="party"></gc-party-panel>
+    <gc-chat-window id="chat"></gc-chat-window>
+</gc-stack>
+
+<script type="module">
+    document.getElementById('party').members = [
+        { id: 'p1', name: 'You', level: 24, role: 'tank' },
+        { id: 'p2', name: 'Mira', level: 22, role: 'healer' }
+    ]
+</script>
+```
+
+### Screens — game over → results
+
+```html
+<gc-game-over-screen id="over" hidden>
+    <gc-stat-row label="Time" value="04:32"></gc-stat-row>
+    <gc-stat-row label="Score" value="12,400"></gc-stat-row>
+    <gc-stat-row label="Kills" value="38"></gc-stat-row>
+</gc-game-over-screen>
+<script type="module">
+    function showGameOver(stats) {
+        const screen = document.getElementById('over')
+        screen.hidden = false
+        screen.addEventListener('continue', () => location.reload(), { once: true })
+    }
+</script>
+```
+
+### Map — minimap with markers
+
+```html
+<gc-minimap id="mini" zoom="1">
+    <gc-objective-marker x="120" y="48"></gc-objective-marker>
+    <gc-waypoint-marker x="64" y="200" label="Camp"></gc-waypoint-marker>
+</gc-minimap>
+```
+
+```ts
+const mini = document.getElementById('mini') as Minimap
+mini.center = { x: player.x, y: player.y }   // re-centers on player
+```
+
+### Effects & overlays — death vignette
+
+```ts
+import type { VignetteOverlay } from '@toolcase/game-components'
+const vignette = document.querySelector<VignetteOverlay>('gc-vignette-overlay')!
+function onDamage(hpPct: number) {
+    vignette.intensity = 1 - hpPct       // ramps in red as HP drops
+}
+```
+
+---
+
+## Theming
+
+Two layers of CSS custom properties:
+
+1. **`--fg-*`** — the global fantasy palette set on `:root` by `style/themes/_fantasy.scss`. Components reference these everywhere; reskinning the whole library means overriding this layer.
+2. **`--gc-*`** — per-component knobs (e.g. `--gc-transition-wipe-duration`, `--gc-kill-feed-killer-color`). Each is declared with a `--fg-*` fallback, so you can either override a single component or restyle the entire palette.
+
+Override either layer on `:root` (global) or on a scoped ancestor (per area, e.g. inside a modal).
+
+### `--fg-*` palette (36 tokens)
+
+**Surfaces & frames** — dark wood/leather + dark ink for shadow text.
+
+| Token | Default | Use |
+|-------|---------|-----|
+| `--fg-ink` | `#1a140d` | deep shadow text/outline |
+| `--fg-ink-2` | `#221912` | secondary deep ink |
+| `--fg-leather` | `#2a1f14` | base panel/frame |
+| `--fg-leather-2` | `#3a2a1c` | raised surface |
+| `--fg-leather-3` | `#4a3422` | highlighted surface |
+
+**Parchment** — primary readable text + dim variants.
+
+| Token | Default | Use |
+|-------|---------|-----|
+| `--fg-parch` | `#e8dcc4` | primary text on dark |
+| `--fg-parch-2` | `#d6c5a3` | secondary text |
+| `--fg-parch-3` | `#b8a47e` | tertiary text |
+| `--fg-parch-dim` | `#8b7a5e` | muted/disabled text |
+
+**Metals** — accents, currency, frames.
+
+| Token | Default | Use |
+|-------|---------|-----|
+| `--fg-gold` | `#c9a961` | accent / currency |
+| `--fg-gold-bright` | `#f0d27a` | hover / highlight on gold |
+| `--fg-gold-deep` | `#8b6f3a` | pressed / shadow on gold |
+| `--fg-gold-shadow` | `#5a4422` | drop-shadow under gold |
+| `--fg-bronze` | `#8b6f3a` | secondary metal |
+| `--fg-copper` | `#a06a3a` | tertiary metal |
+| `--fg-silver` | `#c5cfd6` | cool metal accent |
+
+**Resources** — bar fills, status colours.
+
+| Token | Default | Use |
+|-------|---------|-----|
+| `--fg-blood` | `#a8302a` | HP bar |
+| `--fg-blood-bright` | `#d44a3a` | HP highlight |
+| `--fg-mana` | `#3a6cc9` | mana bar |
+| `--fg-mana-bright` | `#5a8cf0` | mana highlight |
+| `--fg-stamina` | `#6f9f3a` | stamina bar |
+| `--fg-stamina-bright` | `#9fc55a` | stamina highlight |
+| `--fg-arcane` | `#8a4ec9` | arcane resource |
+| `--fg-arcane-bright` | `#b878e8` | arcane highlight |
+
+**Damage / element types.**
+
+| Token | Default |
+|-------|---------|
+| `--fg-poison` | `#6fb04a` |
+| `--fg-fire` | `#e07330` |
+| `--fg-frost` | `#5fb8d4` |
+
+**Rarity** — loot tier colours (used by `gc-loot-list`, `gc-ability-card`, etc.).
+
+| Token | Default |
+|-------|---------|
+| `--fg-common` | `#9c9489` |
+| `--fg-uncommon` | `#5fa84a` |
+| `--fg-rare` | `#4a7fcf` |
+| `--fg-epic` | `#a44dd0` |
+| `--fg-legendary` | `#e8a23a` |
+| `--fg-mythic` | `#e04d6a` |
+
+**Typography** — font stacks.
+
+| Token | Default | Use |
+|-------|---------|-----|
+| `--fg-display` | `'Cinzel', 'Trajan Pro', Georgia, serif` | titles, headings |
+| `--fg-body` | `'EB Garamond', Georgia, 'Times New Roman', serif` | body copy |
+| `--fg-mono` | `'JetBrains Mono', 'Ubuntu Mono', Consolas, monospace` | numbers, codes |
+
+### Reskinning
+
+```css
+:root {
+    /* swap the whole palette to a sci-fi colourway */
+    --fg-leather: #14202b;
+    --fg-leather-2: #1d2f3f;
+    --fg-leather-3: #284054;
+    --fg-parch: #cfe6ff;
+    --fg-parch-2: #98bfde;
+    --fg-gold: #00ffd1;
+    --fg-gold-bright: #5cffe5;
+    --fg-blood: #ff3366;
+    --fg-blood-bright: #ff6b8a;
+    --fg-mana: #00aaff;
+    --fg-display: 'Orbitron', 'Audiowide', sans-serif;
+    --fg-body: 'Rajdhani', 'Roboto', sans-serif;
+}
+```
+
+Or scope the override:
+
+```css
+.theme-parchment {
+    --fg-leather: #f5e6c8;
+    --fg-leather-2: #ecd9b3;
+    --fg-parch: #3a2a14;
+}
+```
+
+```html
+<div class="theme-parchment">
+    <gc-pause-menu>...</gc-pause-menu>
+</div>
+```
+
+### Component-level knobs (`--gc-*`)
+
+Each `--gc-*` variable in component SCSS is declared with a `--fg-*` fallback — `var(--gc-kill-feed-killer-color, var(--fg-gold-bright))`. Override the `--gc-*` token to retune one component without touching the palette:
+
+```css
+gc-kill-feed {
+    --gc-kill-feed-killer-color: #ff00aa;
+}
+
+gc-transition-wipe {
+    --gc-transition-wipe-duration: 800ms;
+}
+```
+
+Inspect the SCSS partial for each component (`game-components/style/components/_<name>.scss`) for the full set of `--gc-*` knobs available on it.
+
+---
+
+## Framework integration
+
+### React (18+)
+
+Use refs for non-string props. React 19 lets you set them as attributes directly.
+
+```tsx
+import { useEffect, useRef } from 'react'
+import '@toolcase/game-components/style.css'
+import { register, type Hotbar } from '@toolcase/game-components'
+register()
+
+export function HotbarBinding({ slots, onSelect }: Props) {
+    const ref = useRef<Hotbar>(null)
+    useEffect(() => { if (ref.current) ref.current.slots = slots }, [slots])
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        const fn = (e: Event) => onSelect((e as CustomEvent).detail)
+        el.addEventListener('select', fn)
+        return () => el.removeEventListener('select', fn)
+    }, [onSelect])
+    return <gc-hotbar ref={ref} slot-size="64" />
+}
+```
+
+### Vue 3
+
+Web components work natively — declare them as custom in `vite.config.ts`:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+    plugins: [vue({ template: { compilerOptions: { isCustomElement: t => t.startsWith('gc-') } } })]
+})
+```
+
+```vue
+<template>
+    <gc-health-bar :value="hp" :max="hpMax" show-text label="HP" />
+    <gc-hotbar ref="bar" />
+</template>
+<script setup lang="ts">
+    import { onMounted, ref } from 'vue'
+    import { register } from '@toolcase/game-components'
+    register()
+    const bar = ref<HTMLElement | null>(null)
+    onMounted(() => { if (bar.value) (bar.value as any).slots = slots })
+</script>
+```
+
+### Phaser (HTMLFeature)
+
+Embed game-components into a `phaser-plus` `HTMLFeature` overlay:
+
+```ts
+import { HTMLFeature } from '@toolcase/phaser-plus'
+import { register } from '@toolcase/game-components'
+register()
+
+export class HUD extends HTMLFeature {
+    onCreate() {
+        this.node.innerHTML = `
+            <gc-anchor>
+                <gc-stack slot="top-left" direction="vertical" gap="4px">
+                    <gc-health-bar id="hp" value="100" max="100" show-text></gc-health-bar>
+                    <gc-mana-bar id="mp" value="50" max="50" show-text></gc-mana-bar>
+                </gc-stack>
+            </gc-anchor>
+        `
+    }
+    setHP(value: number) {
+        ;(this.node.querySelector('#hp') as any).value = value
+    }
+}
 ```
 
 ---

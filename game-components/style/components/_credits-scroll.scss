@@ -64,6 +64,15 @@ gc-credits-scroll .gc-credits-scroll-name {
     text-shadow: 0 1px 2px #000;
 }
 
+gc-credits-scroll:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: -2px;
+}
+
+gc-credits-scroll:focus:not(:focus-visible) {
+    outline: none;
+}
+
 gc-credits-scroll .gc-credits-scroll-indicator {
     position: absolute;
     bottom: 12px;

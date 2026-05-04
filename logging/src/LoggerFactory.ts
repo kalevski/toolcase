@@ -29,9 +29,10 @@ class LoggerFactory {
         return this.loggers.get(scope)!
     }
 
-    private onLog = (level: LoggerLevel, scope: string, time: string, messages: any[]): void => {
+    private onLog = (level: LoggerLevel, scope: string, time: string, messages: any[], overrideOrder?: number | null): void => {
         const order = getLevelOrder(level)
-        if (this.levelOrder < order) {
+        const threshold = (overrideOrder === null || overrideOrder === undefined) ? this.levelOrder : overrideOrder
+        if (threshold < order) {
             return
         }
         for (const reporter of this.reporters) {

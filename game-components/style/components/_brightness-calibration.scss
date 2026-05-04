@@ -88,6 +88,15 @@ gc-brightness-calibration .gc-brightness-calibration-input::-moz-range-thumb {
     box-shadow: 0 0 0 1px #000;
 }
 
+gc-brightness-calibration .gc-brightness-calibration-input:focus-visible {
+    outline: 2px solid var(--fg-gold-bright);
+    outline-offset: 2px;
+}
+
+gc-brightness-calibration .gc-brightness-calibration-input:focus:not(:focus-visible) {
+    outline: none;
+}
+
 gc-brightness-calibration .gc-brightness-calibration-row-value {
     font-family: var(--fg-mono);
     font-size: 11px;
