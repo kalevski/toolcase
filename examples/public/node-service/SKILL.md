@@ -1,0 +1,942 @@
+---
+name: node-service
+description: Use when scaffolding OR modifying any Node.js + TypeScript backend (HTTP service, worker, real-time server) — both greenfield projects and changes to existing ones. Defines workspace layout, layering rules (routers → services → repositories → db), tsyringe DI conventions, Fastify wrapper, typed env loader, Kysely-on-Postgres pattern (no ORM), domain errors, transactions, optional Rivalis real-time integration, and `@toolcase/serializer` binary wire format. Apply when creating a new backend project, adding/changing a domain (table + repo + service + router), adding/modifying an HTTP route, refactoring a layer, wiring auth, introducing real-time rooms, or touching env/boot/DI in an existing service. Trigger on any edit inside `services/<name>/` or `workers/<name>/` (or equivalent backend project directories).
+---
+
+# node-service — Architecture Reference
+
+Opinionated blueprint for Node.js + TypeScript backends. Layered, DI-driven, single-bundle ESM. Applies to **two situations**:
+
+1. **Scaffolding** a new project — follow the workspace layout and folder contracts top to bottom.
+2. **Modifying an existing project** — every edit MUST conform to the layer rules and folder contracts below. Any pre-existing deviation is a latent bug; don't propagate it.
+
+Every new project and every new/changed feature follows this layout. Deviation = bug.
+
+Stack baseline:
+
+- Node 20+, ESM (`"type": "module"`), TypeScript `strict`.
+- `fastify` v5 + `@fastify/cors` for HTTP.
+- `tsyringe` v4 + `reflect-metadata` for DI (constructor injection).
+- `tsup` → `dist/` single bundled ESM entry. SWC backend.
+- PostgreSQL via `kysely` query builder + `pg` pool. **No ORM** (no Prisma, TypeORM, Sequelize, Drizzle).
+- Schema migrations **out-of-tree** (e.g. goose against `<repo>/migrations/<db>/`). Never inside the project.
+- One process = one HTTP server + one DB pool + at most one Rivalis instance.
+
+---
+
+## Optional @toolcase / @rivalis Libraries
+
+These packages slot into this scaffold cleanly. All optional — use what fits.
+
+- **`@toolcase/base`** — Zero-dep helpers + data structures. Mandatory uses in this scaffold:
+  - `env<T>(name, default, type)` from `@toolcase/base/node` for every env var read.
+  - `HTTP.RESTResponse` / `HTTP.RESTError` / `HTTP.Status` for every router response.
+  Optional uses: `Cache`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `ObjectPool`, `JSONSchema` validation, `PriorityQueue`, `VectorClock`. Live in `util/` or `services/` — no extra deps to pull in.
+
+- **`@toolcase/logging`** — Tiny isomorphic logger. Mandatory in this scaffold. One named logger per class: `logging.getLogger('Database')`, `logging.getLogger('Http')`, `logging.getLogger('UserService')`. Configure level + reporters once at boot in `index.ts` (default reporter is console; swap for remote/file via custom `LogReporter`).
+
+- **`@toolcase/serializer`** — Runtime-defined protobuf schemas with encode/decode to compact `Uint8Array`. No `.proto` build step. Use when the service speaks binary over WebSocket/IPC (paired with Rivalis topics) or persists compact buffers. Lives in `wire/` or `services/`. Don't reach for it for JSON HTTP payloads — overkill.
+
+- **`@rivalis/core`** — Server-side real-time rooms (rooms, actors, ticket auth, heartbeats, rate limiting, WS transport). Use when the service needs shared room state, presence, or an authoritative tick loop. Don't hand-roll `ws` / `socket.io` / `colyseus`. Lives behind a `Realtime` injectable in `realtime/`. See the dedicated `rivalis` skill for the full surface.
+
+- **`@rivalis/browser`** — Typed browser `WSClient` with reconnect, JSON/bytes helpers, ticket-via-subprotocol. Pair with `@rivalis/core` server. Lives in the SPA workspace, not in this backend project — but the ticket-mint endpoint (`POST /v1/realtime/ticket`) lives here.
+
+---
+
+## Working in an Existing Project
+
+When modifying an existing Node service, this skill is the contract every edit conforms to — even if surrounding code already deviates. Approach in this order:
+
+### 1. Orient before editing
+
+- Read `src/index.ts`, `src/container.ts`, `src/http.ts`, `src/env.ts`, `src/db/Database.ts`, `src/db/schema.ts` first. They tell you what's wired and what's optional.
+- Identify which folders exist (`db/`, `realtime/`, `wire/`) — that determines which sections of this skill apply.
+- Check `package.json` for which optional libs are installed (`@rivalis/core`, `@toolcase/serializer`, `kysely`, etc.). Don't add a new dep without need.
+
+### 2. Match existing conventions, then this skill
+
+- If the project already follows the blueprint: extend in the same shape — new file in the right folder, registered in `container.ts`, wired through the right layer.
+- If the project deviates from the blueprint in a small way (naming, ordering): match the local convention for the edit at hand. Don't refactor unrelated code in the same change.
+- If the project deviates in a structural way (e.g. raw `pg.Client` calls outside `Database.ts`, repository returning a builder, router building a Kysely query, multiple `pg.Pool`s, `console.log` instead of `logging`): **flag it to the user before adding more of the same**. Offer either a scoped fix or a follow-up cleanup. Don't silently propagate the deviation.
+
+### 3. Where to add new code
+
+| You're adding... | Goes in... |
+|---|---|
+| A new HTTP endpoint on an existing domain | Existing `routers/<domain>Router.ts` + new method on existing service |
+| A new domain (CRUD) | New schema entry → new repository → new service → new router → register in `container.ts` |
+| A new query against an existing table | New method on the existing repository (not in the service, not inline in a router) |
+| A new env var | `src/env.ts` only. Update `.env.example`. |
+| A new external dependency (HTTP/SDK call) | New service that owns the gateway concern; never `fetch` from a domain service directly |
+| A new background job / cron | New `@injectable` service with `init`/`dispose`, registered + booted in `index.ts` |
+| Real-time rooms | `src/realtime/` (create the folder if it doesn't exist; see Recipes) |
+| Binary wire format | `src/wire/` (create the folder if it doesn't exist) |
+| A pure helper | `src/util/` — and check `@toolcase/base` first |
+| Anything that doesn't fit the layers | Stop and ask. Don't invent a new top-level folder. |
+
+### 4. Where to change existing code
+
+- **Schema change** — SQL migration in the out-of-tree `migrations/<db>/` directory **and** the matching update to `src/db/schema.ts` go in the **same PR**. They drift = runtime errors.
+- **Renaming a column / table** — every Kysely call site surfaces as a TS error after `schema.ts` is updated; fix them all in the same change. Don't skip the SQL migration.
+- **Changing an env var** — update `src/env.ts` (typed default), `.env.example`, and any deploy manifests. Boot-time required-var check stays in `index.ts`.
+- **Adding a constructor param to a service/repository** — every other site that constructs it manually (test, script) has to update. Prefer adding via `@inject(NewDep)` and registering in `container.ts`.
+- **Removing code** — drop it cleanly. No backwards-compat shims, no `_unused` renames, no commented-out blocks. Git remembers.
+
+### 5. Boundaries that are non-negotiable in any edit
+
+- **`reflect-metadata` is the first import in `index.ts`.** Don't reorder.
+- **One `pg.Pool` per process.** Adding a second is always wrong.
+- **No migration call from the running process.** Migrations are a deploy step.
+- **No new code path that bypasses the layer rules** (router → service → repository → db). Even for "just this once."
+- **No `console.log` added to production paths.** Use `logging.getLogger('Component')`.
+- **No `process.env.X` reads outside `src/env.ts`.**
+- **No raw `Error` thrown from a service for a known business case.** Use an `AppError` subclass (or add one).
+- **No `ws` / `socket.io` / `colyseus` introduced.** Real-time = Rivalis or nothing.
+
+### 6. Verifying the change
+
+After any non-trivial edit:
+
+- `npm run build` (or `tsc --noEmit`) — typed schema changes surface here.
+- `npm run dev` — boot reaches `listening on http://...` and `connected to <pg>`.
+- `GET /v1/health` returns `{ status: "ok" }`.
+- For schema changes — run the migration locally first, **then** verify the build, **then** smoke the affected endpoint.
+- For real-time changes — connect a `@rivalis/browser` client and confirm the close code on intentional kicks (4001 auth, 4002 rate, 4003 invalid, 4004 capacity, 4005 server kick).
+
+---
+
+## Workspace Layout
+
+```
+<project>/
+├── package.json          # "type": "module"
+├── tsconfig.json         # decorators on, strict on
+├── tsup.config.ts        # single ESM bundle, createRequire banner
+├── Dockerfile            # multi-stage node:20-alpine
+├── .dockerignore
+├── .gitignore
+├── .env.example          # mirrors every key in src/env.ts
+└── src/
+    ├── index.ts          # boot: reflect-metadata → env check → resolve → init → run → SIGTERM
+    ├── container.ts      # tsyringe child container, registerSingleton calls
+    ├── env.ts            # typed env vars, one export const per var
+    ├── http.ts           # Fastify wrapper class (init/run/dispose)
+    ├── db/
+    │   ├── Database.ts           # Kysely instance + pg.Pool lifecycle
+    │   ├── schema.ts             # interface DatabaseSchema { table: Row } — TS mirror of out-of-tree migrations
+    │   └── repositories/         # one file per aggregate root
+    │       └── <Domain>Repository.ts
+    ├── services/                 # business logic — depends on repositories + other services
+    │   └── <Domain>Service.ts
+    ├── routers/                  # Fastify plugins — HTTP shape only
+    │   ├── healthRouter.ts       # GET /v1/health (always)
+    │   └── <domain>Router.ts
+    ├── domain/                   # pure types, errors, value objects — no I/O
+    │   └── errors.ts             # AppError + subclasses with HTTP status
+    ├── realtime/                 # OPTIONAL — Rivalis integration
+    │   ├── Realtime.ts           # @injectable wrapper around Rivalis<TActorData>
+    │   ├── rooms/                # Room subclasses
+    │   ├── auth/                 # AuthMiddleware subclasses
+    │   └── rateLimiter.ts        # custom RateLimiter (optional)
+    ├── wire/                     # OPTIONAL — @toolcase/serializer message schemas
+    │   └── <topic>.ts
+    └── util/                     # cross-cutting pure helpers
+```
+
+Each top-level `src/` dir is single-purpose. Adding a folder outside this set requires explicit justification. **`db/migrations/` and `db/migrate.ts` are forbidden** — schema lives in the out-of-tree migrations directory, applied as a deploy step.
+
+Path inside `src/` is the layer; what's inside the file is its responsibility.
+
+---
+
+## Layer Rules
+
+| Layer | May import from | May NOT import from |
+|---|---|---|
+| `routers/` | `services/`, `domain/`, `container` (`resolve` only), Fastify | `db/`, repositories directly |
+| `services/` | `db/repositories/`, `domain/`, other `services/`, `wire/`, `realtime/` (publish-only API) | `routers/`, Fastify, `container` |
+| `db/repositories/` | `db/Database`, `db/schema`, `domain/` | `services/`, `routers/` |
+| `db/Database.ts` | `pg`, `kysely`, `env` | anything app-specific |
+| `domain/` | nothing app-specific | everything (innermost core) |
+| `realtime/` | `services/`, `domain/`, `wire/`, `@rivalis/core` | `routers/`, `db/repositories/` directly |
+| `wire/` | `@toolcase/serializer`, `domain/` | everything else |
+| `container.ts` | every layer | nothing imports back except `index.ts`, `routers/*` |
+
+The single rule that catches most violations: **a router never builds a Kysely query, never imports a repository.** Routers translate the HTTP request into a service call and translate the result back into a response. Everything else is a service or a repository.
+
+---
+
+## Boot Sequence
+
+`src/index.ts` — single entry. Order matters:
+
+```ts
+import 'reflect-metadata'                         // first — decorator metadata
+import logging from '@toolcase/logging'
+import container from './container'
+import { Database } from './db/Database'
+import { Http } from './http'
+import { SERVICE_NAME } from './env'
+// import { Realtime } from './realtime/Realtime' // when present
+
+const logger = logging.getLogger('•')
+
+const db = container.resolve(Database)
+const http = container.resolve(Http)
+// const realtime = container.resolve(Realtime)
+
+await db.init()
+await http.init()
+// await realtime.init()                           // after http.init, before http.run
+await http.run()
+
+logger.info(`${SERVICE_NAME} started`)
+
+let shuttingDown = false
+const shutdown = async (signal: string): Promise<void> => {
+    if (shuttingDown) return
+    shuttingDown = true
+    logger.info(`received ${signal}, shutting down`)
+    try {
+        // await realtime.dispose()                 // before http.dispose
+        await http.dispose()
+        await db.dispose()
+    } catch (error) {
+        logger.error('shutdown error', error as Error)
+    }
+    process.exit(0)
+}
+
+process.on('SIGTERM', () => { void shutdown('SIGTERM') })
+process.on('SIGINT', () => { void shutdown('SIGINT') })
+```
+
+Constraints:
+
+- `import 'reflect-metadata'` is the **first** statement. Without it tsyringe metadata is silently empty and DI resolves `undefined`.
+- Required env vars without defaults must be checked here and `process.exit(1)` if missing.
+- `init()` order: `db` → `http` → `realtime`. `realtime.init()` runs **after** `http.init()` (needs the `http.Server`) and **before** `http.run()` (so `WSTransport` attaches its `upgrade` listener before clients connect).
+- `dispose()` order is reverse: `realtime` → `http` → `db`. Otherwise rooms see sockets vanish without close codes.
+- Top-level `await` is fine — Node 20 + ESM.
+- No migration call from `index.ts`. Concurrent boot of N replicas races the migration table.
+
+---
+
+## Folder Contracts
+
+### env.ts
+
+One `export const` per variable, all using the typed `env()` helper from `@toolcase/base/node`. Flat — no nested config objects. Group with comment headers.
+
+```ts
+import { env } from '@toolcase/base/node'
+
+// Identity
+export const SERVICE_NAME = env<string>('SERVICE_NAME', '<service>', 'string')
+export const ENVIRONMENT = env<string>('ENVIRONMENT', 'dev', 'string')
+
+// HTTP
+export const HTTP_PORT = env<number>('HTTP_PORT', 3000, 'number')
+export const HTTP_ALLOWED_ORIGINS = env<string>('HTTP_ALLOWED_ORIGINS', '', 'string')
+
+// Postgres
+export const PG_HOST = env<string>('PG_HOST', '127.0.0.1', 'string')
+export const PG_PORT = env<number>('PG_PORT', 5432, 'number')
+export const PG_USER = env<string>('PG_USER', '', 'string')
+export const PG_PASSWORD = env<string>('PG_PASSWORD', '', 'string')
+export const PG_DATABASE = env<string>('PG_DATABASE', '', 'string')
+export const PG_SCHEMA = env<string>('PG_SCHEMA', 'public', 'string')
+export const PG_POOL_MAX = env<number>('PG_POOL_MAX', 10, 'number')
+
+// Real-time (when Rivalis is enabled)
+// export const WS_PORT = env<number>('WS_PORT', 3100, 'number')
+// export const WS_TICKET_SECRET = env<string>('WS_TICKET_SECRET', '', 'string')
+```
+
+`.env.example` mirrors every key — empty for secrets, sensible defaults for tunables. Commit it.
+
+### container.ts
+
+Child of the global tsyringe container. `registerSingleton(Class, Class)` for everything. Alphabetized for diffability.
+
+```ts
+import 'reflect-metadata'
+import { container as globalContainer } from 'tsyringe'
+import { Database } from './db/Database'
+import { Http } from './http'
+import { UserRepository } from './db/repositories/UserRepository'
+import { UserService } from './services/UserService'
+// import { Realtime } from './realtime/Realtime'
+
+const container = globalContainer.createChildContainer()
+
+container.registerSingleton(Database, Database)
+container.registerSingleton(Http, Http)
+// container.registerSingleton(Realtime, Realtime)
+container.registerSingleton(UserRepository, UserRepository)
+container.registerSingleton(UserService, UserService)
+
+export default container
+```
+
+Service classes use constructor injection — never `new`, never `container.resolve` from inside a service:
+
+```ts
+import { inject, injectable } from 'tsyringe'
+
+@injectable()
+export class UserService {
+    constructor(
+        @inject(UserRepository) private users: UserRepository
+    ) {}
+}
+```
+
+Only `index.ts` and `routers/*` call `container.resolve(X)`. Don't use `container.register(...)` value/factory forms unless you have a real reason — `registerSingleton` covers ~95% of cases.
+
+### http.ts
+
+A `@injectable` class with `init` / `run` / `dispose`. Routers register under `/v1`. CORS is opt-in via env.
+
+```ts
+import fastify, { FastifyInstance, FastifyReply } from 'fastify'
+import cors from '@fastify/cors'
+import { HTTP } from '@toolcase/base'
+import logging, { Logger } from '@toolcase/logging'
+import { injectable } from 'tsyringe'
+import { HTTP_PORT, HTTP_ALLOWED_ORIGINS } from './env'
+import { healthRouter } from './routers/healthRouter'
+
+const v1Router = async (instance: FastifyInstance): Promise<void> => {
+    await instance.register(healthRouter)
+    // await instance.register(userRouter, { prefix: '/users' })
+}
+
+const defaultRoute = (_: unknown, reply: FastifyReply) => {
+    const out = new HTTP.RESTError(HTTP.Status.NOT_FOUND, 'not_found')
+    return reply.status(out.status).send(out.toJSON())
+}
+
+const parseOrigins = (raw: string): string[] =>
+    raw.split(',').map(v => v.trim()).filter(v => v.length > 0)
+
+@injectable()
+export class Http {
+
+    public server!: FastifyInstance
+    public logger: Logger = logging.getLogger('Http')
+
+    async init(): Promise<void> {
+        this.server = fastify({ trustProxy: true })
+        const origins = parseOrigins(HTTP_ALLOWED_ORIGINS)
+        await this.server.register(cors, {
+            origin: origins.length > 0 ? origins : false,
+            credentials: false
+        })
+        await this.server.register(v1Router, { prefix: '/v1' })
+        this.server.setNotFoundHandler(defaultRoute)
+    }
+
+    async run(): Promise<void> {
+        await this.server.listen({ host: '0.0.0.0', port: HTTP_PORT })
+        this.logger.info(`listening on http://0.0.0.0:${HTTP_PORT}`)
+    }
+
+    async dispose(): Promise<void> {
+        await this.server?.close()
+    }
+}
+```
+
+When Rivalis shares the port, swap the Fastify constructor for the `serverFactory` shape — see Recipes → "Real-time on the same port".
+
+### routers/
+
+A router is a Fastify plugin that resolves the services it needs from the container and binds handlers. Handlers do three things only: extract input → call service → format response. **Every response goes through `HTTP.RESTResponse` / `HTTP.RESTError` from `@toolcase/base`.**
+
+```ts
+// src/routers/userRouter.ts
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { HTTP } from '@toolcase/base'
+import container from '../container'
+import { UserService } from '../services/UserService'
+import { AppError } from '../domain/errors'
+
+export const userRouter = async (instance: FastifyInstance): Promise<void> => {
+    const users = container.resolve(UserService)
+
+    instance.get('/:id', async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+        try {
+            const user = await users.getById(req.params.id)
+            const ok = new HTTP.RESTResponse(HTTP.Status.OK, user)
+            return reply.status(ok.status).send(ok.toJSON())
+        } catch (error) {
+            return sendError(reply, error)
+        }
+    })
+}
+
+const sendError = (reply: FastifyReply, error: unknown): FastifyReply => {
+    if (error instanceof AppError) {
+        const out = new HTTP.RESTError(error.status, error.code)
+        return reply.status(out.status).send(out.toJSON())
+    }
+    reply.log.error(error)
+    const out = new HTTP.RESTError(HTTP.Status.INTERNAL_SERVER_ERROR, 'internal')
+    return reply.status(out.status).send(out.toJSON())
+}
+```
+
+Conventions:
+
+- One router file per domain. Mounted under a sub-prefix in `v1Router`: `register(userRouter, { prefix: '/users' })`.
+- Routers never `await` Kysely. They `await` services.
+- Validate request bodies via Fastify JSON Schema OR a hand-written guard inside the handler — pick one and stick with it project-wide.
+- The `sendError` helper is the **only** place `AppError` → HTTP mapping happens.
+
+### domain/
+
+Pure types, errors, value objects. No I/O, no React, no Fastify, no Kysely. The innermost layer.
+
+```ts
+// src/domain/errors.ts
+export class AppError extends Error {
+    constructor(public readonly status: number, public readonly code: string, message?: string) {
+        super(message ?? code)
+    }
+}
+
+export class NotFoundError extends AppError {
+    constructor(code = 'not_found') { super(404, code) }
+}
+
+export class ValidationError extends AppError {
+    constructor(code = 'invalid_input') { super(400, code) }
+}
+
+export class UnauthorizedError extends AppError {
+    constructor(code = 'unauthorized') { super(401, code) }
+}
+
+export class ForbiddenError extends AppError {
+    constructor(code = 'forbidden') { super(403, code) }
+}
+
+export class ConflictError extends AppError {
+    constructor(code = 'conflict') { super(409, code) }
+}
+```
+
+Services throw `AppError` subclasses. Plain `Error` becomes a 500 every time — almost never what you want.
+
+### services/
+
+Business logic. `@injectable` class per domain. Depends on repositories + other services via constructor injection. Returns domain DTOs (not raw Kysely rows). Throws `AppError` subclasses. Never imports `routers/`, `http.ts`, or `container`.
+
+```ts
+// src/services/UserService.ts
+import { inject, injectable } from 'tsyringe'
+import logging, { Logger } from '@toolcase/logging'
+import { UserRepository } from '../db/repositories/UserRepository'
+import { NotFoundError } from '../domain/errors'
+
+@injectable()
+export class UserService {
+
+    public logger: Logger = logging.getLogger('UserService')
+
+    constructor(@inject(UserRepository) private users: UserRepository) {}
+
+    async getById(id: string) {
+        const row = await this.users.findById(id)
+        if (row === undefined) throw new NotFoundError('user_not_found')
+        return { id: row.id, email: row.email, displayName: row.displayName }
+    }
+}
+```
+
+Rules:
+
+- Never call `container.resolve` from a service. Constructor injection only.
+- Never call `fetch` directly — wrap external HTTP in a sibling service that owns the gateway concern.
+- Map repository rows to a domain shape before returning. Don't leak `created_at`, internal flags, etc.
+
+### db/
+
+Kysely-on-Postgres. Three things live here:
+
+1. `Database.ts` — owns the `pg.Pool` and the typed Kysely instance.
+2. `schema.ts` — the TypeScript mirror of the out-of-tree SQL schema.
+3. `repositories/<Domain>Repository.ts` — one per aggregate root.
+
+**`db/migrations/`, `db/migrate.ts`, `migrate:up` script — all forbidden.** Schema is owned by the out-of-tree `migrations/<db>/` directory (managed via goose or your team's chosen tool) and is applied as a deploy step. When the SQL changes, update `schema.ts` here in the same PR.
+
+#### db/Database.ts
+
+```ts
+import { CamelCasePlugin, Kysely, PostgresDialect } from 'kysely'
+import { Pool } from 'pg'
+import { injectable } from 'tsyringe'
+import logging, { Logger } from '@toolcase/logging'
+import {
+    PG_DATABASE, PG_HOST, PG_PASSWORD, PG_POOL_MAX,
+    PG_PORT, PG_SCHEMA, PG_USER,
+} from '../env'
+import type { DatabaseSchema } from './schema'
+
+@injectable()
+export class Database {
+
+    public logger: Logger = logging.getLogger('Database')
+    public kysely!: Kysely<DatabaseSchema>
+    private pool!: Pool
+
+    async init(): Promise<void> {
+        this.pool = new Pool({
+            host: PG_HOST,
+            port: PG_PORT,
+            user: PG_USER,
+            password: PG_PASSWORD,
+            database: PG_DATABASE,
+            max: PG_POOL_MAX,
+            idleTimeoutMillis: 30_000,
+            options: PG_SCHEMA.length > 0 ? `-c search_path=${PG_SCHEMA},public` : undefined,
+        })
+
+        this.pool.on('error', (error) => {
+            this.logger.error('idle pool client error', error)
+        })
+
+        this.kysely = new Kysely<DatabaseSchema>({
+            dialect: new PostgresDialect({ pool: this.pool }),
+            plugins: [new CamelCasePlugin()],
+        })
+
+        await this.kysely.selectNoFrom(eb => eb.lit(1).as('ok')).execute()
+        this.logger.info(`connected to ${PG_HOST}:${PG_PORT}/${PG_DATABASE} (schema=${PG_SCHEMA})`)
+    }
+
+    async dispose(): Promise<void> {
+        await this.kysely?.destroy()
+    }
+}
+```
+
+Conventions:
+
+- **One `pg.Pool` per process.** Don't construct a second pool elsewhere. If a `worker_threads` child needs DB access, give it its own small pool — `pg.Pool` is not safe across thread boundaries.
+- **`CamelCasePlugin` is mandatory.** It bridges `display_name` (PG) ↔ `displayName` (TS). Removing it breaks every query that uses TS-style identifiers.
+- **`PG_SCHEMA` defaults to `public`.** For a multi-service shared cluster, give each service its own schema and set `search_path` here.
+- `init()` does a `SELECT 1` to fail fast on bad credentials. No reconnect logic — `pg.Pool` reconnects automatically; if the DB is down at boot, let the supervisor restart the process.
+
+#### db/schema.ts
+
+The single source of truth (in TypeScript) for what tables exist and what columns they have. Mirrors the out-of-tree SQL.
+
+```ts
+import { ColumnType, Generated, Insertable, Selectable, Updateable } from 'kysely'
+
+export interface UsersTable {
+    id: Generated<string>
+    email: string
+    displayName: string
+    createdAt: ColumnType<Date, Date | undefined, never>
+    updatedAt: ColumnType<Date, Date | undefined, Date | undefined>
+}
+
+export interface DatabaseSchema {
+    users: UsersTable
+}
+
+export type User = Selectable<UsersTable>
+export type NewUser = Insertable<UsersTable>
+export type UserUpdate = Updateable<UsersTable>
+```
+
+Rules:
+
+- **CamelCase keys.** With `CamelCasePlugin` on, Kysely auto-translates `displayName` ↔ `display_name` and `pointsEvents` ↔ `points_events`.
+- **`Generated<T>`** for columns the DB fills (serial/bigserial PKs, server defaults).
+- **`ColumnType<S, I, U>`** for finer control: `S` on read, `I` on insert (`undefined` = optional), `U` on update (`never` = immutable, e.g. `createdAt`).
+- **JSONB** — `ColumnType<TParsed, string, string>` so reads return parsed objects and writes accept stringified JSON. Or use `JSONColumnType<T>` from Kysely 0.27+.
+- Always export `Selectable` / `Insertable` / `Updateable` aliases per table — repositories use them.
+
+#### db/repositories/
+
+One repository per aggregate root. `@injectable`. One job: turn a business-meaningful method call into a Kysely query and return a row or domain type.
+
+```ts
+// src/db/repositories/UserRepository.ts
+import { inject, injectable } from 'tsyringe'
+import { Kysely } from 'kysely'
+import { Database } from '../Database'
+import type { DatabaseSchema, NewUser, User, UserUpdate } from '../schema'
+
+@injectable()
+export class UserRepository {
+
+    constructor(@inject(Database) private database: Database) {}
+
+    private resolve(trx?: Kysely<DatabaseSchema>) {
+        return trx ?? this.database.kysely
+    }
+
+    async findById(id: string, trx?: Kysely<DatabaseSchema>): Promise<User | undefined> {
+        return this.resolve(trx).selectFrom('users')
+            .selectAll()
+            .where('id', '=', id)
+            .executeTakeFirst()
+    }
+
+    async insert(input: NewUser, trx?: Kysely<DatabaseSchema>): Promise<User> {
+        return this.resolve(trx).insertInto('users')
+            .values(input)
+            .returningAll()
+            .executeTakeFirstOrThrow()
+    }
+
+    async update(id: string, patch: UserUpdate, trx?: Kysely<DatabaseSchema>): Promise<User | undefined> {
+        return this.resolve(trx).updateTable('users')
+            .set({ ...patch, updatedAt: new Date() })
+            .where('id', '=', id)
+            .returningAll()
+            .executeTakeFirst()
+    }
+
+    async deleteById(id: string, trx?: Kysely<DatabaseSchema>): Promise<number> {
+        const result = await this.resolve(trx).deleteFrom('users')
+            .where('id', '=', id)
+            .executeTakeFirst()
+        return Number(result.numDeletedRows)
+    }
+}
+```
+
+Rules:
+
+- Every method takes an **optional `trx`** as the last parameter. The service passes the transaction handle down when composing multi-statement operations. No AsyncLocalStorage, no proxy-based ambient transaction tricks — explicit is better.
+- **Return materialized rows** — never the Kysely builder. Materialize with `execute()` / `executeTakeFirst()` / `executeTakeFirstOrThrow()` inside the repository.
+- **No business logic.** "If admin then X" belongs in the service.
+- **Throw nothing intentionally.** Let pg/Kysely throw on actual errors. Return `undefined` for "not found"; the service decides whether that's a `NotFoundError`.
+- **`OrThrow` for inserts.** `INSERT ... RETURNING *` always returns a row; using the non-throw variant gives `User | undefined` and forces a non-null assertion downstream.
+- **Pagination** — `(limit: number, before?: Date)` cursor pair or `{ limit, offset }`. Define explicitly.
+- **Joins** — Kysely's `.innerJoin` / `.leftJoin` infer types. When the projection isn't a single table's row shape, declare a return-type alias next to the method.
+- **Raw SQL escape hatch** — for window functions, recursive CTEs, full-text, `LATERAL` joins, use `sql<T>\`...\`.execute(this.db)`. The generic is the row shape; **no compile-time check against `DatabaseSchema`** — be careful with column names.
+- **No `SELECT *` in hot paths.** `.selectAll()` reads well but `.select(['id', 'email'])` is faster, narrower, and makes future column additions opt-in.
+
+### realtime/ (optional)
+
+Present only when the service needs real-time. The Rivalis instance is wrapped in a `@injectable` class so the boot script can sequence it.
+
+Two integration shapes:
+
+- **Same port as Fastify** — REST under `/v1/*` + WS under `/realtime` on `HTTP_PORT`. Build Fastify on top of an existing `http.createServer()` and hand that same `http.Server` to `Transports.WSTransport`. See Recipes.
+- **Separate port** — `WS_PORT` runs its own `http.createServer()`. Use when REST and WS have very different scaling needs.
+
+```ts
+// src/realtime/Realtime.ts (same-port shape)
+import { inject, injectable } from 'tsyringe'
+import { Rivalis, Transports } from '@rivalis/core'
+import logging, { Logger } from '@toolcase/logging'
+import { Http } from '../http'
+import { ChatAuth } from './auth/ChatAuth'
+import { ChatRoom } from './rooms/ChatRoom'
+
+type ActorData = { userId: string; name: string }
+
+@injectable()
+export class Realtime {
+
+    public logger: Logger = logging.getLogger('Realtime')
+    private rivalis!: Rivalis<ActorData>
+
+    constructor(@inject(Http) private http: Http) {}
+
+    async init(): Promise<void> {
+        this.rivalis = new Rivalis<ActorData>({
+            transports: [new Transports.WSTransport({
+                server: this.http.httpServer,
+                path: '/realtime',
+                ticketSource: 'protocol',
+            })],
+            authMiddleware: new ChatAuth(),
+        })
+        this.rivalis.rooms.define('chat', ChatRoom)
+        this.rivalis.rooms.create('chat', 'global')
+    }
+
+    async dispose(): Promise<void> {
+        await this.rivalis?.shutdown()
+    }
+}
+```
+
+Rules pulled from the `rivalis` skill — apply unconditionally:
+
+- **One Rivalis instance per process.** Multiple instances fight over the shared `http.Server`'s `upgrade` event. Define multiple rooms on the one instance instead.
+- **Always `define` then `create`.** No auto-creation. Authentication's `roomId` must match a created room id.
+- **Tickets via `Sec-WebSocket-Protocol`** in production. `ticketSource: 'protocol'` on both server `WSTransportOptions` and client `WSClientOptions`. URL-bearer tickets land in access logs.
+- **Constant-time ticket comparison** — `crypto.timingSafeEqual`. Never `===` or `Buffer.compare`.
+- **Default rate limiter is opt-out.** `new Rivalis({...})` ships with a `TokenBucket` (30 cap / 30 refill/sec). Pass `rateLimiter: null` only with a reason.
+- **Topic prefix `__` is reserved.** Pick app topics that don't start with `__`. The framework owns `__presence:join` / `__presence:leave`.
+- **Throwing from a handler does not kick.** Validate inputs explicitly and call `actor.kick(KickReason.INVALID_MESSAGE)` when appropriate.
+- **`path` is mandatory in same-port shape.** Without it, the WS transport tries to upgrade *every* request and Fastify routes can't reach the handler.
+
+For room patterns (presence chat, server-authoritative state, turn-based, fixed-rate tick), `AuthMiddleware` shapes, custom `RateLimiter`, close codes, and the typed browser `WSClient` API: invoke the `rivalis` skill.
+
+### wire/ (optional)
+
+`@toolcase/serializer` schemas — runtime-defined protobuf, no `.proto` build step. Use when the wire format is binary (paired with Rivalis topics) or persisted as compact bytes. Skip for JSON HTTP payloads.
+
+```ts
+// src/wire/chatMessage.ts
+import { Schema, Type } from '@toolcase/serializer'
+
+export const ChatMessageWire = new Schema('ChatMessage', {
+    userId: { id: 1, type: Type.STRING },
+    text: { id: 2, type: Type.STRING },
+    sentAt: { id: 3, type: Type.UINT64 },
+})
+
+export type ChatMessage = ReturnType<typeof ChatMessageWire.decode>
+```
+
+Rules:
+
+- One file per message type. Export the schema and the decoded TS type.
+- Field ids never change once shipped. Adding a field = new id.
+- The serializer is for **compact bytes**, not validation. Validate semantics in the service layer.
+
+### util/
+
+Cross-cutting pure helpers. No I/O, no `inject`. Reach for `@toolcase/base` first (`generateId`, `retry`, `Cache`, hex/byte/range helpers, `JSONSchema`) before writing your own. Examples: `parseDuration.ts`, `clock.ts`, `hash.ts`.
+
+---
+
+## Cross-Cutting Patterns
+
+### Logging
+
+One named logger per class, declared as a public field. Name = the class:
+
+```ts
+public logger: Logger = logging.getLogger('UserService')
+```
+
+Configure level + reporters once at boot if defaults aren't enough — typically in `index.ts` before resolving services. Never `console.log` from anywhere except a deliberate one-off in a script. Pass `Error` instances to `logger.error('context', error)`, not stringified.
+
+### Env loading
+
+Every env access goes through `env<T>(name, default, type)` from `@toolcase/base/node` in `src/env.ts`. Never read `process.env.X` ad-hoc from a service or repository — it bypasses the type and the default and makes test harnessing impossible.
+
+### Errors
+
+- Service throws `AppError` subclass.
+- Router's `sendError` maps it to `HTTP.RESTError`.
+- Plain `Error` from a service = 500 + log. That's correct behavior for unexpected failures; don't silence it.
+- Repositories don't throw `AppError` — they return `undefined` for not-found, let pg throw on actual DB errors.
+
+### Transactions
+
+The clean pattern: repositories accept an optional `trx?: Kysely<DatabaseSchema>`; services compose a transaction and pass `trx` through. No ambient/AsyncLocalStorage tricks.
+
+```ts
+@injectable()
+export class SignupService {
+    constructor(
+        @inject(Database) private database: Database,
+        @inject(UserRepository) private users: UserRepository,
+        @inject(AuditRepository) private audits: AuditRepository,
+    ) {}
+
+    async signUp(input: SignupInput) {
+        return this.database.kysely.transaction().execute(async (trx) => {
+            const user = await this.users.insert(input, trx)
+            await this.audits.recordSignup(user.id, trx)
+            return user
+        })
+    }
+}
+```
+
+Default isolation is `read committed`. Use `serializable` for read-then-write-based-on-the-read (decrement-and-check, conditional insert):
+
+```ts
+await this.database.kysely.transaction()
+    .setIsolationLevel('serializable')
+    .execute(async (trx) => { ... })
+```
+
+### Migrations (out-of-tree)
+
+- Schema lives in `<repo>/migrations/<db>/` (or wherever the team standardizes — typically goose-managed `*.sql`).
+- `src/db/schema.ts` (TS interface) and the SQL move **together** in any PR that changes the schema.
+- Never call any migrator from `index.ts`. Concurrent boot of N replicas races the migration version table.
+- Adding a brand-new database = create the new `migrations/<db>/` directory and the initial schema **before** writing repositories in the project.
+
+### Real-time auth
+
+The standard ticket flow:
+
+1. Browser calls a small REST endpoint (`POST /v1/realtime/ticket`) on the Fastify side, authenticated however the rest of the API is.
+2. Server mints a short-lived ticket (signed JWT or HMAC of `{userId, roomId, exp}`), returns it.
+3. Browser opens WS and sends the ticket via `Sec-WebSocket-Protocol` (the `@rivalis/browser` `WSClient` does this when configured with `ticketSource: 'protocol'`).
+4. Server `AuthMiddleware.authenticate(ticket)` verifies, returns `{ data: { userId, name }, roomId }`.
+
+Make the ticket single-use friendly with an LRU cache of seen JTIs in the auth middleware.
+
+### Health endpoint (always)
+
+Every service exposes `GET /v1/health`. The DB check is a `SELECT 1`. Don't add deeper readiness checks until ops asks.
+
+```ts
+// src/routers/healthRouter.ts
+import type { FastifyInstance } from 'fastify'
+import container from '../container'
+import { Database } from '../db/Database'
+import { ENVIRONMENT, SERVICE_NAME } from '../env'
+
+export const healthRouter = async (instance: FastifyInstance): Promise<void> => {
+    const db = container.resolve(Database)
+    instance.get('/health', async (_req, reply) => {
+        let dbOk = true
+        try { await db.kysely.selectNoFrom(eb => eb.lit(1).as('ok')).execute() }
+        catch { dbOk = false }
+        return reply
+            .status(dbOk ? 200 : 503)
+            .send({ status: dbOk ? 'ok' : 'db_unavailable', service: SERVICE_NAME, environment: ENVIRONMENT })
+    })
+}
+```
+
+### Layering call flow
+
+```
+HTTP request
+  → router (validate shape, resolve service)
+    → service (business rule, throw AppError, compose transaction)
+      → repository (Kysely query, return materialized row)
+        → Database (pg.Pool)
+```
+
+Skipping a layer is a smell. Routers don't import repositories. Services don't import Fastify. Repositories don't import services.
+
+---
+
+## Recipes
+
+### Add a new domain (table + repo + service + router)
+
+1. **Migration first** — write the SQL in `<repo>/migrations/<db>/`. Apply it (deploy step / local goose).
+2. **Schema mirror** — add the table interface + `Selectable`/`Insertable`/`Updateable` aliases to `src/db/schema.ts`. Add the table to `DatabaseSchema`.
+3. **Repository** — `src/db/repositories/<Domain>Repository.ts`. Methods: `findById`, `insert`, `update`, `deleteById`, plus any business-meaningful query (`findActiveSince`, `listByOwner`). Each accepts optional `trx`.
+4. **Domain types/errors** — if the domain has its own errors (e.g. `QuotaExceededError`), add to `domain/errors.ts`.
+5. **Service** — `src/services/<Domain>Service.ts`. `@injectable`, constructor-injects the repo, throws `AppError` subclasses, returns mapped DTOs.
+6. **Router** — `src/routers/<domain>Router.ts`. Register inside `v1Router` with `{ prefix: '/<domain>' }`.
+7. **Container** — register the new repo + service in `container.ts` (alphabetized).
+
+### Add an HTTP route to an existing domain
+
+1. Add the method to the existing service (don't proliferate services per route).
+2. Add the handler to the existing router file. Same `extract → call → respond` shape.
+3. Use `HTTP.RESTResponse` for success and let the existing `sendError` handle failures.
+
+### Add real-time to an existing service
+
+1. Add `@rivalis/core` to deps (and an env var or two: `WS_TICKET_SECRET`, optionally `WS_PORT`).
+2. Pick the integration shape — same port (use `serverFactory` in `http.ts`) or separate port.
+3. Create `src/realtime/Realtime.ts`, `src/realtime/rooms/<Name>Room.ts`, `src/realtime/auth/<Name>Auth.ts`.
+4. Register `Realtime` in `container.ts`.
+5. Wire `realtime.init()` between `http.init()` and `http.run()` in `index.ts`. Wire `realtime.dispose()` first in `shutdown()`.
+6. Add `POST /v1/realtime/ticket` to a Fastify router for ticket minting.
+7. Read `rivalis/SKILL.md` (and `auth-and-security.md`, `protocol-and-codes.md`) for the room/auth shapes.
+
+### Add a binary wire format
+
+1. Create `src/wire/<message>.ts` with a `@toolcase/serializer` `Schema`.
+2. Encode in the service or in the room before `actor.send(topic, bytes)`. Decode on receipt.
+3. Don't reuse field ids. Adding a field = next free id.
+
+### Scaffold a new project
+
+1. Decide placement (your repo's `services/<name>/` for user-facing APIs, `workers/<name>/` for jobs/integrations — adapt to your monorepo convention).
+2. Create the workspace files: `package.json` (`"type": "module"`, scripts `build`/`dev`), `tsconfig.json` (decorators on, strict on), `tsup.config.ts` (single ESM entry, `createRequire` banner), `Dockerfile` (multi-stage `node:20-alpine`), `.dockerignore`, `.gitignore`, `.env.example`.
+3. `npm install` — deps: `@fastify/cors`, `fastify`, `kysely`, `pg`, `reflect-metadata`, `tsyringe`, `@toolcase/base`, `@toolcase/logging`. devDeps: `@swc/core`, `@types/pg`, `tsup`, `typescript`. Optional: `@rivalis/core`, `@toolcase/serializer`, `jose`, `@aws-sdk/client-s3`.
+4. Create `src/env.ts` with all required env vars.
+5. Decide the database (existing or new). If new: create the out-of-tree `migrations/<db>/` set and apply the initial schema **before** writing repositories.
+6. Create `src/db/schema.ts` mirroring the SQL.
+7. Create `src/db/Database.ts`, `src/http.ts`, `src/routers/healthRouter.ts`.
+8. Create `src/container.ts` (Database + Http registered).
+9. Create `src/index.ts` with the boot sequence.
+10. `npm run build && npm run dev`. Hit `GET /v1/health` to confirm DB connectivity.
+11. Then add the first domain via "Add a new domain". Don't merge layers.
+
+### Real-time on the same port (Fastify + Rivalis)
+
+Modify `http.ts` to expose the underlying `http.Server` so `WSTransport` can attach to it:
+
+```ts
+import http from 'node:http'
+import fastify, { FastifyInstance } from 'fastify'
+import { injectable } from 'tsyringe'
+import { HTTP_PORT } from './env'
+
+@injectable()
+export class Http {
+    public server!: FastifyInstance
+    public httpServer!: http.Server
+
+    async init(): Promise<void> {
+        this.httpServer = http.createServer()
+        this.server = fastify({
+            serverFactory: (handler) => {
+                this.httpServer.on('request', handler)
+                return this.httpServer
+            },
+            trustProxy: true,
+        })
+        // ...register cors + v1Router as usual
+    }
+
+    async run(): Promise<void> {
+        await this.server.ready()
+        await new Promise<void>((resolve, reject) => {
+            this.httpServer.listen(HTTP_PORT, '0.0.0.0', (err?: Error) => {
+                if (err) reject(err); else resolve()
+            })
+        })
+    }
+}
+```
+
+Boot order: `http.init()` → `realtime.init()` (attaches `upgrade` listener to `http.httpServer`) → `http.run()`.
+
+---
+
+## Anti-Patterns
+
+- ❌ `import 'reflect-metadata'` missing or not first in `index.ts`. → DI silently broken.
+- ❌ Service calling `container.resolve(...)`. → Use constructor injection. `resolve` is for `index.ts` and routers only.
+- ❌ Service instantiating `new XxxRepository()`. → Inject it.
+- ❌ Router building a Kysely query / importing a repository. → Push to a service.
+- ❌ Returning Kysely row types from a router. → Map to a DTO in the service.
+- ❌ Throwing raw `Error` from a service when the situation is a known business case. → Use an `AppError` subclass.
+- ❌ Migrations inside the project (`db/migrations/`, `migrate.ts`, `migrate:up`). → Out-of-tree only.
+- ❌ Calling `migrator.migrateToLatest()` from `index.ts`. → Concurrent boot races the version table. Migrate as a deploy step.
+- ❌ Multiple `pg.Pool` instances in one process. → One pool, owned by `Database`.
+- ❌ Sharing a `pg.Pool` across `worker_threads`. → Each worker owns its own pool.
+- ❌ Mixing raw `pg.Client.query` with Kysely. → Pick Kysely. Raw `pg` only inside `Database.ts` for the pool.
+- ❌ Removing `CamelCasePlugin`. → Every TS-style identifier explodes at runtime.
+- ❌ `synchronize: true`-style auto-schema. → ORM concept; doesn't exist here.
+- ❌ Reading `process.env.X` outside `src/env.ts`. → All env access goes through the typed helper.
+- ❌ `console.log` for diagnostics. → `logging.getLogger('Component')`.
+- ❌ Hand-rolling `ws` / `socket.io` / `colyseus`. → Rivalis when the surface is rooms/presence/tick. Plain Fastify SSE / `@fastify/websocket` only for one-way streams.
+- ❌ Multiple Rivalis instances in one process. → One instance, many rooms.
+- ❌ `ticketSource: 'query'` (URL ticket) in production. → `'protocol'` only.
+- ❌ Constant-time ticket compare with `===` / `Buffer.compare`. → `crypto.timingSafeEqual`.
+- ❌ Topics starting with `__`. → Reserved by the framework.
+- ❌ Adding a top-level `src/` folder beyond the documented set without justification.
+- ❌ Returning a Kysely query builder from a repository. → Materialize inside the repository.
+- ❌ `executeTakeFirst()` for an `INSERT ... RETURNING *`. → Use `executeTakeFirstOrThrow()`.
+- ❌ `WHERE` clauses in services. → Push down into a named repository method.
+- ❌ Manual `JSON.stringify` for `jsonb` columns when the `ColumnType` already declares the round-trip. → Pass an object, read an object.

@@ -1,6 +1,7 @@
 import { JSX, ReactNode } from 'react'
 import { Home } from './pages/Home'
 import { Apps } from './pages/Apps'
+import { Skills } from './pages/Skills'
 import { BasePage } from './pages/BasePage'
 import { LoggingPage } from './pages/LoggingPage'
 import { SerializerPage } from './pages/SerializerPage'
@@ -107,4 +108,5 @@ export const packageRoutes: PackageRoute[] = [
 export const topPages = {
     home: <Home />,
     apps: <Apps />,
+    skills: <Skills />,
 }

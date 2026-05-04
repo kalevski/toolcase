@@ -36,9 +36,11 @@ const Nav = ({ theme, onThemeChange }: NavProps) => {
     }
 
     const isApps = location.pathname.startsWith('/apps')
+    const isSkills = location.pathname.startsWith('/skills')
     const items: CoolNavItem[] = [
-        { key: 'packages', label: 'Packages', href: '/', active: !isApps, onClick: go('/') },
+        { key: 'packages', label: 'Packages', href: '/', active: !isApps && !isSkills, onClick: go('/') },
         { key: 'apps', label: 'Apps', href: '/apps', active: isApps, onClick: go('/apps') },
+        { key: 'skills', label: 'Skills', href: '/skills', active: isSkills, onClick: go('/skills') },
     ]
 
     const brand = (
@@ -150,6 +152,7 @@ export const App = () => {
             <Routes>
                 <Route path="/" element={topPages.home} />
                 <Route path="/apps" element={topPages.apps} />
+                <Route path="/skills" element={topPages.skills} />
                 {packageRoutes.map((route) => (
                     <Route key={route.key} path={route.basePath} element={route.page} />
                 ))}
