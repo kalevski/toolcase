@@ -17,9 +17,9 @@ export default class CollisionEvent {
 
     onCreate(): void {}
 
-    onEnter(bodyA: MatterBody, bodyB: MatterBody, event: Physics.Matter.Events.CollisionStartEvent): void {}
+    onEnter(_bodyA: MatterBody, _bodyB: MatterBody, _event: Physics.Matter.Events.CollisionStartEvent): void {}
 
-    onExit(bodyA: MatterBody, bodyB: MatterBody, event: Physics.Matter.Events.CollisionEndEvent): void {}
+    onExit(_bodyA: MatterBody, _bodyB: MatterBody, _event: Physics.Matter.Events.CollisionEndEvent): void {}
 
     onDestroy(): void {}
 

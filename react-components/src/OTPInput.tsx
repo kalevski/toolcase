@@ -1,4 +1,4 @@
-import React, { useId, useRef, useState, useCallback } from 'react'
+import React, { useId, useRef, useCallback } from 'react'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

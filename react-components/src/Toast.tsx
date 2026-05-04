@@ -170,7 +170,6 @@ const ToastItemInternal: React.FC<ToastItemInternalProps> = ({ item, fromBottom,
 	useEffect(() => {
 		startTimer()
 		return () => clearTimeout(timerRef.current)
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	const handleMouseEnter = () => { setPaused(true); pauseTimer() }

@@ -1,4 +1,4 @@
-import React, { JSX, MouseEvent, useId } from 'react'
+import React, { MouseEvent, useId } from 'react'
 
 export interface WindowProps {
 	children: React.ReactNode

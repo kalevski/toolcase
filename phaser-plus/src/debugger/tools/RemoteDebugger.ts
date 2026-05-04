@@ -105,7 +105,7 @@ export default class RemoteDebugger extends Panel {
 
     private onMessage = (e: MessageEvent): void => {
         this.state.received += 1
-        let parsed: { type?: string, data?: unknown } | null = null
+        let parsed: { type?: string, data?: unknown } | null
         try {
             parsed = typeof e.data === 'string' ? JSON.parse(e.data) : null
         } catch {

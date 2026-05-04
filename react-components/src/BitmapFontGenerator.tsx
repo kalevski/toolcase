@@ -127,7 +127,7 @@ const renderGlyph = (
 	border: BitmapFontBorder | undefined,
 	dropShadow: BitmapFontDropShadow | undefined,
 	cellHeight: number,
-	ascent: number,
+	_ascent: number,
 ) => {
 	ctx.font = `${fontSize}px "${fontFamily}"`
 	ctx.textBaseline = 'top'

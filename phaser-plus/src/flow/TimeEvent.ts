@@ -14,7 +14,7 @@ export default class TimeEvent {
 
     onCreate(): void {}
 
-    onFire(times: number): void {}
+    onFire(_times: number): void {}
 
     onDestroy(): void {}
 

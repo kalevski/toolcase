@@ -22,7 +22,7 @@ import {
     ConsoleCommands, HotReload, RemoteDebugger,
     Scene2D, World, GameObject2D, Grid,
     Effect, EffectManager, installEffects, EFFECT_REGISTRY,
-    NavMesh, PathFinder, Path, PathNode, PathIterator,
+    NavMesh, PathFinder, Path,
     PATH_FOUND, PATH_FAILED,
     CameraDirector, ScreenShake, CameraFlash, DialogCameraCue, ParallaxLayer, LetterboxFeature
 } from '@toolcase/phaser-plus'
@@ -634,7 +634,7 @@ path.on(PATH_FAILED, (reason: string) => {
 })
 ```
 
-`Path` instances are pooled — copy any data you need before `'found' / 'failed'` listeners return. Heuristic is octile (8-connectivity). `PathNode`, `PathIterator` are exposed for custom integrations but normally not needed.
+Each `findPath` mints a fresh `Path` backed by an `@toolcase/base` `AStar` stepped cooperatively — `budgetMs` caps the per-frame slice. Heuristic is octile (8-connectivity, diagonal squeeze through two blocked orthogonals is rejected). `reason` is `'end_blocked'`, `'exhausted'`, or `'max_iterations'`.
 
 ---
 

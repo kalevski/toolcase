@@ -1,4 +1,4 @@
-import React, { JSX, JSXElementConstructor, useEffect, useId, useState } from 'react'
+import React, { useEffect, useId, useState } from 'react'
 import { Button } from './Button'
 
 export interface CoolNavItem {

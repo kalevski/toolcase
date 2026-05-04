@@ -17,6 +17,8 @@ import AdjacencyMatrix from './AdjacencyMatrix'
 import State from './State'
 import retry from './retry'
 import WeightedRandom from './WeightedRandom'
+import Dijkstra from './Dijkstra'
+import AStar from './AStar'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -48,6 +50,21 @@ export type {
     PackerOptions as PackingPackerOptions
 } from './packing/types'
 
+export type {
+    Neighbors as PathNeighbors,
+    EdgeCost as PathEdgeCost,
+    NodeHash as PathNodeHash,
+    PathResult,
+    DijkstraOptions,
+    SearchStatus as PathSearchStatus,
+    FailReason as PathFailReason
+} from './Dijkstra'
+
+export type {
+    Heuristic as PathHeuristic,
+    AStarOptions
+} from './AStar'
+
 export {
     HTTP,
     Packing,
@@ -69,7 +86,9 @@ export {
     AdjacencyMatrix,
     State,
     retry,
-    WeightedRandom
+    WeightedRandom,
+    Dijkstra,
+    AStar
 }
 
 const BASE = {
@@ -93,7 +112,9 @@ const BASE = {
     AdjacencyMatrix,
     State,
     retry,
-    WeightedRandom
+    WeightedRandom,
+    Dijkstra,
+    AStar
 }
 
 export default BASE

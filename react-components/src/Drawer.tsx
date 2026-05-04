@@ -46,7 +46,8 @@ export const Drawer: React.FC<DrawerProps> = ({
 		requestAnimationFrame(() => {
 			if (!panelRef.current) return
 			const firstFocusable = panelRef.current.querySelector<HTMLElement>(FOCUSABLE)
-			firstFocusable?.focus() ?? panelRef.current.focus()
+			if (firstFocusable) firstFocusable.focus()
+			else panelRef.current.focus()
 		})
 
 		return () => {

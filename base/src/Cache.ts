@@ -48,7 +48,7 @@ class Cache<T> {
     }
 
     private getTime(): number {
-        return new Date().getTime()
+        return Date.now()
     }
 
     private getHash(filter: any): string {

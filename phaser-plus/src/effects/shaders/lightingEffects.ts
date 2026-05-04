@@ -1,5 +1,5 @@
 import Effect from '../Effect'
-import { HEAD, HASH, NOISE, LUMINANCE, SAMPLE_SRC, SAFE_SAMPLE, MIX_OUT } from './_prelude'
+import { HEAD, HASH, NOISE, SAMPLE_SRC, SAFE_SAMPLE, MIX_OUT } from './_prelude'
 
 // --------------------------------------------------------------------------
 // Outline — 8-tap dilation outside the alpha silhouette.

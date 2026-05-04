@@ -36,7 +36,7 @@ export const Rating: React.FC<RatingProps> = ({
 	...rest
 }) => {
 	const genId = useId()
-	const groupId = `rating-${genId.replace(/[^a-zA-Z0-9_-]/g, '')}`
+	const _groupId = `rating-${genId.replace(/[^a-zA-Z0-9_-]/g, '')}`
 	const [hoverValue, setHoverValue] = useState<number | null>(null)
 	const starRefs = useRef<(HTMLSpanElement | null)[]>([])
 

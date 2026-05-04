@@ -14,7 +14,7 @@ export default class Event<P = unknown> {
 
     onCreate(): void {}
 
-    onFire(payload?: P): void {}
+    onFire(_payload?: P): void {}
 
     onDestroy(): void {}
 

@@ -103,7 +103,7 @@ const ContextMenuList: React.FC<ContextMenuListProps> = ({ items, onSelect, menu
 							item.onClick?.(item.key)
 							onSelect(item.key)
 						}}
-						onMouseEnter={() => { cancelSubClose(); hasSub && setOpenSub(item.key) }}
+						onMouseEnter={() => { cancelSubClose(); if (hasSub) setOpenSub(item.key) }}
 						onMouseLeave={() => { if (hasSub) scheduleSubClose() }}
 						onKeyDown={(e) => handleItemKeyDown(e, item)}
 					>

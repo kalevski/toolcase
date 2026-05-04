@@ -51,15 +51,6 @@ export interface AssetBundleProps {
 	loading?: boolean
 }
 
-const engineMeta: Record<AssetBundleEngine, { label: string; icon: string; color: string }> = {
-	unity:  { label: 'Unity',  icon: 'unity',   color: '#1e293b' },
-	godot:  { label: 'Godot',  icon: 'joystick', color: '#478cbf' },
-	unreal: { label: 'Unreal', icon: 'gpu-card', color: '#0f172a' },
-	phaser: { label: 'Phaser', icon: 'rocket-takeoff', color: '#e44d26' },
-	pixijs: { label: 'PixiJS', icon: 'diamond',  color: '#e91e8c' },
-	custom: { label: 'Custom', icon: 'gear',     color: '#6366f1' },
-}
-
 const fileTypeIcons: Record<string, string> = {
 	textures: 'image',
 	sounds: 'music-note-beamed',

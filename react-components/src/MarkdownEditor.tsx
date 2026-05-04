@@ -4,7 +4,7 @@ import { Icon } from './Icon'
 // ── Minimal Markdown → HTML ───────────────────────────────────────────────────
 
 function markdownToHtml(md: string): string {
-	let html = md
+	const html = md
 		// Escape HTML tags in markdown source to prevent XSS
 		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')

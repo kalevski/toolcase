@@ -79,7 +79,7 @@ export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({
 					<>
 						<ProgressBar value={progress} label={`${completedCount} of ${steps.length} complete`} variant="primary" />
 						<ul className="component-welcome-guide__steps">
-							{steps.map((step, i) => (
+							{steps.map((step) => (
 								<li onClick={(e) => onStepClick?.(e, step.key)} key={step.key} className={`component-welcome-guide__step${step.completed ? ' component-welcome-guide__step--completed' : ''}`}>
 									<span className="component-welcome-guide__step-check">
 									{step.completed && <Icon name="check-lg" />}

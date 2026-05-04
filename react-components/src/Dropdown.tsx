@@ -129,7 +129,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
 			{open && (
 				<ul ref={listRef} id={listId} className="component-dropdown__list" role="listbox">
-					{items.map((item, index) => {
+					{items.map((item) => {
 						const enabledIndex = enabledItems.findIndex((i) => i.key === item.key)
 						const isHighlighted = enabledIndex === activeIndex
 						const isActive = item.key === value

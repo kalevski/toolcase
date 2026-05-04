@@ -88,7 +88,7 @@ export const Hero: FC<HeroProps> = ({
 	className,
 	...rest
 }) => {
-	const cards: HeroStatCard[] = statCards && statCards.length > 0 ? statCards : fallbackStatCards
+	const _cards: HeroStatCard[] = statCards && statCards.length > 0 ? statCards : fallbackStatCards
 	const metricList: HeroMetric[] = metrics && metrics.length > 0 ? metrics : fallbackMetrics
 	const rootClassName = ['component component-hero', className].filter(Boolean).join(' ')
 	const patternAlt = backgroundPatternAlt ?? ''

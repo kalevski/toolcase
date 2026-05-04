@@ -1,4 +1,4 @@
-import React, { ReactNode, MouseEvent, useEffect, useRef, useState, Children, isValidElement, cloneElement } from 'react'
+import React, { ReactNode, MouseEvent, useEffect, useRef, useState, Children, isValidElement } from 'react'
 import { useModalControl } from './ModalContext'
 import { CHANGE_EVENT } from './ModalControl'
 

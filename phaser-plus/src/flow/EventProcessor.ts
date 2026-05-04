@@ -4,8 +4,10 @@ import FlowProcessor from './FlowProcessor'
 
 const TIMEOUT_FN_NAME = '@toolcase/phaser-plus/timeoutFn'
 
+type TimerCallback = (...args: unknown[]) => void
+
 class TimerDef {
-    event: Event<unknown> | Function | null = null
+    event: Event<unknown> | TimerCallback | null = null
     name: string = ''
     time: number = 0
     payload: unknown = null
@@ -33,7 +35,7 @@ export default class EventProcessor extends FlowProcessor {
             def.time += delta / 1000
             if (def.time > 0) {
                 if (def.name === TIMEOUT_FN_NAME) {
-                    (def.event as Function).call(def.context)
+                    (def.event as TimerCallback).call(def.context)
                 } else {
                     (def.event as Event<unknown>).onFire(def.payload)
                 }

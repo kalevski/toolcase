@@ -1,7 +1,5 @@
 type ENVType = 'string' | 'number' | 'boolean'
 
-declare const process: { env: Record<string, string | undefined> } | undefined
-
 const env = <T>(key: string, defaultValue: T = null as T, type: ENVType = 'string'): T => {
     if (typeof (globalThis as any).process === 'undefined') {
         throw new Error('env works only with NodeJS')

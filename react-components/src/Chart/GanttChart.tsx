@@ -41,8 +41,8 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 	onTaskClick,
 	className = '',
 }) => {
-	const { tStart, tEnd, markers, resolvedTasks, svgH } = useMemo(() => {
-		if (!tasks.length) return { tStart: 0, tEnd: 0, markers: [], resolvedTasks: [], svgH: HEADER_H + 10 }
+	const { markers, resolvedTasks, svgH } = useMemo(() => {
+		if (!tasks.length) return { markers: [], resolvedTasks: [], svgH: HEADER_H + 10 }
 
 		const starts = tasks.map(t => new Date(t.start).getTime())
 		const ends = tasks.map(t => new Date(t.end).getTime())
@@ -76,8 +76,6 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 		})
 
 		return {
-			tStart: ts,
-			tEnd: te,
 			markers: mks,
 			resolvedTasks: rt,
 			svgH: HEADER_H + tasks.length * ROW_H + 8,

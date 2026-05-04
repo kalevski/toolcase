@@ -56,7 +56,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
 			className={`component component-checkbox-group ${className}`.trim()}
 		>
 			{label && <Label className="d-block mb-2">{label}</Label>}
-			{options.map((option, index) => (
+			{options.map((option) => (
 				<Checkbox
 					key={option.value}
 					id={`${name || 'checkbox-group'}-${option.value}`}

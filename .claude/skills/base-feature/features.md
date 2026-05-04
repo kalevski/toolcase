@@ -143,6 +143,52 @@ Subclass it to expose `on/off/once` to consumers while keeping `emit` internal.
 
 ---
 
+## Pathfinding
+
+### `Dijkstra` — class-based shortest-path search (extends `EventEmitter`)
+
+`new Dijkstra<N>(start, end, { neighbors, cost, hash? })`. Caller-supplied graph adapter. Manual cooperative iteration via `step()` plus a `run(maxSteps?)` helper. Static `Dijkstra.find(start, end, options)` for one-shot use. Designed to be subclassed (phaser-plus AI plugs a pooled-node frontier through `protected` hooks).
+
+| Member | Returns |
+|---|---|
+| `start` / `end` | `N` (readonly) |
+| `iterations` | `number` |
+| `maxIterations` | `number` (cap; default `Infinity`) |
+| `isComplete` | `boolean` |
+| `getStatus()` | `'searching' \| 'found' \| 'failed'` |
+| `step()` | `SearchStatus` after one expansion |
+| `run(maxSteps?)` | `PathResult<N> \| null` |
+| `getResult()` | `PathResult<N> \| null` |
+
+| Event constant | Payload | Fires |
+|---|---|---|
+| `Dijkstra.VISIT` | `(node, gCost)` | each pop |
+| `Dijkstra.OPEN` | `(node, gCost)` | each enqueue / improvement |
+| `Dijkstra.FOUND` | `(PathResult)` | once |
+| `Dijkstra.FAILED` | `('exhausted' \| 'max_iterations')` | once |
+
+`protected` extension points: `priorityOf(neighbor, g)`, `relax`, `seed`, `reconstruct`, `fail`. Frontier uses `PriorityQueue<{ key, g, priority }>`.
+
+**Use when:** lowest-cost path with non-negative edges; need step-by-step control or progress events; subclass for pooled / instrumented variants.
+**Skip when:** negative weights (use Bellman-Ford — not in `base`); admissible heuristic available → use `AStar`.
+
+**Reuses:** `PriorityQueue` (frontier), `EventEmitter` (events).
+
+---
+
+### `AStar` — A* search (extends `Dijkstra`)
+
+`new AStar<N>(start, end, { neighbors, cost, heuristic, hash? })`. Same surface as `Dijkstra` plus `heuristic: (node, goal) => number`. Override `priorityOf` adds `h` to the g-cost so the frontier orders by `f = g + h`.
+
+Throws on construction if `heuristic` is missing; throws during stepping if heuristic returns negative / non-finite or an edge cost is negative.
+
+**Use when:** spatial / grid pathfinding where an admissible heuristic (Manhattan, Chebyshev, Euclidean) prunes the frontier; cooperative scheduling under a per-frame budget; subclass to plug octile heuristic + 8-connected mesh.
+**Skip when:** no good heuristic exists (heuristic returning `0` reduces A* to Dijkstra at extra cost — just use `Dijkstra`).
+
+**Reuses:** `Dijkstra` (full algorithm + events + step-loop).
+
+---
+
 ## Utilities
 
 ### `generateId` — crypto-random hex
@@ -289,6 +335,9 @@ Type aliases: `Sprite`, `PreparedSprite`, `PlacedSprite`, `PackedPage`, `PackRes
 | Named color palette | `Color` |
 | Graph with edge metadata | `AdjacencyMatrix` |
 | Weighted random pick | `WeightedRandom` |
+| Shortest path (no heuristic) | `Dijkstra` |
+| Shortest path (with heuristic) | `AStar` |
+| Step-controlled / event-emitting search | `Dijkstra` / `AStar` instance API |
 
 ---
 

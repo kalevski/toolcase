@@ -1,4 +1,4 @@
-import React, { useId, useRef, useState } from 'react'
+import React, { useId, useState } from 'react'
 import { Icon } from './Icon'
 
 // ── Types ──────────────────────────────────────────────────────────────────────

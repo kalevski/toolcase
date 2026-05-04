@@ -13,7 +13,7 @@ export default class FlowProcessor {
 
     onCreate(): void {}
 
-    onUpdate(time: number, delta: number): void {}
+    onUpdate(_time: number, _delta: number): void {}
 
     onDestroy(): void {}
 

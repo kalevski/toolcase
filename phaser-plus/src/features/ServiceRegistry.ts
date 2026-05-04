@@ -3,9 +3,9 @@ type ServiceFactory<T> = () => T
 
 export default class ServiceRegistry {
 
-    private readonly services: Map<Function, unknown> = new Map()
+    private readonly services: Map<ServiceClass<unknown>, unknown> = new Map()
 
-    private readonly factories: Map<Function, ServiceFactory<unknown>> = new Map()
+    private readonly factories: Map<ServiceClass<unknown>, ServiceFactory<unknown>> = new Map()
 
     /**
      * Resolve (and lazy-construct) a singleton instance for the given service class.

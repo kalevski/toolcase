@@ -76,7 +76,6 @@ const ScrollColumn: React.FC<ScrollColumnProps> = ({ options, value, onChange, l
 
 	useEffect(() => {
 		scrollTo(value, 'instant')
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	return (

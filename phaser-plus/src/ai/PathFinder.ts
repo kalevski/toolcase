@@ -1,30 +1,65 @@
-import { ObjectPool } from '@toolcase/base'
+import { AStar, Dijkstra } from '@toolcase/base'
+import type { PathResult } from '@toolcase/base'
 import Feature from '../features/Feature'
 import type Scene from '../engine/Scene'
 import NavMesh from './NavMesh'
-import Path from './Path'
-import PathIterator from './PathIterator'
-import PathNode from './PathNode'
+import Path, { type GridNode } from './Path'
 
-interface Pendable { release(): void }
+const STRAIGHT = 1
+
+const DIAG = Math.SQRT2
+
+const NEIGHBOURS_8: ReadonlyArray<readonly [number, number]> = [
+    [ 1,  0],
+    [-1,  0],
+    [ 0,  1],
+    [ 0, -1],
+    [ 1,  1],
+    [ 1, -1],
+    [-1,  1],
+    [-1, -1]
+]
+
+const hashNode = (node: GridNode): string => `${node.x}|${node.y}`
+
+const octileHeuristic = (from: GridNode, to: GridNode): number => {
+    const dx = Math.abs(from.x - to.x)
+    const dy = Math.abs(from.y - to.y)
+    return STRAIGHT * (dx + dy) + (DIAG - 2 * STRAIGHT) * Math.min(dx, dy)
+}
+
+const buildNeighbors = (mesh: NavMesh) => function* (node: GridNode): Iterable<GridNode> {
+    for (const [dx, dy] of NEIGHBOURS_8) {
+        const nx = node.x + dx
+        const ny = node.y + dy
+        if (mesh.isBlocked(nx, ny)) continue
+        // Disallow diagonal squeeze through two blocked orthogonal neighbours.
+        if (dx !== 0 && dy !== 0) {
+            if (mesh.isBlocked(node.x + dx, node.y) && mesh.isBlocked(node.x, node.y + dy)) continue
+        }
+        yield { x: nx, y: ny }
+    }
+}
+
+const buildEdgeCost = (mesh: NavMesh) => (from: GridNode, to: GridNode): number => {
+    const dx = Math.abs(to.x - from.x)
+    const dy = Math.abs(to.y - from.y)
+    const stepCost = (dx !== 0 && dy !== 0) ? DIAG : STRAIGHT
+    return stepCost * mesh.cost(to.x, to.y)
+}
 
 /**
- * Cooperative A* scheduler. Holds a `Path` pool, a shared `PathNode` pool, and
- * a FIFO of in-flight queries. Each `onUpdate` tick processes paths in
- * round-robin until `budgetMs` is exhausted or all queries terminate.
+ * Cooperative A* scheduler. Holds a FIFO of in-flight queries and spends up to
+ * `budgetMs` per `onUpdate` tick stepping each one. Each query owns an
+ * `@toolcase/base` `AStar` instance whose `step()` is invoked round-robin until
+ * the path resolves or the budget runs out.
  */
 export default class PathFinder extends Feature {
 
-    /** Per-tick wall-clock budget in milliseconds. Default 2 ms. */
+    /** Per-tick wall-clock budget in milliseconds. */
     budgetMs: number = 0.1
 
     private mesh: NavMesh | null = null
-
-    private readonly nodePool: ObjectPool<PathNode> = new ObjectPool<PathNode>(PathNode, PathNode.reset)
-
-    private readonly pathPool: ObjectPool<Path>
-
-    private readonly iterator: PathIterator
 
     private readonly active: Path[] = []
 
@@ -32,8 +67,6 @@ export default class PathFinder extends Feature {
 
     constructor(scene: Scene, key: string) {
         super(scene, key)
-        this.iterator = new PathIterator(this.nodePool)
-        this.pathPool = new ObjectPool<Path>(Path, this.resetPath)
     }
 
     setMesh(mesh: NavMesh): this {
@@ -45,7 +78,7 @@ export default class PathFinder extends Feature {
         if (this.mesh === null) {
             throw new Error('PathFinder: setMesh(navMesh) required before findPath()')
         }
-        const path = this.pathPool.obtain()
+        const path = new Path()
         path.setTo(sx, sy, ex, ey)
         path.maxIterations = maxIterations
 
@@ -54,18 +87,30 @@ export default class PathFinder extends Feature {
             return path
         }
 
-        this.iterator.seed(path)
+        const search = new AStar<GridNode>(
+            { x: sx, y: sy },
+            { x: ex, y: ey },
+            {
+                hash: hashNode,
+                heuristic: octileHeuristic,
+                neighbors: buildNeighbors(this.mesh),
+                cost: buildEdgeCost(this.mesh)
+            }
+        )
+        search.maxIterations = maxIterations
+        search.on(Dijkstra.FOUND, (result: PathResult<GridNode>) => path.markFound(result))
+        search.on(Dijkstra.FAILED, (reason: string) => path.markFailed(reason))
+
+        path.search = search
+        path.markSearching()
         this.active.push(path)
         return path
     }
 
     override onUpdate(_time: number, _delta: number): void {
-        if (this.mesh === null) return
-
         while (this.pendingFails.length > 0) {
             const fail = this.pendingFails.shift()!
             fail.path.markFailed(fail.reason)
-            this.releasePath(fail.path)
         }
 
         if (this.active.length === 0) return
@@ -76,44 +121,18 @@ export default class PathFinder extends Feature {
 
         while (this.active.length > 0 && performance.now() - start < this.budgetMs && safety < safetyLimit) {
             const path = this.active.shift()!
-            const status = this.iterator.step(path, this.mesh)
+            const search = path.search!
+            search.step()
             safety++
 
-            if (status === 'progress') {
-                this.active.push(path)
-                continue
-            }
-
-            if (status === 'found') {
-                path.markFound()
-            } else {
-                path.markFailed('exhausted')
-            }
-            this.releasePath(path)
+            if (search.isComplete) continue
+            this.active.push(path)
         }
     }
 
     override onDestroy(): void {
         this.active.length = 0
         this.pendingFails.length = 0
-        this.nodePool.dispose()
-        this.pathPool.dispose()
-    }
-
-    private releasePath(path: Path): void {
-        (path as unknown as Pendable).release()
-    }
-
-    private resetPath = (path: Path): void => {
-        while (path.open.length > 0) {
-            const node = path.open.pop()
-            if (node !== null) (node as unknown as Pendable).release()
-        }
-        path.closed.clear()
-        path.bestG.clear()
-        path.current = null
-        path.iterations = 0
-        path.removeAllListeners()
     }
 
 }

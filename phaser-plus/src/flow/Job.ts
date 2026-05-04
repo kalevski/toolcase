@@ -23,7 +23,7 @@ export default class Job<P = unknown> {
      * Called once per processor tick. Return `true` when the job is finished
      * so the processor stops re-queuing it.
      */
-    onUpdate(time: number): boolean | void {
+    onUpdate(_time: number): boolean | void {
         return false
     }
 
@@ -31,6 +31,6 @@ export default class Job<P = unknown> {
 
     onComplete(): void {}
 
-    onTerminate(error?: unknown): void {}
+    onTerminate(_error?: unknown): void {}
 
 }

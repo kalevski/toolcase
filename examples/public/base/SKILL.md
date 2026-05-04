@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool), events (EventEmitter, Broadcast), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and the Node-only env() loader.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and the Node-only env() loader.
 ---
 
 # base — API Reference
@@ -15,7 +15,8 @@ import {
     generateId, toHex, formatByteSize,
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
-    Cache, AdjacencyMatrix, State, retry
+    Cache, AdjacencyMatrix, State, retry,
+    WeightedRandom, Dijkstra, AStar
 } from '@toolcase/base'
 ```
 
@@ -40,6 +41,9 @@ import { env } from '@toolcase/base/node'
 - [Events](#events)
   - [EventEmitter](#eventemitter)
   - [Broadcast](#broadcast)
+- [Pathfinding](#pathfinding)
+  - [Dijkstra](#dijkstra)
+  - [AStar](#astar)
 - [Utilities](#utilities)
   - [generateId](#generateid)
   - [getNumberInRange](#getnumberinrange)
@@ -280,6 +284,156 @@ Public surface mirrors `EventEmitter` (`on/off/once/removeAllListeners/listenerC
 
 ---
 
+## Pathfinding
+
+Two graph-search **classes** that work on any caller-supplied graph adapter (no coupling to `AdjacencyMatrix`). Pass a `neighbors` iterable + a `cost` function; for `AStar`, also a `heuristic`. Non-string nodes need a `hash` to deduplicate visits.
+
+Both extend `EventEmitter`, expose a manual `step()` for cooperative scheduling (one expansion per call — game loops, web workers, time-budgeted ticks), and emit lifecycle events. `AStar extends Dijkstra` — same surface plus the heuristic. Both reuse `PriorityQueue` internally; costs must be non-negative and finite.
+
+```ts
+type Neighbors<N> = (node: N) => Iterable<N>
+type EdgeCost<N>  = (from: N, to: N) => number
+type NodeHash<N>  = (node: N) => string
+
+interface PathResult<N> {
+    path: N[]
+    cost: number
+}
+
+type SearchStatus = 'searching' | 'found' | 'failed'
+type FailReason   = 'exhausted' | 'max_iterations'
+```
+
+### Shared API
+
+| Member | Description |
+|---|---|
+| `start: N` / `end: N` | (readonly) inputs |
+| `iterations: number` | nodes visited so far |
+| `maxIterations: number` | cap; default `Infinity`. Set to bound work per query |
+| `isComplete: boolean` | true once status is `found` or `failed` |
+| `getStatus(): SearchStatus` | current state |
+| `step(): SearchStatus` | run one expansion; returns new status |
+| `run(maxSteps?): PathResult<N> \| null` | step until complete or `maxSteps` reached |
+| `getResult(): PathResult<N> \| null` | final path (only after `'found'`) |
+
+### Events (mirrored on both classes)
+
+| Constant | Payload | Fires |
+|---|---|---|
+| `Dijkstra.VISIT` | `(node, gCost)` | each time a node is popped from the frontier |
+| `Dijkstra.OPEN` | `(node, gCost)` | each time a neighbor is enqueued or its cost improved |
+| `Dijkstra.FOUND` | `(PathResult)` | once, when goal reached |
+| `Dijkstra.FAILED` | `(FailReason)` | once, when frontier exhausts or `maxIterations` exceeded |
+
+`AStar.FOUND === Dijkstra.FOUND`, etc. Listeners subscribe via `.on(Dijkstra.FOUND, fn)` / `.once(...)`. Subclass-friendly: `priorityOf`, `relax`, `seed`, `reconstruct`, `fail` are all `protected` so phaser-plus AI modules can override (e.g. plug a pooled-node frontier).
+
+### Dijkstra
+
+Lowest-cost path on a weighted directed graph. Optimal when all edge costs are non-negative.
+
+```ts
+class Dijkstra<N> extends EventEmitter {
+    constructor(start: N, end: N, options: DijkstraOptions<N>)
+    static find<N>(start, end, options): PathResult<N> | null
+}
+
+interface DijkstraOptions<N> {
+    neighbors: Neighbors<N>
+    cost: EdgeCost<N>
+    hash?: NodeHash<N>          // default: String(node)
+}
+```
+
+Throws when `neighbors`/`cost` are missing or when an edge cost is negative / non-finite (the throw happens during `step()` / `run()`, not at construction — only the option callbacks are checked up front).
+
+```ts
+import { Dijkstra } from '@toolcase/base'
+
+const edges: Record<string, [string, number][]> = {
+    A: [['B', 1], ['C', 4]],
+    B: [['C', 2], ['D', 5]],
+    C: [['D', 1]],
+    D: []
+}
+
+// One-shot
+const result = Dijkstra.find('A', 'D', {
+    neighbors: (n) => (edges[n] ?? []).map(([t]) => t),
+    cost: (from, to) => edges[from].find(([t]) => t === to)![1]
+})
+result?.path  // ['A', 'B', 'C', 'D']
+result?.cost  // 4
+
+// Manual stepping with events
+const search = new Dijkstra('A', 'D', {
+    neighbors: (n) => (edges[n] ?? []).map(([t]) => t),
+    cost: (from, to) => edges[from].find(([t]) => t === to)![1]
+})
+search.on(Dijkstra.VISIT, (node, g) => console.log('visit', node, 'g=', g))
+search.on(Dijkstra.FOUND, (path) => console.log('done', path))
+while (!search.isComplete) search.step()
+```
+
+### AStar
+
+A* — Dijkstra plus a `heuristic` lower bound on remaining cost. Optimal when the heuristic is **admissible** (never overestimates true remaining cost). Faster than Dijkstra on grids / spatial graphs because it expands toward the goal first.
+
+```ts
+class AStar<N> extends Dijkstra<N> {
+    constructor(start: N, end: N, options: AStarOptions<N>)
+    static find<N>(start, end, options): PathResult<N> | null
+}
+
+interface AStarOptions<N> extends DijkstraOptions<N> {
+    heuristic: (node: N, goal: N) => number
+}
+```
+
+Throws when `heuristic` is missing at construction; throws during stepping if the heuristic returns negative / non-finite or if an edge cost is negative.
+
+```ts
+import { AStar } from '@toolcase/base'
+
+type Cell = { x: number, y: number }
+const SIZE = 5
+const inBounds = (c: Cell) => c.x >= 0 && c.y >= 0 && c.x < SIZE && c.y < SIZE
+
+const result = AStar.find({ x: 0, y: 0 }, { x: 4, y: 4 }, {
+    neighbors: (n) => [
+        { x: n.x + 1, y: n.y },
+        { x: n.x - 1, y: n.y },
+        { x: n.x,     y: n.y + 1 },
+        { x: n.x,     y: n.y - 1 }
+    ].filter(inBounds),
+    cost: () => 1,
+    heuristic: (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y),  // Manhattan
+    hash: (n) => `${n.x},${n.y}`
+})
+
+result?.cost            // 8
+result?.path.length     // 9 (start + 8 steps)
+```
+
+Time-budgeted scheduling (e.g. game loops / phaser-plus AI modules):
+
+```ts
+const search = new AStar(start, end, opts)
+const BUDGET_MS = 2
+
+function tick() {
+    const t0 = performance.now()
+    while (!search.isComplete && performance.now() - t0 < BUDGET_MS) {
+        search.step()
+    }
+    if (search.isComplete) emitFinalPath(search.getResult())
+}
+```
+
+Common admissible heuristics: Manhattan (4-connected grid), Chebyshev (8-connected grid), Euclidean (any-angle / continuous). A heuristic that returns `0` reduces A* to Dijkstra — just use `Dijkstra` instead.
+
+---
+
 ## Utilities
 
 ### generateId
@@ -357,7 +511,7 @@ Schema-driven validator. Throws on first violation.
 new JSONSchema(schema: Schema)
 
 interface Schema {
-    type: string                          // built-ins: string|number|boolean|object|array|email|username|password|url
+    type: string                          // built-ins listed below
     required?: boolean
     properties?: Record<string, Schema>   // for type: 'object'
     items?: Partial<Schema>               // for type: 'array'
@@ -368,11 +522,21 @@ interface Schema {
 - `validate(data): void` — throws `Error` with `property=...` context on failure.
 - `register(type, validationFn)` — add custom type. Throws if type already registered. `validationFn(propertyName, schema, data)`.
 
-Built-in regex validators:
+Built-in types:
+- Core: `string`, `boolean`, `number`, `integer`, `object`, `array`
 - `email` — RFC-ish email regex
 - `username` — `^[A-z][A-z0-9-_]{3,23}$`
 - `password` — must contain lower + upper + digit + one of `!@#$%`, length 8–24
 - `url` — `https?://...`
+- `uuid` — RFC 4122 v1–v5
+- `date` — ISO date `YYYY-MM-DD`
+- `datetime` — ISO 8601 datetime with timezone (`Z` or `±HH:MM`)
+- `ipv4` — dotted-quad
+- `ipv6` — full or compressed
+- `hex` — color hex `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`
+- `slug` — lowercase alphanumerics joined by single dashes
+- `semver` — semantic version (`MAJOR.MINOR.PATCH` + optional pre-release/build)
+- `base64` — RFC 4648 base64 (length multiple of 4)
 
 Object semantics:
 - `flexible: false` (default) ⇒ unknown properties throw.
@@ -696,6 +860,28 @@ function shortestHops(start: string, end: string): string[] | null {
 
 shortestHops('A', 'D') // ['A', 'B', 'C', 'D']  (or via 'A' → 'C' → 'D' depending on order)
 ```
+
+### Pathfinding on top of `AdjacencyMatrix`
+
+```ts
+import { AdjacencyMatrix, Dijkstra, AStar } from '@toolcase/base'
+
+const g = new AdjacencyMatrix<number, null>(1, null)
+;['A', 'B', 'C', 'D'].forEach(v => g.addVertex(v))
+g.addEdge('A', 'B', 2)
+g.addEdge('B', 'C', 5)
+g.addEdge('A', 'C', 9)
+g.addEdge('C', 'D', 1)
+
+const cheapest = Dijkstra.find('A', 'D', {
+    neighbors: (v) => g.getEdges(v),
+    cost: (from, to) => g.getEdge(from, to) as number
+})
+cheapest?.path  // ['A', 'B', 'C', 'D']
+cheapest?.cost  // 8
+```
+
+For grid worlds, swap `Dijkstra` for `AStar` and supply a Manhattan / Chebyshev heuristic — fewer nodes expanded for the same path. Use the instance API (`new AStar(...)` + `step()`) when you need to spread search across frames or react to `VISIT` / `OPEN` events for debug overlays.
 
 ### Hex helpers — cryptographic ids
 

@@ -14,7 +14,7 @@ export interface FileDropzoneProps {
 }
 
 export const FileDropzone: React.FC<FileDropzoneProps> = ({ className = '', onFiles, supported = [] }) => {
-	let dropzoneRef = useRef<HTMLDivElement>(null)
+	const dropzoneRef = useRef<HTMLDivElement>(null)
 
 	let dropzone: Dropzone | null = null
 	const accept = supported.map((format) => format.mimetype)

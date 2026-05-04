@@ -1,5 +1,5 @@
 import Effect from '../Effect'
-import { HEAD, HASH, NOISE, SAMPLE_SRC, SAFE_SAMPLE, MIX_OUT } from './_prelude'
+import { HEAD, HASH, NOISE, SAFE_SAMPLE, MIX_OUT } from './_prelude'
 
 // --------------------------------------------------------------------------
 // BlackHole — radial pull, swirl, and accretion-disk glow.

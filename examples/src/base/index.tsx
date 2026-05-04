@@ -14,6 +14,8 @@ import ColorDemo from './ColorDemo'
 import UtilitiesDemo from './UtilitiesDemo'
 import PackingDemo from './PackingDemo'
 import WeightedRandomDemo from './WeightedRandomDemo'
+import DijkstraDemo from './DijkstraDemo'
+import AStarDemo from './AStarDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -46,6 +48,8 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'adjacency-matrix', label: 'AdjacencyMatrix', category: 'Data Structures', element: <AdjacencyMatrixDemo /> },
     { key: 'object-pool', label: 'ObjectPool', category: 'Data Structures', element: <ObjectPoolDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
+    { key: 'dijkstra', label: 'Dijkstra', category: 'Data Structures', element: <DijkstraDemo /> },
+    { key: 'astar', label: 'AStar', category: 'Data Structures', element: <AStarDemo /> },
 
     { key: 'lsystem', label: 'LSystem', category: 'Generation & Validation', element: <LSystemDemo /> },
     { key: 'json-schema', label: 'JSONSchema', category: 'Generation & Validation', element: <JSONSchemaDemo /> },

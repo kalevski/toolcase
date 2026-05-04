@@ -68,7 +68,7 @@ describe('WeightedRandom', () => {
             (item) => item === 'rare' ? 1 : 9,
             random
         )
-        const counts = { rare: 0, common: 0 }
+        const counts: Record<string, number> = { rare: 0, common: 0 }
         const total = 20000
         for (let i = 0; i < total; i++) {
             counts[wr.pick()] += 1
