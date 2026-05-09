@@ -1,6 +1,6 @@
 ---
 name: game-components
-description: Use when building game UI with @toolcase/game-components — framework-free HTML5 Web Components (`gc-*` custom elements, Shadow DOM, no runtime libs). Covers 134 components across layout, HUDs, menus, inventories, dialogs, settings, overlays, social/lobby, screens, and minimap/markers — drop into any framework or vanilla page.
+description: Use when building game UI with @toolcase/game-components — framework-free HTML5 Web Components (`gc-*` custom elements, Shadow DOM, no runtime libs). Covers 139 components across layout, HUDs, menus, inventories, dialogs, settings, overlays, social/lobby, screens, and minimap/markers — drop into any framework or vanilla page.
 ---
 
 # game-components — API Reference

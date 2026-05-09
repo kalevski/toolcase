@@ -29,7 +29,7 @@ Stack baseline:
 These packages slot into this scaffold cleanly. All optional — use what fits.
 
 - **`@toolcase/base`** — Zero-dep helpers + data structures. Mandatory uses in this scaffold:
-  - `env<T>(name, default, type)` from `@toolcase/base/node` for every env var read.
+  - `env<T>(name, default, type)` from `@toolcase/node` for every env var read.
   - `HTTP.RESTResponse` / `HTTP.RESTError` / `HTTP.Status` for every router response.
   Optional uses: `Cache`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `ObjectPool`, `JSONSchema` validation, `PriorityQueue`, `VectorClock`. Live in `util/` or `services/` — no extra deps to pull in.
 
@@ -226,10 +226,10 @@ Constraints:
 
 ### env.ts
 
-One `export const` per variable, all using the typed `env()` helper from `@toolcase/base/node`. Flat — no nested config objects. Group with comment headers.
+One `export const` per variable, all using the typed `env()` helper from `@toolcase/node`. Flat — no nested config objects. Group with comment headers.
 
 ```ts
-import { env } from '@toolcase/base/node'
+import { env } from '@toolcase/node'
 
 // Identity
 export const SERVICE_NAME = env<string>('SERVICE_NAME', '<service>', 'string')
@@ -727,7 +727,7 @@ Configure level + reporters once at boot if defaults aren't enough — typically
 
 ### Env loading
 
-Every env access goes through `env<T>(name, default, type)` from `@toolcase/base/node` in `src/env.ts`. Never read `process.env.X` ad-hoc from a service or repository — it bypasses the type and the default and makes test harnessing impossible.
+Every env access goes through `env<T>(name, default, type)` from `@toolcase/node` in `src/env.ts`. Never read `process.env.X` ad-hoc from a service or repository — it bypasses the type and the default and makes test harnessing impossible.
 
 ### Errors
 

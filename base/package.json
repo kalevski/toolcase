@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/base",
-    "version": "3.0.2",
+    "version": "3.0.3",
     "description": "Zero-dep JavaScript helpers and data structures for Node.js and the browser — events, async, collections, math, and more.",
     "source": "src/main.js",
     "main": "lib/main.main.js",
@@ -11,11 +11,6 @@
             "types": "./lib/main.d.ts",
             "import": "./lib/main.module.js",
             "require": "./lib/main.main.js"
-        },
-        "./node": {
-            "types": "./lib/node.d.ts",
-            "import": "./lib/node.module.js",
-            "require": "./lib/node.main.js"
         }
     },
     "sideEffects": false,

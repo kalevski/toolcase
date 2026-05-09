@@ -33,7 +33,7 @@ Seven npm workspaces declared in the root `package.json`:
 
 | Workspace | Published name | Purpose |
 |---|---|---|
-| `base/` | `@toolcase/base` | Zero-dep helpers + data structures. Has a Node-only subpath `@toolcase/base/node` (env loader). |
+| `base/` | `@toolcase/base` | Zero-dep helpers + data structures (browser + Node, isomorphic). |
 | `logging/` | `@toolcase/logging` | Isomorphic logger. Default export is a singleton `LoggerFactory` with one `ConsoleLogReporter`. |
 | `serializer/` | `@toolcase/serializer` | Runtime protobuf schemas via `protobufjs/light`. |
 | `react-components/` | `@toolcase/react-components` | React 18+/Bootstrap 5 UI library. Ships JS + a separate `style.css`. |

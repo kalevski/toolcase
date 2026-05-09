@@ -191,7 +191,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 								sandbox="allow-same-origin"
 								srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>
 body{font-family:system-ui,sans-serif;font-size:14px;line-height:1.6;color:#1e293b;padding:1rem;margin:0}
-code{background:#f1f5f9;border-radius:3px;padding:0.15em 0.35em;font-size:0.9em}
+code{background:#f1f5f9;padding:0.15em 0.35em;font-size:0.9em}
 blockquote{border-left:3px solid #e2e8f0;margin:0;padding-left:1rem;color:#64748b}
 h1,h2,h3,h4,h5,h6{line-height:1.3;margin-top:1rem}
 a{color:#3b82f6}

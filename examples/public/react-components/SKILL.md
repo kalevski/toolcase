@@ -1,6 +1,6 @@
 ---
 name: react-components
-description: Use when building UI with @toolcase/react-components — picking the right component, looking up props, or composing landing pages, dashboards, forms, and code/docs surfaces. Covers 160+ components across typography, inputs/forms, buttons, layout, navigation, overlays, data display, charts, media, identity, marketing/landing, and code/docs.
+description: Use when building UI with @toolcase/react-components — picking the right component, looking up props, or composing landing pages, dashboards, forms, and code/docs surfaces. Covers 179 components across typography, inputs/forms, buttons, layout, navigation, overlays, data display, charts, media, identity, marketing/landing, and code/docs.
 ---
 
 # react-components — Component Reference
@@ -3769,3 +3769,82 @@ Ranked tier list — colored dot + name + range. Highlights `currentTierId` row.
     summary={<>▸ You: <b>412 pts</b> · 90d rolling</>}
 />
 ```
+
+---
+
+## Marketing, Docs & SaaS Surfaces
+
+These components are intentionally lighter on prop docs — they are landing-page, documentation, and SaaS-shell building blocks. Import any of them from `@toolcase/react-components`. Inspect props via TypeScript or the demo entry under `examples/src/react-components/<Name>Demo.tsx`.
+
+### Landing & marketing
+
+| Component | Use for |
+|---|---|
+| `AnnouncementBar` | Top-of-page announcement strip (dismissible). |
+| `BadgeRow` | Inline row of `Badge` chips (e.g. "MIT", "TypeScript", "0 deps"). |
+| `BasicLayout` | Single-column public marketing layout shell (header + hero + footer slots). |
+| `CalloutQuote` | Centered pull-quote / testimonial. |
+| `CommunityLinks` | Grid of community / social channels (Discord, GitHub, X, …). |
+| `EarlySignupForm` | Email capture form for launch / beta lists. |
+| `EcosystemMap` | Visual map of related products / packages. |
+| `FAQList` | Collapsible Q&A list. |
+| `FeatureCard` | Marketing feature tile with icon + heading + body. |
+| `FeatureMatrix` | Pricing-style feature matrix across plans. |
+| `Hero` (✓) / `HeroStatsBar` | Page hero + stats strip. |
+| `LogoCloud` | "Trusted by" logo strip. |
+| `MaintainerCard` | Single-maintainer profile card with social links. |
+| `NewsletterSignup` | Inline newsletter capture. |
+| `PageFooter` | Multi-column page footer. |
+| `PinnedFeatureShowcase` | Sticky feature + scrolling explanation pattern. |
+| `PricingCard` | Single tier on a pricing page. |
+| `Roadmap` | Timeline of upcoming/past milestones. |
+| `SocialLinks` | Inline icons row for social profiles. |
+| `SponsorWall` | Sponsor logo wall with tiers. |
+| `TeamList` | Grid of team profile cards. |
+| `TestimonialCarousel` | Rotating testimonials carousel. |
+| `VideoEmbed` | Wrapped responsive `<iframe>` for YouTube/Vimeo/etc. |
+| `WelcomeGuide` | Multi-step onboarding tour panel. |
+
+### Docs & code surfaces
+
+| Component | Use for |
+|---|---|
+| `ApiReferenceTable` | Tabular API reference (name, type, default, description). |
+| `BenchmarkChart` | Comparative benchmark bar chart. |
+| `BundleBar` | Bundle-size breakdown bar with chip legend. |
+| `CdnMap` | Map of CDN edge nodes / regions. |
+| `CodeWithOutput` | Side-by-side code block + rendered output. |
+| `CommandReference` | Reference table for CLI commands and flags. |
+| `CompatibilityMatrix` | Browser/runtime compatibility grid. |
+| `ConfigPreview` | Annotated config-file preview. |
+| `ContributorWall` | Grid of contributor avatars (GitHub-style). |
+| `CookbookGrid` | Tile grid of recipes / how-tos. |
+| `DiffViewer` | Inline diff viewer for snippet comparisons. |
+| `DownloadStats` | npm/GitHub download stat panel. |
+| `GithubStarsCard` | Star count + recent star history card. |
+| `GoodFirstIssues` | "Good first issue" listing for OSS landing pages. |
+| `InstallTabs` | Multi-package-manager install snippet (npm / pnpm / yarn / bun). |
+| `JSONSchemaDef` | Renders a JSON Schema fragment as docs. |
+| `MigrationGuide` | Step-by-step migration walkthrough. |
+| `NodeEditor` | Visual node-graph editor surface. |
+| `PluginGrid` | Grid of plugins / extensions / addons. |
+| `Pipeline` | CI / data-pipeline step visualisation. |
+| `QuickStart` | Numbered "get started in N steps" panel. |
+| `TerminalWindow` | Fake terminal / shell window with prompt + output. |
+| `VersionPicker` | Dropdown to switch documentation version. |
+
+### SaaS shell
+
+| Component | Use for |
+|---|---|
+| `AssetRow` | Row item for asset / file lists in dashboards. |
+| `DashboardCard` | Container card for dashboard tiles (`ActivityCard`, `BasicCard`, `ColoredCard`, `DifferenceCard`, `ListCard`, `MetricCard`, `SlicesCard`, `StatusCard` exports). |
+| `DashboardLayout` | App-shell layout (`Navbar`, `Sidebar`, `Content` exports) for authenticated SaaS pages. |
+| `Login` | Pre-built auth entry surface (form + connect-with options). |
+| `QueuedFile` | Row representing a file being processed / queued. |
+| `SimpleFile` | Compact file row (icon + name + size). |
+| `SingleCardSelect` | Single-pick card option list. |
+| `UsageSummaryPanel` | Plan / usage summary panel for billing pages. |
+| `UserPanel` | Authenticated user dropdown panel (avatar + menu). |
+
+> **Note**: this section is the canonical inventory of marketing/docs/SaaS components. The reference depth in earlier sections (props tables + worked examples) is being filled out incrementally — for now, refer to TypeScript types and the demo file at `examples/src/react-components/<Name>Demo.tsx`. CI runs `npm run lint:skills` (script: `scripts/check-skill-drift.mjs`) and fails when any export is not at least mentioned in this file.

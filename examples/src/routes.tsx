@@ -8,12 +8,14 @@ import { SerializerPage } from './pages/SerializerPage'
 import { ReactComponentsPage } from './pages/ReactComponentsPage'
 import { GameComponentsPage } from './pages/GameComponentsPage'
 import { PhaserPlusPage } from './pages/PhaserPlusPage'
+import { NodePage } from './pages/NodePage'
 import { baseExamples } from './base/index'
 import { loggingExamples } from './logging/index'
 import { serializerExamples } from './serializer/index'
 import { examples as reactComponentExamples } from './react-components/index'
 import { gameComponentExamples } from './game-components/index'
 import { phaserExamples } from './phaser-plus/index'
+import { nodeExamples } from './node/index'
 
 export type DemoEntry = {
     key: string
@@ -101,6 +103,17 @@ export const packageRoutes: PackageRoute[] = [
             title: e.title,
             element: e.element,
             extraHeader: <code>{e.sceneFile}</code>,
+        })),
+    },
+    {
+        key: 'node',
+        basePath: '/node',
+        indexLabel: 'All Node Helpers',
+        page: <NodePage />,
+        examples: nodeExamples.map((e) => ({
+            key: e.key,
+            title: e.label,
+            element: e.element,
         })),
     },
 ]

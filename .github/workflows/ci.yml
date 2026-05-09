@@ -34,3 +34,6 @@ jobs:
 
       - name: Validate published export maps
         run: npm run lint:exports
+
+      - name: Validate SKILL.md inventories
+        run: npm run lint:skills

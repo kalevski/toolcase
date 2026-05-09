@@ -560,7 +560,7 @@ const log = logging.getLogger('payments')
 
 ```ts
 import logging from '@toolcase/logging'
-import { env } from '@toolcase/base/node'
+import { env } from '@toolcase/node'
 logging.level = env('LOG_LEVEL', 'info') as any
 ```
 

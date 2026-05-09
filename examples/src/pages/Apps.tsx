@@ -1,48 +1,59 @@
-import { Badge, Card, EmptyState, FeatureCard, Heading, Icon, RichPageHeader, Text } from '@toolcase/react-components'
+import { Breadcrumbs } from './_chrome'
 
 type AppEntry = {
     name: string
     description: string
     path: string
-    icon: string
 }
 
 const apps: AppEntry[] = []
 
 export const Apps = () => {
     return (
-        <div className="container py-5">
-            <RichPageHeader
-                icon={{ name: 'boxes', color: 'cyan' }}
-                title="Apps"
-                sub="Standalone applications"
-                description="Apps developed inside the toolcase monorepo built on top of @toolcase packages."
-                chips={<Badge variant="secondary">{apps.length} apps</Badge>}
-            />
+        <main className="site-container">
+            <Breadcrumbs current="Apps" />
+            <section className="page-intro">
+                <div>
+                    <div className="eyebrow">Index / Apps</div>
+                    <h1 className="page-title">Standalone applications.</h1>
+                    <p className="page-lead">
+                        Apps developed inside the toolcase monorepo, built on top of @toolcase packages.
+                        Nothing shipping yet — placeholder while the first one is in flight.
+                    </p>
+                </div>
+                <dl className="page-meta">
+                    <div>
+                        <dt>Apps</dt>
+                        <dd>{apps.length}</dd>
+                    </div>
+                    <div>
+                        <dt>Status</dt>
+                        <dd><span className="tag">Coming soon</span></dd>
+                    </div>
+                </dl>
+            </section>
+
             {apps.length === 0 ? (
-                <Card>
-                    <EmptyState icon="boxes">
-                        <Heading as="h3">No apps yet</Heading>
-                        <Text as="p" variant="muted">
-                            Apps developed inside the toolcase monorepo will appear here.
-                        </Text>
-                    </EmptyState>
-                </Card>
+                <div className="empty-state">
+                    <span className="mono-tag">No apps yet</span>
+                    <h3>Nothing here yet</h3>
+                    <p>Apps developed inside the toolcase monorepo will appear here as they ship.</p>
+                </div>
             ) : (
-                <div className="row g-3">
+                <div className="lib-grid">
                     {apps.map((app) => (
-                        <div key={app.name} className="col-md-6">
-                            <a href={app.path} className="home-link">
-                                <FeatureCard
-                                    icon={<Icon name={app.icon} size={28} />}
-                                    title={app.name}
-                                    description={app.description}
-                                />
-                            </a>
-                        </div>
+                        <a key={app.name} href={app.path} className="lib-card">
+                            <div className="lib-card-head">
+                                <div>
+                                    <h3 className="lib-name">{app.name}</h3>
+                                    <p className="lib-tagline">{app.description}</p>
+                                </div>
+                                <span className="lib-arrow">→</span>
+                            </div>
+                        </a>
                     ))}
                 </div>
             )}
-        </div>
+        </main>
     )
 }

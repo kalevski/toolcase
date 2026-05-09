@@ -113,7 +113,7 @@ Bound to the default `logging` singleton.
 | Ship logs to a backend | new subclass of `LogReporter` (use buffered template) |
 | Filter logs by scope | wrap `LogReporter` in a decorator subclass |
 | Run two transports at once | pass both to a new `LoggerFactory(reporters)` |
-| Swap from env | `logging.level = env('LOG_LEVEL', 'info')` (with `@toolcase/base/node` env) |
+| Swap from env | `logging.level = env('LOG_LEVEL', 'info')` (with `@toolcase/node` env) |
 | Capture logs in tests | ring-buffer subclass of `LogReporter` |
 
 ---

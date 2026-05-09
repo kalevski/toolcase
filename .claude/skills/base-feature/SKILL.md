@@ -47,7 +47,7 @@ Trigger on requests like:
 Do NOT use for:
 
 - Edits to existing `base/src/` files (just edit them; the rules below still apply for export placement and inventory updates).
-- Anything browser-specific that won't run in Node, or anything Node-specific that won't run in the browser. Node-only utilities go under `base/src/node.ts` (separate subpath), not `base/src/main.ts`.
+- Anything browser-specific that won't run in Node, or anything Node-specific that won't run in the browser. Node-only utilities live in the `@toolcase/node` workspace, not `@toolcase/base`.
 - Logging (use `logging-feature` skill).
 - Serialization (use `serializer-feature` skill).
 - Game runtime (use `phaser-plus-feature` skill).
@@ -58,7 +58,7 @@ Do NOT use for:
 These are non-negotiable. They come from `base/package.json` (`sideEffects: false`, isomorphic, `engines.node >= 18`) and the conventions every existing file in `base/src/` follows.
 
 1. **Zero runtime dependencies.** Nothing under `base/src/` may import from outside `@toolcase/base` itself. No `lodash`, no `rxjs`, no `protobufjs`, no `eventemitter3`. If you genuinely need a small utility, vendor it into `base/src/` and own it.
-2. **Isomorphic by default.** Every file under `base/src/` must run in Node 18+ and modern browsers. Use only `globalThis.crypto`, standard ES2020+ APIs, `Map`, `Set`, `Uint8Array`. No `process`, no `Buffer`, no `fs`, no `window`, no `document`. Anything Node-only goes in `base/src/node.ts` and is exported via the `/node` subpath.
+2. **Isomorphic, always.** Every file under `base/src/` must run in Node 18+ and modern browsers. Use only `globalThis.crypto`, standard ES2020+ APIs, `Map`, `Set`, `Uint8Array`. No `process`, no `Buffer`, no `fs`, no `window`, no `document`. Anything Node-only belongs in the `@toolcase/node` workspace, not here.
 3. **One class / one function per file.** Filename matches the export. PascalCase classname → `PascalCase.ts`; lowerCamelCase function → `lowerCamel.ts`. The file's `export default` is the canonical export. Named re-export at the bottom is allowed.
 4. **`main.ts` is the export gateway.** Every public export from `base/src/main.ts` must also appear in the `BASE` default object (mirrors the named exports). Both lists stay in sync.
 5. **Subsystem groups go in subfolders with their own `index.ts`.** `http/` and `packing/` are the canonical examples. Three or more related files? Make a subfolder, give it `index.ts` with re-exports + a single namespace default object (e.g. `HTTP`, `Packing`), and import that namespace from `main.ts`.
@@ -184,7 +184,7 @@ describe('MyFeature', () => {
 ## Anti-patterns
 
 - Importing anything outside `@toolcase/base` from `base/src/`. Zero deps means zero deps.
-- Touching `process`, `Buffer`, `fs`, `window`, `document` in any file other than `base/src/node.ts`.
+- Touching `process`, `Buffer`, `fs`, `window`, `document` anywhere under `base/src/`. Those belong in `@toolcase/node`.
 - Adding a feature that duplicates >50% of an existing export instead of extending it.
 - Forgetting to mirror named exports into the `BASE` default object in `main.ts`.
 - Adding a feature without a test file.
@@ -194,4 +194,4 @@ describe('MyFeature', () => {
 - Trailing semicolons (style mismatch with existing files).
 - Throwing a custom Error subclass when `Error` is enough (existing code uses plain `Error`).
 - Returning `undefined` from public methods that mean "absent" — return `null` to match existing patterns.
-- Bundling Node-only code into `base/src/main.ts`. It goes in `base/src/node.ts`.
+- Bundling Node-only code into `@toolcase/base`. It goes in `@toolcase/node`.

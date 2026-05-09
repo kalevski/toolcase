@@ -1,0 +1,111 @@
+{
+    "name": "@toolcase/node",
+    "version": "3.0.1",
+    "description": "Node.js helpers for backend services — Fastify endpoints, Kysely repositories, Redis KV service, and isomorphic sanitize/pagination/where helpers.",
+    "source": "src/main.ts",
+    "main": "lib/main.main.js",
+    "module": "lib/main.module.js",
+    "types": "lib/main.d.ts",
+    "exports": {
+        ".": {
+            "types": "./lib/main.d.ts",
+            "import": "./lib/main.module.js",
+            "require": "./lib/main.main.js"
+        }
+    },
+    "sideEffects": false,
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup && tsc -p tsconfig.build.json || true"
+    },
+    "peerDependencies": {
+        "@fastify/cors": "^11.0.0",
+        "@toolcase/base": "^3.0.0",
+        "@toolcase/serializer": "^3.0.0",
+        "fastify": "^5.0.0",
+        "jose": "^5.10.0",
+        "kysely": "^0.28.0",
+        "redis": "^5.0.0",
+        "sharp": "^0.33.0"
+    },
+    "peerDependenciesMeta": {
+        "@fastify/cors": {
+            "optional": true
+        },
+        "@toolcase/serializer": {
+            "optional": true
+        },
+        "fastify": {
+            "optional": true
+        },
+        "jose": {
+            "optional": true
+        },
+        "kysely": {
+            "optional": true
+        },
+        "redis": {
+            "optional": true
+        },
+        "sharp": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "@fastify/cors": "^11.2.0",
+        "@toolcase/base": "*",
+        "@toolcase/serializer": "*",
+        "@types/node": "^20.0.0",
+        "fastify": "^5.8.5",
+        "jose": "^5.10.0",
+        "kysely": "^0.28.17",
+        "redis": "^5.12.1",
+        "sharp": "^0.33.5"
+    },
+    "author": {
+        "name": "Daniel Kalevski",
+        "url": "https://kalevski.dev"
+    },
+    "homepage": "https://toolcase.kalevski.dev",
+    "keywords": [
+        "toolcase",
+        "node",
+        "nodejs",
+        "fastify",
+        "kysely",
+        "redis",
+        "sharp",
+        "image-processing",
+        "atlas",
+        "sprite-packing",
+        "repository",
+        "crud",
+        "endpoint",
+        "sanitize",
+        "pagination",
+        "typescript",
+        "esm"
+    ],
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kalevski/toolcase.git",
+        "directory": "node"
+    },
+    "bugs": {
+        "url": "https://github.com/kalevski/toolcase/issues"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "license": "MIT"
+}

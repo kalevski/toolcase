@@ -33,4 +33,13 @@ export default tseslint.config(
             },
         },
     },
+    {
+        files: ['scripts/**'],
+        languageOptions: {
+            globals: {
+                console: 'readonly',
+                process: 'readonly',
+            },
+        },
+    },
 )

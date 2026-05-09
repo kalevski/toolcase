@@ -20,7 +20,6 @@ npm install @toolcase/base
 
 ```ts
 import { Cache, retry, generateId } from '@toolcase/base'         // browser + Node
-import { env } from '@toolcase/base/node'                          // Node only
 import { Packing } from '@toolcase/base'                           // sprite/atlas packing
 ```
 
@@ -222,21 +221,6 @@ result.pages.forEach(page => {
 
 - `LSystem` — Lindenmayer system iterator for procedural generation (plants, fractals, dungeons).
 - `Color` — Material design color palette constants.
-
-### Node.js-only (`@toolcase/base/node`)
-
-Subpath import — keeps Node-specific APIs out of the browser bundle.
-
-#### `env(key, defaultValue?, type?)`
-Read environment variables with type coercion (`'string'`, `'number'`, `'boolean'`).
-
-```ts
-import { env } from '@toolcase/base/node'
-
-const port  = env('PORT', 3000, 'number')        // number
-const debug = env('DEBUG', false, 'boolean')     // boolean
-const host  = env('HOST', 'localhost')           // string
-```
 
 ---
 

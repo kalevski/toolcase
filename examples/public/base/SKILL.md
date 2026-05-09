@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and the Node-only env() loader.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -18,12 +18,6 @@ import {
     Cache, AdjacencyMatrix, State, retry,
     WeightedRandom, Dijkstra, AStar
 } from '@toolcase/base'
-```
-
-Node-only subpath:
-
-```ts
-import { env } from '@toolcase/base/node'
 ```
 
 ---
@@ -59,8 +53,6 @@ import { env } from '@toolcase/base/node'
   - [Status](#status)
   - [RESTError](#resterror)
   - [RESTResponse](#restresponse)
-- [Node-only](#node-only)
-  - [env](#env)
 
 ---
 
@@ -633,30 +625,6 @@ return new HTTP.RESTResponse(HTTP.Status.OK, users, users.length)
 
 ---
 
-## Node-only
-
-### env
-
-Typed env-var reader. Subpath import: `@toolcase/base/node`.
-
-```ts
-env<T>(key: string, defaultValue?: T, type: 'string' | 'number' | 'boolean' = 'string'): T
-```
-
-- `'number'` — `parseInt(v, 10)`; falls back to `defaultValue` if the parsed integer's string form ≠ original.
-- `'boolean'` — case-insensitive `'true' | 'false'`; otherwise `defaultValue`.
-- `'string'` — passes through; `defaultValue` if undefined.
-
-Throws `'env works only with NodeJS'` if `globalThis.process` is undefined. Keep this import out of browser bundles.
-
-```ts
-import { env } from '@toolcase/base/node'
-const port  = env('PORT', 3000, 'number')
-const debug = env('DEBUG', false, 'boolean')
-```
-
----
-
 ## Recipes
 
 End-to-end examples that combine multiple primitives.
@@ -896,7 +864,7 @@ const roundTrip = bufferToHex(bytes) === sessionId
 ### Env-driven config (Node)
 
 ```ts
-import { env } from '@toolcase/base/node'
+import { env } from '@toolcase/node'
 import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
 
 const factory = new LoggerFactory([new ConsoleLogReporter()])

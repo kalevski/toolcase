@@ -27,6 +27,7 @@
         "@toolcase/react-components": "*",
         "@toolcase/game-components": "*",
         "@toolcase/phaser-plus": "*",
+        "@toolcase/node": "*",
         "phaser": "^4.0.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

@@ -1,6 +1,6 @@
 # Existing `@toolcase/base` API
 
-Reference inventory for everything currently exported from `base/src/main.ts` and `base/src/node.ts`. Use to pick the right primitive before scaffolding a new one. **Reuse before reinvent.**
+Reference inventory for everything currently exported from `base/src/main.ts`. Use to pick the right primitive before scaffolding a new one. **Reuse before reinvent.**
 
 Source of truth: `base/src/main.ts` exports + `examples/public/base/SKILL.md` documented API. If something listed here is missing from those, treat this doc as stale and refresh it as part of your task.
 
@@ -304,16 +304,6 @@ Type aliases: `Sprite`, `PreparedSprite`, `PlacedSprite`, `PackedPage`, `PackRes
 
 ---
 
-## Node-only (`@toolcase/base/node`)
-
-### `env` — typed env-var reader
-
-`env<T>(key, defaultValue?, type = 'string'): T`. Types: `'string' | 'number' | 'boolean'`. Throws when run in a non-Node environment.
-
-**Use when:** Node services reading config from `process.env`.
-
----
-
 ## Decision quick map
 
 | Need | Reach for |
@@ -329,7 +319,6 @@ Type aliases: `Sprite`, `PreparedSprite`, `PlacedSprite`, `PackedPage`, `PackRes
 | Validate JSON shape | `JSONSchema` |
 | REST envelope | `HTTP.RESTResponse` / `HTTP.RESTError` |
 | Bin-pack rectangles | `Packing.Packer` |
-| Read env var (Node) | `env` from `@toolcase/base/node` |
 | Distributed event order | `VectorClock` |
 | Procedural string growth | `LSystem` |
 | Named color palette | `Color` |

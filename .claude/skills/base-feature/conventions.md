@@ -222,9 +222,8 @@ Tests live under `base/test/<group>/`.
 
 ## Browser vs. Node
 
-- Default surface lives in `base/src/main.ts` and must work in both.
-- Node-only utilities go in `base/src/node.ts`. They throw at module load (or first call) if `globalThis.process` is undefined — see existing `env.ts`.
-- The `tsup.config.js` builds both entries.
+- All `@toolcase/base` surface lives in `base/src/main.ts` and must work in both browser and Node (isomorphic, zero-dep).
+- Node-only utilities do **not** belong here — put them in the `@toolcase/node` workspace (`node/src/`) instead.
 
 ---
 
