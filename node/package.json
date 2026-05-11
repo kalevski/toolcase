@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/node",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "description": "Node.js helpers for backend services — Fastify endpoints, Kysely repositories, Redis KV service, and isomorphic sanitize/pagination/where helpers.",
     "source": "src/main.ts",
     "main": "lib/main.main.js",

@@ -473,7 +473,7 @@ Encodes messages with the configured `Serializer`, stores bytes in Redis, decode
 
 ### `ImageProcessor` — sharp-backed image transforms
 
-Chainable wrapper around `sharp`. Each transform method clones the underlying pipeline so a single instance can be forked into multiple downstream chains.
+Chainable wrapper around `sharp`. `sharp` is loaded lazily — the module is resolved on the first terminal op (`metadata`/`toBuffer`/`toFile`), so services that import `@toolcase/node` without touching imaging pay no startup cost. Each transform returns a new `ImageProcessor` with an appended op; the actual `sharp` pipeline is materialized fresh per terminal call, so chains fork safely without explicit cloning.
 
 | Method | Purpose |
 |---|---|
@@ -497,7 +497,7 @@ Chainable wrapper around `sharp`. Each transform method clones the underlying pi
 
 ### `AtlasBuilder` — sprite-atlas builder over `Packer`
 
-Decodes images from disk, hands a `Sprite[]` to `Packer` from `@toolcase/base/packing`, composites each `PackedPage` into a single atlas image with `sharp`, and writes pages + JSON manifest to an output directory.
+Decodes images from disk, hands a `Sprite[]` to `Packer` from `@toolcase/base/packing`, composites each `PackedPage` into a single atlas image with `sharp`, and writes pages + JSON manifest to an output directory. `sharp` is resolved lazily inside `build()` — constructing an `AtlasBuilder` does not load it.
 
 | Public surface | Notes |
 |---|---|

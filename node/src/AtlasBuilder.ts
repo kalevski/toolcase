@@ -1,9 +1,13 @@
 import { Packing, type PackingPackerOptions, type PackingResult, type PackingSprite } from '@toolcase/base'
-import sharp from 'sharp'
+import type SharpDefault from 'sharp'
+import type { OverlayOptions } from 'sharp'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { AtlasBuildError } from './errors'
 import { ImageProcessor, type ImageFormat } from './ImageProcessor'
+import { loadSharp } from './internal/lazySharp'
+
+type SharpFactory = typeof SharpDefault
 
 export type AtlasBuildStage = 'decode' | 'pack' | 'compose' | 'write'
 
@@ -132,12 +136,13 @@ export class AtlasBuilder {
 			throw new AtlasBuildError('decode', 'inputs must be a non-empty array')
 		}
 
+		const sharp = await loadSharp()
 		const cache = new Map<string, DecodedImage>()
 		const failures: AtlasBuildFailure[] = []
 		const continueOnError = this.options.continueOnError === true
 		for (const input of inputs) {
 			try {
-				const decoded = await this.decode(input)
+				const decoded = await this.decode(sharp, input)
 				cache.set(decoded.id, decoded)
 			} catch (error) {
 				if (!continueOnError) throw error
@@ -191,13 +196,13 @@ export class AtlasBuilder {
 			const filePath = path.join(outputDir, fileName)
 			const composedFrames: AtlasFrame[] = []
 
-			const composites: sharp.OverlayOptions[] = []
+			const composites: OverlayOptions[] = []
 			for (const placed of page.sprites) {
 				const decoded = cache.get(placed.id)
 				if (!decoded) continue
 				if (placed.rect.width <= 0 || placed.rect.height <= 0) continue
 
-				const overlayBuffer = await this.prepareOverlay(decoded, placed.rotated)
+				const overlayBuffer = await this.prepareOverlay(sharp, decoded, placed.rotated)
 				composites.push({
 					input: overlayBuffer,
 					left: placed.rect.x,
@@ -287,7 +292,7 @@ export class AtlasBuilder {
 		}
 	}
 
-	private async decode(input: AtlasInput): Promise<DecodedImage> {
+	private async decode(sharp: SharpFactory, input: AtlasInput): Promise<DecodedImage> {
 		if (typeof input.path !== 'string' || input.path.length === 0) {
 			throw new AtlasBuildError('decode', 'input.path is required')
 		}
@@ -316,7 +321,7 @@ export class AtlasBuilder {
 		}
 	}
 
-	private async prepareOverlay(decoded: DecodedImage, rotated: boolean): Promise<Buffer> {
+	private async prepareOverlay(sharp: SharpFactory, decoded: DecodedImage, rotated: boolean): Promise<Buffer> {
 		const raw = sharp(decoded.trimmedBuffer, {
 			raw: {
 				width: decoded.trimmedWidth,

@@ -868,11 +868,11 @@ await server.run()
 
 ## Imaging
 
-Sharp-backed image transforms plus an atlas builder that composes `Packer` from `@toolcase/base` with `sharp` and `node:fs`. Peer: `sharp` (optional, install only if you import these).
+Sharp-backed image transforms plus an atlas builder that composes `Packer` from `@toolcase/base` with `sharp` and `node:fs`. Peer: `sharp` (optional, install only if you import these). `sharp` is loaded lazily — services that import `@toolcase/node` but never call `ImageProcessor` / `AtlasBuilder` skip the resolution entirely.
 
 ### ImageProcessor
 
-Chainable wrapper around sharp. Each transform method clones the underlying pipeline so chains can fork safely.
+Chainable wrapper around sharp. Transform methods queue operations on an immutable `ImageProcessor`; the underlying `sharp` pipeline is built fresh on each terminal call (`metadata`/`toBuffer`/`toFile`), so chains fork safely and the first call also triggers the lazy `import('sharp')`.
 
 ```ts
 type ImageFormat = 'png' | 'jpeg' | 'webp' | 'avif'
