@@ -1,6 +1,6 @@
 ---
 name: game-components
-description: Use when building game UI with @toolcase/game-components — framework-free HTML5 Web Components (`gc-*` custom elements, Shadow DOM, no runtime libs). Covers 139 components across layout, HUDs, menus, inventories, dialogs, settings, overlays, social/lobby, screens, and minimap/markers — drop into any framework or vanilla page.
+description: Use when building game UI with @toolcase/game-components — framework-free HTML5 Web Components (`gc-*` custom elements, no runtime libs). Covers 137 registered tags across layout, HUDs, menus, inventories, dialogs, settings, overlays, social/lobby, screens, and minimap/markers; consumable from React/Vue/Svelte/vanilla.
 ---
 
 # game-components — API Reference
@@ -11,7 +11,7 @@ Vanilla Web Components for game UIs. No framework, no runtime deps beyond `@tool
 import { register } from '@toolcase/game-components'
 import '@toolcase/game-components/style.css'
 
-register() // registers all 134 custom elements via customElements.define
+register() // registers all 137 custom elements via customElements.define
 ```
 
 After `register()` you can author markup directly:
@@ -43,8 +43,8 @@ import { HealthBar, Hotbar, ItemSlot, type InventoryItem } from '@toolcase/game-
 - **Tag names**: kebab-case prefix `gc-*`. Class names are PascalCase (e.g. `<gc-health-bar>` ↔ `HealthBar`).
 - **Attributes ↔ properties**: most components mirror string/number/boolean attrs as JS properties (boolean = presence). Set primitive props via attributes; set complex data (arrays, objects) via JS properties (`el.slots = [...]`, `el.item = {...}`).
 - **Events**: `CustomEvent` with `bubbles: true, composed: true`. Detail payloads typed via `*EventMap` interfaces (e.g. `MenuItemEventMap`, `ItemSlotEventMap`, `HotbarEventMap`).
-- **Styling**: bundled CSS at `@toolcase/game-components/style.css`. Components read CSS variables (e.g. `--gc-title-size`, `--gc-bar-fill`) — override in your stylesheet for theming.
-- **No framework**: all rendering is `Shadow DOM` + `innerHTML` driven. Safe to nest, slot, and reparent like any HTMLElement.
+- **Styling**: bundled CSS at `@toolcase/game-components/style.css`. Components read CSS variables (e.g. `--gc-title-size`, `--gc-bar-base`, `--fg-blood`) — override in your stylesheet for theming.
+- **Rendering**: a few components (`MenuItem`, `Anchor`, `CooldownBadge`, …) use Shadow DOM with a single `<slot>`; most render to light DOM via `innerHTML`. Either way, safe to nest and reparent like any HTMLElement.
 
 ---
 
@@ -79,7 +79,7 @@ Flex / grid primitives.
 |-----|-------|------------|-------|
 | `gc-stack` | `Stack` | `direction='vertical'\|'horizontal'`, `gap`, `align`, `justify`, `wrap`, `inline` | Flexbox row/column. `gap` is any CSS length. |
 | `gc-grid` | `Grid` | `columns`, `rows`, `gap`, `cell-size` | CSS grid with `repeat(columns, cell-size \|\| 1fr)`. |
-| `gc-anchor` | `Anchor` | — | Positions children at corners/edges via slots/CSS. |
+| `gc-anchor` | `Anchor` | `position` (`top-left`\|`top`\|`top-right`\|`left`\|`center`\|`right`\|`bottom-left`\|`bottom`\|`bottom-right`), `inset` (CSS length, default `0px`) | Absolutely positions its slotted content at one corner/edge of the nearest positioned ancestor. Use one `<gc-anchor>` per position. |
 | `gc-aspect-ratio-box` | `AspectRatioBox` | `ratio` (e.g. `'16:9'`) | Maintains intrinsic aspect ratio. |
 | `gc-safe-area` | `SafeArea` | — | Honors `env(safe-area-inset-*)` (mobile/console UI). |
 | `gc-divider` | `Divider` | `orientation` | Visual separator. |
@@ -430,7 +430,7 @@ Full-viewport screen compositions.
 
 ### Selective registration
 
-`register()` registers all 134. To register one, import the class and call `customElements.define` directly:
+`register()` registers all 137. To register one, import the class and call `customElements.define` directly:
 
 ```ts
 import { HealthBar } from '@toolcase/game-components'
@@ -447,9 +447,9 @@ Override CSS custom properties on a wrapper:
 
 ```css
 .theme-grim {
-    --gc-bar-fill: #6f1d1b;
+    --fg-blood: #6f1d1b;          /* HP bar base via cascading fallback */
+    --gc-bar-base: #6f1d1b;       /* per-bar override */
     --gc-title-size: 32px;
-    --gc-panel-bg: #1a1a1a;
 }
 ```
 
@@ -473,31 +473,37 @@ Web Components work in React 19+ natively. For React 18 use `ref` callbacks to s
 
 Worked examples per category. Every snippet assumes `register()` ran once and the bundled stylesheet is loaded.
 
-### Layout — center HUD with corner anchors
+### Layout — HUD with corner anchors
 
 ```html
-<gc-anchor>
-    <gc-stack slot="top-left" direction="vertical" gap="6px">
-        <gc-health-bar value="80" max="100" show-text label="HP"></gc-health-bar>
-        <gc-mana-bar value="40" max="100" show-text label="MP"></gc-mana-bar>
-    </gc-stack>
-    <gc-stack slot="top-right" direction="horizontal" gap="8px">
-        <gc-currency-chip>235</gc-currency-chip>
-        <gc-ping-display>32 ms</gc-ping-display>
-    </gc-stack>
-    <gc-hotbar slot="bottom" id="bar"></gc-hotbar>
-</gc-anchor>
+<div style="position: relative; width: 100vw; height: 100vh">
+    <gc-anchor position="top-left" inset="12px">
+        <gc-stack direction="vertical" gap="6px">
+            <gc-health-bar value="80" max="100" show-text label="HP"></gc-health-bar>
+            <gc-mana-bar value="40" max="100" show-text label="MP"></gc-mana-bar>
+        </gc-stack>
+    </gc-anchor>
+    <gc-anchor position="top-right" inset="12px">
+        <gc-stack direction="horizontal" gap="8px">
+            <gc-currency-chip>235</gc-currency-chip>
+            <gc-ping-display>32 ms</gc-ping-display>
+        </gc-stack>
+    </gc-anchor>
+    <gc-anchor position="bottom" inset="16px">
+        <gc-hotbar id="bar"></gc-hotbar>
+    </gc-anchor>
+</div>
 ```
 
-`gc-anchor` keeps slotted children pinned to corners/edges. Combine with `gc-safe-area` on consoles/mobile.
+Each `gc-anchor` positions itself absolutely against the nearest positioned ancestor. Combine with `gc-safe-area` on consoles/mobile.
 
 ### Layout — responsive grid
 
 ```html
 <gc-grid columns="3" gap="8px" cell-size="160px">
-    <gc-card>One</gc-card>
-    <gc-card>Two</gc-card>
-    <gc-card>Three</gc-card>
+    <gc-panel>One</gc-panel>
+    <gc-panel>Two</gc-panel>
+    <gc-panel>Three</gc-panel>
 </gc-grid>
 ```
 
@@ -551,7 +557,7 @@ healthBar.ghost = hp - predictedHit  // ghost shows where the bar will land
 ### Inventory grid + tooltip
 
 ```html
-<gc-inventory-grid id="bag" rows="6" columns="8"></gc-inventory-grid>
+<gc-inventory-grid id="bag" columns="8" slot-size="64"></gc-inventory-grid>
 <gc-item-tooltip id="tip" hidden></gc-item-tooltip>
 
 <script type="module">
@@ -559,17 +565,19 @@ healthBar.ghost = hp - predictedHit  // ghost shows where the bar will land
     const tip = document.getElementById('tip')
     bag.items = inventory.map(it => ({ id: it.uid, name: it.name, icon: it.icon, qty: it.qty, rarity: it.rarity }))
 
-    bag.addEventListener('item-hover', e => {
+    bag.addEventListener('select', e => {
         if (e.detail.item) {
             tip.item = e.detail.item
             tip.hidden = false
+            useItem(e.detail.item)
         } else {
             tip.hidden = true
         }
     })
-    bag.addEventListener('item-click', e => useItem(e.detail.item))
 </script>
 ```
+
+`InventoryGrid` emits a single `select` event (`{ item, index }`) on slot click. To preview on hover, listen on the child `gc-item-slot` elements with `mouseenter`/`mouseleave`.
 
 ### Hotbar bound to game state
 
@@ -700,16 +708,28 @@ document.querySelectorAll('[gc-]').forEach(el => {
 ### Map — minimap with markers
 
 ```html
-<gc-minimap id="mini" zoom="1">
-    <gc-objective-marker x="120" y="48"></gc-objective-marker>
-    <gc-waypoint-marker x="64" y="200" label="Camp"></gc-waypoint-marker>
+<gc-minimap
+    id="mini"
+    world-x="0" world-y="0"
+    world-width="2048" world-height="2048"
+    size="200"
+    background-image="/maps/region01.png">
 </gc-minimap>
 ```
 
 ```ts
+import type { Minimap, MinimapMarker } from '@toolcase/game-components'
+
 const mini = document.getElementById('mini') as Minimap
-mini.center = { x: player.x, y: player.y }   // re-centers on player
+mini.markers = [
+    { id: 'objective', x: 1200, y: 480, color: '#e8a23a', size: 10 },
+    { id: 'camp',      x: 640,  y: 2000, color: '#5fa84a' }
+] satisfies MinimapMarker[]
+
+mini.rotation = player.heading           // rotates the surface, player stays centered
 ```
+
+`Minimap` is purely data-driven (`markers` array). The standalone `gc-objective-marker` / `gc-waypoint-marker` tags are full-screen world markers, not minimap children — render them directly over the viewport.
 
 ### Effects & overlays — death vignette
 
@@ -940,7 +960,7 @@ export class HUD extends HTMLFeature {
 
 ## Notes
 
-- Peer dep: `@toolcase/base` 2.x.
+- Peer dep: `@toolcase/base` `3.x.x`.
 - Bundle is `sideEffects: ['*.css', 'lib/index.main.js', 'lib/index.module.js']` — importing the entry registers tag-name globals; only the CSS import has visual side effects.
 - All components extend `HTMLElement` directly (no base class beyond `ResourceBarBase` and `SettingRowBase`).
-- Render strategy is Shadow DOM + per-attribute `attributeChangedCallback`. Mutating attributes is cheap; rapid mutation (>60fps) should batch via JS properties.
+- Render strategy: `connectedCallback` + per-attribute `attributeChangedCallback`. Mutating attributes is cheap; rapid mutation (>60fps) should batch via JS properties (e.g. `el.value = …`, `el.items = …`).

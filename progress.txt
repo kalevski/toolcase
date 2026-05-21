@@ -6,3 +6,12 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 ## Iteration 1 — opt-examples-public-base
 - Added Packing section (Packer, 5 algorithms, helpers) — namespace was fully exported from base/src/main.ts but absent from SKILL.md.
 - Pattern: cross-check `src/main.ts` exports against SKILL.md TOC. Re-exported namespaces (HTTP, Packing) often hide coverage gaps. Public types are re-exported with `Packing*` prefix — list them when adding a section.
+
+## Iteration 2 — opt-examples-public-game-components
+- Frontmatter "139 components" + body "all 134" → corrected to 137 (count of `customElements.define` calls in `register.ts`; ResourceBarBase + SettingRowBase are abstract, not registered).
+- Fixed peer dep `@toolcase/base 2.x` → `3.x.x` (per package.json).
+- Anchor table claimed slot-based positioning ("via slots/CSS") — actually uses `position` + `inset` attrs, single `<slot>`. Rewrote the layout example to use one `<gc-anchor position="…">` per corner.
+- `gc-card` doesn't exist — replaced with `gc-panel` in grid example.
+- InventoryGrid example used `rows="6"` + `item-hover` + `item-click` (none real). Real API: attrs `columns`/`slot-size`/`selected-id`, prop `items`, single `select` event `{ item, index }`.
+- Minimap example used `zoom` attr + `mini.center =` (don't exist) + slotted markers (Minimap ignores children). Real API: `world-x/y/width/height` + `markers` prop (data-driven).
+- Pattern: for component-heavy packages, spot-check `observedAttributes` and event detail shapes — class-name + attribute-list mismatches are the most common form of staleness, more than missing exports.
