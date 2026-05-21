@@ -15,3 +15,11 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 - InventoryGrid example used `rows="6"` + `item-hover` + `item-click` (none real). Real API: attrs `columns`/`slot-size`/`selected-id`, prop `items`, single `select` event `{ item, index }`.
 - Minimap example used `zoom` attr + `mini.center =` (don't exist) + slotted markers (Minimap ignores children). Real API: `world-x/y/width/height` + `markers` prop (data-driven).
 - Pattern: for component-heavy packages, spot-check `observedAttributes` and event detail shapes — class-name + attribute-list mismatches are the most common form of staleness, more than missing exports.
+
+## Iteration 3 — opt-examples-public-logging
+- Dropped duplicate "Independent factory" LoggerFactory example (verbatim repeat of an earlier audit-factory block).
+- Removed redundant "Custom reporter" subsection inside the LogReporter API section — the four worked custom-reporter examples below already cover it; collapsed to a one-line sync/throws-bubble note.
+- Replaced hand-rolled `RemoteReporter` (manual queue + setTimeout) with a `BufferedReporter({ onFlush })` example since the built-in already implements batching/debounce.
+- Dropped the standalone "File reporter (Node)" custom-LogReporter example — `FileLogReporter` + the JSONLineReporter-over-createWriteStream combo earlier in the doc already cover Node file output.
+- Pattern: when the doc has both an API section AND a worked-examples section, the API-section "custom X" subblock almost always duplicates one of the examples — drop the API-side copy, keep the worked examples.
+- All exports cross-checked: `main.ts` exports `{ logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter }`; `node.ts` exports `{ FileLogReporter }`. All covered in doc.

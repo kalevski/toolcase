@@ -319,30 +319,7 @@ class BufferedReporter extends LogReporter {
 
 Either `inner` or `onFlush` must be provided. When both are present, `onFlush` wins (the inner reporter is bypassed). Throws inside `onFlush` will bubble — wrap your I/O.
 
-### Custom reporter
-
-```ts
-import { LogReporter, LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
-
-class RemoteReporter extends LogReporter {
-    log(level, scope, time, messages) {
-        if (level === 'verbose') return
-        fetch('/api/logs', {
-            method: 'POST',
-            body: JSON.stringify({ level, scope, time, messages })
-        }).catch(() => {}) // never throw inside reporters
-    }
-}
-
-const factory = new LoggerFactory([
-    new ConsoleLogReporter(),
-    new RemoteReporter()
-])
-factory.level = 'info'
-const log = factory.getLogger('app')
-```
-
-Reporters run synchronously in order; throws inside a reporter will bubble up to the call site of `logger.<level>(...)`. Wrap I/O accordingly.
+Reporters run synchronously in registration order; a throw inside a reporter bubbles up to the call site of `logger.<level>(...)`. Wrap I/O. See worked custom-reporter examples below.
 
 ---
 
@@ -418,23 +395,11 @@ logging.getLogger('http.request')
 logging.getLogger('http.response')
 ```
 
-A reporter can branch on `scope` (see Custom reporter below) to route or filter by subsystem.
+A reporter can branch on `scope` (see "Filter by scope" below) to route or filter by subsystem.
 
 ---
 
 ## Examples — `LoggerFactory`
-
-### Independent factory
-
-```ts
-import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
-
-const audit = new LoggerFactory([new ConsoleLogReporter()])
-audit.level = 'verbose'
-audit.getLogger('audit').verbose('login', { userId })
-```
-
-Use this when one subsystem (auditing, perf tracing) must log at a different level than the rest of the app, or stream to a different reporter set.
 
 ### Multiple reporters, fan-out
 
@@ -446,8 +411,6 @@ const factory = new LoggerFactory([
 ])
 factory.level = 'info'
 ```
-
-Reporters fire in registration order, synchronously. Throws bubble — wrap I/O.
 
 ### No console output, just a buffer
 
@@ -471,49 +434,20 @@ buffer.snapshot() // last 500 events
 
 ## Examples — `LogReporter`
 
-### File reporter (Node)
+For Node file output, prefer the built-in `FileLogReporter` (or `JSONLineReporter` over `fs.createWriteStream`) shown above — extend `LogReporter` directly only when you need custom routing/filtering/transformation.
+
+### Remote reporter (batched)
+
+For network I/O, wrap a sink with `BufferedReporter` (see API above) — `onFlush` ships the whole batch:
 
 ```ts
-import { appendFile } from 'node:fs/promises'
-import { LogReporter, LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
-
-class FileReporter extends LogReporter {
-    constructor(private path: string) { super() }
-    log(level, scope, time, messages) {
-        const line = JSON.stringify({ level, scope, time, messages }) + '\n'
-        appendFile(this.path, line).catch(() => {})
+new BufferedReporter(null, {
+    maxSize: 50,
+    flushInterval: 500,
+    onFlush: entries => {
+        fetch('/api/logs', { method: 'POST', body: JSON.stringify(entries) }).catch(() => {})
     }
-}
-
-const factory = new LoggerFactory([
-    new ConsoleLogReporter(),
-    new FileReporter('./app.log')
-])
-```
-
-### Remote reporter with batching
-
-The default `ConsoleLogReporter` is synchronous — for network I/O, batch + debounce so log calls stay cheap.
-
-```ts
-class RemoteReporter extends LogReporter {
-
-    private queue: any[] = []
-    private timer: any = null
-
-    log(level, scope, time, messages) {
-        if (level === 'verbose') return
-        this.queue.push({ level, scope, time, messages })
-        if (this.timer === null) this.timer = setTimeout(() => this.flush(), 500)
-    }
-
-    private flush() {
-        const payload = this.queue
-        this.queue = []
-        this.timer = null
-        fetch('/api/logs', { method: 'POST', body: JSON.stringify(payload) }).catch(() => {})
-    }
-}
+})
 ```
 
 ### Filter by scope
@@ -547,14 +481,6 @@ class GroupedReporter extends LogReporter {
 ---
 
 ## Patterns
-
-**Per-module loggers:**
-
-```ts
-// in each file
-import logging from '@toolcase/logging'
-const log = logging.getLogger('payments')
-```
 
 **Switch verbosity from env (Node):**
 
