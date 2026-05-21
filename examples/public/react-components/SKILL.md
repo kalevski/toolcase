@@ -1,6 +1,6 @@
 ---
 name: react-components
-description: Use when building UI with @toolcase/react-components — picking the right component, looking up props, or composing landing pages, dashboards, forms, and code/docs surfaces. Covers 179 components across typography, inputs/forms, buttons, layout, navigation, overlays, data display, charts, media, identity, marketing/landing, and code/docs.
+description: Reference for `@toolcase/react-components` (React 18+/Bootstrap 5 UI library). Use when building or assembling a React UI from this package — picking the right component, looking up props, or composing landing pages, dashboards, forms, charts, and docs/code surfaces. Triggers when the user imports `@toolcase/react-components`, asks for a `<Hero>`/`<AdvancedTable>`/`<CommandPalette>` etc., or asks to theme via `theme--neon` / CSS custom properties.
 ---
 
 # react-components — Component Reference
@@ -1242,6 +1242,28 @@ import { Breadcrumb } from '@toolcase/react-components'
   ]}
   maxItems={3}
 />
+```
+
+---
+
+### Card
+
+A simple bordered container with an optional header and a Bootstrap-style colored variant. Renders a skeleton when `loading`.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `header` | `ReactNode` | ❌ | Header content; renders a header bar when provided |
+| `variant` | `'default' \| 'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger'` | ❌ | Color variant (default: `'default'`) |
+| `loading` | `boolean` | ❌ | Renders skeleton placeholders (default: `false`) |
+| `className` | `string` | ❌ | Additional CSS class on the root |
+| `children` | `ReactNode` | ❌ | Card body content |
+
+```tsx
+import { Card } from '@toolcase/react-components'
+
+<Card header="Settings" variant="info">
+  <p>Body content.</p>
+</Card>
 ```
 
 ---
@@ -2540,9 +2562,12 @@ A full-width landing page hero with eyebrow text, title, description, CTA button
 | `secondaryAction` | `HeroAction` | ❌ | Secondary CTA button |
 | `statCards` | `HeroStatCard[]` | ❌ | `{ label, value, helper? }` |
 | `metrics` | `HeroMetric[]` | ❌ | Inline metrics `{ label, value, helper? }` |
-| `bgIcons` | `string[]` | ❌ | Bootstrap Icon names for background decoration |
+| `bgIcons` | `string[]` | ❌ | Image `src` URLs for the animated background icon layer (one `<img>` per entry) |
 | `backgroundPatternSrc` | `string` | ❌ | Background pattern image URL |
-| `backgroundPattern` | `ReactNode` | ❌ | Custom background element |
+| `backgroundPatternAlt` | `string` | ❌ | Alt text for `backgroundPatternSrc` (omit to hide from a11y) |
+| `backgroundPattern` | `ReactNode` | ❌ | Custom background element (overrides `backgroundPatternSrc`) |
+
+`HeroAction` extends `ButtonHTMLAttributes<HTMLButtonElement>` plus `{ label, outline?, size?, variant? }`. It renders as a `<Button>` — use `onClick` to navigate; there is no `href` / link rendering built in.
 
 ```tsx
 import { Hero } from '@toolcase/react-components'
@@ -2551,13 +2576,13 @@ import { Hero } from '@toolcase/react-components'
   eyebrow="Introducing v2"
   title="Build better UIs, faster."
   description="A complete React component library for modern web apps."
-  primaryAction={{ label: 'Get Started', href: '/docs', variant: 'primary' }}
-  secondaryAction={{ label: 'View on GitHub', href: 'https://github.com/...', outline: true, external: true }}
+  primaryAction={{ label: 'Get Started', variant: 'primary', onClick: () => navigate('/docs') }}
+  secondaryAction={{ label: 'View on GitHub', outline: true, onClick: () => window.open('https://github.com/...', '_blank') }}
   statCards={[
     { label: 'Components', value: '80+' },
     { label: 'Bundle size', value: '< 300 KB' },
   ]}
-  bgIcons={['rocket-takeoff', 'code-slash', 'lightning-charge']}
+  bgIcons={['/icons/rocket.svg', '/icons/code.svg', '/icons/bolt.svg']}
 />
 ```
 

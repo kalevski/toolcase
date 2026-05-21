@@ -87,3 +87,10 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 - ServiceRegistry method is `resolve(class)`, not `.get(class)`. Also has `bind`/`provide`/`has`/`dispose`. Fixed services section + recipe.
 - InputFeature: query method is `isPressed(action)`, not `isDown(action)`. Binding is `bind(action, [Binding[]])`. Fixed.
 - Pattern: architecture-blueprint SKILL.md files compound staleness — when phaser-plus + game-components both moved to 3.x peer ranges and several gc-* components renamed attrs in lockstep, the doc has drift in every example. Worth grepping the doc for *all* old attribute names from one component when fixing it (e.g. once you see `rows=`, also check `header=`, `preset=`, `label=`, `slot="…"`).
+
+## Iteration 9 — opt-examples-public-react-components
+- Frontmatter description: dropped fragile "Covers 179 components across…" count, replaced with concrete trigger surface (React 18+/Bootstrap 5, named-component triggers, theme--neon).
+- Added missing `### Card` body section between Breadcrumb and CommandPalette. TOC had `[Card](#card)` link but no anchor existed — broken anchor for a real top-level export (`src/Card.tsx`: header/variant/loading/className).
+- Hero example drift: `primaryAction={{ href: '/docs', ... }}` + `external: true` — HeroAction extends `ButtonHTMLAttributes<HTMLButtonElement>` (renders as `<Button>`, no href/link). Switched to `onClick` + window.open pattern and added a clarifying note on HeroAction shape.
+- Hero `bgIcons` was documented as "Bootstrap Icon names" but the source maps each entry to `<img src={src}>` (literal URLs). Fixed description + example.
+- Pattern: for components that look "link-like" (Hero/CTA/CoolButton), grep the source for `<a` or `href` before trusting any example that uses `href` — many of these are pure `<button>` underneath and the doc gets it wrong.
