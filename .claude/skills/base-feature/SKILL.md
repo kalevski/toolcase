@@ -15,7 +15,7 @@ Scaffold a new feature in `@toolcase/base`. Single-purpose helpers, data structu
 2. **`.claude/skills/base-feature/conventions.md`** (bundled) — code style, file layout, test layout, multi-class subsystem layout, how exports flow into `main.ts`.
 3. **`examples/public/base/SKILL.md`** — the user-facing API reference for `@toolcase/base` published at `toolcase.kalevski.dev/base/SKILL.md`. This is the **downstream contract**. Anything you add must be appended here too in the same shape (constructor → API → examples).
 
-Do not paraphrase. Open all three. Locate the section matching your feature category (data structure / event / utility / validation / HTTP / Node-only / packing). The shapes you write into the new file, the test, and the docs must follow the patterns visible in those files.
+Open all three. Locate the section matching your feature category (data structure / event / utility / validation / HTTP / pathfinding / packing). The shapes you write into the new file, the test, and the docs must follow the patterns visible in those files.
 
 ## REUSE rule (load-bearing)
 
@@ -55,16 +55,16 @@ Do NOT use for:
 
 ## Hard rules
 
-These are non-negotiable. They come from `base/package.json` (`sideEffects: false`, isomorphic, `engines.node >= 18`) and the conventions every existing file in `base/src/` follows.
+Derived from `base/package.json` (`sideEffects: false`, isomorphic, `engines.node >= 18`) and existing `base/src/` style. Non-negotiable.
 
-1. **Zero runtime dependencies.** Nothing under `base/src/` may import from outside `@toolcase/base` itself. No `lodash`, no `rxjs`, no `protobufjs`, no `eventemitter3`. If you genuinely need a small utility, vendor it into `base/src/` and own it.
+1. **Zero runtime dependencies.** Nothing under `base/src/` may import from outside `@toolcase/base` itself. No `lodash`, no `rxjs`, no `protobufjs`, no `eventemitter3`. If you need a small utility, vendor it into `base/src/` and own it.
 2. **Isomorphic, always.** Every file under `base/src/` must run in Node 18+ and modern browsers. Use only `globalThis.crypto`, standard ES2020+ APIs, `Map`, `Set`, `Uint8Array`. No `process`, no `Buffer`, no `fs`, no `window`, no `document`. Anything Node-only belongs in the `@toolcase/node` workspace, not here.
 3. **One class / one function per file.** Filename matches the export. PascalCase classname → `PascalCase.ts`; lowerCamelCase function → `lowerCamel.ts`. The file's `export default` is the canonical export. Named re-export at the bottom is allowed.
-4. **`main.ts` is the export gateway.** Every public export from `base/src/main.ts` must also appear in the `BASE` default object (mirrors the named exports). Both lists stay in sync.
+4. **`main.ts` is the export gateway.** Every named runtime export from `base/src/main.ts` must also appear in the `BASE` default object. Type-only exports (`export type { … }`) go in their own block and are NOT mirrored into `BASE`. Subsystems (`http/`, `packing/`) expose a single namespace (`HTTP`, `Packing`) — both the namespace export and its `BASE` entry, no individual class re-exports.
 5. **Subsystem groups go in subfolders with their own `index.ts`.** `http/` and `packing/` are the canonical examples. Three or more related files? Make a subfolder, give it `index.ts` with re-exports + a single namespace default object (e.g. `HTTP`, `Packing`), and import that namespace from `main.ts`.
 6. **Tests are mandatory.** Every new export ships with `base/test/<Name>.test.ts` (or `base/test/<group>/<Name>.test.ts` for subsystems) using vitest. Tests must cover: happy path, error/edge cases (empty input, max bounds), and any contract guarantees the JSDoc claims.
 7. **Strict TypeScript.** Generic types where it makes sense; precise return types; no `any` for public surface (the eslint config allows `any` but the existing classes avoid it in declarations — match that). Use `T | null` over `T | undefined` for "absent" in public APIs (matches `PriorityQueue.dequeue()`, `Cache.get()`, etc.).
-8. **No code comments.** Self-documenting names only. The existing files in `base/src/` contain almost zero comments — match that style. JSDoc only when a parameter's contract is non-obvious from its type (e.g. units, valid range).
+8. **No code comments.** Self-documenting names only — existing files in `base/src/` are near-zero-comment. JSDoc only when a parameter's contract is non-obvious from its type (units, valid range, side effects).
 9. **No semicolons.** Match the existing code style in `base/src/` (look at `PriorityQueue.ts`, `ObjectPool.ts`, `Cache.ts`).
 10. **4-space indent.** No tabs.
 11. **Constructor validation throws synchronously.** If a constructor receives invalid input (`null`/non-function/etc.), throw a plain `Error` immediately — match `PriorityQueue` (`throw new Error('priorityFn is required')`).

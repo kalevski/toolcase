@@ -84,7 +84,7 @@ For a new component named `<Name>` (PascalCase), root class `component-<kebab>`:
 
 1. **`react-components/src/<Name>.tsx`** — component class. `export const <Name>` (no default).
 2. **`react-components/style/components/_<kebab>.scss`** — all component styles (BEM scheme + CSS custom properties).
-3. **`react-components/style/components/index.scss`** — append `@forward './<kebab>';` (or `@use` per existing pattern).
+3. **`react-components/style/components/index.scss`** — append `@use './<kebab>';` (existing file is 100% `@use`, no `@forward`).
 4. **`react-components/src/index.ts`** — append `export * from './<Name>'`.
 5. **`examples/src/react-components/<Name>Demo.tsx`** — demo component exercising every prop variant.
 6. **`examples/src/react-components/index.tsx`** — register demo + add entry to `examples` array under correct category.
@@ -254,7 +254,7 @@ Register in `examples/src/react-components/index.tsx`:
 ```tsx
 import { <Name>Demo } from './<Name>Demo'
 
-export const examples: ExampleEntry[] = [
+export const examples: ExampleDef[] = [
     // ...
     { key: '<kebab>', category: '<MatchingCategory>', element: <<Name>Demo /> },
 ]
@@ -267,7 +267,7 @@ export const examples: ExampleEntry[] = [
 3. **Read** `examples/public/react-components/SKILL.md` to find the matching category and copy the section style.
 4. **Create** `react-components/src/<Name>.tsx` from the template.
 5. **Create** `react-components/style/components/_<kebab>.scss` from the SCSS template.
-6. **Append** the SCSS partial to `react-components/style/components/index.scss`.
+6. **Append** `@use './<kebab>';` to `react-components/style/components/index.scss`.
 7. **Append** `export * from './<Name>'` to `react-components/src/index.ts`.
 8. **Create** `examples/src/react-components/<Name>Demo.tsx`.
 9. **Register** demo in `examples/src/react-components/index.tsx`.

@@ -55,7 +55,7 @@ Engine hooks (override on subclass):
 | `Scene` | `beforeInit`, `onInit`, `onLoad`, `onCreate`, `onUpdate(time, delta)`, `onDestroy` |
 | `Feature` | `onCreate`, `onUpdate(time, delta)`, `preDestroy`, `onDestroy` |
 | `GameObject` | `onCreate`, `onAdd(parent)`, `onUpdate(time, delta)`, `onRemove`, `onDestroy` |
-| `FlowProcessor` | `doUpdate(time, delta)`, `onDestroy` |
+| `FlowProcessor` | `onCreate`, `onUpdate(time, delta)`, `onDestroy` |
 | `Panel` | `draw()`, `doUpdate()`, `dispose()` |
 | `Effect` | `applyUniforms(programManager, time)` |
 | `Path` (subclass-internal) | n/a — listen for `PATH_FOUND`/`PATH_FAILED` |
@@ -184,7 +184,7 @@ class MyProcessor extends FlowProcessor {
         return this.items.delete(id)
     }
 
-    override doUpdate(_time: number, delta: number): void {
+    override onUpdate(_time: number, delta: number): void {
         for (const item of this.items.values()) {
             item.tick(delta)
         }
@@ -232,7 +232,7 @@ class MyEffect extends Effect {
 export default MyEffect
 ```
 
-Register via `installEffects(game)` (built-ins) or `ensureEffectRegistered(game, MyEffect)`.
+Register alongside built-ins via `installEffects(game)`, or skip the registration step and let `EffectManager.add(MyEffect)` lazy-register on first use (`ensureEffectRegistered` is internal; not exported from `effects/index.ts`).
 
 ---
 

@@ -25,7 +25,7 @@ Stack baseline:
 
 - **`@toolcase/react-components`** — primary UI primitives (`Hero`, `CoolNav`, `CoolButton`, `Brand`, `Icon`, `PageFooter`, `PricingCard`, `FeatureCard`, `PinnedFeatureShowcase`, `EarlySignupForm`, `Heading`, `Text`, `SectionCard`, etc.). See `react-components` skill for catalog.
 - **`@toolcase/base`** — pure helpers/data structures if a section needs them. No store/services in this stack, so usage is rare.
-- **`@toolcase/logging`** — generally unnecessary — static sites should not log to remote sinks at runtime. Use `console` directly if anything.
+- **`@toolcase/logging`** — unnecessary. Static sites should not log to remote sinks at runtime. Use `console` directly.
 
 `@toolcase/serializer`, `zustand`, `react-query`, `redux` — **out of scope**. If you reach for them, the project is no longer a static-app — switch to `react-spa-app`.
 
@@ -85,7 +85,7 @@ Rules:
 - Adding a route = three edits: `routes.ts` entry, route file in `app/routes/`, sitemap.xml entry. Forgetting sitemap = SEO regression.
 - Generated types live at `app/+types/<route>` — import as `import type { Route } from './+types/<name>'`. Do not commit `.react-router/types/`; `react-router typegen` regenerates on `dev`/`typecheck`.
 
-For nested routes, use react-router's nested-route helpers (`route('parent', 'parent.tsx', [route('child', 'child.tsx')])`). Keep flat unless content actually nests.
+For nested routes, use react-router's nested-route helpers (`route('parent', 'parent.tsx', [route('child', 'child.tsx')])`). Keep flat unless content nests.
 
 ---
 
@@ -362,7 +362,7 @@ Rules:
 
 Every route exports `meta()`. Every route has a sitemap entry. Every route has a unique title and description. OG + Twitter cards on every route — share previews are non-negotiable.
 
-`<meta name="theme-color">` lives in `root.tsx` Layout (one global value). Per-route theme-color requires escape hatches — usually not worth it.
+`<meta name="theme-color">` lives in `root.tsx` Layout (one global value). Per-route theme-color requires escape hatches — not worth it.
 
 ### Anchor navigation
 
@@ -388,7 +388,7 @@ items={[
 - State that depends on the runtime environment (cookie consent value, scroll position) — render the empty/null state on the server, then update inside `useEffect` after mount. Track a `hydrated` flag if needed.
 - Random IDs / dates that would diverge between SSR pass and hydration: generate inside `useEffect` and stash in state.
 
-`suppressHydrationWarning` on `<html>` and `<body>` already silences extension-injected nodes — don't add it elsewhere just to silence warnings; fix the root cause.
+`suppressHydrationWarning` on `<html>` and `<body>` already silences extension-injected nodes — don't add it elsewhere to silence warnings; fix the root cause.
 
 ### Cookie consent + analytics gate
 
@@ -545,7 +545,7 @@ CMD ["nginx", "-g", "daemon off;"]
 - ❌ Per-module SCSS files. Tailwind utilities + UI library styles. Drop into `app.css` `@theme` for tokens.
 - ❌ Importing from `app/routes/` outside `routes.ts`. Routes don't share code with each other. Shared UI = a module.
 - ❌ Forgetting the sitemap entry on a new route. SEO audits will flag it.
-- ❌ Forgetting `meta()`. The page will inherit the parent route's title — usually wrong, definitely bad for SEO.
+- ❌ Forgetting `meta()`. The page inherits the parent route's title — wrong, bad for SEO.
 - ❌ OG image referenced as a relative URL. Crawlers want absolute URLs. Always `https://<domain>/imgs/og-...`.
 - ❌ Env var without `VITE_` prefix in client code. It won't be inlined at build time — `import.meta.env.X` will be `undefined`.
 - ❌ Mixing UI primitives libraries. Pick one (`@toolcase/react-components`, MUI, Chakra, etc.) per app.

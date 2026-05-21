@@ -149,7 +149,9 @@ const chunks = serializer.fragment(buf, 16384)            // payload bytes per c
 
 for (const chunk of chunks) ws.send(chunk)                // each chunk has the 8-byte header
 
-// on the receiver:
+// on the receiver — total lives at bytes [6,7] of every chunk header:
+const peekTotal = (chunk: Uint8Array) => (chunk[6] << 8) | chunk[7]
+
 const incoming: Uint8Array[] = []
 ws.addEventListener('message', e => {
     incoming.push(new Uint8Array(e.data))
@@ -382,31 +384,19 @@ serializer.encode('Frame', {
 
 ### Defensive decode
 
-Buffers from the network can be malformed. `decode()` throws `decode error: ...` — wrap callers:
-
-```ts
-function safeDecode<T = any>(key: string, buf: Uint8Array): T | null {
-    try {
-        return serializer.decode(key, buf) as unknown as T
-    } catch {
-        return null
-    }
-}
-```
-
-Combine with `@toolcase/logging` to capture rejections without flooding the console:
+Buffers from the network can be malformed. Use the built-in `safeDecode` instead of try/catching `decode()` directly — it returns `{ ok, value, error }` and never throws.
 
 ```ts
 import logging from '@toolcase/logging'
 const log = logging.getLogger('netcode')
 
 ws.addEventListener('message', e => {
-    const msg = safeDecode<{ tick: number }>('Input', new Uint8Array(e.data))
-    if (msg === null) {
-        log.warning('dropped malformed frame', { byteLength: e.data.byteLength })
+    const r = serializer.safeDecode('Input', new Uint8Array(e.data))
+    if (!r.ok) {
+        log.warning('dropped malformed frame', { byteLength: e.data.byteLength, reason: r.error?.message })
         return
     }
-    apply(msg)
+    apply(r.value)
 })
 ```
 

@@ -10,8 +10,6 @@ Opinionated blueprint for Node.js + TypeScript backends. Layered, DI-driven, sin
 1. **Scaffolding** a new project — follow the workspace layout and folder contracts top to bottom.
 2. **Modifying an existing project** — every edit MUST conform to the layer rules and folder contracts below. Any pre-existing deviation is a latent bug; don't propagate it.
 
-Every new project and every new/changed feature follows this layout. Deviation = bug.
-
 Stack baseline:
 
 - Node 20+, ESM (`"type": "module"`), TypeScript `strict`.
@@ -26,20 +24,21 @@ Stack baseline:
 
 ## Optional @toolcase / @rivalis Libraries
 
-These packages slot into this scaffold cleanly. All optional — use what fits.
+Optional packages that slot into this scaffold. Use what fits.
 
-- **`@toolcase/base`** — Zero-dep helpers + data structures. Mandatory uses in this scaffold:
-  - `env<T>(name, default, type)` from `@toolcase/node` for every env var read.
+- **`@toolcase/base`** — Zero-dep helpers + data structures. Mandatory uses:
   - `HTTP.RESTResponse` / `HTTP.RESTError` / `HTTP.Status` for every router response.
-  Optional uses: `Cache`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `ObjectPool`, `JSONSchema` validation, `PriorityQueue`, `VectorClock`. Live in `util/` or `services/` — no extra deps to pull in.
+  Optional: `Cache`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `ObjectPool`, `JSONSchema` validation, `PriorityQueue`, `VectorClock`, `Color`, `Dijkstra`, `AStar`, `WeightedRandom`, `Packing.Packer`. Live in `util/` or `services/`.
 
-- **`@toolcase/logging`** — Tiny isomorphic logger. Mandatory in this scaffold. One named logger per class: `logging.getLogger('Database')`, `logging.getLogger('Http')`, `logging.getLogger('UserService')`. Configure level + reporters once at boot in `index.ts` (default reporter is console; swap for remote/file via custom `LogReporter`).
+- **`@toolcase/node`** — Backend helpers. Mandatory: `env(name, default, type)` for every env var read in `src/env.ts`. Optional: `HttpServer` wrapper, `BaseRepository` / `SoftDeleteRepository` (Kysely), `EntityService`, `KVService` (Redis), `ImageProcessor` (sharp), `AtlasBuilder`, `OAuth2` helpers, `RESTRouteHandler`. Peer-deps `@toolcase/base`, `fastify`, `kysely`, `redis`, `sharp`, `jose` declared optional — install only what you use.
 
-- **`@toolcase/serializer`** — Runtime-defined protobuf schemas with encode/decode to compact `Uint8Array`. No `.proto` build step. Use when the service speaks binary over WebSocket/IPC (paired with Rivalis topics) or persists compact buffers. Lives in `wire/` or `services/`. Don't reach for it for JSON HTTP payloads — overkill.
+- **`@toolcase/logging`** — Isomorphic logger. Mandatory. One named logger per class: `logging.getLogger('Database')`, `logging.getLogger('Http')`, `logging.getLogger('UserService')`. Configure level + reporters once at boot in `index.ts` (default reporter is console; swap via custom `LogReporter`, `JSONLineReporter`, `BufferedReporter`, or `FileLogReporter` from `@toolcase/logging/node`).
 
-- **`@rivalis/core`** — Server-side real-time rooms (rooms, actors, ticket auth, heartbeats, rate limiting, WS transport). Use when the service needs shared room state, presence, or an authoritative tick loop. Don't hand-roll `ws` / `socket.io` / `colyseus`. Lives behind a `Realtime` injectable in `realtime/`. See the dedicated `rivalis` skill for the full surface.
+- **`@toolcase/serializer`** — Runtime-defined protobuf schemas, encode/decode to compact `Uint8Array`. No `.proto` build step. Use when the service speaks binary over WebSocket/IPC (paired with Rivalis topics) or persists compact buffers. Lives in `wire/` or `services/`. Skip for JSON HTTP payloads.
 
-- **`@rivalis/browser`** — Typed browser `WSClient` with reconnect, JSON/bytes helpers, ticket-via-subprotocol. Pair with `@rivalis/core` server. Lives in the SPA workspace, not in this backend project — but the ticket-mint endpoint (`POST /v1/realtime/ticket`) lives here.
+- **`@rivalis/core`** — Server-side real-time rooms (rooms, actors, ticket auth, heartbeats, rate limiting, WS transport). Use when the service needs shared room state, presence, or an authoritative tick loop. Do not hand-roll `ws` / `socket.io` / `colyseus`. Lives behind a `Realtime` injectable in `realtime/`. See the dedicated `rivalis` skill.
+
+- **`@rivalis/browser`** — Typed browser `WSClient` with reconnect, JSON/bytes helpers, ticket-via-subprotocol. Pair with `@rivalis/core` server. Lives in the SPA workspace, not this backend — but the ticket-mint endpoint (`POST /v1/realtime/ticket`) lives here.
 
 ---
 
@@ -162,7 +161,7 @@ Path inside `src/` is the layer; what's inside the file is its responsibility.
 | `wire/` | `@toolcase/serializer`, `domain/` | everything else |
 | `container.ts` | every layer | nothing imports back except `index.ts`, `routers/*` |
 
-The single rule that catches most violations: **a router never builds a Kysely query, never imports a repository.** Routers translate the HTTP request into a service call and translate the result back into a response. Everything else is a service or a repository.
+Primary invariant: **a router never builds a Kysely query, never imports a repository.** Routers translate the HTTP request into a service call and the result back into a response. Everything else is a service or a repository.
 
 ---
 
@@ -232,26 +231,28 @@ One `export const` per variable, all using the typed `env()` helper from `@toolc
 import { env } from '@toolcase/node'
 
 // Identity
-export const SERVICE_NAME = env<string>('SERVICE_NAME', '<service>', 'string')
-export const ENVIRONMENT = env<string>('ENVIRONMENT', 'dev', 'string')
+export const SERVICE_NAME = env('SERVICE_NAME', '<service>')
+export const ENVIRONMENT = env('ENVIRONMENT', 'dev')
 
 // HTTP
-export const HTTP_PORT = env<number>('HTTP_PORT', 3000, 'number')
-export const HTTP_ALLOWED_ORIGINS = env<string>('HTTP_ALLOWED_ORIGINS', '', 'string')
+export const HTTP_PORT = env('HTTP_PORT', 3000, 'number')
+export const HTTP_ALLOWED_ORIGINS = env('HTTP_ALLOWED_ORIGINS', '')
 
 // Postgres
-export const PG_HOST = env<string>('PG_HOST', '127.0.0.1', 'string')
-export const PG_PORT = env<number>('PG_PORT', 5432, 'number')
-export const PG_USER = env<string>('PG_USER', '', 'string')
-export const PG_PASSWORD = env<string>('PG_PASSWORD', '', 'string')
-export const PG_DATABASE = env<string>('PG_DATABASE', '', 'string')
-export const PG_SCHEMA = env<string>('PG_SCHEMA', 'public', 'string')
-export const PG_POOL_MAX = env<number>('PG_POOL_MAX', 10, 'number')
+export const PG_HOST = env('PG_HOST', '127.0.0.1')
+export const PG_PORT = env('PG_PORT', 5432, 'number')
+export const PG_USER = env('PG_USER', '')
+export const PG_PASSWORD = env('PG_PASSWORD', '')
+export const PG_DATABASE = env('PG_DATABASE', '')
+export const PG_SCHEMA = env('PG_SCHEMA', 'public')
+export const PG_POOL_MAX = env('PG_POOL_MAX', 10, 'number')
 
 // Real-time (when Rivalis is enabled)
-// export const WS_PORT = env<number>('WS_PORT', 3100, 'number')
-// export const WS_TICKET_SECRET = env<string>('WS_TICKET_SECRET', '', 'string')
+// export const WS_PORT = env('WS_PORT', 3100, 'number')
+// export const WS_TICKET_SECRET = env('WS_TICKET_SECRET', '')
 ```
+
+`env(key, default, type?)`: omitted `type` defaults to `'string'`. Pass `'number'` or `'boolean'` for typed parsing. With a `null` default, the helper returns `T | null` for that type.
 
 `.env.example` mirrors every key — empty for secrets, sensible defaults for tunables. Commit it.
 
@@ -427,7 +428,7 @@ export class ConflictError extends AppError {
 }
 ```
 
-Services throw `AppError` subclasses. Plain `Error` becomes a 500 every time — almost never what you want.
+Services throw `AppError` subclasses. Plain `Error` becomes a 500 every time — reserve that for unexpected failures.
 
 ### services/
 
@@ -614,7 +615,7 @@ export class UserRepository {
 
 Rules:
 
-- Every method takes an **optional `trx`** as the last parameter. The service passes the transaction handle down when composing multi-statement operations. No AsyncLocalStorage, no proxy-based ambient transaction tricks — explicit is better.
+- Every method takes an **optional `trx`** as the last parameter. The service passes the transaction handle down when composing multi-statement operations. No AsyncLocalStorage, no proxy-based ambient transaction tricks.
 - **Return materialized rows** — never the Kysely builder. Materialize with `execute()` / `executeTakeFirst()` / `executeTakeFirstOrThrow()` inside the repository.
 - **No business logic.** "If admin then X" belongs in the service.
 - **Throw nothing intentionally.** Let pg/Kysely throw on actual errors. Return `undefined` for "not found"; the service decides whether that's a `NotFoundError`.
@@ -654,11 +655,11 @@ export class Realtime {
 
     async init(): Promise<void> {
         this.rivalis = new Rivalis<ActorData>({
-            transports: [new Transports.WSTransport({
-                server: this.http.httpServer,
-                path: '/realtime',
-                ticketSource: 'protocol',
-            })],
+            transports: [new Transports.WSTransport(
+                { server: this.http.httpServer, path: '/realtime' },
+                null,
+                { ticketSource: 'protocol' }
+            )],
             authMiddleware: new ChatAuth(),
         })
         this.rivalis.rooms.define('chat', ChatRoom)
@@ -689,23 +690,35 @@ For room patterns (presence chat, server-authoritative state, turn-based, fixed-
 `@toolcase/serializer` schemas — runtime-defined protobuf, no `.proto` build step. Use when the wire format is binary (paired with Rivalis topics) or persisted as compact bytes. Skip for JSON HTTP payloads.
 
 ```ts
-// src/wire/chatMessage.ts
-import { Schema, Type } from '@toolcase/serializer'
+// src/wire/serializer.ts
+import Serializer from '@toolcase/serializer'
 
-export const ChatMessageWire = new Schema('ChatMessage', {
-    userId: { id: 1, type: Type.STRING },
-    text: { id: 2, type: Type.STRING },
-    sentAt: { id: 3, type: Type.UINT64 },
-})
+export interface ChatMessage {
+    userId: string
+    text: string
+    sentAt: number
+}
 
-export type ChatMessage = ReturnType<typeof ChatMessageWire.decode>
+export const wire = new Serializer('app')
+
+wire.define('ChatMessage', [
+    { key: 'userId', type: Serializer.FieldType.STRING, rule: 'optional' },
+    { key: 'text', type: Serializer.FieldType.STRING, rule: 'optional' },
+    { key: 'sentAt', type: Serializer.FieldType.UINT64, rule: 'optional' },
+])
+
+// encode/decode at call sites:
+//   const bytes = wire.encode('ChatMessage', message)
+//   const decoded = wire.decode('ChatMessage', bytes) as unknown as ChatMessage
 ```
 
 Rules:
 
-- One file per message type. Export the schema and the decoded TS type.
-- Field ids never change once shipped. Adding a field = new id.
-- The serializer is for **compact bytes**, not validation. Validate semantics in the service layer.
+- Tag ids are assigned by `define()` insertion order (1, 2, 3…). Adding a field = append; never reorder, never remove.
+- One `Serializer` instance per project (or per wire surface). Field tag uniqueness is per-type, not per-instance — but mixing many unrelated types in one instance gets unwieldy.
+- For versioned wire surfaces: `wire.version(major, minor)` + `wire.encodeVersioned` / `decodeVersioned` + `wire.migrate(key, fromMajor, handler)`. The 2-byte version header is prepended on encode, parsed and migrated forward on decode.
+- For fragmented transport (over rate-limited or MTU-bound channels): `wire.fragment(buffer, maxChunkSize)` → `Uint8Array[]` with an 8-byte header per chunk, `wire.reassemble(chunks)` on the receive side.
+- The serializer is for **compact bytes**, not validation. Validate semantics in the service layer (or call `wire.validate(key, message)` for a structural check).
 
 ### util/
 
@@ -723,7 +736,7 @@ One named logger per class, declared as a public field. Name = the class:
 public logger: Logger = logging.getLogger('UserService')
 ```
 
-Configure level + reporters once at boot if defaults aren't enough — typically in `index.ts` before resolving services. Never `console.log` from anywhere except a deliberate one-off in a script. Pass `Error` instances to `logger.error('context', error)`, not stringified.
+Configure level + reporters once at boot if defaults aren't enough — in `index.ts` before resolving services. No `console.log` in production paths. Pass `Error` instances to `logger.error('context', error)`, not stringified.
 
 ### Env loading
 
@@ -766,13 +779,6 @@ await this.database.kysely.transaction()
     .setIsolationLevel('serializable')
     .execute(async (trx) => { ... })
 ```
-
-### Migrations (out-of-tree)
-
-- Schema lives in `<repo>/migrations/<db>/` (or wherever the team standardizes — typically goose-managed `*.sql`).
-- `src/db/schema.ts` (TS interface) and the SQL move **together** in any PR that changes the schema.
-- Never call any migrator from `index.ts`. Concurrent boot of N replicas races the migration version table.
-- Adding a brand-new database = create the new `migrations/<db>/` directory and the initial schema **before** writing repositories in the project.
 
 ### Real-time auth
 
@@ -853,9 +859,9 @@ Skipping a layer is a smell. Routers don't import repositories. Services don't i
 
 ### Add a binary wire format
 
-1. Create `src/wire/<message>.ts` with a `@toolcase/serializer` `Schema`.
-2. Encode in the service or in the room before `actor.send(topic, bytes)`. Decode on receipt.
-3. Don't reuse field ids. Adding a field = next free id.
+1. Create `src/wire/serializer.ts` with `new Serializer('app')` and one `wire.define(key, fields)` call per message type.
+2. Encode in the service or room before `actor.send(topic, bytes)` (or `actor.broadcast(topic, bytes)`); decode on receipt.
+3. Append new fields at the end of the field array. Tags are positional — never reorder or remove. For breaking changes, use `wire.version(...)` + `encodeVersioned` / `migrate`.
 
 ### Scaffold a new project
 

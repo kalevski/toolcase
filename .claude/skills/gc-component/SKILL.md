@@ -64,14 +64,15 @@ These come from `style_guidelines.md` §19 and the user's confirmed conventions.
 
 For a new component named `<Name>` (PascalCase), tag `gc-<kebab>`:
 
-1. **`game-components/src/<Name>.ts`** — the component class. **NO inline `<style>` blocks in the shadow root; all CSS lives in `.scss` files only.**
-2. **`game-components/style/components/_<kebab>.scss`** — all component styles (shadow DOM + light DOM). Contains the full visual contract from `style_guidelines.md`. This is the single source of truth for the component's appearance.
-3. **`game-components/style/components/index.scss`** — append `@use './<kebab>';`.
-4. **`game-components/src/index.ts`** — append `export * from './<Name>'`.
-5. **`examples/public/game-components/SKILL.md`** — the published downstream contract. Append the new component in the matching category table (Layout / Surfaces & Containers / Typography / Badges, Chips, Icons / Buttons & Menus / Lists & Rows / Resource Bars / Settings Rows / Inventory & Items / HUD & Combat / Map & Markers / Compass, Nav, Indicators / Effects & Overlays / Dialogs & Inputs / Social & Multiplayer / Screens / Character & Player / Progression & Economy). Use the same row shape as the existing entries: `| <gc-tag> | <ClassName> | <attrs/notes> |`. If the component is rich enough to need a code snippet (event listener wiring, prop assignment), add a small example block under the table the way `gc-menu-item`, `gc-hotbar`, and `gc-health-bar` already do. **Without this update the toolcase.kalevski.dev skill install for `@toolcase/game-components` won't surface the new tag.**
-6. **`.claude/skills/gc-component/components.md`** — append a new section for the component following the existing entry pattern (tag/class heading, attribute/prop table with types and defaults, slot/event behavior, "use when" / "skip when"). Also add a row to the **Decision quick map** table and update the slot-only list in **Composition notes** if applicable.
-7. **`examples/src/game-components/<Name>Demo.tsx`** — runnable React demo (template in workflow §12 below). Required.
-8. **`examples/src/game-components/index.tsx`** — register the demo in `gameComponentExamples`. Required.
+1. **`game-components/src/<Name>.ts`** — the component class. **NO inline `<style>` blocks in the shadow root; all CSS lives in `.scss` files only.** The file does **not** call `customElements.define` itself — registration is centralised in `register.ts` (next entry).
+2. **`game-components/src/register.ts`** — add `import { <Name> } from './<Name>'` at the top, and append `customElements.define('gc-<kebab>', <Name>)` inside the `register()` function. Keep the existing list shape (one define per line; the file is loosely sorted but additions go in their natural alphabetical slot).
+3. **`game-components/style/components/_<kebab>.scss`** — all component styles (shadow DOM + light DOM). Contains the full visual contract from `style_guidelines.md`. Single source of truth for the component's appearance.
+4. **`game-components/style/components/index.scss`** — append `@use './<kebab>';`.
+5. **`game-components/src/index.ts`** — append `export * from './<Name>'`.
+6. **`examples/public/game-components/SKILL.md`** — the published downstream contract. Append the new component in the matching category table (Layout / Surfaces & Containers / Typography / Badges, Chips, Icons / Buttons & Menus / Lists & Rows / Resource Bars / Settings Rows / Inventory & Items / HUD & Combat / Map & Markers / Compass, Nav, Indicators / Effects & Overlays / Dialogs & Inputs / Social & Multiplayer / Screens / Character & Player / Progression & Economy). Use the same row shape as existing entries: `| <gc-tag> | <ClassName> | <attrs/notes> |`. If the component is rich enough to need a code snippet (event listener wiring, prop assignment), add a small example block under the table the way `gc-menu-item`, `gc-hotbar`, and `gc-health-bar` already do. **Without this update the toolcase.kalevski.dev skill install for `@toolcase/game-components` won't surface the new tag.**
+7. **`.claude/skills/gc-component/components.md`** — append a new section for the component following the existing entry pattern (tag/class heading, attribute/prop table with types and defaults, slot/event behavior, "use when" / "skip when"). Also add a row to the **Decision quick map** table and update the slot-only list in **Composition notes** if applicable.
+8. **`examples/src/game-components/<Name>Demo.tsx`** — runnable React demo (template in workflow §13 below). Required.
+9. **`examples/src/game-components/index.tsx`** — register the demo in `gameComponentExamples` (pick a `category` from the exported `categories` array — e.g. `'Layout Primitives'`, `'Surfaces'`, `'Typography'`, etc. — do **not** invent new strings; if no category fits, append one to the `categories` array and the `GameComponentCategory` union above it). Required.
 
 **Style injection pattern**: The compiled `.scss` files flow into `lib/index.css`. Import that CSS in your host app or inject it into the shadow root via adopted stylesheets / CSS string import at component load time. Do not write CSS inside the `.ts` file.
 
@@ -130,10 +131,6 @@ export class <Name> extends HTMLElement {
     }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get(TAG_NAME)) {
-    customElements.define(TAG_NAME, <Name>)
-}
-
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: <Name>
@@ -142,6 +139,7 @@ declare global {
 ```
 
 Notes on the template:
+- **Do not** call `customElements.define` here. Registration lives in `game-components/src/register.ts` — append one `customElements.define('gc-<kebab>', <Name>)` line inside its `register()` function (see Files §2).
 - Drop `escape()` if no user text is interpolated.
 - For interactive components, add `tabindex="0"` on the focusable root, set the matching ARIA role (e.g. `role="switch"` for toggle, `role="checkbox"` for check, `role="dialog" aria-modal="true"` for dialogs, `role="menuitem"` for `gc-menu-item`-style entries, `role="listbox"` + `role="option"` for selection lists), and listen for `click` + Space/Enter keydown. Cross-check the role against equivalent primitives already documented in `components.md`.
 - For overlay/dialog components with reflected `open`: register Escape keydown on `connectedCallback` and remove on `disconnectedCallback`.
@@ -186,15 +184,16 @@ Props, events, states, and ARIA must follow the conventions in `components.md` a
 1. **Read** `.claude/skills/gc-component/style_guidelines.md` and locate the matching section(s) using the quick map above. Copy gradient strings, box-shadow stacks, token names, font sizes, and letter-spacing values verbatim into the component's `.scss` partial. Do not invent values, do not paraphrase, do not skip.
 2. **Read** `.claude/skills/gc-component/components.md` and check whether existing primitives cover ≥50% of your component. If yes, compose them inside the new component's shadow DOM or in the demo instead of re-implementing.
 3. **Read** `examples/public/game-components/SKILL.md` to confirm the published category style (table row shape, attr column wording, code-snippet conventions used by `gc-menu-item`, `gc-hotbar`, `gc-health-bar`, etc.). You will mirror this when documenting your component.
-4. Create `game-components/src/<Name>.ts` from the template; fill in observedAttributes, getters/setters, render(). Visual values come from step 1, composition decisions from step 2.
-5. Create `game-components/style/components/_<kebab>.scss`.
-6. Append `@use './<kebab>';` to `game-components/style/components/index.scss`.
-7. Append `export * from './<Name>'` to `game-components/src/index.ts`.
-8. **Update `examples/public/game-components/SKILL.md`** (the published downstream contract). Append the component to the matching category table; mirror the existing row shape (`| <gc-tag> | <ClassName> | <attrs/notes> |`). For components with notable events / props, add a small code snippet under the table the way the existing entries do (`gc-menu-item` event listener, `gc-hotbar` slots assignment, `gc-health-bar` attributes). This is what gets served at `toolcase.kalevski.dev/game-components/SKILL.md` and installed by Claude Code as a skill.
-9. **Update `.claude/skills/gc-component/components.md`**: append a new section for the component matching the existing entry shape — heading `### \`gc-<kebab>\` — \`<Name>\``, one-line description, attribute/prop table (cols: Attribute / Prop, Type, Default, Notes), slot/event lines, **Use when** and **Skip when** bullets. Place it under the appropriate `##` group (Layout primitives / Containers / Typography / etc., adding a new group if none fits). Also add a row to the **Decision quick map** table and, if the component has no attrs/props/events, add it to the slot-only list in **Composition notes**.
-10. Cross-check the finished component against `style_guidelines.md` §19 (authoring rules) and §20 (Yes/No quick reference) before reporting done.
-11. Verify with `cd game-components && npm run build` — tsup must succeed (sass step may fail in the local env; that is pre-existing and not blocking).
-12. **Add a demo to the examples app** — two files, one registration:
+4. Create `game-components/src/<Name>.ts` from the template; fill in observedAttributes, getters/setters, render(). Visual values come from step 1, composition decisions from step 2. The file does **not** register the tag.
+5. Add the component to `game-components/src/register.ts` — `import { <Name> } from './<Name>'` near the other imports and `customElements.define('gc-<kebab>', <Name>)` inside `register()`.
+6. Create `game-components/style/components/_<kebab>.scss`.
+7. Append `@use './<kebab>';` to `game-components/style/components/index.scss`.
+8. Append `export * from './<Name>'` to `game-components/src/index.ts`.
+9. **Update `examples/public/game-components/SKILL.md`** (the published downstream contract). Append the component to the matching category table; mirror the existing row shape (`| <gc-tag> | <ClassName> | <attrs/notes> |`). For components with notable events / props, add a small code snippet under the table the way existing entries do (`gc-menu-item` event listener, `gc-hotbar` slots assignment, `gc-health-bar` attributes). Served at `toolcase.kalevski.dev/game-components/SKILL.md` and installed by Claude Code as a skill.
+10. **Update `.claude/skills/gc-component/components.md`**: append a new section for the component matching the existing entry shape — heading `### \`gc-<kebab>\` — \`<Name>\``, one-line description, attribute/prop table (cols: Attribute / Prop, Type, Default, Notes), slot/event lines, **Use when** and **Skip when** bullets. Place under the appropriate `##` group (Layout primitives / Containers / Typography / etc., adding a new group if none fits). Also add a row to the **Decision quick map** table and, if the component has no attrs/props/events, add it to the slot-only list in **Composition notes**.
+11. Cross-check the finished component against `style_guidelines.md` §19 (authoring rules) and §20 (Yes/No quick reference) before reporting done.
+12. Verify with `npm -w @toolcase/game-components run build` — tsup must succeed (the chained sass step may fail in the local env; that is pre-existing and not blocking).
+13. **Add a demo to the examples app** — two files, one registration:
 
    **`examples/src/game-components/<Name>Demo.tsx`** — React functional component that exercises all key props/states. Pattern:
    ```tsx
@@ -245,5 +244,7 @@ Props, events, states, and ARIA must follow the conventions in `components.md` a
 - Bootstrap, Tailwind, or any utility CSS framework.
 - Code comments of any kind (`//`, `/* */`, `/** */`, SCSS `//`) in generated `.ts` or `.scss` files.
 - Skipping the `examples/public/game-components/SKILL.md` update — without it, the downstream Claude Code skill install won't know about the new tag.
+- Skipping the `game-components/src/register.ts` update — without the `customElements.define` line, the tag is never registered and `document.createElement('gc-<kebab>')` yields a generic `HTMLElement`.
+- Calling `customElements.define` from inside the component's own `.ts` file — registration is centralised in `register.ts`; duplicate defines throw `NotSupportedError`.
 - Skipping the `.claude/skills/gc-component/components.md` update — without it, future runs of this skill will reinvent or re-use the wrong primitive.
 - Skipping the demo in `examples/src/game-components/` — without it, users have nothing to copy and the visual contract is unverified.

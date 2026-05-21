@@ -1,6 +1,6 @@
 ---
 name: phaser-game-dev
-description: Use when scaffolding or extending a Phaser 4 game built on top of `@toolcase/phaser-plus`, with `@toolcase/game-components` as the canonical UI toolkit (HUDs, menus, inventories, dialogs, screens). Defines workspace layout (scenes/ + features/ + ui/ + prefabs/), layering rules (Scene → Feature/HTMLFeature → Prefab GameObject), boot sequence with `installEffects` + `register()` + `style.css`, lifecycle contracts (`onInit/onLoad/onCreate/onUpdate/onDestroy` for scenes, `onCreate/onUpdate/onDestroy` for features, `onCreate/onAdd/onUpdate/onRemove/onDestroy` for game objects), the FeatureRegistry pub-sub bus, GameObjectPool spawning, the `dom: { createContainer: true }` HTMLFeature requirement, and the rule that HTMLFeatures compose `gc-*` Web Components instead of hand-rolled markup. Apply when adding a scene, feature, UI overlay, prefab, or scaffolding a new Phaser game workspace.
+description: Use when scaffolding or extending a Phaser 4 game built on top of `@toolcase/phaser-plus`, with `@toolcase/game-components` as the canonical UI toolkit (HUDs, menus, inventories, dialogs, screens). Defines workspace layout (scenes/ + features/ + ui/ + prefabs/), layering rules (Scene → Feature/HTMLFeature → Prefab GameObject), boot sequence with `installEffects` + `register()` + `style.css`, lifecycle contracts (`onInit/onLoad/onCreate/onUpdate/onDestroy` for scenes, `onCreate/onUpdate/onDestroy` for features, `onCreate/onAdd/onUpdate/onRemove/onDestroy` for game objects), the FeatureRegistry pub-sub bus, GameObjectPool registration/obtain (and ObjectLayer.add for positioned pool-backed spawning), the `dom: { createContainer: true }` HTMLFeature requirement, and the rule that HTMLFeatures compose 137 `gc-*` Web Components instead of hand-rolled markup. Apply when adding a scene, feature, UI overlay, prefab, or scaffolding a new Phaser game workspace.
 ---
 
 # phaser-game-dev — Architecture Reference
@@ -10,11 +10,11 @@ Opinionated blueprint for Phaser 4 games. Layered, registry-driven, ESM. Every s
 Stack baseline:
 
 - Phaser 4 (`phaser ^4.x`).
-- `@toolcase/phaser-plus` ^1.x — **required** runtime layer. Provides `Scene`, `Feature`, `HTMLFeature`, `FeatureRegistry`, `GameObject`, `GameObject2D`, `Layer`, `ObjectLayer`, `GameObjectPool`, `FlowEngine`, `Engine`, `ServiceRegistry`, plus `effects/`, `cinema/`, `input/`, `ai/`, `flow/`, `debugger/`, `perspective2d/` re-exports.
-- `@toolcase/game-components` ^3.x — **required** UI toolkit. 134 framework-free `gc-*` Web Components (Shadow DOM) for HUDs, menus, inventories, dialogs, settings, screens, minimaps. Every `HTMLFeature` composes these instead of hand-rolling markup.
-- `@toolcase/base` ^2.x — peer of `phaser-plus`. Helpers (`generateId`, `Cache`, `EventEmitter`, etc.) and data structures.
-- `@toolcase/logging` ^2.x — peer of `phaser-plus`. Scoped loggers wired through `Engine`.
-- TypeScript `strict`, ESM (`"type": "module"`), Node 20+.
+- `@toolcase/phaser-plus` ^3.x — **required** runtime layer. Top-level exports: `Engine`, `Scene`, `GameObject`, `Feature`, `FeatureRegistry`, `ServiceRegistry`, `GameObjectPool`, `Layer`, `ObjectLayer`, `HTMLFeature`, `SplitScreen`, `LogLevel`, plus `Events`, `Flow`, `Structs` namespaces. Re-exports from `effects/` (`installEffects`, shader effects), `perspective2d/` (`Scene2D`, `World`, `GameObject2D`, `Grid`), `cinema/`, `input/`, `ai/`, `flow/`, `debugger/`.
+- `@toolcase/game-components` ^3.x — **required** UI toolkit. 137 framework-free `gc-*` Web Components (Shadow DOM) for HUDs, menus, inventories, dialogs, settings, screens, minimaps. Every `HTMLFeature` composes these instead of hand-rolling markup.
+- `@toolcase/base` ^3.x — peer of `phaser-plus` and `game-components`. Helpers and data structures (`Broadcast`, `ObjectPool`, etc.).
+- `@toolcase/logging` ^3.x — peer of `phaser-plus`. Scoped loggers wired through `Engine`.
+- TypeScript `strict`, ESM (`"type": "module"`), Node 18+.
 - Vite for dev/build (the canonical tooling — Webpack works but is out of scope here).
 
 Required install before anything else:
@@ -25,7 +25,7 @@ npm install phaser @toolcase/phaser-plus @toolcase/game-components @toolcase/bas
 
 If you want shader effects on `GameObject` instances, also import and call `installEffects(game)` immediately after `new Game(config)` (see Boot below). Without it, `gameObject.effects.add(...)` is a no-op.
 
-`@toolcase/game-components` requires a one-time `register()` call at boot to define all 134 custom elements globally, plus the bundled stylesheet (`@toolcase/game-components/style.css`). After that, any `HTMLFeature` can author UI with `gc-*` tags directly inside `this.node.innerHTML`.
+`@toolcase/game-components` requires a one-time `register()` call at boot to define all 137 custom elements globally, plus the bundled stylesheet (`@toolcase/game-components/style.css`). After that, any `HTMLFeature` can author UI with `gc-*` tags directly inside `this.node.innerHTML`.
 
 ---
 
@@ -182,12 +182,13 @@ export class MainScene extends Scene {
 
     onCreate() {
         // Build the world, register features, register UI, spawn prefabs.
-        this.pool.add('player', Player)
+        this.pool.register('player', Player)
 
         this.features.register('dayNight', DayNightCycleFeature)
         this.features.register('hud', HUDFeature)
 
-        this.pool.spawn<Player>('player', 640, 360)
+        const player = this.pool.obtain<Player>('player')!
+        player.setPosition(640, 360)
     }
 
     onUpdate(time: number, delta: number) {
@@ -364,17 +365,21 @@ export class HUDFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor>
-                <gc-stack slot="top-left" direction="vertical" gap="6px">
+            <gc-anchor position="top-left" inset="12px">
+                <gc-stack direction="vertical" gap="6px">
                     <gc-health-bar id="hp" value="100" max="100" segments="4" show-text label="HP"></gc-health-bar>
                     <gc-mana-bar   id="mp" value="50"  max="50"  segments="3" show-text label="MP"></gc-mana-bar>
                 </gc-stack>
-                <gc-stack slot="top-right" direction="horizontal" gap="8px">
+            </gc-anchor>
+            <gc-anchor position="top-right" inset="12px">
+                <gc-stack direction="horizontal" gap="8px">
                     <gc-eyebrow>SCORE</gc-eyebrow>
                     <gc-title id="score" size="24">0</gc-title>
                     <gc-eyebrow id="phase">day</gc-eyebrow>
                 </gc-stack>
-                <gc-menu-item slot="bottom-right" id="pauseBtn" label="Pause" hotkey="P"></gc-menu-item>
+            </gc-anchor>
+            <gc-anchor position="bottom-right" inset="12px">
+                <gc-menu-item id="pauseBtn" label="Pause" hotkey="P"></gc-menu-item>
             </gc-anchor>
         `
         this.hpEl    = this.node.querySelector<HealthBar>('#hp')!
@@ -408,7 +413,7 @@ export class HUDFeature extends HTMLFeature {
 
 Key things to note in the example:
 
-- Layout primitives (`gc-anchor`, `gc-stack`) replace ad-hoc CSS positioning.
+- `gc-anchor` pins itself to one corner via the `position` attribute (single `<slot>`, no named slots). Use one anchor per corner. `gc-stack` lays out its children inside.
 - Resource bars expose `.value` / `.max` as JS properties — set them, no re-render dance.
 - `gc-menu-item` emits a `select` `CustomEvent` (click + Enter + Space + hotkey). The HTMLFeature translates that into a game event on the bus.
 - `MenuItem` / `HealthBar` / `ManaBar` types come from `@toolcase/game-components` — `querySelector<HealthBar>` is fully typed via `HTMLElementTagNameMap`.
@@ -456,7 +461,7 @@ Canonical mapping from common Phaser-game UI needs to `gc-*` components. Each ro
 | Player / character         | `gc-character-create`, `gc-character-select`, `gc-player-card`, `gc-portrait`, `gc-level-header` |
 | Progression / economy      | `gc-quest-tracker`, `gc-journal`, `gc-codex`, `gc-shop-panel`, `gc-crafting-panel`, `gc-battle-pass` |
 
-For the full catalog (134 components, attributes, events, types), read `game-components/SKILL.md`.
+For the full catalog (137 components, attributes, events, types), read `game-components/SKILL.md`.
 
 ### Pattern: HUD scaffold
 
@@ -477,14 +482,15 @@ export class PauseMenuFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-blur-overlay open>
+            <gc-blur-overlay>
                 <gc-pause-menu>
-                    <gc-menu-item label="Resume"  hotkey="R" data-action="resume" selected></gc-menu-item>
+                    <gc-menu-item label="Resume"   hotkey="R" data-action="resume" selected></gc-menu-item>
                     <gc-menu-item label="Settings" hotkey="S" data-action="settings"></gc-menu-item>
-                    <gc-menu-item label="Quit"    hotkey="Q" data-action="quit"></gc-menu-item>
+                    <gc-menu-item label="Quit"     hotkey="Q" data-action="quit"></gc-menu-item>
                 </gc-pause-menu>
             </gc-blur-overlay>
         `
+        this.node.style.display = 'none'
         this.node.querySelectorAll<MenuItem>('gc-menu-item').forEach(item => {
             item.addEventListener('select', () => {
                 const action = item.getAttribute('data-action')!
@@ -499,9 +505,9 @@ export class PauseMenuFeature extends HTMLFeature {
     }
 
     private toggle = () => {
-        const open = this.node.style.display !== 'none'
-        this.node.style.display = open ? 'none' : 'block'
-        if (open) this.scene.resume(); else this.scene.pause()
+        const visible = this.node.style.display !== 'none'
+        this.node.style.display = visible ? 'none' : 'block'
+        if (visible) this.scene.resume(); else this.scene.pause()
     }
 }
 ```
@@ -525,10 +531,12 @@ export class DialogueFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-stack slot="bottom" direction="vertical" gap="8px">
-                <gc-dialogue-box id="line" typewriter="40"></gc-dialogue-box>
-                <gc-stack id="choices" direction="vertical" gap="4px"></gc-stack>
-            </gc-stack>
+            <gc-anchor position="bottom" inset="24px">
+                <gc-stack direction="vertical" gap="8px">
+                    <gc-dialogue-box id="line" typing-speed="40"></gc-dialogue-box>
+                    <gc-stack id="choices" direction="vertical" gap="4px"></gc-stack>
+                </gc-stack>
+            </gc-anchor>
         `
         this.box = this.node.querySelector<DialogueBox>('#line')!
         this.scene.features.on('dialogue:show',  this.show,  this)
@@ -541,8 +549,8 @@ export class DialogueFeature extends HTMLFeature {
     }
 
     private show = (line: DialogueLine) => {
-        this.box.setAttribute('speaker', line.speaker)
-        this.box.textContent = line.text
+        this.box.speaker = line.speaker
+        this.box.text = line.text
         const choices = this.node.querySelector('#choices')!
         choices.innerHTML = ''
         line.choices?.forEach((c, i) => {
@@ -558,7 +566,7 @@ export class DialogueFeature extends HTMLFeature {
 
     private close = () => {
         this.node.querySelector('#choices')!.innerHTML = ''
-        this.box.textContent = ''
+        this.box.text = ''
     }
 }
 ```
@@ -577,21 +585,24 @@ export class InventoryFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-panel header="Inventory">
-                <gc-inventory-grid id="bag" rows="6" columns="8"></gc-inventory-grid>
+            <gc-panel bordered>
+                <gc-panel-header>Inventory</gc-panel-header>
+                <gc-inventory-grid id="bag" columns="8" slot-size="48"></gc-inventory-grid>
             </gc-panel>
             <gc-item-tooltip id="tip" hidden></gc-item-tooltip>
         `
         this.grid = this.node.querySelector<InventoryGrid>('#bag')!
         this.tip  = this.node.querySelector<ItemTooltip>('#tip')!
 
-        this.grid.addEventListener('item-hover', (e) => {
-            const item = (e as CustomEvent).detail.item as InventoryItem | null
-            if (item) { this.tip.item = item; this.tip.hidden = false }
-            else      { this.tip.hidden = true }
-        })
-        this.grid.addEventListener('item-click', (e) => {
-            this.scene.features.emit('inventory:use', (e as CustomEvent).detail)
+        this.grid.addEventListener('select', (e) => {
+            const detail = (e as CustomEvent).detail as { item: InventoryItem | null, index: number }
+            if (detail.item) {
+                this.tip.item = detail.item
+                this.tip.hidden = false
+            } else {
+                this.tip.hidden = true
+            }
+            this.scene.features.emit('inventory:use', detail)
         })
 
         this.scene.features.on('inventory:changed', this.refresh, this)
@@ -601,7 +612,7 @@ export class InventoryFeature extends HTMLFeature {
         this.scene.features.off('inventory:changed', this.refresh, this)
     }
 
-    private refresh = (items: InventoryItem[]) => {
+    private refresh = (items: (InventoryItem | null)[]) => {
         this.grid.items = items
     }
 }
@@ -620,8 +631,8 @@ export class HotbarFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor>
-                <gc-hotbar slot="bottom" id="bar" slot-size="64"></gc-hotbar>
+            <gc-anchor position="bottom" inset="16px">
+                <gc-hotbar id="bar" slot-size="64"></gc-hotbar>
             </gc-anchor>
         `
         this.bar = this.node.querySelector<Hotbar>('#bar')!
@@ -651,7 +662,7 @@ import { HTMLFeature } from '@toolcase/phaser-plus'
 export class GameOverFeature extends HTMLFeature {
 
     onCreate() {
-        const { score = 0, time = '00:00', kills = 0 } = (this.scene.payload ?? {}) as Record<string, any>
+        const { score = 0, time = '00:00', kills = 0 } = this.scene.payload as Record<string, any>
         this.node.innerHTML = `
             <gc-game-over-screen id="screen">
                 <gc-stat-row label="Score" value="${score}"></gc-stat-row>
@@ -659,8 +670,9 @@ export class GameOverFeature extends HTMLFeature {
                 <gc-stat-row label="Kills" value="${kills}"></gc-stat-row>
             </gc-game-over-screen>
         `
-        this.node.querySelector('#screen')!.addEventListener('continue', () => {
-            this.scene.goTo('main')
+        this.node.querySelector('#screen')!.addEventListener('action', (e) => {
+            const { id } = (e as CustomEvent).detail as { id: string }
+            if (id === 'continue' || id === 'retry') this.scene.goTo('main')
         })
     }
 }
@@ -676,18 +688,19 @@ export class SettingsFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-panel header="Settings">
+            <gc-panel bordered>
+                <gc-panel-header>Settings</gc-panel-header>
                 <gc-tab-bar id="tabs">
                     <gc-stack data-tab="graphics" direction="vertical" gap="6px">
-                        <gc-graphics-preset-picker preset="high"></gc-graphics-preset-picker>
+                        <gc-graphics-preset-picker value="high"></gc-graphics-preset-picker>
                         <gc-fps-cap-select value="60"></gc-fps-cap-select>
                         <gc-fov-slider value="90" min="60" max="120"></gc-fov-slider>
                         <gc-vsync-toggle checked></gc-vsync-toggle>
                     </gc-stack>
                     <gc-stack data-tab="audio" direction="vertical" gap="6px">
-                        <gc-volume-slider label="Master" value="80"></gc-volume-slider>
-                        <gc-volume-slider label="SFX"    value="100"></gc-volume-slider>
-                        <gc-volume-slider label="Music"  value="60"></gc-volume-slider>
+                        <gc-volume-slider row-label="Master" value="80"></gc-volume-slider>
+                        <gc-volume-slider row-label="SFX"    value="100"></gc-volume-slider>
+                        <gc-volume-slider row-label="Music"  value="60"></gc-volume-slider>
                     </gc-stack>
                     <gc-stack data-tab="controls" direction="vertical" gap="6px">
                         <gc-mouse-sensitivity value="40"></gc-mouse-sensitivity>
@@ -718,10 +731,12 @@ export class MinimapFeature extends HTMLFeature {
 
     private map!: Minimap
 
+    private markers: { id: string, x: number, y: number, label?: string }[] = []
+
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor>
-                <gc-minimap slot="top-right" id="map" zoom="1"></gc-minimap>
+            <gc-anchor position="top-right" inset="12px">
+                <gc-minimap id="map" world-x="0" world-y="0" world-width="2048" world-height="2048" size="180"></gc-minimap>
             </gc-anchor>
         `
         this.map = this.node.querySelector<Minimap>('#map')!
@@ -735,15 +750,14 @@ export class MinimapFeature extends HTMLFeature {
     }
 
     private onMove = (p: { x: number; y: number }) => {
-        this.map.center = p
+        // Re-center by sliding the world window — keeps player roughly central.
+        this.map.worldX = p.x - this.map.worldWidth / 2
+        this.map.worldY = p.y - this.map.worldHeight / 2
     }
 
-    private onObjective = (p: { x: number; y: number; label?: string }) => {
-        const marker = document.createElement('gc-objective-marker')
-        marker.setAttribute('x', String(p.x))
-        marker.setAttribute('y', String(p.y))
-        if (p.label) marker.setAttribute('label', p.label)
-        this.map.appendChild(marker)
+    private onObjective = (p: { id: string; x: number; y: number; label?: string }) => {
+        this.markers.push(p)
+        this.map.markers = this.markers
     }
 }
 ```
@@ -763,8 +777,8 @@ Override `--fg-*` palette tokens (global reskin) or `--gc-*` per-component knobs
 }
 
 /* scope to a single feature overlay (HTMLFeature root carries .feature-{key}) */
-.feature-pauseMenu {
-    --gc-blur-overlay-amount: 12px;
+.feature-pauseMenu gc-blur-overlay {
+    --gc-blur-amount: 12px;
 }
 ```
 
@@ -866,7 +880,7 @@ export class CustomGameObject extends GameObject {
         return this
     }
 
-    /** Called when GameObjectPool returns this instance to a fresh slot. */
+    /** Project-local helper — callers (features / ObjectLayer wrappers) invoke after pool.obtain. */
     reset(x: number, y: number) {
         this.setPosition(x, y)
         this.setActive(true).setVisible(true)
@@ -910,33 +924,35 @@ Hard rules:
 
 ## Pooling — `GameObjectPool`
 
-Pooled spawning is the **only** approved way to instantiate prefabs in this architecture. Pools recycle instances across spawn/despawn cycles, dramatically cheaper than `new` + GC.
+Pooled instantiation is the **only** approved way to materialize prefabs in this architecture. Pools recycle instances across obtain/release cycles, dramatically cheaper than `new` + GC.
 
-In a Scene's `onCreate`:
+Register prefab classes in a Scene's `onCreate`:
 
 ```ts
-this.pool.add('player', Player)
-this.pool.add('enemy', Enemy)
-this.pool.add('pickup', Pickup, { initial: 32, max: 256 })
+this.pool.register('player', Player)
+this.pool.register('enemy', Enemy)
+this.pool.register('pickup', Pickup)
+// Optional 3rd/4th args: custom instanceFn(key, class, scene) and resetFn(instance).
 ```
 
-Then a feature spawns:
+Then a feature obtains an instance (calls `onCreate()` first time, reused thereafter):
 
 ```ts
-const enemy = this.scene.pool.spawn<Enemy>('enemy', x, y)
+const enemy = this.scene.pool.obtain<Enemy>('enemy')!
+enemy.setPosition(x, y)
 // ...later...
 this.scene.pool.release(enemy)
 ```
 
-Pair with `ObjectLayer` for layer-bound spawning:
+Pair with `ObjectLayer` for layer-bound spawning that wraps obtain + setPosition in one call and returns instances to the pool on remove:
 
 ```ts
 // In Scene.onCreate:
 this.features.register('mobs', class MobsLayer extends ObjectLayer {})
 // In a feature:
 const mobs = this.scene.features.get<ObjectLayer>('mobs')!
-const enemy = mobs.add<Enemy>('enemy', 100, 200)   // pool-backed
-mobs.remove(enemy)                                  // returns to pool
+const enemy = mobs.add<Enemy>('enemy', 100, 200)   // pool-backed obtain + position
+mobs.remove(enemy)                                  // detach + pool.release
 ```
 
 ---
@@ -963,7 +979,7 @@ For enemy AI, dialog flow, scene state — use `phaser-plus`'s `StateMachine` an
 
 ### Input
 
-Register `InputFeature` and bind logical actions (`'jump'`, `'interact'`) to keys/buttons. Features query `input.isDown('jump')` rather than reading raw keycodes. Add `GamepadFeature` / `VirtualJoystick` from the same module if needed.
+Register `InputFeature` and bind logical actions to keys/buttons via `input.bind('jump', [{ type: 'key', code: 'Space' }])`. Features query `input.isPressed('jump')` (or listen to `ACTION_PRESS`/`ACTION_RELEASE`/`ACTION_HOLD` events) rather than reading raw keycodes. Add `GamepadFeature` / `VirtualJoystick` / `GestureRecognizer` from the same module if needed.
 
 ### Effects (shaders)
 
@@ -975,7 +991,7 @@ Add `Debugger` (HTMLFeature wrapping Tweakpane) only in dev builds. Gate behind 
 
 ### Services (game-lifetime singletons)
 
-Save data, audio mixer, analytics — anything that must outlive scene transitions — goes in `services/`, accessed through `this.engine.services`:
+Save data, audio mixer, analytics — anything that must outlive scene transitions — goes in `services/`, accessed through `this.scene.services` (an alias of `this.scene.engine.services`):
 
 ```ts
 // services/SaveService.ts
@@ -985,9 +1001,11 @@ export class SaveService {
 }
 
 // In a feature:
-const save = this.scene.engine.services.get(SaveService)
+const save = this.scene.services.resolve(SaveService)
 save.save(0, { score: this.score })
 ```
+
+`resolve(class)` lazy-instantiates on first call. Use `bind(class, factory)` for constructors that need args, or `provide(class, instance)` to inject a prebuilt singleton.
 
 ---
 
@@ -1015,7 +1033,7 @@ save.save(0, { score: this.score })
 3. Create `src/ui/<Name>Feature.ts` extending `HTMLFeature`.
 4. Set `this.node.innerHTML` in `onCreate` using `gc-*` markup. Cache typed references via `querySelector<HealthBar>(...)` etc.
 5. Set complex props (arrays/objects) as JS properties (`bar.slots = [...]`); set primitives as attributes.
-6. Listen to `gc-*` `CustomEvent`s (`select`, `change`, `confirm`, `take`, `item-click`, `item-hover`, `continue`, ...) and re-emit user-intent events on `this.scene.features` (never mutate game state directly).
+6. Listen to `gc-*` `CustomEvent`s (`select`, `change`, `confirm`, `take`, `action`, `choice`, `advance`, ...) and re-emit user-intent events on `this.scene.features` (never mutate game state directly).
 7. Subscribe to game events in `onCreate`. Unsubscribe in `onDestroy`.
 8. Register in Scene's `onCreate`: `this.features.register('<key>', <Name>Feature)`.
 9. Theme via `--fg-*` / `--gc-*` overrides scoped on `:root` or `.feature-<key>` in your project stylesheet — do not fork component SCSS.
@@ -1026,13 +1044,13 @@ save.save(0, { score: this.score })
 2. Create `src/prefabs/<Name>.ts` extending `GameObject` (default), `GameObject2D` (isometric), or `CustomGameObject` (project base).
 3. Implement `onCreate` to build sprite + physics body + children. Add tags via `addTag(...)` if using `CustomGameObject`.
 4. Optionally implement `onAdd / onUpdate / onRemove / onDestroy`.
-5. Register with the pool in Scene's `onCreate`: `this.pool.add('<key>', <Name>)`.
-6. Spawn from a feature: `this.scene.pool.spawn<<Name>>('<key>', x, y)`.
+5. Register with the pool in Scene's `onCreate`: `this.pool.register('<key>', <Name>)`.
+6. Obtain from a feature: `const obj = this.scene.pool.obtain<<Name>>('<key>')!; obj.setPosition(x, y)`. Prefer `ObjectLayer.add('<key>', x, y)` when you also want layer-bound depth sorting + auto-release on remove.
 
 ### Add a service
 
 1. Create `src/services/<Name>Service.ts` as a plain class (no base required).
-2. Resolve from any feature via `this.scene.engine.services.get(<Name>Service)`. The first call lazily instantiates.
+2. Resolve from any feature via `this.scene.services.resolve(<Name>Service)`. The first call lazily instantiates.
 
 ### Add a Phaser scene transition
 
@@ -1068,7 +1086,7 @@ save.save(0, { score: this.score })
 
 ❌ **Calling `scene.features.get('other')` from a prefab.** Prefabs don't know features. If you need it, drive the prefab from a feature instead.
 
-❌ **`new Player(scene, x, y)` directly.** Always go through the pool: `this.pool.add('player', Player)` then `this.pool.spawn<Player>('player', x, y)`.
+❌ **`new Player(scene, x, y)` directly.** Always go through the pool: `this.pool.register('player', Player)` then `this.pool.obtain<Player>('player')` (or `ObjectLayer.add('player', x, y)`).
 
 ❌ **Mutating `gameObject.x` / `.y` on a `GameObject2D` placed in a `World`.** Use `setTransform(x, y)` — direct position mutation breaks projection.
 

@@ -1,11 +1,11 @@
 ---
 name: serializer-feature
-description: Add a new feature, helper, FieldType, or extension to `@toolcase/serializer`. Triggers when the user asks to add/create/scaffold a new export inside `serializer/src/` (e.g. "add packed-array helper", "ship a versioned schema wrapper", "extend Serializer with X"). Wires up the implementation and updates the inventory + downstream SKILL.md.
+description: Add a new feature, helper, FieldType alias, codec wrapper, or extension to `@toolcase/serializer`. Triggers when the user asks to add/create/scaffold a new export inside `serializer/src/` (e.g. "add an opcode-tagged wrapper", "ship a cross-library codec adapter", "extend Serializer with X"). Wires up the implementation + test + downstream `examples/public/serializer/SKILL.md` + the demo at `examples/src/serializer/`.
 ---
 
 # serializer-feature
 
-Scaffold a new feature in `@toolcase/serializer`. Typical additions: schema-wrapper helpers (versioning, migrations), batched encode/decode pipelines, additional convenience APIs around the underlying `protobufjs/light` runtime.
+Scaffold a new feature in `@toolcase/serializer`. Typical additions: opcode/router wrappers, codec-pipeline helpers, cross-library integration adapters around the underlying `protobufjs/light` runtime. Versioning, migrations, validation, chunking, safe encode/decode, enum/map/packed-array fields are **already built into `Serializer`** — wrap only for behaviour that isn't already covered.
 
 ## REQUIRED reading before generating any code
 
@@ -22,8 +22,14 @@ Scaffold a new feature in `@toolcase/serializer`. Typical additions: schema-wrap
 Before adding a new export, scan `features.md`. Concrete checks:
 
 - Need to encode a custom shape? Use **existing** `define()` with `FieldType` constants — don't bypass protobuf and hand-roll bytes.
-- Need versioning? Append-only field changes preserve compatibility — see "Versioning a wire format" pattern in the published SKILL.md. Don't introduce a new "version registry" class unless you genuinely need migrations.
-- Need namespaces? **Existing** `new Serializer(id)` is already the namespace mechanism. Don't add a second one.
+- Need versioning + migrations? **Existing** `version(major, minor)`, `migrate(key, fromMajor, fn)`, `encodeVersioned(key, msg)`, `decodeVersioned(key, buf)` already handle a 2-byte header + chained migrations. Don't add a second version registry.
+- Need pre-encode validation? **Existing** `validate(key, message)` returns the protobufjs verify string (or `null` if ok). Don't add a parallel validator.
+- Need throw-free encode/decode? **Existing** `safeEncode` / `safeDecode` return `{ ok, value?, error? }`. Don't add another result wrapper.
+- Need chunked transport? **Existing** `fragment(buf, maxChunkSize)` / `reassemble(chunks)` already handle 8-byte framing (frameId/index/total). Don't reimplement.
+- Need enum or map fields? **Existing** `FieldType.ENUM(values)` / `FieldType.MAP(keyType, valueType)` / `FieldType.PACKED_ARRAY(type)` markers in `define()` cover these. Don't add a parallel API.
+- Need standalone enums? **Existing** `enum(name, values)` adds a named enum to the namespace.
+- Need namespaces? **Existing** `new Serializer(id)` is the namespace mechanism (omit `id` to auto-generate a 16-char hex). Don't add a second one.
+- Need introspection? **Existing** `types()` lists defined message names; `fields(key)` returns the FieldType[] for a message.
 - Need plain-object decode? Use `(decoded as any).toJSON()` — don't add a `decodePlain()` method.
 - Need batched encode? Compose with `for (const m of messages) buf.push(serializer.encode(...))` — don't add a `encodeMany()` API unless it adds value beyond a one-line loop.
 
@@ -33,9 +39,9 @@ If your feature would duplicate >50% of existing surface, **stop and either subc
 
 Trigger on requests like:
 
-- "add a versioned schema wrapper to @toolcase/serializer"
-- "ship a migration helper between schema versions"
-- "implement a batch encode pipeline"
+- "add an opcode-tagged wrapper to @toolcase/serializer"
+- "ship a codec adapter for [transport]"
+- "add a FieldType alias for [shape]"
 - "extend Serializer with [feature]"
 - any request mentioning `serializer/src/`, `@toolcase/serializer`, or runtime protobuf schemas
 
@@ -56,12 +62,12 @@ These come from `serializer/package.json` and the existing single-file design.
 4. **`main.ts` is the export gateway.** Default export remains `Serializer`. Named exports add up.
 5. **Keep `Serializer.FieldType` as the canonical type-name source.** Don't add a parallel constants object.
 6. **Field-tag stability is sacred.** Never change tag assignment logic in `define()`. Never introduce a feature that reorders fields after definition. Append-only is the only safe schema evolution.
-7. **Tests are mandatory.** Add `serializer/test/<Name>.test.ts` (vitest). Currently no `serializer/test/` directory — create it for the first feature.
+7. **Tests are mandatory.** Add `serializer/test/<Name>.test.ts` (vitest). The `serializer/test/` directory already exists (`serializer.test.ts`).
 8. **Strict TypeScript.** No `any` in public surface. The current `Serializer` does use `any` in `decode()` return type (`Message<Record<string, any>>`) — match that for new methods that wrap protobufjs types, but don't propagate `any` further than necessary.
 9. **No code comments.** Self-documenting names only.
 10. **No semicolons. 4-space indent.** Match `serializer/src/main.ts`.
-11. **Encode errors must use the existing format.** `Serializer[<key>] encode error: <reason>` — match the existing throw shape so callers can pattern-match consistently.
-12. **Decode errors must throw `decode error: <reason>`.** Match the existing shape.
+11. **Encode errors must use the existing format.** `Serializer.encode[<key>] failed: <reason>` — match the existing throw shape so callers can pattern-match consistently.
+12. **Decode errors must use `Serializer.decode[<key>] failed: <reason> (bytes=<n>[, offset=<o>])`.** Match the existing shape.
 13. **Update `examples/public/serializer/SKILL.md`.** Append in the matching section (Constructor / API / FieldType / Examples by FieldType / Patterns / Cross-library integration).
 14. **Update `features.md`.** Append the inventory entry.
 15. **Demo is mandatory.** Every new export ships with a runnable demo at `examples/src/serializer/<Name>Demo.tsx` registered in `examples/src/serializer/index.tsx`. No demo = feature not done.
@@ -78,77 +84,95 @@ For a new export named `<Name>`:
 6. **`examples/src/serializer/<Name>Demo.tsx`** — runnable demo. Mirror existing demos (`BasicDemo.tsx`, `FieldTypesDemo.tsx`). Show encode → bytes → decode round-trip and at least one error path if relevant.
 7. **`examples/src/serializer/index.tsx`** — register the demo: `import <Name>Demo from './<Name>Demo'` then append `{ key: '<kebab>', label: '<Human label>', element: <<Name>Demo /> }` to `serializerExamples`.
 
-## Wrapper template (typical use case)
+## Wrapper template
 
-A class that composes `Serializer` for a higher-level pattern (e.g. versioned schemas):
+A class that composes `Serializer` for a higher-level pattern that isn't already built in. Example: opcode-tagged multiplexed framing (1-byte opcode prefix selects which message type to decode). Versioning/migrations/fragmentation/validation are **already on `Serializer`** — wrap only for genuinely new behaviour.
 
 ```ts
-import { Serializer, FieldType } from './main'
+import Serializer from './main'
+import type { FieldType } from './main'
 
-class VersionedSerializer {
+class TaggedSerializer {
 
     private readonly serializer: Serializer
 
-    private readonly versionMap: Map<number, string>
+    private readonly keyByOp: Map<number, string>
 
-    constructor(id: string) {
+    private readonly opByKey: Map<string, number>
+
+    constructor(id: string | null = null) {
         this.serializer = new Serializer(id)
-        this.versionMap = new Map()
+        this.keyByOp = new Map()
+        this.opByKey = new Map()
     }
 
-    register(key: string, version: number, fields: FieldType[]): void {
-        const versionedKey = `${key}_v${version}`
-        this.serializer.define(versionedKey, fields)
-        this.versionMap.set(version, versionedKey)
-    }
-
-    encode(version: number, message: Record<string, any>): Uint8Array {
-        const key = this.lookupKey(version)
-        return this.serializer.encode(key, message)
-    }
-
-    decode(version: number, buffer: Uint8Array): Record<string, any> {
-        const key = this.lookupKey(version)
-        return this.serializer.decode(key, buffer)
-    }
-
-    private lookupKey(version: number): string {
-        const key = this.versionMap.get(version)
-        if (key === undefined) {
-            throw new Error(`version=${version} not registered`)
+    register(opcode: number, key: string, fields: FieldType[]): void {
+        if (!Number.isInteger(opcode) || opcode < 0 || opcode > 255) {
+            throw new Error(`TaggedSerializer.register: opcode must be an integer in [0,255], got ${opcode}`)
         }
-        return key
+        this.serializer.define(key, fields)
+        this.keyByOp.set(opcode, key)
+        this.opByKey.set(key, opcode)
+    }
+
+    encode(key: string, message: Record<string, any>): Uint8Array {
+        const op = this.opByKey.get(key)
+        if (op === undefined) {
+            throw new Error(`TaggedSerializer.encode[${key}] failed: opcode not registered`)
+        }
+        const body = this.serializer.encode(key, message)
+        const out = new Uint8Array(body.byteLength + 1)
+        out[0] = op
+        out.set(body, 1)
+        return out
+    }
+
+    decode(buffer: Uint8Array): { key: string, message: Record<string, any> } {
+        if (!buffer || buffer.byteLength < 1) {
+            throw new Error('TaggedSerializer.decode failed: empty buffer')
+        }
+        const op = buffer[0]
+        const key = this.keyByOp.get(op)
+        if (key === undefined) {
+            throw new Error(`TaggedSerializer.decode failed: opcode=${op} not registered`)
+        }
+        const body = buffer.subarray(1)
+        return { key, message: this.serializer.decode(key, body) as any }
     }
 
 }
 
-export default VersionedSerializer
+export default TaggedSerializer
 ```
 
 ## Test template
 
+`serializer/test/<Name>.test.ts` — copy the layout of the existing `serializer/test/serializer.test.ts`.
+
 ```ts
 import { describe, it, expect } from 'vitest'
 import Serializer from '../src/main'
-import VersionedSerializer from '../src/VersionedSerializer'
+import TaggedSerializer from '../src/TaggedSerializer'
 
-describe('VersionedSerializer', () => {
+describe('TaggedSerializer', () => {
 
-    it('round-trips a v1 message', () => {
-        const v = new VersionedSerializer('test.v1')
-        v.register('Move', 1, [
+    it('round-trips a tagged message', () => {
+        const t = new TaggedSerializer('test')
+        t.register(1, 'Move', [
             { key: 'x', type: Serializer.FieldType.SINT32, rule: 'required' },
             { key: 'y', type: Serializer.FieldType.SINT32, rule: 'required' }
         ])
-        const buf = v.encode(1, { x: 4, y: -2 })
-        const decoded = v.decode(1, buf) as any
-        expect(decoded.x).toBe(4)
-        expect(decoded.y).toBe(-2)
+        const buf = t.encode('Move', { x: 4, y: -2 })
+        expect(buf[0]).toBe(1)
+        const { key, message } = t.decode(buf)
+        expect(key).toBe('Move')
+        expect((message as any).x).toBe(4)
+        expect((message as any).y).toBe(-2)
     })
 
-    it('throws on unknown version', () => {
-        const v = new VersionedSerializer('t')
-        expect(() => v.encode(99, {})).toThrow('version=99 not registered')
+    it('throws on unknown opcode', () => {
+        const t = new TaggedSerializer()
+        expect(() => t.decode(new Uint8Array([99]))).toThrow('opcode=99 not registered')
     })
 })
 ```

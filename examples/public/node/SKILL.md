@@ -1,6 +1,6 @@
 ---
 name: node
-description: Use when reaching for @toolcase/node — backend helpers for Node.js. Single entrypoint exposing Fastify endpoints (RouteHandler, Router, HttpServer, chain), Kysely repositories (BaseRepository, SoftDeleteRepository, EntityService), Redis KV service (KVService — Locker, RateLimiter, Leaderboard, ValueStore, Versioned, SubscriberPool, KeyBuilder, LuaScriptCache), typed env() loader, plus isomorphic sanitize / pagination / where / orderBy / domain-error helpers and FieldSchema → JSON Schema derivation.
+description: Use when reaching for @toolcase/node — backend helpers for Node.js. Single entrypoint exposing Fastify endpoints (RouteHandler, RESTRouteHandler, Router, HttpServer), Kysely repositories (BaseRepository, SoftDeleteRepository, EntityService), Redis KV service (KVService — Locker, RateLimiter, Leaderboard, ValueStore, Versioned, SubscriberPool, KeyBuilder, LuaScriptCache), OAuth2/OIDC helpers, ImageProcessor + AtlasBuilder (sharp), typed env() loader, plus isomorphic sanitize / pagination / where / orderBy / domain-error helpers and FieldSchema → JSON Schema derivation.
 ---
 
 # @toolcase/node — API Reference
@@ -11,14 +11,13 @@ Backend helpers for Node.js. Dual ESM + CJS, TypeScript types, Node 18+. Single 
 
 ```ts
 import {
-    // utils + errors (no extra peers)
-    env, createAPISanitizer, deriveJsonSchema,
-    parseFilters, parseSort,
+    // utils + errors (no extra peers beyond @toolcase/base)
+    env, createSanitizer, deriveJsonSchema,
     NotFoundError, ConflictError, OptimisticLockError, ValidationError,
     RateLimitedError, LockNotAcquiredError,
-    isLibError, statusCodeFromError, codeFromError,
+    isLibError, errorMeta,
     // fastify peers: fastify, @fastify/cors
-    RouteHandler, Router, RESTRouteHandler, HttpServer, chain,
+    RouteHandler, Router, RESTRouteHandler, HttpServer,
     // kysely peer: kysely
     BaseRepository, SoftDeleteRepository, EntityService,
     // redis peers: redis, @toolcase/serializer (serializer optional)
@@ -42,8 +41,15 @@ import {
 Typed env-var reader. Node-only — throws `'env works only with NodeJS'` if `globalThis.process` is undefined.
 
 ```ts
-env<T>(key: string, defaultValue?: T, type: 'string' | 'number' | 'boolean' = 'string'): T
+env(key): string | null
+env(key, defaultValue: string, type?: 'string'): string
+env(key, defaultValue: number, type: 'number'): number
+env(key, defaultValue: boolean, type: 'boolean'): boolean
+env(key, defaultValue: null, type: 'number'): number | null
+env(key, defaultValue: null, type: 'boolean'): boolean | null
 ```
+
+Overloaded — TypeScript narrows the return based on `defaultValue` + `type`.
 
 - `'number'` — `parseInt(v, 10)`; falls back to `defaultValue` if the parsed integer's string form ≠ original.
 - `'boolean'` — case-insensitive `'true' | 'false'`; otherwise `defaultValue`.
@@ -76,11 +82,18 @@ class ImageProcessorError extends LibError    // reason, path
 class AtlasBuildError extends LibError         // stage: 'decode' | 'pack' | 'compose' | 'write', path
 
 function isLibError(e: unknown): e is LibError
-function statusCodeFromError(e: unknown): number | null
-//   EndpointError → e.statusCode (subclass-defined; ValidationError → 400),
-//   NotFoundError → 404, ConflictError / OptimisticLockError → 409,
-//   RateLimitedError → 429, LockNotAcquiredError → 423,
-//   ImageProcessorError → 422, AtlasBuildError → 500
+
+interface ErrorMeta { code: string | null; status: number }
+function errorMeta(e: unknown): ErrorMeta | null
+//   EndpointError → { code: e.code, status: e.statusCode } (ValidationError → 400)
+//   NotFoundError → 404 / 'NOT_FOUND'
+//   ConflictError → 409 / 'CONFLICT'
+//   OptimisticLockError → 409 / 'VERSION_MISMATCH'
+//   RateLimitedError → 429 / 'RATE_LIMITED'
+//   LockNotAcquiredError → 423 / 'LOCKED'
+//   ImageProcessorError → 422 / null
+//   AtlasBuildError → 500 / null
+//   Returns null for unknown errors (callers map to 500 + opaque).
 ```
 
 `new.target.name` is set as `error.name` so log lines / serialization carry the class name.
@@ -138,7 +151,9 @@ function applyOrderBy<Q, T>(qb: Q, ord: OrderBy<T> | OrderBy<T>[]): Q
 
 `WhereValue<V>` also admits a multi-op shape (`WhereMultiCondition<V>`) — `{ age: { gte: 18, lt: 65 } }` is supported. `applyWhere` loops every op key in the condition. Empty `{}` and mixed op + non-op keys fall through to scalar `=` instead of being treated as a condition.
 
-### parseFilters
+### parseFilters / parseSort (internal — drives RESTRouteHandler query parsing)
+
+These helpers live in `utils/` and are NOT re-exported from `@toolcase/node`. `RESTRouteHandler` uses them to translate bracket-form query strings into `WhereClause<T>` + `OrderBy<T>[]`. Documented here so callers know the URL syntax their endpoints accept.
 
 ```ts
 type CoerceType = 'integer' | 'number' | 'boolean' | 'date'
@@ -171,8 +186,6 @@ Bracket-form query → `WhereClause<T>`:
 
 **Schema-less hazard.** Without `schema` (and no `coerceFields`), leaves stay strings. `?age[gte]=18` then performs lexicographic comparison in SQL (`'9' >= '10'` is `true`). Always pass either `schema` (recommended) or `coerceFields` for any non-string column you want to filter on.
 
-### parseSort
-
 ```ts
 interface ParseSortOptions<T> {
     allowedFields?: ReadonlyArray<keyof T & string>                  // unknown field → ValidationError
@@ -204,16 +217,19 @@ interface FieldRule {
 }
 type FieldSchema<T> = { [K in keyof T]?: FieldRule }
 
-interface APISanitizers<T> { input?: Visitor<T>[]; output?: Visitor<T>[]; query?: Visitor<T>[] }
-interface APISanitizerOptions<T> { sanitizers?: APISanitizers<T> }
+interface SanitizerVisitors<T> { input?: Visitor<T>[]; output?: Visitor<T>[]; query?: Visitor<T>[] }
+interface SanitizerOptions<T> { sanitizers?: SanitizerVisitors<T> }
+interface InputCallOptions  { strict?: boolean; restrictedFields?: readonly string[] }
+interface OutputCallOptions { restrictedFields?: readonly string[] }
+interface QueryCallOptions  { strict?: boolean; allowedKeys?: readonly string[] }
 
-function createAPISanitizer<T>(schema: FieldSchema<T>, opts?: APISanitizerOptions<T>): {
-    input(data, { strict?, restrictedFields? }): unknown
-    output(data, { restrictedFields? }): unknown
-    query(query, { strict?, allowedKeys? }): unknown
+function createSanitizer<T>(schema: FieldSchema<T>, opts?: SanitizerOptions<T>): {
+    input(data, opts?: InputCallOptions): unknown
+    output(data, opts?: OutputCallOptions): unknown
+    query(query, opts?: QueryCallOptions): unknown
 }
 
-type APISanitizer<T> = ReturnType<typeof createAPISanitizer<T>>
+type Sanitizer<T> = ReturnType<typeof createSanitizer<T>>
 
 // Composable visitors
 interface VisitorContext<T> { key, value, rule, schema, path }
@@ -272,9 +288,13 @@ interface Logger {
 ```ts
 import type { Kysely, Insertable, Selectable, Transaction, Updateable } from 'kysely'
 
+interface QueryEvent { table: string; op: string; durationMs: number; error?: unknown }
+type QueryHook = (event: QueryEvent) => void
+
 interface BaseRepositoryOptions {
     logger?: Logger
-    slowQueryMs?: number      // default 250 — only applied when the logger has warn or debug
+    slowQueryMs?: number      // default 250
+    onQuery?: QueryHook       // fires after every query (success or failure) for tracing/metrics
 }
 
 interface ListOptions<T> {
@@ -314,13 +334,13 @@ abstract class BaseRepository<DB, TB extends keyof DB & string, PK extends keyof
 
     findById(id, trx?): Promise<Selectable | undefined>
     findByIdOrThrow(id, trx?): Promise<Selectable>                 // throws NotFoundError
+    findByIdMany(ids[], trx?): Promise<Selectable[]>
     findOne(where, trx?): Promise<Selectable | undefined>
     findOneOrThrow(where, trx?): Promise<Selectable>               // throws NotFoundError
-    findFirst({ where?, orderBy?, limit?, offset? }, trx?): Promise<Selectable | undefined>
-    list({ where?, orderBy?, limit?, offset? }, trx?): Promise<Selectable[]>
-    findWithCount(opts, trx?): Promise<[Selectable[], total: number]>
-    findPage({ where?, orderBy?, offset?, limit?, pagination? }, trx?): Promise<Page>
-    findCursorPage({ column, direction?, where?, limit?, cursor? }, trx?): Promise<CursorPage>
+    findMany({ where?, orderBy?, limit?, offset? }, trx?): Promise<Selectable[]>
+    findManyWithCount(opts, trx?): Promise<{ results: Selectable[]; total: number }>
+    paginate({ where?, orderBy?, offset?, limit?, pagination? }, trx?): Promise<Page>
+    paginateCursor({ column, direction?, where?, limit?, cursor? }, trx?): Promise<CursorPage>
     //   cursor is base64url(`${kind}:${value}`) — kind ∈ {s,n,b,d,g}.
     //   Encodes/decodes Date, BigInt, number, boolean, string.
     exists(where, trx?): Promise<boolean>
@@ -340,7 +360,8 @@ abstract class BaseRepository<DB, TB extends keyof DB & string, PK extends keyof
     deleteMany(ids[], trx?): Promise<number>                       // delegates to delete via { pk: ids }
     delete(where, trx?): Promise<number>
 
-    // Slow-query reporting only fires when the logger has warn or debug. >= slowQueryMs → warn, otherwise debug.
+    // Slow-query reporting fires only when `logger.warn`/`logger.debug` exist or `onQuery` is set.
+    // Elapsed >= slowQueryMs → logger.warn + onQuery; otherwise logger.debug + onQuery.
 }
 
 interface SoftDeleteOptions extends BaseRepositoryOptions {
@@ -352,9 +373,8 @@ abstract class SoftDeleteRepository<…> extends BaseRepository<…> {
 
     findActiveById(id, trx?)
     findActiveByIdOrThrow(id, trx?)                                 // throws NotFoundError
-    listActive(opts?, trx?)
-    findManyActive(opts?, trx?)                                     // alias of listActive
-    findActivePage(opts?, trx?)
+    findManyActive(opts?, trx?)
+    paginateActive(opts?, trx?)
     countActive(where?, trx?)
     existsActive(where, trx?)
 
@@ -384,9 +404,10 @@ abstract class EntityService<DB, TB, PK, ID> {
 
     // Public surface — funnels through hooks where listed
     insert(values, trx?)                                            // before/after hooks
+    upsert(values, opts, trx?)                                      // before/after hooks (reuses Insert hooks)
     insertMany(values[], trx?)                                      // hooks parallel via Promise.all (skipped if not overridden)
-    findById | findByIdOrThrow | findOne | findOneOrThrow | findFirst
-    list | findWithCount | findPage | findCursorPage | exists | count
+    findById | findByIdOrThrow | findByIdMany | findOne | findOneOrThrow
+    findMany | findManyWithCount | paginate | paginateCursor | exists | count
     updateById(id, values, trx?)                                    // before/after hooks
     updateByIdOrThrow(id, values, trx?)                             // before/after hooks
     update(where, values, trx?)                                     // beforeUpdate only (no row to fire afterUpdate on)
@@ -397,7 +418,7 @@ abstract class EntityService<DB, TB, PK, ID> {
 }
 ```
 
-`insertMany` skips its hook walk when `beforeInsert` / `afterInsert` are not overridden (identity check against `EntityService.prototype`). Override the hook = pay the per-row promise; skip = single SQL round-trip with no JS overhead.
+`insertMany` skips its hook walk when `beforeInsert` / `afterInsert` are not overridden (identity check against `EntityService.prototype`). Override the hook = pay the per-row promise; skip = single SQL round-trip with no JS overhead. `beforeInsert` / `beforeUpdate` MUST return the (possibly transformed) values — that's what the repo writes. `afterInsert` / `afterUpdate` MUST return the row.
 
 ---
 
@@ -451,7 +472,7 @@ abstract class RouteHandler<T extends object = Record<string, unknown>> {
     protected accepted<D>(reply, data)
     protected noContent(reply, status = 204): null
 
-    protected mapError(error, reply): unknown                       // EndpointError / Repo / KV → REST envelope
+    mapError(error, reply): unknown                                 // public — EndpointError / Repo / KV → REST envelope
     //   ValidationError forwards `error.details` into the response body.
     //   Unknown errors → 500 + 'internal_error', forwarded to onError.
     protected onError(err): void                                    // hook — override to log unhandled errors
@@ -460,12 +481,10 @@ abstract class RouteHandler<T extends object = Record<string, unknown>> {
 }
 
 class Router {
-    add(endpoint: RouteHandler): this
-    addAll(endpoints: readonly RouteHandler[]): this
+    add(handler: RouteHandler): this
+    addAll(handlers: readonly RouteHandler[]): this
     register(fastify: FastifyInstance): void
 }
-
-function chain(...endpoints: RouteHandler[]): Routable                  // smaller alternative to Router
 ```
 
 ### RESTRouteHandler
@@ -486,7 +505,7 @@ interface RESTRouteHandlerOptions<T> extends RouteHandlerOptions<T> {
     filterableFields?: ReadonlyArray<keyof T & string>
     sortableFields?: ReadonlyArray<keyof T & string>
     defaultOrderBy?: OrderBy<T> | OrderBy<T>[]
-    rejectEmptyPatch?: boolean                                       // default true — empty PATCH body → 400
+    allowEmptyPatch?: boolean                                        // default false → empty PATCH body returns 400
 }
 
 class RESTRouteHandler<DB, TB, PK, ID, T = Selectable<DB[TB]>> extends RouteHandler<T> {
@@ -499,8 +518,8 @@ Given a `EntityService`, registers full CRUD with sanitize + pagination + filter
 
 | Method + path | Status | Service call | Pre-handlers |
 |---|---|---|---|
-| `GET /` | 200 | `findPage({ where, orderBy, offset, limit, pagination })` | global + (`canList` ?? `canRead`) |
-| `GET /:id` | 200 / 404 | `findById(id)` | global + (`canGet` ?? `canRead`) |
+| `GET /` | 200 | `paginate({ where, orderBy, offset, limit, pagination })` | global + (`canList` ?? `canRead`) |
+| `GET /:id` | 200 / 404 | `findById(id)` (→ 404 if missing) | global + (`canGet` ?? `canRead`) |
 | `POST /` | 201 | `insert(sanitizedBody)` | global + (`canCreate` ?? `canWrite`) |
 | `PATCH /:id` | 200 / 400 / 404 | `updateByIdOrThrow(id, sanitizedBody)` | global + (`canUpdate` ?? `canWrite`) |
 | `DELETE /:id` | 204 / 404 | `deleteByIdOrThrow(id)` | global + (`canDelete` ?? `canWrite`) |
@@ -513,7 +532,7 @@ Given a `EntityService`, registers full CRUD with sanitize + pagination + filter
 
 This guards against incidents like `?passwordHash[like]=%a%` — by default a schema-less RESTRouteHandler accepts no filters at all.
 
-**Empty PATCH guard.** With `rejectEmptyPatch !== false`, a PATCH whose sanitized body is `{}` returns `400` instead of issuing a no-op `UPDATE … SET (empty)` (kysely throws). Opt out with `rejectEmptyPatch: false`.
+**Empty PATCH guard.** A PATCH whose sanitized body is `{}` returns `400` (`ValidationError('Empty patch')`) instead of issuing a no-op `UPDATE … SET (empty)` (kysely throws). Opt in to the no-op with `allowEmptyPatch: true`.
 
 **bigint ID JSON hazard.** `idType: 'bigint'` parses `:id` to a `BigInt`. If the row carries a bigint column, Fastify's default `JSON.stringify` throws `TypeError: Do not know how to serialize a BigInt`. Override Fastify's reply serializer or coerce bigint columns to string in your sanitize layer — RESTRouteHandler cannot fix this transparently.
 
@@ -616,7 +635,7 @@ class KVService {
     readonly locker: Locker
     readonly rateLimiter: RateLimiter
     readonly leaderboard: Leaderboard
-    readonly values: ValueStore
+    readonly objects: ValueStore                                 // sub-store for typed binary values (*Value methods)
     readonly versioned: Versioned
     readonly subscribers: SubscriberPool
 
@@ -787,7 +806,7 @@ class Versioned {
 }
 class SubscriberPool {
     constructor(duplicate: () => RedisClient, onError?: SubscriberErrorHook)
-    subscribe(channel, handler): Promise<Subscription>
+    subscribeRaw(channel, handler: (message: Buffer, channel: Buffer) => void): Promise<Subscription>
     close(): Promise<void>
 }
 ```
@@ -1056,12 +1075,12 @@ Peer deps: `@toolcase/base` (`Cache`, `EventEmitter`, `retry`, `HTTP.Status`). `
 | `OIDCVerificationError(reason)` | 401 | `OIDC_VERIFICATION_FAILED` | id_token signature / claims rejected |
 | `TokenIntrospectionError(reason)` | 401 | `TOKEN_INTROSPECTION_FAILED` | introspection request failed (active:false is NOT an error) |
 
-All extend `OAuth2Error` → `EndpointError`. `statusCodeFromError` maps via `EndpointError.statusCode`.
+All extend `OAuth2Error` → `EndpointError`. `errorMeta` maps via `EndpointError.statusCode` + `EndpointError.code`.
 
-### `oauth2Provider(opts)` / `oidcProvider(opts)`
+### `defineOAuth2Provider(opts)` / `oidcProvider(opts)`
 
 ```ts
-const github = oauth2Provider({
+const github = defineOAuth2Provider({
     id: 'github',
     authorizationEndpoint: 'https://github.com/login/oauth/authorize',
     tokenEndpoint: 'https://github.com/login/oauth/access_token',
@@ -1077,7 +1096,7 @@ const google = await oidcProvider({
 })
 ```
 
-`oauth2Provider` validates required fields, normalizes trailing slashes, defaults `clientAuthMethod` (`client_secret_basic` if `clientSecret` else `none`). `oidcProvider` resolves the discovery doc and fills endpoints + `jwksUri` + `issuer`.
+`defineOAuth2Provider` validates required fields, normalizes trailing slashes, defaults `clientAuthMethod` (`client_secret_basic` if `clientSecret` else `none`). `oidcProvider` resolves the discovery doc and fills endpoints + `jwksUri` + `issuer`.
 
 ### `random.ts`
 
@@ -1113,7 +1132,8 @@ const userinfo = await fetchUserinfo(provider, tokens.accessToken)
 ### `grants.ts` — Client Credentials + Device
 
 ```ts
-import { clientCredentialsToken, requestDeviceCode, pollDeviceToken, EventEmitter } from '@toolcase/node'
+import { clientCredentialsToken, requestDeviceCode, pollDeviceToken } from '@toolcase/node'
+import { EventEmitter } from '@toolcase/base'
 
 // S2S
 const ccTokens = await clientCredentialsToken(serviceProvider, { scope: ['api:read'], audience: 'https://api.test' })
@@ -1214,7 +1234,7 @@ app.get('/auth/login', async (req, reply) => {
 
     await kv.set(`oauth2:state:${state}`, JSON.stringify({
         codeVerifier: pkce.codeVerifier, nonce, redirectUri, returnTo: req.query.return_to, createdAt: Date.now()
-    }), 'EX', STATE_TTL)
+    }), { EX: STATE_TTL })
 
     reply.redirect(303, buildAuthorizeURL(provider, {
         state, nonce,
@@ -1269,7 +1289,7 @@ const kc = await oidcProvider({ issuer: 'https://kc.test/realms/myrealm', client
 // Authentik / Cognito / Zitadel — all OIDC, use oidcProvider with the issuer URL.
 
 // GitHub — non-OIDC
-const github = oauth2Provider({
+const github = defineOAuth2Provider({
     id: 'github',
     authorizationEndpoint: 'https://github.com/login/oauth/authorize',
     tokenEndpoint: 'https://github.com/login/oauth/access_token',
@@ -1279,7 +1299,7 @@ const github = oauth2Provider({
 })
 
 // Discord — non-OIDC
-const discord = oauth2Provider({
+const discord = defineOAuth2Provider({
     id: 'discord',
     authorizationEndpoint: 'https://discord.com/api/oauth2/authorize',
     tokenEndpoint: 'https://discord.com/api/oauth2/token',

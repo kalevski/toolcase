@@ -13,22 +13,38 @@ import {
     Feature, FeatureRegistry, ServiceRegistry,
     Layer, ObjectLayer, HTMLFeature, SplitScreen,
     GameObjectPool,
-    Flow, // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, Timer, Parallel, throttle, debounce, ... }
+    Flow,    // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, StateMachine, BehaviorTreeProcessor, ReplayRecorder, Timer, Parallel, throttle, debounce, BT: {...} }
     Structs, // { Matrix2 }
     LogLevel,
+    // Debugger
     Debugger, Panel,
-    PerformancePanel, MemoryPanel, TimelinePanel,
-    InputPanel, AudioPanel, NetPanel,
+    PerformancePanel, MemoryPanel, TimelinePanel, InputPanel, AudioPanel, NetPanel,
     ConsoleCommands, HotReload, RemoteDebugger,
+    // Perspective2D
     Scene2D, World, GameObject2D, Grid,
+    // Effects
     Effect, EffectManager, installEffects, EFFECT_REGISTRY,
-    NavMesh, PathFinder, Path,
-    PATH_FOUND, PATH_FAILED,
-    CameraDirector, ScreenShake, CameraFlash, DialogCameraCue, ParallaxLayer, LetterboxFeature
+    // AI
+    NavMesh, PathFinder, Path, PATH_FOUND, PATH_FAILED,
+    // Cinema
+    CameraDirector, EASE_LINEAR, EASE_IN_OUT, EASE_OUT, SHOT_DONE,
+    ScreenShake, CameraFlash, DialogCameraCue, ParallaxLayer, LetterboxFeature,
+    // Input
+    InputFeature, ACTION_PRESS, ACTION_RELEASE, ACTION_HOLD,
+    InputBuffer, GestureRecognizer,
+    GESTURE_TAP, GESTURE_DOUBLE_TAP, GESTURE_LONG_PRESS, GESTURE_SWIPE, GESTURE_PINCH,
+    GamepadFeature, GAMEPAD_CONNECTED, GAMEPAD_DISCONNECTED, GAMEPAD_BUTTON_DOWN, GAMEPAD_BUTTON_UP,
+    MAPPING_XBOX, MAPPING_PS, MAPPING_SWITCH, MAPPING_STANDARD,
+    VirtualJoystick, VIRTUAL_AXIS_X, VIRTUAL_AXIS_Y,
+    // Flow extras (also reachable via `Flow.*`)
+    STATE_ENTER, STATE_EXIT, STATE_TRANSITION,
+    SUCCESS, FAILURE, RUNNING,
+    REPLAY_FRAME, REPLAY_END
 } from '@toolcase/phaser-plus'
 ```
 
-Peers: `phaser@4.x`, `@toolcase/base@2.x`, `@toolcase/logging@2.x`.
+
+Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional peers: `react` / `react-dom` >=18.
 
 ---
 
@@ -111,7 +127,7 @@ Key contract: subclass `Scene`, override `beforeInit / onInit / onLoad / onCreat
 
 ### Engine
 
-Per-Scene singleton wrapping a `LoggerFactory` and a `ServiceRegistry`. Created automatically.
+Per-`Game` singleton wrapping a `LoggerFactory` and a `ServiceRegistry`. Attached to `game.engine` and shared across all Scenes. Created automatically on first Scene init.
 
 | Member | Type | Description |
 |---|---|---|
@@ -571,6 +587,8 @@ obj.effects.clear()
 ### Custom effect
 
 ```ts
+import { Effect } from '@toolcase/phaser-plus'
+
 class MyEffect extends Effect {
     static KEY = 'my-effect'
     static FRAGMENT = `precision mediump float;
@@ -583,7 +601,7 @@ class MyEffect extends Effect {
     }
 }
 
-ensureEffectRegistered(game, MyEffect) // or installEffects covers built-ins
+// First add() lazy-registers the EffectClass with the renderer; no manual install needed.
 obj.effects.add(MyEffect, { intensity: 0.5 })
 ```
 
@@ -630,11 +648,11 @@ path.on(PATH_FOUND, (waypoints: Waypoint[]) => {
     // [{ x, y }, ...] in grid coords
 })
 path.on(PATH_FAILED, (reason: string) => {
-    // 'blocked' | 'exhausted'
+    // 'end_blocked' | 'exhausted' | 'max_iterations'
 })
 ```
 
-Each `findPath` mints a fresh `Path` backed by an `@toolcase/base` `AStar` stepped cooperatively — `budgetMs` caps the per-frame slice. Heuristic is octile (8-connectivity, diagonal squeeze through two blocked orthogonals is rejected). `reason` is `'end_blocked'`, `'exhausted'`, or `'max_iterations'`.
+Each `findPath` mints a fresh `Path` backed by an `@toolcase/base` `AStar` stepped cooperatively — `budgetMs` caps the per-frame slice. Heuristic is octile (8-connectivity, diagonal squeeze through two blocked orthogonals is rejected).
 
 ---
 
@@ -692,7 +710,7 @@ ai.current                 // 'idle' | 'chase' | ...
 `from === null` is a global transition (any source). Listen for transitions:
 
 ```ts
-import StateMachine, { STATE_ENTER, STATE_EXIT, STATE_TRANSITION } from '@toolcase/phaser-plus/lib/flow/StateMachine'
+import { STATE_ENTER, STATE_EXIT, STATE_TRANSITION } from '@toolcase/phaser-plus'
 ai.on(STATE_TRANSITION, (from, to) => log.info('fsm', { from, to }))
 ```
 
@@ -866,15 +884,18 @@ trees.addTiled(scene.add.image(0, 0, 'tree-band'))
 
 ### LetterboxFeature
 
-Animated cinematic bars.
+Aspect-ratio mask that draws bars whenever the viewport doesn't match the target aspect. Re-layouts automatically on `scale.resize`.
 
 ```ts
 import { LetterboxFeature } from '@toolcase/phaser-plus'
 
 const letterbox = scene.features.register('letterbox', LetterboxFeature)
-letterbox.show(0.12, /* sec */ 0.4)   // 12% bars in 0.4s
-letterbox.hide(0.4)
+letterbox.setAspect(21 / 9)         // cinematic — adds top/bottom bars on 16:9 viewports
+letterbox.setBarColor(0x000000)
+letterbox.setBarDepth(1000)
 ```
+
+`setAspect(ratio)` is the toggle: passing a value matching the viewport hides the bars. `setBarColor(0xRRGGBB)` retints, `setBarDepth(depth)` re-layers.
 
 ---
 
@@ -923,49 +944,65 @@ function tryDoubleJump(now: number) {
 
 ### GamepadFeature
 
-Higher-level gamepad polling — vibration, deadzones, multi-pad routing.
+Higher-level gamepad polling — rumble, deadzones, multi-pad routing, per-pad mapping presets (`MAPPING_XBOX` / `MAPPING_PS` / `MAPPING_SWITCH` / `MAPPING_STANDARD`).
 
 ```ts
-import { GamepadFeature } from '@toolcase/phaser-plus'
+import { GamepadFeature, MAPPING_PS } from '@toolcase/phaser-plus'
 
 const gamepad = scene.features.register('gamepad', GamepadFeature)
-gamepad.setDeadzone(0.15)
+gamepad.setDefaultDeadZone(0.15)
+gamepad.setDefaultMapping('xbox')
+gamepad.setMapping(0, MAPPING_PS)
 
 if (gamepad.isConnected(0)) {
-    gamepad.vibrate(0, /* strong */ 0.6, /* weak */ 0.2, /* ms */ 200)
+    const { x, y, rx, ry } = gamepad.axes(0)
+    gamepad.rumble(0, /* strong */ 0.6, /* weak */ 0.2, /* ms */ 200)
 }
 ```
 
+Emits `GAMEPAD_CONNECTED` / `GAMEPAD_DISCONNECTED` / `GAMEPAD_BUTTON_DOWN` / `GAMEPAD_BUTTON_UP` on the feature bus.
+
 ### GestureRecognizer
 
-Tap / double-tap / swipe / pinch from touch input.
+Tap / double-tap / long-press / swipe / pinch from touch input. Event names are exported constants — use them, not raw strings.
 
 ```ts
-import { GestureRecognizer } from '@toolcase/phaser-plus'
+import {
+    GestureRecognizer,
+    GESTURE_TAP, GESTURE_DOUBLE_TAP, GESTURE_LONG_PRESS,
+    GESTURE_SWIPE, GESTURE_PINCH
+} from '@toolcase/phaser-plus'
 
 const gestures = scene.features.register('gestures', GestureRecognizer)
-gestures.on('swipe', ({ direction, length }) => {
+gestures.on(GESTURE_SWIPE, ({ direction, length }) => {
     if (direction === 'left' && length > 80) player.dash(-1)
 })
-gestures.on('double-tap', ({ x, y }) => placeMarker(x, y))
-gestures.on('pinch', ({ scale }) => camera.setZoom(camera.zoom * scale))
+gestures.on(GESTURE_DOUBLE_TAP, ({ x, y }) => placeMarker(x, y))
+gestures.on(GESTURE_PINCH, ({ scale }) => camera.setZoom(camera.zoom * scale))
 ```
 
 ### VirtualJoystick
 
-On-screen analog stick (mobile/touch). Pairs with `InputFeature`'s `'virtual'` binding type.
+On-screen analog stick + buttons (mobile/touch). Wire to an `InputFeature` to drive virtual bindings; the joystick also feeds `VIRTUAL_AXIS_X` / `VIRTUAL_AXIS_Y`.
 
 ```ts
-import { VirtualJoystick } from '@toolcase/phaser-plus'
+import { VirtualJoystick, InputFeature, VIRTUAL_AXIS_X, VIRTUAL_AXIS_Y } from '@toolcase/phaser-plus'
 
+const input = scene.features.register('input', InputFeature)
 const stick = scene.features.register('stick', VirtualJoystick)
-stick.setPosition(120, scene.scale.height - 120).setRadius(80)
+
+stick.setInput(input)
+stick.setJoystickConfig({ size: 160, placement: 'left', bottomOffset: 48, sideOffset: 48, deadZone: 0.2 })
+stick.addButton({ id: 'jump', label: 'A', placement: 'right' })
 
 scene.events.on('update', () => {
-    player.x += stick.x * speed
-    player.y += stick.y * speed
+    const { x, y } = stick.vector
+    player.x += x * speed
+    player.y += y * speed
 })
 ```
+
+Buttons set virtual booleans (`input.setVirtual(id, …)`); pair with an `{ type: 'virtual', id }` binding on `InputFeature.bind('jump', [...])`.
 
 ---
 
@@ -1172,11 +1209,10 @@ world.on('state.score', s => log.info('score', s))
 | Surface | How to style |
 |---|---|
 | Phaser GameObjects | Use Phaser's native API: `setTint(0xRRGGBB)`, `setAlpha`, `setBlendMode`, custom shaders via `Effect`. |
-| `Effect` shaders | All 84 effects accept numeric `color` parameters in `0xRRGGBB` form — pass game-themed palette values (e.g. from `@toolcase/base` `Color.PALETTE`) to keep visuals consistent across scenes. |
+| `Effect` shaders | The 73 built-in effects accept numeric `color` parameters in `0xRRGGBB` form — pass game-themed palette values (e.g. from `@toolcase/base` `Color.PALETTE`) to keep visuals consistent across scenes. |
 | `Cinema` overlays | `CameraFlash.flash(color, ...)`, `LetterboxFeature.setBarColor`, `DialogCameraCue.setDimColor` — all accept `0xRRGGBB`. |
 | `HTMLFeature` content | Plain DOM inside `this.node`. Style with regular CSS / SCSS or by mounting `@toolcase/game-components` (`gc-*` web components) — they expose a full `--fg-*` / `--gc-*` variable layer documented in their SKILL.md. |
-| `Debugger` panels | Built-in panels render to a fixed overlay element with class `tc-debugger`. Override CSS variables `--tc-dbg-bg`, `--tc-dbg-border`, `--tc-dbg-color`, `--tc-dbg-accent` on `.tc-debugger` (or any ancestor) to retheme them. |
-| `ReactFeature` host | When mounted, it adopts the host page's CSS — combine with `@toolcase/react-components` themes (`<div class="theme theme--neon">`) to inherit a palette. |
+| `Debugger` panels | Tweakpane folders; restyle with Tweakpane's own CSS variables on the panel container. |
 
 Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects / cinema overlays are easy to scatter. Consolidate them into a constants module (or `Color.PALETTE` from `@toolcase/base`) and pass references — that way one change retones every scene.
 
@@ -1204,11 +1240,11 @@ Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects
 | Concurrency cap | `Flow.Parallel.run(N, tasks, onAll)` |
 | Throttle / debounce | `Flow.throttle(fn, ms)` / `Flow.debounce(fn, ms)` |
 | Parallax | `features.register('bg', ParallaxLayer)` → `setFactor(...)` |
-| Letterbox bars | `features.register('lb', LetterboxFeature)` → `show(size, sec)` |
+| Letterbox bars | `features.register('lb', LetterboxFeature)` → `setAspect(ratio)` |
 | Action input | `features.register('input', InputFeature)` → `bind('jump', [...])` |
 | Combo / forgiveness window | `features.register('buf', InputBuffer)` → `push` / `consume` |
 | Touch gestures | `features.register('g', GestureRecognizer)` → listen `swipe`/`pinch`/`double-tap` |
-| Mobile joystick | `features.register('stick', VirtualJoystick)` → read `stick.x` / `stick.y` |
+| Mobile joystick | `features.register('stick', VirtualJoystick)` → `setInput(input)` → read `stick.vector.x` / `stick.vector.y` |
 | Shader on object | `obj.effects.add(GrayScaleEffect, { ... })` |
 | Isometric world | Extend `Scene2D`, set `world.projection = Matrix2.createISO(...)` |
 | A* path | Extend `NavMesh` → register `PathFinder` → `findPath(...)` and listen `PATH_FOUND` |
