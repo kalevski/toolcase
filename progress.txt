@@ -38,3 +38,21 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 - Dropped duplicate "Migrations (out-of-tree)" subsection (4 bullets that all restated points already made in stack baseline / db/ folder header / boot rules / anti-patterns).
 - Tightened: dropped "Every new project... Deviation = bug." restatement; "explicit is better"; "almost never what you want"; "the single rule that catches most violations:".
 - Pattern: serializer is the canonical "API in the docs is *not* the API in the code" trap — when you see schema-builder DSL examples in a SKILL.md, grep the package's main.ts class for the actual surface before trusting the example.
+
+## Iteration 6 — opt-examples-public-node
+- @toolcase/node SKILL.md had a wall of API drift: `createAPISanitizer`/`APISanitizers`/`APISanitizerOptions`/`APISanitizer` → real names are `createSanitizer`/`SanitizerVisitors`/`SanitizerOptions`/`Sanitizer` (with separate `InputCallOptions`/`OutputCallOptions`/`QueryCallOptions`).
+- `statusCodeFromError` + `codeFromError` don't exist — replaced with `errorMeta(e): { code, status } | null` (single function carrying both).
+- Repo + service rename pass: BaseRepository's `list/findWithCount/findPage/findCursorPage/findFirst` → `findMany/findManyWithCount/paginate/paginateCursor` (no `findFirst` at all). Added `findByIdMany`. `findManyWithCount` returns `{ results, total }`, not `[Selectable[], total]`. SoftDeleteRepository: `listActive`/`findActivePage` → `findManyActive`/`paginateActive`.
+- EntityService: added `upsert`, removed `findFirst`, fixed list/page method names. Noted `beforeInsert`/`beforeUpdate` MUST return values; `afterInsert`/`afterUpdate` MUST return rows.
+- RESTRouteHandler: `rejectEmptyPatch` (default true) was actually `allowEmptyPatch` (default false) — opposite name, same end behavior; opt-IN to allow rather than opt-OUT to reject. RESTRouteHandler list endpoint calls `service.paginate`, not `service.findPage`.
+- RouteHandler.mapError is public, not protected (the public method is the wrap-target for OTel/Sentry composers).
+- `chain(...endpoints)` doesn't exist. Only `Router` is exported. Dropped from imports + section.
+- `parseFilters`/`parseSort` are internal-only (utils/ but not re-exported from main.ts). Repurposed their sub-section as RESTRouteHandler URL-syntax docs, with explicit "not re-exported" note.
+- KVService field rename: `readonly values: ValueStore` → `readonly objects: ValueStore`.
+- SubscriberPool's public method is `subscribeRaw(channel, handler: (Buffer, Buffer) => void)`, not `subscribe(channel, handler)`.
+- OAuth2: `oauth2Provider` doesn't exist — real export is `defineOAuth2Provider`. Replaced all 3 call sites (intro, GitHub snippet, Discord snippet).
+- `EventEmitter` is from `@toolcase/base`, not `@toolcase/node` — fixed the device-flow import block.
+- `kv.set` cookbook example used positional `'EX', STATE_TTL` — real signature is `set(key, value, options?: SetOptions)`, so options must be `{ EX: STATE_TTL }`.
+- env signature: was a fake generic `env<T>(key, default, type)`. Real is 6-overload function (string|number|boolean × default-typed/null). Replaced doc signature with the overload list.
+- Added `QueryEvent` + `QueryHook` + `onQuery` to BaseRepositoryOptions (tracing hook was missing).
+- Pattern: this SKILL.md had drifted across nearly every section because the underlying package renamed/refactored repo-method names AND sanitize types in lockstep. When you see one rename (e.g. `findPage`→`paginate`), grep the whole doc for the old name — they usually appear in BaseRepository, EntityService, AND the RESTRouteHandler routing table.
