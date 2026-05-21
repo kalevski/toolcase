@@ -159,7 +159,7 @@
       "title": "Optimize examples/public/serializer/SKILL.md",
       "file": "examples/public/serializer/SKILL.md",
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "acceptance": [
         "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
         "Every file path, export, workspace, and npm script referenced exists in the current repo",
