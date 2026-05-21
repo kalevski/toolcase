@@ -57,6 +57,21 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 - Added `QueryEvent` + `QueryHook` + `onQuery` to BaseRepositoryOptions (tracing hook was missing).
 - Pattern: this SKILL.md had drifted across nearly every section because the underlying package renamed/refactored repo-method names AND sanitize types in lockstep. When you see one rename (e.g. `findPage`→`paginate`), grep the whole doc for the old name — they usually appear in BaseRepository, EntityService, AND the RESTRouteHandler routing table.
 
+## Iteration 8 — opt-examples-public-phaser-plus
+- Bumped peer ranges: @toolcase/base ^2.x → ^3.x, @toolcase/logging ^2.x → ^3.x. Added optional react/react-dom peers (per package.json).
+- Engine: "Per-Scene singleton" → "Per-Game singleton attached to game.engine" (initializeEngine() reuses one Engine across scenes).
+- "84 effects" → "73 effects" (counted EFFECT_REGISTRY: 16 color + 13 procedural + 13 distortion + 7 dissolve + 8 mask + 16 lighting).
+- LetterboxFeature API: doc had `show(size, sec)` / `hide(sec)` — neither exists. Real surface: setAspect(ratio) / setBarColor / setBarDepth; bars draw automatically when viewport ≠ targetAspect. Fixed section + cheat sheet row.
+- GamepadFeature: `setDeadzone(0.15)` → `setDefaultDeadZone(0.15)` (also has setDeadZone(padIndex, value)); `vibrate(...)` → `rumble(padIndex, strongMag, weakMag, durationMs)`. Added setDefaultMapping/setMapping/axes coverage + GAMEPAD_* + MAPPING_* events/presets.
+- VirtualJoystick: `setPosition`/`setRadius`/`stick.x`/`stick.y` don't exist. Real: `setJoystickConfig({ size, deadZone, placement, bottomOffset, sideOffset })`, `setInput(InputFeature | null)`, `addButton(config)`, `stick.vector.x`/`.y`. Fixed section + cheat sheet row.
+- GestureRecognizer: doc used raw strings `'swipe'`/`'double-tap'`/`'pinch'`. Real events are constants `GESTURE_SWIPE`/`GESTURE_DOUBLE_TAP`/`GESTURE_PINCH`/`GESTURE_TAP`/`GESTURE_LONG_PRESS`. Switched example to the constants.
+- StateMachine constants deep-import `'@toolcase/phaser-plus/lib/flow/StateMachine'` → just `'@toolcase/phaser-plus'` (package.json `exports` only allows `.`; deep imports break consumers and STATE_* are already re-exported via flow/index.ts → top-level barrel).
+- PATH_FAILED reason: was `'blocked' | 'exhausted'` in top block — fixed to `'end_blocked' | 'exhausted' | 'max_iterations'` matching PathFinder source.
+- Theming: dropped `ReactFeature` row — features/index.ts exports it but the top-level src/index.ts deliberately does NOT re-export from features/index.ts (it imports each feature individually, sans ReactFeature), so `import { ReactFeature } from '@toolcase/phaser-plus'` would fail. Also dropped the made-up `--tc-dbg-*` Debugger CSS vars (Debugger is Tweakpane, not a custom CSS layer).
+- Custom-effect example: dropped manual `ensureEffectRegistered(game, MyEffect)` — function is internal-only (not in any package barrel). EffectManager.add() already calls it automatically on first add.
+- Expanded top-level import block to enumerate input feature surface (InputFeature/InputBuffer/GamepadFeature/VirtualJoystick + their constants), cinema easing + SHOT_DONE, and Flow extras (STATE_*, SUCCESS/FAILURE/RUNNING, REPLAY_*) — they were exported from `flow/index.ts` + barrels but invisible in the doc's overview.
+- Pattern: when the top of a SKILL.md has a "single import surface" block, treat it as a coverage spec — diff it against `src/index.ts` re-exports and every barrel re-exported from it. Constants (GESTURE_*, MAPPING_*, EASE_*) are the easiest things to lose; they leak only via barrels.
+
 ## Iteration 7 — opt-examples-public-phaser-game-dev
 - Stack baseline: bumped peer ranges to actual (phaser-plus ^1.x → ^3.x; @toolcase/base ^2.x → ^3.x; @toolcase/logging ^2.x → ^3.x). Reworded exports list to match real top-level + re-export shape (Engine/Scene/.../SplitScreen, plus Scene2D/World/GameObject2D from perspective2d, installEffects from effects). Node 20+ → Node 18+ per engines.
 - Component count: every "134" → "137" (count of customElements.define calls in register.ts). Frontmatter description also updated.
