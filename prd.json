@@ -204,7 +204,7 @@
       "title": "Optimize .claude/skills/logging-feature/SKILL.md",
       "file": ".claude/skills/logging-feature/SKILL.md",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "acceptance": [
         "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
         "Every file path, export, workspace, and npm script referenced exists in the current repo",
