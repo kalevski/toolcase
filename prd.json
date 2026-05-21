@@ -1,0 +1,683 @@
+{
+  "branchName": "ralph/optimize-skill-files",
+  "feature": "Skill file optimization",
+  "description": "Run Ralph autonomous loop to optimize every SKILL.md under .claude/skills/ and examples/public/. Each story optimizes one file: frontmatter accuracy, factual grounding against current repo, conciseness, and full export coverage.",
+  "model": "claude-opus-4-7",
+  "userStories": [
+    {
+      "id": "opt-examples-public-base",
+      "title": "Optimize examples/public/base/SKILL.md",
+      "file": "examples/public/base/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-game-components",
+      "title": "Optimize examples/public/game-components/SKILL.md",
+      "file": "examples/public/game-components/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-logging",
+      "title": "Optimize examples/public/logging/SKILL.md",
+      "file": "examples/public/logging/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-next-static-app",
+      "title": "Optimize examples/public/next-static-app/SKILL.md",
+      "file": "examples/public/next-static-app/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-node-service",
+      "title": "Optimize examples/public/node-service/SKILL.md",
+      "file": "examples/public/node-service/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-node",
+      "title": "Optimize examples/public/node/SKILL.md",
+      "file": "examples/public/node/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-phaser-game-dev",
+      "title": "Optimize examples/public/phaser-game-dev/SKILL.md",
+      "file": "examples/public/phaser-game-dev/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-phaser-plus",
+      "title": "Optimize examples/public/phaser-plus/SKILL.md",
+      "file": "examples/public/phaser-plus/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-react-components",
+      "title": "Optimize examples/public/react-components/SKILL.md",
+      "file": "examples/public/react-components/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-react-spa-app",
+      "title": "Optimize examples/public/react-spa-app/SKILL.md",
+      "file": "examples/public/react-spa-app/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-examples-public-serializer",
+      "title": "Optimize examples/public/serializer/SKILL.md",
+      "file": "examples/public/serializer/SKILL.md",
+      "priority": 1,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-base-feature",
+      "title": "Optimize .claude/skills/base-feature/SKILL.md",
+      "file": ".claude/skills/base-feature/SKILL.md",
+      "priority": 2,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-gc-component",
+      "title": "Optimize .claude/skills/gc-component/SKILL.md",
+      "file": ".claude/skills/gc-component/SKILL.md",
+      "priority": 2,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-logging-feature",
+      "title": "Optimize .claude/skills/logging-feature/SKILL.md",
+      "file": ".claude/skills/logging-feature/SKILL.md",
+      "priority": 2,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-node-feature",
+      "title": "Optimize .claude/skills/node-feature/SKILL.md",
+      "file": ".claude/skills/node-feature/SKILL.md",
+      "priority": 2,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-plus-feature",
+      "title": "Optimize .claude/skills/phaser-plus-feature/SKILL.md",
+      "file": ".claude/skills/phaser-plus-feature/SKILL.md",
+      "priority": 2,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-react-component",
+      "title": "Optimize .claude/skills/react-component/SKILL.md",
+      "file": ".claude/skills/react-component/SKILL.md",
+      "priority": 2,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-serializer-feature",
+      "title": "Optimize .claude/skills/serializer-feature/SKILL.md",
+      "file": ".claude/skills/serializer-feature/SKILL.md",
+      "priority": 2,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-actions-and-utilities",
+      "title": "Optimize .claude/skills/phaser/actions-and-utilities/SKILL.md",
+      "file": ".claude/skills/phaser/actions-and-utilities/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-animations",
+      "title": "Optimize .claude/skills/phaser/animations/SKILL.md",
+      "file": ".claude/skills/phaser/animations/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-audio-and-sound",
+      "title": "Optimize .claude/skills/phaser/audio-and-sound/SKILL.md",
+      "file": ".claude/skills/phaser/audio-and-sound/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-cameras",
+      "title": "Optimize .claude/skills/phaser/cameras/SKILL.md",
+      "file": ".claude/skills/phaser/cameras/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-curves-and-paths",
+      "title": "Optimize .claude/skills/phaser/curves-and-paths/SKILL.md",
+      "file": ".claude/skills/phaser/curves-and-paths/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-data-manager",
+      "title": "Optimize .claude/skills/phaser/data-manager/SKILL.md",
+      "file": ".claude/skills/phaser/data-manager/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-events-system",
+      "title": "Optimize .claude/skills/phaser/events-system/SKILL.md",
+      "file": ".claude/skills/phaser/events-system/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-filters-and-postfx",
+      "title": "Optimize .claude/skills/phaser/filters-and-postfx/SKILL.md",
+      "file": ".claude/skills/phaser/filters-and-postfx/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-game-object-components",
+      "title": "Optimize .claude/skills/phaser/game-object-components/SKILL.md",
+      "file": ".claude/skills/phaser/game-object-components/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-game-setup-and-config",
+      "title": "Optimize .claude/skills/phaser/game-setup-and-config/SKILL.md",
+      "file": ".claude/skills/phaser/game-setup-and-config/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-geometry-and-math",
+      "title": "Optimize .claude/skills/phaser/geometry-and-math/SKILL.md",
+      "file": ".claude/skills/phaser/geometry-and-math/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-graphics-and-shapes",
+      "title": "Optimize .claude/skills/phaser/graphics-and-shapes/SKILL.md",
+      "file": ".claude/skills/phaser/graphics-and-shapes/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-groups-and-containers",
+      "title": "Optimize .claude/skills/phaser/groups-and-containers/SKILL.md",
+      "file": ".claude/skills/phaser/groups-and-containers/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-input-keyboard-mouse-touch",
+      "title": "Optimize .claude/skills/phaser/input-keyboard-mouse-touch/SKILL.md",
+      "file": ".claude/skills/phaser/input-keyboard-mouse-touch/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-loading-assets",
+      "title": "Optimize .claude/skills/phaser/loading-assets/SKILL.md",
+      "file": ".claude/skills/phaser/loading-assets/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-particles",
+      "title": "Optimize .claude/skills/phaser/particles/SKILL.md",
+      "file": ".claude/skills/phaser/particles/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-physics-arcade",
+      "title": "Optimize .claude/skills/phaser/physics-arcade/SKILL.md",
+      "file": ".claude/skills/phaser/physics-arcade/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-physics-matter",
+      "title": "Optimize .claude/skills/phaser/physics-matter/SKILL.md",
+      "file": ".claude/skills/phaser/physics-matter/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-render-textures",
+      "title": "Optimize .claude/skills/phaser/render-textures/SKILL.md",
+      "file": ".claude/skills/phaser/render-textures/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-scale-and-responsive",
+      "title": "Optimize .claude/skills/phaser/scale-and-responsive/SKILL.md",
+      "file": ".claude/skills/phaser/scale-and-responsive/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-scenes",
+      "title": "Optimize .claude/skills/phaser/scenes/SKILL.md",
+      "file": ".claude/skills/phaser/scenes/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-sprites-and-images",
+      "title": "Optimize .claude/skills/phaser/sprites-and-images/SKILL.md",
+      "file": ".claude/skills/phaser/sprites-and-images/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-text-and-bitmaptext",
+      "title": "Optimize .claude/skills/phaser/text-and-bitmaptext/SKILL.md",
+      "file": ".claude/skills/phaser/text-and-bitmaptext/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-tilemaps",
+      "title": "Optimize .claude/skills/phaser/tilemaps/SKILL.md",
+      "file": ".claude/skills/phaser/tilemaps/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-time-and-timers",
+      "title": "Optimize .claude/skills/phaser/time-and-timers/SKILL.md",
+      "file": ".claude/skills/phaser/time-and-timers/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-tweens",
+      "title": "Optimize .claude/skills/phaser/tweens/SKILL.md",
+      "file": ".claude/skills/phaser/tweens/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    },
+    {
+      "id": "opt-claude-skills-phaser-v4-new-features",
+      "title": "Optimize .claude/skills/phaser/v4-new-features/SKILL.md",
+      "file": ".claude/skills/phaser/v4-new-features/SKILL.md",
+      "priority": 3,
+      "passes": false,
+      "acceptance": [
+        "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
+        "Every file path, export, workspace, and npm script referenced exists in the current repo",
+        "Filler/redundant prose removed; technical substance preserved verbatim",
+        "All code examples reference real symbols in the package source",
+        "If the file is a canonical package contract (under examples/public/), every public export of the package is reachable from the doc",
+        "File committed with message 'ralph: optimize <id> — <one line summary>'"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# Ralph progress log
+
+Append-only learnings from each iteration. Future iterations read this to
+avoid repeating mistakes and to inherit conventions discovered along the way.
+
