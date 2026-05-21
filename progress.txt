@@ -23,3 +23,8 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 - Dropped the standalone "File reporter (Node)" custom-LogReporter example — `FileLogReporter` + the JSONLineReporter-over-createWriteStream combo earlier in the doc already cover Node file output.
 - Pattern: when the doc has both an API section AND a worked-examples section, the API-section "custom X" subblock almost always duplicates one of the examples — drop the API-side copy, keep the worked examples.
 - All exports cross-checked: `main.ts` exports `{ logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter }`; `node.ts` exports `{ FileLogReporter }`. All covered in doc.
+
+## Iteration 4 — opt-examples-public-next-static-app
+- Doc already factually accurate: react-components primitives (Hero/CoolNav/CoolButton/Brand/PageFooter/PricingCard/FeatureCard/PinnedFeatureShowcase/EarlySignupForm/Heading/Text/SectionCard) all exist in react-components/src/index.ts; HeroProps + CoolNavProps shapes match the examples; cross-skill `react-spa-app` reference resolves to examples/public/react-spa-app/.
+- Surgical hedge-stripping only — dropped "generally", "actually", "just", "usually" / "definitely" from 5 spots without touching technical substance.
+- Pattern: architecture-blueprint SKILL.md files (under examples/public/) are not tied to a single package, so the "every export reachable" coverage check doesn't apply — instead verify every named library symbol/prop in the doc against the dependency's `src/index.ts` + interface file. Hedges are the main lever for tightening these.
