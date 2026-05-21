@@ -26,14 +26,14 @@ Before adding a new export, scan `features.md`. Concrete checks:
 - Need a DOM overlay? Subclass **existing** `HTMLFeature`. Don't bypass and use `scene.add.dom` directly.
 - Need a flow processor? Subclass **existing** `FlowProcessor` and register via `scene.flow.addProcessor`. Don't add a sibling processor field.
 - Need a debugger panel? Subclass **existing** `Panel` and register via `dbg.addPanel`. Don't fork the debugger.
-- Need a shader effect? Subclass **existing** `Effect` (set `static KEY` + `static FRAGMENT`). Register via `installEffects` or `ensureEffectRegistered`. Don't write a new filter pipeline.
+- Need a shader effect? Subclass **existing** `Effect` (set `static KEY` + `static FRAGMENT`). Register via `installEffects(game)` or attach with `EffectManager.add(MyEffect)` (lazy-registers on first add). Don't write a new filter pipeline.
 - Need pathfinding? Subclass **existing** `NavMesh` (override `isBlocked` / `cost`). Use **existing** `PathFinder` feature.
 - Need state machine? Use **existing** `Flow.StateMachine`. Don't write a new FSM.
 - Need behavior tree? Compose **existing** `Flow.BT.{Sequence, Selector, Action, Condition, Inverter, Repeater, Parallel, AlwaysSucceed, AlwaysFail}` nodes. Use **existing** `Flow.BehaviorTreeProcessor`.
 - Need scoped logger? Use `scene.engine.getLogger(scope)` — do not import `@toolcase/logging` directly inside `phaser-plus/src/` (the engine wraps it).
 - Need a game-wide singleton? Use **existing** `engine.services.bind` / `provide` / `resolve`. Don't add module-level state.
 - Need pooling for a `GameObject`? Use **existing** `scene.pool.register` + `obtain` / `release`. Never `new` then `destroy` for hot objects.
-- Need camera shots? Use **existing** `CameraDirector.queue(...)`. Don't tween cameras manually.
+- Need camera shots? Use **existing** `CameraDirector.push(shot)` (queue) or `.cut(shot)` (interrupt). Don't tween cameras manually.
 - Need screen shake? Use **existing** `ScreenShake.add(trauma, decay)`.
 - Need parallax? Use **existing** `ParallaxLayer`.
 - Need input mapping? Use **existing** `InputFeature.bind('action', [...])`.
@@ -62,7 +62,7 @@ Do NOT use for:
 
 ## Hard rules
 
-These come from `phaser-plus/package.json` (peers `phaser@4.x`, `@toolcase/base@2.x`, `@toolcase/logging@2.x`, ESM-only) and the patterns every existing class follows.
+These come from `phaser-plus/package.json` (peers `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`, optional `react`/`react-dom` ≥18, ESM-only) and the patterns every existing class follows.
 
 1. **ESM-only.** `phaser-plus/package.json` declares `"type": "module"` and a single ESM `import` export. Don't add CJS code paths.
 2. **Peer deps only.** Never add a new runtime dep without a strong reason. Tweakpane is the only non-peer dep — it's tightly coupled to the debugger.
@@ -77,7 +77,7 @@ These come from `phaser-plus/package.json` (peers `phaser@4.x`, `@toolcase/base@
 11. **Tests are mandatory** when behavior is testable without a Phaser game instance (math helpers, processors that operate on plain data). UI features that need a running Phaser instance ship without tests but with a working demo in `examples/`.
 12. **No code comments.** Match the existing style.
 13. **No semicolons. 4-space indent.** Match the existing style across `phaser-plus/src/`.
-14. **Dispatch broadcast events via `feature.emit(name, ...args)`** — match `Feature.emit`. Never `scene.events.emit` for feature-internal signals.
+14. **Dispatch broadcast events via `this.emit(name, ...args)`** inside a `Feature` subclass (`Feature.emit` is protected). Consumers listen via `scene.features.on(name, fn)`. Never `scene.events.emit` for feature-internal signals.
 15. **Update `examples/public/phaser-plus/SKILL.md`.** Append a section in the matching category (Engine & Scene / GameObject / Features / Flow / Cinema / Input / AI / Effects / Worked examples / Cheat sheet).
 16. **Update `features.md`.** Append the inventory entry.
 17. **Demo is mandatory.** Every new export ships with a runnable Phaser scene at `examples/src/phaser-plus/scenes/<Name>.js` registered in `examples/src/phaser-plus/index.tsx` (`phaserExamples` entry: `key`, `title`, `category`, `description`, `sceneFile`, `element: <PhaserCanvas sceneClass={<Name>} />`). No demo = feature not done. Phaser features need a running scene to verify behavior — the demo *is* the verification.
@@ -165,9 +165,9 @@ class MyProcessor extends FlowProcessor {
         this.items.set(id, entry)
     }
 
-    override doUpdate(time: number, delta: number): void {
+    override onUpdate(_time: number, delta: number): void {
         for (const item of this.items.values()) {
-            // tick
+            item.tick(delta)
         }
     }
 
@@ -211,7 +211,7 @@ class MyEffect extends Effect {
 export default MyEffect
 ```
 
-Register via `installEffects(game)` (built-ins) or `ensureEffectRegistered(game, MyEffect)` (one-off).
+Register via `installEffects(game)` (alongside built-ins) or rely on `EffectManager.add(MyEffect)` — the manager lazily registers the RenderNode on first use. (`ensureEffectRegistered` exists in source but is internal; not exported from `effects/index.ts`.)
 
 ### Subclass `Panel` (debugger)
 

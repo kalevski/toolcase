@@ -219,7 +219,7 @@
       "title": "Optimize .claude/skills/node-feature/SKILL.md",
       "file": ".claude/skills/node-feature/SKILL.md",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "acceptance": [
         "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
         "Every file path, export, workspace, and npm script referenced exists in the current repo",
@@ -234,7 +234,7 @@
       "title": "Optimize .claude/skills/phaser-plus-feature/SKILL.md",
       "file": ".claude/skills/phaser-plus-feature/SKILL.md",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "acceptance": [
         "Frontmatter has accurate name (kebab-case) and a specific description that includes trigger surface",
         "Every file path, export, workspace, and npm script referenced exists in the current repo",
