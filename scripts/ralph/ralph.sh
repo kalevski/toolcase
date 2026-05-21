@@ -14,6 +14,7 @@ MODEL="${RALPH_MODEL:-claude-opus-4-7}"
 PROMPT_FILE="$SCRIPT_DIR/CLAUDE.md"
 PRD_FILE="$REPO_ROOT/prd.json"
 PROGRESS_FILE="$REPO_ROOT/progress.txt"
+EXCLUDE_PREFIX="${RALPH_EXCLUDE_PREFIX:-.claude/skills/phaser/}"
 
 if [ ! -f "$PRD_FILE" ]; then
     echo "ERR: $PRD_FILE missing" >&2
@@ -55,9 +56,9 @@ for i in $(seq 1 "$MAX_ITER"); do
     echo " Ralph iteration $i / $MAX_ITER"
     echo "============================================="
 
-    REMAINING="$(jq '[.userStories[] | select(.passes==false)] | length' "$PRD_FILE")"
-    TOTAL="$(jq '.userStories | length' "$PRD_FILE")"
-    echo " Remaining: $REMAINING / $TOTAL"
+    REMAINING="$(jq --arg ex "$EXCLUDE_PREFIX" '[.userStories[] | select(.passes==false) | select(.file | startswith($ex) | not)] | length' "$PRD_FILE")"
+    TOTAL="$(jq --arg ex "$EXCLUDE_PREFIX" '[.userStories[] | select(.file | startswith($ex) | not)] | length' "$PRD_FILE")"
+    echo " Remaining: $REMAINING / $TOTAL (excluding $EXCLUDE_PREFIX)"
 
     if [ "$REMAINING" -eq 0 ]; then
         echo "ALL STORIES PASS. Done."
@@ -69,7 +70,7 @@ for i in $(seq 1 "$MAX_ITER"); do
         --print \
         --model "$MODEL" \
         --dangerously-skip-permissions \
-        --append-system-prompt "You are running in an autonomous Ralph loop. Make exactly one story of progress per invocation, then stop." \
+        --append-system-prompt "You are running in an autonomous Ralph loop. Make exactly one story of progress per invocation, then stop. IGNORE any userStories whose .file starts with '$EXCLUDE_PREFIX' — do not pick them, do not edit them, treat them as out of scope." \
         "$PROMPT_CONTENT"
     rc=$?
     set -e
@@ -86,6 +87,6 @@ done
 
 echo ""
 echo "Max iterations ($MAX_ITER) reached."
-REMAINING="$(jq '[.userStories[] | select(.passes==false)] | length' "$PRD_FILE")"
-echo "Stories still open: $REMAINING"
+REMAINING="$(jq --arg ex "$EXCLUDE_PREFIX" '[.userStories[] | select(.passes==false) | select(.file | startswith($ex) | not)] | length' "$PRD_FILE")"
+echo "Stories still open: $REMAINING (excluding $EXCLUDE_PREFIX)"
 exit 0

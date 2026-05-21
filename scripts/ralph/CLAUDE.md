@@ -46,8 +46,9 @@ Optimization goals, in priority order:
 
 ## Workflow for THIS iteration
 
-1. `jq '[.userStories[] | select(.passes==false)] | sort_by(.priority) | .[0]' prd.json`
-   to pick your story.
+1. `jq '[.userStories[] | select(.passes==false) | select(.file | startswith(".claude/skills/phaser/") | not)] | sort_by(.priority) | .[0]' prd.json`
+   to pick your story. Stories under `.claude/skills/phaser/` are out of scope —
+   skip them, do not edit, do not flip `passes`.
 2. Read the target file (`story.file`). Read related source (the package's
    `src/index.ts`, key implementation files) to ground your edits.
 3. Edit the SKILL.md per the optimization goals above. Use `Edit` for surgical
