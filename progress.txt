@@ -3,3 +3,6 @@
 Append-only learnings from each iteration. Future iterations read this to
 avoid repeating mistakes and to inherit conventions discovered along the way.
 
+## Iteration 1 — opt-examples-public-base
+- Added Packing section (Packer, 5 algorithms, helpers) — namespace was fully exported from base/src/main.ts but absent from SKILL.md.
+- Pattern: cross-check `src/main.ts` exports against SKILL.md TOC. Re-exported namespaces (HTTP, Packing) often hide coverage gaps. Public types are re-exported with `Packing*` prefix — list them when adding a section.

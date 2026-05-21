@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -9,7 +9,8 @@ Zero-dependency TypeScript helpers and data structures. Isomorphic (Node + brows
 
 ```ts
 import {
-    HTTP, // { Status, RESTError, RESTResponse }
+    HTTP,     // { Status, RESTError, RESTResponse }
+    Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
     VectorClock, EventEmitter, Broadcast,
     LSystem, ObjectPool, PriorityQueue,
     generateId, toHex, formatByteSize,
@@ -53,6 +54,10 @@ import {
   - [Status](#status)
   - [RESTError](#resterror)
   - [RESTResponse](#restresponse)
+- [Packing](#packing)
+  - [Packer](#packer)
+  - [Algorithms](#algorithms)
+  - [Helpers (Trimmer / Sorter / Rotator / MultiPagePlanner / potCeil)](#packing-helpers)
 
 ---
 
@@ -622,6 +627,142 @@ class RESTResponse<T = any> {
 ```ts
 return new HTTP.RESTResponse(HTTP.Status.OK, users, users.length)
 ```
+
+---
+
+## Packing
+
+Rectangle / sprite-atlas packing. Exported as a single namespace `Packing` (also as a default-export object). Five 2D bin-packing algorithms behind a uniform `Algorithm` interface, plus a high-level `Packer` that wires up trimming, sorting, multi-page planning, rotation, and POT (power-of-two) sizing.
+
+```ts
+import { Packing } from '@toolcase/base'
+// Packing = { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree,
+//             MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
+```
+
+Public types (importable from `@toolcase/base`):
+
+```ts
+import type {
+    PackingSize, PackingRect, PackingPlacedRect,
+    PackingSprite, PackingPreparedSprite, PackingPlacedSprite,
+    PackingPackedPage, PackingResult, PackingPOTMode,
+    PackingAlgorithmOptions, PackingAlgorithmKind,
+    PackingMemoryBudget, PackingSortStrategy, PackingPackerOptions
+} from '@toolcase/base'
+```
+
+### Packer
+
+End-to-end pipeline: input `Sprite[]` → optional alpha-trim → sort → multi-page place via the chosen algorithm → rotation fix-up → optional POT page size → `PackResult`.
+
+```ts
+new Packing.Packer(options: PackerOptions)
+
+interface PackerOptions {
+    algorithm: 'max-rects' | 'guillotine' | 'shelf' | 'skyline' | 'binary-tree'
+    maxWidth: number
+    maxHeight: number
+    allowRotation: boolean
+    padding: number          // gutter between sprites (px)
+    extrude: number          // edge-pixel duplication around each sprite (px)
+    pot: 'none' | 'page' | 'square'   // 'page' → ceil each axis to POT; 'square' → POT square
+    sort: SortStrategy | 'none'        // 'area-desc' | 'max-side-desc' | 'height-desc' | 'width-desc' | 'perimeter-desc' | 'none'
+    trim: boolean             // trim transparent borders if sprite.pixels provided
+    alphaThreshold: number    // alpha > threshold counts as opaque
+    budget: MemoryBudget      // { maxPagePixels?, maxPages?, maxSinglePagePixels? }
+}
+
+packer.pack(inputs: Sprite[]): PackResult
+
+interface Sprite { id: string; width: number; height: number; pixels?: PixelGrid }
+interface PixelGrid { width: number; height: number; alphaAt(x: number, y: number): number }
+
+interface PackResult {
+    pages: PackedPage[]            // each: { width, height, sprites: PlacedSprite[], occupancy }
+    unpacked: PreparedSprite[]     // sprites that didn't fit under the budget
+}
+
+interface PlacedSprite extends PreparedSprite {
+    rect: { x: number; y: number; width: number; height: number }
+    page: number
+}
+```
+
+```ts
+const packer = new Packing.Packer({
+    algorithm: 'max-rects',
+    maxWidth: 1024, maxHeight: 1024,
+    allowRotation: true,
+    padding: 2, extrude: 1,
+    pot: 'square',
+    sort: 'max-side-desc',
+    trim: false, alphaThreshold: 0,
+    budget: { maxPages: 4 }
+})
+
+const result = packer.pack([
+    { id: 'hero',   width: 64,  height: 96 },
+    { id: 'enemy',  width: 32,  height: 32 },
+    { id: 'panel',  width: 256, height: 128 }
+])
+
+for (const page of result.pages) {
+    console.log(page.width, page.height, page.occupancy)
+    for (const s of page.sprites) console.log(s.id, s.rect, s.rotated)
+}
+```
+
+### Algorithms
+
+All extend the abstract `Algorithm` class with the same surface:
+
+```ts
+abstract class Algorithm {
+    constructor(options: AlgorithmOptions)
+    abstract insert(size: Size): PlacedRect | null   // null when no fit
+    abstract reset(): void
+    abstract occupancy(): number                     // [0, 1]
+    abstract usedBounds(): Size
+}
+
+interface AlgorithmOptions {
+    maxWidth: number; maxHeight: number
+    allowRotation: boolean
+    padding: number; extrude: number
+    pot: POTMode
+}
+```
+
+Concrete classes — pick by trade-off:
+
+| Class | Strategy | Best for |
+|---|---|---|
+| `Packing.MaxRects` | Tracks all maximal free rectangles; heuristic choice per insert | Highest occupancy, slower |
+| `Packing.Guillotine` | Splits free space with axis-aligned cuts | Good occupancy, fast |
+| `Packing.Skyline` | Bottom-left skyline contour | Fast, ideal for similar-height sprites |
+| `Packing.Shelf` | Fixed-height horizontal rows | Fastest, good for uniform sizes |
+| `Packing.BinaryTree` | Classic growing binary partition tree | Simple, good for incremental packing |
+
+Use an algorithm directly when you want a single page and full control:
+
+```ts
+const algo = new Packing.MaxRects({
+    maxWidth: 512, maxHeight: 512,
+    allowRotation: false, padding: 1, extrude: 0, pot: 'none'
+})
+const placed = algo.insert({ width: 64, height: 64 })  // PlacedRect | null
+algo.occupancy()   // fill ratio so far
+algo.usedBounds()  // tight bounding box of placements
+```
+
+### Packing helpers
+
+- `Packing.MultiPagePlanner(factory, { padding, extrude }, budget?)` — orchestrates page-by-page placement across an `AlgorithmFactory` while honoring `MemoryBudget` caps. `Packer` uses this internally; reach for it directly when you want a custom pipeline.
+- `Packing.Trimmer(alphaThreshold = 0)` — `.trim(sprite)` scans `sprite.pixels` and returns a `PreparedSprite` with cropped width/height + source-offset metadata. Sprites without `pixels` pass through unchanged.
+- `Packing.Sorter(strategy)` — `.sort(prepared)` returns a stable-sorted copy by `area-desc | max-side-desc | height-desc | width-desc | perimeter-desc`.
+- `Packing.Rotator()` — `.apply(placedSprites)` swaps `sourceWidth/sourceHeight` and source offsets for any sprite where `rotated === true`. Run after placement to normalize metadata for atlas writers.
+- `Packing.potCeil(value)` — round a positive integer up to the next power of two; `value <= 1 → 1`.
 
 ---
 
