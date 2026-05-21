@@ -1,11 +1,11 @@
 ---
 name: node-feature
-description: Add a new feature, helper, error class, repository, endpoint, KV primitive, or utility to `@toolcase/node`. Triggers when the user asks to add/create/scaffold a new export inside `node/src/` (e.g. "add a SoftDeleteRepository extension", "ship a TokenBucket helper to KVService", "new sanitize visitor", "add a Fastify pre-handler for X"). Wires up the `.ts` file, the test, the `main.ts` (and `main.iso.ts` if isomorphic) export, and updates the inventory + downstream skill doc.
+description: Add a new feature, helper, error class, repository, endpoint, KV primitive, OAuth2/OIDC helper, image transform, or utility to `@toolcase/node`. Triggers when the user asks to add/create/scaffold a new export inside `node/src/` (e.g. "add a SoftDeleteRepository extension", "ship a TokenBucket helper to KVService", "new sanitize visitor", "add a Fastify pre-handler for X", "add a Keycloak OAuth2 profile mapper", "add an AtlasBuilder option"). Wires up the `.ts` file, the test, the `main.ts` (and `main.iso.ts` if isomorphic) export, and updates the inventory + downstream skill doc.
 ---
 
 # node-feature
 
-Scaffold a new feature in `@toolcase/node`. Backend-only Node helpers — Fastify endpoints, Kysely repositories, Redis KV primitives, isomorphic sanitize / pagination / where / orderBy, typed `env`, and the domain-error tree. Single entrypoint (`@toolcase/node`) re-exporting every surface.
+Scaffold a new feature in `@toolcase/node`. Backend-only Node helpers — Fastify endpoints, Kysely repositories, Redis KV primitives, OAuth2 / OIDC protocol toolkit, sharp-backed image processing + atlas builder, isomorphic sanitize / pagination / where / orderBy, typed `env`, and the domain-error tree. Single entrypoint (`@toolcase/node`) re-exporting every surface.
 
 ## REQUIRED reading before generating any code
 
@@ -21,13 +21,15 @@ Do not paraphrase. Open all three. Locate the section matching your feature cate
 
 Before adding a new export, scan `features.md` for any existing primitive that already covers part of your task. Concrete checks:
 
-- Need a domain error? Extend the matching parent (`RepositoryError` / `KVServiceError` / `EndpointError`) — do not create a new top-level `LibError` sibling unless you are introducing a brand new subsystem.
+- Need a domain error? Extend the matching parent (`RepositoryError` / `KVServiceError` / `EndpointError`, or `OAuth2Error` for OAuth2/OIDC failures) — do not create a new top-level `LibError` sibling unless you are introducing a brand new subsystem.
 - Need pagination shape? Use `Page<T>` / `CursorPage<T>` + `normalizeOffsetLimit` / `buildPage` — do not invent a new envelope.
 - Need where/order helpers? Use `applyWhere` / `applyOrderBy` and the `WhereClause<T>` / `OrderBy<T>` types — do not write a new query DSL.
 - Need a sanitize step? Compose `pipe(...)` over the built-in visitors (`removePrivate`, `removeWriteOnly`, `coerceNumber`, …). Add a new visitor only if the behavior is novel.
 - Need a CRUD slice? Subclass `BaseRepository` (with `SoftDeleteRepository` if soft-delete) and wrap with `EntityService` — do not write a new repo base.
 - Need a Fastify route surface? Subclass `RouteHandler`, compose with `Router`, mount via `HttpServer.add()`. Do not bypass — `HttpServer` owns the lifecycle and `/health`.
 - Need a Redis primitive? Add it to `KVService` (or one of its sub-classes — `Locker`, `RateLimiter`, `Leaderboard`, `ValueStore`, `Versioned`, `SubscriberPool`). Use the existing `KeyBuilder` for namespacing and `LuaScriptCache` for atomic scripts. Do not call `client.eval` directly from a feature file.
+- Need an OAuth2 / OIDC flow piece? Compose with the existing `oauth2/*` primitives — `buildAuthorizeURL` / `exchangeCode` / `refreshToken` / `revokeToken` / `fetchUserinfo` (flow), `clientCredentialsToken` / `requestDeviceCode` / `pollDeviceToken` (grants), `extractBearerToken` / `introspectToken` (resource), `fetchOIDCDiscovery` / `verifyIdToken` / `oidcProvider` (OIDC), `parseStandardOIDCProfile` / `parseGitHubProfile` / `parseDiscordProfile` (profiles), `generatePKCE` / `generateState` / `generateNonce` (random). Provider configs are data — go through `oauth2Provider({...})`. Do not hand-roll fetches; use `fetchWithOptions` from `node/src/http/options.ts` for timeout / retry / fetch-injection.
+- Need an image transform (resize / crop / format / optimize)? Chain off `ImageProcessor.fromBuffer` / `ImageProcessor.fromPath`. For sprite-atlas building, use `AtlasBuilder`. Both lazy-load `sharp` via `node/src/internal/lazySharp.ts` — never `import sharp from 'sharp'` at module top level in a new feature file (it breaks the optional-peer contract for consumers who don't install `sharp`).
 - Need a typed env-var read? Use `env(key, default, type)` — do not roll a new parser.
 - Need a logger contract? Use the `Logger` interface from `node/src/utils/logger.ts` — do not introduce a second one.
 
@@ -38,9 +40,10 @@ If your new feature would duplicate >50% of an existing one, **stop and either e
 Trigger on requests like:
 
 - "add a [helper / utility / error class / sanitize visitor / KV method] to node"
-- "implement [SoftDeleteRepository / TokenBucket / SubscriberPool extension / …] in @toolcase/node"
-- "I need a [Fastify pre-handler / RouteHandler subclass / Kysely repo helper] for the backend"
-- any request mentioning `node/src/`, `@toolcase/node`, Fastify endpoint composition, Kysely repository helpers, Redis KV primitives
+- "implement [SoftDeleteRepository / TokenBucket / SubscriberPool extension / OAuth2 profile mapper / …] in @toolcase/node"
+- "I need a [Fastify pre-handler / RouteHandler subclass / Kysely repo helper / Discord OAuth2 wiring] for the backend"
+- "extend ImageProcessor with [op]" / "add an AtlasBuilder option for [thing]"
+- any request mentioning `node/src/`, `@toolcase/node`, Fastify endpoint composition, Kysely repository helpers, Redis KV primitives, OAuth2/OIDC plumbing, or sharp-backed image processing
 
 Do NOT use for:
 
@@ -56,18 +59,18 @@ Do NOT use for:
 These are non-negotiable. They come from `node/package.json` (`engines.node >= 18`, `sideEffects: false`, peer-dep map), `node/tsup.config.js` (Node platform, ESM + CJS, externals), and the patterns every existing file in `node/src/` follows.
 
 1. **Node-only.** `node/src/` may freely use `process`, `Buffer`, `node:crypto`, `node:fs`, `node:path`, etc. Don't pretend to be isomorphic — that is what `@toolcase/base` is for.
-2. **Peer-dep gated.** A new file may only `import` from a peer that is declared in `node/package.json` `peerDependencies`. Current allowed peers: `@toolcase/base`, `@toolcase/serializer`, `fastify`, `@fastify/cors`, `kysely`, `redis`. Anything else → vendor it under `node/src/` or push back to the user. Files importing optional peers (`fastify`, `kysely`, `redis`, `@toolcase/serializer`, `@fastify/cors`) must be reachable from `main.ts` only — consumers who don't install the peer will tree-shake them via `sideEffects: false` and named-import paths.
-3. **Isomorphic-eligible code goes in `node/src/utils/` and re-exports from `main.iso.ts`.** If your file does not touch `process`/`Buffer`/`fs`/Node-only peers, place it under `node/src/utils/` and add it to `node/src/utils/index.ts` AND `node/src/main.iso.ts`. Sanitize / pagination / where / orderBy / errors / Logger interface are the existing examples. Anything Node-bound (Fastify, Kysely, Redis, `env`, anything calling `process.env`) only goes in `main.ts`.
+2. **Peer-dep gated.** A new file may only `import` from a peer that is declared in `node/package.json` `peerDependencies`. Current allowed peers: `@toolcase/base` (required), `@toolcase/serializer`, `fastify`, `@fastify/cors`, `kysely`, `redis`, `jose`, `sharp` (all optional except `@toolcase/base`). Anything else → vendor it under `node/src/` or push back to the user. Files importing optional peers must be reachable from `main.ts` only — consumers who don't install the peer rely on `sideEffects: false` + named imports to tree-shake the dead path. The `sharp` peer is additionally guarded by lazy dynamic `import('sharp')` via `node/src/internal/lazySharp.ts` (constructing an `ImageProcessor` or `AtlasBuilder` must not pull `sharp` until a terminal op runs).
+3. **Isomorphic-eligible code goes in `node/src/utils/` and re-exports from `main.iso.ts`.** If your file does not touch `process`/`Buffer`/`fs`/Node-only peers, place it under `node/src/utils/` and add it to `node/src/main.iso.ts`. Sanitize / pagination / where / orderBy / errors / `Logger` interface are the existing examples. Anything Node-bound (Fastify, Kysely, Redis, `sharp`, `env`, anything calling `process.env`) only goes in `main.ts`. Note: `main.iso.ts` is currently a discipline marker only — the package `exports` map exposes a single root entry (`.`) pointing at `main.ts`, so consumers always import from `@toolcase/node`. The iso file is still curated so a future `./iso` subpath (or a downstream tree-shake) stays one config edit away. Do NOT add a Node-only export to `main.iso.ts`.
 4. **One export concern per file.** Filename matches the primary export. PascalCase class → `PascalCase.ts`. lowerCamelCase function → `lowerCamel.ts`. Subsystems (`kv/`, `utils/`, …) get a folder with an `index.ts` that re-exports.
-5. **`main.ts` is the gateway. `main.iso.ts` mirrors only isomorphic surface.** Every public export from a `node/src/` file must be reachable through `node/src/main.ts`. If it is also isomorphic-safe, it must additionally be reachable through `node/src/main.iso.ts`. Both files are flat `export * from './…'` lines — keep them sorted into the existing groups (errors → utils → endpoint → repository → kv).
-6. **Subsystems group three-or-more related files.** Existing examples: `node/src/utils/` (sanitize/pagination/where/orderBy/logger/types), `node/src/kv/` (Locker/RateLimiter/Leaderboard/ValueStore/Versioned/SubscriberPool/KVService/keys/scripts/types). Add a third file? Make a folder with `index.ts` `export *` re-exports and import via that folder from `main.ts`.
+5. **`main.ts` is the gateway. `main.iso.ts` mirrors only isomorphic surface.** Every public export from a `node/src/` file must be reachable through `node/src/main.ts`. If it is also isomorphic-safe, it must additionally be reachable through `node/src/main.iso.ts`. Both files are flat `export * from './…'` lines — keep them sorted into the existing groups (`env` → errors → utils → endpoint → repository → image → kv → oauth2).
+6. **Subsystems group three-or-more related files.** Existing subsystems: `node/src/utils/` (sanitize folder + logger / where / orderBy / pagination / types), `node/src/kv/` (Locker / RateLimiter / Leaderboard / ValueStore / Versioned / SubscriberPool / KVService / keys / scripts / types), `node/src/oauth2/` (types / random / flow / grants / resource / oidc / profiles / wire / index). Smaller shared groupings: `node/src/http/` (single `options.ts` carrying `fetchWithOptions` for the oauth2 subsystem) and `node/src/internal/` (non-exported helpers like `lazySharp.ts`). Add a third related file? Make a folder with `index.ts` `export *` re-exports (the `kv/` and `oauth2/` pattern) — `utils/` is the exception: `main.ts` imports the leaf files individually so it can selectively surface a subset (e.g. `utils/path.ts`, `utils/parseFilters.ts`, `utils/parseSort.ts` are intentionally not surfaced from `main.ts`). Pick the folder pattern if everything in the folder is meant to be public; pick the leaf-import pattern if you need to gate which leaves are public.
 7. **Tests are mandatory.** Every new export ships with `node/test/<Name>.test.ts` (or `node/test/<group>/<Name>.test.ts`) using vitest. Tests must cover: happy path, contract violations (throws), and any peer-dep-mocked side effect. Use vitest mocks for `kysely`, `redis`, and `fastify` rather than spinning real services.
 8. **Strict TypeScript.** Generics where it makes sense; precise return types; no `any` for public surface. Use `T | null` over `T | undefined` for "absent" in public APIs (matches `statusCodeFromError`, `Locker.tryWithLock`, `Versioned.versionedGet`).
 9. **No code comments.** Self-documenting names only. Existing files contain almost zero `//`. JSDoc only when a parameter's contract is non-obvious from its type (units, valid ranges, atomicity guarantees, side effects). When you do use JSDoc, mirror the multi-line style from `RouteHandler.ts` / `HttpServer.ts` / `KVService.ts`.
 10. **No semicolons.** Match the project-wide prettier config (`.prettierrc` `"semi": false`).
 11. **Indent: tabs in `node/src/`, 4 spaces in `node/test/`.** The legacy outlier is `node/src/env.ts` (4 spaces). For NEW files, use **tabs** under `node/src/` (matches `errors.ts`, `RouteHandler.ts`, `HttpServer.ts`, `BaseRepository.ts`, `kv/*`, `utils/*`). Tests use 4 spaces (matches `test/env.test.ts` and the rest of the monorepo). Do NOT reformat tabs to spaces in existing files — that is a reformatting churn the project has not opted into.
-12. **Errors extend the existing tree.** All new error classes must inherit (transitively) from `LibError` defined in `node/src/errors.ts`. Pick the right parent: `RepositoryError`, `KVServiceError`, `EndpointError`. Always set readonly fields for any data the consumer needs to handle the error (resource id, key, retry-after, etc.). If an error maps to an HTTP status, also wire it into `statusCodeFromError`.
-13. **Update the published `SKILL.md`.** When you add a feature, append a section to `examples/public/node/SKILL.md` matching the existing surface (env / Errors / Utils / Repository / RouteHandler / KVService). The published doc is the contract Claude Code installs as a skill — keep it current.
+12. **Errors extend the existing tree.** All new error classes must inherit (transitively) from `LibError` defined in `node/src/errors.ts`. Pick the right parent: `RepositoryError`, `KVServiceError`, `EndpointError`, `OAuth2Error` (extends `EndpointError`), or another `LibError` child for a brand-new subsystem (e.g. `ImageProcessorError`, `AtlasBuildError`). Always set readonly fields for any data the consumer needs to handle the error (resource id, key, retry-after, `upstreamStatus`, etc.). If an error maps to an HTTP status, also wire it into `statusCodeFromError`.
+13. **Update the published `SKILL.md`.** When you add a feature, append a section to `examples/public/node/SKILL.md` matching the existing surface (env / Errors / Utils / Repository / RouteHandler / KVService / ImageProcessor / AtlasBuilder / OAuth2). The published doc is the contract Claude Code installs as a skill — keep it current.
 14. **Update `features.md`.** Append a section to `.claude/skills/node-feature/features.md` matching the existing entries (heading, one-line description, "Use when" / "Skip when" bullets, public API table, "Reuses" line if it composes with another node export).
 15. **No demo site requirement.** Unlike `base`, the `examples/` workspace does not host a node demo (it is a Vite SPA — Fastify/Kysely/Redis won't run there). The downstream contract is the published `SKILL.md` only.
 
@@ -78,13 +81,14 @@ For a new export named `<Name>`:
 1. **`node/src/<Name>.ts`** — top-level helper or class (e.g. a new error subclass, a new RouteHandler mixin, a new top-level service).
    OR **`node/src/utils/<Name>.ts`** — isomorphic helper (sanitize visitor, pagination/where/orderBy variant, logger adapter shape).
    OR **`node/src/kv/<Name>.ts`** — Redis-backed KV primitive (pair with `KeyBuilder` and `LuaScriptCache`; export classes that the `KVService` constructor wires up).
+   OR **`node/src/oauth2/<Name>.ts`** — OAuth2/OIDC helper (provider config, flow / grant / resource-server function, profile mapper). Pure functions over data.
    OR **`node/src/<group>/<Name>.ts`** — when introducing a new subsystem of three+ files, create the folder with `index.ts`.
-2. **`node/test/<Name>.test.ts`** (or `node/test/<group>/<Name>.test.ts`) — vitest. Match the shape of `node/test/env.test.ts`. Mock peer libs with `vi.mock`.
-3. **`node/src/main.ts`** — append `export * from './<Name>'` (or `'./<group>/<Name>'`) into the matching block (errors → utils → endpoint/server → repository/CRUD → kv). Keep within the existing grouping comments / ordering.
+2. **`node/test/<Name>.test.ts`** (or `node/test/<group>/<Name>.test.ts`) — vitest. Match the shape of `node/test/env.test.ts` (named imports, 4-space indent). Mock peer libs with `vi.mock` unless the test legitimately needs the real thing (`sharp`-backed tests in `node/test/AtlasBuilder.test.ts` / `ImageProcessor.test.ts` import the real `sharp`).
+3. **`node/src/main.ts`** — append `export * from './<Name>'` (or `'./<group>/<Name>'`, or `'./<group>/index'` if the subsystem barrels through one entry) into the matching block (env → errors → utils leaves → endpoint/server → repository/CRUD → image → kv → oauth2). Keep within the existing grouping / ordering.
 4. **`node/src/main.iso.ts`** — append `export * from './<Name>'` ONLY if the file has no Node-only imports. (Sanitize, pagination, where, orderBy, errors, the `Logger` interface qualify. Anything pulling `node:*`, `process`, `Buffer`, `fastify`, `kysely`, `redis` does NOT.)
-5. **`examples/public/node/SKILL.md`** — append the API section. Same shape as existing entries. For new errors: extend the Errors fence. For new utils: extend the Utils block. For new repo/endpoint methods: append to the corresponding fenced block. For new KVService methods: append to the appropriate KVService section. For new subsystems: a new top-level `## <Group>` section.
+5. **`examples/public/node/SKILL.md`** — append the API section. Same shape as existing entries. For new errors: extend the Errors fence. For new utils: extend the Utils block. For new repo/endpoint methods: append to the corresponding fenced block. For new KVService methods: append to the appropriate KVService section. For new OAuth2 helpers: extend the OAuth2 section + add an IDP snippet to the cookbook if relevant. For new image / atlas surface: extend the ImageProcessor / AtlasBuilder block. For new subsystems: a new top-level `## <Group>` section.
 6. **`.claude/skills/node-feature/features.md`** — append an inventory entry following the existing pattern (heading `### \`<Name>\` — <short tagline>`, one-line description, "Use when" / "Skip when" bullets, public API table, "Reuses" line if it composes with another node export).
-7. **(Conditional)** If your feature changes the peer-dep matrix (e.g. adding a new optional peer), also update `node/package.json` (`peerDependencies` + `peerDependenciesMeta`), `node/tsup.config.js` `external` array, `node/README.md` peer table, and `examples/public/node/SKILL.md` peer-deps table.
+7. **(Conditional)** If your feature changes the peer-dep matrix (e.g. adding a new optional peer), also update `node/package.json` (`peerDependencies` + `peerDependenciesMeta`), `node/tsup.config.js` `external` array, `node/README.md` peer table, `examples/public/node/SKILL.md` peer-deps table, and the peer-dep matrix at the top of `.claude/skills/node-feature/features.md`.
 
 ## Component templates
 
@@ -164,11 +168,51 @@ Extend `BaseRepository` (or `SoftDeleteRepository`); add domain-specific queries
 
 Extend `RouteHandler<T>`. Implement `register(fastify)` using the protected helpers (`path()`, `itemPath()`, `routeOptions()`, `parseId()`, `sanitize*()`, `ok()`, `created()`, `mapError()`). Don't reach for `fastify.register(cors)` etc. — that is `HttpServer`'s job.
 
+### OAuth2 helper (`node/src/oauth2/<name>.ts`)
+
+Pure function over `OAuth2ProviderConfig` (+ inputs). HTTP calls go through `fetchWithOptions` from `node/src/http/options.ts` (timeout via `AbortController`, retry on 5xx, fetch-injection). Throw the right error subclass (`OAuth2TokenError` for upstream IDP failures with `upstreamStatus` + `upstreamBody`, `OAuth2ProtocolError` for spec violations, `OAuth2CallbackError` for `?error=...` callback responses, `OIDCVerificationError` / `TokenIntrospectionError` for OIDC + introspection paths).
+
+```ts
+import type { OAuth2ProviderConfig, OAuth2Tokens } from './types'
+import { fetchWithOptions, type HttpOptions } from '../http/options'
+import { OAuth2TokenError } from '../errors'
+
+export async function myFlow(
+    provider: OAuth2ProviderConfig,
+    input: { /* ... */ },
+    opts: HttpOptions = {},
+): Promise<OAuth2Tokens> {
+    const body = new URLSearchParams({ /* ... */ })
+    const res = await fetchWithOptions(provider.tokenURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+    }, opts)
+    if (!res.ok) {
+        throw new OAuth2TokenError('my_flow_failed', { upstreamStatus: res.status, upstreamBody: await res.text() })
+    }
+    return await res.json()
+}
+```
+
+### Image transform op (`node/src/ImageProcessor.ts`)
+
+Append a chainable method that returns a new `ImageProcessor` with the op recorded — `sharp` itself is invoked lazily inside `toBuffer`/`toFile`/`metadata`, so the method body must not import `sharp` at module scope. Use `loadSharp` (already imported) only inside the terminal-op materializer. Same rule for `AtlasBuilder`.
+
+```ts
+// Inside ImageProcessor — example shape, not a literal patch:
+sepia(): ImageProcessor {
+    return this.withOp(pipeline => pipeline.modulate({ saturation: 0.3 }).tint({ r: 112, g: 66, b: 20 }))
+}
+```
+
+If the op can fail at encode time (out-of-range crop, missing input), throw `ImageProcessorError` lazily inside the materializer — eager-throw in the chained method only when the input is statically invalid.
+
 ## Test template (`node/test/<Name>.test.ts`)
 
 ```ts
 import { describe, it, expect, vi } from 'vitest'
-import MyFeature from '../src/MyFeature'
+import { MyFeature } from '../src/MyFeature'
 
 describe('MyFeature', () => {
     it('throws on invalid construction', () => {
@@ -181,6 +225,8 @@ describe('MyFeature', () => {
     })
 })
 ```
+
+Use a default import only when the source file itself uses `export default` (currently only `env.ts`). Every other file in `node/src/` uses named exports — match that.
 
 Required test cases per export:
 
@@ -212,8 +258,11 @@ Required test cases per export:
 - Adding a `BaseRepository` method that bypasses Kysely's transaction parameter. Every public method must accept an optional `trx?: Transaction<DB>` and pass it through.
 - Adding an `RouteHandler` subclass that builds its own error envelope. Use `mapError` so the response shape stays uniform with `RESTError` / `RESTResponse` from `@toolcase/base`.
 - Adding a domain error that does NOT extend `LibError`. The runtime check is `instanceof LibError`; siblings are invisible to it.
-- Re-exporting a Node-only module from `main.iso.ts`. The whole point of `main.iso.ts` is "no `process`/`Buffer`/`fs`/peer-only code reachable here." Anything you put there will be importable from a browser bundle and must run.
+- Re-exporting a Node-only module from `main.iso.ts`. The whole point of `main.iso.ts` is "no `process`/`Buffer`/`fs`/peer-only code reachable here." Even though no consumer can currently import it as a subpath, the discipline keeps the surface ready for one — break it and the next iso-subpath PR will need a doc refactor.
 - Duplicating CRUD methods in a service that should subclass `EntityService`. Override the `before*` / `after*` hooks instead.
+- Top-level `import sharp from 'sharp'` (or `import('sharp')` at module scope) in a new `node/src/` file. Use `loadSharp()` from `node/src/internal/lazySharp.ts` inside a terminal op so consumers without `sharp` installed don't pay startup cost or hit a require failure.
+- Hand-rolling `fetch(...)` for an OAuth2 / OIDC HTTP call. Use `fetchWithOptions` from `node/src/http/options.ts` — it owns timeout + retry + fetch-injection used by the rest of the OAuth2 subsystem.
+- Hard-coding per-IDP wiring (Google / GitHub / Discord / Auth0 / …) into `node/src/oauth2/`. Provider configs are data — keep them as cookbook snippets in `examples/public/node/SKILL.md`. The library is IDP-agnostic.
 - Mixing tabs into a 4-space file (or vice versa). Match the file you are editing. New files in `node/src/` use tabs.
 - Code comments where a self-documenting name would do.
 - Trailing semicolons (style mismatch with prettier config).
