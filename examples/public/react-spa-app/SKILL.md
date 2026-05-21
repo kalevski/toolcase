@@ -22,13 +22,13 @@ Stack baseline:
 
 These packages are designed for this SPA architecture. All are optional — use what fits.
 
-- **`@toolcase/react-components`** — 160+ UI primitives covering typography, inputs, buttons, layout (`DashboardLayout`, `BasicLayout`), navigation (`SideNav`, `TabSections`), overlays (`Modal`, `Alert`, `Dropdown`), data display, charts, and marketing/landing surfaces. Primary choice for the UI layer in this stack. See the `react-components` skill for component catalog and usage.
+- **`@toolcase/react-components`** — 180+ UI primitives covering typography, inputs, buttons, layout (`DashboardLayout`, `BasicLayout`), navigation (`SideNav`, `TabSections`), overlays (`Modal`, `Alert`, `Dropdown`), data display, charts, and marketing/landing surfaces. See the `react-components` skill for component catalog and usage.
 
-- **`@toolcase/base`** — Zero-dep TypeScript helpers and data structures: `Cache`, `PriorityQueue`, `VectorClock`, `ObjectPool`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `Color`, `JSONSchema` validation, HTTP REST primitives, and a Node-only `env()` loader. Drop into `helpers/` or `services/` for common primitives without pulling in heavyweight deps. See the `base` skill.
+- **`@toolcase/base`** — Zero-dep helpers and data structures: `Cache`, `PriorityQueue`, `VectorClock`, `ObjectPool`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `Color`, `JSONSchema`, `LSystem`, `WeightedRandom`, `Dijkstra`/`AStar`, `AdjacencyMatrix`, `State`, plus `HTTP` REST primitives (`Status`, `RESTError`, `RESTResponse`) and `Packing` (image atlas packer). Drop into `helpers/` or `services/`. See the `base` skill.
 
-- **`@toolcase/logging`** — Tiny isomorphic logger with named scopes, level filtering (`silent/error/warning/info/debug/verbose`), and pluggable `LogReporter` sinks (console default; swap for remote, file, or custom transport). Wire once in `Init`, use named loggers per domain (`logging.getLogger('auth')`). See the `logging` skill.
+- **`@toolcase/logging`** — Isomorphic logger with named scopes, level filtering (`silent/error/warning/info/debug/verbose`), and pluggable `LogReporter` sinks (`ConsoleLogReporter` default; `JSONLineReporter`, `BufferedReporter` available). Wire once in `Init`, use named loggers per domain (`logging.getLogger('auth')`). See the `logging` skill.
 
-- **`@toolcase/serializer`** — Runtime-defined protobuf schemas with encode/decode to compact `Uint8Array` via `protobufjs/light`. No `.proto` build step. Useful when a service communicates over WebSocket or binary IPC and needs compact wire format. Lives in `helpers/` or `services/`. See the `serializer` skill.
+- **`@toolcase/serializer`** — Runtime-defined protobuf schemas (`new Serializer()` + `wire.define(key, [{ key, type, rule }])`) with encode/decode to compact `Uint8Array` via `protobufjs/light`. No `.proto` build step. Useful for WebSocket or binary IPC wire format. Lives in `helpers/` or `services/`. See the `serializer` skill.
 
 ---
 

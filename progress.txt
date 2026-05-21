@@ -94,3 +94,11 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 - Hero example drift: `primaryAction={{ href: '/docs', ... }}` + `external: true` — HeroAction extends `ButtonHTMLAttributes<HTMLButtonElement>` (renders as `<Button>`, no href/link). Switched to `onClick` + window.open pattern and added a clarifying note on HeroAction shape.
 - Hero `bgIcons` was documented as "Bootstrap Icon names" but the source maps each entry to `<img src={src}>` (literal URLs). Fixed description + example.
 - Pattern: for components that look "link-like" (Hero/CTA/CoolButton), grep the source for `<a` or `href` before trusting any example that uses `href` — many of these are pure `<button>` underneath and the doc gets it wrong.
+
+## Iteration 10 — opt-examples-public-react-spa-app
+- Architecture-blueprint doc; trimmed @toolcase library bullets to factual surface.
+- Fixed @toolcase/base attribution: removed bogus "Node-only env() loader" (env lives in @toolcase/node, not base). Added missing real exports: LSystem, WeightedRandom, Dijkstra/AStar, AdjacencyMatrix, State, Packing namespace, HTTP sub-symbols (Status/RESTError/RESTResponse).
+- @toolcase/logging: dropped "Tiny" marketing adjective; named the concrete reporters (ConsoleLogReporter default, JSONLineReporter, BufferedReporter) instead of generic "console default; swap for remote, file, or custom".
+- @toolcase/serializer: replaced generic prose with the actual call shape (`new Serializer()` + `wire.define(key, [{ key, type, rule }])`) since iter 5 already flagged the schema-builder DSL pitfall.
+- @toolcase/react-components: "160+" → "180+" (counted 183 `export * from './X'` lines in src/index.ts).
+- Pattern: when a blueprint SKILL.md surfaces *neighbour packages*, the bullet for each package is the first place to verify against that package's main.ts — they age faster than the architecture rules themselves because they get rebranded ("primary choice for…") and accumulate stale primitive names. Treat each one-line library description as a mini-coverage check.
