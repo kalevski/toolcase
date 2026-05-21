@@ -56,3 +56,19 @@ avoid repeating mistakes and to inherit conventions discovered along the way.
 - env signature: was a fake generic `env<T>(key, default, type)`. Real is 6-overload function (string|number|boolean × default-typed/null). Replaced doc signature with the overload list.
 - Added `QueryEvent` + `QueryHook` + `onQuery` to BaseRepositoryOptions (tracing hook was missing).
 - Pattern: this SKILL.md had drifted across nearly every section because the underlying package renamed/refactored repo-method names AND sanitize types in lockstep. When you see one rename (e.g. `findPage`→`paginate`), grep the whole doc for the old name — they usually appear in BaseRepository, EntityService, AND the RESTRouteHandler routing table.
+
+## Iteration 7 — opt-examples-public-phaser-game-dev
+- Stack baseline: bumped peer ranges to actual (phaser-plus ^1.x → ^3.x; @toolcase/base ^2.x → ^3.x; @toolcase/logging ^2.x → ^3.x). Reworded exports list to match real top-level + re-export shape (Engine/Scene/.../SplitScreen, plus Scene2D/World/GameObject2D from perspective2d, installEffects from effects). Node 20+ → Node 18+ per engines.
+- Component count: every "134" → "137" (count of customElements.define calls in register.ts). Frontmatter description also updated.
+- Anchor API: doc treated gc-anchor as a multi-slot container with `slot="top-left"` kids. Real Anchor has single `<slot>` and a `position` attr — one anchor per corner. Rewrote HUDFeature, HotbarFeature, MinimapFeature, DialogueFeature to use one `<gc-anchor position="...">` per corner.
+- gc-panel doesn't take a `header` attr (real attrs: bordered/corners/parchment). Replaced `<gc-panel header="X">` with `<gc-panel bordered><gc-panel-header>X</gc-panel-header>` in inventory + settings.
+- DialogueBox attrs `speaker`/`text`/`typing-speed` (NOT `typewriter`). Box also exposes `.text` JS property; setting `.textContent` skips the typing pipeline. Fixed DialogueFeature.
+- InventoryGrid: no `rows` attr; only `select` event with `{ item, index }`. Removed `rows="6"` and merged `item-hover`/`item-click` handling into single `select` listener.
+- Minimap: world via `world-x/y/world-width/world-height` attrs, markers via `.markers` array prop (NOT slotted gc-objective-marker children, NOT a `zoom` attr, NOT `.center =`). Rewrote MinimapFeature to slide the world window and accumulate markers.
+- GameOverScreen extends ResultScreen; emits `action` event with `{ id }`, not `continue`. Fixed.
+- BlurOverlay: no `open` attr (toggling visibility is the host's job — added explicit `style.display` toggle). Theming example: real CSS var is `--gc-blur-amount`, not `--gc-blur-overlay-amount`.
+- Settings rows extend SettingRowBase with attr `row-label`, not `label`. GraphicsPresetPicker uses `value` not `preset`. Fixed.
+- Pool API: GameObjectPool exposes `register(key, class, instanceFn?, resetFn?)` + `obtain<T>(key)` + `release(obj)`. No `.add()`, no `.spawn(key, x, y)`, no `{ initial, max }` opts. ObjectLayer.add(key, x, y) is the layer-bound positioned-spawn API (internally pool.obtain + setPosition). Fixed pool section + Recipes + Anti-patterns + MainScene example.
+- ServiceRegistry method is `resolve(class)`, not `.get(class)`. Also has `bind`/`provide`/`has`/`dispose`. Fixed services section + recipe.
+- InputFeature: query method is `isPressed(action)`, not `isDown(action)`. Binding is `bind(action, [Binding[]])`. Fixed.
+- Pattern: architecture-blueprint SKILL.md files compound staleness — when phaser-plus + game-components both moved to 3.x peer ranges and several gc-* components renamed attrs in lockstep, the doc has drift in every example. Worth grepping the doc for *all* old attribute names from one component when fixing it (e.g. once you see `rows=`, also check `header=`, `preset=`, `label=`, `slot="…"`).
