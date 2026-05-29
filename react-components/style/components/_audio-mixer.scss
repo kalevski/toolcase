@@ -1,10 +1,10 @@
 .component.component-audio-mixer {
-    --am-color: #1e293b;
-    --am-muted: #64748b;
-    --am-faint: #94a3b8;
-    --am-border: #e2e8f0;
-    --am-bg: #ffffff;
-    --am-surface: #f8fafc;
+    --am-color: var(--tc-text);
+    --am-muted: var(--tc-text-muted);
+    --am-faint: var(--tc-text-faint);
+    --am-border: var(--tc-border);
+    --am-bg: var(--tc-surface);
+    --am-surface: var(--tc-surface-muted);
     --am-accent: #0d6efd;
     --am-transition: 0.15s ease;
 
