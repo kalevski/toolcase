@@ -122,8 +122,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
 				) : (
 					<span className="component-dropdown__trigger-placeholder">{placeholder}</span>
 				)}
-				<span className="component-dropdown__trigger-chevron">
-					<Icon name={open ? 'chevron-up' : 'chevron-down'} size={14} />
+				<span className="component-dropdown__trigger-chevron" aria-hidden="true">
+					<Icon name="chevron-down" size={14} />
 				</span>
 			</button>
 

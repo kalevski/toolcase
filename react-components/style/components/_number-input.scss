@@ -1,21 +1,21 @@
 // ── NumberInput ───────────────────────────────────────────────────────────────
 
 .component.component-number-input {
-    --ni-color: #1e293b;
-    --ni-muted: #64748b;
-    --ni-border: #e2e8f0;
-    --ni-hover-border: #94a3b8;
-    --ni-focus-border: #1e293b;
-    --ni-bg: #ffffff;
-    --ni-btn-bg: #f8fafc;
-    --ni-btn-hover-bg: #f1f5f9;
-    --ni-error-border: #ef4444;
+    --ni-color: var(--tc-text);
+    --ni-muted: var(--tc-text-muted);
+    --ni-border: var(--tc-border);
+    --ni-hover-border: var(--tc-text-faint);
+    --ni-focus-border: var(--tc-text);
+    --ni-bg: var(--tc-surface);
+    --ni-btn-bg: var(--tc-surface-hover);
+    --ni-btn-hover-bg: var(--tc-surface-muted);
+    --ni-error-border: var(--tc-danger);
     --ni-transition: 0.15s ease;
     --ni-height: 2.5rem;
 
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--tc-space-1);
 }
 
 .component-number-input {
@@ -82,7 +82,7 @@
         display: flex;
         flex-shrink: 0;
         font-size: 0.875rem;
-        padding: 0 0.5rem;
+        padding: 0 var(--tc-space-2);
     }
 
     &__prefix {
@@ -103,7 +103,7 @@
         min-height: var(--ni-height);
         min-width: 4rem;
         outline: none;
-        padding: 0 0.5rem;
+        padding: 0 var(--tc-space-2);
         text-align: center;
         width: 100%;
 
@@ -137,7 +137,7 @@
     &--small &__prefix,
     &--small &__suffix {
         font-size: 0.75rem;
-        padding: 0 0.375rem;
+        padding: 0 var(--tc-space-2);
     }
 
     &--large {
@@ -155,7 +155,7 @@
     &--large &__prefix,
     &--large &__suffix {
         font-size: 1rem;
-        padding: 0 0.625rem;
+        padding: 0 var(--tc-space-3);
     }
 }
 

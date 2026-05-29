@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
 
@@ -68,10 +68,10 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 	className = '',
 	loading = false,
 }) => {
-	const schemaDef = parseSchema(schema)
+	const schemaDef = useMemo(() => parseSchema(schema), [schema])
 	const isControlled = value !== undefined
 	const [internalValue, setInternalValue] = useState<Record<string, unknown>>(
-		() => defaultValue ?? buildDefault(schemaDef),
+		() => defaultValue ?? buildDefault(parseSchema(schema)),
 	)
 	const data = isControlled ? value : internalValue
 
@@ -138,6 +138,14 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 	}
 
 	const removeArrayItem = (path: (string | number)[], index: number) => {
+		const pathKey = path.join('.')
+		const ids = arrayItemIds.current.get(pathKey)
+		if (ids) {
+			arrayItemIds.current.set(
+				pathKey,
+				ids.filter((_, i) => i !== index),
+			)
+		}
 		emit(removePath(data, path, index))
 	}
 
@@ -154,12 +162,44 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 		return current
 	}
 
+	// Stable per-array-item ids so removing/inserting an item doesn't shift
+	// React keys or collapse state onto the wrong sibling. Ids are positional
+	// (not value-keyed) so they survive the clone-on-edit immutable updates.
+	const itemIdCounter = useRef(0)
+	const arrayItemIds = useRef<Map<string, string[]>>(new Map())
+	const getItemIds = (pathKey: string, length: number): string[] => {
+		const map = arrayItemIds.current
+		let ids = map.get(pathKey) ?? []
+		if (ids.length !== length) {
+			const next = ids.slice(0, length)
+			while (next.length < length) next.push(`i${itemIdCounter.current++}`)
+			ids = next
+			map.set(pathKey, next)
+		}
+		return ids
+	}
+
 	const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
 
 	const isCollapsed = (pathKey: string) => collapsed[pathKey] ?? true
 
 	const toggleCollapse = (pathKey: string) => {
 		setCollapsed((prev) => ({ ...prev, [pathKey]: !isCollapsed(pathKey) }))
+	}
+
+	const renderCollapseButton = (pathKey: string, name: string) => {
+		const expanded = !isCollapsed(pathKey)
+		return (
+			<button
+				type="button"
+				className="component-json-editor__collapse"
+				onClick={() => toggleCollapse(pathKey)}
+				aria-expanded={expanded}
+				aria-label={`${expanded ? 'Collapse' : 'Expand'} ${name}`}
+			>
+				<Icon name={expanded ? 'chevron-down' : 'chevron-right'} decorative />
+			</button>
+		)
 	}
 
 	const renderProperty = (prop: JSONEditorSchemaProperty, path: (string | number)[], depth: number) => {
@@ -172,14 +212,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 			return (
 				<div className="component-json-editor__group" key={pathKey} style={{ marginLeft: depth > 0 ? 16 : 0 }}>
 					<div className="component-json-editor__group-header">
-						<button
-							type="button"
-							className="component-json-editor__collapse"
-							onClick={() => toggleCollapse(pathKey)}
-							aria-label={isCollapsed(pathKey) ? 'Expand' : 'Collapse'}
-						>
-							<Icon name={isCollapsed(pathKey) ? 'chevron-right' : 'chevron-down'} />
-						</button>
+						{renderCollapseButton(pathKey, prop.key)}
 						<span className="component-json-editor__group-label">{prop.key}</span>
 						<span className="component-json-editor__group-badge">{items.length} items</span>
 						<button
@@ -189,34 +222,29 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 							onClick={() => addArrayItem(path, prop.properties!)}
 							aria-label={`Add item to ${prop.key}`}
 						>
-							<Icon name="plus-lg" />
+							<Icon name="plus-lg" decorative />
 						</button>
 					</div>
 
 					{!isCollapsed(pathKey) && (
 						<div className="component-json-editor__array-items">
-							{items.map((_, itemIdx) => {
-								const itemPathKey = `${pathKey}.${itemIdx}`
-								return (
-									<div className="component-json-editor__array-item" key={itemIdx}>
+							{(() => {
+								const itemIds = getItemIds(pathKey, items.length)
+								return items.map((_, itemIdx) => {
+									const itemPathKey = `${pathKey}.${itemIds[itemIdx]}`
+									return (
+										<div className="component-json-editor__array-item" key={itemIds[itemIdx]}>
 										<div className="component-json-editor__array-item-header">
-											<button
-												type="button"
-												className="component-json-editor__collapse"
-												onClick={() => toggleCollapse(itemPathKey)}
-												aria-label={isCollapsed(itemPathKey) ? 'Expand' : 'Collapse'}
-											>
-												<Icon name={isCollapsed(itemPathKey) ? 'chevron-right' : 'chevron-down'} />
-											</button>
+											{renderCollapseButton(itemPathKey, `${prop.key} item ${itemIdx + 1}`)}
 											<span className="component-json-editor__array-item-index">{itemIdx}</span>
 											<button
 												type="button"
 												className="component-json-editor__remove"
 												disabled={disabled}
 												onClick={() => removeArrayItem(path, itemIdx)}
-												aria-label={`Remove item ${itemIdx}`}
+												aria-label={`Remove ${prop.key} item ${itemIdx + 1}`}
 											>
-												<Icon name="x-lg" />
+												<Icon name="x-lg" decorative />
 											</button>
 										</div>
 										{!isCollapsed(itemPathKey) && (
@@ -228,7 +256,8 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 										)}
 									</div>
 								)
-							})}
+								})
+							})()}
 							{items.length === 0 && (
 								<div className="component-json-editor__empty">No items</div>
 							)}
@@ -242,14 +271,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 			return (
 				<div className="component-json-editor__group" key={pathKey} style={{ marginLeft: depth > 0 ? 16 : 0 }}>
 					<div className="component-json-editor__group-header">
-						<button
-							type="button"
-							className="component-json-editor__collapse"
-							onClick={() => toggleCollapse(pathKey)}
-							aria-label={isCollapsed(pathKey) ? 'Expand' : 'Collapse'}
-						>
-							<Icon name={isCollapsed(pathKey) ? 'chevron-right' : 'chevron-down'} />
-						</button>
+						{renderCollapseButton(pathKey, prop.key)}
 						<span className="component-json-editor__group-label">{prop.key}</span>
 					</div>
 
@@ -270,14 +292,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 			return (
 				<div className="component-json-editor__group" key={pathKey} style={{ marginLeft: depth > 0 ? 16 : 0 }}>
 					<div className="component-json-editor__group-header">
-						<button
-							type="button"
-							className="component-json-editor__collapse"
-							onClick={() => toggleCollapse(pathKey)}
-							aria-label={isCollapsed(pathKey) ? 'Expand' : 'Collapse'}
-						>
-							<Icon name={isCollapsed(pathKey) ? 'chevron-right' : 'chevron-down'} />
-						</button>
+						{renderCollapseButton(pathKey, prop.key)}
 						<span className="component-json-editor__group-label">{prop.key}</span>
 						<span className="component-json-editor__group-badge">{items.length} items</span>
 						<button
@@ -287,47 +302,59 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 							onClick={() => addPrimitiveArrayItem(path, prop.itemType!)}
 							aria-label={`Add item to ${prop.key}`}
 						>
-							<Icon name="plus-lg" />
+							<Icon name="plus-lg" decorative />
 						</button>
 					</div>
 
 					{!isCollapsed(pathKey) && (
 						<div className="component-json-editor__primitive-list">
-							{items.map((item, itemIdx) => (
-								<div className="component-json-editor__primitive-item" key={itemIdx}>
-									{prop.itemType === 'boolean' ? (
-										<select
-											className="component-json-editor__primitive-input component-json-editor__primitive-input--select"
-											value={String(item ?? false)}
+							{(() => {
+								const itemIds = getItemIds(pathKey, items.length)
+								return items.map((item, itemIdx) => {
+									const itemLabel = `${prop.key} item ${itemIdx + 1}`
+									return (
+										<div className="component-json-editor__primitive-item" key={itemIds[itemIdx]}>
+										{prop.itemType === 'boolean' ? (
+											<select
+												className="component-json-editor__primitive-input component-json-editor__primitive-input--select"
+												value={String(item ?? false)}
+												disabled={disabled}
+												aria-label={itemLabel}
+												onChange={(e) => updateValue([...path, itemIdx], e.target.value === 'true')}
+											>
+												<option value="true">true</option>
+												<option value="false">false</option>
+											</select>
+										) : (
+											<input
+												type={prop.itemType === 'number' ? 'number' : 'text'}
+												className="component-json-editor__primitive-input"
+												value={prop.itemType === 'number' ? ((item as number) ?? 0) : ((item as string) ?? '')}
+												disabled={disabled}
+												aria-label={itemLabel}
+												onChange={(e) => {
+													if (prop.itemType === 'number') {
+														const n = Number(e.target.value)
+														updateValue([...path, itemIdx], Number.isNaN(n) ? 0 : n)
+													} else {
+														updateValue([...path, itemIdx], e.target.value)
+													}
+												}}
+											/>
+										)}
+										<button
+											type="button"
+											className="component-json-editor__primitive-remove"
 											disabled={disabled}
-											onChange={(e) => updateValue([...path, itemIdx], e.target.value === 'true')}
+											onClick={() => removeArrayItem(path, itemIdx)}
+											aria-label={`Remove ${itemLabel}`}
 										>
-											<option value="true">true</option>
-											<option value="false">false</option>
-										</select>
-									) : (
-										<input
-											type={prop.itemType === 'number' ? 'number' : 'text'}
-											className="component-json-editor__primitive-input"
-											value={prop.itemType === 'number' ? (item as number ?? 0) : ((item as string) ?? '')}
-											disabled={disabled}
-											onChange={(e) => updateValue(
-												[...path, itemIdx],
-												prop.itemType === 'number' ? Number(e.target.value) : e.target.value,
-											)}
-										/>
-									)}
-									<button
-										type="button"
-										className="component-json-editor__primitive-remove"
-										disabled={disabled}
-										onClick={() => removeArrayItem(path, itemIdx)}
-										aria-label={`Remove item ${itemIdx}`}
-									>
-										<Icon name="x" />
-									</button>
-								</div>
-							))}
+											<Icon name="x" decorative />
+										</button>
+									</div>
+								)
+								})
+							})()}
 							{items.length === 0 && (
 								<div className="component-json-editor__empty">No items</div>
 							)}
@@ -337,19 +364,28 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 			)
 		}
 
+		const fieldId = `je-${pathKey.replace(/[^a-zA-Z0-9_-]/g, '-')}`
 		return (
 			<div className="component-json-editor__row" key={pathKey} style={{ marginLeft: depth > 0 ? 16 : 0 }}>
-				<label className="component-json-editor__key">{prop.key}</label>
-				{renderValueInput(prop, path, currentValue)}
+				<label className="component-json-editor__key" htmlFor={fieldId}>
+					{prop.key}
+				</label>
+				{renderValueInput(prop, path, currentValue, fieldId)}
 			</div>
 		)
 	}
 
-	const renderValueInput = (prop: JSONEditorSchemaProperty, path: (string | number)[], currentValue: unknown) => {
+	const renderValueInput = (
+		prop: JSONEditorSchemaProperty,
+		path: (string | number)[],
+		currentValue: unknown,
+		fieldId: string,
+	) => {
 		switch (prop.type) {
 			case 'boolean':
 				return (
 					<select
+						id={fieldId}
 						className="component-json-editor__select"
 						value={String(currentValue ?? false)}
 						disabled={disabled}
@@ -362,16 +398,21 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 			case 'number':
 				return (
 					<input
+						id={fieldId}
 						type="number"
 						className="component-json-editor__input"
-						value={currentValue as number ?? 0}
+						value={(currentValue as number) ?? 0}
 						disabled={disabled}
-						onChange={(e) => updateValue(path, Number(e.target.value))}
+						onChange={(e) => {
+							const n = Number(e.target.value)
+							updateValue(path, Number.isNaN(n) ? 0 : n)
+						}}
 					/>
 				)
 			default:
 				return (
 					<input
+						id={fieldId}
 						type="text"
 						className="component-json-editor__input"
 						value={(currentValue as string) ?? ''}

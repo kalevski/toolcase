@@ -1,11 +1,11 @@
 .component.component-plugin-grid {
-	--pg-color: #1e293b;
-	--pg-muted: #64748b;
-	--pg-border: #e2e8f0;
-	--pg-accent: #6366f1;
+	--pg-color: var(--tc-text);
+	--pg-muted: var(--tc-text-muted);
+	--pg-border: var(--tc-border);
+	--pg-accent: var(--tc-text);
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--tc-space-4);
 }
 
 .component-plugin-grid {
@@ -19,22 +19,27 @@
 	&__grid {
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 0.85rem;
+		gap: var(--tc-space-3);
 	}
 
 	&__card {
 		display: flex;
 		flex-direction: column;
-		gap: 0.6rem;
-		padding: 1rem 1.1rem;
-		background: #ffffff;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-4) var(--tc-space-4);
+		background: var(--tc-surface);
 		border: 1px solid var(--pg-border);
 		text-decoration: none;
 		color: var(--pg-color);
 		transition: border-color 0.15s ease, transform 0.15s ease;
 
+		&:hover,
+		&:focus {
+			text-decoration: none;
+		}
+
 		&:hover {
-			border-color: var(--pg-accent);
+			border-color: var(--tc-border-strong);
 			transform: translateY(-2px);
 		}
 	}
@@ -42,7 +47,7 @@
 	&__head {
 		display: flex;
 		align-items: center;
-		gap: 0.65rem;
+		gap: var(--tc-space-3);
 	}
 
 	&__logo {
@@ -51,7 +56,7 @@
 		justify-content: center;
 		width: 36px;
 		height: 36px;
-		background: #f8fafc;
+		background: var(--tc-surface-hover);
 		color: var(--pg-accent);
 		font-size: 1.1rem;
 
@@ -61,7 +66,7 @@
 	&__name-row {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: var(--tc-space-2);
 		flex-wrap: wrap;
 		min-width: 0;
 	}
@@ -71,9 +76,9 @@
 	&__official {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.2rem;
-		padding: 0.1rem 0.4rem;
-		background: rgba(99, 102, 241, 0.1);
+		gap: var(--tc-space-1);
+		padding: var(--tc-space-1) var(--tc-space-2);
+		background: var(--tc-surface-muted);
 		color: var(--pg-accent);
 		font-size: 0.66rem;
 		font-weight: 700;
@@ -92,7 +97,7 @@
 		margin-top: auto;
 		display: flex;
 		align-items: center;
-		gap: 0.6rem;
+		gap: var(--tc-space-2);
 		flex-wrap: wrap;
 		font-size: 0.78rem;
 	}
@@ -100,8 +105,8 @@
 	&__install {
 		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
 		font-size: 0.74rem;
-		background: #f8fafc;
-		padding: 0.25rem 0.45rem;
+		background: var(--tc-surface-hover);
+		padding: var(--tc-space-1) var(--tc-space-2);
 		color: var(--pg-color);
 		flex: 1 1 auto;
 		min-width: 0;
@@ -113,7 +118,7 @@
 	&__downloads {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: var(--tc-space-1);
 		color: var(--pg-muted);
 	}
 }

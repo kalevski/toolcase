@@ -1,9 +1,9 @@
 .component.component-install-tabs {
-	--it-bg: #0f172a;
-	--it-tab-bg: #1e293b;
-	--it-tab-active: #0f172a;
-	--it-text: #e2e8f0;
-	--it-muted: #64748b;
+	--it-bg: var(--tc-accent-hover);
+	--it-tab-bg: var(--tc-text);
+	--it-tab-active: var(--tc-accent-hover);
+	--it-text: var(--tc-border);
+	--it-muted: var(--tc-text-muted);
 	background: var(--it-bg);
 	color: var(--it-text);
 	overflow: hidden;
@@ -19,7 +19,7 @@
 
 	&__tab {
 		flex: 0 0 auto;
-		padding: 0.55rem 1rem;
+		padding: var(--tc-space-2) var(--tc-space-4);
 		background: transparent;
 		border: none;
 		color: var(--it-muted);
@@ -38,16 +38,16 @@
 		}
 
 		&:focus-visible {
-			outline: 2px solid #818cf8;
-			outline-offset: -2px;
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 	}
 
 	&__body {
 		display: flex;
 		align-items: center;
-		gap: 0.65rem;
-		padding: 0.7rem 0.95rem;
+		gap: var(--tc-space-3);
+		padding: var(--tc-space-3) var(--tc-space-4);
 	}
 
 	&__command {
@@ -66,15 +66,20 @@
 		justify-content: center;
 		width: 32px;
 		height: 32px;
-		background: rgba(255, 255, 255, 0.06);
+		background: rgba(var(--tc-surface-rgb), 0.06);
 		border: none;
 		color: var(--it-muted);
 		cursor: pointer;
 		transition: background 0.15s ease, color 0.15s ease;
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.12);
+			background: rgba(var(--tc-surface-rgb), 0.12);
 			color: var(--it-text);
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 	}
 }

@@ -1,20 +1,20 @@
 .component.component-form-input {
-	--fi-label-color: #1e293b;
-	--fi-help-color: #94a3b8;
-	--fi-help-hover: #6366f1;
-	--fi-required-color: #ef4444;
+	--fi-label-color: var(--tc-text);
+	--fi-help-color: var(--tc-text-faint);
+	--fi-help-hover: var(--tc-violet);
+	--fi-required-color: var(--tc-danger);
 	--fi-transition: 0.15s ease;
 
 	display: flex;
 	flex-direction: column;
-	gap: 0.35rem;
+	gap: var(--tc-space-1);
 	font-size: 0.875rem;
-	margin-bottom: 20px;
+	margin-bottom: var(--tc-space-5);
 
 	&.component-form-input--error {
 		.form-control,
 		.form-select {
-			border-color: #ef4444;
+			border-color: var(--tc-danger);
 		}
 	}
 
@@ -22,7 +22,7 @@
 		.component-form-input__inline-wrap {
 			display: flex;
 			align-items: center;
-			gap: 0.5rem;
+			gap: var(--tc-space-2);
 		}
 	}
 
@@ -44,7 +44,7 @@
 .component-form-input {
 
 	.form-range {
-		padding: 20px 0;
+		padding: var(--tc-space-5) 0;
 	}
 
 	.component-extended-select, .component-dropdown {
@@ -62,8 +62,8 @@
 .component-form-input__label {
 	display: flex;
 	align-items: center;
-	gap: 0.35rem;
-	margin-bottom: 0.1rem;
+	gap: var(--tc-space-1);
+	margin-bottom: var(--tc-space-1);
 
 	.form-label {
 		font-weight: 600;
@@ -74,7 +74,7 @@
 
 .component-form-input__required {
 	color: var(--fi-required-color);
-	margin-left: 0.15rem;
+	margin-left: var(--tc-space-1);
 	font-weight: 600;
 }
 

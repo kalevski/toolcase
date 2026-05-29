@@ -4,11 +4,11 @@
 // hover, black border + gradient accent line for the highlighted tier.
 
 .component.component-pricing-card {
-    --pc-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    --pc-border: #e5e7eb;
-    --pc-text: #0f172a;
-    --pc-muted: #64748b;
-    --pc-accent: linear-gradient(90deg, hsl(280, 95%, 57%), hsl(193, 90%, 55%));
+    --pc-bg: linear-gradient(180deg, var(--tc-surface) 0%, var(--tc-surface-hover) 100%);
+    --pc-border: var(--tc-border);
+    --pc-text: var(--tc-accent-hover);
+    --pc-muted: var(--tc-text-muted);
+    --pc-accent: var(--tc-gradient-brand);
     --pc-accent-glow-opacity: 0;
     --pc-accent-glow-hover: 0.28;
 
@@ -25,8 +25,7 @@
     &:hover,
     &:focus-within {
         transform: translateY(-10px);
-        box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1),
-            0 4px 6px -2px rgba(15, 23, 42, 0.05);
+        box-shadow: var(--tc-shadow-md);
         --pc-accent-glow-opacity: var(--pc-accent-glow-hover);
     }
 }
@@ -35,7 +34,7 @@
     &__body {
         display: flex;
         flex-direction: column;
-        gap: 0.625rem;
+        gap: var(--tc-space-3);
         flex: 1 1 auto;
     }
 
@@ -44,9 +43,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 0.625rem;
+        gap: var(--tc-space-3);
         min-height: 22px;
-        margin-bottom: 0.5rem;
+        margin-bottom: var(--tc-space-2);
     }
 
     &__eyebrow {
@@ -65,16 +64,16 @@
         font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        background: #000000;
-        color: #ffffff;
+        background: var(--tc-black);
+        color: var(--tc-text-inverse);
     }
 
     // ── Price row ─────────────────────────────────────────────────────────
     &__price-row {
         display: flex;
         align-items: baseline;
-        gap: 0.25rem;
-        margin-bottom: 0.375rem;
+        gap: var(--tc-space-1);
+        margin-bottom: var(--tc-space-2);
     }
 
     &__price {
@@ -88,14 +87,14 @@
     &__period {
         color: var(--pc-muted);
         font-size: 0.88rem;
-        margin-left: 0.25rem;
+        margin-left: var(--tc-space-1);
         font-weight: 500;
     }
 
     &__description {
-        color: #4b5563;
+        color: var(--tc-text-muted);
         font-size: 0.9rem;
-        margin: 0 0 1rem;
+        margin: 0 0 var(--tc-space-4);
         line-height: 1.5;
         min-height: 2.8em;
     }
@@ -105,10 +104,10 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.375rem;
+        gap: var(--tc-space-2);
         width: 100%;
-        padding: 0.7rem 1.1rem;
-        margin-bottom: 1.25rem;
+        padding: var(--tc-space-3) var(--tc-space-4);
+        margin-bottom: var(--tc-space-5);
         font-family: inherit;
         font-size: 0.9rem;
         font-weight: 600;
@@ -120,24 +119,24 @@
             background 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
 
         &--primary {
-            background: linear-gradient(135deg, #000000, #0a0a0a);
-            color: #ffffff;
-            border-color: #000000;
+            background: linear-gradient(135deg, var(--tc-black), var(--tc-black));
+            color: var(--tc-text-inverse);
+            border-color: var(--tc-black);
 
             &:hover:not(:disabled) {
                 transform: translateY(-1px);
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                box-shadow: var(--tc-shadow-md);
             }
         }
 
         &--outline {
-            background: #ffffff;
+            background: var(--tc-surface);
             color: var(--pc-text);
             border-color: var(--pc-border);
 
             &:hover:not(:disabled) {
-                background: #f8fafc;
-                border-color: #000000;
+                background: var(--tc-surface-hover);
+                border-color: var(--tc-black);
                 transform: translateY(-1px);
             }
         }
@@ -159,19 +158,19 @@
     // ── Features list ─────────────────────────────────────────────────────
     &__features {
         list-style: none;
-        padding: 1.25rem 0 0;
+        padding: var(--tc-space-5) 0 0;
         margin: 0;
-        border-top: 1px solid rgba(226, 232, 240, 0.6);
+        border-top: 1px solid rgba(var(--tc-border-rgb), 0.6);
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: var(--tc-space-1);
     }
 
     &__feature {
         display: flex;
         align-items: flex-start;
-        gap: 0.625rem;
-        padding: 0.3rem 0;
+        gap: var(--tc-space-3);
+        padding: var(--tc-space-1) 0;
         font-size: 0.88rem;
         color: var(--pc-text);
         line-height: 1.5;
@@ -181,10 +180,10 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: #10b981;
+        color: var(--tc-success);
         font-size: 1rem;
         flex-shrink: 0;
-        margin-top: 0.125rem;
+        margin-top: var(--tc-space-1);
     }
 
     &__feature-text {
@@ -206,10 +205,10 @@
 
 // ── Highlighted tier ──────────────────────────────────────────────────────
 .component-pricing-card--highlight {
-    --pc-border: #000000;
+    --pc-border: var(--tc-black);
     --pc-accent-glow-opacity: 0.18;
     --pc-accent-glow-hover: 0.42;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    box-shadow: var(--tc-shadow-sm);
 
     // Gradient accent line at top
     &::after {

@@ -1,13 +1,13 @@
 .component.component-feature-matrix {
-	--fmx-color: #1e293b;
-	--fmx-muted: #64748b;
-	--fmx-border: #e2e8f0;
-	--fmx-bg: #ffffff;
-	--fmx-surface: #f8fafc;
-	--fmx-accent: #1e293b;
-	--fmx-yes: #10b981;
-	--fmx-no: #cbd5e1;
-	--fmx-partial: #f59e0b;
+	--fmx-color: var(--tc-text);
+	--fmx-muted: var(--tc-text-muted);
+	--fmx-border: var(--tc-border);
+	--fmx-bg: var(--tc-surface);
+	--fmx-surface: var(--tc-surface-hover);
+	--fmx-accent: var(--tc-text);
+	--fmx-yes: var(--tc-success);
+	--fmx-no: var(--tc-border-strong);
+	--fmx-partial: var(--tc-warning);
 	background: var(--fmx-bg);
 	border: 1px solid var(--fmx-border);
 	overflow: hidden;
@@ -16,7 +16,7 @@
 .component-feature-matrix {
 	&__title {
 		margin: 0;
-		padding: 1rem 1.1rem;
+		padding: var(--tc-space-4) var(--tc-space-4);
 		font-size: 1rem;
 		font-weight: 700;
 		color: var(--fmx-color);
@@ -36,7 +36,7 @@
 
 	&__feature-head,
 	&__col-head {
-		padding: 0.7rem 0.85rem;
+		padding: var(--tc-space-3) var(--tc-space-3);
 		text-align: left;
 		font-size: 0.72rem;
 		font-weight: 700;
@@ -51,16 +51,16 @@
 		text-align: center;
 
 		&--highlight {
-			background: rgba(99, 102, 241, 0.08);
+			background: rgba(var(--tc-violet-rgb), 0.08);
 			color: var(--fmx-accent);
 		}
 	}
 
 	&__col-name { display: block; font-size: 0.85rem; color: var(--fmx-color); text-transform: none; letter-spacing: 0; }
-	&__col-tagline { display: block; font-size: 0.7rem; color: var(--fmx-muted); margin-top: 0.2rem; font-weight: 500; }
+	&__col-tagline { display: block; font-size: 0.7rem; color: var(--fmx-muted); margin-top: var(--tc-space-1); font-weight: 500; }
 
 	&__feature {
-		padding: 0.65rem 0.85rem;
+		padding: var(--tc-space-3) var(--tc-space-3);
 		text-align: left;
 		font-weight: 500;
 		border-bottom: 1px solid var(--fmx-border);
@@ -68,17 +68,17 @@
 	}
 
 	&__feature-name { display: block; font-size: 0.88rem; color: var(--fmx-color); }
-	&__feature-desc { display: block; font-size: 0.75rem; color: var(--fmx-muted); margin-top: 0.15rem; line-height: 1.4; }
+	&__feature-desc { display: block; font-size: 0.75rem; color: var(--fmx-muted); margin-top: var(--tc-space-1); line-height: 1.4; }
 
 	&__cell {
-		padding: 0.65rem 0.85rem;
+		padding: var(--tc-space-3) var(--tc-space-3);
 		text-align: center;
 		font-size: 0.85rem;
 		color: var(--fmx-color);
 		border-bottom: 1px solid var(--fmx-border);
 		vertical-align: middle;
 
-		&--highlight { background: rgba(99, 102, 241, 0.04); }
+		&--highlight { background: rgba(var(--tc-violet-rgb), 0.04); }
 	}
 
 	&__yes { color: var(--fmx-yes); font-size: 1.1rem; }

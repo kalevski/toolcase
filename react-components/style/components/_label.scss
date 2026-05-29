@@ -1,18 +1,18 @@
 // ── Label ──────────────────────────────────────────────────────────────────────
 
 .component.component-label {
-	--label-text: #1e293b;
-	--label-required: #ef4444;
-	--label-tooltip: #94a3b8;
+	--label-text: var(--tc-text);
+	--label-required: var(--tc-danger);
+	--label-tooltip: var(--tc-text-faint);
 	--label-transition: 0.15s ease;
 
 	display: inline-flex;
 	align-items: center;
-	gap: 0.25rem;
+	gap: var(--tc-space-1);
 	font-weight: 500;
 	font-size: 0.85rem;
 	color: var(--label-text);
-	margin-bottom: 0.35rem;
+	margin-bottom: var(--tc-space-1);
 	cursor: default;
 
 	&.component-label--small {
@@ -27,7 +27,7 @@
 .component-label__text {
 	display: inline-flex;
 	align-items: baseline;
-	gap: 0.15rem;
+	gap: var(--tc-space-1);
 }
 
 .component-label__required {

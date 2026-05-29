@@ -4,13 +4,13 @@
 // consistent across admin tables.
 
 .component.component-entity-cell {
-    --ec-color: #0f172a;
-    --ec-muted: #64748b;
-    --ec-focus: #1e293b;
+    --ec-color: var(--tc-accent-hover);
+    --ec-muted: var(--tc-text-muted);
+    --ec-focus: var(--tc-text);
 
     display: inline-flex;
     align-items: center;
-    gap: 0.625rem;
+    gap: var(--tc-space-3);
     min-width: 0;
     max-width: 100%;
 }
@@ -26,20 +26,20 @@
         flex-shrink: 0;
         line-height: 1;
 
-        &--violet  { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
-        &--cyan    { background: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; }
-        &--emerald { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-        &--amber   { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-        &--pink    { background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; }
-        &--blue    { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-        &--slate   { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
-        &--rose    { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+        &--violet  { background: var(--tc-violet-tint-bg); color: var(--tc-violet-tint-text); border: 1px solid var(--tc-violet-tint-border); }
+        &--cyan    { background: var(--tc-cyan-bg); color: var(--tc-cyan-tint-text); border: 1px solid var(--tc-cyan-tint-border); }
+        &--emerald { background: var(--tc-emerald-tint-bg); color: var(--tc-success); border: 1px solid var(--tc-emerald-tint-border); }
+        &--amber   { background: var(--tc-warning-tint-bg); color: var(--tc-warning); border: 1px solid var(--tc-warning-tint-border); }
+        &--pink    { background: var(--tc-pink-tint-bg); color: var(--tc-pink-tint-text); border: 1px solid var(--tc-pink-tint-border); }
+        &--blue    { background: var(--tc-info-tint-bg); color: var(--tc-info-tint-text); border: 1px solid var(--tc-info-tint-border); }
+        &--slate   { background: var(--tc-surface-muted); color: var(--tc-text); border: 1px solid var(--tc-border); }
+        &--rose    { background: var(--tc-rose-tint-bg); color: var(--tc-rose-tint-text); border: 1px solid var(--tc-rose-tint-border); }
     }
 
     &__labels {
         display: flex;
         flex-direction: column;
-        gap: 0.125rem;
+        gap: var(--tc-space-1);
         min-width: 0;
     }
 
@@ -79,7 +79,7 @@
     }
 
     &--sm {
-        gap: 0.5rem;
+        gap: var(--tc-space-2);
 
         .component-entity-cell__tile {
             width: 24px;
@@ -99,7 +99,7 @@
     }
 
     &--lg {
-        gap: 0.75rem;
+        gap: var(--tc-space-3);
 
         .component-entity-cell__tile {
             width: 40px;

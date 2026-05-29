@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { ButtonHTMLAttributes, CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, CSSProperties, ElementType, FC, HTMLAttributes, ReactNode } from 'react'
 import { Button } from './Button'
 
 export interface HeroAction extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -15,15 +15,14 @@ export interface HeroStatCard {
 	helper?: string
 }
 
-export interface HeroMetric {
-	label: string
-	value: string
-	helper?: string
-}
+// Metrics share the stat shape; alias keeps both public names stable.
+export type HeroMetric = HeroStatCard
 
 export interface HeroProps extends HTMLAttributes<HTMLElement> {
 	eyebrow?: string
 	title: string
+	/** Heading tag for the title. Use `h2` when the page already has an `h1`. */
+	titleAs?: ElementType
 	description: string
 	primaryAction: HeroAction
 	secondaryAction?: HeroAction
@@ -61,21 +60,16 @@ const heroBgIconAnchors = [
 
 const clampPercent = (value: number) => Math.min(92, Math.max(8, value))
 
-const fallbackStatCards: HeroStatCard[] = [
-	{ label: 'Active players', value: '12,482', helper: '+8% vs last week' },
-	{ label: 'Avg. session time', value: '32m', helper: 'Peak engagement' },
-	{ label: 'Retention', value: '91%', helper: '30-day rolling' },
-]
-
-const fallbackMetrics: HeroMetric[] = [
-	{ label: 'studio teams', value: '180+', helper: 'building on webgame.cloud' },
-	{ label: 'ms response', value: '28ms', helper: 'global edge latency' },
-	{ label: 'uptime', value: '99.99%', helper: 'backed by multi-region' },
-]
+const renderHeroButton = (action: HeroAction, extraClass?: string) => {
+	const { label, className: actionClassName, size, ...buttonProps } = action
+	const mergedClass = ['component-hero__button', extraClass, actionClassName].filter(Boolean).join(' ')
+	return <Button {...buttonProps} className={mergedClass} size={size ?? 'large'} label={label} />
+}
 
 export const Hero: FC<HeroProps> = ({
 	eyebrow,
 	title,
+	titleAs: TitleTag = 'h1',
 	description,
 	primaryAction,
 	secondaryAction,
@@ -88,17 +82,11 @@ export const Hero: FC<HeroProps> = ({
 	className,
 	...rest
 }) => {
-	const _cards: HeroStatCard[] = statCards && statCards.length > 0 ? statCards : fallbackStatCards
-	const metricList: HeroMetric[] = metrics && metrics.length > 0 ? metrics : fallbackMetrics
+	const cards = statCards ?? []
+	const metricList = metrics ?? []
 	const rootClassName = ['component component-hero', className].filter(Boolean).join(' ')
 	const patternAlt = backgroundPatternAlt ?? ''
 	const shouldHidePatternFromA11y = !backgroundPattern && (!patternAlt || patternAlt.length === 0)
-
-	const renderHeroButton = (action: HeroAction, extraClass?: string) => {
-		const { label, className: actionClassName, size, ...buttonProps } = action
-		const mergedClass = ['component-hero__button', extraClass, actionClassName].filter(Boolean).join(' ')
-		return <Button {...buttonProps} className={mergedClass} size={size ?? 'large'} label={label} />
-	}
 
 	const patternElement =
 		backgroundPattern ??
@@ -178,11 +166,22 @@ export const Hero: FC<HeroProps> = ({
 					))}
 				</div>
 			)}
+			{cards.length > 0 && (
+				<div className="component-hero__stat-cards" aria-hidden="true">
+					{cards.map((card, index) => (
+						<div className="component-hero__stat-card" key={`${card.label}-${index}`}>
+							<span className="component-hero__stat-value">{card.value}</span>
+							<span className="component-hero__stat-label">{card.label}</span>
+							{card.helper && <span className="component-hero__stat-helper">{card.helper}</span>}
+						</div>
+					))}
+				</div>
+			)}
 			<div className="component-hero__main">
 				<div className="component-hero__grid">
 					<div className="component-hero__text component-hero__text--centered">
 						{eyebrow && <p className="component-hero__eyebrow">{eyebrow}</p>}
-						<h1 className="component-hero__title component-hero__title--centered">{title}</h1>
+						<TitleTag className="component-hero__title component-hero__title--centered">{title}</TitleTag>
 						<p className="component-hero__description component-hero__description--centered">{description}</p>
 						<div className="component-hero__actions component-hero__actions--centered">
 							{renderHeroButton(primaryAction, 'component-hero__button--primary')}
@@ -199,21 +198,27 @@ export const Hero: FC<HeroProps> = ({
 				</div>
 			</div>
 
-			<div className="component-hero__separator" aria-hidden="true"></div>
+			{metricList.length > 0 && (
+				<>
+					<div className="component-hero__separator" aria-hidden="true"></div>
 
-			<div className="component-hero__bottom">
-				<div className="component-hero__bottom-inner">
-					<ul className="component-hero__metrics component-hero__metrics--centered">
-						{metricList.map((metric) => (
-							<li className="component-hero__metric" key={metric.label}>
-								<span className="component-hero__metric-value">{metric.value}</span>
-								<span className="component-hero__metric-label">{metric.label}</span>
-								{metric.helper && <span className="component-hero__metric-helper">{metric.helper}</span>}
-							</li>
-						))}
-					</ul>
-				</div>
-			</div>
+					<div className="component-hero__bottom">
+						<div className="component-hero__bottom-inner">
+							<ul className="component-hero__metrics component-hero__metrics--centered">
+								{metricList.map((metric, index) => (
+									<li className="component-hero__metric" key={`${metric.label}-${index}`}>
+										<span className="component-hero__metric-value">{metric.value}</span>
+										<span className="component-hero__metric-label">{metric.label}</span>
+										{metric.helper && (
+											<span className="component-hero__metric-helper">{metric.helper}</span>
+										)}
+									</li>
+								))}
+							</ul>
+						</div>
+					</div>
+				</>
+			)}
 		</section>
 	)
 }

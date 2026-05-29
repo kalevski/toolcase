@@ -20,8 +20,8 @@
 .component-leaderboard__head {
     display: grid;
     grid-template-columns: 50px 1fr 110px 70px 80px 100px;
-    gap: 14px;
-    padding: 12px 20px;
+    gap: var(--tc-space-4);
+    padding: var(--tc-space-3) var(--tc-space-5);
     border-bottom: 1px solid var(--lb-border);
     font-family: var(--tc-font-family-sans);
     font-size: 0.7rem;
@@ -34,8 +34,8 @@
 .component-leaderboard__row {
     display: grid;
     grid-template-columns: 50px 1fr 110px 70px 80px 100px;
-    gap: 14px;
-    padding: 14px 20px;
+    gap: var(--tc-space-4);
+    padding: var(--tc-space-4) var(--tc-space-5);
     border-bottom: 1px solid var(--lb-border);
     align-items: center;
     font-family: var(--tc-font-family-sans);
@@ -49,13 +49,13 @@
 .component-leaderboard__row--me {
     background: var(--lb-bg-me);
     border-left: 2px solid var(--lb-accent);
-    padding-left: 18px;
+    padding-left: var(--tc-space-5);
 }
 
 .component-leaderboard__name {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--tc-space-3);
 }
 
 .component-leaderboard__avatar {
@@ -104,7 +104,7 @@
 }
 
 .component-leaderboard__sub {
-    margin-top: 2px;
+    margin-top: var(--tc-space-1);
 }
 
 .component-leaderboard__tier {
@@ -113,7 +113,7 @@
     font-weight: var(--tc-font-weight-semibold);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 3px 7px;
+    padding: var(--tc-space-1) var(--tc-space-2);
     border: 1px solid currentColor;
     color: var(--lb-muted);
     width: fit-content;

@@ -3,12 +3,12 @@
 // rectangle, black-gradient primary, lift-on-hover with soft shadow.
 
 .component.component-cool-button {
-    --cb-bg: #000000;
-    --cb-bg-hover: #0a0a0a;
-    --cb-fg: #ffffff;
+    --cb-bg: var(--tc-black);
+    --cb-bg-hover: var(--tc-black);
+    --cb-fg: var(--tc-text-inverse);
     --cb-border: transparent;
-    --cb-separator: rgba(255, 255, 255, 0.28);
-    --cb-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.28);
+    --cb-separator: rgba(var(--tc-surface-rgb), 0.28);
+    --cb-shadow-hover: var(--tc-shadow-md);
 
     display: inline-flex;
     align-items: center;
@@ -24,7 +24,7 @@
     border: 1px solid var(--cb-border);
     background: var(--cb-bg);
     color: var(--cb-fg);
-    padding: 0.5rem 1rem;
+    padding: var(--tc-space-2) var(--tc-space-4);
     font-size: 0.875rem;
     transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out,
         background 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -37,7 +37,7 @@
 
     &:active:not(:disabled) {
         transform: translateY(0);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+        box-shadow: inset 0 2px 4px rgba(var(--tc-black-rgb), 0.15);
     }
 
     &:disabled {
@@ -53,20 +53,20 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.625rem;
+        gap: var(--tc-space-3);
         height: 100%;
     }
 
     &__label {
         display: inline-flex;
         align-items: center;
-        gap: 0.375rem;
+        gap: var(--tc-space-2);
     }
 
     &__addon {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
+        gap: var(--tc-space-1);
         font-size: 1em;
     }
 
@@ -78,150 +78,150 @@
 
     // ── Sizes ─────────────────────────────────────────────────────────────
     &--small {
-        padding: 0.35rem 0.75rem;
+        padding: var(--tc-space-1) var(--tc-space-3);
         font-size: 0.8rem;
     }
 
     &--default {
-        padding: 0.5rem 1rem;
+        padding: var(--tc-space-2) var(--tc-space-4);
         font-size: 0.875rem;
     }
 
     &--large {
-        padding: 0.8rem 1.35rem;
+        padding: var(--tc-space-3) var(--tc-space-5);
         font-size: 0.98rem;
     }
 
     // ── Variants ──────────────────────────────────────────────────────────
     // Primary = signature black with subtle gradient shimmer
     &--primary {
-        background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
-        color: #ffffff;
-        border-color: #000000;
-        --cb-separator: rgba(255, 255, 255, 0.28);
+        background: linear-gradient(135deg, var(--tc-black) 0%, var(--tc-black) 100%);
+        color: var(--tc-text-inverse);
+        border-color: var(--tc-black);
+        --cb-separator: rgba(var(--tc-surface-rgb), 0.28);
 
         &:hover:not(:disabled) {
-            background: linear-gradient(135deg, #0a0a0a 0%, #141414 100%);
+            background: linear-gradient(135deg, var(--tc-black) 0%, var(--tc-black) 100%);
         }
     }
 
     &--secondary {
-        background: #3f3d56;
-        color: #ffffff;
-        border-color: #3f3d56;
-        --cb-separator: rgba(255, 255, 255, 0.28);
+        background: var(--tc-secondary);
+        color: var(--tc-text-inverse);
+        border-color: var(--tc-secondary);
+        --cb-separator: rgba(var(--tc-surface-rgb), 0.28);
 
         &:hover:not(:disabled) {
-            background: #2d2b40;
+            background: var(--tc-secondary-dark);
         }
     }
 
     &--success {
-        background: #10b981;
-        color: #ffffff;
-        border-color: #10b981;
-        --cb-separator: rgba(255, 255, 255, 0.28);
+        background: var(--tc-success);
+        color: var(--tc-text-inverse);
+        border-color: var(--tc-success);
+        --cb-separator: rgba(var(--tc-surface-rgb), 0.28);
 
         &:hover:not(:disabled) {
-            background: #0ea371;
+            background: var(--tc-success);
         }
     }
 
     &--danger {
-        background: #ef4444;
-        color: #ffffff;
-        border-color: #ef4444;
-        --cb-separator: rgba(255, 255, 255, 0.28);
+        background: var(--tc-danger);
+        color: var(--tc-text-inverse);
+        border-color: var(--tc-danger);
+        --cb-separator: rgba(var(--tc-surface-rgb), 0.28);
 
         &:hover:not(:disabled) {
-            background: #dc2626;
+            background: var(--tc-danger);
         }
     }
 
     &--warning {
-        background: #f59e0b;
-        color: #111827;
-        border-color: #f59e0b;
-        --cb-separator: rgba(0, 0, 0, 0.18);
+        background: var(--tc-warning);
+        color: var(--tc-accent-hover);
+        border-color: var(--tc-warning);
+        --cb-separator: rgba(var(--tc-black-rgb), 0.18);
 
         &:hover:not(:disabled) {
-            background: #d97706;
+            background: var(--tc-warning);
         }
     }
 
     &--info {
-        background: #06b6d4;
-        color: #ffffff;
-        border-color: #06b6d4;
-        --cb-separator: rgba(255, 255, 255, 0.28);
+        background: var(--tc-cyan);
+        color: var(--tc-text-inverse);
+        border-color: var(--tc-cyan);
+        --cb-separator: rgba(var(--tc-surface-rgb), 0.28);
 
         &:hover:not(:disabled) {
-            background: #0891b2;
+            background: var(--tc-cyan);
         }
     }
 
     // ── Outline modifier — invert each variant ────────────────────────────
     &--outline {
-        background: #ffffff;
-        --cb-separator: rgba(15, 23, 42, 0.18);
+        background: var(--tc-surface);
+        --cb-separator: rgba(var(--tc-accent-hover-rgb), 0.18);
 
         &.component-cool-button--primary {
-            color: #000000;
-            border-color: #e2e8f0;
+            color: var(--tc-black);
+            border-color: var(--tc-border);
 
             &:hover:not(:disabled) {
-                background: #f8fafc;
-                border-color: #000000;
+                background: var(--tc-surface-hover);
+                border-color: var(--tc-black);
             }
         }
 
         &.component-cool-button--secondary {
-            color: #3f3d56;
-            border-color: #3f3d56;
-            background: #ffffff;
+            color: var(--tc-secondary);
+            border-color: var(--tc-secondary);
+            background: var(--tc-surface);
 
             &:hover:not(:disabled) {
-                background: #f3f4f6;
+                background: var(--tc-surface-muted);
             }
         }
 
         &.component-cool-button--success {
-            color: #10b981;
-            border-color: #10b981;
-            background: #ffffff;
+            color: var(--tc-success);
+            border-color: var(--tc-success);
+            background: var(--tc-surface);
 
             &:hover:not(:disabled) {
-                background: #ecfdf5;
+                background: var(--tc-emerald-tint-bg);
             }
         }
 
         &.component-cool-button--danger {
-            color: #ef4444;
-            border-color: #ef4444;
-            background: #ffffff;
+            color: var(--tc-danger);
+            border-color: var(--tc-danger);
+            background: var(--tc-surface);
 
             &:hover:not(:disabled) {
-                background: #fef2f2;
+                background: var(--tc-danger-tint-bg);
             }
         }
 
         &.component-cool-button--warning {
-            color: #b45309;
-            border-color: #f59e0b;
-            background: #ffffff;
+            color: var(--tc-warning);
+            border-color: var(--tc-warning);
+            background: var(--tc-surface);
 
             &:hover:not(:disabled) {
-                background: #fffbeb;
+                background: var(--tc-warning-tint-bg);
             }
         }
 
         &.component-cool-button--info {
-            color: #06b6d4;
-            border-color: #06b6d4;
-            background: #ffffff;
+            color: var(--tc-cyan);
+            border-color: var(--tc-cyan);
+            background: var(--tc-surface);
 
             &:hover:not(:disabled) {
-                background: #ecfeff;
+                background: var(--tc-cyan-bg);
             }
         }
     }

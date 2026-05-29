@@ -1,9 +1,9 @@
 .component.component-sponsor-wall {
-	--sw-color: #1e293b;
-	--sw-muted: #64748b;
+	--sw-color: var(--tc-text);
+	--sw-muted: var(--tc-text-muted);
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
+	gap: var(--tc-space-6);
 }
 
 .component-sponsor-wall {
@@ -18,7 +18,7 @@
 	&__tier {
 		display: flex;
 		flex-direction: column;
-		gap: 0.7rem;
+		gap: var(--tc-space-3);
 		align-items: center;
 	}
 
@@ -33,7 +33,7 @@
 	&__logos {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem 1.5rem;
+		gap: var(--tc-space-4) var(--tc-space-6);
 		align-items: center;
 		justify-content: center;
 	}

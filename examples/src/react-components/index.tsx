@@ -111,6 +111,7 @@ import MetricGridDemo from './MetricGridDemo'
 import { ModalDemo } from './ModalDemo'
 import MultiCardSelectDemo from './MultiCardSelectDemo'
 import NodeEditorDemo from './NodeEditorDemo'
+import AudioMixerDemo from './AudioMixerDemo'
 import { NumberInputDemo } from './NumberInputDemo'
 import { OTPInputDemo } from './OTPInputDemo'
 import PageFooterDemo from './PageFooterDemo'
@@ -409,6 +410,7 @@ export const examples: ExampleDef[] = [
     { key: 'json-editor', category: 'Code & Docs', element: <JSONEditorDemo /> },
     { key: 'bitmap-font-generator', category: 'Code & Docs', element: <BitmapFontGeneratorDemo /> },
     { key: 'node-editor', category: 'Code & Docs', element: <NodeEditorDemo /> },
+    { key: 'audio-mixer', category: 'Code & Docs', element: <AudioMixerDemo /> },
 
     // ── Game Jam / Arcade ────────────────────────────────────────────
     { key: 'section-flag', category: 'Game Jam / Arcade', element: <SectionFlagDemo /> },

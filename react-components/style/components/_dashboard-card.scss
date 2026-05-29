@@ -1,17 +1,25 @@
+// ── Shared "eyebrow" section title ────────────────────────────────────────
+
+%dashboard-card-title {
+	font-size: var(--tc-font-sm);
+	font-weight: var(--tc-font-weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--tc-text-muted);
+}
+
 // ── Colored ─────────────────────────────────────────────────────────────
 
 .component-dashboard-card--colored {
 	.component-dashboard-card__body--colored {
 		position: relative;
 		min-height: 100px;
-		border-radius: 0;
-		background: #fff;
+		background: var(--tc-surface);
 		overflow: hidden;
-		padding: 24px 24px 18px 24px;
+		padding: var(--tc-space-6) var(--tc-space-6) var(--tc-space-5) var(--tc-space-6);
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		box-shadow: 0 2px 16px 0 rgba(30,41,59,0.04);
 	}
 
 	.component-dashboard-card__colored-icon-bg {
@@ -29,47 +37,71 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 		min-height: 70px;
 		justify-content: center;
 		align-items: flex-start;
-		padding-top: 0.75rem;
+		padding-top: var(--tc-space-3);
 	}
 
 	.component-dashboard-card__colored-text {
 		font-size: 0.9375rem;
 		font-weight: 600;
-		color: #334155;
+		color: var(--tc-text);
 		letter-spacing: 0.01em;
 	}
 
 	.component-dashboard-card__colored-value {
 		font-size: clamp(1.5rem, 4vw, 2rem);
 		font-weight: 800;
-		color: #000;
+		color: var(--tc-text);
 		line-height: 1;
 	}
 
 	.component-dashboard-card__colored-icon {
 		font-size: 1.375rem;
-		color: #000;
+		color: var(--tc-text);
 		opacity: 0.7;
 		display: inline-flex;
 		align-items: center;
-		margin-top: 0.125rem;
+		margin-top: var(--tc-space-1);
 	}
 }
 // ── Shared wrapper ────────────────────────────────────────────────────────
 
 .component.component-dashboard-card {
-	border: 1px solid #e2e8f0;
-	background: #fff;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border: 1px solid var(--tc-border);
+	background: var(--tc-surface);
+	box-shadow: var(--tc-shadow-sm);
 	overflow: hidden;
+	transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+
+	// Lift on hover/keyboard focus — signals the optional onClick affordance.
+	&:hover,
+	&:focus-within {
+		border-color: var(--tc-border-strong);
+		box-shadow: var(--tc-shadow-md);
+	}
+
+	&:focus-within {
+		outline: var(--tc-focus-outline);
+		outline-offset: var(--tc-focus-offset);
+	}
 
 	.component-dashboard-card__body {
-		padding: 24px;
+		flex: 1 1 auto;
+		padding: var(--tc-space-6);
 		display: flex;
 		flex-direction: column;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.component.component-dashboard-card {
+		transition: none;
 	}
 }
 
@@ -79,7 +111,7 @@
 	.component-dashboard-card__body--basic {
 		flex-direction: row;
 		align-items: center;
-		gap: 18px;
+		gap: var(--tc-space-5);
 	}
 
 	.component-dashboard-card__basic-icon {
@@ -88,8 +120,8 @@
 		justify-content: center;
 		width: 52px;
 		height: 52px;
-		background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-		color: #6366f1;
+		background: var(--tc-violet-bg);
+		color: var(--tc-violet);
 		font-size: 1.4rem;
 		flex-shrink: 0;
 	}
@@ -97,21 +129,19 @@
 	.component-dashboard-card__basic-text {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: var(--tc-space-1);
+		min-width: 0;
 	}
 
 	.component-dashboard-card__basic-a {
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-transform: uppercase;
+		@extend %dashboard-card-title;
 		letter-spacing: 0.06em;
-		color: #64748b;
 	}
 
 	.component-dashboard-card__basic-b {
 		font-size: 1.15rem;
 		font-weight: 700;
-		color: #0f172a;
+		color: var(--tc-accent-hover);
 	}
 }
 
@@ -120,57 +150,53 @@
 .component-dashboard-card--difference {
 	.component-dashboard-card__body--difference {
 		align-items: flex-start;
-		gap: 6px;
+		gap: var(--tc-space-2);
 	}
 
 	.component-dashboard-card__diff-title {
-		font-size: 0.78rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: #64748b;
+		@extend %dashboard-card-title;
 	}
 
 	.component-dashboard-card__diff-value {
 		font-size: 1.75rem;
 		font-weight: 800;
-		color: #0f172a;
+		color: var(--tc-accent-hover);
 		line-height: 1.2;
 	}
 
 	.component-dashboard-card__diff-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 2px;
-		padding: 2px 8px;
+		gap: var(--tc-space-1);
+		padding: var(--tc-space-1) var(--tc-space-2);
 		font-size: 0.78rem;
 		font-weight: 700;
-		margin-top: 4px;
+		margin-top: var(--tc-space-1);
 
 		i {
 			font-size: 1rem;
 		}
 
 		&--up {
-			background: #dcfce7;
-			color: #16a34a;
+			background: var(--tc-success-bg);
+			color: var(--tc-success);
 		}
 
 		&--down {
-			background: #fee2e2;
-			color: #dc2626;
+			background: var(--tc-danger-bg);
+			color: var(--tc-danger);
 		}
 
 		&--neutral {
-			background: #f1f5f9;
-			color: #64748b;
+			background: var(--tc-surface-muted);
+			color: var(--tc-text-muted);
 		}
 	}
 
 	.component-dashboard-card__diff-period {
 		font-size: 0.74rem;
-		color: #94a3b8;
-		margin-top: 2px;
+		color: var(--tc-text-faint);
+		margin-top: var(--tc-space-1);
 	}
 }
 
@@ -179,15 +205,11 @@
 .component-dashboard-card--slices {
 	.component-dashboard-card__body--slices {
 		align-items: center;
-		gap: 16px;
+		gap: var(--tc-space-4);
 	}
 
 	.component-dashboard-card__slices-title {
-		font-size: 0.78rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: #64748b;
+		@extend %dashboard-card-title;
 		align-self: flex-start;
 	}
 
@@ -202,7 +224,7 @@
 		position: absolute;
 		font-size: 1.3rem;
 		font-weight: 800;
-		color: #0f172a;
+		color: var(--tc-accent-hover);
 	}
 
 	.component-dashboard-card__slices-legend {
@@ -212,13 +234,13 @@
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: var(--tc-space-2);
 	}
 
 	.component-dashboard-card__slices-legend-item {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--tc-space-2);
 		font-size: 0.82rem;
 	}
 
@@ -230,12 +252,12 @@
 
 	.component-dashboard-card__slices-legend-text {
 		flex: 1 1 auto;
-		color: #475569;
+		color: var(--tc-text-muted);
 	}
 
 	.component-dashboard-card__slices-legend-value {
 		font-weight: 600;
-		color: #0f172a;
+		color: var(--tc-accent-hover);
 	}
 }
 
@@ -243,15 +265,11 @@
 
 .component-dashboard-card--activity {
 	.component-dashboard-card__body--activity {
-		gap: 14px;
+		gap: var(--tc-space-4);
 	}
 
 	.component-dashboard-card__activity-title {
-		font-size: 0.78rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: #64748b;
+		@extend %dashboard-card-title;
 	}
 
 	.component-dashboard-card__activity-list {
@@ -264,8 +282,8 @@
 
 	.component-dashboard-card__activity-item {
 		display: flex;
-		gap: 14px;
-		padding-bottom: 16px;
+		gap: var(--tc-space-4);
+		padding-bottom: var(--tc-space-4);
 
 		&:last-child {
 			padding-bottom: 0;
@@ -285,8 +303,8 @@
 			justify-content: center;
 			width: 28px;
 			height: 28px;
-			background: #f1f5f9;
-			color: #475569;
+			background: var(--tc-surface-muted);
+			color: var(--tc-text-muted);
 			font-size: 0.78rem;
 		}
 	}
@@ -294,45 +312,45 @@
 	.component-dashboard-card__activity-line {
 		flex: 1 1 auto;
 		width: 2px;
-		background: #e2e8f0;
-		margin-top: 4px;
+		background: var(--tc-border);
+		margin-top: var(--tc-space-1);
 	}
 
 	.component-dashboard-card__activity-content {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: var(--tc-space-1);
 		min-width: 0;
-		padding-top: 4px;
+		padding-top: var(--tc-space-1);
 	}
 
 	.component-dashboard-card__activity-header {
 		display: flex;
 		align-items: baseline;
-		gap: 8px;
+		gap: var(--tc-space-2);
 	}
 
 	.component-dashboard-card__activity-item-title {
 		font-size: 0.84rem;
 		font-weight: 600;
-		color: #1e293b;
+		color: var(--tc-text);
 	}
 
 	.component-dashboard-card__activity-time {
 		font-size: 0.72rem;
-		color: #94a3b8;
+		color: var(--tc-text-faint);
 		white-space: nowrap;
 	}
 
 	.component-dashboard-card__activity-desc {
 		font-size: 0.8rem;
-		color: #475569;
+		color: var(--tc-text-muted);
 		line-height: 1.45;
 	}
 
 	.component-dashboard-card__activity-user {
 		font-size: 0.72rem;
-		color: #94a3b8;
+		color: var(--tc-text-faint);
 		font-style: italic;
 	}
 }
@@ -341,7 +359,7 @@
 
 .component-dashboard-card--metric {
 	.component-dashboard-card__body--metric {
-		gap: 12px;
+		gap: var(--tc-space-3);
 	}
 
 	.component-dashboard-card__metric-top {
@@ -353,28 +371,24 @@
 	.component-dashboard-card__metric-info {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: var(--tc-space-1);
 	}
 
 	.component-dashboard-card__metric-title {
-		font-size: 0.78rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: #64748b;
+		@extend %dashboard-card-title;
 	}
 
 	.component-dashboard-card__metric-value {
 		font-size: 1.6rem;
 		font-weight: 800;
-		color: #0f172a;
+		color: var(--tc-accent-hover);
 		line-height: 1.2;
 	}
 
 	.component-dashboard-card__metric-subtitle {
 		font-size: 0.76rem;
-		color: #94a3b8;
-		margin-top: 2px;
+		color: var(--tc-text-faint);
+		margin-top: var(--tc-space-1);
 	}
 
 	.component-dashboard-card__metric-icon {
@@ -383,8 +397,8 @@
 		justify-content: center;
 		width: 42px;
 		height: 42px;
-		background: #f1f5f9;
-		color: #64748b;
+		background: var(--tc-surface-muted);
+		color: var(--tc-text-muted);
 		font-size: 1.1rem;
 	}
 
@@ -399,15 +413,11 @@
 
 .component-dashboard-card--list {
 	.component-dashboard-card__body--list {
-		gap: 12px;
+		gap: var(--tc-space-3);
 	}
 
 	.component-dashboard-card__list-title {
-		font-size: 0.78rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: #64748b;
+		@extend %dashboard-card-title;
 	}
 
 	.component-dashboard-card__list {
@@ -416,18 +426,20 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: var(--tc-space-1);
 	}
 
 	.component-dashboard-card__list-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 8px 6px;
+		gap: var(--tc-space-3);
+		// Bleed the hover background out to the card edges.
+		margin: 0 calc(var(--tc-space-6) * -1);
+		padding: var(--tc-space-2) var(--tc-space-6);
 		transition: background 0.12s ease;
 
 		&:hover {
-			background: #f8fafc;
+			background: var(--tc-surface-hover);
 		}
 	}
 
@@ -437,10 +449,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #f1f5f9;
+		background: var(--tc-surface-muted);
 		font-size: 0.72rem;
 		font-weight: 700;
-		color: #64748b;
+		color: var(--tc-text-muted);
 		flex-shrink: 0;
 	}
 
@@ -452,13 +464,13 @@
 	.component-dashboard-card__list-label {
 		flex: 1 1 auto;
 		font-size: 0.84rem;
-		color: #334155;
+		color: var(--tc-text);
 	}
 
 	.component-dashboard-card__list-value {
 		font-size: 0.84rem;
 		font-weight: 700;
-		color: #0f172a;
+		color: var(--tc-accent-hover);
 	}
 }
 
@@ -466,15 +478,11 @@
 
 .component-dashboard-card--status {
 	.component-dashboard-card__body--status {
-		gap: 12px;
+		gap: var(--tc-space-3);
 	}
 
 	.component-dashboard-card__status-title {
-		font-size: 0.78rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: #64748b;
+		@extend %dashboard-card-title;
 	}
 
 	.component-dashboard-card__status-list {
@@ -483,30 +491,30 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
+		gap: var(--tc-space-1);
 	}
 
 	.component-dashboard-card__status-item {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 8px 8px;
+		gap: var(--tc-space-3);
+		padding: var(--tc-space-2) var(--tc-space-2);
 		font-size: 0.84rem;
 
 		&--ok .component-dashboard-card__status-icon {
-			color: #22c55e;
+			color: var(--tc-success);
 		}
 
 		&--warning .component-dashboard-card__status-icon {
-			color: #f59e0b;
+			color: var(--tc-warning);
 		}
 
 		&--error .component-dashboard-card__status-icon {
-			color: #ef4444;
+			color: var(--tc-danger);
 		}
 
 		&--inactive .component-dashboard-card__status-icon {
-			color: #cbd5e0;
+			color: var(--tc-border-strong);
 		}
 	}
 
@@ -517,12 +525,12 @@
 
 	.component-dashboard-card__status-label {
 		flex: 1 1 auto;
-		color: #334155;
+		color: var(--tc-text);
 		font-weight: 500;
 	}
 
 	.component-dashboard-card__status-detail {
 		font-size: 0.74rem;
-		color: #94a3b8;
+		color: var(--tc-text-faint);
 	}
 }

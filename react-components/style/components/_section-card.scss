@@ -4,16 +4,16 @@
 // for destructive sections (Account removal, danger zones, etc.).
 
 .component.component-section-card {
-    --sec-title: #1e293b;
-    --sec-muted: #64748b;
-    --sec-icon: #1e293b;
-    --sec-border: #e2e8f0;
-    --sec-surface: #ffffff;
-    --sec-danger-title: #991b1b;
-    --sec-danger-icon: #b91c1c;
-    --sec-danger-border: #fca5a5;
-    --sec-danger-bg: #fef2f2;
-    --sec-danger-icon-bg: #fee2e2;
+    --sec-title: var(--tc-text);
+    --sec-muted: var(--tc-text-muted);
+    --sec-icon: var(--tc-text);
+    --sec-border: var(--tc-border);
+    --sec-surface: var(--tc-surface);
+    --sec-danger-title: var(--tc-danger-tint-text);
+    --sec-danger-icon: var(--tc-danger);
+    --sec-danger-border: var(--tc-danger-tint-border);
+    --sec-danger-bg: var(--tc-danger-tint-bg);
+    --sec-danger-icon-bg: var(--tc-danger-bg);
     --sec-transition: 0.15s ease;
 }
 
@@ -21,20 +21,20 @@
     .card-header {
         background: var(--sec-surface);
         border-bottom: 1px solid var(--sec-border);
-        padding: 0.875rem 1rem;
+        padding: var(--tc-space-4) var(--tc-space-4);
     }
 
     &__header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 0.75rem;
+        gap: var(--tc-space-3);
     }
 
     &__title {
         display: flex;
         align-items: center;
-        gap: 0.625rem;
+        gap: var(--tc-space-3);
         min-width: 0;
     }
 
@@ -44,7 +44,7 @@
         justify-content: center;
         width: 28px;
         height: 28px;
-        background: #f8fafc;
+        background: var(--tc-surface-hover);
         border: 1px solid var(--sec-border);
         color: var(--sec-icon);
         font-size: 0.95rem;
@@ -67,7 +67,7 @@
         flex-shrink: 0;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: var(--tc-space-2);
     }
 
     &--danger {

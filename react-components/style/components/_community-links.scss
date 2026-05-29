@@ -1,10 +1,10 @@
 .component.component-community-links {
-	--cl-color: #1e293b;
-	--cl-muted: #64748b;
-	--cl-border: #e2e8f0;
+	--cl-color: var(--tc-text);
+	--cl-muted: var(--tc-text-muted);
+	--cl-border: var(--tc-border);
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--tc-space-4);
 }
 
 .component-community-links {
@@ -18,34 +18,39 @@
 	&__grid {
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 0.6rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__card {
 		display: flex;
 		align-items: center;
-		gap: 0.7rem;
-		padding: 0.75rem 0.95rem;
-		background: #ffffff;
+		gap: var(--tc-space-3);
+		padding: var(--tc-space-3) var(--tc-space-4);
+		background: var(--tc-surface);
 		border: 1px solid var(--cl-border);
 		text-decoration: none;
 		color: var(--cl-color);
 		transition: border-color 0.15s ease, transform 0.15s ease;
+
+		&:hover,
+		&:focus {
+			text-decoration: none;
+		}
 
 		&:hover {
 			border-color: var(--cl-color);
 			transform: translateY(-1px);
 		}
 
-		&--github { --cl-icon: #1e293b; }
-		&--discord { --cl-icon: #5865f2; }
-		&--slack { --cl-icon: #611f69; }
-		&--x { --cl-icon: #000000; }
-		&--mastodon { --cl-icon: #6364ff; }
-		&--rss { --cl-icon: #f97316; }
-		&--mail { --cl-icon: #1e293b; }
-		&--youtube { --cl-icon: #ff0000; }
-		&--discussions { --cl-icon: #6366f1; }
+		&--github { --cl-icon: var(--tc-text); }
+		&--discord { --cl-icon: var(--tc-discord); }
+		&--slack { --cl-icon: var(--tc-slack); }
+		&--x { --cl-icon: var(--tc-black); }
+		&--mastodon { --cl-icon: var(--tc-mastodon); }
+		&--rss { --cl-icon: var(--tc-rss); }
+		&--mail { --cl-icon: var(--tc-text); }
+		&--youtube { --cl-icon: var(--tc-youtube); }
+		&--discussions { --cl-icon: var(--tc-violet); }
 	}
 
 	&__icon {

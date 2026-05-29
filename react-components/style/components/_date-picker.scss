@@ -1,35 +1,35 @@
 .component.component-date-picker {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
+	gap: var(--tc-space-1);
 
 	.form-label {
 		font-weight: 500;
-		color: #1e293b;
-		margin-bottom: 0.25rem;
+		color: var(--tc-text);
+		margin-bottom: var(--tc-space-1);
 		font-size: 0.875rem;
 	}
 
 	.date-input {
 		width: 100%;
-		padding: 0.375rem 0.75rem;
+		padding: var(--tc-space-2) var(--tc-space-3);
 		font-size: 0.875rem;
 		line-height: 1.5;
-		color: #1e293b;
-		background-color: #fff;
+		color: var(--tc-text);
+		background-color: var(--tc-text-inverse);
 		background-clip: padding-box;
-		border: 1px solid #e2e8f0;
+		border: 1px solid var(--tc-border);
 		transition: border-color 0.15s ease;
 		box-shadow: none;
 
 		&:focus {
-			border-color: #1e293b;
+			border-color: var(--tc-text);
 			outline: 0;
 			box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.1);
 		}
 		&:disabled {
-			background-color: #f8fafc;
-			color: #94a3b8;
+			background-color: var(--tc-surface-hover);
+			color: var(--tc-text-faint);
 			cursor: not-allowed;
 		}
 	}

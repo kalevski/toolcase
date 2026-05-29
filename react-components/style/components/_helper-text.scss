@@ -1,11 +1,11 @@
 .component.component-helper-text {
-	--ht-text: #64748b;
-	--ht-icon: #94a3b8;
+	--ht-text: var(--tc-text-muted);
+	--ht-icon: var(--tc-text-faint);
 
 	display: flex;
 	align-items: flex-start;
-	gap: 0.35rem;
-	margin: 0.3rem 0 0;
+	gap: var(--tc-space-1);
+	margin: var(--tc-space-1) 0 0;
 	padding: 0;
 	font-size: 0.76rem;
 	line-height: 1.45;
@@ -15,7 +15,7 @@
 .component-helper-text__icon {
 	flex-shrink: 0;
 	font-size: 0.78rem;
-	margin-top: 1px;
+	margin-top: var(--tc-space-1);
 	color: var(--ht-icon);
 }
 
@@ -25,16 +25,16 @@
 }
 
 .component-helper-text--success {
-	--ht-text: #15803d;
-	--ht-icon: #16a34a;
+	--ht-text: var(--tc-success-tint-text);
+	--ht-icon: var(--tc-success);
 }
 
 .component-helper-text--warning {
-	--ht-text: #a16207;
-	--ht-icon: #ca8a04;
+	--ht-text: var(--tc-warning-tint-text);
+	--ht-icon: var(--tc-warning);
 }
 
 .component-helper-text--error {
-	--ht-text: #b91c1c;
-	--ht-icon: #dc2626;
+	--ht-text: var(--tc-danger);
+	--ht-icon: var(--tc-danger);
 }

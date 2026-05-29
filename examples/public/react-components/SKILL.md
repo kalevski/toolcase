@@ -1022,10 +1022,11 @@ import { Skeleton } from '@toolcase/react-components'
 
 ### Spinner
 
-A circular animated loading indicator with size, variant, and accessible label.
+An animated loading indicator with multiple shapes, size, variant, and accessible label.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
+| `shape` | `'ring' \| 'dots' \| 'bars' \| 'grid' \| 'pulse'` | ❌ | Animation style (default: `'ring'`) |
 | `size` | `'small' \| 'default' \| 'large'` | ❌ | Spinner size (default: `'default'`) |
 | `variant` | `'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger'` | ❌ | Color theme (default: `'primary'`) |
 | `label` | `string` | ❌ | Visible label (otherwise visually hidden) |
@@ -1034,7 +1035,10 @@ A circular animated loading indicator with size, variant, and accessible label.
 import { Spinner } from '@toolcase/react-components'
 
 <Spinner />
-<Spinner size="large" variant="success" label="Saving..." />
+<Spinner shape="dots" variant="info" />
+<Spinner shape="bars" size="large" variant="success" label="Saving..." />
+<Spinner shape="grid" />
+<Spinner shape="pulse" />
 ```
 
 ---
@@ -1723,12 +1727,13 @@ const actions: ActionHeaderAction[] = [
 
 ### ActionItems
 
-A three-dots (⋮) dropdown menu of labelled action items.
+A three-dots (⋮) dropdown menu of labelled action items. Self-managed (no Bootstrap JS needed). Full keyboard support: arrows / Home / End / Enter / Esc, roving focus, click-outside to close, WAI-ARIA menu-button semantics (`role="menu"`/`menuitem`).
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `items` | `ActionItem[]` | ✅ | `{ key, label, icon? }` |
 | `onActionClick` | `(key: string) => void` | ❌ | Called when a menu item is clicked |
+| `label` | `string` | ❌ | Accessible name for the trigger (default: `'Actions'`) |
 
 ```tsx
 import { ActionItems, ActionItem } from '@toolcase/react-components'
@@ -1746,23 +1751,29 @@ const items: ActionItem[] = [
 
 ### Button
 
-A styled button with variant colors, sizes, and outline mode.
+A styled button with variant colors, sizes, outline mode, loading state, and icon slots.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `variant` | `'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger'` | ❌ | Color theme (default: `'primary'`) |
+| `variant` | `'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger' \| 'link'` | ❌ | Color theme (default: `'primary'`). `'link'` renders a text-style button |
 | `size` | `'small' \| 'default' \| 'large'` | ❌ | Button size (default: `'default'`) |
-| `outline` | `boolean` | ❌ | Outline style |
+| `outline` | `boolean` | ❌ | Outline style (ignored for `'link'`) |
+| `loading` | `boolean` | ❌ | Shows a spinner, disables the button, sets `aria-busy` |
+| `fullWidth` | `boolean` | ❌ | Stretch to full container width |
+| `startIcon` | `ReactNode` | ❌ | Icon before the label |
+| `endIcon` | `ReactNode` | ❌ | Icon after the label |
 | `label` | `string` | ❌ | Text alternative to `children` |
 | `children` | `ReactNode` | ❌ | Button content |
 
-Also accepts all `HTMLButtonElement` attributes. Supports `ref` forwarding.
+Also accepts all `HTMLButtonElement` attributes. Supports `ref` forwarding. `type` defaults to `"button"` (won't accidentally submit a form).
 
 ```tsx
 import { Button } from '@toolcase/react-components'
 
 <Button variant="primary">Save</Button>
 <Button variant="danger" outline size="small">Delete</Button>
+<Button variant="primary" loading>Saving…</Button>
+<Button variant="secondary" startIcon={<Icon name="plus" />}>New item</Button>
 ```
 
 ---
@@ -3851,7 +3862,8 @@ These components are intentionally lighter on prop docs — they are landing-pag
 | `InstallTabs` | Multi-package-manager install snippet (npm / pnpm / yarn / bun). |
 | `JSONSchemaDef` | Renders a JSON Schema fragment as docs. |
 | `MigrationGuide` | Step-by-step migration walkthrough. |
-| `NodeEditor` | Visual node-graph editor surface. |
+| `NodeEditor` | Canvas-only node-graph view (pan/zoom/touch, drag-to-connect). Drive it with the `useNodeEditor()` hook, which owns graph state + `actions`/`selection`; build toolbar/inspector yourself. |
+| `AudioMixer` | Visual multitrack mixer editor (track headers, timeline clips, loop region, inspector). Drive it with the `useAudioMixer()` hook (owns the project-document JSON + `actions`/`selection`); playhead is callback-driven (`currentMs`/`onSeek`) — no Web Audio inside. |
 | `PluginGrid` | Grid of plugins / extensions / addons. |
 | `Pipeline` | CI / data-pipeline step visualisation. |
 | `QuickStart` | Numbered "get started in N steps" panel. |

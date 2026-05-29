@@ -3,13 +3,13 @@
 // name. Used for country codes, currency codes, IATA codes, plan keys, etc.
 
 .component.component-code-label-cell {
-    --clc-color: #0f172a;
-    --clc-muted: #64748b;
-    --clc-border: #e2e8f0;
+    --clc-color: var(--tc-accent-hover);
+    --clc-muted: var(--tc-text-muted);
+    --clc-border: var(--tc-border);
 
     display: inline-flex;
     align-items: center;
-    gap: 0.625rem;
+    gap: var(--tc-space-3);
     min-width: 0;
     max-width: 100%;
 }
@@ -22,8 +22,8 @@
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: var(--clc-muted);
-        padding: 0.1rem 0.4rem;
-        background: #f8fafc;
+        padding: var(--tc-space-1) var(--tc-space-2);
+        background: var(--tc-surface-hover);
         border: 1px solid var(--clc-border);
         flex-shrink: 0;
         line-height: 1.4;

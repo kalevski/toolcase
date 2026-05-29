@@ -1,12 +1,12 @@
 .component.component-icon-picker {
-	--ip-text: #1e293b;
-	--ip-muted: #64748b;
-	--ip-subtle: #94a3b8;
-	--ip-border: #e2e8f0;
-	--ip-hover-bg: #f1f5f9;
-	--ip-light-bg: #ffffff;
-	--ip-accent: #1e293b;
-	--ip-accent-text: #ffffff;
+	--ip-text: var(--tc-text);
+	--ip-muted: var(--tc-text-muted);
+	--ip-subtle: var(--tc-text-faint);
+	--ip-border: var(--tc-border);
+	--ip-hover-bg: var(--tc-surface-muted);
+	--ip-light-bg: var(--tc-surface);
+	--ip-accent: var(--tc-text);
+	--ip-accent-text: var(--tc-surface);
 	--ip-transition: 0.15s ease;
 	--ip-radius: 0;
 
@@ -18,7 +18,7 @@
 	font-size: 0.85rem;
 	font-weight: 600;
 	color: var(--ip-text);
-	margin-bottom: 0.4rem;
+	margin-bottom: var(--tc-space-2);
 }
 
 .component-icon-picker__trigger {
@@ -39,16 +39,21 @@
 		border-color: var(--ip-muted);
 		background: var(--ip-hover-bg);
 	}
+
+	&:focus-visible {
+		outline: var(--tc-focus-outline);
+		outline-offset: var(--tc-focus-offset);
+	}
 }
 
 .component-icon-picker__dropdown {
 	position: absolute;
 	top: calc(100% + 4px);
 	left: 0;
-	background: #fff;
+	background: var(--tc-surface);
 	border: 1px solid var(--ip-border);
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-	padding: 0.5rem;
+	box-shadow: var(--tc-shadow-md);
+	padding: var(--tc-space-2);
 	z-index: 1060; // above modal (1050)
 	animation: ip-picker-in 0.12s ease-out;
 }
@@ -56,10 +61,10 @@
 .component-icon-picker__search {
 	display: flex;
 	align-items: center;
-	gap: 0.4rem;
-	padding: 0.35rem 0.5rem;
+	gap: var(--tc-space-2);
+	padding: var(--tc-space-1) var(--tc-space-2);
 	border-bottom: 1px solid var(--ip-border);
-	margin-bottom: 0.35rem;
+	margin-bottom: var(--tc-space-1);
 
 	input {
 		flex: 1;
@@ -71,7 +76,7 @@
 		min-width: 0;
 
 		&::placeholder {
-			color: #94a3b8;
+			color: var(--tc-text-faint);
 		}
 	}
 }
@@ -100,11 +105,16 @@
 		background: var(--ip-hover-bg);
 		color: var(--ip-text);
 	}
+
+	&:focus-visible {
+		outline: var(--tc-focus-outline);
+		outline-offset: var(--tc-focus-offset);
+	}
 }
 
 .component-icon-picker__grid {
 	display: grid;
-	gap: 2px;
+	gap: var(--tc-space-1);
 
 	@media (max-width: 576px) {
 		grid-template-columns: repeat(4, 1fr) !important;

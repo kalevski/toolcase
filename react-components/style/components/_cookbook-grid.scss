@@ -1,11 +1,11 @@
 .component.component-cookbook-grid {
-	--cg-color: #1e293b;
-	--cg-muted: #64748b;
-	--cg-border: #e2e8f0;
-	--cg-accent: #6366f1;
+	--cg-color: var(--tc-text);
+	--cg-muted: var(--tc-text-muted);
+	--cg-border: var(--tc-border);
+	--cg-accent: var(--tc-violet);
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--tc-space-4);
 }
 
 .component-cookbook-grid {
@@ -19,16 +19,16 @@
 	&__grid {
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 1rem;
+		gap: var(--tc-space-4);
 	}
 
 	&__card {
-		background: #ffffff;
+		background: var(--tc-surface);
 		border: 1px solid var(--cg-border);
-		padding: 1rem 1.1rem;
+		padding: var(--tc-space-4) var(--tc-space-4);
 		display: flex;
 		flex-direction: column;
-		gap: 0.6rem;
+		gap: var(--tc-space-2);
 		transition: border-color 0.15s ease, transform 0.15s ease;
 
 		&:hover {
@@ -40,7 +40,7 @@
 	&__head {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
+		gap: var(--tc-space-1);
 	}
 
 	&__name {
@@ -52,15 +52,15 @@
 
 	&__tags {
 		display: flex;
-		gap: 0.3rem;
+		gap: var(--tc-space-1);
 		flex-wrap: wrap;
 	}
 
 	&__tag {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.15rem 0.45rem;
-		background: #f1f5f9;
+		padding: var(--tc-space-1) var(--tc-space-2);
+		background: var(--tc-surface-muted);
 		color: var(--cg-muted);
 		font-size: 0.68rem;
 		font-weight: 600;
@@ -78,7 +78,7 @@
 	&__code { width: 100%; min-width: 0; }
 
 	&__more {
-		margin-top: 0.2rem;
+		margin-top: var(--tc-space-1);
 		font-size: 0.85rem;
 		font-weight: 600;
 		color: var(--cg-accent);

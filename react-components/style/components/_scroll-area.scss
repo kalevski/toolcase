@@ -3,8 +3,8 @@
 .component.component-scroll-area {
     --sa-scrollbar-w:     6px;
     --sa-scrollbar-bg:    transparent;
-    --sa-thumb-bg:        #cbd5e1;
-    --sa-thumb-hover:     #94a3b8;
+    --sa-thumb-bg:        var(--tc-border-strong);
+    --sa-thumb-hover:     var(--tc-text-faint);
     --sa-transition:      0.2s ease;
 
     // Custom scrollbar (webkit)

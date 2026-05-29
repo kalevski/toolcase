@@ -1,12 +1,12 @@
 .component.component-compatibility-matrix {
-	--cm-color: #1e293b;
-	--cm-muted: #64748b;
-	--cm-border: #e2e8f0;
-	--cm-supported: #10b981;
-	--cm-deprecated: #f59e0b;
-	--cm-unsupported: #cbd5e1;
-	--cm-planned: #6366f1;
-	background: #ffffff;
+	--cm-color: var(--tc-text);
+	--cm-muted: var(--tc-text-muted);
+	--cm-border: var(--tc-border);
+	--cm-supported: var(--tc-success);
+	--cm-deprecated: var(--tc-warning);
+	--cm-unsupported: var(--tc-border-strong);
+	--cm-planned: var(--tc-violet);
+	background: var(--tc-surface);
 	border: 1px solid var(--cm-border);
 	overflow: hidden;
 }
@@ -14,7 +14,7 @@
 .component-compatibility-matrix {
 	&__title {
 		margin: 0;
-		padding: 0.85rem 1rem;
+		padding: var(--tc-space-3) var(--tc-space-4);
 		font-size: 0.95rem;
 		font-weight: 700;
 		color: var(--cm-color);
@@ -31,13 +31,13 @@
 
 	&__corner,
 	&__head {
-		padding: 0.55rem 0.7rem;
+		padding: var(--tc-space-2) var(--tc-space-3);
 		font-size: 0.72rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 		color: var(--cm-muted);
-		background: #f8fafc;
+		background: var(--tc-surface-hover);
 		border-bottom: 1px solid var(--cm-border);
 		text-align: center;
 	}
@@ -45,7 +45,7 @@
 	&__corner { text-align: left; }
 
 	&__version {
-		padding: 0.55rem 0.85rem;
+		padding: var(--tc-space-2) var(--tc-space-3);
 		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
 		font-size: 0.85rem;
 		color: var(--cm-color);
@@ -55,7 +55,7 @@
 	}
 
 	&__cell {
-		padding: 0.55rem;
+		padding: var(--tc-space-2);
 		text-align: center;
 		border-bottom: 1px solid var(--cm-border);
 		font-size: 1.05rem;
@@ -69,11 +69,11 @@
 	&__legend {
 		list-style: none;
 		margin: 0;
-		padding: 0.6rem 0.85rem;
+		padding: var(--tc-space-2) var(--tc-space-3);
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.85rem;
-		background: #f8fafc;
+		gap: var(--tc-space-3);
+		background: var(--tc-surface-hover);
 		border-top: 1px solid var(--cm-border);
 		font-size: 0.78rem;
 	}
@@ -81,7 +81,7 @@
 	&__legend-item {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
+		gap: var(--tc-space-1);
 		color: var(--cm-color);
 
 		&--supported .bi { color: var(--cm-supported); }

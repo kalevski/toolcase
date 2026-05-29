@@ -8,7 +8,7 @@
     font-weight: var(--tc-font-weight-semibold);
     background: var(--st-bg);
     color: var(--st-color);
-    padding: 4px 8px;
+    padding: var(--tc-space-1) var(--tc-space-2);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     display: inline-block;
@@ -27,7 +27,7 @@
     position: absolute;
 }
 
-.component-stamp--tl { top: 8px; left: 8px; }
-.component-stamp--tr { top: 8px; right: 8px; }
-.component-stamp--bl { bottom: 8px; left: 8px; }
-.component-stamp--br { bottom: 8px; right: 8px; }
+.component-stamp--tl { top: var(--tc-space-2); left: var(--tc-space-2); }
+.component-stamp--tr { top: var(--tc-space-2); right: var(--tc-space-2); }
+.component-stamp--bl { bottom: var(--tc-space-2); left: var(--tc-space-2); }
+.component-stamp--br { bottom: var(--tc-space-2); right: var(--tc-space-2); }

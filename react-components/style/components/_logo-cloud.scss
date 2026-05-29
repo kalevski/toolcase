@@ -1,9 +1,9 @@
 .component.component-logo-cloud {
 	--lc-columns: 3;
-	--lc-color: #64748b;
+	--lc-color: var(--tc-text-muted);
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--tc-space-4);
 }
 
 .component-logo-cloud {
@@ -20,7 +20,7 @@
 	&__grid {
 		display: grid;
 		grid-template-columns: repeat(var(--lc-columns), 1fr);
-		gap: 1rem 1.5rem;
+		gap: var(--tc-space-4) var(--tc-space-6);
 		align-items: center;
 		justify-items: center;
 	}
@@ -33,6 +33,7 @@
 		transition: opacity 0.15s ease, filter 0.15s ease;
 
 		&:hover { opacity: 1; }
+		&:focus-visible { outline: var(--tc-focus-outline); outline-offset: var(--tc-focus-offset); }
 	}
 
 	&__logo {

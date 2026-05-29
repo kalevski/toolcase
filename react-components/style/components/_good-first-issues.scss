@@ -1,11 +1,11 @@
 .component.component-good-first-issues {
-	--gfi-color: #1e293b;
-	--gfi-muted: #64748b;
-	--gfi-border: #e2e8f0;
-	--gfi-accent: #6366f1;
+	--gfi-color: var(--tc-text);
+	--gfi-muted: var(--tc-text-muted);
+	--gfi-border: var(--tc-border);
+	--gfi-accent: var(--tc-violet);
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--tc-space-4);
 }
 
 .component-good-first-issues {
@@ -22,43 +22,88 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__empty {
-		padding: 1.25rem;
-		background: #f8fafc;
+		padding: var(--tc-space-5);
+		background: var(--tc-surface-hover);
 		text-align: center;
 		color: var(--gfi-muted);
 	}
 
 	&__item {
-		background: #ffffff;
+		position: relative;
+		background: var(--tc-surface);
 		border: 1px solid var(--gfi-border);
-		transition: border-color 0.15s ease;
+		overflow: hidden;
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease,
+			transform 0.15s ease;
 
-		&:hover { border-color: var(--gfi-accent); }
+		// Accent bar that wipes in from the top edge on hover/focus.
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			width: 3px;
+			background: var(--gfi-accent);
+			transform: scaleY(0);
+			transform-origin: top;
+			transition: transform 0.15s ease;
+		}
+
+		&:hover,
+		&:focus-within {
+			border-color: var(--gfi-accent);
+			box-shadow: var(--tc-shadow-md);
+			transform: translateY(-1px);
+
+			&::before { transform: scaleY(1); }
+
+			.component-good-first-issues__issue-title { color: var(--gfi-accent); }
+		}
 	}
 
 	&__link {
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
-		padding: 0.85rem 1rem;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-3) var(--tc-space-4);
 		text-decoration: none;
 		color: var(--gfi-color);
+
+		&:hover,
+		&:focus { text-decoration: none; }
+
+		@media (pointer: coarse) {
+			min-height: 44px;
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
+		}
 	}
 
 	&__head {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 		flex-wrap: wrap;
 	}
 
-	&__issue-title { font-weight: 600; font-size: 0.92rem; }
+	&__issue-title {
+		font-weight: 600;
+		font-size: 0.92rem;
+		transition: color 0.15s ease;
+	}
 
 	&__repo {
+		margin-left: auto;
 		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
 		font-size: 0.7rem;
 		color: var(--gfi-muted);
@@ -68,17 +113,17 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		gap: 0.6rem;
+		gap: var(--tc-space-2);
 		flex-wrap: wrap;
 	}
 
-	&__labels { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+	&__labels { display: flex; flex-wrap: wrap; gap: var(--tc-space-1); }
 
 	&__label {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.1rem 0.4rem;
-		background: rgba(99, 102, 241, 0.08);
+		padding: var(--tc-space-1) var(--tc-space-2);
+		background: rgba(var(--tc-violet-rgb), 0.08);
 		color: var(--gfi-accent);
 		font-size: 0.66rem;
 		font-weight: 600;
@@ -87,7 +132,7 @@
 
 	&__stats {
 		display: flex;
-		gap: 0.6rem;
+		gap: var(--tc-space-2);
 		font-size: 0.75rem;
 		color: var(--gfi-muted);
 	}
@@ -95,6 +140,18 @@
 	&__stat {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.2rem;
+		gap: var(--tc-space-1);
+		white-space: nowrap;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.component-good-first-issues__item {
+		transition: none;
+
+		&:hover,
+		&:focus-within {
+			transform: none;
+		}
 	}
 }

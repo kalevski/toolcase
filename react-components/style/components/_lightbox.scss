@@ -1,13 +1,13 @@
 // ── Lightbox ──────────────────────────────────────────────────────────────────
 
 .component.component-lightbox {
-    --lb-backdrop:        rgba(0, 0, 0, 0.9);
-    --lb-text:            #ffffff;
-    --lb-muted:           rgba(255, 255, 255, 0.65);
-    --lb-arrow-bg:        rgba(255, 255, 255, 0.12);
-    --lb-arrow-hover:     rgba(255, 255, 255, 0.22);
-    --lb-thumb-border:    rgba(255, 255, 255, 0.25);
-    --lb-thumb-active:    #ffffff;
+    --lb-backdrop:        rgba(var(--tc-black-rgb), 0.9);
+    --lb-text:            var(--tc-text-inverse);
+    --lb-muted:           rgba(var(--tc-surface-rgb), 0.65);
+    --lb-arrow-bg:        rgba(var(--tc-surface-rgb), 0.12);
+    --lb-arrow-hover:     rgba(var(--tc-surface-rgb), 0.22);
+    --lb-thumb-border:    rgba(var(--tc-surface-rgb), 0.25);
+    --lb-thumb-active:    var(--tc-surface);
     --lb-transition:      0.2s ease;
     --lb-z:               1070;
 
@@ -35,14 +35,14 @@
         width: 100%;
         height: 100%;
         max-width: 1200px;
-        padding: 3rem 1rem 1rem;
+        padding: var(--tc-space-9) var(--tc-space-4) var(--tc-space-4);
         outline: none;
     }
 
     &__close {
         position: absolute;
-        top: 0.75rem;
-        right: 0.75rem;
+        top: var(--tc-space-3);
+        right: var(--tc-space-3);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -57,11 +57,16 @@
         transition: background var(--lb-transition);
 
         &:hover { background: var(--lb-arrow-hover); }
+
+        &:focus-visible {
+            outline: var(--tc-focus-outline);
+            outline-offset: var(--tc-focus-offset);
+        }
     }
 
     &__counter {
         position: absolute;
-        top: 0.85rem;
+        top: var(--tc-space-3);
         left: 50%;
         transform: translateX(-50%);
         color: var(--lb-muted);
@@ -83,7 +88,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
+        gap: var(--tc-space-2);
         margin: 0;
         max-width: 100%;
         max-height: 100%;
@@ -119,19 +124,24 @@
         font-size: 1.1rem;
         transition: background var(--lb-transition);
 
-        &--prev { left: 0.5rem; }
-        &--next { right: 0.5rem; }
+        &--prev { left: var(--tc-space-2); }
+        &--next { right: var(--tc-space-2); }
 
         &:hover { background: var(--lb-arrow-hover); }
+
+        &:focus-visible {
+            outline: var(--tc-focus-outline);
+            outline-offset: var(--tc-focus-offset);
+        }
     }
 
     &__thumbnails {
         display: flex;
-        gap: 0.5rem;
+        gap: var(--tc-space-2);
         overflow-x: auto;
-        padding: 0.5rem 0;
+        padding: var(--tc-space-2) 0;
         scrollbar-width: thin;
-        scrollbar-color: rgba(255,255,255,0.3) transparent;
+        scrollbar-color: rgba(var(--tc-surface-rgb), 0.3) transparent;
         max-width: 100%;
         flex-shrink: 0;
     }
@@ -155,7 +165,12 @@
         }
 
         &:hover {
-            border-color: rgba(255, 255, 255, 0.65);
+            border-color: rgba(var(--tc-surface-rgb), 0.65);
+        }
+
+        &:focus-visible {
+            outline: var(--tc-focus-outline);
+            outline-offset: var(--tc-focus-offset);
         }
 
         &--active {

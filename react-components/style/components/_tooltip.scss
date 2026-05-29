@@ -8,12 +8,12 @@
 .component-tooltip__bubble {
 	position: absolute;
 	z-index: 1070; // above modals and dropdowns
-	padding: 0.35rem 0.6rem;
+	padding: var(--tc-space-1) var(--tc-space-2);
 	font-size: 0.75rem;
 	font-weight: 500;
 	line-height: 1.4;
-	color: #fff;
-	background: #1e293b;
+	color: var(--tc-text-inverse);
+	background: var(--tc-text);
 	white-space: nowrap;
 	pointer-events: none;
 

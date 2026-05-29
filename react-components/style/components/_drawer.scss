@@ -1,12 +1,12 @@
 // ── Drawer ───────────────────────────────────────────────────────────────────
 
 .component-drawer {
-	--dr-bg: #ffffff;
-	--dr-border: #e2e8f0;
-	--dr-title-color: #1e293b;
-	--dr-muted: #64748b;
-	--dr-backdrop: rgba(0, 0, 0, 0.4);
-	--dr-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+	--dr-bg: var(--tc-surface);
+	--dr-border: var(--tc-border);
+	--dr-title-color: var(--tc-text);
+	--dr-muted: var(--tc-text-muted);
+	--dr-backdrop: rgba(var(--tc-black-rgb), 0.4);
+	--dr-shadow: var(--tc-shadow-lg);
 	--dr-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	--dr-header-height: 3.25rem;
 
@@ -128,9 +128,9 @@
 	border-bottom: 1px solid var(--dr-border);
 	display: flex;
 	flex-shrink: 0;
-	gap: 0.5rem;
+	gap: var(--tc-space-2);
 	height: var(--dr-header-height);
-	padding: 0 1rem;
+	padding: 0 var(--tc-space-4);
 }
 
 .component-drawer__title {
@@ -159,7 +159,7 @@
 	width: 2rem;
 
 	&:hover {
-		background: #f1f5f9;
+		background: var(--tc-surface-muted);
 		color: var(--dr-title-color);
 	}
 }
@@ -169,7 +169,7 @@
 .component-drawer__body {
 	flex: 1;
 	overflow-y: auto;
-	padding: 1rem;
+	padding: var(--tc-space-4);
 	-webkit-overflow-scrolling: touch;
 	scrollbar-width: thin;
 }

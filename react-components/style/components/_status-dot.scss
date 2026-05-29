@@ -6,18 +6,18 @@
 }
 
 .component.component-status-dot {
-	--dot-color: #94a3b8;
+	--dot-color: var(--tc-text-faint);
 	--dot-size: 10px;
 
 	display: inline-flex;
 	align-items: center;
-	gap: 0.35rem;
+	gap: var(--tc-space-1);
 
 	// Status colors
-	&.component-status-dot--online  { --dot-color: #22c55e; }
-	&.component-status-dot--offline { --dot-color: #94a3b8; }
-	&.component-status-dot--busy    { --dot-color: #ef4444; }
-	&.component-status-dot--away    { --dot-color: #f59e0b; }
+	&.component-status-dot--online  { --dot-color: var(--tc-success); }
+	&.component-status-dot--offline { --dot-color: var(--tc-text-faint); }
+	&.component-status-dot--busy    { --dot-color: var(--tc-danger); }
+	&.component-status-dot--away    { --dot-color: var(--tc-warning); }
 
 	// Sizes
 	&.component-status-dot--small { --dot-size: 7px; }
@@ -39,5 +39,5 @@
 
 .component-status-dot__label {
 	font-size: 0.8rem;
-	color: #64748b;
+	color: var(--tc-text-muted);
 }

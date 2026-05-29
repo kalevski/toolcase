@@ -60,28 +60,30 @@ export const Changelog: FC<ChangelogProps> = ({
 					)}
 				</header>
 
-				<div className="component-changelog__slider" aria-live="polite">
-					<div className="component-changelog__track">
-						{loading ? (
-							Array.from({ length: maxVisible }, (_, i) => (
-								<article key={i} className="component-changelog__item">
+				<ol className="component-changelog__timeline" aria-live="polite">
+					{loading ? (
+						Array.from({ length: maxVisible }, (_, i) => (
+							<li key={i} className="component-changelog__item">
+								<div className="component-changelog__body">
 									<Skeleton width="25%" />
 									<Skeleton width="60%" height="1.25em" />
 									<Skeleton count={2} />
-								</article>
-							))
-						) : visibleEntries.map((entry, index) => (
-							<article key={entry.id ?? `${entry.date}-${index}`} className="component-changelog__item">
+								</div>
+							</li>
+						))
+					) : visibleEntries.map((entry, index) => (
+						<li key={entry.id ?? `${entry.date}-${index}`} className="component-changelog__item">
+							<div className="component-changelog__body">
 								<div className="component-changelog__item-meta">
 									<span className="component-changelog__item-date">{entry.date}</span>
-								{entry.tag && <Tag variant="primary">{entry.tag}</Tag>}
+									{entry.tag && <Tag variant="primary">{entry.tag}</Tag>}
 								</div>
 								<h3 className="component-changelog__item-title">{entry.title}</h3>
 								<p className="component-changelog__item-description">{entry.description}</p>
-							</article>
-						))}
-					</div>
-				</div>
+							</div>
+						</li>
+					))}
+				</ol>
 			</div>
 		</section>
 	)

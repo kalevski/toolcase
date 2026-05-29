@@ -1,13 +1,13 @@
 .component.component-newsletter-signup {
-	--ns-color: #1e293b;
-	--ns-muted: #64748b;
-	--ns-border: #e2e8f0;
-	--ns-accent: #1e293b;
-	--ns-success: #10b981;
-	--ns-error: #ef4444;
+	--ns-color: var(--tc-text);
+	--ns-muted: var(--tc-text-muted);
+	--ns-border: var(--tc-border);
+	--ns-accent: var(--tc-text);
+	--ns-success: var(--tc-success);
+	--ns-error: var(--tc-danger);
 	display: flex;
 	flex-direction: column;
-	gap: 0.6rem;
+	gap: var(--tc-space-2);
 }
 
 .component-newsletter-signup {
@@ -28,7 +28,7 @@
 	&__form {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__label {
@@ -46,24 +46,24 @@
 
 	&__input {
 		flex: 1 1 auto;
-		padding: 0.65rem 0.85rem;
-		background: #ffffff;
+		padding: var(--tc-space-3) var(--tc-space-3);
+		background: var(--tc-surface);
 		border: 1px solid var(--ns-border);
 		font-size: 0.92rem;
 		color: var(--ns-color);
 		min-width: 0;
 
 		&:focus-visible {
-			outline: 2px solid var(--ns-accent);
-			outline-offset: -2px;
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 	}
 
 	&__cta {
 		flex: 0 0 auto;
-		padding: 0.65rem 1.1rem;
+		padding: var(--tc-space-3) var(--tc-space-4);
 		background: var(--ns-accent);
-		color: #ffffff;
+		color: var(--tc-text-inverse);
 		border: none;
 		font-weight: 600;
 		font-size: 0.9rem;
@@ -72,6 +72,7 @@
 
 		&:hover:not(:disabled) { opacity: 0.9; }
 		&:disabled { opacity: 0.6; cursor: not-allowed; }
+		&:focus-visible { outline: var(--tc-focus-outline); outline-offset: var(--tc-focus-offset); }
 	}
 
 	&__privacy {
@@ -85,9 +86,9 @@
 	&__success {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.7rem 0.95rem;
-		background: rgba(16, 185, 129, 0.1);
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-3) var(--tc-space-4);
+		background: rgba(var(--tc-success-rgb), 0.1);
 		color: var(--ns-success);
 		font-weight: 600;
 		font-size: 0.92rem;

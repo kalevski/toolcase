@@ -1,11 +1,11 @@
 .component.component-badge-row {
-	--bdr-bg-label: #1e293b;
-	--bdr-bg-value: #475569;
-	--bdr-color: #ffffff;
-	--bdr-accent: #1e293b;
+	--bdr-bg-label: var(--tc-text);
+	--bdr-bg-value: var(--tc-text-muted);
+	--bdr-color: var(--tc-text-inverse);
+	--bdr-accent: var(--tc-text);
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.4rem;
+	gap: var(--tc-space-2);
 }
 
 .component-badge-row {
@@ -23,13 +23,13 @@
 	}
 
 	&__label {
-		padding: 0.25rem 0.55rem;
+		padding: var(--tc-space-1) var(--tc-space-2);
 		background: var(--bdr-bg-label);
 		color: var(--bdr-color);
 	}
 
 	&__value {
-		padding: 0.25rem 0.55rem;
+		padding: var(--tc-space-1) var(--tc-space-2);
 		background: var(--bdr-accent);
 		color: var(--bdr-color);
 	}

@@ -13,11 +13,11 @@
 
     border: 1px solid var(--bc-border);
     border-top: 3px solid var(--bc-accent);
-    padding: 24px 22px;
+    padding: var(--tc-space-6) var(--tc-space-6);
     background: var(--bc-bg);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--tc-space-3);
     text-align: center;
     min-height: 320px;
     position: relative;
@@ -44,7 +44,7 @@
     font-family: var(--tc-font-family-sans);
     font-size: 1.75rem;
     color: var(--bc-accent);
-    margin: 4px 0;
+    margin: var(--tc-space-1) 0;
 }
 
 .component-brief-card__id {
@@ -63,7 +63,7 @@
     letter-spacing: 0.1em;
     color: var(--bc-accent);
     align-self: center;
-    padding: 4px 10px;
+    padding: var(--tc-space-1) var(--tc-space-3);
     border: 1px solid var(--bc-accent);
     text-transform: uppercase;
 }
@@ -74,7 +74,7 @@
     font-weight: var(--tc-font-weight-bold);
     color: var(--bc-text);
     line-height: 1.35;
-    margin-top: 4px;
+    margin-top: var(--tc-space-1);
 }
 
 .component-brief-card__body {
@@ -93,7 +93,7 @@
     display: flex;
     justify-content: space-between;
     border-top: 1px solid var(--bc-border);
-    padding-top: 12px;
+    padding-top: var(--tc-space-3);
     text-transform: uppercase;
 }
 

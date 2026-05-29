@@ -3,19 +3,19 @@
 // Follows the same CSS-custom-property + BEM pattern as other components.
 
 .component.component-alert {
-	--alert-bg: #f8fafc;
-	--alert-border: #e2e8f0;
-	--alert-text: #1e293b;
-	--alert-icon: #64748b;
-	--alert-title: #0f172a;
+	--alert-bg: var(--tc-surface-hover);
+	--alert-border: var(--tc-border);
+	--alert-text: var(--tc-text);
+	--alert-icon: var(--tc-text-muted);
+	--alert-title: var(--tc-accent-hover);
 	--alert-transition: 0.15s ease;
 
 	position: relative;
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 0.75rem;
-	padding: 0.85rem 1rem;
+	gap: var(--tc-space-3);
+	padding: var(--tc-space-3) var(--tc-space-4);
 	border: 1px solid var(--alert-border);
 	background: var(--alert-bg);
 	color: var(--alert-text);
@@ -26,51 +26,51 @@
 	// ── Variant themes ────────────────────────────────────────────────────────
 
 	&.alert-primary {
-		--alert-bg: #eef2ff;
-		--alert-border: #c7d2fe;
-		--alert-text: #312e81;
-		--alert-icon: #6366f1;
-		--alert-title: #1e1b4b;
+		--alert-bg: var(--tc-violet-bg);
+		--alert-border: var(--tc-violet-tint-border);
+		--alert-text: var(--tc-violet-tint-text);
+		--alert-icon: var(--tc-violet);
+		--alert-title: var(--tc-violet-tint-text);
 	}
 
 	&.alert-secondary {
-		--alert-bg: #f8fafc;
-		--alert-border: #e2e8f0;
-		--alert-text: #475569;
-		--alert-icon: #94a3b8;
-		--alert-title: #1e293b;
+		--alert-bg: var(--tc-surface-hover);
+		--alert-border: var(--tc-border);
+		--alert-text: var(--tc-text-muted);
+		--alert-icon: var(--tc-text-faint);
+		--alert-title: var(--tc-text);
 	}
 
 	&.alert-info {
-		--alert-bg: #ecfeff;
-		--alert-border: #a5f3fc;
-		--alert-text: #155e75;
-		--alert-icon: #06b6d4;
-		--alert-title: #083344;
+		--alert-bg: var(--tc-cyan-bg);
+		--alert-border: var(--tc-cyan-tint-border);
+		--alert-text: var(--tc-cyan-tint-text);
+		--alert-icon: var(--tc-cyan);
+		--alert-title: var(--tc-cyan-tint-text);
 	}
 
 	&.alert-success {
-		--alert-bg: #f0fdf4;
-		--alert-border: #bbf7d0;
-		--alert-text: #166534;
-		--alert-icon: #22c55e;
-		--alert-title: #14532d;
+		--alert-bg: var(--tc-success-tint-bg);
+		--alert-border: var(--tc-success-tint-border);
+		--alert-text: var(--tc-success-tint-text);
+		--alert-icon: var(--tc-success);
+		--alert-title: var(--tc-success-tint-text);
 	}
 
 	&.alert-warning {
-		--alert-bg: #fffbeb;
-		--alert-border: #fde68a;
-		--alert-text: #854d0e;
-		--alert-icon: #f59e0b;
-		--alert-title: #713f12;
+		--alert-bg: var(--tc-warning-tint-bg);
+		--alert-border: var(--tc-warning-tint-border);
+		--alert-text: var(--tc-warning-tint-text);
+		--alert-icon: var(--tc-warning);
+		--alert-title: var(--tc-warning-tint-text);
 	}
 
 	&.alert-danger {
-		--alert-bg: #fef2f2;
-		--alert-border: #fecaca;
-		--alert-text: #991b1b;
-		--alert-icon: #ef4444;
-		--alert-title: #7f1d1d;
+		--alert-bg: var(--tc-danger-tint-bg);
+		--alert-border: var(--tc-danger-tint-border);
+		--alert-text: var(--tc-danger-tint-text);
+		--alert-icon: var(--tc-danger);
+		--alert-title: var(--tc-danger-tint-text);
 	}
 }
 
@@ -79,7 +79,7 @@
 .component-alert-content {
 	display: flex;
 	align-items: flex-start;
-	gap: 0.625rem;
+	gap: var(--tc-space-3);
 	flex: 1;
 	min-width: 0;
 }
@@ -93,7 +93,7 @@
 	flex-shrink: 0;
 	font-size: 1.1rem;
 	color: var(--alert-icon);
-	margin-top: 1px;
+	margin-top: var(--tc-space-1);
 }
 
 // ── Title ───────────────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@
 	font-weight: 600;
 	font-size: 0.875rem;
 	color: var(--alert-title);
-	margin-bottom: 0.15rem;
+	margin-bottom: var(--tc-space-1);
 }
 
 // ── Dismiss button ──────────────────────────────────────────────────────────
@@ -118,5 +118,10 @@
 
 	&:hover {
 		opacity: 0.85;
+	}
+
+	&:focus-visible {
+		outline: var(--tc-focus-outline);
+		outline-offset: var(--tc-focus-offset);
 	}
 }

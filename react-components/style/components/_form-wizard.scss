@@ -1,12 +1,12 @@
 .component.component-form-wizard {
-	--fw-bg: #ffffff;
-	--fw-text: #1e293b;
-	--fw-muted: #64748b;
-	--fw-subtle: #94a3b8;
-	--fw-border: #e2e8f0;
-	--fw-hover-bg: #f1f5f9;
-	--fw-accent: #1e293b;
-	--fw-accent-text: #ffffff;
+	--fw-bg: var(--tc-surface);
+	--fw-text: var(--tc-text);
+	--fw-muted: var(--tc-text-muted);
+	--fw-subtle: var(--tc-text-faint);
+	--fw-border: var(--tc-border);
+	--fw-hover-bg: var(--tc-surface-muted);
+	--fw-accent: var(--tc-text);
+	--fw-accent-text: var(--tc-surface);
 	--fw-transition: 0.15s ease;
 	--fw-radius: 0;
 
@@ -30,11 +30,11 @@
 
 .component-form-wizard__tabs {
 	.component-tab-sections__header {
-		padding: 1.25rem 1.5rem 0;
+		padding: var(--tc-space-5) var(--tc-space-6) 0;
 	}
 
 	.component-tab-sections__body {
-		padding: 1.5rem;
+		padding: var(--tc-space-6);
 		flex: 1;
 		overflow-y: auto;
 	}
@@ -43,16 +43,16 @@
 .component-form-wizard__footer {
 	display: flex;
 	align-items: center;
-	gap: 0.75rem;
-	padding: 1rem 1.5rem;
+	gap: var(--tc-space-3);
+	padding: var(--tc-space-4) var(--tc-space-6);
 	border-top: 1px solid var(--fw-border);
 }
 
 .component-form-wizard__btn {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.4rem;
-	padding: 0.5rem 1rem;
+	gap: var(--tc-space-2);
+	padding: var(--tc-space-2) var(--tc-space-4);
 	font-size: 0.82rem;
 	font-weight: 600;
 	border: none;
@@ -67,7 +67,7 @@
 }
 
 .component-form-wizard__btn--lg {
-	padding: 0.6rem 1.5rem;
+	padding: var(--tc-space-2) var(--tc-space-6);
 	font-size: 0.88rem;
 }
 

@@ -143,7 +143,10 @@ export const TagInput: React.FC<TagInputProps> = ({
 
 			<div
 				className={`component-tag-input__field${open ? ' component-tag-input__field--focus' : ''}${disabled ? ' component-tag-input__field--disabled' : ''}`}
-				onClick={() => inputRef.current?.focus()}
+				onClick={() => {
+					inputRef.current?.focus()
+					setOpen(true)
+				}}
 			>
 				{tags.map((tag) => (
 					<span className="component-tag-input__tag" key={tag}>

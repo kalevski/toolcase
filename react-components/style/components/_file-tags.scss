@@ -1,10 +1,9 @@
-@import '../colors';
 
 .component.component-file-tags {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 4px;
+	gap: var(--tc-space-1);
 }
 
 .component-file-tags {
@@ -12,7 +11,7 @@
 		display: inline-flex;
 		align-items: center;
 		height: 22px;
-		padding: 0 8px;
+		padding: 0 var(--tc-space-2);
 		line-height: 1;
 		user-select: none;
 		font-size: 0.75rem;
@@ -20,12 +19,12 @@
 		border: none;
 
 		&--tag {
-			background: $gray-100;
-			color: $gray-600;
+			background: var(--tc-surface-muted);
+			color: var(--tc-text-muted);
 			position: relative;
 			cursor: pointer;
 			transition: background 0.15s ease, color 0.15s ease, padding-left 0.15s ease;
-			gap: 4px;
+			gap: var(--tc-space-1);
 
 			&::after {
 				content: '\00d7';
@@ -34,21 +33,26 @@
 				justify-content: center;
 				width: 12px;
 				height: 12px;
-				background: $red-400;
-				color: #fff;
+				background: var(--tc-danger);
+				color: var(--tc-text-inverse);
 				font-size: 0.65rem;
 				line-height: 0.9;
 				position: absolute;
-				left: 3px;
+				left: var(--tc-space-1);
 				top: 50%;
 				transform: translateY(-50%) scale(0);
 				opacity: 0;
 				transition: transform 0.15s ease, opacity 0.15s ease;
 			}
 
+			&:focus-visible {
+				outline: var(--tc-focus-outline);
+				outline-offset: var(--tc-focus-offset);
+			}
+
 			&:hover {
-				background: $gray-200;
-				padding-left: 18px;
+				background: var(--tc-border);
+				padding-left: var(--tc-space-5);
 
 				&::after {
 					transform: translateY(-50%) scale(1);
@@ -68,14 +72,19 @@
 			cursor: pointer;
 			font-size: 0.85rem;
 			font-weight: 500;
-			background: $gray-100;
-			color: $gray-500;
+			background: var(--tc-surface-muted);
+			color: var(--tc-text-muted);
 			transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 
 			&:hover {
-				background: $green-500;
-				color: #fff;
+				background: var(--tc-success);
+				color: var(--tc-text-inverse);
 				transform: scale(1.1);
+			}
+
+			&:focus-visible {
+				outline: var(--tc-focus-outline);
+				outline-offset: var(--tc-focus-offset);
 			}
 		}
 	}
@@ -83,7 +92,7 @@
 	&__dropdown {
 		min-width: 180px;
 		padding: 0;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+		box-shadow: var(--tc-shadow-md);
 		overflow: hidden;
 
 		.dropdown-item {
@@ -91,59 +100,61 @@
 			text-align: left;
 			border: none;
 			background: none;
-			padding: 6px 12px;
+			padding: var(--tc-space-2) var(--tc-space-3);
 			font-size: 0.8rem;
-			color: $gray-600;
+			color: var(--tc-text-muted);
 			cursor: pointer;
 			transition: background 0.1s ease;
 
 			&:hover {
-				background: $gray-50;
-				color: $gray-800;
+				background: var(--tc-bg);
+				color: var(--tc-text);
 			}
 		}
 	}
 
 	&__divider {
 		height: 1px;
-		background: $gray-200;
+		background: var(--tc-border);
 		margin: 0;
 	}
 
 	&__search {
-		padding: 6px 8px;
+		padding: var(--tc-space-2) var(--tc-space-2);
 		border-bottom: none;
 
 		form {
 			display: flex;
 			align-items: center;
-			gap: 4px;
+			gap: var(--tc-space-1);
 			width: 100%;
 		}
 
 		input {
 			flex: 1;
-			border: 1px solid $gray-200;
-			padding: 4px 8px;
+			border: 1px solid var(--tc-border);
+			padding: var(--tc-space-1) var(--tc-space-2);
 			font-size: 0.8rem;
-			color: $gray-700;
+			color: var(--tc-text);
 			outline: none;
 			transition: border-color 0.15s ease;
 
 			&::placeholder {
-				color: $gray-400;
+				color: var(--tc-text-faint);
 			}
 
-			&:focus {
-				border-color: $gray-400;
+			&:focus-visible {
+				border-color: var(--tc-text-faint);
+				outline: var(--tc-focus-outline);
+				outline-offset: var(--tc-focus-offset);
 			}
 		}
 	}
 
 	&__empty {
-		padding: 8px 12px;
+		padding: var(--tc-space-2) var(--tc-space-3);
 		font-size: 0.8rem;
-		color: $gray-400;
+		color: var(--tc-text-faint);
 		text-align: center;
 		font-style: italic;
 	}

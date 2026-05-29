@@ -2,9 +2,9 @@
 
 .component.component-resizable-panel {
     --rp-divider-size:    6px;
-    --rp-divider-bg:      #e2e8f0;
-    --rp-divider-hover:   #cbd5e1;
-    --rp-handle-color:    #94a3b8;
+    --rp-divider-bg:      var(--tc-border);
+    --rp-divider-hover:   var(--tc-border-strong);
+    --rp-handle-color:    var(--tc-text-faint);
     --rp-transition:      0.1s ease;
 
     display: flex;

@@ -77,10 +77,30 @@ const ButtonDemo: React.FC = () => {
 				</div>
 			</SectionCard>
 
+			<SectionCard title="Loading">
+				<div className="d-flex gap-2 flex-wrap">
+					<Button variant="primary" loading>Saving…</Button>
+					<Button variant="success" loading>Publishing</Button>
+					<Button variant="danger" outline loading>Deleting</Button>
+				</div>
+			</SectionCard>
+
+			<SectionCard title="With icons">
+				<div className="d-flex gap-2 flex-wrap">
+					<Button variant="primary" startIcon={<span aria-hidden>＋</span>}>New item</Button>
+					<Button variant="secondary" outline endIcon={<span aria-hidden>→</span>}>Next</Button>
+					<Button variant="danger" outline startIcon={<span aria-hidden>🗑</span>}>Delete</Button>
+				</div>
+			</SectionCard>
+
+			<SectionCard title="Full width">
+				<Button variant="primary" fullWidth>Continue</Button>
+			</SectionCard>
+
 			<SectionCard title="Save flow">
 				<div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
 					<Button variant="secondary" outline onClick={() => setConfirmed(false)}>Cancel</Button>
-					<Button variant="primary" onClick={simulateSave} disabled={saving}>
+					<Button variant="primary" onClick={simulateSave} loading={saving}>
 						{saving ? 'Saving…' : 'Save changes'}
 					</Button>
 				</div>

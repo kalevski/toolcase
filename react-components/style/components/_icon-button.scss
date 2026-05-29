@@ -4,9 +4,9 @@
 	--ib-size: 36px;
 	--ib-icon: 1rem;
 	--ib-bg: transparent;
-	--ib-border: #e2e8f0;
-	--ib-color: #475569;
-	--ib-hover-bg: #f8fafc;
+	--ib-border: var(--tc-border);
+	--ib-color: var(--tc-text-muted);
+	--ib-hover-bg: var(--tc-surface-hover);
 	--ib-transition: 0.15s ease;
 
 	display: inline-flex;
@@ -27,6 +27,11 @@
 		background: var(--ib-hover-bg);
 	}
 
+	&:focus-visible {
+		outline: var(--tc-focus-outline);
+		outline-offset: var(--tc-focus-offset);
+	}
+
 	&:disabled {
 		opacity: 0.55;
 		cursor: not-allowed;
@@ -45,12 +50,12 @@
 	}
 
 	// Variant colors
-	&.component-icon-button--primary   { --ib-color: #6366f1; --ib-hover-bg: #eef2ff; }
-	&.component-icon-button--secondary { --ib-color: #475569; --ib-hover-bg: #f8fafc; }
-	&.component-icon-button--info      { --ib-color: #06b6d4; --ib-hover-bg: #ecfeff; }
-	&.component-icon-button--success   { --ib-color: #22c55e; --ib-hover-bg: #f0fdf4; }
-	&.component-icon-button--warning   { --ib-color: #f59e0b; --ib-hover-bg: #fffbeb; }
-	&.component-icon-button--danger    { --ib-color: #ef4444; --ib-hover-bg: #fef2f2; }
+	&.component-icon-button--primary   { --ib-color: var(--tc-violet); --ib-hover-bg: var(--tc-violet-bg); }
+	&.component-icon-button--secondary { --ib-color: var(--tc-text-muted); --ib-hover-bg: var(--tc-surface-hover); }
+	&.component-icon-button--info      { --ib-color: var(--tc-cyan); --ib-hover-bg: var(--tc-cyan-bg); }
+	&.component-icon-button--success   { --ib-color: var(--tc-success); --ib-hover-bg: var(--tc-success-tint-bg); }
+	&.component-icon-button--warning   { --ib-color: var(--tc-warning); --ib-hover-bg: var(--tc-warning-tint-bg); }
+	&.component-icon-button--danger    { --ib-color: var(--tc-danger); --ib-hover-bg: var(--tc-danger-tint-bg); }
 
 	// Outline
 	&.component-icon-button--outline {

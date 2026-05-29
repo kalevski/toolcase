@@ -11,11 +11,11 @@
     display: grid;
     border: 1px solid var(--hsb-border);
     background: var(--hsb-bg);
-    margin-top: 16px;
+    margin-top: var(--tc-space-4);
 }
 
 .component-hero-stats-bar__cell {
-    padding: 18px 16px;
+    padding: var(--tc-space-5) var(--tc-space-4);
     border-right: 1px solid var(--hsb-border);
     text-align: center;
 
@@ -37,7 +37,7 @@
     font-weight: var(--tc-font-weight-bold);
     line-height: 1;
     color: var(--hsb-text);
-    margin-top: 8px;
+    margin-top: var(--tc-space-2);
     letter-spacing: -0.02em;
 }
 
@@ -46,7 +46,7 @@
     font-size: 0.7rem;
     font-weight: var(--tc-font-weight-medium);
     color: var(--hsb-faint);
-    margin-left: 4px;
+    margin-left: var(--tc-space-1);
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }

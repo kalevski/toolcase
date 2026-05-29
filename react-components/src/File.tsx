@@ -57,7 +57,10 @@ export const File: React.FC<FileProps> = ({
 
 	return (
 		<div className="component component-file">
-			<div className={`component-file__type file-bg__${format}`}>
+			<div
+				className={`component-file__type file-bg__${format}`}
+				title={`${format} file`}
+			>
 				<span>{extension}</span>
 			</div>
 			<div className="component-file__label">
@@ -77,12 +80,15 @@ export const File: React.FC<FileProps> = ({
 			</div>
 			<div className="component-file__items">
 				{items !== 0 ? (
-					<a href="#">
+					<span
+						className="component-file__items-count"
+						aria-label={`${items} nested ${items === 1 ? 'item' : 'items'}`}
+					>
 						<span>{items}</span>
 						<span className="icon icon--medium">
-							<Icon name="file-binary" />
+							<Icon name="file-binary" decorative />
 						</span>
-					</a>
+					</span>
 				) : null}
 			</div>
 			<div className="component-file__size">{toolcase.formatByteSize(size)}</div>

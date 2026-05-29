@@ -4,9 +4,9 @@
 // consumer-supplied overrides.
 
 .component.component-linked-providers-card {
-    --lpc-color: #0f172a;
-    --lpc-muted: #64748b;
-    --lpc-border: #e2e8f0;
+    --lpc-color: var(--tc-accent-hover);
+    --lpc-muted: var(--tc-text-muted);
+    --lpc-border: var(--tc-border);
 }
 
 .component-linked-providers-card {
@@ -21,8 +21,8 @@
     &__row {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.625rem 0;
+        gap: var(--tc-space-3);
+        padding: var(--tc-space-3) 0;
         border-bottom: 1px solid var(--lpc-border);
 
         &:last-child {
@@ -36,7 +36,7 @@
         justify-content: center;
         width: 36px;
         height: 36px;
-        color: #ffffff;
+        color: var(--tc-text-inverse);
         font-size: 1rem;
         flex-shrink: 0;
         border-radius: 50%;
@@ -45,7 +45,7 @@
     &__meta {
         display: flex;
         flex-direction: column;
-        gap: 0.125rem;
+        gap: var(--tc-space-1);
         min-width: 0;
     }
 
@@ -69,8 +69,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        padding: 1.5rem 0.5rem;
+        gap: var(--tc-space-2);
+        padding: var(--tc-space-6) var(--tc-space-2);
         color: var(--lpc-muted);
         font-size: 0.9rem;
 

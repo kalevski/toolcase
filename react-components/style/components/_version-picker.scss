@@ -1,8 +1,8 @@
 .component.component-version-picker {
-	--vp-color: #1e293b;
-	--vp-muted: #64748b;
-	--vp-border: #e2e8f0;
-	--vp-accent: #1e293b;
+	--vp-color: var(--tc-text);
+	--vp-muted: var(--tc-text-muted);
+	--vp-border: var(--tc-border);
+	--vp-accent: var(--tc-text);
 }
 
 .component-version-picker {
@@ -10,16 +10,16 @@
 		display: inline-flex;
 		flex-wrap: wrap;
 		gap: 0;
-		background: #f8fafc;
+		background: var(--tc-surface-hover);
 		border: 1px solid var(--vp-border);
-		padding: 0.2rem;
+		padding: var(--tc-space-1);
 	}
 
 	&__option {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
-		padding: 0.4rem 0.7rem;
+		gap: var(--tc-space-1);
+		padding: var(--tc-space-2) var(--tc-space-3);
 		background: transparent;
 		border: none;
 		color: var(--vp-muted);
@@ -31,9 +31,9 @@
 		&:hover { color: var(--vp-color); }
 
 		&--active {
-			background: #ffffff;
+			background: var(--tc-surface);
 			color: var(--vp-color);
-			box-shadow: 0 1px 4px rgba(30, 41, 59, 0.08);
+			box-shadow: var(--tc-shadow-sm);
 		}
 
 		&--deprecated { opacity: 0.6; }
@@ -47,24 +47,24 @@
 	&__option-label { font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace; }
 
 	&__tag {
-		padding: 0.1rem 0.35rem;
-		background: rgba(99, 102, 241, 0.1);
-		color: #6366f1;
+		padding: var(--tc-space-1) var(--tc-space-1);
+		background: rgba(var(--tc-violet-rgb), 0.1);
+		color: var(--tc-violet);
 		font-size: 0.62rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 
-		&--lts { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-		&--deprecated { background: rgba(245, 158, 11, 0.1); color: #b45309; }
+		&--lts { background: rgba(var(--tc-success-rgb), 0.1); color: var(--tc-success); }
+		&--deprecated { background: rgba(var(--tc-warning-rgb), 0.1); color: var(--tc-warning); }
 	}
 
 	&__label {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.45rem;
-		padding: 0.4rem 0.7rem;
-		background: #ffffff;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-2) var(--tc-space-3);
+		background: var(--tc-surface);
 		border: 1px solid var(--vp-border);
 		font-size: 0.85rem;
 		color: var(--vp-color);

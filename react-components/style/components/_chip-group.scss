@@ -14,7 +14,7 @@
 .component-chip-group--bordered {
     border: 1px solid var(--cg-border);
     background: var(--cg-bg);
-    padding: 20px;
+    padding: var(--tc-space-5);
 }
 
 .component-chip-group__title {
@@ -22,7 +22,7 @@
     font-size: var(--tc-font-md);
     font-weight: var(--tc-font-weight-semibold);
     color: var(--cg-text);
-    margin-bottom: 4px;
+    margin-bottom: var(--tc-space-1);
     letter-spacing: 0.02em;
 }
 
@@ -30,13 +30,13 @@
     font-family: var(--tc-font-family-sans);
     font-size: var(--tc-font-sm);
     color: var(--cg-muted);
-    margin-bottom: 14px;
+    margin-bottom: var(--tc-space-4);
 }
 
 .component-chip-group__chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: var(--tc-space-2);
 }
 
 .component-chip-group__chip {
@@ -44,7 +44,7 @@
     font-size: 0.75rem;
     font-weight: var(--tc-font-weight-medium);
     letter-spacing: 0.04em;
-    padding: 6px 10px;
+    padding: var(--tc-space-2) var(--tc-space-3);
     border: 1px solid var(--cg-border);
     background: var(--cg-bg);
     color: var(--cg-muted);
@@ -54,7 +54,7 @@
                 background var(--tc-transition-fast);
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--tc-space-2);
 
     &:hover:not(:disabled) {
         color: var(--cg-text);
@@ -95,6 +95,6 @@
 @media (pointer: coarse) {
     .component-chip-group__chip {
         min-height: 44px;
-        padding: 10px 14px;
+        padding: var(--tc-space-3) var(--tc-space-4);
     }
 }

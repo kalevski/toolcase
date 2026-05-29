@@ -5,7 +5,7 @@
 //
 // Principles (see CLAUDE.md):
 // - Sharp corners. No rectangular border-radius. Circular elements use 50%.
-// - Flat high-contrast surfaces. Single 1px borders. Two shadow tiers max.
+// - Flat high-contrast surfaces. Single 1px borders. Three shadow tiers: sm/md/lg.
 // - 4px spacing scale.
 // - Monochrome neutrals + one accent.
 
@@ -34,6 +34,90 @@
     --tc-warning-bg: #fef3c7;
     --tc-danger: #dc2626;
     --tc-danger-bg: #fee2e2;
+
+    // ── Color: extended accents (violet, cyan) ────────────────────────────
+    --tc-violet: #6366f1;
+    --tc-violet-bg: #eef2ff;
+    --tc-cyan: #06b6d4;
+    --tc-cyan-bg: #ecfeff;
+
+    // ── Color: pure black (intentional zero-neutral designs) ─────────────
+    --tc-black: #000000;
+
+    // ── Brand gradient ────────────────────────────────────────────────────
+    --tc-gradient-brand: linear-gradient(90deg, hsl(280, 95%, 57%), hsl(193, 90%, 55%));
+
+    // ── Surface: dark (editor-style inverted components) ──────────────────
+    --tc-surface-dark: #1a1a2e;
+
+    // ── RGB channel values (for rgba() opacity composition) ───────────────
+    --tc-text-rgb: 30, 41, 59;
+    --tc-text-muted-rgb: 100, 116, 139;
+    --tc-text-faint-rgb: 148, 163, 184;
+    --tc-accent-hover-rgb: 15, 23, 42;
+    --tc-border-rgb: 226, 232, 240;
+    --tc-border-strong-rgb: 203, 213, 225;
+    --tc-surface-rgb: 255, 255, 255;
+    --tc-surface-muted-rgb: 241, 245, 249;
+    --tc-surface-dark-rgb: 26, 26, 46;
+    --tc-black-rgb: 0, 0, 0;
+    --tc-success-rgb: 22, 163, 74;
+    --tc-danger-rgb: 220, 38, 38;
+    --tc-warning-rgb: 217, 119, 6;
+    --tc-violet-rgb: 99, 102, 241;
+
+    // ── Status tint palettes (light bg + border + text for semantic UI) ───
+    --tc-success-tint-bg: #f0fdf4;
+    --tc-success-tint-border: #bbf7d0;
+    --tc-success-tint-text: #166534;
+    --tc-success-light: #6ee7b7;
+    --tc-warning-tint-bg: #fffbeb;
+    --tc-warning-tint-border: #fde68a;
+    --tc-warning-tint-text: #92400e;
+    --tc-danger-tint-bg: #fef2f2;
+    --tc-danger-tint-border: #fecaca;
+    --tc-danger-tint-text: #991b1b;
+    --tc-info-tint-bg: #eff6ff;
+    --tc-info-tint-border: #bfdbfe;
+    --tc-info-tint-text: #1e40af;
+    --tc-violet-tint-bg: #f5f3ff;
+    --tc-violet-tint-border: #c7d2fe;
+    --tc-violet-tint-text: #6d28d9;
+    --tc-cyan-tint-border: #a5f3fc;
+    --tc-cyan-tint-text: #0e7490;
+    --tc-pink: #ec4899;
+    --tc-pink-tint-bg: #fdf2f8;
+    --tc-pink-tint-border: #fbcfe8;
+    --tc-pink-tint-text: #be185d;
+    --tc-rose-tint-bg: #fff1f2;
+    --tc-rose-tint-border: #fecdd3;
+    --tc-rose-tint-text: #be123c;
+    --tc-emerald-tint-bg: #ecfdf5;
+    --tc-emerald-tint-border: #a7f3d0;
+
+    // ── Code syntax palette (for dark-background code/config blocks) ──────
+    --tc-code-string: #86efac;
+    --tc-code-keyword: #c4b5fd;
+    --tc-code-literal: #fb923c;
+    --tc-code-function: #7dd3fc;
+    --tc-code-variable: #fcd34d;
+    --tc-code-operator: #f472b6;
+    --tc-code-bool: #f9a8d4;
+
+    // ── Social platform brand colors ──────────────────────────────────────
+    --tc-discord: #5865f2;
+    --tc-slack: #611f69;
+    --tc-mastodon: #6364ff;
+    --tc-rss: #f97316;
+    --tc-youtube: #ff0000;
+
+    // ── Misc accent (secondary, indigo, terminal) ─────────────────────────
+    --tc-indigo: #4f46e5;
+    --tc-secondary: #3f3d56;
+    --tc-secondary-dark: #2d2b40;
+    --tc-terminal-red: #ff5f56;
+    --tc-terminal-yellow: #ffbd2e;
+    --tc-terminal-green: #27c93f;
 
     // ── Spacing (4px scale) ───────────────────────────────────────────────
     --tc-space-1: 4px;
@@ -80,9 +164,10 @@
     --tc-transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --tc-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
-    // ── Shadow (two tiers only) ───────────────────────────────────────────
+    // ── Shadow (three tiers) ─────────────────────────────────────────────
     --tc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
     --tc-shadow-md: 0 2px 8px rgba(15, 23, 42, 0.06);
+    --tc-shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.10);
 
     // ── Borders ───────────────────────────────────────────────────────────
     --tc-border-width: 1px;
@@ -101,4 +186,22 @@
 
     // ── Touch target ──────────────────────────────────────────────────────
     --tc-touch-target: 44px;
+}
+
+// ── Focus-visible ring — shared placeholder for component SCSS files ──────────
+// Usage: @extend %focus-visible-ring (within same compilation scope) or write
+// `outline: var(--tc-focus-outline); outline-offset: var(--tc-focus-offset);`
+%focus-visible-ring {
+    outline: var(--tc-focus-outline);
+    outline-offset: var(--tc-focus-offset);
+}
+
+// ── Reduced-motion — shared placeholder for per-component overrides ───────────
+// Usage: @extend %reduced-motion within a @media (prefers-reduced-motion: reduce) block.
+// The global _reduced-motion.scss already provides a catch-all for all .component *
+// elements. Use this placeholder for explicit `animation: none` on infinite/looping
+// keyframes where "near-instant" is not sufficient (e.g. spin loops, pulse loops).
+%reduced-motion {
+    animation: none !important;
+    transition: none !important;
 }

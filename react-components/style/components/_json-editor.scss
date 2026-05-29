@@ -1,19 +1,19 @@
 .component.component-json-editor {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: var(--tc-space-2);
 
 	.component-json-editor__row {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		border: 1px solid #e2e8f0;
-		padding-left: 5px;
-		background: #f8fafc;
+		gap: var(--tc-space-2);
+		border: 1px solid var(--tc-border);
+		padding-left: var(--tc-space-1);
+		background: var(--tc-surface-hover);
 		transition: background 0.15s ease;
 
 		&:hover {
-			background: #f1f5f9;
+			background: var(--tc-surface-muted);
 		}
 	}
 
@@ -22,7 +22,7 @@
 		min-width: 80px;
 		font-size: 0.82rem;
 		font-weight: 600;
-		color: #1e293b;
+		color: var(--tc-text);
 		white-space: nowrap;
 	}
 
@@ -33,11 +33,11 @@
 		@media (pointer: coarse) {
 			min-height: 44px;
 		}
-		padding: 4px 8px;
+		padding: var(--tc-space-1) var(--tc-space-2);
 		border: 0;
-		border-left: 1px solid #e2e8f0;
-		background: #fff;
-		color: #1e293b;
+		border-left: 1px solid var(--tc-border);
+		background: var(--tc-surface);
+		color: var(--tc-text);
 		font-size: 0.82rem;
 		outline: none;
 		transition:
@@ -45,7 +45,7 @@
 			box-shadow 0.15s ease;
 
 		&:disabled {
-			background: #f8fafc;
+			background: var(--tc-surface-hover);
 			cursor: not-allowed;
 			opacity: 0.65;
 		}
@@ -58,11 +58,11 @@
 		@media (pointer: coarse) {
 			min-height: 44px;
 		}
-		padding: 4px 8px;
+		padding: var(--tc-space-1) var(--tc-space-2);
 		border: none;
-		border-left: 1px solid #e2e8f0;
-		background: #fff;
-		color: #1e293b;
+		border-left: 1px solid var(--tc-border);
+		background: var(--tc-surface);
+		color: var(--tc-text);
 		font-size: 0.82rem;
 		outline: none;
 		cursor: pointer;
@@ -71,7 +71,7 @@
 			box-shadow 0.15s ease;
 
 		&:disabled {
-			background: #f8fafc;
+			background: var(--tc-surface-hover);
 			cursor: not-allowed;
 			opacity: 0.65;
 		}
@@ -81,15 +81,15 @@
 	.component-json-editor__group {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
+		gap: var(--tc-space-1);
 	}
 
 	.component-json-editor__group-header {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
-		padding: 5px 8px;
-		background: #eef2f7;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-1) var(--tc-space-2);
+		background: var(--tc-surface-muted);
 		user-select: none;
 	}
 
@@ -102,7 +102,7 @@
 		padding: 0;
 		border: none;
 		background: transparent;
-		color: #64748b;
+		color: var(--tc-text-muted);
 		font-size: 0.72rem;
 		cursor: pointer;
 		transition:
@@ -110,24 +110,29 @@
 			background 0.15s ease;
 
 		&:hover {
-			color: #1e293b;
-			background: rgba(30, 41, 59, 0.06);
+			color: var(--tc-text);
+			background: rgba(var(--tc-text-rgb), 0.06);
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 	}
 
 	.component-json-editor__group-label {
 		font-size: 0.82rem;
 		font-weight: 600;
-		color: #1e293b;
+		color: var(--tc-text);
 	}
 
 	.component-json-editor__group-badge {
 		font-size: 0.72rem;
 		font-weight: 500;
-		color: #64748b;
-		background: #fff;
-		border: 1px solid #e2e8f0;
-		padding: 1px 8px;
+		color: var(--tc-text-muted);
+		background: var(--tc-surface);
+		border: 1px solid var(--tc-border);
+		padding: var(--tc-space-1) var(--tc-space-2);
 		line-height: 1.4;
 	}
 
@@ -139,9 +144,9 @@
 		height: 24px;
 		margin-left: auto;
 		padding: 0;
-		border: 1px dashed #cbd5e1;
+		border: 1px dashed var(--tc-border-strong);
 		background: transparent;
-		color: #64748b;
+		color: var(--tc-text-muted);
 		font-size: 0.72rem;
 		cursor: pointer;
 		transition:
@@ -150,9 +155,14 @@
 			background 0.15s ease;
 
 		&:hover {
-			color: #1e293b;
-			border-color: #1e293b;
-			background: #f8fafc;
+			color: var(--tc-text);
+			border-color: var(--tc-text);
+			background: var(--tc-surface-hover);
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 
 		&:disabled {
@@ -160,8 +170,8 @@
 			opacity: 0.5;
 
 			&:hover {
-				color: #64748b;
-				border-color: #cbd5e1;
+				color: var(--tc-text-muted);
+				border-color: var(--tc-border-strong);
 				background: transparent;
 			}
 		}
@@ -171,19 +181,19 @@
 	.component-json-editor__array-items {
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
-		padding-left: 12px;
-		border-left: 2px solid #e2e8f0;
-		margin-left: 10px;
+		gap: var(--tc-space-1);
+		padding-left: var(--tc-space-3);
+		border-left: 2px solid var(--tc-border);
+		margin-left: var(--tc-space-3);
 	}
 
 	.component-json-editor__array-item {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		padding: 6px 8px;
-		border: 1px solid #e2e8f0;
-		background: #fff;
+		gap: var(--tc-space-1);
+		padding: var(--tc-space-2) var(--tc-space-2);
+		border: 1px solid var(--tc-border);
+		background: var(--tc-surface);
 	}
 
 	.component-json-editor__array-item-header {
@@ -195,24 +205,24 @@
 	.component-json-editor__array-item-index {
 		font-size: 0.72rem;
 		font-weight: 600;
-		color: #94a3b8;
-		padding: 1px 6px;
-		background: #f1f5f9;
+		color: var(--tc-text-faint);
+		padding: var(--tc-space-1) var(--tc-space-2);
+		background: var(--tc-surface-muted);
 	}
 
 	.component-json-editor__array-item-fields {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--tc-space-1);
 	}
 
 	.component-json-editor__object-fields {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
-		padding-left: 12px;
-		border-left: 2px solid #e2e8f0;
-		margin-left: 10px;
+		gap: var(--tc-space-1);
+		padding-left: var(--tc-space-3);
+		border-left: 2px solid var(--tc-border);
+		margin-left: var(--tc-space-3);
 	}
 
 	.component-json-editor__remove {
@@ -225,7 +235,7 @@
 		padding: 0;
 		border: none;
 		background: transparent;
-		color: #94a3b8;
+		color: var(--tc-text-faint);
 		font-size: 0.72rem;
 		cursor: pointer;
 		transition:
@@ -233,8 +243,13 @@
 			background 0.15s ease;
 
 		&:hover {
-			color: #ef4444;
-			background: rgba(239, 68, 68, 0.08);
+			color: var(--tc-danger);
+			background: rgba(var(--tc-danger-rgb), 0.08);
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 
 		&:disabled {
@@ -242,42 +257,42 @@
 			opacity: 0.5;
 
 			&:hover {
-				color: #94a3b8;
+				color: var(--tc-text-faint);
 				background: transparent;
 			}
 		}
 	}
 
 	.component-json-editor__empty {
-		padding: 8px 12px;
+		padding: var(--tc-space-2) var(--tc-space-3);
 		text-align: center;
-		color: #94a3b8;
+		color: var(--tc-text-faint);
 		font-size: 0.78rem;
-		border: 1px dashed #e2e8f0;
+		border: 1px dashed var(--tc-border);
 	}
 
 	// Primitive array (string / number / boolean)
 	.component-json-editor__primitive-list {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.35rem;
-		padding: 6px 8px 6px 24px;
+		gap: var(--tc-space-1);
+		padding: var(--tc-space-2) var(--tc-space-2) var(--tc-space-2) var(--tc-space-6);
 	}
 
 	.component-json-editor__primitive-item {
 		display: inline-flex;
 		align-items: center;
 		gap: 0;
-		border: 1px solid #e2e8f0;
-		background: #fff;
+		border: 1px solid var(--tc-border);
+		background: var(--tc-surface);
 		transition: border-color 0.15s ease;
 
 		&:hover {
-			border-color: #cbd5e1;
+			border-color: var(--tc-border-strong);
 		}
 
 		&:focus-within {
-			border-color: #6366f1;
+			border-color: var(--tc-violet);
 		}
 	}
 
@@ -285,10 +300,10 @@
 		height: 28px;
 		min-width: 60px;
 		max-width: 140px;
-		padding: 2px 8px;
+		padding: var(--tc-space-1) var(--tc-space-2);
 		border: none;
 		background: transparent;
-		color: #1e293b;
+		color: var(--tc-text);
 		font-size: 0.78rem;
 		outline: none;
 
@@ -299,7 +314,7 @@
 		&--select {
 			cursor: pointer;
 			min-width: 56px;
-			padding-right: 4px;
+			padding-right: var(--tc-space-1);
 		}
 
 		&:disabled {
@@ -328,9 +343,9 @@
 		flex-shrink: 0;
 		padding: 0;
 		border: none;
-		border-left: 1px solid #e2e8f0;
+		border-left: 1px solid var(--tc-border);
 		background: transparent;
-		color: #cbd5e1;
+		color: var(--tc-border-strong);
 		font-size: 0.7rem;
 		cursor: pointer;
 		transition: color 0.15s ease, background 0.15s ease;
@@ -341,8 +356,13 @@
 		}
 
 		&:hover {
-			color: #ef4444;
-			background: rgba(239, 68, 68, 0.06);
+			color: var(--tc-danger);
+			background: rgba(var(--tc-danger-rgb), 0.06);
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 
 		&:disabled {
@@ -350,7 +370,7 @@
 			opacity: 0.5;
 
 			&:hover {
-				color: #cbd5e1;
+				color: var(--tc-border-strong);
 				background: transparent;
 			}
 		}

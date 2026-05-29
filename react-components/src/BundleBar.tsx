@@ -64,6 +64,11 @@ export const BundleBar: FC<BundleBarProps> = ({
 							]
 								.filter(Boolean)
 								.join(' ')}
+							style={{
+								// Lets filled segments share one continuous gradient across the bar.
+								['--seg-index' as string]: index,
+								['--seg-total' as string]: totalSegments,
+							}}
 						/>
 					))}
 				</div>

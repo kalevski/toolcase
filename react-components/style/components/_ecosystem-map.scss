@@ -1,12 +1,12 @@
 .component.component-ecosystem-map {
-	--em-color: #1e293b;
-	--em-muted: #64748b;
-	--em-border: #e2e8f0;
-	--em-accent: #6366f1;
+	--em-color: var(--tc-text);
+	--em-muted: var(--tc-text-muted);
+	--em-border: var(--tc-border);
+	--em-accent: var(--tc-violet);
 	--em-size: 480px;
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: var(--tc-space-4);
 }
 
 .component-ecosystem-map {
@@ -26,26 +26,35 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.35rem 0.7rem;
-		background: #ffffff;
+		padding: var(--tc-space-1) var(--tc-space-3);
+		background: var(--tc-surface);
 		border: 1px solid var(--em-border);
 		color: var(--em-color);
 		font-size: 0.78rem;
 		font-weight: 600;
 		text-decoration: none;
 		white-space: nowrap;
-		box-shadow: 0 4px 12px rgba(30, 41, 59, 0.06);
-		transition: transform 0.15s ease, border-color 0.15s ease;
+		box-shadow: var(--tc-shadow-sm);
+		transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 
 		&:hover {
 			transform: translateY(-1px);
 			border-color: var(--em-node-accent, var(--em-accent));
+			box-shadow: var(--tc-shadow-md);
+		}
+
+		&:hover,
+		&:focus { text-decoration: none; }
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 
 		&--core {
 			background: var(--em-color);
-			color: #ffffff;
-			padding: 0.5rem 1rem;
+			color: var(--tc-text-inverse);
+			padding: var(--tc-space-2) var(--tc-space-4);
 			font-size: 0.95rem;
 			border-color: var(--em-color);
 		}
@@ -54,13 +63,13 @@
 	&__list {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: var(--tc-space-4);
 	}
 
 	&__list-group {
 		display: flex;
 		flex-direction: column;
-		gap: 0.45rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__list-label {
@@ -74,7 +83,7 @@
 	&__list-items {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: var(--tc-space-2);
 	}
 }
 
@@ -96,7 +105,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.3rem;
+		gap: var(--tc-space-1);
 		z-index: 2;
 	}
 
@@ -119,6 +128,7 @@
 		transform: translate(-50%, -50%);
 	}
 
+	// Desktop shows the radial (now accessible); the list is the mobile fallback.
 	.component-ecosystem-map__list {
 		display: none;
 	}

@@ -3,28 +3,28 @@
 .component.component-otp-input {
     --otp-cell-size:      2.75rem;
     --otp-cell-font:      1.25rem;
-    --otp-border:         #e2e8f0;
-    --otp-border-focus:   #1e293b;
-    --otp-border-error:   #ef4444;
-    --otp-bg:             #ffffff;
-    --otp-filled-bg:      #f8fafc;
+    --otp-border:         var(--tc-border);
+    --otp-border-focus:   var(--tc-text);
+    --otp-border-error:   var(--tc-danger);
+    --otp-bg:             var(--tc-surface);
+    --otp-filled-bg:      var(--tc-surface-hover);
     --otp-transition:     0.15s ease;
 
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--tc-space-2);
 }
 
 .component-otp-input {
     &__label {
         font-size: 0.875rem;
         font-weight: 500;
-        color: #1e293b;
+        color: var(--tc-text);
     }
 
     &__fields {
         display: flex;
-        gap: 0.5rem;
+        gap: var(--tc-space-2);
         flex-wrap: wrap;
     }
 
@@ -45,9 +45,11 @@
             background: var(--otp-filled-bg);
         }
 
-        &:focus {
+        &:focus-visible {
             border-color: var(--otp-border-focus);
             box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+            outline: var(--tc-focus-outline);
+            outline-offset: var(--tc-focus-offset);
         }
 
         &.is-invalid {
@@ -66,7 +68,7 @@
     &--disabled .component-otp-input__cell {
         opacity: 0.5;
         cursor: not-allowed;
-        background: #f1f5f9;
+        background: var(--tc-surface-muted);
     }
 }
 
@@ -75,7 +77,7 @@
         --otp-cell-size: 2.25rem;
         --otp-cell-font: 1rem;
 
-        &__fields { gap: 0.3rem; }
+        &__fields { gap: var(--tc-space-1); }
     }
 }
 

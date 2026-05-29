@@ -1,23 +1,23 @@
 .component.component-announcement-bar {
-	--ab-bg: #1e293b;
-	--ab-color: #ffffff;
-	--ab-accent: #818cf8;
+	--ab-bg: var(--tc-text);
+	--ab-color: var(--tc-text-inverse);
+	--ab-accent: var(--tc-violet);
 	width: 100%;
 	background: var(--ab-bg);
 	color: var(--ab-color);
 	font-size: 0.85rem;
 
-	&--success { --ab-bg: #047857; --ab-accent: #6ee7b7; }
-	&--warning { --ab-bg: #b45309; --ab-accent: #fde68a; }
-	&--announce { --ab-bg: #4f46e5; --ab-accent: #c4b5fd; }
+	&--success { --ab-bg: var(--tc-success); --ab-accent: var(--tc-success-light); }
+	&--warning { --ab-bg: var(--tc-warning); --ab-accent: var(--tc-warning-tint-border); }
+	&--announce { --ab-bg: var(--tc-indigo); --ab-accent: var(--tc-code-keyword); }
 }
 
 .component-announcement-bar {
 	&__inner {
 		display: flex;
 		align-items: center;
-		gap: 0.65rem;
-		padding: 0.5rem 0.85rem;
+		gap: var(--tc-space-3);
+		padding: var(--tc-space-2) var(--tc-space-3);
 		max-width: 1200px;
 		margin: 0 auto;
 		flex-wrap: wrap;
@@ -35,22 +35,23 @@
 	&__cta {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
-		padding: 0.25rem 0.6rem;
+		gap: var(--tc-space-1);
+		padding: var(--tc-space-1) var(--tc-space-2);
 		font-weight: 600;
 		color: var(--ab-color);
-		background: rgba(255, 255, 255, 0.12);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		background: rgba(var(--tc-surface-rgb), 0.12);
+		border: 1px solid rgba(var(--tc-surface-rgb), 0.2);
 		text-decoration: none;
 		font-size: 0.8rem;
 		transition: background 0.15s ease;
-		&:hover { background: rgba(255, 255, 255, 0.2); }
+		&:hover { background: rgba(var(--tc-surface-rgb), 0.2); }
+		&:focus-visible { outline: var(--tc-focus-outline); outline-offset: var(--tc-focus-offset); }
 	}
 	&__dismiss {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.25rem;
+		padding: var(--tc-space-1);
 		background: transparent;
 		border: none;
 		color: var(--ab-color);
@@ -58,9 +59,10 @@
 		cursor: pointer;
 		transition: opacity 0.15s ease;
 		&:hover { opacity: 1; }
+		&:focus-visible { outline: var(--tc-focus-outline); outline-offset: var(--tc-focus-offset); }
 	}
 }
 
 @media (min-width: 768px) {
-	.component-announcement-bar__inner { padding: 0.55rem 1.5rem; }
+	.component-announcement-bar__inner { padding: var(--tc-space-2) var(--tc-space-6); }
 }

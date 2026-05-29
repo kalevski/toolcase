@@ -1,7 +1,7 @@
 .component.component-action-items {
 	width: 60px;
 	max-width: 60px;
-	padding: 15px;
+	padding: var(--tc-space-4);
 	overflow: visible;
 
 	text-align: center;
@@ -10,7 +10,7 @@
 
 	user-select: none;
 	align-self: center;
-	color: #64748b;
+	color: var(--tc-text-muted);
 
 	&:has(.dropdown-menu.show) {
 		z-index: 1050;
@@ -20,28 +20,43 @@
 .component-action-items {
 	&__trigger {
 		cursor: pointer;
-		padding: 4px 6px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		background: none;
+		color: inherit;
+		padding: var(--tc-space-1) var(--tc-space-2);
 		transition: background 0.15s ease, color 0.15s ease;
 
 		&:hover {
-			background: #e2e8f0;
-			color: #1e293b;
+			background: var(--tc-border);
+			color: var(--tc-text);
+		}
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
+		}
+
+		@media (pointer: coarse) {
+			min-width: 44px;
+			min-height: 44px;
 		}
 	}
 
 	&__dropdown {
 		min-width: 150px;
-		padding: 4px 0;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+		padding: var(--tc-space-1) 0;
+		box-shadow: var(--tc-shadow-md);
 		z-index: 9999;
 
 		.dropdown-item {
 			display: flex;
 			align-items: center;
-			gap: 8px;
-			padding: 6px 12px;
+			gap: var(--tc-space-2);
+			padding: var(--tc-space-2) var(--tc-space-3);
 			font-size: 0.8rem;
-			color: #475569;
+			color: var(--tc-text-muted);
 			border: none;
 			background: none;
 			width: calc(100% - 8px);
@@ -54,9 +69,14 @@
 				text-align: center;
 			}
 
-			&:hover {
-				background: #f1f5f9;
-				color: #1e293b;
+			&:hover,
+			&:focus {
+				background: var(--tc-surface-muted);
+				color: var(--tc-text);
+			}
+			&:focus-visible {
+				outline: var(--tc-focus-outline);
+				outline-offset: var(--tc-focus-offset);
 			}
 		}
 	}

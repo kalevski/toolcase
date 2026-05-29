@@ -1,25 +1,25 @@
 .component.component-multi-card-select {
-	--mcs-text: #1e293b;
-	--mcs-muted: #64748b;
-	--mcs-subtle: #94a3b8;
-	--mcs-border: #e2e8f0;
-	--mcs-hover-bg: #f1f5f9;
-	--mcs-light-bg: #f8fafc;
-	--mcs-accent: #1e293b;
+	--mcs-text: var(--tc-text);
+	--mcs-muted: var(--tc-text-muted);
+	--mcs-subtle: var(--tc-text-faint);
+	--mcs-border: var(--tc-border);
+	--mcs-hover-bg: var(--tc-surface-muted);
+	--mcs-light-bg: var(--tc-surface-hover);
+	--mcs-accent: var(--tc-text);
 	--mcs-transition: 0.15s ease;
 
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 0.5rem;
+	gap: var(--tc-space-2);
 }
 
 .component-multi-card-select__card {
 	display: flex;
 	align-items: flex-start;
-	gap: 0.5rem;
-	padding: 0.65rem 0.75rem;
+	gap: var(--tc-space-2);
+	padding: var(--tc-space-3) var(--tc-space-3);
 	border: 1px solid var(--mcs-border);
-	background: #fff;
+	background: var(--tc-surface);
 	cursor: pointer;
 	text-align: left;
 	font-family: inherit;
@@ -39,7 +39,7 @@
 .component-multi-card-select__check {
 	font-size: 0.95rem;
 	line-height: 1;
-	margin-top: 1px;
+	margin-top: var(--tc-space-1);
 	color: var(--mcs-subtle);
 	flex-shrink: 0;
 
@@ -64,5 +64,5 @@
 	font-size: 0.72rem;
 	color: var(--mcs-muted);
 	line-height: 1.3;
-	margin-top: 0.1rem;
+	margin-top: var(--tc-space-1);
 }
