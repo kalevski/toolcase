@@ -175,6 +175,7 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [AssetBundle](#assetbundle)
   - [BitmapFontGenerator](#bitmapfontgenerator)
   - [NormalMapGenerator](#normalmapgenerator)
+  - [PhysicsEditor](#physicseditor)
   - [Build](#build)
   - [CardOptions](#cardoptions)
   - [Changelog](#changelog)
@@ -2555,6 +2556,89 @@ const [brush] = useState<NormalBrush>({ mode: 'height', size: 24, hardness: 0.5,
 ```
 
 Pure helpers (also exported): `generateNormalMap`, `buildHeightmap`, `normalsFromHeight`, `alphaToDistance`, `bevelHeightmap`, `toHeightmap`, `blurHeightmap`, `applyBrush`, `pack`, `unpack`, `lerp3`, `STRUCTURE_TILES`.
+
+---
+
+### PhysicsEditor
+
+A canvas-based collision-shape editor (a PhysicsEditor-style tool). Derives a fixture shape from a sprite two ways: **auto-trace** the alpha silhouette into a simplified polygon (Moore-neighbor contour → Douglas-Peucker), or **draw** polygons / circles / boxes by hand and drag their vertices. Each shape carries physical props (`density`, `friction`, `restitution`, `isSensor`). Geometry is stored **engine-neutral, in source pixels**; units convert only at export. Concave polygons can be **decomposed into convex pieces** (Bayazit). Exports deterministically to **Box2D**, **Planck.js**, **Matter.js**, or **raw JSON**, reporting any properties the target engine drops. All geometry/export math is pure & exported for reuse.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `source` | `ArrayBuffer \| Uint8Array \| Blob` | ❌ | Encoded sprite bytes (PNG/etc.), decoded via `createImageBitmap` |
+| `shapes` | `PhysicsShape[]` | ❌ | Initial shape list; later edits fire `onChange` |
+| `onChange` | `(shapes: PhysicsShape[]) => void` | ❌ | Fired after any edit (draw / move / vertex / delete / trace / decompose / undo / redo) |
+| `tool` | `'select' \| 'polygon' \| 'circle' \| 'box'` | ❌ | Active tool (default `'select'`) |
+| `alphaThreshold` | `number` | ❌ | Opaque alpha cutoff 0..255 (default `1`) |
+| `simplifyTolerance` | `number` | ❌ | Douglas-Peucker tolerance in px (default `1.5`) |
+| `targetVertexCount` | `number` | ❌ | Target vertices; `> 0` overrides tolerance (default `0`) |
+| `decomposeConcave` | `boolean` | ❌ | Auto-trace yields convex pieces (default `false`) |
+| `snapPixel` | `boolean` | ❌ | Snap placed points to integer px (default `true`) |
+| `snapGrid` | `boolean` | ❌ | Snap to grid (default `false`) |
+| `gridSize` | `number` | ❌ | Grid size in px (default `16`) |
+| `showGrid` | `boolean` | ❌ | Draw the grid guide (default `false`) |
+| `defaultProps` | `Partial<ShapeProps>` | ❌ | Props for newly drawn/traced shapes |
+| `pixelsPerMeter` | `number` | ❌ | Meters scale baked into the default export (default `32`) |
+| `selectedIndex` | `number \| null` | ❌ | Selected shape index (controlled) |
+| `onSelectShape` | `(index: number \| null) => void` | ❌ | Fired when the selection changes |
+| `background` | `string` | ❌ | Preview backdrop (default `'#1a1a2e'`) |
+| `onError` | `(error: unknown) => void` | ❌ | Fired when decoding `source` fails |
+| `disabled` | `boolean` | ❌ | Disables editing |
+| `className` | `string` | ❌ | Additional CSS class |
+
+**Shapes** (`PhysicsShape`, engine-neutral, pixels):
+
+```ts
+type ShapeProps = { density: number; friction: number; restitution: number; isSensor: boolean }
+type PolygonShape = { type: 'polygon'; points: [number, number][]; props: ShapeProps }
+type CircleShape  = { type: 'circle'; center: [number, number]; radius: number; props: ShapeProps }
+type BoxShape     = { type: 'box'; rect: { x: number; y: number; w: number; h: number }; props: ShapeProps }
+```
+
+**Interaction.** `select`: drag a shape body to move, drag a vertex/handle to reshape, double-click a polygon edge to insert a vertex, **Alt+click** a polygon vertex to delete it, **Delete/Backspace** removes the selected shape. `polygon`: click to add points, **double-click / Enter / click the first point** to close, **Esc** cancels. `circle` / `box`: press-drag to size.
+
+**Handle methods** (`PhysicsEditorHandle`):
+
+| Method | Description |
+|--------|-------------|
+| `autoTrace()` | `Promise<PhysicsShape[]>` — trace the silhouette → polygon(s), replacing the list (empty if fully transparent) |
+| `decompose()` | Split the selected polygon (or all polygons) into convex pieces |
+| `addShape(shape)` / `removeShape(i)` / `clearShapes()` | Mutate the list |
+| `undo()` / `redo()` / `reset()` | History; `reset()` reverts to the last trace / initial list |
+| `getShapes()` / `setShapes(shapes)` | Read / replace the list |
+| `export(engine, pixelsPerMeter?)` | `ExportResult` — `{ engine, pixelsPerMeter, body, droppedProperties }` |
+| `validate(engine)` | `{ valid, issues }` — convex / max-vertex checks (FR-9) |
+
+**Engine capability matrix** (`ENGINE_CAPABILITIES`):
+
+| Engine | Units | Convex required | Max verts | Notes |
+|--------|-------|-----------------|-----------|-------|
+| `box2d` | meters | yes | 8 | decompose first; scaled by `1/pixelsPerMeter` |
+| `planck` | meters | yes | 8 | Box2D-equivalent |
+| `matter` | pixels | no | ∞ | `Bodies.fromVertices` handles concave |
+| `json` | pixels | no | ∞ | lossless engine-neutral passthrough |
+
+```tsx
+import { useRef } from 'react'
+import { PhysicsEditor, PhysicsEditorHandle } from '@toolcase/react-components'
+
+const ref = useRef<PhysicsEditorHandle>(null)
+
+<PhysicsEditor
+  ref={ref}
+  source={spriteBlob}
+  tool="select"
+  simplifyTolerance={2}
+  decomposeConcave
+  onChange={(shapes) => console.log(shapes)}
+/>
+
+// await ref.current?.autoTrace()
+// const { body, droppedProperties } = ref.current!.export('box2d', 32)
+// const { valid, issues } = ref.current!.validate('box2d')
+```
+
+Pure helpers (also exported): `autoTrace`, `alphaMask`, `traceContour`, `simplify`, `simplifyToCount`, `decomposePolygon`, `isConvex`, `makeCCW`, `signedArea`, `exportShapes`, `validateShapes`, `ENGINE_CAPABILITIES`, `snapPoint`, `pointInPolygon`, `hitVertex`, `hitShape`, `nearestEdge`, `translateShape`, `moveVertex`, `shapeVertices`, `shapeBounds`.
 
 ---
 
