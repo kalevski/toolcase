@@ -2,12 +2,12 @@
 
 .component.component-carousel {
     --cr-arrow-size:       2.25rem;
-    --cr-arrow-bg:         rgba(255, 255, 255, 0.85);
-    --cr-arrow-hover-bg:   rgba(255, 255, 255, 0.98);
+    --cr-arrow-bg:         rgba(var(--tc-surface-rgb), 0.85);
+    --cr-arrow-hover-bg:   rgba(var(--tc-surface-rgb), 0.98);
     --cr-dot-size:         8px;
     --cr-dot-active-size:  10px;
-    --cr-dot-bg:           rgba(255, 255, 255, 0.6);
-    --cr-dot-active-bg:    #ffffff;
+    --cr-dot-bg:           rgba(var(--tc-surface-rgb), 0.6);
+    --cr-dot-active-bg:    var(--tc-surface);
     --cr-transition:       0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
     position: relative;
@@ -50,12 +50,12 @@
         border: none;
         border-radius: 50%;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+        box-shadow: var(--tc-shadow-sm);
         transition: background 0.15s ease, transform 0.15s ease;
         font-size: 1rem;
 
-        &--prev { left: 0.75rem; }
-        &--next { right: 0.75rem; }
+        &--prev { left: var(--tc-space-3); }
+        &--next { right: var(--tc-space-3); }
 
         &:hover {
             background: var(--cr-arrow-hover-bg);
@@ -70,11 +70,11 @@
 
     &__dots {
         position: absolute;
-        bottom: 0.75rem;
+        bottom: var(--tc-space-3);
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        gap: 0.35rem;
+        gap: var(--tc-space-1);
         z-index: 2;
     }
 

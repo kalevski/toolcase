@@ -36,6 +36,11 @@ export const PinnedFeatureShowcase: FC<PinnedFeatureShowcaseProps> = ({
 	const [isCentered, setIsCentered] = useState(false)
 
 	useEffect(() => {
+		// Sticky/centering only applies on the desktop layout (>=769px). On
+		// mobile the left panel is static, so skip the scroll listener entirely
+		// to avoid layout-shift jank against the mobile address-bar resize.
+		const stickyQuery = window.matchMedia('(min-width: 769px)')
+
 		const handleScroll = () => {
 			if (!leftRef.current) {
 				return
@@ -55,13 +60,27 @@ export const PinnedFeatureShowcase: FC<PinnedFeatureShowcaseProps> = ({
 			window.requestAnimationFrame(handleScroll)
 		}
 
-		handleScroll()
-		window.addEventListener('scroll', handleEvent, { passive: true })
+		let attached = false
+		const sync = () => {
+			if (stickyQuery.matches && !attached) {
+				window.addEventListener('scroll', handleEvent, { passive: true })
+				attached = true
+				handleScroll()
+			} else if (!stickyQuery.matches && attached) {
+				window.removeEventListener('scroll', handleEvent)
+				attached = false
+				setIsCentered(false)
+			}
+		}
+
+		sync()
+		stickyQuery.addEventListener('change', sync)
 		window.addEventListener('resize', handleEvent)
 
 		return () => {
 			window.removeEventListener('scroll', handleEvent)
 			window.removeEventListener('resize', handleEvent)
+			stickyQuery.removeEventListener('change', sync)
 		}
 	}, [])
 

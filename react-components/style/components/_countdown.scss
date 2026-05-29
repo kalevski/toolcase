@@ -5,9 +5,9 @@
     --cd-bg: var(--tc-surface);
     --cd-border: var(--tc-border);
     --cd-muted: var(--tc-text-muted);
-    --cd-pad-x: 20px;
-    --cd-pad-y: 16px;
-    --cd-gap: 16px;
+    --cd-pad-x: var(--tc-space-5);
+    --cd-pad-y: var(--tc-space-4);
+    --cd-gap: var(--tc-space-4);
     --cd-num-size: 2.5rem;
     --cd-unit-size: 0.7rem;
 
@@ -21,7 +21,7 @@
     color: var(--tc-text-muted);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    margin-bottom: 16px;
+    margin-bottom: var(--tc-space-4);
 }
 
 .component-countdown__grid {
@@ -56,7 +56,7 @@
     font-size: var(--cd-unit-size);
     font-weight: var(--tc-font-weight-semibold);
     color: var(--cd-muted);
-    margin-top: 8px;
+    margin-top: var(--tc-space-2);
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
@@ -64,26 +64,26 @@
 .component-countdown__sub {
     font-family: var(--tc-font-family-sans);
     font-size: var(--tc-font-sm);
-    margin-top: 16px;
+    margin-top: var(--tc-space-4);
     color: var(--tc-text-muted);
 }
 
 .component-countdown--compact {
-    --cd-pad-x: 12px;
-    --cd-pad-y: 10px;
+    --cd-pad-x: var(--tc-space-3);
+    --cd-pad-y: var(--tc-space-3);
     --cd-num-size: 1.5rem;
     --cd-unit-size: 0.65rem;
-    --cd-gap: 10px;
+    --cd-gap: var(--tc-space-3);
 }
 
 @media (max-width: 576px) {
     .component-countdown__grid {
         grid-auto-columns: minmax(64px, 1fr);
-        gap: 8px;
+        gap: var(--tc-space-2);
     }
     .component-countdown__cell {
         min-width: 0;
-        padding: 12px 8px;
+        padding: var(--tc-space-3) var(--tc-space-2);
     }
     .component-countdown__num { font-size: 1.75rem; }
 }

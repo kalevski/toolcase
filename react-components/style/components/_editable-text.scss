@@ -8,9 +8,9 @@
 		background: none;
 		width: 100%;
 		display: block;
-		color: #1e293b;
+		color: var(--tc-text);
 		font-size: 0.875rem;
-		padding: 0.15rem 0.25rem;
+		padding: var(--tc-space-1) var(--tc-space-1);
 		transition: background-color 0.15s ease;
 		outline: none;
 	}

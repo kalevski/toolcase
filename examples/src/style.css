@@ -676,6 +676,30 @@ code, pre, .mono { font-family: var(--font-mono); }
 .example__canvas {
     min-height: calc(100vh - 130px);
 }
+/* react-components theme toggle */
+.example__theme {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.example__theme select {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 8px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    color: var(--fg-2);
+    cursor: pointer;
+}
+/* dark theme wrapper fills the canvas so the demo sits on dark ground */
+.example__canvas > .theme--dark {
+    min-height: calc(100vh - 130px);
+}
 
 /* Phaser canvas wrapper */
 .tp-dfwv {

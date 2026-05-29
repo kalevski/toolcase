@@ -18,7 +18,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
+    padding: var(--tc-space-3) var(--tc-space-5);
     border-bottom: 1px solid var(--lf-border);
     font-family: var(--tc-font-family-sans);
     font-size: 0.75rem;
@@ -31,7 +31,7 @@
 .component-live-feed__rec {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--tc-space-2);
     color: var(--lf-danger);
 }
 
@@ -47,8 +47,8 @@
 .component-live-feed__row {
     display: grid;
     grid-template-columns: 60px 1fr;
-    gap: 14px;
-    padding: 12px 20px;
+    gap: var(--tc-space-4);
+    padding: var(--tc-space-3) var(--tc-space-5);
     border-bottom: 1px solid var(--lf-border);
     align-items: start;
 
@@ -89,8 +89,8 @@
     font-weight: var(--tc-font-weight-semibold);
     color: var(--lf-info);
     border: 1px solid currentColor;
-    padding: 2px 6px;
-    margin-left: 6px;
+    padding: var(--tc-space-1) var(--tc-space-2);
+    margin-left: var(--tc-space-2);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     vertical-align: 1px;

@@ -16,6 +16,16 @@ const SpinnerDemo: React.FC = () => (
 				description="A loading indicator with variant colors, sizes, and optional label."
 			/>
 				<div className="d-flex flex-column gap-4 mt-4">
+		<SectionCard title="Shapes">
+			<div style={{ display: 'flex', alignItems: 'flex-end', gap: 40, flexWrap: 'wrap' }}>
+				<Spinner shape="ring" size="large" label="ring" />
+				<Spinner shape="dots" size="large" label="dots" variant="info" />
+				<Spinner shape="bars" size="large" label="bars" variant="success" />
+				<Spinner shape="grid" size="large" label="grid" variant="warning" />
+				<Spinner shape="pulse" size="large" label="pulse" variant="danger" />
+			</div>
+		</SectionCard>
+
 		<SectionCard title="Variants">
 			<div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
 				<Spinner variant="primary" />

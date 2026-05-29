@@ -38,6 +38,7 @@
 @use './vertical-item-list';
 @use './bitmap-font-generator';
 @use './node-editor';
+@use './audio-mixer';
 @use './action-header';
 @use './action-items';
 @use './group';
@@ -170,3 +171,5 @@
 @use './pulse-indicator';
 @use './section-flag';
 @use './hero-stats-bar';
+@use './normal-map-generator';
+@use './physics-editor';

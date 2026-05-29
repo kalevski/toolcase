@@ -13,6 +13,8 @@ import BadgeDemo from './BadgeDemo'
 import { BannerDemo } from './BannerDemo'
 import BasicLayoutDemo from './BasicLayoutDemo'
 import BitmapFontGeneratorDemo from './BitmapFontGeneratorDemo'
+import NormalMapGeneratorDemo from './NormalMapGeneratorDemo'
+import PhysicsEditorDemo from './PhysicsEditorDemo'
 import BrandDemo from './BrandDemo'
 import BreadcrumbDemo from './BreadcrumbDemo'
 import BuildDemo from './BuildDemo'
@@ -111,6 +113,7 @@ import MetricGridDemo from './MetricGridDemo'
 import { ModalDemo } from './ModalDemo'
 import MultiCardSelectDemo from './MultiCardSelectDemo'
 import NodeEditorDemo from './NodeEditorDemo'
+import AudioMixerDemo from './AudioMixerDemo'
 import { NumberInputDemo } from './NumberInputDemo'
 import { OTPInputDemo } from './OTPInputDemo'
 import PageFooterDemo from './PageFooterDemo'
@@ -408,7 +411,10 @@ export const examples: ExampleDef[] = [
     { key: 'markdown-editor', category: 'Code & Docs', element: <MarkdownEditorDemo /> },
     { key: 'json-editor', category: 'Code & Docs', element: <JSONEditorDemo /> },
     { key: 'bitmap-font-generator', category: 'Code & Docs', element: <BitmapFontGeneratorDemo /> },
+    { key: 'normal-map-generator', category: 'Code & Docs', element: <NormalMapGeneratorDemo /> },
+    { key: 'physics-editor', category: 'Code & Docs', element: <PhysicsEditorDemo /> },
     { key: 'node-editor', category: 'Code & Docs', element: <NodeEditorDemo /> },
+    { key: 'audio-mixer', category: 'Code & Docs', element: <AudioMixerDemo /> },
 
     // ── Game Jam / Arcade ────────────────────────────────────────────
     { key: 'section-flag', category: 'Game Jam / Arcade', element: <SectionFlagDemo /> },

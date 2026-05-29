@@ -1,11 +1,11 @@
 .component.component-cool-nav {
-	--cool-nav-bg: rgba(255, 255, 255, 0.98);
-	--cool-nav-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+	--cool-nav-bg: rgba(var(--tc-surface-rgb), 0.98);
+	--cool-nav-shadow: var(--tc-shadow-lg);
 	--cool-nav-transform: none;
 	backdrop-filter: none;
 	background-color: var(--cool-nav-bg);
 	box-shadow: none;
-	padding: 1rem 1.5rem;
+	padding: var(--tc-space-4) var(--tc-space-6);
 	position: relative;
 	transition:
 		background-color 0.3s ease,
@@ -28,33 +28,33 @@
 }
 
 .component-cool-nav--scrolled {
-	--cool-nav-bg: rgba(255, 255, 255, 0.85);
+	--cool-nav-bg: rgba(var(--tc-surface-rgb), 0.85);
 	backdrop-filter: blur(16px);
 	box-shadow: var(--cool-nav-shadow);
-	padding-top: 0.75rem;
-	padding-bottom: 0.75rem;
+	padding-top: var(--tc-space-3);
+	padding-bottom: var(--tc-space-3);
 	transform: translateY(-2px) scaleY(0.96);
 }
 
 .component-cool-nav.navbar-dark {
-	--cool-nav-bg: rgba(17, 24, 39, 0.95);
-	--cool-nav-shadow: 0 16px 40px rgba(11, 16, 28, 0.5);
+	--cool-nav-bg: rgba(var(--tc-accent-hover-rgb), 0.95);
+	--cool-nav-shadow: var(--tc-shadow-lg);
 }
 
 .component-cool-nav.navbar-dark.component-cool-nav--scrolled {
-	--cool-nav-bg: rgba(17, 24, 39, 0.85);
+	--cool-nav-bg: rgba(var(--tc-accent-hover-rgb), 0.85);
 }
 
 .component-cool-nav__brand {
 	align-items: center;
 	display: flex;
 	font-weight: 600;
-	gap: 0.75rem;
+	gap: var(--tc-space-3);
 }
 
 .component-cool-nav__items .nav-link {
 	font-weight: 500;
-	padding: 0.5rem 1rem;
+	padding: var(--tc-space-2) var(--tc-space-4);
 	transition:
 		color 0.2s ease,
 		opacity 0.2s ease;
@@ -66,12 +66,12 @@
 
 .component-cool-nav__actions {
 	align-items: center;
-	gap: 0.75rem;
+	gap: var(--tc-space-3);
 }
 
 @media (max-width: 991.98px) {
 	.component-cool-nav {
-		padding: 0.75rem 1rem;
+		padding: var(--tc-space-3) var(--tc-space-4);
 	}
 
 	.component-cool-nav .navbar-collapse.show {
@@ -80,16 +80,16 @@
 	}
 
 	.component-cool-nav__items {
-		margin-top: 1.25rem;
+		margin-top: var(--tc-space-5);
 		text-align: center;
 	}
 
 	.component-cool-nav__actions {
 		justify-content: center;
-		margin-top: 1rem;
+		margin-top: var(--tc-space-4);
 	}
 
 	.component-cool-nav__brand {
-		margin-right: 0.5rem;
+		margin-right: var(--tc-space-2);
 	}
 }

@@ -3,3 +3,5 @@ node_modules
 .parcel-cache
 examples/dist
 !examples/dist/CNAME
+tasks/*.md
+tasks/logs/*.log

@@ -166,6 +166,18 @@ Prefix all custom properties with `--{abbreviated-name}-`:
 Use the pattern `--{abbreviated}-{semantic}` where semantic is one of:
 `color`, `muted`, `border`, `bg`, `hover-bg`, `active-color`, `active-border`, `transition`, `shadow`, `radius`.
 
+### Shadow tokens
+
+All elevation shadows **must** use one of the three global tokens — no inline shadow values:
+
+| Token | Value | Use when |
+|-------|-------|----------|
+| `--tc-shadow-sm` | `0 1px 2px rgba(15, 23, 42, 0.04)` | Subtle lift: cards at rest, small floating elements |
+| `--tc-shadow-md` | `0 2px 8px rgba(15, 23, 42, 0.06)` | Dropdown panels, popovers, hover lift |
+| `--tc-shadow-lg` | `0 8px 24px rgba(15, 23, 42, 0.10)` | Modals, command palette, drawers, large floating panels |
+
+**Exception:** `box-shadow` values with a zero x/y offset used as focus rings or selection rings (e.g. `0 0 0 3px rgba(...)`) are accessibility indicators, not elevation — keep them as-is.
+
 ### Border radius — NEVER use
 
 **Do not add `border-radius` to any component.** All elements use sharp, square corners by design. This is a hard rule, not a preference.
@@ -175,11 +187,38 @@ Use the pattern `--{abbreviated}-{semantic}` where semantic is one of:
 - Do not reference `var(--rc-radius-*)` in component files.
 - **Exception:** `border-radius: 50%` is allowed only on elements whose shape is intentionally circular (spinner rings, slider thumbs, stepper step indicators, carousel dots and arrow buttons, lightbox close/arrow buttons). These are shape-defining, not decorative rounding.
 
-### Color values
+### Color values (CSS-01 migration complete)
 
-- Use the SCSS `$variable` values from `_colors.scss` inside SCSS variables and mixins.
-- For CSS custom properties inside component rules, use literal hex values that correspond to the palette (they will be replaced when CSS-01 migration is complete).
-- Preferred neutral values: `#1e293b` (dark text), `#64748b` (muted), `#94a3b8` (faint), `#e2e8f0` (border), `#f8fafc` (surface), `#ffffff` (white).
+- **Never use raw hex, rgba(), or hsl() color literals in component SCSS.** All colors must reference `var(--tc-*)` tokens from `_tokens.scss`.
+- Component-local CSS custom properties must default to a `var(--tc-*)` token, not a literal: `--ac-color: var(--tc-text);` not `--ac-color: #1e293b;`.
+- Do NOT import or use `$gray-*`, `$red-*`, `$green-*` or other SCSS palette variables from `_colors.scss` in component files.
+- Do NOT reference Bootstrap `--bs-*` CSS variables in component SCSS.
+- **Exception:** `box-shadow: 0 0 0 Xpx rgba(...)` focus-ring and selection-ring values are accessibility indicators; keep them as raw rgba — do not replace with shadow tokens.
+- Common token reference:
+
+| Intent | Token |
+|--------|-------|
+| Primary text | `var(--tc-text)` |
+| Muted text | `var(--tc-text-muted)` |
+| Faint text | `var(--tc-text-faint)` |
+| Text on dark bg | `var(--tc-text-inverse)` |
+| Page background | `var(--tc-bg)` |
+| White surface | `var(--tc-surface)` |
+| Hover surface | `var(--tc-surface-hover)` |
+| Muted surface | `var(--tc-surface-muted)` |
+| Dark (editor) surface | `var(--tc-surface-dark)` |
+| Border | `var(--tc-border)` |
+| Strong border | `var(--tc-border-strong)` |
+| Accent (hover) | `var(--tc-accent-hover)` |
+| Violet accent | `var(--tc-violet)` |
+| Cyan accent | `var(--tc-cyan)` |
+| Brand gradient | `var(--tc-gradient-brand)` |
+| Status (success/warning/danger/info) | `var(--tc-success)`, `var(--tc-warning)`, `var(--tc-danger)`, `var(--tc-info)` |
+| Status tint bg | `var(--tc-success-tint-bg)` etc. |
+| Status tint border | `var(--tc-success-tint-border)` etc. |
+| Status tint text | `var(--tc-success-tint-text)` etc. |
+| Code syntax | `var(--tc-code-string)`, `var(--tc-code-keyword)`, etc. |
+| rgba() with opacity | `rgba(var(--tc-text-rgb), 0.1)` — use `-rgb` channel tokens |
 
 ---
 
@@ -241,7 +280,7 @@ Every component must follow these rules before being considered complete:
 ### Interactive elements
 - All interactive non-button elements that act as buttons must have `role="button"` and `tabIndex={0}`.
 - All buttons must be actual `<button>` elements (not `<div>` or `<span>`).
-- Focus ring: every interactive element must have a visible `:focus-visible` style — use `outline: 2px solid #1e293b; outline-offset: 2px`.
+- Focus ring: every interactive element must have a visible `:focus-visible` style — use `outline: var(--tc-focus-outline); outline-offset: var(--tc-focus-offset)` (tokens defined in `_tokens.scss`; values are `2px solid var(--tc-accent)` / `2px`).
 - Never remove focus ring without providing an equivalent visible alternative.
 
 ### Dropdowns / listboxes
@@ -346,16 +385,22 @@ if (e.key === 'Escape') {
 - Use `transition: {property} 0.15s ease` for micro-interactions (color, border, opacity).
 - Use `transition: {property} 0.2s cubic-bezier(0.4, 0, 0.2, 1)` for layout transitions (height, width, transform).
 - Use `@keyframes` with `animation: name 0.15s ease-out` for enter animations.
-- Always include `@media (prefers-reduced-motion: reduce)` overrides:
+
+### Reduced motion
+
+`style/_reduced-motion.scss` is a **global catch-all** — it sets `animation-duration: 0.01ms` and `transition-duration: 0.01ms` on every `.component *` element whenever `prefers-reduced-motion: reduce` is active. **No per-component block is required for one-shot transitions or enter animations.**
+
+Per-component `@media (prefers-reduced-motion: reduce)` blocks are required only for **infinite/looping `@keyframes`** (e.g. spin, pulse, marquee). Use `animation: none` to stop the loop entirely — "near-instant" is not acceptable for infinite motion:
 
 ```scss
 @media (prefers-reduced-motion: reduce) {
     .component-{name} {
         animation: none;
-        transition: none;
     }
 }
 ```
+
+The shared `%reduced-motion` placeholder in `_tokens.scss` sets `animation: none !important; transition: none !important;` and can be extended within a `@media (prefers-reduced-motion: reduce)` block after `@use '../tokens'`.
 
 ---
 

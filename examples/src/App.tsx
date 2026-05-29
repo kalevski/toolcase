@@ -1,4 +1,4 @@
-import { useEffect, ReactNode } from 'react'
+import { useEffect, useState, ReactNode } from 'react'
 import { Routes, Route, useNavigate, useLocation, Link as RouterLink } from 'react-router'
 import { packageRoutes, topPages, type DemoEntry, type PackageRoute } from './routes'
 
@@ -72,6 +72,8 @@ interface ExampleWrapperProps {
 
 const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
     const navigate = useNavigate()
+    const supportsTheme = route.key === 'react-components'
+    const [theme, setTheme] = useState<'default' | 'dark'>('default')
     const index = route.examples.findIndex((e) => e.key === example.key)
     const prev = index > 0 ? route.examples[index - 1] : null
     const next = index < route.examples.length - 1 ? route.examples[index + 1] : null
@@ -105,12 +107,27 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
                         {example.title}
                         {example.extraHeader ? <> — {example.extraHeader}</> : null}
                     </span>
+                    {supportsTheme ? (
+                        <label className="example__theme">
+                            theme
+                            <select value={theme} onChange={(e) => setTheme(e.target.value as 'default' | 'dark')}>
+                                <option value="default">Default</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </label>
+                    ) : null}
                     <span className="example__hint">
                         <kbd>←</kbd> <kbd>→</kbd> navigate
                     </span>
                 </div>
             </div>
-            <div className={canvasClass}>{children}</div>
+            <div className={canvasClass}>
+                {supportsTheme && theme === 'dark' ? (
+                    <div className="theme theme--dark">{children}</div>
+                ) : (
+                    children
+                )}
+            </div>
         </div>
     )
 }

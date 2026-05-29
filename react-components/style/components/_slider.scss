@@ -1,24 +1,24 @@
 // ── Slider ────────────────────────────────────────────────────────────────────
 
 .component.component-slider {
-    --sl-color: #1e293b;
-    --sl-muted: #64748b;
-    --sl-track-bg: #e2e8f0;
-    --sl-fill-bg: #1e293b;
-    --sl-thumb-bg: #ffffff;
-    --sl-thumb-border: #1e293b;
-    --sl-thumb-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    --sl-color: var(--tc-text);
+    --sl-muted: var(--tc-text-muted);
+    --sl-track-bg: var(--tc-border);
+    --sl-fill-bg: var(--tc-text);
+    --sl-thumb-bg: var(--tc-surface);
+    --sl-thumb-border: var(--tc-text);
+    --sl-thumb-shadow: var(--tc-shadow-sm);
     --sl-thumb-size: 1.125rem;
     --sl-track-height: 4px;
-    --sl-tick-color: #94a3b8;
-    --sl-tooltip-bg: #1e293b;
-    --sl-tooltip-color: #ffffff;
-    --sl-error-color: #ef4444;
+    --sl-tick-color: var(--tc-text-faint);
+    --sl-tooltip-bg: var(--tc-text);
+    --sl-tooltip-color: var(--tc-text-inverse);
+    --sl-error-color: var(--tc-danger);
     --sl-transition: 0.15s ease;
 
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--tc-space-1);
     user-select: none;
 }
 
@@ -27,7 +27,7 @@
         align-items: center;
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.25rem;
+        margin-bottom: var(--tc-space-1);
     }
 
     &__label {
@@ -64,6 +64,11 @@
         &:disabled {
             cursor: not-allowed;
         }
+    }
+
+    &__track-area:focus-within {
+        outline: var(--tc-focus-outline);
+        outline-offset: var(--tc-focus-offset);
     }
 
     &__track {
@@ -111,7 +116,7 @@
         font-size: 0.75rem;
         font-weight: 600;
         left: 50%;
-        padding: 2px 6px;
+        padding: var(--tc-space-1) var(--tc-space-2);
         pointer-events: none;
         position: absolute;
         transform: translateX(-50%);
@@ -121,7 +126,7 @@
     // Tick marks
     &__ticks {
         height: 1rem;
-        margin-top: 0.25rem;
+        margin-top: var(--tc-space-1);
         position: relative;
         width: 100%;
     }
@@ -130,7 +135,7 @@
         align-items: center;
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: var(--tc-space-1);
         position: absolute;
         transform: translateX(-50%);
 

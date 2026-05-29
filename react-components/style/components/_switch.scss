@@ -4,13 +4,13 @@
 	--switch-track-w: 36px;
 	--switch-track-h: 20px;
 	--switch-knob: 16px;
-	--switch-off-bg: #e2e8f0;
-	--switch-on-bg: #1e293b;
+	--switch-off-bg: var(--tc-border-strong);
+	--switch-on-bg: var(--tc-text);
 	--switch-transition: 0.2s ease;
 
 	display: inline-flex;
 	align-items: center;
-	gap: 0.5rem;
+	gap: var(--tc-space-2);
 	cursor: pointer;
 	user-select: none;
 
@@ -57,9 +57,10 @@
 	left: 2px;
 	width: var(--switch-knob);
 	height: var(--switch-knob);
-	background: #fff;
+	background: var(--tc-surface);
+	border: 1px solid var(--tc-border-strong);
 	transition: transform var(--switch-transition);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	box-shadow: var(--tc-shadow-sm);
 }
 
 .component-switch__input:checked + .component-switch__track {
@@ -72,6 +73,6 @@
 
 .component-switch__label {
 	font-size: 0.85rem;
-	color: #1e293b;
+	color: var(--tc-text);
 	font-weight: 500;
 }

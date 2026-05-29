@@ -1,10 +1,10 @@
 .component.component-command-reference {
-	--cr-color: #1e293b;
-	--cr-muted: #64748b;
-	--cr-border: #e2e8f0;
+	--cr-color: var(--tc-text);
+	--cr-muted: var(--tc-text-muted);
+	--cr-border: var(--tc-border);
 	display: flex;
 	flex-direction: column;
-	gap: 0.85rem;
+	gap: var(--tc-space-3);
 }
 
 .component-command-reference {
@@ -18,9 +18,9 @@
 	&__search {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.55rem 0.85rem;
-		background: #ffffff;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-2) var(--tc-space-3);
+		background: var(--tc-surface);
 		border: 1px solid var(--cr-border);
 
 		.bi { color: var(--cr-muted); }
@@ -34,15 +34,20 @@
 		font-size: 0.92rem;
 		color: var(--cr-color);
 		min-width: 0;
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
+		}
 	}
 
 	&__empty {
 		margin: 0;
-		padding: 1rem;
+		padding: var(--tc-space-4);
 		color: var(--cr-muted);
 		font-size: 0.85rem;
 		text-align: center;
-		background: #f8fafc;
+		background: var(--tc-surface-hover);
 	}
 
 	&__list {
@@ -51,22 +56,22 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.6rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__item {
-		padding: 0.85rem 1rem;
-		background: #ffffff;
+		padding: var(--tc-space-3) var(--tc-space-4);
+		background: var(--tc-surface);
 		border: 1px solid var(--cr-border);
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__head {
 		display: flex;
 		align-items: baseline;
-		gap: 0.65rem;
+		gap: var(--tc-space-3);
 		flex-wrap: wrap;
 	}
 
@@ -81,13 +86,13 @@
 		font-size: 0.72rem;
 		color: var(--cr-muted);
 		display: inline-flex;
-		gap: 0.25rem;
+		gap: var(--tc-space-1);
 		align-items: center;
 
 		code {
 			font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
-			background: #f1f5f9;
-			padding: 0.05rem 0.3rem;
+			background: var(--tc-surface-muted);
+			padding: var(--tc-space-1) var(--tc-space-1);
 		}
 	}
 
@@ -95,8 +100,8 @@
 		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
 		font-size: 0.82rem;
 		color: var(--cr-color);
-		background: #f8fafc;
-		padding: 0.4rem 0.55rem;
+		background: var(--tc-surface-hover);
+		padding: var(--tc-space-2) var(--tc-space-2);
 		overflow-x: auto;
 		white-space: pre;
 	}
@@ -112,7 +117,7 @@
 		margin: 0;
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 0.4rem;
+		gap: var(--tc-space-2);
 		font-size: 0.82rem;
 
 		dt {
@@ -120,13 +125,13 @@
 			color: var(--cr-color);
 			font-weight: 600;
 			display: flex;
-			gap: 0.4rem;
+			gap: var(--tc-space-2);
 			align-items: baseline;
 			flex-wrap: wrap;
 		}
 
 		dd {
-			margin: 0 0 0.3rem;
+			margin: 0 0 var(--tc-space-1);
 			color: var(--cr-muted);
 			line-height: 1.5;
 		}
@@ -143,7 +148,7 @@
 @media (min-width: 768px) {
 	.component-command-reference__flags {
 		grid-template-columns: minmax(180px, auto) 1fr;
-		gap: 0.4rem 1rem;
+		gap: var(--tc-space-2) var(--tc-space-4);
 
 		dd { margin: 0; }
 	}

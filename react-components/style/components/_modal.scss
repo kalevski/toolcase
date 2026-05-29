@@ -9,12 +9,12 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background-color: rgba(0, 0, 0, 0.5);
+	background-color: rgba(var(--tc-black-rgb), 0.5);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	z-index: 1050;
-	padding: 1rem;
+	padding: var(--tc-space-4);
 
 	transition: opacity 0.15s ease-in-out;
 	opacity: 1;
@@ -27,7 +27,7 @@
 
 .component-modals__window {
 	background: white;
-	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+	box-shadow: var(--tc-shadow-lg);
 	max-width: 500px;
 	width: 100%;
 	// overflow must be visible so that absolutely-positioned children
@@ -41,7 +41,7 @@
 	@media (max-width: 576px) {
 		max-width: 100%;
 		width: calc(100vw - 1rem);
-		margin: 0.5rem;
+		margin: var(--tc-space-2);
 	}
 }
 
@@ -86,8 +86,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 1rem 1.5rem;
-	border-bottom: 1px solid #e2e8f0;
+	padding: var(--tc-space-4) var(--tc-space-6);
+	border-bottom: 1px solid var(--tc-border);
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
 
@@ -95,27 +95,27 @@
 		margin: 0;
 		font-size: 1.1rem;
 		font-weight: 600;
-		color: #1e293b;
+		color: var(--tc-text);
 	}
 
 	.btn-close {
-		padding: 0.5rem;
-		margin: -0.5rem -0.5rem -0.5rem auto;
+		padding: var(--tc-space-2);
+		margin: calc(-1 * var(--tc-space-2)) calc(-1 * var(--tc-space-2)) calc(-1 * var(--tc-space-2)) auto;
 		background: transparent;
 		border: none;
 		font-size: 1.125rem;
 		cursor: pointer;
-		color: #64748b;
+		color: var(--tc-text-muted);
 		transition: color 0.15s ease;
 
 		&:hover {
-			color: #1e293b;
+			color: var(--tc-text);
 		}
 	}
 }
 
 .modal-body {
-	padding: 1.5rem;
+	padding: var(--tc-space-6);
 
 	&--scrollable {
 		max-height: 60vh;
@@ -123,7 +123,7 @@
 	}
 
 	@media (max-width: 576px) {
-		padding: 1rem;
+		padding: var(--tc-space-4);
 	}
 }
 
@@ -132,9 +132,9 @@
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: flex-end;
-	gap: 0.5rem;
-	padding: 1rem 1.5rem;
-	border-top: 1px solid #e2e8f0;
+	gap: var(--tc-space-2);
+	padding: var(--tc-space-4) var(--tc-space-6);
+	border-top: 1px solid var(--tc-border);
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 }

@@ -1,12 +1,12 @@
 .component.component-color-picker {
-	--cp-text: #1e293b;
-	--cp-muted: #64748b;
-	--cp-subtle: #94a3b8;
-	--cp-border: #e2e8f0;
-	--cp-hover-bg: #f1f5f9;
-	--cp-light-bg: #f8fafc;
-	--cp-accent: #1e293b;
-	--cp-accent-text: #ffffff;
+	--cp-text: var(--tc-text);
+	--cp-muted: var(--tc-text-muted);
+	--cp-subtle: var(--tc-text-faint);
+	--cp-border: var(--tc-border);
+	--cp-hover-bg: var(--tc-surface-muted);
+	--cp-light-bg: var(--tc-surface-hover);
+	--cp-accent: var(--tc-text);
+	--cp-accent-text: var(--tc-surface);
 	--cp-transition: 0.15s ease;
 
 	position: relative;
@@ -18,16 +18,16 @@
 		font-size: 0.85rem;
 		font-weight: 600;
 		color: var(--cp-text);
-		margin-bottom: 0.4rem;
+		margin-bottom: var(--tc-space-2);
 	}
 
 	.component-color-picker__trigger {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.4rem 0.75rem;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-2) var(--tc-space-3);
 		border: 1.5px solid var(--cp-border);
-		background: #fff;
+		background: var(--tc-surface);
 		cursor: pointer;
 		height: 44px;
 		font-family: inherit;
@@ -55,10 +55,10 @@
 		position: absolute;
 		top: calc(100% + 4px);
 		left: 0;
-		background: #fff;
+		background: var(--tc-surface);
 		border: 1px solid var(--cp-border);
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-		padding: 0.5rem;
+		box-shadow: var(--tc-shadow-md);
+		padding: var(--tc-space-2);
 		z-index: 1060; // above modal (1050)
 		animation: cp-picker-in 0.12s ease-out;
 	}
@@ -66,10 +66,10 @@
 	.component-color-picker__hex-input {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
-		padding: 0.35rem 0.5rem;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-1) var(--tc-space-2);
 		border-top: 1px solid var(--cp-border);
-		margin-top: 0.35rem;
+		margin-top: var(--tc-space-1);
 
 		.component-color-picker__hex-prefix {
 			font-size: 0.8rem;
@@ -91,7 +91,7 @@
 
 	.component-color-picker__grid {
 		display: grid;
-		gap: 3px;
+		gap: var(--tc-space-1);
 	}
 
 	.component-color-picker__option {
@@ -118,7 +118,7 @@
 
 	.component-color-picker__grid {
 		display: grid;
-		gap: 3px;
+		gap: var(--tc-space-1);
 
 		@media (max-width: 576px) {
 			grid-template-columns: repeat(4, 1fr) !important;
@@ -137,4 +137,12 @@
 		}
 	}
 
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.component-color-picker {
+		.component-color-picker__dropdown { animation: none; }
+		.component-color-picker__trigger { transition: none; }
+		.component-color-picker__option { transition: none; }
+	}
 }

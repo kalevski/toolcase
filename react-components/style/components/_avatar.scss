@@ -65,19 +65,19 @@
 		border: 2px solid white;
 
 		&.avatar-status-online {
-			background-color: #22c55e;
+			background-color: var(--tc-success);
 		}
 
 		&.avatar-status-offline {
-			background-color: #94a3b8;
+			background-color: var(--tc-text-faint);
 		}
 
 		&.avatar-status-busy {
-			background-color: #ef4444;
+			background-color: var(--tc-danger);
 		}
 
 		&.avatar-status-away {
-			background-color: #f59e0b;
+			background-color: var(--tc-warning);
 		}
 	}
 

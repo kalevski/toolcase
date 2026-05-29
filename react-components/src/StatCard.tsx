@@ -47,32 +47,32 @@ export const StatCard: React.FC<StatCardProps> = ({
 
 	const deltaIcon =
 		deltaKind === 'up' ? 'arrow-up-short' : deltaKind === 'down' ? 'arrow-down-short' : 'dash'
-	const hasFooter = delta || helper || footer
+	const hasMeta = helper || footer
 
 	return (
 		<div className={rootClass}>
 			<div className="component-stat-card__header">
+				<span className="component-stat-card__label">{label}</span>
 				{icon && (
 					<span className="component-stat-card__icon">
 						<Icon name={icon} decorative />
 					</span>
 				)}
-				<span className="component-stat-card__label">{label}</span>
 			</div>
 			<div className="component-stat-card__value">
 				<span className="component-stat-card__number">{value}</span>
 				{unit && <span className="component-stat-card__unit">{unit}</span>}
+				{delta && (
+					<span
+						className={`component-stat-card__delta component-stat-card__delta--${deltaKind}`}
+					>
+						<Icon name={deltaIcon} decorative />
+						{delta}
+					</span>
+				)}
 			</div>
-			{hasFooter && (
+			{hasMeta && (
 				<div className="component-stat-card__footer">
-					{delta && (
-						<span
-							className={`component-stat-card__delta component-stat-card__delta--${deltaKind}`}
-						>
-							<Icon name={deltaIcon} decorative />
-							{delta}
-						</span>
-					)}
 					{helper && <span className="component-stat-card__helper">{helper}</span>}
 					{footer && <span className="component-stat-card__footer-extra">{footer}</span>}
 				</div>

@@ -2,7 +2,7 @@
 
 .component.component-virtual-list {
     --vl-scrollbar-w:    6px;
-    --vl-thumb-bg:       #cbd5e1;
+    --vl-thumb-bg:       var(--tc-border-strong);
 
     overflow-y: auto;
     scrollbar-width: thin;

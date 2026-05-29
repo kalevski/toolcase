@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { Badge } from './Badge'
 import { Skeleton } from './Skeleton'
@@ -36,12 +36,18 @@ export const VerticalItemList: React.FC<VerticalItemListProps> = ({
 	const isControlled = activeKey !== undefined
 	const [internalKey, setInternalKey] = useState(defaultActiveKey ?? '')
 	const selected = isControlled ? activeKey : internalKey
+	const activeRef = useRef<HTMLButtonElement>(null)
 
 	const handleSelect = (key: string) => {
 		if (disabled) return
 		if (!isControlled) setInternalKey(key)
 		onSelect?.(key)
 	}
+
+	// Keep the active item visible when the nav scrolls (horizontal strip on mobile).
+	useEffect(() => {
+		activeRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+	}, [selected])
 
 	return (
 		<div className={`component component-vertical-item-list${className ? ` ${className}` : ''}`}>
@@ -55,6 +61,7 @@ export const VerticalItemList: React.FC<VerticalItemListProps> = ({
 				) : items.map((item) => (
 					<button
 						key={item.key}
+						ref={selected === item.key ? activeRef : undefined}
 						type="button"
 						className={`component-vertical-item-list__item${selected === item.key ? ' component-vertical-item-list__item--active' : ''}`}
 						disabled={disabled}

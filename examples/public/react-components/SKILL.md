@@ -174,6 +174,8 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [ActionRowList](#actionrowlist)
   - [AssetBundle](#assetbundle)
   - [BitmapFontGenerator](#bitmapfontgenerator)
+  - [NormalMapGenerator](#normalmapgenerator)
+  - [PhysicsEditor](#physicseditor)
   - [Build](#build)
   - [CardOptions](#cardoptions)
   - [Changelog](#changelog)
@@ -1022,10 +1024,11 @@ import { Skeleton } from '@toolcase/react-components'
 
 ### Spinner
 
-A circular animated loading indicator with size, variant, and accessible label.
+An animated loading indicator with multiple shapes, size, variant, and accessible label.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
+| `shape` | `'ring' \| 'dots' \| 'bars' \| 'grid' \| 'pulse'` | ❌ | Animation style (default: `'ring'`) |
 | `size` | `'small' \| 'default' \| 'large'` | ❌ | Spinner size (default: `'default'`) |
 | `variant` | `'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger'` | ❌ | Color theme (default: `'primary'`) |
 | `label` | `string` | ❌ | Visible label (otherwise visually hidden) |
@@ -1034,7 +1037,10 @@ A circular animated loading indicator with size, variant, and accessible label.
 import { Spinner } from '@toolcase/react-components'
 
 <Spinner />
-<Spinner size="large" variant="success" label="Saving..." />
+<Spinner shape="dots" variant="info" />
+<Spinner shape="bars" size="large" variant="success" label="Saving..." />
+<Spinner shape="grid" />
+<Spinner shape="pulse" />
 ```
 
 ---
@@ -1723,12 +1729,13 @@ const actions: ActionHeaderAction[] = [
 
 ### ActionItems
 
-A three-dots (⋮) dropdown menu of labelled action items.
+A three-dots (⋮) dropdown menu of labelled action items. Self-managed (no Bootstrap JS needed). Full keyboard support: arrows / Home / End / Enter / Esc, roving focus, click-outside to close, WAI-ARIA menu-button semantics (`role="menu"`/`menuitem`).
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `items` | `ActionItem[]` | ✅ | `{ key, label, icon? }` |
 | `onActionClick` | `(key: string) => void` | ❌ | Called when a menu item is clicked |
+| `label` | `string` | ❌ | Accessible name for the trigger (default: `'Actions'`) |
 
 ```tsx
 import { ActionItems, ActionItem } from '@toolcase/react-components'
@@ -1746,23 +1753,29 @@ const items: ActionItem[] = [
 
 ### Button
 
-A styled button with variant colors, sizes, and outline mode.
+A styled button with variant colors, sizes, outline mode, loading state, and icon slots.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `variant` | `'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger'` | ❌ | Color theme (default: `'primary'`) |
+| `variant` | `'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger' \| 'link'` | ❌ | Color theme (default: `'primary'`). `'link'` renders a text-style button |
 | `size` | `'small' \| 'default' \| 'large'` | ❌ | Button size (default: `'default'`) |
-| `outline` | `boolean` | ❌ | Outline style |
+| `outline` | `boolean` | ❌ | Outline style (ignored for `'link'`) |
+| `loading` | `boolean` | ❌ | Shows a spinner, disables the button, sets `aria-busy` |
+| `fullWidth` | `boolean` | ❌ | Stretch to full container width |
+| `startIcon` | `ReactNode` | ❌ | Icon before the label |
+| `endIcon` | `ReactNode` | ❌ | Icon after the label |
 | `label` | `string` | ❌ | Text alternative to `children` |
 | `children` | `ReactNode` | ❌ | Button content |
 
-Also accepts all `HTMLButtonElement` attributes. Supports `ref` forwarding.
+Also accepts all `HTMLButtonElement` attributes. Supports `ref` forwarding. `type` defaults to `"button"` (won't accidentally submit a form).
 
 ```tsx
 import { Button } from '@toolcase/react-components'
 
 <Button variant="primary">Save</Button>
 <Button variant="danger" outline size="small">Delete</Button>
+<Button variant="primary" loading>Saving…</Button>
+<Button variant="secondary" startIcon={<Icon name="plus" />}>New item</Button>
 ```
 
 ---
@@ -2435,6 +2448,197 @@ A canvas-based tool for generating bitmap font spritesheets (PNG + XML) with con
 | `onGenerate` | `(output: BitmapFontOutput) => void` | ❌ | `{ png: Blob, xml: string, glyphs: BitmapFontGlyph[] }` |
 | `disabled` | `boolean` | ❌ | Disables generation |
 | `className` | `string` | ❌ | Additional CSS class |
+
+---
+
+### NormalMapGenerator
+
+A canvas-based tool that turns a 2D sprite buffer into a tangent-space normal map. Stacks two complementary passes: an **alpha-bevel** (distance transform from the transparent edge → rounds the outline) and a **luminance-emboss** (Sobel-from-luminance → texture relief), summed before the gradient → normal step. Imperative `generate()` handle resolves a PNG `Blob` + raw RGBA. Pure helpers (`generateNormalMap`, `alphaToDistance`, `bevelHeightmap`, `toHeightmap`, `blurHeightmap`) are exported for reuse.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `source` | `ArrayBuffer \| Uint8Array \| Blob` | ❌ | Encoded sprite bytes (PNG/etc.), decoded via `createImageBitmap` |
+| `strength` | `number` | ❌ | Overall gradient gain (default `2`) |
+| `embossHeight` | `number` | ❌ | Luminance-emboss height; `0` disables emboss (default `2`) |
+| `bevelWidth` | `number` | ❌ | Alpha-bevel reach in px; `0` disables bevel (default `0`) |
+| `bevelHeight` | `number` | ❌ | Bevel ramp depth (default `1`) |
+| `bevelDirection` | `'raised' \| 'recessed'` | ❌ | Outline pops out vs sinks in (default `'raised'`) |
+| `tileMode` | `boolean` | ❌ | Treat sprite border as seamless (no edge) (default `false`) |
+| `blur` | `number` | ❌ | Box-blur radius applied to the combined heightmap (default `0`) |
+| `invertX` | `boolean` | ❌ | Flip red channel / handedness (default `false`) |
+| `invertY` | `boolean` | ❌ | Flip green channel — OpenGL (`false`) vs DirectX (`true`) (default `false`) |
+| `flatColor` | `string` | ❌ | Transparent-pixel fill (default `'#8080ff'`) |
+| `background` | `string` | ❌ | Preview backdrop (default `'#1a1a2e'`) |
+| `onGenerate` | `(output: NormalMapOutput) => void` | ❌ | `{ png: Blob, rgba: Uint8ClampedArray, width, height }` |
+| `disabled` | `boolean` | ❌ | Disables generation |
+| `className` | `string` | ❌ | Additional CSS class |
+
+#### Brush editor (paint corrections on the working buffer)
+
+Set `editable` to make the preview interactive — pointer drawing paints the brush onto the auto-generated normal buffer. All paint blends in **vector space** (lerp + renormalize), never naive RGB.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `editable` | `boolean` | ❌ | Opt-in to pointer editing (default `false`) |
+| `brush` | `NormalBrush` | ❌ | Active brush config (see below) |
+| `maskToAlpha` | `boolean` | ❌ | Clamp paint to opaque source pixels (default `true`) |
+| `onEdit` | `(rgba: Uint8ClampedArray) => void` | ❌ | Fired after each stroke with the edited buffer |
+| `onSampleDirection` | `(n: [number, number, number]) => void` | ❌ | Fired on `Alt+click` (direction mode) with the sampled normal under the cursor |
+
+`NormalBrush`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mode` | `'direction' \| 'height' \| 'smooth' \| 'structure' \| 'erase'` | Tool |
+| `size` | `number` | Radius in source px (default `16`) |
+| `hardness` | `number` | `0` hard edge → `1` full soft falloff (default `0.5`) |
+| `strength` | `number` | Per-stamp blend weight `0..1` (default `0.5`) |
+| `direction` | `[x,y,z]` | Target normal for `'direction'` mode |
+| `heightSign` | `1 \| -1` | `'height'` mode: raise vs lower |
+| `pattern` | `'reptile' \| 'furry' \| 'cracked'` | `'structure'` mode tile |
+| `eraseTarget` | `'neutral' \| 'auto'` | `'erase'` mode: flat `#8080ff` or auto-generated normal |
+
+#### Light inspector (shade the sprite to judge the map)
+
+A raw normal map is unreadable — set `previewMode` to `lit` to render the sprite shaded by the normal map and a movable light (WebGL, Canvas2D fallback). Light edits/brush strokes update live.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `previewMode` | `'albedo' \| 'normal' \| 'lit' \| 'lit-surface'` | ❌ | Display mode (default `'normal'`). `lit-surface` forces albedo white (geometry only) |
+| `light` | `NormalLight` | ❌ | `{ x, y, z, color?, intensity? }` — position in normalized image space, `z` = height |
+| `ambient` | `number` | ❌ | Ambient level `0..1` (default `0.2`) |
+| `ambientColor` | `string` | ❌ | Ambient color (default `'#ffffff'`) |
+| `specular` | `boolean` | ❌ | Enable Blinn-Phong specular (default `false`) |
+| `shininess` | `number` | ❌ | Specular exponent (default `32`) |
+| `followCursor` | `boolean` | ❌ | Light tracks the cursor in lit modes (default `true`) |
+| `autoRotate` | `boolean` | ❌ | Turntable — light circles the sprite (default `false`) |
+| `onLightChange` | `(light: NormalLight) => void` | ❌ | Fired as the light moves |
+
+Keyboard (when the preview is focused, lit modes): **P** places the light under the cursor, **R** toggles auto-rotate, scroll wheel changes light height.
+
+#### Selection tools (restrict effects & paint to a region)
+
+Set `tool` to `rect`, `lasso`, or `wand` to paint a coverage mask that gates both generation and brushes. With no selection (`null`) the whole sprite is affected (zero overhead).
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `tool` | `'brush' \| 'rect' \| 'lasso' \| 'wand'` | ❌ | Active tool (default `'brush'`) |
+| `wandTolerance` | `number` | ❌ | Wand flood tolerance `0..1` over alpha+normal distance (default `0.1`) |
+| `feather` | `number` | ❌ | Mask edge feather in px (default `0`) |
+| `onSelectionChange` | `(mask: Uint8Array \| null) => void` | ❌ | Fired when the selection changes |
+
+Drag (rect/lasso) or click (wand) on the preview. **Shift** adds to the selection, **Alt** subtracts. When a selection exists, changing a generation prop re-bevels **only inside** the selection (outside is preserved), and brush strokes are multiplied by the mask. A marching-ants overlay shows the boundary.
+
+Handle methods: `generate()`, `undo()`, `redo()`, `reset()`, `exportLit()`, `selectAll()`, `clearSelection()`, `setSelection(mask)`. `exportLit()` resolves a PNG `Blob` of the lit sprite (albedo × shading) at source resolution — preview-only; `generate()` (the normal map) is unaffected by the light. **Note:** changing any generation prop (`strength`, `bevelWidth`, …) rebuilds the auto buffer and **discards brush edits** — paint after the params are settled.
+
+Selection helpers (exported): `polygonToMask`, `wandSelect`, `featherMask`, `combineSelection`, `rectToMask`, `maskEdges`.
+
+```tsx
+import { useRef, useState } from 'react'
+import { NormalMapGenerator, NormalMapGeneratorHandle, NormalBrush } from '@toolcase/react-components'
+
+const ref = useRef<NormalMapGeneratorHandle>(null)
+const [brush] = useState<NormalBrush>({ mode: 'height', size: 24, hardness: 0.5, strength: 0.6, heightSign: 1 })
+
+<NormalMapGenerator
+  ref={ref}
+  source={spriteBlob}
+  bevelWidth={24}   // round the alpha outline
+  embossHeight={2}  // texture relief from luminance
+  strength={2}
+  editable
+  brush={brush}
+  onGenerate={(out) => console.log(out.png, out.width, out.height)}
+/>
+
+// const output = await ref.current?.generate()  // packs the edited buffer
+// ref.current?.undo() / redo() / reset()
+```
+
+Pure helpers (also exported): `generateNormalMap`, `buildHeightmap`, `normalsFromHeight`, `alphaToDistance`, `bevelHeightmap`, `toHeightmap`, `blurHeightmap`, `applyBrush`, `pack`, `unpack`, `lerp3`, `STRUCTURE_TILES`.
+
+---
+
+### PhysicsEditor
+
+A canvas-based collision-shape editor (a PhysicsEditor-style tool). Derives a fixture shape from a sprite two ways: **auto-trace** the alpha silhouette into a simplified polygon (Moore-neighbor contour → Douglas-Peucker), or **draw** polygons / circles / boxes by hand and drag their vertices. Each shape carries physical props (`density`, `friction`, `restitution`, `isSensor`). Geometry is stored **engine-neutral, in source pixels**; units convert only at export. Concave polygons can be **decomposed into convex pieces** (Bayazit). Exports deterministically to **Box2D**, **Planck.js**, **Matter.js**, or **raw JSON**, reporting any properties the target engine drops. All geometry/export math is pure & exported for reuse.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `source` | `ArrayBuffer \| Uint8Array \| Blob` | ❌ | Encoded sprite bytes (PNG/etc.), decoded via `createImageBitmap` |
+| `shapes` | `PhysicsShape[]` | ❌ | Initial shape list; later edits fire `onChange` |
+| `onChange` | `(shapes: PhysicsShape[]) => void` | ❌ | Fired after any edit (draw / move / vertex / delete / trace / decompose / undo / redo) |
+| `tool` | `'select' \| 'polygon' \| 'circle' \| 'box'` | ❌ | Active tool (default `'select'`) |
+| `alphaThreshold` | `number` | ❌ | Opaque alpha cutoff 0..255 (default `1`) |
+| `simplifyTolerance` | `number` | ❌ | Douglas-Peucker tolerance in px (default `1.5`) |
+| `targetVertexCount` | `number` | ❌ | Target vertices; `> 0` overrides tolerance (default `0`) |
+| `decomposeConcave` | `boolean` | ❌ | Auto-trace yields convex pieces (default `false`) |
+| `snapPixel` | `boolean` | ❌ | Snap placed points to integer px (default `true`) |
+| `snapGrid` | `boolean` | ❌ | Snap to grid (default `false`) |
+| `gridSize` | `number` | ❌ | Grid size in px (default `16`) |
+| `showGrid` | `boolean` | ❌ | Draw the grid guide (default `false`) |
+| `defaultProps` | `Partial<ShapeProps>` | ❌ | Props for newly drawn/traced shapes |
+| `pixelsPerMeter` | `number` | ❌ | Meters scale baked into the default export (default `32`) |
+| `selectedIndex` | `number \| null` | ❌ | Selected shape index (controlled) |
+| `onSelectShape` | `(index: number \| null) => void` | ❌ | Fired when the selection changes |
+| `background` | `string` | ❌ | Preview backdrop (default `'#1a1a2e'`) |
+| `onError` | `(error: unknown) => void` | ❌ | Fired when decoding `source` fails |
+| `disabled` | `boolean` | ❌ | Disables editing |
+| `className` | `string` | ❌ | Additional CSS class |
+
+**Shapes** (`PhysicsShape`, engine-neutral, pixels):
+
+```ts
+type ShapeProps = { density: number; friction: number; restitution: number; isSensor: boolean }
+type PolygonShape = { type: 'polygon'; points: [number, number][]; props: ShapeProps }
+type CircleShape  = { type: 'circle'; center: [number, number]; radius: number; props: ShapeProps }
+type BoxShape     = { type: 'box'; rect: { x: number; y: number; w: number; h: number }; props: ShapeProps }
+```
+
+**Interaction.** `select`: drag a shape body to move, drag a vertex/handle to reshape, double-click a polygon edge to insert a vertex, **Alt+click** a polygon vertex to delete it, **Delete/Backspace** removes the selected shape. `polygon`: click to add points, **double-click / Enter / click the first point** to close, **Esc** cancels. `circle` / `box`: press-drag to size.
+
+**Handle methods** (`PhysicsEditorHandle`):
+
+| Method | Description |
+|--------|-------------|
+| `autoTrace()` | `Promise<PhysicsShape[]>` — trace the silhouette → polygon(s), replacing the list (empty if fully transparent) |
+| `decompose()` | Split the selected polygon (or all polygons) into convex pieces |
+| `addShape(shape)` / `removeShape(i)` / `clearShapes()` | Mutate the list |
+| `undo()` / `redo()` / `reset()` | History; `reset()` reverts to the last trace / initial list |
+| `getShapes()` / `setShapes(shapes)` | Read / replace the list |
+| `export(engine, pixelsPerMeter?)` | `ExportResult` — `{ engine, pixelsPerMeter, body, droppedProperties }` |
+| `validate(engine)` | `{ valid, issues }` — convex / max-vertex checks (FR-9) |
+
+**Engine capability matrix** (`ENGINE_CAPABILITIES`):
+
+| Engine | Units | Convex required | Max verts | Notes |
+|--------|-------|-----------------|-----------|-------|
+| `box2d` | meters | yes | 8 | decompose first; scaled by `1/pixelsPerMeter` |
+| `planck` | meters | yes | 8 | Box2D-equivalent |
+| `matter` | pixels | no | ∞ | `Bodies.fromVertices` handles concave |
+| `json` | pixels | no | ∞ | lossless engine-neutral passthrough |
+
+```tsx
+import { useRef } from 'react'
+import { PhysicsEditor, PhysicsEditorHandle } from '@toolcase/react-components'
+
+const ref = useRef<PhysicsEditorHandle>(null)
+
+<PhysicsEditor
+  ref={ref}
+  source={spriteBlob}
+  tool="select"
+  simplifyTolerance={2}
+  decomposeConcave
+  onChange={(shapes) => console.log(shapes)}
+/>
+
+// await ref.current?.autoTrace()
+// const { body, droppedProperties } = ref.current!.export('box2d', 32)
+// const { valid, issues } = ref.current!.validate('box2d')
+```
+
+Pure helpers (also exported): `autoTrace`, `alphaMask`, `traceContour`, `simplify`, `simplifyToCount`, `decomposePolygon`, `isConvex`, `makeCCW`, `signedArea`, `exportShapes`, `validateShapes`, `ENGINE_CAPABILITIES`, `snapPoint`, `pointInPolygon`, `hitVertex`, `hitShape`, `nearestEdge`, `translateShape`, `moveVertex`, `shapeVertices`, `shapeBounds`.
 
 ---
 
@@ -3851,7 +4055,8 @@ These components are intentionally lighter on prop docs — they are landing-pag
 | `InstallTabs` | Multi-package-manager install snippet (npm / pnpm / yarn / bun). |
 | `JSONSchemaDef` | Renders a JSON Schema fragment as docs. |
 | `MigrationGuide` | Step-by-step migration walkthrough. |
-| `NodeEditor` | Visual node-graph editor surface. |
+| `NodeEditor` | Canvas-only node-graph view (pan/zoom/touch, drag-to-connect). Drive it with the `useNodeEditor()` hook, which owns graph state + `actions`/`selection`; build toolbar/inspector yourself. |
+| `AudioMixer` | Visual multitrack mixer editor (track headers, timeline clips, loop region, inspector). Drive it with the `useAudioMixer()` hook (owns the project-document JSON + `actions`/`selection`); playhead is callback-driven (`currentMs`/`onSeek`) — no Web Audio inside. |
 | `PluginGrid` | Grid of plugins / extensions / addons. |
 | `Pipeline` | CI / data-pipeline step visualisation. |
 | `QuickStart` | Numbered "get started in N steps" panel. |

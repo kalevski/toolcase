@@ -1,24 +1,24 @@
 .component.component-code-with-output {
-	--cwo-bg: #0f172a;
-	--cwo-pane-bg: #020617;
-	--cwo-text: #e2e8f0;
-	--cwo-muted: #94a3b8;
-	--cwo-error: #fca5a5;
+	--cwo-bg: var(--tc-accent-hover);
+	--cwo-pane-bg: var(--tc-accent-hover);
+	--cwo-text: var(--tc-border);
+	--cwo-muted: var(--tc-text-faint);
+	--cwo-error: var(--tc-danger-tint-border);
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: var(--tc-space-2);
 }
 
 .component-code-with-output {
 	&__title {
 		font-size: 0.85rem;
 		font-weight: 600;
-		color: #1e293b;
+		color: var(--tc-text);
 	}
 
 	&__panes {
 		display: grid;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 		grid-template-columns: 1fr;
 	}
 
@@ -34,18 +34,18 @@
 	}
 
 	&__pane-header {
-		padding: 0.5rem 0.85rem;
+		padding: var(--tc-space-2) var(--tc-space-3);
 		font-size: 0.65rem;
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		color: var(--cwo-muted);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		border-bottom: 1px solid rgba(var(--tc-surface-rgb), 0.06);
 	}
 
 	&__output {
 		margin: 0;
-		padding: 0.85rem 1rem;
+		padding: var(--tc-space-3) var(--tc-space-4);
 		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
 		font-size: 0.82rem;
 		color: var(--cwo-text);

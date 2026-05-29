@@ -1,13 +1,13 @@
 // ── TreeView ──────────────────────────────────────────────────────────────────
 
 .component.component-tree-view {
-    --tv-text:            #1e293b;
-    --tv-muted:           #64748b;
-    --tv-border:          #e2e8f0;
-    --tv-hover-bg:        #f8fafc;
-    --tv-active-bg:       #f1f5f9;
-    --tv-selected-bg:     #f1f5f9;
-    --tv-selected-color:  #1e293b;
+    --tv-text:            var(--tc-text);
+    --tv-muted:           var(--tc-text-muted);
+    --tv-border:          var(--tc-border);
+    --tv-hover-bg:        var(--tc-surface-hover);
+    --tv-active-bg:       var(--tc-surface-muted);
+    --tv-selected-bg:     var(--tc-surface-muted);
+    --tv-selected-color:  var(--tc-text);
     --tv-transition:      0.12s ease;
     --tv-icon-size:       0.9rem;
 
@@ -30,10 +30,10 @@
     &__row {
         display: flex;
         align-items: center;
-        gap: 0.35rem;
-        padding-top: 0.2rem;
-        padding-bottom: 0.2rem;
-        padding-right: 0.75rem;
+        gap: var(--tc-space-1);
+        padding-top: var(--tc-space-1);
+        padding-bottom: var(--tc-space-1);
+        padding-right: var(--tc-space-3);
         cursor: pointer;
         transition: background var(--tv-transition);
         user-select: none;
@@ -45,6 +45,11 @@
 
         &:hover {
             background: var(--tv-hover-bg);
+        }
+
+        &:focus-visible {
+            outline: var(--tc-focus-outline);
+            outline-offset: var(--tc-focus-offset);
         }
 
         &--selected {
@@ -84,7 +89,7 @@
 
     &__checkbox {
         flex-shrink: 0;
-        accent-color: #1e293b;
+        accent-color: var(--tc-text);
         width: 14px;
         height: 14px;
     }
@@ -111,12 +116,12 @@
     // Indent lines
     &__children {
         position: relative;
-        padding-left: 1.25rem;
+        padding-left: var(--tc-space-5);
 
         &::before {
             content: '';
             position: absolute;
-            left: 0.625rem;
+            left: var(--tc-space-3);
             top: 0;
             bottom: 0;
             width: 1px;

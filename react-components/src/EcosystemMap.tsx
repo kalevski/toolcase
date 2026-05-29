@@ -49,7 +49,6 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
 			<div
 				className="component-ecosystem-map__radial"
 				style={{ '--em-size': `${size}px` } as React.CSSProperties}
-				aria-hidden="false"
 			>
 				<div className="component-ecosystem-map__center">
 					<Node node={{ name: core.name }} isCore />
@@ -64,7 +63,6 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
 							key={ri}
 							className="component-ecosystem-map__ring"
 							style={{ '--em-radius': radius } as React.CSSProperties}
-							aria-hidden="true"
 						>
 							{ring.items.map((node, ni) => {
 								const angle = (ni / ring.items.length) * Math.PI * 2 - Math.PI / 2
@@ -82,7 +80,7 @@ export const EcosystemMap: React.FC<EcosystemMapProps> = ({
 					)
 				})}
 			</div>
-			<div className="component-ecosystem-map__list" aria-hidden="false">
+			<div className="component-ecosystem-map__list">
 				<div className="component-ecosystem-map__list-group">
 					<span className="component-ecosystem-map__list-label">Core</span>
 					<Node node={{ name: core.name }} isCore />

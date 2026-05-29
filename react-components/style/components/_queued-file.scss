@@ -1,38 +1,44 @@
-@import '../colors';
 
 @keyframes queued-file-blink {
 	0%, 100% {
 		opacity: 1;
 	}
 	50% {
-		opacity: 0.45;
+		opacity: 0.7;
 	}
 }
 
 .component.component-queued-file {
-	--qf-bg: #fff;
-	--qf-border: $gray-200;
-	--qf-text: #1e293b;
-	--qf-muted: #64748b;
+	--qf-bg: var(--tc-surface);
+	--qf-border: var(--tc-border);
+	--qf-text: var(--tc-text);
+	--qf-muted: var(--tc-text-muted);
 	--qf-transition: 0.15s ease;
 
 	position: relative;
 	width: 100%;
-	min-height: 30px;
+	min-height: 38px;
 
 	background: var(--qf-bg);
 	border: 1px solid var(--qf-border);
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	margin: 2px 0;
+	gap: var(--tc-space-2);
+	padding: var(--tc-space-1) var(--tc-space-2);
+	margin: var(--tc-space-1) 0;
 
 	animation: queued-file-blink 1.6s ease-in-out infinite;
 	transition: background-color var(--qf-transition), border-color var(--qf-transition);
 
 	&:hover {
-		background: #f8fafc;
+		background: var(--tc-surface-hover);
 		animation-play-state: paused;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.component.component-queued-file {
+		animation: none;
 	}
 }
 
@@ -40,20 +46,22 @@
 	&__type {
 		flex-shrink: 0;
 		user-select: none;
-		width: 25px;
-		max-width: 25px;
-		max-height: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
 		align-self: center;
 		text-transform: uppercase;
+		// Fallback so the inverse text stays legible when no file-bg__* class matches.
+		background: var(--tc-text-muted);
+		color: var(--tc-text-inverse);
 
-		color: #fff;
 		span {
-			display: block;
-			width: 100%;
-			text-align: center;
-			line-height: 8px;
-			font-size: 8px;
-			padding: 10px 0;
+			font-size: 0.6rem;
+			font-weight: 700;
+			letter-spacing: 0.03em;
+			line-height: 1;
 		}
 	}
 
@@ -65,10 +73,10 @@
 
 	&__name {
 		display: block;
-		font-size: 0.875rem;
-		font-weight: 500;
+		font-size: var(--tc-font-md);
+		font-weight: var(--tc-font-weight-medium);
 		color: var(--qf-text);
-		line-height: 1.55;
+		line-height: 1.4;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -76,13 +84,14 @@
 
 	&__size {
 		flex-shrink: 0;
-		width: 90px;
-		max-width: 90px;
+		width: 84px;
+		max-width: 84px;
 		text-align: right;
-		font-size: 0.85rem;
+		font-size: var(--tc-font-sm);
 		color: var(--qf-muted);
+		font-variant-numeric: tabular-nums;
 		line-height: 1.5;
-		padding: 0 4px;
+		padding: 0 var(--tc-space-1);
 	}
 
 	&__dismiss {

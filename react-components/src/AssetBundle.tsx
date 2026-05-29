@@ -5,6 +5,7 @@ import { Switch } from './Switch'
 import { Icon } from './Icon'
 import { ActionItems, ActionItem } from './ActionItems'
 import { Skeleton } from './Skeleton'
+import { ProgressBar } from './ProgressBar'
 
 export type AssetBundleEngine = 'unity' | 'godot' | 'unreal' | 'phaser' | 'pixijs' | 'custom'              // Unreal
 
@@ -212,13 +213,11 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
 							Files
 							<Badge variant="secondary" pill>{totalFiles}</Badge>
 						</span>
-						<div className="component-asset-bundle__file-grid">
+						<div className="component-asset-bundle__tag-list">
 							{fileEntries.map(([type, count]) => (
-								<div key={type} className="component-asset-bundle__file-chip">
-									<Icon name={fileTypeIcon(type)} />
-									<span className="component-asset-bundle__file-type">{type}</span>
-									<span className="component-asset-bundle__file-count">{count}</span>
-								</div>
+								<Tag key={type} variant="secondary">
+									<Icon name={fileTypeIcon(type)} decorative /> {type} {count}
+								</Tag>
 							))}
 						</div>
 					</div>
@@ -235,13 +234,7 @@ export const AssetBundle: React.FC<AssetBundleProps> = ({
 
 				<div className="component-asset-bundle__options-grid">
 					{/* Scale */}
-					<div className="component-asset-bundle__option">
-						<span className="component-asset-bundle__option-label">Scale</span>
-						<div className="component-asset-bundle__scale-bar">
-							<div className="component-asset-bundle__scale-fill" style={{ width: `${scale}%` }} />
-						</div>
-						<span className="component-asset-bundle__option-value">{scale}%</span>
-					</div>
+					<ProgressBar label="Scale" value={scale} />
 
 					{/* Rotation */}
 					<div className="component-asset-bundle__option">

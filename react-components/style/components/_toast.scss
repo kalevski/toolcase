@@ -44,7 +44,7 @@
 // ── Container ─────────────────────────────────────────────────────────────────
 
 .component.component-toast-container {
-    --tc-gap: 0.5rem;
+    --tc-gap: var(--tc-space-2);
 
     position: fixed;
     z-index: 1080;
@@ -67,21 +67,21 @@
 // ── Toast item ────────────────────────────────────────────────────────────────
 
 .component-toast-item {
-    --ti-bg:          #ffffff;
-    --ti-border:      #e2e8f0;
-    --ti-color:       #1e293b;
-    --ti-muted:       #64748b;
-    --ti-shadow:      0 4px 16px rgba(0, 0, 0, 0.10);
-    --ti-accent:      #64748b;   // overridden per variant
-    --ti-accent-bg:   #f8fafc;   // overridden per variant
-    --ti-close-hover: #f1f5f9;
+    --ti-bg:          var(--tc-surface);
+    --ti-border:      var(--tc-border);
+    --ti-color:       var(--tc-text);
+    --ti-muted:       var(--tc-text-muted);
+    --ti-shadow:      var(--tc-shadow-md);
+    --ti-accent:      var(--tc-text-muted);   // overridden per variant
+    --ti-accent-bg:   var(--tc-surface-hover);   // overridden per variant
+    --ti-close-hover: var(--tc-surface-muted);
 
     position: relative;
     display: flex;
     align-items: flex-start;
-    gap: 0.625rem;
-    padding: 0.75rem 0.875rem;
-    padding-bottom: 1.25rem; // room for progress bar
+    gap: var(--tc-space-3);
+    padding: var(--tc-space-3) var(--tc-space-4);
+    padding-bottom: var(--tc-space-5); // room for progress bar
     background: var(--ti-bg);
     border: 1px solid var(--ti-border);
     border-left: 4px solid var(--ti-accent);
@@ -113,23 +113,23 @@
     // ── Variant accents ───────────────────────────────────────────────────
 
     &--success {
-        --ti-accent:    #38a169;
-        --ti-accent-bg: #f0fff4;
+        --ti-accent:    var(--tc-success);
+        --ti-accent-bg: var(--tc-success-tint-bg);
     }
 
     &--error {
-        --ti-accent:    #e53e3e;
-        --ti-accent-bg: #fff5f5;
+        --ti-accent:    var(--tc-danger);
+        --ti-accent-bg: var(--tc-danger-tint-bg);
     }
 
     &--warning {
-        --ti-accent:    #d69e2e;
-        --ti-accent-bg: #fffff0;
+        --ti-accent:    var(--tc-warning);
+        --ti-accent-bg: var(--tc-warning-tint-bg);
     }
 
     &--info {
-        --ti-accent:    #3182ce;
-        --ti-accent-bg: #ebf8ff;
+        --ti-accent:    var(--tc-info);
+        --ti-accent-bg: var(--tc-info-tint-bg);
     }
 
     // ── Parts ─────────────────────────────────────────────────────────────
@@ -139,7 +139,7 @@
         font-size: 1.0625rem;
         color: var(--ti-accent);
         line-height: 1.4;
-        margin-top: 0.05rem;
+        margin-top: var(--tc-space-1);
     }
 
     &__body {
@@ -151,7 +151,7 @@
         font-size: 0.8125rem;
         font-weight: 600;
         color: var(--ti-color);
-        margin-bottom: 0.125rem;
+        margin-bottom: var(--tc-space-1);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -179,8 +179,8 @@
         height: 1.5rem;
         width: 1.5rem;
         padding: 0;
-        margin-top: -0.125rem;
-        margin-right: -0.25rem;
+        margin-top: calc(-1 * var(--tc-space-1));
+        margin-right: calc(-1 * var(--tc-space-1));
         transition: background-color 0.15s ease, color 0.15s ease;
 
         &:hover {
@@ -225,8 +225,8 @@
 @media (max-width: 400px) {
     .component.component-toast-container {
         width: calc(100vw - 1rem);
-        left: 0.5rem !important;
-        right: 0.5rem !important;
+        left: var(--tc-space-2) !important;
+        right: var(--tc-space-2) !important;
         transform: none !important;
     }
 }

@@ -1,153 +1,187 @@
-@use '../colors' as *;
-
 .component.component-changelog {
 	position: relative;
-	padding: clamp(2.5rem, 5vw, 3.5rem) clamp(1.5rem, 6vw, 3.5rem);
-	background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
-	border: 1px solid rgba($gray-200, 0.9);
-	box-shadow: 0 24px 40px rgba($gray-900, 0.06);
+	padding: clamp(2rem, 5vw, 3rem) clamp(1.25rem, 5vw, 2.5rem);
+	background: var(--tc-surface);
+	border: 1px solid var(--tc-border);
+	box-shadow: var(--tc-shadow-sm);
 }
 
 .component-changelog {
 	.component-changelog__inner {
-		max-width: 1100px;
+		max-width: 760px;
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: clamp(1.5rem, 3vw, 2rem);
+		gap: clamp(1.75rem, 4vw, 2.5rem);
 	}
 
+	// ── Header ────────────────────────────────────────────────────────────
 	.component-changelog__header {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 1rem 2rem;
-		align-items: center;
-		justify-content: space-between;
+		flex-direction: column;
+		gap: var(--tc-space-4);
+		align-items: flex-start;
 	}
 
 	.component-changelog__header-copy {
-		max-width: 560px;
+		display: flex;
+		flex-direction: column;
+		gap: var(--tc-space-2);
 	}
 
 	.component-changelog__eyebrow {
-		margin: 0 0 0.5rem;
-		font-size: 0.75rem;
-		letter-spacing: 0.22em;
+		margin: 0;
+		font-size: var(--tc-font-xs);
+		letter-spacing: 0.18em;
 		text-transform: uppercase;
-		font-weight: 600;
-		color: rgba($gray-600, 0.9);
+		font-weight: var(--tc-font-weight-semibold);
+		color: var(--tc-text-muted);
 	}
 
 	.component-changelog__title {
-		margin: 0 0 0.4rem;
-		font-size: clamp(1.6rem, 3vw, 2rem);
-		font-weight: 700;
-		color: #0f172a;
+		margin: 0;
+		font-size: clamp(1.5rem, 3vw, 1.875rem);
+		font-weight: var(--tc-font-weight-bold);
+		letter-spacing: -0.01em;
+		color: var(--tc-accent-hover);
 	}
 
 	.component-changelog__subtitle {
 		margin: 0;
-		font-size: 0.98rem;
-		color: rgba($gray-700, 0.72);
+		font-size: var(--tc-font-md);
+		line-height: 1.55;
+		color: var(--tc-text-muted);
 	}
 
 	.component-changelog__read-more-button {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.65rem 1.2rem;
-		border: 1px solid rgba($gray-300, 0.9);
-		background: rgba(255, 255, 255, 0.84);
-		color: #111827;
-		font-size: 0.9rem;
-		font-weight: 600;
+		padding: var(--tc-space-2) var(--tc-space-4);
+		border: 1px solid var(--tc-border-strong);
+		background: var(--tc-surface);
+		color: var(--tc-accent-hover);
+		font-size: var(--tc-font-sm);
+		font-weight: var(--tc-font-weight-semibold);
 		text-decoration: none;
-		letter-spacing: 0.02em;
-		box-shadow: 0 10px 20px rgba($gray-900, 0.06);
 		transition:
-			background 160ms ease,
-			box-shadow 160ms ease,
-			transform 160ms ease;
+			background 0.15s ease,
+			border-color 0.15s ease,
+			color 0.15s ease;
 
 		&:hover,
 		&:focus-visible {
-			background: #111827;
-			color: #f9fafb;
-			box-shadow: 0 16px 26px rgba($gray-900, 0.18);
-			transform: translateY(-1px);
+			background: var(--tc-accent-hover);
+			border-color: var(--tc-accent-hover);
+			color: var(--tc-text-inverse);
+			text-decoration: none;
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
+		}
+
+		@media (pointer: coarse) {
+			min-height: 44px;
 		}
 	}
 
-	.component-changelog__slider {
-		position: relative;
-		overflow: hidden;
-	}
-
-	.component-changelog__track {
-		display: grid;
-		grid-auto-flow: column;
-		grid-auto-columns: minmax(260px, 1fr);
-		gap: 1rem;
-		overflow-x: auto;
-		padding-bottom: 0.25rem;
-		scroll-snap-type: x mandatory;
+	// ── Timeline ──────────────────────────────────────────────────────────
+	.component-changelog__timeline {
+		list-style: none;
+		margin: 0;
+		padding: 0;
 	}
 
 	.component-changelog__item {
-		scroll-snap-align: start;
-		background: rgba(255, 255, 255, 0.9);
-		border: 1px solid rgba($gray-200, 0.9);
-		padding: 1.1rem 1.25rem;
-		box-shadow: 0 14px 30px rgba($gray-900, 0.04);
+		position: relative;
+		padding-left: var(--tc-space-6);
+		padding-bottom: var(--tc-space-6);
+
+		&:last-child {
+			padding-bottom: 0;
+		}
+
+		// Connector line down the rail (hidden on the final entry).
+		&::before {
+			content: '';
+			position: absolute;
+			left: 4px;
+			top: 0.4rem;
+			bottom: 0;
+			width: 2px;
+			background: var(--tc-border);
+		}
+
+		&:last-child::before {
+			display: none;
+		}
+
+		// Square node sitting on the rail. Ring matches the surface to lift it off the line.
+		&::after {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 0.4rem;
+			width: 10px;
+			height: 10px;
+			background: var(--tc-violet);
+			box-shadow: 0 0 0 4px var(--tc-surface);
+		}
+
+		// Latest (first) entry reads as the highlight.
+		&:first-child::after {
+			background: var(--tc-accent-hover);
+		}
+	}
+
+	.component-changelog__body {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 	}
 
 	.component-changelog__item-meta {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 		align-items: center;
-		font-size: 0.8rem;
+		font-size: var(--tc-font-sm);
 	}
 
 	.component-changelog__item-date {
-		color: rgba($gray-600, 0.9);
-	}
-
-	.component-changelog__item-tag {
-		padding: 0.15rem 0.6rem;
-		background: rgba($gray-900, 0.06);
-		color: rgba($gray-900, 0.86);
-		font-weight: 500;
+		font-family: var(--tc-font-family-mono);
+		font-size: var(--tc-font-xs);
+		letter-spacing: 0.02em;
+		color: var(--tc-text-muted);
 	}
 
 	.component-changelog__item-title {
 		margin: 0;
-		font-size: 1rem;
-		font-weight: 600;
-		color: #0f172a;
+		font-size: var(--tc-font-lg);
+		font-weight: var(--tc-font-weight-semibold);
+		color: var(--tc-accent-hover);
 	}
 
 	.component-changelog__item-description {
 		margin: 0;
-		font-size: 0.92rem;
-		color: rgba($gray-700, 0.86);
+		font-size: var(--tc-font-md);
+		line-height: 1.6;
+		color: var(--tc-text-muted);
 	}
 
-	@media (max-width: 768px) {
-		.changelog {
-		}
-
+	// ── Tablet/desktop: header becomes a row ────────────────────────────────
+	@media (min-width: 640px) {
 		.component-changelog__header {
-			align-items: flex-start;
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--tc-space-6);
 		}
 
-		.component-changelog__read-more-button {
-			width: 100%;
-			justify-content: center;
+		.component-changelog__header-copy {
+			max-width: 520px;
 		}
 	}
-
 }

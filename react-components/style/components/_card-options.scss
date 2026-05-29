@@ -1,17 +1,17 @@
 .component.component-card-options {
-	--co-text: #1e293b;
-	--co-muted: #64748b;
-	--co-subtle: #94a3b8;
-	--co-border: #e2e8f0;
-	--co-hover-bg: #f1f5f9;
-	--co-light-bg: #f8fafc;
-	--co-accent: #1e293b;
-	--co-accent-text: #ffffff;
+	--co-text: var(--tc-text);
+	--co-muted: var(--tc-text-muted);
+	--co-subtle: var(--tc-text-faint);
+	--co-border: var(--tc-border);
+	--co-hover-bg: var(--tc-surface-muted);
+	--co-light-bg: var(--tc-surface-hover);
+	--co-accent: var(--tc-text);
+	--co-accent-text: var(--tc-surface);
 	--co-transition: 0.15s ease;
 
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-	gap: 0.75rem;
+	gap: var(--tc-space-3);
 }
 
 .component-card-options {
@@ -20,10 +20,10 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 1.25rem 1rem 1rem;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-5) var(--tc-space-4) var(--tc-space-4);
 		border: 1.5px solid var(--co-border);
-		background: #fff;
+		background: var(--tc-surface);
 		cursor: pointer;
 		text-align: center;
 		font-family: inherit;
@@ -32,6 +32,11 @@
 		&:hover {
 			border-color: var(--co-muted);
 			background: var(--co-light-bg);
+		}
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
 		}
 	}
 
@@ -48,7 +53,7 @@
 		align-items: center;
 		justify-content: center;
 		background: var(--co-hover-bg);
-		margin-bottom: 0.15rem;
+		margin-bottom: var(--tc-space-1);
 		overflow: hidden;
 		flex-shrink: 0;
 	}
@@ -82,8 +87,8 @@
 
 	.component-card-options__check {
 		position: absolute;
-		top: 0.5rem;
-		right: 0.5rem;
+		top: var(--tc-space-2);
+		right: var(--tc-space-2);
 		color: var(--co-accent);
 		font-size: 1rem;
 	}

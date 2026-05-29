@@ -14,7 +14,7 @@
 
     border: 1px solid var(--tl-border);
     background: var(--tl-bg);
-    padding: 20px;
+    padding: var(--tc-space-5);
 }
 
 .component-tier-ladder__title {
@@ -22,15 +22,15 @@
     font-size: var(--tc-font-md);
     font-weight: var(--tc-font-weight-semibold);
     color: var(--tl-text);
-    margin-bottom: 12px;
+    margin-bottom: var(--tc-space-3);
     letter-spacing: 0.02em;
 }
 
 .component-tier-ladder__row {
     display: grid;
     grid-template-columns: 16px 1fr auto;
-    gap: 12px;
-    padding: 10px 0;
+    gap: var(--tc-space-3);
+    padding: var(--tc-space-3) 0;
     border-bottom: 1px solid var(--tl-border);
     align-items: center;
     font-family: var(--tc-font-family-sans);
@@ -68,8 +68,8 @@
 
 .component-tier-ladder__row--current {
     background: var(--tl-bg-current);
-    margin: 0 -10px;
-    padding: 10px 10px;
+    margin: 0 calc(-1 * var(--tc-space-3));
+    padding: var(--tc-space-3) var(--tc-space-3);
     border-bottom-color: transparent;
 
     .component-tier-ladder__name {
@@ -84,8 +84,8 @@
 }
 
 .component-tier-ladder__summary {
-    margin-top: 14px;
-    padding-top: 14px;
+    margin-top: var(--tc-space-4);
+    padding-top: var(--tc-space-4);
     border-top: 1px solid var(--tl-border);
     font-family: var(--tc-font-family-sans);
     font-size: var(--tc-font-md);

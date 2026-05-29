@@ -56,7 +56,7 @@
     display: grid;
     place-items: center;
     text-align: center;
-    padding: 12px;
+    padding: var(--tc-space-3);
 }
 
 .component-cycle-wheel__core-label {
@@ -73,7 +73,7 @@
     font-size: 3rem;
     font-weight: var(--tc-font-weight-bold);
     color: var(--cw-value);
-    margin: 12px 0 8px;
+    margin: var(--tc-space-3) 0 var(--tc-space-2);
     line-height: 1;
     letter-spacing: -0.02em;
 }
@@ -84,7 +84,7 @@
     font-weight: var(--tc-font-weight-semibold);
     color: var(--cw-pill-color);
     background: var(--cw-pill-bg);
-    padding: 4px 10px;
+    padding: var(--tc-space-1) var(--tc-space-3);
     display: inline-block;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -94,7 +94,7 @@
     font-family: var(--tc-font-family-sans);
     font-size: var(--tc-font-sm);
     color: var(--cw-text);
-    margin-top: 12px;
+    margin-top: var(--tc-space-3);
 }
 
 @keyframes component-cycle-wheel-spin {

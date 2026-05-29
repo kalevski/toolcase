@@ -3,18 +3,18 @@
 .component.component-range-slider {
     --rs-track-height:  6px;
     --rs-thumb-size:    18px;
-    --rs-thumb-color:   #ffffff;
-    --rs-fill-color:    #1e293b;
-    --rs-track-bg:      #e2e8f0;
-    --rs-border:        #e2e8f0;
-    --rs-label-color:   #1e293b;
-    --rs-muted:         #64748b;
+    --rs-thumb-color:   var(--tc-text-inverse);
+    --rs-fill-color:    var(--tc-text);
+    --rs-track-bg:      var(--tc-border);
+    --rs-border:        var(--tc-border);
+    --rs-label-color:   var(--tc-text);
+    --rs-muted:         var(--tc-text-muted);
     --rs-transition:    0.12s ease;
-    --rs-disabled-bg:   #f1f5f9;
+    --rs-disabled-bg:   var(--tc-surface-muted);
 
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--tc-space-2);
 }
 
 .component-range-slider {
@@ -22,7 +22,7 @@
         display: flex;
         justify-content: space-between;
         align-items: baseline;
-        gap: 0.5rem;
+        gap: var(--tc-space-2);
     }
 
     &__label {
@@ -39,7 +39,7 @@
 
     &__track-area {
         position: relative;
-        padding: 0.75rem 0;
+        padding: var(--tc-space-3) 0;
     }
 
     // Native inputs – visually hidden but accessible
@@ -92,15 +92,20 @@
         }
     }
 
+    &__track-area:focus-within {
+        outline: var(--tc-focus-outline);
+        outline-offset: var(--tc-focus-offset);
+    }
+
     &__tooltip {
         position: absolute;
         bottom: calc(100% + 6px);
         left: 50%;
         transform: translateX(-50%);
-        background: #1e293b;
-        color: #ffffff;
+        background: var(--tc-text);
+        color: var(--tc-text-inverse);
         font-size: 0.75rem;
-        padding: 2px 8px;
+        padding: var(--tc-space-1) var(--tc-space-2);
         white-space: nowrap;
         pointer-events: none;
     }
@@ -108,7 +113,7 @@
     &__ticks {
         position: relative;
         height: 1.25rem;
-        margin-top: 0.25rem;
+        margin-top: var(--tc-space-1);
     }
 
     &__tick {
@@ -134,7 +139,7 @@
     &__tick-label {
         font-size: 0.625rem;
         color: var(--rs-muted);
-        margin-top: 2px;
+        margin-top: var(--tc-space-1);
     }
 
     // States
@@ -144,7 +149,7 @@
     }
 
     &--error .component-range-slider__track {
-        background: #fee2e2;
+        background: var(--tc-danger-bg);
     }
 }
 

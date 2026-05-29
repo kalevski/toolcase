@@ -20,7 +20,7 @@
 .component-state-machine__cell {
     flex: 1;
     min-width: 130px;
-    padding: 16px 12px;
+    padding: var(--tc-space-4) var(--tc-space-3);
     border-right: 1px solid var(--sm-border);
     text-align: center;
     position: relative;
@@ -41,7 +41,7 @@
     font-size: var(--tc-font-md);
     font-weight: var(--tc-font-weight-semibold);
     color: var(--sm-text);
-    margin-top: 8px;
+    margin-top: var(--tc-space-2);
     letter-spacing: 0.02em;
 }
 
@@ -49,7 +49,7 @@
     font-family: var(--tc-font-family-sans);
     font-size: var(--tc-font-sm);
     color: var(--sm-muted);
-    margin-top: 4px;
+    margin-top: var(--tc-space-1);
     line-height: 1.4;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .component-state-machine--compact .component-state-machine__cell {
-    padding: 10px 8px;
+    padding: var(--tc-space-3) var(--tc-space-2);
 }
 
 @media (max-width: 576px) {

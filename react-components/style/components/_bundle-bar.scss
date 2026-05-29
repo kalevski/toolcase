@@ -3,37 +3,49 @@
 // FeatureCard visual slot to illustrate an asset bundle.
 
 .component.component-bundle-bar {
-    padding: 1rem 0.875rem 0.875rem;
-    background: #f9fafb;
-    border: 1px solid rgba(229, 231, 235, 0.6);
+    padding: var(--tc-space-4);
+    background: var(--tc-surface);
+    border: 1px solid var(--tc-border);
+    box-shadow: var(--tc-shadow-sm);
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--tc-space-3);
 }
 
 .component-bundle-bar {
     &__chips {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.375rem;
+        gap: var(--tc-space-2);
     }
 
     &__chip {
         display: inline-flex;
         align-items: center;
-        gap: 0.25rem;
-        padding: 0.2rem 0.575rem;
-        font-size: 0.7rem;
-        font-family: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
-        font-weight: 500;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        color: #1e293b;
+        gap: var(--tc-space-1);
+        padding: var(--tc-space-1) var(--tc-space-2);
+        font-size: var(--tc-font-xs);
+        font-family: var(--tc-font-family-mono);
+        font-weight: var(--tc-font-weight-medium);
+        background: var(--tc-surface);
+        border: 1px solid var(--tc-border);
+        color: var(--tc-text-muted);
+        transition:
+            border-color 0.15s ease,
+            color 0.15s ease;
 
+        &:hover {
+            border-color: var(--tc-border-strong);
+            color: var(--tc-text);
+        }
+
+        // Active chip: solid accent fill.
         &--active {
-            background: #000000;
-            color: #ffffff;
-            border-color: #000000;
+            background: var(--tc-accent-hover);
+            color: var(--tc-text-inverse);
+            border-color: var(--tc-accent-hover);
+
+            &:hover { color: var(--tc-text-inverse); }
         }
     }
 
@@ -44,31 +56,39 @@
 
     &__bar {
         display: flex;
-        gap: 2px;
-        height: 8px;
+        gap: 3px;
+        height: 10px;
     }
 
     &__segment {
         height: 100%;
         flex: 1;
-        background: #e5e7eb;
+        background: var(--tc-surface-muted);
+        transition: background 0.2s ease;
     }
 
+    // Filled segments tile one continuous gradient: a bar-wide gradient is
+    // scaled to N×width, and each segment shows the slice at its index.
     &__segment--filled {
-        background: linear-gradient(90deg, hsla(280, 95%, 57%, 0.5), hsla(193, 90%, 55%, 0.5));
+        background-image: var(--tc-gradient-brand);
+        background-repeat: no-repeat;
+        background-size: calc(var(--seg-total, 1) * 100%) 100%;
+        background-position: calc(var(--seg-index, 0) / max(var(--seg-total, 1) - 1, 1) * 100%) 0;
     }
 
     &__meta {
         display: flex;
         justify-content: space-between;
-        font-family: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
-        font-size: 0.72rem;
-        color: #64748b;
-        gap: 0.5rem;
+        align-items: baseline;
+        font-family: var(--tc-font-family-mono);
+        font-size: var(--tc-font-xs);
+        color: var(--tc-text-muted);
+        gap: var(--tc-space-2);
     }
 
     &__name {
-        font-weight: 500;
+        font-weight: var(--tc-font-weight-medium);
+        color: var(--tc-text);
     }
 
     &__detail {

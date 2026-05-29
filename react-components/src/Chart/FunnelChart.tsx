@@ -18,7 +18,9 @@ export interface FunnelChartProps {
 	className?: string
 }
 
-const PALETTE = ['#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe', '#dde4ff', '#e8ecfe', '#f0f3ff']
+// Saturated indigo→fuchsia descent. Every shade stays dark enough for white
+// labels to read (the old palette faded to near-white = invisible text).
+const PALETTE = ['#4f46e5', '#6d28d9', '#7c3aed', '#9333ea', '#a21caf', '#be185d', '#db2777']
 
 export const FunnelChart: React.FC<FunnelChartProps> = ({
 	data,
@@ -99,13 +101,19 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({
 						key={i}
 						style={{
 							cursor: onClick ? 'pointer' : undefined,
-							opacity: activeIndex !== null && activeIndex !== i ? 0.72 : 1,
-							transition: 'opacity 0.15s ease',
+							opacity: activeIndex !== null && activeIndex !== i ? 0.55 : 1,
+							filter: activeIndex === i ? 'brightness(1.12)' : undefined,
+							transition: 'opacity 0.15s ease, filter 0.15s ease',
 						}}
 						onClick={() => onClick?.(s, i)}
 						onMouseEnter={() => setActiveIndex(i)}
 					>
-						<polygon points={s.points} fill={s.color} />
+						<polygon
+							points={s.points}
+							fill={s.color}
+							stroke="var(--tc-surface)"
+							strokeWidth={1}
+						/>
 						{showLabels && (
 							<>
 								<text

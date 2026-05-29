@@ -1,20 +1,20 @@
 .component.component-migration-guide {
-	--mg-color: #1e293b;
-	--mg-muted: #64748b;
-	--mg-border: #e2e8f0;
-	--mg-accent: #6366f1;
+	--mg-color: var(--tc-text);
+	--mg-muted: var(--tc-text-muted);
+	--mg-border: var(--tc-border);
+	--mg-accent: var(--tc-violet);
 	display: flex;
 	flex-direction: column;
-	gap: 1.25rem;
+	gap: var(--tc-space-5);
 }
 
 .component-migration-guide {
 	&__header {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
-		padding: 1rem 1.1rem;
-		background: #f8fafc;
+		gap: var(--tc-space-2);
+		padding: var(--tc-space-4) var(--tc-space-4);
+		background: var(--tc-surface-hover);
 		border: 1px solid var(--mg-border);
 	}
 
@@ -28,22 +28,22 @@
 	&__versions {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 		font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
 		font-size: 0.85rem;
 	}
 
 	&__from {
-		padding: 0.2rem 0.55rem;
-		background: rgba(239, 68, 68, 0.1);
-		color: #b91c1c;
+		padding: var(--tc-space-1) var(--tc-space-2);
+		background: rgba(var(--tc-danger-rgb), 0.1);
+		color: var(--tc-danger);
 		font-weight: 600;
 	}
 
 	&__to {
-		padding: 0.2rem 0.55rem;
-		background: rgba(16, 185, 129, 0.1);
-		color: #047857;
+		padding: var(--tc-space-1) var(--tc-space-2);
+		background: rgba(var(--tc-success-rgb), 0.1);
+		color: var(--tc-success);
 		font-weight: 600;
 	}
 
@@ -55,19 +55,19 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
+		gap: var(--tc-space-5);
 	}
 
 	&__step {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__step-head {
 		display: flex;
 		align-items: center;
-		gap: 0.6rem;
+		gap: var(--tc-space-2);
 	}
 
 	&__step-index {
@@ -77,7 +77,7 @@
 		width: 28px;
 		height: 28px;
 		background: var(--mg-accent);
-		color: #ffffff;
+		color: var(--tc-text-inverse);
 		font-weight: 700;
 		font-size: 0.78rem;
 		flex-shrink: 0;
@@ -94,6 +94,6 @@
 		color: var(--mg-muted);
 		font-size: 0.88rem;
 		line-height: 1.55;
-		padding-left: 38px;
+		padding-left: var(--tc-space-8);
 	}
 }

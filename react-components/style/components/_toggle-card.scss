@@ -1,16 +1,16 @@
 .component.component-toggle-card {
-	--tc-text: #1e293b;
-	--tc-muted: #64748b;
-	--tc-border: #e2e8f0;
-	--tc-hover-bg: #f8fafc;
-	--tc-accent: #1e293b;
+	--tc-text: var(--tc-text);
+	--tc-muted: var(--tc-text-muted);
+	--tc-border: var(--tc-border-strong);
+	--tc-hover-bg: var(--tc-surface-hover);
+	--tc-accent: var(--tc-text);
 	--tc-transition: 0.15s ease;
 
 	position: relative;
 	display: flex;
 	align-items: flex-start;
-	gap: 0.75rem;
-	padding: 0.85rem 1rem;
+	gap: var(--tc-space-3);
+	padding: var(--tc-space-3) var(--tc-space-4);
 	border: 1px solid var(--tc-border);
 	cursor: pointer;
 	transition: border-color var(--tc-transition), background-color var(--tc-transition);
@@ -20,6 +20,11 @@
 	&:hover {
 		border-color: var(--tc-muted);
 		background: var(--tc-hover-bg);
+	}
+
+	&:focus-visible {
+		outline: var(--tc-focus-outline);
+		outline-offset: var(--tc-focus-offset);
 	}
 }
 
@@ -38,8 +43,8 @@
 /* ── Badge (top-right corner) ── */
 .component-toggle-card__badge {
 	position: absolute;
-	top: -0.45rem;
-	right: -0.45rem;
+	top: calc(-1 * var(--tc-space-2));
+	right: calc(-1 * var(--tc-space-2));
 	z-index: 1;
 }
 
@@ -53,7 +58,7 @@
 	height: 28px;
 	font-size: 1rem;
 	color: var(--tc-muted);
-	margin-top: 1px;
+	margin-top: var(--tc-space-1);
 }
 
 /* ── Toggle switch wrapper (Switch primitive is decorative; outer div owns interaction) ── */
@@ -61,7 +66,9 @@
 	display: inline-flex;
 	align-items: center;
 	flex-shrink: 0;
-	margin-top: 1px;
+	margin-top: var(--tc-space-1);
+	padding: var(--tc-space-1);
+	border: 1px solid var(--tc-border-strong);
 	pointer-events: none;
 }
 
@@ -69,7 +76,7 @@
 .component-toggle-card__text {
 	display: flex;
 	flex-direction: column;
-	gap: 0.15rem;
+	gap: var(--tc-space-1);
 }
 
 .component-toggle-card__label {

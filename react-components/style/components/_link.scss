@@ -1,8 +1,8 @@
 // ── Link ───────────────────────────────────────────────────────────────────────
 
 .component.component-link {
-	--link-color: #6366f1;
-	--link-hover: #4f46e5;
+	--link-color: var(--tc-violet);
+	--link-hover: var(--tc-indigo);
 	--link-transition: 0.15s ease;
 
 	color: var(--link-color);
@@ -11,10 +11,15 @@
 	transition: color var(--link-transition);
 	display: inline-flex;
 	align-items: center;
-	gap: 0.25rem;
+	gap: var(--tc-space-1);
 
 	&:hover {
 		color: var(--link-hover);
+	}
+
+	&:focus-visible {
+		outline: var(--tc-focus-outline);
+		outline-offset: var(--tc-focus-offset);
 	}
 
 	// Underline control
@@ -32,12 +37,12 @@
 	}
 
 	// Variants
-	&.component-link--primary   { --link-color: #6366f1; --link-hover: #4f46e5; }
-	&.component-link--secondary { --link-color: #64748b; --link-hover: #475569; }
-	&.component-link--info      { --link-color: #06b6d4; --link-hover: #0891b2; }
-	&.component-link--success   { --link-color: #22c55e; --link-hover: #16a34a; }
-	&.component-link--warning   { --link-color: #f59e0b; --link-hover: #d97706; }
-	&.component-link--danger    { --link-color: #ef4444; --link-hover: #dc2626; }
+	&.component-link--primary   { --link-color: var(--tc-violet); --link-hover: var(--tc-indigo); }
+	&.component-link--secondary { --link-color: var(--tc-text-muted); --link-hover: var(--tc-text-muted); }
+	&.component-link--info      { --link-color: var(--tc-cyan); --link-hover: var(--tc-cyan); }
+	&.component-link--success   { --link-color: var(--tc-success); --link-hover: var(--tc-success); }
+	&.component-link--warning   { --link-color: var(--tc-warning); --link-hover: var(--tc-warning); }
+	&.component-link--danger    { --link-color: var(--tc-danger); --link-hover: var(--tc-danger); }
 }
 
 .component-link__external-icon {

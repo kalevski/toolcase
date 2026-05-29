@@ -6,7 +6,7 @@
 
     display: inline-flex;
     align-items: baseline;
-    gap: 4px;
+    gap: var(--tc-space-1);
     font-family: var(--tc-font-family-mono);
     font-size: 0.8rem;
     font-weight: var(--tc-font-weight-medium);

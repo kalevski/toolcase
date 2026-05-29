@@ -3,7 +3,7 @@
     --sf-text: var(--tc-text);
     --sf-muted: var(--tc-text-muted);
 
-    margin-bottom: 24px;
+    margin-bottom: var(--tc-space-6);
 }
 
 .component-section-flag--center { text-align: center; }
@@ -23,7 +23,7 @@
     font-family: var(--tc-font-family-sans);
     font-size: var(--tc-font-md);
     color: var(--sf-muted);
-    margin-top: 8px;
+    margin-top: var(--tc-space-2);
     line-height: 1.5;
     max-width: 60ch;
 }

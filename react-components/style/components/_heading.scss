@@ -1,7 +1,7 @@
 // ── Heading ────────────────────────────────────────────────────────────────────
 
 .component.component-heading {
-	--heading-text: #0f172a;
+	--heading-text: var(--tc-accent-hover);
 
 	color: var(--heading-text);
 	font-weight: 700;

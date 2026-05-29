@@ -3,8 +3,8 @@
     --mq-bg: var(--tc-surface-muted);
     --mq-color: var(--tc-text);
     --mq-border: var(--tc-border);
-    --mq-gap: 32px;
-    --mq-pad-y: 12px;
+    --mq-gap: var(--tc-space-7);
+    --mq-pad-y: var(--tc-space-3);
 
     overflow: hidden;
     background: var(--mq-bg);
@@ -43,7 +43,7 @@
 .component-marquee__item {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--tc-space-2);
 }
 
 .component-marquee__sep {

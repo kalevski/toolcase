@@ -60,10 +60,10 @@
 }
 
 .component-game-showcase__info {
-    padding: 16px 18px;
+    padding: var(--tc-space-4) var(--tc-space-5);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--tc-space-2);
 }
 
 .component-game-showcase__meta {
@@ -82,7 +82,7 @@
     font-weight: var(--tc-font-weight-bold);
     color: var(--gs-text);
     line-height: 1.3;
-    margin-top: 2px;
+    margin-top: var(--tc-space-1);
 }
 
 .component-game-showcase__pitch {
@@ -93,9 +93,9 @@
 }
 
 .component-game-showcase__foot {
-    margin-top: 6px;
+    margin-top: var(--tc-space-2);
     border-top: 1px solid var(--gs-border);
-    padding-top: 10px;
+    padding-top: var(--tc-space-3);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -106,7 +106,7 @@
 
 .component-game-showcase__compliance {
     display: flex;
-    gap: 5px;
+    gap: var(--tc-space-1);
 }
 
 .component-game-showcase__comp {

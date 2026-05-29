@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useClickOutside } from './hooks/useClickOutside'
 import { Icon } from './Icon'
 
@@ -18,16 +18,21 @@ export interface TimePickerProps {
 	className?: string
 }
 
+type Period = 'AM' | 'PM'
+interface TimeParts { h: number; m: number; s: number; period: Period }
+
+const DEFAULT_TIME: TimeParts = { h: 12, m: 0, s: 0, period: 'AM' }
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function pad(n: number) { return String(n).padStart(2, '0') }
+const pad = (n: number) => String(n).padStart(2, '0')
 
-function parseTime(value: string, fmt: '12h' | '24h') {
-	const parts = value.split(':')
-	let h = parseInt(parts[0] ?? '0', 10)
-	const m = parseInt(parts[1] ?? '0', 10)
-	const s = parseInt(parts[2] ?? '0', 10)
-	let period: 'AM' | 'PM' = 'AM'
+function parseTime(value: string, fmt: '12h' | '24h'): TimeParts {
+	const [hh = '0', mm = '0', ss = '0'] = value.split(':')
+	let h = parseInt(hh, 10)
+	const m = parseInt(mm, 10)
+	const s = parseInt(ss, 10)
+	let period: Period = 'AM'
 	if (fmt === '12h') {
 		period = h >= 12 ? 'PM' : 'AM'
 		h = h % 12 || 12
@@ -35,11 +40,10 @@ function parseTime(value: string, fmt: '12h' | '24h') {
 	return { h, m, s, period }
 }
 
-function buildValue(h: number, m: number, s: number, period: 'AM' | 'PM', fmt: '12h' | '24h', showSec: boolean) {
+function buildValue({ h, m, s, period }: TimeParts, fmt: '12h' | '24h', showSec: boolean) {
 	let hour24 = h
 	if (fmt === '12h') {
-		if (period === 'AM') { hour24 = h === 12 ? 0 : h }
-		else { hour24 = h === 12 ? 12 : h + 12 }
+		hour24 = period === 'AM' ? (h === 12 ? 0 : h) : (h === 12 ? 12 : h + 12)
 	}
 	return showSec ? `${pad(hour24)}:${pad(m)}:${pad(s)}` : `${pad(hour24)}:${pad(m)}`
 }
@@ -47,11 +51,11 @@ function buildValue(h: number, m: number, s: number, period: 'AM' | 'PM', fmt: '
 function formatDisplay(value: string, fmt: '12h' | '24h', showSec: boolean) {
 	if (!value) return ''
 	const { h, m, s, period } = parseTime(value, fmt)
-	if (fmt === '12h') {
-		return showSec ? `${pad(h)}:${pad(m)}:${pad(s)} ${period}` : `${pad(h)}:${pad(m)} ${period}`
-	}
-	return showSec ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}`
+	const base = showSec ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}`
+	return fmt === '12h' ? `${base} ${period}` : base
 }
+
+const cx = (...classes: (string | false | undefined)[]) => classes.filter(Boolean).join(' ')
 
 // ── Scroll column ──────────────────────────────────────────────────────────────
 
@@ -64,35 +68,37 @@ interface ScrollColumnProps {
 }
 
 const ScrollColumn: React.FC<ScrollColumnProps> = ({ options, value, onChange, label, format = pad }) => {
-	const colRef = useRef<HTMLUListElement>(null)
+	const listRef = useRef<HTMLUListElement>(null)
+	const mounted = useRef(false)
 
-	const scrollTo = (v: number, behavior: ScrollBehavior = 'smooth') => {
-		if (!colRef.current) return
-		const idx = options.indexOf(v)
-		if (idx < 0) return
-		const child = colRef.current.children[idx] as HTMLElement
-		child?.scrollIntoView({ block: 'center', behavior })
-	}
-
+	// Keep the selected option centered; jump instantly on mount, glide on change.
 	useEffect(() => {
-		scrollTo(value, 'instant')
-	}, [])
+		const idx = options.indexOf(value)
+		const child = listRef.current?.children[idx] as HTMLElement | undefined
+		child?.scrollIntoView({ block: 'center', behavior: mounted.current ? 'smooth' : 'instant' })
+		mounted.current = true
+	}, [value, options])
 
 	return (
 		<div className="component-time-picker__column" role="listbox" aria-label={label}>
-			<ul ref={colRef} className="component-time-picker__column-list">
+			<ul ref={listRef} className="component-time-picker__column-list">
 				{options.map((opt) => (
 					<li
 						key={opt}
-						className={[
+						className={cx(
 							'component-time-picker__column-item',
-							opt === value ? 'component-time-picker__column-item--selected' : '',
-						].filter(Boolean).join(' ')}
+							opt === value && 'component-time-picker__column-item--selected',
+						)}
 						role="option"
 						aria-selected={opt === value}
 						tabIndex={0}
-						onClick={() => { onChange(opt); setTimeout(() => scrollTo(opt), 0) }}
-						onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(opt) } }}
+						onClick={() => onChange(opt)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault()
+								onChange(opt)
+							}
+						}}
 					>
 						{format(opt)}
 					</li>
@@ -117,36 +123,40 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 	clearable = false,
 	className = '',
 }) => {
-	const genId = useId()
-	const inputId = `timepicker-${genId.replace(/[^a-zA-Z0-9_-]/g, '')}`
+	const rawId = useId()
+	const inputId = `timepicker-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`
 	const errorId = error ? `${inputId}-error` : undefined
 
 	const [open, setOpen] = useState(false)
 	const containerRef = useRef<HTMLDivElement>(null)
 	useClickOutside(containerRef, () => setOpen(false))
 
-	const current = value ? parseTime(value, format) : { h: 12, m: 0, s: 0, period: 'AM' as const }
+	const current = value ? parseTime(value, format) : DEFAULT_TIME
+	const commit = (patch: Partial<TimeParts>) =>
+		onChange?.(buildValue({ ...current, ...patch }, format, showSeconds))
 
-	const setH = (h: number) => onChange?.(buildValue(h, current.m, current.s, current.period as 'AM' | 'PM', format, showSeconds))
-	const setM = (m: number) => onChange?.(buildValue(current.h, m, current.s, current.period as 'AM' | 'PM', format, showSeconds))
-	const setS = (s: number) => onChange?.(buildValue(current.h, current.m, s, current.period as 'AM' | 'PM', format, showSeconds))
-	const setPeriod = (p: 'AM' | 'PM') => onChange?.(buildValue(current.h, current.m, current.s, p, format, showSeconds))
+	const hourOptions = useMemo(
+		() =>
+			format === '12h'
+				? Array.from({ length: 12 }, (_, i) => i + 1)
+				: Array.from({ length: 24 }, (_, i) => i),
+		[format],
+	)
+	const minuteOptions = useMemo(
+		() => Array.from({ length: Math.ceil(60 / minuteStep) }, (_, i) => i * minuteStep),
+		[minuteStep],
+	)
+	const secondOptions = useMemo(() => Array.from({ length: 60 }, (_, i) => i), [])
 
-	const hourOptions = format === '12h'
-		? Array.from({ length: 12 }, (_, i) => i + 1)
-		: Array.from({ length: 24 }, (_, i) => i)
-	const minuteOptions = Array.from({ length: Math.ceil(60 / minuteStep) }, (_, i) => i * minuteStep)
-	const secondOptions = Array.from({ length: 60 }, (_, i) => i)
+	const displayText = formatDisplay(value, format, showSeconds)
 
-	const displayText = value ? formatDisplay(value, format, showSeconds) : ''
-
-	const rootClass = [
+	const rootClass = cx(
 		'component component-time-picker',
-		error    ? 'component-time-picker--error'    : '',
-		disabled ? 'component-time-picker--disabled' : '',
-		open     ? 'component-time-picker--open'     : '',
+		error && 'component-time-picker--error',
+		disabled && 'component-time-picker--disabled',
+		open && 'component-time-picker--open',
 		className,
-	].filter(Boolean).join(' ')
+	)
 
 	return (
 		<div className={rootClass} ref={containerRef}>
@@ -190,24 +200,26 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 			{open && (
 				<div className="component-time-picker__dropdown">
 					<div className="component-time-picker__columns">
-						<ScrollColumn label="Hours" options={hourOptions} value={current.h} onChange={setH} />
+						<ScrollColumn label="Hours" options={hourOptions} value={current.h} onChange={(h) => commit({ h })} />
 						<div className="component-time-picker__sep" aria-hidden="true">:</div>
-						<ScrollColumn label="Minutes" options={minuteOptions} value={current.m} onChange={setM} />
-						{showSeconds && <>
-							<div className="component-time-picker__sep" aria-hidden="true">:</div>
-							<ScrollColumn label="Seconds" options={secondOptions} value={current.s} onChange={setS} />
-						</>}
+						<ScrollColumn label="Minutes" options={minuteOptions} value={current.m} onChange={(m) => commit({ m })} />
+						{showSeconds && (
+							<>
+								<div className="component-time-picker__sep" aria-hidden="true">:</div>
+								<ScrollColumn label="Seconds" options={secondOptions} value={current.s} onChange={(s) => commit({ s })} />
+							</>
+						)}
 						{format === '12h' && (
 							<div className="component-time-picker__period-col">
 								{(['AM', 'PM'] as const).map((p) => (
 									<button
 										key={p}
 										type="button"
-										className={[
+										className={cx(
 											'component-time-picker__period-btn',
-											current.period === p ? 'component-time-picker__period-btn--active' : '',
-										].filter(Boolean).join(' ')}
-										onClick={() => setPeriod(p)}
+											current.period === p && 'component-time-picker__period-btn--active',
+										)}
+										onClick={() => commit({ period: p })}
 									>
 										{p}
 									</button>

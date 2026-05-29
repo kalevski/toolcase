@@ -1,4 +1,5 @@
 import type { CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Skeleton } from './Skeleton'
 
 export type TimelineVariant = 'default' | 'glass' | 'outlined' | 'elevated' | 'minimal'
@@ -41,10 +42,37 @@ export const Timeline: FC<TimelineProps> = ({
 	className,
 	...rest
 }) => {
+	const containerRef = useRef<HTMLDivElement>(null)
+	// Progressive enhancement: items are visible by default; once JS mounts we
+	// enable the reveal animation and observe each item entering the viewport.
+	const [animate, setAnimate] = useState(false)
+
+	useEffect(() => {
+		const root = containerRef.current
+		if (loading || !root || typeof IntersectionObserver === 'undefined') return
+
+		setAnimate(true)
+		const els = Array.from(root.querySelectorAll('.component-timeline__item'))
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('component-timeline__item--in-view')
+						io.unobserve(entry.target)
+					}
+				}
+			},
+			{ threshold: 0.15, rootMargin: '0px 0px -10% 0px' },
+		)
+		els.forEach((el) => io.observe(el))
+		return () => io.disconnect()
+	}, [loading, items])
+
 	const rootClasses = [
 		'component component-timeline',
 		`component-timeline--${variant}`,
 		`component-timeline--connector-${connector}`,
+		animate && 'component-timeline--animate',
 		className,
 	]
 		.filter(Boolean)
@@ -52,7 +80,7 @@ export const Timeline: FC<TimelineProps> = ({
 
 	if (loading) {
 		return (
-			<div className={rootClasses} {...rest}>
+			<div ref={containerRef} className={rootClasses} {...rest}>
 				<div className="component-timeline__line" aria-hidden="true" />
 				<div className="component-timeline__items">
 					{Array.from({ length: loadingCount }, (_, i) => (
@@ -74,7 +102,7 @@ export const Timeline: FC<TimelineProps> = ({
 	}
 
 	return (
-		<div className={rootClasses} {...rest}>
+		<div ref={containerRef} className={rootClasses} {...rest}>
 			<div className="component-timeline__line" aria-hidden="true" />
 			<div className="component-timeline__items">
 				{items.map((item, index) => {
@@ -92,6 +120,7 @@ export const Timeline: FC<TimelineProps> = ({
 					}
 
 					const itemStyle: CSSProperties = {}
+					;(itemStyle as Record<string, string>)['--tl-index'] = `${index}`
 					if (overlapValue > 0) {
 						(itemStyle as Record<string, string>)['--timeline-item-overlap'] = `${overlapValue}px`
 					}

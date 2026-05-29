@@ -1,9 +1,9 @@
 // ── InfiniteScroll ────────────────────────────────────────────────────────────
 
 .component.component-infinite-scroll {
-    --is-loader-padding: 1.5rem;
-    --is-end-padding:    1rem;
-    --is-text-color:     #64748b;
+    --is-loader-padding: var(--tc-space-6);
+    --is-end-padding:    var(--tc-space-4);
+    --is-text-color:     var(--tc-text-muted);
 }
 
 .component-infinite-scroll {

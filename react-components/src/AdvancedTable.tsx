@@ -5,6 +5,7 @@ import { FormInput } from './FormInput'
 import type { FormInputType, FormInputProps } from './FormInput'
 import { Spinner } from './Spinner'
 import { Icon } from './Icon'
+import { Button } from './Button'
 
 export interface AdvancedTableFilter extends Omit<FormInputProps, 'onChange'> {
 	key: string
@@ -109,13 +110,14 @@ export function AdvancedTable<T = any>({
 					))}
 					{onFilterChange && Object.values(filterValues).some((v) => v !== '' && v !== null && v !== undefined) && (
 						<div className="component-advanced-table__filter-reset">
-							<button
-								type="button"
-								className="btn btn-sm btn-link component-advanced-table__clear-btn"
+							<Button
+								variant="link"
+								size="small"
+								className="component-advanced-table__clear-btn"
 								onClick={() => filters.forEach(({ key }) => onFilterChange(key, ''))}
 							>
 								Clear filters
-							</button>
+							</Button>
 						</div>
 					)}
 				</div>

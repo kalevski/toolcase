@@ -1,9 +1,9 @@
 .component.component-social-links {
-	--sl-color: #1e293b;
-	--sl-muted: #64748b;
-	--sl-border: #e2e8f0;
+	--sl-color: var(--tc-text);
+	--sl-muted: var(--tc-text-muted);
+	--sl-border: var(--tc-border);
 	display: inline-flex;
-	gap: 0.5rem;
+	gap: var(--tc-space-2);
 	flex-wrap: wrap;
 }
 
@@ -19,6 +19,7 @@
 		transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 
 		&:hover { transform: translateY(-1px); }
+		&:focus-visible { outline: var(--tc-focus-outline); outline-offset: var(--tc-focus-offset); }
 	}
 
 	&--ghost .component-social-links__link {
@@ -28,9 +29,9 @@
 	}
 
 	&--filled .component-social-links__link {
-		background: #f8fafc;
+		background: var(--tc-surface-hover);
 		border: 1px solid var(--sl-border);
-		&:hover { background: var(--sl-color); color: #ffffff; }
+		&:hover { background: var(--sl-color); color: var(--tc-text-inverse); }
 	}
 
 	&--sm .component-social-links__link { width: 30px; height: 30px; font-size: 0.85rem; }

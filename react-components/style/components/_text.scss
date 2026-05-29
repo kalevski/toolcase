@@ -1,7 +1,7 @@
 // ── Text ───────────────────────────────────────────────────────────────────────
 
 .component.component-text {
-	--text-color: #1e293b;
+	--text-color: var(--tc-text);
 
 	color: var(--text-color);
 	font-size: 0.875rem;
@@ -18,15 +18,15 @@
 
 	// Variants
 	&.component-text--muted {
-		--text-color: #64748b;
+		--text-color: var(--tc-text-muted);
 	}
 
 	&.component-text--code {
 		font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-		background: #f1f5f9;
+		background: var(--tc-surface-muted);
 		padding: 0.1em 0.35em;
 		font-size: 0.825em;
-		color: #0f172a;
+		color: var(--tc-accent-hover);
 	}
 
 	&.component-text--mono {

@@ -16,7 +16,7 @@
     display: flex;
     justify-content: space-between;
     align-items: end;
-    margin-bottom: 16px;
+    margin-bottom: var(--tc-space-4);
     font-family: var(--tc-font-family-sans);
     font-size: var(--tc-font-sm);
     font-weight: var(--tc-font-weight-semibold);
@@ -33,12 +33,12 @@
 }
 
 .component-sprint-chain__cell {
-    padding: 12px 8px;
+    padding: var(--tc-space-3) var(--tc-space-2);
     text-align: center;
     border-right: 1px solid var(--sc-border);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--tc-space-1);
     align-items: center;
     justify-content: center;
     min-height: 80px;

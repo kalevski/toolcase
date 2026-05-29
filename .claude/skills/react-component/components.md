@@ -140,7 +140,10 @@ Source of truth: `react-components/src/index.ts` exports + `examples/public/reac
 
 ## Complex / Domain
 
-`ActionRowList`, `AssetBundle`, `BitmapFontGenerator`, `Build`, `CardOptions`, `Changelog`, `Comparator`, `Hero`, `LinkedProvidersCard`, `MultiCardSelect`, `Timeline`, `ToggleCard`.
+`ActionRowList`, `AssetBundle`, `AudioMixer`, `BitmapFontGenerator`, `Build`, `CardOptions`, `Changelog`, `Comparator`, `Hero`, `LinkedProvidersCard`, `MultiCardSelect`, `NodeEditor`, `Timeline`, `ToggleCard`.
+
+`AudioMixer` — visual multitrack mixer editor (transport / track headers / timeline clips with canvas waveforms / loop region / inspector). Headless: `useAudioMixer({value,onChange})` owns the project-document JSON + `actions`/`selection`; the view is visual-only (transport callback-driven via `onPlay`/`onPause`/`onSeek`, no Web Audio). Use when authoring/arranging audio clips; skip for plain audio playback (use a native `<audio>` / player).
+`NodeEditor` — canvas-only node-graph view (pan/zoom/touch, drag-to-connect); headless `useNodeEditor()` owns graph state + `actions`/`selection`.
 
 ## Game Jam / Arcade
 

@@ -53,30 +53,36 @@ export const Roadmap: React.FC<RoadmapProps> = ({
 							</span>
 							<span className="component-roadmap__column-count">{col.items.length}</span>
 						</div>
-						<ul className="component-roadmap__items">
-							{col.items.map((item, i) => {
-								const inner = (
-									<>
-										<span className="component-roadmap__item-title">{item.title}</span>
-										{item.eta ? (
-											<span className="component-roadmap__item-eta">{item.eta}</span>
-										) : null}
-										{item.description ? (
-											<p className="component-roadmap__item-description">{item.description}</p>
-										) : null}
-									</>
-								)
-								return (
-									<li key={i} className="component-roadmap__item">
-										{item.href ? (
-											<a href={item.href} target="_blank" rel="noopener noreferrer">{inner}</a>
-										) : (
-											inner
-										)}
-									</li>
-								)
-							})}
-						</ul>
+						{col.items.length === 0 ? (
+							<p className="component-roadmap__empty">Nothing here yet.</p>
+						) : (
+							<ul className="component-roadmap__items">
+								{col.items.map((item, i) => {
+									const inner = (
+										<>
+											<div className="component-roadmap__item-head">
+												<span className="component-roadmap__item-title">{item.title}</span>
+												{item.eta ? (
+													<span className="component-roadmap__item-eta">{item.eta}</span>
+												) : null}
+											</div>
+											{item.description ? (
+												<p className="component-roadmap__item-description">{item.description}</p>
+											) : null}
+										</>
+									)
+									return (
+										<li key={i} className="component-roadmap__item">
+											{item.href ? (
+												<a href={item.href} target="_blank" rel="noopener noreferrer">{inner}</a>
+											) : (
+												inner
+											)}
+										</li>
+									)
+								})}
+							</ul>
+						)}
 					</div>
 				))}
 			</div>

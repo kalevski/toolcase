@@ -1,0 +1,387 @@
+.component.component-audio-mixer {
+    --am-color: var(--tc-text);
+    --am-muted: var(--tc-text-muted);
+    --am-faint: var(--tc-text-faint);
+    --am-border: var(--tc-border);
+    --am-bg: var(--tc-surface);
+    --am-surface: var(--tc-surface-muted);
+    --am-accent: #0d6efd;
+    --am-transition: 0.15s ease;
+
+    display: flex;
+    flex-direction: column;
+    color: var(--am-color);
+    background: var(--am-bg);
+    border: 1px solid var(--am-border);
+    overflow: hidden;
+    font-size: 0.875rem;
+}
+
+.component-audio-mixer {
+
+    &__main {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__stage {
+        display: flex;
+        min-height: 220px;
+        overflow: hidden;
+    }
+
+    &__headers {
+        flex-shrink: 0;
+        width: 200px;
+        border-right: 1px solid var(--am-border);
+        background: var(--am-surface);
+    }
+
+    &__headers-spacer {
+        border-bottom: 1px solid var(--am-border);
+    }
+
+    &__track-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 0.4rem 0.5rem;
+        border-bottom: 1px solid var(--am-border);
+        border-left: 3px solid transparent;
+        cursor: pointer;
+
+        &--active {
+            background: var(--am-bg);
+        }
+    }
+
+    &__track-name {
+        width: 100%;
+        border: 1px solid transparent;
+        background: transparent;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--am-color);
+        padding: 0.1rem 0.25rem;
+
+        &:hover {
+            border-color: var(--am-border);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--am-color);
+            outline-offset: 1px;
+        }
+    }
+
+    &__track-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    &__track-fader {
+        flex: 1;
+    }
+
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: 1px solid var(--am-border);
+        background: var(--am-bg);
+        color: var(--am-muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background var(--am-transition), color var(--am-transition);
+
+        &:focus-visible {
+            outline: 2px solid var(--am-color);
+            outline-offset: 2px;
+        }
+
+        &--on {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: #ffffff;
+        }
+
+        &--solo {
+            background: #eab308;
+            border-color: #eab308;
+            color: #1e293b;
+        }
+    }
+
+    &__scroll {
+        flex: 1;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        touch-action: pan-x;
+    }
+
+    &__timeline {
+        position: relative;
+    }
+
+    &__ruler {
+        position: relative;
+        border-bottom: 1px solid var(--am-border);
+        background: var(--am-surface);
+        cursor: text;
+    }
+
+    &__tick {
+        position: absolute;
+        top: 0;
+        font-size: 0.62rem;
+        color: var(--am-faint);
+        padding-left: 2px;
+        border-left: 1px solid var(--am-border);
+        height: 100%;
+        user-select: none;
+        line-height: 1.6;
+    }
+
+    &__lanes {
+        position: relative;
+    }
+
+    &__lane {
+        position: relative;
+        border-bottom: 1px solid var(--am-border);
+        background-image: linear-gradient(var(--am-surface) 0 0);
+        background-size: 100% 50%;
+        background-repeat: no-repeat;
+    }
+
+    &__loop-region {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: rgba(13, 110, 253, 0.08);
+        border-left: 2px solid var(--am-accent);
+        border-right: 2px solid var(--am-accent);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    &__clip {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        border: 2px solid var(--am-accent);
+        background: var(--am-bg);
+        box-shadow: var(--tc-shadow-sm);
+        cursor: grab;
+        overflow: hidden;
+        user-select: none;
+        touch-action: none;
+        z-index: 2;
+
+        &:active {
+            cursor: grabbing;
+        }
+
+        &--selected {
+            box-shadow: 0 0 0 2px var(--am-color);
+            z-index: 3;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--am-color);
+            outline-offset: 2px;
+        }
+    }
+
+    &__trim {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 8px;
+        cursor: ew-resize;
+        touch-action: none;
+        z-index: 4;
+
+        &--l {
+            left: 0;
+        }
+
+        &--r {
+            right: 0;
+        }
+
+        &:hover {
+            background: rgba(13, 110, 253, 0.2);
+        }
+    }
+
+    &__playhead {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #ef4444;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    &__inspector {
+        flex-shrink: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border-top: 1px solid var(--am-border);
+        background: var(--am-bg);
+    }
+
+    &__inspector-empty {
+        color: var(--am-muted);
+        font-size: 0.82rem;
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    &__inspector-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    &__inspector-title {
+        font-weight: 600;
+    }
+
+    &__master-link {
+        border: 1px solid var(--am-border);
+        background: var(--am-surface);
+        color: var(--am-accent);
+        padding: 0.35rem 0.5rem;
+        font-size: 0.78rem;
+        cursor: pointer;
+
+        &:focus-visible {
+            outline: 2px solid var(--am-color);
+            outline-offset: 2px;
+        }
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    &__field-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--am-muted);
+    }
+
+    &__loop-fields {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    &__order {
+        display: flex;
+        gap: 0.35rem;
+    }
+
+    &__effects {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        border-top: 1px solid var(--am-border);
+        padding-top: 0.5rem;
+    }
+
+    &__effect {
+        border: 1px solid var(--am-border);
+        padding: 0.4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    &__effect-head {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    &__effect-type {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+        flex: 1;
+    }
+
+    &__bypass {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.7rem;
+        color: var(--am-muted);
+        margin: 0;
+    }
+
+    &__effect-params {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.35rem;
+    }
+
+    &__param {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        font-size: 0.68rem;
+        color: var(--am-muted);
+    }
+}
+
+@media (min-width: 992px) {
+    .component-audio-mixer__main {
+        flex-direction: row;
+    }
+
+    .component-audio-mixer__stage {
+        flex: 1;
+    }
+
+    .component-audio-mixer__inspector {
+        width: 300px;
+        border-top: 0;
+        border-left: 1px solid var(--am-border);
+        overflow-y: auto;
+    }
+}
+
+@media (pointer: coarse) {
+    .component-audio-mixer__chip {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .component-audio-mixer__trim {
+        width: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .component-audio-mixer__chip {
+        transition: none;
+    }
+}
