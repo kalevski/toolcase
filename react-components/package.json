@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/react-components",
-    "version": "3.0.3",
+    "version": "3.0.4",
     "description": "Practical React UI components — forms, dropzone, layout, and dashboard pieces — styled and ready to drop in.",
     "main": "lib/index.main.js",
     "module": "lib/index.module.js",
