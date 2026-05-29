@@ -174,6 +174,7 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [ActionRowList](#actionrowlist)
   - [AssetBundle](#assetbundle)
   - [BitmapFontGenerator](#bitmapfontgenerator)
+  - [NormalMapGenerator](#normalmapgenerator)
   - [Build](#build)
   - [CardOptions](#cardoptions)
   - [Changelog](#changelog)
@@ -2446,6 +2447,114 @@ A canvas-based tool for generating bitmap font spritesheets (PNG + XML) with con
 | `onGenerate` | `(output: BitmapFontOutput) => void` | ❌ | `{ png: Blob, xml: string, glyphs: BitmapFontGlyph[] }` |
 | `disabled` | `boolean` | ❌ | Disables generation |
 | `className` | `string` | ❌ | Additional CSS class |
+
+---
+
+### NormalMapGenerator
+
+A canvas-based tool that turns a 2D sprite buffer into a tangent-space normal map. Stacks two complementary passes: an **alpha-bevel** (distance transform from the transparent edge → rounds the outline) and a **luminance-emboss** (Sobel-from-luminance → texture relief), summed before the gradient → normal step. Imperative `generate()` handle resolves a PNG `Blob` + raw RGBA. Pure helpers (`generateNormalMap`, `alphaToDistance`, `bevelHeightmap`, `toHeightmap`, `blurHeightmap`) are exported for reuse.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `source` | `ArrayBuffer \| Uint8Array \| Blob` | ❌ | Encoded sprite bytes (PNG/etc.), decoded via `createImageBitmap` |
+| `strength` | `number` | ❌ | Overall gradient gain (default `2`) |
+| `embossHeight` | `number` | ❌ | Luminance-emboss height; `0` disables emboss (default `2`) |
+| `bevelWidth` | `number` | ❌ | Alpha-bevel reach in px; `0` disables bevel (default `0`) |
+| `bevelHeight` | `number` | ❌ | Bevel ramp depth (default `1`) |
+| `bevelDirection` | `'raised' \| 'recessed'` | ❌ | Outline pops out vs sinks in (default `'raised'`) |
+| `tileMode` | `boolean` | ❌ | Treat sprite border as seamless (no edge) (default `false`) |
+| `blur` | `number` | ❌ | Box-blur radius applied to the combined heightmap (default `0`) |
+| `invertX` | `boolean` | ❌ | Flip red channel / handedness (default `false`) |
+| `invertY` | `boolean` | ❌ | Flip green channel — OpenGL (`false`) vs DirectX (`true`) (default `false`) |
+| `flatColor` | `string` | ❌ | Transparent-pixel fill (default `'#8080ff'`) |
+| `background` | `string` | ❌ | Preview backdrop (default `'#1a1a2e'`) |
+| `onGenerate` | `(output: NormalMapOutput) => void` | ❌ | `{ png: Blob, rgba: Uint8ClampedArray, width, height }` |
+| `disabled` | `boolean` | ❌ | Disables generation |
+| `className` | `string` | ❌ | Additional CSS class |
+
+#### Brush editor (paint corrections on the working buffer)
+
+Set `editable` to make the preview interactive — pointer drawing paints the brush onto the auto-generated normal buffer. All paint blends in **vector space** (lerp + renormalize), never naive RGB.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `editable` | `boolean` | ❌ | Opt-in to pointer editing (default `false`) |
+| `brush` | `NormalBrush` | ❌ | Active brush config (see below) |
+| `maskToAlpha` | `boolean` | ❌ | Clamp paint to opaque source pixels (default `true`) |
+| `onEdit` | `(rgba: Uint8ClampedArray) => void` | ❌ | Fired after each stroke with the edited buffer |
+| `onSampleDirection` | `(n: [number, number, number]) => void` | ❌ | Fired on `Alt+click` (direction mode) with the sampled normal under the cursor |
+
+`NormalBrush`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mode` | `'direction' \| 'height' \| 'smooth' \| 'structure' \| 'erase'` | Tool |
+| `size` | `number` | Radius in source px (default `16`) |
+| `hardness` | `number` | `0` hard edge → `1` full soft falloff (default `0.5`) |
+| `strength` | `number` | Per-stamp blend weight `0..1` (default `0.5`) |
+| `direction` | `[x,y,z]` | Target normal for `'direction'` mode |
+| `heightSign` | `1 \| -1` | `'height'` mode: raise vs lower |
+| `pattern` | `'reptile' \| 'furry' \| 'cracked'` | `'structure'` mode tile |
+| `eraseTarget` | `'neutral' \| 'auto'` | `'erase'` mode: flat `#8080ff` or auto-generated normal |
+
+#### Light inspector (shade the sprite to judge the map)
+
+A raw normal map is unreadable — set `previewMode` to `lit` to render the sprite shaded by the normal map and a movable light (WebGL, Canvas2D fallback). Light edits/brush strokes update live.
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `previewMode` | `'albedo' \| 'normal' \| 'lit' \| 'lit-surface'` | ❌ | Display mode (default `'normal'`). `lit-surface` forces albedo white (geometry only) |
+| `light` | `NormalLight` | ❌ | `{ x, y, z, color?, intensity? }` — position in normalized image space, `z` = height |
+| `ambient` | `number` | ❌ | Ambient level `0..1` (default `0.2`) |
+| `ambientColor` | `string` | ❌ | Ambient color (default `'#ffffff'`) |
+| `specular` | `boolean` | ❌ | Enable Blinn-Phong specular (default `false`) |
+| `shininess` | `number` | ❌ | Specular exponent (default `32`) |
+| `followCursor` | `boolean` | ❌ | Light tracks the cursor in lit modes (default `true`) |
+| `autoRotate` | `boolean` | ❌ | Turntable — light circles the sprite (default `false`) |
+| `onLightChange` | `(light: NormalLight) => void` | ❌ | Fired as the light moves |
+
+Keyboard (when the preview is focused, lit modes): **P** places the light under the cursor, **R** toggles auto-rotate, scroll wheel changes light height.
+
+#### Selection tools (restrict effects & paint to a region)
+
+Set `tool` to `rect`, `lasso`, or `wand` to paint a coverage mask that gates both generation and brushes. With no selection (`null`) the whole sprite is affected (zero overhead).
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `tool` | `'brush' \| 'rect' \| 'lasso' \| 'wand'` | ❌ | Active tool (default `'brush'`) |
+| `wandTolerance` | `number` | ❌ | Wand flood tolerance `0..1` over alpha+normal distance (default `0.1`) |
+| `feather` | `number` | ❌ | Mask edge feather in px (default `0`) |
+| `onSelectionChange` | `(mask: Uint8Array \| null) => void` | ❌ | Fired when the selection changes |
+
+Drag (rect/lasso) or click (wand) on the preview. **Shift** adds to the selection, **Alt** subtracts. When a selection exists, changing a generation prop re-bevels **only inside** the selection (outside is preserved), and brush strokes are multiplied by the mask. A marching-ants overlay shows the boundary.
+
+Handle methods: `generate()`, `undo()`, `redo()`, `reset()`, `exportLit()`, `selectAll()`, `clearSelection()`, `setSelection(mask)`. `exportLit()` resolves a PNG `Blob` of the lit sprite (albedo × shading) at source resolution — preview-only; `generate()` (the normal map) is unaffected by the light. **Note:** changing any generation prop (`strength`, `bevelWidth`, …) rebuilds the auto buffer and **discards brush edits** — paint after the params are settled.
+
+Selection helpers (exported): `polygonToMask`, `wandSelect`, `featherMask`, `combineSelection`, `rectToMask`, `maskEdges`.
+
+```tsx
+import { useRef, useState } from 'react'
+import { NormalMapGenerator, NormalMapGeneratorHandle, NormalBrush } from '@toolcase/react-components'
+
+const ref = useRef<NormalMapGeneratorHandle>(null)
+const [brush] = useState<NormalBrush>({ mode: 'height', size: 24, hardness: 0.5, strength: 0.6, heightSign: 1 })
+
+<NormalMapGenerator
+  ref={ref}
+  source={spriteBlob}
+  bevelWidth={24}   // round the alpha outline
+  embossHeight={2}  // texture relief from luminance
+  strength={2}
+  editable
+  brush={brush}
+  onGenerate={(out) => console.log(out.png, out.width, out.height)}
+/>
+
+// const output = await ref.current?.generate()  // packs the edited buffer
+// ref.current?.undo() / redo() / reset()
+```
+
+Pure helpers (also exported): `generateNormalMap`, `buildHeightmap`, `normalsFromHeight`, `alphaToDistance`, `bevelHeightmap`, `toHeightmap`, `blurHeightmap`, `applyBrush`, `pack`, `unpack`, `lerp3`, `STRUCTURE_TILES`.
 
 ---
 

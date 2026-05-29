@@ -1,0 +1,75 @@
+// ── NormalMapGenerator ───────────────────────────────────────────────────────
+
+.component.component-normal-map-generator {
+    --rc-nmg-bg: var(--tc-surface-dark);
+    --rc-nmg-border: var(--tc-border);
+    --rc-nmg-preview-h: 320px;
+    --rc-nmg-cursor-ring: rgba(255, 255, 255, 0.85);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--rc-nmg-border);
+    overflow: hidden;
+    background: var(--rc-nmg-bg);
+}
+
+.component-normal-map-generator {
+    &__preview {
+        display: block;
+        width: 100%;
+        height: var(--rc-nmg-preview-h);
+    }
+
+    &--editable .component-normal-map-generator__preview,
+    &--lit .component-normal-map-generator__preview,
+    &--selecting .component-normal-map-generator__preview {
+        cursor: crosshair;
+        touch-action: none;
+    }
+
+    // Marching-ants selection overlay — sits above the preview, never intercepts pointer.
+    &__selection-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: var(--rc-nmg-preview-h);
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    // Light source gizmo — circular dot (allowed border-radius: 50% exception).
+    &__light-gizmo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 14px;
+        height: 14px;
+        transform: translate(-50%, -50%);
+        border: 2px solid var(--tc-surface);
+        border-radius: 50%;
+        background: var(--tc-warning);
+        box-shadow: 0 0 8px 2px rgba(255, 220, 120, 0.7);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    // Circular brush-outline cursor — the allowed border-radius: 50% exception.
+    &__brush-cursor {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: none;
+        transform: translate(-50%, -50%);
+        border: 1px solid var(--rc-nmg-cursor-ring);
+        border-radius: 50%;
+        pointer-events: none;
+        mix-blend-mode: difference;
+        z-index: 1;
+    }
+
+    @media (min-width: 768px) {
+        --rc-nmg-preview-h: 420px;
+    }
+}

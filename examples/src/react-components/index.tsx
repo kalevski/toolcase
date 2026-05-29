@@ -13,6 +13,7 @@ import BadgeDemo from './BadgeDemo'
 import { BannerDemo } from './BannerDemo'
 import BasicLayoutDemo from './BasicLayoutDemo'
 import BitmapFontGeneratorDemo from './BitmapFontGeneratorDemo'
+import NormalMapGeneratorDemo from './NormalMapGeneratorDemo'
 import BrandDemo from './BrandDemo'
 import BreadcrumbDemo from './BreadcrumbDemo'
 import BuildDemo from './BuildDemo'
@@ -409,6 +410,7 @@ export const examples: ExampleDef[] = [
     { key: 'markdown-editor', category: 'Code & Docs', element: <MarkdownEditorDemo /> },
     { key: 'json-editor', category: 'Code & Docs', element: <JSONEditorDemo /> },
     { key: 'bitmap-font-generator', category: 'Code & Docs', element: <BitmapFontGeneratorDemo /> },
+    { key: 'normal-map-generator', category: 'Code & Docs', element: <NormalMapGeneratorDemo /> },
     { key: 'node-editor', category: 'Code & Docs', element: <NodeEditorDemo /> },
     { key: 'audio-mixer', category: 'Code & Docs', element: <AudioMixerDemo /> },
 
