@@ -1,7 +1,7 @@
 {
     "name": "@toolcase/node",
-    "version": "3.0.2",
-    "description": "Node.js helpers for backend services — Fastify endpoints, Kysely repositories, Redis KV service, and isomorphic sanitize/pagination/where helpers.",
+    "version": "4.0.0",
+    "description": "Node.js helpers for backend services — Fastify endpoints, raw-SQL repositories, Redis KV service, and isomorphic sanitize/pagination/where helpers.",
     "source": "src/main.ts",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",
@@ -24,7 +24,6 @@
         "@toolcase/serializer": "^3.0.0",
         "fastify": "^5.0.0",
         "jose": "^5.10.0",
-        "kysely": "^0.28.0",
         "redis": "^5.0.0",
         "sharp": "^0.33.0"
     },
@@ -41,9 +40,6 @@
         "jose": {
             "optional": true
         },
-        "kysely": {
-            "optional": true
-        },
         "redis": {
             "optional": true
         },
@@ -58,7 +54,6 @@
         "@types/node": "^20.0.0",
         "fastify": "^5.8.5",
         "jose": "^5.10.0",
-        "kysely": "^0.28.17",
         "redis": "^5.12.1",
         "sharp": "^0.33.5"
     },
@@ -72,7 +67,6 @@
         "node",
         "nodejs",
         "fastify",
-        "kysely",
         "redis",
         "sharp",
         "image-processing",

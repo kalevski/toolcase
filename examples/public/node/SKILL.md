@@ -1,6 +1,6 @@
 ---
 name: node
-description: Use when reaching for @toolcase/node — backend helpers for Node.js. Single entrypoint exposing Fastify endpoints (RouteHandler, RESTRouteHandler, Router, HttpServer), Kysely repositories (BaseRepository, SoftDeleteRepository, EntityService), Redis KV service (KVService — Locker, RateLimiter, Leaderboard, ValueStore, Versioned, SubscriberPool, KeyBuilder, LuaScriptCache), OAuth2/OIDC helpers, ImageProcessor + AtlasBuilder (sharp), typed env() loader, plus isomorphic sanitize / pagination / where / orderBy / domain-error helpers and FieldSchema → JSON Schema derivation.
+description: Use when reaching for @toolcase/node — backend helpers for Node.js. Single entrypoint exposing Fastify endpoints (RouteHandler, RESTRouteHandler, Router, HttpServer), engine-agnostic repositories (BaseRepository, EntityService — you implement the verbs for your engine), Redis KV service (KVService — Locker, RateLimiter, Leaderboard, ValueStore, Versioned, SubscriberPool, KeyBuilder, LuaScriptCache), OAuth2/OIDC helpers, ImageProcessor + AtlasBuilder (sharp), typed env() loader, plus isomorphic sanitize / pagination / filter / sort / domain-error helpers and FieldSchema → JSON Schema derivation.
 ---
 
 # @toolcase/node — API Reference
@@ -18,8 +18,10 @@ import {
     isLibError, errorMeta,
     // fastify peers: fastify, @fastify/cors
     RouteHandler, Router, RESTRouteHandler, HttpServer,
-    // kysely peer: kysely
-    BaseRepository, SoftDeleteRepository, EntityService,
+    // repository — engine-agnostic contract; you implement the verbs for your engine
+    BaseRepository, EntityService, type TransactionClient,
+    // engine-neutral query-description types + cursor codec
+    type Filter, type Sort, FILTER_OP_SET, encodeCursor, decodeCursor,
     // redis peers: redis, @toolcase/serializer (serializer optional)
     KVService, KeyBuilder, LuaScriptCache, KV_LUA_SCRIPTS,
 } from '@toolcase/node'
@@ -27,9 +29,9 @@ import {
 
 | Surface | Peer deps required |
 |---|---|
-| utils + errors (sanitize, pagination, where, orderBy, domain errors), `env` | `@toolcase/base` |
+| utils + errors (sanitize, pagination, filter, sort, domain errors), `env` | `@toolcase/base` |
 | `RouteHandler`, `Router`, `HttpServer`, `chain` | `@toolcase/base`, `fastify`, `@fastify/cors` |
-| `BaseRepository`, `SoftDeleteRepository`, `EntityService` | `@toolcase/base`, `kysely` |
+| `BaseRepository`, `EntityService` | `@toolcase/base` — engine-agnostic; you implement the verbs against any driver |
 | `KVService` (string surface only) | `@toolcase/base`, `redis` |
 | `KVService.*Value*` methods (typed binary) | adds `@toolcase/serializer` |
 | `ImageProcessor`, `AtlasBuilder` | `@toolcase/base`, `sharp` |
@@ -123,13 +125,15 @@ function buildPage<T>(results: T[], count: number, offset: number, limit: number
 
 `strict: true` makes `normalizeOffsetLimit` throw `ValidationError` on non-finite / negative inputs; default behavior coerces them to defaults.
 
-### Where / OrderBy
+### Filter / Sort
+
+Engine-neutral query-description types. `@toolcase/node` ships **no SQL builder** — these describe *intent*; your `BaseRepository` subclass translates them for its engine (SQL predicate, Mongo filter, key scan, …).
 
 ```ts
-type WhereOp = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike'
+type FilterOp = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike'
               | 'in' | 'notIn' | 'isNull' | 'isNotNull'
 
-type WhereCondition<V> =
+type FilterCondition<V> =
     | { eq: V } | { ne: V }
     | { gt: NonNullable<V> } | { gte: NonNullable<V> }
     | { lt: NonNullable<V> } | { lte: NonNullable<V> }
@@ -137,23 +141,29 @@ type WhereCondition<V> =
     | { in: NonNullable<V>[] } | { notIn: NonNullable<V>[] }
     | { isNull: true } | { isNotNull: true }
 
-type WhereValue<V> = V | V[] | null | WhereCondition<V>
-type WhereClause<T> = { [K in keyof T]?: WhereValue<T[K]> }
+type FilterValue<V> = V | V[] | null | FilterCondition<V> | FilterMultiCondition<V>
+type Filter<T> = { [K in keyof T]?: FilterValue<T[K]> }
 
-function applyWhere<Q>(qb: Q, where: Record<string, unknown>): [Q, empty: boolean]
-//   empty === true when {col: []} or {col: {in: []}} — the qb is forced to a
-//   `WHERE FALSE` predicate AND the flag lets callers skip the round-trip.
+const FILTER_OP_SET: Set<string>   // the recognized operator keys — validate / translate against it
 
-interface OrderByColumn<T> { column: keyof T & string; direction?: 'asc' | 'desc'; nulls?: 'first' | 'last' }
-type OrderBy<T> = (keyof T & string) | OrderByColumn<T>
-function applyOrderBy<Q, T>(qb: Q, ord: OrderBy<T> | OrderBy<T>[]): Q
+interface SortField<T> { field: keyof T & string; direction?: 'asc' | 'desc'; nulls?: 'first' | 'last' }
+type Sort<T> = (keyof T & string) | SortField<T>
 ```
 
-`WhereValue<V>` also admits a multi-op shape (`WhereMultiCondition<V>`) — `{ age: { gte: 18, lt: 65 } }` is supported. `applyWhere` loops every op key in the condition. Empty `{}` and mixed op + non-op keys fall through to scalar `=` instead of being treated as a condition.
+`Filter` admits a multi-op shape too (`FilterMultiCondition<V>`) — `{ age: { gte: 18, lt: 65 } }`. A bare value is `eq` (`{ status: 'active' }`), a bare array is membership (`{ id: [1, 2, 3] }`), `null` is an `isNull` test. `Sort` is a bare field name (ascending), a `SortField` object, or an array of either. **How each operator maps to a query is entirely your repository's choice** — the library no longer emits SQL.
+
+### Cursor codec
+
+```ts
+function encodeCursor(value: unknown): string     // opaque base64url(`${kind}:${value}`), kind ∈ {s,n,b,d,g}
+function decodeCursor(cursor: string): unknown     // round-trips Date, BigInt, number, boolean, string
+```
+
+Engine-neutral keyset-cursor helpers for a `paginateCursor` implementation — encode the ordering value of the last row of a page, decode it to resume on the next page.
 
 ### parseFilters / parseSort (internal — drives RESTRouteHandler query parsing)
 
-These helpers live in `utils/` and are NOT re-exported from `@toolcase/node`. `RESTRouteHandler` uses them to translate bracket-form query strings into `WhereClause<T>` + `OrderBy<T>[]`. Documented here so callers know the URL syntax their endpoints accept.
+These helpers live in `utils/` and are NOT re-exported from `@toolcase/node`. `RESTRouteHandler` uses them to translate bracket-form query strings into `Filter<T>` + `Sort<T>[]`. Documented here so callers know the URL syntax their endpoints accept.
 
 ```ts
 type CoerceType = 'integer' | 'number' | 'boolean' | 'date'
@@ -165,10 +175,10 @@ interface ParseFiltersOptions<T> {
     reservedKeys?: ReadonlyArray<string>                             // default ['offset','limit','sort','cursor']
 }
 
-function parseFilters<T>(query: Record<string, unknown>, options?: ParseFiltersOptions<T>): WhereClause<T>
+function parseFilters<T>(query: Record<string, unknown>, options?: ParseFiltersOptions<T>): Filter<T>
 ```
 
-Bracket-form query → `WhereClause<T>`:
+Bracket-form query → `Filter<T>`:
 
 ```
 ?email=foo@bar.com               → { email: 'foo@bar.com' }
@@ -181,22 +191,22 @@ Bracket-form query → `WhereClause<T>`:
 - Reserved keys (`offset`, `limit`, `sort`, `cursor`) are skipped.
 - `allowedFields` set → unknown top-level key throws `ValidationError` (clean 400).
 - Unknown op key (`?foo[bar]=`) → `ValidationError`.
-- `[in]` / `[notIn]` csv-split string values; arrays passed as-is. Empty `[in]=` produces an empty array, which `applyWhere` short-circuits to `WHERE FALSE`.
+- `[in]` / `[notIn]` csv-split string values; arrays passed as-is. Empty `[in]=` produces an empty array — your repository decides how to treat an empty membership set.
 - Boolean ops (`isNull`, `isNotNull`): truthy (`'1'`, `'true'`) emits the op; falsy drops the clause. `isNull=0` ≠ `isNotNull` — by design, use the named op.
 
-**Schema-less hazard.** Without `schema` (and no `coerceFields`), leaves stay strings. `?age[gte]=18` then performs lexicographic comparison in SQL (`'9' >= '10'` is `true`). Always pass either `schema` (recommended) or `coerceFields` for any non-string column you want to filter on.
+**Schema-less hazard.** Without `schema` (and no `coerceFields`), leaves stay strings. `?age[gte]=18` then compares lexicographically in most engines (`'9' >= '10'` is `true`). Always pass either `schema` (recommended) or `coerceFields` for any non-string column you want to filter on.
 
 ```ts
 interface ParseSortOptions<T> {
     allowedFields?: ReadonlyArray<keyof T & string>                  // unknown field → ValidationError
 }
 
-function parseSort<T>(query: Record<string, unknown>, options?: ParseSortOptions<T>): OrderBy<T>[] | undefined
+function parseSort<T>(query: Record<string, unknown>, options?: ParseSortOptions<T>): Sort<T>[] | undefined
 ```
 
 ```
-?sort=-createdAt,name   → [{ column: 'createdAt', direction: 'desc' }, { column: 'name', direction: 'asc' }]
-?sort=+name             → [{ column: 'name', direction: 'asc' }]
+?sort=-createdAt,name   → [{ field: 'createdAt', direction: 'desc' }, { field: 'name', direction: 'asc' }]
+?sort=+name             → [{ field: 'name', direction: 'asc' }]
 ```
 
 - `-` prefix = `desc`, `+` or no prefix = `asc`. Whitespace tolerated. Empty tokens skipped.
@@ -285,21 +295,23 @@ interface Logger {
 
 ## Repository
 
-```ts
-import type { Kysely, Insertable, Selectable, Transaction, Updateable } from 'kysely'
+Engine-agnostic repository **contract + toolbox**. `BaseRepository` ships **no queries and no driver/SQL code** — every data-access verb throws `not implemented` until you override it. You subclass it and implement the verbs for your engine (Postgres, MySQL, SQLite, MongoDB, DynamoDB, Redis, an HTTP API). What the base provides: the verb surface as the contract, the engine-neutral `Filter` / `Sort` / pagination types, observability (`logger`, `slowQueryMs`, `onOperation`) wired through `time()`, and transaction resolution via `run(trx)`.
 
-interface QueryEvent { table: string; op: string; durationMs: number; error?: unknown }
-type QueryHook = (event: QueryEvent) => void
+```ts
+// 2nd generic = the engine handle (Driver). Defaults to `unknown`; a real subclass
+// pins it to its driver type (a pg Pool, a Kysely instance, a Mongo Db, …).
+interface OperationEvent { source: string; op: string; durationMs: number; error?: unknown }
+type OperationHook = (event: OperationEvent) => void
 
 interface BaseRepositoryOptions {
     logger?: Logger
-    slowQueryMs?: number      // default 250
-    onQuery?: QueryHook       // fires after every query (success or failure) for tracing/metrics
+    slowQueryMs?: number          // default 250
+    onOperation?: OperationHook   // fires after every operation wrapped in time() (success or failure)
 }
 
 interface ListOptions<T> {
-    where?: WhereClause<T>
-    orderBy?: OrderBy<T> | OrderBy<T>[]
+    where?: Filter<T>
+    orderBy?: Sort<T> | Sort<T>[]
     limit?: number
     offset?: number
 }
@@ -308,117 +320,135 @@ type PageOptions<T> = Omit<ListOptions<T>, 'limit' | 'offset'> & PaginationInput
     pagination?: PaginationOptions
 }
 
-interface UpsertOptions<DB, TB> {
-    conflictColumns: readonly (keyof DB[TB] & string)[]
-    updateColumns?: readonly (keyof DB[TB] & string)[]
+interface UpsertOptions {
+    uniqueBy: readonly string[]      // unique-key fields a conflict is detected on
+    update?: readonly string[]       // which fields to write on conflict
 }
 
 interface CursorOptions<T> {
-    column: keyof T & string
+    field: keyof T & string
     direction?: 'asc' | 'desc'
-    where?: WhereClause<T>
+    where?: Filter<T>
     limit?: number             // default 25
     cursor?: string | null
 }
 
-abstract class BaseRepository<DB, TB extends keyof DB & string, PK extends keyof DB[TB] & string, ID> {
-    protected constructor(kysely: Kysely<DB>, table: TB, pkColumn: PK, opts?: BaseRepositoryOptions)
+abstract class BaseRepository<Entity = any, Driver = unknown> {
+    protected constructor(driver: Driver, source: string, idField = 'id', opts?: BaseRepositoryOptions)
 
-    get primaryKey(): PK
+    get primaryKey(): string
 
-    insert(values, trx?): Promise<Selectable>
-    insertMany(values[], trx?): Promise<Selectable[]>
-    upsert(values, opts: UpsertOptions, trx?): Promise<Selectable>
-    //   updateColumns defaults to all keys of `values` minus conflictColumns.
-    //   Empty updateColumns → DO NOTHING; `excluded.<col>` ref otherwise.
+    // Toolbox for your implementations:
+    protected run(trx?: Driver): Driver                                  // trx if supplied, else the base driver
+    protected byId(id: any): Filter<Entity>                              // { [idField]: id }
+    protected time<T>(label: string, fn: () => Promise<T>): Promise<T>   // times → slow-log + onOperation
 
-    findById(id, trx?): Promise<Selectable | undefined>
-    findByIdOrThrow(id, trx?): Promise<Selectable>                 // throws NotFoundError
-    findByIdMany(ids[], trx?): Promise<Selectable[]>
-    findOne(where, trx?): Promise<Selectable | undefined>
-    findOneOrThrow(where, trx?): Promise<Selectable>               // throws NotFoundError
-    findMany({ where?, orderBy?, limit?, offset? }, trx?): Promise<Selectable[]>
-    findManyWithCount(opts, trx?): Promise<{ results: Selectable[]; total: number }>
+    // Leaf verbs — each throws 'BaseRepository.<verb>: not implemented' until you override it.
+    insert(values, trx?): Promise<Entity>
+    insertMany(values[], trx?): Promise<Entity[]>
+    upsert(values, opts: UpsertOptions, trx?): Promise<Entity>
+    findById(id, trx?): Promise<Entity | undefined>
+    findByIdMany(ids[], trx?): Promise<Entity[]>
+    findOne(where, trx?): Promise<Entity | undefined>
+    findMany({ where?, orderBy?, limit?, offset? }, trx?): Promise<Entity[]>
+    findManyWithCount(opts, trx?): Promise<{ results: Entity[]; total: number }>
     paginate({ where?, orderBy?, offset?, limit?, pagination? }, trx?): Promise<Page>
-    paginateCursor({ column, direction?, where?, limit?, cursor? }, trx?): Promise<CursorPage>
-    //   cursor is base64url(`${kind}:${value}`) — kind ∈ {s,n,b,d,g}.
-    //   Encodes/decodes Date, BigInt, number, boolean, string.
+    paginateCursor({ field, direction?, where?, limit?, cursor? }, trx?): Promise<CursorPage>
     exists(where, trx?): Promise<boolean>
     count(where?, trx?): Promise<number>
-
-    updateById(id, values, trx?): Promise<Selectable | undefined>
-    updateByIdOrThrow(id, values, trx?): Promise<Selectable>       // throws NotFoundError
-    updateByIdAndVersion(id, expectedVersion, values, { versionColumn? }, trx?): Promise<Selectable>
-    //   versionColumn defaults to 'version'. Throws OptimisticLockError on mismatch.
-    //   Auto-bumps to expectedVersion + 1 on success.
-    updateOne(where, values, trx?): Promise<Selectable | undefined>
-    update(where, values, trx?): Promise<number>                   // rows affected
-    updateMany(ids[], values, trx?): Promise<number>               // delegates to update via { pk: ids }
-
-    deleteById(id, trx?): Promise<number>                          // rows affected
-    deleteByIdOrThrow(id, trx?): Promise<void>                     // throws NotFoundError
-    deleteMany(ids[], trx?): Promise<number>                       // delegates to delete via { pk: ids }
+    updateById(id, values, trx?): Promise<Entity | undefined>
+    updateByIdAndVersion(id, expectedVersion, values, { versionColumn? }, trx?): Promise<Entity>
+    updateOne(where, values, trx?): Promise<Entity | undefined>
+    update(where, values, trx?): Promise<number>
+    deleteById(id, trx?): Promise<number>
     delete(where, trx?): Promise<number>
 
-    // Slow-query reporting fires only when `logger.warn`/`logger.debug` exist or `onQuery` is set.
-    // Elapsed >= slowQueryMs → logger.warn + onQuery; otherwise logger.debug + onQuery.
-}
+    // Composition verbs — ALREADY implemented in terms of the leaf verbs. Do NOT re-stub;
+    // they start working the moment the verbs they call are implemented.
+    findByIdOrThrow(id, trx?): Promise<Entity>                     // findById → throws NotFoundError
+    findOneOrThrow(where, trx?): Promise<Entity>                   // findOne → throws NotFoundError
+    updateByIdOrThrow(id, values, trx?): Promise<Entity>           // updateById → throws NotFoundError
+    updateMany(ids[], values, trx?): Promise<number>               // update via { idField: ids }
+    deleteByIdOrThrow(id, trx?): Promise<void>                     // deleteById → throws NotFoundError
+    deleteMany(ids[], trx?): Promise<number>                       // delete via { idField: ids }
 
-interface SoftDeleteOptions extends BaseRepositoryOptions {
-    deletedAtColumn?: string                                        // default 'deleted_at'
-}
-
-abstract class SoftDeleteRepository<…> extends BaseRepository<…> {
-    protected constructor(kysely, table, pkColumn, opts?: SoftDeleteOptions)
-
-    findActiveById(id, trx?)
-    findActiveByIdOrThrow(id, trx?)                                 // throws NotFoundError
-    findManyActive(opts?, trx?)
-    paginateActive(opts?, trx?)
-    countActive(where?, trx?)
-    existsActive(where, trx?)
-
-    softDeleteById(id, trx?): Promise<number>
-    softDeleteByIdOrThrow(id, trx?): Promise<void>                  // throws NotFoundError
-    softDelete(where, trx?): Promise<number>
-    restoreById(id, trx?): Promise<number>
-    restore(where, trx?): Promise<number>
-}
-
-interface HookContext<DB> { trx?: Transaction<DB> }
-
-abstract class EntityService<DB, TB, PK, ID> {
-    protected constructor(repo: BaseRepository, kysely: Kysely<DB>)
-
-    get primaryKey(): PK
-    transaction<T>(cb: (trx) => Promise<T>): Promise<T>
-    protected withTrx<T>(trx, fn): Promise<T>                       // reuse trx if provided, else open one
-
-    // Hooks — override to inject before/after logic
-    protected beforeInsert(values, ctx: HookContext)
-    protected afterInsert(row, ctx: HookContext)
-    protected beforeUpdate(values, ctx: HookContext & { id? })
-    protected afterUpdate(row, ctx: HookContext & { id? })
-    protected beforeDelete(ctx: HookContext & { id?, where? })
-    protected afterDelete(count, ctx: HookContext & { id?, where? })
-
-    // Public surface — funnels through hooks where listed
-    insert(values, trx?)                                            // before/after hooks
-    upsert(values, opts, trx?)                                      // before/after hooks (reuses Insert hooks)
-    insertMany(values[], trx?)                                      // hooks parallel via Promise.all (skipped if not overridden)
-    findById | findByIdOrThrow | findByIdMany | findOne | findOneOrThrow
-    findMany | findManyWithCount | paginate | paginateCursor | exists | count
-    updateById(id, values, trx?)                                    // before/after hooks
-    updateByIdOrThrow(id, values, trx?)                             // before/after hooks
-    update(where, values, trx?)                                     // beforeUpdate only (no row to fire afterUpdate on)
-    updateOne(where, values, trx?)                                  // before/after hooks
-    deleteById | deleteByIdOrThrow                                  // before/after hooks
-    deleteMany(ids[], trx?)                                         // hooks fire once with { where: { pk: ids } }
-    delete(where, trx?)                                             // before/after hooks with ctx.where
+    // values / where / id are loose: Record<string, any> / Filter<Entity> / any.
+    // trx is an optional Driver — pass a transaction handle to enlist the call.
+    // Slow reporting fires only when `logger.warn`/`logger.debug` exist or `onOperation` is set.
+    // Elapsed >= slowQueryMs → logger.warn + onOperation; otherwise logger.debug + onOperation.
 }
 ```
 
-`insertMany` skips its hook walk when `beforeInsert` / `afterInsert` are not overridden (identity check against `EntityService.prototype`). Override the hook = pay the per-row promise; skip = single SQL round-trip with no JS overhead. `beforeInsert` / `beforeUpdate` MUST return the (possibly transformed) values — that's what the repo writes. `afterInsert` / `afterUpdate` MUST return the row.
+**Implementing a repository.** Override only the leaf verbs you use; the 6 composition verbs (`*OrThrow`, `updateMany`, `deleteMany`) are already written against the leaf verbs — they start working the moment those are implemented. Wrap data access in `this.time(label, fn)` so slow-query logging + the `onOperation` hook fire. Use `this.run(trx)` to pick the transaction handle when one is passed, else the base driver.
+
+```ts
+import { Pool } from 'pg'
+import { BaseRepository, type Filter } from '@toolcase/node'
+
+class UserRepository extends BaseRepository<User, Pool> {
+    constructor(pool: Pool) { super(pool, 'users', 'id', { slowQueryMs: 100 }) }
+
+    async insert(values: Record<string, any>, trx?: Pool): Promise<User> {
+        return this.time('insert', async () => {
+            const keys = Object.keys(values)
+            const cols = keys.map((k) => `"${k}"`).join(', ')
+            const ph = keys.map((_, i) => `$${i + 1}`).join(', ')
+            const { rows } = await this.run(trx).query(
+                `INSERT INTO "${this.source}" (${cols}) VALUES (${ph}) RETURNING *`,
+                keys.map((k) => values[k]),
+            )
+            return rows[0]
+        })
+    }
+
+    async findById(id: number, trx?: Pool): Promise<User | undefined> {
+        const { rows } = await this.run(trx).query(
+            `SELECT * FROM "${this.source}" WHERE "${this.idField}" = $1 LIMIT 1`, [id],
+        )
+        return rows[0]
+    }
+    // … findOne / findMany / paginate / update / delete / count: translate Filter & Sort to
+    // your dialect. Quote identifiers; bind values as params, never interpolate.
+}
+```
+
+```ts
+interface HookContext<Driver> { trx?: Driver }
+
+abstract class EntityService<Entity = any, Driver = unknown> {
+    protected constructor(repo: BaseRepository<Entity, Driver>, db: TransactionClient<Driver>)
+
+    get primaryKey(): string
+    transaction<T>(cb: (trx: Driver) => Promise<T>): Promise<T>
+    protected withTrx<T>(trx, fn): Promise<T>                       // reuse trx if provided, else open one
+
+    // Hooks — override to inject before/after logic
+    protected beforeInsert(values, ctx: HookContext<Driver>)
+    protected afterInsert(row, ctx)
+    protected beforeUpdate(values, ctx: HookContext<Driver> & { id? })
+    protected afterUpdate(row, ctx)
+    protected beforeDelete(ctx: HookContext<Driver> & { id?, where? })
+    protected afterDelete(count, ctx)
+
+    // Public surface — delegates to the repository, funneling through hooks where listed
+    insert(values, trx?)                                            // before/after Insert hooks
+    upsert(values, opts, trx?)                                      // before/after Insert hooks
+    insertMany(values[], trx?)                                      // hooks parallel via Promise.all (skipped if not overridden)
+    findById | findByIdOrThrow | findByIdMany | findOne | findOneOrThrow
+    findMany | findManyWithCount | paginate | paginateCursor | exists | count
+    updateById(id, values, trx?)                                    // before/after Update hooks
+    updateByIdOrThrow(id, values, trx?)                             // before/after Update hooks
+    update(where, values, trx?)                                     // beforeUpdate only (no row to fire afterUpdate on)
+    updateOne(where, values, trx?)                                  // before/after Update hooks
+    deleteById | deleteByIdOrThrow                                  // before/after Delete hooks
+    deleteMany(ids[], trx?)                                         // hooks fire once with { where: { idField: ids } }
+    delete(where, trx?)                                             // before/after Delete hooks with ctx.where
+}
+```
+
+`TransactionClient<Driver>` (from `@toolcase/node`) is the neutral transaction contract `EntityService` needs — `{ transaction<T>(fn: (trx: Driver) => Promise<T>): Promise<T> }`. Your adapter implements it (a `pg` pool wrapper, a Kysely `db.transaction()`, an in-memory shim). `EntityService` is **never used standalone** — it always wraps a concrete `BaseRepository`; only the repository's verb bodies know your engine.
+
+`insertMany` skips its hook walk when `beforeInsert` / `afterInsert` are not overridden (identity check against `EntityService.prototype`). `beforeInsert` / `beforeUpdate` MUST return the (possibly transformed) values — that's what the repository writes. `afterInsert` / `afterUpdate` MUST return the row.
 
 ---
 
@@ -504,12 +534,12 @@ interface RESTRouteHandlerOptions<T> extends RouteHandlerOptions<T> {
     methods?: ReadonlyArray<RESTMethod>                              // default: all 5
     filterableFields?: ReadonlyArray<keyof T & string>
     sortableFields?: ReadonlyArray<keyof T & string>
-    defaultOrderBy?: OrderBy<T> | OrderBy<T>[]
+    defaultOrderBy?: Sort<T> | Sort<T>[]
     allowEmptyPatch?: boolean                                        // default false → empty PATCH body returns 400
 }
 
-class RESTRouteHandler<DB, TB, PK, ID, T = Selectable<DB[TB]>> extends RouteHandler<T> {
-    constructor(service: EntityService<DB, TB, PK, ID>, options?: RESTRouteHandlerOptions<T>)
+class RESTRouteHandler<Row extends object = any> extends RouteHandler<Row> {
+    constructor(service: EntityService<Row>, options?: RESTRouteHandlerOptions<Row>)
     register(fastify: FastifyInstance): void
 }
 ```
@@ -532,26 +562,28 @@ Given a `EntityService`, registers full CRUD with sanitize + pagination + filter
 
 This guards against incidents like `?passwordHash[like]=%a%` — by default a schema-less RESTRouteHandler accepts no filters at all.
 
-**Empty PATCH guard.** A PATCH whose sanitized body is `{}` returns `400` (`ValidationError('Empty patch')`) instead of issuing a no-op `UPDATE … SET (empty)` (kysely throws). Opt in to the no-op with `allowEmptyPatch: true`.
+**Empty PATCH guard.** A PATCH whose sanitized body is `{}` returns `400` (`ValidationError('Empty patch')`) by default. Opt in with `allowEmptyPatch: true` to call `updateByIdOrThrow` with an empty patch instead — your repository implementation decides how to handle a no-op update.
 
 **bigint ID JSON hazard.** `idType: 'bigint'` parses `:id` to a `BigInt`. If the row carries a bigint column, Fastify's default `JSON.stringify` throws `TypeError: Do not know how to serialize a BigInt`. Override Fastify's reply serializer or coerce bigint columns to string in your sanitize layer — RESTRouteHandler cannot fix this transparently.
 
 **No endpoint-level success hooks.** Use `EntityService.afterInsert` / `afterUpdate` / `afterDelete` — they run inside the same transaction as the write, strictly stronger than a post-response endpoint hook.
 
 ```ts
-class UserService extends EntityService<DB, 'users', 'id', number> {
-    constructor(db: Kysely<DB>) { super(new UserRepo(db), db) }
+// `db` is a TransactionClient<Pool>; UserRepo extends BaseRepository<User, Pool> and
+// implements its verbs with SQL (see Repository → "Implementing a repository").
+class UserService extends EntityService<User, Pool> {
+    constructor(repo: UserRepo, db: TransactionClient<Pool>) { super(repo, db) }
 }
 
-class UserEndpoint extends RESTRouteHandler<DB, 'users', 'id', number> {}
+class UserEndpoint extends RESTRouteHandler<User> {}
 
-const endpoint = new UserEndpoint(new UserService(db), {
+const endpoint = new UserEndpoint(new UserService(new UserRepo(pool), db), {
     prefix: '/users',
     schema: userSchema,
     resourceName: 'User',
     filterableFields: ['email', 'status', 'createdAt'],
     sortableFields: ['createdAt', 'name'],
-    defaultOrderBy: { column: 'createdAt', direction: 'desc' },
+    defaultOrderBy: { field: 'createdAt', direction: 'desc' },
     canWrite: requireAuth(['admin']),       // group alias: create + update + delete
     canList: rateLimit({ rpm: 60 }),        // per-verb override; alias still applies to other verbs
     restrictedOutputFields: ['passwordHash'],
@@ -820,26 +852,29 @@ class SubscriberPool {
 ## End-to-end Example
 
 ```ts
-import { Kysely } from 'kysely'
+import { Pool } from 'pg'
 import { createClient } from 'redis'
 import Serializer from '@toolcase/serializer'
 
 import {
     RouteHandler, Router, HttpServer,
-    BaseRepository, EntityService,
+    BaseRepository, EntityService, type TransactionClient, type Filter,
     KVService,
     ConflictError, NotFoundError, RateLimitedError,
 } from '@toolcase/node'
 
-class UserRepo extends BaseRepository<DB, 'users', 'id', number> {
-    constructor(db: Kysely<DB>) { super(db, 'users', 'id') }
-    findByEmail(email: string) { return this.findOne({ email }) }
+// UserRepo implements the Postgres verbs over a pg Pool (see Repository → "Implementing a
+// repository"); findByEmail builds on the findOne it implements.
+class UserRepo extends BaseRepository<User, Pool> {
+    constructor(pool: Pool) { super(pool, 'users', 'id') }
+    findByEmail(email: string) { return this.findOne({ email } as Filter<User>) }
+    // insert / findOne / paginate / update / … implemented here with SQL
 }
 
-class UserService extends EntityService<DB, 'users', 'id', number> {
-    constructor(repo: UserRepo, db: Kysely<DB>, private kv: KVService) { super(repo, db) }
+class UserService extends EntityService<User, Pool> {
+    constructor(repo: UserRepo, db: TransactionClient<Pool>, private kv: KVService) { super(repo, db) }
 
-    protected async beforeInsert(values) {
+    protected async beforeInsert(values: Record<string, any>) {
         const taken = await (this.repository as UserRepo).findByEmail(values.email)
         if (taken) throw new ConflictError('User', `email taken: ${values.email}`)
         const rl = await this.kv.slidingWindow(`signup:${values.email}`, 5, 60_000)

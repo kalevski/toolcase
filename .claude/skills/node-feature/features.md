@@ -543,7 +543,7 @@ Failure modes:
 | Build an offset-paged response | `buildPage` |
 | Translate request filter to query | `applyWhere` + `WhereClause<T>` |
 | Translate request sort to query | `applyOrderBy` + `OrderBy<T>` |
-| CRUD on a Kysely table | subclass `BaseRepository` (or `SoftDeleteRepository`) |
+| CRUD on a Kysely table | subclass `BaseRepository` |
 | Hooks around CRUD | wrap repo with `EntityService` |
 | Bundle Fastify routes | subclass `RouteHandler`, compose with `Router` |
 | Mount + run a server | `HttpServer.add(...).init().run()` |

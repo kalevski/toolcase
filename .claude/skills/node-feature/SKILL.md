@@ -162,7 +162,7 @@ Then wire into `KVService` constructor as `readonly myThing: MyThing` and surfac
 
 ### Repository extension (`node/src/<Name>Repository.ts`)
 
-Extend `BaseRepository` (or `SoftDeleteRepository`); add domain-specific queries. Do not duplicate CRUD — that is `BaseRepository`'s job.
+Extend `BaseRepository`; add domain-specific queries. Do not duplicate CRUD — that is `BaseRepository`'s job.
 
 ### RouteHandler subclass (`node/src/<Name>RouteHandler.ts`)
 

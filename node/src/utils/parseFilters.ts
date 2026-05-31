@@ -1,6 +1,6 @@
 import { ValidationError } from '../errors'
 import { FieldRule, FieldSchema } from './sanitize'
-import { OP_KEY_SET, WhereClause, WhereOp } from './where'
+import { FILTER_OP_SET, Filter, FilterOp } from './filter'
 
 export type CoerceType = 'integer' | 'number' | 'boolean' | 'date'
 
@@ -20,7 +20,7 @@ const ARRAY_OPS: ReadonlySet<string> = new Set(['in', 'notIn'])
 export function parseFilters<T extends object = Record<string, unknown>>(
 	query: Record<string, unknown>,
 	options: ParseFiltersOptions<T> = {},
-): WhereClause<T> {
+): Filter<T> {
 	const reserved = new Set<string>(options.reservedKeys ?? DEFAULT_RESERVED)
 	const allowed = options.allowedFields ? new Set<string>(options.allowedFields) : null
 	const out: Record<string, unknown> = {}
@@ -49,10 +49,10 @@ export function parseFilters<T extends object = Record<string, unknown>>(
 			const condition: Record<string, unknown> = {}
 			let any = false
 			for (const [op, opValue] of opEntries) {
-				if (!OP_KEY_SET.has(op)) {
+				if (!FILTER_OP_SET.has(op)) {
 					throw new ValidationError(`Unknown filter op: ${key}[${op}]`)
 				}
-				const coerced = coerceOpValue(opValue, op as WhereOp, coerceType, key)
+				const coerced = coerceOpValue(opValue, op as FilterOp, coerceType, key)
 				if (coerced === DROP) continue
 				condition[op] = coerced
 				any = true
@@ -64,7 +64,7 @@ export function parseFilters<T extends object = Record<string, unknown>>(
 		out[key] = coerceLeaf(raw, coerceType, key, 'eq')
 	}
 
-	return out as WhereClause<T>
+	return out as Filter<T>
 }
 
 const DROP = Symbol('drop')
@@ -85,7 +85,7 @@ function resolveCoerceType<T extends object>(
 
 function coerceOpValue(
 	raw: unknown,
-	op: WhereOp,
+	op: FilterOp,
 	coerceType: CoerceType | undefined,
 	key: string,
 ): unknown {

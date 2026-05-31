@@ -1,7 +1,7 @@
 import { JSX } from 'react'
 import SanitizeDemo from './SanitizeDemo'
 import PaginationDemo from './PaginationDemo'
-import WhereOrderByDemo from './WhereOrderByDemo'
+import FilterSortDemo from './FilterSortDemo'
 import ErrorsDemo from './ErrorsDemo'
 import RepositoryDemo from './RepositoryDemo'
 import EndpointDemo from './EndpointDemo'
@@ -16,7 +16,7 @@ export type NodeExampleDef = {
 export const nodeExamples: NodeExampleDef[] = [
     { key: 'sanitize', label: 'API Sanitizer', element: <SanitizeDemo /> },
     { key: 'pagination', label: 'Pagination', element: <PaginationDemo /> },
-    { key: 'where-orderby', label: 'Where & OrderBy', element: <WhereOrderByDemo /> },
+    { key: 'filter-sort', label: 'Filter & Sort', element: <FilterSortDemo /> },
     { key: 'errors', label: 'Domain Errors', element: <ErrorsDemo /> },
     { key: 'repository', label: 'Repository', element: <RepositoryDemo /> },
     { key: 'endpoint', label: 'Endpoint', element: <EndpointDemo /> },

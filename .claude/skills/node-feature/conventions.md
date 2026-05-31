@@ -6,7 +6,7 @@ Authoritative style + structure contract for files under `node/src/` and `node/t
 
 ## Indent & whitespace
 
-- **`node/src/`: tabs.** Existing files (`errors.ts`, `RouteHandler.ts`, `HttpServer.ts`, `BaseRepository.ts`, `SoftDeleteRepository.ts`, `EntityService.ts`, `kv/*`, `utils/*`) all use tab-indent. The lone outlier is `node/src/env.ts` (4 spaces) — do not propagate that style.
+- **`node/src/`: tabs.** Existing files (`errors.ts`, `RouteHandler.ts`, `HttpServer.ts`, `BaseRepository.ts`, `EntityService.ts`, `kv/*`, `utils/*`) all use tab-indent. The lone outlier is `node/src/env.ts` (4 spaces) — do not propagate that style.
 - **`node/test/`: 4 spaces.** Matches `test/env.test.ts` and the rest of the monorepo's vitest layout.
 - **No trailing semicolons.** Project-wide via `.prettierrc` (`"semi": false`). Match the existing files.
 - One blank line between top-level statements (imports → types → class → export).

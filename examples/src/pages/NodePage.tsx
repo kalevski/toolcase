@@ -5,7 +5,7 @@ const peerInstall = `# RouteHandler / HttpServer
 npm install fastify @fastify/cors
 
 # BaseRepository / EntityService
-npm install kysely
+npm install pg   # or any { query } executor
 
 # KVService
 npm install redis @toolcase/serializer`
@@ -14,7 +14,7 @@ const subpathTable = `// One entrypoint — peers are optional, install only wha
 import {
     createAPISanitizer, NotFoundError, ValidationError, // utils + errors
     RouteHandler, HttpServer,                           // peers: fastify, @fastify/cors
-    BaseRepository, EntityService,                      // peer:  kysely
+    BaseRepository, EntityService,                      // peer:  pg (or any SQL executor)
     KVService,                                          // peers: redis, @toolcase/serializer
 } from '@toolcase/node'`
 
@@ -28,10 +28,10 @@ export const NodePage = () => {
                     name: 'node',
                     eyebrow: 'Library · Backend · Node',
                     tagline:
-                        'Backend helpers — Fastify endpoints, Kysely repositories, Redis KV service, isomorphic sanitize / pagination / domain-error helpers. One entrypoint, peers are optional so you only pay for what you import.',
+                        'Backend helpers — Fastify endpoints, raw-SQL repositories, Redis KV service, isomorphic sanitize / pagination / domain-error helpers. One entrypoint, peers are optional so you only pay for what you import.',
                     version: '1.0.0',
                     examples: nodeExamples.length,
-                    chips: ['Fastify', 'Kysely', 'Redis', 'ESM + CJS'],
+                    chips: ['Fastify', 'Postgres', 'Redis', 'ESM + CJS'],
                 }}
             />
             <InstallBlock pkg="@toolcase/node" />

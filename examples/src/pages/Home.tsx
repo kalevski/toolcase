@@ -91,7 +91,7 @@ const libs: LibCard[] = [
         key: 'node',
         scope: '@toolcase/',
         name: 'node',
-        tagline: 'Backend helpers — Fastify endpoints, Kysely repositories, Redis KV service, isomorphic sanitize/pagination utils.',
+        tagline: 'Backend helpers — Fastify endpoints, raw-SQL repositories, Redis KV service, isomorphic sanitize/pagination utils.',
         category: 'Backend · Node',
         version: '1.0.0',
         examples: nodeExamples.length,

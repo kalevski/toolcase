@@ -16,7 +16,6 @@ export default defineConfig({
         'fastify',
         '@fastify/cors',
         'jose',
-        'kysely',
         'redis',
         'sharp',
     ],

@@ -135,7 +135,7 @@ describe('RESTRouteHandler.list', () => {
         expect(state.paginate).toHaveBeenCalledTimes(1)
         const arg = state.paginate.mock.calls[0][0]
         expect(arg.where).toEqual({ email: 'foo', status: { in: ['a', 'b'] } })
-        expect(arg.orderBy).toEqual([{ column: 'createdAt', direction: 'desc' }])
+        expect(arg.orderBy).toEqual([{ field: 'createdAt', direction: 'desc' }])
         expect(arg.offset).toBe(0)
         expect(arg.limit).toBe(25)
     })
@@ -169,11 +169,11 @@ describe('RESTRouteHandler.list', () => {
     })
 
     it('falls back to defaultOrderBy when sort absent', async () => {
-        const { state, list } = setup({ defaultOrderBy: { column: 'createdAt', direction: 'desc' } })
+        const { state, list } = setup({ defaultOrderBy: { field: 'createdAt', direction: 'desc' } })
         state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
         const { reply } = makeReply()
         await list.handler(makeReq(), reply)
-        expect(state.paginate.mock.calls[0][0].orderBy).toEqual({ column: 'createdAt', direction: 'desc' })
+        expect(state.paginate.mock.calls[0][0].orderBy).toEqual({ field: 'createdAt', direction: 'desc' })
     })
 
     it('coerces filters via schema', async () => {

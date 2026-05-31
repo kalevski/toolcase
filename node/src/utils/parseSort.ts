@@ -1,5 +1,5 @@
 import { ValidationError } from '../errors'
-import { OrderBy } from './orderBy'
+import { Sort } from './sort'
 
 export interface ParseSortOptions<T extends object> {
 	allowedFields?: ReadonlyArray<keyof T & string>
@@ -8,14 +8,14 @@ export interface ParseSortOptions<T extends object> {
 export function parseSort<T extends object = Record<string, unknown>>(
 	query: Record<string, unknown>,
 	options: ParseSortOptions<T> = {},
-): OrderBy<T>[] | undefined {
+): Sort<T>[] | undefined {
 	const raw = query.sort
 	if (raw === undefined || raw === null || raw === '') return undefined
 	if (typeof raw !== 'string') {
 		throw new ValidationError(`Invalid sort: ${String(raw)}`)
 	}
 	const allowed = options.allowedFields ? new Set<string>(options.allowedFields) : null
-	const out: OrderBy<T>[] = []
+	const out: Sort<T>[] = []
 	for (const tokenRaw of raw.split(',')) {
 		const token = tokenRaw.trim()
 		if (token === '') continue
@@ -33,7 +33,7 @@ export function parseSort<T extends object = Record<string, unknown>>(
 		if (allowed && !allowed.has(column)) {
 			throw new ValidationError(`Unknown sort field: ${column}`)
 		}
-		out.push({ column: column as keyof T & string, direction })
+		out.push({ field: column as keyof T & string, direction })
 	}
 	if (out.length === 0) return undefined
 	return out

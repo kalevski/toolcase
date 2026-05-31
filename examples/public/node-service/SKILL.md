@@ -16,7 +16,7 @@ Stack baseline:
 - `fastify` v5 + `@fastify/cors` for HTTP.
 - `tsyringe` v4 + `reflect-metadata` for DI (constructor injection).
 - `tsup` → `dist/` single bundled ESM entry. SWC backend.
-- PostgreSQL via `kysely` query builder + `pg` pool. **No ORM** (no Prisma, TypeORM, Sequelize, Drizzle).
+- PostgreSQL via `kysely` query builder + `pg` pool, with repositories built on `@toolcase/node` `BaseRepository` (engine-agnostic — you implement the verbs with Kysely). **No ORM** (no Prisma, TypeORM, Sequelize, Drizzle).
 - Schema migrations **out-of-tree** (e.g. goose against `<repo>/migrations/<db>/`). Never inside the project.
 - One process = one HTTP server + one DB pool + at most one Rivalis instance.
 
@@ -30,7 +30,7 @@ Optional packages that slot into this scaffold. Use what fits.
   - `HTTP.RESTResponse` / `HTTP.RESTError` / `HTTP.Status` for every router response.
   Optional: `Cache`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `ObjectPool`, `JSONSchema` validation, `PriorityQueue`, `VectorClock`, `Color`, `Dijkstra`, `AStar`, `WeightedRandom`, `Packing.Packer`. Live in `util/` or `services/`.
 
-- **`@toolcase/node`** — Backend helpers. Mandatory: `env(name, default, type)` for every env var read in `src/env.ts`. Optional: `HttpServer` wrapper, `BaseRepository` / `SoftDeleteRepository` (Kysely), `EntityService`, `KVService` (Redis), `ImageProcessor` (sharp), `AtlasBuilder`, `OAuth2` helpers, `RESTRouteHandler`. Peer-deps `@toolcase/base`, `fastify`, `kysely`, `redis`, `sharp`, `jose` declared optional — install only what you use.
+- **`@toolcase/node`** — Backend helpers. Mandatory: `env(name, default, type)` for every env var read in `src/env.ts`. Recommended for the db layer: `BaseRepository` (engine-agnostic — ships no queries; you implement the verbs with Kysely, see `db/`) + `EntityService` (before/after hooks) + `RESTRouteHandler` (auto-CRUD over an `EntityService`). Also: `HttpServer` wrapper, `KVService` (Redis), `ImageProcessor` (sharp), `AtlasBuilder`, `OAuth2` helpers. Peer-deps `@toolcase/base`, `fastify`, `redis`, `sharp`, `jose` declared optional — install only what you use. `BaseRepository` is driver-free: pass it your Kysely instance, `kysely` stays the project's own dep.
 
 - **`@toolcase/logging`** — Isomorphic logger. Mandatory. One named logger per class: `logging.getLogger('Database')`, `logging.getLogger('Http')`, `logging.getLogger('UserService')`. Configure level + reporters once at boot in `index.ts` (default reporter is console; swap via custom `LogReporter`, `JSONLineReporter`, `BufferedReporter`, or `FileLogReporter` from `@toolcase/logging/node`).
 
@@ -154,7 +154,7 @@ Path inside `src/` is the layer; what's inside the file is its responsibility.
 |---|---|---|
 | `routers/` | `services/`, `domain/`, `container` (`resolve` only), Fastify | `db/`, repositories directly |
 | `services/` | `db/repositories/`, `domain/`, other `services/`, `wire/`, `realtime/` (publish-only API) | `routers/`, Fastify, `container` |
-| `db/repositories/` | `db/Database`, `db/schema`, `domain/` | `services/`, `routers/` |
+| `db/repositories/` | `db/Database`, `db/schema`, `domain/`, `@toolcase/node` (`BaseRepository`) | `services/`, `routers/` |
 | `db/Database.ts` | `pg`, `kysely`, `env` | anything app-specific |
 | `domain/` | nothing app-specific | everything (innermost core) |
 | `realtime/` | `services/`, `domain/`, `wire/`, `@rivalis/core` | `routers/`, `db/repositories/` directly |
@@ -464,11 +464,11 @@ Rules:
 
 ### db/
 
-Kysely-on-Postgres. Three things live here:
+Kysely-on-Postgres, with repositories built on `@toolcase/node` `BaseRepository`. Three things live here:
 
-1. `Database.ts` — owns the `pg.Pool` and the typed Kysely instance.
+1. `Database.ts` — owns the `pg.Pool` and the typed Kysely instance, and exposes a `transaction()` (it doubles as the `TransactionClient` for `EntityService`).
 2. `schema.ts` — the TypeScript mirror of the out-of-tree SQL schema.
-3. `repositories/<Domain>Repository.ts` — one per aggregate root.
+3. `repositories/<Domain>Repository.ts` — one per aggregate root, each `extends BaseRepository<Row, Kysely<DatabaseSchema>>`.
 
 **`db/migrations/`, `db/migrate.ts`, `migrate:up` script — all forbidden.** Schema is owned by the out-of-tree `migrations/<db>/` directory (managed via goose or your team's chosen tool) and is applied as a deploy step. When the SQL changes, update `schema.ts` here in the same PR.
 
@@ -520,6 +520,12 @@ export class Database {
     async dispose(): Promise<void> {
         await this.kysely?.destroy()
     }
+
+    // TransactionClient<Kysely<DatabaseSchema>> — hand to EntityService, or use directly to
+    // compose a transaction and pass `trx` down to repository verbs.
+    transaction<T>(fn: (trx: Kysely<DatabaseSchema>) => Promise<T>): Promise<T> {
+        return this.kysely.transaction().execute(fn)
+    }
 }
 ```
 
@@ -570,59 +576,70 @@ One repository per aggregate root. `@injectable`. One job: turn a business-meani
 // src/db/repositories/UserRepository.ts
 import { inject, injectable } from 'tsyringe'
 import { Kysely } from 'kysely'
+import { BaseRepository, type Filter } from '@toolcase/node'
 import { Database } from '../Database'
 import type { DatabaseSchema, NewUser, User, UserUpdate } from '../schema'
 
+// Driver = the Kysely instance. `run(trx)` returns the trx the service passes, else the
+// base Kysely. Implement the verbs you use with Kysely; the composition verbs
+// (findByIdOrThrow, updateMany, deleteMany, …) are inherited from BaseRepository.
 @injectable()
-export class UserRepository {
+export class UserRepository extends BaseRepository<User, Kysely<DatabaseSchema>> {
 
-    constructor(@inject(Database) private database: Database) {}
+    constructor(@inject(Database) database: Database) {
+        super(database.kysely, 'users', 'id')
+    }
 
-    private resolve(trx?: Kysely<DatabaseSchema>) {
-        return trx ?? this.database.kysely
+    async insert(values: NewUser, trx?: Kysely<DatabaseSchema>): Promise<User> {
+        return this.time('insert', () => this.run(trx).insertInto('users')
+            .values(values).returningAll().executeTakeFirstOrThrow())
     }
 
     async findById(id: string, trx?: Kysely<DatabaseSchema>): Promise<User | undefined> {
-        return this.resolve(trx).selectFrom('users')
-            .selectAll()
-            .where('id', '=', id)
-            .executeTakeFirst()
+        return this.run(trx).selectFrom('users').selectAll()
+            .where('id', '=', id).executeTakeFirst()
     }
 
-    async insert(input: NewUser, trx?: Kysely<DatabaseSchema>): Promise<User> {
-        return this.resolve(trx).insertInto('users')
-            .values(input)
-            .returningAll()
-            .executeTakeFirstOrThrow()
-    }
-
-    async update(id: string, patch: UserUpdate, trx?: Kysely<DatabaseSchema>): Promise<User | undefined> {
-        return this.resolve(trx).updateTable('users')
+    async updateById(id: string, patch: UserUpdate, trx?: Kysely<DatabaseSchema>): Promise<User | undefined> {
+        return this.run(trx).updateTable('users')
             .set({ ...patch, updatedAt: new Date() })
-            .where('id', '=', id)
-            .returningAll()
-            .executeTakeFirst()
+            .where('id', '=', id).returningAll().executeTakeFirst()
     }
 
     async deleteById(id: string, trx?: Kysely<DatabaseSchema>): Promise<number> {
-        const result = await this.resolve(trx).deleteFrom('users')
-            .where('id', '=', id)
-            .executeTakeFirst()
+        const result = await this.run(trx).deleteFrom('users').where('id', '=', id).executeTakeFirst()
         return Number(result.numDeletedRows)
+    }
+
+    // findOne translates the engine-neutral Filter into Kysely. Support only the operators
+    // you expose; a shared applyFilter(qb, where) helper scales this across repositories.
+    async findOne(where: Filter<User>, trx?: Kysely<DatabaseSchema>): Promise<User | undefined> {
+        let qb = this.run(trx).selectFrom('users').selectAll()
+        for (const [field, value] of Object.entries(where)) {
+            qb = qb.where(field as keyof User & string, '=', value as never)   // eq-only example
+        }
+        return qb.executeTakeFirst()
+    }
+
+    // Custom domain finder — builds on findOne.
+    findByEmail(email: string, trx?: Kysely<DatabaseSchema>) {
+        return this.findOne({ email } as Filter<User>, trx)
     }
 }
 ```
 
 Rules:
 
-- Every method takes an **optional `trx`** as the last parameter. The service passes the transaction handle down when composing multi-statement operations. No AsyncLocalStorage, no proxy-based ambient transaction tricks.
-- **Return materialized rows** — never the Kysely builder. Materialize with `execute()` / `executeTakeFirst()` / `executeTakeFirstOrThrow()` inside the repository.
+- **Extend `BaseRepository<Row, Kysely<DatabaseSchema>>`.** Pass `database.kysely` as the driver in `super(...)`. Implement the leaf verbs you use (`insert`, `findById`, `findOne`, `updateById`, `deleteById`, plus `findMany`/`paginate` for list endpoints). The 6 composition verbs (`findByIdOrThrow`, `findOneOrThrow`, `updateByIdOrThrow`, `updateMany`, `deleteByIdOrThrow`, `deleteMany`) are inherited — **never re-implement them.**
+- **`run(trx)` resolves the handle** — the `trx` the service passes, else the base Kysely. Every verb takes the optional `trx: Kysely<DatabaseSchema>` (the Driver) last. No AsyncLocalStorage, no ambient-transaction tricks.
+- **Wrap verbs in `this.time(label, fn)`** so slow-query logging + the `onOperation` hook fire (configure `slowQueryMs` / `logger` / `onOperation` via the options arg of `super(...)`).
+- **Translate `Filter` / `Sort` to Kysely** inside `findOne` / `findMany` / `paginate`. Support only the operators you expose; a shared `applyFilter(qb, where)` / `applySort(qb, orderBy)` helper keeps it DRY. These are the same `Filter` / `Sort` that `RESTRouteHandler` parses from the query string — implement them and a domain gets CRUD+list endpoints for free.
+- **Return materialized rows** — never the Kysely builder. Materialize with `execute()` / `executeTakeFirst()` / `executeTakeFirstOrThrow()` inside the verb.
 - **No business logic.** "If admin then X" belongs in the service.
-- **Throw nothing intentionally.** Let pg/Kysely throw on actual errors. Return `undefined` for "not found"; the service decides whether that's a `NotFoundError`.
-- **`OrThrow` for inserts.** `INSERT ... RETURNING *` always returns a row; using the non-throw variant gives `User | undefined` and forces a non-null assertion downstream.
-- **Pagination** — `(limit: number, before?: Date)` cursor pair or `{ limit, offset }`. Define explicitly.
+- **Return `undefined` for not-found** from the leaf verbs; the service maps it to a domain `AppError` (the blueprint pattern). The inherited `*OrThrow` verbs raise `@toolcase/node`'s `NotFoundError` instead — if you call them, teach the router's `sendError` to map `@toolcase/node` errors via `errorMeta`, or stick to the non-throwing verbs.
+- **`executeTakeFirstOrThrow` for inserts.** `INSERT ... RETURNING *` always returns a row; the non-throw variant gives `Row | undefined` and forces a non-null assertion downstream.
 - **Joins** — Kysely's `.innerJoin` / `.leftJoin` infer types. When the projection isn't a single table's row shape, declare a return-type alias next to the method.
-- **Raw SQL escape hatch** — for window functions, recursive CTEs, full-text, `LATERAL` joins, use `sql<T>\`...\`.execute(this.db)`. The generic is the row shape; **no compile-time check against `DatabaseSchema`** — be careful with column names.
+- **Raw SQL escape hatch** — for window functions, recursive CTEs, full-text, `LATERAL` joins, use `sql<T>\`...\`.execute(this.run(trx))`. The generic is the row shape; **no compile-time check against `DatabaseSchema`** — be careful with column names.
 - **No `SELECT *` in hot paths.** `.selectAll()` reads well but `.select(['id', 'email'])` is faster, narrower, and makes future column additions opt-in.
 
 ### realtime/ (optional)
@@ -763,7 +780,7 @@ export class SignupService {
     ) {}
 
     async signUp(input: SignupInput) {
-        return this.database.kysely.transaction().execute(async (trx) => {
+        return this.database.transaction(async (trx) => {       // trx: Kysely<DatabaseSchema>
             const user = await this.users.insert(input, trx)
             await this.audits.recordSignup(user.id, trx)
             return user
@@ -835,7 +852,7 @@ Skipping a layer is a smell. Routers don't import repositories. Services don't i
 
 1. **Migration first** — write the SQL in `<repo>/migrations/<db>/`. Apply it (deploy step / local goose).
 2. **Schema mirror** — add the table interface + `Selectable`/`Insertable`/`Updateable` aliases to `src/db/schema.ts`. Add the table to `DatabaseSchema`.
-3. **Repository** — `src/db/repositories/<Domain>Repository.ts`. Methods: `findById`, `insert`, `update`, `deleteById`, plus any business-meaningful query (`findActiveSince`, `listByOwner`). Each accepts optional `trx`.
+3. **Repository** — `src/db/repositories/<Domain>Repository.ts`, `extends BaseRepository<Row, Kysely<DatabaseSchema>>`. Implement the verbs you use (`insert`, `findById`, `findOne`, `updateById`, `deleteById`, plus `findMany`/`paginate` for list endpoints) with Kysely; the composition verbs are inherited. Add any business-meaningful query (`findActiveSince`, `listByOwner`). Each accepts optional `trx: Kysely<DatabaseSchema>`.
 4. **Domain types/errors** — if the domain has its own errors (e.g. `QuotaExceededError`), add to `domain/errors.ts`.
 5. **Service** — `src/services/<Domain>Service.ts`. `@injectable`, constructor-injects the repo, throws `AppError` subclasses, returns mapped DTOs.
 6. **Router** — `src/routers/<domain>Router.ts`. Register inside `v1Router` with `{ prefix: '/<domain>' }`.
@@ -942,7 +959,9 @@ Boot order: `http.init()` → `realtime.init()` (attaches `upgrade` listener to 
 - ❌ Constant-time ticket compare with `===` / `Buffer.compare`. → `crypto.timingSafeEqual`.
 - ❌ Topics starting with `__`. → Reserved by the framework.
 - ❌ Adding a top-level `src/` folder beyond the documented set without justification.
-- ❌ Returning a Kysely query builder from a repository. → Materialize inside the repository.
+- ❌ Returning a Kysely query builder from a repository. → Materialize inside the verb.
+- ❌ Re-implementing `BaseRepository`'s composition verbs (`findByIdOrThrow`, `updateMany`, `deleteMany`, …). → Inherited; implement only the leaf verbs they call.
+- ❌ A repository that doesn't extend `BaseRepository`. → Repositories are `BaseRepository<Row, Kysely<DatabaseSchema>>` subclasses — that's how they plug into `EntityService` / `RESTRouteHandler`.
 - ❌ `executeTakeFirst()` for an `INSERT ... RETURNING *`. → Use `executeTakeFirstOrThrow()`.
 - ❌ `WHERE` clauses in services. → Push down into a named repository method.
 - ❌ Manual `JSON.stringify` for `jsonb` columns when the `ColumnType` already declares the round-trip. → Pass an object, read an object.

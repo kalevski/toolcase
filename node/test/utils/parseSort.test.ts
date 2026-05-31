@@ -19,35 +19,35 @@ describe('parseSort', () => {
     })
 
     it('parses single asc', () => {
-        expect(parseSort({ sort: 'name' })).toEqual([{ column: 'name', direction: 'asc' }])
+        expect(parseSort({ sort: 'name' })).toEqual([{ field: 'name', direction: 'asc' }])
     })
 
     it('parses leading - as desc', () => {
-        expect(parseSort({ sort: '-createdAt' })).toEqual([{ column: 'createdAt', direction: 'desc' }])
+        expect(parseSort({ sort: '-createdAt' })).toEqual([{ field: 'createdAt', direction: 'desc' }])
     })
 
     it('parses leading + as asc', () => {
-        expect(parseSort({ sort: '+name' })).toEqual([{ column: 'name', direction: 'asc' }])
+        expect(parseSort({ sort: '+name' })).toEqual([{ field: 'name', direction: 'asc' }])
     })
 
     it('parses csv list with mixed directions', () => {
         expect(parseSort({ sort: '-createdAt,name' })).toEqual([
-            { column: 'createdAt', direction: 'desc' },
-            { column: 'name', direction: 'asc' },
+            { field: 'createdAt', direction: 'desc' },
+            { field: 'name', direction: 'asc' },
         ])
     })
 
     it('tolerates whitespace', () => {
         expect(parseSort({ sort: '  -createdAt , name  ' })).toEqual([
-            { column: 'createdAt', direction: 'desc' },
-            { column: 'name', direction: 'asc' },
+            { field: 'createdAt', direction: 'desc' },
+            { field: 'name', direction: 'asc' },
         ])
     })
 
     it('skips empty tokens', () => {
         expect(parseSort({ sort: 'a,,b' })).toEqual([
-            { column: 'a', direction: 'asc' },
-            { column: 'b', direction: 'asc' },
+            { field: 'a', direction: 'asc' },
+            { field: 'b', direction: 'asc' },
         ])
     })
 
@@ -57,7 +57,7 @@ describe('parseSort', () => {
 
     it('accepts allowed field', () => {
         expect(parseSort<Row>({ sort: '-createdAt' }, { allowedFields: ['createdAt'] }))
-            .toEqual([{ column: 'createdAt', direction: 'desc' }])
+            .toEqual([{ field: 'createdAt', direction: 'desc' }])
     })
 
     it('throws on non-string sort', () => {

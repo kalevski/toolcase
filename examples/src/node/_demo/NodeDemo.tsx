@@ -32,6 +32,33 @@ export const captureLogs = (fn: () => void): LogEntry[] => {
     return entries
 }
 
+export const captureLogsAsync = async (fn: () => Promise<void>): Promise<LogEntry[]> => {
+    const entries: LogEntry[] = []
+    const orig = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+    }
+    const stringify = (a: unknown) => {
+        if (a === undefined) return 'undefined'
+        if (typeof a === 'object') {
+            try { return JSON.stringify(a, null, 2) } catch { return String(a) }
+        }
+        return String(a)
+    }
+    const push = (level: string) => (...args: unknown[]) =>
+        entries.push({ time: ts(), text: args.map(stringify).join(' '), level })
+    console.log = push('info')
+    console.warn = push('warning')
+    console.error = push('error')
+    try { await fn() } finally {
+        console.log = orig.log
+        console.warn = orig.warn
+        console.error = orig.error
+    }
+    return entries
+}
+
 export const ConsoleOutput = ({ logs }: { logs: LogEntry[] }) =>
     logs.length > 0 ? (
         <pre className="console-output">
