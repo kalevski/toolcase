@@ -5,8 +5,12 @@
 	backdrop-filter: none;
 	background-color: var(--cool-nav-bg);
 	box-shadow: none;
-	padding: var(--tc-space-4) var(--tc-space-6);
+	padding: var(--tc-space-3) var(--tc-space-4); // mobile
 	position: relative;
+
+	@media (min-width: 992px) {
+		padding: var(--tc-space-4) var(--tc-space-6);
+	}
 	transition:
 		background-color 0.3s ease,
 		backdrop-filter 0.3s ease,
@@ -16,18 +20,18 @@
 	z-index: 1030;
 }
 
-.component-cool-nav--sticky {
+.component-cool-nav.component-cool-nav--sticky {
 	position: sticky;
 	top: 0;
 	left: 0;
 	right: 0;
 }
 
-.component-cool-nav--default-bg {
+.component-cool-nav.component-cool-nav--default-bg {
 	background-color: var(--cool-nav-bg);
 }
 
-.component-cool-nav--scrolled {
+.component-cool-nav.component-cool-nav--scrolled {
 	--cool-nav-bg: rgba(var(--tc-surface-rgb), 0.85);
 	backdrop-filter: blur(16px);
 	box-shadow: var(--cool-nav-shadow);
@@ -50,6 +54,28 @@
 	display: flex;
 	font-weight: 600;
 	gap: var(--tc-space-3);
+	margin-right: var(--tc-space-2); // mobile
+
+	@media (min-width: 992px) {
+		margin-right: 0;
+	}
+}
+
+// Collapsed-menu behavior (mobile): cap the open menu height and let it scroll.
+// Harmless above the expand breakpoint — the expanded bar never reaches the cap.
+.component-cool-nav .navbar-collapse.show {
+	max-height: calc(100vh - 60px);
+	overflow-y: auto;
+}
+
+.component-cool-nav__items {
+	margin-top: var(--tc-space-5); // mobile: stacked below brand
+	text-align: center;
+
+	@media (min-width: 992px) {
+		margin-top: 0;
+		text-align: start;
+	}
 }
 
 .component-cool-nav__items .nav-link {
@@ -67,29 +93,11 @@
 .component-cool-nav__actions {
 	align-items: center;
 	gap: var(--tc-space-3);
-}
+	justify-content: center; // mobile: centered under menu
+	margin-top: var(--tc-space-4);
 
-@media (max-width: 991.98px) {
-	.component-cool-nav {
-		padding: var(--tc-space-3) var(--tc-space-4);
-	}
-
-	.component-cool-nav .navbar-collapse.show {
-		max-height: calc(100vh - 60px);
-		overflow-y: auto;
-	}
-
-	.component-cool-nav__items {
-		margin-top: var(--tc-space-5);
-		text-align: center;
-	}
-
-	.component-cool-nav__actions {
-		justify-content: center;
-		margin-top: var(--tc-space-4);
-	}
-
-	.component-cool-nav__brand {
-		margin-right: var(--tc-space-2);
+	@media (min-width: 992px) {
+		justify-content: flex-start;
+		margin-top: 0;
 	}
 }

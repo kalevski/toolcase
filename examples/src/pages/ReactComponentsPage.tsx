@@ -1,5 +1,6 @@
 import { Breadcrumbs, CategorySection, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
 import { examples, categories } from '../react-components/index'
+import { versions } from '../versions'
 
 const formatLabel = (key: string) =>
     key.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
@@ -15,7 +16,7 @@ export const ReactComponentsPage = () => {
                     eyebrow: 'Library · UI · React',
                     tagline:
                         'React UI components built on Bootstrap 5 — typography, inputs, layout, navigation, charts, data display, marketing surfaces.',
-                    version: '3.0.2',
+                    version: versions['react-components'],
                     examples: examples.length,
                     chips: ['React 18+', 'Bootstrap 5', 'TypeScript'],
                 }}

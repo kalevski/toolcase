@@ -8,9 +8,9 @@
 	line-height: 1.3;
 	margin: 0;
 
-	&.component-heading--h1 { font-size: 2rem; }
-	&.component-heading--h2 { font-size: 1.5rem; }
-	&.component-heading--h3 { font-size: 1.25rem; }
+	&.component-heading--h1 { font-size: 1.5rem; }
+	&.component-heading--h2 { font-size: 1.25rem; }
+	&.component-heading--h3 { font-size: 1.1rem; }
 	&.component-heading--h4 { font-size: 1.1rem; }
 	&.component-heading--h5 { font-size: 0.95rem; }
 	&.component-heading--h6 { font-size: 0.85rem; }
@@ -22,9 +22,9 @@
 		background-clip: text;
 	}
 
-	@media (max-width: 575px) {
-		&.component-heading--h1 { font-size: 1.5rem; }
-		&.component-heading--h2 { font-size: 1.25rem; }
-		&.component-heading--h3 { font-size: 1.1rem; }
+	@media (min-width: 576px) {
+		&.component-heading--h1 { font-size: 2rem; }
+		&.component-heading--h2 { font-size: 1.5rem; }
+		&.component-heading--h3 { font-size: 1.25rem; }
 	}
 }

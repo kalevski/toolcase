@@ -8,3 +8,11 @@
         min-height: 2.5rem;
     }
 }
+
+// Touch targets (WCAG 2.5.5) — keep parity with the central coarse block in
+// _bootstrap.scss; this outranks the 2.5rem rule above on a later-source tie.
+@media (pointer: coarse) {
+    .component-input input {
+        min-height: 44px;
+    }
+}

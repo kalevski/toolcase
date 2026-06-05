@@ -31,6 +31,8 @@ export const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
+		// Enter in the input bypasses the disabled CTA — apply the same guard here.
+		if (!email.trim() || status === 'submitting') return
 		setStatus('submitting')
 		setError(null)
 		try {
@@ -55,6 +57,13 @@ export const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
 				<div className="component-newsletter-signup__success" role="status">
 					<Icon name="check-circle-fill" aria-hidden={true} />
 					{successMessage}
+					<button
+						type="button"
+						className="component-newsletter-signup__reset"
+						onClick={() => setStatus('idle')}
+					>
+						Subscribe another email
+					</button>
 				</div>
 			) : (
 				<form className="component-newsletter-signup__form" onSubmit={handleSubmit} noValidate>

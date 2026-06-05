@@ -171,7 +171,7 @@
     &__option-name { flex: 1; }
     &__option-dial { color: var(--ph-muted); white-space: nowrap; }
 
-    &--disabled {
+    &.component-phone-input--disabled {
         opacity: 0.6;
         pointer-events: none;
     }

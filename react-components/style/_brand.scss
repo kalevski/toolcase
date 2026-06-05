@@ -1,27 +1,15 @@
-@use 'sass:string';
-
+// Brand gradient endpoints. The legacy IE9 `progid:DXImageTransform` mixin,
+// `ie-hex-str` helper, and vendor-prefixed gradients were removed (node >= 18 /
+// modern-browser library; improvements/02). Runtime consumers should prefer
+// the --tc-gradient-brand token.
 $primary-gradient-angle: 90deg !default;
 $primary-gradient-start: hsla(280, 95%, 57%, 1) !default;
 $primary-gradient-end: hsla(193, 90%, 55%, 1) !default;
-
-@function primary-hex-str($color) {
-	$ie-hex: ie-hex-str($color);
-	$short: string.slice($ie-hex, 4);
-	@return unquote('##{$short}');
-}
 
 @mixin primary-gradient-background(
 	$angle: $primary-gradient-angle,
 	$start: $primary-gradient-start,
 	$end: $primary-gradient-end
 ) {
-	$start-hex: primary-hex-str($start);
-	$end-hex: primary-hex-str($end);
-	background: $start;
 	background: linear-gradient($angle, $start 0%, $end 100%);
-	background: -moz-linear-gradient($angle, $start 0%, $end 100%);
-	background: -webkit-linear-gradient($angle, $start 0%, $end 100%);
-	filter: unquote(
-		'progid:DXImageTransform.Microsoft.gradient(startColorstr="#{$start-hex}", endColorstr="#{$end-hex}", GradientType=1)'
-	);
 }

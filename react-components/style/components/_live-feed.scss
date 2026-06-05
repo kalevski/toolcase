@@ -44,6 +44,13 @@
     display: inline-block;
 }
 
+// Newest rows render first; consumers cap the feed with --lf-max-height to
+// make it scroll (scrollTop 0 = newest). Without a cap this is inert.
+.component-live-feed__body {
+    max-height: var(--lf-max-height, none);
+    overflow-y: auto;
+}
+
 .component-live-feed__row {
     display: grid;
     grid-template-columns: 60px 1fr;

@@ -97,3 +97,16 @@
 		margin-left: var(--tc-space-2);
 	}
 }
+
+// Touch targets: expand the collapse button's hit area without growing it visually
+@media (pointer: coarse) {
+	.component-group__collapse {
+		position: relative;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: -11px; // 22px visual + 22px = 44px hit area
+		}
+	}
+}

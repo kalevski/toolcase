@@ -13,6 +13,8 @@ export interface VersionPickerProps extends Omit<React.HTMLAttributes<HTMLDivEle
 	versions: VersionOption[]
 	value: string
 	onChange: (value: string) => void
+	/** Submit the selected version in native <form> posts (select gets it directly; segmented adds a hidden input). */
+	name?: string
 	variant?: 'segmented' | 'dropdown'
 }
 
@@ -20,6 +22,7 @@ export const VersionPicker: React.FC<VersionPickerProps> = ({
 	versions,
 	value,
 	onChange,
+	name,
 	variant = 'segmented',
 	className = '',
 	...rest
@@ -35,6 +38,7 @@ export const VersionPicker: React.FC<VersionPickerProps> = ({
 					<span className="component-version-picker__label-text">Version</span>
 					<select
 						className="component-version-picker__select"
+						name={name}
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
 					>
@@ -54,6 +58,7 @@ export const VersionPicker: React.FC<VersionPickerProps> = ({
 
 	return (
 		<div className={rootClass} role="radiogroup" aria-label="Version" {...rest}>
+			{name && <input type="hidden" name={name} value={current.value} />}
 			{versions.map((v) => {
 				const isActive = v.value === current.value
 				return (

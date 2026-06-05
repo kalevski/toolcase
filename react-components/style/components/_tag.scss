@@ -48,8 +48,11 @@
 		opacity: 1;
 	}
 
-	@media (max-width: 575px) {
-		min-width: 1.75rem;
-		min-height: 1.75rem;
+	min-width: 1.75rem;
+	min-height: 1.75rem;
+
+	@media (min-width: 576px) {
+		min-width: auto;
+		min-height: auto;
 	}
 }

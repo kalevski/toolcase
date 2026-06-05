@@ -4,7 +4,8 @@
 
 .component.component-login {
     display: flex;
-    min-height: 100vh;
+    flex-direction: column;
+    min-height: auto;
     width: 100%;
     color: var(--tc-accent-hover);
     background: var(--tc-surface);
@@ -12,7 +13,8 @@
 
 .component-login__left {
     position: relative;
-    flex: 1 1 50%;
+    flex: 0 0 220px;
+    min-height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -55,11 +57,11 @@
 }
 
 .component-login__right {
-    flex: 1 1 50%;
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(2rem, 5vw, 3rem);
+    padding: var(--tc-space-7) var(--tc-space-6);
     background: var(--tc-surface);
 }
 
@@ -150,20 +152,20 @@
     white-space: nowrap;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
     .component.component-login {
-        flex-direction: column;
-        min-height: auto;
+        flex-direction: row;
+        min-height: 100vh;
     }
 
     .component-login__left {
-        flex: 0 0 220px;
-        min-height: 220px;
+        flex: 1 1 50%;
+        min-height: auto;
     }
 
     .component-login__right {
-        flex: 1 1 auto;
-        padding: var(--tc-space-7) var(--tc-space-6);
+        flex: 1 1 50%;
+        padding: clamp(2rem, 5vw, 3rem);
     }
 }
 

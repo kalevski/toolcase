@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Skeleton } from './Skeleton'
-import { useClickOutside } from './hooks/useClickOutside'
+import { usePopup } from './hooks/usePopup'
 
 export type ColorOption = {
 	hex: string
@@ -35,9 +35,8 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 }) => {
 	const initial = value || getHex(colors[0])
 	const [selected, setSelected] = useState(initial)
-	const [open, setOpen] = useState(false)
 	const [hexInput, setHexInput] = useState(initial)
-	const rootRef = useRef<HTMLDivElement>(null)
+	const popup = usePopup<HTMLDivElement, HTMLButtonElement>({ arrowNav: true })
 
 	useEffect(() => {
 		if (value !== undefined && value !== selected) {
@@ -46,12 +45,10 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 		}
 	}, [value])
 
-	useClickOutside(rootRef, () => setOpen(false))
-
 	const handleSelect = (color: string) => {
 		setSelected(color)
 		setHexInput(color)
-		setOpen(false)
+		popup.close()
 		if (onChange) onChange(color)
 	}
 
@@ -76,21 +73,21 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 	}
 
 	return (
-		<div className={`component component-color-picker${className ? ` ${className}` : ''}`} ref={rootRef}>
+		<div className={`component component-color-picker${className ? ` ${className}` : ''}`} ref={popup.rootRef}>
 			{label && <label className="component-color-picker__label">{label}</label>}
 			<button
 				type="button"
 				className="component-color-picker__trigger"
-				onClick={() => setOpen((o) => !o)}
+				{...popup.triggerProps}
 			>
 				<span className="component-color-picker__swatch" style={{ background: selected }} />
 				<span className="component-color-picker__hex_label">{getLabel(colors.find(c => getHex(c) === selected) || selected)}</span>
 			</button>
-			{open && (
-				<div className="component-color-picker__dropdown">
+			{popup.open && (
+				<div className="component-color-picker__dropdown" {...popup.popupProps}>
 					<div
 						className="component-color-picker__grid"
-						style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+						style={{ '--cp-cols': columns } as React.CSSProperties}
 					>
 						{colors.map((option) => (
 							<button
@@ -100,6 +97,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 								style={{ background: getHex(option) }}
 								onClick={() => handleSelect(getHex(option))}
 								title={getLabel(option)}
+								aria-label={getLabel(option)}
 							/>
 						))}
 					</div>

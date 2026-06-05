@@ -161,7 +161,7 @@
     }
 
     // Disabled state
-    &--disabled {
+    &.component-slider--disabled {
         opacity: 0.5;
         pointer-events: none;
 

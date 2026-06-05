@@ -105,23 +105,5 @@
 	margin-bottom: var(--tc-space-1);
 }
 
-// ── Dismiss button ──────────────────────────────────────────────────────────
-
-.component-alert .btn-close {
-	flex-shrink: 0;
-	padding: 0;
-	margin: 0;
-	width: 20px;
-	height: 20px;
-	opacity: 0.45;
-	transition: opacity var(--alert-transition);
-
-	&:hover {
-		opacity: 0.85;
-	}
-
-	&:focus-visible {
-		outline: var(--tc-focus-outline);
-		outline-offset: var(--tc-focus-offset);
-	}
-}
+// Dismiss is an IconButton (see Alert.tsx) — no Bootstrap .btn-close here;
+// the `close` module is deliberately not imported (improvements/01 R1).

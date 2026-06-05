@@ -48,7 +48,11 @@
 	&--right {
 		top: 0;
 		bottom: 0;
-		width: 400px; // default
+		width: 100%; // mobile: full-width sheet
+
+		@media (min-width: 576px) {
+			width: 400px; // default
+		}
 	}
 
 	&--left {
@@ -75,7 +79,11 @@
 	&--bottom {
 		left: 0;
 		right: 0;
-		height: 320px; // default
+		height: 75vh; // mobile: tall sheet
+
+		@media (min-width: 576px) {
+			height: 320px; // default
+		}
 	}
 
 	&--top {
@@ -99,25 +107,28 @@
 	}
 
 	// ── Size variants (width for left/right, height for top/bottom) ────────
+	// Sizes only apply from sm up — below that every drawer is a full sheet.
 
-	&--left.component-drawer__panel--small,
-	&--right.component-drawer__panel--small {
-		width: 280px;
-	}
+	@media (min-width: 576px) {
+		&--left.component-drawer__panel--small,
+		&--right.component-drawer__panel--small {
+			width: 280px;
+		}
 
-	&--left.component-drawer__panel--large,
-	&--right.component-drawer__panel--large {
-		width: 560px;
-	}
+		&--left.component-drawer__panel--large,
+		&--right.component-drawer__panel--large {
+			width: 560px;
+		}
 
-	&--top.component-drawer__panel--small,
-	&--bottom.component-drawer__panel--small {
-		height: 200px;
-	}
+		&--top.component-drawer__panel--small,
+		&--bottom.component-drawer__panel--small {
+			height: 200px;
+		}
 
-	&--top.component-drawer__panel--large,
-	&--bottom.component-drawer__panel--large {
-		height: 480px;
+		&--top.component-drawer__panel--large,
+		&--bottom.component-drawer__panel--large {
+			height: 480px;
+		}
 	}
 }
 
@@ -172,22 +183,6 @@
 	padding: var(--tc-space-4);
 	-webkit-overflow-scrolling: touch;
 	scrollbar-width: thin;
-}
-
-// ── Responsive ──────────────────────────────────────────────────────────────
-
-@media (max-width: 576px) {
-	.component-drawer__panel {
-		&--left,
-		&--right {
-			width: 100% !important;
-		}
-
-		&--top,
-		&--bottom {
-			height: 75vh !important;
-		}
-	}
 }
 
 // Touch targets

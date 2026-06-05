@@ -9,11 +9,11 @@ import {
 } from '@toolcase/react-components'
 
 const INITIAL_STEPS: WelcomeGuideStep[] = [
-	{ label: 'Create your first project', completed: true },
-	{ label: 'Upload an asset', completed: true },
-	{ label: 'Configure game settings', completed: false },
-	{ label: 'Invite a team member', completed: false },
-	{ label: 'Publish a build', completed: false },
+	{ key: 'create-project', label: 'Create your first project', completed: true },
+	{ key: 'upload-asset', label: 'Upload an asset', completed: true },
+	{ key: 'configure-settings', label: 'Configure game settings', completed: false },
+	{ key: 'invite-member', label: 'Invite a team member', completed: false },
+	{ key: 'publish-build', label: 'Publish a build', completed: false },
 ]
 
 const MESSAGES = [

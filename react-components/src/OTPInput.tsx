@@ -6,6 +6,8 @@ export interface OTPInputProps {
 	length?: number
 	value?: string
 	onChange?: (value: string) => void
+	/** Submit the joined code in native <form> posts via a hidden input. */
+	name?: string
 	mode?: 'numeric' | 'alphanumeric'
 	masked?: boolean
 	label?: string
@@ -21,6 +23,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
 	length = 6,
 	value = '',
 	onChange,
+	name,
 	mode = 'numeric',
 	masked = false,
 	label,
@@ -98,6 +101,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
 
 	return (
 		<div className={rootClass}>
+			{name && <input type="hidden" name={name} value={value} />}
 			{label && (
 				<label className="form-label component-otp-input__label" id={`${groupId}-label`}>
 					{label}

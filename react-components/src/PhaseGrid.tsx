@@ -25,9 +25,9 @@ export const PhaseGrid: React.FC<PhaseGridProps> = ({
 }) => {
 	const rootClass = `component component-phase-grid ${className}`.trim()
 	const gridStyle: React.CSSProperties = {
-		gridTemplateColumns: `repeat(${columns}, 1fr)`,
+		'--pg-cols': columns,
 		...style,
-	}
+	} as React.CSSProperties
 
 	return (
 		<div className={rootClass} style={gridStyle} role="list" {...rest}>

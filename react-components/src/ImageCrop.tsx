@@ -4,7 +4,7 @@ import { Icon } from './Icon'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-export interface ImageCropProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onCrop'> {
+export interface ImageCropProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onCrop' | 'onError'> {
 	src: string
 	/** Fixed aspect ratio (width/height). Undefined = free-form */
 	aspectRatio?: number
@@ -12,6 +12,8 @@ export interface ImageCropProps extends Omit<React.HTMLAttributes<HTMLDivElement
 	circular?: boolean
 	/** Called with the cropped image as a Blob */
 	onCrop: (blob: Blob) => void
+	/** Called when the source image fails to load or the canvas cannot export */
+	onError?: (error: Error) => void
 	className?: string
 }
 
@@ -28,6 +30,7 @@ export const ImageCrop: React.FC<ImageCropProps> = ({
 	aspectRatio,
 	circular = false,
 	onCrop,
+	onError,
 	className = '',
 	...rest
 }) => {
@@ -35,20 +38,35 @@ export const ImageCrop: React.FC<ImageCropProps> = ({
 	const containerRef   = useRef<HTMLDivElement>(null)
 	const imageRef       = useRef<HTMLImageElement | null>(null)
 	const [loaded, setLoaded] = useState(false)
+	const [loadError, setLoadError] = useState(false)
 	const [state, setState]   = useState<CropState>({ x: 0, y: 0, scale: 1 })
 
 	const dragRef = useRef({ active: false, startX: 0, startY: 0, origX: 0, origY: 0 })
 
+	const onErrorRef = useRef(onError)
+	onErrorRef.current = onError
+
 	// Load image
 	useEffect(() => {
 		setLoaded(false)
+		setLoadError(false)
+		let cancelled = false
 		const img = new Image()
 		img.crossOrigin = 'anonymous'
 		img.onload = () => {
+			if (cancelled) return
 			imageRef.current = img
 			setLoaded(true)
 		}
+		// A CORS-blocked or missing image used to fail silently (blank canvas
+		// forever) — surface it instead.
+		img.onerror = () => {
+			if (cancelled) return
+			setLoadError(true)
+			onErrorRef.current?.(new Error(`ImageCrop: failed to load image "${src}"`))
+		}
 		img.src = src
+		return () => { cancelled = true }
 	}, [src])
 
 	// Draw canvas
@@ -102,7 +120,11 @@ export const ImageCrop: React.FC<ImageCropProps> = ({
 
 	// Pointer events for panning
 	const handlePointerDown = (e: React.PointerEvent) => {
-		;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+		// setPointerCapture throws if the pointer is already gone (fast tap) —
+		// the drag still works without capture, so don't let it crash.
+		try {
+			(e.target as HTMLElement).setPointerCapture(e.pointerId)
+		} catch { /* ignore */ }
 		dragRef.current = { active: true, startX: e.clientX, startY: e.clientY, origX: state.x, origY: state.y }
 	}
 	const handlePointerMove = (e: React.PointerEvent) => {
@@ -123,7 +145,12 @@ export const ImageCrop: React.FC<ImageCropProps> = ({
 	const handleCrop = useCallback(() => {
 		if (!canvasRef.current) return
 		canvasRef.current.toBlob((blob) => {
-			if (blob) onCrop(blob)
+			if (blob) {
+				onCrop(blob)
+			} else {
+				// null blob = tainted canvas (image served without CORS headers)
+				onErrorRef.current?.(new Error('ImageCrop: canvas export failed (tainted canvas?)'))
+			}
 		}, 'image/png')
 	}, [onCrop])
 
@@ -155,6 +182,12 @@ export const ImageCrop: React.FC<ImageCropProps> = ({
 				onPointerCancel={handlePointerUp}
 				onWheel={handleWheel}
 			/>
+
+			{loadError && (
+				<div className="component-image-crop__error" role="alert">
+					Failed to load image.
+				</div>
+			)}
 
 			<div className="component-image-crop__controls">
 				<div className="component-image-crop__zoom">

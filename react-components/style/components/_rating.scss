@@ -65,11 +65,11 @@
     }
 
     // Sizes
-    &--small  { --rt-star-size: 1rem; }
-    &--default{ --rt-star-size: 1.5rem; }
-    &--large  { --rt-star-size: 2rem; }
+    &.component-rating--small  { --rt-star-size: 1rem; }
+    &.component-rating--default{ --rt-star-size: 1.5rem; }
+    &.component-rating--large  { --rt-star-size: 2rem; }
 
-    &--readonly .component-rating__star {
+    &.component-rating--readonly .component-rating__star {
         cursor: default;
         pointer-events: none;
         &:hover { transform: none; }

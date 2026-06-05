@@ -77,24 +77,24 @@
     }
 
     // ── Sizes ─────────────────────────────────────────────────────────────
-    &--small {
+    &.component-cool-button--small {
         padding: var(--tc-space-1) var(--tc-space-3);
         font-size: 0.8rem;
     }
 
-    &--default {
+    &.component-cool-button--default {
         padding: var(--tc-space-2) var(--tc-space-4);
         font-size: 0.875rem;
     }
 
-    &--large {
+    &.component-cool-button--large {
         padding: var(--tc-space-3) var(--tc-space-5);
         font-size: 0.98rem;
     }
 
     // ── Variants ──────────────────────────────────────────────────────────
     // Primary = signature black with subtle gradient shimmer
-    &--primary {
+    &.component-cool-button--primary {
         background: linear-gradient(135deg, var(--tc-black) 0%, var(--tc-black) 100%);
         color: var(--tc-text-inverse);
         border-color: var(--tc-black);
@@ -105,7 +105,7 @@
         }
     }
 
-    &--secondary {
+    &.component-cool-button--secondary {
         background: var(--tc-secondary);
         color: var(--tc-text-inverse);
         border-color: var(--tc-secondary);
@@ -116,7 +116,7 @@
         }
     }
 
-    &--success {
+    &.component-cool-button--success {
         background: var(--tc-success);
         color: var(--tc-text-inverse);
         border-color: var(--tc-success);
@@ -127,7 +127,7 @@
         }
     }
 
-    &--danger {
+    &.component-cool-button--danger {
         background: var(--tc-danger);
         color: var(--tc-text-inverse);
         border-color: var(--tc-danger);
@@ -138,7 +138,7 @@
         }
     }
 
-    &--warning {
+    &.component-cool-button--warning {
         background: var(--tc-warning);
         color: var(--tc-accent-hover);
         border-color: var(--tc-warning);
@@ -149,7 +149,7 @@
         }
     }
 
-    &--info {
+    &.component-cool-button--info {
         background: var(--tc-cyan);
         color: var(--tc-text-inverse);
         border-color: var(--tc-cyan);
@@ -161,7 +161,7 @@
     }
 
     // ── Outline modifier — invert each variant ────────────────────────────
-    &--outline {
+    &.component-cool-button--outline {
         background: var(--tc-surface);
         --cb-separator: rgba(var(--tc-accent-hover-rgb), 0.18);
 
@@ -226,7 +226,7 @@
         }
     }
 
-    &--loading {
+    &.component-cool-button--loading {
         pointer-events: none;
         opacity: 0.75;
     }

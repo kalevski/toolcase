@@ -1,5 +1,6 @@
 import { Breadcrumbs, CategorySection, CodeBlock, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
 import { nodeExamples } from '../node/index'
+import { versions } from '../versions'
 
 const peerInstall = `# RouteHandler / HttpServer
 npm install fastify @fastify/cors
@@ -29,7 +30,7 @@ export const NodePage = () => {
                     eyebrow: 'Library · Backend · Node',
                     tagline:
                         'Backend helpers — Fastify endpoints, raw-SQL repositories, Redis KV service, isomorphic sanitize / pagination / domain-error helpers. One entrypoint, peers are optional so you only pay for what you import.',
-                    version: '1.0.0',
+                    version: versions.node,
                     examples: nodeExamples.length,
                     chips: ['Fastify', 'Postgres', 'Redis', 'ESM + CJS'],
                 }}

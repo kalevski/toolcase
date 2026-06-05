@@ -14,7 +14,7 @@
 }
 
 .component-resizable-panel {
-    &--vertical {
+    &.component-resizable-panel--vertical {
         flex-direction: column;
     }
 

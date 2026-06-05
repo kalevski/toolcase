@@ -460,7 +460,11 @@ export const NodeEditor: React.FC<NodeEditorViewProps> = ({
 	const onNodePointerDown = (e: React.PointerEvent, id: string) => {
 		if (disabled || e.button !== 0) return
 		e.stopPropagation()
-		;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+		// Capture can throw for an already-inactive pointer; the drag still
+		// works without it.
+		try {
+			(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+		} catch { /* ignore */ }
 		const w = toWorld(e.clientX, e.clientY)
 		const pos = positions[id] ?? { x: 0, y: 0 }
 		setDragging({ id, dx: w.x - pos.x, dy: w.y - pos.y, moved: false })
@@ -469,13 +473,21 @@ export const NodeEditor: React.FC<NodeEditorViewProps> = ({
 
 	const onNodePointerMove = (e: React.PointerEvent) => {
 		if (!dragging) return
+		// The dragged node can be deleted mid-gesture (Delete key, consumer
+		// update) — cancel the drag instead of moving a ghost.
+		if (!(dragging.id in positions)) {
+			setDragging(null)
+			return
+		}
 		const w = toWorld(e.clientX, e.clientY)
 		onMoveNode(dragging.id, { x: Math.round(w.x - dragging.dx), y: Math.round(w.y - dragging.dy) })
 		if (!dragging.moved) setDragging(d => (d ? { ...d, moved: true } : d))
 	}
 
 	const onNodePointerUp = (e: React.PointerEvent) => {
-		;(e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId)
+		try {
+			(e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId)
+		} catch { /* ignore */ }
 		setDragging(null)
 	}
 
@@ -508,9 +520,10 @@ export const NodeEditor: React.FC<NodeEditorViewProps> = ({
 
 		// pinch zoom
 		if (pointersRef.current.size === 2 && pinchRef.current) {
+			if (!canvasRef.current) return
 			const [a, b] = [...pointersRef.current.values()]
 			const dist = Math.hypot(a.x - b.x, a.y - b.y)
-			const rect = canvasRef.current!.getBoundingClientRect()
+			const rect = canvasRef.current.getBoundingClientRect()
 			const cx = (a.x + b.x) / 2 - rect.left
 			const cy = (a.y + b.y) / 2 - rect.top
 			const next = Math.min(MAX_SCALE, Math.max(MIN_SCALE, pinchRef.current.scale * (dist / pinchRef.current.dist)))
@@ -634,7 +647,7 @@ export const NodeEditor: React.FC<NodeEditorViewProps> = ({
 					<svg className="component-node-editor__svg" style={{ overflow: 'visible' }}>
 						<defs>
 							<marker id="ne-arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-								<polygon points="0 0, 8 3, 0 6" fill="#6c757d" />
+								<polygon points="0 0, 8 3, 0 6" fill="var(--tc-text-muted)" />
 							</marker>
 						</defs>
 						{graph.edges.map((edge, idx) => {
@@ -644,7 +657,7 @@ export const NodeEditor: React.FC<NodeEditorViewProps> = ({
 							const g = edgeGeom(fp, tp)
 							return (
 								<g key={idx}>
-									<path d={g.d} fill="none" stroke="#6c757d" strokeWidth={2} markerEnd="url(#ne-arrowhead)" />
+									<path d={g.d} fill="none" stroke="var(--tc-text-muted)" strokeWidth={2} markerEnd="url(#ne-arrowhead)" />
 									{edge.trigger && (
 										<text x={g.mid.x} y={g.mid.y - 6} className="component-node-editor__edge-label">
 											{edge.trigger}

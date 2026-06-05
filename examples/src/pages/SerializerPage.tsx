@@ -1,5 +1,6 @@
 import { Breadcrumbs, CategorySection, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
 import { serializerExamples } from '../serializer/index'
+import { versions } from '../versions'
 
 export const SerializerPage = () => {
     return (
@@ -12,7 +13,7 @@ export const SerializerPage = () => {
                     eyebrow: 'Library · Data',
                     tagline:
                         'Protobuf-based binary serializer — compact encoding with schema-driven (de)serialization. Fast under load.',
-                    version: '3.0.2',
+                    version: versions.serializer,
                     examples: serializerExamples.length,
                     chips: ['Binary', 'Protobuf', 'Compact'],
                 }}

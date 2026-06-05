@@ -30,7 +30,6 @@ const Header = () => {
                 </nav>
                 <div className="header-spacer" />
                 <div className="header-meta">
-                    <span>v3.0.2</span>
                     <a href="https://github.com/kalevski/toolcase" target="_blank" rel="noopener">
                         github ↗
                     </a>

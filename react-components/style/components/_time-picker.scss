@@ -188,12 +188,12 @@
         }
     }
 
-    &--disabled {
+    &.component-time-picker--disabled {
         opacity: 0.55;
         pointer-events: none;
     }
 
-    &--open > .component-time-picker__control > .component-time-picker__trigger {
+    &.component-time-picker--open > .component-time-picker__control > .component-time-picker__trigger {
         border-color: var(--tp-border-focus);
     }
 }

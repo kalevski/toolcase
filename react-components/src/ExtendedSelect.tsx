@@ -16,6 +16,8 @@ export interface ExtendedSelectProps extends Omit<React.HTMLAttributes<HTMLDivEl
 	items?: ExtendedSelectItem[]
 	value?: string
 	onChange?: (key: string) => void
+	/** Submit the selected key in native <form> posts via a hidden input. */
+	name?: string
 	placeholder?: string
 	searchPlaceholder?: string
 	noResultsText?: string
@@ -26,6 +28,7 @@ export const ExtendedSelect: React.FC<ExtendedSelectProps> = ({
 	items = [],
 	value,
 	onChange,
+	name,
 	placeholder = 'Select an option',
 	searchPlaceholder = 'Search...',
 	noResultsText = 'No results found',
@@ -141,6 +144,7 @@ export const ExtendedSelect: React.FC<ExtendedSelectProps> = ({
 
 	return (
 		<div ref={containerRef} className={rootClassName} {...rest}>
+			{name && <input type="hidden" name={name} value={value ?? ''} />}
 			<button
 				type="button"
 				className="component-extended-select__trigger"

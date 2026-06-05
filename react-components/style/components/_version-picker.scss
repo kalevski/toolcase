@@ -6,7 +6,7 @@
 }
 
 .component-version-picker {
-	&--segmented {
+	&.component-version-picker--segmented {
 		display: inline-flex;
 		flex-wrap: wrap;
 		gap: 0;

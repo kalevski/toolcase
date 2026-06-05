@@ -38,3 +38,12 @@
 	&--md .component-social-links__link { width: 36px; height: 36px; font-size: 1rem; }
 	&--lg .component-social-links__link { width: 44px; height: 44px; font-size: 1.2rem; }
 }
+
+// Touch targets (WCAG 2.5.5 / spec §5)
+// Doubled class to outrank the --sm/--md size variants (0,2,0).
+@media (pointer: coarse) {
+	.component-social-links .component-social-links__link {
+		width: 44px;
+		height: 44px;
+	}
+}

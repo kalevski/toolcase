@@ -73,13 +73,13 @@
     // Truncate long labels on small screens
     &__link,
     &__label {
-        max-width: 12rem;
+        max-width: 7rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        @media (max-width: 576px) {
-            max-width: 7rem;
+        @media (min-width: 576px) {
+            max-width: 12rem;
         }
     }
 }

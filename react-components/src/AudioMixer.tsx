@@ -386,7 +386,7 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
     const generatedId = useId()
     const rootId = propId ?? generatedId
     const [pxPerMs] = useState(0.05)
-    const [drag, setDrag] = useState<{ trackId: string; clipId: string; mode: 'move' | 'trim-l' | 'trim-r'; startX: number; orig: MixerClip } | null>(null)
+    const [drag, setDrag] = useState<{ pointerId: number; trackId: string; clipId: string; mode: 'move' | 'trim-l' | 'trim-r'; startX: number; orig: MixerClip } | null>(null)
     const lanesRef = useRef<HTMLDivElement>(null)
 
     const totalMs = Math.max(documentDuration(doc), 10000)
@@ -394,14 +394,18 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
 
     const onClipPointerDown = (e: React.PointerEvent, trackId: string, clip: MixerClip, mode: 'move' | 'trim-l' | 'trim-r') => {
         if (disabled || e.button !== 0) return
+        // A second touch must not hijack an in-flight drag (multi-touch).
+        if (drag) return
         e.stopPropagation()
-        ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
-        setDrag({ trackId, clipId: clip.id, mode, startX: e.clientX, orig: clip })
+        try {
+            (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+        } catch { /* pointer already gone — drag works without capture */ }
+        setDrag({ pointerId: e.pointerId, trackId, clipId: clip.id, mode, startX: e.clientX, orig: clip })
         selection.select({ kind: 'clip', trackId, clipId: clip.id })
     }
 
     const onLanesPointerMove = (e: React.PointerEvent) => {
-        if (!drag) return
+        if (!drag || e.pointerId !== drag.pointerId) return
         const deltaMs = Math.round((e.clientX - drag.startX) / pxPerMs)
         const o = drag.orig
         if (drag.mode === 'move') {
@@ -416,7 +420,10 @@ export const AudioMixer: React.FC<AudioMixerProps> = ({
     }
 
     const onLanesPointerUp = (e: React.PointerEvent) => {
-        ;(e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId)
+        if (drag && e.pointerId !== drag.pointerId) return
+        try {
+            (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId)
+        } catch { /* capture may already be released */ }
         setDrag(null)
     }
 

@@ -7,6 +7,7 @@ import { examples as reactComponentExamples } from '../react-components/index'
 import { gameComponentExamples } from '../game-components/index'
 import { phaserExamples } from '../phaser-plus/index'
 import { nodeExamples } from '../node/index'
+import { versions } from '../versions'
 
 type LibCard = {
     key: string
@@ -27,7 +28,7 @@ const libs: LibCard[] = [
         name: 'base',
         tagline: 'Foundational primitives — events, registries, async helpers, data structures — that everything else in toolcase builds on.',
         category: 'Foundation',
-        version: '3.0.2',
+        version: versions.base,
         examples: baseExamples.length,
         pkg: '@toolcase/base',
         path: '/base',
@@ -38,7 +39,7 @@ const libs: LibCard[] = [
         name: 'logging',
         tagline: 'Lightweight logger with scoped loggers, log levels and pluggable reporters. Quiet by default, loud when you need it.',
         category: 'Diagnostics',
-        version: '3.0.2',
+        version: versions.logging,
         examples: loggingExamples.length,
         pkg: '@toolcase/logging',
         path: '/logging',
@@ -49,7 +50,7 @@ const libs: LibCard[] = [
         name: 'serializer',
         tagline: 'Protobuf-based binary serializer for compact, schema-driven encoding. Fast under load.',
         category: 'Data',
-        version: '3.0.2',
+        version: versions.serializer,
         examples: serializerExamples.length,
         pkg: '@toolcase/serializer',
         path: '/serializer',
@@ -60,7 +61,7 @@ const libs: LibCard[] = [
         name: 'react-components',
         tagline: 'React UI building blocks built on Bootstrap 5 — typography, inputs, layout, navigation, charts, data display.',
         category: 'UI · React',
-        version: '3.0.2',
+        version: versions['react-components'],
         examples: reactComponentExamples.length,
         pkg: '@toolcase/react-components',
         path: '/react-components',
@@ -71,7 +72,7 @@ const libs: LibCard[] = [
         name: 'game-components',
         tagline: 'Framework-free Web Components for game UI — panels, bars, dialogs, overlays, fantasy HUD primitives.',
         category: 'Games · Web Components',
-        version: '3.0.2',
+        version: versions['game-components'],
         examples: gameComponentExamples.length,
         pkg: '@toolcase/game-components',
         path: '/game-components',
@@ -82,7 +83,7 @@ const libs: LibCard[] = [
         name: 'phaser-plus',
         tagline: 'Unified runtime layer for Phaser 4 — Scene lifecycle, FeatureRegistry, Flow, AI, Effects, Cinema, Input.',
         category: 'Games · Phaser',
-        version: '3.0.2',
+        version: versions['phaser-plus'],
         examples: phaserExamples.length,
         pkg: '@toolcase/phaser-plus',
         path: '/phaser-plus',
@@ -93,7 +94,7 @@ const libs: LibCard[] = [
         name: 'node',
         tagline: 'Backend helpers — Fastify endpoints, raw-SQL repositories, Redis KV service, isomorphic sanitize/pagination utils.',
         category: 'Backend · Node',
-        version: '1.0.0',
+        version: versions.node,
         examples: nodeExamples.length,
         pkg: '@toolcase/node',
         path: '/node',

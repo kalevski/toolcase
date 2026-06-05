@@ -108,8 +108,8 @@
         max-width: 900px;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: 1.05fr 1fr;
-        gap: clamp(2rem, 5vw, 3.5rem);
+        grid-template-columns: 1fr;
+        gap: var(--tc-space-7);
         align-items: center;
     }
 
@@ -286,6 +286,25 @@
         display: inline-flex;
     }
 
+    &__reset {
+        background: none;
+        border: none;
+        padding: 0;
+        margin-top: var(--tc-space-2);
+        font-size: 0.8rem;
+        color: inherit;
+        opacity: 0.7;
+        text-decoration: underline;
+        cursor: pointer;
+
+        &:hover { opacity: 1; }
+
+        &:focus-visible {
+            outline: var(--tc-focus-outline);
+            outline-offset: var(--tc-focus-offset);
+        }
+    }
+
     &__success-title {
         color: var(--tc-text-inverse);
         font-size: 1.05rem;
@@ -306,11 +325,11 @@
     }
 }
 
-@media (max-width: 720px) {
+@media (min-width: 768px) {
     .component-early-signup-form {
         &__inner {
-            grid-template-columns: 1fr;
-            gap: var(--tc-space-7);
+            grid-template-columns: 1.05fr 1fr;
+            gap: clamp(2rem, 5vw, 3.5rem);
         }
     }
 }

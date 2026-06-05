@@ -8,6 +8,9 @@
 
     pointer-events: auto;
     z-index: 1060;
+
+    // On very small screens, collapse to near full-width
+    max-width: calc(100vw - 1rem);
 }
 
 .component-popover {
@@ -37,9 +40,8 @@
     }
 }
 
-@media (max-width: 576px) {
+@media (min-width: 576px) {
     .component.component-popover {
-        // On very small screens, collapse to near full-width
-        max-width: calc(100vw - 1rem);
+        max-width: none;
     }
 }

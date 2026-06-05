@@ -107,6 +107,7 @@ const filters: AdvancedTableFilter[] = [
 		key: 'role',
 		type: 'dropdown',
 		label: 'Role',
+		placeholder: 'Select a role',
 		items: [
 			{ key: 'Admin', name: 'Admin' },
 			{ key: 'Editor', name: 'Editor' },
@@ -117,6 +118,7 @@ const filters: AdvancedTableFilter[] = [
 		key: 'status',
 		type: 'dropdown',
 		label: 'Status',
+		placeholder: 'Select a status',
 		items: [
 			{ key: 'Active', name: 'Active' },
 			{ key: 'Inactive', name: 'Inactive' },

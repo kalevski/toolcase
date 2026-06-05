@@ -13,9 +13,9 @@
     letter-spacing: -0.01em;
 }
 
-.component-leaderboard-trend--up   { color: var(--lbt-up); }
-.component-leaderboard-trend--down { color: var(--lbt-down); }
-.component-leaderboard-trend--flat { color: var(--lbt-flat); }
+.component-leaderboard-trend.component-leaderboard-trend--up   { color: var(--lbt-up); }
+.component-leaderboard-trend.component-leaderboard-trend--down { color: var(--lbt-down); }
+.component-leaderboard-trend.component-leaderboard-trend--flat { color: var(--lbt-flat); }
 
 .component-leaderboard-trend__arrow {
     font-size: 0.75rem;

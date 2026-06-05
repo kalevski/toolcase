@@ -12,6 +12,8 @@ export interface MultiCardSelectProps {
 	options: MultiCardSelectOption[]
 	value?: string[]
 	onChange?: (selected: string[]) => void
+	/** Submit each selected key in native <form> posts via hidden inputs. */
+	name?: string
 	columns?: number
 	className?: string
 	loading?: boolean
@@ -22,6 +24,7 @@ export const MultiCardSelect: React.FC<MultiCardSelectProps> = ({
 	options,
 	value = [],
 	onChange,
+	name,
 	columns,
 	className = '',
 	loading = false,
@@ -59,6 +62,7 @@ export const MultiCardSelect: React.FC<MultiCardSelectProps> = ({
 			className={`component component-multi-card-select${className ? ` ${className}` : ''}`}
 			style={style}
 		>
+			{name && value.map((key) => <input key={key} type="hidden" name={name} value={key} />)}
 			{options.map((opt) => {
 				const selected = value.includes(opt.key)
 				return (
@@ -66,6 +70,7 @@ export const MultiCardSelect: React.FC<MultiCardSelectProps> = ({
 						key={opt.key}
 						type="button"
 						className={`component-multi-card-select__card${selected ? ' component-multi-card-select__card--selected' : ''}`}
+						aria-pressed={selected}
 						onClick={() => toggle(opt.key)}
 					>
 						<span className="component-multi-card-select__check">

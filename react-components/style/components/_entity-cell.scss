@@ -78,7 +78,7 @@
         text-overflow: ellipsis;
     }
 
-    &--sm {
+    &.component-entity-cell--sm {
         gap: var(--tc-space-2);
 
         .component-entity-cell__tile {
@@ -91,14 +91,14 @@
         .component-entity-cell__sub { font-size: 0.72rem; }
     }
 
-    &--md {
+    &.component-entity-cell--md {
         .component-entity-cell__tile {
             width: 32px;
             height: 32px;
         }
     }
 
-    &--lg {
+    &.component-entity-cell--lg {
         gap: var(--tc-space-3);
 
         .component-entity-cell__tile {

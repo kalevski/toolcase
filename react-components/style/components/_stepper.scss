@@ -21,7 +21,7 @@
 
 // ── Horizontal ───────────────────────────────────────────────────────────────
 
-.component-stepper--horizontal {
+.component-stepper.component-stepper--horizontal {
     align-items: flex-start;
     flex-direction: row;
 
@@ -66,7 +66,7 @@
 
 // ── Vertical ─────────────────────────────────────────────────────────────────
 
-.component-stepper--vertical {
+.component-stepper.component-stepper--vertical {
     flex-direction: column;
 
     .component-stepper__connector {
@@ -201,10 +201,16 @@
     }
 }
 
-@media (max-width: 576px) {
-    .component-stepper--horizontal {
+.component-stepper.component-stepper--horizontal {
+    .component-stepper__desc {
+        display: none;
+    }
+}
+
+@media (min-width: 576px) {
+    .component-stepper.component-stepper--horizontal {
         .component-stepper__desc {
-            display: none;
+            display: inline;
         }
     }
 }

@@ -137,8 +137,12 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 		emit(setPath(data, [...path, items.length], getTypeDefault(itemType)))
 	}
 
+	// Unambiguous map/collapse key for a path — join('.') collides when object
+	// keys themselves contain dots (e.g. ['a','b.c'] vs ['a.b','c']).
+	const pathKeyOf = (path: (string | number)[]) => JSON.stringify(path)
+
 	const removeArrayItem = (path: (string | number)[], index: number) => {
-		const pathKey = path.join('.')
+		const pathKey = pathKeyOf(path)
 		const ids = arrayItemIds.current.get(pathKey)
 		if (ids) {
 			arrayItemIds.current.set(
@@ -204,7 +208,7 @@ export const JSONEditor: React.FC<JSONEditorProps> = ({
 
 	const renderProperty = (prop: JSONEditorSchemaProperty, path: (string | number)[], depth: number) => {
 		const currentValue = getValueAtPath(data, path)
-		const pathKey = path.join('.')
+		const pathKey = pathKeyOf(path)
 
 		if (prop.type === 'array' && prop.properties) {
 			const items = Array.isArray(currentValue) ? (currentValue as Record<string, unknown>[]) : []

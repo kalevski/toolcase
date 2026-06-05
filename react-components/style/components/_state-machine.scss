@@ -19,13 +19,14 @@
 
 .component-state-machine__cell {
     flex: 1;
-    min-width: 130px;
+    min-width: 100%;
     padding: var(--tc-space-4) var(--tc-space-3);
-    border-right: 1px solid var(--sm-border);
+    border-right: none;
+    border-bottom: 1px solid var(--sm-border);
     text-align: center;
     position: relative;
 
-    &:last-child { border-right: none; }
+    &:last-child { border-bottom: none; }
 }
 
 .component-state-machine__rank {
@@ -88,12 +89,15 @@
     padding: var(--tc-space-3) var(--tc-space-2);
 }
 
-@media (max-width: 576px) {
+@media (min-width: 576px) {
     .component-state-machine__cell {
-        min-width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--sm-border);
+        min-width: 130px;
+        border-right: 1px solid var(--sm-border);
+        border-bottom: none;
 
-        &:last-child { border-bottom: none; }
+        &:last-child {
+            border-right: none;
+            border-bottom: none;
+        }
     }
 }

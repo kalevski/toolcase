@@ -1,12 +1,12 @@
 // ── CommandPalette ────────────────────────────────────────────────────────────
 
 .component-command-palette__backdrop {
-    align-items: flex-start;
+    align-items: flex-end;
     background: rgba(var(--tc-black-rgb), 0.4);
     display: flex;
     inset: 0;
     justify-content: center;
-    padding-top: 8vh;
+    padding-top: 0;
     position: fixed;
     z-index: 1080;
     animation: cp-backdrop-in 0.15s ease;
@@ -27,8 +27,8 @@
     --cp-active-bg: var(--tc-surface-muted);
     --cp-active-border: var(--tc-text);
     --cp-transition: 0.15s ease;
-    --cp-width: min(680px, calc(100vw - 2rem));
-    --cp-max-height: 60vh;
+    --cp-width: 100vw;
+    --cp-max-height: 80vh;
 
     animation: cp-panel-in 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--cp-bg);
@@ -212,14 +212,14 @@
     }
 }
 
-@media (max-width: 576px) {
+@media (min-width: 576px) {
     .component-command-palette__backdrop {
-        align-items: flex-end;
-        padding-top: 0;
+        align-items: flex-start;
+        padding-top: 8vh;
     }
 
     .component.component-command-palette {
-        --cp-width: 100vw;
-        --cp-max-height: 80vh;
+        --cp-width: min(680px, calc(100vw - 2rem));
+        --cp-max-height: 60vh;
     }
 }

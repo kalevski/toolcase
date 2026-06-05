@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/react-components",
-    "version": "3.0.5",
+    "version": "3.0.6",
     "description": "Practical React UI components — forms, dropzone, layout, and dashboard pieces — styled and ready to drop in.",
     "main": "lib/index.main.js",
     "module": "lib/index.module.js",
@@ -18,8 +18,8 @@
     ],
     "scripts": {
         "dev": "tsup --watch",
-        "build": "tsup && sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import --silence-deprecation=color-functions --silence-deprecation=global-builtin",
-        "build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import --silence-deprecation=color-functions --silence-deprecation=global-builtin"
+        "build": "tsup && sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import",
+        "build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed --load-path=../node_modules --quiet-deps --silence-deprecation=import"
     },
     "peerDependencies": {
         "@toolcase/base": "3.x.x",

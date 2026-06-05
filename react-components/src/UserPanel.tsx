@@ -3,6 +3,7 @@ import { Avatar } from './Avatar'
 import { Icon } from './Icon'
 import { IconButton } from './IconButton'
 import { Skeleton } from './Skeleton'
+import { usePopup } from './hooks/usePopup'
 
 export interface UserPanelMenuItem {
 	key: string
@@ -36,36 +37,34 @@ export const UserPanel: React.FC<UserPanelProps> = ({
 	loading = false,
 	...props
 }) => {
-	const [menuOpen, setMenuOpen] = React.useState(false)
 	const [direction, setDirection] = React.useState<'up' | 'down'>('up')
-	const panelRef = React.useRef<HTMLDivElement>(null)
+	const popup = usePopup<HTMLDivElement, HTMLDivElement>({ arrowNav: true })
 
 	const hasMenu = menuItems && menuItems.length > 0
 
 	const toggleMenu = () => {
 		if (!hasMenu) return
-		if (!menuOpen && panelRef.current) {
-			const rect = panelRef.current.getBoundingClientRect()
+		if (!popup.open && popup.rootRef.current) {
+			const rect = popup.rootRef.current.getBoundingClientRect()
 			const spaceBelow = window.innerHeight - rect.bottom
 			const spaceAbove = rect.top
 			setDirection(spaceBelow < 200 && spaceAbove > spaceBelow ? 'up' : 'down')
 		}
-		setMenuOpen((prev) => !prev)
+		popup.setOpen(!popup.open)
 	}
 
-	React.useEffect(() => {
-		if (!menuOpen) return
-		const handleClick = (e: MouseEvent) => {
-			if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-				setMenuOpen(false)
-			}
+	const onTriggerKeyDown = (e: React.KeyboardEvent) => {
+		// role="button" div — Enter/Space must activate like a real button
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault()
+			toggleMenu()
+			return
 		}
-		document.addEventListener('mousedown', handleClick)
-		return () => document.removeEventListener('mousedown', handleClick)
-	}, [menuOpen])
+		popup.triggerProps.onKeyDown(e)
+	}
 
 	return (
-		<div {...props} ref={panelRef} className={`${props.className || ''} component component-user-panel`.trim()}>
+		<div {...props} ref={popup.rootRef} className={`${props.className || ''} component component-user-panel`.trim()}>
 			{loading ? (
 				<>
 					<Skeleton variant="circle" width="2rem" height="2rem" />
@@ -77,7 +76,16 @@ export const UserPanel: React.FC<UserPanelProps> = ({
 			) : (
 				<>
 					<Avatar src={avatarSrc} name={initials ?? username} size="small" />
-					<div className="component-user-panel__info" onClick={toggleMenu} role="button" tabIndex={0}>
+					<div
+						className="component-user-panel__info"
+						role="button"
+						tabIndex={0}
+						ref={popup.triggerProps.ref}
+						aria-haspopup={hasMenu ? true : undefined}
+						aria-expanded={hasMenu ? popup.open : undefined}
+						onClick={toggleMenu}
+						onKeyDown={onTriggerKeyDown}
+					>
 						<span className="component-user-panel__username">{username}</span>
 						<span className="component-user-panel__plan">{plan}</span>
 					</div>
@@ -86,15 +94,16 @@ export const UserPanel: React.FC<UserPanelProps> = ({
 
 			)}
 
-			{!loading && menuOpen && hasMenu && (
-				<div className={`component-user-panel__menu component-user-panel__menu--${direction}`}>
+			{!loading && popup.open && hasMenu && (
+				<div className={`component-user-panel__menu component-user-panel__menu--${direction}`} role="menu" {...popup.popupProps}>
 					{menuItems.map((item, i) => (
 						<button
 							key={i}
+							role="menuitem"
 							className="component-user-panel__menu-item"
 							onClick={e => {
 								onMenuClick?.(e, item.key)
-								setMenuOpen(false)
+								popup.close()
 							}}
 						>
 							{item.icon && <Icon name={item.icon} />}

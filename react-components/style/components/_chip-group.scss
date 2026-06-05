@@ -11,7 +11,7 @@
     --cg-accent-contrast: var(--tc-accent-contrast);
 }
 
-.component-chip-group--bordered {
+.component-chip-group.component-chip-group--bordered {
     border: 1px solid var(--cg-border);
     background: var(--cg-bg);
     padding: var(--tc-space-5);

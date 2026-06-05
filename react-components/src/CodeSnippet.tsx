@@ -172,12 +172,16 @@ export const CodeSnippet: React.FC<CodeSnippetProps> = ({
 	...rest
 }) => {
 	const [copied, setCopied] = useState(false)
+	const copyTimerRef = React.useRef<number | undefined>(undefined)
+
+	// Clear any pending copied-state timer on unmount.
+	React.useEffect(() => () => window.clearTimeout(copyTimerRef.current), [])
 
 	const handleCopy = useCallback(() => {
 		onCopy?.(code)
 		setCopied(true)
-		const id = window.setTimeout(() => setCopied(false), 2000)
-		return () => window.clearTimeout(id)
+		window.clearTimeout(copyTimerRef.current)
+		copyTimerRef.current = window.setTimeout(() => setCopied(false), 2000)
 	}, [code, onCopy])
 
 	const tokens = useMemo(() => (loading ? [] : tokenize(code, language)), [code, language, loading])

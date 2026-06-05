@@ -4,7 +4,7 @@
 
 .component.component-pipeline {
     display: grid;
-    grid-template-columns: repeat(var(--pipeline-count, 5), 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 0;
     border: 1px solid var(--tc-border);
     background: var(--tc-surface);
@@ -16,6 +16,7 @@
         padding: var(--tc-space-4);
         background: var(--tc-surface);
         border-right: 1px solid var(--tc-border);
+        border-bottom: 1px solid var(--tc-border);
 
         &:last-child {
             border-right: none;
@@ -77,13 +78,12 @@
     }
 }
 
-@media (max-width: 720px) {
+@media (min-width: 768px) {
     .component.component-pipeline {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(var(--pipeline-count, 5), 1fr);
     }
 
     .component-pipeline__step {
-        border-right: 1px solid var(--tc-border);
-        border-bottom: 1px solid var(--tc-border);
+        border-bottom: none;
     }
 }

@@ -49,6 +49,8 @@ const COUNTRIES: Country[] = [
 export interface PhoneInputProps {
 	value?: string
 	onChange?: (value: string) => void
+	/** Submit the full +<dial><digits> value in native <form> posts via a hidden input. */
+	name?: string
 	defaultCountry?: string
 	label?: string
 	placeholder?: string
@@ -62,6 +64,7 @@ export interface PhoneInputProps {
 export const PhoneInput: React.FC<PhoneInputProps> = ({
 	value = '',
 	onChange,
+	name,
 	defaultCountry = 'US',
 	label,
 	placeholder = 'Phone number',
@@ -113,6 +116,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
 
 	return (
 		<div className={rootClass} ref={containerRef}>
+			{name && <input type="hidden" name={name} value={value} />}
 			{label && (
 				<label htmlFor={inputId} className="form-label component-phone-input__label">
 					{label}

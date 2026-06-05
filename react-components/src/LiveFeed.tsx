@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 
 export interface FeedTag {
 	label: React.ReactNode
@@ -31,12 +31,22 @@ export const LiveFeed: React.FC<LiveFeedProps> = ({
 	...rest
 }) => {
 	const bodyRef = useRef<HTMLDivElement | null>(null)
+	const prevScrollHeight = useRef(0)
 	const visible = maxRows ? events.slice(0, maxRows) : events
 
-	useEffect(() => {
-		if (!autoScroll) return
+	// Newest rows prepend at the top. autoScroll pins the view to the newest row;
+	// otherwise compensate scrollTop by the height delta so a reader scrolled
+	// into older entries doesn't have their position shifted by new rows.
+	useLayoutEffect(() => {
 		const el = bodyRef.current
-		if (el) el.scrollTop = 0
+		if (!el) return
+		if (autoScroll) {
+			el.scrollTop = 0
+		} else {
+			const delta = el.scrollHeight - prevScrollHeight.current
+			if (delta > 0 && el.scrollTop > 0) el.scrollTop += delta
+		}
+		prevScrollHeight.current = el.scrollHeight
 	}, [events, autoScroll])
 
 	return (

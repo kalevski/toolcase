@@ -34,6 +34,12 @@
         border-radius: 50%;
     }
 
+    &__error {
+        padding: var(--tc-space-2) 0;
+        font-size: 0.8rem;
+        color: var(--tc-danger);
+    }
+
     &__controls {
         display: flex;
         align-items: center;
