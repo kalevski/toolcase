@@ -144,3 +144,16 @@
     .component-tree-view__spinner { animation: none; }
     .component-tree-view__row    { transition: none; }
 }
+
+// Touch targets: expand the chevron toggle's hit area without growing it visually
+@media (pointer: coarse) {
+    .component-tree-view__toggle {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: -12px; // 20px visual + 24px = 44px hit area
+        }
+    }
+}

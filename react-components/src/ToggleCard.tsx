@@ -8,6 +8,10 @@ export interface ToggleCardProps {
 	checked?: boolean
 	/** Called when the user clicks the card */
 	onChange?: (checked: boolean) => void
+	/** Submit on/'' in native <form> posts via a hidden input (checkbox semantics). */
+	name?: string
+	/** Value submitted when checked (default "on"). */
+	value?: string
 	/** Primary label text */
 	label: string
 	/** Optional secondary description text */
@@ -27,6 +31,8 @@ export interface ToggleCardProps {
 export const ToggleCard: React.FC<ToggleCardProps> = ({
 	checked = false,
 	onChange,
+	name,
+	value = 'on',
 	label,
 	hint,
 	icon,
@@ -81,6 +87,8 @@ export const ToggleCard: React.FC<ToggleCardProps> = ({
 			aria-label={label}
 			tabIndex={disabled ? -1 : 0}
 		>
+			{/* native checkbox semantics: present in form data only while checked */}
+			{name && checked && <input type="hidden" name={name} value={value} />}
 			{badge && <span className="component-toggle-card__badge">{badge}</span>}
 
 			{icon && (

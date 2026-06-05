@@ -26,7 +26,8 @@
 
     &__header {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
         justify-content: space-between;
         gap: var(--tc-space-3);
     }
@@ -68,9 +69,11 @@
         display: flex;
         align-items: center;
         gap: var(--tc-space-2);
+        width: 100%;
+        justify-content: flex-start;
     }
 
-    &--danger {
+    &.component-section-card--danger {
         border-color: var(--sec-danger-border);
 
         .card-header {
@@ -90,15 +93,15 @@
     }
 }
 
-@media (max-width: 576px) {
+@media (min-width: 576px) {
     .component-section-card {
         &__header {
-            flex-direction: column;
-            align-items: flex-start;
+            flex-direction: row;
+            align-items: center;
         }
 
         &__action {
-            width: 100%;
+            width: auto;
             justify-content: flex-start;
         }
     }

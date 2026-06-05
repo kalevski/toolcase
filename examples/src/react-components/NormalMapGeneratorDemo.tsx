@@ -386,7 +386,7 @@ const NormalMapGeneratorDemo = () => {
 
 						<SectionCard title="Selection Tools">
 							<div className="d-flex flex-column gap-3">
-								<div className="btn-group" role="group" aria-label="Editor tool">
+								<div className="d-flex" role="group" aria-label="Editor tool">
 									{(['brush', 'rect', 'lasso', 'wand'] as EditorTool[]).map((t) => (
 										<Button
 											key={t}
@@ -426,7 +426,7 @@ const NormalMapGeneratorDemo = () => {
 
 						<SectionCard title="Light Inspector">
 							<div className="d-flex flex-column gap-3">
-								<div className="btn-group" role="group" aria-label="Preview mode">
+								<div className="d-flex" role="group" aria-label="Preview mode">
 									{(['albedo', 'normal', 'lit', 'lit-surface'] as PreviewMode[]).map((m) => (
 										<Button
 											key={m}

@@ -1,5 +1,6 @@
 import { Breadcrumbs, CategorySection, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
 import { loggingExamples } from '../logging/index'
+import { versions } from '../versions'
 
 export const LoggingPage = () => {
     return (
@@ -12,7 +13,7 @@ export const LoggingPage = () => {
                     eyebrow: 'Library · Diagnostics',
                     tagline:
                         'Lightweight isomorphic logger — scoped loggers, custom reporters, log levels. Quiet by default, loud when you need it.',
-                    version: '3.0.2',
+                    version: versions.logging,
                     examples: loggingExamples.length,
                     chips: ['Node.js', 'Browser', 'Zero deps'],
                 }}

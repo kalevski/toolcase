@@ -1,4 +1,8 @@
-@use '../colors' as *;
+@use 'sass:color';
+@use '../brand' as *;
+
+// Hero keeps the purple brand-gradient accent (formerly _colors.scss $primary).
+$primary: $primary-gradient-start;
 
 .component.component-hero {
 	position: relative;
@@ -163,9 +167,14 @@
 
 .component-hero__actions {
 	display: flex;
+	flex-direction: column; // mobile: stacked full-width actions
 	flex-wrap: wrap;
 	gap: var(--tc-space-4);
 	justify-content: center;
+
+	@media (min-width: 576px) {
+		flex-direction: row;
+	}
 }
 
 .component-hero__actions--centered {
@@ -173,8 +182,13 @@
 }
 
 .component-hero__button {
+	width: 100%; // mobile: full-width
 	min-width: 180px;
 	box-shadow: var(--tc-shadow-md);
+
+	@media (min-width: 576px) {
+		width: auto;
+	}
 	transition:
 		transform 220ms ease,
 		box-shadow 220ms ease;
@@ -196,13 +210,17 @@
 }
 
 .component-hero__visual {
-	display: flex;
-	justify-content: center;
+	display: none; // mobile: decorative visual hidden
+
+	@media (min-width: 992px) {
+		display: flex;
+		justify-content: center;
+	}
 }
 
 .component-hero__image-wrapper {
 	position: relative;
-	background: linear-gradient(135deg, rgba(lighten($primary, 40%), 0.18), rgba(var(--tc-surface-rgb), 0.95));
+	background: linear-gradient(135deg, rgba(color.adjust($primary, $lightness: 40%), 0.18), rgba(var(--tc-surface-rgb), 0.95));
 	border: 1px solid rgba(var(--tc-border-strong-rgb), 0.9);
 	box-shadow: var(--tc-shadow-lg);
 	overflow: hidden;
@@ -216,26 +234,39 @@
 	object-fit: cover;
 	display: block;
 	box-shadow: inset 0 0 0 1px rgba(var(--tc-border-strong-rgb), 0.35);
-	background: radial-gradient(circle, rgba($primary, 0.32), rgba(lighten($primary, 6%), 0.26));
+	background: radial-gradient(circle, rgba($primary, 0.32), rgba(color.adjust($primary, $lightness: 6%), 0.26));
 }
 
 .component-hero__image--placeholder {
-	background: linear-gradient(130deg, rgba($primary, 0.34), rgba(lighten($primary, 12%), 0.26));
+	background: linear-gradient(130deg, rgba($primary, 0.34), rgba(color.adjust($primary, $lightness: 12%), 0.26));
 }
 
 .component-hero__stat-stack {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	width: clamp(180px, 22vw, 240px);
+	position: static;
+	width: 100%;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin-top: var(--tc-space-6);
 	gap: var(--tc-space-4);
 	align-items: flex-end;
 	pointer-events: none;
+
+	@media (min-width: 992px) {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		width: clamp(180px, 22vw, 240px);
+		flex-direction: column;
+		flex-wrap: nowrap;
+		justify-content: normal;
+		margin-top: 0;
+	}
 }
 
 .component-hero__stat-card {
+	width: min(220px, 100%); // mobile: capped tiles in a wrapping row
 	background: rgba(var(--tc-surface-rgb), 0.88);
 	border: 1px solid rgba(var(--tc-text-faint-rgb), 0.25);
 	padding: var(--tc-space-1) var(--tc-space-3);
@@ -244,16 +275,26 @@
 		inset 0 1px rgba(var(--tc-surface-rgb), 0.6);
 	backdrop-filter: blur(14px);
 	animation: hero-card-float 6s ease-in-out infinite;
+
+	@media (min-width: 992px) {
+		width: auto;
+	}
 }
 
 .component-hero__stat-card:nth-child(2) {
-	margin-left: var(--tc-space-6);
 	animation-delay: 0.45s;
+
+	@media (min-width: 992px) {
+		margin-left: var(--tc-space-6);
+	}
 }
 
 .component-hero__stat-card:nth-child(3) {
-	margin-left: var(--tc-space-8);
 	animation-delay: 0.9s;
+
+	@media (min-width: 992px) {
+		margin-left: var(--tc-space-8);
+	}
 }
 
 .component-hero__stat-label {
@@ -359,8 +400,8 @@
 	height: 32px;
 	background:
 		radial-gradient(circle at 0% 50%, rgba($primary, 0.12), transparent 55%),
-		radial-gradient(circle at 100% 50%, rgba(lighten($primary, 8%), 0.16), transparent 55%),
-		linear-gradient(90deg, rgba($primary, 0.14), rgba(lighten($primary, 10%), 0.18));
+		radial-gradient(circle at 100% 50%, rgba(color.adjust($primary, $lightness: 8%), 0.16), transparent 55%),
+		linear-gradient(90deg, rgba($primary, 0.14), rgba(color.adjust($primary, $lightness: 10%), 0.18));
 	box-shadow:
 		var(--tc-shadow-lg),
 		0 0 0 1px rgba(255, 255, 255, 0.35);
@@ -370,9 +411,13 @@
 .component-hero__bottom {
 	position: relative;
 	z-index: 3;
-	padding: clamp(2rem, 5vw, 3.25rem) clamp(1.25rem, 5vw, 3rem);
+	padding: clamp(1.25rem, 6vw, 1.75rem) clamp(1rem, 6vw, 1.5rem); // mobile
 	display: flex;
 	justify-content: center;
+
+	@media (min-width: 576px) {
+		padding: clamp(2rem, 5vw, 3.25rem) clamp(1.25rem, 5vw, 3rem);
+	}
 }
 
 .component-hero__bottom::before {
@@ -390,7 +435,11 @@
 .component-hero__bottom-inner {
 	width: 100%;
 	max-width: 1180px;
-	padding: clamp(1.75rem, 4vw, 2.5rem);
+	padding: clamp(1.1rem, 6vw, 1.6rem); // mobile
+
+	@media (min-width: 576px) {
+		padding: clamp(1.75rem, 4vw, 2.5rem);
+	}
 	background: rgba(var(--tc-surface-rgb), 0.82);
 	border: 1px solid rgba(var(--tc-text-faint-rgb), 0.2);
 	box-shadow: var(--tc-shadow-lg);
@@ -399,7 +448,11 @@
 
 .component-hero__metrics {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	grid-template-columns: minmax(0, 1fr); // mobile: single column
+
+	@media (min-width: 576px) {
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	}
 	gap: clamp(1.2rem, 4vw, 2.5rem);
 	margin: 0;
 	padding: 0;
@@ -423,7 +476,7 @@
 	content: '';
 	width: 48px;
 	height: 3px;
-	background: linear-gradient(90deg, rgba($primary, 0.85), rgba(lighten($primary, 10%), 0.7));
+	background: linear-gradient(90deg, rgba($primary, 0.85), rgba(color.adjust($primary, $lightness: 10%), 0.7));
 	opacity: 0.85;
 }
 
@@ -515,48 +568,3 @@
 	}
 }
 
-@media (max-width: 992px) {
-	.component-hero__grid {
-		grid-template-columns: minmax(0, 1fr);
-	}
-
-	.component-hero__stat-stack {
-		position: static;
-		width: 100%;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		margin-top: var(--tc-space-6);
-	}
-
-	.component-hero__stat-card {
-		width: min(220px, 100%);
-		margin-left: 0 !important;
-	}
-
-	.component-hero__visual {
-		display: none;
-	}
-}
-
-@media (max-width: 576px) {
-	.component-hero__actions {
-		flex-direction: column;
-	}
-
-	.component-hero__button {
-		width: 100%;
-	}
-
-	.component-hero__bottom {
-		padding: clamp(1.25rem, 6vw, 1.75rem) clamp(1rem, 6vw, 1.5rem);
-	}
-
-	.component-hero__bottom-inner {
-		padding: clamp(1.1rem, 6vw, 1.6rem);
-	}
-
-	.component-hero__metrics {
-		grid-template-columns: minmax(0, 1fr);
-	}
-}

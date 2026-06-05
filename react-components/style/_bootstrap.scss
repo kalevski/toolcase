@@ -1,27 +1,32 @@
 @charset "UTF-8";
 @use 'sass:color';
-@import './brand';
 
-$primary: #000 !default;
-$secondary: #3f3d56 !default;
-$success: #10b981 !default;
-$info: #06b6d4 !default;
-$warning: #f59e0b !default;
-$danger: #ef4444 !default;
-$light: #f9fafb !default;
-$dark: #1f2937 !default;
+// ── Bootstrap functions must precede any variable that uses them ─────────────
+@import 'bootstrap/scss/functions';
+
+// Single palette (improvements/02): every value below mirrors a `--tc-*` token
+// from _tokens.scss so Bootstrap primitives and BEM components share one source
+// of truth. Keep in sync when tokens change.
+$primary: #1e293b !default; // --tc-accent (slate-800)
+$secondary: #3f3d56 !default; // --tc-secondary
+$success: #16a34a !default; // --tc-success
+$info: #0284c7 !default; // --tc-info
+$warning: #d97706 !default; // --tc-warning
+$danger: #dc2626 !default; // --tc-danger
+$light: #f8fafc !default; // --tc-bg
+$dark: #0f172a !default; // --tc-accent-hover (slate-900)
 
 $white: #fff !default;
-$gray-50: #f9fafb !default;
-$gray-100: #f3f4f6 !default;
-$gray-200: #e5e7eb !default;
-$gray-300: #d1d5db !default;
-$gray-400: #9ca3af !default;
-$gray-500: #6b7280 !default;
-$gray-600: #4b5563 !default;
-$gray-700: #374151 !default;
-$gray-800: #1f2937 !default;
-$gray-900: #111827 !default;
+$gray-50: #f8fafc !default; // --tc-bg / slate-50
+$gray-100: #f1f5f9 !default; // --tc-surface-muted / slate-100
+$gray-200: #e2e8f0 !default; // --tc-border / slate-200
+$gray-300: #cbd5e1 !default; // --tc-border-strong / slate-300
+$gray-400: #94a3b8 !default; // --tc-text-faint / slate-400
+$gray-500: #64748b !default; // --tc-text-muted / slate-500
+$gray-600: #475569 !default; // slate-600
+$gray-700: #334155 !default; // slate-700
+$gray-800: #1e293b !default; // --tc-text / slate-800
+$gray-900: #0f172a !default; // slate-900
 $black: #000 !default;
 
 $font-family-sans-serif:
@@ -144,40 +149,6 @@ $grid-columns: 12 !default;
 $grid-gutter-width: 1.5rem !default;
 $grid-row-columns: 6 !default;
 
-$table-cell-padding-y: 0.75rem !default;
-$table-cell-padding-x: 0.75rem !default;
-$table-cell-padding-y-sm: 0.375rem !default;
-$table-cell-padding-x-sm: 0.375rem !default;
-
-$table-cell-vertical-align: top !default;
-$table-color: inherit !default;
-$table-bg: transparent !default;
-$table-accent-bg: transparent !default;
-
-$table-th-font-weight: $font-weight-semibold !default;
-$table-striped-color: $table-color !default;
-$table-striped-bg-factor: 0.02 !default;
-$table-striped-bg: rgba($black, $table-striped-bg-factor) !default;
-
-$table-active-color: $table-color !default;
-$table-active-bg-factor: 0.1 !default;
-$table-active-bg: rgba($black, $table-active-bg-factor) !default;
-
-$table-hover-color: $table-color !default;
-$table-hover-bg-factor: 0.075 !default;
-$table-hover-bg: rgba($black, $table-hover-bg-factor) !default;
-
-$table-border-factor: 0.2 !default;
-$table-border-width: $border-width !default;
-$table-border-color: $border-color !default;
-
-$table-striped-order: odd !default;
-$table-striped-columns-order: even !default;
-
-$table-group-separator-color: currentcolor !default;
-$table-caption-color: $gray-600 !default;
-$table-bg-scale: -80% !default;
-
 $btn-padding-y: 0.5rem !default;
 $btn-padding-x: 1rem !default;
 $btn-font-family: null !default;
@@ -231,9 +202,56 @@ $card-bg: $white !default;
 $card-img-overlay-padding: $spacer !default;
 $card-group-margin: $grid-gutter-width * 0.5 !default;
 
-@import 'bootstrap/scss/bootstrap';
+// ── Modular Bootstrap import — only the parts components actually consume ────
+// Used by: Button/.btn, Badge/.bg-*, Checkbox+Radio/.form-check, Input+Textarea/
+// .form-control, Select/.form-select, AudioMixer/.form-range, CoolNav/.navbar+
+// .nav-link+.collapse, ActionItems+FileTags/.dropdown-menu, ProgressBar/.progress,
+// Alert/.alert, Button-loading/.spinner-border, Card/.card, plus grid/containers/
+// type/utilities used across demos.
+// Deliberately NOT imported (each has a BEM component instead): accordion,
+// breadcrumb, button-group, carousel, close, list-group, modal, offcanvas,
+// pagination, placeholders, popover, tables, toasts, tooltip, images.
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
 @import 'bootstrap/scss/root';
+@import 'bootstrap/scss/reboot';
+@import 'bootstrap/scss/type';
+@import 'bootstrap/scss/containers';
+@import 'bootstrap/scss/grid';
+@import 'bootstrap/scss/forms';
+@import 'bootstrap/scss/buttons';
+@import 'bootstrap/scss/transitions';
+@import 'bootstrap/scss/dropdown';
+@import 'bootstrap/scss/nav';
+@import 'bootstrap/scss/navbar';
+@import 'bootstrap/scss/card';
+@import 'bootstrap/scss/badge';
+@import 'bootstrap/scss/alert';
+@import 'bootstrap/scss/progress';
+@import 'bootstrap/scss/spinners';
+@import 'bootstrap/scss/helpers';
+@import 'bootstrap/scss/utilities/api';
 
+// ── Bridge Bootstrap CSS vars to the design tokens (single source of truth) ──
+// Components read --tc-*; Bootstrap primitives read --bs-*. Mapping the --bs-*
+// vars to tokens makes consumer theming propagate to both systems at runtime.
+:root {
+	--bs-body-color: var(--tc-text);
+	--bs-body-bg: var(--tc-surface);
+	--bs-border-color: var(--tc-border);
+	--bs-primary: var(--tc-accent);
+	--bs-danger: var(--tc-danger);
+	--bs-success: var(--tc-success);
+	--bs-warning: var(--tc-warning);
+	--bs-info: var(--tc-info);
+	--bs-font-sans-serif: var(--tc-font-family-sans);
+	--bs-font-monospace: var(--tc-font-family-mono);
+}
+
+// ── First-party overrides for the Bootstrap primitives we keep ───────────────
 
 .card {
 	transition: all 0.2s ease-in-out;
@@ -274,13 +292,17 @@ $card-group-margin: $grid-gutter-width * 0.5 !default;
 	}
 }
 
+// Text color per variant comes from Bootstrap's button-variant() contrast math —
+// no `.btn { color: $white }` global (it forced white onto light/outline/link
+// variants and needed a chain of patch-back rules; see improvements/01 R4).
+
 .btn-primary {
-	background: linear-gradient(135deg, $primary, lighten($primary, 5%));
+	background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: 5%));
 	border-color: $primary;
 
 	&:hover {
-		background: linear-gradient(135deg, darken($primary, 5%), $primary);
-		border-color: darken($primary, 5%);
+		background: linear-gradient(135deg, color.adjust($primary, $lightness: -5%), $primary);
+		border-color: color.adjust($primary, $lightness: -5%);
 		box-shadow: 0 4px 15px rgba($primary, 0.3);
 	}
 }
@@ -312,47 +334,6 @@ input[type='color'].form-control {
 	margin-bottom: 0.5rem;
 }
 
-.table {
-	font-size: 0.9rem;
-
-	th {
-		font-weight: $font-weight-semibold;
-		text-transform: uppercase;
-		font-size: 0.8rem;
-		letter-spacing: 0.05em;
-		color: $gray-600;
-		border-bottom: 2px solid $gray-200;
-	}
-
-	td {
-		vertical-align: middle;
-	}
-}
-
-.table-hover tbody tr:hover {
-	background-color: #fff;
-}
-
-.navbar {
-	backdrop-filter: blur(20px);
-	background: rgba($white, 0.95) !important;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-	.navbar-brand {
-		font-weight: $font-weight-bold;
-		color: $gray-800;
-	}
-
-	.nav-link {
-		font-weight: $font-weight-medium;
-		transition: color 0.15s ease-in-out;
-
-		&:hover {
-			color: $primary;
-		}
-	}
-}
-
 .alert {
 	border: none;
 	border-left: 4px solid;
@@ -360,25 +341,25 @@ input[type='color'].form-control {
 	&.alert-primary {
 		background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
 		border-left-color: $primary;
-		color: darken($primary, 20%);
+		color: color.adjust($primary, $lightness: -20%);
 	}
 
 	&.alert-success {
-		background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
+		background: linear-gradient(135deg, rgba($success, 0.1), rgba($success, 0.05));
 		border-left-color: $success;
-		color: darken($success, 20%);
+		color: color.adjust($success, $lightness: -20%);
 	}
 
 	&.alert-warning {
-		background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
+		background: linear-gradient(135deg, rgba($warning, 0.1), rgba($warning, 0.05));
 		border-left-color: $warning;
-		color: darken($warning, 20%);
+		color: color.adjust($warning, $lightness: -20%);
 	}
 
 	&.alert-danger {
-		background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
+		background: linear-gradient(135deg, rgba($danger, 0.1), rgba($danger, 0.05));
 		border-left-color: $danger;
-		color: darken($danger, 20%);
+		color: color.adjust($danger, $lightness: -20%);
 	}
 }
 
@@ -386,52 +367,6 @@ input[type='color'].form-control {
 	font-weight: $font-weight-medium;
 	letter-spacing: 0.025em;
 	padding: 0.375rem 0.75rem;
-}
-
-.list-group-item {
-	border: 1px solid rgba($gray-200, 0.8);
-	transition: all 0.15s ease-in-out;
-
-	&:hover {
-		background-color: rgba($primary, 0.02);
-		border-color: rgba($primary, 0.2);
-	}
-
-	&.active {
-		background: linear-gradient(135deg, $primary, lighten($primary, 5%));
-		border-color: $primary;
-	}
-}
-
-.breadcrumb {
-	background: rgba($gray-100, 0.5);
-	padding: 0.75rem 1rem;
-
-	.breadcrumb-item {
-		font-weight: $font-weight-medium;
-
-		&.active {
-			color: $primary;
-		}
-	}
-}
-
-.pagination {
-	.page-link {
-		border: none;
-		margin: 0 0.125rem;
-		transition: all 0.15s ease-in-out;
-
-		&:hover {
-			background-color: rgba($primary, 0.1);
-			color: $primary;
-		}
-	}
-
-	.page-item.active .page-link {
-		background: linear-gradient(135deg, $primary, lighten($primary, 5%));
-		box-shadow: 0 2px 8px rgba($primary, 0.3);
-	}
 }
 
 .dropdown-menu {
@@ -453,32 +388,8 @@ input[type='color'].form-control {
 		}
 
 		&.active {
-			background: linear-gradient(135deg, $primary, lighten($primary, 5%));
+			background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: 5%));
 		}
-	}
-}
-
-.modal-content {
-	border: none;
-	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-
-	.modal-header {
-		border-bottom: 1px solid rgba($gray-200, 0.8);
-		padding: 1.5rem;
-
-		.modal-title {
-			font-weight: $font-weight-semibold;
-			color: $gray-800;
-		}
-	}
-
-	.modal-body {
-		padding: 1.5rem;
-	}
-
-	.modal-footer {
-		border-top: 1px solid rgba($gray-200, 0.8);
-		padding: 1rem 1.5rem;
 	}
 }
 
@@ -486,167 +397,47 @@ input[type='color'].form-control {
 	background-color: rgba($gray-200, 0.5);
 	overflow: hidden;
 
-	.progress-bar {
-		background: linear-gradient(90deg, $primary, lighten($primary, 10%));
-		transition: width 0.6s ease;
-	}
+	// No background override here: a gradient background-image painted over the
+	// `bg-*` utility classes ProgressBar sets, making every variant render $primary.
+	// Bootstrap's own .progress-bar already provides bg color + width transition.
 }
 
-.shadow-soft {
-	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
-}
-
-.shadow-strong {
-	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
-}
-
-.border-soft {
-	border: 1px solid rgba($gray-200, 0.6) !important;
-}
-
-.bg-gradient-primary {
-	background: linear-gradient(135deg, $primary, lighten($primary, 10%)) !important;
-}
-
-.bg-gradient-secondary {
-	background: linear-gradient(135deg, darken($primary, 10%), lighten($primary, 10%)) !important;
-}
-
+// Used by demo headers (AudioMixerDemo); intentionally kept.
 .text-gradient-primary {
-	background: linear-gradient(135deg, $primary, lighten($primary, 20%));
+	background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: 20%));
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
 }
 
-[data-bs-theme='dark'] {
-	.card {
-		background-color: rgba($gray-800, 0.8);
-		border-color: rgba($gray-600, 0.3);
-
-		&:hover {
-			box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-		}
-
-		.card-header {
-			background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
-			border-bottom-color: rgba($gray-600, 0.3);
-		}
+// ── Touch targets (WCAG 2.5.5) — Bootstrap-styled controls ───────────────────
+// Central coarse-pointer pass for every component that renders Bootstrap
+// primitives (Button, Checkbox, Radio, Input, Select, CoolNav links, …).
+// Checkbox/Radio: the input keeps its visual size; the 44px target is the
+// combined input + label row (label carries htmlFor, so it toggles too).
+@media (pointer: coarse) {
+	.btn {
+		min-height: 44px;
 	}
 
-	.navbar {
-		background: rgba($gray-900, 0.95) !important;
-
-		.navbar-brand {
-			color: $gray-100;
-		}
+	.form-control,
+	.form-select {
+		min-height: 44px;
 	}
 
-	.table th {
-		color: $gray-300;
-		border-bottom-color: rgba($gray-600, 0.5);
+	.nav-link {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
 	}
 
-	.dropdown-menu {
-		background-color: $gray-800;
-		border-color: rgba($gray-600, 0.3);
+	.form-check {
+		min-height: 44px;
 	}
 
-	.modal-content {
-		background-color: $gray-800;
-
-		.modal-header {
-			border-bottom-color: rgba($gray-600, 0.3);
-
-			.modal-title {
-				color: $gray-100;
-			}
-		}
-
-		.modal-footer {
-			border-top-color: rgba($gray-600, 0.3);
-		}
+	.form-check-label {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
 	}
-}
-
-.btn,
-.btn:hover {
-	color: $white;
-}
-
-.btn-outline-primary {
-	color: $primary;
-
-	&:hover {
-		color: $white;
-	}
-}
-
-.btn-outline-secondary {
-	color: $secondary;
-
-	&:hover {
-		color: $white;
-	}
-}
-
-.btn-light {
-	color: $primary;
-}
-
-.btn-outline-danger {
-	color: $danger;
-
-	&:hover {
-		color: $white;
-	}
-}
-
-.btn-outline-success {
-	color: $success;
-
-	&:hover {
-		color: $white;
-	}
-}
-
-.btn-outline-info {
-	color: $info;
-
-	&:hover {
-		color: $white;
-	}
-}
-
-.btn-outline-warning {
-	color: $warning;
-
-	&:hover {
-		color: $white;
-	}
-}
-
-::-webkit-scrollbar {
-	width: 12px;
-	background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-	background: #c1c1c1;
-	border-radius: 6px;
-	border: 3px solid transparent;
-	background-clip: content-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: #a0a0a0;
-}
-
-::-webkit-scrollbar-track {
-	background: transparent;
-}
-
-html {
-	scrollbar-width: thin;
-	scrollbar-color: #c1c1c1 transparent;
 }

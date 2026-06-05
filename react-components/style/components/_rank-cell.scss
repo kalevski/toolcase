@@ -13,6 +13,6 @@
     display: inline-block;
 }
 
-.component-rank-cell--top1 { color: var(--rc-top1); }
-.component-rank-cell--top2 { color: var(--rc-top2); }
-.component-rank-cell--top3 { color: var(--rc-top3); }
+.component-rank-cell.component-rank-cell--top1 { color: var(--rc-top1); }
+.component-rank-cell.component-rank-cell--top2 { color: var(--rc-top2); }
+.component-rank-cell.component-rank-cell--top3 { color: var(--rc-top3); }

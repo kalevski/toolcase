@@ -85,17 +85,24 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 36px;
-	height: 36px;
+	width: 44px; // mobile: touch-sized
+	height: 44px;
 	border: none;
 	background: none;
-	font-size: 1.05rem;
+	font-size: 1.25rem;
 	color: var(--ip-muted);
 	cursor: pointer;
 	font-family: inherit;
 	transition: background-color var(--ip-transition), color var(--ip-transition);
 
-	@media (max-width: 576px) {
+	@media (min-width: 576px) {
+		width: 36px;
+		height: 36px;
+		font-size: 1.05rem;
+	}
+
+	// keep touch-sized targets on coarse pointers at any width
+	@media (pointer: coarse) {
 		width: 44px;
 		height: 44px;
 		font-size: 1.25rem;
@@ -114,10 +121,11 @@
 
 .component-icon-picker__grid {
 	display: grid;
+	grid-template-columns: repeat(4, 1fr); // mobile: fixed 4-up
 	gap: var(--tc-space-1);
 
-	@media (max-width: 576px) {
-		grid-template-columns: repeat(4, 1fr) !important;
+	@media (min-width: 576px) {
+		grid-template-columns: repeat(var(--ip-cols, 5), 1fr);
 	}
 }
 

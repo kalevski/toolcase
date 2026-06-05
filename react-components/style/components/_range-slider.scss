@@ -143,12 +143,12 @@
     }
 
     // States
-    &--disabled {
+    &.component-range-slider--disabled {
         opacity: 0.5;
         pointer-events: none;
     }
 
-    &--error .component-range-slider__track {
+    &.component-range-slider--error .component-range-slider__track {
         background: var(--tc-danger-bg);
     }
 }

@@ -52,16 +52,51 @@
     flex-direction: column;
     gap: var(--tc-gap);
     pointer-events: none; // children opt back in
-    width: min(360px, calc(100vw - 2rem));
+}
+
+// Width + horizontal anchoring live on a single-class selector so the position
+// modifiers below (same specificity, later in source) can override per corner.
+.component-toast-container {
+    // Mobile: full-width strip with thin gutters, no centering transform.
+    width: auto;
+    left: var(--tc-space-2);
+    right: var(--tc-space-2);
+
+    @media (min-width: 400px) {
+        width: min(360px, calc(100vw - 2rem));
+        left: auto;
+        right: auto;
+    }
 }
 
 .component-toast-container {
-    &--top-right    { top: 1rem;    right: 1rem; }
-    &--top-left     { top: 1rem;    left: 1rem; }
-    &--top-center   { top: 1rem;    left: 50%; transform: translateX(-50%); }
-    &--bottom-right { bottom: 1rem; right: 1rem; flex-direction: column-reverse; }
-    &--bottom-left  { bottom: 1rem; left: 1rem;  flex-direction: column-reverse; }
-    &--bottom-center { bottom: 1rem; left: 50%; transform: translateX(-50%); flex-direction: column-reverse; }
+    &.component-toast-container--top-right {
+        top: 1rem;
+        @media (min-width: 400px) { right: 1rem; }
+    }
+    &.component-toast-container--top-left {
+        top: 1rem;
+        @media (min-width: 400px) { left: 1rem; }
+    }
+    &.component-toast-container--top-center {
+        top: 1rem;
+        @media (min-width: 400px) { left: 50%; transform: translateX(-50%); }
+    }
+    &.component-toast-container--bottom-right {
+        bottom: 1rem;
+        flex-direction: column-reverse;
+        @media (min-width: 400px) { right: 1rem; }
+    }
+    &.component-toast-container--bottom-left {
+        bottom: 1rem;
+        flex-direction: column-reverse;
+        @media (min-width: 400px) { left: 1rem; }
+    }
+    &.component-toast-container--bottom-center {
+        bottom: 1rem;
+        flex-direction: column-reverse;
+        @media (min-width: 400px) { left: 50%; transform: translateX(-50%); }
+    }
 }
 
 // ── Toast item ────────────────────────────────────────────────────────────────
@@ -217,17 +252,6 @@
     .component-toast-item__close {
         min-width: 44px;
         min-height: 44px;
-    }
-}
-
-// ── Responsive: full-width on very small screens ──────────────────────────────
-
-@media (max-width: 400px) {
-    .component.component-toast-container {
-        width: calc(100vw - 1rem);
-        left: var(--tc-space-2) !important;
-        right: var(--tc-space-2) !important;
-        transform: none !important;
     }
 }
 

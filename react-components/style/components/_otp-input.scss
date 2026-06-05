@@ -1,8 +1,8 @@
 // ── OTPInput ──────────────────────────────────────────────────────────────────
 
 .component.component-otp-input {
-    --otp-cell-size:      2.75rem;
-    --otp-cell-font:      1.25rem;
+    --otp-cell-size:      2.25rem;
+    --otp-cell-font:      1rem;
     --otp-border:         var(--tc-border);
     --otp-border-focus:   var(--tc-text);
     --otp-border-error:   var(--tc-danger);
@@ -24,7 +24,7 @@
 
     &__fields {
         display: flex;
-        gap: var(--tc-space-2);
+        gap: var(--tc-space-1);
         flex-wrap: wrap;
     }
 
@@ -72,15 +72,24 @@
     }
 }
 
-@media (max-width: 400px) {
-    .component-otp-input {
-        --otp-cell-size: 2.25rem;
-        --otp-cell-font: 1rem;
+@media (min-width: 400px) {
+    .component.component-otp-input {
+        --otp-cell-size: 2.75rem;
+        --otp-cell-font: 1.25rem;
+    }
 
-        &__fields { gap: var(--tc-space-1); }
+    .component-otp-input__fields {
+        gap: var(--tc-space-2);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .component-otp-input__cell { transition: none; }
+}
+
+// Touch targets (WCAG 2.5.5 / spec §5)
+@media (pointer: coarse) {
+    .component.component-otp-input {
+        --otp-cell-size: 2.75rem;
+    }
 }

@@ -90,22 +90,22 @@ const AvatarDemo: React.FC = () => (
 		</SectionCard>
 
 		<SectionCard title="Avatar in User Lists">
-			<div className="list-group">
-				<div className="list-group-item d-flex align-items-center gap-3">
+			<div className="border border-bottom-0">
+				<div className="d-flex align-items-center gap-3 p-3 border-bottom">
 					<Avatar name="John Doe" status="online" />
 					<div>
 						<div className="fw-bold">John Doe</div>
 						<small className="text-muted">john.doe@example.com</small>
 					</div>
 				</div>
-				<div className="list-group-item d-flex align-items-center gap-3">
+				<div className="d-flex align-items-center gap-3 p-3 border-bottom">
 					<Avatar name="Jane Smith" status="busy" variant="secondary" />
 					<div>
 						<div className="fw-bold">Jane Smith</div>
 						<small className="text-muted">jane.smith@example.com</small>
 					</div>
 				</div>
-				<div className="list-group-item d-flex align-items-center gap-3">
+				<div className="d-flex align-items-center gap-3 p-3 border-bottom">
 					<Avatar src="https://i.pravatar.cc/150?img=7" name="Bob Wilson" status="away" />
 					<div>
 						<div className="fw-bold">Bob Wilson</div>

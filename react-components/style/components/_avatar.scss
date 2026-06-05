@@ -7,14 +7,14 @@
 	flex-shrink: 0;
 	user-select: none;
 
-	width: 40px;
-	height: 40px;
-	font-size: 1rem;
+	width: 36px;
+	height: 36px;
+	font-size: 0.875rem;
 
-	@media (max-width: 575px) {
-		width: 36px;
-		height: 36px;
-		font-size: 0.875rem;
+	@media (min-width: 576px) {
+		width: 40px;
+		height: 40px;
+		font-size: 1rem;
 	}
 }
 

@@ -26,21 +26,21 @@
 
 .component-countdown__grid {
     display: inline-grid;
-    gap: var(--cd-gap);
+    gap: var(--tc-space-2);
     grid-auto-flow: column;
-    grid-auto-columns: minmax(96px, 1fr);
+    grid-auto-columns: minmax(64px, 1fr);
 }
 
 .component-countdown__cell {
     border: 1px solid var(--cd-border);
-    padding: var(--cd-pad-y) var(--cd-pad-x);
+    padding: var(--tc-space-3) var(--tc-space-2);
     background: var(--cd-bg);
-    min-width: 96px;
+    min-width: 0;
 }
 
 .component-countdown__num {
     font-family: var(--tc-font-family-mono);
-    font-size: var(--cd-num-size);
+    font-size: 1.75rem;
     font-weight: var(--tc-font-weight-bold);
     color: var(--cd-color);
     line-height: 1;
@@ -68,7 +68,7 @@
     color: var(--tc-text-muted);
 }
 
-.component-countdown--compact {
+.component-countdown.component-countdown--compact {
     --cd-pad-x: var(--tc-space-3);
     --cd-pad-y: var(--tc-space-3);
     --cd-num-size: 1.5rem;
@@ -76,14 +76,14 @@
     --cd-gap: var(--tc-space-3);
 }
 
-@media (max-width: 576px) {
+@media (min-width: 576px) {
     .component-countdown__grid {
-        grid-auto-columns: minmax(64px, 1fr);
-        gap: var(--tc-space-2);
+        grid-auto-columns: minmax(96px, 1fr);
+        gap: var(--cd-gap);
     }
     .component-countdown__cell {
-        min-width: 0;
-        padding: var(--tc-space-3) var(--tc-space-2);
+        min-width: 96px;
+        padding: var(--cd-pad-y) var(--cd-pad-x);
     }
-    .component-countdown__num { font-size: 1.75rem; }
+    .component-countdown__num { font-size: var(--cd-num-size); }
 }

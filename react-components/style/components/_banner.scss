@@ -66,21 +66,21 @@
     }
 
     // Variants
-    &--warning {
+    &.component-banner--warning {
         --bn-bg:         var(--tc-warning-tint-bg);
         --bn-border:     var(--tc-warning-tint-border);
         --bn-text:       var(--tc-warning-tint-text);
         --bn-icon-color: var(--tc-warning);
     }
 
-    &--success {
+    &.component-banner--success {
         --bn-bg:         var(--tc-success-tint-bg);
         --bn-border:     var(--tc-success-tint-border);
         --bn-text:       var(--tc-success-tint-text);
         --bn-icon-color: var(--tc-success);
     }
 
-    &--error {
+    &.component-banner--error {
         --bn-bg:         var(--tc-danger-tint-bg);
         --bn-border:     var(--tc-danger-tint-border);
         --bn-text:       var(--tc-danger-tint-text);

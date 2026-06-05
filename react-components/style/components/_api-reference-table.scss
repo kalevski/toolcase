@@ -37,7 +37,9 @@
 	&__row {
 		padding: var(--tc-space-3) var(--tc-space-4);
 		display: grid;
-		grid-template-columns: 1fr;
+		// minmax(0, …) lets the signature cell shrink below its intrinsic
+		// width so its own overflow-x: auto can kick in on narrow screens.
+		grid-template-columns: minmax(0, 1fr);
 		gap: var(--tc-space-2);
 		border-bottom: 1px solid var(--art-border);
 
@@ -85,6 +87,8 @@
 		background: var(--tc-surface-hover);
 		padding: var(--tc-space-2) var(--tc-space-2);
 		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: thin;
 		white-space: pre;
 	}
 

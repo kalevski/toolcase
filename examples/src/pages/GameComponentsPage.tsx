@@ -1,5 +1,6 @@
 import { Breadcrumbs, CategorySection, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
 import { gameComponentExamples, categories } from '../game-components/index'
+import { versions } from '../versions'
 
 const formatLabel = (key: string) =>
     key.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
@@ -15,7 +16,7 @@ export const GameComponentsPage = () => {
                     eyebrow: 'Library · Games · Web Components',
                     tagline:
                         'Framework-free Web Components for fantasy game UI — panels, bars, dialogs, overlays, HUD primitives. Drop into any framework or none.',
-                    version: '3.0.2',
+                    version: versions['game-components'],
                     examples: gameComponentExamples.length,
                     chips: ['Web Components', 'Framework-agnostic', 'Shadow DOM'],
                 }}

@@ -20,15 +20,24 @@
 
 .component-advanced-table__filters {
 	display: flex;
+	flex-direction: column; // mobile: stacked filters
 	flex-wrap: wrap;
 	gap: var(--tc-space-2);
 	padding: 0 0 var(--tc-space-3);
+
+	@media (min-width: 768px) {
+		flex-direction: row;
+	}
 }
 
 .component-advanced-table__filter {
 	min-width: 160px;
 	flex: 1 1 160px;
-	max-width: 280px;
+	max-width: none; // mobile: full-width
+
+	@media (min-width: 768px) {
+		max-width: 280px;
+	}
 
 	// Compact FormInput inside filters — remove default bottom margin
 	.component.component-form-input {
@@ -156,12 +165,16 @@
 	padding: var(--tc-space-3) 0 0;
 }
 
-@media (max-width: 768px) {
-	.component-advanced-table__filters {
-		flex-direction: column;
-	}
 
-	.component-advanced-table__filter {
-		max-width: none;
+// Touch targets: expand the sort button's hit area without growing it visually
+@media (pointer: coarse) {
+	.component-advanced-table__sort-btn {
+		position: relative;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: -13px 0; // header row stays compact; vertical hit area reaches 44px
+		}
 	}
 }

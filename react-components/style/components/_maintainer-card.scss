@@ -115,3 +115,11 @@
 	.component-maintainer-card__location,
 	.component-maintainer-card__footer { justify-content: flex-start; }
 }
+
+// Touch targets (WCAG 2.5.5 / spec §5)
+@media (pointer: coarse) {
+	.component-maintainer-card__link {
+		width: 44px;
+		height: 44px;
+	}
+}

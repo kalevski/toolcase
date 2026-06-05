@@ -752,3 +752,30 @@ code, pre, .mono { font-family: var(--font-mono); }
     .site-container, .site-container-narrow { padding: 32px 20px 64px; }
     .example__bar-inner { padding: 10px 20px; }
 }
+
+/* Custom scrollbar — site-level chrome. Moved out of @toolcase/react-components
+   (a component library should not own global scrollbar styling; improvements/01 R6).
+   Thumb is square per the no-border-radius design rule. */
+::-webkit-scrollbar {
+    width: 12px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 transparent;
+}

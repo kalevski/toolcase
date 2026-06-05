@@ -139,13 +139,18 @@ Every component SCSS file follows this template:
         // Child element styles
     }
 
-    &--{modifier} {
+    // Root modifiers MUST be doubled so they outrank the double-class base
+    // block above (`.component.component-{name}` is 0,2,0 — a bare
+    // `.component-{name}--{modifier}` at 0,1,0 silently loses and the
+    // variant never applies). Guarded by react-components/test/variant-specificity.test.ts.
+    &.component-{name}--{modifier} {
         // Root modifier styles
     }
 }
 
-// Responsive overrides — mobile-first, exceptions for wider screens
-@media (max-width: 576px) {
+// Responsive overrides — mobile-first ONLY: base styles are the mobile
+// layout, wider screens are the exception. Never use max-width queries.
+@media (min-width: 768px) {
     .component-{name} { ... }
 }
 ```

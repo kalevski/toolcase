@@ -1,11 +1,9 @@
-@import '../colors';
-
 .layout.layout--dashboard {
-	--dl-navbar-bg: #{$white};
-	--dl-sidebar-bg: #{$white};
-	--dl-content-bg: #{$gray-50};
-	--dl-border: #{$gray-200};
-	--dl-text: #{$dark};
+	--dl-navbar-bg: var(--tc-surface);
+	--dl-sidebar-bg: var(--tc-surface);
+	--dl-content-bg: var(--tc-bg);
+	--dl-border: var(--tc-border);
+	--dl-text: var(--tc-text);
 	--dl-overlay-bg: rgba(0, 0, 0, 0.5);
 
 	display: block;

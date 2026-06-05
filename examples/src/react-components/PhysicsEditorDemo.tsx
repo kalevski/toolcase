@@ -152,7 +152,7 @@ const PhysicsEditorDemo = () => {
 						</SectionCard>
 
 						<SectionCard title="Tool">
-							<div className="btn-group" role="group" aria-label="Editor tool">
+							<div className="d-flex" role="group" aria-label="Editor tool">
 								{(['select', 'polygon', 'circle', 'box'] as PhysicsTool[]).map((t) => (
 									<Button
 										key={t}

@@ -17,7 +17,8 @@
 //   they show up wrong.
 
 .theme.theme--dark,
-.theme--dark {
+.theme--dark,
+[data-bs-theme='dark'] {
     // Paint the wrapper itself + opt native form controls/scrollbars into dark.
     background-color: var(--tc-bg);
     color: var(--tc-text);
@@ -147,7 +148,8 @@
 // the `.card` rule, so a local declaration wins over the inherited `--bs-*`
 // tokens above. Re-declare them inside the scope to flip Bootstrap chrome.
 .theme.theme--dark .card,
-.theme--dark .card {
+.theme--dark .card,
+[data-bs-theme='dark'] .card {
     --bs-card-bg: var(--tc-surface);
     --bs-card-color: var(--tc-text);
     --bs-card-border-color: var(--tc-border);
@@ -156,7 +158,8 @@
 }
 
 .theme.theme--dark .card .card-title,
-.theme--dark .card .card-title {
+.theme--dark .card .card-title,
+[data-bs-theme='dark'] .card .card-title {
     color: var(--tc-text);
 }
 
@@ -165,7 +168,8 @@
 // Re-pin the exact tokens it consumes back to their light `:root` values on
 // the component root (custom props inherit → children read light too).
 .theme.theme--dark .component-cool-button,
-.theme--dark .component-cool-button {
+.theme--dark .component-cool-button,
+[data-bs-theme='dark'] .component-cool-button {
     --tc-black: #000000;
     --tc-black-rgb: 0, 0, 0;
     --tc-text-inverse: #ffffff;
@@ -197,7 +201,8 @@
 // forces them to the dark foreground / muted tokens. Loaded after the
 // component styles, so equal-specificity rules win on source order.
 .theme.theme--dark,
-.theme--dark {
+.theme--dark,
+[data-bs-theme='dark'] {
     // Strong foreground (headings, titles, values, names, labels).
     [class*='__title'],
     [class*='__heading'],
@@ -249,6 +254,7 @@
 // Higher specificity than the safety-net sweep above so its labels are not
 // flipped to light (which would vanish on the light outline surface).
 .theme.theme--dark .component-cool-button [class*='__'],
-.theme--dark .component-cool-button [class*='__'] {
+.theme--dark .component-cool-button [class*='__'],
+[data-bs-theme='dark'] .component-cool-button [class*='__'] {
     color: inherit;
 }

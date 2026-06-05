@@ -164,3 +164,16 @@
 		transform: translateY(0);
 	}
 }
+
+// Touch targets: expand the tiny remove button's hit area without growing it visually
+@media (pointer: coarse) {
+	.component-tag-input__tag-remove {
+		position: relative;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: -13px; // 18px visual + 26px = 44px hit area
+		}
+	}
+}

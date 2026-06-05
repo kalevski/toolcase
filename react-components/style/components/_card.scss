@@ -8,9 +8,13 @@
         transform: none;
     }
 
-    @media (max-width: 575px) {
+    .card-body {
+        padding: var(--tc-space-3);
+    }
+
+    @media (min-width: 576px) {
         .card-body {
-            padding: var(--tc-space-3);
+            padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
         }
     }
 }

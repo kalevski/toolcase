@@ -11,6 +11,8 @@ export interface SingleCardSelectProps {
 	options: SingleCardSelectOption[]
 	value?: string | null
 	onChange?: (selected: string) => void
+	/** Submit the selected key in native <form> posts via a hidden input. */
+	name?: string
 	columns?: number
 	className?: string
 	loading?: boolean
@@ -21,6 +23,7 @@ export const SingleCardSelect: React.FC<SingleCardSelectProps> = ({
 	options,
 	value = null,
 	onChange,
+	name,
 	columns,
 	className = '',
 	loading = false,
@@ -51,6 +54,7 @@ export const SingleCardSelect: React.FC<SingleCardSelectProps> = ({
 			className={`component component-single-card-select${className ? ` ${className}` : ''}`}
 			style={style}
 		>
+			{name && <input type="hidden" name={name} value={value ?? ''} />}
 			{options.map((opt) => {
 				const selected = value === opt.key
 				return (
@@ -58,6 +62,7 @@ export const SingleCardSelect: React.FC<SingleCardSelectProps> = ({
 						key={opt.key}
 						type="button"
 						className={`component-single-card-select__card${selected ? ' component-single-card-select__card--selected' : ''}`}
+						aria-pressed={selected}
 						onClick={() => onChange?.(opt.key)}
 					>
 						<span className="component-single-card-select__body">

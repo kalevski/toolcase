@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
-import { useClickOutside } from './hooks/useClickOutside'
+import { usePopup } from './hooks/usePopup'
 
 export type IconOption =
 	| {
@@ -46,9 +46,11 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 }) => {
 	const initial = value || getValue(icons[0])
 	const [selected, setSelected] = useState(initial)
-	const [open, setOpen] = useState(false)
 	const [search, setSearch] = useState('')
-	const rootRef = useRef<HTMLDivElement>(null)
+	const popup = usePopup<HTMLDivElement, HTMLButtonElement>({
+		arrowNav: true,
+		onClose: () => setSearch(''),
+	})
 
 	useEffect(() => {
 		if (value !== undefined && value !== selected) {
@@ -56,12 +58,9 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 		}
 	}, [value])
 
-	useClickOutside(rootRef, () => { setOpen(false); setSearch('') })
-
 	const handleSelect = (val: string) => {
 		setSelected(val)
-		setOpen(false)
-		setSearch('')
+		popup.close()
 		if (onChange) onChange(val)
 	}
 
@@ -81,18 +80,18 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 	}
 
 	return (
-		<div className={`component component-icon-picker${className ? ` ${className}` : ''}`} ref={rootRef}>
+		<div className={`component component-icon-picker${className ? ` ${className}` : ''}`} ref={popup.rootRef}>
 			{label && <label className="component-icon-picker__label">{label}</label>}
 			<button
 				type="button"
 				className={`component-icon-picker__trigger${triggerClassName ? ` ${triggerClassName}` : ''}`}
-				onClick={() => setOpen((o) => !o)}
 				style={triggerStyle}
+				{...popup.triggerProps}
 			>
 				<Icon name={String(getIcon(selectedOption))} />
 			</button>
-			{open && (
-				<div className="component-icon-picker__dropdown">
+			{popup.open && (
+				<div className="component-icon-picker__dropdown" {...popup.popupProps}>
 					<div className="component-icon-picker__search">
 						<input
 							type="text"
@@ -105,7 +104,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 					</div>
 					<div
 						className="component-icon-picker__grid"
-						style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+						style={{ '--ip-cols': columns } as React.CSSProperties}
 					>
 						{filteredIcons.length === 0 && (
 							<span className="component-icon-picker__empty">No icons found</span>

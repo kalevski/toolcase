@@ -1,4 +1,5 @@
-import React, { useRef, useState, KeyboardEvent } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { usePopup } from './hooks/usePopup'
 
 export interface FileTag {
 	id: string
@@ -17,13 +18,20 @@ export const FileTags: React.FC<FileTagsProps> = ({ readonly = false, tags, sele
 	const freeTags = tags.filter((tag) => !selectedIds.includes(tag.id))
 	const [search, setSearch] = useState('')
 
-	const tagAddEl = useRef<HTMLSpanElement>(null)
 	const searchInputEl = useRef<HTMLInputElement>(null)
+	// Self-contained popup (Escape / outside-click / focus restore / arrow nav) —
+	// the previous markup used `data-bs-toggle="dropdown"`, which silently
+	// requires Bootstrap JS that this package neither ships nor declares.
+	const popup = usePopup<HTMLDivElement, HTMLSpanElement, HTMLUListElement>({
+		arrowNav: true,
+		onClose: () => setSearch(''),
+	})
 
-	const handleTagAddClick = () => {
-		setSearch('')
-		setTimeout(() => searchInputEl.current?.focus(), 50)
-	}
+	// Focus the search field once the menu has rendered (replaces the old
+	// setTimeout(…, 50) hack).
+	useEffect(() => {
+		if (popup.open) searchInputEl.current?.focus()
+	}, [popup.open])
 
 	const handleRemoveTag = (tagId: string) => {
 		onChange?.(selectedIds.filter((id) => id !== tagId))
@@ -31,13 +39,16 @@ export const FileTags: React.FC<FileTagsProps> = ({ readonly = false, tags, sele
 
 	const handleAddTag = (tagId: string) => {
 		onChange?.([...selectedIds, tagId])
+		popup.close()
 	}
 
-	const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === 'Escape') {
-			setSearch('')
-			searchInputEl.current?.blur()
+	const onTriggerKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault()
+			popup.toggle()
+			return
 		}
+		popup.triggerProps.onKeyDown(e)
 	}
 
 	const filteredTags = freeTags
@@ -45,7 +56,7 @@ export const FileTags: React.FC<FileTagsProps> = ({ readonly = false, tags, sele
 		.slice(0, 5)
 
 	return (
-		<div className="component component-file-tags" role="group" aria-label="File tags">
+		<div className="component component-file-tags" role="group" aria-label="File tags" ref={popup.rootRef}>
 			{addedTags.map((tag) => (
 				<span
 					key={tag.id}
@@ -61,26 +72,26 @@ export const FileTags: React.FC<FileTagsProps> = ({ readonly = false, tags, sele
 			))}
 			{!readonly && (
 				<span
-					ref={tagAddEl}
-					onClick={handleTagAddClick}
+					ref={popup.triggerProps.ref}
 					className="badge badge--add"
-					data-bs-toggle="dropdown"
-					aria-expanded="false"
+					aria-haspopup={true}
+					aria-expanded={popup.open}
 					aria-label="Add tag"
 					role="button"
 					tabIndex={0}
+					onClick={popup.triggerProps.onClick}
+					onKeyDown={onTriggerKeyDown}
 				>
 					+
 				</span>
 			)}
-			{!readonly && (
-				<ul className="dropdown-menu dropdown-menu--small component-file-tags__dropdown">
+			{!readonly && popup.open && (
+				<ul className="dropdown-menu show dropdown-menu--small component-file-tags__dropdown" {...popup.popupProps}>
 					<li className="component-file-tags__search">
 						<input
 							ref={searchInputEl}
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							onKeyDown={handleSearchKeyDown}
 							placeholder="Search tags…"
 							autoComplete="off"
 						/>

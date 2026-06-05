@@ -28,8 +28,13 @@
 
 .component-sprint-chain__track {
     display: grid;
+    grid-template-columns: repeat(6, 1fr); // mobile: fixed 6-up wrap
     border: 1px solid var(--sc-border);
     background: var(--sc-bg);
+
+    @media (min-width: 768px) {
+        grid-template-columns: repeat(var(--sc-cols, 6), 1fr);
+    }
 }
 
 .component-sprint-chain__cell {
@@ -41,7 +46,11 @@
     gap: var(--tc-space-1);
     align-items: center;
     justify-content: center;
-    min-height: 80px;
+    min-height: 64px;
+
+    @media (min-width: 768px) {
+        min-height: 80px;
+    }
     font-family: var(--tc-font-family-sans);
     font-size: 0.7rem;
     font-weight: var(--tc-font-weight-medium);
@@ -90,9 +99,3 @@
     .component-sprint-chain__tag { color: var(--sc-info); }
 }
 
-@media (max-width: 768px) {
-    .component-sprint-chain__track {
-        grid-template-columns: repeat(6, 1fr) !important;
-    }
-    .component-sprint-chain__cell { min-height: 64px; }
-}

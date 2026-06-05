@@ -18,9 +18,9 @@ export const HeroStatsBar: React.FC<HeroStatsBarProps> = ({
 	...rest
 }) => {
 	const gridStyle: React.CSSProperties = {
-		gridTemplateColumns: `repeat(${stats.length}, 1fr)`,
+		'--hsb-cols': stats.length,
 		...style,
-	}
+	} as React.CSSProperties
 	return (
 		<div
 			className={`component component-hero-stats-bar ${className}`.trim()}

@@ -1,15 +1,13 @@
-// Define a border-radius scale via CSS custom properties.
-// Components reference --rc-radius-* so consumers can override globally or per-component.
-:root {
-	--rc-radius-sm: 4px;
-	--rc-radius-md: 8px;
-	--rc-radius-lg: 12px;
-	--rc-radius-full: 9999px;
+// Focus management (WCAG 2.4.7):
+// - mouse/touch focus (`:focus` without `:focus-visible`) shows no ring;
+// - keyboard focus (`:focus-visible`) gets the token ring globally, so every
+//   component is keyboard-visible by default. Components may override the ring
+//   but must never remove it.
+:focus {
+	outline: none;
 }
 
-// Suppress outlines and focus rings on all interactive elements.
-*:focus,
-*:focus-visible {
-	outline: none;
-	box-shadow: none;
+:focus-visible {
+	outline: var(--tc-focus-outline);
+	outline-offset: var(--tc-focus-offset);
 }

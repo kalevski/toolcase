@@ -67,7 +67,7 @@ export const File: React.FC<FileProps> = ({
 				<EditableText
 					disabled={readonly}
 					defaultValue={name}
-					onChange={(e) => onNameChange?.((e.target as HTMLInputElement).value)}
+					onChange={(e) => onNameChange?.(e.target.value)}
 				/>
 				<div className="component-file__label__lists">
 					<FileTags

@@ -5,26 +5,25 @@
 
 .component.component-pinned-feature-showcase {
     position: relative;
-    padding: clamp(2rem, 5vw, 4rem) 0;
+    padding: clamp(1.5rem, 4vw, 2.5rem) 0;
     color: var(--tc-text);
 
     .component-pinned-feature-showcase__inner {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-        gap: clamp(2rem, 4vw, 4rem);
+        grid-template-columns: minmax(0, 1fr);
+        gap: clamp(1.75rem, 5vw, 3rem);
         align-items: start;
         position: relative;
     }
 
     .component-pinned-feature-showcase__left {
-        position: sticky;
-        top: clamp(1.5rem, 6vh, 3rem);
+        position: relative;
+        top: 0;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         gap: clamp(1.5rem, 3vw, 2.5rem);
-        min-height: calc(100vh - clamp(1.5rem, 6vh, 3rem));
-        min-height: calc(100dvh - clamp(1.5rem, 6vh, 3rem));
+        min-height: auto;
     }
 
     .component-pinned-feature-showcase__left--centered {
@@ -89,10 +88,13 @@
         display: flex;
         flex-direction: column;
         gap: clamp(1rem, 2vw, 1.25rem);
+        margin-top: var(--tc-space-6);
     }
 
     .component-pinned-feature-showcase__item {
         display: flex;
+        flex-direction: column;
+        align-items: flex-start;
         gap: var(--tc-space-5);
         padding: clamp(1.25rem, 2.5vw, 1.75rem);
         background: var(--tc-surface);
@@ -151,35 +153,36 @@
         line-height: 1.55;
     }
 
-    @media (max-width: 1024px) {
-        .component-pinned-feature-showcase__inner {
-            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-            gap: clamp(1.75rem, 5vw, 3rem);
+    @media (min-width: 576px) {
+        .component-pinned-feature-showcase__item {
+            flex-direction: row;
+            align-items: stretch;
         }
     }
 
-    @media (max-width: 768px) {
-        padding: clamp(1.5rem, 4vw, 2.5rem) 0;
+    @media (min-width: 768px) {
+        padding: clamp(2rem, 5vw, 4rem) 0;
 
         .component-pinned-feature-showcase__inner {
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
         }
 
         .component-pinned-feature-showcase__left {
-            position: relative;
-            top: 0;
-            min-height: auto;
+            position: sticky;
+            top: clamp(1.5rem, 6vh, 3rem);
+            min-height: calc(100vh - clamp(1.5rem, 6vh, 3rem));
+            min-height: calc(100dvh - clamp(1.5rem, 6vh, 3rem));
         }
 
         .component-pinned-feature-showcase__right {
-            margin-top: var(--tc-space-6);
+            margin-top: 0;
         }
     }
 
-    @media (max-width: 520px) {
-        .component-pinned-feature-showcase__item {
-            flex-direction: column;
-            align-items: flex-start;
+    @media (min-width: 992px) {
+        .component-pinned-feature-showcase__inner {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+            gap: clamp(2rem, 4vw, 4rem);
         }
     }
 

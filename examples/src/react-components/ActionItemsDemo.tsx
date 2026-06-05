@@ -53,9 +53,9 @@ const ActionItemsDemo: React.FC = () => {
 			</SectionCard>
 
 			<SectionCard title="In a List Context">
-				<ul className="list-group list-group-flush">
+				<ul className="list-unstyled m-0">
 					{['player.png', 'enemy.png', 'tilemap.json'].map((name) => (
-						<li key={name} className="list-group-item d-flex align-items-center justify-content-between">
+						<li key={name} className="d-flex align-items-center justify-content-between py-2 border-bottom">
 							<span>{name}</span>
 							<ActionItems
 								items={[

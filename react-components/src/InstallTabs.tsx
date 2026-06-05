@@ -38,16 +38,25 @@ export const InstallTabs: React.FC<InstallTabsProps> = ({
 	...rest
 }) => {
 	const [active, setActive] = useState<InstallManager>(defaultManager ?? managers[0])
-	const [copied, setCopied] = useState(false)
+	const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
 	const command = buildCommand(active, pkg, dev, global)
 
+	const copyTimerRef = React.useRef<number | undefined>(undefined)
+	React.useEffect(() => () => window.clearTimeout(copyTimerRef.current), [])
+
+	// Reflect the real outcome — a swallowed clipboard failure used to show the
+	// success check while nothing was copied.
 	const handleCopy = useCallback(() => {
-		if (typeof navigator !== 'undefined' && navigator.clipboard) {
-			navigator.clipboard.writeText(command).catch(() => {})
+		const finish = (state: 'copied' | 'error') => {
+			setCopyState(state)
+			window.clearTimeout(copyTimerRef.current)
+			copyTimerRef.current = window.setTimeout(() => setCopyState('idle'), 1800)
 		}
-		setCopied(true)
-		const id = window.setTimeout(() => setCopied(false), 1800)
-		return () => window.clearTimeout(id)
+		if (typeof navigator !== 'undefined' && navigator.clipboard) {
+			navigator.clipboard.writeText(command).then(() => finish('copied'), () => finish('error'))
+		} else {
+			finish('error')
+		}
 	}, [command])
 
 	const rootClass = `component component-install-tabs ${className}`.trim()
@@ -74,9 +83,12 @@ export const InstallTabs: React.FC<InstallTabsProps> = ({
 					type="button"
 					className="component-install-tabs__copy"
 					onClick={handleCopy}
-					aria-label="Copy install command"
+					aria-label={copyState === 'error' ? 'Copy failed' : 'Copy install command'}
 				>
-					<Icon name={copied ? 'check-lg' : 'clipboard'} aria-hidden={true} />
+					<Icon
+						name={copyState === 'copied' ? 'check-lg' : copyState === 'error' ? 'x-lg' : 'clipboard'}
+						aria-hidden={true}
+					/>
 				</button>
 			</div>
 		</div>

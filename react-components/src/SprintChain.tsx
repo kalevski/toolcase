@@ -37,9 +37,9 @@ export const SprintChain: React.FC<SprintChainProps> = ({
 }) => {
 	const cols = columns ?? items.length
 	const trackStyle: React.CSSProperties = {
-		gridTemplateColumns: `repeat(${cols}, 1fr)`,
+		'--sc-cols': cols,
 		...style,
-	}
+	} as React.CSSProperties
 
 	return (
 		<div className={`component component-sprint-chain ${className}`.trim()} {...rest}>

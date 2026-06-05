@@ -17,9 +17,9 @@
 
 .component-scoring-rules__row {
     display: grid;
-    grid-template-columns: 40px 1fr auto;
+    grid-template-columns: 32px 1fr;
     gap: var(--tc-space-4);
-    padding: var(--tc-space-4) var(--tc-space-5);
+    padding: var(--tc-space-4) var(--tc-space-4);
     border-bottom: 1px solid var(--sr-border);
     align-items: center;
 
@@ -51,6 +51,7 @@
 }
 
 .component-scoring-rules__pts {
+    grid-column: 1 / -1;
     text-align: right;
     font-family: var(--tc-font-family-mono);
     font-size: 1rem;
@@ -74,13 +75,13 @@
 .component-scoring-rules__row--green  .component-scoring-rules__icon { color: var(--sr-success); }
 .component-scoring-rules__row--red    .component-scoring-rules__icon { color: var(--sr-danger); }
 
-@media (max-width: 576px) {
+@media (min-width: 576px) {
     .component-scoring-rules__row {
-        grid-template-columns: 32px 1fr;
-        padding: var(--tc-space-4) var(--tc-space-4);
+        grid-template-columns: 40px 1fr auto;
+        padding: var(--tc-space-4) var(--tc-space-5);
     }
     .component-scoring-rules__pts {
-        grid-column: 1 / -1;
+        grid-column: auto;
         text-align: right;
     }
 }

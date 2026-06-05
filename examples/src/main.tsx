@@ -1,7 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { App } from './App'
-import 'bootstrap/dist/js/bootstrap.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import '@toolcase/react-components/style.css'
 import { register } from '@toolcase/game-components'

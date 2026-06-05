@@ -36,8 +36,8 @@
 }
 
 .component-scroll-area {
-    &--axis-x { overflow-y: hidden !important; }
-    &--axis-y { overflow-x: hidden !important; }
+    &.component-scroll-area--axis-x { overflow-y: hidden !important; }
+    &.component-scroll-area--axis-y { overflow-x: hidden !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -24,10 +24,10 @@
     transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
 }
 
-.component-brief-card--medium { --bc-accent: var(--bc-medium); }
-.component-brief-card--hard   { --bc-accent: var(--bc-hard); }
+.component-brief-card.component-brief-card--medium { --bc-accent: var(--bc-medium); }
+.component-brief-card.component-brief-card--hard   { --bc-accent: var(--bc-hard); }
 
-.component-brief-card--interactive {
+.component-brief-card.component-brief-card--interactive {
     cursor: pointer;
 
     &:hover {

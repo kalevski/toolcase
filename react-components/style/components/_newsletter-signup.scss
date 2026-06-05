@@ -94,6 +94,25 @@
 		font-size: 0.92rem;
 	}
 
+	&__reset {
+		background: none;
+		border: none;
+		padding: 0;
+		margin-left: var(--tc-space-2);
+		font-size: 0.8rem;
+		color: inherit;
+		opacity: 0.7;
+		text-decoration: underline;
+		cursor: pointer;
+
+		&:hover { opacity: 1; }
+
+		&:focus-visible {
+			outline: var(--tc-focus-outline);
+			outline-offset: var(--tc-focus-offset);
+		}
+	}
+
 	&__error {
 		margin: 0;
 		font-size: 0.82rem;

@@ -95,12 +95,18 @@
 	}
 
 	.component-color-picker__option {
-		width: 32px;
-		height: 32px;
+		width: 44px; // mobile: touch-sized
+		height: 44px;
 		border: 2px solid transparent;
 		cursor: pointer;
 		transition: border-color var(--cp-transition), transform var(--cp-transition);
 
+		@media (min-width: 576px) {
+			width: 32px;
+			height: 32px;
+		}
+
+		// keep touch-sized targets on coarse pointers at any width
 		@media (pointer: coarse) {
 			width: 44px;
 			height: 44px;
@@ -109,19 +115,15 @@
 		&:hover {
 			transform: scale(1.1);
 		}
-
-		@media (max-width: 576px) {
-			width: 44px;
-			height: 44px;
-		}
 	}
 
 	.component-color-picker__grid {
 		display: grid;
+		grid-template-columns: repeat(4, 1fr); // mobile: fixed 4-up
 		gap: var(--tc-space-1);
 
-		@media (max-width: 576px) {
-			grid-template-columns: repeat(4, 1fr) !important;
+		@media (min-width: 576px) {
+			grid-template-columns: repeat(var(--cp-cols, 5), 1fr);
 		}
 	}
 

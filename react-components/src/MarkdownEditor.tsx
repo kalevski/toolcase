@@ -97,7 +97,10 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 		if (!el) return
 		const start = el.selectionStart
 		const end   = el.selectionEnd
-		const selected = value.slice(start, end) || wrap[1] === '' ? value.slice(start, end) : 'text'
+		// Use the selection if there is one; otherwise insert a 'text' placeholder,
+		// except for prefix-only wraps (e.g. headings) where nothing is needed.
+		const selectedText = value.slice(start, end)
+		const selected = selectedText !== '' ? selectedText : wrap[1] === '' ? '' : 'text'
 		const newVal = value.slice(0, start) + wrap[0] + selected + wrap[1] + value.slice(end)
 		onChange?.(newVal)
 		// restore cursor

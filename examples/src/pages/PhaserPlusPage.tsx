@@ -1,5 +1,6 @@
 import { Breadcrumbs, CategorySection, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
 import { phaserExamples, phaserCategories } from '../phaser-plus/index'
+import { versions } from '../versions'
 
 export const PhaserPlusPage = () => {
     return (
@@ -12,7 +13,7 @@ export const PhaserPlusPage = () => {
                     eyebrow: 'Library · Games · Phaser',
                     tagline:
                         'Unified runtime for Phaser 4 — Scene lifecycle, FeatureRegistry, Flow, AI, Effects, Cinema, Input. Less boilerplate, more game.',
-                    version: '3.0.2',
+                    version: versions['phaser-plus'],
                     examples: phaserExamples.length,
                     chips: ['Phaser 4', 'TypeScript', 'ESM'],
                 }}

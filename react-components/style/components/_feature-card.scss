@@ -79,13 +79,13 @@
     }
 
     // ── Size modifiers — map to a 12-col grid on the parent ───────────────
-    &--default { grid-column: span 4; }
-    &--wide    { grid-column: span 6; }
-    &--full    { grid-column: span 12; }
+    &.component-feature-card--default { grid-column: span 12; }
+    &.component-feature-card--wide    { grid-column: span 12; }
+    &.component-feature-card--full    { grid-column: span 12; }
 
     // ── Inline modifier — lay out head + visual side-by-side (for `full`)
-    &--inline.component-feature-card--full {
-        flex-direction: row;
+    &.component-feature-card--inline.component-feature-card--full {
+        flex-direction: column;
         gap: clamp(1.25rem, 3vw, 2rem);
         align-items: flex-start;
         flex-wrap: wrap;
@@ -109,15 +109,15 @@
     gap: var(--tc-space-4);
 }
 
-@media (max-width: 960px) {
-    .component.component-feature-card {
-        &--default,
-        &--wide,
-        &--full { grid-column: span 12; }
+@media (min-width: 992px) {
+    .component-feature-card {
+        &.component-feature-card--default { grid-column: span 4; }
+        &.component-feature-card--wide    { grid-column: span 6; }
+        &.component-feature-card--full    { grid-column: span 12; }
     }
 
-    .component.component-feature-card--inline.component-feature-card--full {
-        flex-direction: column;
+    .component-feature-card.component-feature-card--inline.component-feature-card--full {
+        flex-direction: row;
     }
 }
 

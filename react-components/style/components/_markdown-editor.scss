@@ -40,6 +40,7 @@
     &__tabs {
         display: flex;
         align-items: center;
+        flex-wrap: wrap; // mobile: toolbar wraps under the tabs instead of clipping
         background: var(--me-tab-bg);
         border-bottom: 1px solid var(--me-border);
         padding: 0 var(--tc-space-2);

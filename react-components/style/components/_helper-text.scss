@@ -24,17 +24,17 @@
 	min-width: 0;
 }
 
-.component-helper-text--success {
+.component-helper-text.component-helper-text--success {
 	--ht-text: var(--tc-success-tint-text);
 	--ht-icon: var(--tc-success);
 }
 
-.component-helper-text--warning {
+.component-helper-text.component-helper-text--warning {
 	--ht-text: var(--tc-warning-tint-text);
 	--ht-icon: var(--tc-warning);
 }
 
-.component-helper-text--error {
+.component-helper-text.component-helper-text--error {
 	--ht-text: var(--tc-danger);
 	--ht-icon: var(--tc-danger);
 }

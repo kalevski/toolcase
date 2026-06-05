@@ -9,7 +9,8 @@
     --rph-border: var(--tc-border);
 
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: stretch;
     justify-content: space-between;
     gap: var(--tc-space-5);
     padding-bottom: var(--tc-space-5);
@@ -81,7 +82,7 @@
 
     &__title {
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 700;
         letter-spacing: -0.02em;
         color: var(--rph-title);
@@ -107,20 +108,21 @@
         flex-wrap: wrap;
         gap: var(--tc-space-2);
         flex-shrink: 0;
+        width: 100%;
     }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
     .component.component-rich-page-header {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        align-items: flex-start;
     }
 
     .component-rich-page-header__title {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
     }
 
     .component-rich-page-header__actions {
-        width: 100%;
+        width: auto;
     }
 }

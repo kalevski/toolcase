@@ -8,7 +8,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--tc-space-1);
-	font-size: 0.875rem;
+	font-size: 1rem;
 	margin-bottom: var(--tc-space-5);
 
 	&.component-form-input--error {
@@ -21,22 +21,32 @@
 	&.component-form-input--inline {
 		.component-form-input__inline-wrap {
 			display: flex;
-			align-items: center;
+			flex-direction: column;
+			align-items: flex-start;
 			gap: var(--tc-space-2);
 		}
 	}
 
-	@media (max-width: 575px) {
-		font-size: 1rem;
+	.form-control,
+	.form-select {
+		min-height: 2.75rem;
+	}
+
+	@media (min-width: 576px) {
+		font-size: 0.875rem;
 
 		.form-control,
 		.form-select {
-			min-height: 2.75rem;
+			min-height: auto;
+		}
+
+		textarea.form-control {
+			min-height: calc(1.6em + 0.75rem + calc(var(--bs-border-width) * 2));
 		}
 
 		&.component-form-input--inline .component-form-input__inline-wrap {
-			flex-direction: column;
-			align-items: flex-start;
+			flex-direction: row;
+			align-items: center;
 		}
 	}
 }
@@ -88,5 +98,15 @@
 
 	&:hover {
 		color: var(--fi-help-hover);
+	}
+}
+
+// Touch targets (WCAG 2.5.5) — re-assert 44px under coarse pointers; the
+// >=576px tier above resets min-height to auto, which must not win on touch
+// tablets. Same specificity as that rule, later in source.
+@media (pointer: coarse) {
+	.component.component-form-input .form-control,
+	.component.component-form-input .form-select {
+		min-height: 44px;
 	}
 }

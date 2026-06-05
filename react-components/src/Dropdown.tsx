@@ -1,4 +1,4 @@
-import React, { useId, useRef, useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { Skeleton } from './Skeleton'
 import { useClickOutside } from './hooks/useClickOutside'
@@ -23,7 +23,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 	items = [],
 	value,
 	onChange,
-	placeholder = 'Select a project',
+	placeholder = 'Select…',
 	loading = false,
 	className,
 	...rest
@@ -39,6 +39,13 @@ export const Dropdown: React.FC<DropdownProps> = ({
 	const enabledItems = items.filter((item) => !item.disabled)
 
 	useClickOutside(containerRef, () => setOpen(false))
+
+	// Keep the keyboard highlight in range when `items` change under an open menu.
+	useEffect(() => {
+		if (activeIndex >= enabledItems.length) {
+			setActiveIndex(enabledItems.length - 1)
+		}
+	}, [enabledItems.length, activeIndex])
 
 	const rootClassName = [
 		'component component-dropdown',

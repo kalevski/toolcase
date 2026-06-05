@@ -90,12 +90,13 @@
 		margin: var(--tc-space-1) 0 0;
 		position: absolute;
 		left: 0;
-		right: 0;
+		right: auto;
+		min-width: 100%;
 		z-index: 1060; // above modal (1050)
 
-		@media (max-width: 576px) {
-			right: auto;
-			min-width: 100%;
+		@media (min-width: 576px) {
+			right: 0;
+			min-width: auto;
 		}
 	}
 

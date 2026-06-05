@@ -36,7 +36,7 @@
         }
     }
 
-    &--error &__control {
+    &.component-number-input--error &__control {
         border-color: var(--ni-error-border);
     }
 
@@ -117,43 +117,43 @@
         }
     }
 
-    &--disabled {
+    &.component-number-input--disabled {
         opacity: 0.55;
         pointer-events: none;
     }
 
-    &--small {
+    &.component-number-input--small {
         --ni-height: 1.875rem;
     }
 
-    &--small &__btn {
+    &.component-number-input--small &__btn {
         font-size: 0.9375rem;
     }
 
-    &--small &__input {
+    &.component-number-input--small &__input {
         font-size: 0.8125rem;
     }
 
-    &--small &__prefix,
-    &--small &__suffix {
+    &.component-number-input--small &__prefix,
+    &.component-number-input--small &__suffix {
         font-size: 0.75rem;
         padding: 0 var(--tc-space-2);
     }
 
-    &--large {
+    &.component-number-input--large {
         --ni-height: 3rem;
     }
 
-    &--large &__btn {
+    &.component-number-input--large &__btn {
         font-size: 1.25rem;
     }
 
-    &--large &__input {
+    &.component-number-input--large &__input {
         font-size: 1.0625rem;
     }
 
-    &--large &__prefix,
-    &--large &__suffix {
+    &.component-number-input--large &__prefix,
+    &.component-number-input--large &__suffix {
         font-size: 1rem;
         padding: 0 var(--tc-space-3);
     }

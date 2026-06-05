@@ -44,26 +44,38 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
 	const targetMs = target instanceof Date ? target.getTime() : target
 	const [now, setNow] = useState(() => compute(targetMs))
 
+	// Keep the latest callback out of the effect deps — an inline onExpire prop
+	// would otherwise tear down and restart the interval on every render.
+	const onExpireRef = React.useRef(onExpire)
+	onExpireRef.current = onExpire
+
 	useEffect(() => {
-		setNow(compute(targetMs))
 		let interval: ReturnType<typeof setInterval> | null = null
+		const stop = () => { if (interval) { clearInterval(interval); interval = null } }
+		const tick = () => {
+			const next = compute(targetMs)
+			setNow(next)
+			if (next.expired) {
+				stop()
+				onExpireRef.current?.()
+			}
+			return next.expired
+		}
 		const start = () => {
 			if (interval) return
-			interval = setInterval(() => {
-				const next = compute(targetMs)
-				setNow(next)
-				if (next.expired) {
-					if (interval) { clearInterval(interval); interval = null }
-					onExpire?.()
-				}
-			}, 1000)
+			// Recompute immediately (covers resume-from-hidden showing a stale
+			// second) and skip the interval entirely when already expired.
+			if (tick()) return
+			interval = setInterval(tick, 1000)
 		}
-		const stop = () => { if (interval) { clearInterval(interval); interval = null } }
+		// Visibility API can be absent in some embedders/test envs — degrade to
+		// an always-running interval instead of throwing.
+		const hasVisibility = typeof document !== 'undefined' && typeof document.hidden === 'boolean'
 		const onVis = () => { if (document.hidden) stop(); else start() }
-		if (!document.hidden) start()
-		document.addEventListener('visibilitychange', onVis)
-		return () => { stop(); document.removeEventListener('visibilitychange', onVis) }
-	}, [targetMs, onExpire])
+		if (!hasVisibility || !document.hidden) start()
+		if (hasVisibility) document.addEventListener('visibilitychange', onVis)
+		return () => { stop(); if (hasVisibility) document.removeEventListener('visibilitychange', onVis) }
+	}, [targetMs])
 
 	const rootClass = [
 		'component component-countdown',

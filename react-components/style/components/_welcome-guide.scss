@@ -5,7 +5,7 @@
 
 .component.component-welcome-guide {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
     border: 1px solid var(--tc-border);
     background: var(--tc-surface);
@@ -101,9 +101,11 @@
 
     // ── Right panel: light checklist ──────────────────────────────────────
     .component-welcome-guide__right {
-        flex: 0 0 320px;
+        flex: 0 0 auto;
         padding: clamp(1.25rem, 3vw, 1.75rem);
-        border-left: 1px solid var(--tc-border);
+        border-left: none;
+        border-top: 1px solid var(--tc-border);
+        width: 100%;
         display: flex;
         flex-direction: column;
         gap: var(--tc-space-4);
@@ -225,15 +227,15 @@
     }
 }
 
-@media (max-width: 760px) {
+@media (min-width: 768px) {
     .component.component-welcome-guide {
-        flex-direction: column;
+        flex-direction: row;
 
         .component-welcome-guide__right {
-            flex: 0 0 auto;
-            border-left: none;
-            border-top: 1px solid var(--tc-border);
-            width: 100%;
+            flex: 0 0 320px;
+            border-left: 1px solid var(--tc-border);
+            border-top: none;
+            width: auto;
         }
     }
 }

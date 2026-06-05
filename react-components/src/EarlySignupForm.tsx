@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useId, useState } from 'react'
 import { Icon } from './Icon'
 
 export interface EarlySignupFormProps {
@@ -35,6 +35,9 @@ export const EarlySignupForm: React.FC<EarlySignupFormProps> = ({
 	const [email, setEmail] = useState('')
 	const [status, setStatus] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle')
 	const [error, setError] = useState('')
+	// unique per instance — a hardcoded id breaks label association when the
+	// form renders more than once on a page
+	const inputId = `early-signup-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
 
 	const rootClassName = [
 		'component',
@@ -92,14 +95,21 @@ export const EarlySignupForm: React.FC<EarlySignupFormProps> = ({
 									</>
 								)}
 							</span>
+							<button
+								type="button"
+								className="component-early-signup-form__reset"
+								onClick={() => { setEmail(''); setStatus('idle') }}
+							>
+								Use a different email
+							</button>
 						</div>
 					) : (
 						<>
-							<label className="component-early-signup-form__label" htmlFor="early-signup-email">
+							<label className="component-early-signup-form__label" htmlFor={inputId}>
 								Your email address
 							</label>
 							<input
-								id="early-signup-email"
+								id={inputId}
 								name="email"
 								type="email"
 								className="component-early-signup-form__input"

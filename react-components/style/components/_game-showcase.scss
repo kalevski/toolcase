@@ -20,7 +20,7 @@
     &:hover { box-shadow: var(--tc-shadow-md); }
 }
 
-.component-game-showcase--interactive {
+.component-game-showcase.component-game-showcase--interactive {
     cursor: pointer;
 
     &:focus-visible {

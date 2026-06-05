@@ -132,7 +132,7 @@ export const WelcomeGuide: React.FC<WelcomeGuideProps> = ({
 								].filter(Boolean).join(' ')
 								return (
 									<li
-										key={step.key}
+										key={step.key ?? i}
 										className={stepClass}
 										role="checkbox"
 										aria-checked={step.completed}

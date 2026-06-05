@@ -1,5 +1,6 @@
 import { Breadcrumbs, CategorySection, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
 import { baseExamples, baseCategories } from '../base/index'
+import { versions } from '../versions'
 
 export const BasePage = () => {
     return (
@@ -12,7 +13,7 @@ export const BasePage = () => {
                     eyebrow: 'Library · Foundation',
                     tagline:
                         'Foundational primitives — events, state, data structures, generation, validation, color utilities — that every other toolcase package depends on. Zero dependencies.',
-                    version: '3.0.2',
+                    version: versions.base,
                     examples: baseExamples.length,
                     chips: ['TypeScript', 'Zero deps', 'Tree-shakeable', 'Browser + Node'],
                 }}

@@ -204,7 +204,7 @@
 }
 
 // ── Highlighted tier ──────────────────────────────────────────────────────
-.component-pricing-card--highlight {
+.component-pricing-card.component-pricing-card--highlight {
     --pc-border: var(--tc-black);
     --pc-accent-glow-opacity: 0.18;
     --pc-accent-glow-hover: 0.42;

@@ -62,3 +62,13 @@
 		border-color: var(--ib-color);
 	}
 }
+
+// Touch targets (WCAG 2.5.5 / spec §5)
+// The size-variant selectors are doubled (doc 09) and compile to (0,3,0) —
+// this override must match that specificity or the size variants win on touch.
+@media (pointer: coarse) {
+	.component.component-icon-button,
+	.component.component-icon-button.component-icon-button--small {
+		--ib-size: 44px;
+	}
+}

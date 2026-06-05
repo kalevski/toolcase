@@ -19,9 +19,10 @@
 .component-action-row-list {
     &__row {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
         justify-content: space-between;
-        gap: var(--tc-space-4);
+        gap: var(--tc-space-3);
         padding: var(--tc-space-4) var(--tc-space-4);
         border-bottom: 1px solid var(--arl-border);
 
@@ -73,6 +74,7 @@
 
     &__cta {
         flex-shrink: 0;
+        align-self: stretch;
     }
 
     &__trailing {
@@ -80,16 +82,16 @@
     }
 }
 
-@media (max-width: 576px) {
+@media (min-width: 576px) {
     .component-action-row-list {
         &__row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: var(--tc-space-3);
+            flex-direction: row;
+            align-items: center;
+            gap: var(--tc-space-4);
         }
 
         &__cta {
-            align-self: stretch;
+            align-self: auto;
         }
     }
 }

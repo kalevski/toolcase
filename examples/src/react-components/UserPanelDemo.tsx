@@ -60,6 +60,21 @@ const UserPanelDemo: React.FC = () => (
 				/>
 			</div>
 		</SectionCard>
+
+		<SectionCard title="With Menu (click the name — Escape / arrows work)">
+			<div style={{ maxWidth: 240, border: '1px solid #dee2e6' }}>
+				<UserPanel
+					username="Daniel Kalevski"
+					plan="Pro"
+					menuItems={[
+						{ key: 'profile', label: 'Profile', icon: 'person' },
+						{ key: 'billing', label: 'Billing', icon: 'credit-card' },
+						{ key: 'signout', label: 'Sign out', icon: 'box-arrow-right' },
+					]}
+					onMenuClick={(_e, key) => console.log('menu:', key)}
+				/>
+			</div>
+		</SectionCard>
 	</div>
 		
 			</div>
