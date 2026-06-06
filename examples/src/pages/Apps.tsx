@@ -1,12 +1,23 @@
+import { Fragment } from 'react'
+import { Link as RouterLink } from 'react-router'
 import { Breadcrumbs } from './_chrome'
 
 type AppEntry = {
     name: string
     description: string
     path: string
+    meta: string[]
 }
 
-const apps: AppEntry[] = []
+const apps: AppEntry[] = [
+    {
+        name: 'nginx-static-server',
+        description:
+            'Go daemon that keeps nginx static site directories in sync with remote sources — git repositories or HTTP zip archives. Atomic symlink deploys, last known-good on failure, never in the request path.',
+        path: '/apps/nginx-static-server',
+        meta: ['Go', 'Daemon', 'git · http-zip'],
+    },
+]
 
 export const Apps = () => {
     return (
@@ -17,8 +28,8 @@ export const Apps = () => {
                     <div className="eyebrow">Index / Apps</div>
                     <h1 className="page-title">Standalone applications.</h1>
                     <p className="page-lead">
-                        Apps developed inside the toolcase monorepo, built on top of @toolcase packages.
-                        Nothing shipping yet — placeholder while the first one is in flight.
+                        Apps developed inside the toolcase monorepo, built on top of @toolcase packages
+                        or standing on their own.
                     </p>
                 </div>
                 <dl className="page-meta">
@@ -28,7 +39,7 @@ export const Apps = () => {
                     </div>
                     <div>
                         <dt>Status</dt>
-                        <dd><span className="tag">Coming soon</span></dd>
+                        <dd><span className="tag accent">Shipping</span></dd>
                     </div>
                 </dl>
             </section>
@@ -42,7 +53,7 @@ export const Apps = () => {
             ) : (
                 <div className="lib-grid">
                     {apps.map((app) => (
-                        <a key={app.name} href={app.path} className="lib-card">
+                        <RouterLink key={app.name} to={app.path} className="lib-card">
                             <div className="lib-card-head">
                                 <div>
                                     <h3 className="lib-name">{app.name}</h3>
@@ -50,7 +61,15 @@ export const Apps = () => {
                                 </div>
                                 <span className="lib-arrow">→</span>
                             </div>
-                        </a>
+                            <div className="lib-meta-row">
+                                {app.meta.map((m, i) => (
+                                    <Fragment key={m}>
+                                        {i > 0 && <span className="sep">·</span>}
+                                        <span>{m}</span>
+                                    </Fragment>
+                                ))}
+                            </div>
+                        </RouterLink>
                     ))}
                 </div>
             )}
