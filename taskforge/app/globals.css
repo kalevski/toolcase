@@ -1,0 +1,152 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+body {
+    font-family:
+        system-ui,
+        -apple-system,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
+}
+
+/* ── TaskForge layout shell ──────────────────────────────────────────────── */
+
+.tf-content {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* sidebar: repo picker sits above the section nav */
+.tf-sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tf-repo-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.75rem 1rem 0.5rem;
+}
+
+.tf-repo-picker__label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+/* ── repo header (shared across sub-pages) ──────────────────────────────── */
+
+.tf-repo-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.tf-repo-header__bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.tf-repo-header__title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.tf-repo-header__title h1 {
+    margin: 0;
+}
+
+.tf-repo-header__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.tf-repo-header__actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── content utilities ───────────────────────────────────────────────────── */
+
+.tf-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.tf-stack-sm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tf-card-body {
+    padding: 1rem;
+}
+
+.tf-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .tf-grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.tf-form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.tf-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tf-kv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.tf-kv > span:first-child {
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+.tf-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}

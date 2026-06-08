@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1
+
+# ── build stage ──────────────────────────────────────────────────────────────
+FROM node:20-slim AS builder
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm install
+
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+# ── runtime stage ────────────────────────────────────────────────────────────
+FROM node:20-slim AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV WORKSPACE_DIR=/workspace
+ENV APP_SKILLS_DIR=/app/skills
+
+# git (for the git operations) + the Claude Code CLI (the default agent backend)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm i -g @anthropic-ai/claude-code \
+    && npm cache clean --force
+
+# non-root user that owns /workspace
+RUN useradd -m -u 10001 app \
+    && mkdir -p /workspace \
+    && chown -R app:app /workspace
+
+# Next standalone output
+COPY --from=builder --chown=app:app /app/.next/standalone ./
+COPY --from=builder --chown=app:app /app/.next/static ./.next/static
+COPY --from=builder --chown=app:app /app/public ./public
+# bundled, read-only app-level skills (task-creator, commit-message)
+COPY --from=builder --chown=app:app /app/skills ./skills
+
+USER app
+EXPOSE 3000
+CMD ["node", "server.js"]
