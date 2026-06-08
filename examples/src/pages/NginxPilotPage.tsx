@@ -1,14 +1,14 @@
 import { Link as RouterLink } from 'react-router'
 import { CodeBlock, CopyLine } from './_chrome'
 
-const archDiagram = `git remotes / zip endpoints ──fetch──► nginx-static-server ──writes──► data_dir/sites/<domain>/
-                                                                        releases/<ts>-<ref>/
-                                                                        current -> releases/...  (atomic symlink)
-                                                                                 ▲
-                                                 nginx  root = .../current ─────┘`
+const archDiagram = `git remotes / zip endpoints ──fetch──► nginxpilot ──writes──► data_dir/sites/<domain>/
+                                                                    releases/<ts>-<ref>/
+                                                                    current -> releases/...  (atomic symlink)
+                                                                             ▲
+                                             nginx  root = .../current ─────┘`
 
-const configExample = `# /etc/nginx-static-server/config.yml — globals + includes
-data_dir: /var/lib/nginx-static-server
+const configExample = `# /etc/nginxpilot/config.yml — globals + includes
+data_dir: /var/lib/nginxpilot
 admin:
   listen: 127.0.0.1:9090          # health + status + manual sync trigger
 defaults:
@@ -17,7 +17,7 @@ defaults:
 include:
   - sites.d/*.yml                 # drop a file in, kill -HUP — that's onboarding
 
-# /etc/nginx-static-server/sites.d/example.com.yml
+# /etc/nginxpilot/sites.d/example.com.yml
 sites:
   - domain: example.com
     source:
@@ -26,21 +26,21 @@ sites:
       branch: gh-pages
       auth:
         method: ssh-key
-        key_file: /etc/nginx-static-server/keys/example_ed25519`
+        key_file: /etc/nginxpilot/keys/example_ed25519`
 
-const cliReference = `nginx-static-server run                  # the daemon (default)
-nginx-static-server validate             # parse + validate merged config, CI exit codes
-nginx-static-server sync <domain>        # one-shot sync, no daemon needed (onboarding)
-nginx-static-server print-vhost <domain> # nginx server-block starting snippet
-nginx-static-server status [--json]      # per-site table from the daemon
-nginx-static-server version              # build info`
+const cliReference = `nginxpilot run                  # the daemon (default)
+nginxpilot validate             # parse + validate merged config, CI exit codes
+nginxpilot sync <domain>        # one-shot sync, no daemon needed (onboarding)
+nginxpilot print-vhost <domain> # nginx server-block starting snippet
+nginxpilot status [--json]      # per-site table from the daemon
+nginxpilot version              # build info`
 
 const nginxSnippet = `server {
     listen 80;
     server_name example.com;
 
     # swapped atomically via rename(2) — no nginx reload on content updates
-    root /var/lib/nginx-static-server/sites/example.com/current;
+    root /var/lib/nginxpilot/sites/example.com/current;
     index index.html;
 
     location / {
@@ -67,19 +67,19 @@ const features = [
     },
 ]
 
-export const NginxStaticServerPage = () => {
+export const NginxPilotPage = () => {
     return (
         <main className="site-container">
             <div className="breadcrumbs">
                 <RouterLink to="/apps">Apps</RouterLink>
                 <span className="sep">/</span>
-                <span className="current mono">nginx-static-server</span>
+                <span className="current mono">nginxpilot</span>
             </div>
 
             <section className="page-intro">
                 <div>
                     <div className="eyebrow">App · Daemon · Go</div>
-                    <h1 className="page-title mono">nginx-static-server</h1>
+                    <h1 className="page-title mono">nginxpilot</h1>
                     <p className="page-lead">
                         A standalone Go daemon that runs alongside nginx and keeps directories of
                         static files in sync with remote sources — git repositories or HTTP zip
@@ -153,8 +153,8 @@ export const NginxStaticServerPage = () => {
                 <span className="count">binary, systemd or Docker</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 720 }}>
-                <CopyLine cmd="docker pull ghcr.io/kalevski/nginx-static-server:latest" />
-                <CopyLine cmd="nginx-static-server validate && nginx-static-server sync example.com" />
+                <CopyLine cmd="docker pull ghcr.io/kalevski/toolcase/nginxpilot:latest" />
+                <CopyLine cmd="nginxpilot validate && nginxpilot sync example.com" />
             </div>
 
             <div className="section-head">
@@ -163,7 +163,7 @@ export const NginxStaticServerPage = () => {
             </div>
             <div className="lib-grid">
                 <a
-                    href="https://github.com/kalevski/toolcase/tree/main/nginx-static-server"
+                    href="https://github.com/kalevski/toolcase/tree/main/nginxpilot"
                     target="_blank"
                     rel="noreferrer"
                     className="lib-card"
@@ -171,7 +171,7 @@ export const NginxStaticServerPage = () => {
                     <div className="lib-card-head">
                         <div>
                             <h3 className="lib-name">kalevski/toolcase</h3>
-                            <p className="lib-tagline">nginx-static-server/ — Go module, README, systemd unit, Dockerfile</p>
+                            <p className="lib-tagline">nginxpilot/ — Go module, README, systemd unit, Dockerfile</p>
                         </div>
                         <span className="lib-arrow">→</span>
                     </div>

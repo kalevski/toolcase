@@ -16,12 +16,6 @@ export const removeUnknown: Visitor = ({ rule }, { remove }) => {
 	if (!rule) remove()
 }
 
-const matchesPath = (target: string, key: string, path: string): boolean => {
-	if (target === key) return true
-	if (target === path) return true
-	return false
-}
-
 export const removeRestricted = (restricted: readonly string[]): Visitor => {
 	const set = new Set(restricted)
 	return ({ key, path }, { remove }) => {

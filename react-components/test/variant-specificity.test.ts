@@ -30,13 +30,11 @@ describe('variant modifier specificity', () => {
     // flatten: pull selectors out of @media blocks too, preserving order
     const flat: string[] = []
     {
-        let depth = 0
         let current = ''
         for (const ch of css) {
             if (ch === '{') {
                 const sel = current.trim()
                 if (sel && !sel.startsWith('@')) flat.push(sel)
-                if (!sel.startsWith('@')) depth++
                 current = ''
             } else if (ch === '}') {
                 current = ''

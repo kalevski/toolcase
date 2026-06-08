@@ -29,7 +29,7 @@ export default async function ProjectLayout({
         getKnowledge(params.project),
     ])
     const snapshot = engine.snapshot(params.project)
-    let git: GitStatus | null = null
+    let git: GitStatus | null
     try {
         git = await gitStatus(params.project)
     } catch {

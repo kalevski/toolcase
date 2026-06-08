@@ -18,10 +18,10 @@ const apps: AppEntry[] = [
         meta: ['Next.js', 'Claude Code CLI', 'GitHub OAuth · SSE'],
     },
     {
-        name: 'nginx-static-server',
+        name: 'nginxpilot',
         description:
             'Go daemon that keeps nginx static site directories in sync with remote sources — git repositories or HTTP zip archives. Atomic symlink deploys, last known-good on failure, never in the request path.',
-        path: '/apps/nginx-static-server',
+        path: '/apps/nginxpilot',
         meta: ['Go', 'Daemon', 'git · http-zip'],
     },
 ]

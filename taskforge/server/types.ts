@@ -227,5 +227,4 @@ export interface SkillSummary {
 
 // ── Model catalog ────────────────────────────────────────────────────────────
 
-const MODEL_ALIASES = ['fast', 'mid', 'deep'] as const
-export type ModelAlias = (typeof MODEL_ALIASES)[number]
+export type ModelAlias = 'fast' | 'mid' | 'deep'

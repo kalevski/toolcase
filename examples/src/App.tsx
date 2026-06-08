@@ -1,7 +1,7 @@
 import { useEffect, useState, ReactNode } from 'react'
 import { Routes, Route, useNavigate, useLocation, Link as RouterLink } from 'react-router'
 import { packageRoutes, topPages, type DemoEntry, type PackageRoute } from './routes'
-import { NginxStaticServerPage } from './pages/NginxStaticServerPage'
+import { NginxPilotPage } from './pages/NginxPilotPage'
 import { TaskForgePage } from './pages/TaskForgePage'
 
 const Header = () => {
@@ -140,7 +140,7 @@ export const App = () => {
             <Routes>
                 <Route path="/" element={topPages.home} />
                 <Route path="/apps" element={topPages.apps} />
-                <Route path="/apps/nginx-static-server" element={<NginxStaticServerPage />} />
+                <Route path="/apps/nginxpilot" element={<NginxPilotPage />} />
                 <Route path="/apps/taskforge" element={<TaskForgePage />} />
                 <Route path="/skills" element={topPages.skills} />
                 {packageRoutes.map((route) => (

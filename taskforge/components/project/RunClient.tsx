@@ -23,7 +23,6 @@ import { useProject } from '../ProjectContext'
 export function RunClient() {
     const {
         project,
-        config,
         snapshot,
         lines,
         wakeAt,

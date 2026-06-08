@@ -118,7 +118,7 @@ export async function dirtyFiles(project: string): Promise<string[]> {
 }
 
 export async function status(project: string): Promise<GitStatus> {
-    let branch = ''
+    let branch: string
     try {
         branch = (await git(project, ['rev-parse', '--abbrev-ref', 'HEAD'])).trim()
     } catch {

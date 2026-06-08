@@ -775,7 +775,6 @@ class ExecutionManager extends EventEmitter {
 // ── singleton (survives Next dev hot-reload via globalThis cache) ────────────
 
 declare global {
-    // eslint-disable-next-line no-var
     var __taskforgeEngine: ExecutionManager | undefined
 }
 
