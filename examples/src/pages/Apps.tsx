@@ -11,6 +11,13 @@ type AppEntry = {
 
 const apps: AppEntry[] = [
     {
+        name: 'taskforge',
+        description:
+            'Self-hosted Next.js control panel that drives the Claude Code CLI over local git repositories. Per-project Markdown task queues, live SSE streaming, survives usage-limit walls, commit + push from the UI. Database-free, GitHub OAuth.',
+        path: '/apps/taskforge',
+        meta: ['Next.js', 'Claude Code CLI', 'GitHub OAuth · SSE'],
+    },
+    {
         name: 'nginx-static-server',
         description:
             'Go daemon that keeps nginx static site directories in sync with remote sources — git repositories or HTTP zip archives. Atomic symlink deploys, last known-good on failure, never in the request path.',

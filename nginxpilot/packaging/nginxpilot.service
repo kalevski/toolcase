@@ -1,0 +1,35 @@
+[Unit]
+Description=nginxpilot — keep nginx static site directories in sync with remote sources
+Documentation=https://github.com/kalevski/toolcase/tree/main/nginxpilot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/nginxpilot run --config /etc/nginxpilot/config.yml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+
+User=nginxpilot
+Group=nginxpilot
+UMask=0027
+
+# Hardening (spec §6, Q24) — the daemon runs unprivileged and only ever
+# writes inside its data_dir.
+ProtectSystem=strict
+ReadWritePaths=/var/lib/nginxpilot
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+# Secrets: prefer environment files or systemd LoadCredential + *_file refs.
+# EnvironmentFile=-/etc/nginxpilot/env
+
+[Install]
+WantedBy=multi-user.target
