@@ -44,7 +44,7 @@ import { HealthBar, Hotbar, ItemSlot, type InventoryItem } from '@toolcase/game-
 - **Attributes ↔ properties**: most components mirror string/number/boolean attrs as JS properties (boolean = presence). Set primitive props via attributes; set complex data (arrays, objects) via JS properties (`el.slots = [...]`, `el.item = {...}`).
 - **Events**: `CustomEvent` with `bubbles: true, composed: true`. Detail payloads typed via `*EventMap` interfaces (e.g. `MenuItemEventMap`, `ItemSlotEventMap`, `HotbarEventMap`).
 - **Styling**: bundled CSS at `@toolcase/game-components/style.css`. Components read CSS variables (e.g. `--gc-title-size`, `--gc-bar-base`, `--fg-blood`) — override in your stylesheet for theming.
-- **Rendering**: a few components (`MenuItem`, `Anchor`, `CooldownBadge`, …) use Shadow DOM with a single `<slot>`; most render to light DOM via `innerHTML`. Either way, safe to nest and reparent like any HTMLElement.
+- **Rendering**: roughly a third of components (42 of the source files — e.g. `MenuItem`, `Anchor`, `CooldownBadge`) use Shadow DOM with a single `<slot>`; the rest render to light DOM via `innerHTML`. Either way, safe to nest and reparent like any HTMLElement. Styling implication: your descendant CSS selectors do **not** pierce a component's shadow root — only inherited properties and CSS custom properties (the `--gc-*` / `--fg-*` tokens) cross the boundary, so theme via those variables rather than targeting internal markup.
 
 ---
 
@@ -170,7 +170,7 @@ All accept default slotted children as text content.
 | Tag | Class |
 |-----|-------|
 | `gc-list-row` | `ListRow` |
-| `gc-list` (`gc-list`) | `GcList` |
+| `gc-list` | `GcList` |
 | `gc-stat-row` | `StatRow` |
 | `gc-settings-category-list` | `SettingsCategoryList` |
 | `gc-controls-rebind-list` | `ControlsRebindList` |
@@ -196,7 +196,7 @@ abstract class ResourceBarBase extends HTMLElement {
     value: number          // attr 'value', default 0 (clamped 0..max)
     max: number            // attr 'max', default 100
     ghost: number | null   // attr 'ghost', preview overlay (e.g. predicted dmg)
-    segments: number       // attr 'segments', dividers
+    segments: number       // attr 'segments', number of segments (default 1 = solid bar; >1 draws dividers)
     showText: boolean      // attr 'show-text'
     label: string          // attr 'label'
 }
@@ -612,12 +612,21 @@ bar.addEventListener('select', e => activate(e.detail.item, e.detail.index))
 </gc-stack>
 ```
 
-Each row dispatches a `change` event with the new value:
+Most rows dispatch a `change` event with the new value (`{ value }`). Note the exceptions:
+`gc-reset-to-defaults` emits `reset` (no value), and `gc-volume-slider` additionally emits
+`toggle-mute`. Listen by tag name — these are element tags, not a `gc-` attribute:
 
 ```ts
-document.querySelectorAll('[gc-]').forEach(el => {
+document.querySelectorAll(
+    'gc-toggle-row, gc-fullscreen-toggle, gc-invert-axis-toggle, gc-vsync-toggle, ' +
+    'gc-select-row, gc-fps-cap-select, gc-graphics-preset-picker, ' +
+    'gc-fov-slider, gc-deadzone-slider, gc-volume-slider, gc-mouse-sensitivity'
+).forEach(el => {
     el.addEventListener('change', e => settings.apply(el.tagName, e.detail.value))
 })
+
+document.querySelector('gc-reset-to-defaults')
+    ?.addEventListener('reset', () => settings.resetAll())
 ```
 
 ### Dialogs — confirm before quit
@@ -643,16 +652,25 @@ document.querySelectorAll('[gc-]').forEach(el => {
 ### NPC dialogue with typewriter + branching
 
 ```html
-<gc-dialogue-box id="d" speaker="Old Man" typewriter="40">
-    "The path ahead is treacherous. Will you turn back?"
+<gc-dialogue-box id="d" speaker="Old Man" typing-speed="40"
+    text="The path ahead is treacherous. Will you turn back?">
 </gc-dialogue-box>
-<gc-stack direction="vertical">
-    <gc-menu-item label="Push on" hotkey="1"></gc-menu-item>
-    <gc-menu-item label="Turn back" hotkey="2"></gc-menu-item>
-</gc-stack>
+<script type="module">
+    const box = document.getElementById('d')
+    // Branching choices are set via the `choices` JS property:
+    box.choices = [
+        { id: 'push', label: 'Push on' },
+        { id: 'back', label: 'Turn back' }
+    ]
+    box.addEventListener('choice', e => onChoice(e.detail.id))
+    box.addEventListener('advance', () => nextLine())
+</script>
 ```
 
-`typewriter` is the chars/sec rate. The box exposes `skip()` and `complete` events.
+Attributes: `speaker`, `text`, `typing-speed` (chars/sec, prop `typingSpeed`, default `24`). Set
+`choices: DialogueChoice[]` (`{ id, label, disabled? }`) via the JS property to render branch buttons.
+Events: `choice` (`{ id }`) when a choice is picked, and `advance` when the box is clicked with no
+choices pending. Clicking while text is still typing skips to the full text (no public `skip()` method).
 
 ### HUD — combat feedback
 
@@ -747,29 +765,28 @@ function onDamage(hpPct: number) {
 
 Two layers of CSS custom properties:
 
-1. **`--fg-*`** — the global fantasy palette set on `:root` by `style/themes/_fantasy.scss`. Components reference these everywhere; reskinning the whole library means overriding this layer.
-2. **`--gc-*`** — per-component knobs (e.g. `--gc-transition-wipe-duration`, `--gc-kill-feed-killer-color`). Each is declared with a `--fg-*` fallback, so you can either override a single component or restyle the entire palette.
+1. **`--fg-*`** — the global fantasy palette. These tokens are **referenced** throughout the component SCSS (~26 distinct `--fg-*` names across the partials) but the library ships **no `:root` definition for them** — there is no `_fantasy.scss`; `style/themes/` only contains `_dark.scss` (which sets `color-scheme: dark`). Every `--fg-*` reference therefore relies on a fallback hex baked into the `var(--gc-…, <hex>)` chain. To reskin the whole library you must **define** the `--fg-*` tokens yourself on `:root` (or a scoped ancestor) — see Reskinning below.
+2. **`--gc-*`** — per-component knobs (e.g. `--gc-transition-wipe-duration`, `--gc-kill-feed-killer-color`). Many are declared with a `--fg-*` fallback, so you can override a single component or, by defining the palette, restyle broadly.
 
 Override either layer on `:root` (global) or on a scoped ancestor (per area, e.g. inside a modal).
 
-### `--fg-*` palette (36 tokens)
+> **Reskinning is partial, not total.** Several components hardcode palette hex directly in their SCSS instead of going through `--fg-*` — at minimum `_panel.scss`, `_loading-screen.scss`, `_quest-tracker.scss`, `_battle-pass.scss`, `_level-header.scss`, and `_achievement-list.scss`. Defining/overriding `--fg-*` will **not** reskin those surfaces; to retheme them you must edit the SCSS source (or override their specific `--gc-*` knobs where they expose any). Treat `--fg-*` overrides as covering the resource bars, typography, gold/parchment chrome, and rarity colours — not the whole library.
 
-**Surfaces & frames** — dark wood/leather + dark ink for shadow text.
+### `--fg-*` palette (~26 referenced tokens)
+
+These are the `--fg-*` names actually referenced by the component SCSS. The "Default" column is the conventional fantasy value to assign when you define the palette (the library itself does not ship these definitions).
+
+**Surfaces & frames** — dark ink for shadow text/outline.
 
 | Token | Default | Use |
 |-------|---------|-----|
 | `--fg-ink` | `#1a140d` | deep shadow text/outline |
-| `--fg-ink-2` | `#221912` | secondary deep ink |
-| `--fg-leather` | `#2a1f14` | base panel/frame |
-| `--fg-leather-2` | `#3a2a1c` | raised surface |
-| `--fg-leather-3` | `#4a3422` | highlighted surface |
 
 **Parchment** — primary readable text + dim variants.
 
 | Token | Default | Use |
 |-------|---------|-----|
 | `--fg-parch` | `#e8dcc4` | primary text on dark |
-| `--fg-parch-2` | `#d6c5a3` | secondary text |
 | `--fg-parch-3` | `#b8a47e` | tertiary text |
 | `--fg-parch-dim` | `#8b7a5e` | muted/disabled text |
 
@@ -782,7 +799,6 @@ Override either layer on `:root` (global) or on a scoped ancestor (per area, e.g
 | `--fg-gold-deep` | `#8b6f3a` | pressed / shadow on gold |
 | `--fg-gold-shadow` | `#5a4422` | drop-shadow under gold |
 | `--fg-bronze` | `#8b6f3a` | secondary metal |
-| `--fg-copper` | `#a06a3a` | tertiary metal |
 | `--fg-silver` | `#c5cfd6` | cool metal accent |
 
 **Resources** — bar fills, status colours.
@@ -791,18 +807,14 @@ Override either layer on `:root` (global) or on a scoped ancestor (per area, e.g
 |-------|---------|-----|
 | `--fg-blood` | `#a8302a` | HP bar |
 | `--fg-blood-bright` | `#d44a3a` | HP highlight |
-| `--fg-mana` | `#3a6cc9` | mana bar |
 | `--fg-mana-bright` | `#5a8cf0` | mana highlight |
 | `--fg-stamina` | `#6f9f3a` | stamina bar |
 | `--fg-stamina-bright` | `#9fc55a` | stamina highlight |
-| `--fg-arcane` | `#8a4ec9` | arcane resource |
-| `--fg-arcane-bright` | `#b878e8` | arcane highlight |
 
 **Damage / element types.**
 
 | Token | Default |
 |-------|---------|
-| `--fg-poison` | `#6fb04a` |
 | `--fg-fire` | `#e07330` |
 | `--fg-frost` | `#5fb8d4` |
 
@@ -827,19 +839,20 @@ Override either layer on `:root` (global) or on a scoped ancestor (per area, e.g
 
 ### Reskinning
 
+Because the library ships no `:root` palette definition, define the tokens yourself to recolour everything that routes through `--fg-*` (resource bars, typography, gold/parchment chrome, rarity). Surfaces that hardcode hex — see the limitation note above — will not follow.
+
 ```css
 :root {
-    /* swap the whole palette to a sci-fi colourway */
-    --fg-leather: #14202b;
-    --fg-leather-2: #1d2f3f;
-    --fg-leather-3: #284054;
+    /* define a sci-fi colourway */
     --fg-parch: #cfe6ff;
-    --fg-parch-2: #98bfde;
+    --fg-parch-3: #98bfde;
     --fg-gold: #00ffd1;
     --fg-gold-bright: #5cffe5;
+    --fg-gold-deep: #00b894;
     --fg-blood: #ff3366;
     --fg-blood-bright: #ff6b8a;
-    --fg-mana: #00aaff;
+    --fg-stamina: #28d8a8;
+    --fg-stamina-bright: #5cffe5;
     --fg-display: 'Orbitron', 'Audiowide', sans-serif;
     --fg-body: 'Rajdhani', 'Roboto', sans-serif;
 }
@@ -849,9 +862,9 @@ Or scope the override:
 
 ```css
 .theme-parchment {
-    --fg-leather: #f5e6c8;
-    --fg-leather-2: #ecd9b3;
     --fg-parch: #3a2a14;
+    --fg-parch-3: #6b5535;
+    --fg-gold: #b8862b;
 }
 ```
 
@@ -942,8 +955,8 @@ register()
 export class HUD extends HTMLFeature {
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor>
-                <gc-stack slot="top-left" direction="vertical" gap="4px">
+            <gc-anchor position="top-left" inset="12px">
+                <gc-stack direction="vertical" gap="4px">
                     <gc-health-bar id="hp" value="100" max="100" show-text></gc-health-bar>
                     <gc-mana-bar id="mp" value="50" max="50" show-text></gc-mana-bar>
                 </gc-stack>

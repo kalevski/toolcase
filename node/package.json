@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/node",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "description": "Node.js helpers for backend services — Fastify endpoints, raw-SQL repositories, Redis KV service, and isomorphic sanitize/pagination/where helpers.",
     "source": "src/main.ts",
     "main": "lib/main.main.js",
@@ -11,6 +11,11 @@
             "types": "./lib/main.d.ts",
             "import": "./lib/main.module.js",
             "require": "./lib/main.main.js"
+        },
+        "./env": {
+            "types": "./lib/env.d.ts",
+            "import": "./lib/env.module.js",
+            "require": "./lib/env.main.js"
         }
     },
     "sideEffects": false,

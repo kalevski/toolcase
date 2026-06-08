@@ -1,6 +1,6 @@
 ---
 name: react-spa-app
-description: Use when scaffolding or extending a React + TypeScript SPA. Defines folder layout, path aliases, layering rules (pages → modules → components/services/state), zustand slice convention, react-router + AuthGuard wiring, modal registry, layout HOC, and singleton service pattern. Apply when adding a page, module, service, state slice, modal, or new SPA workspace.
+description: Use when scaffolding or extending a React + TypeScript SPA. Defines folder layout, path aliases, layering rules (pages → modules → components/services/state), zustand slice convention, react-router + AuthGuard wiring, modal registry, layout HOC, and singleton service pattern. Apply when adding a page, module, service, state slice, modal, or new SPA workspace. For static marketing/content sites with no auth or store (landing pages, docs, legal pages, prerendered/SEO marketing surfaces), use the next-static-app skill instead.
 ---
 
 # react-spa-app — Architecture Reference
@@ -120,6 +120,8 @@ export default defineConfig({
 ```
 
 `state`, `types`, `modals` resolve to their `index` — always import `from 'state'`, `from 'types'`, `from 'modals'`. Never `from '../state'` or `from './modules/Foo'` — always alias-relative.
+
+Note: the two mechanisms are not literally identical strings. The Vite alias maps a bare specifier to the `src/<dir>/` **directory** and relies on Vite's index resolution to pick up `index.ts`/`index.tsx`, whereas the tsconfig `paths` for `state`/`types`/`modals` hardcode the full `.../index.ts(x)` file. "MUST stay in sync" means the two must agree on the resolved target, not that the replacement strings match character-for-character.
 
 ---
 
@@ -498,7 +500,7 @@ Conventions:
 
 ### contexts/
 
-Reserved for cross-cutting React contexts. **`PageContext` is mandatory.** It carries `pageTitle`, `pageDescription`, and (optional) accent `color`. Every page sets it; `PageHeader` reads it.
+Reserved for cross-cutting React contexts. **`PageContext` is mandatory.** It carries `pageTitle`, `pageDescription`, and an accent `color` (always present — defaults to `'#000000'`). Every page sets it; `PageHeader` reads it.
 
 ```tsx
 export const PageContext = createContext({
@@ -547,6 +549,8 @@ const useAuth = () => {
     }
 }
 ```
+
+The `window.location.reload()` after `login()` exists because `useAuth` reads the JWT once into `useState` (`isAuthenticated` is initialized from `!!jwt` and never recomputed). Once `AuthService` writes the new token, React state is stale, so a full page reload is the simplest way to re-derive `isAuthenticated` from the freshly persisted JWT.
 
 Other hooks: domain-specific composition (`usePayments`, `useFeatureFlag`, etc.). Keep small; lift state into zustand if it grows.
 

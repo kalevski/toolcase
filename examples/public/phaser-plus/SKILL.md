@@ -78,6 +78,27 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
 - [Effects](#effects)
 - [AI / Pathfinding](#ai--pathfinding)
 - [Events constants](#events-constants)
+- [Flow extensions — StateMachine, BehaviorTree, Replay](#flow-extensions--statemachine-behaviortree-replay)
+  - [StateMachine](#statemachine--finite-state-machine)
+  - [BehaviorTree](#behaviortree)
+  - [ReplayRecorder](#replayrecorder)
+- [Cinema — Camera, Shake, Parallax, Letterbox](#cinema--camera-shake-parallax-letterbox)
+  - [CameraDirector](#cameradirector)
+  - [ScreenShake](#screenshake)
+  - [CameraFlash](#cameraflash)
+  - [DialogCameraCue](#dialogcameracue)
+  - [ParallaxLayer](#parallaxlayer)
+  - [LetterboxFeature](#letterboxfeature)
+- [Input — actions, buffer, gamepad, gestures, joystick](#input--actions-buffer-gamepad-gestures-joystick)
+  - [InputFeature](#inputfeature--action-mapping)
+  - [InputBuffer](#inputbuffer--combo--leniency-window)
+  - [GamepadFeature](#gamepadfeature)
+  - [GestureRecognizer](#gesturerecognizer)
+  - [VirtualJoystick](#virtualjoystick)
+- [Worked examples](#worked-examples)
+- [Cross-library integration](#cross-library-integration)
+- [Theming / styling surfaces](#theming--styling-surfaces)
+- [Cheat sheet](#cheat-sheet)
 
 ---
 
@@ -131,10 +152,11 @@ Per-`Game` singleton wrapping a `LoggerFactory` and a `ServiceRegistry`. Attache
 
 | Member | Type | Description |
 |---|---|---|
-| `version` | `string` | Engine version string |
 | `services` | `ServiceRegistry` | Game-wide DI container |
 | `setLogLevel(level)` | `this` | `level` is a `LogLevel` enum value |
 | `getLogger(scope?)` | `Logger` | Scoped logger from `@toolcase/logging` |
+
+(There is a `version` string field on `Engine`, but it is hardcoded and currently stale — do not rely on it to reflect the installed package version.)
 
 ### Scene
 
@@ -288,6 +310,8 @@ class Hud extends HTMLFeature {
 }
 ```
 
+> Note: a `ReactFeature` exists in source (`features/ReactFeature.ts`) for mounting a React tree into the DOM overlay, but it is **not** re-exported from the package root, so `import { ReactFeature } from '@toolcase/phaser-plus'` does not resolve. Until that export gap is closed, mount React manually inside an `HTMLFeature.onCreate()` (`createRoot(this.node).render(...)`).
+
 ### SplitScreen
 
 Two-camera follow with adaptive single↔split mode based on point distance.
@@ -406,10 +430,20 @@ class HitEvent extends Flow.CollisionEvent {
     onExit(bodyA, bodyB, event) {}
 }
 
-scene.flow.physics?.addProcessor /* … */
+// flow.physics is the CollisionEventProcessor (null when scene.matter is absent).
+scene.flow.physics?.add('hit', HitEvent)         // register the event class under a name
+scene.flow.physics?.setCollision('bullet', 'enemy', 'hit')  // map two Matter body labels → that event
 ```
 
-(See source for processor-specific `add` API; physics is optional.)
+Collisions are routed by Matter body `label`. `add(name, EventClass)` registers the handler; `setCollision(labelA, labelB, name)` (symmetric) binds a label pair to it, so `onEnter` / `onExit` fire when bodies with those labels touch.
+
+| Method | Purpose |
+|---|---|
+| `add(name, EventClass)` | Register a `CollisionEvent` subclass under `name` (calls its `onCreate`) |
+| `setCollision(labelA, labelB, name)` | Bind a body-label pair to a registered event (both directions) |
+| `removeCollision(labelA, labelB)` | Unbind a label pair |
+| `remove(name)` | Tear down a registered event (calls its `onDestroy`) |
+| `has(name)` | Whether an event name is registered |
 
 ### Flow sugar — `Timer`, `Parallel`, `throttle`, `debounce`
 
@@ -528,10 +562,11 @@ class Tile extends GameObject2D {
 
 const t = world.add<Tile>('tile', 4, 2)
 t.setTransform(5, 3)   // re-project
-t.addTag('walkable')
 ```
 
 Use `setTransform / setTransformX / setTransformY` to move in world space — they apply the World's projection automatically.
+
+`addTag / removeTag / removeTags` exist on the base `GameObject2D` as no-op stubs (they just `return this`) — they are override hooks for subclasses, not a working tag system in the base class.
 
 ### Grid
 
@@ -549,7 +584,7 @@ grid.setColors(0x334155, 0x64748b)
 
 ```ts
 const iso = Structs.Matrix2.createISO(64)
-const custom = Structs.Matrix2.create(64, 32, Math.PI / 6, -Math.PI / 6)
+const custom = Structs.Matrix2.create(64, 32, /* angleX deg */ 30, /* angleY deg */ -30)
 
 iso.translate(worldX, worldY, outVec)   // worldX,Y → screen
 iso.adjoint                              // for back-projection
@@ -735,7 +770,7 @@ const tree = new Selector([
 ])
 
 const proc = scene.flow.addProcessor(Flow.BehaviorTreeProcessor.EVENT_TYPE, Flow.BehaviorTreeProcessor)
-proc.add('boss', tree, { lowHP: false, target: null }, /* tickIntervalMs */ 100)
+proc.add('boss', tree, { lowHP: false, target: null }, /* tickIntervalSec */ 0.1)
 
 // blackboard is mutable
 proc.get('boss')!.blackboard.target = player
@@ -745,21 +780,28 @@ Status values: `'success' | 'failure' | 'running'`. `running` keeps the cursor i
 
 ### ReplayRecorder
 
-Deterministic input capture/playback (assumes deterministic sim).
+Deterministic input capture/playback (assumes deterministic sim). The recorder ticks a fixed-rate frame accumulator on `onUpdate`; per frame it snapshots the inputs staged via `setInput(key, value)` and emits `REPLAY_FRAME`. Inputs reset each frame.
 
 ```ts
-const replay = scene.features.register('replay', Flow.ReplayRecorder)
-replay.startRecording({ seed: 42, fps: 60 })
+import { Flow, REPLAY_FRAME, REPLAY_END } from '@toolcase/phaser-plus'
 
+const replay = scene.features.register('replay', Flow.ReplayRecorder)
+const session = replay.record(42, 60)         // (seed, fps) → ReplaySession { seed, fps, frames[] }
+
+// Stage inputs for the current frame; they are captured on the next tick.
 scene.flow.events.add('input', class extends Flow.Event<{ action: string }> {
-    onFire(payload) { replay.record(payload) }
+    onFire(payload) { replay.setInput('action', payload.action) }
 })
 
-const session = replay.stop()                 // ReplaySession { seed, fps, frames[] }
-replay.startPlaying(session)
-replay.on('replay.frame', frame => apply(frame.inputs))
-replay.on('replay.end', () => log.info('replay finished'))
+const recorded = replay.stop()                // returns the ReplaySession (or null)
+
+// Play it back — REPLAY_FRAME is emitted with (tick, inputs) positional args.
+replay.play(recorded!)
+replay.on(REPLAY_FRAME, (tick, inputs) => apply(inputs))
+replay.on(REPLAY_END, session => log.info('replay finished', session))
 ```
+
+During playback read the active frame's inputs with `replay.readInput(key)`. `replay.state` is `'idle' | 'recording' | 'playing'`; `replay.tick` is the current frame index.
 
 ---
 
@@ -1209,12 +1251,12 @@ world.on('state.score', s => log.info('score', s))
 | Surface | How to style |
 |---|---|
 | Phaser GameObjects | Use Phaser's native API: `setTint(0xRRGGBB)`, `setAlpha`, `setBlendMode`, custom shaders via `Effect`. |
-| `Effect` shaders | The 73 built-in effects accept numeric `color` parameters in `0xRRGGBB` form — pass game-themed palette values (e.g. from `@toolcase/base` `Color.PALETTE`) to keep visuals consistent across scenes. |
+| `Effect` shaders | The 73 built-in effects accept numeric `color` parameters in `0xRRGGBB` form — pass game-themed palette values (e.g. from `@toolcase/base` `Color`, where keys resolve as `Color.RED` / `Color.BLUE` etc., or `Color.toNumber('blue')` for the `0xRRGGBB` number) to keep visuals consistent across scenes. |
 | `Cinema` overlays | `CameraFlash.flash(color, ...)`, `LetterboxFeature.setBarColor`, `DialogCameraCue.setDimColor` — all accept `0xRRGGBB`. |
 | `HTMLFeature` content | Plain DOM inside `this.node`. Style with regular CSS / SCSS or by mounting `@toolcase/game-components` (`gc-*` web components) — they expose a full `--fg-*` / `--gc-*` variable layer documented in their SKILL.md. |
 | `Debugger` panels | Tweakpane folders; restyle with Tweakpane's own CSS variables on the panel container. |
 
-Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects / cinema overlays are easy to scatter. Consolidate them into a constants module (or `Color.PALETTE` from `@toolcase/base`) and pass references — that way one change retones every scene.
+Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects / cinema overlays are easy to scatter. Consolidate them into a constants module (or the `Color` palette from `@toolcase/base` — `Color.toNumber('blue')` yields the `0xRRGGBB` number) and pass references — that way one change retones every scene.
 
 ---
 
@@ -1231,7 +1273,7 @@ Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects
 | Long task | `class extends Flow.Job` → `flow.jobs.run(JobCls, payload)` |
 | Finite state machine | `class extends Flow.StateMachine<C>` → `addState/addTransition/setStart` |
 | AI behavior tree | Build `Selector/Sequence/Action/...` → `Flow.BehaviorTreeProcessor.add(id, root, blackboard)` |
-| Replay capture | `features.register('replay', Flow.ReplayRecorder)` → `startRecording` / `startPlaying` |
+| Replay capture | `features.register('replay', Flow.ReplayRecorder)` → `record(seed, fps)` / `play(session)` |
 | Cinematic camera | `features.register('cam', CameraDirector)` → `queue({...shot})` |
 | Screen shake | `features.register('shake', ScreenShake)` → `shake.add/impact/rumble/sine` |
 | Camera flash | `features.register('flash', CameraFlash)` → `flash.flash(0xffffff, 0.3)` |

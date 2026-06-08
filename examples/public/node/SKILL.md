@@ -30,7 +30,7 @@ import {
 | Surface | Peer deps required |
 |---|---|
 | utils + errors (sanitize, pagination, filter, sort, domain errors), `env` | `@toolcase/base` |
-| `RouteHandler`, `Router`, `HttpServer`, `chain` | `@toolcase/base`, `fastify`, `@fastify/cors` |
+| `RouteHandler`, `Router`, `HttpServer` | `@toolcase/base`, `fastify`, `@fastify/cors` |
 | `BaseRepository`, `EntityService` | `@toolcase/base` — engine-agnostic; you implement the verbs against any driver |
 | `KVService` (string surface only) | `@toolcase/base`, `redis` |
 | `KVService.*Value*` methods (typed binary) | adds `@toolcase/serializer` |
@@ -290,6 +290,18 @@ interface Logger {
     error?: (msg, meta?) => void
 }
 ```
+
+> **Adapter note — `@toolcase/logging`.** This `Logger` contract uses `warn`, but a `@toolcase/logging` logger exposes `warning` (not `warn`). `BaseRepository` emits slow-query reports via `logger?.warn?.()`, so if you pass a logging logger straight through, those warnings are silently dropped (the optional call is just `undefined`). Adapt the level name when bridging:
+>
+> ```ts
+> const log = LoggerFactory.getLogger('repo')
+> const adapted: Logger = {
+>     debug: (m, meta) => log.debug(m, meta),
+>     info:  (m, meta) => log.info(m, meta),
+>     warn:  (m, meta) => log.warning(m, meta), // warning → warn
+>     error: (m, meta) => log.error(m, meta),
+> }
+> ```
 
 ---
 
@@ -794,7 +806,7 @@ class KeyBuilder {
     scope(namespace: string): KeyBuilder
     stripNamespace(value: string): string
 }
-const DEFAULT_SEPARATOR = ':'
+const KV_KEY_SEPARATOR = ':'
 
 class LuaScript {
     readonly sha: string
@@ -911,6 +923,12 @@ class UsersEndpoint extends RouteHandler<UserDTO> {
 const kv = new KVService({ client: await createClient().connect(), namespace: 'app' })
 await kv.warmScripts()
 
+// `pool` is a pg Pool; `db` is your TransactionClient<Pool> adapter (a thin
+// wrapper exposing `transaction(fn)` over `pool`).
+const pool = new Pool()
+const db: TransactionClient<Pool> = { transaction: (fn) => fn(pool) }
+const svc = new UserService(new UserRepo(pool), db, kv)
+
 const server = new HttpServer({ port: 3000, prefix: '/api/v1', healthCheck: () => kv.ping() })
     .add(new Router().add(new UsersEndpoint(svc)))
 
@@ -949,9 +967,11 @@ interface FormatOptions {
 }
 
 interface OptimizeOptions {
+    format?: ImageFormat   // optimize for one encoder; if omitted, ALL encoders
+                           //   (jpeg+png+webp+avif) are configured (legacy, wasteful)
     quality?: number       // default 80
-    palette?: boolean      // png palette quantization
-    effort?: number        // 0–9 webp/avif compute budget
+    palette?: boolean      // png palette quantization, default true
+    effort?: number        // 0–9 webp/avif compute budget, default 6
     stripMetadata?: boolean // default true
 }
 
@@ -985,7 +1005,7 @@ const meta = await ImageProcessor.fromPath('./avatar.png')
     .toFile('./avatar.webp')
 ```
 
-Errors funnel through `ImageProcessorError` (`reason: 'crop-out-of-bounds' | 'decode-failed' | 'encode-failed' | …`).
+Errors funnel through `ImageProcessorError` (`reason: 'invalid-buffer' | 'invalid-path' | 'crop-invalid' | 'crop-out-of-bounds' | 'decode-failed' | 'metadata-failed' | 'encode-failed' | 'write-failed'`). `invalid-buffer` / `invalid-path` / `crop-invalid` are thrown eagerly from the builder methods; the rest are produced lazily on the terminal call (`metadata` → `metadata-failed`, `toBuffer` → `encode-failed`, `toFile` → `write-failed`), with sharp's underlying message reclassified to `crop-out-of-bounds` / `decode-failed` when it matches.
 
 ### AtlasBuilder
 
@@ -1008,6 +1028,10 @@ interface AtlasBuilderOptions {
     writeManifest?: boolean                  // default true
     optimize?: boolean                       // run ImageProcessor.optimize on each page
     useAlphaTrimming?: boolean               // default true → trims transparent borders before packing
+    continueOnError?: boolean                // default false → skip inputs that fail at the
+                                             //   `decode` stage and collect them in result.failures
+                                             //   instead of throwing. pack/compose/write errors
+                                             //   still throw (whole-atlas concerns).
 }
 
 interface AtlasFrame {
@@ -1027,11 +1051,19 @@ interface AtlasPageFile {
     frames: AtlasFrame[]
 }
 
+interface AtlasBuildFailure {
+    input: AtlasInput
+    stage: 'decode' | 'pack' | 'compose' | 'write'   // 'decode' in practice — see continueOnError
+    error: Error
+}
+
 interface AtlasResult {
     pages: AtlasPageFile[]
     unpacked: Array<{ id: string; sourcePath: string; width: number; height: number }>
     manifestPath: string | null   // null if writeManifest === false
     pack: PackingResult           // raw Packer result for advanced introspection
+    failures: AtlasBuildFailure[] // decode-stage failures skipped via continueOnError; [] otherwise.
+                                  //   If every input fails to decode, build() still throws.
 }
 
 class AtlasBuilder {
@@ -1104,7 +1136,7 @@ Peer deps: `@toolcase/base` (`Cache`, `EventEmitter`, `retry`, `HTTP.Status`). `
 
 | Class | Status | Code | Use |
 |---|---|---|---|
-| `OAuth2CallbackError(error, description?)` | 400 | `OAUTH2_CALLBACK_ERROR` | upstream redirected with `error=` param |
+| `OAuth2CallbackError(upstreamError, description?)` | 400 | `OAUTH2_CALLBACK_ERROR` | upstream redirected with `error=` param (public fields: `upstreamError`, `upstreamDescription`) |
 | `OAuth2TokenError(upstreamStatus, message, body?)` | 502 | `OAUTH2_TOKEN_ERROR` | non-2xx from token / userinfo / device-poll |
 | `OAuth2ProtocolError(reason)` | 400 | `OAUTH2_PROTOCOL_ERROR` | shape violation (missing access_token, etc.) |
 | `OIDCVerificationError(reason)` | 401 | `OIDC_VERIFICATION_FAILED` | id_token signature / claims rejected |
@@ -1113,6 +1145,40 @@ Peer deps: `@toolcase/base` (`Cache`, `EventEmitter`, `retry`, `HTTP.Status`). `
 All extend `OAuth2Error` → `EndpointError`. `errorMeta` maps via `EndpointError.statusCode` + `EndpointError.code`.
 
 ### `defineOAuth2Provider(opts)` / `oidcProvider(opts)`
+
+`OAuth2ProviderConfig` (input + return shape of `defineOAuth2Provider`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `clientId` | `string` | required |
+| `authorizationEndpoint` | `string` | required; trailing slash stripped |
+| `tokenEndpoint` | `string` | required; trailing slash stripped |
+| `clientSecret` | `string?` | drives the default `clientAuthMethod` |
+| `clientAuthMethod` | `'client_secret_basic' \| 'client_secret_post' \| 'none'?` | explicit value always wins (incl. `'none'` with a secret set); else `client_secret_basic` if `clientSecret` present, else `none` |
+| `pkceMethod` | `'S256' \| 'plain'?` | preferred PKCE challenge method |
+| `revocationEndpoint` | `string?` | trailing slash stripped |
+| `introspectionEndpoint` | `string?` | trailing slash stripped |
+| `deviceAuthorizationEndpoint` | `string?` | trailing slash stripped |
+| `userinfoEndpoint` | `string?` | trailing slash stripped |
+| `endSessionEndpoint` | `string?` | trailing slash stripped (RP-initiated logout) |
+| `jwksUri` | `string?` | trailing slash stripped |
+| `issuer` | `string?` | OIDC issuer |
+| `defaultScope` | `readonly string[]?` | default scopes |
+| `id` | `string?` | caller-chosen identifier (passed through) |
+
+`OidcProviderInput` (input to `oidcProvider`, which fetches discovery then calls `defineOAuth2Provider`):
+
+| Field | Type | Notes |
+|---|---|---|
+| `issuer` | `string` | required; discovery is fetched from `{issuer}/.well-known/openid-configuration` |
+| `clientId` | `string` | required |
+| `clientSecret` | `string?` | |
+| `clientAuthMethod` | `ClientAuthMethod?` | forwarded to `defineOAuth2Provider` |
+| `defaultScope` | `readonly string[]?` | |
+| `id` | `string?` | |
+| `fetchImpl` | `typeof fetch?` | override for the discovery fetch |
+
+All endpoints (`authorization`/`token`/`revocation`/`introspection`/`device`/`userinfo`/`endSession`/`jwksUri`) + `issuer` are filled from the discovery doc — you only supply credentials and scope.
 
 ```ts
 const github = defineOAuth2Provider({

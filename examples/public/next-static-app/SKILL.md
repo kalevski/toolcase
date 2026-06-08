@@ -1,6 +1,6 @@
 ---
 name: next-static-app
-description: Use when scaffolding or extending a statically-prerendered React Router v7 marketing/content site (landing page, docs, legal pages). Defines workspace layout (app/ + routes/ + modules/), file-based routing through routes.ts, prerender + SPA hydration config, root.tsx shell with Layout/App/ErrorBoundary, per-route meta() for SEO, modules/ section composition pattern, Tailwind v4 + @toolcase/react-components stack, public/ assets (sitemap, robots, og), and the nginx-served Docker build. Apply when adding a route, marketing section, legal page, SEO metadata, env var, sitemap entry, or scaffolding a new static-app workspace.
+description: Use when scaffolding or extending a statically-prerendered React Router v7 marketing/content site (landing page, docs, legal pages). NOT a Next.js project — this uses React Router v7, not Next.js. If you specifically need Next.js (App Router, RSC, Server Components, the `next` package, `next build`/`next dev`), this is the WRONG skill — do not load it. The "next-" prefix means "next-gen", not Next.js. Defines workspace layout (app/ + routes/ + modules/), file-based routing through routes.ts, prerender + SPA hydration config, root.tsx shell with Layout/App/ErrorBoundary, per-route meta() for SEO, modules/ section composition pattern, Tailwind v4 + @toolcase/react-components stack, public/ assets (sitemap, robots, og), and the nginx-served Docker build. Apply when adding a route, marketing section, legal page, SEO metadata, env var, sitemap entry, or scaffolding a new static-app workspace.
 ---
 
 # next-static-app — Architecture Reference
@@ -16,7 +16,7 @@ Stack baseline:
 - `react-router.config.ts` with `prerender: true, ssr: false` — every route is rendered to static HTML at build time, then hydrated as an SPA.
 - Tailwind v4 (`@import 'tailwindcss'`) + `@toolcase/react-components` for primitives + `bootstrap-icons` font + Bootstrap utility classes mixed in. The architecture is library-independent — swap freely, but pick **one** UI primitives library per app.
 - ESM (`"type": "module"`).
-- Node 24+ (`engines.node: ">=24"`).
+- Node 18+ (`engines.node: ">=18"`); Docker builds on `node:20-alpine` (a modern LTS).
 - Dockerfile: `npm run build` → `build/client/` → copied into nginx:alpine.
 
 ---
@@ -25,9 +25,9 @@ Stack baseline:
 
 - **`@toolcase/react-components`** — primary UI primitives (`Hero`, `CoolNav`, `CoolButton`, `Brand`, `Icon`, `PageFooter`, `PricingCard`, `FeatureCard`, `PinnedFeatureShowcase`, `EarlySignupForm`, `Heading`, `Text`, `SectionCard`, etc.). See `react-components` skill for catalog.
 - **`@toolcase/base`** — pure helpers/data structures if a section needs them. No store/services in this stack, so usage is rare.
-- **`@toolcase/logging`** — unnecessary. Static sites should not log to remote sinks at runtime. Use `console` directly.
+- **`@toolcase/logging`** — rarely needed (but fine for e.g. client-side error logging). Static sites generally don't log to remote sinks at runtime, so prefer `console` directly unless you have a specific need like reporting client-side errors.
 
-`@toolcase/serializer`, `zustand`, `react-query`, `redux` — **out of scope**. If you reach for them, the project is no longer a static-app — switch to `react-spa-app`.
+`@toolcase/serializer`, `zustand`, `react-query`, `redux` — **rarely needed** (but fine for e.g. client-side error logging or a genuinely isolated use). If you find yourself leaning on them for app state or data fetching, the project is probably no longer a static-app — consider switching to `react-spa-app`.
 
 ---
 
@@ -101,6 +101,8 @@ export default {
     ssr: false,         // no server runtime — pure SPA hydration
 } satisfies Config
 ```
+
+> Note: `prerender: true` covers only **static** route paths. **Dynamic routes** (`/post/:slug`) are not enumerable and require the explicit **array form** — `prerender: ['/post/a', '/post/b', ...]` — listing every concrete path to emit. See "Dynamic routes" below and the Anti-Patterns section.
 
 `prerender: true` + `ssr: false` is the contract:
 
@@ -472,22 +474,22 @@ OG image MUST be 1200×630, < 1 MB, hosted under `/imgs/` (absolute URL in the m
 
 Create `<app>/` with:
 
-- `package.json` — `"type": "module"`, `"engines": { "node": ">=24" }`, scripts:
+- `package.json` — `"type": "module"`, `"engines": { "node": ">=18" }`, scripts:
   ```json
   "dev": "react-router dev",
   "build": "react-router build",
   "preview": "vite preview",
   "typecheck": "react-router typegen && tsc --noEmit"
   ```
-  Deps: `react`, `react-dom`, `react-router`, `@react-router/node`, `@react-router/dev` (dev), `vite` (dev), `vite-plugin-commonjs` (dev), TS toolchain.
+  Deps: `react`, `react-dom`, `react-router`, `@react-router/node`, `@react-router/dev` (dev), `vite` (dev), `vite-plugin-commonjs` (dev, optional — only for interop with CommonJS-only deps that Vite's ESM pipeline can't pre-bundle; drop it and the plugin from `vite.config.ts` if you have none), TS toolchain.
 - `react-router.config.ts` — `{ prerender: true, ssr: false }`.
 - `vite.config.ts`:
   ```ts
   import { reactRouter } from '@react-router/dev/vite'
   import { defineConfig } from 'vite'
-  import commonjs from 'vite-plugin-commonjs'
+  import commonjs from 'vite-plugin-commonjs' // optional: only needed for CommonJS-only deps
   export default defineConfig({
-      plugins: [commonjs(), reactRouter()],
+      plugins: [commonjs(), reactRouter()], // drop commonjs() if no CommonJS-only deps
       server: { allowedHosts: ['<host-list>'], host: '0.0.0.0' },
       resolve: { tsconfigPaths: true },
   })
@@ -498,14 +500,14 @@ Create `<app>/` with:
 - `app/routes/index.tsx` placeholder with `meta()` + minimal page.
 - `app/modules/Navbar.tsx` + `app/modules/Footer.tsx` placeholders.
 - `public/favicon.ico`, `public/robots.txt`, `public/sitemap.xml`, `public/imgs/`.
-- `Dockerfile` — multi-stage `node:24-alpine` build → `nginx:alpine` static serve from `build/client`.
+- `Dockerfile` — multi-stage `node:20-alpine` build → `nginx:alpine` static serve from `build/client`.
 
 ### Add the Docker build
 
 Multi-stage, nginx-served. Pin Node version, no SSR runtime needed:
 
 ```dockerfile
-FROM node:24-alpine AS build-env
+FROM node:20-alpine AS build-env
 COPY . /app/
 WORKDIR /app
 RUN npm ci && npm run build

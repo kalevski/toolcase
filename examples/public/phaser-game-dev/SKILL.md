@@ -23,7 +23,7 @@ Required install before anything else:
 npm install phaser @toolcase/phaser-plus @toolcase/game-components @toolcase/base @toolcase/logging
 ```
 
-If you want shader effects on `GameObject` instances, also import and call `installEffects(game)` immediately after `new Game(config)` (see Boot below). Without it, `gameObject.effects.add(...)` is a no-op.
+If you want shader effects on `GameObject` instances, import and call `installEffects(game)` immediately after `new Game(config)` (see Boot below). This is the recommended pre-registration step — it registers every effect's RenderNode up front. It is not strictly required: `gameObject.effects.add(...)` lazily registers the effect it needs as a fallback (so a forgotten `installEffects` still works), but pre-registering at boot is cleaner and avoids first-use registration cost.
 
 `@toolcase/game-components` requires a one-time `register()` call at boot to define all 137 custom elements globally, plus the bundled stylesheet (`@toolcase/game-components/style.css`). After that, any `HTMLFeature` can author UI with `gc-*` tags directly inside `this.node.innerHTML`.
 
@@ -142,7 +142,7 @@ const config: Phaser.Types.Core.GameConfig = {
 }
 
 const game = new Game(config)
-installEffects(game)            // REQUIRED if any GameObject uses .effects.add(...)
+installEffects(game)            // RECOMMENDED if any GameObject uses .effects.add(...) — add() lazy-registers as fallback
 
 export default game
 ```
@@ -150,8 +150,8 @@ export default game
 Hard rules:
 
 - `dom.createContainer: true` is **mandatory** if any `HTMLFeature` exists. Without it, `HTMLFeature` constructor throws.
-- `installEffects(game)` runs **once, after `new Game(config)`**, never inside a scene.
-- `register()` from `@toolcase/game-components` runs **once at module top-level**, before `new Game(config)`. Calling it twice is a no-op (custom elements are idempotent), but registering inside a scene risks racing the first `HTMLFeature.onCreate`.
+- `installEffects(game)` runs **once, after `new Game(config)`**, never inside a scene. It is recommended pre-registration, not strictly required — `gameObject.effects.add(...)` lazy-registers the effect it needs as a fallback if `installEffects` was skipped.
+- `register()` from `@toolcase/game-components` runs **exactly once at module top-level**, before `new Game(config)`. It is **not** idempotent — it calls `customElements.define(...)` directly with no guard, so calling it twice throws `NotSupportedError` ("the name has already been used"). Call it exactly once; registering inside a scene also risks racing the first `HTMLFeature.onCreate`.
 - The bundled stylesheet `@toolcase/game-components/style.css` must be imported once (boot.ts is the canonical place). Without it, `gc-*` elements render unstyled.
 - Scenes are listed in boot order. The first scene auto-starts.
 - Never construct `new Phaser.Scene(...)` directly — register the class on `config.scene`.
@@ -342,6 +342,8 @@ Hard rules:
 - **Always `off()` in `onDestroy`** if you `on()`-ed in `onCreate`. The bus survives across re-registrations.
 - **Never store a reference to another feature in a field at construction time.** Other features may not exist yet. Resolve at use, or wait for an event.
 - **Never touch the DOM from a Feature.** Use HTMLFeature for that.
+
+> **Emit-before-subscribe drops the event.** `this.emit(event, ...)` checks `scene.features.listenerCount(event)` first: if **no** listener is registered yet, it logs a warning and **drops** the payload (it does not buffer or replay). Consequences for the cross-feature pattern this doc promotes: (1) register the listening feature **before** the emitting one fires — `features.register` order matters, and `onCreate` subscriptions must be wired before the first `emit`; (2) a late-joining feature registered after an event already fired will never see it — re-emit current state on registration (e.g. an `emit('<domain>:state')` snapshot) or have the new feature pull via `scene.features.get(...)`; (3) an unhandled `emit` surfacing as a logger warning usually means a subscriber is missing or the ordering is wrong, not that the payload is malformed.
 
 ---
 
@@ -915,7 +917,7 @@ export class Enemy extends CustomGameObject {
 
 Hard rules:
 
-- **Constructor stays empty.** Use `onCreate()`. The pool may construct your prefab before the scene even calls `create()`.
+- **Constructor stays empty.** Use `onCreate()`. The pool may construct your prefab before the scene even calls `create()`. If you must declare a constructor, its signature is `(scene, x, y)` and the first statement must be `super(scene, x, y)` — `GameObject`'s ctor wires `scene`/`game`/`id`. Don't put sprite/physics setup there; that still belongs in `onCreate()`.
 - **Children added with `this.add(...)`** receive `onAdd()` calls automatically if they're GameObjects.
 - **No feature lookups inside prefabs.** Prefabs are passive. Features find prefabs via `scene.pool` / `Layer`, not the other way around.
 - **`id` is auto-assigned** by `GameObject` (16-char generated id). Use `gameObject.id` for stable comparisons.
@@ -967,11 +969,13 @@ Naming convention: `<domain>:<verb>` — `enemy:killed`, `player:level-up`, `day
 
 ### Time, timers, jobs
 
-Use `this.flow` (`FlowEngine`) instead of `setTimeout` / `Phaser.Time.TimerEvent`. `flow` survives pause correctly, integrates with the scene update loop, and exposes `Job` / `Timer` / `Parallel` / `throttle` / `debounce` primitives.
+Use `this.flow` (`FlowEngine`) instead of `setTimeout` / `Phaser.Time.TimerEvent`. `flow` survives pause correctly, integrates with the scene update loop, and exposes `Job` / `Timer` / `Parallel` / `throttle` / `debounce` primitives via `flow.jobs`, `flow.timer`, `flow.events`.
+
+> **`flow.physics` is null under Arcade physics.** The collision-event processor (`flow.physics`) is only constructed when `scene.matter` exists — i.e. only under **Matter** physics. The boot config above uses `physics: { default: 'arcade' }`, so `scene.matter` is undefined and `this.flow.physics === null`. Guard before use (`if (this.flow.physics) ...`), or switch the game to Matter (`physics: { default: 'matter' }`) if you need flow-driven collision events. Arcade collision is still available directly via `this.scene.physics.add.collider(...)`.
 
 ### State machines / behavior trees
 
-For enemy AI, dialog flow, scene state — use `phaser-plus`'s `StateMachine` and `BehaviorTree` from the `flow` and `ai` re-exports. One state machine per Feature; the Feature drives ticks in `onUpdate`.
+For enemy AI, dialog flow, scene state — use `phaser-plus`'s `StateMachine` and `BehaviorTree`. Both live in the **`flow`** module (`src/flow/`), not `ai`. The `ai` module is pathfinding only (`NavMesh`, `Path`, `PathFinder`) — reach for it when you need movement/navigation, and pair it with a `flow` `BehaviorTree`/`StateMachine` for decision-making. One state machine per Feature; the Feature drives ticks in `onUpdate`.
 
 ### Cinema / camera
 
@@ -983,7 +987,7 @@ Register `InputFeature` and bind logical actions to keys/buttons via `input.bind
 
 ### Effects (shaders)
 
-Per-GameObject GLSL via `gameObject.effects.add(...)`. **Requires `installEffects(game)` at boot.** 84+ built-in effects available; custom shaders follow the documented pattern in the `phaser-plus` skill.
+Per-GameObject GLSL via `gameObject.effects.add(...)`. **`installEffects(game)` at boot is recommended** (pre-registers all effect RenderNodes); `add(...)` lazy-registers the effect it needs as a fallback if you skipped it. 73 built-in effects available; custom shaders follow the documented pattern in the `phaser-plus` skill.
 
 ### Debugging
 
@@ -1066,7 +1070,7 @@ save.save(0, { score: this.score })
 
 ❌ **Calling `new Game(config)` more than once.** Single instance, in `boot.ts`, never re-created. Hot-reload should reload the page, not rebuild the game.
 
-❌ **Skipping `installEffects(game)`** then wondering why `gameObject.effects.add(...)` does nothing.
+⚠️ **Skipping `installEffects(game)`.** Not fatal — `gameObject.effects.add(...)` lazy-registers the effect it needs as a fallback — but pre-registering at boot is cleaner and avoids first-use registration cost. Prefer calling it.
 
 ❌ **Forgetting `dom.createContainer: true`** then getting `HTMLFeature` constructor errors at runtime.
 

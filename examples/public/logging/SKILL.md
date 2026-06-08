@@ -41,6 +41,8 @@ import { FileLogReporter } from '@toolcase/logging/node'
 type LoggerLevel = 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose'
 ```
 
+> **Note:** the `LoggerLevel` *type* is **not** re-exported from the package root — `import { LoggerLevel } from '@toolcase/logging'` fails. Only the `Level` value (the string-key constant map) is exported. To type a level, inline the union above, or derive it: `type LoggerLevel = typeof Level[keyof typeof Level]`. The level methods accept these strings directly, so an explicit type annotation is rarely needed.
+
 Order (lowest → highest verbosity):
 
 | Order | Level     |
@@ -238,6 +240,8 @@ Errors are serialized to `{ name, message, stack }`. Circular references fall ba
 
 Append to a log file. Lazy-loads `node:fs`; available from `@toolcase/logging/node`.
 
+> **Caveat:** the constructor's environment check is `require`-based (`typeof require !== 'function'` → throws `"FileLogReporter is only available in Node.js"`). This is **not** universally Node-safe — under pure-ESM Node (no CommonJS `require` in scope) the guard can misfire and throw even though `fs` is available. It targets CJS/bundled-Node setups.
+
 ```ts
 import { LoggerFactory } from '@toolcase/logging'
 import { FileLogReporter } from '@toolcase/logging/node'
@@ -317,9 +321,9 @@ class BufferedReporter extends LogReporter {
 }
 ```
 
-Either `inner` or `onFlush` must be provided. When both are present, `onFlush` wins (the inner reporter is bypassed). Throws inside `onFlush` will bubble — wrap your I/O.
+Either `inner` or `onFlush` must be provided. When both are present, `onFlush` wins (the inner reporter is bypassed). A throw inside `onFlush` (or the wrapped `inner`) propagates out of `flush()` — but **where** depends on what triggered the flush: a `maxSize`-overflow flush runs synchronously from the `logger.<level>(...)` call, so the throw reaches that call site; a `flushInterval` timer flush runs from a `setTimeout` callback, so the throw becomes an **unhandled exception** (no call-site to catch it). Always wrap your I/O.
 
-Reporters run synchronously in registration order; a throw inside a reporter bubbles up to the call site of `logger.<level>(...)`. Wrap I/O. See worked custom-reporter examples below.
+Reporters run synchronously in registration order; a throw inside a synchronous reporter bubbles up to the call site of `logger.<level>(...)`. The exception is a reporter that flushes off a timer (e.g. `BufferedReporter`'s `flushInterval` path) — a throw there fires from a `setTimeout` callback and surfaces as an **unhandled exception**, not at the call site. Either way, wrap your I/O. See worked custom-reporter examples below.
 
 ---
 

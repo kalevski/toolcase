@@ -1,6 +1,6 @@
 ---
 name: react-components
-description: Reference for `@toolcase/react-components` (React 18+/Bootstrap 5 UI library). Use when building or assembling a React UI from this package — picking the right component, looking up props, or composing landing pages, dashboards, forms, charts, and docs/code surfaces. Triggers when the user imports `@toolcase/react-components`, asks for a `<Hero>`/`<AdvancedTable>`/`<CommandPalette>` etc., or asks to theme via `theme--neon` / CSS custom properties.
+description: Reference for `@toolcase/react-components` (React 18+/Bootstrap 5 UI library). Use when building or assembling a React UI from this package — picking the right component, looking up props, or composing landing pages, dashboards, forms, charts, and docs/code surfaces. Covers `<Chart>` (bar/line/area/pie/heatmap/funnel/gantt) and the canvas authoring tools `<NormalMapGenerator>`, `<PhysicsEditor>`, `<BitmapFontGenerator>`, `<NodeEditor>`, and `<AudioMixer>`. Triggers when the user imports `@toolcase/react-components`, asks for a `<Hero>`/`<AdvancedTable>`/`<CommandPalette>` etc., or asks to theme via `theme--neon` / CSS custom properties.
 ---
 
 # react-components — Component Reference
@@ -63,6 +63,8 @@ Each component reads its colors and dimensions from CSS custom properties scoped
 | ActionRowList | `--arl-` | `surface`, `border`, `color`, `muted` |
 | Alert | `--alert-` | `bg`, `border`, `text`, `title`, `icon` |
 | ActionItems | `--ac-` | `border`, `color`, `muted`, `hover-bg`, `active-bg` |
+| ColorPicker | `--cp-` | `color`, `bg`, `border`, `accent`, `accent-text`, `hover-bg`, `active-bg`, `active-border`, `cols` |
+| IconPicker | `--ip-` | `text`, `muted`, `border`, `accent`, `accent-text`, `subtle`, `hover-bg`, `light-bg`, `cols` |
 
 The full list of prefixes lives in the SCSS partials under `react-components/style/components/_<name>.scss`. Search for `--<abbr>-` inside a partial to see every knob it exposes — overriding them in a parent rule (or in a theme partial) is always sufficient; you should never need to fork a component to retheme it.
 
@@ -82,12 +84,20 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [IconPicker](#iconpicker)
   - [Input](#input)
   - [JSONEditor](#jsoneditor)
+  - [MarkdownEditor](#markdowneditor)
+  - [NumberInput](#numberinput)
+  - [OTPInput](#otpinput)
+  - [PhoneInput](#phoneinput)
   - [Radio](#radio)
   - [RadioGroup](#radiogroup)
+  - [RangeSlider](#rangeslider)
+  - [Rating](#rating)
   - [Select](#select)
+  - [Slider](#slider)
   - [Switch](#switch)
   - [TagInput](#taginput)
   - [Textarea](#textarea)
+  - [TimePicker](#timepicker)
 - [Display & Feedback](#display--feedback)
   - [Alert](#alert)
   - [Badge](#badge)
@@ -103,6 +113,7 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [Tooltip](#tooltip)
 - [Layout & Structure](#layout--structure)
   - [Accordion](#accordion)
+  - [Banner](#banner)
   - [Breadcrumb](#breadcrumb)
   - [Card](#card)
   - [CommandPalette](#commandpalette)
@@ -111,30 +122,18 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [Drawer](#drawer)
   - [Form](#form)
   - [Group](#group)
-  - [NumberInput](#numberinput)
+  - [InfiniteScroll](#infinitescroll)
   - [Popover](#popover)
+  - [ResizablePanel](#resizablepanel)
   - [RichPageHeader](#richpageheader)
+  - [ScrollArea](#scrollarea)
   - [SectionCard](#sectioncard)
-  - [Slider](#slider)
   - [Spacer](#spacer)
   - [Stepper](#stepper)
   - [TabSections](#tabsections)
   - [Toast](#toast)
-  - [RangeSlider](#rangeslider)
-  - [Rating](#rating)
-  - [OTPInput](#otpinput)
-  - [PhoneInput](#phoneinput)
   - [TreeView](#treeview)
-  - [ScrollArea](#scrollarea)
-  - [ResizablePanel](#resizablepanel)
   - [VirtualList](#virtuallist)
-  - [InfiniteScroll](#infinitescroll)
-  - [TimePicker](#timepicker)
-  - [MarkdownEditor](#markdowneditor)
-  - [Carousel](#carousel)
-  - [ImageCrop](#imagecrop)
-  - [Lightbox](#lightbox)
-  - [Banner](#banner)
 - [Navigation](#navigation)
   - [CoolNav](#coolnav)
   - [Pagination](#pagination)
@@ -157,10 +156,13 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [Table](#table)
 - [Media & Files](#media--files)
   - [Avatar](#avatar)
+  - [Carousel](#carousel)
   - [File](#file)
   - [FileDropzone](#filedropzone)
   - [FileTags](#filetags)
   - [Image](#image)
+  - [ImageCrop](#imagecrop)
+  - [Lightbox](#lightbox)
 - [Typography & Decoration](#typography--decoration)
   - [Brand](#brand)
   - [Heading](#heading)
@@ -176,6 +178,8 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [BitmapFontGenerator](#bitmapfontgenerator)
   - [NormalMapGenerator](#normalmapgenerator)
   - [PhysicsEditor](#physicseditor)
+  - [NodeEditor](#nodeeditor)
+  - [AudioMixer](#audiomixer)
   - [Build](#build)
   - [CardOptions](#cardoptions)
   - [Changelog](#changelog)
@@ -205,6 +209,22 @@ The full list of prefixes lives in the SCSS partials under `react-components/sty
   - [Stamp](#stamp)
   - [StateMachine](#statemachine)
   - [TierLadder](#tierladder)
+- [Charts](#charts)
+  - [Chart (wrapper)](#chart-wrapper)
+  - [TrendIndicator](#trendindicator)
+  - [Sparkline](#sparkline)
+  - [BarChart](#barchart)
+  - [LineChart](#linechart)
+  - [AreaChart](#areachart)
+  - [PieChart / DonutChart](#piechart--donutchart)
+  - [Heatmap](#heatmap)
+  - [FunnelChart](#funnelchart)
+  - [GanttChart](#ganttchart)
+  - [ChartContainer](#chartcontainer)
+- [Marketing, Docs & SaaS Surfaces](#marketing-docs--saas-surfaces)
+  - [Landing & marketing](#landing--marketing)
+  - [Docs & code surfaces](#docs--code-surfaces)
+  - [SaaS shell](#saas-shell)
 
 ---
 
@@ -403,6 +423,7 @@ A universal form field that renders the correct control based on a single `type`
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `type` | `FormInputType` | ✅ | Which control to render (see below) |
+| `name` | `string` | ❌ | Field name; forwarded to the control so `<Form>` can collect it via FormData |
 | `label` | `string` | ❌ | Field label |
 | `value` | `unknown` | ❌ | Controlled value |
 | `onChange` | `(value, hasError) => void` | ❌ | Called when value changes |
@@ -1351,19 +1372,6 @@ import { Popover, Button } from '@toolcase/react-components'
 <Popover content={<p>Hello!</p>} placement="bottom-start">
   <Button variant="primary">Click me</Button>
 </Popover>
-```
-| `header` | `ReactNode` | ❌ | Card header content |
-| `variant` | `'default' \| 'primary' \| 'secondary' \| 'info' \| 'success' \| 'warning' \| 'danger'` | ❌ | Color theme (default: `'default'`) |
-| `loading` | `boolean` | ❌ | Skeleton state |
-| `className` | `string` | ❌ | Additional CSS class |
-| `children` | `ReactNode` | ❌ | Card body content |
-
-```tsx
-import { Card } from '@toolcase/react-components'
-
-<Card header={<h2>Settings</h2>}>
-  <p>Manage your account settings.</p>
-</Card>
 ```
 
 ---
@@ -2642,6 +2650,102 @@ Pure helpers (also exported): `autoTrace`, `alphaMask`, `traceContour`, `simplif
 
 ---
 
+### NodeEditor
+
+A canvas-only node-graph view (pan / zoom / touch, drag-to-connect). The `<NodeEditor>` component is a **pure view** — all graph state, selection, layout, and mutations live in the headless `useNodeEditor()` hook, so you build the toolbar / inspector UI yourself. Graph state is a JSON string (`{ context, initialId, nodes, edges }`); the hook is controlled (`value`) or uncontrolled (`defaultValue`).
+
+```ts
+function useNodeEditor(opts?: {
+  value?: string            // controlled graph JSON
+  defaultValue?: string     // initial graph JSON (uncontrolled)
+  onChange?: (value: string) => void
+  disabled?: boolean
+}): {
+  graph: GraphData
+  actions: NodeEditorActions     // addNode/removeNode/updateNode, addEdge/updateEdge/removeEdge, addOption…, setInitialId, setContext, getTriggerOptions
+  selection: NodeEditorSelection // { id, node, select(id) }
+  positions: Record<string, Pos>
+  setPositions: React.Dispatch<React.SetStateAction<Record<string, Pos>>>
+  view: NodeEditorViewProps      // spread straight onto <NodeEditor {...view} />
+}
+```
+
+`<NodeEditor>` props (`NodeEditorViewProps`):
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `graph` | `GraphData` | ✅ | Graph to render |
+| `positions` | `Record<string, Pos>` | ✅ | Node positions (`{ [id]: { x, y } }`) |
+| `selectedId` | `string \| null` | ✅ | Currently selected node id |
+| `onSelect` | `(id: string \| null) => void` | ✅ | Called on node selection / deselect |
+| `onMoveNode` | `(id: string, pos: Pos) => void` | ✅ | Called while dragging a node |
+| `onConnect` | `(from: string, to: string) => void` | ✅ | Called when an edge is drawn |
+| `onDeleteNode` | `(id: string) => void` | ❌ | Called when a node is deleted |
+| `disabled` | `boolean` | ❌ | Read-only view |
+| `loading` | `boolean` | ❌ | Skeleton state |
+| `className` | `string` | ❌ | Additional CSS class |
+
+```tsx
+import { NodeEditor, useNodeEditor } from '@toolcase/react-components'
+
+const { actions, selection, view } = useNodeEditor({ onChange: setGraphJson })
+
+<button onClick={() => actions.addNode({ type: 'branch' })}>Add node</button>
+<NodeEditor {...view} />
+{selection.node && <Inspector node={selection.node} actions={actions} />}
+```
+
+Pure helpers (also exported): `parseGraph`, `nodeLabel`, `NODE_TYPES`, `TYPE_COLORS`, `NODE_W`, `NODE_H`.
+
+---
+
+### AudioMixer
+
+A visual multitrack mixer editor (track headers, timeline clips, loop region, inspector). Like `NodeEditor`, the `<AudioMixer>` component is a **pure view** driven by the headless `useAudioMixer()` hook, which owns the project-document JSON plus `actions` / `selection`. The playhead is **callback-driven** (`currentMs` / `onSeek`) — there is no Web Audio engine inside; wire it to your own clock.
+
+```ts
+function useAudioMixer(opts?: {
+  value?: string            // controlled document JSON
+  defaultValue?: string     // initial document JSON (uncontrolled)
+  onChange?: (value: string) => void
+  disabled?: boolean
+}): {
+  doc: AudioMixerDocument
+  actions: AudioMixerActions          // addTrack/removeTrack/updateTrack/moveTrack, addClip/removeClip/updateClip/splitClip, setMasterGain, setLoop, addEffect/removeEffect/updateEffect
+  selection: AudioMixerSelectionState // { current, select(sel), track, clip }
+  view: AudioMixerViewModel           // { doc, actions, selection, disabled }
+}
+```
+
+`<AudioMixer>` props (`AudioMixerProps`):
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `doc` | `AudioMixerDocument` | ✅ | Project document to render |
+| `actions` | `AudioMixerActions` | ✅ | Mutation callbacks (from the hook) |
+| `selection` | `AudioMixerSelectionState` | ✅ | Selection state (from the hook) |
+| `currentMs` | `number` | ❌ | Playhead position in ms (default: `0`) |
+| `onSeek` | `(ms: number) => void` | ❌ | Called when the user scrubs the ruler |
+| `disabled` | `boolean` | ❌ | Read-only view |
+| `loading` | `boolean` | ❌ | Skeleton state |
+| `className` | `string` | ❌ | Additional CSS class |
+
+The hook's `view` bundles `doc` / `actions` / `selection` / `disabled`, so spread it and add the callback-driven playhead props separately:
+
+```tsx
+import { AudioMixer, useAudioMixer } from '@toolcase/react-components'
+
+const { actions, view } = useAudioMixer({ onChange: setProjectJson })
+const [ms, setMs] = useState(0)
+
+<button onClick={() => actions.addTrack()}>Add track</button>
+<AudioMixer {...view} currentMs={ms} onSeek={setMs} />
+```
+
+Pure helpers (also exported): `parseDocument`, `documentDuration`, `clipDuration`, `formatTime`, `EFFECT_TYPES`, `EFFECT_DEFAULTS`.
+
+---
+
 ### Build
 
 A build record card showing status icon, name, date, size, duration, badge, and an action menu.
@@ -3036,7 +3140,7 @@ Star rating with hover preview and optional half-star support.
 | `count` | `number` | ❌ | Total stars (default: `5`) |
 | `allowHalf` | `boolean` | ❌ | Allow half-star values |
 | `readOnly` | `boolean` | ❌ | No interaction |
-| `size` | `'small' | 'default' | 'large'` | ❌ | Icon size |
+| `size` | `'small' \| 'default' \| 'large'` | ❌ | Icon size |
 | `label` | `string` | ❌ | Accessible group label |
 
 ```tsx
@@ -3056,7 +3160,7 @@ Per-digit OTP input with auto-focus, paste support, and masking.
 | `value` | `string` | ✅ | Controlled OTP string |
 | `onChange` | `(v: string) => void` | ✅ | Called on change |
 | `length` | `number` | ❌ | Number of cells (default: `6`) |
-| `mode` | `'numeric' | 'alphanumeric'` | ❌ | Accepted chars |
+| `mode` | `'numeric' \| 'alphanumeric'` | ❌ | Accepted chars |
 | `masked` | `boolean` | ❌ | Password-dot rendering |
 | `label` | `string` | ❌ | Label |
 | `error` | `string` | ❌ | Error message |
@@ -3127,9 +3231,9 @@ Styled scrollable container with custom thin scrollbar.
 
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
-| `maxHeight` | `number | string` | ❌ | Max height before scrolling |
-| `maxWidth` | `number | string` | ❌ | Max width before scrolling |
-| `axis` | `'x' | 'y' | 'both'` | ❌ | Scroll axis (default: `'y'`) |
+| `maxHeight` | `number \| string` | ❌ | Max height before scrolling |
+| `maxWidth` | `number \| string` | ❌ | Max width before scrolling |
+| `axis` | `'x' \| 'y' \| 'both'` | ❌ | Scroll axis (default: `'y'`) |
 | `children` | `ReactNode` | ✅ | Content |
 
 ```tsx
@@ -3146,7 +3250,7 @@ Split-pane container with draggable divider; double-click resets sizes.
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `children` | `[ReactNode, ReactNode]` | ✅ | Two panel contents |
-| `direction` | `'horizontal' | 'vertical'` | ❌ | Split direction |
+| `direction` | `'horizontal' \| 'vertical'` | ❌ | Split direction |
 | `defaultSizes` | `[number, number]` | ❌ | Initial percentages |
 | `minSize` | `number` | ❌ | Min panel % (default: `10`) |
 | `storageKey` | `string` | ❌ | Persist sizes to localStorage |
@@ -3210,7 +3314,7 @@ Dropdown time picker with 12h/24h, minute steps, optional seconds, and clear.
 |------|------|----------|-------------|
 | `value` | `string` | ✅ | `HH:MM` or `HH:MM:SS` |
 | `onChange` | `(v: string) => void` | ✅ | Called on selection |
-| `format` | `'12h' | '24h'` | ❌ | Display format |
+| `format` | `'12h' \| '24h'` | ❌ | Display format |
 | `minuteStep` | `number` | ❌ | Minute increment |
 | `showSeconds` | `boolean` | ❌ | Add seconds column |
 | `clearable` | `boolean` | ❌ | Show clear button |
@@ -3323,7 +3427,7 @@ Page-level informational banner with variants, dismiss, action, and localStorage
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `children` | `ReactNode` | ✅ | Message content |
-| `variant` | `'info' | 'warning' | 'success' | 'error'` | ❌ | Visual style |
+| `variant` | `'info' \| 'warning' \| 'success' \| 'error'` | ❌ | Visual style |
 | `dismissible` | `boolean` | ❌ | Show close button |
 | `storageKey` | `string` | ❌ | localStorage key to remember dismissal |
 | `action` | `ReactNode` | ❌ | Action element (e.g. a Button) |
@@ -4055,8 +4159,8 @@ These components are intentionally lighter on prop docs — they are landing-pag
 | `InstallTabs` | Multi-package-manager install snippet (npm / pnpm / yarn / bun). |
 | `JSONSchemaDef` | Renders a JSON Schema fragment as docs. |
 | `MigrationGuide` | Step-by-step migration walkthrough. |
-| `NodeEditor` | Canvas-only node-graph view (pan/zoom/touch, drag-to-connect). Drive it with the `useNodeEditor()` hook, which owns graph state + `actions`/`selection`; build toolbar/inspector yourself. |
-| `AudioMixer` | Visual multitrack mixer editor (track headers, timeline clips, loop region, inspector). Drive it with the `useAudioMixer()` hook (owns the project-document JSON + `actions`/`selection`); playhead is callback-driven (`currentMs`/`onSeek`) — no Web Audio inside. |
+| `NodeEditor` | Canvas-only node-graph view (pan/zoom/touch, drag-to-connect). Drive it with the `useNodeEditor()` hook, which owns graph state + `actions`/`selection`; build toolbar/inspector yourself. See [NodeEditor](#nodeeditor) for the full signature + example. |
+| `AudioMixer` | Visual multitrack mixer editor (track headers, timeline clips, loop region, inspector). Drive it with the `useAudioMixer()` hook (owns the project-document JSON + `actions`/`selection`); playhead is callback-driven (`currentMs`/`onSeek`) — no Web Audio inside. See [AudioMixer](#audiomixer) for the full signature + example. |
 | `PluginGrid` | Grid of plugins / extensions / addons. |
 | `Pipeline` | CI / data-pipeline step visualisation. |
 | `QuickStart` | Numbered "get started in N steps" panel. |

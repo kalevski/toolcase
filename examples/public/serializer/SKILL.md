@@ -58,6 +58,17 @@ interface FieldType {
 - `default` is applied on decode when the field is absent. `null` is used internally if `default` is undefined.
 - `'repeated'` ⇒ field is encoded as `T[]`.
 
+### `enum(name, values)`
+
+Register a named enum once and reference it by `name` from multiple message types (see [Composite helpers](#composite-helpers)).
+
+```ts
+serializer.enum(name: string, values: string[] | Record<string, number>): void
+```
+
+- `values` accepts either `string[]` (auto-numbered from 0) or `Record<string, number>` (explicit values).
+- Throws `Serializer: enum name=<name> already defined` if an enum (or any nested type) with that name already exists — registration is one-shot.
+
 ### `encode(key, message): Uint8Array`
 
 ```ts
@@ -84,6 +95,8 @@ Returns a `protobufjs` `Message` instance (object-like; spread or `.toJSON()` to
 
 Pre-encode validation. Returns `null` on success or a human-readable field-level error string on failure. Use to surface field errors before paying for the encode.
 
+Throws `Serializer: type key=<key> is not defined. known types: [...]` if `key` was never defined — the unknown-key case is a thrown error, not a returned validation string.
+
 ```ts
 const err = serializer.validate('Player', payload)
 if (err !== null) throw new Error(`bad payload: ${err}`)
@@ -108,10 +121,14 @@ Runtime introspection — list every defined type, or get the field metadata for
 
 ```ts
 serializer.types()              // → ['Player', 'Inventory']
-serializer.fields('Player')     // → [{ key: 'id', type: 'string', rule: 'required', default: null }, …]
+serializer.fields('Player')     // → [{ key: 'id', type: 'string', rule: 'optional', default: null }, …]
 ```
 
-### Versioning — `version()`, `migrate()`, `encodeVersioned()`, `decodeVersioned()`
+- `fields()` reflects the **protobuf-stored** options, which may differ from the input passed to `define()`. A field defined without a `default` reflects back as `default: null` (the value `define()` stores internally); a field defined `'required'` reflects back as `rule: 'optional'`.
+- Map fields are reported with `rule: 'optional'` (protobuf has no rule concept for maps) and `type` set to the map's value type; the `default` key is absent (`undefined`).
+- `fields(key)` throws `Serializer: type key=<key> is not defined. known types: [...]` if `key` was never defined.
+
+### Versioning — `version()`, `getVersion()`, `migrate()`, `encodeVersioned()`, `decodeVersioned()`
 
 Stamps a 2-byte version header (`major`, `minor`) onto encoded frames and dispatches per-type migrations on decode when the frame is older than current. Both `major` and `minor` are byte-sized (0–255).
 
@@ -214,6 +231,8 @@ s.define('Person', [
 ```
 
 `ENUM(values)` accepts either `string[]` (auto-numbered from 0) or `Record<string, number>` (explicit values, useful for proto-compat).
+
+> Note: `MAP(keyType, valueType)` and `PACKED_ARRAY(type)` type their arguments as plain `string`, not as a `FieldType` union. Passing `F.STRING`, `F.INT32`, etc. works because those constants are themselves string literals — the raw strings (`'string'`, `'uint32'`) are equally valid.
 
 For shared enums across multiple message types, register once with `s.enum(name, values)` then reference by name:
 
@@ -409,7 +428,7 @@ ws.addEventListener('message', e => {
 Memoize a heavy decode of the same buffer (same hex hash → same parsed entity):
 
 ```ts
-import { Cache, bufferToHex } from '@toolcase/base'
+import { Cache, bufferToHex, hexToBuffer } from '@toolcase/base'
 
 const decodeCache = new Cache(async (hex: string) => {
     return serializer.decode('Snapshot', hexToBuffer(hex))

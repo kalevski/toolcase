@@ -88,11 +88,11 @@ userCache.invalidate('42')
 Min-heap. Smallest priority dequeues first.
 
 ```ts
-new PriorityQueue<T>(priorityFn: (node: T) => number, uniqueFn?: (node: T) => string | null)
+new PriorityQueue<T>(priorityFn: (node: T) => number, uniqueFn?: (node: T) => string)
 ```
 
 - `length: number` — read-only count.
-- `enqueue(value: T): true` — throws if `value === undefined`.
+- `enqueue(value: T): boolean` — returns `true`; throws if `value === undefined`.
 - `dequeue(): T | null` — remove + return root (lowest priority).
 - `pop(): T | null` — remove last raw element (no heap restoration).
 - `has(value: T): boolean | null` — only when `uniqueFn` provided; else `null`.
@@ -502,27 +502,44 @@ formatByteSize(1536) // "1.5 KB"
 
 ### JSONSchema
 
-Schema-driven validator. Throws on first violation.
+Schema-driven validator. `validate()` returns a boolean and accumulates issues — it does **not** throw on a validation failure (it only throws for a structurally invalid *schema*).
 
 ```ts
-new JSONSchema(schema: Schema)
-
-interface Schema {
-    type: string                          // built-ins listed below
-    required?: boolean
-    properties?: Record<string, Schema>   // for type: 'object'
-    items?: Partial<Schema>               // for type: 'array'
-    flexible?: boolean                    // for type: 'object'; allow extra keys
-}
+new JSONSchema(schema: Schema, customValidators?: Record<string, ValidationFn>)
 ```
 
-- `validate(data): void` — throws `Error` with `property=...` context on failure.
-- `register(type, validationFn)` — add custom type. Throws if type already registered. `validationFn(propertyName, schema, data)`.
+The optional 2nd argument registers extra type validators up front (same as calling `register()` for each).
+
+`Schema` is a discriminated union on `type` (not a single flat shape):
+
+```ts
+type Schema =
+    | { type: PrimitiveTypeName; required?: boolean }                                   // primitives
+    | { type: 'object'; required?: boolean; flexible?: boolean; properties?: Record<string, Schema> }
+    | { type: 'array';  required?: boolean; items?: Schema }
+    | { type: string; required?: boolean; flexible?: boolean; properties?: Record<string, Schema>; items?: Schema }  // custom
+
+type ValidationFn = (
+    propertyName: string | null,
+    schema: RawSchema,
+    data: any,
+    issues: ValidationIssue[]
+) => void
+
+interface ValidationIssue { path: string; message: string }
+interface ValidationError { issues: ValidationIssue[] }
+```
+
+> Note: `Schema`, `ValidationFn`, `ValidationError`, and `ValidationIssue` are **not** re-exported from `@toolcase/base` — `import type { Schema }` will fail. Annotate inline or pass the literal directly to the constructor.
+
+- `validate(data): boolean` — `true` when `data` passes; `false` otherwise (collecting issues). Throws only when the *schema* itself is malformed.
+- `getLatestError(): ValidationError | null` — the issues from the last `validate()` call (`null` when the last call passed).
+- `register(type, validationFn)` — add a custom type. Throws if the type is already registered. The validator signature is `(propertyName, schema, data, issues)` — push `{ path, message }` onto `issues` to report a problem.
 
 Built-in types:
 - Core: `string`, `boolean`, `number`, `integer`, `object`, `array`
 - `email` — RFC-ish email regex
-- `username` — `^[A-z][A-z0-9-_]{3,23}$`
+- `username` — `^[A-Za-z][A-Za-z0-9_-]{2,22}$` (starts with a letter; 3–23 chars total)
 - `password` — must contain lower + upper + digit + one of `!@#$%`, length 8–24
 - `url` — `https?://...`
 - `uuid` — RFC 4122 v1–v5
@@ -548,7 +565,10 @@ const schema = new JSONSchema({
         tags: { type: 'array', items: { type: 'string' } }
     }
 })
-schema.validate({ name: 'a', tags: ['x'] })
+
+if (!schema.validate({ name: 'a', tags: ['x'] })) {
+    console.error(schema.getLatestError()?.issues)  // [{ path, message }, ...]
+}
 ```
 
 ---
@@ -582,6 +602,8 @@ Static palette (uppercase keys, hex strings): `RED PINK PURPLE DEEP_PURPLE INDIG
 - `Color.getHex(name): string | null` — name is lowercased palette key (e.g. `'red'`, `'deep_purple'`); returns `null` if unknown.
 - `Color.toNumber(name): number` — hex parsed as integer (`0` if unknown).
 - `Color.getRandomHex(): string` — random palette entry.
+
+> The `ColorType` union also type-accepts `'white'`, `'brown'`, `'grey'`, `'blue_grey'`, and `'black'`, but those have no palette entry — `getHex` resolves them to `null` and `toNumber` to `0`.
 
 ```ts
 Color.getHex('teal')         // '#009688'
@@ -881,9 +903,10 @@ const createUser = new JSONSchema({
 })
 
 async function POST(req: Request) {
-    try { createUser.validate(await req.json()) }
-    catch (err: any) {
-        const e = new HTTP.RESTError(HTTP.Status.BAD_REQUEST, err.message)
+    if (!createUser.validate(await req.json())) {
+        const issues = createUser.getLatestError()?.issues ?? []
+        const message = issues.map(i => `${i.path}: ${i.message}`).join('; ')
+        const e = new HTTP.RESTError(HTTP.Status.BAD_REQUEST, message)
         return Response.json(e, { status: e.status })
     }
     /* ... */
@@ -1004,6 +1027,8 @@ const roundTrip = bufferToHex(bytes) === sessionId
 
 ### Env-driven config (Node)
 
+> Requires the sibling packages `@toolcase/node` (for `env`) and `@toolcase/logging` — neither ships in `@toolcase/base`.
+
 ```ts
 import { env } from '@toolcase/node'
 import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
@@ -1020,4 +1045,4 @@ const debug   = env('DEBUG', false, 'boolean')
 
 - Package is `sideEffects: false` — tree-shakable.
 - Targets `node >= 18`; uses `globalThis.crypto` (Node 19+ exposes it globally; in Node 18 import `crypto.webcrypto` and assign).
-- All public APIs are typed. Browser bundle is pure ESM/CJS dual; subpath `/node` is Node-only.
+- All public APIs are typed. The package ships a single ESM/CJS dual entry point (`.`) — there is no `/node` subpath.

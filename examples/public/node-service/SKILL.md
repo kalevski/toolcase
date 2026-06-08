@@ -1,6 +1,6 @@
 ---
 name: node-service
-description: Use when scaffolding OR modifying any Node.js + TypeScript backend (HTTP service, worker, real-time server) — both greenfield projects and changes to existing ones. Defines workspace layout, layering rules (routers → services → repositories → db), tsyringe DI conventions, Fastify wrapper, typed env loader, raw-SQL repository pattern (no ORM, no query builder) over either `pg` (Postgres) or native `node:sqlite`, domain errors, transactions, optional Rivalis real-time integration, and `@toolcase/serializer` binary wire format. Apply when creating a new backend project, adding/changing a domain (table + repo + service + router), adding/modifying an HTTP route, refactoring a layer, wiring auth, introducing real-time rooms, or touching env/boot/DI in an existing service. Trigger on any edit inside `services/<name>/` or `workers/<name>/` (or equivalent backend project directories).
+description: Use when scaffolding OR modifying any Node.js + TypeScript backend (HTTP service, worker, real-time server) — both greenfield projects and changes to existing ones. Defines workspace layout, layering rules (routers → services → repositories → db), tsyringe DI conventions, Fastify wrapper, typed env loader, raw-SQL repository pattern (no ORM, no query builder) over either `pg` (Postgres) or native `node:sqlite`, domain errors, transactions, optional Rivalis real-time integration, and `@toolcase/serializer` binary wire format. Apply when creating a new backend project, adding/changing a domain (table + repo + service + router), adding/modifying an HTTP route, refactoring a layer, wiring auth, introducing real-time rooms, or touching env/boot/DI in an existing service. Trigger on any edit inside `services/<name>/` or `workers/<name>/` (or equivalent backend project directories). Scope boundary — this skill owns project structure, layering, DI, and boot wiring; for the exact `@toolcase/node` API surface (method signatures of `BaseRepository`, `HttpServer`, `RESTRouteHandler`, `KVService`, `env()`, etc.) use the `node` skill instead. (Vice-versa: the `node` skill documents the library API; when the question is where code lives, how layers depend on each other, or how a service boots, come here.)
 ---
 
 # node-service — Architecture Reference
@@ -15,7 +15,7 @@ Stack baseline:
 - Node 20+, ESM (`"type": "module"`), TypeScript `strict`.
 - `fastify` v5 + `@fastify/cors` for HTTP.
 - `tsyringe` v4 + `reflect-metadata` for DI (constructor injection).
-- `tsup` → `dist/` single bundled ESM entry. SWC backend.
+- `tsup` (SWC transform) → single bundled ESM entry in `dist/`.
 - Database via **raw SQL** — pick one driver: `pg` (`Pool`) for PostgreSQL, or native `node:sqlite` (`DatabaseSync`) for SQLite. Repositories built on `@toolcase/node` `BaseRepository` (engine-agnostic — you implement the verbs with hand-written parameterized SQL). **No ORM** (no Prisma, TypeORM, Sequelize, Drizzle) and **no query builder** (no Kysely, Knex).
 - Schema migrations **out-of-tree** (e.g. goose against `<repo>/migrations/<db>/`). Never inside the project.
 - One process = one HTTP server + one DB pool + at most one Rivalis instance.
@@ -255,7 +255,7 @@ export const PG_POOL_MAX = env('PG_POOL_MAX', 10, 'number')
 // export const WS_TICKET_SECRET = env('WS_TICKET_SECRET', '')
 ```
 
-`env(key, default, type?)`: omitted `type` defaults to `'string'`. Pass `'number'` or `'boolean'` for typed parsing. With a `null` default, the helper returns `T | null` for that type.
+`env(key, default, type?)`: omitted `type` defaults to `'string'`. Pass `'number'` or `'boolean'` for typed parsing. A `null` default is only overloaded for `'number'` and `'boolean'` (returns `number | null` / `boolean | null`); there is no `null`-default overload for `'string'`. To express an optional string, call `env(key)` with no default — the no-default overload returns `string | null`.
 
 `.env.example` mirrors every key — empty for secrets, sensible defaults for tunables. Commit it.
 
@@ -758,6 +758,10 @@ export class Realtime {
     constructor(@inject(Http) private http: Http) {}
 
     async init(): Promise<void> {
+        // NOTE: `this.http.httpServer` only exists in the same-port `http.ts` shape — the
+        // `serverFactory` variant in Recipes → "Real-time on the same port" exposes the raw
+        // `http.Server`. The default `http.ts` contract above exposes only `this.server`
+        // (the FastifyInstance), not `httpServer`. Switch `http.ts` to the same-port shape first.
         this.rivalis = new Rivalis<ActorData>({
             transports: [new Transports.WSTransport(
                 { server: this.http.httpServer, path: '/realtime' },
@@ -841,6 +845,8 @@ public logger: Logger = logging.getLogger('UserService')
 ```
 
 Configure level + reporters once at boot if defaults aren't enough — in `index.ts` before resolving services. No `console.log` in production paths. Pass `Error` instances to `logger.error('context', error)`, not stringified.
+
+**`warning` vs `warn` mismatch when wiring a `@toolcase/logging` logger into `@toolcase/node`.** `@toolcase/logging`'s `Logger` exposes `warning(...)` — there is no `.warn`. But `@toolcase/node`'s `BaseRepository` (slow-query log) and `HttpServer` call `logger.warn?.(...)`. Passing a raw `@toolcase/logging` logger as the repository/server `logger` option means every `warn` call no-ops silently (warnings drop). Adapt the surface when wiring: pass an object that maps `warn` → the logging logger's `warning` (e.g. `{ ...logger, warn: (...a) => logger.warning(...a) }`), or a thin wrapper exposing `warn`/`debug`/`error`. Don't assume the two `.warn`/`.warning` names line up.
 
 ### Env loading
 
