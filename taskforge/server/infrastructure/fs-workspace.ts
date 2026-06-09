@@ -334,7 +334,7 @@ export async function reconcileTasks(project: string): Promise<void> {
     const ids = await listTaskFiles(project)
     await Promise.all(
         ids.map(async (id) => {
-            let mtimeMs = 0
+            let mtimeMs: number
             try {
                 mtimeMs = Math.floor((await fs.stat(resolveWithin(projectTasksDir(project), id))).mtimeMs)
             } catch {

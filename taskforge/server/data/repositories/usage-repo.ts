@@ -22,7 +22,7 @@ export function latest(): UsageSnapshot | null {
         'SELECT fetched_at, note, raw, entries FROM usage_snapshot ORDER BY id DESC LIMIT 1',
     )
     if (!r) return null
-    let entries: UsageSnapshot['entries'] = []
+    let entries: UsageSnapshot['entries']
     try {
         entries = JSON.parse(r.entries)
     } catch {
