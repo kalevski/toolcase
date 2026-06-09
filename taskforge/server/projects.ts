@@ -5,16 +5,19 @@ import {
     listProjects,
     listTaskFiles,
     readCompleted,
+    removeCompleted,
     readTaskFile,
     parseTask,
+    updateTaskStatus,
     listKnowledgeFiles,
     readKnowledgeFile,
     extractTitle,
     extractSummary,
 } from './fs-workspace'
-import { readTelemetry } from './logs'
+import { readTelemetry, clearTelemetry } from './logs'
 import { engine } from './execution-manager'
 import { readProjectMeta } from './provision'
+import { slog } from './server-log'
 import type { KnowledgeDoc, ProjectNavItem, ProjectSummary, TaskInfo } from './types'
 
 export async function getTasks(project: string): Promise<TaskInfo[]> {
@@ -63,10 +66,34 @@ export async function getTasks(project: string): Promise<TaskInfo[]> {
             lastElapsed: tele?.elapsed,
             lastModel: tele?.model,
             lastCommit: tele?.commit,
-            lastError: status === 'error' ? tele?.error : undefined,
+            // Prefer live telemetry; fall back to the error persisted on the task
+            // file (telemetry rotates/prunes, the file copy is durable).
+            lastError: status === 'error' ? (tele?.error ?? parsed.error) : undefined,
         })
     }
     return out
+}
+
+/**
+ * Move every task currently in the `error` state back to `pending`: reopen its
+ * header (clearing the persisted error), and drop its `.status` + telemetry
+ * records so nothing pins it back to `error`. Returns the moved ids and the
+ * refreshed task list. Callers must ensure no run holds the lock.
+ */
+export async function resetErrorTasksToPending(
+    project: string,
+): Promise<{ moved: string[]; tasks: TaskInfo[] }> {
+    const tasks = await getTasks(project)
+    const moved = tasks.filter((t) => t.status === 'error').map((t) => t.id)
+    if (moved.length === 0) {
+        slog('info', 'tasks', `reset-errors: nothing to move`, { project })
+        return { moved, tasks }
+    }
+    await Promise.all(moved.map((id) => updateTaskStatus(project, id, 'open').catch(() => {})))
+    await removeCompleted(project, moved)
+    await clearTelemetry(project, moved)
+    slog('info', 'tasks', `reset-errors: moved ${moved.length} task(s) to pending`, { project, moved })
+    return { moved, tasks: await getTasks(project) }
 }
 
 /** Knowledge docs for a project (index.md first), titled + summarized from each file. */

@@ -10,6 +10,7 @@ import {
     sessionCookieOptions,
     verifyStateToken,
 } from '@/server/auth'
+import { config } from '@/server/config'
 import { resolveOnLogin } from '@/server/roles'
 
 export const runtime = 'nodejs'
@@ -21,8 +22,10 @@ export async function GET(req: NextRequest) {
     const state = url.searchParams.get('state')
     const cookieState = req.cookies.get(STATE_COOKIE)?.value
 
+    const base = config.publicOrigin || req.url
+
     const loginError = (reason: string) => {
-        const res = NextResponse.redirect(new URL(`/login?error=${reason}`, req.url))
+        const res = NextResponse.redirect(new URL(`/login?error=${reason}`, base))
         res.cookies.set(STATE_COOKIE, '', clearedCookieOptions())
         return res
     }
@@ -43,7 +46,7 @@ export async function GET(req: NextRequest) {
         const user = await resolveOnLogin(profile)
         const session = makeSessionToken(profile, user.role)
 
-        const res = NextResponse.redirect(new URL('/', req.url))
+        const res = NextResponse.redirect(new URL('/', base))
         res.cookies.set(SESSION_COOKIE, session, sessionCookieOptions())
         res.cookies.set(STATE_COOKIE, '', clearedCookieOptions())
         return res

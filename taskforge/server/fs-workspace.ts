@@ -153,6 +153,8 @@ export interface ParsedTask {
     status: TaskStatus
     severity?: string
     project?: string
+    /** Last failure recorded onto the task file when it errored (durable; survives telemetry pruning). */
+    error?: string
 }
 
 export function parseTask(content: string, id: string): ParsedTask {
@@ -160,11 +162,13 @@ export function parseTask(content: string, id: string): ParsedTask {
     const status = (extractField(content, 'status')?.toLowerCase() as TaskStatus) || 'open'
     const severity = facet(content, id, 'severity', 'priority')
     const project = facet(content, id, 'project', 'tags')
+    const error = extractField(content, 'error')
     return {
         title,
         status: status === 'done' || status === 'error' ? status : 'open',
         severity,
         project,
+        error: error || undefined,
     }
 }
 
@@ -252,9 +256,56 @@ function setStatusHeader(content: string, status: TaskStatus): string {
     return `**Status:** ${status}\n\n` + content
 }
 
-export async function updateTaskStatus(project: string, id: string, status: TaskStatus): Promise<void> {
+/** Collapse a raw error to a single redacted, truncated header line. */
+function errorHeaderLine(error: string): string {
+    const oneLine = error.replace(/\s+/g, ' ').trim()
+    const capped = oneLine.length > 300 ? oneLine.slice(0, 297).trimEnd() + '…' : oneLine
+    return capped
+}
+
+/**
+ * Insert/replace (or, when `error` is null, remove) the `**Error:**` header,
+ * placed right after the `**Status:**` line so the failure travels with the task.
+ */
+function setErrorHeader(content: string, error: string | null): string {
+    const re = /^\s*\*{0,2}error\*{0,2}\s*:\s*.*$/im
+    if (error === null) {
+        // Drop the line entirely (and a trailing blank left behind).
+        return content.replace(/(?:^|\n)\s*\*{0,2}error\*{0,2}\s*:\s*.*(?=\n|$)/i, '')
+    }
+    const line = `**Error:** ${errorHeaderLine(error)}`
+    if (re.test(content)) {
+        return content.replace(re, line)
+    }
+    // Anchor after the status header when present, else after the H1, else prepend.
+    const statusRe = /^\s*\*{0,2}status\*{0,2}\s*:\s*\*{0,2}\s*(?:open|done|error)\s*\*{0,2}\s*$/im
+    const sm = content.match(statusRe)
+    if (sm && sm.index !== undefined) {
+        const insertAt = sm.index + sm[0].length
+        return content.slice(0, insertAt) + `\n${line}` + content.slice(insertAt)
+    }
+    const h1 = content.match(/^#\s+.+$/m)
+    if (h1 && h1.index !== undefined) {
+        const insertAt = h1.index + h1[0].length
+        return content.slice(0, insertAt) + `\n\n${line}` + content.slice(insertAt)
+    }
+    return `${line}\n\n` + content
+}
+
+/**
+ * Update a task's `**Status:**` header. When moving to `error` you may pass the
+ * failure text to persist alongside it; any other status clears a stale error.
+ */
+export async function updateTaskStatus(
+    project: string,
+    id: string,
+    status: TaskStatus,
+    error?: string,
+): Promise<void> {
     const content = await readTaskFile(project, id)
-    await writeTaskFile(project, id, setStatusHeader(content, status))
+    let next = setStatusHeader(content, status)
+    next = setErrorHeader(next, status === 'error' && error ? error : null)
+    await writeTaskFile(project, id, next)
 }
 
 // ── .status (completion ledger) ───────────────────────────────────────────────

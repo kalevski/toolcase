@@ -31,6 +31,7 @@ import { updateKnowledge } from './knowledge'
 import * as git from './git'
 import { isClean, dirtyFiles } from './git'
 import { RunLogger } from './logs'
+import { slog } from './server-log'
 import { isLimitError, isTransientError, computeLimitSleep } from './limit'
 import { notifyBatch } from './slack'
 import type {
@@ -223,9 +224,18 @@ class ExecutionManager extends EventEmitter {
         run.logger = new RunLogger(repo)
         this.runs.set(repo, run)
         this.emitEvent(repo, { type: 'state', state: 'RUNNING' })
+        slog('info', 'engine', `run started`, {
+            project: repo,
+            model: run.model,
+            dryRun: !!opts.dryRun,
+            reset: !!opts.reset,
+            filter: opts.filter,
+            resetTasks: opts.resetTasks,
+        })
 
         // run the loop without blocking the request
         void this.runLoop(repo, opts).catch((err) => {
+            slog('error', 'engine', `run loop crashed`, { project: repo, error: err?.message ?? String(err) })
             this.log(repo, 'error', `engine error: ${err?.message ?? err}`, null)
         })
 
@@ -235,6 +245,7 @@ class ExecutionManager extends EventEmitter {
     stopAfterCurrent(repo: string): RunSnapshot {
         const r = this.get(repo)
         if (r.state === 'RUNNING' || r.state === 'SLEEPING') {
+            slog('info', 'engine', `graceful stop requested`, { project: repo, current: r.current })
             r.stopRequested = true
             this.setState(repo, 'STOPPING')
             // a graceful stop while sleeping wakes the sleep so the run can end
@@ -245,6 +256,7 @@ class ExecutionManager extends EventEmitter {
 
     async force(repo: string): Promise<RunSnapshot> {
         const r = this.get(repo)
+        slog('warn', 'engine', `force stop requested`, { project: repo, current: r.current, pid: r.child?.pid })
         r.forceRequested = true
         // kill the process group (detached:true → negative pid)
         if (r.child && r.child.pid) {
@@ -466,6 +478,13 @@ class ExecutionManager extends EventEmitter {
                 )
                 r.done++
                 r.completedThisRun.push(rel)
+                slog('info', 'engine', `task done: ${rel}`, {
+                    project: repo,
+                    elapsed,
+                    commit: commitSha,
+                    done: r.done,
+                    total: r.total,
+                })
                 this.emitEvent(repo, { type: 'task:done', taskId: rel, commit: commitSha })
                 this.progress(repo)
                 this.emitEvent(repo, { type: 'git' })
@@ -492,6 +511,12 @@ class ExecutionManager extends EventEmitter {
             r.logger?.close(),
         ])
 
+        slog(r.error > 0 ? 'warn' : 'info', 'engine', `run finalized: ${reason}`, {
+            project: repo,
+            done: r.done,
+            error: r.error,
+            total: r.total,
+        })
         if (reason === 'completed') {
             this.emitEvent(repo, { type: 'completed', done: r.done, error: r.error, total: r.total })
         } else {
@@ -663,10 +688,16 @@ class ExecutionManager extends EventEmitter {
         error: string,
     ): Promise<void> {
         const r = this.get(repo)
-        await updateTaskStatus(repo, rel, 'error').catch(() => {})
+        await updateTaskStatus(repo, rel, 'error', error).catch(() => {})
         await r.logger!.telemetry(this.telem(rel, 'error', elapsed, model, error))
         r.error++
         r.erroredThisRun.push(rel)
+        slog('error', 'engine', `task errored: ${rel}`, {
+            project: repo,
+            elapsed,
+            model: resolveModel(model),
+            error: error.slice(0, 300),
+        })
         this.emitEvent(repo, { type: 'task:error', taskId: rel, error: error.slice(0, 200) })
         this.progress(repo)
     }

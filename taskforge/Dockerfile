@@ -28,6 +28,13 @@ RUN apt-get update \
     && npm i -g @anthropic-ai/claude-code \
     && npm cache clean --force
 
+# run-docker.sh starts the container with `--user $(id -u)` and bind-mounts
+# /workspace from the host, so cloned repos are owned by an arbitrary uid with no
+# passwd entry. Without this, every git op fails with "detected dubious ownership".
+# A SYSTEM-level config (/etc/gitconfig) is read regardless of uid/$HOME, unlike
+# `git config --global` which needs a writable home the runtime user lacks.
+RUN git config --system --add safe.directory '*'
+
 # non-root user that owns /workspace
 RUN useradd -m -u 10001 app \
     && mkdir -p /workspace \

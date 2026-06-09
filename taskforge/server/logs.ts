@@ -146,3 +146,42 @@ export async function readTelemetry(project: string): Promise<Map<string, Teleme
     }
     return out
 }
+
+/**
+ * Drop every telemetry record for the given task ids across all rotated files.
+ * Used when a task is moved back to "pending" so its stale error/done outcome no
+ * longer drives the queue status. Rewrites each affected file (deletes if empty).
+ */
+export async function clearTelemetry(project: string, ids: string[]): Promise<void> {
+    if (ids.length === 0) return
+    const drop = new Set(ids)
+    let entries: string[]
+    try {
+        entries = await fs.readdir(logsDir(project))
+    } catch {
+        return
+    }
+    const files = entries.filter((n) => /^telemetry-.*\.jsonl$/.test(n))
+    await Promise.all(
+        files.map(async (name) => {
+            const full = path.join(logsDir(project), name)
+            const raw = await fs.readFile(full, 'utf8').catch(() => null)
+            if (raw === null) return
+            const kept: string[] = []
+            for (const line of raw.split('\n')) {
+                if (!line.trim()) continue
+                try {
+                    const rec = JSON.parse(line) as TelemetryRecord
+                    if (!drop.has(rec.task)) kept.push(line)
+                } catch {
+                    kept.push(line) // preserve malformed lines untouched
+                }
+            }
+            if (kept.length === 0) {
+                await fs.unlink(full).catch(() => {})
+            } else {
+                await fs.writeFile(full, kept.join('\n') + '\n', 'utf8')
+            }
+        }),
+    )
+}

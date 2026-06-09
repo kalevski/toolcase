@@ -4,6 +4,7 @@ import { generateTasks } from '@/server/generate'
 import { getTasks } from '@/server/projects'
 import { config } from '@/server/config'
 import { projectExists, UnsafePathError } from '@/server/fs-workspace'
+import { slog } from '@/server/server-log'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -24,7 +25,12 @@ export async function POST(req: Request, { params }: { params: { project: string
         const model = body.model || config.defaultModel
         if (!config.modelCatalog.includes(model)) return error(`model not in catalog: ${model}`, 400)
 
+        slog('info', 'api', `POST tasks/generate`, { project: params.project, model, by: auth.session.login })
         const result = await generateTasks(params.project, body.prompt.trim(), model)
+        slog('info', 'api', `generated ${result.created.length} task(s)`, {
+            project: params.project,
+            timedOut: result.timedOut,
+        })
         const tasks = await getTasks(params.project)
         return json({ created: result.created, timedOut: result.timedOut, tasks })
     } catch (e) {

@@ -29,8 +29,20 @@ const STATUS_BADGE: Record<TaskRuntimeStatus, 'secondary' | 'info' | 'success' |
 type Filter = 'all' | TaskRuntimeStatus
 
 export function TasksClient() {
-    const { project, tasks, running, genPrompt, setGenPrompt, genModel, setGenModel, generating, modelOptions, onGenerate, onReRunTask } =
-        useProject()
+    const {
+        project,
+        tasks,
+        running,
+        genPrompt,
+        setGenPrompt,
+        genModel,
+        setGenModel,
+        generating,
+        modelOptions,
+        onGenerate,
+        onReRunTask,
+        onResetErrors,
+    } = useProject()
     const [openTask, setOpenTask] = useState<string | null>(null)
     const [statusFilter, setStatusFilter] = useState<Filter>('all')
 
@@ -93,7 +105,23 @@ export function TasksClient() {
 
     return (
         <div className="tf-stack">
-            <ChipGroup items={chips} onToggle={(id) => setStatusFilter(id as Filter)} />
+            <div
+                className="tf-actions"
+                style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}
+            >
+                <ChipGroup items={chips} onToggle={(id) => setStatusFilter(id as Filter)} />
+                <Button
+                    size="small"
+                    variant="warning"
+                    outline
+                    disabled={running || counts.error === 0}
+                    title={running ? 'Stop the active run first.' : ''}
+                    style={{ marginLeft: 'auto' }}
+                    onClick={onResetErrors}
+                >
+                    Move errors to pending{counts.error > 0 ? ` (${counts.error})` : ''}
+                </Button>
+            </div>
 
             <Table
                 columns={columns}

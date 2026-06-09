@@ -29,7 +29,14 @@ export function middleware(req: NextRequest) {
         return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
     }
 
-    const loginUrl = new URL('/login', req.url)
+    // Behind a reverse proxy, `req.url` carries the internal listen host
+    // (e.g. 0.0.0.0:3000). Rebuild the redirect from the forwarded headers the
+    // proxy sets so the browser is sent to the public origin, not the container.
+    const fwdHost = req.headers.get('x-forwarded-host') ?? req.headers.get('host')
+    const fwdProto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
+    const base = fwdHost ? `${fwdProto}://${fwdHost}` : req.url
+
+    const loginUrl = new URL('/login', base)
     return NextResponse.redirect(loginUrl)
 }
 

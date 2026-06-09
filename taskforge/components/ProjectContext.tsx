@@ -107,6 +107,8 @@ interface ProjectContextValue {
     loadCommits: () => Promise<void>
     onResetToggle: (checked: boolean) => Promise<void>
     onGenerate: () => Promise<void>
+    /** Move every errored task back to pending so the next run retries them. */
+    onResetErrors: () => Promise<void>
     setTasks: React.Dispatch<React.SetStateAction<TaskInfo[]>>
     setKnowledge: React.Dispatch<React.SetStateAction<KnowledgeDoc[]>>
 }
@@ -485,6 +487,33 @@ export function ProjectProvider({
         }
     }, [project, genPrompt, genModel])
 
+    const onResetErrors = useCallback(async () => {
+        const errored = tasks.filter((t) => t.status === 'error')
+        if (errored.length === 0) {
+            toast.info('No errored tasks to move.')
+            return
+        }
+        const ok = await confirm({
+            title: 'Move errored tasks to pending?',
+            body: `Reset ${errored.length} errored task(s) to pending so the next run retries them. Their recorded errors are cleared.`,
+            confirmLabel: 'Move to pending',
+            confirmVariant: 'warning',
+        })
+        if (!ok) return
+        const res = await fetch(`/api/projects/${project}/tasks/reset-errors`, { method: 'POST' })
+        if (res.status === 409) {
+            toast.error('Cannot move tasks while a run is in progress.')
+            return
+        }
+        if (!res.ok) {
+            toast.error('Failed to move errored tasks.')
+            return
+        }
+        const data = await res.json()
+        setTasks(data.tasks)
+        toast.success(`Moved ${data.moved.length} task(s) to pending`)
+    }, [project, tasks, confirm])
+
     const onAddKnowledge = useCallback(async () => {
         if (!knowledgePrompt.trim()) return
         setGeneratingKnowledge(true)
@@ -625,6 +654,7 @@ export function ProjectProvider({
         loadCommits,
         onResetToggle,
         onGenerate,
+        onResetErrors,
         setTasks,
         setKnowledge,
     }

@@ -52,6 +52,21 @@ export const config = {
     githubClientId: required('GITHUB_CLIENT_ID'),
     githubClientSecret: required('GITHUB_CLIENT_SECRET'),
     oauthRedirectUri: required('OAUTH_REDIRECT_URI'),
+    // Public-facing origin (scheme + host[:port]) the browser actually talks to.
+    // Behind a reverse proxy, `req.url` reflects the internal listen address
+    // (e.g. http://0.0.0.0:3000), so app-relative redirects built from it leak
+    // that internal host to the browser. The OAuth redirect URI is the
+    // authoritative public URL (GitHub redirects the browser there), so derive
+    // the origin from it. Override with PUBLIC_ORIGIN if they differ.
+    get publicOrigin(): string {
+        const explicit = process.env.PUBLIC_ORIGIN
+        if (explicit && explicit.trim() !== '') return explicit.trim().replace(/\/+$/, '')
+        try {
+            return new URL(this.oauthRedirectUri).origin
+        } catch {
+            return ''
+        }
+    },
     authSecret: required('AUTH_SECRET'),
     sessionTtl: num('SESSION_TTL', 86400),
     allowedLogins: csv('GITHUB_ALLOWED_LOGINS'),
