@@ -5,10 +5,10 @@
 import 'server-only'
 import crypto from 'node:crypto'
 import { cookies } from 'next/headers'
-import { config } from './config'
-import { getRole } from './roles'
-import { ROLE_RANK, type Role, type SessionPayload } from './types'
-import type { GithubProfile } from './roles'
+import { config } from '@/server/config'
+import { getRole } from '@/server/services/roles'
+import { ROLE_RANK, type Role, type SessionPayload } from '@/server/domain/types'
+import type { GithubProfile } from '@/server/services/roles'
 
 export const SESSION_COOKIE = 'atm_session'
 export const STATE_COOKIE = 'atm_oauth_state'
@@ -127,6 +127,7 @@ export function buildAuthorizeUrl(state: string): string {
 export async function exchangeCodeForToken(code: string): Promise<string> {
     const res = await fetch('https://github.com/login/oauth/access_token', {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
             client_id: config.githubClientId,
@@ -143,6 +144,7 @@ export async function exchangeCodeForToken(code: string): Promise<string> {
 
 export async function fetchGithubProfile(token: string): Promise<GithubProfile> {
     const res = await fetch('https://api.github.com/user', {
+        cache: 'no-store',
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
     })
     if (!res.ok) throw new Error(`GitHub profile fetch failed: ${res.status}`)
@@ -164,7 +166,10 @@ export async function checkAllowlist(profile: GithubProfile, token: string): Pro
         try {
             const res = await fetch(
                 `https://api.github.com/user/memberships/orgs/${encodeURIComponent(config.allowedOrg)}`,
-                { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } },
+                {
+                    cache: 'no-store',
+                    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
+                },
             )
             if (!res.ok) return false
             const m = (await res.json()) as { state?: string }

@@ -1,6 +1,6 @@
-import { guard, json, error } from '@/server/http'
-import { projectExists, UnsafePathError } from '@/server/fs-workspace'
-import { deleteProject, ProjectLockedError } from '@/server/provision'
+import { guard, json, error } from '@/server/web/http'
+import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { deleteProject, ProjectLockedError } from '@/server/services/provision'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

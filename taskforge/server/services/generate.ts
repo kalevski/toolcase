@@ -4,9 +4,9 @@
 import 'server-only'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { config } from './config'
-import { runAgentOnce } from './agent'
-import { listTaskFiles, projectTasksDir } from './fs-workspace'
+import { config } from '@/server/config'
+import { runAgentOnce } from '@/server/infrastructure/agent'
+import { listTaskFiles, projectTasksDir } from '@/server/infrastructure/fs-workspace'
 
 async function skillBody(): Promise<string> {
     try {

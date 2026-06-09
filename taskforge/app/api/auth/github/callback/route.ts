@@ -9,9 +9,9 @@ import {
     makeSessionToken,
     sessionCookieOptions,
     verifyStateToken,
-} from '@/server/auth'
+} from '@/server/services/auth'
 import { config } from '@/server/config'
-import { resolveOnLogin } from '@/server/roles'
+import { resolveOnLogin } from '@/server/services/roles'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

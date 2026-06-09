@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Drawer, Spinner, Badge, Button, Text, Divider } from '@toolcase/react-components'
-import type { TaskInfo, TaskRuntimeStatus } from '@/server/types'
+import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 
 const STATUS_BADGE: Record<TaskRuntimeStatus, 'secondary' | 'info' | 'success' | 'danger'> = {
     pending: 'secondary',

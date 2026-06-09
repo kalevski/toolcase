@@ -6,8 +6,10 @@
 import 'server-only'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { config } from './config'
-import type { SkillSummary, TaskStatus } from './types'
+import { config } from '@/server/config'
+import * as taskRepo from '@/server/data/repositories/task-repo'
+import * as warmRepo from '@/server/data/repositories/warm-session-repo'
+import type { SkillSummary, TaskStatus } from '@/server/domain/types'
 
 // ── path safety ──────────────────────────────────────────────────────────────
 
@@ -293,8 +295,10 @@ function setErrorHeader(content: string, error: string | null): string {
 }
 
 /**
- * Update a task's `**Status:**` header. When moving to `error` you may pass the
- * failure text to persist alongside it; any other status clears a stale error.
+ * Update a task's runtime status. The DB row is authoritative for the UI; the
+ * `**Status:**`/`**Error:**` markdown headers are also rewritten (best-effort) so
+ * the agent and a human reading `tasks/*.md` see the same truth. When moving to
+ * `error` you may pass the failure text to persist; any other status clears it.
  */
 export async function updateTaskStatus(
     project: string,
@@ -302,66 +306,69 @@ export async function updateTaskStatus(
     status: TaskStatus,
     error?: string,
 ): Promise<void> {
-    const content = await readTaskFile(project, id)
-    let next = setStatusHeader(content, status)
-    next = setErrorHeader(next, status === 'error' && error ? error : null)
-    await writeTaskFile(project, id, next)
+    taskRepo.setStatus(project, id, status, error)
+    try {
+        const content = await readTaskFile(project, id)
+        let next = setStatusHeader(content, status)
+        next = setErrorHeader(next, status === 'error' && error ? error : null)
+        await writeTaskFile(project, id, next)
+        // The header rewrite bumps mtime; record it so the next reconcile does not
+        // re-parse this file purely because we just touched it.
+        try {
+            const stat = await fs.stat(resolveWithin(projectTasksDir(project), id))
+            taskRepo.touchSyncedMtime(project, id, Math.floor(stat.mtimeMs))
+        } catch {
+            /* ignore */
+        }
+    } catch {
+        /* md header is best-effort; the DB row is the source of truth */
+    }
 }
 
-// ── .status (completion ledger) ───────────────────────────────────────────────
+// ── task reconciliation (markdown files → DB metadata mirror) ──────────────────
+// The markdown body stays on disk (the agent reads it); this keeps the `task`
+// rows in sync with the files so the queue renders from a single query. Status is
+// engine-owned: `syncTask` seeds it on INSERT only and preserves it on UPDATE.
 
-function statusFilePath(project: string): string {
-    return path.join(projectTasksDir(project), '.status')
+export async function reconcileTasks(project: string): Promise<void> {
+    const ids = await listTaskFiles(project)
+    await Promise.all(
+        ids.map(async (id) => {
+            let mtimeMs = 0
+            try {
+                mtimeMs = Math.floor((await fs.stat(resolveWithin(projectTasksDir(project), id))).mtimeMs)
+            } catch {
+                return
+            }
+            if (taskRepo.syncedMtime(project, id) === mtimeMs) return // unchanged since last sync
+            try {
+                const parsed = parseTask(await readTaskFile(project, id), id)
+                taskRepo.syncTask(project, id, parsed, mtimeMs)
+            } catch {
+                /* skip unreadable file */
+            }
+        }),
+    )
+    taskRepo.pruneMissing(project, ids)
 }
+
+// ── completion ledger (DB-backed: task.status = 'done') ────────────────────────
 
 export async function readCompleted(project: string): Promise<Set<string>> {
-    const file = statusFilePath(project)
-    try {
-        const raw = await fs.readFile(file, 'utf8')
-        return new Set(
-            raw.split('\n').flatMap((l) => {
-                const trimmed = l.trim()
-                return trimmed ? [trimmed] : []
-            }),
-        )
-    } catch {
-        return new Set()
-    }
+    return taskRepo.completedIds(project)
 }
 
 export async function appendCompleted(project: string, id: string): Promise<void> {
-    const file = statusFilePath(project)
-    await ensureDir(path.dirname(file))
-    const done = await readCompleted(project)
-    if (done.has(id)) return
-    await fs.appendFile(file, id + '\n', 'utf8')
+    taskRepo.setStatus(project, id, 'done')
 }
 
 export async function clearCompleted(project: string): Promise<void> {
-    const file = statusFilePath(project)
-    try {
-        await fs.unlink(file)
-    } catch {
-        /* already absent */
-    }
+    taskRepo.reopenAllDone(project)
 }
 
-/**
- * Drop specific ids from the completion ledger, leaving every other entry intact.
- * Used to re-run a single finished task without resetting the whole queue. Removes
- * the `.status` file entirely if nothing remains.
- */
+/** Reopen specific finished tasks (re-run one task without disturbing the queue). */
 export async function removeCompleted(project: string, ids: string[]): Promise<void> {
-    if (ids.length === 0) return
-    const drop = new Set(ids)
-    const remaining = [...(await readCompleted(project))].filter((id) => !drop.has(id))
-    const file = statusFilePath(project)
-    if (remaining.length === 0) {
-        await clearCompleted(project)
-        return
-    }
-    await ensureDir(path.dirname(file))
-    await fs.writeFile(file, remaining.join('\n') + '\n', 'utf8')
+    taskRepo.reopen(project, ids)
 }
 
 // ── knowledge docs (project-root knowledge/) ───────────────────────────────────
@@ -441,37 +448,18 @@ export async function readProjectPromptOverride(project: string): Promise<string
     }
 }
 
-// ── warm session marker ───────────────────────────────────────────────────────
-
-const WARM_FILE = '.warm_session'
+// ── warm session marker (DB-backed) ────────────────────────────────────────────
 
 export async function readWarmSession(project: string): Promise<{ sessionId: string; ts: number } | null> {
-    const file = path.join(projectTasksDir(project), WARM_FILE)
-    try {
-        const raw = await fs.readFile(file, 'utf8')
-        const parsed = JSON.parse(raw)
-        if (parsed && typeof parsed.sessionId === 'string' && typeof parsed.ts === 'number') {
-            return parsed
-        }
-    } catch {
-        /* none */
-    }
-    return null
+    return warmRepo.get(project)
 }
 
 export async function writeWarmSession(project: string, sessionId: string, ts: number): Promise<void> {
-    const file = path.join(projectTasksDir(project), WARM_FILE)
-    await ensureDir(path.dirname(file))
-    await fs.writeFile(file, JSON.stringify({ sessionId, ts }), 'utf8')
+    warmRepo.set(project, sessionId, ts)
 }
 
 export async function clearWarmSession(project: string): Promise<void> {
-    const file = path.join(projectTasksDir(project), WARM_FILE)
-    try {
-        await fs.unlink(file)
-    } catch {
-        /* none */
-    }
+    warmRepo.clear(project)
 }
 
 // ── skills ────────────────────────────────────────────────────────────────────

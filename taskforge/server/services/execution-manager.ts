@@ -8,8 +8,8 @@ import { EventEmitter } from 'node:events'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import type { ChildProcess } from 'node:child_process'
-import { config } from './config'
-import { spawnAgent, runAgentOnce, resolveModel } from './agent'
+import { config } from '@/server/config'
+import { spawnAgent, runAgentOnce, resolveModel } from '@/server/infrastructure/agent'
 import {
     listTaskFiles,
     readCompleted,
@@ -26,14 +26,18 @@ import {
     writeWarmSession,
     clearWarmSession,
     knowledgeExists,
-} from './fs-workspace'
-import { updateKnowledge } from './knowledge'
-import * as git from './git'
-import { isClean, dirtyFiles } from './git'
-import { RunLogger } from './logs'
-import { slog } from './server-log'
-import { isLimitError, isTransientError, computeLimitSleep } from './limit'
-import { notifyBatch } from './slack'
+    reconcileTasks,
+} from '@/server/infrastructure/fs-workspace'
+import { updateKnowledge } from '@/server/services/knowledge'
+import * as git from '@/server/infrastructure/git'
+import { isClean, dirtyFiles } from '@/server/infrastructure/git'
+import { RunLogger } from '@/server/infrastructure/logs'
+import { slog } from '@/server/infrastructure/server-log'
+import { isLimitError, isTransientError, computeLimitSleep } from '@/server/domain/limit'
+import { notifyBatch } from '@/server/infrastructure/slack'
+import { refreshUsage } from '@/server/services/usage'
+import { ensureImported } from '@/server/services/migrate-fs'
+import * as runEventRepo from '@/server/data/repositories/run-event-repo'
 import type {
     EngineState,
     RunOptions,
@@ -41,9 +45,21 @@ import type {
     SseEvent,
     TerminalKind,
     TelemetryRecord,
-} from './types'
+} from '@/server/domain/types'
 
 const RING_MAX = 1000
+
+// Milestone events persisted to the durable run-event log (best-effort). Not the
+// high-frequency `log` frames — those stay in the in-memory ring only.
+const PERSIST_EVENTS = new Set<SseEvent['type']>([
+    'task:begin',
+    'task:done',
+    'task:error',
+    'commit',
+    'limit',
+    'completed',
+    'stopped',
+])
 
 interface RepoRun {
     state: EngineState
@@ -148,6 +164,13 @@ class ExecutionManager extends EventEmitter {
         if (event.type === 'log' || event.type === 'task:begin' || event.type === 'commit') {
             r.ring.push(event)
             if (r.ring.length > RING_MAX) r.ring.splice(0, r.ring.length - RING_MAX)
+        }
+        if (PERSIST_EVENTS.has(event.type)) {
+            try {
+                runEventRepo.append(repo, event)
+            } catch {
+                /* durability is best-effort; never block the run */
+            }
         }
         this.emit('event', repo, event)
     }
@@ -290,6 +313,11 @@ class ExecutionManager extends EventEmitter {
 
         let reason = 'completed'
         try {
+            // Ensure legacy filesystem state is imported, then mirror the markdown
+            // task files into the DB before reading/mutating their rows.
+            await ensureImported()
+            await reconcileTasks(repo)
+
             // §6.7 FORCE / reset
             if (opts.reset) {
                 await clearCompleted(repo)
@@ -339,6 +367,7 @@ class ExecutionManager extends EventEmitter {
             let i = 0
             let limitRetries = 0
             let transientRetries = 0
+            let executed = false
 
             while (i < scoped.length) {
                 if (r.forceRequested) {
@@ -357,6 +386,20 @@ class ExecutionManager extends EventEmitter {
                 }
 
                 r.current = rel
+
+                // §usage gate — after each executed task, before starting the next,
+                // pause if usage is at/above the threshold (avoids limit failures).
+                if (executed && config.usageGateEnabled) {
+                    await this.usageGate(repo, rel)
+                    if (r.forceRequested) {
+                        reason = 'force-stopped'
+                        return
+                    }
+                    if (r.stopRequested) {
+                        reason = 'stopped'
+                        return
+                    }
+                }
 
                 // §6.7 DRY_RUN — list the invocation, skip execution, don't touch .status.
                 // Guard runs before the task-file read so dry runs skip the IO entirely.
@@ -378,6 +421,7 @@ class ExecutionManager extends EventEmitter {
                 this.emitEvent(repo, { type: 'task:begin', taskId: rel })
                 await r.logger!.beginTask(rel)
                 const startedAt = Date.now()
+                executed = true
 
                 const outcome = await this.runOne(repo, rel, taskBody, opts.model, preamble, warmSessionId)
                 const elapsed = (Date.now() - startedAt) / 1000
@@ -517,10 +561,11 @@ class ExecutionManager extends EventEmitter {
             error: r.error,
             total: r.total,
         })
+        const runId = r.startedAt ?? 0
         if (reason === 'completed') {
-            this.emitEvent(repo, { type: 'completed', done: r.done, error: r.error, total: r.total })
+            this.emitEvent(repo, { type: 'completed', done: r.done, error: r.error, total: r.total, runId })
         } else {
-            this.emitEvent(repo, { type: 'stopped', reason })
+            this.emitEvent(repo, { type: 'stopped', reason, runId })
         }
         r.state = 'IDLE'
         r.current = null
@@ -783,6 +828,44 @@ class ExecutionManager extends EventEmitter {
             return msg && !res.timedOut ? msg : null
         } catch {
             return null
+        }
+    }
+
+    /**
+     * §Initiative 2 — pre-emptive usage gate. Runs `/usage` (local, no tokens);
+     * while any bucket is at/above the threshold, pause in SLEEPING and re-check
+     * after a poll interval. Fail-open: any error checking usage logs and returns
+     * so a parser/CLI hiccup never wedges the queue. Honors stop/force (the shared
+     * `sleep` resolves early; we re-check the flags each loop).
+     */
+    private async usageGate(repo: string, nextRel: string): Promise<void> {
+        const r = this.get(repo)
+        const threshold = config.usageGateThreshold
+        for (;;) {
+            if (r.stopRequested || r.forceRequested) return
+            let peak: number
+            try {
+                const snap = await refreshUsage(Date.now())
+                peak = snap.entries.reduce((m, e) => Math.max(m, e.percent), 0)
+            } catch (err: any) {
+                this.log(repo, 'comment', `usage check skipped (${err?.message ?? err}) — continuing`, nextRel)
+                return // fail-open
+            }
+            if (peak < threshold) return
+            const pollMs = config.usageGatePollSeconds * 1000
+            const wakeAt = Date.now() + pollMs
+            r.wakeAt = wakeAt
+            this.setState(repo, 'SLEEPING')
+            this.emitEvent(repo, { type: 'limit', wakeAt, taskId: nextRel })
+            this.log(
+                repo,
+                'comment',
+                `usage ${peak}% ≥ ${threshold}% — pausing before ${nextRel}; next check ${new Date(wakeAt).toISOString()}`,
+                nextRel,
+            )
+            slog('info', 'engine', 'usage gate pause', { project: repo, peak, threshold, wakeAt })
+            await this.sleep(repo, pollMs)
+            // loop: re-check stop/force + usage
         }
     }
 

@@ -1,6 +1,6 @@
-import { authorize } from '@/server/auth'
-import { sseResponse } from '@/server/sse'
-import { error } from '@/server/http'
+import { authorize } from '@/server/services/auth'
+import { sseResponse } from '@/server/web/sse'
+import { error } from '@/server/web/http'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

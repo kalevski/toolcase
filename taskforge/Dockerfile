@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # ── build stage ──────────────────────────────────────────────────────────────
-FROM node:20-slim AS builder
+# Node >= 22.5 required for the built-in `node:sqlite` module (stable, flag-free
+# on Node 24). See server/db.ts.
+FROM node:24-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -12,7 +14,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # ── runtime stage ────────────────────────────────────────────────────────────
-FROM node:20-slim AS runner
+FROM node:24-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -46,6 +48,12 @@ COPY --from=builder --chown=app:app /app/.next/static ./.next/static
 COPY --from=builder --chown=app:app /app/public ./public
 # bundled, read-only app-level skills (task-creator, commit-message)
 COPY --from=builder --chown=app:app /app/skills ./skills
+
+# run-docker.sh runs the container as an arbitrary HOST uid (to own the bind-
+# mounted /workspace), NOT the image's `app` user. Next writes its incremental /
+# data cache under /app/.next/cache at runtime, so that dir must be writable by
+# any uid — otherwise every cached response logs `EACCES … mkdir /app/.next/cache`.
+RUN mkdir -p /app/.next/cache && chmod -R 0777 /app/.next/cache
 
 USER app
 EXPOSE 3000

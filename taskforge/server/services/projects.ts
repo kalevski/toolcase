@@ -3,72 +3,61 @@
 import 'server-only'
 import {
     listProjects,
-    listTaskFiles,
-    readCompleted,
+    reconcileTasks,
     removeCompleted,
-    readTaskFile,
-    parseTask,
     updateTaskStatus,
     listKnowledgeFiles,
     readKnowledgeFile,
     extractTitle,
     extractSummary,
-} from './fs-workspace'
-import { readTelemetry, clearTelemetry } from './logs'
-import { engine } from './execution-manager'
-import { readProjectMeta } from './provision'
-import { slog } from './server-log'
-import type { KnowledgeDoc, ProjectNavItem, ProjectSummary, TaskInfo } from './types'
+} from '@/server/infrastructure/fs-workspace'
+import { readTelemetry, clearTelemetry } from '@/server/infrastructure/logs'
+import { engine } from '@/server/services/execution-manager'
+import { readProjectMeta } from '@/server/services/provision'
+import * as taskRepo from '@/server/data/repositories/task-repo'
+import { ensureImported } from '@/server/services/migrate-fs'
+import { slog } from '@/server/infrastructure/server-log'
+import type { KnowledgeDoc, ProjectNavItem, ProjectSummary, TaskInfo } from '@/server/domain/types'
 
 export async function getTasks(project: string): Promise<TaskInfo[]> {
-    const [files, completed, telemetry] = await Promise.all([
-        listTaskFiles(project),
-        readCompleted(project),
+    await ensureImported()
+    // Mirror the markdown files into the DB (cheap when nothing changed), then
+    // render the queue from a single query + telemetry, with no per-file parse.
+    await reconcileTasks(project)
+    const [rows, telemetry] = await Promise.all([
+        Promise.resolve(taskRepo.listTasks(project)),
         readTelemetry(project),
     ])
     const snap = engine.snapshot(project)
 
-    const parsedList = await Promise.all(
-        files.map(async (id) => {
-            try {
-                return { id, parsed: parseTask(await readTaskFile(project, id), id) }
-            } catch {
-                return null
-            }
-        }),
-    )
-
     const out: TaskInfo[] = []
-    for (const item of parsedList) {
-        if (!item) continue
-        const { id, parsed } = item
-        const tele = telemetry.get(id)
+    for (const row of rows) {
+        const tele = telemetry.get(row.id)
 
         let status: TaskInfo['status']
-        if (snap.state === 'RUNNING' && snap.current === id) {
+        if (snap.state === 'RUNNING' && snap.current === row.id) {
             status = 'running'
-        } else if (completed.has(id)) {
+        } else if (row.status === 'done') {
             status = 'done'
         } else if (tele && (tele.status === 'error' || tele.status === 'failed')) {
             status = 'error'
-        } else if (parsed.status === 'error') {
+        } else if (row.status === 'error') {
             status = 'error'
         } else {
             status = 'pending'
         }
 
         out.push({
-            id,
-            title: parsed.title,
+            id: row.id,
+            title: row.title,
             status,
-            severity: parsed.severity,
-            project: parsed.project,
+            severity: row.severity,
+            project: row.project,
             lastElapsed: tele?.elapsed,
             lastModel: tele?.model,
             lastCommit: tele?.commit,
-            // Prefer live telemetry; fall back to the error persisted on the task
-            // file (telemetry rotates/prunes, the file copy is durable).
-            lastError: status === 'error' ? (tele?.error ?? parsed.error) : undefined,
+            // Prefer live telemetry; fall back to the error persisted on the task row.
+            lastError: status === 'error' ? (tele?.error ?? row.error) : undefined,
         })
     }
     return out

@@ -1,5 +1,5 @@
-import { guard, json, error } from '@/server/http'
-import { readTaskFile, parseTask, UnsafePathError } from '@/server/fs-workspace'
+import { guard, json, error } from '@/server/web/http'
+import { readTaskFile, parseTask, UnsafePathError } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

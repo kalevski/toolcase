@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { buildAuthorizeUrl, makeStateToken, STATE_COOKIE, stateCookieOptions } from '@/server/auth'
+import { buildAuthorizeUrl, makeStateToken, STATE_COOKIE, stateCookieOptions } from '@/server/services/auth'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

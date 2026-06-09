@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { Card, Heading, Badge, StatusDot, Button, Banner, Text, Divider } from '@toolcase/react-components'
-import type { GitCommit } from '@/server/types'
+import type { GitCommit } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 
 function CommitRow({ c }: { c: GitCommit }) {

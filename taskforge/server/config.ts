@@ -100,6 +100,12 @@ export const config = {
     get authDir() {
         return `${this.workspaceDir}/.auth`
     },
+    /** SQLite database file — system of record for app state (see server/db.ts). */
+    get dbPath() {
+        return process.env.DB_PATH && process.env.DB_PATH.trim() !== ''
+            ? process.env.DB_PATH.trim()
+            : `${this.workspaceDir}/taskforge.db`
+    },
     skillsDir: optional('SKILLS_DIR', optional('WORKSPACE_DIR', '/workspace') + '/skills'),
     /** Bundled, read-only app-level skills shipped in the image. */
     appSkillsDir: optional('APP_SKILLS_DIR', process.cwd() + '/skills'),
@@ -114,6 +120,14 @@ export const config = {
     // ── transient retry ──
     transientMaxRetries: num('TRANSIENT_MAX_RETRIES', 3),
     transientBaseDelay: num('TRANSIENT_BASE_DELAY', 10),
+
+    // ── usage gate (pre-emptive pause before a task fails on the limit) ──
+    // After each task settles, the engine runs `/usage` (local, no tokens); if any
+    // bucket is at/above the threshold it pauses (SLEEPING) until usage drops.
+    usageGateEnabled: bool('USAGE_GATE_ENABLED', true),
+    usageGateThreshold: num('USAGE_GATE_THRESHOLD', 95), // percent
+    /** Poll interval while paused waiting for usage to drop below the threshold. */
+    usageGatePollSeconds: num('USAGE_GATE_POLL_SECONDS', 1800),
 
     // ── warm session ──
     warmSession: bool('WARM_SESSION', false),

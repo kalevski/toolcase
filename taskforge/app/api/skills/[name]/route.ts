@@ -1,5 +1,5 @@
-import { guard, json, error } from '@/server/http'
-import { readSkill, writeSkill, deleteSkill, skillExists, UnsafePathError } from '@/server/fs-workspace'
+import { guard, json, error } from '@/server/web/http'
+import { readSkill, writeSkill, deleteSkill, skillExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

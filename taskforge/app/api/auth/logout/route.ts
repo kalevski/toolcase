@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { SESSION_COOKIE, clearedCookieOptions } from '@/server/auth'
+import { SESSION_COOKIE, clearedCookieOptions } from '@/server/services/auth'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

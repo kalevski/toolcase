@@ -15,7 +15,7 @@ import {
     toast,
     type TableColumn,
 } from '@toolcase/react-components'
-import type { EngineState, ProjectSummary, UsageSnapshot } from '@/server/types'
+import type { EngineState, ProjectSummary, UsageSnapshot } from '@/server/domain/types'
 import { useNewProject } from './NewProjectModal'
 import { useConfirm } from './ConfirmModal'
 

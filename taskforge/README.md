@@ -60,7 +60,13 @@ Then open `http://localhost:3000` and sign in with GitHub (first login = admin).
 
 ## Local development
 
+**Requires Node >= 22.5** (Node 24 recommended) for the built-in `node:sqlite`
+module that backs the app's persistence layer (`server/db.ts`). On older Node the
+app starts but fails fast with a clear message the first time it touches the DB.
+The Docker image pins `node:24-slim`.
+
 ```bash
+nvm use 24           # or any Node >= 22.5
 npm install
 npm run dev          # http://localhost:3000
 npm run typecheck
@@ -75,21 +81,42 @@ The app depends only on the published `@toolcase/react-components` (+ its
 
 ```
 app/            Next.js App Router — pages + api/** route handlers
-server/         engine, auth, roles, git, agent, logs, fs, sse (server-only)
 components/     client compositions over @toolcase/react-components
 skills/         bundled read-only app skills (task-creator, commit-message)
 middleware.ts   thin edge auth gate (full verify happens in the Node layer)
+server/         server-only code, n-layer architecture (deps point downward):
+  config.ts          cross-cutting config (importable by any layer)
+  web/               presentation adapters: http, sse, page-guards
+  services/          use-cases: execution-manager, projects, provision,
+                     knowledge, generate, usage, roles, auth, migrate-fs
+  infrastructure/    external IO: agent (claude CLI), git, slack, fs-workspace,
+                     logs, server-log
+  data/              persistence: db (node:sqlite) + repositories/*
+  domain/            pure types + logic: types, limit
 ```
+
+Layer rule: `web → services → {infrastructure, data, domain}`; `infrastructure →
+{data, domain}`; `data → domain`; `domain` depends on nothing. `config` is the
+shared kernel any layer may import.
 
 ## Filesystem contract
 
 ```
 /workspace
-├── repos/<name>/            managed git repositories
-├── tasks/<name>/            *.md task files + .status + logs/ (hourly-rotated)
+├── projects/<name>/         self-contained project (repo/, tasks/, knowledge/)
+│   └── tasks/logs/          hourly-rotated run-*.log stream logs
 ├── skills/<skill>/SKILL.md  user-level skills
-└── .auth/roles.json         GitHub user → role map
+└── taskforge.db             SQLite — system of record for app state
 ```
+
+SQLite (`server/db.ts` + `server/repositories/*`) is the system of record for
+runtime state: task status + completion ledger, telemetry, users/roles, `/usage`
+snapshots, warm sessions, project metadata, and the durable run-event log. The
+**task and knowledge markdown bodies stay on disk** (the agent reads them); the DB
+mirrors their metadata so the queue renders from one query. On first boot against
+an existing `/workspace`, the legacy files (`.status`, `roles.json`,
+`telemetry-*.jsonl`, `.usage-cache.json`, `project.json`, `.warm_session`) are
+imported once into SQLite automatically.
 
 ## Key environment variables
 

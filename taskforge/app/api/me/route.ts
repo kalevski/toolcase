@@ -1,6 +1,6 @@
-import { guard, json } from '@/server/http'
-import { getUser } from '@/server/roles'
-import type { MeResponse } from '@/server/types'
+import { guard, json } from '@/server/web/http'
+import { getUser } from '@/server/services/roles'
+import type { MeResponse } from '@/server/domain/types'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

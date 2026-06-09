@@ -1,5 +1,5 @@
-import { requireRole } from '@/server/page-guards'
-import { getProjectSummaries } from '@/server/projects'
+import { requireRole } from '@/server/web/page-guards'
+import { getProjectSummaries } from '@/server/services/projects'
 import { AppShell } from '@/components/AppShell'
 import { DashboardClient } from '@/components/DashboardClient'
 import type { Metadata } from 'next'

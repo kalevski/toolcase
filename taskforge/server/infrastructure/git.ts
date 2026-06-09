@@ -5,9 +5,10 @@
 
 import 'server-only'
 import { spawn } from 'node:child_process'
-import { config, canPush } from './config'
-import { projectPath, projectRepoDir } from './fs-workspace'
-import type { GitCommit, GitStatus } from './types'
+import { config, canPush } from '@/server/config'
+import { projectPath, projectRepoDir } from '@/server/infrastructure/fs-workspace'
+import { slog } from '@/server/infrastructure/server-log'
+import type { GitCommit, GitStatus } from '@/server/domain/types'
 
 export class GitError extends Error {
     constructor(
@@ -98,8 +99,20 @@ export async function clone(project: string, url: string, branch?: string): Prom
     argv.push('--', url, projectRepoDir(project))
     const res = await run(projectPath(project), argv)
     if (res.code !== 0) {
-        throw new GitError(`git clone failed (exit ${res.code})`, res.code, res.stderr)
+        // Surface git's own fatal line (last stderr line), redacted of any creds,
+        // so "exit 128" becomes diagnosable (auth vs not-found vs ssh-key vs net).
+        const last = res.stderr.trim().split('\n').filter(Boolean).pop() || ''
+        const detail = redactGit(last) || `exit ${res.code}`
+        slog('error', 'git', 'clone failed', { project, code: res.code, detail })
+        throw new GitError(`git clone failed (exit ${res.code}): ${detail}`, res.code, res.stderr)
     }
+}
+
+/** Strip embedded credentials / tokens from git output before surfacing it. */
+function redactGit(s: string): string {
+    return s
+        .replace(/(https?:\/\/)[^@\s/]+@/gi, '$1***@')
+        .replace(/(ghp_|github_pat_|gho_|sk-ant-)[A-Za-z0-9_-]+/g, '«redacted»')
 }
 
 /** True when the working tree is clean (no staged/unstaged changes). */

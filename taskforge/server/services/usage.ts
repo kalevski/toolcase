@@ -6,16 +6,11 @@
 // path serves the last cached snapshot so the panel renders instantly.
 
 import 'server-only'
-import { promises as fs } from 'node:fs'
-import path from 'node:path'
-import { config } from './config'
-import { runAgentOnce } from './agent'
-import type { UsageEntry, UsageSnapshot } from './types'
-
-/** On-disk cache for the most recent `/usage` snapshot. */
-function cachePath(): string {
-    return path.join(config.workspaceDir, '.usage-cache.json')
-}
+import { config } from '@/server/config'
+import { runAgentOnce } from '@/server/infrastructure/agent'
+import { saveSnapshot, latest as latestSnapshot } from '@/server/data/repositories/usage-repo'
+import { ensureImported } from '@/server/services/migrate-fs'
+import type { UsageEntry, UsageSnapshot } from '@/server/domain/types'
 
 // Matches lines like:
 //   "Current session: 37% used · resets Jun 9 at 1:40am (Europe/Skopje)"
@@ -44,34 +39,19 @@ export function parseUsage(raw: string, fetchedAt: string): UsageSnapshot {
     return { fetchedAt, note, entries, raw: raw.trim() }
 }
 
-/** Read the cached snapshot, or null if none exists / is unreadable. */
+/** Read the most recent cached snapshot from SQLite, or null if none exists. */
 export async function readUsageCache(): Promise<UsageSnapshot | null> {
-    try {
-        const raw = await fs.readFile(cachePath(), 'utf8')
-        const parsed = JSON.parse(raw)
-        if (parsed && Array.isArray(parsed.entries) && typeof parsed.fetchedAt === 'string') {
-            return parsed as UsageSnapshot
-        }
-    } catch {
-        /* no cache yet */
-    }
-    return null
-}
-
-async function writeUsageCache(snapshot: UsageSnapshot): Promise<void> {
-    await fs.mkdir(config.workspaceDir, { recursive: true })
-    await fs.writeFile(cachePath(), JSON.stringify(snapshot, null, 2), 'utf8')
+    await ensureImported()
+    return latestSnapshot()
 }
 
 export class UsageError extends Error {}
 
 /**
- * Run `/usage` through the agent, parse it, persist to the cache, and return the
- * fresh snapshot. Throws `UsageError` on timeout or unparseable output.
+ * Run `/usage` through the agent, parse it, persist the snapshot, and return it.
+ * Throws `UsageError` on timeout or unparseable output.
  */
 export async function refreshUsage(now: number): Promise<UsageSnapshot> {
-    await fs.mkdir(config.workspaceDir, { recursive: true })
-
     const res = await runAgentOnce({
         cwd: config.workspaceDir,
         model: config.defaultModel,
@@ -91,6 +71,6 @@ export async function refreshUsage(now: number): Promise<UsageSnapshot> {
         throw new UsageError(detail ? `No usage data in /usage output: ${detail}` : 'No usage data in /usage output')
     }
 
-    await writeUsageCache(snapshot)
+    saveSnapshot(snapshot)
     return snapshot
 }

@@ -13,7 +13,7 @@ import {
     Textarea,
     type TableColumn,
 } from '@toolcase/react-components'
-import type { KnowledgeDoc } from '@/server/types'
+import type { KnowledgeDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { KnowledgeDrawer } from './KnowledgeDrawer'
 

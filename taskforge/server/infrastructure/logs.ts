@@ -8,9 +8,10 @@ import 'server-only'
 import { promises as fs } from 'node:fs'
 import { createWriteStream, type WriteStream } from 'node:fs'
 import path from 'node:path'
-import { config } from './config'
-import { projectTasksDir } from './fs-workspace'
-import type { TelemetryRecord } from './types'
+import { config } from '@/server/config'
+import { projectTasksDir } from '@/server/infrastructure/fs-workspace'
+import * as telemetryRepo from '@/server/data/repositories/telemetry-repo'
+import type { TelemetryRecord } from '@/server/domain/types'
 
 function logsDir(project: string): string {
     return path.join(projectTasksDir(project), 'logs')
@@ -23,10 +24,6 @@ function hourKey(date: Date = new Date()): string {
 
 function runLogPath(project: string, hour: string): string {
     return path.join(logsDir(project), `run-${hour}.log`)
-}
-
-function telemetryPath(project: string, hour: string): string {
-    return path.join(logsDir(project), `telemetry-${hour}.jsonl`)
 }
 
 // Redact obvious secrets before anything is written to the run log (§10).
@@ -80,9 +77,9 @@ export class RunLogger {
     }
 
     async telemetry(record: TelemetryRecord): Promise<void> {
-        await this.ensureDir()
-        const file = telemetryPath(this.project, hourKey())
-        await fs.appendFile(file, JSON.stringify(record) + '\n', 'utf8')
+        // Telemetry now lives in SQLite (queryable, no rotation/merge). Run logs
+        // (BEGIN/END + stream) stay as rotated files — see the header note.
+        telemetryRepo.record(this.project, record)
     }
 
     async close(): Promise<void> {
@@ -115,73 +112,17 @@ export class RunLogger {
 }
 
 /**
- * Read every `telemetry-*.jsonl` for a project and return the latest record per
- * task id (drives the queue table status column, §6.9).
+ * Latest telemetry record per task id (drives the queue table status column).
+ * Backed by SQLite — a single indexed query, no jsonl rotation/merge.
  */
 export async function readTelemetry(project: string): Promise<Map<string, TelemetryRecord>> {
-    const out = new Map<string, TelemetryRecord>()
-    let entries: string[]
-    try {
-        entries = await fs.readdir(logsDir(project))
-    } catch {
-        return out
-    }
-    const files = entries.filter((n) => /^telemetry-.*\.jsonl$/.test(n)).sort()
-    // Read every file concurrently, but apply records in sorted-file order so a
-    // later (newer) file still wins for a given task id (latest-wins semantics).
-    const raws = await Promise.all(
-        files.map((name) => fs.readFile(path.join(logsDir(project), name), 'utf8').catch(() => null)),
-    )
-    for (const raw of raws) {
-        if (raw === null) continue
-        for (const line of raw.split('\n')) {
-            if (!line.trim()) continue
-            try {
-                const rec = JSON.parse(line) as TelemetryRecord
-                out.set(rec.task, rec)
-            } catch {
-                /* skip malformed line */
-            }
-        }
-    }
-    return out
+    return telemetryRepo.latestByTask(project)
 }
 
 /**
- * Drop every telemetry record for the given task ids across all rotated files.
- * Used when a task is moved back to "pending" so its stale error/done outcome no
- * longer drives the queue status. Rewrites each affected file (deletes if empty).
+ * Drop every telemetry record for the given task ids. Used when a task is moved
+ * back to "pending" so its stale error/done outcome no longer drives the queue.
  */
 export async function clearTelemetry(project: string, ids: string[]): Promise<void> {
-    if (ids.length === 0) return
-    const drop = new Set(ids)
-    let entries: string[]
-    try {
-        entries = await fs.readdir(logsDir(project))
-    } catch {
-        return
-    }
-    const files = entries.filter((n) => /^telemetry-.*\.jsonl$/.test(n))
-    await Promise.all(
-        files.map(async (name) => {
-            const full = path.join(logsDir(project), name)
-            const raw = await fs.readFile(full, 'utf8').catch(() => null)
-            if (raw === null) return
-            const kept: string[] = []
-            for (const line of raw.split('\n')) {
-                if (!line.trim()) continue
-                try {
-                    const rec = JSON.parse(line) as TelemetryRecord
-                    if (!drop.has(rec.task)) kept.push(line)
-                } catch {
-                    kept.push(line) // preserve malformed lines untouched
-                }
-            }
-            if (kept.length === 0) {
-                await fs.unlink(full).catch(() => {})
-            } else {
-                await fs.writeFile(full, kept.join('\n') + '\n', 'utf8')
-            }
-        }),
-    )
+    telemetryRepo.clearForTasks(project, ids)
 }

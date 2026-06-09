@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { toast, type TerminalLine } from '@toolcase/react-components'
 import type {
     CommitMessageMode,
@@ -12,7 +12,7 @@ import type {
     RunSnapshot,
     SseEvent,
     TaskInfo,
-} from '@/server/types'
+} from '@/server/domain/types'
 import { useConfirm, usePrompt } from './ConfirmModal'
 
 export interface ProjectConfig {
@@ -151,6 +151,9 @@ export function ProjectProvider({
     })
     const [lines, setLines] = useState<TerminalLine[]>([])
     const [wakeAt, setWakeAt] = useState<number | null>(initialSnapshot.wakeAt)
+    // Keys of toasts already fired, so a reconnect/ring-replay never re-toasts the
+    // same commit / run-complete / run-stopped message.
+    const toastedKeys = useRef<Set<string>>(new Set())
 
     // run config
     const [model, setModelState] = useState(config.defaultModel)
@@ -243,11 +246,19 @@ export function ProjectProvider({
     useEffect(() => {
         const es = new EventSource(`/api/projects/${project}/stream`)
         es.onmessage = (ev) => {
-            let event: SseEvent
+            let event: SseEvent & { replay?: boolean }
             try {
                 event = JSON.parse(ev.data)
             } catch {
                 return
+            }
+            // Replayed frames (sent on every (re)connect) rebuild scrollback/state
+            // but must never re-fire ephemeral toasts.
+            const replayed = event.replay === true
+            const toastOnce = (key: string, fn: () => void) => {
+                if (replayed || toastedKeys.current.has(key)) return
+                toastedKeys.current.add(key)
+                fn()
             }
             switch (event.type) {
                 case 'state':
@@ -268,7 +279,7 @@ export function ProjectProvider({
                     break
                 case 'commit':
                     appendLine({ kind: 'comment', text: `✔ committed ${event.sha.slice(0, 8)} — ${event.message}` })
-                    toast.success(`Committed ${event.sha.slice(0, 8)}`)
+                    toastOnce(`commit:${event.sha}`, () => toast.success(`Committed ${event.sha.slice(0, 8)}`))
                     break
                 case 'limit':
                     setWakeAt(event.wakeAt)
@@ -283,12 +294,14 @@ export function ProjectProvider({
                     void refreshKnowledge()
                     break
                 case 'completed':
-                    toast.success(`Run complete — ${event.done} done, ${event.error} error`)
+                    toastOnce(`completed:${event.runId}`, () =>
+                        toast.success(`Run complete — ${event.done} done, ${event.error} error`),
+                    )
                     setWakeAt(null)
                     void refresh()
                     break
                 case 'stopped':
-                    toast.info(`Run stopped: ${event.reason}`)
+                    toastOnce(`stopped:${event.runId}`, () => toast.info(`Run stopped: ${event.reason}`))
                     setWakeAt(null)
                     void refresh()
                     break

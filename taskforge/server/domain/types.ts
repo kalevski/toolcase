@@ -178,8 +178,8 @@ export type SseEvent =
     | { type: 'transient'; taskId: string; attempt: number; delay: number }
     | { type: 'git' }
     | { type: 'knowledge' }
-    | { type: 'completed'; done: number; error: number; total: number }
-    | { type: 'stopped'; reason: string }
+    | { type: 'completed'; done: number; error: number; total: number; runId: number }
+    | { type: 'stopped'; reason: string; runId: number }
 
 export type TerminalKind = 'output' | 'error' | 'comment'
 

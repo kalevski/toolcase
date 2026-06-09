@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { Heading, Table, Avatar, Select, Badge, toast, type TableColumn } from '@toolcase/react-components'
-import type { Role, UserRecord } from '@/server/types'
+import type { Role, UserRecord } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
 
 const ROLE_OPTIONS = [

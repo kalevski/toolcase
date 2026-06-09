@@ -1,8 +1,8 @@
 // Optional Slack batch notification on run completion (§6.9, notify_slack_batch).
 
 import 'server-only'
-import { config } from './config'
-import { readTaskFile, parseTask } from './fs-workspace'
+import { config } from '@/server/config'
+import { readTaskFile, parseTask } from '@/server/infrastructure/fs-workspace'
 
 async function summarize(repo: string, rel: string): Promise<string> {
     try {

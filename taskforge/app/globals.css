@@ -27,26 +27,49 @@ body {
     width: 100%;
 }
 
-/* sidebar: repo picker sits above the section nav */
+/* sidebar: projects list + section nav, scrolls when the project list is long */
 .tf-sidebar-menu {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-height: 0;
+    overflow-y: auto;
 }
 
-.tf-repo-picker {
+/* keep the active-project badge pinned to the right of its nav row */
+.tf-sidebar-menu .component-side-nav__link {
     display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 0.75rem 1rem 0.5rem;
+    align-items: center;
+    gap: 0.5rem;
+}
+.tf-sidebar-menu .component-side-nav__item .component-badge {
+    margin-left: auto;
 }
 
-.tf-repo-picker__label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.55;
+/* ── IconButton fix ────────────────────────────────────────────────────────
+   The published @toolcase/react-components@^3 ships an UNSCOPED CommandPalette
+   rule (`.component-icon-button { color: var(--cp-muted); border: none; … }`)
+   that leaks onto every IconButton. `--cp-muted` is undefined outside a command
+   palette, so the icon color collapses to an inherited/near-white value and the
+   icon box loses its border — making icons invisible on the light surface.
+   globals.css loads after style.css, so re-asserting the token-driven chrome at
+   matching specificity restores the intended look. (Source SCSS is already
+   correctly scoped; this guards the stale published build.) */
+.component.component-icon-button {
+    display: inline-flex;
+    color: var(--ib-color, var(--tc-text-muted));
+    background: var(--ib-bg, transparent);
+    border: 1px solid var(--ib-border, var(--tc-border));
+    width: var(--ib-size, 36px);
+    height: var(--ib-size, 36px);
+    padding: 0;
+}
+.component.component-icon-button:hover {
+    color: var(--ib-color, var(--tc-text-muted));
+    background: var(--ib-hover-bg, var(--tc-surface-hover));
+}
+.component.component-icon-button.component-icon-button--outline {
+    border-color: var(--ib-color, var(--tc-text-muted));
 }
 
 /* ── repo header (shared across sub-pages) ──────────────────────────────── */

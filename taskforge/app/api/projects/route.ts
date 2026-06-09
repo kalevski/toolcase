@@ -1,8 +1,8 @@
-import { guard, json, error } from '@/server/http'
-import { getProjectSummaries } from '@/server/projects'
-import { createProject, ProjectExistsError } from '@/server/provision'
-import { UnsafePathError } from '@/server/fs-workspace'
-import { GitError } from '@/server/git'
+import { guard, json, error } from '@/server/web/http'
+import { getProjectSummaries } from '@/server/services/projects'
+import { createProject, ProjectExistsError } from '@/server/services/provision'
+import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { GitError } from '@/server/infrastructure/git'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -36,7 +36,16 @@ export async function POST(req: Request) {
     } catch (e) {
         if (e instanceof ProjectExistsError) return error('project already exists', 409)
         if (e instanceof UnsafePathError) return error('invalid project name', 400)
-        if (e instanceof GitError) return error(`clone failed: ${e.message}`, 422)
+        if (e instanceof GitError) {
+            const needsAuth =
+                /could not read Username|Authentication failed|terminal prompts disabled|repository not found|Permission denied|Host key verification/i.test(
+                    `${e.stderr} ${e.message}`,
+                )
+            const hint = needsAuth
+                ? ' — private repo, wrong URL, or SSH without a key. For private HTTPS repos set GIT_REMOTE_TOKEN (a GitHub PAT with `repo` scope) and restart.'
+                : ''
+            return error(`clone failed: ${e.message}${hint}`, 422)
+        }
         throw e
     }
 }

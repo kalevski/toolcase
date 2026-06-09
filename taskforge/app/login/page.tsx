@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getSession } from '@/server/auth'
+import { getSession } from '@/server/services/auth'
 import { LoginClient } from '@/components/LoginClient'
 import type { Metadata } from 'next'
 

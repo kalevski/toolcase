@@ -6,19 +6,27 @@ import {
     DashboardLayout,
     Brand,
     SideNav,
-    Dropdown,
+    Badge,
     UserPanel,
-    type DropdownItem,
+    type BadgeProps,
     type SideNavItem,
     type SideNavSection,
 } from '@toolcase/react-components'
-import type { EngineState, MeResponse, ProjectNavItem } from '@/server/types'
+import type { EngineState, MeResponse, ProjectNavItem } from '@/server/domain/types'
 
 const STATE_ICON: Record<EngineState, string> = {
     RUNNING: 'play-circle-fill',
     SLEEPING: 'moon-fill',
     STOPPING: 'pause-circle-fill',
     IDLE: 'folder2',
+}
+
+/** Badge shown next to a project in the sidebar when its engine isn't idle. */
+const STATE_BADGE: Record<EngineState, BadgeProps['variant'] | null> = {
+    RUNNING: 'success',
+    SLEEPING: 'info',
+    STOPPING: 'warning',
+    IDLE: null,
 }
 
 type ProjectSub = 'overview' | 'tasks' | 'knowledge' | 'run' | 'git'
@@ -51,17 +59,35 @@ export function AppShell({
     const pathname = usePathname()
     const { activeProject, sub, section } = deriveActive(pathname)
 
-    const projectItems: DropdownItem[] = projects.map((p) => ({
-        key: p.name,
-        name: p.name,
-        icon: STATE_ICON[p.state],
-        description: p.state === 'IDLE' ? undefined : p.state.toLowerCase(),
-    }))
+    // Projects are a first-class nav list (replaces the old dropdown): each row
+    // links straight to its overview, highlights when active, and shows a state
+    // badge when its engine isn't idle.
+    const projectsSection: SideNavSection = {
+        key: 'projects',
+        title: `Projects${projects.length ? ` · ${projects.length}` : ''}`,
+        items: projects.length
+            ? projects.map((p) => {
+                  const variant = STATE_BADGE[p.state]
+                  return {
+                      key: `project-${p.name}`,
+                      label: p.name,
+                      icon: STATE_ICON[p.state],
+                      href: `/projects/${p.name}`,
+                      active: p.name === activeProject,
+                      badge: variant ? (
+                          <Badge variant={variant} size="sm" pill>
+                              {p.state.toLowerCase()}
+                          </Badge>
+                      ) : undefined,
+                  } as SideNavItem
+              })
+            : [{ key: 'no-projects', label: 'No projects yet', icon: 'plus-circle', href: '/' }],
+    }
 
     const projectSection: SideNavSection | null = activeProject
         ? {
               key: 'project',
-              title: 'Project',
+              title: activeProject,
               items: [
                   {
                       key: 'overview',
@@ -122,7 +148,11 @@ export function AppShell({
         ],
     }
 
-    const sections: SideNavSection[] = projectSection ? [projectSection, generalSection] : [generalSection]
+    const sections: SideNavSection[] = [
+        projectsSection,
+        ...(projectSection ? [projectSection] : []),
+        generalSection,
+    ]
 
     const onItemClick = (e: React.MouseEvent<HTMLAnchorElement>, item: SideNavItem) => {
         if (item.href) {
@@ -143,15 +173,6 @@ export function AppShell({
             brandComponent={<Brand primaryText="Task Forge" color="#6c5ce7" />}
             sidebarMenuComponent={
                 <div className="tf-sidebar-menu">
-                    <div className="tf-repo-picker">
-                        <span className="tf-repo-picker__label">Project</span>
-                        <Dropdown
-                            items={projectItems}
-                            value={activeProject ?? undefined}
-                            placeholder={projects.length ? 'Select a project…' : 'No projects'}
-                            onChange={(key) => router.push(`/projects/${key}`)}
-                        />
-                    </div>
                     <SideNav sections={sections} onItemClick={onItemClick} />
                 </div>
             }

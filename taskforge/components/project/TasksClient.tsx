@@ -15,7 +15,7 @@ import {
     type TableColumn,
     type ChipGroupItem,
 } from '@toolcase/react-components'
-import type { TaskInfo, TaskRuntimeStatus } from '@/server/types'
+import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { TaskDrawer } from '../TaskDrawer'
 

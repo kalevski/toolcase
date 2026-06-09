@@ -1,6 +1,6 @@
-import { guard, json, error } from '@/server/http'
-import { status } from '@/server/git'
-import { projectExists, UnsafePathError } from '@/server/fs-workspace'
+import { guard, json, error } from '@/server/web/http'
+import { status } from '@/server/infrastructure/git'
+import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

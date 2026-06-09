@@ -1,8 +1,8 @@
-import { guard, json, error } from '@/server/http'
-import { engine } from '@/server/execution-manager'
-import { removeKnowledge } from '@/server/knowledge'
-import { getKnowledge } from '@/server/projects'
-import { readKnowledgeFile, extractTitle, UnsafePathError } from '@/server/fs-workspace'
+import { guard, json, error } from '@/server/web/http'
+import { engine } from '@/server/services/execution-manager'
+import { removeKnowledge } from '@/server/services/knowledge'
+import { getKnowledge } from '@/server/services/projects'
+import { readKnowledgeFile, extractTitle, UnsafePathError } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

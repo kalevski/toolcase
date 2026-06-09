@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { requireSession } from '@/server/page-guards'
+import { requireSession } from '@/server/web/page-guards'
 import { NoAccessClient } from '@/components/NoAccessClient'
 import type { Metadata } from 'next'
 

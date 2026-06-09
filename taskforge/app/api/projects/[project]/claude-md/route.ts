@@ -1,7 +1,7 @@
-import { guard, json, error } from '@/server/http'
-import { projectExists, UnsafePathError } from '@/server/fs-workspace'
-import { generateProjectClaudeMd } from '@/server/provision'
-import { engine } from '@/server/execution-manager'
+import { guard, json, error } from '@/server/web/http'
+import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { generateProjectClaudeMd } from '@/server/services/provision'
+import { engine } from '@/server/services/execution-manager'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

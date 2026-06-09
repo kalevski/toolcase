@@ -1,8 +1,8 @@
-import { guard, json, error } from '@/server/http'
-import { engine } from '@/server/execution-manager'
-import { resetErrorTasksToPending } from '@/server/projects'
-import { projectExists, UnsafePathError } from '@/server/fs-workspace'
-import { slog } from '@/server/server-log'
+import { guard, json, error } from '@/server/web/http'
+import { engine } from '@/server/services/execution-manager'
+import { resetErrorTasksToPending } from '@/server/services/projects'
+import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { slog } from '@/server/infrastructure/server-log'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

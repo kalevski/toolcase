@@ -7,17 +7,19 @@
 import 'server-only'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { config } from './config'
-import { runAgentOnce } from './agent'
-import * as git from './git'
-import { engine } from './execution-manager'
+import { config } from '@/server/config'
+import { runAgentOnce } from '@/server/infrastructure/agent'
+import * as git from '@/server/infrastructure/git'
+import { engine } from '@/server/services/execution-manager'
 import {
     projectPath,
     projectTasksDir,
     projectKnowledgeDir,
     projectSkillsLink,
     projectExists,
-} from './fs-workspace'
+} from '@/server/infrastructure/fs-workspace'
+import * as projectRepo from '@/server/data/repositories/project-repo'
+import { ensureImported } from '@/server/services/migrate-fs'
 
 export class ProjectExistsError extends Error {}
 export class ProjectLockedError extends Error {}
@@ -115,11 +117,12 @@ export async function createProject({ name, gitUrl, branch }: CreateProjectInput
             fs.mkdir(projectKnowledgeDir(name), { recursive: true }),
         ])
         await linkSkills(name)
-        await fs.writeFile(
-            path.join(root, 'project.json'),
-            JSON.stringify({ gitUrl, branch: branch ?? null, createdAt: new Date().toISOString() }, null, 2),
-            'utf8',
-        )
+        projectRepo.upsertProject({
+            name,
+            gitUrl,
+            branch: branch ?? null,
+            createdAt: new Date().toISOString(),
+        })
     } catch (err) {
         await fs.rm(root, { recursive: true, force: true }).catch(() => {})
         throw err
@@ -132,21 +135,19 @@ export interface ProjectMeta {
     createdAt?: string
 }
 
-/** Read `<project>/project.json`, or `{}` if absent/unreadable. */
+/** Read a project's metadata from SQLite, or `{}` if unknown. */
 export async function readProjectMeta(name: string): Promise<ProjectMeta> {
-    try {
-        const raw = await fs.readFile(path.join(projectPath(name), 'project.json'), 'utf8')
-        return JSON.parse(raw) as ProjectMeta
-    } catch {
-        return {}
-    }
+    await ensureImported()
+    const row = projectRepo.getProject(name)
+    return row ? { gitUrl: row.gitUrl, branch: row.branch, createdAt: row.createdAt } : {}
 }
 
-/** Delete a project folder. Refuses while a run holds the lock. */
+/** Delete a project folder + its DB rows. Refuses while a run holds the lock. */
 export async function deleteProject(name: string): Promise<void> {
     const root = projectPath(name) // validates the name
     if (engine.isLocked(name)) {
         throw new ProjectLockedError(`A run is in progress for ${name}`)
     }
     await fs.rm(root, { recursive: true, force: true })
+    projectRepo.deleteProject(name)
 }

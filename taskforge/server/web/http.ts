@@ -2,8 +2,8 @@
 
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { authorize, type AuthzResult } from './auth'
-import type { Role } from './types'
+import { authorize, type AuthzResult } from '@/server/services/auth'
+import type { Role } from '@/server/domain/types'
 
 export function json(data: unknown, status = 200): NextResponse {
     return NextResponse.json(data, { status })

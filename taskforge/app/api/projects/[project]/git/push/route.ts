@@ -1,8 +1,8 @@
-import { guard, json, error } from '@/server/http'
-import { engine } from '@/server/execution-manager'
-import { push, status, GitError } from '@/server/git'
+import { guard, json, error } from '@/server/web/http'
+import { engine } from '@/server/services/execution-manager'
+import { push, status, GitError } from '@/server/infrastructure/git'
 import { canPush } from '@/server/config'
-import { UnsafePathError } from '@/server/fs-workspace'
+import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

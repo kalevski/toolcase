@@ -3,9 +3,9 @@
 
 import 'server-only'
 import { redirect } from 'next/navigation'
-import { getSession } from './auth'
-import { getUser } from './roles'
-import { ROLE_RANK, type MeResponse, type Role } from './types'
+import { getSession } from '@/server/services/auth'
+import { getUser } from '@/server/services/roles'
+import { ROLE_RANK, type MeResponse, type Role } from '@/server/domain/types'
 
 /** Require a valid session; returns the current user (`MeResponse`). */
 export async function requireSession(): Promise<MeResponse> {

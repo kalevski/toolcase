@@ -1,8 +1,8 @@
-import { guard, json, error } from '@/server/http'
-import { engine, DirtyTreeError, LockHeldError } from '@/server/execution-manager'
-import { projectExists, UnsafePathError } from '@/server/fs-workspace'
+import { guard, json, error } from '@/server/web/http'
+import { engine, DirtyTreeError, LockHeldError } from '@/server/services/execution-manager'
+import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
 import { config } from '@/server/config'
-import type { RunOptions } from '@/server/types'
+import type { RunOptions } from '@/server/domain/types'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

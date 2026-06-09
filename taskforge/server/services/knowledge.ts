@@ -8,8 +8,8 @@
 import 'server-only'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { config } from './config'
-import { runAgentOnce } from './agent'
+import { config } from '@/server/config'
+import { runAgentOnce } from '@/server/infrastructure/agent'
 import {
     listKnowledgeFiles,
     readKnowledgeFile,
@@ -19,7 +19,7 @@ import {
     extractSummary,
     projectKnowledgeDir,
     projectPath,
-} from './fs-workspace'
+} from '@/server/infrastructure/fs-workspace'
 
 const FALLBACK_BODY = [
     'You are given one topic to analyze about the repository in the `repo/` subdirectory.',

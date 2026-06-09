@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Heading, Button, Table, IconButton, EmptyState, toast, type TableColumn } from '@toolcase/react-components'
-import type { SkillSummary } from '@/server/types'
+import type { SkillSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
 
 export function SkillsClient({ skills }: { skills: SkillSummary[] }) {

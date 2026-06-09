@@ -3,7 +3,7 @@
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Breadcrumb, Heading, Badge, StatusDot, IconButton, ProgressBar } from '@toolcase/react-components'
-import type { EngineState } from '@/server/types'
+import type { EngineState } from '@/server/domain/types'
 import { useProject } from './ProjectContext'
 
 const STATE_DOT: Record<EngineState, 'online' | 'offline' | 'busy' | 'away'> = {

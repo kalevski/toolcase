@@ -4,7 +4,7 @@
 
 import 'server-only'
 import { spawn, type ChildProcess } from 'node:child_process'
-import { config } from './config'
+import { config } from '@/server/config'
 
 // ── model resolution (alias → backend slug) ─────────────────────────────────
 

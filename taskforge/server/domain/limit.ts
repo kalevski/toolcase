@@ -2,7 +2,7 @@
 // Faithful to executor.sh `compute_limit_sleep` + the limit branch.
 
 import 'server-only'
-import { config } from './config'
+import { config } from '@/server/config'
 
 // Detected on STDERR ONLY (stdout stream-json can embed limit-shaped strings
 // inside tool results — false positives).

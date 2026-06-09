@@ -17,7 +17,7 @@ import {
     TerminalWindow,
     toast,
 } from '@toolcase/react-components'
-import type { CommitMessageMode } from '@/server/types'
+import type { CommitMessageMode } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 
 export function RunClient() {

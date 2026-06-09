@@ -1,6 +1,6 @@
-import { guard, json, error } from '@/server/http'
-import { setRole, LastAdminError, UnknownUserError } from '@/server/roles'
-import type { Role } from '@/server/types'
+import { guard, json, error } from '@/server/web/http'
+import { setRole, LastAdminError, UnknownUserError } from '@/server/services/roles'
+import type { Role } from '@/server/domain/types'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

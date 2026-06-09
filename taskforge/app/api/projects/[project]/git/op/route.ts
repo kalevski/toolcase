@@ -1,8 +1,8 @@
-import { guard, json, error } from '@/server/http'
-import { engine } from '@/server/execution-manager'
-import { fetchRemote, pull, discardAll, status, GitError } from '@/server/git'
-import { UnsafePathError } from '@/server/fs-workspace'
-import type { GitOp } from '@/server/types'
+import { guard, json, error } from '@/server/web/http'
+import { engine } from '@/server/services/execution-manager'
+import { fetchRemote, pull, discardAll, status, GitError } from '@/server/infrastructure/git'
+import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import type { GitOp } from '@/server/domain/types'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
