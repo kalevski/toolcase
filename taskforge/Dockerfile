@@ -23,9 +23,10 @@ ENV PORT=3000
 ENV WORKSPACE_DIR=/workspace
 ENV APP_SKILLS_DIR=/app/skills
 
-# git (for the git operations) + the Claude Code CLI (the default agent backend)
+# git (for the git operations) + openssh-client (SSH remotes / GIT_SSH_CONFIGURED)
+# + the Claude Code CLI (the default agent backend)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git ca-certificates \
+    && apt-get install -y --no-install-recommends git openssh-client ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && npm i -g @anthropic-ai/claude-code \
     && npm cache clean --force
