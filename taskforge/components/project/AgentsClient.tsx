@@ -23,11 +23,13 @@ import { AgentPanel } from './AgentPanel'
 const BUNDLED_HELP: Record<string, string> = {
     'task-creator': helpTexts.agents.taskCreator,
     'knowledge-writer': helpTexts.agents.knowledgeWriter,
+    'note-writer': helpTexts.notes.agent,
 }
 
 const BUNDLED_PLACEHOLDER: Record<string, string> = {
     'task-creator': 'e.g. Add health checks and structured logging across the API service.',
     'knowledge-writer': 'e.g. How does the SSE streaming pipeline deliver run logs to the client?',
+    'note-writer': "e.g. Summarize today's run failures and list follow-ups.",
 }
 
 const BUNDLED_SUBMIT: Record<string, string> = {
@@ -38,11 +40,20 @@ const BUNDLED_SUBMIT: Record<string, string> = {
 export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const { config } = useProject()
+    const { config, notes, agentSessions } = useProject()
     const confirm = useConfirm()
 
-    // Every kind except note-writer (it lives on the Notes page) gets a tab.
-    const tabKinds = config.agentKinds.filter((k) => k.kind !== 'note-writer')
+    const tabKinds = config.agentKinds
+
+    // note-writer tab: which note the agent should edit (empty = create new);
+    // falls back to "create new" when the selected note has been deleted
+    const [rawTargetNote, setTargetNote] = useState('')
+    const targetNote = notes.some((n) => n.id === rawTargetNote) ? rawTargetNote : ''
+    const noteAgentRunning = agentSessions['note-writer']?.status === 'running'
+    const targetOptions = [
+        { value: '', label: '➕ Create new note' },
+        ...notes.map((n) => ({ value: n.id, label: n.title })),
+    ]
 
     // Tab selection lives in the URL (?tab=…) so the activity bar can deep-link
     // to a specific agent and refresh/share keeps the tab.
@@ -126,11 +137,34 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                                     </Button>
                                 </div>
                             )}
-                            <AgentPanel
-                                kind={k.kind}
-                                placeholder={BUNDLED_PLACEHOLDER[k.kind] ?? `Instructions for the ${k.label} agent…`}
-                                submitLabel={BUNDLED_SUBMIT[k.kind] ?? 'Run agent'}
-                            />
+                            {k.kind === 'note-writer' ? (
+                                <AgentPanel
+                                    kind="note-writer"
+                                    placeholder={BUNDLED_PLACEHOLDER['note-writer']}
+                                    submitLabel={targetNote ? 'Edit note' : 'Create note'}
+                                    submitOptions={() => ({ targetNote: targetNote || undefined })}
+                                    beforeComposer={
+                                        <div className="tf-stack-sm">
+                                            <div style={{ maxWidth: 320 }}>
+                                                <Select
+                                                    label="Target note"
+                                                    options={targetOptions}
+                                                    value={targetNote}
+                                                    disabled={noteAgentRunning}
+                                                    onChange={(e) => setTargetNote(e.target.value)}
+                                                />
+                                            </div>
+                                            <HelperText text={helpTexts.notes.agentTarget} />
+                                        </div>
+                                    }
+                                />
+                            ) : (
+                                <AgentPanel
+                                    kind={k.kind}
+                                    placeholder={BUNDLED_PLACEHOLDER[k.kind] ?? `Instructions for the ${k.label} agent…`}
+                                    submitLabel={BUNDLED_SUBMIT[k.kind] ?? 'Run agent'}
+                                />
+                            )}
                         </div>
                     ),
                 }))}

@@ -83,10 +83,7 @@ export function ActivityBar() {
     for (const kind of kinds) {
         if (agentSessions[kind]?.status !== 'running') continue
         const label = AGENT_LABELS[kind] ?? config.agentKinds.find((k) => k.kind === kind)?.label ?? kind
-        const href =
-            kind === 'note-writer'
-                ? `/projects/${project}/notes`
-                : `/projects/${project}/agents?tab=${kind}`
+        const href = `/projects/${project}/agents?tab=${kind}`
         return (
             <div className="tf-activity-bar" onClick={go(href)}>
                 <AnnouncementBar

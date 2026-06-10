@@ -8,7 +8,6 @@ import {
     Text,
     Table,
     Button,
-    Select,
     MarkdownEditor,
     HelperText,
     toast,
@@ -18,7 +17,6 @@ import type { NoteDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm, usePrompt } from '../ConfirmModal'
 import { helpTexts } from '../helpTexts'
-import { AgentPanel } from './AgentPanel'
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
 
@@ -43,9 +41,6 @@ export function NotesClient() {
     const [loaded, setLoaded] = useState<{ id: string; content: string } | null>(null)
     const [editor, setEditor] = useState('')
     const [saving, setSaving] = useState(false)
-
-    // note-writer target select (agent section)
-    const [targetNote, setTargetNote] = useState('')
 
     const noteAgentRunning = agentSessions['note-writer'].status === 'running'
     const dirtyEditor = loaded !== null && editor !== loaded.content
@@ -184,7 +179,6 @@ export function NotesClient() {
             setOpenId(null)
             setLoaded(null)
         }
-        if (targetNote === id) setTargetNote('')
         toast.success(`Deleted ${id}`)
         void refreshNotes()
     }
@@ -214,11 +208,6 @@ export function NotesClient() {
         },
     ]
 
-    const targetOptions = [
-        { value: '', label: '➕ Create new note' },
-        ...notes.map((n) => ({ value: n.id, label: n.title })),
-    ]
-
     return (
         <div className="tf-stack">
             <Card
@@ -236,7 +225,7 @@ export function NotesClient() {
                     data={notes}
                     rowKey={(n) => n.id}
                     hoverable
-                    emptyMessage="No notes yet — create one, or let the notes agent write one below."
+                    emptyMessage="No notes yet — create one, or let the notes agent (Agents page) write one."
                     onRowClick={(n) => void openNote(n.id)}
                 />
                 <div className="tf-card-body">
@@ -279,32 +268,6 @@ export function NotesClient() {
                     </div>
                 </Card>
             )}
-
-            <Card header={<Heading as="h3">Notes agent</Heading>}>
-                <div className="tf-card-body tf-stack-sm">
-                    <HelperText text={helpTexts.notes.agent} />
-                    <AgentPanel
-                        kind="note-writer"
-                        placeholder="e.g. Summarize today's run failures and list follow-ups."
-                        submitLabel={targetNote ? 'Edit note' : 'Create note'}
-                        submitOptions={() => ({ targetNote: targetNote || undefined })}
-                        beforeComposer={
-                            <div className="tf-stack-sm">
-                                <div style={{ maxWidth: 320 }}>
-                                    <Select
-                                        label="Target note"
-                                        options={targetOptions}
-                                        value={targetNote}
-                                        disabled={noteAgentRunning}
-                                        onChange={(e) => setTargetNote(e.target.value)}
-                                    />
-                                </div>
-                                <HelperText text={helpTexts.notes.agentTarget} />
-                            </div>
-                        }
-                    />
-                </div>
-            </Card>
         </div>
     )
 }
