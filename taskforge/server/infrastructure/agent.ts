@@ -7,6 +7,7 @@ import { spawn, type ChildProcess } from 'node:child_process'
 import { config } from '@/server/config'
 
 // ── model resolution (alias → backend slug) ─────────────────────────────────
+// (E4: the unused `cursor` alias table was removed with the backend stub.)
 
 const CLAUDE_ALIASES: Record<string, string> = {
     fast: 'claude-haiku-4-5',
@@ -14,15 +15,8 @@ const CLAUDE_ALIASES: Record<string, string> = {
     deep: 'claude-opus-4-8',
 }
 
-const CURSOR_ALIASES: Record<string, string> = {
-    fast: 'cursor-small',
-    mid: 'cursor-medium',
-    deep: 'cursor-large',
-}
-
 export function resolveModel(model: string): string {
-    const table = config.agent === 'cursor' ? CURSOR_ALIASES : CLAUDE_ALIASES
-    return table[model] ?? model
+    return CLAUDE_ALIASES[model] ?? model
 }
 
 // ── argv construction ────────────────────────────────────────────────────────

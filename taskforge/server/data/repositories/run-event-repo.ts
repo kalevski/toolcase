@@ -7,12 +7,18 @@ import 'server-only'
 import { prep, allRows } from '@/server/data/db'
 import type { SseEvent } from '@/server/domain/types'
 
-export function append(project: string, event: SseEvent): void {
+export function append(project: string, event: SseEvent, runId: number | null = null): void {
     const task = 'taskId' in event ? (event as { taskId: string | null }).taskId : null
     prep(
-        `INSERT INTO run_event (project, type, task, payload, created_at)
-         VALUES (?, ?, ?, ?, ?)`,
-    ).run(project, event.type, task ?? null, JSON.stringify(event), new Date().toISOString())
+        `INSERT INTO run_event (project, type, task, payload, run_id, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(project, event.type, task ?? null, JSON.stringify(event), runId, new Date().toISOString())
+}
+
+/** Prune high-frequency `log` frames older than `keepDays` (milestones stay). */
+export function pruneOldLogs(keepDays: number): void {
+    const cutoff = new Date(Date.now() - keepDays * 86400_000).toISOString()
+    prep(`DELETE FROM run_event WHERE type = 'log' AND created_at < ?`).run(cutoff)
 }
 
 export interface RunEventRow {

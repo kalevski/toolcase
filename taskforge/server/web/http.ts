@@ -3,6 +3,7 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
 import { authorize, type AuthzResult } from '@/server/services/auth'
+import * as auditRepo from '@/server/data/repositories/audit-repo'
 import type { Role } from '@/server/domain/types'
 
 export function json(data: unknown, status = 200): NextResponse {
@@ -25,4 +26,36 @@ export async function guard(
         return { res: error(result.status === 401 ? 'unauthorized' : 'forbidden', result.status) }
     }
     return result
+}
+
+/**
+ * D3 — record who did what. `auth` is the successful guard result; best-effort
+ * (an audit failure never blocks the mutation it describes).
+ */
+export function audit(
+    auth: Extract<AuthzResult, { ok: true }>,
+    action: string,
+    project?: string | null,
+    detail?: string | null,
+): void {
+    try {
+        auditRepo.append({
+            githubId: auth.session.sub,
+            login: auth.session.login,
+            action,
+            project,
+            detail,
+        })
+    } catch {
+        /* best-effort */
+    }
+}
+
+/** D3 — audit entry for non-user actors (scheduler etc.). */
+export function auditSystem(action: string, project?: string | null, detail?: string | null): void {
+    try {
+        auditRepo.append({ githubId: null, login: 'system', action, project, detail })
+    } catch {
+        /* best-effort */
+    }
 }

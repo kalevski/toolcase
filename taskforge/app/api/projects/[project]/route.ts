@@ -1,4 +1,4 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, audit } from '@/server/web/http'
 import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
 import { deleteProject, ProjectLockedError } from '@/server/services/provision'
 
@@ -11,6 +11,7 @@ export async function DELETE(_req: Request, { params }: { params: { project: str
     try {
         if (!(await projectExists(params.project))) return error('project not found', 404)
         await deleteProject(params.project)
+        audit(auth, 'project.delete', params.project)
         return json({ ok: true })
     } catch (e) {
         if (e instanceof ProjectLockedError) return error('run in progress', 409)

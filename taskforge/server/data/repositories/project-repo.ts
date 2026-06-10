@@ -47,11 +47,17 @@ export function listProjectRows(): ProjectRow[] {
 }
 
 export function deleteProject(name: string): void {
-    // Children (task/telemetry/warm_session/run_event) are pruned explicitly so
-    // we do not depend on cross-table cascades for non-FK tables.
+    // Children are pruned explicitly so we do not depend on cross-table cascades
+    // for non-FK tables. (`audit` rows are kept — they are the history of who
+    // did what, including deleting this project.)
     prep('DELETE FROM task WHERE project = ?').run(name)
     prep('DELETE FROM telemetry WHERE project = ?').run(name)
     prep('DELETE FROM warm_session WHERE project = ?').run(name)
     prep('DELETE FROM run_event WHERE project = ?').run(name)
+    prep('DELETE FROM run WHERE project = ?').run(name)
+    prep('DELETE FROM schedule WHERE project = ?').run(name)
+    prep('DELETE FROM agent_prompt WHERE project = ?').run(name)
+    prep('DELETE FROM agent_prompt_history WHERE project = ?').run(name)
+    prep('DELETE FROM project_setting WHERE project = ?').run(name)
     prep('DELETE FROM project WHERE name = ?').run(name)
 }

@@ -4,6 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { ToastProvider, Modal } from '@toolcase/react-components'
 import { ConfirmModal, PromptModal } from './ConfirmModal'
 import { NewProjectModal } from './NewProjectModal'
+import { NewTaskModal } from './NewTaskModal'
+import { ImportIssuesModal } from './ImportIssuesModal'
+import { FeedbackModal } from './FeedbackModal'
 
 /**
  * `@toolcase/react-components` is a client-only library — several components
@@ -31,6 +34,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     <ConfirmModal key="confirm" />
                     <PromptModal key="prompt" />
                     <NewProjectModal key="newProject" />
+                    <NewTaskModal key="newTask" />
+                    <ImportIssuesModal key="importIssues" />
+                    <FeedbackModal key="taskFeedback" />
                 </Modal.ModalRender>
             </Modal.ModalContext>
         </ToastProvider>

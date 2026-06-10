@@ -23,9 +23,13 @@ const STATE_BADGE: Record<EngineState, 'info' | 'success' | 'warning' | 'seconda
 const SUB_LABEL: Record<string, string> = {
     overview: 'Overview',
     tasks: 'Tasks',
+    agents: 'Agents',
     knowledge: 'Knowledge',
+    notes: 'Notes',
     run: 'Run',
+    runs: 'Run history',
     git: 'Git',
+    settings: 'Settings',
 }
 
 export function ProjectHeader() {
@@ -33,7 +37,7 @@ export function ProjectHeader() {
     const pathname = usePathname()
     const { project, snapshot, git, running, progressPct, onStop, onForce } = useProject()
 
-    const m = pathname.match(/^\/projects\/[^/]+(?:\/(tasks|knowledge|run|git))?\/?$/)
+    const m = pathname.match(/^\/projects\/[^/]+(?:\/(tasks|knowledge|notes|runs|run|git|agents|settings))?\/?$/)
     const subKey = m?.[1] ?? 'overview'
     const subLabel = SUB_LABEL[subKey]
 

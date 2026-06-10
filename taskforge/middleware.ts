@@ -10,10 +10,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const SESSION_COOKIE = 'atm_session'
 
-// Paths that never require a session.
+// Paths that never require a session. `/api/health` (exact) is the D4 liveness
+// probe for Docker HEALTHCHECK — details stay admin-gated at /api/health/details.
 const PUBLIC_PREFIXES = ['/login', '/api/auth/github']
+const PUBLIC_EXACT = ['/api/health']
 
 function isPublic(pathname: string): boolean {
+    if (PUBLIC_EXACT.includes(pathname)) return true
     return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/') || pathname === p)
 }
 

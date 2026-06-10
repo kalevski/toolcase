@@ -75,7 +75,8 @@ export const config = {
     // ── agent ──
     // No API key here: the `claude` CLI/daemon authenticates itself (e.g. via
     // `claude login` / its own stored credentials). We only spawn the binary.
-    agent: optional('AGENT', 'claude') as 'claude' | 'cursor',
+    // (E4: the half-implemented `cursor` backend stub was removed — `claude`
+    //  is the one supported backend; a second one needs a real AgentBackend seam.)
     agentBin: process.env.CLAUDE_BIN || process.env.AGENT_BIN || 'claude',
     defaultModel: optional('DEFAULT_MODEL', 'claude-sonnet-4-6'),
     modelCatalog: (() => {
@@ -153,6 +154,15 @@ export const config = {
     // ── logs / notify ──
     logRetentionHours: num('LOG_RETENTION_HOURS', 168),
     slackWebhookUrl: optional('SLACK_WEBHOOK_URL', ''),
+    // D2 — events that fire notifications (CSV of run:completed,run:errored,
+    // task:error,limit,agent:done) + a generic outbound JSON webhook. Both can
+    // be overridden per project (E1 settings).
+    notifyEvents: csv('NOTIFY_EVENTS'),
+    notifyWebhookUrl: optional('NOTIFY_WEBHOOK_URL', ''),
+
+    // ── B8 reviewer ──
+    reviewModel: optional('REVIEW_MODEL', 'claude-haiku-4-5'),
+    reviewTimeoutMs: num('REVIEW_TIMEOUT_MS', 120000),
 
     port: num('PORT', 3000),
 }

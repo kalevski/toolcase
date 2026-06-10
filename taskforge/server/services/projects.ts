@@ -8,16 +8,20 @@ import {
     updateTaskStatus,
     listKnowledgeFiles,
     readKnowledgeFile,
+    listNoteFiles,
+    readNoteFile,
+    noteUpdatedAt,
     extractTitle,
     extractSummary,
 } from '@/server/infrastructure/fs-workspace'
 import { readTelemetry, clearTelemetry } from '@/server/infrastructure/logs'
 import { engine } from '@/server/services/execution-manager'
+import { agentSessions } from '@/server/services/agent-sessions'
 import { readProjectMeta } from '@/server/services/provision'
 import * as taskRepo from '@/server/data/repositories/task-repo'
 import { ensureImported } from '@/server/services/migrate-fs'
 import { slog } from '@/server/infrastructure/server-log'
-import type { KnowledgeDoc, ProjectNavItem, ProjectSummary, TaskInfo } from '@/server/domain/types'
+import type { KnowledgeDoc, NoteDoc, ProjectNavItem, ProjectSummary, TaskInfo } from '@/server/domain/types'
 
 export async function getTasks(project: string): Promise<TaskInfo[]> {
     await ensureImported()
@@ -38,7 +42,9 @@ export async function getTasks(project: string): Promise<TaskInfo[]> {
         if (snap.state === 'RUNNING' && snap.current === row.id) {
             status = 'running'
         } else if (row.status === 'done') {
-            status = 'done'
+            // B8 — a done task whose reviewer verdict was `fail` renders as a
+            // warning. Advisory only: the engine still treats it as done.
+            status = tele?.review === 'fail' ? 'needs-review' : 'done'
         } else if (tele && (tele.status === 'error' || tele.status === 'failed')) {
             status = 'error'
         } else if (row.status === 'error') {
@@ -53,11 +59,18 @@ export async function getTasks(project: string): Promise<TaskInfo[]> {
             status,
             severity: row.severity,
             project: row.project,
+            model: row.model,
+            depends: row.depends,
             lastElapsed: tele?.elapsed,
             lastModel: tele?.model,
             lastCommit: tele?.commit,
             // Prefer live telemetry; fall back to the error persisted on the task row.
             lastError: status === 'error' ? (tele?.error ?? row.error) : undefined,
+            tokensIn: tele?.tokensIn,
+            tokensOut: tele?.tokensOut,
+            costUsd: tele?.costUsd,
+            review: tele?.review,
+            reviewNote: tele?.reviewNote,
         })
     }
     return out
@@ -112,9 +125,29 @@ export async function getKnowledge(project: string): Promise<KnowledgeDoc[]> {
     return out
 }
 
+/** Notes for a project, titled from each file with its mtime for relative-time display. */
+export async function getNotes(project: string): Promise<NoteDoc[]> {
+    const files = await listNoteFiles(project)
+    const docs = await Promise.all(
+        files.map(async (id) => {
+            try {
+                const [content, updatedAt] = await Promise.all([
+                    readNoteFile(project, id),
+                    noteUpdatedAt(project, id),
+                ])
+                return { id, title: extractTitle(content, id), updatedAt }
+            } catch {
+                return null
+            }
+        }),
+    )
+    return docs.filter((d): d is NoteDoc => d !== null)
+}
+
 async function getProjectSummary(project: string): Promise<ProjectSummary> {
     const [tasks, meta] = await Promise.all([getTasks(project), readProjectMeta(project)])
-    const done = tasks.filter((t) => t.status === 'done').length
+    // needs-review (B8) is advisory — the ledger treats those tasks as done.
+    const done = tasks.filter((t) => t.status === 'done' || t.status === 'needs-review').length
     const error = tasks.filter((t) => t.status === 'error').length
     const pending = tasks.filter((t) => t.status === 'pending' || t.status === 'running').length
     return {
@@ -141,5 +174,9 @@ export async function getProjectSummaries(): Promise<ProjectSummary[]> {
  */
 export async function getProjectNav(): Promise<ProjectNavItem[]> {
     const projects = await listProjects()
-    return projects.map((name) => ({ name, state: engine.state(name) }))
+    return projects.map((name) => ({
+        name,
+        state: engine.state(name),
+        agentBusy: agentSessions.isBusy(name),
+    }))
 }

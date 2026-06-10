@@ -5,10 +5,19 @@
 
 import 'server-only'
 import { spawn } from 'node:child_process'
+import { promises as fs } from 'node:fs'
+import path from 'node:path'
 import { config, canPush } from '@/server/config'
 import { projectPath, projectRepoDir } from '@/server/infrastructure/fs-workspace'
 import { slog } from '@/server/infrastructure/server-log'
-import type { GitCommit, GitStatus } from '@/server/domain/types'
+import type {
+    GitBranchList,
+    GitCommit,
+    GitCommitDetail,
+    GitStashEntry,
+    GitStatus,
+    GitStatusFile,
+} from '@/server/domain/types'
 
 export class GitError extends Error {
     constructor(
@@ -21,6 +30,37 @@ export class GitError extends Error {
 }
 
 const BRANCH_RE = /^[A-Za-z0-9._/-]+$/
+const SHA_RE = /^[0-9a-f]{7,40}$/i
+
+function assertSafeSha(sha: string): void {
+    if (!SHA_RE.test(sha)) {
+        throw new GitError(`Invalid commit sha: ${JSON.stringify(sha)}`, null, '')
+    }
+}
+
+function assertSafeBranch(name: string): void {
+    if (!BRANCH_RE.test(name) || name.includes('..')) {
+        throw new GitError(`Invalid branch name: ${name}`, null, '')
+    }
+}
+
+/**
+ * Resolve a repo-relative file path (from `git status` output / the diff route)
+ * inside the project's repo dir, rejecting traversal. Unlike task ids, repo
+ * paths may contain arbitrary-but-sane segments, so this checks containment
+ * rather than a charset.
+ */
+function resolveRepoPath(project: string, rel: string): string {
+    if (!rel || rel.includes('\0') || path.isAbsolute(rel)) {
+        throw new GitError(`Invalid path: ${JSON.stringify(rel)}`, null, '')
+    }
+    const base = path.resolve(projectRepoDir(project))
+    const resolved = path.resolve(base, rel)
+    if (resolved !== base && !resolved.startsWith(base + path.sep)) {
+        throw new GitError(`Path escapes repository: ${rel}`, null, '')
+    }
+    return resolved
+}
 
 // Accept the URL forms a clone can sensibly take; reject anything else so a
 // crafted value can't smuggle a local-transport / helper trick. `--` in the
@@ -217,15 +257,47 @@ export async function workingDiff(project: string): Promise<string> {
 }
 
 export async function createOrSwitchBranch(project: string, name: string): Promise<void> {
-    if (!BRANCH_RE.test(name) || name.includes('..')) {
-        throw new GitError(`Invalid branch name: ${name}`, null, '')
-    }
+    assertSafeBranch(name)
     const branches = await git(project, ['branch', '--list', name])
     if (branches.trim() !== '') {
         await git(project, ['switch', name])
     } else {
         await git(project, ['switch', '-c', name])
     }
+}
+
+/** Switch to an existing branch (no implicit create). */
+export async function switchBranch(project: string, name: string): Promise<void> {
+    assertSafeBranch(name)
+    await git(project, ['switch', name])
+}
+
+/** Delete a local branch (`-d`, or `-D` with force). Refuses the current branch. */
+export async function deleteBranch(project: string, name: string, force = false): Promise<void> {
+    assertSafeBranch(name)
+    const current = await currentBranch(project)
+    if (current === name) {
+        throw new GitError('Cannot delete the currently checked-out branch.', null, '')
+    }
+    await git(project, ['branch', force ? '-D' : '-d', name])
+}
+
+/** Local + remote branch names and the current one. */
+export async function listBranches(project: string): Promise<GitBranchList> {
+    const current = await currentBranch(project)
+    const parse = (out: string) =>
+        out.split('\n').flatMap((l) => {
+            const name = l.trim()
+            return name && !name.includes('->') ? [name] : []
+        })
+    const local = parse(await git(project, ['branch', '--format=%(refname:short)']))
+    let remote: string[] = []
+    try {
+        remote = parse(await git(project, ['branch', '-r', '--format=%(refname:short)']))
+    } catch {
+        /* no remotes */
+    }
+    return { local, remote, current }
 }
 
 async function currentBranch(project: string): Promise<string> {
@@ -295,4 +367,122 @@ export async function pull(project: string): Promise<void> {
 export async function discardAll(project: string): Promise<void> {
     await git(project, ['reset', '--hard', 'HEAD'])
     await git(project, ['clean', '-fd'])
+}
+
+// ── per-file working tree (git page §6) ──────────────────────────────────────
+
+/** `git status --porcelain` split per file: staged (index) + unstaged codes. */
+export async function statusFiles(project: string): Promise<GitStatusFile[]> {
+    const out = await git(project, ['status', '--porcelain'])
+    return out.split('\n').flatMap((l) => {
+        if (l.length < 4) return []
+        const staged = l[0].trim()
+        const unstaged = l[1].trim()
+        let p = l.slice(3).trim()
+        // renames: "R  old -> new" — show the new path
+        const arrow = p.indexOf(' -> ')
+        if (arrow !== -1) p = p.slice(arrow + 4)
+        // strip porcelain quoting of unusual paths
+        if (p.startsWith('"') && p.endsWith('"')) p = p.slice(1, -1)
+        return p ? [{ path: p, staged, unstaged }] : []
+    })
+}
+
+/**
+ * Discard changes to specific paths: `checkout --` restores tracked files,
+ * `clean -f` removes untracked ones. Destructive (per-path).
+ */
+export async function discardPaths(project: string, paths: string[]): Promise<void> {
+    if (paths.length === 0) return
+    for (const p of paths) resolveRepoPath(project, p) // validate every path first
+    const entries = await statusFiles(project)
+    const untrackedSet = new Set(entries.filter((e) => e.staged === '?' || e.unstaged === '?').map((e) => e.path))
+    const tracked = paths.filter((p) => !untrackedSet.has(p))
+    const untracked = paths.filter((p) => untrackedSet.has(p))
+    if (tracked.length) {
+        // unstage first so staged-only edits are restorable, then drop the edits
+        await git(project, ['reset', '-q', 'HEAD', '--', ...tracked]).catch(() => {})
+        await git(project, ['checkout', '--', ...tracked])
+    }
+    if (untracked.length) {
+        await git(project, ['clean', '-f', '--', ...untracked])
+    }
+}
+
+/** Before/after content of one working-tree file vs HEAD (for the DiffViewer). */
+export async function fileDiff(project: string, rel: string): Promise<{ before: string; after: string }> {
+    const abs = resolveRepoPath(project, rel)
+    let before = ''
+    try {
+        before = await git(project, ['show', `HEAD:${rel}`])
+    } catch {
+        /* new file — empty before */
+    }
+    let after = ''
+    try {
+        after = await fs.readFile(abs, 'utf8')
+    } catch {
+        /* deleted file — empty after */
+    }
+    return { before, after }
+}
+
+// ── commit detail / revert (§6) ─────────────────────────────────────────────
+
+const PATCH_CAP = 100_000
+
+/** One commit's meta + `--stat` block + patch (capped for transport). */
+export async function commitDetail(project: string, sha: string): Promise<GitCommitDetail> {
+    assertSafeSha(sha)
+    const metaOut = await git(project, ['log', '-1', LOG_FORMAT, sha])
+    const commit = parseLog(metaOut)[0]
+    if (!commit) throw new GitError(`Unknown commit: ${sha}`, null, '')
+    const stat = (await git(project, ['show', '--stat', '--format=', sha])).trim()
+    const rawPatch = await git(project, ['show', '--format=', sha])
+    const patchTruncated = rawPatch.length > PATCH_CAP
+    const patch = patchTruncated ? rawPatch.slice(0, PATCH_CAP) + '\n…(truncated)…' : rawPatch
+    return { commit, stat, patch, patchTruncated }
+}
+
+/** Revert one commit with a generated message. Conflicts surface as GitError (stderr). */
+export async function revertCommit(project: string, sha: string): Promise<void> {
+    assertSafeSha(sha)
+    try {
+        await git(project, ['revert', '--no-edit', sha])
+    } catch (e) {
+        // leave the tree clean — abort the half-applied revert before surfacing
+        if (e instanceof GitError) {
+            await git(project, ['revert', '--abort']).catch(() => {})
+        }
+        throw e
+    }
+}
+
+// ── stash (§6) ──────────────────────────────────────────────────────────────
+
+export async function stashPush(project: string, message?: string): Promise<void> {
+    const argv = ['stash', 'push', '-u']
+    if (message && message.trim()) argv.push('-m', message.trim())
+    await git(project, argv)
+}
+
+export async function stashList(project: string): Promise<GitStashEntry[]> {
+    const out = await git(project, ['stash', 'list', '--format=%gd%x1f%gs%x1f%ci'])
+    return out.split('\n').flatMap((line) => {
+        if (!line.trim()) return []
+        const [ref, message, date] = line.split('\x1f')
+        const m = ref?.match(/stash@\{(\d+)\}/)
+        if (!m) return []
+        return [{ index: Number(m[1]), message: message ?? '', date: date ?? '' }]
+    })
+}
+
+export async function stashPop(project: string, index: number): Promise<void> {
+    if (!Number.isInteger(index) || index < 0) throw new GitError(`Invalid stash index: ${index}`, null, '')
+    await git(project, ['stash', 'pop', `stash@{${index}}`])
+}
+
+export async function stashDrop(project: string, index: number): Promise<void> {
+    if (!Number.isInteger(index) || index < 0) throw new GitError(`Invalid stash index: ${index}`, null, '')
+    await git(project, ['stash', 'drop', `stash@{${index}}`])
 }

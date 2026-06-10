@@ -1,0 +1,54 @@
+// B7 — open a GitHub PR for the current branch (manual button on the Git page).
+// Pushes first so the head exists on the remote.
+
+import { guard, json, error, audit } from '@/server/web/http'
+import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { parseGithubRepo, createPull, defaultBranch, GithubError } from '@/server/infrastructure/github'
+import { readProjectMeta } from '@/server/services/provision'
+import { engine } from '@/server/services/execution-manager'
+import * as git from '@/server/infrastructure/git'
+import { canPush } from '@/server/config'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+export async function POST(req: Request, { params }: { params: { project: string } }) {
+    const auth = await guard('standard')
+    if ('res' in auth) return auth.res
+    try {
+        if (!(await projectExists(params.project))) return error('project not found', 404)
+        if (engine.isLocked(params.project)) return error('a run is in progress', 409)
+        if (!canPush()) return error('no push credential configured (GIT_REMOTE_TOKEN)', 400)
+
+        const meta = await readProjectMeta(params.project)
+        const gh = parseGithubRepo(meta.gitUrl)
+        if (!gh) return error('project origin is not a GitHub repository', 400)
+
+        const body = (await req.json().catch(() => ({}))) as { title?: string; body?: string }
+        const status = await git.status(params.project)
+        if (status.dirty) return error('working tree is dirty — commit or discard first', 412)
+
+        const base = meta.branch || (await defaultBranch(gh.owner, gh.repo))
+        if (status.branch === base) {
+            return error(`current branch is the base branch (${base}) — create a branch first`, 400)
+        }
+
+        await git.push(params.project)
+        const commits = await git.unpushedCommits(params.project).catch(() => [])
+        const recent = await git.recentCommits(params.project, 10)
+        const listed = (commits.length ? commits : recent).map((c) => `- ${c.subject}`).join('\n')
+        const url = await createPull(gh.owner, gh.repo, {
+            title: body.title?.trim() || `taskforge: ${status.branch}`,
+            head: status.branch,
+            base,
+            body: body.body?.trim() || `Changes from TaskForge branch \`${status.branch}\`.\n\n${listed}`,
+        })
+        audit(auth, 'git.pr', params.project, url)
+        return json({ url })
+    } catch (e) {
+        if (e instanceof GithubError) return error(e.message, 502)
+        if (e instanceof git.GitError) return error(e.stderr || e.message, 500)
+        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        throw e
+    }
+}

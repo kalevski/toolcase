@@ -48,8 +48,11 @@ export interface MeResponse {
 
 export type TaskStatus = 'open' | 'done' | 'error'
 
-/** Runtime status of a task, merging on-disk header + live engine state. */
-export type TaskRuntimeStatus = 'pending' | 'running' | 'done' | 'error'
+/**
+ * Runtime status of a task, merging on-disk header + live engine state.
+ * `needs-review` (B8) renders a done task whose reviewer verdict was `fail`.
+ */
+export type TaskRuntimeStatus = 'pending' | 'running' | 'done' | 'error' | 'needs-review'
 
 export interface TaskInfo {
     /** Project-relative path within `tasks/`, e.g. `001-add-healthcheck.md`. Stable id. */
@@ -58,11 +61,22 @@ export interface TaskInfo {
     status: TaskRuntimeStatus
     severity?: string
     project?: string
+    /** Pinned model for this task (`**Model:**` facet) — overrides the run model. */
+    model?: string
+    /** Task ids/number prefixes this task depends on (`**Depends:**` facet, A4). */
+    depends?: string[]
     /** Last recorded attempt outcome from telemetry, if any. */
     lastElapsed?: number
     lastModel?: string
     lastCommit?: string
     lastError?: string
+    /** B2 — token/cost usage of the last attempt, when the CLI reported it. */
+    tokensIn?: number
+    tokensOut?: number
+    costUsd?: number
+    /** B8 — reviewer verdict of the last attempt. */
+    review?: 'pass' | 'fail'
+    reviewNote?: string
 }
 
 /** A repository knowledge/ doc — a source-anchored analysis of one topic. */
@@ -96,6 +110,62 @@ export interface ProjectSummary {
 export interface ProjectNavItem {
     name: string
     state: EngineState
+    /** True when a one-shot agent session (task-creator / knowledge-writer / note-writer) runs for the project. */
+    agentBusy?: boolean
+}
+
+// ── Notes ────────────────────────────────────────────────────────────────────
+
+/** A free-form `notes/*.md` doc at the project root (manual or agent-written). */
+export interface NoteDoc {
+    /** notes-relative path, e.g. `deploy-checklist.md`. Stable id. */
+    id: string
+    title: string
+    /** ISO mtime of the file, for relative-time display. */
+    updatedAt: string
+}
+
+// ── One-shot agent sessions ──────────────────────────────────────────────────
+
+/**
+ * Agent kind. The three bundled kinds are literal; C4 custom agent kinds widen
+ * this to any kebab-case string defined in the `agent_def` table.
+ */
+export type BundledAgentKind = 'task-creator' | 'knowledge-writer' | 'note-writer'
+export type AgentKind = string
+
+export const AGENT_KINDS: BundledAgentKind[] = ['task-creator', 'knowledge-writer', 'note-writer']
+
+/** C4 — post-processing hook a custom agent runs after it finishes. */
+export type AgentPost = 'none' | 'tasks' | 'knowledge' | 'notes'
+
+/** C4 — an admin-defined custom agent kind (`agent_def` table). */
+export interface AgentDef {
+    kind: string
+    label: string
+    /** Prepended to every user prompt for this agent. */
+    promptPreamble: string
+    /** Directory contract inside the project root the agent is pointed at. */
+    target: 'repo' | 'tasks' | 'knowledge' | 'notes' | 'project'
+    post: AgentPost
+    createdAt: string
+}
+
+export interface AgentSessionSnapshot {
+    project: string
+    agent: AgentKind
+    status: 'idle' | 'running'
+    startedAt: number | null
+    model: string | null
+    /** last submitted prompt (also persisted — see agent_prompt table) */
+    prompt: string | null
+}
+
+/** Latest persisted prompt per (project, agent) — survives restarts via SQLite. */
+export interface AgentPromptRecord {
+    prompt: string
+    model: string
+    usedAt: string
 }
 
 // ── Git ──────────────────────────────────────────────────────────────────────
@@ -135,8 +205,136 @@ export interface RunOptions {
     reset?: boolean
     /** drop only these task ids from `.status` (reset them to "open") before the run — used to re-run a single finished task without disturbing the rest of the ledger */
     resetTasks?: string[]
+    /** exact-id allowlist (A3 bulk re-run) — only these tasks are in scope */
+    onlyTasks?: string[]
     /** list invocations without executing */
     dryRun?: boolean
+    /** B4 — push the branch after a run that finishes with ≥1 done and 0 errors */
+    pushAfter?: boolean
+    /** B5 — create/switch to `taskforge/run-<id>` before the first task */
+    branchPerRun?: boolean
+    /** B8 — run a cheap reviewer pass over each task's commit diff */
+    review?: boolean
+    /** B7 — open a GitHub PR after a successful pushAfter (requires branchPerRun) */
+    openPr?: boolean
+    /** B1 — who triggered the run ('user:<login>' | 'schedule'); recorded on the run row */
+    startedBy?: string
+}
+
+// ── Run history (B1) ─────────────────────────────────────────────────────────
+
+export interface RunRecord {
+    id: number
+    project: string
+    startedAt: string
+    finishedAt: string | null
+    /** 'completed' | 'stopped' | 'force-stopped' | 'usage-limit' (null while running) */
+    reason: string | null
+    options: Partial<RunOptions>
+    done: number
+    error: number
+    total: number
+    startedBy: string | null
+    branch: string | null
+    prUrl: string | null
+    /** B2 — summed cost of telemetry rows recorded during the run, if any. */
+    costUsd: number | null
+}
+
+// ── Schedules (B3) ───────────────────────────────────────────────────────────
+
+export interface ScheduleRecord {
+    project: string
+    /** 5-field cron expression (min hour dom mon dow); supports wildcards, lists, ranges and step values. */
+    cron: string
+    options: Partial<RunOptions>
+    enabled: boolean
+    /** Fire only when at least one task is pending. */
+    onlyIfPending: boolean
+    /** Skip firing when any usage bucket is at/above this percent (null = no gate). */
+    skipAboveUsage: number | null
+    lastFiredAt: string | null
+}
+
+// ── Audit log (D3) ───────────────────────────────────────────────────────────
+
+export interface AuditRecord {
+    id: number
+    at: string
+    githubId: number | null
+    login: string | null
+    action: string
+    project: string | null
+    detail: string | null
+}
+
+// ── Workspace search (C3) ────────────────────────────────────────────────────
+
+export type SearchDocType = 'task' | 'knowledge' | 'note'
+
+export interface SearchHit {
+    type: SearchDocType
+    id: string
+    title: string
+    /** Highlighted snippet (FTS5 `snippet()`, `<mark>` delimited). */
+    snippet: string
+}
+
+// ── Per-project settings (E1) ────────────────────────────────────────────────
+
+/** Persisted per-project overrides; absent keys fall back to env config. */
+export interface ProjectSettings {
+    defaultModel?: string
+    commitAfter?: boolean
+    commitMessageMode?: CommitMessageMode
+    commitModel?: string
+    warmSession?: boolean
+    knowledgeAutoUpdate?: boolean
+    usageGateThreshold?: number
+    pushAfter?: boolean
+    branchPerRun?: boolean
+    review?: boolean
+    openPr?: boolean
+    /** D2 — per-event notification matrix (event keys, see NotifyEvent). */
+    notifyEvents?: string[]
+    /** D2 — generic outbound JSON webhook for the selected events. */
+    notifyWebhookUrl?: string
+}
+
+// ── Notifications (D2) ───────────────────────────────────────────────────────
+
+export type NotifyEvent = 'run:completed' | 'run:errored' | 'task:error' | 'limit' | 'agent:done'
+
+export const NOTIFY_EVENTS: NotifyEvent[] = [
+    'run:completed',
+    'run:errored',
+    'task:error',
+    'limit',
+    'agent:done',
+]
+
+// ── GitHub integration (B7 / E2) ─────────────────────────────────────────────
+
+export interface GithubIssue {
+    number: number
+    title: string
+    body: string
+    labels: string[]
+    url: string
+}
+
+// ── Health / diagnostics (D4) ────────────────────────────────────────────────
+
+export interface HealthDetails {
+    ok: boolean
+    agentBin: string
+    agentVersion: string | null
+    gitVersion: string | null
+    diskFree: { totalBytes: number; freeBytes: number } | null
+    db: { path: string; sizeBytes: number; migrationVersion: number }
+    engines: { project: string; state: EngineState }[]
+    searchAvailable: boolean
+    config: Record<string, string | number | boolean>
 }
 
 /** One commit, as listed for the git page (unpushed / recent history). */
@@ -148,7 +346,38 @@ export interface GitCommit {
     author: string
 }
 
-export type GitOp = 'fetch' | 'pull' | 'discard'
+export type GitOp = 'fetch' | 'pull' | 'discard' | 'stash-push' | 'stash-pop' | 'stash-drop'
+
+/** One working-tree entry from `git status --porcelain`, split per file. */
+export interface GitStatusFile {
+    path: string
+    /** Index (staged) status code, e.g. `M`, `A`, `?`. */
+    staged: string
+    /** Working-tree (unstaged) status code. */
+    unstaged: string
+}
+
+export interface GitBranchList {
+    local: string[]
+    remote: string[]
+    current: string
+}
+
+export interface GitStashEntry {
+    index: number
+    message: string
+    date: string
+}
+
+export interface GitCommitDetail {
+    commit: GitCommit
+    /** `git show --stat` summary block. */
+    stat: string
+    /** Unified patch, capped for transport. */
+    patch: string
+    /** True when the patch was truncated at the transport cap. */
+    patchTruncated: boolean
+}
 
 export interface RunSnapshot {
     project: string
@@ -178,8 +407,28 @@ export type SseEvent =
     | { type: 'transient'; taskId: string; attempt: number; delay: number }
     | { type: 'git' }
     | { type: 'knowledge' }
+    | { type: 'notes' }
     | { type: 'completed'; done: number; error: number; total: number; runId: number }
     | { type: 'stopped'; reason: string; runId: number }
+    | {
+          type: 'agent:state'
+          agent: AgentKind
+          status: 'idle' | 'running'
+          startedAt: number | null
+          model: string | null
+      }
+    | { type: 'agent:log'; agent: AgentKind; kind: TerminalKind; text: string }
+    | {
+          type: 'agent:done'
+          agent: AgentKind
+          ok: boolean
+          created: string[]
+          timedOut: boolean
+          /** True when the session was killed by the user (client toasts "killed", not "failed"). */
+          stopped?: boolean
+          /** Session start ts — stable toast-dedupe key across SSE reconnects. */
+          startedAt: number | null
+      }
 
 export type TerminalKind = 'output' | 'error' | 'comment'
 
@@ -193,6 +442,23 @@ export interface TelemetryRecord {
     commit?: string
     timestamp: string
     error?: string
+    /** B2 — usage reported by the CLI's final `result` frame. */
+    tokensIn?: number
+    tokensOut?: number
+    costUsd?: number
+    /** B8 — reviewer verdict for this attempt. */
+    review?: 'pass' | 'fail'
+    reviewNote?: string
+}
+
+/** D1 — aggregate rows for the telemetry dashboard. */
+export interface TelemetrySummary {
+    perDay: { date: string; done: number; error: number; costUsd: number }[]
+    perModel: { model: string; count: number; avgElapsed: number; costUsd: number }[]
+    slowest: { task: string; elapsed: number; model: string }[]
+    expensive: { task: string; costUsd: number; model: string }[]
+    retried: { task: string; attempts: number }[]
+    totals: { done: number; error: number; costUsd: number; tokensIn: number; tokensOut: number }
 }
 
 // ── Usage (claude /usage) ──────────────────────────────────────────────────────

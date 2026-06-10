@@ -1,37 +1,54 @@
 'use client'
 
-import React, { useState } from 'react'
-import {
-    Card,
-    Heading,
-    Text,
-    Table,
-    Tag,
-    Badge,
-    Button,
-    Select,
-    Textarea,
-    type TableColumn,
-} from '@toolcase/react-components'
+import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Card, Heading, Text, Table, Tag, Badge, Button, toast, type TableColumn } from '@toolcase/react-components'
 import type { KnowledgeDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
+import { usePrompt } from '../ConfirmModal'
 import { KnowledgeDrawer } from './KnowledgeDrawer'
+import { helpTexts } from '../helpTexts'
+
+const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
 
 export function KnowledgeClient() {
-    const {
-        project,
-        knowledge,
-        running,
-        knowledgePrompt,
-        setKnowledgePrompt,
-        knowledgeModel,
-        setKnowledgeModel,
-        modelOptions,
-        generatingKnowledge,
-        onAddKnowledge,
-        onRemoveKnowledge,
-    } = useProject()
+    const { project, knowledge, busy, onRemoveKnowledge, setKnowledge } = useProject()
+    const prompt = usePrompt()
+    const searchParams = useSearchParams()
     const [openDoc, setOpenDoc] = useState<string | null>(null)
+
+    // C3 — deep link from the search palette (?open=<id>)
+    useEffect(() => {
+        const open = searchParams.get('open')
+        if (open) setOpenDoc(open)
+    }, [searchParams])
+
+    // C2 — manual doc creation
+    const onNewDoc = async () => {
+        const slug = await prompt({
+            title: 'New knowledge doc',
+            label: 'Filename (kebab-case, .md is appended)',
+            placeholder: 'auth-flow',
+        })
+        if (!slug) return
+        if (!SLUG_RE.test(slug)) {
+            toast.error('Use lowercase letters, digits and dashes.')
+            return
+        }
+        const res = await fetch(`/api/projects/${project}/knowledge`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug, content: `# ${slug}\n\nOne-sentence summary goes here.\n\n` }),
+        })
+        if (!res.ok) {
+            toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to create doc')
+            return
+        }
+        const data = await res.json()
+        setKnowledge(data.docs)
+        setOpenDoc(data.id)
+        toast.success(`Created knowledge/${data.id}`)
+    }
 
     const columns: TableColumn<KnowledgeDoc>[] = [
         { key: 'id', header: 'File', width: '26%', render: (d) => <code>knowledge/{d.id}</code> },
@@ -57,7 +74,7 @@ export function KnowledgeClient() {
                         variant="danger"
                         outline
                         aria-label={`Remove ${d.id}`}
-                        disabled={running || generatingKnowledge}
+                        disabled={busy}
                         onClick={(e) => {
                             e.stopPropagation()
                             void onRemoveKnowledge(d.id)
@@ -71,47 +88,32 @@ export function KnowledgeClient() {
 
     return (
         <div className="tf-stack">
-            <Card header={<Heading as="h3">Knowledge base</Heading>}>
+            <Card
+                header={
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        <Heading as="h3">Knowledge base</Heading>
+                        <Button
+                            size="small"
+                            variant="primary"
+                            style={{ marginLeft: 'auto' }}
+                            disabled={busy}
+                            title={helpTexts.knowledge.newDoc}
+                            onClick={() => void onNewDoc()}
+                            startIcon={<span>＋</span>}
+                        >
+                            New doc
+                        </Button>
+                    </div>
+                }
+            >
                 <Table
                     columns={columns}
                     data={knowledge}
                     rowKey={(d) => d.id}
                     hoverable
-                    emptyMessage="No knowledge yet — describe an aspect of the repo to analyze below."
+                    emptyMessage="No knowledge yet — use the knowledge analyzer on the Agents page, or create a doc by hand."
                     onRowClick={(d) => setOpenDoc(d.id)}
                 />
-            </Card>
-
-            <Card header={<Heading as="h3">Knowledge analyzer</Heading>}>
-                <div className="tf-card-body tf-stack-sm">
-                    <Textarea
-                        label="Describe what to analyze — Claude reads the repo source, picks a filename, and writes one doc."
-                        rows={4}
-                        placeholder="e.g. How does the SSE streaming pipeline deliver run logs to the client?"
-                        value={knowledgePrompt}
-                        disabled={generatingKnowledge || running}
-                        onChange={(e) => setKnowledgePrompt(e.target.value)}
-                    />
-                    <div className="tf-form-row">
-                        <div style={{ minWidth: 200 }}>
-                            <Select
-                                label="Model"
-                                options={modelOptions}
-                                value={knowledgeModel}
-                                disabled={generatingKnowledge || running}
-                                onChange={(e) => setKnowledgeModel(e.target.value)}
-                            />
-                        </div>
-                        <Button
-                            variant="primary"
-                            loading={generatingKnowledge}
-                            disabled={running || !knowledgePrompt.trim()}
-                            onClick={onAddKnowledge}
-                        >
-                            Analyze &amp; add doc
-                        </Button>
-                    </div>
-                </div>
             </Card>
 
             {knowledge.length > 0 && (

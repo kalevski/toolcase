@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import {
     Card,
     Heading,
@@ -13,20 +14,24 @@ import {
     IconButton,
     ProgressBar,
     Badge,
-    AnnouncementBar,
+    HelperText,
+    Tooltip,
     TerminalWindow,
     toast,
 } from '@toolcase/react-components'
 import type { CommitMessageMode } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
+import { ScheduleCard } from './ScheduleCard'
+import { helpTexts } from '../helpTexts'
 
 export function RunClient() {
     const {
         project,
+        config,
         snapshot,
         lines,
-        wakeAt,
         running,
+        busy,
         progressPct,
         startDisabled,
         modelOptions,
@@ -40,6 +45,14 @@ export function RunClient() {
         setCommitMode,
         commitModel,
         setCommitModel,
+        pushAfter,
+        setPushAfter,
+        branchPerRun,
+        setBranchPerRun,
+        review,
+        setReview,
+        openPr,
+        setOpenPr,
         filter,
         setFilter,
         severity,
@@ -57,8 +70,10 @@ export function RunClient() {
         onStart,
         onStop,
         onForce,
+        onSkipCurrent,
         onResetToggle,
     } = useProject()
+    const router = useRouter()
 
     const logText = () => lines.map((l) => l.text).join('\n')
 
@@ -83,14 +98,6 @@ export function RunClient() {
 
     return (
         <div className="tf-stack">
-            {snapshot.state === 'SLEEPING' && wakeAt && (
-                <AnnouncementBar
-                    variant="warning"
-                    iconName="moon"
-                    message={`Usage limit hit — sleeping until ~${new Date(wakeAt).toLocaleTimeString()}, will resume the current task.`}
-                />
-            )}
-
             <Card>
                 <div className="tf-card-body tf-stack">
                     <Heading as="h3">Run configuration</Heading>
@@ -100,22 +107,30 @@ export function RunClient() {
                                 label="Model"
                                 options={modelOptions}
                                 value={model}
-                                disabled={running}
+                                disabled={busy}
                                 onChange={(e) => setModel(e.target.value)}
                             />
                         </div>
-                        <Switch
-                            label="Warm session"
-                            checked={warmSession}
-                            disabled={running}
-                            onChange={(e) => setWarmSession(e.target.checked)}
-                        />
-                        <Switch
-                            label="Commit after each task"
-                            checked={commitAfter}
-                            disabled={running}
-                            onChange={(e) => setCommitAfter(e.target.checked)}
-                        />
+                        <Tooltip content={helpTexts.run.warmSession}>
+                            <span>
+                                <Switch
+                                    label="Warm session"
+                                    checked={warmSession}
+                                    disabled={busy}
+                                    onChange={(e) => setWarmSession(e.target.checked)}
+                                />
+                            </span>
+                        </Tooltip>
+                        <Tooltip content={helpTexts.run.commitAfter}>
+                            <span>
+                                <Switch
+                                    label="Commit after each task"
+                                    checked={commitAfter}
+                                    disabled={busy}
+                                    onChange={(e) => setCommitAfter(e.target.checked)}
+                                />
+                            </span>
+                        </Tooltip>
                         {commitAfter && (
                             <>
                                 <RadioGroup
@@ -134,7 +149,7 @@ export function RunClient() {
                                             label="Commit model"
                                             options={modelOptions}
                                             value={commitModel}
-                                            disabled={running}
+                                            disabled={busy}
                                             onChange={(e) => setCommitModel(e.target.value)}
                                         />
                                     </div>
@@ -143,47 +158,101 @@ export function RunClient() {
                         )}
                     </div>
                     <div className="tf-form-row">
+                        <Tooltip content={helpTexts.run.branchPerRun}>
+                            <span>
+                                <Switch
+                                    label="Branch per run"
+                                    checked={branchPerRun}
+                                    disabled={busy}
+                                    onChange={(e) => setBranchPerRun(e.target.checked)}
+                                />
+                            </span>
+                        </Tooltip>
+                        <Tooltip content={helpTexts.run.pushAfter}>
+                            <span>
+                                <Switch
+                                    label="Push after run"
+                                    checked={pushAfter}
+                                    disabled={busy || !config.canPush}
+                                    onChange={(e) => setPushAfter(e.target.checked)}
+                                />
+                            </span>
+                        </Tooltip>
+                        {branchPerRun && pushAfter && (
+                            <Tooltip content={helpTexts.run.openPr}>
+                                <span>
+                                    <Switch
+                                        label="Open PR"
+                                        checked={openPr}
+                                        disabled={busy}
+                                        onChange={(e) => setOpenPr(e.target.checked)}
+                                    />
+                                </span>
+                            </Tooltip>
+                        )}
+                        <Tooltip content={helpTexts.run.review}>
+                            <span>
+                                <Switch
+                                    label="Reviewer pass"
+                                    checked={review}
+                                    disabled={busy}
+                                    onChange={(e) => setReview(e.target.checked)}
+                                />
+                            </span>
+                        </Tooltip>
+                    </div>
+                    <div className="tf-form-row">
                         <Input
                             label="Task filter"
                             placeholder="substring of path"
                             value={filter}
-                            disabled={running}
+                            disabled={busy}
                             onChange={(e) => setFilter(e.target.value)}
                         />
                         <Input
                             label="Severity (CSV)"
                             placeholder="high,critical"
                             value={severity}
-                            disabled={running}
+                            disabled={busy}
                             onChange={(e) => setSeverity(e.target.value)}
                         />
                         <Input
                             label="Project (CSV)"
                             placeholder="api,web"
                             value={projectFilter}
-                            disabled={running}
+                            disabled={busy}
                             onChange={(e) => setProjectFilter(e.target.value)}
                         />
                         <Input
                             label="Resume from"
                             placeholder="003-"
                             value={resumeFrom}
-                            disabled={running}
+                            disabled={busy}
                             onChange={(e) => setResumeFrom(e.target.value)}
                         />
-                        <Switch
-                            label="Re-run all (reset)"
-                            checked={reset}
-                            disabled={running}
-                            onChange={(e) => onResetToggle(e.target.checked)}
-                        />
-                        <Switch
-                            label="Preview (dry run)"
-                            checked={dryRun}
-                            disabled={running}
-                            onChange={(e) => setDryRun(e.target.checked)}
-                        />
+                        <Tooltip content={helpTexts.run.reset}>
+                            <span>
+                                <Switch
+                                    label="Re-run all (reset)"
+                                    checked={reset}
+                                    disabled={busy}
+                                    onChange={(e) => onResetToggle(e.target.checked)}
+                                />
+                            </span>
+                        </Tooltip>
+                        <Tooltip content={helpTexts.run.dryRun}>
+                            <span>
+                                <Switch
+                                    label="Preview (dry run)"
+                                    checked={dryRun}
+                                    disabled={busy}
+                                    onChange={(e) => setDryRun(e.target.checked)}
+                                />
+                            </span>
+                        </Tooltip>
                     </div>
+
+                    <HelperText text={helpTexts.run.filter} />
 
                     <Text variant="muted">
                         {matchingCount === 0
@@ -205,6 +274,13 @@ export function RunClient() {
                                     disabled={snapshot.state === 'STOPPING'}
                                     onClick={onStop}
                                 />
+                                <IconButton
+                                    icon="skip-forward"
+                                    label="Skip current task"
+                                    variant="warning"
+                                    disabled={snapshot.state !== 'RUNNING'}
+                                    onClick={onSkipCurrent}
+                                />
                                 <IconButton icon="stop-fill" label="Force stop" variant="danger" onClick={onForce} />
                             </>
                         )}
@@ -216,9 +292,16 @@ export function RunClient() {
                             />
                         </div>
                         <Badge variant={running ? 'info' : 'secondary'}>{snapshot.state}</Badge>
+                        <Tooltip content={helpTexts.run.history}>
+                            <Button size="small" variant="secondary" outline onClick={() => router.push(`/projects/${project}/runs`)}>
+                                ⏱ Run history
+                            </Button>
+                        </Tooltip>
                     </div>
                 </div>
             </Card>
+
+            <ScheduleCard />
 
             <div className="tf-stack-sm">
                 <div className="tf-actions" style={{ justifyContent: 'flex-end' }}>

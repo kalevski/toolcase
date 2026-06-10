@@ -14,6 +14,8 @@ export interface TaskRow {
     status: TaskStatus
     severity?: string
     project?: string // the task's **Project:** facet (NOT the workspace project)
+    model?: string // pinned per-task model (**Model:** facet)
+    depends?: string[] // A4 — **Depends:** facet (stored as CSV)
     error?: string
 }
 
@@ -23,17 +25,27 @@ interface Raw {
     status: string
     severity: string | null
     facet_project: string | null
+    model: string | null
+    depends: string | null
     last_error: string | null
 }
 
 function map(r: Raw): TaskRow {
     const status = (r.status === 'done' || r.status === 'error' ? r.status : 'open') as TaskStatus
+    const depends = r.depends
+        ? r.depends
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+        : undefined
     return {
         id: r.id,
         title: r.title,
         status,
         severity: r.severity ?? undefined,
         project: r.facet_project ?? undefined,
+        model: r.model ?? undefined,
+        depends: depends?.length ? depends : undefined,
         error: r.last_error ?? undefined,
     }
 }
@@ -43,6 +55,8 @@ export interface ParsedMeta {
     status: TaskStatus
     severity?: string
     project?: string
+    model?: string
+    depends?: string[]
     error?: string
 }
 
@@ -53,12 +67,14 @@ export interface ParsedMeta {
  */
 export function syncTask(project: string, id: string, meta: ParsedMeta, mtimeMs: number): void {
     prep(
-        `INSERT INTO task (project, id, title, severity, facet_project, status, last_error, synced_mtime, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO task (project, id, title, severity, facet_project, model, depends, status, last_error, synced_mtime, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(project, id) DO UPDATE SET
             title         = excluded.title,
             severity      = excluded.severity,
             facet_project = excluded.facet_project,
+            model         = excluded.model,
+            depends       = excluded.depends,
             synced_mtime  = excluded.synced_mtime,
             updated_at    = excluded.updated_at`,
     ).run(
@@ -67,6 +83,8 @@ export function syncTask(project: string, id: string, meta: ParsedMeta, mtimeMs:
         meta.title,
         meta.severity ?? null,
         meta.project ?? null,
+        meta.model ?? null,
+        meta.depends?.length ? meta.depends.join(',') : null,
         meta.status,
         meta.error ?? null,
         mtimeMs,
@@ -89,15 +107,20 @@ export function syncedMtime(project: string, id: string): number | null {
     return r ? r.synced_mtime : null
 }
 
-/** Remove rows whose markdown file no longer exists. */
-export function pruneMissing(project: string, presentIds: string[]): void {
-    tx(() => {
+/** Remove rows whose markdown file no longer exists; returns the removed ids. */
+export function pruneMissing(project: string, presentIds: string[]): string[] {
+    return tx(() => {
         const existing = allRows<{ id: string }>('SELECT id FROM task WHERE project = ?', project)
         const keep = new Set(presentIds)
         const del = prep('DELETE FROM task WHERE project = ? AND id = ?')
+        const removed: string[] = []
         for (const row of existing) {
-            if (!keep.has(row.id)) del.run(project, row.id)
+            if (!keep.has(row.id)) {
+                del.run(project, row.id)
+                removed.push(row.id)
+            }
         }
+        return removed
     })
 }
 
@@ -110,14 +133,14 @@ export function setStatus(project: string, id: string, status: TaskStatus, error
 
 export function listTasks(project: string): TaskRow[] {
     return allRows<Raw>(
-        'SELECT id, title, status, severity, facet_project, last_error FROM task WHERE project = ? ORDER BY id',
+        'SELECT id, title, status, severity, facet_project, model, depends, last_error FROM task WHERE project = ? ORDER BY id',
         project,
     ).map(map)
 }
 
 export function getTask(project: string, id: string): TaskRow | null {
     const r = getRow<Raw>(
-        'SELECT id, title, status, severity, facet_project, last_error FROM task WHERE project = ? AND id = ?',
+        'SELECT id, title, status, severity, facet_project, model, depends, last_error FROM task WHERE project = ? AND id = ?',
         project,
         id,
     )

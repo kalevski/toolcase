@@ -1,13 +1,17 @@
-import { guard, json, error } from '@/server/web/http'
-import { engine } from '@/server/services/execution-manager'
-import { addKnowledge } from '@/server/services/knowledge'
+import { guard, json, error, audit } from '@/server/web/http'
 import { getKnowledge } from '@/server/services/projects'
-import { config } from '@/server/config'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import {
+    projectExists,
+    writeKnowledgeFile,
+    listKnowledgeFiles,
+    UnsafePathError,
+} from '@/server/infrastructure/fs-workspace'
+import { rebuildIndex } from '@/server/services/knowledge'
+import { engine } from '@/server/services/execution-manager'
+import { agentSessions } from '@/server/services/agent-sessions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const maxDuration = 300
 
 export async function GET(_req: Request, { params }: { params: { project: string } }) {
     const auth = await guard('standard')
@@ -21,23 +25,33 @@ export async function GET(_req: Request, { params }: { params: { project: string
     }
 }
 
+const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
+
+/** C2 — manual knowledge-doc creation: `{ slug, content }` → `<slug>.md`. */
 export async function POST(req: Request, { params }: { params: { project: string } }) {
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     try {
         if (!(await projectExists(params.project))) return error('project not found', 404)
-        // don't write to the working tree while a run holds the lock
-        if (engine.isLocked(params.project)) return error('run in progress', 409)
-
-        const body = (await req.json().catch(() => ({}))) as { prompt?: string; model?: string }
-        if (!body.prompt || !body.prompt.trim()) return error('prompt required', 400)
-
-        const model = body.model || config.defaultModel
-        if (!config.modelCatalog.includes(model)) return error(`model not in catalog: ${model}`, 400)
-
-        const result = await addKnowledge(params.project, body.prompt.trim(), model)
-        const docs = await getKnowledge(params.project)
-        return json({ created: result.files, timedOut: result.timedOut, docs })
+        if (
+            engine.isLocked(params.project) ||
+            agentSessions.snapshot(params.project, 'knowledge-writer').status === 'running'
+        ) {
+            return error('run or knowledge agent in progress', 409)
+        }
+        const body = (await req.json().catch(() => ({}))) as { slug?: string; content?: string }
+        if (!body.slug || !SLUG_RE.test(body.slug)) return error('slug must be kebab-case', 400)
+        if (body.slug === 'index') return error('index is managed automatically', 400)
+        if (typeof body.content !== 'string' || !body.content.trim()) return error('content required', 400)
+        const id = `${body.slug}.md`
+        const existing = await listKnowledgeFiles(params.project)
+        if (existing.some((f) => f.toLowerCase() === id.toLowerCase())) {
+            return error(`${id} already exists`, 409)
+        }
+        await writeKnowledgeFile(params.project, id, body.content)
+        await rebuildIndex(params.project)
+        audit(auth, 'knowledge.create', params.project, id)
+        return json({ id, docs: await getKnowledge(params.project) }, 201)
     } catch (e) {
         if (e instanceof UnsafePathError) return error('invalid name', 400)
         throw e

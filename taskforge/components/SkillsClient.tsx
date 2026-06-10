@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Heading, Button, Table, IconButton, EmptyState, toast, type TableColumn } from '@toolcase/react-components'
+import { Heading, Button, Table, IconButton, EmptyState, HelperText, toast, type TableColumn } from '@toolcase/react-components'
 import type { SkillSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
+import { helpTexts } from './helpTexts'
 
 export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
     const router = useRouter()
@@ -53,6 +54,8 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
                     New skill
                 </Button>
             </div>
+
+            <HelperText text={helpTexts.skills.shared} />
 
             {rows.length === 0 ? (
                 <EmptyState icon="lightbulb">

@@ -1,4 +1,4 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, audit } from '@/server/web/http'
 import { getProjectSummaries } from '@/server/services/projects'
 import { createProject, ProjectExistsError } from '@/server/services/provision'
 import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
 
     try {
         await createProject({ name, gitUrl, branch })
+        audit(auth, 'project.create', name, gitUrl)
         return json({ name }, 201)
     } catch (e) {
         if (e instanceof ProjectExistsError) return error('project already exists', 409)

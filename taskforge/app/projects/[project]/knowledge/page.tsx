@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { KnowledgeClient } from '@/components/project/KnowledgeClient'
 import type { Metadata } from 'next'
 
@@ -9,5 +10,10 @@ export function generateMetadata({ params }: { params: { project: string } }): M
 }
 
 export default function RepoKnowledgePage() {
-    return <KnowledgeClient />
+    // useSearchParams (?open= deep link from search) requires a Suspense boundary.
+    return (
+        <Suspense>
+            <KnowledgeClient />
+        </Suspense>
+    )
 }

@@ -92,18 +92,15 @@ export async function rebuildIndex(project: string): Promise<void> {
 }
 
 /**
- * Analyze one user-named topic: the agent picks a filename and writes a single
- * source-anchored doc under `knowledge/`. The index is then rebuilt to include it.
+ * Assemble the knowledge-writer prompt for one user-named topic (cwd = project
+ * root). The agent run itself is owned by the AgentSessionManager (streaming).
  */
-export async function addKnowledge(
+export async function buildKnowledgeWriterPrompt(
     project: string,
     topic: string,
-    model: string = config.defaultModel,
-): Promise<KnowledgeResult> {
+): Promise<{ cwd: string; prompt: string }> {
     const cwd = projectPath(project)
     await fs.mkdir(projectKnowledgeDir(project), { recursive: true })
-
-    const before = new Set(await listKnowledgeFiles(project))
     const body = await skillBody()
 
     const prompt = [
@@ -116,19 +113,7 @@ export async function addKnowledge(
         topic,
     ].join('\n')
 
-    const res = await runAgentOnce({
-        cwd,
-        model,
-        prompt,
-        timeoutMs: config.knowledgeTimeoutMs,
-        extraArgs: AGENT_ARGS,
-    })
-
-    await rebuildIndex(project)
-
-    const after = await listKnowledgeFiles(project)
-    const created = after.filter((f) => f.toLowerCase() !== INDEX_ID && !before.has(f))
-    return { files: created, stdout: res.stdout, timedOut: res.timedOut }
+    return { cwd, prompt }
 }
 
 /** Remove a single knowledge doc, then rebuild the index. The index itself is not removable. */

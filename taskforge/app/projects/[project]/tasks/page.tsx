@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { TasksClient } from '@/components/project/TasksClient'
 import type { Metadata } from 'next'
 
@@ -9,5 +10,10 @@ export function generateMetadata({ params }: { params: { project: string } }): M
 }
 
 export default function RepoTasksPage() {
-    return <TasksClient />
+    // useSearchParams (?open= deep link from search) requires a Suspense boundary.
+    return (
+        <Suspense>
+            <TasksClient />
+        </Suspense>
+    )
 }

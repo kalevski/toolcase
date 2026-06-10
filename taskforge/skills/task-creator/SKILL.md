@@ -21,7 +21,14 @@ the queue directory for a single repository.
 - Each file must contain, in this order:
   1. An H1 title: `# <Imperative title>`
   2. A status line: `**Status:** open`
-  3. Optionally `**Severity:** low|medium|high|critical` and `**Project:** <name>`
+  3. Optionally `**Severity:** low|medium|high|critical` and `**Project:** <name>`.
+     You MAY also add `**Model:** fast|mid|deep` (or a full model slug) when the
+     request implies a per-task model (e.g. "use opus for the refactor tasks") —
+     it overrides the run-wide model for that task only. Not required.
+     When a task genuinely cannot run before another one finished (e.g. it builds
+     on a schema another task introduces), you MAY add `**Depends:** <NNN>[, <NNN>…]`
+     listing the task numbers it needs; the executor leaves it pending until every
+     dependency is done. Use sparingly — prefer independent tasks.
   4. A `## Problem` section (1–3 sentences of context)
   5. A `## Task` section: the concrete, verifiable work to do.
 - Keep each task tightly scoped. Prefer more small tasks over one large one.

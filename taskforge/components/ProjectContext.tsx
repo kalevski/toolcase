@@ -3,17 +3,26 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { toast, type TerminalLine } from '@toolcase/react-components'
 import type {
+    AgentKind,
+    AgentPromptRecord,
     CommitMessageMode,
     EngineState,
     GitCommit,
     GitOp,
     GitStatus,
     KnowledgeDoc,
+    NoteDoc,
     RunSnapshot,
     SseEvent,
     TaskInfo,
 } from '@/server/domain/types'
 import { useConfirm, usePrompt } from './ConfirmModal'
+
+export interface AgentKindInfo {
+    kind: AgentKind
+    label: string
+    custom: boolean
+}
 
 export interface ProjectConfig {
     modelCatalog: string[]
@@ -23,9 +32,34 @@ export interface ProjectConfig {
     commitModel: string
     warmSession: boolean
     canPush: boolean
+    /** E1 — per-project effective defaults for the new run toggles. */
+    pushAfter: boolean
+    branchPerRun: boolean
+    review: boolean
+    openPr: boolean
+    /** C4 — bundled + custom agent kinds (drives Agents page tabs). */
+    agentKinds: AgentKindInfo[]
+}
+
+export const AGENT_LABELS: Record<string, string> = {
+    'task-creator': 'Task creator',
+    'knowledge-writer': 'Knowledge analyzer',
+    'note-writer': 'Notes agent',
 }
 
 const TERMINAL_MAX = 1500
+const AGENT_TERMINAL_MAX = 500
+
+export interface AgentSessionState {
+    status: 'idle' | 'running'
+    startedAt: number | null
+    model: string | null
+}
+
+export interface AgentDraft {
+    prompt: string
+    model: string
+}
 
 interface ProjectContextValue {
     project: string
@@ -34,11 +68,26 @@ interface ProjectContextValue {
     // live state
     tasks: TaskInfo[]
     knowledge: KnowledgeDoc[]
+    notes: NoteDoc[]
     snapshot: RunSnapshot
     git: GitStatus | null
     commits: { unpushed: GitCommit[]; recent: GitCommit[] }
     lines: TerminalLine[]
     wakeAt: number | null
+
+    // one-shot agent sessions (§3)
+    agentSessions: Record<AgentKind, AgentSessionState>
+    agentLines: Record<AgentKind, TerminalLine[]>
+    drafts: Record<AgentKind, AgentDraft>
+    setDraft: (kind: AgentKind, patch: Partial<AgentDraft>) => void
+    lastPrompts: Record<AgentKind, AgentPromptRecord | null>
+    anyAgentRunning: boolean
+    /** Executor or any agent session running — drives every disabled= gate. */
+    busy: boolean
+    onStartAgent: (kind: AgentKind, opts?: { targetNote?: string }) => Promise<boolean>
+    /** Kill the running agent session (confirm included). */
+    onStopAgent: (kind: AgentKind) => Promise<void>
+    clearAgentLines: (kind: AgentKind) => void
 
     // derived
     idle: boolean
@@ -63,6 +112,15 @@ interface ProjectContextValue {
     setCommitMode: (v: CommitMessageMode) => void
     commitModel: string
     setCommitModel: (v: string) => void
+    // B4/B5/B7/B8 — run toggles
+    pushAfter: boolean
+    setPushAfter: (v: boolean) => void
+    branchPerRun: boolean
+    setBranchPerRun: (v: boolean) => void
+    review: boolean
+    setReview: (v: boolean) => void
+    openPr: boolean
+    setOpenPr: (v: boolean) => void
     filter: string
     setFilter: (v: string) => void
     severity: string
@@ -77,21 +135,13 @@ interface ProjectContextValue {
     dryRun: boolean
     setDryRun: (v: boolean) => void
 
-    // task creator
-    genPrompt: string
-    setGenPrompt: (v: string) => void
-    genModel: string
-    setGenModel: (v: string) => void
-    generating: boolean
-
     // knowledge base
-    knowledgePrompt: string
-    setKnowledgePrompt: (v: string) => void
-    knowledgeModel: string
-    setKnowledgeModel: (v: string) => void
-    generatingKnowledge: boolean
-    onAddKnowledge: () => Promise<void>
     onRemoveKnowledge: (id: string) => Promise<void>
+    refreshKnowledge: () => Promise<void>
+
+    // notes
+    refreshNotes: () => Promise<void>
+    setNotes: React.Dispatch<React.SetStateAction<NoteDoc[]>>
 
     // terminal
     clearLines: () => void
@@ -99,18 +149,23 @@ interface ProjectContextValue {
     // actions
     onStart: () => Promise<void>
     onReRunTask: (id: string) => Promise<void>
+    /** A3 — start a run scoped to exactly these task ids (bulk re-run). */
+    onRunTasks: (ids: string[]) => Promise<void>
     onStop: () => Promise<void>
     onForce: () => Promise<void>
+    /** Kill only the in-flight task; the run continues with the next (confirm included). */
+    onSkipCurrent: () => Promise<void>
     onNewBranch: () => Promise<void>
     onPush: () => Promise<void>
     onGitOp: (op: GitOp) => Promise<void>
     loadCommits: () => Promise<void>
+    refreshGit: () => Promise<void>
     onResetToggle: (checked: boolean) => Promise<void>
-    onGenerate: () => Promise<void>
     /** Move every errored task back to pending so the next run retries them. */
     onResetErrors: () => Promise<void>
     setTasks: React.Dispatch<React.SetStateAction<TaskInfo[]>>
     setKnowledge: React.Dispatch<React.SetStateAction<KnowledgeDoc[]>>
+    refresh: () => Promise<void>
 }
 
 const Ctx = createContext<ProjectContextValue | null>(null)
@@ -121,20 +176,34 @@ export function useProject(): ProjectContextValue {
     return ctx
 }
 
+function agentRecord<T>(kinds: AgentKindInfo[], make: () => T): Record<AgentKind, T> {
+    const out: Record<AgentKind, T> = {}
+    for (const k of kinds) out[k.kind] = make()
+    // bundled three are always present even if the kinds list is stale
+    for (const k of ['task-creator', 'knowledge-writer', 'note-writer']) {
+        if (!(k in out)) out[k] = make()
+    }
+    return out
+}
+
 export function ProjectProvider({
     project,
     initialTasks,
     initialKnowledge,
+    initialNotes,
     initialSnapshot,
     initialGit,
+    initialAgentPrompts,
     config,
     children,
 }: {
     project: string
     initialTasks: TaskInfo[]
     initialKnowledge: KnowledgeDoc[]
+    initialNotes: NoteDoc[]
     initialSnapshot: RunSnapshot
     initialGit: GitStatus | null
+    initialAgentPrompts: Partial<Record<AgentKind, AgentPromptRecord>>
     config: ProjectConfig
     children: React.ReactNode
 }) {
@@ -143,6 +212,7 @@ export function ProjectProvider({
 
     const [tasks, setTasks] = useState<TaskInfo[]>(initialTasks)
     const [knowledge, setKnowledge] = useState<KnowledgeDoc[]>(initialKnowledge)
+    const [notes, setNotes] = useState<NoteDoc[]>(initialNotes)
     const [snapshot, setSnapshot] = useState<RunSnapshot>(initialSnapshot)
     const [git, setGit] = useState<GitStatus | null>(initialGit)
     const [commits, setCommits] = useState<{ unpushed: GitCommit[]; recent: GitCommit[] }>({
@@ -152,7 +222,7 @@ export function ProjectProvider({
     const [lines, setLines] = useState<TerminalLine[]>([])
     const [wakeAt, setWakeAt] = useState<number | null>(initialSnapshot.wakeAt)
     // Keys of toasts already fired, so a reconnect/ring-replay never re-toasts the
-    // same commit / run-complete / run-stopped message.
+    // same commit / run-complete / agent-done message.
     const toastedKeys = useRef<Set<string>>(new Set())
 
     // run config
@@ -172,6 +242,10 @@ export function ProjectProvider({
     const [commitAfter, setCommitAfter] = useState(config.commitAfter)
     const [commitMode, setCommitMode] = useState<CommitMessageMode>(config.commitMessageMode)
     const [commitModel, setCommitModel] = useState(config.commitModel)
+    const [pushAfter, setPushAfter] = useState(config.pushAfter)
+    const [branchPerRun, setBranchPerRun] = useState(config.branchPerRun)
+    const [review, setReview] = useState(config.review)
+    const [openPr, setOpenPr] = useState(config.openPr)
     const [filter, setFilter] = useState('')
     const [severity, setSeverity] = useState('')
     const [projectFilter, setProjectFilter] = useState('')
@@ -179,18 +253,32 @@ export function ProjectProvider({
     const [reset, setReset] = useState(false)
     const [dryRun, setDryRun] = useState(false)
 
-    // task creator
-    const [genPrompt, setGenPrompt] = useState('')
-    const [genModel, setGenModel] = useState(config.defaultModel)
-    const [generating, setGenerating] = useState(false)
+    // one-shot agent sessions (§3): live status + per-agent terminal + drafts
+    const [agentSessions, setAgentSessions] = useState<Record<AgentKind, AgentSessionState>>(() =>
+        agentRecord(config.agentKinds, () => ({ status: 'idle' as const, startedAt: null, model: null })),
+    )
+    const [agentLines, setAgentLines] = useState<Record<AgentKind, TerminalLine[]>>(() =>
+        agentRecord(config.agentKinds, () => []),
+    )
+    const [drafts, setDrafts] = useState<Record<AgentKind, AgentDraft>>(() =>
+        agentRecord(config.agentKinds, () => ({ prompt: '', model: config.defaultModel })),
+    )
+    const [lastPrompts, setLastPrompts] = useState<Record<AgentKind, AgentPromptRecord | null>>(() => {
+        const out = agentRecord<AgentPromptRecord | null>(config.agentKinds, () => null)
+        for (const [kind, rec] of Object.entries(initialAgentPrompts)) {
+            if (rec) out[kind] = rec
+        }
+        return out
+    })
 
-    // knowledge base
-    const [knowledgePrompt, setKnowledgePrompt] = useState('')
-    const [knowledgeModel, setKnowledgeModel] = useState(config.defaultModel)
-    const [generatingKnowledge, setGeneratingKnowledge] = useState(false)
+    const setDraft = useCallback((kind: AgentKind, patch: Partial<AgentDraft>) => {
+        setDrafts((prev) => ({ ...prev, [kind]: { ...prev[kind], ...patch } }))
+    }, [])
 
     const idle = snapshot.state === 'IDLE'
     const running = !idle
+    const anyAgentRunning = Object.values(agentSessions).some((s) => s.status === 'running')
+    const busy = running || anyAgentRunning
 
     // Restore the last-used model for this project. localStorage is client-only,
     // so this runs in an effect (SSR has no localStorage); persistence on change
@@ -224,6 +312,24 @@ export function ProjectProvider({
         }
     }, [project])
 
+    const refreshNotes = useCallback(async () => {
+        try {
+            const docs = await fetch(`/api/projects/${project}/notes`).then((r) => (r.ok ? r.json() : null))
+            if (docs) setNotes(docs)
+        } catch {
+            /* transient */
+        }
+    }, [project])
+
+    const refreshGit = useCallback(async () => {
+        try {
+            const g = await fetch(`/api/projects/${project}/git`).then((r) => (r.ok ? r.json() : null))
+            if (g) setGit(g)
+        } catch {
+            /* transient */
+        }
+    }, [project])
+
     const appendLine = useCallback((line: TerminalLine) => {
         setLines((prev) => {
             const next = prev.length >= TERMINAL_MAX ? prev.slice(prev.length - TERMINAL_MAX + 1) : prev
@@ -231,7 +337,18 @@ export function ProjectProvider({
         })
     }, [])
 
+    const appendAgentLine = useCallback((kind: AgentKind, line: TerminalLine) => {
+        setAgentLines((prev) => {
+            const cur = prev[kind] ?? [] // custom kind may appear mid-session
+            const trimmed = cur.length >= AGENT_TERMINAL_MAX ? cur.slice(cur.length - AGENT_TERMINAL_MAX + 1) : cur
+            return { ...prev, [kind]: [...trimmed, line] }
+        })
+    }, [])
+
     const clearLines = useCallback(() => setLines([]), [])
+    const clearAgentLines = useCallback((kind: AgentKind) => {
+        setAgentLines((prev) => ({ ...prev, [kind]: [] }))
+    }, [])
 
     const loadCommits = useCallback(async () => {
         try {
@@ -285,14 +402,47 @@ export function ProjectProvider({
                     setWakeAt(event.wakeAt)
                     break
                 case 'git':
-                    fetch(`/api/projects/${project}/git`)
-                        .then((r) => (r.ok ? r.json() : null))
-                        .then((g) => g && setGit(g))
-                        .catch(() => {})
+                    void refreshGit()
                     break
                 case 'knowledge':
                     void refreshKnowledge()
                     break
+                case 'notes':
+                    void refreshNotes()
+                    break
+                case 'agent:state':
+                    setAgentSessions((prev) => ({
+                        ...prev,
+                        [event.agent]: { status: event.status, startedAt: event.startedAt, model: event.model },
+                    }))
+                    break
+                case 'agent:log':
+                    appendAgentLine(event.agent, { kind: event.kind, text: event.text })
+                    break
+                case 'agent:done': {
+                    const label =
+                        AGENT_LABELS[event.agent] ??
+                        config.agentKinds.find((k) => k.kind === event.agent)?.label ??
+                        event.agent
+                    toastOnce(`agent:done:${event.agent}:${event.startedAt ?? 'x'}`, () => {
+                        if (event.stopped) toast.info(`${label} killed`)
+                        else if (event.timedOut) toast.error(`${label} timed out`)
+                        else if (!event.ok) toast.error(`${label} failed`)
+                        else if (event.created.length > 0)
+                            toast.success(`${label}: created ${event.created.length} file(s)`)
+                        else toast.success(`${label} finished`)
+                    })
+                    if (event.agent === 'task-creator') void refresh()
+                    else if (event.agent === 'knowledge-writer') void refreshKnowledge()
+                    else if (event.agent === 'note-writer') void refreshNotes()
+                    else {
+                        // custom kind (C4) — its post hook may touch any corpus
+                        void refresh()
+                        void refreshKnowledge()
+                        void refreshNotes()
+                    }
+                    break
+                }
                 case 'completed':
                     toastOnce(`completed:${event.runId}`, () =>
                         toast.success(`Run complete — ${event.done} done, ${event.error} error`),
@@ -311,7 +461,7 @@ export function ProjectProvider({
             /* browser auto-reconnects; ring buffer replays */
         }
         return () => es.close()
-    }, [project, appendLine, refresh, refreshKnowledge])
+    }, [project, appendLine, appendAgentLine, refresh, refreshKnowledge, refreshNotes, refreshGit, config.agentKinds])
 
     // ── actions ────────────────────────────────────────────────────────────────
 
@@ -335,6 +485,10 @@ export function ProjectProvider({
                     project: projectFilter || undefined,
                     reset,
                     dryRun,
+                    pushAfter,
+                    branchPerRun,
+                    review,
+                    openPr: openPr && branchPerRun && pushAfter ? true : undefined,
                     ...overrides,
                 }),
             })
@@ -345,7 +499,7 @@ export function ProjectProvider({
                 return false
             }
             if (res.status === 409) {
-                toast.error('A run is already in progress.')
+                toast.error('A run or agent is already in progress.')
                 return false
             }
             if (!res.ok) {
@@ -356,7 +510,7 @@ export function ProjectProvider({
             setSnapshot(await res.json())
             return true
         },
-        [project, model, warmSession, commitAfter, commitMode, commitModel, filter, resumeFrom, severity, projectFilter, reset, dryRun],
+        [project, model, warmSession, commitAfter, commitMode, commitModel, filter, resumeFrom, severity, projectFilter, reset, dryRun, pushAfter, branchPerRun, review, openPr],
     )
 
     const onStart = useCallback(async () => {
@@ -375,13 +529,39 @@ export function ProjectProvider({
             if (!ok) return
             // Scope the run to this one task and drop just it from the ledger.
             await startRun({
-                filter: id,
+                filter: undefined,
                 resumeFrom: undefined,
                 severity: undefined,
                 project: undefined,
                 reset: false,
                 dryRun: false,
+                onlyTasks: [id],
                 resetTasks: [id],
+            })
+        },
+        [startRun, confirm],
+    )
+
+    // A3 — bulk re-run: scope the run to exactly the selected ids.
+    const onRunTasks = useCallback(
+        async (ids: string[]) => {
+            if (!ids.length) return
+            const ok = await confirm({
+                title: `Re-run ${ids.length} task(s)?`,
+                body: 'The selected tasks are reopened and run now; the rest of the queue is untouched.',
+                confirmLabel: 'Re-run selected',
+                confirmVariant: 'primary',
+            })
+            if (!ok) return
+            await startRun({
+                filter: undefined,
+                resumeFrom: undefined,
+                severity: undefined,
+                project: undefined,
+                reset: false,
+                dryRun: false,
+                onlyTasks: ids,
+                resetTasks: ids,
             })
         },
         [startRun, confirm],
@@ -402,6 +582,77 @@ export function ProjectProvider({
         if (!ok) return
         setSnapshot(await fetch(`/api/projects/${project}/run/force`, { method: 'POST' }).then((r) => r.json()))
     }, [project, confirm])
+
+    const onSkipCurrent = useCallback(async () => {
+        const current = snapshot.current
+        const ok = await confirm({
+            title: 'Skip current task?',
+            body: `Skip ${current ?? 'the current task'}? It will be marked as error; the run continues with the next task.`,
+            confirmLabel: 'Skip task',
+            confirmVariant: 'warning',
+        })
+        if (!ok) return
+        const res = await fetch(`/api/projects/${project}/run/skip`, { method: 'POST' })
+        if (res.ok) {
+            setSnapshot(await res.json())
+            toast.info('Skipping current task…')
+        } else {
+            toast.error((await res.json().catch(() => ({}))).error ?? 'Nothing to skip.')
+        }
+    }, [project, snapshot, confirm])
+
+    // ── one-shot agents ────────────────────────────────────────────────────────
+
+    const onStartAgent = useCallback(
+        async (kind: AgentKind, opts: { targetNote?: string } = {}) => {
+            const draft = drafts[kind]
+            if (!draft.prompt.trim()) return false
+            const res = await fetch(`/api/projects/${project}/agents/${kind}/start`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: draft.prompt,
+                    model: draft.model,
+                    targetNote: opts.targetNote || undefined,
+                }),
+            })
+            if (res.status === 409) {
+                toast.error('Another run or agent is active for this project.')
+                return false
+            }
+            if (!res.ok) {
+                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to start agent.')
+                return false
+            }
+            const snap = await res.json()
+            // The SSE agent:state frame will land too, but reflect it immediately.
+            setAgentSessions((prev) => ({
+                ...prev,
+                [kind]: { status: 'running', startedAt: snap.startedAt, model: snap.model },
+            }))
+            setAgentLines((prev) => ({ ...prev, [kind]: [] }))
+            setLastPrompts((prev) => ({
+                ...prev,
+                [kind]: { prompt: draft.prompt, model: draft.model, usedAt: new Date().toISOString() },
+            }))
+            return true
+        },
+        [project, drafts],
+    )
+
+    const onStopAgent = useCallback(
+        async (kind: AgentKind) => {
+            const ok = await confirm({
+                title: `Kill the running ${AGENT_LABELS[kind].toLowerCase()}?`,
+                body: 'The agent process is terminated immediately. Partial files it already wrote stay on disk.',
+                confirmLabel: 'Kill agent',
+                confirmVariant: 'danger',
+            })
+            if (!ok) return
+            await fetch(`/api/projects/${project}/agents/${kind}/stop`, { method: 'POST' }).catch(() => {})
+        },
+        [project, confirm],
+    )
 
     const onNewBranch = useCallback(async () => {
         const name = await prompt({ title: 'New branch', label: 'Branch name', placeholder: 'feature/my-work' })
@@ -448,7 +699,18 @@ export function ProjectProvider({
             })
             if (res.ok) {
                 setGit(await res.json())
-                const label = op === 'fetch' ? 'Fetched from remote' : op === 'pull' ? 'Pulled (fast-forward)' : 'Discarded local changes'
+                const label =
+                    op === 'fetch'
+                        ? 'Fetched from remote'
+                        : op === 'pull'
+                          ? 'Pulled (fast-forward)'
+                          : op === 'discard'
+                            ? 'Discarded local changes'
+                            : op === 'stash-push'
+                              ? 'Stashed working tree'
+                              : op === 'stash-pop'
+                                ? 'Stash popped'
+                                : 'Stash dropped'
                 toast.success(label)
                 void loadCommits()
             } else {
@@ -473,32 +735,6 @@ export function ProjectProvider({
         },
         [confirm],
     )
-
-    const onGenerate = useCallback(async () => {
-        if (!genPrompt.trim()) return
-        setGenerating(true)
-        try {
-            const res = await fetch(`/api/projects/${project}/tasks/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: genPrompt, model: genModel }),
-            })
-            if (res.status === 409) {
-                toast.error('Cannot generate while a run is in progress.')
-                return
-            }
-            if (!res.ok) {
-                toast.error('Task generation failed.')
-                return
-            }
-            const data = await res.json()
-            setTasks(data.tasks)
-            setGenPrompt('')
-            toast.success(`Created ${data.created.length} task(s)`)
-        } finally {
-            setGenerating(false)
-        }
-    }, [project, genPrompt, genModel])
 
     const onResetErrors = useCallback(async () => {
         const errored = tasks.filter((t) => t.status === 'error')
@@ -526,32 +762,6 @@ export function ProjectProvider({
         setTasks(data.tasks)
         toast.success(`Moved ${data.moved.length} task(s) to pending`)
     }, [project, tasks, confirm])
-
-    const onAddKnowledge = useCallback(async () => {
-        if (!knowledgePrompt.trim()) return
-        setGeneratingKnowledge(true)
-        try {
-            const res = await fetch(`/api/projects/${project}/knowledge`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: knowledgePrompt, model: knowledgeModel }),
-            })
-            if (res.status === 409) {
-                toast.error('Cannot add knowledge while a run is in progress.')
-                return
-            }
-            if (!res.ok) {
-                toast.error('Knowledge analysis failed.')
-                return
-            }
-            const data = await res.json()
-            setKnowledge(data.docs)
-            setKnowledgePrompt('')
-            toast.success(`Added ${data.created.length} knowledge doc(s)`)
-        } finally {
-            setGeneratingKnowledge(false)
-        }
-    }, [project, knowledgePrompt, knowledgeModel])
 
     const onRemoveKnowledge = useCallback(
         async (id: string) => {
@@ -581,7 +791,7 @@ export function ProjectProvider({
     // ── derived ──────────────────────────────────────────────────────────────
     const progressPct = snapshot.total > 0 ? Math.round((snapshot.done / snapshot.total) * 100) : 0
     const dirty = git?.dirty ?? false
-    const startDisabled = running || (dirty && !dryRun)
+    const startDisabled = busy || (dirty && !dryRun)
     const modelOptions = useMemo(() => config.modelCatalog.map((m) => ({ value: m, label: m })), [config.modelCatalog])
 
     // Mirror the engine's static filters (see passesStaticFilters) so the form can
@@ -601,7 +811,8 @@ export function ProjectProvider({
             if (projWant.length && (!t.project || !projWant.includes(t.project.toLowerCase()))) return false
             return true
         })
-        const willRun = matches.filter((t) => reset || t.status !== 'done').length
+        // needs-review (B8) is ledger-done — it won't re-run without reset
+        const willRun = matches.filter((t) => reset || (t.status !== 'done' && t.status !== 'needs-review')).length
         return { matchingCount: matches.length, willRunCount: willRun }
     }, [tasks, filter, resumeFrom, severity, projectFilter, reset])
 
@@ -610,11 +821,22 @@ export function ProjectProvider({
         config,
         tasks,
         knowledge,
+        notes,
         snapshot,
         git,
         commits,
         lines,
         wakeAt,
+        agentSessions,
+        agentLines,
+        drafts,
+        setDraft,
+        lastPrompts,
+        anyAgentRunning,
+        busy,
+        onStartAgent,
+        onStopAgent,
+        clearAgentLines,
         idle,
         running,
         dirty,
@@ -633,6 +855,14 @@ export function ProjectProvider({
         setCommitMode,
         commitModel,
         setCommitModel,
+        pushAfter,
+        setPushAfter,
+        branchPerRun,
+        setBranchPerRun,
+        review,
+        setReview,
+        openPr,
+        setOpenPr,
         filter,
         setFilter,
         severity,
@@ -644,32 +874,27 @@ export function ProjectProvider({
         reset,
         dryRun,
         setDryRun,
-        genPrompt,
-        setGenPrompt,
-        genModel,
-        setGenModel,
-        generating,
-        knowledgePrompt,
-        setKnowledgePrompt,
-        knowledgeModel,
-        setKnowledgeModel,
-        generatingKnowledge,
-        onAddKnowledge,
         onRemoveKnowledge,
+        refreshKnowledge,
+        refreshNotes,
+        setNotes,
         clearLines,
         onStart,
         onReRunTask,
+        onRunTasks,
         onStop,
         onForce,
+        onSkipCurrent,
         onNewBranch,
         onPush,
         onGitOp,
         loadCommits,
+        refreshGit,
         onResetToggle,
-        onGenerate,
         onResetErrors,
         setTasks,
         setKnowledge,
+        refresh,
     }
 
     return <Ctx.Provider value={value}>{children}</Ctx.Provider>

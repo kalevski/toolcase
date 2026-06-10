@@ -138,6 +138,110 @@ const MIGRATIONS: string[] = [
         value TEXT NOT NULL
     );
     `,
+    // v2 — latest prompt per (project, agent) for the one-shot agent composer
+    `
+    CREATE TABLE agent_prompt (
+        project  TEXT NOT NULL,
+        agent    TEXT NOT NULL,
+        prompt   TEXT NOT NULL,
+        model    TEXT NOT NULL,
+        used_at  TEXT NOT NULL,
+        PRIMARY KEY (project, agent)
+    );
+    `,
+    // v3 — per-task preferred model (mirrors the task file's **Model:** facet)
+    `
+    ALTER TABLE task ADD COLUMN model TEXT;
+    `,
+    // v4 — additional-features batch (additional_features.md):
+    //   B2 token/cost telemetry, B8 reviewer verdict, B1 run history,
+    //   C1 prompt history + templates, B3 schedules, D3 audit log,
+    //   E1 per-project settings, C4 custom agent kinds.
+    // (C3 search uses an FTS5 virtual table created lazily by search-repo.ts so
+    //  a runtime without FTS5 degrades to "search unavailable", not a boot failure.)
+    `
+    ALTER TABLE task ADD COLUMN depends TEXT;
+
+    ALTER TABLE telemetry ADD COLUMN tokens_in INTEGER;
+    ALTER TABLE telemetry ADD COLUMN tokens_out INTEGER;
+    ALTER TABLE telemetry ADD COLUMN cost_usd REAL;
+    ALTER TABLE telemetry ADD COLUMN review TEXT;
+    ALTER TABLE telemetry ADD COLUMN review_note TEXT;
+
+    CREATE TABLE run (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        project      TEXT NOT NULL,
+        started_at   TEXT NOT NULL,
+        finished_at  TEXT,
+        reason       TEXT,
+        options_json TEXT NOT NULL,
+        done         INTEGER NOT NULL DEFAULT 0,
+        error        INTEGER NOT NULL DEFAULT 0,
+        total        INTEGER NOT NULL DEFAULT 0,
+        started_by   TEXT,
+        branch       TEXT,
+        pr_url       TEXT
+    );
+    CREATE INDEX idx_run_project ON run(project, id DESC);
+
+    ALTER TABLE run_event ADD COLUMN run_id INTEGER;
+    CREATE INDEX idx_run_event_run ON run_event(run_id, id);
+
+    CREATE TABLE agent_prompt_history (
+        id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        project TEXT NOT NULL,
+        agent   TEXT NOT NULL,
+        prompt  TEXT NOT NULL,
+        model   TEXT NOT NULL,
+        used_at TEXT NOT NULL
+    );
+    CREATE INDEX idx_prompt_history ON agent_prompt_history(project, agent, id DESC);
+
+    CREATE TABLE prompt_template (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        name       TEXT NOT NULL,
+        agent      TEXT NOT NULL,
+        prompt     TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE schedule (
+        project          TEXT PRIMARY KEY,
+        cron             TEXT NOT NULL,
+        options_json     TEXT NOT NULL,
+        enabled          INTEGER NOT NULL DEFAULT 1,
+        only_if_pending  INTEGER NOT NULL DEFAULT 1,
+        skip_above_usage INTEGER,
+        last_fired_at    TEXT
+    );
+
+    CREATE TABLE audit (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        at        TEXT NOT NULL,
+        github_id INTEGER,
+        login     TEXT,
+        action    TEXT NOT NULL,
+        project   TEXT,
+        detail    TEXT
+    );
+    CREATE INDEX idx_audit_id ON audit(id DESC);
+
+    CREATE TABLE project_setting (
+        project TEXT NOT NULL,
+        key     TEXT NOT NULL,
+        value   TEXT NOT NULL,
+        PRIMARY KEY (project, key)
+    );
+
+    CREATE TABLE agent_def (
+        kind            TEXT PRIMARY KEY,
+        label           TEXT NOT NULL,
+        prompt_preamble TEXT NOT NULL,
+        target          TEXT NOT NULL,
+        post            TEXT NOT NULL DEFAULT 'none',
+        created_at      TEXT NOT NULL
+    );
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

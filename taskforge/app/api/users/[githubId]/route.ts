@@ -1,4 +1,4 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, audit } from '@/server/web/http'
 import { setRole, LastAdminError, UnknownUserError } from '@/server/services/roles'
 import type { Role } from '@/server/domain/types'
 
@@ -19,6 +19,7 @@ export async function PUT(req: Request, { params }: { params: { githubId: string
 
     try {
         const user = await setRole(githubId, body.role)
+        audit(auth, 'user.role', null, `${githubId} -> ${body.role}`)
         return json(user)
     } catch (e) {
         if (e instanceof LastAdminError) return error('cannot demote the last admin', 409)

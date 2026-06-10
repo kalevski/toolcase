@@ -1,6 +1,7 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, audit } from '@/server/web/http'
 import { engine, DirtyTreeError, LockHeldError } from '@/server/services/execution-manager'
 import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { effectiveSettings } from '@/server/services/settings'
 import { config } from '@/server/config'
 import type { RunOptions } from '@/server/domain/types'
 
@@ -15,14 +16,15 @@ export async function POST(req: Request, { params }: { params: { project: string
         if (!(await projectExists(params.project))) return error('project not found', 404)
         const body = (await req.json().catch(() => ({}))) as Partial<RunOptions>
 
-        const model = body.model || config.defaultModel
+        const model = body.model || effectiveSettings(params.project).defaultModel
         if (!config.modelCatalog.includes(model)) {
             return error(`model not in catalog: ${model}`, 400)
         }
 
-        const resetTasks = Array.isArray(body.resetTasks)
-            ? body.resetTasks.filter((t): t is string => typeof t === 'string' && t.length > 0)
-            : undefined
+        const idList = (v: unknown) =>
+            Array.isArray(v) ? v.filter((t): t is string => typeof t === 'string' && t.length > 0) : undefined
+        const resetTasks = idList(body.resetTasks)
+        const onlyTasks = idList(body.onlyTasks)
 
         const opts: RunOptions = {
             model,
@@ -36,10 +38,17 @@ export async function POST(req: Request, { params }: { params: { project: string
             project: body.project,
             reset: body.reset,
             resetTasks: resetTasks?.length ? resetTasks : undefined,
+            onlyTasks: onlyTasks?.length ? onlyTasks : undefined,
             dryRun: body.dryRun,
+            pushAfter: body.pushAfter,
+            branchPerRun: body.branchPerRun,
+            review: body.review,
+            openPr: body.openPr,
+            startedBy: `user:${auth.session.login}`,
         }
 
         const snapshot = await engine.start(params.project, opts)
+        audit(auth, 'run.start', params.project, `model=${model}${opts.dryRun ? ' dry' : ''}`)
         return json(snapshot)
     } catch (e) {
         if (e instanceof DirtyTreeError) {
