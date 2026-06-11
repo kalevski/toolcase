@@ -4,6 +4,7 @@ import RowDemo from './RowDemo'
 import ColDemo from './ColDemo'
 import AccordionDemo from './AccordionDemo'
 import AlertDemo from './AlertDemo'
+import BadgeDemo from './BadgeDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -28,4 +29,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'col', category: 'Layout', element: <ColDemo /> },
     { key: 'accordion', category: 'Components', element: <AccordionDemo /> },
     { key: 'alert', category: 'Components', element: <AlertDemo /> },
+    { key: 'badge', category: 'Components', element: <BadgeDemo /> },
 ]
