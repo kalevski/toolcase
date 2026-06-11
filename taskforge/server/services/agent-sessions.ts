@@ -266,7 +266,10 @@ class AgentSessionManager extends EventEmitter {
             cwd: spec.cwd,
             model,
             prompt: spec.prompt,
-            extraArgs: STREAM_ARGS,
+            // --add-dir grants read/write across the whole project root regardless
+            // of cwd, so every agent kind (incl. the tasks/-sandboxed task-creator)
+            // can read repo/, knowledge/, notes/ and tasks/.
+            extraArgs: `${STREAM_ARGS} --add-dir ${projectPath(project)}`,
         })
         s.child = child
 
@@ -283,8 +286,12 @@ class AgentSessionManager extends EventEmitter {
             onSessionId: () => {},
         })
 
+<<<<<<< HEAD
         // timeoutMs <= 0 means no timeout (a zero-delay timer would kill the
         // agent on the next tick).
+=======
+        // A non-positive timeout disables the watchdog entirely (run unbounded).
+>>>>>>> origin/main
         const timeoutMs = (TIMEOUTS[agent] ?? (() => config.knowledgeTimeoutMs))()
         const timer =
             timeoutMs > 0
