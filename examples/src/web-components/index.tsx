@@ -24,6 +24,7 @@ import PopoverDemo from './PopoverDemo'
 import ProgressDemo from './ProgressDemo'
 import ScrollspyDemo from './ScrollspyDemo'
 import SpinnerDemo from './SpinnerDemo'
+import ToastDemo from './ToastDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -64,6 +65,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'modal', category: 'Overlays & Feedback', element: <ModalDemo /> },
     { key: 'offcanvas', category: 'Overlays & Feedback', element: <OffcanvasDemo /> },
     { key: 'popover', category: 'Overlays & Feedback', element: <PopoverDemo /> },
+    { key: 'toast', category: 'Overlays & Feedback', element: <ToastDemo /> },
     { key: 'placeholder', category: 'Components', element: <PlaceholderDemo /> },
     { key: 'progress', category: 'Components', element: <ProgressDemo /> },
     { key: 'spinner', category: 'Components', element: <SpinnerDemo /> },
