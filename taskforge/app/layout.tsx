@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import 'bootstrap-icons/font/bootstrap-icons.css'
 import '@toolcase/react-components/style.css'
 import './globals.css'
 import { Providers } from '@/components/Providers'
