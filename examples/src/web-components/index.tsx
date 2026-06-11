@@ -6,6 +6,7 @@ import AccordionDemo from './AccordionDemo'
 import AlertDemo from './AlertDemo'
 import BadgeDemo from './BadgeDemo'
 import BreadcrumbDemo from './BreadcrumbDemo'
+import ButtonDemo from './ButtonDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -31,5 +32,6 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'accordion', category: 'Components', element: <AccordionDemo /> },
     { key: 'alert', category: 'Components', element: <AlertDemo /> },
     { key: 'badge', category: 'Components', element: <BadgeDemo /> },
+    { key: 'button', category: 'Components', element: <ButtonDemo /> },
     { key: 'breadcrumb', category: 'Navigation', element: <BreadcrumbDemo /> },
 ]

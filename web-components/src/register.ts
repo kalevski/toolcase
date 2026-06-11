@@ -7,6 +7,7 @@ import { Alert } from './Alert'
 import { Badge } from './Badge'
 import { Breadcrumb } from './Breadcrumb'
 import { BreadcrumbItem } from './BreadcrumbItem'
+import { Button } from './Button'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -21,4 +22,5 @@ export function register(): void {
     customElements.define('tc-badge', Badge)
     customElements.define('tc-breadcrumb', Breadcrumb)
     customElements.define('tc-breadcrumb-item', BreadcrumbItem)
+    customElements.define('tc-button', Button)
 }
