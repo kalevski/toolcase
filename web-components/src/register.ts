@@ -30,6 +30,7 @@ import { ProgressBar } from './ProgressBar'
 import { Scrollspy } from './Scrollspy'
 import { Spinner } from './Spinner'
 import { Toast } from './Toast'
+import { Tooltip } from './Tooltip'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -67,4 +68,5 @@ export function register(): void {
     customElements.define('tc-scrollspy', Scrollspy)
     customElements.define('tc-spinner', Spinner)
     customElements.define('tc-toast', Toast)
+    customElements.define('tc-tooltip', Tooltip)
 }
