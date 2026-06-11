@@ -13,6 +13,8 @@ import { Card } from './Card'
 import { Carousel } from './Carousel'
 import { CloseButton } from './CloseButton'
 import { Collapse } from './Collapse'
+import { Dropdown } from './Dropdown'
+import { DropdownItem } from './DropdownItem'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -33,4 +35,6 @@ export function register(): void {
     customElements.define('tc-carousel', Carousel)
     customElements.define('tc-close-button', CloseButton)
     customElements.define('tc-collapse', Collapse)
+    customElements.define('tc-dropdown', Dropdown)
+    customElements.define('tc-dropdown-item', DropdownItem)
 }
