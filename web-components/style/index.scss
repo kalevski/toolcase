@@ -1,0 +1,14 @@
+// @toolcase/web-components global stylesheet.
+//
+// Import order determines cascade priority:
+//   (1) Bootstrap + toolcase Sass variable overrides  →  base layer
+//   (2) Component partials                            →  tc-* layer on top
+
+// (1) Bootstrap bundle with toolcase theme overrides.
+//     style/themes/_variables.scss imports bootstrap/scss/functions, declares
+//     our Sass variable overrides, then imports the full Bootstrap bundle.
+@use './themes/variables';
+
+// (2) Component partials aggregator (empty until component tasks run).
+//     style/components/_index.scss forwards each tc-* component partial.
+@use './components';
