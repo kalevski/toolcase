@@ -5,6 +5,8 @@ import { Accordion } from './Accordion'
 import { AccordionItem } from './AccordionItem'
 import { Alert } from './Alert'
 import { Badge } from './Badge'
+import { Breadcrumb } from './Breadcrumb'
+import { BreadcrumbItem } from './BreadcrumbItem'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -17,4 +19,6 @@ export function register(): void {
     customElements.define('tc-accordion-item', AccordionItem)
     customElements.define('tc-alert', Alert)
     customElements.define('tc-badge', Badge)
+    customElements.define('tc-breadcrumb', Breadcrumb)
+    customElements.define('tc-breadcrumb-item', BreadcrumbItem)
 }
