@@ -17,6 +17,7 @@ import { Dropdown } from './Dropdown'
 import { DropdownItem } from './DropdownItem'
 import { ListGroup } from './ListGroup'
 import { ListGroupItem } from './ListGroupItem'
+import { Modal } from './Modal'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -41,4 +42,5 @@ export function register(): void {
     customElements.define('tc-dropdown-item', DropdownItem)
     customElements.define('tc-list-group', ListGroup)
     customElements.define('tc-list-group-item', ListGroupItem)
+    customElements.define('tc-modal', Modal)
 }
