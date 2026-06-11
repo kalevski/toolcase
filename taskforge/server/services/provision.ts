@@ -67,6 +67,9 @@ export async function createProject({ name, gitUrl, branch }: CreateProjectInput
     await fs.mkdir(root, { recursive: true })
     try {
         await git.clone(name, gitUrl, branch) // creates repo/
+        // Embed the push token in origin's URL so the agent can push/fetch
+        // directly from inside repo/ (no-op without GIT_REMOTE_TOKEN / non-HTTPS).
+        await git.setOriginUrlWithToken(name, gitUrl)
         await Promise.all([
             fs.mkdir(projectTasksDir(name), { recursive: true }),
             fs.mkdir(projectKnowledgeDir(name), { recursive: true }),

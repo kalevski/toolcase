@@ -154,6 +154,21 @@ export async function clone(project: string, url: string, branch?: string): Prom
     }
 }
 
+/**
+ * Rewrite origin to embed the HTTPS token (`https://<token>@host/path.git`) so
+ * processes running inside `repo/` (the agent) can push/fetch without the
+ * one-shot credential helper. No-op when no token is configured or the clone
+ * URL isn't HTTPS. The token lands in `repo/.git/config` — acceptable inside
+ * the sandboxed workspace, and `redactGit` strips it from surfaced output.
+ */
+export async function setOriginUrlWithToken(project: string, url: string): Promise<void> {
+    if (!config.gitRemoteToken || !/^https:\/\//i.test(url)) return
+    const withToken = new URL(url)
+    withToken.username = config.gitRemoteToken
+    withToken.password = ''
+    await git(project, ['remote', 'set-url', 'origin', withToken.toString()])
+}
+
 /** Strip embedded credentials / tokens from git output before surfacing it. */
 function redactGit(s: string): string {
     return s
