@@ -21,6 +21,7 @@ import NavbarDemo from './NavbarDemo'
 import PaginationDemo from './PaginationDemo'
 import PlaceholderDemo from './PlaceholderDemo'
 import PopoverDemo from './PopoverDemo'
+import ProgressDemo from './ProgressDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -62,4 +63,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'offcanvas', category: 'Overlays & Feedback', element: <OffcanvasDemo /> },
     { key: 'popover', category: 'Overlays & Feedback', element: <PopoverDemo /> },
     { key: 'placeholder', category: 'Components', element: <PlaceholderDemo /> },
+    { key: 'progress', category: 'Components', element: <ProgressDemo /> },
 ]
