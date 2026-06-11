@@ -27,6 +27,7 @@ import { Placeholder } from './Placeholder'
 import { Popover } from './Popover'
 import { Progress } from './Progress'
 import { ProgressBar } from './ProgressBar'
+import { Scrollspy } from './Scrollspy'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -61,4 +62,5 @@ export function register(): void {
     customElements.define('tc-popover', Popover)
     customElements.define('tc-progress', Progress)
     customElements.define('tc-progress-bar', ProgressBar)
+    customElements.define('tc-scrollspy', Scrollspy)
 }
