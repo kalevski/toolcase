@@ -12,6 +12,7 @@ import { ButtonGroup } from './ButtonGroup'
 import { Card } from './Card'
 import { Carousel } from './Carousel'
 import { CloseButton } from './CloseButton'
+import { Collapse } from './Collapse'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -31,4 +32,5 @@ export function register(): void {
     customElements.define('tc-card', Card)
     customElements.define('tc-carousel', Carousel)
     customElements.define('tc-close-button', CloseButton)
+    customElements.define('tc-collapse', Collapse)
 }
