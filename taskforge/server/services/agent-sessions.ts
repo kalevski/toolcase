@@ -286,11 +286,15 @@ class AgentSessionManager extends EventEmitter {
             onSessionId: () => {},
         })
 
+        // A non-positive timeout disables the watchdog entirely (run unbounded).
         const timeoutMs = (TIMEOUTS[agent] ?? (() => config.knowledgeTimeoutMs))()
-        const timer = setTimeout(() => {
-            s.timedOut = true
-            this.killGroup(child)
-        }, timeoutMs)
+        const timer =
+            timeoutMs > 0
+                ? setTimeout(() => {
+                      s.timedOut = true
+                      this.killGroup(child)
+                  }, timeoutMs)
+                : null
 
         void new Promise<void>((resolve) => {
             child.stdout?.on('data', (chunk: Buffer) => parser.feed(chunk.toString()))
@@ -305,7 +309,7 @@ class AgentSessionManager extends EventEmitter {
                 resolve()
             })
         }).then(async () => {
-            clearTimeout(timer)
+            if (timer) clearTimeout(timer)
             s.child = null
             // Post-processing runs INSIDE the running window so the 409 gates
             // cover reconcile/index-rebuild too; only then flip idle + done.
