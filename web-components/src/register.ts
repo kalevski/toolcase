@@ -22,6 +22,7 @@ import { Offcanvas } from './Offcanvas'
 import { Nav } from './Nav'
 import { NavItem } from './NavItem'
 import { Navbar } from './Navbar'
+import { Pagination } from './Pagination'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -51,4 +52,5 @@ export function register(): void {
     customElements.define('tc-nav', Nav)
     customElements.define('tc-nav-item', NavItem)
     customElements.define('tc-navbar', Navbar)
+    customElements.define('tc-pagination', Pagination)
 }

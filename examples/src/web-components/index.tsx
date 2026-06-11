@@ -18,6 +18,7 @@ import ModalDemo from './ModalDemo'
 import OffcanvasDemo from './OffcanvasDemo'
 import NavDemo from './NavDemo'
 import NavbarDemo from './NavbarDemo'
+import PaginationDemo from './PaginationDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -54,6 +55,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'breadcrumb', category: 'Navigation', element: <BreadcrumbDemo /> },
     { key: 'nav', category: 'Navigation', element: <NavDemo /> },
     { key: 'navbar', category: 'Navigation', element: <NavbarDemo /> },
+    { key: 'pagination', category: 'Navigation', element: <PaginationDemo /> },
     { key: 'modal', category: 'Overlays & Feedback', element: <ModalDemo /> },
     { key: 'offcanvas', category: 'Overlays & Feedback', element: <OffcanvasDemo /> },
 ]
