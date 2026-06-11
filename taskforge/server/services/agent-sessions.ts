@@ -286,12 +286,8 @@ class AgentSessionManager extends EventEmitter {
             onSessionId: () => {},
         })
 
-<<<<<<< HEAD
         // timeoutMs <= 0 means no timeout (a zero-delay timer would kill the
         // agent on the next tick).
-=======
-        // A non-positive timeout disables the watchdog entirely (run unbounded).
->>>>>>> origin/main
         const timeoutMs = (TIMEOUTS[agent] ?? (() => config.knowledgeTimeoutMs))()
         const timer =
             timeoutMs > 0
