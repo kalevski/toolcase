@@ -23,6 +23,7 @@ import PlaceholderDemo from './PlaceholderDemo'
 import PopoverDemo from './PopoverDemo'
 import ProgressDemo from './ProgressDemo'
 import ScrollspyDemo from './ScrollspyDemo'
+import SpinnerDemo from './SpinnerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -65,5 +66,6 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'popover', category: 'Overlays & Feedback', element: <PopoverDemo /> },
     { key: 'placeholder', category: 'Components', element: <PlaceholderDemo /> },
     { key: 'progress', category: 'Components', element: <ProgressDemo /> },
+    { key: 'spinner', category: 'Components', element: <SpinnerDemo /> },
     { key: 'scrollspy', category: 'Navigation', element: <ScrollspyDemo /> },
 ]
