@@ -24,6 +24,7 @@ import { NavItem } from './NavItem'
 import { Navbar } from './Navbar'
 import { Pagination } from './Pagination'
 import { Placeholder } from './Placeholder'
+import { Popover } from './Popover'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -55,4 +56,5 @@ export function register(): void {
     customElements.define('tc-navbar', Navbar)
     customElements.define('tc-pagination', Pagination)
     customElements.define('tc-placeholder', Placeholder)
+    customElements.define('tc-popover', Popover)
 }

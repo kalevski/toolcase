@@ -20,6 +20,7 @@ import NavDemo from './NavDemo'
 import NavbarDemo from './NavbarDemo'
 import PaginationDemo from './PaginationDemo'
 import PlaceholderDemo from './PlaceholderDemo'
+import PopoverDemo from './PopoverDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -59,5 +60,6 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'pagination', category: 'Navigation', element: <PaginationDemo /> },
     { key: 'modal', category: 'Overlays & Feedback', element: <ModalDemo /> },
     { key: 'offcanvas', category: 'Overlays & Feedback', element: <OffcanvasDemo /> },
+    { key: 'popover', category: 'Overlays & Feedback', element: <PopoverDemo /> },
     { key: 'placeholder', category: 'Components', element: <PlaceholderDemo /> },
 ]
