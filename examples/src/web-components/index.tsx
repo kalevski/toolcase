@@ -8,6 +8,7 @@ import BadgeDemo from './BadgeDemo'
 import BreadcrumbDemo from './BreadcrumbDemo'
 import ButtonDemo from './ButtonDemo'
 import ButtonGroupDemo from './ButtonGroupDemo'
+import CardDemo from './CardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -35,5 +36,6 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'badge', category: 'Components', element: <BadgeDemo /> },
     { key: 'button', category: 'Components', element: <ButtonDemo /> },
     { key: 'button-group', category: 'Components', element: <ButtonGroupDemo /> },
+    { key: 'card', category: 'Components', element: <CardDemo /> },
     { key: 'breadcrumb', category: 'Navigation', element: <BreadcrumbDemo /> },
 ]

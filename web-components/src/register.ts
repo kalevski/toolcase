@@ -9,6 +9,7 @@ import { Breadcrumb } from './Breadcrumb'
 import { BreadcrumbItem } from './BreadcrumbItem'
 import { Button } from './Button'
 import { ButtonGroup } from './ButtonGroup'
+import { Card } from './Card'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -25,4 +26,5 @@ export function register(): void {
     customElements.define('tc-breadcrumb-item', BreadcrumbItem)
     customElements.define('tc-button', Button)
     customElements.define('tc-button-group', ButtonGroup)
+    customElements.define('tc-card', Card)
 }
