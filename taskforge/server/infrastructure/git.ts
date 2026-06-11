@@ -91,10 +91,16 @@ interface GitResult {
     code: number | null
 }
 
-function run(cwd: string, argv: string[], extraEnv: Record<string, string> = {}): Promise<GitResult> {
+function run(
+    cwd: string,
+    argv: string[],
+    extraEnv: Record<string, string> = {},
+    timeoutMs?: number,
+): Promise<GitResult> {
     return new Promise((resolve, reject) => {
         const child = spawn('git', argv, {
             cwd,
+            ...(timeoutMs ? { timeout: timeoutMs, killSignal: 'SIGKILL' as const } : {}),
             env: {
                 ...process.env,
                 GIT_TERMINAL_PROMPT: '0',
@@ -456,6 +462,92 @@ export async function revertCommit(project: string, sha: string): Promise<void> 
         }
         throw e
     }
+}
+
+// ── interactive terminal (git page) ──────────────────────────────────────────
+
+const TERMINAL_OUTPUT_CAP = 100_000
+const TERMINAL_TIMEOUT_MS = 60_000
+
+// Subcommands that talk to a remote — only these get the one-shot credential
+// helper, so the token never shows up in e.g. `git config --list` output.
+const REMOTE_SUBCOMMANDS = new Set(['push', 'pull', 'fetch', 'clone', 'ls-remote', 'remote', 'submodule'])
+
+export interface GitTerminalResult {
+    stdout: string
+    stderr: string
+    code: number | null
+}
+
+/**
+ * Split a user-typed command line into argv: whitespace-separated with
+ * single/double-quote grouping and backslash escapes. No expansion of any
+ * kind — the result feeds spawn() directly, never a shell.
+ */
+export function tokenizeCommand(line: string): string[] {
+    const argv: string[] = []
+    let current = ''
+    let started = false
+    let quote: '"' | "'" | null = null
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i]
+        if (quote === "'") {
+            if (ch === "'") quote = null
+            else current += ch
+        } else if (quote === '"') {
+            if (ch === '"') quote = null
+            else if (ch === '\\' && i + 1 < line.length && '"\\'.includes(line[i + 1])) current += line[++i]
+            else current += ch
+        } else if (ch === "'" || ch === '"') {
+            quote = ch
+            started = true
+        } else if (ch === '\\' && i + 1 < line.length) {
+            current += line[++i]
+            started = true
+        } else if (/\s/.test(ch)) {
+            if (started) {
+                argv.push(current)
+                current = ''
+                started = false
+            }
+        } else {
+            current += ch
+            started = true
+        }
+    }
+    if (quote) throw new GitError('Unbalanced quote in command.', null, '')
+    if (started) argv.push(current)
+    return argv
+}
+
+/**
+ * Run a user-typed git command inside the project's repo/ checkout (git page
+ * terminal). A leading `git` token is optional; everything after it is passed
+ * to git verbatim as argv — no shell, so metacharacters are inert. Editor and
+ * pager are disabled so nothing can hang waiting for a tty; remote-touching
+ * subcommands reuse the configured HTTPS-token credential helper. Output is
+ * redacted and capped.
+ */
+export async function execTerminal(project: string, command: string): Promise<GitTerminalResult> {
+    const tokens = tokenizeCommand(command)
+    if (tokens[0] === 'git') tokens.shift()
+    if (tokens.length === 0) throw new GitError('Empty command.', null, '')
+    const argv = REMOTE_SUBCOMMANDS.has(tokens[0]) ? [...tokenCredentialArgs(), ...tokens] : tokens
+    const res = await run(
+        projectRepoDir(project),
+        argv,
+        {
+            GIT_PAGER: 'cat',
+            PAGER: 'cat',
+            GIT_EDITOR: 'true',
+            GIT_SEQUENCE_EDITOR: 'true',
+            EDITOR: 'true',
+        },
+        TERMINAL_TIMEOUT_MS,
+    )
+    const cap = (s: string) =>
+        s.length > TERMINAL_OUTPUT_CAP ? s.slice(0, TERMINAL_OUTPUT_CAP) + '\n…(output truncated)…' : s
+    return { stdout: cap(redactGit(res.stdout)), stderr: cap(redactGit(res.stderr)), code: res.code }
 }
 
 // ── stash (§6) ──────────────────────────────────────────────────────────────

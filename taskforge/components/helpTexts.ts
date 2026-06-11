@@ -39,12 +39,8 @@ export const helpTexts = {
         history: 'Every run is recorded: trigger, options, outcome, counts, duration, cost — with a replayable terminal.',
     },
     git: {
-        pull: 'Pull is fast-forward-only — it refuses to create a merge commit.',
-        discard: 'Discard is irreversible: it hard-resets tracked files and deletes untracked ones.',
-        stash: 'Stash sets the working tree aside (including untracked files) so you can switch branches; pop restores it.',
-        revert: 'Revert creates a new commit that undoes the selected one; conflicts surface here without touching anything else.',
-        switchDirty: 'Commit or stash first — switching branches with a dirty tree is blocked.',
-        commit: 'Stages everything and commits; pick a manual message or let Claude write one from the staged diff.',
+        terminal:
+            'Commands run as git <args> inside the project repo — argv only, no shell. Editor and pager are disabled so nothing hangs; push/pull/fetch reuse the configured credentials. Blocked while a run or agent is active.',
     },
     notes: {
         storage: 'Notes live in notes/ at the project workspace root — outside the repo, never committed.',

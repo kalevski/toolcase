@@ -176,14 +176,46 @@ body {
 
 /* ── git page ────────────────────────────────────────────────────────────── */
 
-.tf-git-pre {
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.8rem;
-    margin: 0;
-    max-height: 480px;
-    overflow: auto;
+.tf-git-terminal {
+    cursor: text;
+}
+
+.tf-git-terminal .component-terminal-window__body {
+    min-height: 220px;
+    max-height: 440px;
+}
+
+.tf-git-terminal__input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem 0.65rem;
+    background: var(--tc-accent-hover, #1c1f26);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: 'SF Mono', 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.82rem;
+}
+
+.tf-git-terminal__prompt {
+    color: var(--tc-violet, #7c6cf0);
+    user-select: none;
+}
+
+.tf-git-terminal__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--tc-border, #e7e9ee);
+    font: inherit;
+}
+
+.tf-git-terminal__input::placeholder {
+    color: var(--tc-text-faint, #6b7280);
+}
+
+.tf-git-terminal__input:disabled {
+    opacity: 0.5;
 }
 
 /* ── global activity bar ─────────────────────────────────────────────────── */
