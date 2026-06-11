@@ -136,11 +136,13 @@ export const config = {
 
     // ── process / generate ──
     forceKillGraceMs: num('FORCE_KILL_GRACE_MS', 5000),
+    /** One-shot agent runs (task generation, /usage refresh). 0 = no timeout. */
     generateTimeoutMs: num('GENERATE_TIMEOUT_MS', 120000),
 
     // ── knowledge docs ──
     /** Regenerate/update the repo's knowledge/ docs after each completed task. */
     knowledgeAutoUpdate: bool('KNOWLEDGE_AUTO_UPDATE', true),
+    /** 0 = no timeout. */
     knowledgeTimeoutMs: num('KNOWLEDGE_TIMEOUT_MS', 300000),
 
     // ── commit / git ──
@@ -162,6 +164,7 @@ export const config = {
 
     // ── B8 reviewer ──
     reviewModel: optional('REVIEW_MODEL', 'claude-haiku-4-5'),
+    /** 0 = no timeout. */
     reviewTimeoutMs: num('REVIEW_TIMEOUT_MS', 120000),
 
     port: num('PORT', 3000),

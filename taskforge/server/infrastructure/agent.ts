@@ -106,22 +106,27 @@ export function runAgentOnce(opts: RunOnceOptions): Promise<RunOnceResult> {
         let timedOut = false
         child.stdout?.on('data', (d) => (stdout += d.toString()))
         child.stderr?.on('data', (d) => (stderr += d.toString()))
-        const timer = setTimeout(() => {
-            timedOut = true
-            if (child.pid) {
-                try {
-                    process.kill(-child.pid, 'SIGKILL')
-                } catch {
-                    child.kill('SIGKILL')
-                }
-            }
-        }, opts.timeoutMs)
+        // timeoutMs <= 0 disables the watchdog (setTimeout(fn, 0) would fire
+        // immediately and kill the child before it produces any output).
+        const timer =
+            opts.timeoutMs > 0
+                ? setTimeout(() => {
+                      timedOut = true
+                      if (child.pid) {
+                          try {
+                              process.kill(-child.pid, 'SIGKILL')
+                          } catch {
+                              child.kill('SIGKILL')
+                          }
+                      }
+                  }, opts.timeoutMs)
+                : null
         child.on('close', (code) => {
-            clearTimeout(timer)
+            if (timer) clearTimeout(timer)
             resolve({ stdout, stderr, code, timedOut })
         })
         child.on('error', () => {
-            clearTimeout(timer)
+            if (timer) clearTimeout(timer)
             resolve({ stdout, stderr, code: null, timedOut })
         })
     })
