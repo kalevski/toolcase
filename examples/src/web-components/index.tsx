@@ -15,6 +15,7 @@ import CollapseDemo from './CollapseDemo'
 import DropdownDemo from './DropdownDemo'
 import ListGroupDemo from './ListGroupDemo'
 import ModalDemo from './ModalDemo'
+import OffcanvasDemo from './OffcanvasDemo'
 import NavDemo from './NavDemo'
 import NavbarDemo from './NavbarDemo'
 
@@ -54,4 +55,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'nav', category: 'Navigation', element: <NavDemo /> },
     { key: 'navbar', category: 'Navigation', element: <NavbarDemo /> },
     { key: 'modal', category: 'Overlays & Feedback', element: <ModalDemo /> },
+    { key: 'offcanvas', category: 'Overlays & Feedback', element: <OffcanvasDemo /> },
 ]

@@ -18,6 +18,7 @@ import { DropdownItem } from './DropdownItem'
 import { ListGroup } from './ListGroup'
 import { ListGroupItem } from './ListGroupItem'
 import { Modal } from './Modal'
+import { Offcanvas } from './Offcanvas'
 import { Nav } from './Nav'
 import { NavItem } from './NavItem'
 import { Navbar } from './Navbar'
@@ -46,6 +47,7 @@ export function register(): void {
     customElements.define('tc-list-group', ListGroup)
     customElements.define('tc-list-group-item', ListGroupItem)
     customElements.define('tc-modal', Modal)
+    customElements.define('tc-offcanvas', Offcanvas)
     customElements.define('tc-nav', Nav)
     customElements.define('tc-nav-item', NavItem)
     customElements.define('tc-navbar', Navbar)
