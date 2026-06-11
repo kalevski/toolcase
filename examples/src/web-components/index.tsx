@@ -1,5 +1,6 @@
 import { JSX } from 'react'
 import ContainerDemo from './ContainerDemo'
+import RowDemo from './RowDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -20,4 +21,5 @@ export const categories: WebComponentCategory[] = [
 
 export const webComponentExamples: WebComponentDef[] = [
     { key: 'container', category: 'Layout', element: <ContainerDemo /> },
+    { key: 'row', category: 'Layout', element: <RowDemo /> },
 ]
