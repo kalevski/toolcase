@@ -10,6 +10,7 @@ import ButtonDemo from './ButtonDemo'
 import ButtonGroupDemo from './ButtonGroupDemo'
 import CardDemo from './CardDemo'
 import CarouselDemo from './CarouselDemo'
+import CloseButtonDemo from './CloseButtonDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -39,5 +40,6 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'button-group', category: 'Components', element: <ButtonGroupDemo /> },
     { key: 'card', category: 'Components', element: <CardDemo /> },
     { key: 'carousel', category: 'Components', element: <CarouselDemo /> },
+    { key: 'close-button', category: 'Components', element: <CloseButtonDemo /> },
     { key: 'breadcrumb', category: 'Navigation', element: <BreadcrumbDemo /> },
 ]
