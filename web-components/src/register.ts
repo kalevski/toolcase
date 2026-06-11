@@ -18,6 +18,8 @@ import { DropdownItem } from './DropdownItem'
 import { ListGroup } from './ListGroup'
 import { ListGroupItem } from './ListGroupItem'
 import { Modal } from './Modal'
+import { Nav } from './Nav'
+import { NavItem } from './NavItem'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -43,4 +45,6 @@ export function register(): void {
     customElements.define('tc-list-group', ListGroup)
     customElements.define('tc-list-group-item', ListGroupItem)
     customElements.define('tc-modal', Modal)
+    customElements.define('tc-nav', Nav)
+    customElements.define('tc-nav-item', NavItem)
 }

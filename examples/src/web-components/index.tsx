@@ -15,6 +15,7 @@ import CollapseDemo from './CollapseDemo'
 import DropdownDemo from './DropdownDemo'
 import ListGroupDemo from './ListGroupDemo'
 import ModalDemo from './ModalDemo'
+import NavDemo from './NavDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -49,5 +50,6 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'dropdown', category: 'Components', element: <DropdownDemo /> },
     { key: 'list-group', category: 'Components', element: <ListGroupDemo /> },
     { key: 'breadcrumb', category: 'Navigation', element: <BreadcrumbDemo /> },
+    { key: 'nav', category: 'Navigation', element: <NavDemo /> },
     { key: 'modal', category: 'Overlays & Feedback', element: <ModalDemo /> },
 ]
