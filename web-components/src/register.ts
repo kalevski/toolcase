@@ -31,6 +31,7 @@ import { Scrollspy } from './Scrollspy'
 import { Spinner } from './Spinner'
 import { Toast } from './Toast'
 import { Tooltip } from './Tooltip'
+import { Input } from './Input'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -69,4 +70,5 @@ export function register(): void {
     customElements.define('tc-spinner', Spinner)
     customElements.define('tc-toast', Toast)
     customElements.define('tc-tooltip', Tooltip)
+    customElements.define('tc-input', Input)
 }
