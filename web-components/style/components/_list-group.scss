@@ -1,0 +1,22 @@
+// tc-list-group / tc-list-group-item — theme tweaks only.
+// Bootstrap list-group classes handle layout; we only need to reset inner
+// <a> and <button> content wrappers so they fill the item correctly.
+
+tc-list-group-item {
+    a.tc-lgi-content {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    button.tc-lgi-content {
+        display: block;
+        width: 100%;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: inherit;
+        text-align: inherit;
+        font: inherit;
+    }
+}

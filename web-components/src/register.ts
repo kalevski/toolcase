@@ -15,6 +15,8 @@ import { CloseButton } from './CloseButton'
 import { Collapse } from './Collapse'
 import { Dropdown } from './Dropdown'
 import { DropdownItem } from './DropdownItem'
+import { ListGroup } from './ListGroup'
+import { ListGroupItem } from './ListGroupItem'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -37,4 +39,6 @@ export function register(): void {
     customElements.define('tc-collapse', Collapse)
     customElements.define('tc-dropdown', Dropdown)
     customElements.define('tc-dropdown-item', DropdownItem)
+    customElements.define('tc-list-group', ListGroup)
+    customElements.define('tc-list-group-item', ListGroupItem)
 }
