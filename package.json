@@ -6,7 +6,7 @@
         "build": "npm run build --workspaces",
         "test": "vitest run",
         "lint": "eslint . --ignore-pattern examples/",
-        "lint:exports": "publint base && publint logging && publint serializer && publint react-components && publint phaser-plus && publint node",
+        "lint:exports": "publint base && publint logging && publint serializer && publint react-components && publint game-components && publint web-components && publint phaser-plus && publint node",
         "format": "prettier --write ."
     },
     "workspaces": [
@@ -15,6 +15,7 @@
         "serializer",
         "react-components",
         "game-components",
+        "web-components",
         "phaser-plus",
         "node",
         "examples"
