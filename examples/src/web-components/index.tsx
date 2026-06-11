@@ -2,6 +2,7 @@ import { JSX } from 'react'
 import ContainerDemo from './ContainerDemo'
 import RowDemo from './RowDemo'
 import ColDemo from './ColDemo'
+import AccordionDemo from './AccordionDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -24,4 +25,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'container', category: 'Layout', element: <ContainerDemo /> },
     { key: 'row', category: 'Layout', element: <RowDemo /> },
     { key: 'col', category: 'Layout', element: <ColDemo /> },
+    { key: 'accordion', category: 'Components', element: <AccordionDemo /> },
 ]
