@@ -26,6 +26,7 @@
         "@toolcase/serializer": "*",
         "@toolcase/react-components": "*",
         "@toolcase/game-components": "*",
+        "@toolcase/web-components": "*",
         "@toolcase/phaser-plus": "*",
         "@toolcase/node": "*",
         "phaser": "^4.0.0",

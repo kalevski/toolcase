@@ -7,6 +7,7 @@ import { LoggingPage } from './pages/LoggingPage'
 import { SerializerPage } from './pages/SerializerPage'
 import { ReactComponentsPage } from './pages/ReactComponentsPage'
 import { GameComponentsPage } from './pages/GameComponentsPage'
+import { WebComponentsPage } from './pages/WebComponentsPage'
 import { PhaserPlusPage } from './pages/PhaserPlusPage'
 import { NodePage } from './pages/NodePage'
 import { baseExamples } from './base/index'
@@ -14,6 +15,7 @@ import { loggingExamples } from './logging/index'
 import { serializerExamples } from './serializer/index'
 import { examples as reactComponentExamples } from './react-components/index'
 import { gameComponentExamples } from './game-components/index'
+import { webComponentExamples } from './web-components/index'
 import { phaserExamples } from './phaser-plus/index'
 import { nodeExamples } from './node/index'
 
@@ -103,6 +105,17 @@ export const packageRoutes: PackageRoute[] = [
             title: e.title,
             element: e.element,
             extraHeader: <code>{e.sceneFile}</code>,
+        })),
+    },
+    {
+        key: 'web-components',
+        basePath: '/web-components',
+        indexLabel: 'All Web Components',
+        page: <WebComponentsPage />,
+        examples: webComponentExamples.map((e) => ({
+            key: e.key,
+            title: formatLabel(e.key),
+            element: e.element,
         })),
     },
     {

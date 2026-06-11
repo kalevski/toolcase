@@ -12,6 +12,8 @@ export default defineConfig({
         alias: [
             { find: '@toolcase/game-components/style.css', replacement: resolve(__dirname, '../game-components/lib/index.css') },
             { find: '@toolcase/game-components', replacement: resolve(__dirname, '../game-components/src/index.ts') },
+            { find: '@toolcase/web-components/style.css', replacement: resolve(__dirname, '../web-components/lib/index.css') },
+            { find: '@toolcase/web-components', replacement: resolve(__dirname, '../web-components/src/index.ts') },
             { find: '@toolcase/phaser-plus', replacement: resolve(__dirname, '../phaser-plus/src/index.ts') },
             { find: /^@toolcase\/node$/, replacement: resolve(__dirname, '../node/src/main.iso.ts') },
         ],
