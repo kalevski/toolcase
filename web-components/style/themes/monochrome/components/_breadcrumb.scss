@@ -13,17 +13,27 @@
 //   (3) .breadcrumb-item a: muted ink (#525252) link, darker on hover (#333333).
 //       Bootstrap has no --bs-breadcrumb-link-color token, so we target the
 //       anchor directly.
-//   (4) Focus ring: inherited from the foundation's :focus-visible rule
+//   (4) Mono structural voice — the breadcrumb is a navigation trail, which the
+//       design-system guide places in the JetBrains Mono "structure" register
+//       (alongside eyebrows, meta rows and version tags), not the Inter prose
+//       register. The trail switches to var(--bs-font-monospace) at a reduced
+//       size with light tracking so it reads as machine-facing chrome.
+//   (5) Focus ring: inherited from the foundation's :focus-visible rule
 //       (outline: 2px solid #111111 / offset 2px) — no per-component override needed.
 
 tc-theme[name="monochrome"] {
 
     // ── Breadcrumb container ──────────────────────────────────────────────────
-    // Muted gray divider + near-black active crumb via --bs-breadcrumb-* tokens.
+    // Muted gray divider + near-black active crumb via --bs-breadcrumb-* tokens,
+    // rendered in the mono structural voice (reduced size + light tracking).
 
     .breadcrumb {
         --bs-breadcrumb-divider-color: #a3a3a3;
         --bs-breadcrumb-active-color:  #0a0a0a;
+
+        font-family:    var(--bs-font-monospace);
+        font-size:      0.8125rem;
+        letter-spacing: 0.02em;
     }
 
     // ── Non-active crumb links ────────────────────────────────────────────────

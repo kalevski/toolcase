@@ -56,6 +56,19 @@ tc-theme[name="monochrome"] {
     --bs-link-hover-color:     #333333;
     --bs-link-hover-color-rgb: 51, 51, 51;
 
+    // ── Typography — two-family voice (Inter prose · JetBrains Mono structure) ──
+    // The brand speaks in two families with intent (design-system guide §typography):
+    // Inter carries prose / UI / buttons; JetBrains Mono is the voice of structure —
+    // eyebrows, section labels, meta rows, version tags, breadcrumbs, code and the
+    // wordmark. "Prose is Inter; structure is mono." These families are also set on
+    // the compiled Sass base, but are reaffirmed here so the monochrome scope is
+    // self-describing and any per-component partial can reach for
+    // var(--bs-font-monospace) to switch a structural element into the mono register.
+    // Headings cap at weight 600; 700 is reserved for the wordmark and strong inline.
+    --bs-font-sans-serif:  'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --bs-font-monospace:   'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+    --bs-body-font-family: var(--bs-font-sans-serif);
+
     // ── Borders ───────────────────────────────────────────────────────────────
     --bs-border-color:             #e5e5e5;
     --bs-border-color-translucent: rgba(0, 0, 0, 0.1);
