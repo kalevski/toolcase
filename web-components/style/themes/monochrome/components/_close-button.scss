@@ -1,0 +1,45 @@
+// Monochrome theme override for tc-close-button.
+//
+// Bootstrap's .btn-close bakes the glyph fill into a compile-time data-URI SVG,
+// so the only runtime lever is --bs-btn-close-bg. We also clear the colored
+// focus box-shadow and let the foundation's :focus-visible ink ring (2px solid
+// #111111) serve as the sole keyboard focus indicator (WCAG 2.4.7).
+//
+// Override strategy:
+//   (1) Glyph — near-black ink fill (#111111) via --bs-btn-close-bg and
+//       --bs-btn-close-color; full opacity at rest.
+//   (2) Hover  — subtle neutral background tint (rgba(0,0,0,0.06)); opacity
+//       stays at 1 so the ink glyph reads cleanly on paper-white surfaces.
+//   (3) Focus  — --bs-btn-close-focus-shadow: none so Bootstrap's translucent
+//       ring is suppressed; the foundation :focus-visible rule takes over.
+//   (4) Coarse-pointer touch target — min 44×44 px (WCAG 2.5.5).
+
+tc-theme[name="monochrome"] {
+
+    // ── Glyph & baseline ──────────────────────────────────────────────────────
+    // Near-black ink X; no Bootstrap focus shadow.
+
+    .btn-close {
+        --bs-btn-close-color:         #111111;
+        --bs-btn-close-bg:            url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23111111'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e");
+        --bs-btn-close-opacity:       1;
+        --bs-btn-close-hover-opacity: 1;
+        --bs-btn-close-focus-shadow:  none;
+    }
+
+    // ── Hover — subtle neutral background tint ────────────────────────────────
+
+    .btn-close:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+    }
+
+    // ── Coarse-pointer touch target ───────────────────────────────────────────
+    // WCAG 2.5.5 — minimum 44×44 px tappable area on touch devices.
+
+    @media (pointer: coarse) {
+        .btn-close {
+            min-width:  44px;
+            min-height: 44px;
+        }
+    }
+}
