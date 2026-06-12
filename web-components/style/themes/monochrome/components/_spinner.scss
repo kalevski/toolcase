@@ -1,0 +1,65 @@
+// Monochrome theme override for tc-spinner.
+//
+// Bootstrap's .spinner-border and .spinner-grow use currentColor for their
+// visual fill (border-color and background-color respectively). The active
+// color comes from a .text-{variant} utility class applied to the element;
+// without a variant the spinner inherits --bs-body-color (#0a0a0a) — already
+// near-black and correct.
+//
+// Bootstrap exposes no --bs-spinner-color runtime token, so variant colors are
+// remapped via direct color declarations targeting each .text-* combination.
+// The .text-* utilities use !important, so these overrides also use !important
+// at higher specificity to win (tc-theme[name="monochrome"] .spinner-*.text-*
+// is (0,3,0) vs Bootstrap's .text-* at (0,1,0)).
+//
+// Severity → darkness scale (lightest = passive, darkest = critical):
+//   info    → #a3a3a3  passive light gray
+//   success → #737373  mid gray
+//   warning → #404040  dark, caution
+//   danger  → #171717  near-black, critical
+//
+// border-radius: 50% is hard-coded in Bootstrap's compiled CSS (not a runtime
+// token) and is never overridden here — the circular shape is preserved.
+
+tc-theme[name="monochrome"] {
+
+    .spinner-border.text-primary,
+    .spinner-grow.text-primary {
+        color: #111111 !important;
+    }
+
+    .spinner-border.text-secondary,
+    .spinner-grow.text-secondary {
+        color: #525252 !important;
+    }
+
+    .spinner-border.text-info,
+    .spinner-grow.text-info {
+        color: #a3a3a3 !important;
+    }
+
+    .spinner-border.text-success,
+    .spinner-grow.text-success {
+        color: #737373 !important;
+    }
+
+    .spinner-border.text-warning,
+    .spinner-grow.text-warning {
+        color: #404040 !important;
+    }
+
+    .spinner-border.text-danger,
+    .spinner-grow.text-danger {
+        color: #171717 !important;
+    }
+
+    .spinner-border.text-light,
+    .spinner-grow.text-light {
+        color: #d4d4d4 !important;
+    }
+
+    .spinner-border.text-dark,
+    .spinner-grow.text-dark {
+        color: #0a0a0a !important;
+    }
+}
