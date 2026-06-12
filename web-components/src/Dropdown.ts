@@ -1,4 +1,4 @@
-import { Dropdown as BsDropdown } from 'bootstrap'
+import { Dropdown as BsDropdown } from './internal/Dropdown'
 
 const TAG_NAME = 'tc-dropdown'
 

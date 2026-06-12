@@ -1,4 +1,4 @@
-import { Collapse as BsCollapse } from 'bootstrap'
+import { Collapse as BsCollapse } from './internal/Collapse'
 
 const TAG_NAME = 'tc-collapse'
 

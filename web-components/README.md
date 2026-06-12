@@ -3,7 +3,7 @@
 [![GitHub](https://img.shields.io/github/license/kalevski/toolcase?style=for-the-badge)](https://github.com/kalevski/toolcase/blob/main/LICENSE)
 [![npm version](https://img.shields.io/npm/v/@toolcase/web-components?color=teal&label=VERSION&style=for-the-badge)](https://www.npmjs.com/package/@toolcase/web-components)
 
-**Framework-free** Bootstrap 5 components wrapped as HTML5 Web Components (`tc-*`). Drop them into plain HTML, React, Vue, Svelte, Angular, or any other stack — no framework required.
+**Framework-free** HTML5 Web Components (`tc-*`) with their own from-scratch toolcase styling — no Bootstrap dependency, but a Bootstrap-compatible class and 12-column grid API. Drop them into plain HTML, React, Vue, Svelte, Angular, or any other stack — no framework required.
 
 📖 Live demos: **[toolcase.kalevski.dev/web-components](https://toolcase.kalevski.dev/web-components)**
 

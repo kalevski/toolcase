@@ -1,1 +1,225 @@
-// tc-modal — theme tweaks only; Bootstrap modal classes handle layout.
+// tc-modal — sharp dialog, 1px border, the single hard overlay shadow.
+// Class protocol (.modal.fade.show / .modal-backdrop / .modal-static) is
+// driven by the internal Modal plugin.
+
+@use '../foundation/tokens' as *;
+
+.modal {
+    --bs-modal-zindex: var(--tc-z-modal);
+    --bs-modal-width: 500px;
+    --bs-modal-padding: 1rem;
+    --bs-modal-margin: 1.75rem;
+    --bs-modal-color: var(--bs-body-color);
+    --bs-modal-bg: var(--tc-surface);
+    --bs-modal-border-color: var(--tc-border);
+    --bs-modal-border-width: var(--bs-border-width);
+    --bs-modal-border-radius: 0;
+    --bs-modal-box-shadow: var(--tc-shadow-lg);
+    --bs-modal-header-padding: 0.8125rem 1rem;
+    --bs-modal-header-border-color: var(--tc-border);
+    --bs-modal-header-border-width: var(--bs-border-width);
+    --bs-modal-title-line-height: 1.4;
+    --bs-modal-footer-gap: 0.5rem;
+    --bs-modal-footer-border-color: var(--tc-border);
+    --bs-modal-footer-border-width: var(--bs-border-width);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--bs-modal-zindex);
+    display: none;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    outline: 0;
+}
+
+.modal-dialog {
+    position: relative;
+    width: auto;
+    margin: 0.5rem;
+    pointer-events: none;
+
+    .modal.fade & {
+        transform: translateY(-2rem);
+        transition: transform 0.25s ease-out;
+    }
+
+    .modal.show & {
+        transform: none;
+    }
+
+    // Static-backdrop nudge.
+    .modal.modal-static & {
+        transform: scale(1.02);
+    }
+}
+
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+}
+
+.modal-dialog-scrollable {
+    height: calc(100% - 1rem);
+
+    .modal-content {
+        max-height: 100%;
+        overflow: hidden;
+    }
+
+    .modal-body {
+        overflow-y: auto;
+    }
+}
+
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    color: var(--bs-modal-color);
+    pointer-events: auto;
+    background: var(--bs-modal-bg);
+    background-clip: padding-box;
+    border: var(--bs-modal-border-width) solid var(--bs-modal-border-color);
+    border-radius: var(--bs-modal-border-radius);
+    box-shadow: var(--bs-modal-box-shadow);
+    outline: 0;
+}
+
+.modal-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--bs-modal-header-padding);
+    border-bottom: var(--bs-modal-header-border-width) solid var(--bs-modal-header-border-color);
+}
+
+// Guard against foreign bridge sheets (react-components ships a
+// `.modal-header .btn-close` rule at the same 0,2,0 specificity setting
+// font-size/padding); this sheet loads after, so equal specificity wins here.
+.modal-header .btn-close {
+    padding: 0;
+    margin: -0.4375rem -0.4375rem -0.4375rem auto;
+    font-size: 0; // glyph is an inline svg — neutralise foreign 1.125rem
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: var(--bs-modal-title-line-height);
+}
+
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: var(--bs-modal-padding);
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+.modal-footer {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--bs-modal-footer-gap);
+    padding: 0.75rem 1rem;
+    border-top: var(--bs-modal-footer-border-width) solid var(--bs-modal-footer-border-color);
+}
+
+.modal-backdrop {
+    --bs-backdrop-zindex: var(--tc-z-modal-backdrop);
+    --bs-backdrop-bg: #0f172a;
+    --bs-backdrop-opacity: 0.5;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--bs-backdrop-zindex);
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bs-backdrop-bg);
+
+    &.fade {
+        transition: opacity 0.15s linear;
+    }
+
+    &:not(.show) {
+        opacity: 0;
+    }
+
+    &.show {
+        opacity: var(--bs-backdrop-opacity);
+    }
+}
+
+// ── Sizes ─────────────────────────────────────────────────────────────────────
+
+@include media-up(sm) {
+    .modal-dialog {
+        max-width: var(--bs-modal-width);
+        margin: var(--bs-modal-margin) auto;
+    }
+
+    .modal-dialog-centered {
+        min-height: calc(100% - var(--bs-modal-margin) * 2);
+    }
+
+    .modal-dialog-scrollable {
+        height: calc(100% - var(--bs-modal-margin) * 2);
+    }
+
+    .modal-sm {
+        --bs-modal-width: 300px;
+    }
+}
+
+@include media-up(lg) {
+    .modal-lg,
+    .modal-xl {
+        --bs-modal-width: 800px;
+    }
+}
+
+@include media-up(xl) {
+    .modal-xl {
+        --bs-modal-width: 1140px;
+    }
+}
+
+// ── Fullscreen ────────────────────────────────────────────────────────────────
+
+@mixin modal-fullscreen {
+    width: 100vw;
+    max-width: none;
+    height: 100%;
+    margin: 0;
+
+    .modal-content {
+        height: 100%;
+        border: 0;
+    }
+
+    .modal-body {
+        overflow-y: auto;
+    }
+}
+
+.modal-fullscreen {
+    @include modal-fullscreen;
+}
+
+@each $bp, $min in $grid-breakpoints {
+    @media (max-width: #{$min - 0.02px}) {
+        .modal-fullscreen-#{$bp}-down {
+            @include modal-fullscreen;
+        }
+    }
+}

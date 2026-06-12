@@ -1,1 +1,85 @@
-// tc-button-group — theme tweaks only; Bootstrap btn-group classes handle layout.
+// tc-button-group — segmented control. Segments render white over collapsed
+// 1px border-strong hairlines; the active segment fills solid with the app
+// accent. Buttons inside a group never lift on hover.
+
+.btn-group,
+.btn-group-vertical {
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+
+    .btn {
+        --bs-btn-color: var(--tc-slate-700);
+        --bs-btn-bg: #fff;
+        --bs-btn-border-color: var(--tc-border-strong);
+        --bs-btn-font-size: 12.5px;
+        --bs-btn-padding-y: 7px;
+        --bs-btn-padding-x: 13px;
+        --bs-btn-hover-color: var(--tc-slate-700);
+        --bs-btn-hover-bg: #fff;
+        --bs-btn-hover-border-color: var(--tc-border-strong);
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: var(--tc-app-accent);
+        --bs-btn-active-border-color: var(--tc-app-accent);
+        --bs-btn-disabled-color: var(--tc-slate-700);
+        --bs-btn-disabled-bg: #fff;
+        --bs-btn-disabled-border-color: var(--tc-border-strong);
+
+        position: relative;
+        flex: 1 1 auto;
+        gap: 6px;
+
+        &:hover,
+        &:focus-visible,
+        &:active,
+        &.active {
+            z-index: 1;
+        }
+
+        // Joined buttons don't lift or glow individually.
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}
+
+// Collapse adjoining hairlines — raw .btn children or tc-button hosts.
+.btn-group > .btn:not(:first-child),
+.btn-group > tc-button:not(:first-child) {
+    margin-left: calc(-1 * var(--bs-border-width));
+}
+
+.btn-group-vertical {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+
+    > .btn,
+    > tc-button {
+        width: 100%;
+
+        &:not(:first-child) {
+            margin-top: calc(-1 * var(--bs-border-width));
+        }
+    }
+
+    > tc-button > .btn {
+        width: 100%;
+    }
+}
+
+// Size modifiers cascade the .btn-sm/.btn-lg metrics to children.
+.btn-group-sm > .btn,
+.btn-group-sm > tc-button > .btn {
+    --bs-btn-padding-y: 0.375rem;
+    --bs-btn-padding-x: 0.75rem;
+    --bs-btn-font-size: 0.8125rem;
+}
+
+.btn-group-lg > .btn,
+.btn-group-lg > tc-button > .btn {
+    --bs-btn-padding-y: 0.75rem;
+    --bs-btn-padding-x: 1.5rem;
+    --bs-btn-font-size: 1.04rem;
+}

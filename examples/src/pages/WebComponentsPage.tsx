@@ -15,10 +15,10 @@ export const WebComponentsPage = () => {
                     name: 'web-components',
                     eyebrow: 'Library · UI · Web Components',
                     tagline:
-                        'Bootstrap 5 components wrapped as framework-free HTML5 Web Components — drop into any stack without React, Vue, or Angular.',
+                        'Framework-free HTML5 Web Components with from-scratch toolcase styling — drop into any stack without React, Vue, or Angular.',
                     version: versions['web-components'],
                     examples: webComponentExamples.length,
-                    chips: ['Web Components', 'Bootstrap 5', 'Framework-agnostic'],
+                    chips: ['Web Components', 'Zero CSS deps', 'Framework-agnostic'],
                 }}
             />
             <InstallBlock pkg="@toolcase/web-components" />

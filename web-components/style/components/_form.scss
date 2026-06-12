@@ -1,1 +1,14 @@
-// tc-form — theme tweaks only; Bootstrap was-validated and validation classes handle layout.
+// tc-form — layout shell + .was-validated state (the actual feedback rules
+// are shared from _input.scss).
+
+tc-form {
+    display: block;
+
+    form {
+        display: block;
+    }
+
+    .tc-form-body {
+        display: block;
+    }
+}

@@ -1,1 +1,78 @@
-// tc-switch — theme tweaks only; Bootstrap form-switch classes handle layout.
+// tc-switch — pill track (sanctioned circle/pill geometry) with a sliding
+// knob; the checked track carries the signature slate-ink gradient. The knob
+// is a pure circle — never a check mark.
+
+.form-switch {
+    // 18px knob, 2px inset on the 22px track (viewBox 11 ⇒ ×2 scale). A faint
+    // edge ring keeps the white knob crisp on light tracks.
+    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5.5 -5.5 11 11'%3e%3ccircle r='4.5' fill='%23ffffff'/%3e%3ccircle r='4.5' fill='none' stroke='rgba(15,23,42,0.08)' stroke-width='0.5'/%3e%3c/svg%3e");
+
+    padding-left: 3.1rem;
+
+    .form-check-input {
+        --bs-form-check-bg-image: var(--bs-form-switch-bg);
+
+        width: 40px;
+        height: 22px;
+        margin-top: 0.15em;
+        margin-left: -3.1rem;
+        background-color: var(--tc-border-strong);
+        background-image: var(--bs-form-check-bg-image);
+        background-position: left center;
+        background-size: contain;
+        border: 0;
+        border-radius: 999px;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+        transition:
+            background-position var(--tc-transition-base),
+            background-color var(--tc-transition-base),
+            box-shadow var(--tc-transition-base);
+
+        &:hover {
+            background-color: var(--tc-text-faint);
+        }
+
+        // Outranks the base checkbox rules (0,3,0) that would otherwise swap
+        // the knob for the check-mark glyph and repaint the fill.
+        &:checked {
+            --bs-form-check-bg-image: var(--bs-form-switch-bg);
+
+            background-color: var(--tc-app-accent);
+            background-image:
+                var(--bs-form-check-bg-image),
+                linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+            background-position:
+                right center,
+                center;
+            background-size: contain, cover;
+            box-shadow: none;
+        }
+
+        &:focus-visible {
+            box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+
+            ~ .form-check-label {
+                opacity: 0.6;
+            }
+        }
+    }
+
+    .form-check-label {
+        font-size: 0.9rem;
+        color: var(--tc-text);
+    }
+
+    &.form-check-reverse {
+        padding-right: 3.1rem;
+        padding-left: 0;
+
+        .form-check-input {
+            margin-right: -3.1rem;
+            margin-left: 0;
+        }
+    }
+}

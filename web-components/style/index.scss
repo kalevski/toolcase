@@ -1,19 +1,16 @@
-// @toolcase/web-components global stylesheet.
+// @toolcase/web-components global stylesheet — authored from scratch, no
+// Bootstrap dependency. Import order determines cascade priority:
 //
-// Import order determines cascade priority:
-//   (1) Bootstrap + toolcase Sass variable overrides  →  base layer
-//   (2) Component partials                            →  tc-* layer on top
+//   (1) Foundation — compile-time Sass tokens, element base styles, the
+//       Bootstrap-compatible 12-column grid, and the utility slice the
+//       components emit.
+//   (2) Component partials — full from-scratch styling for every class the
+//       tc-* components render, driven through --bs-<component>-* custom
+//       properties (Bootstrap 5.3 names) so themes re-skin via vars alone.
+//   (3) Default theme — the toolcase design system (product voice): the
+//       runtime --tc-* tokens and the --bs-* theming contract, applied at
+//       :root so components are styled with no wrapper required.
 
-// (1) Bootstrap bundle with toolcase theme overrides.
-//     style/themes/_variables.scss imports bootstrap/scss/functions, declares
-//     our Sass variable overrides, then imports the full Bootstrap bundle.
-@use './themes/variables';
-
-// (2) Component partials aggregator (empty until component tasks run).
-//     style/components/_index.scss forwards each tc-* component partial.
+@use './foundation';
 @use './components';
-
-// (3) Monochrome theme — scoped overrides applied only inside
-//     <tc-theme name="monochrome">…</tc-theme>. Placed after components so
-//     these cascade rules win over the default theme layer.
-@use './themes/monochrome';
+@use './themes/default';

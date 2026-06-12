@@ -1,1 +1,55 @@
-// tc-floating-label — theme tweaks only; Bootstrap form-floating classes handle layout.
+// tc-floating-label — control with the label docked top-left in the mono
+// register once the field is focused or filled.
+
+.form-floating {
+    position: relative;
+    display: block;
+
+    > .form-control,
+    > .form-select {
+        height: calc(3.1rem + var(--bs-border-width) * 2);
+        min-height: calc(3.1rem + var(--bs-border-width) * 2);
+        padding: 1.35rem 0.75rem 0.35rem;
+    }
+
+    > label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        max-width: 100%;
+        height: 100%;
+        padding: 0.95rem 0.75rem;
+        overflow: hidden;
+        font-size: 0.925rem;
+        color: var(--bs-form-floating-label-color, var(--tc-text-muted));
+        text-align: start;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        pointer-events: none;
+        transform-origin: 0 0;
+        transition:
+            transform 0.1s ease-in-out,
+            opacity 0.1s ease-in-out,
+            font-size 0.1s ease-in-out,
+            padding 0.1s ease-in-out;
+    }
+
+    > .form-control::placeholder {
+        color: transparent;
+    }
+
+    > .form-control:focus ~ label,
+    > .form-control:not(:placeholder-shown) ~ label,
+    > .form-select ~ label {
+        height: auto;
+        padding-top: 0.4375rem;
+        padding-bottom: 0;
+        font-family: var(--tc-font-mono);
+        font-size: 0.625rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: var(--bs-form-floating-label-opacity, 1);
+        transform: none;
+    }
+}

@@ -8,7 +8,9 @@ const Header = () => {
     const location = useLocation()
     const path = location.pathname
 
-    const isPackages = path === '/' || packageRoutes.some((r) => path === r.basePath || path.startsWith(`${r.basePath}/`))
+    const isPackages =
+        path === '/' ||
+        packageRoutes.some((r) => path === r.basePath || path.startsWith(`${r.basePath}/`))
     const isApps = path.startsWith('/apps')
     const isSkills = path.startsWith('/skills')
 
@@ -20,7 +22,10 @@ const Header = () => {
                     <span>@toolcase</span>
                 </RouterLink>
                 <nav className="nav">
-                    <RouterLink to="/" className={isPackages && !isApps && !isSkills ? 'active' : ''}>
+                    <RouterLink
+                        to="/"
+                        className={isPackages && !isApps && !isSkills ? 'active' : ''}
+                    >
                         Packages
                     </RouterLink>
                     <RouterLink to="/apps" className={isApps ? 'active' : ''}>
@@ -49,8 +54,12 @@ const Footer = () => (
                 &nbsp;·&nbsp; reusable code shaped over 10 years
             </div>
             <div style={{ display: 'flex', gap: 20 }}>
-                <a href="https://github.com/kalevski/toolcase" target="_blank" rel="noopener">github</a>
-                <a href="https://www.npmjs.com/~kalevski" target="_blank" rel="noopener">npm</a>
+                <a href="https://github.com/kalevski/toolcase" target="_blank" rel="noopener">
+                    github
+                </a>
+                <a href="https://www.npmjs.com/~kalevski" target="_blank" rel="noopener">
+                    npm
+                </a>
                 <a href="mailto:dakalevski@gmail.com">contact</a>
             </div>
         </div>
@@ -71,10 +80,17 @@ interface ExampleWrapperProps {
     example: DemoEntry
 }
 
+const routeThemes: Record<string, { value: string; label: string }[]> = {
+    'react-components': [
+        { value: 'default', label: 'Default' },
+        { value: 'dark', label: 'Dark' },
+    ],
+}
+
 const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
     const navigate = useNavigate()
-    const supportsTheme = route.key === 'react-components'
-    const [theme, setTheme] = useState<'default' | 'dark'>('default')
+    const themes = routeThemes[route.key]
+    const [theme, setTheme] = useState('default')
     const index = route.examples.findIndex((e) => e.key === example.key)
     const prev = index > 0 ? route.examples[index - 1] : null
     const next = index < route.examples.length - 1 ? route.examples[index + 1] : null
@@ -108,12 +124,15 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
                         {example.title}
                         {example.extraHeader ? <> — {example.extraHeader}</> : null}
                     </span>
-                    {supportsTheme ? (
+                    {themes ? (
                         <label className="example__theme">
                             theme
-                            <select value={theme} onChange={(e) => setTheme(e.target.value as 'default' | 'dark')}>
-                                <option value="default">Default</option>
-                                <option value="dark">Dark</option>
+                            <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+                                {themes.map((t) => (
+                                    <option key={t.value} value={t.value}>
+                                        {t.label}
+                                    </option>
+                                ))}
                             </select>
                         </label>
                     ) : null}
@@ -123,7 +142,7 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
                 </div>
             </div>
             <div className={canvasClass}>
-                {supportsTheme && theme === 'dark' ? (
+                {route.key === 'react-components' && theme === 'dark' ? (
                     <div className="theme theme--dark">{children}</div>
                 ) : (
                     children
@@ -157,7 +176,7 @@ export const App = () => {
                                 </ExampleWrapper>
                             }
                         />
-                    ))
+                    )),
                 )}
             </Routes>
             <Footer />

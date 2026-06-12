@@ -1,1 +1,119 @@
-// tc-accordion / tc-accordion-item — no additional theme overrides needed; Bootstrap accordion classes handle layout.
+// tc-accordion — bordered list of items, mono-free header buttons with a
+// chevron that rotates open. Active header gets the muted ink wash.
+
+.accordion {
+    --bs-accordion-color: var(--bs-body-color);
+    --bs-accordion-bg: var(--tc-surface);
+    --bs-accordion-border-color: var(--tc-border);
+    --bs-accordion-border-width: var(--bs-border-width);
+    --bs-accordion-border-radius: 0;
+    --bs-accordion-btn-padding-x: 0.875rem;
+    --bs-accordion-btn-padding-y: 0.6875rem;
+    --bs-accordion-btn-color: var(--bs-body-color);
+    --bs-accordion-btn-bg: var(--bs-accordion-bg);
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231e293b'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-icon-width: 1.1rem;
+    --bs-accordion-btn-icon-transform: rotate(-180deg);
+    --bs-accordion-btn-icon-transition: transform 0.2s ease-in-out;
+    --bs-accordion-btn-active-icon: var(--bs-accordion-btn-icon);
+    --bs-accordion-btn-focus-box-shadow: var(--tc-focus-ring);
+    --bs-accordion-body-padding-x: 0.875rem;
+    --bs-accordion-body-padding-y: 0.75rem;
+    --bs-accordion-active-color: var(--bs-emphasis-color);
+    --bs-accordion-active-bg: var(--tc-surface-hover);
+
+    display: block;
+}
+
+.accordion-item {
+    display: block;
+    color: var(--bs-accordion-color);
+    background-color: var(--bs-accordion-bg);
+    border: var(--bs-accordion-border-width) solid var(--bs-accordion-border-color);
+
+    &:not(:first-of-type) {
+        border-top: 0;
+    }
+}
+
+.accordion-header {
+    margin: 0;
+    font-size: inherit;
+}
+
+.accordion-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--bs-accordion-btn-padding-y) var(--bs-accordion-btn-padding-x);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-accordion-btn-color);
+    text-align: left;
+    cursor: pointer;
+    background-color: var(--bs-accordion-btn-bg);
+    border: 0;
+    overflow-anchor: none;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &::after {
+        flex-shrink: 0;
+        width: var(--bs-accordion-btn-icon-width);
+        height: var(--bs-accordion-btn-icon-width);
+        margin-left: auto;
+        content: '';
+        background-image: var(--bs-accordion-btn-icon);
+        background-repeat: no-repeat;
+        background-size: var(--bs-accordion-btn-icon-width);
+        transition: var(--bs-accordion-btn-icon-transition);
+    }
+
+    &:not(.collapsed) {
+        color: var(--bs-accordion-active-color);
+        background-color: var(--bs-accordion-active-bg);
+
+        &::after {
+            background-image: var(--bs-accordion-btn-active-icon);
+            transform: var(--bs-accordion-btn-icon-transform);
+        }
+    }
+
+    &:hover {
+        background-color: var(--tc-surface-hover);
+    }
+
+    &:focus-visible {
+        z-index: 3;
+        outline: 0;
+        box-shadow: var(--bs-accordion-btn-focus-box-shadow);
+    }
+}
+
+.accordion-body {
+    display: block;
+    padding: 0 var(--bs-accordion-body-padding-x) var(--bs-accordion-body-padding-y);
+    font-size: 0.78125rem;
+    color: var(--tc-text-muted);
+}
+
+// Flush — edge-to-edge: drop side borders.
+.accordion-flush > .accordion-item {
+    border-right: 0;
+    border-left: 0;
+
+    &:first-child {
+        border-top: 0;
+    }
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+@media (pointer: coarse) {
+    .accordion-button {
+        min-height: 44px;
+    }
+}

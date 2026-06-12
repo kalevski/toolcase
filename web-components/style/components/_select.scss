@@ -1,8 +1,67 @@
-// tc-select — theme tweaks only; Bootstrap form-select classes handle layout.
-// The `size` attribute maps to Bootstrap's visual-size classes (form-select-sm /
-// form-select-lg), NOT to the native <select size> visible-rows attribute.
-// To control visible rows on a multiple select, target the inner <select> directly.
+// tc-select — .form-select with an inline chevron. The `size` attribute maps
+// to Bootstrap's visual-size classes (form-select-sm / form-select-lg), NOT to
+// the native <select size> visible-rows attribute.
 
 tc-option {
     display: none;
+}
+
+.form-select {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    --bs-form-select-border-color: var(--tc-border-strong);
+    --bs-form-select-focus-border-color: rgba(30, 41, 59, 0.5);
+    --bs-form-select-focus-box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+
+    display: block;
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 0.625rem;
+    font-family: var(--tc-font-sans);
+    font-size: 0.925rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--tc-text);
+    cursor: pointer;
+    appearance: none;
+    background-color: var(--tc-surface);
+    background-image: var(--bs-form-select-bg-img);
+    background-repeat: no-repeat;
+    background-position: right 0.625rem center;
+    background-size: 14px 12px;
+    border: var(--bs-border-width) solid var(--bs-form-select-border-color);
+    border-radius: 0;
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus {
+        border-color: var(--bs-form-select-focus-border-color);
+        outline: 0;
+        box-shadow: var(--bs-form-select-focus-box-shadow);
+    }
+
+    &:disabled {
+        color: var(--tc-text-muted);
+        background-color: var(--tc-surface-muted);
+        cursor: default;
+    }
+
+    &[multiple],
+    &[size]:not([size='1']) {
+        padding-right: 0.625rem;
+        background-image: none;
+    }
+}
+
+.form-select-sm {
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+    padding-left: 0.55rem;
+    font-size: 0.8125rem;
+}
+
+.form-select-lg {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+    padding-left: 1rem;
+    font-size: 1.04rem;
 }

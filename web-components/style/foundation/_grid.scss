@@ -1,0 +1,149 @@
+// Bootstrap-compatible 12-column flexbox grid, authored from scratch.
+//
+// Implements the exact class surface tc-container / tc-row / tc-col emit:
+//   .container, .container-fluid, .container-{sm…xxl}
+//   .row, .row-cols-{1…6|auto}, .row-cols-{bp}-{1…6|auto}
+//   .col, .col-auto, .col-{1…12}, .col-{bp}-{1…12|auto}
+//   .offset-{0…11}, .offset-{bp}-{0…11}
+//   .order-first|last|{0…5}, .order-{bp}-…
+//   .g-{0…5}, .gx-{0…5}, .gy-{0…5} (+ responsive variants)
+// Gutters flow through --bs-gutter-x/--bs-gutter-y like Bootstrap 5 so they
+// remain themable at runtime.
+
+@use 'sass:map';
+@use 'sass:math';
+@use 'tokens' as *;
+
+// ── Containers ────────────────────────────────────────────────────────────────
+
+%container-base {
+    --bs-gutter-x: #{$grid-gutter-width};
+    width: 100%;
+    padding-right: calc(var(--bs-gutter-x) * 0.5);
+    padding-left: calc(var(--bs-gutter-x) * 0.5);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container,
+.container-fluid {
+    @extend %container-base;
+}
+
+@each $bp, $min in $grid-breakpoints {
+    .container-#{$bp} {
+        @extend %container-base;
+    }
+}
+
+// Each breakpoint caps .container and every .container-{smaller-or-equal-bp}.
+@each $bp, $min in $grid-breakpoints {
+    $max: map.get($container-max-widths, $bp);
+
+    @include media-up($bp) {
+        .container {
+            max-width: $max;
+        }
+        @each $inner-bp, $inner-min in $grid-breakpoints {
+            @if $inner-min <= $min {
+                .container-#{$inner-bp} {
+                    max-width: $max;
+                }
+            }
+        }
+    }
+}
+
+// ── Row ───────────────────────────────────────────────────────────────────────
+
+.row {
+    --bs-gutter-x: #{$grid-gutter-width};
+    --bs-gutter-y: 0;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: calc(-1 * var(--bs-gutter-y));
+    margin-right: calc(-0.5 * var(--bs-gutter-x));
+    margin-left: calc(-0.5 * var(--bs-gutter-x));
+
+    > * {
+        flex-shrink: 0;
+        width: 100%;
+        max-width: 100%;
+        padding-right: calc(var(--bs-gutter-x) * 0.5);
+        padding-left: calc(var(--bs-gutter-x) * 0.5);
+        margin-top: var(--bs-gutter-y);
+    }
+}
+
+// ── Column / row-cols / offset / order generators ────────────────────────────
+
+@mixin grid-classes($infix) {
+    .col#{$infix} {
+        flex: 1 0 0%;
+    }
+
+    .col#{$infix}-auto {
+        flex: 0 0 auto;
+        width: auto;
+    }
+
+    @for $i from 1 through $grid-columns {
+        .col#{$infix}-#{$i} {
+            flex: 0 0 auto;
+            width: math.percentage(math.div($i, $grid-columns));
+        }
+    }
+
+    .row-cols#{$infix}-auto > * {
+        flex: 0 0 auto;
+        width: auto;
+    }
+
+    @for $i from 1 through 6 {
+        .row-cols#{$infix}-#{$i} > * {
+            flex: 0 0 auto;
+            width: math.percentage(math.div(1, $i));
+        }
+    }
+
+    @for $i from 0 through ($grid-columns - 1) {
+        .offset#{$infix}-#{$i} {
+            @if $i == 0 {
+                margin-left: 0;
+            } @else {
+                margin-left: math.percentage(math.div($i, $grid-columns));
+            }
+        }
+    }
+
+    .order#{$infix}-first {
+        order: -1;
+    }
+    .order#{$infix}-last {
+        order: 6;
+    }
+    @for $i from 0 through 5 {
+        .order#{$infix}-#{$i} {
+            order: $i;
+        }
+    }
+
+    @each $key, $value in $spacers {
+        .g#{$infix}-#{$key},
+        .gx#{$infix}-#{$key} {
+            --bs-gutter-x: #{$value};
+        }
+        .g#{$infix}-#{$key},
+        .gy#{$infix}-#{$key} {
+            --bs-gutter-y: #{$value};
+        }
+    }
+}
+
+@include grid-classes('');
+
+@each $bp, $min in $grid-breakpoints {
+    @include media-up($bp) {
+        @include grid-classes('-#{$bp}');
+    }
+}

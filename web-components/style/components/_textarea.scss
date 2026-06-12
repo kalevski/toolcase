@@ -1,1 +1,6 @@
-// tc-textarea — theme tweaks only; Bootstrap form-control classes handle layout.
+// tc-textarea — rides on .form-control; only the textarea-specific bits live here.
+
+textarea.form-control {
+    min-height: calc(1.6em + 1rem + var(--bs-border-width) * 2);
+    resize: vertical;
+}

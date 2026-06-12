@@ -1,4 +1,5 @@
-import { Carousel as BsCarousel } from 'bootstrap'
+import { Carousel as BsCarousel } from './internal/Carousel'
+import { chevronLeftIcon, chevronRightIcon } from './icons'
 
 const TAG_NAME = 'tc-carousel'
 
@@ -144,11 +145,11 @@ export class Carousel extends HTMLElement {
 
         const controlsHtml = this.controls
             ? `<button class="carousel-control-prev" type="button" data-bs-target="#${id}" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="carousel-control-prev-icon" aria-hidden="true">${chevronLeftIcon}</span>
                 <span class="visually-hidden">Previous</span>
             </button>
             <button class="carousel-control-next" type="button" data-bs-target="#${id}" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="carousel-control-next-icon" aria-hidden="true">${chevronRightIcon}</span>
                 <span class="visually-hidden">Next</span>
             </button>`
             : ''

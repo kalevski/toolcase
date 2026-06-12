@@ -1,0 +1,112 @@
+// toolcase design tokens — the compile-time (Sass) layer for @toolcase/web-components.
+//
+// Breakpoints, spacers, the slate palette, and the theme-color maps shared by
+// the grid, utilities, and component partials. The runtime custom-property
+// layer (--tc-* + the --bs-* theming contract) lives in the default theme:
+// style/themes/default/_foundation.scss.
+
+@use 'sass:color';
+@use 'sass:map';
+
+@function rgb-channels($color) {
+    @return color.channel($color, 'red', $space: rgb), color.channel($color, 'green', $space: rgb),
+        color.channel($color, 'blue', $space: rgb);
+}
+
+// ── Sass maps (compile-time) ──────────────────────────────────────────────────
+
+$grid-breakpoints: (
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px,
+    xxl: 1400px,
+) !default;
+
+$container-max-widths: (
+    sm: 540px,
+    md: 720px,
+    lg: 960px,
+    xl: 1140px,
+    xxl: 1400px,
+) !default;
+
+$grid-columns: 12 !default;
+$grid-gutter-width: 1.5rem !default;
+
+$spacers: (
+    0: 0,
+    1: 0.25rem,
+    2: 0.5rem,
+    3: 1rem,
+    4: 1.5rem,
+    5: 3rem,
+) !default;
+
+@mixin media-up($breakpoint) {
+    $min: map.get($grid-breakpoints, $breakpoint);
+    @media (min-width: $min) {
+        @content;
+    }
+}
+
+// ── Palette (Sass-level, reused by component partials) ───────────────────────
+
+$white: #ffffff !default;
+$slate-50: #f8fafc !default;
+$slate-100: #f1f5f9 !default;
+$slate-200: #e2e8f0 !default;
+$slate-300: #cbd5e1 !default;
+$slate-400: #94a3b8 !default;
+$slate-500: #64748b !default;
+$slate-600: #475569 !default;
+$slate-700: #334155 !default;
+$slate-800: #1e293b !default;
+$slate-900: #0f172a !default;
+
+$primary: $slate-800 !default; // slate ink — the library accent
+$secondary: #3f3d56 !default;
+$success: #16a34a !default;
+$info: #0284c7 !default;
+$warning: #d97706 !default;
+$danger: #dc2626 !default;
+$light: $slate-50 !default;
+$dark: $slate-900 !default;
+
+$theme-colors: (
+    'primary': $primary,
+    'secondary': $secondary,
+    'success': $success,
+    'danger': $danger,
+    'warning': $warning,
+    'info': $info,
+    'light': $light,
+    'dark': $dark,
+) !default;
+
+// Soft (tinted) backgrounds for alerts / list-group variants / text-bg-light.
+$theme-colors-soft: (
+    'primary': #e7eaf0,
+    'secondary': #e8e7ee,
+    'success': #dcfce7,
+    'danger': #fee2e2,
+    'warning': #fef3c7,
+    'info': #e0f2fe,
+    'light': $slate-50,
+    'dark': #d8dce3,
+) !default;
+
+// Emphasis (dark) text on the soft backgrounds.
+$theme-colors-emphasis: (
+    'primary': $slate-900,
+    'secondary': #2c2b3c,
+    'success': #166534,
+    'danger': #991b1b,
+    'warning': #92400e,
+    'info': #075985,
+    'light': $slate-600,
+    'dark': $slate-900,
+) !default;
+
+// Variants whose solid fill needs dark text for contrast.
+$contrast-dark-variants: ('light') !default;

@@ -1,1 +1,174 @@
-// tc-dropdown — theme tweaks only; Bootstrap dropdown classes handle layout.
+// tc-dropdown — surface menu with 1px border and the hard overlay shadow.
+// Positioning comes from Popper (internal plugin); CSS only paints.
+
+.dropdown,
+.dropup,
+.dropend,
+.dropstart {
+    position: relative;
+    display: inline-flex;
+}
+
+.dropdown-toggle {
+    white-space: nowrap;
+
+    // Caret — small bordered triangle, matches Bootstrap's geometry.
+    &::after {
+        display: inline-block;
+        margin-left: 0.4em;
+        vertical-align: 0.15em;
+        content: '';
+        border-top: 0.3em solid;
+        border-right: 0.3em solid transparent;
+        border-bottom: 0;
+        border-left: 0.3em solid transparent;
+    }
+}
+
+.dropup .dropdown-toggle::after {
+    border-top: 0;
+    border-bottom: 0.3em solid;
+}
+
+.dropend .dropdown-toggle::after {
+    border-top: 0.3em solid transparent;
+    border-right: 0;
+    border-bottom: 0.3em solid transparent;
+    border-left: 0.3em solid;
+    vertical-align: 0;
+}
+
+.dropstart .dropdown-toggle::after {
+    border-top: 0.3em solid transparent;
+    border-right: 0.3em solid;
+    border-bottom: 0.3em solid transparent;
+    border-left: 0;
+    vertical-align: 0;
+}
+
+.dropdown-toggle-split {
+    padding-right: 0.6rem;
+    padding-left: 0.6rem;
+
+    &::after {
+        margin-left: 0;
+    }
+}
+
+.dropdown-menu {
+    --bs-dropdown-min-width: 180px;
+    --bs-dropdown-padding-x: 0.25rem;
+    --bs-dropdown-padding-y: 0.25rem;
+    --bs-dropdown-font-size: 0.8125rem;
+    --bs-dropdown-color: var(--bs-body-color);
+    --bs-dropdown-bg: var(--tc-surface);
+    --bs-dropdown-border-color: var(--tc-border);
+    --bs-dropdown-border-radius: 0;
+    --bs-dropdown-border-width: var(--bs-border-width);
+    --bs-dropdown-box-shadow: var(--tc-shadow-lg);
+    --bs-dropdown-divider-bg: var(--tc-border);
+    --bs-dropdown-divider-margin-y: 0.25rem;
+    --bs-dropdown-item-padding-x: 0.625rem;
+    --bs-dropdown-item-padding-y: 0.4375rem;
+    --bs-dropdown-link-color: var(--tc-slate-700);
+    --bs-dropdown-link-hover-color: var(--tc-text);
+    --bs-dropdown-link-hover-bg: var(--tc-surface-muted);
+    --bs-dropdown-link-active-color: var(--tc-app-accent-contrast);
+    --bs-dropdown-link-active-bg: var(--tc-app-accent);
+    --bs-dropdown-link-disabled-color: var(--tc-text-faint);
+
+    position: absolute;
+    z-index: var(--tc-z-dropdown);
+    display: none;
+    min-width: var(--bs-dropdown-min-width);
+    padding: var(--bs-dropdown-padding-y) var(--bs-dropdown-padding-x);
+    margin: 0;
+    font-size: var(--bs-dropdown-font-size);
+    color: var(--bs-dropdown-color);
+    text-align: left;
+    list-style: none;
+    background-color: var(--bs-dropdown-bg);
+    background-clip: padding-box;
+    border: var(--bs-dropdown-border-width) solid var(--bs-dropdown-border-color);
+    border-radius: var(--bs-dropdown-border-radius);
+    box-shadow: var(--bs-dropdown-box-shadow);
+
+    &.show {
+        display: block;
+    }
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    padding: var(--bs-dropdown-item-padding-y) var(--bs-dropdown-item-padding-x);
+    clear: both;
+    font-weight: 400;
+    color: var(--bs-dropdown-link-color);
+    text-align: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    background-color: transparent;
+    border: 0;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-dropdown-link-hover-color);
+        background-color: var(--bs-dropdown-link-hover-bg);
+        text-decoration: none;
+    }
+
+    &.active,
+    &:active {
+        color: var(--bs-dropdown-link-active-color);
+        background-color: var(--bs-dropdown-link-active-bg);
+    }
+
+    &.disabled,
+    &:disabled {
+        color: var(--bs-dropdown-link-disabled-color);
+        pointer-events: none;
+        background-color: transparent;
+    }
+
+    // Shortcut hint — right-aligned mono ghost.
+    kbd {
+        padding: 0;
+        margin-left: auto;
+        font-family: var(--tc-font-mono);
+        font-size: 0.65625rem;
+        color: var(--tc-text-faint);
+        background: none;
+    }
+
+    &.active kbd,
+    &:active kbd {
+        color: rgba(255, 255, 255, 0.6);
+    }
+}
+
+.dropdown-divider {
+    height: 0;
+    margin: var(--bs-dropdown-divider-margin-y) 0;
+    overflow: hidden;
+    border: 0;
+    border-top: 1px solid var(--bs-dropdown-divider-bg);
+}
+
+.dropdown-header {
+    display: block;
+    padding: var(--bs-dropdown-item-padding-y) var(--bs-dropdown-item-padding-x);
+    margin-bottom: 0;
+    font-family: var(--tc-font-mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--tc-text-faint);
+    white-space: nowrap;
+}

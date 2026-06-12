@@ -1,4 +1,4 @@
-import { Tooltip as BsTooltip } from 'bootstrap'
+import { Tooltip as BsTooltip } from './internal/Tooltip'
 
 const TAG_NAME = 'tc-tooltip'
 

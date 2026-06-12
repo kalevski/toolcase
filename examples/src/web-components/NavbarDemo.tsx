@@ -9,34 +9,34 @@ const NavbarDemo: React.FC = () => (
                     <RichPageHeader
                         chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
                         title="Navbar"
-                        description="Bootstrap responsive navbar wrapper. Use brand for the brand text, expand for the collapse breakpoint, variant for light/dark theming, and bg for background colour. Place nav links directly as children — they are projected into the collapsible region."
+                        description="The toolcase app chrome: a translucent glass bar on a hairline, with the typographic brand mark (square accent dot + mono wordmark) and dense links — the active item carries a 2px accent underline. Use brand for the wordmark, expand for the collapse breakpoint, variant=dark for the ink surface, and sticky/fixed for positioning. Nav links placed as children are projected into the collapsible region."
                     />
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default — brand + links, collapses at lg">
+                        <SectionCard title="Default — glass chrome, brand mark + links, collapses at lg">
                             {/* @ts-ignore */}
-                            <tc-navbar brand="MyApp" expand="lg" bg="body-tertiary">
+                            <tc-navbar brand="toolcase" expand="lg">
                                 <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                                     <li className="nav-item">
-                                        <a className="nav-link active" href="#">Home</a>
+                                        <a className="nav-link active" href="#">Overview</a>
                                     </li>
                                     <li className="nav-item">
-                                        <a className="nav-link" href="#">Features</a>
+                                        <a className="nav-link" href="#">Components</a>
                                     </li>
                                     <li className="nav-item">
-                                        <a className="nav-link" href="#">Pricing</a>
+                                        <a className="nav-link" href="#">Tokens</a>
                                     </li>
                                     <li className="nav-item">
-                                        <a className="nav-link disabled" aria-disabled="true">Disabled</a>
+                                        <a className="nav-link disabled" aria-disabled="true">Changelog</a>
                                     </li>
                                 </ul>
                             {/* @ts-ignore */}
                             </tc-navbar>
                         </SectionCard>
 
-                        <SectionCard title="expand=md — collapses below md breakpoint">
+                        <SectionCard title="expand=md — borderless icon toggler, sheet-style collapse below md">
                             {/* @ts-ignore */}
-                            <tc-navbar brand="SiteMD" expand="md" bg="primary" variant="dark">
+                            <tc-navbar brand="console" expand="md">
                                 <ul className="navbar-nav me-auto mb-2 mb-md-0">
                                     <li className="nav-item">
                                         <a className="nav-link active" href="#">Dashboard</a>
@@ -52,18 +52,18 @@ const NavbarDemo: React.FC = () => (
                             </tc-navbar>
                         </SectionCard>
 
-                        <SectionCard title="variant=dark — dark-themed navbar">
+                        <SectionCard title="variant=dark — ink surface, the brand dot keeps the signature cyan">
                             {/* @ts-ignore */}
-                            <tc-navbar brand="DarkSite" expand="lg" bg="dark" variant="dark">
+                            <tc-navbar brand="ops" expand="lg" variant="dark">
                                 <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                                     <li className="nav-item">
-                                        <a className="nav-link active" href="#">Home</a>
+                                        <a className="nav-link active" href="#">Fleet</a>
                                     </li>
                                     <li className="nav-item">
-                                        <a className="nav-link" href="#">About</a>
+                                        <a className="nav-link" href="#">Incidents</a>
                                     </li>
                                     <li className="nav-item">
-                                        <a className="nav-link" href="#">Contact</a>
+                                        <a className="nav-link" href="#">Audit</a>
                                     </li>
                                 </ul>
                                 <div className="d-flex">
@@ -73,22 +73,22 @@ const NavbarDemo: React.FC = () => (
                             </tc-navbar>
                         </SectionCard>
 
-                        <SectionCard title="sticky=top — sticks to top of scroll container">
+                        <SectionCard title="sticky=top — the glass surface blurs content scrolling underneath">
                             <div style={{ height: '160px', overflowY: 'auto', border: '1px solid var(--bs-border-color)' }}>
                                 {/* @ts-ignore */}
-                                <tc-navbar brand="Sticky" expand="lg" bg="success" variant="dark" sticky="top">
+                                <tc-navbar brand="docs" expand="lg" sticky="top">
                                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                                         <li className="nav-item">
-                                            <a className="nav-link active" href="#">Page</a>
+                                            <a className="nav-link active" href="#">Guide</a>
                                         </li>
                                         <li className="nav-item">
-                                            <a className="nav-link" href="#">Another</a>
+                                            <a className="nav-link" href="#">Reference</a>
                                         </li>
                                     </ul>
                                 {/* @ts-ignore */}
                                 </tc-navbar>
                                 <div className="p-3">
-                                    <p>Scroll this region to see the navbar stay at the top.</p>
+                                    <p>Scroll this region — the bar stays pinned and the translucent surface picks up the content moving beneath it.</p>
                                     <p>More content below…</p>
                                     <p>Even more content…</p>
                                     <p>Keeps going…</p>

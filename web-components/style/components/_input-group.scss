@@ -1,1 +1,85 @@
-// tc-input-group / tc-input-group-text — theme tweaks only; Bootstrap input-group classes handle layout.
+// tc-input-group — joined addon + control row; addons take the muted surface
+// and the mono register (units, prefixes, protocol fragments).
+
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+
+    > .form-control,
+    > .form-select {
+        position: relative;
+        flex: 1 1 auto;
+        width: 1%;
+        min-width: 0;
+    }
+
+    // Join borders — every element after the first overlaps by 1px.
+    > :not(:first-child) {
+        margin-left: calc(-1 * var(--bs-border-width));
+    }
+
+    > .form-control:focus,
+    > .form-select:focus {
+        z-index: 3;
+    }
+
+    .btn {
+        position: relative;
+        z-index: 2;
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+.input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0 11px;
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--tc-text-muted);
+    text-align: center;
+    white-space: nowrap;
+    background-color: var(--tc-surface-muted);
+    border: var(--bs-border-width) solid var(--tc-border-strong);
+}
+
+.input-group-sm {
+    > .form-control,
+    > .form-select {
+        padding: 0.3rem 0.55rem;
+        font-size: 0.8125rem;
+    }
+
+    > .input-group-text,
+    > .btn {
+        padding: 0.3rem 0.55rem;
+        font-size: 0.75rem;
+    }
+}
+
+.input-group-lg {
+    > .form-control,
+    > .form-select {
+        padding: 0.7rem 1rem;
+        font-size: 1.04rem;
+    }
+
+    > .input-group-text,
+    > .btn {
+        padding: 0.7rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+// Custom-element hosts inside the group must stretch as flex children.
+.input-group > tc-input-group-text {
+    display: flex;
+}

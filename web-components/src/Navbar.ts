@@ -1,4 +1,4 @@
-import { Collapse as BsCollapse } from 'bootstrap'
+import { Collapse as BsCollapse } from './internal/Collapse'
 
 const TAG_NAME = 'tc-navbar'
 
@@ -108,7 +108,9 @@ export class Navbar extends HTMLElement {
         }
 
         const brandHtml = brand
-            ? `<a class="navbar-brand" href="#">${this._escape(brand)}</a>`
+            ? `<a class="navbar-brand" href="#">` +
+              `<span class="navbar-brand-dot"></span>` +
+              `${this._escape(brand)}</a>`
             : ''
         const id = this._collapseId
 

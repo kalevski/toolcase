@@ -1,4 +1,5 @@
-import { Toast as BsToast } from 'bootstrap'
+import { Toast as BsToast } from './internal/Toast'
+import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-toast'
 
@@ -131,7 +132,7 @@ export class Toast extends HTMLElement {
         const headerHtml = hasTitle
             ? `<div class="toast-header">` +
               `<strong class="me-auto">${titleText}</strong>` +
-              `<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>` +
+              `<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">${closeIcon}</button>` +
               `</div>`
             : ''
 

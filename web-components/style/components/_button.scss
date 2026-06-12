@@ -1,1 +1,214 @@
-// tc-button — theme tweaks only; Bootstrap button classes handle layout.
+// tc-button — .btn authored from scratch (toolcase product voice).
+// Sharp corners, slate-ink primary with the signature gradient fill, hover
+// lift, 1px borders. Styling flows through the Bootstrap 5.3 --bs-btn-* custom
+// property API so theme scopes can re-skin via vars alone.
+
+@use 'sass:list';
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+.btn {
+    --bs-btn-padding-x: 1rem;
+    --bs-btn-padding-y: 0.5rem;
+    --bs-btn-font-family: var(--tc-font-sans);
+    --bs-btn-font-size: 0.925rem;
+    --bs-btn-font-weight: 500;
+    --bs-btn-line-height: 1.6;
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-width: var(--bs-border-width);
+    --bs-btn-border-color: transparent;
+    --bs-btn-border-radius: 0;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-box-shadow: none;
+    --bs-btn-disabled-opacity: 0.65;
+    --bs-btn-active-shadow: none;
+    --bs-btn-focus-shadow-rgb: 30, 41, 59;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
+    font-family: var(--bs-btn-font-family);
+    font-size: var(--bs-btn-font-size);
+    font-weight: var(--bs-btn-font-weight);
+    line-height: var(--bs-btn-line-height);
+    letter-spacing: 0.025em;
+    color: var(--bs-btn-color);
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    background: var(--bs-btn-bg);
+    border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
+    border-radius: var(--bs-btn-border-radius);
+    box-shadow: var(--bs-btn-box-shadow);
+    transition:
+        transform var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast),
+        background var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-btn-hover-color, var(--bs-btn-color));
+        background: var(--bs-btn-hover-bg, var(--bs-btn-bg));
+        border-color: var(--bs-btn-hover-border-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 var(--bs-focus-ring-width) rgba(var(--bs-btn-focus-shadow-rgb), 0.25);
+    }
+
+    &:active,
+    &.active {
+        color: var(--bs-btn-active-color, var(--bs-btn-color));
+        background: var(--bs-btn-active-bg, var(--bs-btn-bg));
+        border-color: var(--bs-btn-active-border-color, var(--bs-btn-border-color));
+        box-shadow: var(--bs-btn-active-shadow);
+        transform: translateY(0);
+    }
+
+    &:disabled,
+    &.disabled,
+    &[aria-disabled='true'] {
+        color: var(--bs-btn-disabled-color, var(--bs-btn-color));
+        background: var(--bs-btn-disabled-bg, var(--bs-btn-bg));
+        border-color: var(--bs-btn-disabled-border-color, var(--bs-btn-border-color));
+        opacity: var(--bs-btn-disabled-opacity);
+        pointer-events: none;
+        transform: none;
+    }
+}
+
+// ── Solid variants ────────────────────────────────────────────────────────────
+
+// Primary carries the signature slate-ink gradient + hover glow.
+.btn-primary {
+    --bs-btn-color: #{$white};
+    --bs-btn-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-btn-border-color: var(--tc-app-accent);
+    --bs-btn-hover-color: #{$white};
+    --bs-btn-hover-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-btn-hover-border-color: var(--tc-app-accent);
+    --bs-btn-active-color: #{$white};
+    --bs-btn-active-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-btn-active-border-color: var(--tc-app-accent);
+    --bs-btn-disabled-color: #{$white};
+    --bs-btn-disabled-bg: var(--tc-app-accent);
+    --bs-btn-disabled-border-color: var(--tc-app-accent);
+
+    &:hover {
+        box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+    }
+}
+
+@each $name, $value in $theme-colors {
+    @if $name != 'primary' {
+        // Solid fills keep white text (only light flips to ink) and never
+        // darken — hover feedback is the translateY lift alone.
+        $contrast: $white;
+        $border: rgba(var(--bs-#{$name}-rgb), 1);
+        @if $name == 'light' {
+            $contrast: $slate-900;
+            $border: $slate-300;
+        }
+
+        .btn-#{$name} {
+            --bs-btn-color: #{$contrast};
+            --bs-btn-bg: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-border-color: #{$border};
+            --bs-btn-hover-color: #{$contrast};
+            --bs-btn-hover-bg: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-hover-border-color: #{$border};
+            --bs-btn-active-color: #{$contrast};
+            --bs-btn-active-bg: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-active-border-color: #{$border};
+            --bs-btn-disabled-color: #{$contrast};
+            --bs-btn-disabled-bg: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-disabled-border-color: rgba(var(--bs-#{$name}-rgb), 1);
+        }
+    }
+}
+
+// ── Outline variants ──────────────────────────────────────────────────────────
+
+// Outline primary is the quiet workhorse: slate text, strong hairline border,
+// muted-surface hover (no color wash).
+.btn-outline-primary {
+    --bs-btn-color: var(--tc-app-accent);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: var(--tc-border-strong);
+    --bs-btn-hover-color: var(--tc-app-accent);
+    --bs-btn-hover-bg: var(--tc-surface-muted);
+    --bs-btn-hover-border-color: var(--tc-border-strong);
+    --bs-btn-active-color: var(--tc-app-accent);
+    --bs-btn-active-bg: var(--tc-surface-muted);
+    --bs-btn-active-border-color: var(--tc-border-strong);
+    --bs-btn-disabled-color: var(--tc-app-accent);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--tc-border-strong);
+}
+
+@each $name, $value in $theme-colors {
+    @if $name != 'primary' {
+        // Colored outlines keep their own hue for text + border; hover washes
+        // in the soft tint — never the solid fill.
+        $hover-bg: map.get($theme-colors-soft, $name);
+        @if list.index(('success', 'danger', 'warning', 'info'), $name) {
+            $hover-bg: var(--tc-#{$name}-bg);
+        }
+
+        .btn-outline-#{$name} {
+            --bs-btn-color: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-bg: transparent;
+            --bs-btn-border-color: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-hover-color: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-hover-bg: #{$hover-bg};
+            --bs-btn-hover-border-color: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-active-color: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-active-bg: #{$hover-bg};
+            --bs-btn-active-border-color: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-disabled-color: rgba(var(--bs-#{$name}-rgb), 1);
+            --bs-btn-disabled-bg: transparent;
+            --bs-btn-disabled-border-color: rgba(var(--bs-#{$name}-rgb), 1);
+        }
+    }
+}
+
+// ── Link variant ──────────────────────────────────────────────────────────────
+
+.btn-link {
+    --bs-btn-color: var(--bs-link-color);
+    --bs-btn-hover-color: var(--bs-link-color);
+    --bs-btn-padding-x: 0.25rem;
+
+    &:hover {
+        text-decoration: underline;
+        transform: none;
+    }
+}
+
+// ── Sizes ─────────────────────────────────────────────────────────────────────
+
+.btn-sm {
+    --bs-btn-padding-y: 0.375rem;
+    --bs-btn-padding-x: 0.75rem;
+    --bs-btn-font-size: 0.8125rem;
+}
+
+.btn-lg {
+    --bs-btn-padding-y: 0.75rem;
+    --bs-btn-padding-x: 1.5rem;
+    --bs-btn-font-size: 1.04rem;
+}
+
+// WCAG 2.5.5 — minimum tappable area on touch devices.
+@media (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+    }
+}

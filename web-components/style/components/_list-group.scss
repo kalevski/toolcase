@@ -1,7 +1,157 @@
-// tc-list-group / tc-list-group-item — theme tweaks only.
-// Bootstrap list-group classes handle layout; we only need to reset inner
-// <a> and <button> content wrappers so they fill the item correctly.
+// tc-list-group — bordered stack, hairline item dividers, ink active state.
 
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+.list-group {
+    --bs-list-group-color: #{$slate-700};
+    --bs-list-group-bg: var(--tc-surface);
+    --bs-list-group-border-color: var(--tc-border);
+    --bs-list-group-border-width: var(--bs-border-width);
+    --bs-list-group-border-radius: 0;
+    --bs-list-group-item-padding-x: 0.8125rem;
+    --bs-list-group-item-padding-y: 0.625rem;
+    --bs-list-group-action-color: #{$slate-700};
+    --bs-list-group-action-hover-color: var(--tc-text);
+    --bs-list-group-action-hover-bg: var(--tc-surface-hover);
+    --bs-list-group-action-active-color: var(--tc-text);
+    --bs-list-group-action-active-bg: var(--tc-surface-muted);
+    --bs-list-group-disabled-color: var(--tc-text-faint);
+    --bs-list-group-disabled-bg: var(--tc-surface-hover);
+    --bs-list-group-active-color: var(--tc-app-accent-contrast);
+    --bs-list-group-active-bg: var(--tc-app-accent);
+    --bs-list-group-active-border-color: #{$slate-100};
+
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    margin: 0;
+    font-size: 0.8125rem;
+    border: var(--bs-list-group-border-width) solid var(--bs-list-group-border-color);
+    border-radius: var(--bs-list-group-border-radius);
+}
+
+.list-group-numbered {
+    list-style-type: none;
+    counter-reset: section;
+
+    > .list-group-item::before {
+        content: counters(section, '.') '. ';
+        counter-increment: section;
+        font-family: var(--tc-font-mono);
+        color: var(--tc-text-faint);
+    }
+}
+
+.list-group-item {
+    position: relative;
+    display: block;
+    padding: var(--bs-list-group-item-padding-y) var(--bs-list-group-item-padding-x);
+    color: var(--bs-list-group-color);
+    text-decoration: none;
+    background-color: var(--bs-list-group-bg);
+    // Inner separators are fainter than the outer hairline box.
+    border-bottom: var(--bs-list-group-border-width) solid #{$slate-100};
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    &.active {
+        z-index: 2;
+        color: var(--bs-list-group-active-color);
+        background-color: var(--bs-list-group-active-bg);
+        border-color: var(--bs-list-group-active-border-color);
+    }
+
+    &.disabled,
+    &:disabled {
+        color: var(--bs-list-group-disabled-color);
+        pointer-events: none;
+        background-color: var(--bs-list-group-disabled-bg);
+    }
+}
+
+.list-group-item-action {
+    width: 100%;
+    color: var(--bs-list-group-action-color);
+    text-align: inherit;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-visible {
+        z-index: 1;
+        color: var(--bs-list-group-action-hover-color);
+        background-color: var(--bs-list-group-action-hover-bg);
+        text-decoration: none;
+    }
+
+    &:active {
+        color: var(--bs-list-group-action-active-color);
+        background-color: var(--bs-list-group-action-active-bg);
+    }
+}
+
+.list-group-flush {
+    border: 0;
+    border-radius: 0;
+
+    > .list-group-item {
+        border-width: 0 0 var(--bs-list-group-border-width);
+
+        &:last-child {
+            border-bottom-width: 0;
+        }
+    }
+}
+
+// Horizontal layouts (base + per breakpoint).
+@mixin list-group-horizontal {
+    flex-direction: row;
+
+    > .list-group-item {
+        border-bottom: 0;
+        border-right: var(--bs-list-group-border-width) solid #{$slate-100};
+
+        &:last-child {
+            border-right: 0;
+        }
+    }
+}
+
+.list-group-horizontal {
+    @include list-group-horizontal;
+}
+
+@each $bp, $min in $grid-breakpoints {
+    @include media-up($bp) {
+        .list-group-horizontal-#{$bp} {
+            @include list-group-horizontal;
+        }
+    }
+}
+
+// Variant items — soft tinted fill with emphasis text.
+@each $name, $value in $theme-colors {
+    .list-group-item-#{$name} {
+        --bs-list-group-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-list-group-bg: #{map.get($theme-colors-soft, $name)};
+        --bs-list-group-action-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-list-group-action-hover-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-list-group-action-hover-bg: #{rgba($value, 0.25)};
+        --bs-list-group-active-color: #fff;
+        --bs-list-group-active-bg: #{map.get($theme-colors-emphasis, $name)};
+        --bs-list-group-active-border-color: #{map.get($theme-colors-emphasis, $name)};
+
+        color: var(--bs-list-group-color);
+        background-color: var(--bs-list-group-bg);
+    }
+}
+
+// Host content wrappers — inner <a>/<button> fill the item.
 tc-list-group-item {
     a.tc-lgi-content {
         display: block;

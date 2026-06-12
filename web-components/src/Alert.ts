@@ -1,4 +1,5 @@
-import { Alert as BsAlert } from 'bootstrap'
+import { Alert as BsAlert } from './internal/Alert'
+import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-alert'
 
@@ -78,7 +79,7 @@ export class Alert extends HTMLElement {
         const dismissible = this.dismissible
         this.setAttribute('role', 'alert')
         this.className = `alert alert-${variant}${dismissible ? ' alert-dismissible fade show' : ''}`
-        this.innerHTML = `<span class="tc-alert-content"></span>${dismissible ? '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' : ''}`
+        this.innerHTML = `<span class="tc-alert-content"></span>${dismissible ? `<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">${closeIcon}</button>` : ''}`
     }
 
     private _initBsAlert(): void {

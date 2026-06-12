@@ -1,1 +1,77 @@
-// tc-alert — theme tweaks only; Bootstrap alert classes handle layout.
+// tc-alert — the toolcase left-border alert: no full border, a 4px severity
+// edge, soft tinted gradient fill, emphasis-toned text.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+.alert {
+    --bs-alert-bg: var(--tc-surface-muted);
+    --bs-alert-padding-x: 1rem;
+    --bs-alert-padding-y: 0.85rem;
+    --bs-alert-margin-bottom: 1rem;
+    --bs-alert-color: var(--tc-text);
+    --bs-alert-border-color: var(--tc-app-accent);
+    --bs-alert-border-radius: 0;
+    --bs-alert-link-color: inherit;
+
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: var(--bs-alert-padding-y) var(--bs-alert-padding-x);
+    margin-bottom: var(--bs-alert-margin-bottom);
+    font-size: 0.9rem;
+    color: var(--bs-alert-color);
+    background: var(--bs-alert-bg);
+    border: 0;
+    border-left: 4px solid var(--bs-alert-border-color);
+    border-radius: var(--bs-alert-border-radius);
+
+    .alert-link {
+        font-weight: 600;
+        color: var(--bs-alert-link-color);
+    }
+}
+
+.alert-heading {
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: inherit;
+}
+
+.alert-dismissible {
+    padding-right: 3rem;
+
+    .btn-close {
+        position: absolute;
+        top: 0.5625rem;
+        right: 0.5rem;
+        z-index: 2;
+    }
+}
+
+@each $name, $value in $theme-colors {
+    .alert-#{$name} {
+        --bs-alert-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-alert-border-color: rgba(var(--bs-#{$name}-rgb), 1);
+        --bs-alert-bg: linear-gradient(
+            135deg,
+            rgba(var(--bs-#{$name}-rgb), 0.1),
+            rgba(var(--bs-#{$name}-rgb), 0.04)
+        );
+    }
+}
+
+// Primary/secondary read as ink — keep the wash subtle.
+.alert-primary {
+    --bs-alert-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.08), rgba(30, 41, 59, 0.03));
+}
+
+.alert-light {
+    --bs-alert-bg: #{$slate-50};
+    --bs-alert-border-color: #{$slate-300};
+}
+
+.alert-dark {
+    --bs-alert-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.05));
+}

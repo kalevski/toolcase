@@ -1,4 +1,5 @@
-import { Modal as BsModal } from 'bootstrap'
+import { Modal as BsModal } from './internal/Modal'
+import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-modal'
 
@@ -173,7 +174,7 @@ export class Modal extends HTMLElement {
             `<div class="modal-content">` +
             `<div class="modal-header">` +
             `<h5 class="modal-title">${titleText}</h5>` +
-            `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>` +
+            `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">${closeIcon}</button>` +
             `</div>` +
             `<div class="modal-body"></div>` +
             footerHtml +

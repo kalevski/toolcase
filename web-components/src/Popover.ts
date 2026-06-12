@@ -1,4 +1,4 @@
-import { Popover as BsPopover } from 'bootstrap'
+import { Popover as BsPopover } from './internal/Popover'
 
 const TAG_NAME = 'tc-popover'
 

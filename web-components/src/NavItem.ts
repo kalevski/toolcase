@@ -1,4 +1,4 @@
-import { Tab as BsTab } from 'bootstrap'
+import { Tab as BsTab } from './internal/Tab'
 
 const TAG_NAME = 'tc-nav-item'
 

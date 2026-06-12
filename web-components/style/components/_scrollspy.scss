@@ -1,1 +1,8 @@
-// tc-scrollspy — theme tweaks only; Bootstrap scrollspy classes handle highlighting.
+// tc-scrollspy — the host is the scroll container the internal ScrollSpy
+// plugin observes. position:relative keeps section offsetTop math local.
+
+tc-scrollspy {
+    position: relative;
+    display: block;
+    overflow-y: auto;
+}

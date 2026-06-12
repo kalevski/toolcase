@@ -1,11 +1,11 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — Bootstrap 5 components wrapped as framework-free HTML5 Web Components (`tc-*` custom elements). Covers layout (Container, Row, Col), content (Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Dropdown, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Dropdown, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
 
-Bootstrap 5 components wrapped as framework-free HTML5 Web Components. No React, Vue, or Angular required — drop `tc-*` tags into any stack.
+Framework-free HTML5 Web Components with their own from-scratch toolcase styling — no Bootstrap dependency, Bootstrap-compatible markup/class API. No React, Vue, or Angular required — drop `tc-*` tags into any stack.
 
 ```ts
 import { register } from '@toolcase/web-components'
@@ -178,7 +178,7 @@ Small count or label indicator.
 
 ### tc-button
 
-Bootstrap button.
+Button.
 
 **Attributes**
 
@@ -247,7 +247,7 @@ Content container with optional header/footer.
 
 ### tc-carousel
 
-Slideshow component backed by Bootstrap's Carousel plugin.
+Slideshow component with built-in slide/fade behavior.
 
 **Attributes**
 
@@ -295,7 +295,7 @@ Standalone × close button.
 
 ### tc-collapse
 
-Toggleable content panel backed by Bootstrap's Collapse plugin.
+Toggleable content panel with built-in height/width animation.
 
 **Attributes**
 
@@ -317,7 +317,7 @@ Toggleable content panel backed by Bootstrap's Collapse plugin.
 
 ### tc-dropdown
 
-Bootstrap Dropdown backed by Popper.js.
+Dropdown menu positioned by Popper.js.
 
 **Attributes**
 
@@ -434,14 +434,20 @@ Animated loading indicator.
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `type` | `border\|grow` | `border` | Spinner style |
+| `type` | `border\|grow\|dots\|bars\|pulse\|orbit` | `border` | Spinner shape |
 | `variant` | `primary\|secondary\|…` | — | Color |
 | `size` | `sm` | — | Small size |
 | `label` | string | `Loading…` | Visually-hidden label |
 
+Shapes: `border` (ring with colored arc), `grow` (pulsing dot), `dots` (bouncing trio), `bars` (equalizer bars), `pulse` (sonar ping), `orbit` (dashed ring with satellite dot).
+
 ```html
 <tc-spinner type="border" variant="primary"></tc-spinner>
 <tc-spinner type="grow" size="sm"></tc-spinner>
+<tc-spinner type="dots" variant="info"></tc-spinner>
+<tc-spinner type="bars"></tc-spinner>
+<tc-spinner type="pulse" variant="success"></tc-spinner>
+<tc-spinner type="orbit" size="sm"></tc-spinner>
 ```
 
 ---
@@ -496,13 +502,13 @@ Navigation strip.
 
 **Attributes:** `href`, `target`, `active`, `disabled`
 
-**Events:** `tc-show`, `tc-shown` (when variant is tabs/pills and Bootstrap Tab plugin activates)
+**Events:** `tc-show`, `tc-shown` (when variant is tabs/pills and a tab activates)
 
 ---
 
 ### tc-navbar
 
-Responsive navigation bar backed by Bootstrap's Collapse plugin.
+Responsive navigation bar with built-in collapse behavior. Styled as the toolcase app chrome: translucent glass surface (backdrop blur) on a hairline border, the brand rendered as the typographic mark (cyan square dot + mono wordmark), active links carrying a 2px accent underline. `variant="dark"` switches to the ink surface.
 
 **Attributes**
 
@@ -550,7 +556,7 @@ Page navigation controls.
 
 ### tc-scrollspy
 
-Scroll-position tracker backed by Bootstrap's ScrollSpy plugin.
+Scroll-position tracker (IntersectionObserver based).
 
 **Attributes**
 
@@ -577,7 +583,7 @@ Scroll-position tracker backed by Bootstrap's ScrollSpy plugin.
 
 ### tc-modal
 
-Bootstrap Modal dialog.
+Modal dialog.
 
 **Attributes**
 
@@ -610,7 +616,7 @@ Bootstrap Modal dialog.
 
 ### tc-offcanvas
 
-Bootstrap Offcanvas panel.
+Offcanvas panel.
 
 **Attributes**
 
@@ -637,7 +643,7 @@ Bootstrap Offcanvas panel.
 
 ### tc-popover
 
-Bootstrap Popover backed by Popper.js.
+Popover positioned by Popper.js.
 
 **Attributes**
 
@@ -663,7 +669,7 @@ Bootstrap Popover backed by Popper.js.
 
 ### tc-toast
 
-Bootstrap Toast notification.
+Toast notification.
 
 **Attributes**
 
@@ -689,7 +695,7 @@ Bootstrap Toast notification.
 
 ### tc-tooltip
 
-Bootstrap Tooltip backed by Popper.js.
+Tooltip positioned by Popper.js.
 
 **Attributes**
 

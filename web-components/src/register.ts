@@ -70,7 +70,9 @@ export function register(): void {
     customElements.define('tc-list-group', ListGroup)
     customElements.define('tc-list-group-item', ListGroupItem)
     customElements.define('tc-modal', Modal)
-    customElements.define('tc-offcanvas', Offcanvas)
+    // Cast: tc-offcanvas's boolean `scroll` accessor intentionally shadows
+    // HTMLElement.scroll(), which breaks structural assignability.
+    customElements.define('tc-offcanvas', Offcanvas as unknown as CustomElementConstructor)
     customElements.define('tc-nav', Nav)
     customElements.define('tc-nav-item', NavItem)
     customElements.define('tc-navbar', Navbar)

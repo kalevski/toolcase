@@ -1,0 +1,7 @@
+// Foundation layer — tokens, base element styles, grid, utilities.
+// Loads before the component partials so they sit later in the cascade.
+
+@forward 'tokens';
+@use 'reset';
+@use 'grid';
+@use 'utilities';

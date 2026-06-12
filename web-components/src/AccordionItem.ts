@@ -1,13 +1,13 @@
-import { Collapse } from 'bootstrap'
+import { Collapse } from './internal/Collapse'
 
 const TAG_NAME = 'tc-accordion-item'
 
 let itemCounter = 0
 
 export class AccordionItem extends HTMLElement {
-
     private _collapseId: string
     private _collapseEl: Element | null = null
+    private _collapse: Collapse | null = null
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -24,7 +24,7 @@ export class AccordionItem extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const body = this.querySelector('.accordion-body')
-            if (body) slotContent.forEach(n => body.appendChild(n))
+            if (body) slotContent.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
         this._collapseEl = this.querySelector('.accordion-collapse')
@@ -126,6 +126,9 @@ export class AccordionItem extends HTMLElement {
     private _attachListeners(): void {
         const el = this._collapseEl
         if (!el) return
+        // Bootstrap's global data API used to create the Collapse lazily on
+        // toggler click; the internal plugin is wired up explicitly instead.
+        this._collapse = new Collapse(el as HTMLElement, { toggle: false })
         el.addEventListener('show.bs.collapse', this._onShow)
         el.addEventListener('shown.bs.collapse', this._onShown)
         el.addEventListener('hide.bs.collapse', this._onHide)
@@ -133,6 +136,8 @@ export class AccordionItem extends HTMLElement {
     }
 
     private _detachListeners(): void {
+        this._collapse?.dispose()
+        this._collapse = null
         const el = this._collapseEl
         if (!el) return
         el.removeEventListener('show.bs.collapse', this._onShow)

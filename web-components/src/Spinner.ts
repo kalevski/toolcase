@@ -1,9 +1,9 @@
 const TAG_NAME = 'tc-spinner'
 
-export type SpinnerType = 'border' | 'grow'
+export type SpinnerType = 'border' | 'grow' | 'dots' | 'bars' | 'pulse' | 'orbit'
 export type SpinnerVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
-const TYPES: SpinnerType[] = ['border', 'grow']
+const TYPES: SpinnerType[] = ['border', 'grow', 'dots', 'bars', 'pulse', 'orbit']
 const VARIANTS: SpinnerVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
 
 export class Spinner extends HTMLElement {
@@ -64,8 +64,9 @@ export class Spinner extends HTMLElement {
 
         const variantClass = variant ? ` text-${variant}` : ''
         const sizeClass = small ? ` spinner-${type}-sm` : ''
+        const segments = type === 'dots' || type === 'bars' ? '<span></span><span></span><span></span>' : ''
 
-        this.innerHTML = `<div class="spinner-${type}${variantClass}${sizeClass}" role="status"><span class="visually-hidden">${label}</span></div>`
+        this.innerHTML = `<div class="spinner-${type}${variantClass}${sizeClass}" role="status">${segments}<span class="visually-hidden">${label}</span></div>`
     }
 }
 

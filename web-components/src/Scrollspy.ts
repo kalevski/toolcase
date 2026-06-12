@@ -1,4 +1,4 @@
-import { ScrollSpy as BsScrollSpy } from 'bootstrap'
+import { ScrollSpy as BsScrollSpy } from './internal/ScrollSpy'
 
 const TAG_NAME = 'tc-scrollspy'
 

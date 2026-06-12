@@ -1,120 +1,173 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
-const ScrollspyDemo: React.FC = () => (
-    <div className="py-4">
-        <div className="container">
-            <div className="row">
-                <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Scrollspy"
-                        description="Bootstrap ScrollSpy plugin wrapper. Highlights nav links as the user scrolls through a scrollable content region. Use the target attribute to point at the nav, offset to adjust the trigger threshold, and smooth-scroll to enable animated anchoring."
-                    />
+// tc-scrollspy toggles .active on the href-carrying anchor inside the target.
+// For tc-list-group-item that anchor is an internal node, so this hook listens
+// for the tc-activate event and mirrors the state onto the item's `active`
+// attribute, which drives the list-group-item active styling.
+function useListGroupSync(): [React.RefObject<any>, React.RefObject<any>] {
+    const spyRef = useRef<any>(null)
+    const listRef = useRef<any>(null)
 
-                    <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Basic — nav pills linked to scrollable region">
-                            <nav id="scrollspy-nav-basic" className="navbar bg-body-secondary px-3 mb-3">
-                                <ul className="nav nav-pills">
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-s1">Section 1</a>
-                                    </li>
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-s2">Section 2</a>
-                                    </li>
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-s3">Section 3</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            {/* @ts-ignore */}
-                            <tc-scrollspy target="#scrollspy-nav-basic" style={{ height: '200px', overflowY: 'scroll', display: 'block' }}>
-                                <div id="scrollspy-s1" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Section 1</h5>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                                </div>
-                                <div id="scrollspy-s2" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Section 2</h5>
-                                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                                </div>
-                                <div id="scrollspy-s3" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Section 3</h5>
-                                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-                                </div>
-                            {/* @ts-ignore */}
-                            </tc-scrollspy>
-                        </SectionCard>
+    useEffect(() => {
+        const spy = spyRef.current
+        const list = listRef.current
+        if (!spy || !list) return
+        const handler = (event: Event) => {
+            const link = (event as CustomEvent).detail?.relatedTarget as HTMLElement | null
+            const href = link?.getAttribute('href')
+            if (!href) return
+            list.querySelectorAll('tc-list-group-item').forEach((item: any) => {
+                if (item.getAttribute('href') === href) item.setAttribute('active', '')
+                else item.removeAttribute('active')
+            })
+        }
+        spy.addEventListener('tc-activate', handler)
+        return () => spy.removeEventListener('tc-activate', handler)
+    }, [])
 
-                        <SectionCard title="offset — activate 80px before the section reaches the top">
-                            <nav id="scrollspy-nav-offset" className="navbar bg-body-secondary px-3 mb-3">
-                                <ul className="nav nav-pills">
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-o1">Alpha</a>
-                                    </li>
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-o2">Beta</a>
-                                    </li>
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-o3">Gamma</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            {/* @ts-ignore */}
-                            <tc-scrollspy target="#scrollspy-nav-offset" offset="80" style={{ height: '200px', overflowY: 'scroll', display: 'block' }}>
-                                <div id="scrollspy-o1" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Alpha</h5>
-                                    <p>With <code>offset="80"</code> the link activates 80 px before the section scrolls to the top of the container.</p>
-                                    <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula.</p>
-                                </div>
-                                <div id="scrollspy-o2" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Beta</h5>
-                                    <p>Curabitur aliquet quam id dui posuere blandit. Cras ultricies ligula sed magna dictum porta. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus.</p>
-                                </div>
-                                <div id="scrollspy-o3" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Gamma</h5>
-                                    <p>Proin eget tortor risus. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Donec rutrum congue leo eget malesuada.</p>
-                                </div>
-                            {/* @ts-ignore */}
-                            </tc-scrollspy>
-                        </SectionCard>
+    return [spyRef, listRef]
+}
 
-                        <SectionCard title="smooth-scroll — animated anchor navigation">
-                            <nav id="scrollspy-nav-smooth" className="navbar bg-body-secondary px-3 mb-3">
-                                <ul className="nav nav-pills">
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-sm1">Intro</a>
-                                    </li>
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-sm2">Details</a>
-                                    </li>
-                                    <li className="nav-item">
-                                        <a className="nav-link" href="#scrollspy-sm3">Summary</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            {/* @ts-ignore */}
-                            <tc-scrollspy target="#scrollspy-nav-smooth" smooth-scroll style={{ height: '200px', overflowY: 'scroll', display: 'block' }}>
-                                <div id="scrollspy-sm1" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Intro</h5>
-                                    <p>Click a nav link above — with <code>smooth-scroll</code> set, Bootstrap animates the scroll instead of jumping instantly.</p>
-                                    <p>Quisque velit nisi, pretium ut lacinia in, elementum id enim. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus.</p>
+const ScrollspyDemo: React.FC = () => {
+    const [spyRef, listRef] = useListGroupSync()
+
+    return (
+        <div className="py-4">
+            <div className="container">
+                <div className="row">
+                    <div className="col-12">
+                        <RichPageHeader
+                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
+                            title="Scrollspy"
+                            description="Scroll-position tracker. Point the target attribute at a tc-nav or tc-list-group and the active link follows the section scrolled into view. Use offset to shift the trigger threshold, smooth-scroll for animated in-pane anchor clicks, and the tc-activate event to react to section changes."
+                        />
+
+                        <div className="d-flex flex-column gap-4 mt-4">
+                            <SectionCard title="tc-nav target — vertical underline nav follows scroll">
+                                <div className="row g-3">
+                                    <div className="col-12 col-md-3">
+                                        {/* @ts-ignore */}
+                                        <tc-nav id="scrollspy-nav-target" variant="underline" vertical>
+                                            {/* @ts-ignore */}
+                                            <tc-nav-item href="#scrollspy-n1">Overview</tc-nav-item>
+                                            {/* @ts-ignore */}
+                                            <tc-nav-item href="#scrollspy-n2">Install</tc-nav-item>
+                                            {/* @ts-ignore */}
+                                            <tc-nav-item href="#scrollspy-n3">Theming</tc-nav-item>
+                                            {/* @ts-ignore */}
+                                            <tc-nav-item href="#scrollspy-n4">API</tc-nav-item>
+                                        {/* @ts-ignore */}
+                                        </tc-nav>
+                                    </div>
+                                    <div className="col-12 col-md-9">
+                                        {/* @ts-ignore */}
+                                        <tc-scrollspy target="#scrollspy-nav-target" smooth-scroll style={{ height: '220px' }}>
+                                            <div id="scrollspy-n1" style={{ padding: '0.5rem 0 1rem' }}>
+                                                <h5 className="d-flex align-items-center gap-2">
+                                                    Overview
+                                                    {/* @ts-ignore */}
+                                                    <tc-badge variant="secondary" text="docs" />
+                                                </h5>
+                                                <p>Scroll this pane — the underline nav on the left highlights the section currently in view. Each nav item links to a section id inside the pane (<code>href="#scrollspy-n1"</code> and so on), and the spy resolves them automatically.</p>
+                                            </div>
+                                            <div id="scrollspy-n2" style={{ padding: '0.5rem 0 1rem' }}>
+                                                <h5>Install</h5>
+                                                <p>The scroll container is the <code>tc-scrollspy</code> element itself; it only needs a fixed height. The <code>target</code> attribute is a CSS selector pointing at the nav whose links should be spied.</p>
+                                            </div>
+                                            <div id="scrollspy-n3" style={{ padding: '0.5rem 0 1rem' }}>
+                                                <h5 className="d-flex align-items-center gap-2">
+                                                    Theming
+                                                    {/* @ts-ignore */}
+                                                    <tc-badge variant="info" text="css vars" />
+                                                </h5>
+                                                <p>The active link picks up the regular <code>tc-nav</code> active styling, so any nav variant works — underline shown here keeps the plain anchors the spy expects.</p>
+                                            </div>
+                                            <div id="scrollspy-n4" style={{ padding: '0.5rem 0 1rem' }}>
+                                                <h5>API</h5>
+                                                <p>With <code>smooth-scroll</code> set, clicking a nav link animates the pane to the section instead of jumping the whole page. The host also fires <code>tc-activate</code> whenever the active link changes.</p>
+                                            </div>
+                                        {/* @ts-ignore */}
+                                        </tc-scrollspy>
+                                    </div>
                                 </div>
-                                <div id="scrollspy-sm2" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Details</h5>
-                                    <p>Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a. Curabitur aliquet quam id dui posuere blandit. Donec sollicitudin molestie malesuada.</p>
+                            </SectionCard>
+
+                            <SectionCard title="tc-list-group target — active item follows scroll via tc-activate">
+                                <div className="row g-3">
+                                    <div className="col-12 col-md-4">
+                                        {/* @ts-ignore */}
+                                        <tc-list-group id="scrollspy-list-target" ref={listRef}>
+                                            {/* @ts-ignore */}
+                                            <tc-list-group-item href="#scrollspy-l1" active>Getting started</tc-list-group-item>
+                                            {/* @ts-ignore */}
+                                            <tc-list-group-item href="#scrollspy-l2">Configuration</tc-list-group-item>
+                                            {/* @ts-ignore */}
+                                            <tc-list-group-item href="#scrollspy-l3">Release notes</tc-list-group-item>
+                                        {/* @ts-ignore */}
+                                        </tc-list-group>
+                                    </div>
+                                    <div className="col-12 col-md-8">
+                                        {/* @ts-ignore */}
+                                        <tc-scrollspy ref={spyRef} target="#scrollspy-list-target" smooth-scroll style={{ height: '220px' }}>
+                                            <div id="scrollspy-l1" style={{ padding: '0.5rem 0 1rem' }}>
+                                                <h5>Getting started</h5>
+                                                <p>A <code>tc-list-group</code> works as a spy target too: give each <code>tc-list-group-item</code> an <code>href</code> pointing at a section id inside the pane.</p>
+                                                <p>This demo listens for the <code>tc-activate</code> event on the scrollspy host and mirrors the activated link onto the matching item's <code>active</code> attribute.</p>
+                                            </div>
+                                            <div id="scrollspy-l2" style={{ padding: '0.5rem 0 1rem' }}>
+                                                <h5>Configuration</h5>
+                                                <p>The event detail carries <code>relatedTarget</code> — the anchor that just became active — so the handler only needs to compare hrefs to find the matching item.</p>
+                                            </div>
+                                            <div id="scrollspy-l3" style={{ padding: '0.5rem 0 1rem' }}>
+                                                <h5>Release notes</h5>
+                                                {/* @ts-ignore */}
+                                                <tc-card title="Sections can hold any markup" subtitle="Cards, badges, forms…">
+                                                    <p className="mb-0">The spy observes the section wrappers by id, so the content inside them is unconstrained — this card scrolls along like any other block.</p>
+                                                {/* @ts-ignore */}
+                                                </tc-card>
+                                            </div>
+                                        {/* @ts-ignore */}
+                                        </tc-scrollspy>
+                                    </div>
                                 </div>
-                                <div id="scrollspy-sm3" style={{ padding: '0.5rem 0 1rem' }}>
-                                    <h5>Summary</h5>
-                                    <p>Nulla quis lorem ut libero malesuada feugiat. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Sed porttitor lectus nibh.</p>
-                                </div>
-                            {/* @ts-ignore */}
-                            </tc-scrollspy>
-                        </SectionCard>
+                            </SectionCard>
+
+                            <SectionCard title="offset — activate 80px before the section reaches the top">
+                                {/* @ts-ignore */}
+                                <tc-nav id="scrollspy-offset-target" variant="underline" style={{ marginBottom: '0.75rem' }}>
+                                    {/* @ts-ignore */}
+                                    <tc-nav-item href="#scrollspy-o1">Alpha</tc-nav-item>
+                                    {/* @ts-ignore */}
+                                    <tc-nav-item href="#scrollspy-o2">Beta</tc-nav-item>
+                                    {/* @ts-ignore */}
+                                    <tc-nav-item href="#scrollspy-o3">Gamma</tc-nav-item>
+                                {/* @ts-ignore */}
+                                </tc-nav>
+                                {/* @ts-ignore */}
+                                <tc-scrollspy target="#scrollspy-offset-target" offset="80" smooth-scroll style={{ height: '200px' }}>
+                                    <div id="scrollspy-o1" style={{ padding: '0.5rem 0 1rem' }}>
+                                        <h5>Alpha</h5>
+                                        <p>With <code>offset="80"</code> the link activates 80 px before the section scrolls to the top of the container.</p>
+                                        <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula.</p>
+                                    </div>
+                                    <div id="scrollspy-o2" style={{ padding: '0.5rem 0 1rem' }}>
+                                        <h5>Beta</h5>
+                                        <p>Curabitur aliquet quam id dui posuere blandit. Cras ultricies ligula sed magna dictum porta. Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus.</p>
+                                    </div>
+                                    <div id="scrollspy-o3" style={{ padding: '0.5rem 0 1rem' }}>
+                                        <h5>Gamma</h5>
+                                        <p>Proin eget tortor risus. Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Donec rutrum congue leo eget malesuada.</p>
+                                    </div>
+                                {/* @ts-ignore */}
+                                </tc-scrollspy>
+                            </SectionCard>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-)
+    )
+}
 
 export default ScrollspyDemo

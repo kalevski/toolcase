@@ -109,7 +109,7 @@ export class Button extends HTMLElement {
         const classes = `btn ${variantClass}${sizeClass}`
 
         const spinnerHtml = loading
-            ? `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>`
+            ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
             : ''
 
         if (href != null) {
