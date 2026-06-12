@@ -42,6 +42,7 @@ import { Range } from './Range'
 import { FloatingLabel } from './FloatingLabel'
 import { InputGroup } from './InputGroup'
 import { InputGroupText } from './InputGroupText'
+import { Form } from './Form'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -91,4 +92,5 @@ export function register(): void {
     customElements.define('tc-floating-label', FloatingLabel)
     customElements.define('tc-input-group', InputGroup)
     customElements.define('tc-input-group-text', InputGroupText)
+    customElements.define('tc-form', Form)
 }
