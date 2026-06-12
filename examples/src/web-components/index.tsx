@@ -33,6 +33,7 @@ import CheckDemo from './CheckDemo'
 import RadioDemo from './RadioDemo'
 import SwitchDemo from './SwitchDemo'
 import RangeDemo from './RangeDemo'
+import FloatingLabelDemo from './FloatingLabelDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -86,4 +87,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'radio', category: 'Forms', element: <RadioDemo /> },
     { key: 'switch', category: 'Forms', element: <SwitchDemo /> },
     { key: 'range', category: 'Forms', element: <RangeDemo /> },
+    { key: 'floating-label', category: 'Forms', element: <FloatingLabelDemo /> },
 ]

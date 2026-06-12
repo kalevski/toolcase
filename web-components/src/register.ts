@@ -39,6 +39,7 @@ import { Check } from './Check'
 import { Radio } from './Radio'
 import { Switch } from './Switch'
 import { Range } from './Range'
+import { FloatingLabel } from './FloatingLabel'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -85,4 +86,5 @@ export function register(): void {
     customElements.define('tc-radio', Radio)
     customElements.define('tc-switch', Switch)
     customElements.define('tc-range', Range)
+    customElements.define('tc-floating-label', FloatingLabel)
 }
