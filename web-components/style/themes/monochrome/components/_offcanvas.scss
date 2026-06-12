@@ -1,0 +1,45 @@
+// Monochrome theme override for tc-offcanvas.
+//
+// Bootstrap's .offcanvas renders a drawer panel with a soft shadow and a
+// tinted header. The monochrome skin replaces those with a flat,
+// border-defined panel:
+//
+//   - Paper-white panel surface (#ffffff) with a hairline edge border
+//     (#e5e5e5) as the sole elevation signal — no box shadow
+//   - Ink text (#0a0a0a) via --bs-offcanvas-color (title inherits from it)
+//   - Neutral paper-gray header cap (#f5f5f5) and a hairline divider between
+//     header and body; Bootstrap provides no --bs-offcanvas-header-bg token,
+//     so background-color is declared directly (§4.1 sanctioned escape)
+//   - Sharp corners are the compiled default for offcanvas panels; no
+//     --bs-offcanvas-border-radius token exists in Bootstrap 5.3, so no
+//     runtime pin is needed
+//   - Dismiss .btn-close already handled by _close-button.scss — no
+//     additional override needed here
+//
+// Backdrop note: Bootstrap appends .offcanvas-backdrop directly to <body>,
+// outside any tc-theme scope. The default rgba(0,0,0,0.5) neutral overlay
+// is already monochrome and requires no override.
+
+tc-theme[name="monochrome"] {
+
+    // ── Panel surface ─────────────────────────────────────────────────────────
+    // All --bs-offcanvas-* tokens cascade into .offcanvas-header, .offcanvas-body,
+    // and .offcanvas-footer through Bootstrap's variable inheritance.
+
+    .offcanvas {
+        --bs-offcanvas-color:        #0a0a0a;
+        --bs-offcanvas-bg:           #ffffff;
+        --bs-offcanvas-border-color: #e5e5e5;
+        --bs-offcanvas-border-width: 1px;
+        --bs-offcanvas-box-shadow:   none;
+    }
+
+    // ── Header cap ───────────────────────────────────────────────────────────
+    // Bootstrap provides no --bs-offcanvas-header-bg token; direct rules are
+    // the sanctioned escape (§4.1 — "a state Bootstrap has no token for").
+
+    .offcanvas-header {
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #e5e5e5;
+    }
+}
