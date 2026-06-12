@@ -35,6 +35,7 @@ import { Input } from './Input'
 import { Textarea } from './Textarea'
 import { Select } from './Select'
 import { Option } from './Option'
+import { Check } from './Check'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -77,4 +78,5 @@ export function register(): void {
     customElements.define('tc-textarea', Textarea)
     customElements.define('tc-select', Select)
     customElements.define('tc-option', Option)
+    customElements.define('tc-check', Check)
 }

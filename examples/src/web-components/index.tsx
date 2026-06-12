@@ -29,6 +29,7 @@ import TooltipDemo from './TooltipDemo'
 import InputDemo from './InputDemo'
 import TextareaDemo from './TextareaDemo'
 import SelectDemo from './SelectDemo'
+import CheckDemo from './CheckDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -78,4 +79,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'input', category: 'Forms', element: <InputDemo /> },
     { key: 'textarea', category: 'Forms', element: <TextareaDemo /> },
     { key: 'select', category: 'Forms', element: <SelectDemo /> },
+    { key: 'check', category: 'Forms', element: <CheckDemo /> },
 ]
