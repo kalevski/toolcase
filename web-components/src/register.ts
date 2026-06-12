@@ -37,6 +37,7 @@ import { Select } from './Select'
 import { Option } from './Option'
 import { Check } from './Check'
 import { Radio } from './Radio'
+import { Switch } from './Switch'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -81,4 +82,5 @@ export function register(): void {
     customElements.define('tc-option', Option)
     customElements.define('tc-check', Check)
     customElements.define('tc-radio', Radio)
+    customElements.define('tc-switch', Switch)
 }
