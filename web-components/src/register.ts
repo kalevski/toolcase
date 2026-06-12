@@ -40,6 +40,8 @@ import { Radio } from './Radio'
 import { Switch } from './Switch'
 import { Range } from './Range'
 import { FloatingLabel } from './FloatingLabel'
+import { InputGroup } from './InputGroup'
+import { InputGroupText } from './InputGroupText'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -87,4 +89,6 @@ export function register(): void {
     customElements.define('tc-switch', Switch)
     customElements.define('tc-range', Range)
     customElements.define('tc-floating-label', FloatingLabel)
+    customElements.define('tc-input-group', InputGroup)
+    customElements.define('tc-input-group-text', InputGroupText)
 }
