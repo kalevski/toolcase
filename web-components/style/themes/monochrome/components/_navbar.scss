@@ -1,0 +1,49 @@
+// Monochrome theme override for tc-navbar.
+//
+// Bootstrap's .navbar renders with a themed background, colored brand/link
+// text, and a data-URI hamburger toggler icon baked with a colored stroke.
+// The monochrome skin maps everything to the neutral ink ramp:
+//
+//   bar:       paper-white surface (#ffffff), hairline bottom border (#e5e5e5),
+//              flat — no shadow or gradient
+//   brand:     ink text (#111111) at rest, hover to #333333
+//   nav-links: muted ink (#525252) at rest, near-black (#0a0a0a) on
+//              hover/active; passive gray (#a3a3a3) when disabled
+//   toggler:   ink hamburger stroke (%23111111), hairline border (#e5e5e5),
+//              sharp corners; Bootstrap's box-shadow focus ring zeroed so the
+//              foundation's 2px solid #111111 :focus-visible ring is the sole
+//              keyboard indicator (WCAG 2.4.7)
+//   corners:   sharp throughout — --bs-navbar-toggler-border-radius: 0
+
+tc-theme[name="monochrome"] {
+
+    // ── Bar surface — paper-white, hairline bottom, no shadow ─────────────────
+    // Bootstrap has no --bs-navbar-bg token; background-color, border-bottom,
+    // and box-shadow are sanctioned bespoke declarations (§4.1 — "a state
+    // Bootstrap has no token for"). All other overrides use --bs-navbar-* tokens.
+
+    .navbar {
+        --bs-navbar-color:                 #525252;
+        --bs-navbar-hover-color:           #0a0a0a;
+        --bs-navbar-disabled-color:        #a3a3a3;
+        --bs-navbar-active-color:          #0a0a0a;
+        --bs-navbar-brand-color:           #111111;
+        --bs-navbar-brand-hover-color:     #333333;
+        --bs-navbar-toggler-border-color:  #e5e5e5;
+        --bs-navbar-toggler-border-radius: 0;
+        --bs-navbar-toggler-focus-width:   0;
+        --bs-navbar-toggler-icon-bg:       url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23111111' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c%2fsvg%3e");
+        background-color: #ffffff;
+        border-bottom:    1px solid #e5e5e5;
+        box-shadow:       none;
+    }
+
+    // ── Coarse-pointer touch target ───────────────────────────────────────────
+    // WCAG 2.5.5 — minimum 44px tappable area for the hamburger toggler.
+
+    @media (pointer: coarse) {
+        .navbar-toggler {
+            min-height: 44px;
+        }
+    }
+}
