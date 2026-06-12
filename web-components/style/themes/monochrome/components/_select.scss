@@ -1,0 +1,121 @@
+// Monochrome theme override for tc-select.
+//
+// Bootstrap's .form-select exposes runtime CSS custom properties for most visual
+// attributes (unlike .form-control which bakes border-color at Sass compile time).
+// --bs-form-select-border-color, --bs-form-select-focus-border-color, and
+// --bs-form-select-focus-box-shadow are all used via var() and are overridable
+// at the theme scope. The caret is declared as --bs-form-select-bg-img on the
+// .form-select class itself (a runtime token), so it can be replaced with a
+// monochrome chevron without a Sass-compile-time data-URI escape.
+//
+// Design choices (§2 ink ramp / §2.1 darkness scale):
+//   - Paper-white bg (#ffffff), near-black ink text (#0a0a0a)
+//   - Hairline-strong resting border (#d4d4d4, 1px); sharp corners
+//   - Monochrome caret: ink chevron (stroke #111111) replacing the slate default
+//   - Near-black focus border (#111111); Bootstrap shadow ring cleared;
+//     foundation :focus-visible provides the 2px solid ink outline (WCAG 2.4.7)
+//   - Disabled: muted-gray text (#a3a3a3) on faint surface (#fafafa)
+//   - .is-valid:   2px solid mid-gray border (#737373) + ink checkmark icon
+//   - .is-invalid: 2px solid near-black border (#171717) + near-black warning icon
+//   - Label kept in ink regardless of validation state
+
+tc-theme[name="monochrome"] {
+
+    // ── Validation color tokens ───────────────────────────────────────────────
+    // Mirrors _input.scss — remaps from semantic hue onto the §2.1 darkness scale.
+    // Declared here so this partial is self-contained.
+    //   valid (success) → mid-gray  #737373
+    //   invalid (danger) → near-black #171717
+
+    --bs-form-valid-color:          #737373;
+    --bs-form-valid-border-color:   #737373;
+    --bs-form-invalid-color:        #171717;
+    --bs-form-invalid-border-color: #171717;
+
+    // ── Form select surface ───────────────────────────────────────────────────
+
+    .form-select {
+        // Token overrides — prefer --bs-form-select-* runtime variables
+        --bs-form-select-bg:                    #ffffff;
+        --bs-form-select-color:                 #0a0a0a;
+        --bs-form-select-border-color:          #d4d4d4;
+        --bs-form-select-border-radius:         0;
+        --bs-form-select-focus-border-color:    #111111;
+        --bs-form-select-focus-box-shadow:      none;
+        --bs-form-select-disabled-color:        #a3a3a3;
+        --bs-form-select-disabled-bg:           #fafafa;
+        --bs-form-select-disabled-border-color: #e5e5e5;
+
+        // Monochrome caret: ink chevron (stroke %23111111) replacing the slate-tinted
+        // default. --bs-form-select-bg-img is a runtime CSS custom property declared
+        // on .form-select itself, so this is a clean token override (§3.2), not a
+        // sanctioned escape — no Sass-compile-time data-URI recolor required.
+        --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23111111' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+
+        // Sharp corners — token override keeps the runtime var in sync with the
+        // compiled $enable-rounded: false default.
+        border-radius: 0;
+
+        // ── Focus ─────────────────────────────────────────────────────────────
+        // Near-black ink border replaces the compiled primary-tinted focus color.
+        // Bootstrap's translucent shadow ring cleared so the foundation's
+        // :focus-visible { outline: 2px solid #111111 } is the sole indicator.
+
+        &:focus {
+            border-color: #111111;
+            box-shadow:   none;
+        }
+    }
+
+    // ── Validation states — border weight + tone + icon ───────────────────────
+    // Applies only to single-select elements (Bootstrap adds validation icons only
+    // for :not([multiple]):not([size]) and :not([multiple])[size="1"]).
+    //
+    // Bootstrap 5.3 re-declares --bs-form-select-bg-img in the compiled validation
+    // state selector with the default slate caret, which has higher specificity
+    // than our base .form-select rule. The monochrome caret is re-asserted here
+    // inside a matching selector so this rule wins (§4.1 specificity escape).
+    //
+    // background-image carries two layers:
+    //   1. var(--bs-form-select-bg-img) — monochrome ink caret (right rail)
+    //   2. validation icon — checkmark (#737373) or warning circle (#171717)
+    // background-position / background-size match Bootstrap's compiled values for
+    // the caret + icon two-layer layout.
+
+    .form-select.is-valid:not([multiple]):not([size]),
+    .form-select.is-valid:not([multiple])[size="1"],
+    .was-validated .form-select:valid:not([multiple]):not([size]),
+    .was-validated .form-select:valid:not([multiple])[size="1"] {
+        border-width: 2px;
+        --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23111111' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        // Checkmark in #737373 (mid-gray, success tone — URL-encoded %23737373)
+        background-image: var(--bs-form-select-bg-img), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23737373' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center, center right 2.25rem;
+        background-size: 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    .form-select.is-invalid:not([multiple]):not([size]),
+    .form-select.is-invalid:not([multiple])[size="1"],
+    .was-validated .form-select:invalid:not([multiple]):not([size]),
+    .was-validated .form-select:invalid:not([multiple])[size="1"] {
+        border-width: 2px;
+        --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23111111' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        // Warning circle in #171717 (near-black, critical tone — URL-encoded %23171717)
+        background-image: var(--bs-form-select-bg-img), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23171717'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23171717' stroke='none'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center, center right 2.25rem;
+        background-size: 16px 12px, calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    // ── Label ─────────────────────────────────────────────────────────────────
+    // Bootstrap's validation mixin adds `~ label { color: var(--bs-form-*-color) }`
+    // for .form-floating layouts. Pin back to near-black ink so validation state
+    // does not bleed hue into label text.
+
+    .form-label,
+    .was-validated .form-select:valid ~ label,
+    .form-select.is-valid ~ label,
+    .was-validated .form-select:invalid ~ label,
+    .form-select.is-invalid ~ label {
+        color: #0a0a0a;
+    }
+}
