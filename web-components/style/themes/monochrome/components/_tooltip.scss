@@ -1,0 +1,21 @@
+// Monochrome theme override for tc-tooltip.
+//
+// Bootstrap's .tooltip renders a dark bubble by default via --bs-emphasis-color,
+// which the monochrome foundation remaps to neutral grays. Pin the bubble
+// explicitly to solid near-black ink with white text and sharp corners:
+//
+//   - Solid near-black ink bubble (#111111) at full opacity
+//   - White text (#ffffff)
+//   - Arrow tone matches the bubble — Bootstrap drives arrow fill from
+//     --bs-tooltip-bg automatically; no separate arrow token is needed
+//   - Sharp corners (border-radius: 0)
+
+tc-theme[name="monochrome"] {
+
+    .tooltip {
+        --bs-tooltip-bg:            #111111;
+        --bs-tooltip-color:         #ffffff;
+        --bs-tooltip-border-radius: 0;
+        --bs-tooltip-opacity:       1;
+    }
+}
