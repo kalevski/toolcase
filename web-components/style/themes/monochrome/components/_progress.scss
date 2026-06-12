@@ -1,0 +1,85 @@
+// Monochrome theme override for tc-progress / tc-progress-bar.
+//
+// Bootstrap's .progress renders a colored fill bar (--bs-progress-bar-bg:
+// #0d6efd) on a tinted track. The monochrome skin uses a hairline neutral
+// track (#e5e5e5) with a near-black ink fill (#111111).
+//
+// Override strategy:
+//   (1) Track — via --bs-progress-bg, --bs-progress-border-radius,
+//       --bs-progress-box-shadow.
+//   (2) Default fill — near-black ink via --bs-progress-bar-bg; white label
+//       text via --bs-progress-bar-color.
+//   (3) Semantic variants — .progress-bar.bg-* fills remapped to neutral
+//       darkness scale (lighter = passive, darker = critical); text color
+//       adjusted per fill for legibility (near-black on light fills).
+//   (4) Striped / animated — Bootstrap's rgba(255,255,255,.15) stripe
+//       gradient is already achromatic (no hue); no override required.
+//   (5) Stacked bars — .progress-stacked is a layout container only; child
+//       .progress elements inherit the same token overrides automatically.
+
+tc-theme[name="monochrome"] {
+
+    // ── Track ─────────────────────────────────────────────────────────────────
+    // Hairline neutral surface; sharp corners; no shadow (border-driven theme).
+
+    .progress {
+        --bs-progress-bg:            #e5e5e5;  // hairline light neutral track
+        --bs-progress-border-radius: 0;         // sharp corners
+        --bs-progress-box-shadow:    none;      // no shadow
+        --bs-progress-bar-color:     #ffffff;   // default label text on dark fill
+        --bs-progress-bar-bg:        #111111;   // default near-black ink fill
+    }
+
+    // ── Semantic variant fills ────────────────────────────────────────────────
+    // Darkness scale mirrors the alert (border weight) and badge (fill tone)
+    // severity mapping:
+    //   info    → #a3a3a3  (lightest, passive)
+    //   success → #737373  (mid gray, positive)
+    //   warning → #404040  (dark, caution)
+    //   danger  → #171717  (near-black, critical)
+    //
+    // .bg-* utility classes apply background-color with !important, so these
+    // overrides also use !important to maintain cascade order.
+    // Text color switches to near-black (#0a0a0a) on fills lighter than mid-gray
+    // to preserve WCAG AA contrast.
+
+    .progress-bar.bg-primary {
+        background-color: #111111 !important;
+        color: #ffffff;
+    }
+
+    .progress-bar.bg-secondary {
+        background-color: #525252 !important;
+        color: #ffffff;
+    }
+
+    .progress-bar.bg-info {
+        background-color: #a3a3a3 !important;
+        color: #0a0a0a;
+    }
+
+    .progress-bar.bg-success {
+        background-color: #737373 !important;
+        color: #ffffff;
+    }
+
+    .progress-bar.bg-warning {
+        background-color: #404040 !important;
+        color: #ffffff;
+    }
+
+    .progress-bar.bg-danger {
+        background-color: #171717 !important;
+        color: #ffffff;
+    }
+
+    .progress-bar.bg-light {
+        background-color: #f5f5f5 !important;
+        color: #0a0a0a;
+    }
+
+    .progress-bar.bg-dark {
+        background-color: #0a0a0a !important;
+        color: #ffffff;
+    }
+}
