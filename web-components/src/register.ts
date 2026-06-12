@@ -32,6 +32,7 @@ import { Spinner } from './Spinner'
 import { Toast } from './Toast'
 import { Tooltip } from './Tooltip'
 import { Input } from './Input'
+import { Textarea } from './Textarea'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -71,4 +72,5 @@ export function register(): void {
     customElements.define('tc-toast', Toast)
     customElements.define('tc-tooltip', Tooltip)
     customElements.define('tc-input', Input)
+    customElements.define('tc-textarea', Textarea)
 }

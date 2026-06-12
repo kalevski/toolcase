@@ -27,6 +27,7 @@ import SpinnerDemo from './SpinnerDemo'
 import ToastDemo from './ToastDemo'
 import TooltipDemo from './TooltipDemo'
 import InputDemo from './InputDemo'
+import TextareaDemo from './TextareaDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -74,4 +75,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'spinner', category: 'Components', element: <SpinnerDemo /> },
     { key: 'scrollspy', category: 'Navigation', element: <ScrollspyDemo /> },
     { key: 'input', category: 'Forms', element: <InputDemo /> },
+    { key: 'textarea', category: 'Forms', element: <TextareaDemo /> },
 ]
