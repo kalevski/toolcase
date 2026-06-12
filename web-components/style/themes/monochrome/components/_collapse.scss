@@ -1,0 +1,23 @@
+// Monochrome theme override for tc-collapse.
+//
+// tc-collapse is a behavior wrapper (show/hide) that carries no chromatic
+// surface of its own. It renders a single Bootstrap .collapse div whose
+// sole job is to animate visibility — it has no background, border, or
+// shadow to override. The collapse transition timing and the .show class
+// toggle are Bootstrap internals driven at compile time; no --bs-* runtime
+// tokens apply here.
+//
+// Collapse-revealed content (e.g. a card or list-group inside the panel) is
+// styled by the consumer's own element and is already covered by the relevant
+// monochrome partials (_card.scss, _list-group.scss, etc.). No additional
+// rules are needed here for monochrome alignment.
+//
+// This partial is an intentional placeholder. It exists so the monochrome
+// component aggregator is complete and any future collapse-specific skinning
+// (e.g. a transition-timing or panel background unique to the monochrome
+// context) has a defined home. Add overrides inside the selector block below
+// if and when needed.
+
+tc-theme[name="monochrome"] {
+    // No collapse overrides required for the monochrome theme.
+}
