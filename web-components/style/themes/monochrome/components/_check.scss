@@ -1,0 +1,62 @@
+// Monochrome theme override for tc-check.
+//
+// Bootstrap's .form-check-input bakes most visual attributes at Sass compile
+// time (initial border color, focus border/shadow, checked/indeterminate
+// background-color) — those require bespoke declarations (sanctioned escape
+// §4.1). --bs-form-check-bg is the one runtime custom property on the element
+// itself; --bs-form-check-bg-image is set by Bootstrap at runtime in the
+// :checked / :indeterminate selectors and is overridden here to supply the
+// white glyph explicitly.
+//
+// Design choices (§2 ink ramp):
+//   - Unchecked:     paper-white bg (#ffffff), hairline-strong border (#d4d4d4),
+//                    sharp corners, no shadow
+//   - Checked:       solid near-black ink fill (#111111), ink border, white glyph
+//   - Indeterminate: solid near-black ink fill, ink border, white dash glyph
+//   - Focus:         ink border (#111111); Bootstrap shadow ring cleared;
+//                    foundation :focus-visible ink ring is the sole indicator
+//   - Disabled:      Bootstrap's built-in opacity: 0.5 mutes without hue
+
+tc-theme[name="monochrome"] {
+
+    // Validation color tokens — remapped from semantic hue onto the §2.1 darkness scale.
+    --bs-form-valid-color:          #737373;
+    --bs-form-valid-border-color:   #737373;
+    --bs-form-invalid-color:        #171717;
+    --bs-form-invalid-border-color: #171717;
+
+    .form-check-input {
+        --bs-form-check-bg: #ffffff;
+
+        // Hairline-strong neutral resting border (no runtime --bs-form-check-border-color token)
+        border-color: #d4d4d4;
+        border-radius: 0;
+
+        // ── Focus ─────────────────────────────────────────────────────────────
+        // Bootstrap's focus border and shadow ring are both compile-time values.
+        // Clear the shadow so the foundation's :focus-visible ink ring is the
+        // sole focus indicator (WCAG 2.4.7).
+        &:focus {
+            border-color: #111111;
+            box-shadow: none;
+        }
+
+        // ── Checked — solid ink fill with white check glyph ───────────────────
+        // background-color is compile-time in Bootstrap (primary blue) so must
+        // be overridden with a bespoke declaration; --bs-form-check-bg-image is a
+        // runtime token Bootstrap sets in this selector, overridden here for an
+        // explicit white glyph on the ink background.
+        &:checked {
+            background-color: #111111;
+            border-color: #111111;
+            --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+        }
+
+        // ── Indeterminate — ink fill with white dash glyph ────────────────────
+        &:indeterminate {
+            background-color: #111111;
+            border-color: #111111;
+            --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+        }
+    }
+}

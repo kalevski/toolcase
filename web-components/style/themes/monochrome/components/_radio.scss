@@ -1,0 +1,50 @@
+// Monochrome theme override for tc-radio.
+//
+// Bootstrap's .form-check-input bakes most visual attributes at Sass compile
+// time (initial border color, focus border/shadow, checked background-color) —
+// those require bespoke declarations (sanctioned escape §4.1).
+// --bs-form-check-bg is the one runtime custom property; --bs-form-check-bg-image
+// is set by Bootstrap at runtime in the :checked selector and is overridden here
+// to supply the white dot explicitly.
+//
+// Design choices (§2 ink ramp):
+//   - Unselected: paper-white bg (#ffffff), hairline-strong border (#d4d4d4),
+//                 circular shape kept (border-radius: 50%), no shadow
+//   - Selected:   solid near-black ink fill (#111111), ink border, white dot glyph
+//   - Focus:      ink border (#111111); Bootstrap shadow ring cleared;
+//                 foundation :focus-visible ink ring is the sole indicator
+//   - Disabled:   Bootstrap's built-in opacity: 0.5 mutes without hue
+
+tc-theme[name="monochrome"] {
+
+    // [type="radio"] raises specificity to (0,3,0), winning over the (0,2,0)
+    // .form-check-input rule in _check.scss that would otherwise force border-radius: 0.
+    .form-check-input[type="radio"] {
+        --bs-form-check-bg: #ffffff;
+
+        // Hairline-strong neutral resting border (no runtime --bs-form-check-border-color token).
+        // border-radius: 50% preserved — genuine circles are the one permitted rounding.
+        border-color: #d4d4d4;
+        border-radius: 50%;
+
+        // ── Focus ─────────────────────────────────────────────────────────────
+        // Bootstrap's focus border and shadow ring are both compile-time values.
+        // Clear the shadow so the foundation's :focus-visible ink ring is the
+        // sole focus indicator (WCAG 2.4.7).
+        &:focus {
+            border-color: #111111;
+            box-shadow: none;
+        }
+
+        // ── Selected — solid ink fill with white dot glyph ────────────────────
+        // background-color is compile-time in Bootstrap (primary blue) so must
+        // be overridden with a bespoke declaration; --bs-form-check-bg-image is a
+        // runtime token Bootstrap sets in this selector, overridden here for an
+        // explicit white circle dot on the ink background.
+        &:checked {
+            background-color: #111111;
+            border-color: #111111;
+            --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23ffffff'/%3e%3c/svg%3e");
+        }
+    }
+}
