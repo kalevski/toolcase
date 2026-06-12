@@ -30,6 +30,7 @@ import InputDemo from './InputDemo'
 import TextareaDemo from './TextareaDemo'
 import SelectDemo from './SelectDemo'
 import CheckDemo from './CheckDemo'
+import RadioDemo from './RadioDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -80,4 +81,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'textarea', category: 'Forms', element: <TextareaDemo /> },
     { key: 'select', category: 'Forms', element: <SelectDemo /> },
     { key: 'check', category: 'Forms', element: <CheckDemo /> },
+    { key: 'radio', category: 'Forms', element: <RadioDemo /> },
 ]
