@@ -1,0 +1,8 @@
+// tc-select — theme tweaks only; Bootstrap form-select classes handle layout.
+// The `size` attribute maps to Bootstrap's visual-size classes (form-select-sm /
+// form-select-lg), NOT to the native <select size> visible-rows attribute.
+// To control visible rows on a multiple select, target the inner <select> directly.
+
+tc-option {
+    display: none;
+}

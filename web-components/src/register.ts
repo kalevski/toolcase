@@ -33,6 +33,8 @@ import { Toast } from './Toast'
 import { Tooltip } from './Tooltip'
 import { Input } from './Input'
 import { Textarea } from './Textarea'
+import { Select } from './Select'
+import { Option } from './Option'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -73,4 +75,6 @@ export function register(): void {
     customElements.define('tc-tooltip', Tooltip)
     customElements.define('tc-input', Input)
     customElements.define('tc-textarea', Textarea)
+    customElements.define('tc-select', Select)
+    customElements.define('tc-option', Option)
 }
