@@ -1,0 +1,71 @@
+// tc-action-header — flex header row with right-side action buttons.
+// Sharp corners, 1px hairline bottom rule, slate neutrals. Buttons use the
+// muted-well hover / ink-active state ladder. Cosmetics flow through
+// --bs-action-header-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+.tc-action-header {
+    --bs-action-header-border-color: var(--tc-border);
+    --bs-action-header-color: var(--tc-text);
+    --bs-action-header-bg: transparent;
+    --bs-action-header-padding-y: 0.625rem;
+    --bs-action-header-padding-x: 0;
+
+    padding: var(--bs-action-header-padding-y) var(--bs-action-header-padding-x);
+    color: var(--bs-action-header-color);
+    background: var(--bs-action-header-bg);
+    border-bottom: 1px solid var(--bs-action-header-border-color);
+    border-radius: 0;
+}
+
+.tc-action-header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.925rem;
+    font-weight: 500;
+    color: var(--tc-text);
+    min-width: 0;
+}
+
+.tc-action-header-actions {
+    // Ghost-style overrides for secondary action buttons within the header.
+    // Danger/success variants keep their own hue.
+    .btn-secondary {
+        --bs-btn-color: var(--tc-text);
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: var(--tc-border-strong);
+        --bs-btn-hover-color: var(--tc-text);
+        --bs-btn-hover-bg: var(--tc-surface-muted);
+        --bs-btn-hover-border-color: var(--tc-border-strong);
+        --bs-btn-active-color: #{$white};
+        --bs-btn-active-bg: var(--tc-app-accent);
+        --bs-btn-active-border-color: var(--tc-app-accent);
+        --bs-btn-disabled-color: var(--tc-text-muted);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--tc-border);
+        border-radius: 0;
+    }
+
+    // Ensure all variant buttons stay sharp.
+    .btn {
+        border-radius: 0;
+    }
+}
+
+// Inline lucide icon sizing within action buttons.
+.tc-action-header-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    flex-shrink: 0;
+}
+
+// WCAG 2.5.5 — 44px minimum tappable area on coarse-pointer devices.
+@media (pointer: coarse) {
+    .tc-action-header-actions .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}

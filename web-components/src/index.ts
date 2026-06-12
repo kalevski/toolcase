@@ -1,4 +1,5 @@
 export { register } from './register'
+export * from './ActionHeader'
 export { icon } from './icons'
 export * from './Theme'
 export * from './Container'

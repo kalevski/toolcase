@@ -1,3 +1,4 @@
+import { ActionHeader } from './ActionHeader'
 import { Theme } from './Theme'
 import { Container } from './Container'
 import { Row } from './Row'
@@ -49,6 +50,7 @@ export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
         return
     }
+    customElements.define('tc-action-header', ActionHeader)
     customElements.define('tc-theme', Theme)
     customElements.define('tc-container', Container)
     customElements.define('tc-row', Row)

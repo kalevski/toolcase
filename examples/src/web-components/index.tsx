@@ -1,4 +1,5 @@
 import { JSX } from 'react'
+import ActionHeaderDemo from './ActionHeaderDemo'
 import ContainerDemo from './ContainerDemo'
 import RowDemo from './RowDemo'
 import ColDemo from './ColDemo'
@@ -55,6 +56,7 @@ export const categories: WebComponentCategory[] = [
 ]
 
 export const webComponentExamples: WebComponentDef[] = [
+    { key: 'action-header', category: 'Components', element: <ActionHeaderDemo /> },
     { key: 'container', category: 'Layout', element: <ContainerDemo /> },
     { key: 'row', category: 'Layout', element: <RowDemo /> },
     { key: 'col', category: 'Layout', element: <ColDemo /> },
