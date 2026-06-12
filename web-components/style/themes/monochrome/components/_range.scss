@@ -1,0 +1,94 @@
+// Monochrome theme override for tc-range.
+//
+// Bootstrap's .form-range bakes thumb color (#0d6efd from $primary) and
+// track/thumb border-radius at Sass compile time — pseudo-element bespoke
+// declarations are required (sanctioned escape §4.1).
+//
+// Design choices (§2 ink ramp):
+//   - Track:    hairline gray (#e5e5e5), sharp corners (border-radius: 0), no shadow
+//   - Thumb:    near-black ink (#111111), 50%-circle (permitted rounding for
+//               genuine circles), active press lightens to #333333
+//   - Focus:    2px solid ink box-shadow on the thumb pseudo-element; the
+//               foundation's :focus-visible outline targets the host <input>;
+//               the thumb needs its own box-shadow indicator (pseudo-elements
+//               are not independently focusable)
+//   - Disabled: muted gray thumb (#a3a3a3) and hairline-strong track (#d4d4d4),
+//               encode inactive state through lightness on the ink ramp
+
+tc-theme[name="monochrome"] {
+
+    .form-range {
+
+        // ── Track ──────────────────────────────────────────────────────────────
+        // background-color is a runtime token (var(--bs-tertiary-bg)) but is
+        // pinned explicitly so the track reads clearly against paper-white.
+        // border-radius and box-shadow are compile-time in Bootstrap.
+        &::-webkit-slider-runnable-track {
+            background-color: #e5e5e5;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        &::-moz-range-track {
+            background-color: #e5e5e5;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        // ── Thumb ──────────────────────────────────────────────────────────────
+        // background-color is compile-time (Bootstrap bakes $primary blue);
+        // override with near-black ink (bespoke declaration, sanctioned §4.1).
+        // border-radius: 50% is the one permitted rounding — the thumb is a
+        // genuine circle and the design system explicitly allows it.
+        &::-webkit-slider-thumb {
+            background-color: #111111;
+            border-radius: 50%;
+        }
+
+        &::-webkit-slider-thumb:active {
+            background-color: #333333;
+        }
+
+        &::-moz-range-thumb {
+            background-color: #111111;
+            border-radius: 50%;
+            border: 0;
+        }
+
+        &::-moz-range-thumb:active {
+            background-color: #333333;
+        }
+
+        // ── Focus — 2px ink ring on the thumb ─────────────────────────────────
+        // Bootstrap compiles a translucent rgba focus box-shadow onto the thumb.
+        // Replace it with a solid 2px ink ring. :focus-visible is used so the
+        // ring only appears on keyboard navigation (consistent with the
+        // foundation's :focus-visible rule on the host input).
+        &:focus-visible::-webkit-slider-thumb {
+            box-shadow: 0 0 0 2px #111111;
+        }
+
+        &:focus-visible::-moz-range-thumb {
+            box-shadow: 0 0 0 2px #111111;
+        }
+
+        // ── Disabled ───────────────────────────────────────────────────────────
+        // Muted gray conveys inactive state through lightness, not hue.
+        // Track darkens slightly (hairline-strong) relative to the enabled track.
+        &:disabled::-webkit-slider-thumb {
+            background-color: #a3a3a3;
+        }
+
+        &:disabled::-moz-range-thumb {
+            background-color: #a3a3a3;
+        }
+
+        &:disabled::-webkit-slider-runnable-track {
+            background-color: #d4d4d4;
+        }
+
+        &:disabled::-moz-range-track {
+            background-color: #d4d4d4;
+        }
+    }
+}
