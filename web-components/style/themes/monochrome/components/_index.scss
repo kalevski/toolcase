@@ -6,3 +6,5 @@
 // The partial it forwards lives at:
 //   style/themes/monochrome/components/_<name>.scss
 // and must scope all rules under tc-theme[name="monochrome"].
+
+@forward 'container';

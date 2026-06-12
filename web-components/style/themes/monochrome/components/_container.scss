@@ -1,0 +1,16 @@
+// Monochrome theme override for tc-container.
+//
+// tc-container is a layout primitive that carries no chromatic surface
+// (no background, border, or shadow). Bootstrap's container max-widths and
+// horizontal padding are declared as Sass variables at compile time and are
+// identical under every runtime theme, so there is nothing to override here
+// via --bs-* custom properties.
+//
+// This partial is an intentional placeholder. It exists so the monochrome
+// component aggregator is complete and any future container-specific skinning
+// (e.g. a max-width or gutter change unique to the monochrome context) has a
+// home. Add overrides inside the selector block below if and when needed.
+
+tc-theme[name="monochrome"] {
+    // No container overrides required for the monochrome theme.
+}
