@@ -1,4 +1,5 @@
 import { ActionHeader } from './ActionHeader'
+import { ActionItems } from './ActionItems'
 import { Theme } from './Theme'
 import { Container } from './Container'
 import { Row } from './Row'
@@ -51,6 +52,7 @@ export function register(): void {
         return
     }
     customElements.define('tc-action-header', ActionHeader)
+    customElements.define('tc-action-items', ActionItems)
     customElements.define('tc-theme', Theme)
     customElements.define('tc-container', Container)
     customElements.define('tc-row', Row)

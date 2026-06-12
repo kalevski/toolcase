@@ -1,0 +1,164 @@
+// tc-action-items — dropdown action menu triggered from a labelled button.
+// Sharp corners, overlay shadow, slate neutral items. Cosmetics flow through
+// --bs-action-items-* custom properties so themes re-skin via vars alone.
+
+@use '../foundation/tokens' as *;
+
+// Host is the positioned parent; the menu is absolute inside it.
+tc-action-items {
+    position: relative;
+}
+
+// ── Trigger button ─────────────────────────────────────────────────────────
+
+// The trigger inherits all .btn / .btn-sm / .btn-secondary paint.
+// Pin border-radius explicitly so a foreign Bootstrap sheet cannot override it.
+.tc-action-items-trigger {
+    border-radius: 0;
+}
+
+// Chevron wrapper — inline-flex so the SVG sits on the baseline grid.
+.tc-action-items-caret {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    svg {
+        width: 0.875em;
+        height: 0.875em;
+    }
+}
+
+// ── Overlay menu ───────────────────────────────────────────────────────────
+
+.tc-action-items-menu {
+    // ── Theme tokens ──────────────────────────────────────────────────────
+    --bs-action-items-min-width: 180px;
+    --bs-action-items-padding-y: 0.25rem;
+    --bs-action-items-padding-x: 0.25rem;
+    --bs-action-items-bg: var(--tc-surface);
+    --bs-action-items-border-color: var(--tc-border);
+    --bs-action-items-shadow: var(--tc-shadow-lg);
+    --bs-action-items-z-index: var(--tc-z-dropdown);
+    --bs-action-items-item-padding-x: 0.625rem;
+    --bs-action-items-item-padding-y: 0.4375rem;
+    --bs-action-items-item-font-size: 0.8125rem;
+    --bs-action-items-item-color: var(--tc-slate-700);
+    --bs-action-items-item-hover-color: var(--tc-text);
+    --bs-action-items-item-hover-bg: var(--tc-surface-muted);
+    --bs-action-items-item-active-color: #{$white};
+    --bs-action-items-item-active-bg: var(--tc-app-accent);
+    --bs-action-items-item-disabled-color: var(--tc-text-faint);
+    --bs-action-items-danger-color: var(--tc-danger);
+    --bs-action-items-divider-color: var(--tc-border);
+    --bs-action-items-divider-margin-y: 0.25rem;
+
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: var(--bs-action-items-z-index);
+    display: none;
+    min-width: var(--bs-action-items-min-width);
+    padding: var(--bs-action-items-padding-y) var(--bs-action-items-padding-x);
+    margin-top: 2px;
+    background-color: var(--bs-action-items-bg);
+    border: 1px solid var(--bs-action-items-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-action-items-shadow);
+
+    &.show {
+        display: block;
+    }
+
+    // Divider row — a horizontal hairline between item groups.
+    .dropdown-divider {
+        height: 0;
+        margin: var(--bs-action-items-divider-margin-y) 0;
+        overflow: hidden;
+        border: 0;
+        border-top: 1px solid var(--bs-action-items-divider-color);
+    }
+}
+
+// ── Menu items ─────────────────────────────────────────────────────────────
+
+.tc-action-items-item {
+    // Full explicit reset — the .dropdown-item class is present but we own all
+    // paint here so foreign Bootstrap sheets cannot interfere.
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: var(--bs-action-items-item-padding-y) var(--bs-action-items-item-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-action-items-item-font-size);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-action-items-item-color);
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    // Hover = slate well; focus = same plus the global outline from _reset.scss.
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-action-items-item-hover-color);
+        background-color: var(--bs-action-items-item-hover-bg);
+        text-decoration: none;
+    }
+
+    // Active (click) = ink fill + white text.
+    &:active {
+        color: var(--bs-action-items-item-active-color);
+        background-color: var(--bs-action-items-item-active-bg);
+    }
+
+    // Disabled: opacity + pointer-events, never color-only.
+    &[disabled],
+    &:disabled {
+        color: var(--bs-action-items-item-disabled-color);
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    // Danger variant — red text as status indicator, not decoration.
+    &--danger {
+        color: var(--bs-action-items-danger-color);
+
+        &:hover,
+        &:focus-visible {
+            // Keep danger hue; well background is the same slate well.
+            color: var(--bs-action-items-danger-color);
+            background-color: var(--bs-action-items-item-hover-bg);
+        }
+    }
+
+    // Inline lucide icon.
+    svg {
+        width: 1em;
+        height: 1em;
+        flex-shrink: 0;
+    }
+}
+
+// ── Touch targets ──────────────────────────────────────────────────────────
+
+// WCAG 2.5.5 — 44px minimum tappable area on coarse-pointer (touch) devices.
+@media (pointer: coarse) {
+    .tc-action-items-trigger {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .tc-action-items-item {
+        min-height: 44px;
+    }
+}

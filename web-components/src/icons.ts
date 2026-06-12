@@ -3,7 +3,7 @@
 // svg aria-hidden (the host button/span carries the accessible name) and keeps
 // stroke="currentColor" so color flows from CSS `color`.
 
-import { X, ChevronLeft, ChevronRight } from 'lucide-static'
+import { X, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-static'
 
 export function icon(svg: string, className?: string): string {
     let out = svg
@@ -17,5 +17,6 @@ export function icon(svg: string, className?: string): string {
 }
 
 export const closeIcon = icon(X)
+export const chevronDownIcon = icon(ChevronDown)
 export const chevronLeftIcon = icon(ChevronLeft)
 export const chevronRightIcon = icon(ChevronRight)
