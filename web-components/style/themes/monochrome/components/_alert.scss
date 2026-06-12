@@ -1,0 +1,60 @@
+// Monochrome theme override for tc-alert.
+//
+// Bootstrap's alert variants (.alert-success/.info/.warning/.danger) convey
+// semantic meaning through hue — incompatible with the monochrome skin.
+//
+// Override strategy:
+//   (1) Base overrides on .alert (via --bs-alert-*): paper-white surface,
+//       near-black ink text, hairline perimeter border, sharp corners.
+//       tc-theme[name="monochrome"] .alert specificity (0,2,0) beats
+//       Bootstrap's per-variant .alert-* rules (0,1,0), so these cascade
+//       values win without needing to repeat them per variant.
+//   (2) Left accent border per variant — the sole visual severity signal.
+//       Weight (thinner → heavier) and tone (lighter → darker) together
+//       distinguish all four semantics in strict grayscale:
+//
+//         info    → 2px / #a3a3a3  (light gray,  passive)
+//         success → 3px / #737373  (mid gray,    positive)
+//         warning → 4px / #404040  (dark gray,   caution)
+//         danger  → 5px / #171717  (near-black,  critical)
+//
+//   (3) Dismiss button (.btn-close): solid near-black X icon, no colored
+//       focus shadow; the foundation's :focus-visible rule provides the
+//       2px solid ink ring (WCAG 2.4.7).
+
+tc-theme[name="monochrome"] {
+
+    // ── Base alert ────────────────────────────────────────────────────────────
+    // Paper-white surface, near-black ink, hairline perimeter border.
+    // Extra padding-left (1.25rem) leaves breathing room beside the accent strip.
+
+    .alert {
+        --bs-alert-bg:            #ffffff;
+        --bs-alert-color:         #0a0a0a;
+        --bs-alert-border-color:  #e5e5e5;
+        --bs-alert-border-radius: 0;
+        --bs-alert-link-color:    #111111;
+
+        padding-left: 1.25rem;
+    }
+
+    // ── Per-variant left accent ───────────────────────────────────────────────
+    // Severity is encoded through border weight (px) and tone (gray shade).
+    // All other perimeter sides remain the hairline #e5e5e5 set above.
+
+    .alert-info    { border-left: 2px solid #a3a3a3; }
+    .alert-success { border-left: 3px solid #737373; }
+    .alert-warning { border-left: 4px solid #404040; }
+    .alert-danger  { border-left: 5px solid #171717; }
+
+    // ── Dismiss button ────────────────────────────────────────────────────────
+    // Near-black X icon (fill #111111); no colored box-shadow so the
+    // foundation's :focus-visible ink ring is the sole focus indicator.
+
+    .alert .btn-close {
+        --bs-btn-close-opacity:       1;
+        --bs-btn-close-hover-opacity: 0.7;
+        --bs-btn-close-focus-shadow:  none;
+        --bs-btn-close-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23111111'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e");
+    }
+}
