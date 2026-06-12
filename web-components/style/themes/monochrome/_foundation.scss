@@ -1,0 +1,97 @@
+// Monochrome theme foundation — design tokens for tc-theme[name="monochrome"].
+//
+// CONTRACT FOR DOWNSTREAM TASKS:
+//   • Every per-component partial lives at:
+//       style/themes/monochrome/components/_<name>.scss
+//   • All rules in that partial must be scoped under:
+//       tc-theme[name="monochrome"] { ... }
+//   • Prefer overriding Bootstrap's component CSS custom properties
+//     (--bs-<component>-*) over writing bespoke property declarations.
+//     Example: override --bs-btn-bg / --bs-btn-border-color on .btn-primary
+//     rather than setting background-color and border-color directly.
+//
+// DESIGN RAILS (§2 of the web-components design system):
+//   - Pure neutral palette — paper-white #ffffff, near-black ink #0a0a0a
+//   - Accent: solid ink #111111, hover #333333
+//   - Hairline borders #e5e5e5 / strong #d4d4d4
+//   - Sharp corners everywhere (border-radius: 0; 50% for circles only)
+//   - Border-driven elevation: no soft shadows; single hard shadow for modals/dropdowns
+//   - Typography-forward: Inter + JetBrains Mono, weight + letter-spacing hierarchy
+//   - 2px solid ink focus indicator (WCAG 2.4.7 — never remove focus visibility)
+
+tc-theme[name="monochrome"] {
+
+    // ── Palette ───────────────────────────────────────────────────────────────
+    --bs-primary:     #111111;
+    --bs-primary-rgb: 17, 17, 17;
+
+    // Semantic colors — desaturated neutrals distinguished by border weight
+    // and icon treatment, not hue. Per-component partials map these onto
+    // --bs-<component>-* variables for each Bootstrap component variant.
+    --bs-success:         #525252;
+    --bs-success-rgb:     82, 82, 82;
+    --bs-info:            #404040;
+    --bs-info-rgb:        64, 64, 64;
+    --bs-warning:         #737373;
+    --bs-warning-rgb:     115, 115, 115;
+    --bs-danger:          #171717;
+    --bs-danger-rgb:      23, 23, 23;
+    --bs-secondary:       #525252;
+    --bs-secondary-rgb:   82, 82, 82;
+    --bs-light:           #f5f5f5;
+    --bs-light-rgb:       245, 245, 245;
+    --bs-dark:            #0a0a0a;
+    --bs-dark-rgb:        10, 10, 10;
+
+    // ── Body / surface ────────────────────────────────────────────────────────
+    --bs-body-color:     #0a0a0a;
+    --bs-body-color-rgb: 10, 10, 10;
+    --bs-body-bg:        #ffffff;
+    --bs-body-bg-rgb:    255, 255, 255;
+    --bs-emphasis-color: #0a0a0a;
+
+    // ── Links ─────────────────────────────────────────────────────────────────
+    --bs-link-color:           #111111;
+    --bs-link-color-rgb:       17, 17, 17;
+    --bs-link-hover-color:     #333333;
+    --bs-link-hover-color-rgb: 51, 51, 51;
+
+    // ── Borders ───────────────────────────────────────────────────────────────
+    --bs-border-color:             #e5e5e5;
+    --bs-border-color-translucent: rgba(0, 0, 0, 0.1);
+
+    // ── Shadows — border-driven elevation ─────────────────────────────────────
+    // sm and default elevations are removed; a crisp 1px border provides visual
+    // separation instead. lg is the single hard shadow reserved for
+    // modals / dropdowns — the only permitted use of elevation in this theme.
+    --bs-box-shadow-sm:    none;
+    --bs-box-shadow:       none;
+    --bs-box-shadow-lg:    0 8px 32px -4px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.08);
+    --bs-box-shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+
+    // ── Focus ring — 2px solid ink (WCAG 2.4.7) ───────────────────────────────
+    // Replaces Bootstrap's translucent shadow ring with a high-contrast solid
+    // outline so keyboard users always see a clear focus indicator.
+    --bs-focus-ring-width:   2px;
+    --bs-focus-ring-opacity: 1;
+    --bs-focus-ring-color:   #111111;
+
+    // ── Secondary / tertiary surfaces ─────────────────────────────────────────
+    --bs-secondary-color:      rgba(10, 10, 10, 0.65);
+    --bs-secondary-color-rgb:  10, 10, 10;
+    --bs-secondary-bg:         #f5f5f5;
+    --bs-secondary-bg-rgb:     245, 245, 245;
+    --bs-tertiary-color:       rgba(10, 10, 10, 0.45);
+    --bs-tertiary-color-rgb:   10, 10, 10;
+    --bs-tertiary-bg:          #fafafa;
+    --bs-tertiary-bg-rgb:      250, 250, 250;
+
+    // ── Focus-visible — solid ink ring ────────────────────────────────────────
+    // Applied to all focusable descendants so every Bootstrap component within
+    // this scope renders the crisp 2px outline instead of the translucent ring.
+    :focus-visible {
+        outline: 2px solid #111111;
+        outline-offset: 2px;
+        box-shadow: none;
+    }
+}

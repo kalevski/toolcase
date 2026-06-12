@@ -12,3 +12,8 @@
 // (2) Component partials aggregator (empty until component tasks run).
 //     style/components/_index.scss forwards each tc-* component partial.
 @use './components';
+
+// (3) Monochrome theme — scoped overrides applied only inside
+//     <tc-theme name="monochrome">…</tc-theme>. Placed after components so
+//     these cascade rules win over the default theme layer.
+@use './themes/monochrome';

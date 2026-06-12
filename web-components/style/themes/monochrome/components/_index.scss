@@ -1,0 +1,8 @@
+// Monochrome per-component overrides aggregator.
+//
+// Each per-component monochrome task appends one @forward line here, e.g.:
+//   @forward 'button';
+//
+// The partial it forwards lives at:
+//   style/themes/monochrome/components/_<name>.scss
+// and must scope all rules under tc-theme[name="monochrome"].
