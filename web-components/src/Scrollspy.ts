@@ -81,11 +81,13 @@ export class Scrollspy extends HTMLElement {
 
     private _initPlugin(): void {
         const target = this.getAttribute('target') ?? ''
-        const offsetAttr = this.getAttribute('offset')
-        const offset = offsetAttr ? parseInt(offsetAttr, 10) : 0
         const smoothScroll = this.hasAttribute('smooth-scroll')
+        const offsetAttr = this.getAttribute('offset')
+        const offsetPx = offsetAttr ? parseInt(offsetAttr, 10) : 0
+        // Bootstrap 5.3 replaced the offset option with rootMargin (Intersection Observer).
+        const rootMargin = offsetPx > 0 ? `0px 0px -${offsetPx}px 0px` : undefined
 
-        this._bsScrollspy = new BsScrollSpy(this, { target, offset, smoothScroll })
+        this._bsScrollspy = new BsScrollSpy(this, { target, smoothScroll, ...(rootMargin ? { rootMargin } : {}) })
         this.addEventListener('activate.bs.scrollspy', this._onActivate)
     }
 
