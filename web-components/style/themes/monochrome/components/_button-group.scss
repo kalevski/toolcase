@@ -1,0 +1,41 @@
+// Monochrome theme override for tc-button-group.
+//
+// tc-button-group renders Bootstrap .btn-group (or .btn-group-vertical).
+// Bootstrap prevents doubled edges by applying margin-left: calc(1px * -1)
+// to every non-first button; this partial ensures the seams read as clean
+// single ink hairlines and that the active/checked toggle member uses the
+// solid ink fill already defined in _button.scss.
+//
+// Override strategy:
+//   (1) Group container — no box-shadow; the ink border is the sole
+//       separator (consistent with the foundation's border-driven elevation).
+//   (2) Inner .btn — --bs-btn-border-radius: 0 locks out any runtime
+//       stylesheet that might re-introduce rounding (Sass $enable-rounded:false
+//       already compiles to 0; this runtime token stays in sync).
+//   (3) Active / checked toggle member — --bs-btn-active-shadow: none
+//       scoped to the group so the z-index-1 lift produces no inset artefact
+//       against the neighbouring hairline (mirrors the .btn rule in
+//       _button.scss and is safe to repeat here for group-level clarity).
+
+tc-theme[name="monochrome"] {
+
+    .btn-group,
+    .btn-group-vertical {
+        // No elevation — ink borders provide all the visual separation needed.
+        box-shadow: none;
+
+        // Lock border-radius to 0 at the CSS-custom-property layer so no
+        // runtime override can reintroduce rounded corners inside the group.
+        > .btn {
+            --bs-btn-border-radius: 0;
+        }
+
+        // Active / checked toggle member — prevent the inset press shadow from
+        // showing against the seam when Bootstrap raises z-index to 1.
+        > .btn:active,
+        > .btn.active,
+        > .btn-check:checked + .btn {
+            --bs-btn-active-shadow: none;
+        }
+    }
+}
