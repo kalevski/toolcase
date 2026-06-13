@@ -1,0 +1,84 @@
+// tc-divider — horizontal or vertical 1px hairline separator, optionally
+// with a centered mono micro-label. All cosmetics via --bs-divider-* props.
+
+.tc-divider {
+    --bs-divider-border-color: var(--tc-border);
+    --bs-divider-label-color: var(--tc-text-muted);
+    --bs-divider-label-bg: var(--tc-surface);
+    --bs-divider-label-font-size: 0.6875rem; // 11px — micro-label tier
+    --bs-divider-label-font-weight: 500;
+    --bs-divider-label-letter-spacing: 0.08em;
+
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    // Flanking hairlines drawn via pseudo-elements so the label floats between
+    // them without any positioning tricks. When the label is hidden (:empty),
+    // the two pseudo-elements are adjacent flex items that together span 100%.
+    &::before,
+    &::after {
+        content: '';
+        flex: 1;
+        background-color: var(--bs-divider-border-color);
+        border: 0;
+        border-radius: 0;
+    }
+}
+
+// ── Horizontal ──────────────────────────────────────────────────────────────
+
+.tc-divider.tc-divider--horizontal {
+    width: 100%;
+    flex-direction: row;
+
+    &::before,
+    &::after {
+        height: 1px;
+        width: auto;
+    }
+}
+
+// ── Vertical ────────────────────────────────────────────────────────────────
+
+.tc-divider.tc-divider--vertical {
+    flex-direction: column;
+    align-self: stretch;
+    width: auto;
+
+    &::before,
+    &::after {
+        width: 1px;
+        height: auto;
+    }
+
+    // Labels in vertical orientation are not rendered — ignore the label span.
+    .tc-divider__label {
+        display: none !important;
+    }
+}
+
+// ── Label ────────────────────────────────────────────────────────────────────
+
+.tc-divider__label {
+    // Mono micro-label: uppercase, mono face, tight spacing, muted ink.
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-divider-label-font-size);
+    font-weight: var(--bs-divider-label-font-weight);
+    line-height: 1;
+    letter-spacing: var(--bs-divider-label-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-divider-label-color);
+    background-color: var(--bs-divider-label-bg);
+    white-space: nowrap;
+    user-select: none;
+
+    // Spacing between the label text and the flanking lines.
+    padding: 0 0.75rem;
+
+    // Hide the span entirely when empty so the two pseudo-elements merge into
+    // a single unbroken hairline.
+    &:empty {
+        display: none;
+    }
+}

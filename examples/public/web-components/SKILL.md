@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Dropdown, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -42,6 +42,7 @@ After `register()` you can author markup directly:
   - [tc-carousel](#tc-carousel)
   - [tc-close-button](#tc-close-button)
   - [tc-collapse](#tc-collapse)
+  - [tc-divider](#tc-divider)
   - [tc-dropdown](#tc-dropdown)
   - [tc-list-group](#tc-list-group)
   - [tc-placeholder](#tc-placeholder)
@@ -1120,4 +1121,70 @@ Multi-line text input.
 
 ```html
 <tc-textarea label="Bio" rows="5" placeholder="Tell us about yourself…"></tc-textarea>
+```
+
+---
+
+## tc-divider
+
+Horizontal or vertical 1px hairline separator, optionally with a centered mono micro-label. Port of the `@toolcase/react-components` `Divider` component.
+
+**Tag:** `tc-divider`
+
+**Attributes / Props**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `vertical` | boolean | false | Renders a thin full-height vertical rule instead of a horizontal one |
+| `label` | string | — | Text label centered between the two flanking hairlines. When absent, slotted children are used as label content instead |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| _(default)_ | Optional label content when the `label` attribute is not set. Rendered inside `.tc-divider__label` between the flanking lines |
+
+**Events**
+
+None. The divider is purely presentational.
+
+**Accessibility**
+
+- Renders `role="separator"` with the appropriate `aria-orientation` (`horizontal` or `vertical`).
+- When using the `label` attribute, `aria-label` is also set on the inner wrapper so the separator name is exposed to assistive technology.
+- Slotted-child labels are accessible via text content — no extra ARIA needed.
+- Presentational; receives no focus.
+- `prefers-reduced-motion` is honoured globally by the stylesheet.
+
+**Vertical label note**
+
+Labels (both `label` attribute and slotted children) are suppressed in vertical mode. Vertical dividers render as a plain hairline rule only. This is intentional — rotated label support is not implemented.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-divider-border-color` | `var(--tc-border)` | Hairline colour |
+| `--bs-divider-label-color` | `var(--tc-text-muted)` | Label text colour |
+| `--bs-divider-label-bg` | `var(--tc-surface)` | Label background |
+| `--bs-divider-label-font-size` | `0.6875rem` (11px) | Label font size |
+| `--bs-divider-label-font-weight` | `500` | Label font weight |
+| `--bs-divider-label-letter-spacing` | `0.08em` | Label letter spacing |
+
+```html
+<!-- Plain horizontal rule -->
+<tc-divider></tc-divider>
+
+<!-- Labelled horizontal divider (attribute) -->
+<tc-divider label="Section"></tc-divider>
+
+<!-- Labelled horizontal divider (slotted children) -->
+<tc-divider>or</tc-divider>
+
+<!-- Vertical rule between inline elements -->
+<div style="display:flex;align-items:center;gap:0.75rem;height:2rem">
+    <span>Left</span>
+    <tc-divider vertical></tc-divider>
+    <span>Right</span>
+</div>
 ```

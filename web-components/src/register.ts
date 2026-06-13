@@ -46,6 +46,7 @@ import { Range } from './Range'
 import { FloatingLabel } from './FloatingLabel'
 import { InputGroup } from './InputGroup'
 import { InputGroupText } from './InputGroupText'
+import { Divider } from './Divider'
 import { Form } from './Form'
 
 export function register(): void {
@@ -103,4 +104,5 @@ export function register(): void {
     customElements.define('tc-input-group', InputGroup)
     customElements.define('tc-input-group-text', InputGroupText)
     customElements.define('tc-form', Form)
+    customElements.define('tc-divider', Divider)
 }
