@@ -119,6 +119,7 @@ import { SectionCard } from './SectionCard'
 import { SimpleFile } from './SimpleFile'
 import { SponsorWall } from './SponsorWall'
 import { SprintChain } from './SprintChain'
+import { StatCard } from './StatCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -247,4 +248,5 @@ export function register(): void {
     customElements.define('tc-simple-file', SimpleFile)
     customElements.define('tc-sponsor-wall', SponsorWall)
     customElements.define('tc-sprint-chain', SprintChain)
+    customElements.define('tc-stat-card', StatCard)
 }

@@ -111,6 +111,7 @@ import ScoringRulesDemo from './ScoringRulesDemo'
 import SectionCardDemo from './SectionCardDemo'
 import SponsorWallDemo from './SponsorWallDemo'
 import SprintChainDemo from './SprintChainDemo'
+import StatCardDemo from './StatCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -242,4 +243,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'scoring-rules', category: 'Content', element: <ScoringRulesDemo /> },
     { key: 'section-card', category: 'Components', element: <SectionCardDemo /> },
     { key: 'sprint-chain', category: 'Content', element: <SprintChainDemo /> },
+    { key: 'stat-card', category: 'Content', element: <StatCardDemo /> },
 ]
