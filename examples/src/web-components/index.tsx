@@ -59,6 +59,7 @@ import SocialLinksDemo from './SocialLinksDemo'
 import StampDemo from './StampDemo'
 import StatusDotDemo from './StatusDotDemo'
 import TagDemo from './TagDemo'
+import AssetRowDemo from './AssetRowDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -138,4 +139,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'stamp', category: 'Content', element: <StampDemo /> },
     { key: 'status-dot', category: 'Content', element: <StatusDotDemo /> },
     { key: 'tag', category: 'Content', element: <TagDemo /> },
+    { key: 'asset-row', category: 'Components', element: <AssetRowDemo /> },
 ]
