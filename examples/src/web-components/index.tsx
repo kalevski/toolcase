@@ -73,6 +73,7 @@ import CodeWithOutputDemo from './CodeWithOutputDemo'
 import CommunityLinksDemo from './CommunityLinksDemo'
 import ConfigPreviewDemo from './ConfigPreviewDemo'
 import ContributorWallDemo from './ContributorWallDemo'
+import CookbookGridDemo from './CookbookGridDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -166,4 +167,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'community-links', category: 'Components', element: <CommunityLinksDemo /> },
     { key: 'config-preview', category: 'Content', element: <ConfigPreviewDemo /> },
     { key: 'contributor-wall', category: 'Components', element: <ContributorWallDemo /> },
+    { key: 'cookbook-grid', category: 'Components', element: <CookbookGridDemo /> },
 ]
