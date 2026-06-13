@@ -61,6 +61,7 @@ import StatusDotDemo from './StatusDotDemo'
 import TagDemo from './TagDemo'
 import AssetRowDemo from './AssetRowDemo'
 import AssetRowListDemo from './AssetRowListDemo'
+import BasicLayoutDemo from './BasicLayoutDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -84,6 +85,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'action-header', category: 'Components', element: <ActionHeaderDemo /> },
     { key: 'action-items', category: 'Components', element: <ActionItemsDemo /> },
     { key: 'action-row-list', category: 'Components', element: <ActionRowListDemo /> },
+    { key: 'basic-layout', category: 'Layout', element: <BasicLayoutDemo /> },
     { key: 'container', category: 'Layout', element: <ContainerDemo /> },
     { key: 'row', category: 'Layout', element: <RowDemo /> },
     { key: 'col', category: 'Layout', element: <ColDemo /> },

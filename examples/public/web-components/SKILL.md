@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -27,6 +27,7 @@ After `register()` you can author markup directly:
 ## Table of Contents
 
 - [Layout](#layout)
+  - [tc-basic-layout](#tc-basic-layout)
   - [tc-container](#tc-container)
   - [tc-row](#tc-row)
   - [tc-col](#tc-col)
@@ -96,6 +97,67 @@ After `register()` you can author markup directly:
 ---
 
 ## Layout
+
+### tc-basic-layout
+
+Two-section page layout: an optional brand header region followed by a full-height main content area. Flat structural surface — no shadows, no border-radius, slate neutrals only.
+
+**Tag:** `tc-basic-layout`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `brand` | string | — | Text content for the brand header. When set, renders a `<header>` with the attribute value. When omitted and no `slot="brand"` children are present, the header is hidden entirely. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `brand` | `string \| null` | Reflects the `brand` attribute. |
+
+**Events**
+
+None. `tc-basic-layout` is a purely presentational layout element.
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | Main page content. Rendered inside `<main class="tc-basic-layout-main">`. |
+| `brand` | Rich brand header content (logos, nav, custom markup). Used when the `brand` attribute is absent. Rendered inside `<header class="tc-basic-layout-brand">`. |
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-basic-layout-brand-bg` | `var(--tc-surface)` | Brand header background. |
+| `--bs-basic-layout-brand-color` | `var(--tc-text)` | Brand header text color. |
+| `--bs-basic-layout-brand-border` | `var(--tc-border)` | Color of the 1px hairline beneath the brand header. |
+| `--bs-basic-layout-main-bg` | `transparent` | Main content area background. |
+| `--bs-basic-layout-main-color` | `var(--tc-text)` | Main content area text color. |
+
+```html
+<!-- Brand via attribute -->
+<tc-basic-layout brand="My App">
+    <p>Page content here.</p>
+</tc-basic-layout>
+
+<!-- Rich brand via slot -->
+<tc-basic-layout>
+    <div slot="brand">
+        <img src="logo.svg" alt="My App" />
+    </div>
+    <p>Page content here.</p>
+</tc-basic-layout>
+
+<!-- No header -->
+<tc-basic-layout>
+    <p>Full-height main area, no brand header.</p>
+</tc-basic-layout>
+```
+
+---
 
 ### tc-container
 
