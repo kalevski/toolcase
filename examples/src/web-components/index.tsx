@@ -112,6 +112,7 @@ import SectionCardDemo from './SectionCardDemo'
 import SponsorWallDemo from './SponsorWallDemo'
 import SprintChainDemo from './SprintChainDemo'
 import StatCardDemo from './StatCardDemo'
+import StateMachineDemo from './StateMachineDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -244,4 +245,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'section-card', category: 'Components', element: <SectionCardDemo /> },
     { key: 'sprint-chain', category: 'Content', element: <SprintChainDemo /> },
     { key: 'stat-card', category: 'Content', element: <StatCardDemo /> },
+    { key: 'state-machine', category: 'Content', element: <StateMachineDemo /> },
 ]
