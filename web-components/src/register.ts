@@ -95,6 +95,7 @@ import { EmptyState } from './EmptyState'
 import { EntityCell } from './EntityCell'
 import { FeatureCard } from './FeatureCard'
 import { GoodFirstIssues } from './GoodFirstIssues'
+import { HeroStatsBar } from './HeroStatsBar'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -199,4 +200,5 @@ export function register(): void {
     customElements.define('tc-entity-cell', EntityCell)
     customElements.define('tc-feature-card', FeatureCard)
     customElements.define('tc-good-first-issues', GoodFirstIssues)
+    customElements.define('tc-hero-stats-bar', HeroStatsBar)
 }
