@@ -1,0 +1,49 @@
+// tc-code-label-cell — machine code chip alongside a human-readable display name.
+// Purely presentational; designed to drop into table/list cells.
+// All cosmetics flow through --bs-code-label-cell-* custom properties backed by --tc-* tokens.
+
+tc-code-label-cell {
+    --bs-code-label-cell-gap: 0.5rem;
+    --bs-code-label-cell-code-padding-x: 0.375rem;
+    --bs-code-label-cell-code-padding-y: 0.125rem;
+    --bs-code-label-cell-code-font-size: 0.75rem;
+    --bs-code-label-cell-code-font-weight: 500;
+    --bs-code-label-cell-code-color: var(--tc-text);
+    --bs-code-label-cell-code-bg: var(--tc-surface-muted);
+    --bs-code-label-cell-code-border: 1px solid var(--tc-border);
+    --bs-code-label-cell-name-font-size: 0.875rem;
+    --bs-code-label-cell-name-color: var(--tc-text-muted);
+}
+
+.tc-code-label-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-code-label-cell-gap);
+}
+
+.tc-code-label-cell-code {
+    display: inline-block;
+    padding: var(--bs-code-label-cell-code-padding-y) var(--bs-code-label-cell-code-padding-x);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-code-label-cell-code-font-size);
+    font-weight: var(--bs-code-label-cell-code-font-weight);
+    color: var(--bs-code-label-cell-code-color);
+    background-color: var(--bs-code-label-cell-code-bg);
+    border: var(--bs-code-label-cell-code-border);
+    border-radius: 0;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.tc-code-label-cell-name {
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-code-label-cell-name-font-size);
+    color: var(--bs-code-label-cell-name-color);
+    line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-code-label-cell {
+        transition: none;
+    }
+}
