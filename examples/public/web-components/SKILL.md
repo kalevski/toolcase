@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -46,6 +46,7 @@ After `register()` you can author markup directly:
   - [tc-dropdown](#tc-dropdown)
   - [tc-heading](#tc-heading)
   - [tc-icon](#tc-icon)
+  - [tc-kbd](#tc-kbd)
   - [tc-list-group](#tc-list-group)
   - [tc-placeholder](#tc-placeholder)
   - [tc-progress](#tc-progress)
@@ -1340,4 +1341,67 @@ None. The icon SVG is rendered inline; there is no slot for child content.
 
 <!-- Custom wrapper tag -->
 <tc-icon name="Circle" as="div" size="32"></tc-icon>
+```
+
+---
+
+## tc-kbd
+
+Keyboard key cap(s) rendered as square mono hints. Supports a single slotted key or a multi-key combination via the `keys` JS property, with an optional custom separator.
+
+**Tag:** `tc-kbd`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `class-name` | string | — | Extra CSS classes merged onto the `.tc-kbd` wrapper span |
+| `separator` | string | `+` | Visual joiner rendered between keys when using the `keys` property. Wrapped in `aria-hidden` span |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `keys` | `string[]` | `[]` | Array of key label strings. When set (non-empty), renders one `<kbd>` per key interleaved with separator spans. Takes precedence over slotted children |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| _(default)_ | Key label content when `keys` is not set. Rendered inside a single `<kbd class="tc-kbd-key">` |
+
+**Events**
+
+None. `tc-kbd` is a purely presentational element.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-kbd-font-family` | `var(--bs-font-monospace)` | Key cap font |
+| `--bs-kbd-font-size` | `0.71875rem` (~11.5px) | Key cap font size |
+| `--bs-kbd-font-weight` | `500` | Key cap font weight |
+| `--bs-kbd-color` | `var(--tc-text)` | Key cap glyph color |
+| `--bs-kbd-bg` | `var(--tc-surface-muted)` | Key cap background fill |
+| `--bs-kbd-border-color` | `var(--tc-border-strong)` | Key cap border color |
+| `--bs-kbd-border-width` | `1px` | Key cap border width |
+| `--bs-kbd-padding-x` | `0.35em` | Horizontal key cap padding |
+| `--bs-kbd-padding-y` | `0.18em` | Vertical key cap padding |
+| `--bs-kbd-sep-color` | `var(--tc-text-faint)` | Separator color |
+| `--bs-kbd-sep-margin` | `0.25em` | Horizontal margin around separator |
+
+```html
+<!-- Single slotted key -->
+<tc-kbd>Enter</tc-kbd>
+
+<!-- Key combination via JS property -->
+<tc-kbd id="combo"></tc-kbd>
+<script>document.getElementById('combo').keys = ['Ctrl', 'K']</script>
+
+<!-- Custom separator -->
+<tc-kbd id="seq" separator=" then "></tc-kbd>
+<script>document.getElementById('seq').keys = ['Esc', 'Enter']</script>
+
+<!-- Extra class on wrapper -->
+<tc-kbd class-name="my-key">Space</tc-kbd>
 ```
