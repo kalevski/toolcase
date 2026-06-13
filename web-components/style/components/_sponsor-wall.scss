@@ -1,0 +1,167 @@
+// tc-sponsor-wall — sponsor logos organised by tier with optional title.
+// Sharp corners (border-radius: 0). Logos rest greyscale/muted; lift to full on hover.
+// Tier labels are mono uppercase micro-labels in --tc-text-faint.
+// Logo cells sit on --tc-surface separated by a 1px --tc-border gap-grid.
+// Linked logos: always-visible :focus-visible ring. Honour prefers-reduced-motion.
+
+@use '../foundation/tokens' as *;
+
+tc-sponsor-wall {
+    --bs-sponsor-wall-title-color: var(--tc-text-faint);
+    --bs-sponsor-wall-title-font-size: 0.6875rem;
+    --bs-sponsor-wall-title-margin-bottom: 1.5rem;
+    --bs-sponsor-wall-tier-gap: 2rem;
+    --bs-sponsor-wall-label-color: var(--tc-text-faint);
+    --bs-sponsor-wall-label-font-size: 0.6875rem;
+    --bs-sponsor-wall-label-margin-bottom: 0.75rem;
+    --bs-sponsor-wall-logos-gap: 1px;
+    --bs-sponsor-wall-cell-bg: var(--tc-surface);
+    --bs-sponsor-wall-cell-border: var(--tc-border);
+    --bs-sponsor-wall-logo-grayscale: 1;
+    --bs-sponsor-wall-logo-opacity: 0.55;
+    --bs-sponsor-wall-logo-transition: filter var(--tc-transition-base), opacity var(--tc-transition-base), transform var(--tc-transition-fast);
+    --bs-sponsor-wall-hover-translate: -1px;
+    // Size vars — control logo cell height per tier size
+    --bs-sponsor-wall-size-xl: 5rem;
+    --bs-sponsor-wall-size-lg: 3.75rem;
+    --bs-sponsor-wall-size-md: 3rem;
+    --bs-sponsor-wall-size-sm: 2.25rem;
+}
+
+.tc-sponsor-wall {
+    display: block;
+}
+
+.tc-sponsor-wall-title {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-sponsor-wall-title-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-sponsor-wall-title-color);
+    margin: 0 0 var(--bs-sponsor-wall-title-margin-bottom);
+    line-height: 1.4;
+}
+
+.tc-sponsor-tier {
+    & + & {
+        margin-top: var(--bs-sponsor-wall-tier-gap);
+    }
+}
+
+.tc-sponsor-tier-label {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-sponsor-wall-label-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-sponsor-wall-label-color);
+    margin-bottom: var(--bs-sponsor-wall-label-margin-bottom);
+    line-height: 1.4;
+}
+
+// Logo grid — hairline 1px gaps using outline trick on cells + gap:1px
+.tc-sponsor-tier-logos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--bs-sponsor-wall-logos-gap);
+    background: var(--bs-sponsor-wall-cell-border);
+    border: 1px solid var(--bs-sponsor-wall-cell-border);
+    border-radius: 0;
+}
+
+// Logo cell — wraps the <img>; linked variant is an <a>, plain is a <span>
+.tc-sponsor-logo-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-sponsor-wall-cell-bg);
+    border-radius: 0;
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+    position: relative;
+    transition: transform var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-within {
+        transform: translateY(var(--bs-sponsor-wall-hover-translate));
+        z-index: 1;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        z-index: 1;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+a.tc-sponsor-logo-wrap {
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// Logo image — greyscale/muted at rest, full on hover/focus-within of parent cell
+.tc-sponsor-logo {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    max-height: var(--bs-sponsor-wall-size-md);
+    object-fit: contain;
+    border-radius: 0;
+    filter: grayscale(var(--bs-sponsor-wall-logo-grayscale));
+    opacity: var(--bs-sponsor-wall-logo-opacity);
+    transition: var(--bs-sponsor-wall-logo-transition);
+}
+
+.tc-sponsor-logo-wrap:hover .tc-sponsor-logo,
+.tc-sponsor-logo-wrap:focus-within .tc-sponsor-logo {
+    filter: grayscale(0);
+    opacity: 1;
+}
+
+// Size variants — drive logo cell height through max-height on the img
+.tc-sponsor-tier--xl .tc-sponsor-logo {
+    max-height: var(--bs-sponsor-wall-size-xl);
+}
+
+.tc-sponsor-tier--lg .tc-sponsor-logo {
+    max-height: var(--bs-sponsor-wall-size-lg);
+}
+
+.tc-sponsor-tier--md .tc-sponsor-logo {
+    max-height: var(--bs-sponsor-wall-size-md);
+}
+
+.tc-sponsor-tier--sm .tc-sponsor-logo {
+    max-height: var(--bs-sponsor-wall-size-sm);
+}
+
+// 44px coarse touch targets for linked cells
+@media (pointer: coarse) {
+    a.tc-sponsor-logo-wrap {
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+    }
+}
+
+// Honour prefers-reduced-motion: skip lift; keep opacity/filter transition
+@media (prefers-reduced-motion: reduce) {
+    .tc-sponsor-logo-wrap {
+        transition: none;
+
+        &:hover,
+        &:focus-within {
+            transform: none;
+        }
+    }
+
+    .tc-sponsor-logo {
+        transition: opacity var(--tc-transition-base);
+    }
+}

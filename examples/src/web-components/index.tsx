@@ -109,6 +109,7 @@ import RankCellDemo from './RankCellDemo'
 import RichPageHeaderDemo from './RichPageHeaderDemo'
 import ScoringRulesDemo from './ScoringRulesDemo'
 import SectionCardDemo from './SectionCardDemo'
+import SponsorWallDemo from './SponsorWallDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -234,6 +235,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'pricing-card', category: 'Components', element: <PricingCardDemo /> },
     { key: 'queued-file', category: 'Components', element: <QueuedFileDemo /> },
     { key: 'simple-file', category: 'Content', element: <SimpleFileDemo /> },
+    { key: 'sponsor-wall', category: 'Content', element: <SponsorWallDemo /> },
     { key: 'rank-cell', category: 'Components', element: <RankCellDemo /> },
     { key: 'rich-page-header', category: 'Components', element: <RichPageHeaderDemo /> },
     { key: 'scoring-rules', category: 'Content', element: <ScoringRulesDemo /> },
