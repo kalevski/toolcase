@@ -1,0 +1,95 @@
+// tc-status-dot — status indicator dot with optional label and pulse ring.
+// The marker is a sanctioned circle (border-radius: 50%). Status is the only
+// place color appears; size modifiers control the marker diameter and label size.
+// The pulse ring is a ::after expand-and-fade; it honours prefers-reduced-motion.
+
+@use '../foundation/tokens' as *;
+
+.tc-status-dot {
+    --bs-status-dot-marker-size: 8px;
+    --bs-status-dot-gap: 6px;
+    --bs-status-dot-label-size: 13px;
+    --bs-status-dot-label-color: var(--tc-text-muted);
+    --bs-status-dot-animation-speed: 1.6s;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-status-dot-gap);
+}
+
+.tc-status-dot-small {
+    --bs-status-dot-marker-size: 6px;
+    --bs-status-dot-label-size: 12px;
+}
+
+.tc-status-dot-default {
+    --bs-status-dot-marker-size: 8px;
+    --bs-status-dot-label-size: 13px;
+}
+
+.tc-status-dot-large {
+    --bs-status-dot-marker-size: 10px;
+    --bs-status-dot-label-size: 14px;
+}
+
+.tc-status-dot-marker {
+    // --bs-status-dot-color drives both the solid dot and the pulse ring border.
+    --bs-status-dot-color: var(--tc-text-faint);
+
+    position: relative;
+    width: var(--bs-status-dot-marker-size);
+    height: var(--bs-status-dot-marker-size);
+    border-radius: 50%;
+    background-color: var(--bs-status-dot-color);
+    flex-shrink: 0;
+
+    &.tc-status-dot-online  { --bs-status-dot-color: var(--tc-success); }
+    &.tc-status-dot-busy    { --bs-status-dot-color: var(--tc-danger); }
+    &.tc-status-dot-away    { --bs-status-dot-color: var(--tc-warning); }
+    &.tc-status-dot-offline { --bs-status-dot-color: var(--tc-text-faint); }
+}
+
+// Pulse ring — only visible when --pulse modifier is present.
+.tc-status-dot-marker::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--bs-status-dot-marker-size);
+    height: var(--bs-status-dot-marker-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--bs-status-dot-color);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+    animation: none;
+}
+
+.tc-status-dot-marker--pulse::after {
+    animation: status-dot-pulse var(--bs-status-dot-animation-speed) ease-out infinite;
+}
+
+.tc-status-dot-label {
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-status-dot-label-size);
+    color: var(--bs-status-dot-label-color);
+    line-height: 1;
+    // The label container stays rectangular — no border-radius.
+    border-radius: 0;
+}
+
+@keyframes status-dot-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-status-dot-marker--pulse::after {
+        animation: none;
+    }
+}

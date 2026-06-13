@@ -65,6 +65,7 @@ import { SectionFlag } from './SectionFlag'
 import { Skeleton } from './Skeleton'
 import { SocialLinks } from './SocialLinks'
 import { Stamp } from './Stamp'
+import { StatusDot } from './StatusDot'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -139,4 +140,5 @@ export function register(): void {
     customElements.define('tc-skeleton', Skeleton)
     customElements.define('tc-social-links', SocialLinks)
     customElements.define('tc-stamp', Stamp)
+    customElements.define('tc-status-dot', StatusDot)
 }

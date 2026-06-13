@@ -57,6 +57,7 @@ import SectionFlagDemo from './SectionFlagDemo'
 import SkeletonDemo from './SkeletonDemo'
 import SocialLinksDemo from './SocialLinksDemo'
 import StampDemo from './StampDemo'
+import StatusDotDemo from './StatusDotDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -134,4 +135,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'skeleton', category: 'Components', element: <SkeletonDemo /> },
     { key: 'social-links', category: 'Navigation', element: <SocialLinksDemo /> },
     { key: 'stamp', category: 'Content', element: <StampDemo /> },
+    { key: 'status-dot', category: 'Content', element: <StatusDotDemo /> },
 ]
