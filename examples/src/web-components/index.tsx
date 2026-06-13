@@ -75,6 +75,7 @@ import ConfigPreviewDemo from './ConfigPreviewDemo'
 import ContributorWallDemo from './ContributorWallDemo'
 import CookbookGridDemo from './CookbookGridDemo'
 import CoolButtonDemo from './CoolButtonDemo'
+import ActivityCardDemo from './ActivityCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -170,4 +171,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'contributor-wall', category: 'Components', element: <ContributorWallDemo /> },
     { key: 'cookbook-grid', category: 'Components', element: <CookbookGridDemo /> },
     { key: 'cool-button', category: 'Components', element: <CoolButtonDemo /> },
+    { key: 'activity-card', category: 'Components', element: <ActivityCardDemo /> },
 ]
