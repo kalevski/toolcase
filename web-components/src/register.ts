@@ -110,6 +110,7 @@ import { PinnedFeatureShowcase } from './PinnedFeatureShowcase'
 import { Pipeline } from './Pipeline'
 import { PluginGrid } from './PluginGrid'
 import { PricingCard } from './PricingCard'
+import { QueuedFile } from './QueuedFile'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -229,4 +230,5 @@ export function register(): void {
     customElements.define('tc-pipeline', Pipeline)
     customElements.define('tc-plugin-grid', PluginGrid)
     customElements.define('tc-pricing-card', PricingCard)
+    customElements.define('tc-queued-file', QueuedFile)
 }

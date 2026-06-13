@@ -102,6 +102,7 @@ import PinnedFeatureShowcaseDemo from './PinnedFeatureShowcaseDemo'
 import PipelineDemo from './PipelineDemo'
 import PluginGridDemo from './PluginGridDemo'
 import PricingCardDemo from './PricingCardDemo'
+import QueuedFileDemo from './QueuedFileDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -224,4 +225,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'pipeline', category: 'Components', element: <PipelineDemo /> },
     { key: 'plugin-grid', category: 'Components', element: <PluginGridDemo /> },
     { key: 'pricing-card', category: 'Components', element: <PricingCardDemo /> },
+    { key: 'queued-file', category: 'Components', element: <QueuedFileDemo /> },
 ]
