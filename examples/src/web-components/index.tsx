@@ -83,6 +83,7 @@ import ListCardDemo from './ListCardDemo'
 import StatusCardDemo from './StatusCardDemo'
 import DashboardContentDemo from './DashboardContentDemo'
 import DownloadStatsDemo from './DownloadStatsDemo'
+import EmptyStateDemo from './EmptyStateDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -186,4 +187,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'status-card', category: 'Components', element: <StatusCardDemo /> },
     { key: 'dashboard-content', category: 'Layout', element: <DashboardContentDemo /> },
     { key: 'download-stats', category: 'Components', element: <DownloadStatsDemo /> },
+    { key: 'empty-state', category: 'Components', element: <EmptyStateDemo /> },
 ]

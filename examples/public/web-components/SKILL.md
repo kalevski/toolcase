@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, Heading, Kbd, ListCard, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusCard, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, Heading, Kbd, ListCard, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusCard, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -86,6 +86,7 @@ After `register()` you can author markup directly:
   - [tc-list-card](#tc-list-card)
   - [tc-status-card](#tc-status-card)
   - [tc-download-stats](#tc-download-stats)
+  - [tc-empty-state](#tc-empty-state)
   - [tc-text](#tc-text)
   - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
@@ -4417,4 +4418,67 @@ None. `tc-cookbook-grid` is purely presentational. Recipe cards link via `href`.
     <span slot="title"><strong>Advanced Recipes</strong></span>
 </tc-cookbook-grid>
 ```
+```
+
+---
+
+### tc-empty-state
+
+Centered placeholder shown when data is unavailable. Displays an optional lucide icon in a sharp slate tile, followed by slotted body content (message text, optional action button).
+
+**Tag:** `tc-empty-state`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `icon` | string | — | Lucide icon name in PascalCase (e.g. `"Inbox"`, `"FolderOpen"`). When set, renders the icon as an inline SVG inside a muted tile above the body. When omitted, no icon is shown. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `icon` | `string \| null` | Reflects the `icon` attribute. |
+
+**Events**
+
+None. `tc-empty-state` is purely presentational.
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | Message text, headings, and optional action buttons. Rendered inside `.tc-empty-state__body`. Preserved across re-renders when the `icon` attribute changes. |
+
+**Accessibility**
+
+- The icon SVG carries `aria-hidden="true"` — it is decorative; the message text is the readable content.
+- Any slotted `tc-button` or `<button>` remains keyboard-reachable with a visible focus ring.
+- `prefers-reduced-motion` is honoured globally via the reset; no transitions are defined by default.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-empty-state-padding-y` | `3rem` | Vertical padding of the centered container. |
+| `--bs-empty-state-padding-x` | `1.5rem` | Horizontal padding of the centered container. |
+| `--bs-empty-state-gap` | `1rem` | Gap between the icon tile and the body. |
+| `--bs-empty-state-color` | `var(--tc-text-muted)` | Default text color for body content. |
+| `--bs-empty-state-icon-size` | `1.25rem` | Width and height of the icon SVG. |
+| `--bs-empty-state-icon-color` | `var(--tc-text-faint)` | Icon stroke color. |
+| `--bs-empty-state-icon-bg` | `var(--tc-surface-muted)` | Background of the icon tile. |
+| `--bs-empty-state-icon-padding` | `0.75rem` | Padding inside the icon tile. |
+
+```html
+<!-- Icon + message -->
+<tc-empty-state icon="Inbox">No messages yet</tc-empty-state>
+
+<!-- Icon + message + action button -->
+<tc-empty-state icon="FolderOpen">
+    No files found
+    <tc-button variant="secondary">Upload a file</tc-button>
+</tc-empty-state>
+
+<!-- Message only, no icon -->
+<tc-empty-state>Nothing to show here yet.</tc-empty-state>
 ```
