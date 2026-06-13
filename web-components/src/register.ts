@@ -54,6 +54,7 @@ import { Form } from './Form'
 import { Heading } from './Heading'
 import { HelperText } from './HelperText'
 import { Icon } from './Icon'
+import { IconButton } from './IconButton'
 import { Kbd } from './Kbd'
 import { Label } from './Label'
 import { Link } from './Link'
@@ -159,6 +160,7 @@ export function register(): void {
     customElements.define('tc-heading', Heading)
     customElements.define('tc-helper-text', HelperText)
     customElements.define('tc-icon', Icon)
+    customElements.define('tc-icon-button', IconButton)
     customElements.define('tc-kbd', Kbd)
     customElements.define('tc-label', Label)
     customElements.define('tc-link', Link)

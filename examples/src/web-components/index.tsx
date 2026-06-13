@@ -46,6 +46,7 @@ import DividerDemo from './DividerDemo'
 import HeadingDemo from './HeadingDemo'
 import HelperTextDemo from './HelperTextDemo'
 import IconDemo from './IconDemo'
+import IconButtonDemo from './IconButtonDemo'
 import KbdDemo from './KbdDemo'
 import LabelDemo from './LabelDemo'
 import LinkDemo from './LinkDemo'
@@ -155,6 +156,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'heading', category: 'Content', element: <HeadingDemo /> },
     { key: 'helper-text', category: 'Forms', element: <HelperTextDemo /> },
     { key: 'icon', category: 'Content', element: <IconDemo /> },
+    { key: 'icon-button', category: 'Components', element: <IconButtonDemo /> },
     { key: 'kbd', category: 'Content', element: <KbdDemo /> },
     { key: 'label', category: 'Forms', element: <LabelDemo /> },
     { key: 'link', category: 'Content', element: <LinkDemo /> },

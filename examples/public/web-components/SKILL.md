@@ -52,6 +52,7 @@ After `register()` you can author markup directly:
   - [tc-dropdown](#tc-dropdown)
   - [tc-heading](#tc-heading)
   - [tc-icon](#tc-icon)
+  - [tc-icon-button](#tc-icon-button)
   - [tc-kbd](#tc-kbd)
   - [tc-link](#tc-link)
   - [tc-list-group](#tc-list-group)
@@ -2875,6 +2876,69 @@ None. The icon SVG is rendered inline; there is no slot for child content.
 
 <!-- Custom wrapper tag -->
 <tc-icon name="Circle" as="div" size="32"></tc-icon>
+```
+
+---
+
+## tc-icon-button
+
+Square icon-only button with variant, size, outline, and accessible label. Dispatches `tc-click` on activation.
+
+**Tag:** `tc-icon-button`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `icon` | string | — | **Required.** Lucide icon name in PascalCase (e.g. `"Trash2"`, `"Pencil"`) |
+| `size` | `small\|default\|large` | `default` | Button size: 28 / 36 / 44 px |
+| `variant` | `primary\|secondary\|info\|success\|warning\|danger` | `secondary` | Color variant |
+| `outline` | boolean | false | Outline style — transparent background, colored border |
+| `label` | string | — | **Required for a11y.** Applied as `aria-label` (visible text is absent) |
+| `disabled` | boolean | false | Disables the button and prevents `tc-click` |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-click` | `{}` | Fires when the button is clicked (not fired when disabled) |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `onClick` | `(() => void) \| null` | Optional callback, called in addition to `tc-click` |
+
+**Accessibility**
+
+- `aria-label` is the only accessible name — the `label` attribute is effectively required.
+- Focus ring: `2px solid var(--tc-app-accent)`, offset `2px`.
+- Disabled: native `disabled` attribute on inner `<button>` + `pointer-events: none` on host.
+- Touch target ≥ 44 px under `@media (pointer: coarse)`.
+- Respects `prefers-reduced-motion` — transform lift frozen, state transitions kept.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-icon-button-size` | `36px` | Square size of the button (overridden by size modifier) |
+| `--bs-icon-button-icon-size` | `1rem` | Width and height of the SVG icon |
+
+```html
+<!-- Default (secondary ghost) -->
+<tc-icon-button icon="Pencil" label="Edit"></tc-icon-button>
+
+<!-- Primary -->
+<tc-icon-button icon="Plus" variant="primary" label="Add"></tc-icon-button>
+
+<!-- Danger outline -->
+<tc-icon-button icon="Trash2" variant="danger" outline label="Delete"></tc-icon-button>
+
+<!-- Large success -->
+<tc-icon-button icon="Check" variant="success" size="large" label="Confirm"></tc-icon-button>
+
+<!-- Disabled -->
+<tc-icon-button icon="Lock" label="Locked" disabled></tc-icon-button>
 ```
 
 ---
