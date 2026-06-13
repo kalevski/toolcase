@@ -94,6 +94,7 @@ import { DownloadStats } from './DownloadStats'
 import { EmptyState } from './EmptyState'
 import { EntityCell } from './EntityCell'
 import { FeatureCard } from './FeatureCard'
+import { GoodFirstIssues } from './GoodFirstIssues'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -197,4 +198,5 @@ export function register(): void {
     customElements.define('tc-empty-state', EmptyState)
     customElements.define('tc-entity-cell', EntityCell)
     customElements.define('tc-feature-card', FeatureCard)
+    customElements.define('tc-good-first-issues', GoodFirstIssues)
 }
