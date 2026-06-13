@@ -84,6 +84,7 @@ import { ContributorWall } from './ContributorWall'
 import { CookbookGrid } from './CookbookGrid'
 import { CoolButton } from './CoolButton'
 import { ActivityCard } from './ActivityCard'
+import { BasicCard } from './BasicCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -177,4 +178,5 @@ export function register(): void {
     customElements.define('tc-cookbook-grid', CookbookGrid)
     customElements.define('tc-cool-button', CoolButton)
     customElements.define('tc-activity-card', ActivityCard)
+    customElements.define('tc-basic-card', BasicCard)
 }
