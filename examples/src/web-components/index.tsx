@@ -89,6 +89,7 @@ import EntityCellDemo from './EntityCellDemo'
 import FeatureCardDemo from './FeatureCardDemo'
 import GoodFirstIssuesDemo from './GoodFirstIssuesDemo'
 import HeroStatsBarDemo from './HeroStatsBarDemo'
+import LeaderboardTrendDemo from './LeaderboardTrendDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -198,4 +199,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'feature-card', category: 'Components', element: <FeatureCardDemo /> },
     { key: 'good-first-issues', category: 'Components', element: <GoodFirstIssuesDemo /> },
     { key: 'hero-stats-bar', category: 'Components', element: <HeroStatsBarDemo /> },
+    { key: 'leaderboard-trend', category: 'Components', element: <LeaderboardTrendDemo /> },
 ]

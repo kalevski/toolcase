@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusCard, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusCard, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -92,6 +92,7 @@ After `register()` you can author markup directly:
   - [tc-feature-card](#tc-feature-card)
   - [tc-good-first-issues](#tc-good-first-issues)
   - [tc-hero-stats-bar](#tc-hero-stats-bar)
+  - [tc-leaderboard-trend](#tc-leaderboard-trend)
   - [tc-text](#tc-text)
   - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
@@ -4949,4 +4950,64 @@ document.getElementById('zero').stats = [
     { label: 'Alerts', value: '' },
 ]
 </script>
+```
+
+---
+
+### tc-leaderboard-trend
+
+Small directional trend indicator with a Lucide arrow icon and a value. Three directions drive the icon shape and color. Designed to sit inline within table cells, metric rows, or leaderboard entries. Purely presentational — no interaction, no events.
+
+**Tag:** `tc-leaderboard-trend`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | string | — | The trend value text (e.g. `"+240"`, `"-8%"`). When set, rendered as escaped text. When omitted, slotted children are projected into the value span instead. |
+| `direction` | `'up' \| 'down' \| 'flat'` | `'flat'` | Direction of the trend. Drives the arrow icon and color. `up` → `--tc-success`, `down` → `--tc-danger`, `flat` → `--tc-text-muted`. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `string \| null` | Reflects the `value` attribute. |
+| `direction` | `LeaderboardTrendDirection` | Reflects the `direction` attribute. Defaults to `'flat'` when the attribute is absent or invalid. |
+
+**Events**
+
+None. `tc-leaderboard-trend` is purely presentational.
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | Value content when the `value` attribute is absent. Projected into the inner `.tc-leaderboard-trend-value` span. Useful for rich markup (e.g. `<strong>+5</strong> pts`). |
+
+**Accessibility**
+
+The arrow icon SVG carries `aria-hidden="true"` so it is decorative. Direction is conveyed by both icon shape and color — not color alone. Reduced motion is honoured globally via the `prefers-reduced-motion` reset.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-leaderboard-trend-color` | direction-mapped | Text and icon color. `up` → `--tc-success`, `down` → `--tc-danger`, `flat` → `--tc-text-muted`. |
+| `--bs-leaderboard-trend-icon-size` | `0.875em` | Icon width and height (relative to the element's font size). |
+| `--bs-leaderboard-trend-font-size` | `12px` | Value text font size (JetBrains Mono, weight 500). |
+| `--bs-leaderboard-trend-gap` | `0.25rem` | Gap between the icon and the value text. |
+
+```html
+<!-- Attribute value with explicit direction -->
+<tc-leaderboard-trend value="+12%" direction="up"></tc-leaderboard-trend>
+<tc-leaderboard-trend value="-8%" direction="down"></tc-leaderboard-trend>
+<tc-leaderboard-trend value="0%" direction="flat"></tc-leaderboard-trend>
+
+<!-- Slotted value (no value attribute) -->
+<tc-leaderboard-trend direction="up"><strong>+5</strong> pts</tc-leaderboard-trend>
+
+<!-- Inline in a table cell -->
+<td>
+    <tc-leaderboard-trend value="+240" direction="up"></tc-leaderboard-trend>
+</td>
 ```

@@ -1,0 +1,59 @@
+// tc-leaderboard-trend — inline directional trend indicator with lucide arrow icon and value.
+// Up = --tc-success, down = --tc-danger, flat = --tc-text-muted (neutral slate).
+// Bare inline indicator — no border, no background, no shadow.
+// All cosmetics via --bs-leaderboard-trend-* backed by --tc-* tokens.
+
+tc-leaderboard-trend {
+    vertical-align: middle;
+}
+
+.tc-leaderboard-trend {
+    --bs-leaderboard-trend-icon-size: 0.875em;
+    --bs-leaderboard-trend-font-size: 12px;
+    --bs-leaderboard-trend-gap: 0.25rem;
+    --bs-leaderboard-trend-color: var(--tc-text-muted);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-leaderboard-trend-gap);
+    font-family: 'JetBrains Mono', 'JetBrainsMono NF', monospace;
+    font-size: var(--bs-leaderboard-trend-font-size);
+    font-weight: 500;
+    color: var(--bs-leaderboard-trend-color);
+    line-height: 1;
+    white-space: nowrap;
+    border-radius: 0;
+    border: none;
+    background: none;
+}
+
+.tc-leaderboard-trend-up {
+    --bs-leaderboard-trend-color: var(--tc-success);
+}
+
+.tc-leaderboard-trend-down {
+    --bs-leaderboard-trend-color: var(--tc-danger);
+}
+
+.tc-leaderboard-trend-flat {
+    --bs-leaderboard-trend-color: var(--tc-text-muted);
+}
+
+.tc-leaderboard-trend-icon {
+    width: var(--bs-leaderboard-trend-icon-size);
+    height: var(--bs-leaderboard-trend-icon-size);
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+    fill: none;
+}
+
+.tc-leaderboard-trend-value {
+    line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-leaderboard-trend {
+        transition: none;
+    }
+}
