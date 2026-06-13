@@ -1,0 +1,162 @@
+// tc-config-preview — JSON-like configuration preview with syntax-highlighted key-value pairs.
+// Dark code surface (--tc-ink), mono text, sharp corners, 1px hairline border.
+// All cosmetics flow through --bs-config-preview-* vars backed by --tc-* tokens.
+// Live badge is the only accent element; all token colors are muted, not rainbow.
+// Honours prefers-reduced-motion (live-dot pulse freezes, state colors remain).
+
+tc-config-preview {
+    // Panel surface
+    --bs-config-preview-bg: var(--tc-ink);
+    --bs-config-preview-border: 1px solid var(--tc-border);
+    --bs-config-preview-font-size: 0.85rem;
+    --bs-config-preview-line-height: 1.6;
+    --bs-config-preview-padding-y: 0.875rem;
+    --bs-config-preview-padding-x: 1rem;
+
+    // Header cap (slightly lighter ink)
+    --bs-config-preview-header-bg: var(--tc-ink-2);
+    --bs-config-preview-header-border: 1px solid var(--tc-border);
+    --bs-config-preview-header-padding: 0.375rem 0.75rem;
+
+    // Text — all on dark surface
+    --bs-config-preview-text-color: var(--tc-text-inverse);
+
+    // Syntax token colors — restrained, muted tints; no rainbow
+    --bs-config-preview-key-color: oklch(0.75 0.06 220);     // muted slate-blue
+    --bs-config-preview-string-color: oklch(0.78 0.1 150);   // muted green
+    --bs-config-preview-number-color: oklch(0.80 0.1 75);    // muted amber
+    --bs-config-preview-boolean-color: oklch(0.75 0.1 300);  // muted purple
+    --bs-config-preview-null-color: oklch(0.68 0.08 30);     // muted red-orange
+    --bs-config-preview-comment-color: oklch(0.55 0.01 250); // muted slate gray
+
+    // Live badge — cyan accent pill (the one sanctioned accent moment)
+    --bs-config-preview-live-badge-bg: var(--tc-accent-soft);
+    --bs-config-preview-live-badge-color: var(--tc-accent-fg);
+    --bs-config-preview-live-badge-border: 1px solid var(--tc-accent);
+    --bs-config-preview-live-dot-color: var(--tc-accent);
+    --bs-config-preview-live-dot-size: 6px;
+}
+
+.tc-config-preview {
+    background: var(--bs-config-preview-bg);
+    border: var(--bs-config-preview-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+
+.tc-config-preview-header {
+    display: none;
+    align-items: center;
+    padding: var(--bs-config-preview-header-padding);
+    background: var(--bs-config-preview-header-bg);
+    border-bottom: var(--bs-config-preview-header-border);
+
+    // Revealed when the live-label container has content (attribute text or slot child)
+    &:has(.tc-config-preview-live-label:not(:empty)) {
+        display: flex;
+    }
+}
+
+// ── Live badge ───────────────────────────────────────────────────────────────
+
+.tc-config-preview-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    padding: 0.125rem 0.5rem 0.125rem 0.375rem;
+    background: var(--bs-config-preview-live-badge-bg);
+    border: var(--bs-config-preview-live-badge-border);
+    border-radius: 999px; // sanctioned pill shape
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--bs-config-preview-live-badge-color);
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.tc-config-preview-live-dot {
+    display: inline-block;
+    width: var(--bs-config-preview-live-dot-size);
+    height: var(--bs-config-preview-live-dot-size);
+    border-radius: 50%; // sanctioned circle
+    background: var(--bs-config-preview-live-dot-color);
+    flex-shrink: 0;
+    animation: tc-config-preview-live-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tc-config-preview-live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+// ── Body (<pre>) ─────────────────────────────────────────────────────────────
+
+.tc-config-preview-body {
+    margin: 0;
+    padding: var(--bs-config-preview-padding-y) var(--bs-config-preview-padding-x);
+    background: transparent;
+    color: var(--bs-config-preview-text-color);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-config-preview-font-size);
+    line-height: var(--bs-config-preview-line-height);
+    border-radius: 0;
+    overflow-x: auto;
+    // pre-wrap so long values wrap rather than overflow on narrow viewports
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.tc-config-preview-line {
+    display: block;
+}
+
+// ── Syntax token colours ──────────────────────────────────────────────────────
+
+.tc-config-preview-key {
+    color: var(--bs-config-preview-key-color);
+}
+
+.tc-config-preview-value--string {
+    color: var(--bs-config-preview-string-color);
+}
+
+.tc-config-preview-value--number {
+    color: var(--bs-config-preview-number-color);
+}
+
+.tc-config-preview-value--boolean {
+    color: var(--bs-config-preview-boolean-color);
+}
+
+.tc-config-preview-value--null {
+    color: var(--bs-config-preview-null-color);
+}
+
+.tc-config-preview-comment {
+    color: var(--bs-config-preview-comment-color);
+    font-style: italic;
+}
+
+// ── Default slot content ──────────────────────────────────────────────────────
+
+.tc-config-preview-content {
+    display: block;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-config-preview-live-dot {
+        // Freeze the decorative pulse; leave the dot visible (state-conveying color retained)
+        animation: none;
+    }
+}
