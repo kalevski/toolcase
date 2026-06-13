@@ -81,6 +81,7 @@ import ColoredCardDemo from './ColoredCardDemo'
 import DifferenceCardDemo from './DifferenceCardDemo'
 import ListCardDemo from './ListCardDemo'
 import StatusCardDemo from './StatusCardDemo'
+import DashboardContentDemo from './DashboardContentDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -182,4 +183,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'difference-card', category: 'Components', element: <DifferenceCardDemo /> },
     { key: 'list-card', category: 'Components', element: <ListCardDemo /> },
     { key: 'status-card', category: 'Components', element: <StatusCardDemo /> },
+    { key: 'dashboard-content', category: 'Layout', element: <DashboardContentDemo /> },
 ]

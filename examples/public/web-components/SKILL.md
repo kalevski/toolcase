@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListCard, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusCard, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListCard, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusCard, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -28,6 +28,7 @@ After `register()` you can author markup directly:
 
 - [Layout](#layout)
   - [tc-basic-layout](#tc-basic-layout)
+  - [tc-dashboard-content](#tc-dashboard-content)
   - [tc-container](#tc-container)
   - [tc-row](#tc-row)
   - [tc-col](#tc-col)
@@ -174,6 +175,54 @@ None. `tc-basic-layout` is a purely presentational layout element.
 <tc-basic-layout>
     <p>Full-height main area, no brand header.</p>
 </tc-basic-layout>
+```
+
+---
+
+### tc-dashboard-content
+
+Scrollable main content area for the dashboard layout. A pure layout wrapper — no chrome, no elevation. Provides comfortable padding and `overflow-y: auto` for hosting cards, rows, and section headers inside a dashboard shell.
+
+**Tag:** `tc-dashboard-content`
+
+**Attributes**
+
+None. `tc-dashboard-content` is a purely structural layout element with no configurable attributes.
+
+**JS Properties**
+
+None.
+
+**Events**
+
+None. `tc-dashboard-content` is a purely presentational layout element.
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | Main dashboard content (cards, rows, headers). Rendered inside `<div class="tc-dashboard-content-inner">` which sits inside `<main class="tc-dashboard-content">`. |
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-dashboard-content-bg` | `var(--tc-surface)` | Background of the scroll region. |
+| `--bs-dashboard-content-color` | `var(--tc-text)` | Text color of the content area. |
+| `--bs-dashboard-content-padding` | `1.5rem` | Inner padding applied to the content container. |
+| `--bs-dashboard-content-max-width` | `none` | Optional max-width cap for the inner container. |
+
+```html
+<!-- Basic usage -->
+<tc-dashboard-content>
+    <h2>Overview</h2>
+    <tc-basic-card title="Revenue" value="$12,400"></tc-basic-card>
+</tc-dashboard-content>
+
+<!-- Constrained width -->
+<tc-dashboard-content style="--bs-dashboard-content-max-width: 960px">
+    <p>Content centred within 960px.</p>
+</tc-dashboard-content>
 ```
 
 ---

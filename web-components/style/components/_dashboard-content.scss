@@ -1,0 +1,28 @@
+// tc-dashboard-content — scrollable main content area for the dashboard layout.
+// Pure layout surface: slate page background, comfortable padding, no shadow or border-radius.
+// Drive every cosmetic value through --bs-dashboard-content-* custom properties.
+
+tc-dashboard-content {
+    --bs-dashboard-content-bg: var(--tc-surface);
+    --bs-dashboard-content-color: var(--tc-text);
+    --bs-dashboard-content-padding: 1.5rem;
+    --bs-dashboard-content-max-width: none;
+}
+
+.tc-dashboard-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    background: var(--bs-dashboard-content-bg);
+    color: var(--bs-dashboard-content-color);
+    border-radius: 0;
+    min-height: 0;
+}
+
+.tc-dashboard-content-inner {
+    flex: 1 1 auto;
+    padding: var(--bs-dashboard-content-padding);
+    max-width: var(--bs-dashboard-content-max-width);
+    width: 100%;
+}
