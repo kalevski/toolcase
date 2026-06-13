@@ -104,6 +104,7 @@ import { MaintainerCard } from './MaintainerCard'
 import { MetricTile } from './MetricTile'
 import { MetricGrid } from './MetricGrid'
 import { MigrationGuide } from './MigrationGuide'
+import { PageFooter } from './PageFooter'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -217,4 +218,5 @@ export function register(): void {
     customElements.define('tc-metric-tile', MetricTile)
     customElements.define('tc-metric-grid', MetricGrid)
     customElements.define('tc-migration-guide', MigrationGuide)
+    customElements.define('tc-page-footer', PageFooter)
 }
