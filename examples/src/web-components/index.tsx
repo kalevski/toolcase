@@ -95,6 +95,7 @@ import LogoCloudDemo from './LogoCloudDemo'
 import MaintainerCardDemo from './MaintainerCardDemo'
 import MetricTileDemo from './MetricTileDemo'
 import MetricGridDemo from './MetricGridDemo'
+import MigrationGuideDemo from './MigrationGuideDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -210,4 +211,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'maintainer-card', category: 'Components', element: <MaintainerCardDemo /> },
     { key: 'metric-tile', category: 'Components', element: <MetricTileDemo /> },
     { key: 'metric-grid', category: 'Content', element: <MetricGridDemo /> },
+    { key: 'migration-guide', category: 'Content', element: <MigrationGuideDemo /> },
 ]
