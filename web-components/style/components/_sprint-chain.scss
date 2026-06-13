@@ -1,0 +1,201 @@
+// tc-sprint-chain — horizontal timeline/chain visualization of sprint items.
+// States: past (filled slate node, muted label), now (accent filled, white dot, bold label),
+// future (hollow node with border ring, muted label).
+// Connectors are hairline pseudo-element lines drawn between nodes.
+// Sharp corners everywhere; the node marker is the ONLY sanctioned border-radius: 50%.
+
+tc-sprint-chain {
+    // Node marker geometry
+    --bs-sprint-chain-node-size: 0.875rem;
+
+    // Connector hairline
+    --bs-sprint-chain-connector-color: var(--tc-border);
+
+    // Label typography
+    --bs-sprint-chain-label-font-size: 0.8125rem;
+    --bs-sprint-chain-label-font-weight: 400;
+    --bs-sprint-chain-label-color: var(--tc-text-muted);
+
+    // Tag micro-label
+    --bs-sprint-chain-tag-font-size: 0.6875rem;
+    --bs-sprint-chain-tag-font-family: var(--tc-font-mono, monospace);
+    --bs-sprint-chain-tag-color: var(--tc-text-faint);
+
+    // Header
+    --bs-sprint-chain-header-font-size: 0.8125rem;
+    --bs-sprint-chain-header-color: var(--tc-text);
+    --bs-sprint-chain-header-margin-bottom: 0.75rem;
+
+    // Cell padding
+    --bs-sprint-chain-item-padding-x: 0.25rem;
+    --bs-sprint-chain-item-padding-y: 0.5rem;
+
+    // State: past — filled slate node
+    --bs-sprint-chain-past-node-bg: var(--tc-border-strong);
+    --bs-sprint-chain-past-node-border: var(--tc-border-strong);
+    --bs-sprint-chain-past-label-color: var(--tc-text-faint);
+
+    // State: now — accent filled node
+    --bs-sprint-chain-now-node-bg: var(--tc-app-accent);
+    --bs-sprint-chain-now-node-border: var(--tc-app-accent);
+    --bs-sprint-chain-now-label-color: var(--tc-text);
+    --bs-sprint-chain-now-label-font-weight: 600;
+
+    // State: future — hollow node (border ring, surface center)
+    --bs-sprint-chain-future-node-bg: var(--tc-surface);
+    --bs-sprint-chain-future-node-border: var(--tc-border);
+    --bs-sprint-chain-future-label-color: var(--tc-text-muted);
+}
+
+// Outer wrapper — block, no visual chrome
+.tc-sprint-chain {
+    display: block;
+}
+
+// Optional header row: space-between flex
+.tc-sprint-chain-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--bs-sprint-chain-header-margin-bottom);
+    font-size: var(--bs-sprint-chain-header-font-size);
+    color: var(--bs-sprint-chain-header-color);
+}
+
+.tc-sprint-chain-header-start,
+.tc-sprint-chain-header-end {
+    display: flex;
+    align-items: center;
+}
+
+// Grid of chain items — columns driven by --cols custom property
+.tc-sprint-chain-items {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 1), 1fr);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+}
+
+// Individual chain item — centred column layout: node → label → optional tag
+.tc-sprint-chain-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--bs-sprint-chain-item-padding-y) var(--bs-sprint-chain-item-padding-x);
+    gap: 0.375rem;
+    text-align: center;
+
+    // Left connector half — from left edge to node centre
+    &::before {
+        content: '';
+        position: absolute;
+        top: calc(var(--bs-sprint-chain-item-padding-y) + var(--bs-sprint-chain-node-size) / 2);
+        left: 0;
+        width: calc(50% - var(--bs-sprint-chain-node-size) / 2);
+        height: 1px;
+        background: var(--bs-sprint-chain-connector-color);
+        border-radius: 0;
+    }
+
+    // Right connector half — from node centre to right edge
+    &::after {
+        content: '';
+        position: absolute;
+        top: calc(var(--bs-sprint-chain-item-padding-y) + var(--bs-sprint-chain-node-size) / 2);
+        right: 0;
+        width: calc(50% - var(--bs-sprint-chain-node-size) / 2);
+        height: 1px;
+        background: var(--bs-sprint-chain-connector-color);
+        border-radius: 0;
+    }
+
+    // No left connector on first item
+    &:first-child::before {
+        content: none;
+    }
+
+    // No right connector on last item
+    &:last-child::after {
+        content: none;
+    }
+}
+
+// Node marker — small circle (the ONE sanctioned border-radius: 50%)
+.tc-sprint-chain-node {
+    display: block;
+    flex-shrink: 0;
+    width: var(--bs-sprint-chain-node-size);
+    height: var(--bs-sprint-chain-node-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--bs-sprint-chain-future-node-border);
+    background: var(--bs-sprint-chain-future-node-bg);
+    position: relative;
+    z-index: 1;
+}
+
+// Sprint label
+.tc-sprint-chain-label {
+    font-size: var(--bs-sprint-chain-label-font-size);
+    font-weight: var(--bs-sprint-chain-label-font-weight);
+    color: var(--bs-sprint-chain-label-color);
+    line-height: 1.35;
+    border-radius: 0;
+}
+
+// Tag: small monospace micro-label
+.tc-sprint-chain-tag {
+    font-size: var(--bs-sprint-chain-tag-font-size);
+    font-family: var(--bs-sprint-chain-tag-font-family);
+    color: var(--bs-sprint-chain-tag-color);
+    line-height: 1.2;
+    border-radius: 0;
+}
+
+// ── State: past ───────────────────────────────────────────────────────────────
+.tc-sprint-chain-item-past {
+    .tc-sprint-chain-node {
+        background: var(--bs-sprint-chain-past-node-bg);
+        border-color: var(--bs-sprint-chain-past-node-border);
+    }
+
+    .tc-sprint-chain-label {
+        color: var(--bs-sprint-chain-past-label-color);
+    }
+}
+
+// ── State: now (current) ──────────────────────────────────────────────────────
+.tc-sprint-chain-item-now {
+    .tc-sprint-chain-node {
+        background: var(--bs-sprint-chain-now-node-bg);
+        border-color: var(--bs-sprint-chain-now-node-border);
+    }
+
+    .tc-sprint-chain-label {
+        color: var(--bs-sprint-chain-now-label-color);
+        font-weight: var(--bs-sprint-chain-now-label-font-weight);
+    }
+}
+
+// ── State: future ─────────────────────────────────────────────────────────────
+.tc-sprint-chain-item-future {
+    .tc-sprint-chain-node {
+        background: var(--bs-sprint-chain-future-node-bg);
+        border-color: var(--bs-sprint-chain-future-node-border);
+    }
+
+    .tc-sprint-chain-label {
+        color: var(--bs-sprint-chain-future-label-color);
+    }
+}
+
+// Reduced motion: no transition or animation overrides needed (this component
+// has no animated states), but honour the preference declaratively.
+@media (prefers-reduced-motion: reduce) {
+    .tc-sprint-chain-node {
+        transition: none;
+    }
+}

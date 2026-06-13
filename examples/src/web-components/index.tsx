@@ -110,6 +110,7 @@ import RichPageHeaderDemo from './RichPageHeaderDemo'
 import ScoringRulesDemo from './ScoringRulesDemo'
 import SectionCardDemo from './SectionCardDemo'
 import SponsorWallDemo from './SponsorWallDemo'
+import SprintChainDemo from './SprintChainDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -240,4 +241,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'rich-page-header', category: 'Components', element: <RichPageHeaderDemo /> },
     { key: 'scoring-rules', category: 'Content', element: <ScoringRulesDemo /> },
     { key: 'section-card', category: 'Components', element: <SectionCardDemo /> },
+    { key: 'sprint-chain', category: 'Content', element: <SprintChainDemo /> },
 ]
