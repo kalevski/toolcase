@@ -50,6 +50,7 @@ import { Divider } from './Divider'
 import { Form } from './Form'
 import { Heading } from './Heading'
 import { HelperText } from './HelperText'
+import { Icon } from './Icon'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -109,4 +110,5 @@ export function register(): void {
     customElements.define('tc-divider', Divider)
     customElements.define('tc-heading', Heading)
     customElements.define('tc-helper-text', HelperText)
+    customElements.define('tc-icon', Icon)
 }

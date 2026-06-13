@@ -159,6 +159,10 @@ tc-input-group-text {
     display: inline-block;
 }
 
+tc-icon {
+    display: inline-flex;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

@@ -45,6 +45,7 @@ After `register()` you can author markup directly:
   - [tc-divider](#tc-divider)
   - [tc-dropdown](#tc-dropdown)
   - [tc-heading](#tc-heading)
+  - [tc-icon](#tc-icon)
   - [tc-list-group](#tc-list-group)
   - [tc-placeholder](#tc-placeholder)
   - [tc-progress](#tc-progress)
@@ -1274,4 +1275,69 @@ Labels (both `label` attribute and slotted children) are suppressed in vertical 
     <tc-divider vertical></tc-divider>
     <span>Right</span>
 </div>
+```
+
+---
+
+## tc-icon
+
+Inline lucide SVG icon glyph. Inherits color from surrounding text by default; accessibility attributes (`label`, `decorative`) follow WAI-ARIA pattern for icon-only controls.
+
+**Tag:** `tc-icon`
+
+> **Icon set note:** The `set` attribute is accepted for API parity with the `@toolcase/react-components` `Icon` component, which supports `bi` (Bootstrap Icons) and `tc` (ToolCase) sets. In `@toolcase/web-components` all names are resolved through the [lucide-static](https://www.npmjs.com/package/lucide-static) map regardless of `set` value.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | string | — | **Required.** Lucide icon name in PascalCase (e.g. `"Star"`, `"Trash2"`) |
+| `set` | `bi\|tc` | `bi` | Icon set identifier — accepted for parity, always resolves via lucide-static |
+| `as` | string | `span` | HTML tag name for the wrapper element |
+| `size` | string | `1em` | SVG width and height. Plain numbers become `px` (e.g. `"24"` → `24px`); strings with units are passed through (e.g. `"1.5rem"`) |
+| `color` | string | — | Icon color. Any valid CSS color value. When absent, inherits `currentColor` from the surrounding text |
+| `label` | string | — | Accessible name. When set, the wrapper receives `role="img"` and `aria-label`. Ignored when `decorative` is present |
+| `decorative` | boolean | false | Marks the icon as presentational: adds `aria-hidden="true"` to the wrapper and omits any `aria-label` |
+
+**Events**
+
+None. `tc-icon` is a purely presentational element.
+
+**Slots**
+
+None. The icon SVG is rendered inline; there is no slot for child content.
+
+**Accessibility**
+
+- When `label` is set (and `decorative` is absent): wrapper gets `role="img"` and `aria-label="{label}"`.
+- When `decorative` is set: wrapper gets `aria-hidden="true"` — the icon is invisible to screen readers.
+- When neither is set: no ARIA attributes are added — the icon inherits context from its surroundings.
+- Color contrast is always caller-supplied; the component inherits `currentColor`.
+- `prefers-reduced-motion` is honoured globally by the stylesheet.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-icon-size` | `1em` | Width and height of the icon box (overridden by `size` attribute) |
+| `--bs-icon-color` | `currentColor` | Stroke color (overridden by `color` attribute) |
+
+```html
+<!-- Basic icon -->
+<tc-icon name="Star"></tc-icon>
+
+<!-- Sized icon -->
+<tc-icon name="Heart" size="24"></tc-icon>
+
+<!-- Colored icon -->
+<tc-icon name="AlertTriangle" size="20" color="var(--tc-warning)"></tc-icon>
+
+<!-- Accessible labelled icon -->
+<tc-icon name="Bell" size="20" label="Notifications"></tc-icon>
+
+<!-- Decorative icon (hidden from screen readers) -->
+<tc-icon name="Sparkles" size="20" decorative></tc-icon>
+
+<!-- Custom wrapper tag -->
+<tc-icon name="Circle" as="div" size="32"></tc-icon>
 ```

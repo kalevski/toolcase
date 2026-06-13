@@ -42,6 +42,7 @@ import FormDemo from './FormDemo'
 import DividerDemo from './DividerDemo'
 import HeadingDemo from './HeadingDemo'
 import HelperTextDemo from './HelperTextDemo'
+import IconDemo from './IconDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -104,4 +105,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'divider', category: 'Components', element: <DividerDemo /> },
     { key: 'heading', category: 'Content', element: <HeadingDemo /> },
     { key: 'helper-text', category: 'Forms', element: <HelperTextDemo /> },
+    { key: 'icon', category: 'Content', element: <IconDemo /> },
 ]
