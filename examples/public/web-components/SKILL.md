@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, StatusDot, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -70,6 +70,7 @@ After `register()` you can author markup directly:
   - [tc-callout-quote](#tc-callout-quote)
   - [tc-chart-container](#tc-chart-container)
   - [tc-sparkline](#tc-sparkline)
+  - [tc-trend-indicator](#tc-trend-indicator)
   - [tc-text](#tc-text)
   - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
@@ -2975,4 +2976,72 @@ The inner root div carries `role="group"` and `aria-label` tied to the `title` a
 <script>
     document.getElementById('chart-empty').emptySlot = '<span>No records for the selected date range.</span>'
 </script>
+```
+
+---
+
+### tc-trend-indicator
+
+Trend badge with a directional arrow icon and formatted value. Direction is determined by the explicit `direction` attribute or inferred from the numeric sign of `value`. Three sizes scale icon and text together. Purely presentational — no interaction, no events.
+
+**Tag:** `tc-trend-indicator`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | string | `""` | The displayed value text (e.g. `"+12%"`, `"-8.3"`, `"0"`). When `direction` is absent and the value parses to a number, direction is inferred from its sign. |
+| `direction` | `'up' \| 'down' \| 'neutral'` | inferred | Explicit direction. Overrides sign inference. When absent, positive numbers → `up`, negative → `down`, zero or non-numeric → `neutral`. |
+| `size` | `'small' \| 'default' \| 'large'` | `'default'` | Scale variant — adjusts icon size, font size, and gap together. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `string \| null` | Reflects the `value` attribute. |
+| `direction` | `TrendDirection \| null` | Reflects the `direction` attribute. `null` when the attribute is absent (direction is then inferred at render time). |
+| `size` | `TrendSize` | Reflects the `size` attribute. Defaults to `'default'` when the attribute is absent or invalid. |
+
+**Events**
+
+None. `tc-trend-indicator` is purely presentational.
+
+**Slots**
+
+None. All content is generated from attributes.
+
+**Accessibility**
+
+The host element receives an auto-generated `aria-label` combining direction and value (e.g. `"trending up +12%"`). The icon SVG carries `aria-hidden="true"` — the label text conveys meaning without relying on color alone.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-trend-indicator-color` | direction-mapped | Text and icon color. `up` → `--tc-success`, `down` → `--tc-danger`, `neutral` → `--tc-text-muted`. |
+| `--bs-trend-indicator-icon-size` | `1rem` | Icon width and height (scales with size variant). |
+| `--bs-trend-indicator-font-size` | `0.8125rem` | Value text font size (scales with size variant). |
+| `--bs-trend-indicator-gap` | `0.25rem` | Gap between icon and value text. |
+
+```html
+<!-- Explicit direction -->
+<tc-trend-indicator value="+12%" direction="up"></tc-trend-indicator>
+<tc-trend-indicator value="-8%" direction="down"></tc-trend-indicator>
+<tc-trend-indicator value="0%" direction="neutral"></tc-trend-indicator>
+
+<!-- Sign-inferred direction (no direction attribute) -->
+<tc-trend-indicator value="42"></tc-trend-indicator>
+<tc-trend-indicator value="-17"></tc-trend-indicator>
+<tc-trend-indicator value="0"></tc-trend-indicator>
+
+<!-- Three sizes -->
+<tc-trend-indicator value="+5%" direction="up" size="small"></tc-trend-indicator>
+<tc-trend-indicator value="+5%" direction="up" size="default"></tc-trend-indicator>
+<tc-trend-indicator value="+5%" direction="up" size="large"></tc-trend-indicator>
+
+<!-- Inline within a metric row -->
+<p>
+    Revenue <strong>$42,180</strong>
+    <tc-trend-indicator value="+12.4%" direction="up" size="small"></tc-trend-indicator>
+</p>
 ```

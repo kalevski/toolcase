@@ -75,6 +75,7 @@ import { BundleBar } from './BundleBar'
 import { CalloutQuote } from './CalloutQuote'
 import { ChartContainer } from './ChartContainer'
 import { Sparkline } from './Sparkline'
+import { TrendIndicator } from './TrendIndicator'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -159,4 +160,5 @@ export function register(): void {
     customElements.define('tc-callout-quote', CalloutQuote)
     customElements.define('tc-chart-container', ChartContainer)
     customElements.define('tc-sparkline', Sparkline)
+    customElements.define('tc-trend-indicator', TrendIndicator)
 }
