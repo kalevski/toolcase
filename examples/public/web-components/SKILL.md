@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Avatar, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Avatar, Badge, BadgeRow, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -38,6 +38,7 @@ After `register()` you can author markup directly:
   - [tc-alert](#tc-alert)
   - [tc-avatar](#tc-avatar)
   - [tc-badge](#tc-badge)
+  - [tc-badge-row](#tc-badge-row)
   - [tc-button](#tc-button)
   - [tc-button-group](#tc-button-group)
   - [tc-card](#tc-card)
@@ -455,6 +456,57 @@ Small count or label indicator.
 ```html
 <tc-badge variant="danger">4</tc-badge>
 <tc-badge variant="success" text="New"></tc-badge>
+```
+
+---
+
+### tc-badge-row
+
+Horizontal row of paired key/value chips. Sharp square corners, slate neutral default, JetBrains Mono value text. Set badges exclusively via the `badges` JS property.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `size` | `sm\|md` | `md` | Chip size — controls padding and font-size |
+
+**Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `badges` | `BadgeRowItem[]` | `[]` | Array of badge descriptors (see below) |
+
+**BadgeRowItem shape**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | `string` | Always-visible key text |
+| `value` | `string \| number` | Optional value segment (right chip) |
+| `variant` | `primary\|secondary\|success\|danger\|warning\|info\|light\|dark` | Status tint applied to the item |
+| `color` | `string` | Per-item accent color (any CSS color) applied via `--bs-badge-row-color` |
+
+**Events**
+
+None. `tc-badge-row` is a purely presentational component.
+
+**Slots**
+
+None.
+
+```html
+<tc-badge-row></tc-badge-row>
+
+<script>
+const row = document.querySelector('tc-badge-row')
+row.badges = [
+    { label: 'env', value: 'production' },
+    { label: 'status', value: 'healthy', variant: 'success' },
+    { label: 'team', value: 'frontend', color: '#6366f1' },
+]
+</script>
+
+<!-- sm size -->
+<tc-badge-row size="sm"></tc-badge-row>
 ```
 
 ---
