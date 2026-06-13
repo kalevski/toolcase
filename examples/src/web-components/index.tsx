@@ -100,6 +100,7 @@ import PageFooterDemo from './PageFooterDemo'
 import PhaseGridDemo from './PhaseGridDemo'
 import PinnedFeatureShowcaseDemo from './PinnedFeatureShowcaseDemo'
 import PipelineDemo from './PipelineDemo'
+import PluginGridDemo from './PluginGridDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -220,4 +221,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'phase-grid', category: 'Content', element: <PhaseGridDemo /> },
     { key: 'pinned-feature-showcase', category: 'Content', element: <PinnedFeatureShowcaseDemo /> },
     { key: 'pipeline', category: 'Components', element: <PipelineDemo /> },
+    { key: 'plugin-grid', category: 'Components', element: <PluginGridDemo /> },
 ]
