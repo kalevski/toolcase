@@ -109,6 +109,7 @@ import { PhaseGrid } from './PhaseGrid'
 import { PinnedFeatureShowcase } from './PinnedFeatureShowcase'
 import { Pipeline } from './Pipeline'
 import { PluginGrid } from './PluginGrid'
+import { PricingCard } from './PricingCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -227,4 +228,5 @@ export function register(): void {
     customElements.define('tc-pinned-feature-showcase', PinnedFeatureShowcase)
     customElements.define('tc-pipeline', Pipeline)
     customElements.define('tc-plugin-grid', PluginGrid)
+    customElements.define('tc-pricing-card', PricingCard)
 }
