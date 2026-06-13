@@ -47,6 +47,7 @@ After `register()` you can author markup directly:
   - [tc-heading](#tc-heading)
   - [tc-icon](#tc-icon)
   - [tc-kbd](#tc-kbd)
+  - [tc-link](#tc-link)
   - [tc-list-group](#tc-list-group)
   - [tc-placeholder](#tc-placeholder)
   - [tc-progress](#tc-progress)
@@ -1473,4 +1474,56 @@ None. `tc-kbd` is a purely presentational element.
 
 <!-- Extra class on wrapper -->
 <tc-kbd class-name="my-key">Space</tc-kbd>
+```
+
+---
+
+## tc-link
+
+Semantic anchor (`<a>`) with variant color, underline mode, and an optional external-link icon. Renders a real `<a>` element for correct document semantics.
+
+**Tag:** `tc-link`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `variant` | `primary\|secondary\|info\|success\|warning\|danger` | `primary` | Link color drawn from the status palette. `primary` uses the ink/app-accent tone |
+| `underline` | `always\|hover\|none` | `hover` | Text-decoration mode: always underlined, underline on hover/focus, or never |
+| `external` | boolean | false | Appends a lucide `external-link` icon, sets `target="_blank"` and `rel="noopener noreferrer"`, and adds a visually-hidden "(opens in new tab)" note |
+| `href` | string | `#` | The anchor `href` value |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| _(default)_ | Link label content. Preserved across re-renders as light-DOM children inside `.tc-link-content` |
+
+**Events**
+
+None. `tc-link` is a purely presentational element.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-link-color` | `var(--tc-app-accent)` | Link text color at rest |
+| `--bs-link-hover-color` | `var(--tc-app-accent-hover)` | Link text color on hover / focus |
+
+```html
+<!-- Default (primary, hover underline) -->
+<tc-link href="/docs">Read the docs</tc-link>
+
+<!-- Status variants -->
+<tc-link href="#" variant="success">Confirmed</tc-link>
+<tc-link href="#" variant="danger">Delete account</tc-link>
+
+<!-- Always underlined -->
+<tc-link href="#" underline="always">Terms of service</tc-link>
+
+<!-- Never underlined -->
+<tc-link href="#" underline="none">Clean link</tc-link>
+
+<!-- External link (new tab + icon + accessible note) -->
+<tc-link href="https://example.com" external>Visit example.com</tc-link>
 ```
