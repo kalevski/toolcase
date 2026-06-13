@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Avatar, Badge, BadgeRow, Brand, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Avatar, Badge, BadgeRow, Brand, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, PulseIndicator, SectionFlag, Skeleton, Spinner, Stamp, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -59,6 +59,7 @@ After `register()` you can author markup directly:
   - [tc-section-flag](#tc-section-flag)
   - [tc-skeleton](#tc-skeleton)
   - [tc-spinner](#tc-spinner)
+  - [tc-stamp](#tc-stamp)
   - [tc-text](#tc-text)
   - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
@@ -2110,5 +2111,79 @@ None. `tc-visually-hidden` is a purely presentational accessibility helper.
 <!-- Block live-region description (as="div") -->
 <div role="status" aria-live="polite">
     <tc-visually-hidden as="div">3 items loaded.</tc-visually-hidden>
+</div>
+```
+
+---
+
+### tc-stamp
+
+Decorative stamp badge pinned to a corner of a relatively-positioned ancestor element. Uses the status tint palette (soft background + dark emphasis text). Sharp rectangular corners; mono uppercase micro-label type. Non-interactive — no hover/active states or events.
+
+**Tag:** `tc-stamp`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | — | Stamp text. When present, renders as escaped text inside `.tc-stamp-content`. When absent, slotted children are used instead |
+| `color` | `primary\|secondary\|success\|danger\|warning\|info` | `primary` | Color variant. Drives the soft bg tint and dark emphasis text from the status palette |
+| `position` | `top-left\|top-right\|bottom-left\|bottom-right` | `top-right` | Corner of the nearest relatively-positioned ancestor to pin the stamp to |
+
+**JS Properties**
+
+All three attributes are reflected as JS properties with the same names (`label`, `color`, `position`).
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| _(default)_ | Stamp content when the `label` attribute is absent. Preserved across re-renders inside `.tc-stamp-content` |
+
+**Events**
+
+None. `tc-stamp` is a purely presentational decorative element.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-stamp-padding-x` | `0.4rem` | Horizontal padding |
+| `--bs-stamp-padding-y` | `0.25rem` | Vertical padding |
+| `--bs-stamp-font-size` | `0.6875rem` | Label font size (11px) |
+| `--bs-stamp-font-weight` | `600` | Label font weight |
+| `--bs-stamp-letter-spacing` | `0.08em` | Uppercase micro-label letter spacing |
+| `--bs-stamp-border-width` | `1px` | Hairline border width |
+| `--bs-stamp-corner-offset` | `0.75rem` | Distance from the anchor corner |
+| `--bs-stamp-color` | _(set per color variant)_ | Text and border color |
+| `--bs-stamp-bg` | _(set per color variant)_ | Background fill color |
+
+```html
+<!-- Status colors (position defaults to top-right) -->
+<div style="position: relative; padding: 2rem;">
+    Card content
+    <tc-stamp color="success" label="New"></tc-stamp>
+</div>
+
+<div style="position: relative; padding: 2rem;">
+    <tc-stamp color="danger" label="Sale"></tc-stamp>
+</div>
+
+<div style="position: relative; padding: 2rem;">
+    <tc-stamp color="warning" label="Beta"></tc-stamp>
+</div>
+
+<!-- Corner positions -->
+<div style="position: relative; padding: 2rem;">
+    <tc-stamp color="info" position="top-left" label="New"></tc-stamp>
+</div>
+
+<div style="position: relative; padding: 2rem;">
+    <tc-stamp color="success" position="bottom-right" label="Verified"></tc-stamp>
+</div>
+
+<!-- Slotted children (label attribute absent) -->
+<div style="position: relative; padding: 2rem;">
+    <tc-stamp color="danger" position="top-right"><strong>Sale</strong></tc-stamp>
 </div>
 ```

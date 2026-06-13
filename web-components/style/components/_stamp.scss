@@ -1,0 +1,79 @@
+// tc-stamp — decorative stamp badge pinned to a corner of a relatively-positioned
+// ancestor. All cosmetics flow through --bs-stamp-* custom properties.
+// Uses the status tint palette (soft bg + dark emphasis text) for color variants.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+tc-stamp {
+    --bs-stamp-padding-x: 0.4rem;
+    --bs-stamp-padding-y: 0.25rem;
+    --bs-stamp-font-size: 0.6875rem;
+    --bs-stamp-font-weight: 600;
+    --bs-stamp-letter-spacing: 0.08em;
+    --bs-stamp-border-width: 1px;
+    --bs-stamp-corner-offset: 0.75rem;
+    --bs-stamp-color: var(--tc-app-accent);
+    --bs-stamp-bg: var(--tc-surface-muted);
+}
+
+.tc-stamp {
+    position: absolute;
+    display: inline-block;
+    padding: var(--bs-stamp-padding-y) var(--bs-stamp-padding-x);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-stamp-font-size);
+    font-weight: var(--bs-stamp-font-weight);
+    letter-spacing: var(--bs-stamp-letter-spacing);
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--bs-stamp-color);
+    background-color: var(--bs-stamp-bg);
+    border: var(--bs-stamp-border-width) solid currentcolor;
+    border-radius: 0;
+}
+
+// Color variants — soft bg tint + dark emphasis text from the status palette
+@each $name in ('primary', 'secondary', 'success', 'danger', 'warning', 'info') {
+    .tc-stamp-#{$name} {
+        --bs-stamp-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-stamp-bg: #{map.get($theme-colors-soft, $name)};
+    }
+}
+
+// Corner-position variants
+.tc-stamp-top-right {
+    top: var(--bs-stamp-corner-offset);
+    right: var(--bs-stamp-corner-offset);
+    bottom: auto;
+    left: auto;
+}
+
+.tc-stamp-top-left {
+    top: var(--bs-stamp-corner-offset);
+    left: var(--bs-stamp-corner-offset);
+    bottom: auto;
+    right: auto;
+}
+
+.tc-stamp-bottom-right {
+    bottom: var(--bs-stamp-corner-offset);
+    right: var(--bs-stamp-corner-offset);
+    top: auto;
+    left: auto;
+}
+
+.tc-stamp-bottom-left {
+    bottom: var(--bs-stamp-corner-offset);
+    left: var(--bs-stamp-corner-offset);
+    top: auto;
+    right: auto;
+}
+
+// prefers-reduced-motion guard — no transitions currently; block reserved for theming
+@media (prefers-reduced-motion: reduce) {
+    .tc-stamp {
+        transition: none;
+    }
+}

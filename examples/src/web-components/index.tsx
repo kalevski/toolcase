@@ -56,6 +56,7 @@ import PulseIndicatorDemo from './PulseIndicatorDemo'
 import SectionFlagDemo from './SectionFlagDemo'
 import SkeletonDemo from './SkeletonDemo'
 import SocialLinksDemo from './SocialLinksDemo'
+import StampDemo from './StampDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -132,4 +133,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'section-flag', category: 'Content', element: <SectionFlagDemo /> },
     { key: 'skeleton', category: 'Components', element: <SkeletonDemo /> },
     { key: 'social-links', category: 'Navigation', element: <SocialLinksDemo /> },
+    { key: 'stamp', category: 'Content', element: <StampDemo /> },
 ]
