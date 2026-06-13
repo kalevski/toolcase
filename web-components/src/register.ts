@@ -71,6 +71,7 @@ import { AssetRow } from './AssetRow'
 import { AssetRowList } from './AssetRowList'
 import { BasicLayout } from './BasicLayout'
 import { BriefCard } from './BriefCard'
+import { BundleBar } from './BundleBar'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -151,4 +152,5 @@ export function register(): void {
     customElements.define('tc-asset-row-list', AssetRowList)
     customElements.define('tc-basic-layout', BasicLayout)
     customElements.define('tc-brief-card', BriefCard)
+    customElements.define('tc-bundle-bar', BundleBar)
 }

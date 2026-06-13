@@ -63,6 +63,7 @@ import AssetRowDemo from './AssetRowDemo'
 import AssetRowListDemo from './AssetRowListDemo'
 import BasicLayoutDemo from './BasicLayoutDemo'
 import BriefCardDemo from './BriefCardDemo'
+import BundleBarDemo from './BundleBarDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -146,4 +147,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'asset-row', category: 'Components', element: <AssetRowDemo /> },
     { key: 'asset-row-list', category: 'Components', element: <AssetRowListDemo /> },
     { key: 'brief-card', category: 'Content', element: <BriefCardDemo /> },
+    { key: 'bundle-bar', category: 'Content', element: <BundleBarDemo /> },
 ]

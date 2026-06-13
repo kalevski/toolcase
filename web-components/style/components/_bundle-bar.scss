@@ -1,0 +1,135 @@
+// tc-bundle-bar — segmented progress bar for build/bundle visualisation.
+// Optional header (name left, meta mono right), a hairline-separated segment track,
+// and an optional row of chip labels.
+// All cosmetics flow through --bs-bundle-bar-* custom properties backed by --tc-* tokens.
+// Sharp corners throughout; flat surface; slate neutrals; filled segments use --tc-app-accent.
+
+@use '../foundation/tokens' as *;
+
+tc-bundle-bar {
+    --bs-bundle-bar-segment-bg: var(--tc-surface-muted);
+    --bs-bundle-bar-segment-filled-bg: var(--tc-app-accent);
+    --bs-bundle-bar-segment-height: 0.5rem;
+    --bs-bundle-bar-segment-gap: 1px;
+    --bs-bundle-bar-name-color: var(--tc-text);
+    --bs-bundle-bar-meta-color: var(--tc-text-muted);
+    --bs-bundle-bar-chip-bg: var(--tc-surface-muted);
+    --bs-bundle-bar-chip-border-color: var(--tc-border);
+    --bs-bundle-bar-chip-text-color: var(--tc-text);
+    --bs-bundle-bar-chip-font-size: 0.72rem;
+}
+
+.tc-bundle-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    width: 100%;
+}
+
+// Header row: name (left) + meta (right, mono, muted).
+// Hidden via :has when neither child has visible content.
+.tc-bundle-bar__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    // Collapse when both name and meta are empty (no attribute, no slot content)
+    &:not(:has(*:not(:empty))) {
+        display: none;
+    }
+}
+
+.tc-bundle-bar__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bs-bundle-bar-name-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:empty {
+        display: none;
+    }
+}
+
+.tc-bundle-bar__meta {
+    flex-shrink: 0;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--bs-bundle-bar-meta-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Track: flex row of segment cells with hairline gaps (structure, not boxes)
+.tc-bundle-bar__track {
+    display: flex;
+    gap: var(--bs-bundle-bar-segment-gap);
+    height: var(--bs-bundle-bar-segment-height);
+    width: 100%;
+}
+
+.tc-bundle-bar__segment {
+    flex: 1 1 0;
+    height: 100%;
+    background-color: var(--bs-bundle-bar-segment-bg);
+    border-radius: 0;
+    transition: background-color var(--tc-transition-fast);
+
+    &.is-filled {
+        background-color: var(--bs-bundle-bar-segment-filled-bg);
+    }
+}
+
+// Chips row: small slate mono badges
+.tc-bundle-bar__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.tc-bundle-bar__chip {
+    // Per-chip accent; overridden by inline style when chip.color is set
+    --bs-bundle-bar-chip-accent: var(--bs-bundle-bar-chip-border-color);
+
+    display: inline-flex;
+    align-items: stretch;
+    border: 1px solid var(--bs-bundle-bar-chip-accent);
+    border-radius: 0;
+    overflow: hidden;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-bundle-bar-chip-font-size);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.tc-bundle-bar__chip-label {
+    display: flex;
+    align-items: center;
+    padding: 0.2rem 0.45rem;
+    background: var(--bs-bundle-bar-chip-bg);
+    color: var(--bs-bundle-bar-chip-text-color);
+}
+
+.tc-bundle-bar__chip-value {
+    display: flex;
+    align-items: center;
+    padding: 0.2rem 0.45rem;
+    background: var(--bs-bundle-bar-chip-accent);
+    color: var(--tc-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-bundle-bar__segment {
+        transition: none;
+    }
+}
