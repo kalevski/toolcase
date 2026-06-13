@@ -114,6 +114,7 @@ import { QueuedFile } from './QueuedFile'
 import { QuickStart } from './QuickStart'
 import { RankCell } from './RankCell'
 import { RichPageHeader } from './RichPageHeader'
+import { ScoringRules } from './ScoringRules'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -237,4 +238,5 @@ export function register(): void {
     customElements.define('tc-quick-start', QuickStart)
     customElements.define('tc-rank-cell', RankCell)
     customElements.define('tc-rich-page-header', RichPageHeader)
+    customElements.define('tc-scoring-rules', ScoringRules)
 }

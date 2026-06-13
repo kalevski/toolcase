@@ -1,0 +1,129 @@
+// tc-scoring-rules — presentational list of scoring rules with optional icons,
+// titles, descriptions, point values, and optional accent color markers.
+// All cosmetics flow through --bs-scoring-rules-* custom properties backed by --tc-* tokens.
+// Sharp corners throughout (border-radius: 0); slate neutrals; 1px hairline row separators.
+// Accent values (pink/yellow/cyan/green/red) appear only as a left 3px bar + icon tint.
+
+@use '../foundation/tokens' as *;
+
+tc-scoring-rules {
+    --bs-scoring-rules-row-border-color: var(--tc-border);
+    --bs-scoring-rules-title-color: var(--tc-text);
+    --bs-scoring-rules-desc-color: var(--tc-text-muted);
+    --bs-scoring-rules-points-color: var(--tc-text);
+    --bs-scoring-rules-icon-size: 1.125rem;
+    --bs-scoring-rules-row-padding-y: 0.75rem;
+    --bs-scoring-rules-row-padding-x: 1rem;
+    --bs-scoring-rules-accent-bar-width: 3px;
+    // Accent palette — the only place decorative color appears
+    --bs-scoring-rules-accent-pink: #ec4899;
+    --bs-scoring-rules-accent-yellow: var(--tc-warning);
+    --bs-scoring-rules-accent-cyan: var(--tc-accent-fg);
+    --bs-scoring-rules-accent-green: var(--tc-success);
+    --bs-scoring-rules-accent-red: var(--tc-danger);
+}
+
+.tc-scoring-rules {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.tc-scoring-rule {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: var(--bs-scoring-rules-row-padding-y) var(--bs-scoring-rules-row-padding-x);
+    border-radius: 0;
+    position: relative;
+
+    & + & {
+        border-top: 1px solid var(--bs-scoring-rules-row-border-color);
+    }
+
+    // Accent left bar (decorative, positional via ::before)
+    &.tc-accent-pink,
+    &.tc-accent-yellow,
+    &.tc-accent-cyan,
+    &.tc-accent-green,
+    &.tc-accent-red {
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--bs-scoring-rules-accent-bar-width);
+            border-radius: 0;
+            background-color: var(--bs-scoring-rule-accent-color);
+        }
+
+        .tc-scoring-rule-icon {
+            color: var(--bs-scoring-rule-accent-color);
+        }
+    }
+
+    &.tc-accent-pink  { --bs-scoring-rule-accent-color: var(--bs-scoring-rules-accent-pink); }
+    &.tc-accent-yellow { --bs-scoring-rule-accent-color: var(--bs-scoring-rules-accent-yellow); }
+    &.tc-accent-cyan  { --bs-scoring-rule-accent-color: var(--bs-scoring-rules-accent-cyan); }
+    &.tc-accent-green { --bs-scoring-rule-accent-color: var(--bs-scoring-rules-accent-green); }
+    &.tc-accent-red   { --bs-scoring-rule-accent-color: var(--bs-scoring-rules-accent-red); }
+}
+
+// Leading icon box — decorative, aria-hidden on the element
+.tc-scoring-rule-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--tc-text-muted); // default; overridden to accent color when accent is set
+
+    svg {
+        width: var(--bs-scoring-rules-icon-size);
+        height: var(--bs-scoring-rules-icon-size);
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+// Text block
+.tc-scoring-rule-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-scoring-rule-title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bs-scoring-rules-title-color);
+}
+
+.tc-scoring-rule-desc {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--bs-scoring-rules-desc-color);
+}
+
+// Points cell — mono emphasis, right-aligned
+.tc-scoring-rule-points {
+    flex-shrink: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-scoring-rules-points-color);
+    white-space: nowrap;
+    text-align: right;
+}
+
+.tc-scoring-rule-suffix {
+    font-size: 0.725rem;
+    font-weight: 400;
+    color: var(--tc-text-muted);
+}
