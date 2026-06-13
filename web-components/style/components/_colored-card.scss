@@ -1,0 +1,145 @@
+// tc-colored-card — dashboard card with a caller-supplied color tinting the icon chip.
+// The chip is the only element that uses --bs-colored-card-accent; all other chrome
+// stays slate. Every cosmetic value flows through --bs-colored-card-* custom properties.
+//
+// Design exception: the icon chip deliberately uses a caller-supplied accent color for
+// the glyph and a 12% soft tint of that color for the chip background. This is not
+// decoration — the color carries information about the metric category.
+
+@use '../foundation/tokens' as *;
+
+tc-colored-card {
+    // Default accent falls back to slate-muted; callers override via the `color` attribute.
+    --bs-colored-card-accent: var(--tc-text-muted);
+    --bs-colored-card-bg: var(--tc-surface);
+    --bs-colored-card-border-color: var(--tc-border);
+    --bs-colored-card-shadow: var(--tc-shadow-sm);
+    --bs-colored-card-padding-y: 1rem;
+    --bs-colored-card-padding-x: 1.25rem;
+    --bs-colored-card-gap: 0.875rem;
+    --bs-colored-card-icon-size: 2.75rem;
+    --bs-colored-card-icon-svg-size: 1.25rem;
+    --bs-colored-card-value-color: var(--tc-text);
+    --bs-colored-card-value-font-size: 1.375rem;
+    --bs-colored-card-text-color: var(--tc-text-muted);
+    --bs-colored-card-text-font-size: 0.8125rem;
+    --bs-colored-card-skeleton-bg: var(--tc-surface-muted);
+    --bs-colored-card-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// Wire Bootstrap card tokens so .card inherits our component tokens correctly.
+.tc-colored-card {
+    --bs-card-bg: var(--bs-colored-card-bg);
+    --bs-card-border-color: var(--bs-colored-card-border-color);
+    --bs-card-box-shadow: var(--bs-colored-card-shadow);
+    --bs-card-border-radius: 0;
+    --bs-card-spacer-y: var(--bs-colored-card-padding-y);
+    --bs-card-spacer-x: var(--bs-colored-card-padding-x);
+}
+
+.tc-colored-card-body {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--bs-colored-card-gap);
+}
+
+// Color-tinted icon chip — 12% soft tint of --bs-colored-card-accent for background,
+// full accent for the icon glyph. Sharp corners by mandate.
+.tc-colored-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-colored-card-icon-size);
+    height: var(--bs-colored-card-icon-size);
+    // color-mix() gives a soft tint without needing alpha channels on the accent.
+    background: color-mix(in srgb, var(--bs-colored-card-accent) 12%, var(--bs-colored-card-bg));
+    color: var(--bs-colored-card-accent);
+    border-radius: 0;
+    flex-shrink: 0;
+}
+
+.tc-colored-card-icon-svg {
+    width: var(--bs-colored-card-icon-svg-size);
+    height: var(--bs-colored-card-icon-svg-size);
+    stroke: currentColor;
+    fill: none;
+}
+
+// Text block — value is prominent; label is muted.
+.tc-colored-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.tc-colored-card-value {
+    display: block;
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: var(--bs-colored-card-value-font-size);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--bs-colored-card-value-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-colored-card-text {
+    display: block;
+    font-size: var(--bs-colored-card-text-font-size);
+    line-height: 1.4;
+    color: var(--bs-colored-card-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-colored-card-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-colored-card-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-colored-card-skeleton-bg) 25%,
+        var(--bs-colored-card-skeleton-shimmer) 50%,
+        var(--bs-colored-card-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-colored-card-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-colored-card-icon--skeleton {
+    @extend %tc-colored-card-shimmer;
+}
+
+.tc-colored-card-skeleton {
+    display: block;
+    height: 0.875rem;
+    border-radius: 0;
+    @extend %tc-colored-card-shimmer;
+
+    &--value {
+        width: 45%;
+        height: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+
+    &--text {
+        width: 65%;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze shimmer to a static fill.
+@media (prefers-reduced-motion: reduce) {
+    .tc-colored-card-icon--skeleton,
+    .tc-colored-card-skeleton {
+        animation: none;
+        background: var(--bs-colored-card-skeleton-bg);
+    }
+}

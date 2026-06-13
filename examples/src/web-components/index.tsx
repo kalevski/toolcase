@@ -77,6 +77,7 @@ import CookbookGridDemo from './CookbookGridDemo'
 import CoolButtonDemo from './CoolButtonDemo'
 import ActivityCardDemo from './ActivityCardDemo'
 import BasicCardDemo from './BasicCardDemo'
+import ColoredCardDemo from './ColoredCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -174,4 +175,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'cool-button', category: 'Components', element: <CoolButtonDemo /> },
     { key: 'activity-card', category: 'Components', element: <ActivityCardDemo /> },
     { key: 'basic-card', category: 'Components', element: <BasicCardDemo /> },
+    { key: 'colored-card', category: 'Components', element: <ColoredCardDemo /> },
 ]
