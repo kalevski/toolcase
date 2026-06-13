@@ -40,6 +40,7 @@ import FloatingLabelDemo from './FloatingLabelDemo'
 import InputGroupDemo from './InputGroupDemo'
 import FormDemo from './FormDemo'
 import DividerDemo from './DividerDemo'
+import HeadingDemo from './HeadingDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -100,4 +101,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'input-group', category: 'Forms', element: <InputGroupDemo /> },
     { key: 'form', category: 'Forms', element: <FormDemo /> },
     { key: 'divider', category: 'Components', element: <DividerDemo /> },
+    { key: 'heading', category: 'Content', element: <HeadingDemo /> },
 ]

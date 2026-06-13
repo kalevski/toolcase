@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, Input, InputGroup, InputGroupText, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -44,6 +44,7 @@ After `register()` you can author markup directly:
   - [tc-collapse](#tc-collapse)
   - [tc-divider](#tc-divider)
   - [tc-dropdown](#tc-dropdown)
+  - [tc-heading](#tc-heading)
   - [tc-list-group](#tc-list-group)
   - [tc-placeholder](#tc-placeholder)
   - [tc-progress](#tc-progress)
@@ -518,6 +519,31 @@ Dropdown menu positioned by Popper.js.
 Item inside `tc-dropdown`.
 
 **Attributes:** `href`, `disabled`, `active`, `divider` (boolean, renders `<hr>`)
+
+---
+
+### tc-heading
+
+Semantic heading element (h1–h6) with optional slate-ink gradient text treatment. Renders a real `<hN>` element for a correct document outline.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `as` | `h1\|h2\|h3\|h4\|h5\|h6` | `h2` | Which heading level to render |
+| `gradient` | boolean | false | Apply slate-ink gradient text treatment |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| (default) | Heading text or inline content |
+
+```html
+<tc-heading as="h1">Page title</tc-heading>
+<tc-heading as="h2" gradient>Section with gradient</tc-heading>
+<tc-heading>Default h2 heading</tc-heading>
+```
 
 ---
 

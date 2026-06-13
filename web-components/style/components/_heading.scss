@@ -1,0 +1,70 @@
+// tc-heading — semantic heading (h1–h6) with optional slate-ink gradient treatment.
+//
+// The host tc-heading element is display: block (registered in _reset.scss).
+// The inner hN.tc-heading carries all visual styling so document outline is
+// preserved. Sizing is driven by --bs-heading-{level}-font-size to give themes
+// a clean override surface without touching Sass vars.
+//
+// Gradient: 135deg slate-ink treatment applied to the inner .tc-heading-content
+// span via background-clip: text. color: var(--bs-heading-color) is the solid
+// fallback for browsers that don't support background-clip: text.
+
+// Component-level token defaults — inherit into the inner hN via the cascade.
+tc-heading {
+    --bs-heading-color: var(--tc-text);
+    --bs-heading-font-weight: 600;
+    --bs-heading-line-height: 1.3;
+    --bs-heading-letter-spacing: -0.01em;
+    --bs-heading-h1-font-size: 2.25rem;
+    --bs-heading-h2-font-size: 1.75rem;
+    --bs-heading-h3-font-size: 1.4rem;
+    --bs-heading-h4-font-size: 1.2rem;
+    --bs-heading-h5-font-size: 1.05rem;
+    --bs-heading-h6-font-size: 0.925rem;
+    --bs-heading-gradient-start: var(--tc-app-accent);
+    --bs-heading-gradient-end: var(--tc-ink);
+}
+
+.tc-heading {
+    margin: 0;
+    font-family: var(--tc-font-sans);
+    font-weight: var(--bs-heading-font-weight);
+    line-height: var(--bs-heading-line-height);
+    letter-spacing: var(--bs-heading-letter-spacing);
+    color: var(--bs-heading-color);
+    background: none;
+    border-radius: 0;
+}
+
+// Per-level sizes driven by --bs-heading-* to expose the theming surface.
+h1.tc-heading { font-size: var(--bs-heading-h1-font-size); }
+h2.tc-heading { font-size: var(--bs-heading-h2-font-size); }
+h3.tc-heading { font-size: var(--bs-heading-h3-font-size); }
+h4.tc-heading { font-size: var(--bs-heading-h4-font-size); }
+h5.tc-heading { font-size: var(--bs-heading-h5-font-size); }
+h6.tc-heading { font-size: var(--bs-heading-h6-font-size); }
+
+.tc-heading-content {
+    display: inline;
+}
+
+// Gradient variant — background-clip: text with a solid-color fallback.
+.tc-heading--gradient > .tc-heading-content {
+    // Solid fallback for browsers without background-clip: text support.
+    color: var(--bs-heading-color);
+    background: linear-gradient(135deg, var(--bs-heading-gradient-start), var(--bs-heading-gradient-end));
+    -webkit-background-clip: text;
+    background-clip: text;
+    // -webkit-text-fill-color overrides color; browsers that do not understand
+    // it will use the color fallback above.
+    -webkit-text-fill-color: transparent;
+}
+
+// Nested links must remain focus-visible even inside gradient headings.
+// The global :focus-visible rule in _reset.scss covers outline; this rule
+// restores the fill color so the focus ring is not clipped away.
+.tc-heading a:focus-visible {
+    -webkit-text-fill-color: initial;
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+}

@@ -48,6 +48,7 @@ import { InputGroup } from './InputGroup'
 import { InputGroupText } from './InputGroupText'
 import { Divider } from './Divider'
 import { Form } from './Form'
+import { Heading } from './Heading'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -105,4 +106,5 @@ export function register(): void {
     customElements.define('tc-input-group-text', InputGroupText)
     customElements.define('tc-form', Form)
     customElements.define('tc-divider', Divider)
+    customElements.define('tc-heading', Heading)
 }
