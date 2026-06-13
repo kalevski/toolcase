@@ -1,6 +1,7 @@
 // Component partials aggregator.
 // Each component task appends a @forward line here, e.g.:
 //   @forward 'button';
+@forward 'avatar';
 @forward 'action-header';
 @forward 'action-items';
 @forward 'theme';

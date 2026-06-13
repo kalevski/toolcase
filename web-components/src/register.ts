@@ -1,3 +1,4 @@
+import { Avatar } from './Avatar'
 import { ActionHeader } from './ActionHeader'
 import { ActionItems } from './ActionItems'
 import { ActionRowList } from './ActionRowList'
@@ -62,6 +63,7 @@ export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
         return
     }
+    customElements.define('tc-avatar', Avatar)
     customElements.define('tc-action-header', ActionHeader)
     customElements.define('tc-action-items', ActionItems)
     customElements.define('tc-action-row-list', ActionRowList)
