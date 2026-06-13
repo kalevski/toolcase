@@ -1,0 +1,128 @@
+// tc-social-links — horizontal row of social-media icon-button links.
+// Ghost: transparent → slate-100 well on hover. Filled: slate-100 → slate-200 + 1px lift on hover.
+// Sharp square buttons (border-radius: 0). Three sizes. No brand colors — slate only.
+
+@use '../foundation/tokens' as *;
+
+tc-social-links {
+    // Sizing knobs — overridden per size modifier.
+    --bs-social-links-btn-size: 40px;
+    --bs-social-links-icon-size: 1.25rem;
+    --bs-social-links-gap: 0.25rem;
+    // Color knobs — overridden per variant modifier.
+    --bs-social-links-color: var(--tc-text-muted);
+    --bs-social-links-bg: transparent;
+    --bs-social-links-border: transparent;
+    --bs-social-links-hover-color: var(--tc-text);
+    --bs-social-links-hover-bg: var(--tc-surface-muted);
+    --bs-social-links-hover-border: transparent;
+    --bs-social-links-hover-shadow: none;
+    --bs-social-links-hover-translate: 0;
+}
+
+.tc-social-links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-social-links-gap);
+    border: 0;
+    border-radius: 0;
+    background: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+// sm — compact, still hits 44px on coarse via min-size rule below
+.tc-social-links-sm {
+    --bs-social-links-btn-size: 32px;
+    --bs-social-links-icon-size: 1rem;
+}
+
+// lg — already ≥ 44px
+.tc-social-links-lg {
+    --bs-social-links-btn-size: 48px;
+    --bs-social-links-icon-size: 1.5rem;
+}
+
+// Filled variant: slate-100 surface at rest, slate-200 + 1px lift on hover
+.tc-social-links-filled {
+    --bs-social-links-color: var(--tc-text-muted);
+    --bs-social-links-bg: var(--tc-surface-muted);
+    --bs-social-links-border: var(--tc-border);
+    --bs-social-links-hover-color: var(--tc-text);
+    --bs-social-links-hover-bg: var(--tc-border);
+    --bs-social-links-hover-border: var(--tc-border-strong);
+    --bs-social-links-hover-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --bs-social-links-hover-translate: -1px;
+}
+
+.tc-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-social-links-btn-size);
+    height: var(--bs-social-links-btn-size);
+    border: 1px solid var(--bs-social-links-border);
+    border-radius: 0;
+    background: var(--bs-social-links-bg);
+    color: var(--bs-social-links-color);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-social-links-icon-size);
+        height: var(--bs-social-links-icon-size);
+        flex-shrink: 0;
+        // lucide SVGs already carry stroke="currentColor"; explicit for foreign-sheet resilience
+        stroke: currentColor;
+        fill: none;
+    }
+
+    &:hover,
+    &:focus {
+        background: var(--bs-social-links-hover-bg);
+        color: var(--bs-social-links-hover-color);
+        border-color: var(--bs-social-links-hover-border);
+        box-shadow: var(--bs-social-links-hover-shadow);
+        transform: translateY(var(--bs-social-links-hover-translate));
+        text-decoration: none;
+    }
+
+    // Visible focus ring for keyboard navigation
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// 44px coarse touch targets — sm and md buttons expand minimally
+@media (pointer: coarse) {
+    .tc-social-link {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// Freeze hover lift under reduced-motion; color/bg transitions are still allowed
+// (they convey state, not animation). Global block in _reset.scss handles the rest.
+@media (prefers-reduced-motion: reduce) {
+    .tc-social-link {
+        transition:
+            background-color var(--tc-transition-fast),
+            color var(--tc-transition-fast),
+            border-color var(--tc-transition-fast);
+        transform: none !important;
+    }
+}
