@@ -70,6 +70,7 @@ import { Tag } from './Tag'
 import { AssetRow } from './AssetRow'
 import { AssetRowList } from './AssetRowList'
 import { BasicLayout } from './BasicLayout'
+import { BriefCard } from './BriefCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -149,4 +150,5 @@ export function register(): void {
     customElements.define('tc-asset-row', AssetRow)
     customElements.define('tc-asset-row-list', AssetRowList)
     customElements.define('tc-basic-layout', BasicLayout)
+    customElements.define('tc-brief-card', BriefCard)
 }

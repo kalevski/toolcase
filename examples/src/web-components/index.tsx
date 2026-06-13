@@ -62,6 +62,7 @@ import TagDemo from './TagDemo'
 import AssetRowDemo from './AssetRowDemo'
 import AssetRowListDemo from './AssetRowListDemo'
 import BasicLayoutDemo from './BasicLayoutDemo'
+import BriefCardDemo from './BriefCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -144,4 +145,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'tag', category: 'Content', element: <TagDemo /> },
     { key: 'asset-row', category: 'Components', element: <AssetRowDemo /> },
     { key: 'asset-row-list', category: 'Components', element: <AssetRowListDemo /> },
+    { key: 'brief-card', category: 'Content', element: <BriefCardDemo /> },
 ]
