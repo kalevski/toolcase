@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -30,6 +30,7 @@ After `register()` you can author markup directly:
   - [tc-container](#tc-container)
   - [tc-row](#tc-row)
   - [tc-col](#tc-col)
+  - [tc-spacer](#tc-spacer)
 - [Content](#content)
   - [tc-action-header](#tc-action-header)
   - [tc-action-items](#tc-action-items)
@@ -141,6 +142,44 @@ Grid column.
 ```html
 <tc-col span="6">Half width</tc-col>
 <tc-col span="12" span-md="6">Full then half</tc-col>
+```
+
+---
+
+### tc-spacer
+
+Purely structural spacing element. Fills available space in a flex container when `size` is omitted, or provides a fixed dimension along the given axis when `size` is set. The element is `aria-hidden` and carries no visible chrome.
+
+**Tag:** `tc-spacer`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `size` | string \| number | — | Fixed size along the axis. Bare numbers are treated as `px` (e.g. `size="24"` → `24px`). Any CSS length string is accepted (`1rem`, `50%`, …). When omitted the spacer sets `flex: 1 1 auto` and expands to fill available space. |
+| `axis` | `horizontal\|vertical` | `vertical` | Axis along which space is applied. `vertical` sets a fixed/flexible height; `horizontal` sets a fixed/flexible width. |
+
+**Events**
+
+None. `tc-spacer` is a purely presentational element.
+
+**Slots**
+
+None.
+
+```html
+<!-- Fixed vertical gap (32px) between two blocks -->
+<tc-spacer size="32"></tc-spacer>
+
+<!-- Fixed horizontal gap (1rem) between inline items -->
+<tc-spacer size="1rem" axis="horizontal"></tc-spacer>
+
+<!-- Flexible spacer — pushes siblings apart in a flex row -->
+<div style="display:flex">
+    <span>Left</span>
+    <tc-spacer axis="horizontal"></tc-spacer>
+    <span>Right</span>
+</div>
 ```
 
 ---

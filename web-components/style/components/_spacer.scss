@@ -1,0 +1,8 @@
+// tc-spacer — purely structural spacing element. No visible chrome; occupies
+// space only. Inline styles drive size; this partial handles display overrides.
+
+// Default display is block (vertical axis) — registered in foundation/_reset.scss.
+// Horizontal axis switches to inline-block so the element sits in a text/flex row.
+tc-spacer[axis="horizontal"] {
+    display: inline-block;
+}
