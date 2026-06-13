@@ -73,6 +73,7 @@ import { BasicLayout } from './BasicLayout'
 import { BriefCard } from './BriefCard'
 import { BundleBar } from './BundleBar'
 import { CalloutQuote } from './CalloutQuote'
+import { ChartContainer } from './ChartContainer'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -155,4 +156,5 @@ export function register(): void {
     customElements.define('tc-brief-card', BriefCard)
     customElements.define('tc-bundle-bar', BundleBar)
     customElements.define('tc-callout-quote', CalloutQuote)
+    customElements.define('tc-chart-container', ChartContainer)
 }

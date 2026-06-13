@@ -1,0 +1,174 @@
+// tc-chart-container — chart wrapper with header (title + subtitle + actions),
+// body (slotted chart), legend region, and loading/empty states.
+// All cosmetics flow through --bs-chart-container-* custom properties backed by --tc-* tokens.
+// Sharp corners everywhere; hairline border; low shadow; ink-gradient header cap.
+
+@use '../foundation/tokens' as *;
+
+tc-chart-container {
+    --bs-chart-container-bg: var(--tc-surface);
+    --bs-chart-container-border-color: var(--tc-border);
+    --bs-chart-container-shadow: var(--tc-shadow-sm);
+    --bs-chart-container-header-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.03), rgba(30, 41, 59, 0.01));
+    --bs-chart-container-header-border-color: var(--tc-border);
+    --bs-chart-container-header-padding-y: 0.75rem;
+    --bs-chart-container-header-padding-x: 1.25rem;
+    --bs-chart-container-body-padding-y: 1.25rem;
+    --bs-chart-container-body-padding-x: 1.25rem;
+    --bs-chart-container-legend-padding-y: 0.625rem;
+    --bs-chart-container-legend-padding-x: 1.25rem;
+    --bs-chart-container-title-color: var(--tc-text);
+    --bs-chart-container-subtitle-color: var(--tc-text-muted);
+    --bs-chart-container-skeleton-bg: var(--tc-surface-muted);
+    --bs-chart-container-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+    --bs-chart-container-empty-color: var(--tc-text-faint);
+}
+
+// Root inner div — card motif: flat white surface, 1px border, low shadow.
+.tc-chart-container {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-chart-container-bg);
+    border: 1px solid var(--bs-chart-container-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-chart-container-shadow);
+}
+
+// Header: title-block on the left, actions on the right.
+.tc-chart-container-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: var(--bs-chart-container-header-padding-y) var(--bs-chart-container-header-padding-x);
+    background: var(--bs-chart-container-header-bg);
+    border-bottom: 1px solid var(--bs-chart-container-header-border-color);
+    min-height: 0;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Title block: stacked title + subtitle.
+.tc-chart-container-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.tc-chart-container-title {
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-chart-container-title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-chart-container-subtitle {
+    font-size: 0.78125rem; // 12.5px
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--bs-chart-container-subtitle-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Actions region: right-side of header.
+.tc-chart-container-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+    margin-left: auto;
+
+    &:empty {
+        display: none;
+    }
+
+    // Visible focus ring on any interactive control placed here.
+    :focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// Body: chart content area.
+.tc-chart-container-body {
+    flex: 1 1 auto;
+    padding: var(--bs-chart-container-body-padding-y) var(--bs-chart-container-body-padding-x);
+    min-height: 0;
+}
+
+// Legend / footer region.
+.tc-chart-container-legend {
+    padding: var(--bs-chart-container-legend-padding-y) var(--bs-chart-container-legend-padding-x);
+    border-top: 1px solid var(--bs-chart-container-border-color);
+    font-size: 0.75rem;
+    color: var(--bs-chart-container-subtitle-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// ── Loading skeleton ─────────────────────────────────────────────────────────
+
+.tc-chart-container-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-chart-container-skeleton-bar {
+    display: block;
+    width: 100%;
+    height: 180px;
+    background: linear-gradient(
+        90deg,
+        var(--bs-chart-container-skeleton-bg) 25%,
+        var(--bs-chart-container-skeleton-shimmer) 50%,
+        var(--bs-chart-container-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-chart-container-shimmer 1.5s infinite linear;
+    border-radius: 0;
+
+    &--short {
+        height: 1rem;
+        width: 40%;
+    }
+}
+
+@keyframes tc-chart-container-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+// Honour prefers-reduced-motion: freeze the shimmer in place.
+@media (prefers-reduced-motion: reduce) {
+    .tc-chart-container-skeleton-bar {
+        animation: none;
+        background: var(--bs-chart-container-skeleton-bg);
+    }
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────────
+
+.tc-chart-container-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    color: var(--bs-chart-container-empty-color);
+}
+
+.tc-chart-container-empty-text {
+    font-size: 0.875rem;
+    color: var(--bs-chart-container-empty-color);
+}

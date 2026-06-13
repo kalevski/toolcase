@@ -65,6 +65,7 @@ import BasicLayoutDemo from './BasicLayoutDemo'
 import BriefCardDemo from './BriefCardDemo'
 import BundleBarDemo from './BundleBarDemo'
 import CalloutQuoteDemo from './CalloutQuoteDemo'
+import ChartContainerDemo from './ChartContainerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -150,4 +151,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'brief-card', category: 'Content', element: <BriefCardDemo /> },
     { key: 'bundle-bar', category: 'Content', element: <BundleBarDemo /> },
     { key: 'callout-quote', category: 'Content', element: <CalloutQuoteDemo /> },
+    { key: 'chart-container', category: 'Components', element: <ChartContainerDemo /> },
 ]
