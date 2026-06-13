@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner, Text), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Badge, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -54,6 +54,7 @@ After `register()` you can author markup directly:
   - [tc-progress](#tc-progress)
   - [tc-spinner](#tc-spinner)
   - [tc-text](#tc-text)
+  - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
   - [tc-breadcrumb](#tc-breadcrumb)
   - [tc-nav](#tc-nav)
@@ -1603,4 +1604,56 @@ None. `tc-link` is a purely presentational element.
 
 <!-- External link (new tab + icon + accessible note) -->
 <tc-link href="https://example.com" external>Visit example.com</tc-link>
+```
+
+---
+
+## tc-visually-hidden
+
+Hides content from sighted users while keeping it in the accessibility tree. The host element uses `display: contents` so it adds no layout box; the inner wrapper receives the standard `.visually-hidden` clip. Use it to label icon-only controls, annotate status regions, or provide skip-link text.
+
+**Tag:** `tc-visually-hidden`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `as` | `span\|div` | `span` | The inner wrapper element tag. Use `span` (default) for inline contexts and `div` for block-level hidden regions (e.g. live regions, landmark descriptions). |
+
+**JS Properties**
+
+None beyond the reflected `as` attribute.
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| _(default)_ | The content to hide visually. Preserved across re-renders inside `.tc-visually-hidden-content`. Must not be `display:none` or `hidden` — it stays in the accessibility tree. |
+
+**Events**
+
+None. `tc-visually-hidden` is a purely presentational accessibility helper.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-visually-hidden-clip` | `rect(0, 0, 0, 0)` | Clip rect applied to the inner wrapper. Override to unhide temporarily (e.g. during focus). |
+
+```html
+<!-- Annotate an icon button -->
+<button type="button" class="btn btn-secondary">
+    <span aria-hidden="true">✕</span>
+    <tc-visually-hidden>Close dialog</tc-visually-hidden>
+</button>
+
+<!-- Skip link (becomes visible on :focus via browser default) -->
+<tc-visually-hidden>
+    <a href="#main-content">Skip to main content</a>
+</tc-visually-hidden>
+
+<!-- Block live-region description (as="div") -->
+<div role="status" aria-live="polite">
+    <tc-visually-hidden as="div">3 items loaded.</tc-visually-hidden>
+</div>
 ```

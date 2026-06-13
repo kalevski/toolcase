@@ -56,6 +56,7 @@ import { Label } from './Label'
 import { Link } from './Link'
 import { Spacer } from './Spacer'
 import { Text } from './Text'
+import { VisuallyHidden } from './VisuallyHidden'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -121,4 +122,5 @@ export function register(): void {
     customElements.define('tc-link', Link)
     customElements.define('tc-spacer', Spacer)
     customElements.define('tc-text', Text)
+    customElements.define('tc-visually-hidden', VisuallyHidden)
 }

@@ -169,6 +169,13 @@ tc-text {
     display: inline;
 }
 
+// tc-visually-hidden uses display: contents so the host adds no layout box.
+// The inner <span>/<div> (with .visually-hidden) is absolutely positioned and
+// invisible to sighted users but remains in the accessibility tree.
+tc-visually-hidden {
+    display: contents;
+}
+
 tc-icon,
 tc-kbd {
     display: inline-flex;

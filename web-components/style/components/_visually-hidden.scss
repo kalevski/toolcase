@@ -1,0 +1,10 @@
+// tc-visually-hidden — host reset.
+// The host uses display:contents (registered in _reset.scss) so it adds no
+// visual box to the layout. The inner <span>/<div> carries the .visually-hidden
+// utility class (defined in _utilities.scss) — not duplicated here.
+// No borders, radius, background, or color on the host.
+
+tc-visually-hidden {
+    // No visible chrome — custom properties scaffold for future theming surface.
+    --bs-visually-hidden-clip: rect(0, 0, 0, 0);
+}

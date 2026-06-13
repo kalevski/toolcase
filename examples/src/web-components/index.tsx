@@ -48,6 +48,7 @@ import LabelDemo from './LabelDemo'
 import LinkDemo from './LinkDemo'
 import SpacerDemo from './SpacerDemo'
 import TextDemo from './TextDemo'
+import VisuallyHiddenDemo from './VisuallyHiddenDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -116,4 +117,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'link', category: 'Content', element: <LinkDemo /> },
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
     { key: 'text', category: 'Content', element: <TextDemo /> },
+    { key: 'visually-hidden', category: 'Components', element: <VisuallyHiddenDemo /> },
 ]
