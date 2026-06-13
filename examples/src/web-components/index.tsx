@@ -47,6 +47,7 @@ import KbdDemo from './KbdDemo'
 import LabelDemo from './LabelDemo'
 import LinkDemo from './LinkDemo'
 import SpacerDemo from './SpacerDemo'
+import TextDemo from './TextDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -114,4 +115,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'label', category: 'Forms', element: <LabelDemo /> },
     { key: 'link', category: 'Content', element: <LinkDemo /> },
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
+    { key: 'text', category: 'Content', element: <TextDemo /> },
 ]

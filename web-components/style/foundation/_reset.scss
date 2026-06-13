@@ -162,6 +162,13 @@ tc-input-group-text {
     display: inline-block;
 }
 
+// tc-text uses display: inline so it works as a transparent wrapper for both
+// inline (span, small) and block (p, div) inner elements. Block layout is
+// handled by the inner element class rules in _text.scss.
+tc-text {
+    display: inline;
+}
+
 tc-icon,
 tc-kbd {
     display: inline-flex;
