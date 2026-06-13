@@ -61,6 +61,7 @@ import { Spacer } from './Spacer'
 import { Text } from './Text'
 import { VisuallyHidden } from './VisuallyHidden'
 import { PulseIndicator } from './PulseIndicator'
+import { SectionFlag } from './SectionFlag'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -131,4 +132,5 @@ export function register(): void {
     customElements.define('tc-text', Text)
     customElements.define('tc-visually-hidden', VisuallyHidden)
     customElements.define('tc-pulse-indicator', PulseIndicator)
+    customElements.define('tc-section-flag', SectionFlag)
 }
