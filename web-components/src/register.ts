@@ -123,6 +123,7 @@ import { StatCard } from './StatCard'
 import { StateMachine } from './StateMachine'
 import { Stepper } from './Stepper'
 import { TeamList } from './TeamList'
+import { TierLadder } from './TierLadder'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -255,4 +256,5 @@ export function register(): void {
     customElements.define('tc-state-machine', StateMachine)
     customElements.define('tc-stepper', Stepper)
     customElements.define('tc-team-list', TeamList)
+    customElements.define('tc-tier-ladder', TierLadder)
 }

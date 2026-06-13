@@ -1,0 +1,163 @@
+// tc-tier-ladder — ranked tier ladder with color-coded dots and a current-tier indicator.
+// Sharp corners (border-radius: 0) on all rectangles; only the dot is circular (50%).
+// Slate neutrals carry the layout; color is identity-only on the dot, never as row fill.
+// Current tier uses --tc-app-accent left marker + subtle tint background.
+// All cosmetic values flow through --bs-tier-ladder-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-tier-ladder {
+    --bs-tier-ladder-title-color: var(--tc-text);
+    --bs-tier-ladder-title-font-size: 0.925rem;
+    --bs-tier-ladder-title-font-weight: 600;
+    --bs-tier-ladder-title-margin-bottom: 0.75rem;
+
+    --bs-tier-ladder-border: var(--tc-border);
+    --bs-tier-ladder-row-separator: var(--tc-surface-muted);
+    --bs-tier-ladder-row-padding-y: 0.5rem;
+    --bs-tier-ladder-row-padding-x: 0.875rem;
+    --bs-tier-ladder-row-hover-bg: var(--tc-surface-hover);
+
+    --bs-tier-ladder-dot-size: 0.625rem;
+    --bs-tier-ladder-dot-gray: var(--tc-text-faint);
+    --bs-tier-ladder-dot-cyan: var(--tc-accent);
+    --bs-tier-ladder-dot-yellow: var(--tc-warning);
+    --bs-tier-ladder-dot-pink: var(--tc-danger);
+    --bs-tier-ladder-dot-red: var(--tc-danger);
+
+    --bs-tier-ladder-name-color: var(--tc-text);
+    --bs-tier-ladder-name-font-size: 0.875rem;
+    --bs-tier-ladder-range-color: var(--tc-text-muted);
+    --bs-tier-ladder-range-font-size: 0.75rem;
+
+    --bs-tier-ladder-current-border: var(--tc-app-accent);
+    --bs-tier-ladder-current-bg: rgba(30, 41, 59, 0.04);
+    --bs-tier-ladder-current-name-color: var(--tc-app-accent);
+    --bs-tier-ladder-current-indicator-color: var(--tc-app-accent);
+    --bs-tier-ladder-current-indicator-size: 0.875rem;
+    --bs-tier-ladder-current-marker-width: 3px;
+
+    --bs-tier-ladder-summary-color: var(--tc-text-faint);
+    --bs-tier-ladder-summary-font-size: 0.75rem;
+    --bs-tier-ladder-summary-margin-top: 0.75rem;
+
+    --bs-tier-ladder-empty-color: var(--tc-text-faint);
+    --bs-tier-ladder-empty-font-size: 0.875rem;
+}
+
+.tc-tier-ladder {
+    display: block;
+}
+
+.tc-tier-ladder-title {
+    font-size: var(--bs-tier-ladder-title-font-size);
+    font-weight: var(--bs-tier-ladder-title-font-weight);
+    color: var(--bs-tier-ladder-title-color);
+    margin: 0 0 var(--bs-tier-ladder-title-margin-bottom);
+    line-height: 1.4;
+}
+
+.tc-tier-ladder-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--bs-tier-ladder-border);
+    border-radius: 0;
+}
+
+.tc-tier-ladder-tier {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: var(--bs-tier-ladder-row-padding-y) var(--bs-tier-ladder-row-padding-x);
+    border-bottom: 1px solid var(--bs-tier-ladder-row-separator);
+    border-radius: 0;
+    position: relative;
+    background: transparent;
+    transition: background-color var(--tc-transition-fast);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-tier-ladder-row-hover-bg);
+    }
+
+    &.tc-tier-ladder-tier--current {
+        background: var(--bs-tier-ladder-current-bg);
+        border-left: var(--bs-tier-ladder-current-marker-width) solid var(--bs-tier-ladder-current-border);
+        padding-left: calc(var(--bs-tier-ladder-row-padding-x) - var(--bs-tier-ladder-current-marker-width));
+
+        .tc-tier-ladder-name {
+            color: var(--bs-tier-ladder-current-name-color);
+            font-weight: 500;
+        }
+    }
+}
+
+// Circular color-identity dot — only curve sanctioned by the design system
+.tc-tier-ladder-dot {
+    display: inline-block;
+    flex-shrink: 0;
+    width: var(--bs-tier-ladder-dot-size);
+    height: var(--bs-tier-ladder-dot-size);
+    border-radius: 50%;
+
+    &.tc-tier-ladder-dot--gray  { background: var(--bs-tier-ladder-dot-gray); }
+    &.tc-tier-ladder-dot--cyan  { background: var(--bs-tier-ladder-dot-cyan); }
+    &.tc-tier-ladder-dot--yellow { background: var(--bs-tier-ladder-dot-yellow); }
+    &.tc-tier-ladder-dot--pink  { background: var(--bs-tier-ladder-dot-pink); }
+    &.tc-tier-ladder-dot--red   { background: var(--bs-tier-ladder-dot-red); }
+}
+
+.tc-tier-ladder-name {
+    flex: 1;
+    font-size: var(--bs-tier-ladder-name-font-size);
+    color: var(--bs-tier-ladder-name-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-tier-ladder-range {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-tier-ladder-range-font-size);
+    color: var(--bs-tier-ladder-range-color);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tc-tier-ladder-current-indicator {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--bs-tier-ladder-current-indicator-color);
+}
+
+.tc-tier-ladder-current-icon {
+    width: var(--bs-tier-ladder-current-indicator-size);
+    height: var(--bs-tier-ladder-current-indicator-size);
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
+.tc-tier-ladder-summary {
+    margin-top: var(--bs-tier-ladder-summary-margin-top);
+    font-size: var(--bs-tier-ladder-summary-font-size);
+    color: var(--bs-tier-ladder-summary-color);
+    line-height: 1.5;
+}
+
+.tc-tier-ladder-empty {
+    padding: var(--bs-tier-ladder-row-padding-y) var(--bs-tier-ladder-row-padding-x);
+    font-size: var(--bs-tier-ladder-empty-font-size);
+    color: var(--bs-tier-ladder-empty-color);
+    font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-tier-ladder-tier {
+        transition: none;
+    }
+}
