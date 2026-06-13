@@ -116,6 +116,7 @@ import { RankCell } from './RankCell'
 import { RichPageHeader } from './RichPageHeader'
 import { ScoringRules } from './ScoringRules'
 import { SectionCard } from './SectionCard'
+import { SimpleFile } from './SimpleFile'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -241,4 +242,5 @@ export function register(): void {
     customElements.define('tc-rich-page-header', RichPageHeader)
     customElements.define('tc-scoring-rules', ScoringRules)
     customElements.define('tc-section-card', SectionCard)
+    customElements.define('tc-simple-file', SimpleFile)
 }

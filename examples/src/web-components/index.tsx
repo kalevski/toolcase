@@ -104,6 +104,7 @@ import PipelineDemo from './PipelineDemo'
 import PluginGridDemo from './PluginGridDemo'
 import PricingCardDemo from './PricingCardDemo'
 import QueuedFileDemo from './QueuedFileDemo'
+import SimpleFileDemo from './SimpleFileDemo'
 import RankCellDemo from './RankCellDemo'
 import RichPageHeaderDemo from './RichPageHeaderDemo'
 import ScoringRulesDemo from './ScoringRulesDemo'
@@ -232,6 +233,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'plugin-grid', category: 'Components', element: <PluginGridDemo /> },
     { key: 'pricing-card', category: 'Components', element: <PricingCardDemo /> },
     { key: 'queued-file', category: 'Components', element: <QueuedFileDemo /> },
+    { key: 'simple-file', category: 'Content', element: <SimpleFileDemo /> },
     { key: 'rank-cell', category: 'Components', element: <RankCellDemo /> },
     { key: 'rich-page-header', category: 'Components', element: <RichPageHeaderDemo /> },
     { key: 'scoring-rules', category: 'Content', element: <ScoringRulesDemo /> },
