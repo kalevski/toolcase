@@ -105,6 +105,7 @@ import { MetricTile } from './MetricTile'
 import { MetricGrid } from './MetricGrid'
 import { MigrationGuide } from './MigrationGuide'
 import { PageFooter } from './PageFooter'
+import { PhaseGrid } from './PhaseGrid'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -219,4 +220,5 @@ export function register(): void {
     customElements.define('tc-metric-grid', MetricGrid)
     customElements.define('tc-migration-guide', MigrationGuide)
     customElements.define('tc-page-footer', PageFooter)
+    customElements.define('tc-phase-grid', PhaseGrid)
 }
