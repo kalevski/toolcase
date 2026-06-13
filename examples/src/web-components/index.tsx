@@ -105,6 +105,7 @@ import PluginGridDemo from './PluginGridDemo'
 import PricingCardDemo from './PricingCardDemo'
 import QueuedFileDemo from './QueuedFileDemo'
 import RankCellDemo from './RankCellDemo'
+import RichPageHeaderDemo from './RichPageHeaderDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -230,4 +231,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'pricing-card', category: 'Components', element: <PricingCardDemo /> },
     { key: 'queued-file', category: 'Components', element: <QueuedFileDemo /> },
     { key: 'rank-cell', category: 'Components', element: <RankCellDemo /> },
+    { key: 'rich-page-header', category: 'Components', element: <RichPageHeaderDemo /> },
 ]

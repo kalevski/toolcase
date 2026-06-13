@@ -113,6 +113,7 @@ import { PricingCard } from './PricingCard'
 import { QueuedFile } from './QueuedFile'
 import { QuickStart } from './QuickStart'
 import { RankCell } from './RankCell'
+import { RichPageHeader } from './RichPageHeader'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -235,4 +236,5 @@ export function register(): void {
     customElements.define('tc-queued-file', QueuedFile)
     customElements.define('tc-quick-start', QuickStart)
     customElements.define('tc-rank-cell', RankCell)
+    customElements.define('tc-rich-page-header', RichPageHeader)
 }

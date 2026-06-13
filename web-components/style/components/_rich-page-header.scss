@@ -1,0 +1,190 @@
+// tc-rich-page-header — page-level hero with optional icon tile, chip row,
+// title, subtitle, description, and slotted action buttons.
+// All cosmetics flow through --bs-rich-page-header-* custom properties backed
+// by --tc-* tokens. Sharp corners everywhere; hairline bottom rule; no shadow.
+
+tc-rich-page-header {
+    --bs-rich-page-header-bg: var(--tc-surface);
+    --bs-rich-page-header-border-color: var(--tc-border);
+    --bs-rich-page-header-padding-y: 1.5rem;
+    --bs-rich-page-header-padding-x: 0;
+    --bs-rich-page-header-gap: 1rem;
+    --bs-rich-page-header-body-gap: 0.5rem;
+    --bs-rich-page-header-title-color: var(--tc-text);
+    --bs-rich-page-header-title-font-size: 1.25rem;
+    --bs-rich-page-header-title-weight: 600;
+    --bs-rich-page-header-sub-color: var(--tc-text-muted);
+    --bs-rich-page-header-sub-font-size: 0.9375rem;
+    --bs-rich-page-header-description-color: var(--tc-text-faint);
+    --bs-rich-page-header-description-font-size: 0.875rem;
+    --bs-rich-page-header-icon-size: 3rem;
+    --bs-rich-page-header-icon-glyph-size: 1.25rem;
+    --bs-rich-page-header-icon-bg: var(--tc-surface-muted);
+    --bs-rich-page-header-icon-color: var(--tc-text);
+    --bs-rich-page-header-icon-border-color: var(--tc-border);
+    --bs-rich-page-header-chips-gap: 0.5rem;
+    --bs-rich-page-header-actions-gap: 0.5rem;
+}
+
+.tc-rich-page-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-rich-page-header-gap);
+    padding: var(--bs-rich-page-header-padding-y) var(--bs-rich-page-header-padding-x);
+    background: var(--bs-rich-page-header-bg);
+    border-bottom: 1px solid var(--bs-rich-page-header-border-color);
+    border-radius: 0;
+}
+
+.tc-rich-page-header-main {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--bs-rich-page-header-gap);
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+// Icon tile — square, fixed size, no shadow
+.tc-rich-page-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-rich-page-header-icon-size);
+    height: var(--bs-rich-page-header-icon-size);
+    flex-shrink: 0;
+    background: var(--bs-rich-page-header-icon-bg);
+    color: var(--bs-rich-page-header-icon-color);
+    border: 1px solid var(--bs-rich-page-header-icon-border-color);
+    border-radius: 0;
+
+    svg {
+        width: var(--bs-rich-page-header-icon-glyph-size);
+        height: var(--bs-rich-page-header-icon-glyph-size);
+        display: block;
+        flex-shrink: 0;
+    }
+}
+
+// Icon color variants — soft tint bg + emphasis foreground
+// Each maps --bs-rich-page-header-icon-* on the tile; other elements unchanged.
+.tc-rich-page-header-icon--violet {
+    --bs-rich-page-header-icon-bg: #f5f3ff;
+    --bs-rich-page-header-icon-color: #6d28d9;
+    --bs-rich-page-header-icon-border-color: #c7d2fe;
+}
+
+.tc-rich-page-header-icon--cyan {
+    --bs-rich-page-header-icon-bg: #ecfeff;
+    --bs-rich-page-header-icon-color: #0e7490;
+    --bs-rich-page-header-icon-border-color: #a5f3fc;
+}
+
+.tc-rich-page-header-icon--emerald {
+    --bs-rich-page-header-icon-bg: #ecfdf5;
+    --bs-rich-page-header-icon-color: #166534;
+    --bs-rich-page-header-icon-border-color: #a7f3d0;
+}
+
+.tc-rich-page-header-icon--amber {
+    --bs-rich-page-header-icon-bg: #fef3c7;
+    --bs-rich-page-header-icon-color: #92400e;
+    --bs-rich-page-header-icon-border-color: #fde68a;
+}
+
+.tc-rich-page-header-icon--pink {
+    --bs-rich-page-header-icon-bg: #fdf2f8;
+    --bs-rich-page-header-icon-color: #be185d;
+    --bs-rich-page-header-icon-border-color: #fbcfe8;
+}
+
+.tc-rich-page-header-icon--blue {
+    --bs-rich-page-header-icon-bg: #e0f2fe;
+    --bs-rich-page-header-icon-color: #075985;
+    --bs-rich-page-header-icon-border-color: #bae6fd;
+}
+
+.tc-rich-page-header-icon--slate {
+    --bs-rich-page-header-icon-bg: var(--tc-surface-muted);
+    --bs-rich-page-header-icon-color: var(--tc-text);
+    --bs-rich-page-header-icon-border-color: var(--tc-border);
+}
+
+.tc-rich-page-header-icon--rose {
+    --bs-rich-page-header-icon-bg: #fff1f2;
+    --bs-rich-page-header-icon-color: #be123c;
+    --bs-rich-page-header-icon-border-color: #fecdd3;
+}
+
+.tc-rich-page-header-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-rich-page-header-body-gap);
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.tc-rich-page-header-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--bs-rich-page-header-chips-gap);
+
+    &:empty {
+        display: none;
+    }
+}
+
+.tc-rich-page-header-title {
+    margin: 0;
+    font-size: var(--bs-rich-page-header-title-font-size);
+    font-weight: var(--bs-rich-page-header-title-weight);
+    line-height: 1.2;
+    color: var(--bs-rich-page-header-title-color);
+    letter-spacing: -0.01em;
+}
+
+.tc-rich-page-header-sub {
+    margin: 0;
+    font-size: var(--bs-rich-page-header-sub-font-size);
+    font-weight: 500;
+    color: var(--bs-rich-page-header-sub-color);
+    line-height: 1.4;
+}
+
+.tc-rich-page-header-description {
+    margin: 0;
+    font-size: var(--bs-rich-page-header-description-font-size);
+    color: var(--bs-rich-page-header-description-color);
+    line-height: 1.5;
+    max-width: 64ch;
+}
+
+.tc-rich-page-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--bs-rich-page-header-actions-gap);
+    flex-shrink: 0;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Wider screens: bump title size and lay out actions inline on the right
+@media (min-width: 768px) {
+    .tc-rich-page-header {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .tc-rich-page-header-title {
+        font-size: 1.5rem;
+    }
+}
+
+// Honour reduced motion — no decorative transitions on this component
+@media (prefers-reduced-motion: reduce) {
+    .tc-rich-page-header,
+    .tc-rich-page-header-icon {
+        transition: none;
+    }
+}
