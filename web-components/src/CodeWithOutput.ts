@@ -68,14 +68,6 @@ export class CodeWithOutput extends HTMLElement {
         this.setAttribute('layout', v)
     }
 
-    get title(): string | null {
-        return this.getAttribute('title')
-    }
-    set title(v: string | null) {
-        if (v != null) this.setAttribute('title', v)
-        else this.removeAttribute('title')
-    }
-
     get output(): string {
         return this._output
     }

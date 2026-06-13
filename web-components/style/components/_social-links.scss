@@ -81,9 +81,10 @@ tc-social-links {
         width: var(--bs-social-links-icon-size);
         height: var(--bs-social-links-icon-size);
         flex-shrink: 0;
-        // lucide SVGs already carry stroke="currentColor"; explicit for foreign-sheet resilience
-        stroke: currentColor;
-        fill: none;
+        // Brand glyphs are fill-based (Bootstrap Icons), not stroke-based like lucide;
+        // explicit for foreign-sheet resilience.
+        fill: currentColor;
+        stroke: none;
     }
 
     &:hover,
