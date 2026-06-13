@@ -72,6 +72,7 @@ import CodeLabelCellDemo from './CodeLabelCellDemo'
 import CodeWithOutputDemo from './CodeWithOutputDemo'
 import CommunityLinksDemo from './CommunityLinksDemo'
 import ConfigPreviewDemo from './ConfigPreviewDemo'
+import ContributorWallDemo from './ContributorWallDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -164,4 +165,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'code-with-output', category: 'Components', element: <CodeWithOutputDemo /> },
     { key: 'community-links', category: 'Components', element: <CommunityLinksDemo /> },
     { key: 'config-preview', category: 'Content', element: <ConfigPreviewDemo /> },
+    { key: 'contributor-wall', category: 'Components', element: <ContributorWallDemo /> },
 ]

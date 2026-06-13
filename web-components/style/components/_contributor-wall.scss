@@ -1,0 +1,144 @@
+// tc-contributor-wall — grid of contributor avatar tiles with optional overflow chip.
+// Avatars are sanctioned circles (border-radius: 50%); everything else stays sharp.
+// Overflow chip is also a circle for visual consistency with the avatar row.
+// Hover: 1px lift (translateY(-1px)) + slate ring. Honour prefers-reduced-motion.
+// Linked avatars extend to 44px under coarse pointers.
+
+@use '../foundation/tokens' as *;
+
+tc-contributor-wall {
+    --bs-contributor-wall-avatar-size: 2.5rem;
+    --bs-contributor-wall-avatar-bg: var(--tc-surface-muted);
+    --bs-contributor-wall-avatar-color: var(--tc-text);
+    --bs-contributor-wall-avatar-ring-color: var(--tc-surface);
+    --bs-contributor-wall-avatar-ring-size: 2px;
+    --bs-contributor-wall-hover-translate: -1px;
+    --bs-contributor-wall-hover-ring-color: var(--tc-app-accent);
+    --bs-contributor-wall-more-bg: var(--tc-surface-muted);
+    --bs-contributor-wall-more-color: var(--tc-text-muted);
+    --bs-contributor-wall-title-color: var(--tc-text);
+    --bs-contributor-wall-initials-font-size: 0.8125rem;
+    --bs-contributor-wall-gap: 0.375rem;
+}
+
+.tc-contributor-wall {
+    display: block;
+}
+
+.tc-contributor-wall__header {
+    margin-bottom: 0.75rem;
+}
+
+.tc-contributor-wall__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bs-contributor-wall-title-color);
+    margin: 0;
+}
+
+.tc-contributor-wall-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-contributor-wall-gap);
+}
+
+// Avatar tiles — sanctioned circle shape.
+.tc-contributor-wall-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-contributor-wall-avatar-size);
+    height: var(--bs-contributor-wall-avatar-size);
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--bs-contributor-wall-avatar-color);
+    background: var(--bs-contributor-wall-avatar-bg);
+    // White ring separates each avatar — on-brand overlapping effect ready if gap is set to negative.
+    box-shadow: 0 0 0 var(--bs-contributor-wall-avatar-ring-size) var(--bs-contributor-wall-avatar-ring-color);
+    box-sizing: border-box;
+    position: relative;
+    transition:
+        transform var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:hover,
+    &:focus {
+        transform: translateY(var(--bs-contributor-wall-hover-translate));
+        // Ring + lift on hover: slate accent ring replaces the neutral ring.
+        box-shadow: 0 0 0 2px var(--bs-contributor-wall-hover-ring-color);
+        z-index: 1;
+        text-decoration: none;
+        color: var(--bs-contributor-wall-avatar-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        z-index: 1;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// Avatar image — fills the circle, covers to maintain aspect ratio.
+.tc-contributor-wall-item__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+// Initials tile — slate bg + tc-text initials, mono micro-label.
+.tc-contributor-wall-item__initials {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-contributor-wall-initials-font-size);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--bs-contributor-wall-avatar-color);
+    user-select: none;
+}
+
+// Overflow chip — circle matching avatar size, muted bg, mono +N text.
+.tc-contributor-wall-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-contributor-wall-avatar-size);
+    height: var(--bs-contributor-wall-avatar-size);
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--bs-contributor-wall-more-bg);
+    color: var(--bs-contributor-wall-more-color);
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-contributor-wall-initials-font-size);
+    font-weight: 600;
+    user-select: none;
+    box-shadow: 0 0 0 var(--bs-contributor-wall-avatar-ring-size) var(--bs-contributor-wall-avatar-ring-color);
+    box-sizing: border-box;
+}
+
+// 44px coarse touch targets for linked avatars.
+@media (pointer: coarse) {
+    a.tc-contributor-wall-item {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze the 1px lift; keep box-shadow transition.
+@media (prefers-reduced-motion: reduce) {
+    .tc-contributor-wall-item {
+        transition: box-shadow var(--tc-transition-fast);
+
+        &:hover,
+        &:focus {
+            transform: none;
+        }
+    }
+}
