@@ -112,6 +112,7 @@ import { PluginGrid } from './PluginGrid'
 import { PricingCard } from './PricingCard'
 import { QueuedFile } from './QueuedFile'
 import { QuickStart } from './QuickStart'
+import { RankCell } from './RankCell'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -233,4 +234,5 @@ export function register(): void {
     customElements.define('tc-pricing-card', PricingCard)
     customElements.define('tc-queued-file', QueuedFile)
     customElements.define('tc-quick-start', QuickStart)
+    customElements.define('tc-rank-cell', RankCell)
 }
