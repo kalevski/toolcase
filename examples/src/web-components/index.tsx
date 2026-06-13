@@ -93,6 +93,7 @@ import LeaderboardTrendDemo from './LeaderboardTrendDemo'
 import LinkedProvidersCardDemo from './LinkedProvidersCardDemo'
 import LogoCloudDemo from './LogoCloudDemo'
 import MaintainerCardDemo from './MaintainerCardDemo'
+import MetricTileDemo from './MetricTileDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -206,4 +207,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'linked-providers-card', category: 'Components', element: <LinkedProvidersCardDemo /> },
     { key: 'logo-cloud', category: 'Content', element: <LogoCloudDemo /> },
     { key: 'maintainer-card', category: 'Components', element: <MaintainerCardDemo /> },
+    { key: 'metric-tile', category: 'Components', element: <MetricTileDemo /> },
 ]

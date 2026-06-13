@@ -101,6 +101,7 @@ import { LeaderboardTrend } from './LeaderboardTrend'
 import { LinkedProvidersCard } from './LinkedProvidersCard'
 import { LogoCloud } from './LogoCloud'
 import { MaintainerCard } from './MaintainerCard'
+import { MetricTile } from './MetricTile'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -211,4 +212,5 @@ export function register(): void {
     customElements.define('tc-linked-providers-card', LinkedProvidersCard)
     customElements.define('tc-logo-cloud', LogoCloud)
     customElements.define('tc-maintainer-card', MaintainerCard)
+    customElements.define('tc-metric-tile', MetricTile)
 }
