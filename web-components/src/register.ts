@@ -60,6 +60,7 @@ import { Link } from './Link'
 import { Spacer } from './Spacer'
 import { Text } from './Text'
 import { VisuallyHidden } from './VisuallyHidden'
+import { PulseIndicator } from './PulseIndicator'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -129,4 +130,5 @@ export function register(): void {
     customElements.define('tc-spacer', Spacer)
     customElements.define('tc-text', Text)
     customElements.define('tc-visually-hidden', VisuallyHidden)
+    customElements.define('tc-pulse-indicator', PulseIndicator)
 }

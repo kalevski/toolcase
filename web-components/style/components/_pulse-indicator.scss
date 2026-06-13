@@ -1,0 +1,73 @@
+// tc-pulse-indicator — animated status dot with label.
+// Color defaults to --tc-success (live/online); override via the `color` attribute
+// which writes --bs-pulse-indicator-color on the host element as an inline style.
+// The ring is a ::after pseudo expanding + fading (~1.6s loop).
+// --paused modifier freezes the ring. prefers-reduced-motion hides it entirely.
+
+tc-pulse-indicator {
+    // Default color; overridden by host inline style when `color` attribute is set.
+    --bs-pulse-indicator-color: var(--tc-success);
+}
+
+.tc-pulse-indicator {
+    --bs-pulse-indicator-dot-size: 8px;
+    --bs-pulse-indicator-gap: 6px;
+    --bs-pulse-indicator-label-size: 12.5px;
+    --bs-pulse-indicator-label-color: var(--tc-text-muted);
+    --bs-pulse-indicator-animation-speed: 1.6s;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-pulse-indicator-gap);
+}
+
+.tc-pulse-indicator-dot {
+    position: relative;
+    width: var(--bs-pulse-indicator-dot-size);
+    height: var(--bs-pulse-indicator-dot-size);
+    border-radius: 50%;
+    background-color: var(--bs-pulse-indicator-color);
+    flex-shrink: 0;
+}
+
+.tc-pulse-indicator-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--bs-pulse-indicator-dot-size);
+    height: var(--bs-pulse-indicator-dot-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--bs-pulse-indicator-color);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+    animation: pulse-indicator-ring var(--bs-pulse-indicator-animation-speed) ease-out infinite;
+}
+
+.tc-pulse-indicator--paused .tc-pulse-indicator-dot::after {
+    animation: none;
+}
+
+.tc-pulse-indicator-label {
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-pulse-indicator-label-size);
+    color: var(--bs-pulse-indicator-label-color);
+    line-height: 1;
+}
+
+@keyframes pulse-indicator-ring {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.5);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-pulse-indicator-dot::after {
+        animation: none;
+    }
+}
