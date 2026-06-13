@@ -78,6 +78,7 @@ import { Sparkline } from './Sparkline'
 import { TrendIndicator } from './TrendIndicator'
 import { CodeLabelCell } from './CodeLabelCell'
 import { CodeWithOutput } from './CodeWithOutput'
+import { CommunityLinks } from './CommunityLinks'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -165,4 +166,5 @@ export function register(): void {
     customElements.define('tc-trend-indicator', TrendIndicator)
     customElements.define('tc-code-label-cell', CodeLabelCell)
     customElements.define('tc-code-with-output', CodeWithOutput)
+    customElements.define('tc-community-links', CommunityLinks)
 }
