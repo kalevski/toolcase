@@ -88,6 +88,7 @@ import { BasicCard } from './BasicCard'
 import { ColoredCard } from './ColoredCard'
 import { DifferenceCard } from './DifferenceCard'
 import { ListCard } from './ListCard'
+import { StatusCard } from './StatusCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -185,4 +186,5 @@ export function register(): void {
     customElements.define('tc-colored-card', ColoredCard)
     customElements.define('tc-difference-card', DifferenceCard)
     customElements.define('tc-list-card', ListCard)
+    customElements.define('tc-status-card', StatusCard)
 }
