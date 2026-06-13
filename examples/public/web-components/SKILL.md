@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Avatar, Badge, BadgeRow, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, Avatar, Badge, BadgeRow, Brand, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, Heading, Kbd, ListGroup, Placeholder, Progress, Spinner, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -39,6 +39,7 @@ After `register()` you can author markup directly:
   - [tc-avatar](#tc-avatar)
   - [tc-badge](#tc-badge)
   - [tc-badge-row](#tc-badge-row)
+  - [tc-brand](#tc-brand)
   - [tc-button](#tc-button)
   - [tc-button-group](#tc-button-group)
   - [tc-card](#tc-card)
@@ -845,6 +846,60 @@ None. `tc-text` is a purely presentational element.
 <tc-text size="small" variant="muted">Small muted caption.</tc-text>
 <tc-text size="large">Large body text.</tc-text>
 <tc-text as="span">Inline span text.</tc-text>
+```
+
+---
+
+### tc-brand
+
+Branded wordmark with primary/secondary text, a customisable accent underline bar, and an optional micro-label chip. The primary wordmark renders in JetBrains Mono weight 700 (uppercase, tracked); secondary text uses the muted slate ladder; the label is a sharp-cornered mono micro-chip. The underline defaults to the toolcase signature cyan (`--tc-accent`) and is overridable via the `color` attribute.
+
+**Tag:** `tc-brand`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `primary-text` | string | — | Primary wordmark text rendered as the branded mark |
+| `secondary-text` | string | — | Secondary text rendered inline after the primary mark |
+| `label` | string | — | Micro-label text rendered as a small chip beside the wordmark |
+| `color` | string (CSS color) | `var(--tc-accent)` | CSS color for the underline accent bar (hex, oklch, named, etc.) |
+| `xlarge` | boolean | false | Scales primary and secondary text to 2rem |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| `primary` | Rich content for the primary wordmark region (overrides `primary-text` attribute when both present) |
+| `secondary` | Rich content for the secondary text region (overrides `secondary-text` attribute) |
+| `label` | Rich content for the label chip region (overrides `label` attribute) |
+
+**Events**
+
+None.
+
+```html
+<!-- Primary text via attribute -->
+<tc-brand primary-text="ToolCase"></tc-brand>
+
+<!-- Primary + secondary text -->
+<tc-brand primary-text="Tool" secondary-text="Case"></tc-brand>
+
+<!-- With label chip -->
+<tc-brand primary-text="ToolCase" label="beta"></tc-brand>
+
+<!-- Custom underline color -->
+<tc-brand primary-text="ToolCase" color="#e85d04"></tc-brand>
+
+<!-- Xlarge scale -->
+<tc-brand primary-text="ToolCase" xlarge></tc-brand>
+
+<!-- Rich slotted content -->
+<tc-brand>
+    <strong slot="primary">ToolCase</strong>
+    <span slot="secondary">Platform</span>
+    <em slot="label">v2</em>
+</tc-brand>
 ```
 
 ---

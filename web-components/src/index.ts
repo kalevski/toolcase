@@ -1,4 +1,5 @@
 export { register } from './register'
+export * from './Brand'
 export * from './Avatar'
 export * from './ActionHeader'
 export * from './ActionItems'

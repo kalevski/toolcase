@@ -1,0 +1,115 @@
+// tc-brand — branded wordmark with primary/secondary text, an accent underline
+// bar, and an optional micro-label chip. All cosmetics flow through --bs-brand-*
+// custom properties so themes can override the full visual without touching Sass.
+//
+// The host (tc-brand) is display: inline-block (registered in _reset.scss).
+// The inner .tc-brand span wraps a .tc-brand__text-group (primary + secondary
+// inline text + the underline bar) and an optional .tc-brand__label-content chip.
+//
+// Underline color: default --tc-accent (signature cyan); override via the
+// color attribute which sets --bs-brand-underline-color inline on
+// .tc-brand__text-group so it cascades down to .tc-brand__underline.
+//
+// Sharp corners everywhere (border-radius: 0). No shadows. No animated underline.
+
+tc-brand {
+    --bs-brand-primary-font: var(--tc-font-mono);
+    --bs-brand-primary-weight: 700;
+    --bs-brand-primary-size: 1rem;
+    --bs-brand-primary-color: var(--tc-text);
+    --bs-brand-primary-letter-spacing: 0.06em;
+    --bs-brand-secondary-size: 1rem;
+    --bs-brand-secondary-color: var(--tc-text-muted);
+    --bs-brand-underline-height: 3px;
+    --bs-brand-underline-color: var(--tc-accent);
+    --bs-brand-label-font: var(--tc-font-mono);
+    --bs-brand-label-size: 0.6rem;
+    --bs-brand-label-weight: 500;
+    --bs-brand-label-color: var(--tc-text-faint);
+    --bs-brand-label-bg: var(--tc-surface-muted);
+    --bs-brand-label-letter-spacing: 0.1em;
+    --bs-brand-label-padding-y: 0.2em;
+    --bs-brand-label-padding-x: 0.45em;
+    --bs-brand-gap: 0.5rem;
+    --bs-brand-xlarge-scale: 2rem;
+}
+
+.tc-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-brand-gap);
+}
+
+.tc-brand__text-group {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.tc-brand__primary {
+    display: inline;
+    font-family: var(--bs-brand-primary-font);
+    font-weight: var(--bs-brand-primary-weight);
+    font-size: var(--bs-brand-primary-size);
+    color: var(--bs-brand-primary-color);
+    letter-spacing: var(--bs-brand-primary-letter-spacing);
+    text-transform: uppercase;
+    user-select: none;
+    line-height: 1.2;
+}
+
+.tc-brand__secondary {
+    display: inline;
+    font-size: var(--bs-brand-secondary-size);
+    color: var(--bs-brand-secondary-color);
+    user-select: none;
+    line-height: 1.2;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// The underline bar: a sharp 2–4px accent stroke beneath the wordmark.
+// Color is set via --bs-brand-underline-color (defaults to --tc-accent cyan).
+// The color attribute on the host sets this property inline on .tc-brand__text-group
+// so the cascade reaches here. No border-radius. No animated transition.
+.tc-brand__underline {
+    display: block;
+    height: var(--bs-brand-underline-height);
+    width: 100%;
+    background-color: var(--bs-brand-underline-color, var(--tc-accent));
+    border-radius: 0;
+    margin-top: 0.15em;
+}
+
+// Micro-label chip: mono uppercase, sharp corners, muted chip background.
+.tc-brand__label-content {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--bs-brand-label-font);
+    font-size: var(--bs-brand-label-size);
+    font-weight: var(--bs-brand-label-weight);
+    letter-spacing: var(--bs-brand-label-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-brand-label-color);
+    background-color: var(--bs-brand-label-bg);
+    padding: var(--bs-brand-label-padding-y) var(--bs-brand-label-padding-x);
+    border-radius: 0;
+    white-space: nowrap;
+    line-height: 1;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Xlarge modifier: scales primary and secondary text to the xlarge size token.
+.tc-brand--xlarge {
+    .tc-brand__primary {
+        font-size: var(--bs-brand-xlarge-scale);
+    }
+
+    .tc-brand__secondary {
+        font-size: var(--bs-brand-xlarge-scale);
+    }
+}

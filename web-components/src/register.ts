@@ -1,3 +1,4 @@
+import { Brand } from './Brand'
 import { Avatar } from './Avatar'
 import { ActionHeader } from './ActionHeader'
 import { ActionItems } from './ActionItems'
@@ -64,6 +65,7 @@ export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
         return
     }
+    customElements.define('tc-brand', Brand)
     customElements.define('tc-avatar', Avatar)
     customElements.define('tc-action-header', ActionHeader)
     customElements.define('tc-action-items', ActionItems)
