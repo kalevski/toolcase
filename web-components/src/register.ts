@@ -68,6 +68,7 @@ import { Stamp } from './Stamp'
 import { StatusDot } from './StatusDot'
 import { Tag } from './Tag'
 import { AssetRow } from './AssetRow'
+import { AssetRowList } from './AssetRowList'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -145,4 +146,5 @@ export function register(): void {
     customElements.define('tc-status-dot', StatusDot)
     customElements.define('tc-tag', Tag)
     customElements.define('tc-asset-row', AssetRow)
+    customElements.define('tc-asset-row-list', AssetRowList)
 }
