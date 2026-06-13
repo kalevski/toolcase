@@ -1,0 +1,227 @@
+// tc-linked-providers-card — section card listing OAuth providers with custom icons and brand colors.
+// Outer frame: toolcase Card motif (.card) — white, 1px --tc-border hairline, --tc-shadow-sm.
+// Header: faint ink-gradient cap (.card-header).
+// Provider rows: separated by slate-100 inner hairlines (fainter than outer frame).
+// Row hover: --tc-surface-hover (slate-50). Icon tile carries brand color; everything else is slate.
+// Action buttons: hover well + focus-visible ring. ≥44px coarse targets.
+// Honour prefers-reduced-motion.
+
+@use '../foundation/tokens' as *;
+
+tc-linked-providers-card {
+    // Public theming contract — all cosmetics flow through these vars.
+    --bs-linked-providers-card-row-separator: var(--tc-border-faint, rgba(148, 163, 184, 0.35));
+    --bs-linked-providers-card-row-hover-bg: var(--tc-surface-hover);
+    --bs-linked-providers-card-row-padding-y: 0.75rem;
+    --bs-linked-providers-card-row-padding-x: 1.25rem;
+    --bs-linked-providers-card-label-color: var(--tc-text);
+    --bs-linked-providers-card-label-font-size: 0.875rem;
+    --bs-linked-providers-card-account-color: var(--tc-text-muted);
+    --bs-linked-providers-card-account-font-size: 0.75rem;
+    --bs-linked-providers-card-tile-bg: var(--tc-surface-muted);
+    --bs-linked-providers-card-tile-border-color: var(--tc-border);
+    --bs-linked-providers-card-tile-size: 2.125rem;
+    --bs-linked-providers-card-icon-size: 1rem;
+    --bs-linked-providers-card-icon-default-color: var(--tc-text-muted);
+    --bs-linked-providers-card-btn-color: var(--tc-text-muted);
+    --bs-linked-providers-card-btn-hover-color: var(--tc-text);
+    --bs-linked-providers-card-btn-hover-bg: var(--tc-surface-muted);
+    --bs-linked-providers-card-btn-size: 2rem;
+    --bs-linked-providers-card-connected-dot-color: var(--tc-success);
+    --bs-linked-providers-card-connected-dot-size: 6px;
+    --bs-linked-providers-card-empty-color: var(--tc-text-faint);
+    --bs-linked-providers-card-empty-padding-y: 2rem;
+    --bs-linked-providers-card-title-color: var(--tc-text);
+    --bs-linked-providers-card-title-font-size: 0.9375rem;
+}
+
+// Inner card div — .card class supplies white bg, border, shadow.
+// This class adds linked-providers-specific layout.
+.tc-linked-providers-card {
+    // Ensure list and empty state sit flush inside the card frame.
+    overflow: hidden;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+// .card-header supplies gradient cap + border-bottom via the Card SCSS.
+.tc-linked-providers-card__header {
+    display: flex;
+    align-items: center;
+}
+
+.tc-linked-providers-card__title {
+    margin: 0;
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: var(--bs-linked-providers-card-title-font-size);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-linked-providers-card-title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ── Provider list ─────────────────────────────────────────────────────────────
+
+.tc-linked-providers-card__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tc-linked-providers-card__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: var(--bs-linked-providers-card-row-padding-y) var(--bs-linked-providers-card-row-padding-x);
+    transition: background-color var(--tc-transition-fast);
+
+    & + & {
+        border-top: 1px solid var(--bs-linked-providers-card-row-separator);
+    }
+
+    &:hover {
+        background-color: var(--bs-linked-providers-card-row-hover-bg);
+    }
+}
+
+// ── Icon tile ─────────────────────────────────────────────────────────────────
+
+// Square tile — intentionally NOT circular (businesslike voice).
+// Brand color flows in via inline style="color: ..." from JS.
+.tc-linked-providers-card__tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-linked-providers-card-tile-size);
+    height: var(--bs-linked-providers-card-tile-size);
+    background: var(--bs-linked-providers-card-tile-bg);
+    border: 1px solid var(--bs-linked-providers-card-tile-border-color);
+    border-radius: 0;
+    color: var(--bs-linked-providers-card-icon-default-color);
+}
+
+.tc-linked-providers-card__icon-svg {
+    width: var(--bs-linked-providers-card-icon-size);
+    height: var(--bs-linked-providers-card-icon-size);
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+// ── Provider info ─────────────────────────────────────────────────────────────
+
+.tc-linked-providers-card__info {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-linked-providers-card__label {
+    font-size: var(--bs-linked-providers-card-label-font-size);
+    font-weight: 500;
+    color: var(--bs-linked-providers-card-label-color);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-linked-providers-card__account {
+    font-size: var(--bs-linked-providers-card-account-font-size);
+    color: var(--bs-linked-providers-card-account-color);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Connected state dot ───────────────────────────────────────────────────────
+
+// Sanctioned circle (status indicator dot, not a rectangular element).
+.tc-linked-providers-card__connected-dot {
+    flex-shrink: 0;
+    width: var(--bs-linked-providers-card-connected-dot-size);
+    height: var(--bs-linked-providers-card-connected-dot-size);
+    border-radius: 50%;
+    background: var(--bs-linked-providers-card-connected-dot-color);
+}
+
+// ── Action button ─────────────────────────────────────────────────────────────
+
+.tc-linked-providers-card__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-linked-providers-card-btn-size);
+    height: var(--bs-linked-providers-card-btn-size);
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    color: var(--bs-linked-providers-card-btn-color);
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--bs-linked-providers-card-btn-hover-bg);
+        color: var(--bs-linked-providers-card-btn-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+.tc-linked-providers-card__action-icon {
+    width: 0.9375rem;
+    height: 0.9375rem;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+.tc-linked-providers-card__empty {
+    padding: var(--bs-linked-providers-card-empty-padding-y) var(--bs-linked-providers-card-row-padding-x);
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--bs-linked-providers-card-empty-color);
+}
+
+// ── 44 px coarse touch targets on action buttons ──────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-linked-providers-card__btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── prefers-reduced-motion: freeze transforms, keep bg/color transitions ──────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-linked-providers-card__row {
+        transition:
+            background-color var(--tc-transition-fast);
+    }
+
+    .tc-linked-providers-card__btn {
+        transition:
+            background-color var(--tc-transition-fast),
+            color var(--tc-transition-fast);
+    }
+}

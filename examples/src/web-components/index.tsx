@@ -90,6 +90,7 @@ import FeatureCardDemo from './FeatureCardDemo'
 import GoodFirstIssuesDemo from './GoodFirstIssuesDemo'
 import HeroStatsBarDemo from './HeroStatsBarDemo'
 import LeaderboardTrendDemo from './LeaderboardTrendDemo'
+import LinkedProvidersCardDemo from './LinkedProvidersCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -200,4 +201,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'good-first-issues', category: 'Components', element: <GoodFirstIssuesDemo /> },
     { key: 'hero-stats-bar', category: 'Components', element: <HeroStatsBarDemo /> },
     { key: 'leaderboard-trend', category: 'Components', element: <LeaderboardTrendDemo /> },
+    { key: 'linked-providers-card', category: 'Components', element: <LinkedProvidersCardDemo /> },
 ]
