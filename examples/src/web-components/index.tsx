@@ -114,6 +114,7 @@ import SprintChainDemo from './SprintChainDemo'
 import StatCardDemo from './StatCardDemo'
 import StateMachineDemo from './StateMachineDemo'
 import StepperDemo from './StepperDemo'
+import TeamListDemo from './TeamListDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -248,4 +249,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'stat-card', category: 'Content', element: <StatCardDemo /> },
     { key: 'state-machine', category: 'Content', element: <StateMachineDemo /> },
     { key: 'stepper', category: 'Navigation', element: <StepperDemo /> },
+    { key: 'team-list', category: 'Content', element: <TeamListDemo /> },
 ]

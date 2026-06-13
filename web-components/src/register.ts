@@ -122,6 +122,7 @@ import { SprintChain } from './SprintChain'
 import { StatCard } from './StatCard'
 import { StateMachine } from './StateMachine'
 import { Stepper } from './Stepper'
+import { TeamList } from './TeamList'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -253,4 +254,5 @@ export function register(): void {
     customElements.define('tc-stat-card', StatCard)
     customElements.define('tc-state-machine', StateMachine)
     customElements.define('tc-stepper', Stepper)
+    customElements.define('tc-team-list', TeamList)
 }

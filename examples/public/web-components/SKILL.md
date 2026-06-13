@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -116,6 +116,7 @@ After `register()` you can author markup directly:
   - [tc-sprint-chain](#tc-sprint-chain)
   - [tc-stat-card](#tc-stat-card)
   - [tc-state-machine](#tc-state-machine)
+  - [tc-team-list](#tc-team-list)
   - [tc-text](#tc-text)
   - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
@@ -2325,6 +2326,92 @@ None. `tc-plugin-grid` is purely data-driven via the `items` JS property.
 
 <!-- 4-column grid -->
 <tc-plugin-grid id="plugins4" columns="4"></tc-plugin-grid>
+```
+
+---
+
+### tc-team-list
+
+List of team members with gradient avatar tiles, names, emails, and optional role chips. Members are set via the JS `members` property. Initials are derived automatically from `name` when the `initials` field is absent. Image avatars are rendered when `avatarUrl` is provided. The avatar circle is the only sanctioned `border-radius`; all other shapes are sharp.
+
+**Tag:** `tc-team-list`
+
+**Attributes**
+
+None. All content is driven by the `members` JS property.
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `members` | `TeamMember[]` | Array of member objects. Set via `el.members = [...]`. Getter/setter; triggers re-render on assignment. |
+
+`TeamMember` shape:
+
+```ts
+interface TeamMember {
+    id: string
+    name: string
+    email?: string
+    role?: string
+    initials?: string   // derived from name (first letters of up to two words) when absent
+    avatarUrl?: string  // when present, renders <img> instead of initials span
+    gradient?: boolean  // defaults to true; renders slate ink gradient background on initials avatar
+}
+```
+
+**Events**
+
+None. `tc-team-list` is purely presentational.
+
+**Slots**
+
+None. All content is driven by the `members` JS property.
+
+**Accessibility**
+
+- The inner `<ul>` carries `role="list"`; each member `<li>` carries `role="listitem"`.
+- Initials avatars carry `aria-hidden="true"` — the member name text is the accessible label.
+- Image avatars receive `alt` set to the member's `name`.
+- Row hover transitions respect `prefers-reduced-motion`.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-team-list-bg` | `var(--tc-surface)` | List background. |
+| `--bs-team-list-border` | `var(--tc-border)` | Outer border color. |
+| `--bs-team-list-separator` | `var(--tc-slate-100)` | Inner row separator hairline. |
+| `--bs-team-list-row-hover-bg` | `var(--tc-surface-hover)` | Row background on hover. |
+| `--bs-team-list-name-color` | `var(--tc-text)` | Member name text color. |
+| `--bs-team-list-name-weight` | `500` | Member name font weight. |
+| `--bs-team-list-email-color` | `var(--tc-text-muted)` | Email address text color. |
+| `--bs-team-list-role-bg` | `var(--tc-surface-muted)` | Role chip background. |
+| `--bs-team-list-role-color` | `var(--tc-text-muted)` | Role chip text color. |
+| `--bs-team-list-avatar-size` | `2.25rem` | Diameter of the avatar circle. |
+| `--bs-team-list-avatar-font-size` | `0.75rem` | Initials font size inside the avatar. |
+| `--bs-team-list-avatar-gradient` | `linear-gradient(135deg, var(--tc-app-accent), #2b3a51)` | Gradient used on initials avatars when `gradient` is true. |
+| `--bs-team-list-avatar-color` | `#fff` | Initials text color on gradient avatars. |
+
+```html
+<tc-team-list id="tl1"></tc-team-list>
+
+<script>
+document.querySelector('#tl1').members = [
+    { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Engineering' },
+    { id: '2', name: 'Bob Smith',     email: 'bob@example.com',   role: 'Design' },
+    { id: '3', name: 'Carol White',   email: 'carol@example.com', role: 'Product' },
+]
+</script>
+
+<!-- Explicit initials + image avatar -->
+<tc-team-list id="tl2"></tc-team-list>
+<script>
+document.querySelector('#tl2').members = [
+    { id: '1', name: 'Dave Kumar',  initials: 'DK', email: 'dave@example.com' },
+    { id: '2', name: 'Eva Müller',  avatarUrl: 'https://example.com/eva.jpg', email: 'eva@example.com', role: 'Lead' },
+]
+</script>
 ```
 
 ---
