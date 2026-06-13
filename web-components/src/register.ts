@@ -92,6 +92,7 @@ import { StatusCard } from './StatusCard'
 import { DashboardContent } from './DashboardContent'
 import { DownloadStats } from './DownloadStats'
 import { EmptyState } from './EmptyState'
+import { EntityCell } from './EntityCell'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -193,4 +194,5 @@ export function register(): void {
     customElements.define('tc-dashboard-content', DashboardContent)
     customElements.define('tc-download-stats', DownloadStats)
     customElements.define('tc-empty-state', EmptyState)
+    customElements.define('tc-entity-cell', EntityCell)
 }
