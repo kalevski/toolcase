@@ -74,6 +74,7 @@ import { BriefCard } from './BriefCard'
 import { BundleBar } from './BundleBar'
 import { CalloutQuote } from './CalloutQuote'
 import { ChartContainer } from './ChartContainer'
+import { Sparkline } from './Sparkline'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -157,4 +158,5 @@ export function register(): void {
     customElements.define('tc-bundle-bar', BundleBar)
     customElements.define('tc-callout-quote', CalloutQuote)
     customElements.define('tc-chart-container', ChartContainer)
+    customElements.define('tc-sparkline', Sparkline)
 }

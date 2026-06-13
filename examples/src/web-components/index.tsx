@@ -66,6 +66,7 @@ import BriefCardDemo from './BriefCardDemo'
 import BundleBarDemo from './BundleBarDemo'
 import CalloutQuoteDemo from './CalloutQuoteDemo'
 import ChartContainerDemo from './ChartContainerDemo'
+import SparklineDemo from './SparklineDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -152,4 +153,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'bundle-bar', category: 'Content', element: <BundleBarDemo /> },
     { key: 'callout-quote', category: 'Content', element: <CalloutQuoteDemo /> },
     { key: 'chart-container', category: 'Components', element: <ChartContainerDemo /> },
+    { key: 'sparkline', category: 'Components', element: <SparklineDemo /> },
 ]
