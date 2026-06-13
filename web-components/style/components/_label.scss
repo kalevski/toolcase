@@ -1,0 +1,83 @@
+// tc-label — semantic form label with required indicator and info-icon tooltip.
+// Sharp corners, dense 13px body, no shadows. All cosmetic values flow through
+// --bs-label-* backed by --tc-* tokens.
+
+tc-label {
+    --bs-label-font-size: 0.8125rem;        // 13px
+    --bs-label-font-weight: 500;
+    --bs-label-color: var(--tc-text);
+    --bs-label-sm-font-size: 0.75rem;       // 12px
+    --bs-label-lg-font-size: 0.9375rem;     // 15px
+    --bs-label-gap: 0.3125rem;              // 5px
+    --bs-label-required-color: var(--tc-danger);
+    --bs-label-info-color: var(--tc-text-muted);
+    --bs-label-info-hover-bg: var(--tc-surface-muted);
+    --bs-label-info-icon-size: 0.875em;
+}
+
+.tc-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-label-gap);
+    margin-bottom: 0.4rem;
+    font-size: var(--bs-label-font-size);
+    font-weight: var(--bs-label-font-weight);
+    line-height: 1.4;
+    color: var(--bs-label-color);
+    border-radius: 0;
+}
+
+.tc-label-sm {
+    font-size: var(--bs-label-sm-font-size);
+}
+
+.tc-label-lg {
+    font-size: var(--bs-label-lg-font-size);
+}
+
+.tc-label-required {
+    color: var(--bs-label-required-color);
+}
+
+.tc-label-info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem;
+    border: 0;
+    background: none;
+    border-radius: 0;
+    color: var(--bs-label-info-color);
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color 0.15s ease;
+
+    svg {
+        width: var(--bs-label-info-icon-size);
+        height: var(--bs-label-info-icon-size);
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background-color: var(--bs-label-info-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2.75rem;
+            height: 2.75rem;
+            transform: translate(-50%, -50%);
+        }
+    }
+}

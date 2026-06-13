@@ -44,6 +44,7 @@ import HeadingDemo from './HeadingDemo'
 import HelperTextDemo from './HelperTextDemo'
 import IconDemo from './IconDemo'
 import KbdDemo from './KbdDemo'
+import LabelDemo from './LabelDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -108,4 +109,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'helper-text', category: 'Forms', element: <HelperTextDemo /> },
     { key: 'icon', category: 'Content', element: <IconDemo /> },
     { key: 'kbd', category: 'Content', element: <KbdDemo /> },
+    { key: 'label', category: 'Forms', element: <LabelDemo /> },
 ]

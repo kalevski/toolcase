@@ -52,6 +52,7 @@ import { Heading } from './Heading'
 import { HelperText } from './HelperText'
 import { Icon } from './Icon'
 import { Kbd } from './Kbd'
+import { Label } from './Label'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -113,4 +114,5 @@ export function register(): void {
     customElements.define('tc-helper-text', HelperText)
     customElements.define('tc-icon', Icon)
     customElements.define('tc-kbd', Kbd)
+    customElements.define('tc-label', Label)
 }
