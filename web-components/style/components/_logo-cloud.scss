@@ -1,0 +1,108 @@
+// tc-logo-cloud — grid of logos with optional title, grayscale filter, and optional links.
+// Sharp corners (border-radius: 0). Neutral spacing; logos sit on the page surface.
+// Grayscale variant: filter + opacity at rest, full color/opacity on hover/focus-within.
+// Linked logos: visible :focus-visible ring, ≥44px coarse touch targets.
+// Honour prefers-reduced-motion: grayscale shift becomes instant.
+
+@use '../foundation/tokens' as *;
+
+tc-logo-cloud {
+    --bs-logo-cloud-columns: 5;
+    --bs-logo-cloud-gap: 2rem;
+    --bs-logo-cloud-cell-padding-x: 1.25rem;
+    --bs-logo-cloud-cell-padding-y: 1rem;
+    --bs-logo-cloud-title-color: var(--tc-text);
+    --bs-logo-cloud-title-font-size: 0.8125rem;
+    --bs-logo-cloud-title-margin-bottom: 1.25rem;
+    --bs-logo-cloud-grayscale-opacity: 0.55;
+    --bs-logo-cloud-grayscale-transition: filter var(--tc-transition-base), opacity var(--tc-transition-base);
+}
+
+.tc-logo-cloud {
+    display: block;
+}
+
+.tc-logo-cloud__title {
+    font-size: var(--bs-logo-cloud-title-font-size);
+    font-weight: 600;
+    color: var(--bs-logo-cloud-title-color);
+    margin: 0 0 var(--bs-logo-cloud-title-margin-bottom);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: var(--bs-font-monospace);
+    line-height: 1.4;
+}
+
+.tc-logo-cloud-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--bs-logo-cloud-columns), 1fr);
+    gap: var(--bs-logo-cloud-gap);
+    align-items: center;
+
+    @media (max-width: 767px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 479px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.tc-logo-cloud-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--bs-logo-cloud-cell-padding-y) var(--bs-logo-cloud-cell-padding-x);
+    border-radius: 0;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+}
+
+a.tc-logo-cloud-cell {
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// 44px coarse touch targets for linked logo cells
+@media (pointer: coarse) {
+    a.tc-logo-cloud-cell {
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+    }
+}
+
+.tc-logo-cloud-img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 0;
+}
+
+// Grayscale variant — desaturate + dim at rest, restore on hover/focus-within
+.tc-logo-cloud--grayscale {
+    .tc-logo-cloud-img {
+        filter: grayscale(1);
+        opacity: var(--bs-logo-cloud-grayscale-opacity);
+        transition: var(--bs-logo-cloud-grayscale-transition);
+    }
+
+    .tc-logo-cloud-cell:hover .tc-logo-cloud-img,
+    .tc-logo-cloud-cell:focus-within .tc-logo-cloud-img {
+        filter: grayscale(0);
+        opacity: 1;
+    }
+}
+
+// Honour prefers-reduced-motion: skip the filter/opacity transition entirely
+@media (prefers-reduced-motion: reduce) {
+    .tc-logo-cloud--grayscale .tc-logo-cloud-img {
+        transition: none;
+    }
+}

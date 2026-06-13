@@ -99,6 +99,7 @@ import { GoodFirstIssues } from './GoodFirstIssues'
 import { HeroStatsBar } from './HeroStatsBar'
 import { LeaderboardTrend } from './LeaderboardTrend'
 import { LinkedProvidersCard } from './LinkedProvidersCard'
+import { LogoCloud } from './LogoCloud'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -207,4 +208,5 @@ export function register(): void {
     customElements.define('tc-hero-stats-bar', HeroStatsBar)
     customElements.define('tc-leaderboard-trend', LeaderboardTrend)
     customElements.define('tc-linked-providers-card', LinkedProvidersCard)
+    customElements.define('tc-logo-cloud', LogoCloud)
 }
