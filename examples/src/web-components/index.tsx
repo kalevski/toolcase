@@ -69,6 +69,7 @@ import ChartContainerDemo from './ChartContainerDemo'
 import SparklineDemo from './SparklineDemo'
 import TrendIndicatorDemo from './TrendIndicatorDemo'
 import CodeLabelCellDemo from './CodeLabelCellDemo'
+import CodeWithOutputDemo from './CodeWithOutputDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -158,4 +159,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'sparkline', category: 'Components', element: <SparklineDemo /> },
     { key: 'trend-indicator', category: 'Components', element: <TrendIndicatorDemo /> },
     { key: 'code-label-cell', category: 'Components', element: <CodeLabelCellDemo /> },
+    { key: 'code-with-output', category: 'Components', element: <CodeWithOutputDemo /> },
 ]
