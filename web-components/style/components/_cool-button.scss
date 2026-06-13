@@ -1,0 +1,96 @@
+// tc-cool-button — grouped button with an optional addon region.
+// Core appearance (gradient primary, hover lift, variants, sizes, disabled)
+// comes from .btn + .btn-{variant} in _button.scss. This partial adds the
+// inner flex layout and the addon segment styling.
+
+@use '../foundation/tokens' as *;
+
+.btn.tc-cool-button {
+    // Override .btn's uniform padding so inner spans can carry it independently.
+    padding: 0;
+    // Stretch children to fill the full button height for the grouped-control look.
+    align-items: stretch;
+    overflow: hidden;
+}
+
+// ── Inner regions ─────────────────────────────────────────────────────────────
+
+.tc-cool-button-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
+    // Inherits variant bg/color from the parent .btn class.
+}
+
+// 1px internal separator — collapses into a single frame with the outer border.
+.tc-cool-button-divider {
+    display: block;
+    width: 1px;
+    align-self: stretch;
+    flex-shrink: 0;
+    background-color: var(--bs-cool-button-divider-color, rgba(255, 255, 255, 0.28));
+}
+
+.tc-cool-button-addon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: var(--bs-btn-padding-y) calc(var(--bs-btn-padding-x) * 0.8);
+    background: var(--bs-cool-button-addon-bg, var(--tc-surface-muted));
+    color: var(--bs-cool-button-addon-color, var(--tc-text));
+    flex-shrink: 0;
+}
+
+// ── Divider tint per solid variant ───────────────────────────────────────────
+// Solid variants get a semi-transparent white separator so it reads
+// against the colored fill; outline variants use the strong border token.
+
+.btn-primary.tc-cool-button,
+.btn-secondary.tc-cool-button,
+.btn-success.tc-cool-button,
+.btn-danger.tc-cool-button,
+.btn-warning.tc-cool-button,
+.btn-info.tc-cool-button {
+    --bs-cool-button-divider-color: rgba(255, 255, 255, 0.28);
+}
+
+.btn-outline-primary.tc-cool-button,
+.btn-outline-secondary.tc-cool-button,
+.btn-outline-success.tc-cool-button,
+.btn-outline-danger.tc-cool-button,
+.btn-outline-warning.tc-cool-button,
+.btn-outline-info.tc-cool-button {
+    --bs-cool-button-divider-color: var(--tc-border-strong);
+    --bs-cool-button-addon-bg: var(--tc-surface-muted);
+    --bs-cool-button-addon-color: var(--tc-text);
+}
+
+// ── Touch target ─────────────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .btn.tc-cool-button {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+// The global reset in _reset.scss freezes all transitions/animations.
+// Re-opt-in to state transitions (color, background, border-color) while
+// keeping the transform (1 px lift) frozen.
+
+@media (prefers-reduced-motion: reduce) {
+    .btn.tc-cool-button {
+        transition:
+            background var(--tc-transition-fast),
+            color var(--tc-transition-fast),
+            border-color var(--tc-transition-fast);
+
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}
