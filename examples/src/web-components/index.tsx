@@ -78,6 +78,7 @@ import CoolButtonDemo from './CoolButtonDemo'
 import ActivityCardDemo from './ActivityCardDemo'
 import BasicCardDemo from './BasicCardDemo'
 import ColoredCardDemo from './ColoredCardDemo'
+import DifferenceCardDemo from './DifferenceCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -176,4 +177,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'activity-card', category: 'Components', element: <ActivityCardDemo /> },
     { key: 'basic-card', category: 'Components', element: <BasicCardDemo /> },
     { key: 'colored-card', category: 'Components', element: <ColoredCardDemo /> },
+    { key: 'difference-card', category: 'Components', element: <DifferenceCardDemo /> },
 ]
