@@ -1,0 +1,192 @@
+// tc-pipeline — horizontal steps/pipeline visualization with numbered markers,
+// titles, and state (default / live / complete).
+// Sharp corners everywhere except the circular marker (border-radius: 50%).
+// Neutrals carry the layout; status color appears ONLY in the marker and title.
+// The live marker pulses via a ring animation; prefers-reduced-motion disables it.
+
+@keyframes tc-pipeline-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+tc-pipeline {
+    // Marker geometry
+    --bs-pipeline-marker-size: 2.25rem;
+    --bs-pipeline-marker-font-size: 0.875rem;
+    --bs-pipeline-marker-font-weight: 600;
+
+    // Connector hairline
+    --bs-pipeline-connector-height: 1px;
+    --bs-pipeline-connector-color: var(--tc-border);
+
+    // Default marker — neutral slate
+    --bs-pipeline-marker-bg: transparent;
+    --bs-pipeline-marker-border: var(--tc-border-strong);
+    --bs-pipeline-marker-color: var(--tc-text-muted);
+
+    // Title
+    --bs-pipeline-title-font-size: 0.8125rem;
+    --bs-pipeline-title-color: var(--tc-text-muted);
+    --bs-pipeline-title-font-weight: 400;
+
+    // State: complete
+    --bs-pipeline-complete-color: var(--tc-success);
+    --bs-pipeline-complete-title-color: var(--tc-text);
+
+    // State: live
+    --bs-pipeline-live-color: var(--tc-app-accent);
+    --bs-pipeline-live-title-color: var(--tc-text);
+    --bs-pipeline-live-title-font-weight: 600;
+
+    // Check icon size
+    --bs-pipeline-check-icon-size: 1rem;
+
+    // Pulse timing
+    --bs-pipeline-pulse-duration: 1.6s;
+}
+
+// Outer ordered list — horizontal flex row, no list markers
+.tc-pipeline {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+}
+
+// Per-step container — stacks marker + title vertically, centred on axis
+.tc-pipeline-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+// Connector hairline between steps (absent on the last step)
+.tc-pipeline-connector {
+    display: block;
+    position: absolute;
+    top: calc(var(--bs-pipeline-marker-size) / 2);
+    left: 50%;
+    right: -50%;
+    height: var(--bs-pipeline-connector-height);
+    background: var(--bs-pipeline-connector-color);
+    transform: translateY(-50%);
+    z-index: 0;
+    border-radius: 0;
+}
+
+// Circular numbered marker — the ONE sanctioned circle in this component
+.tc-pipeline-marker {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-pipeline-marker-size);
+    height: var(--bs-pipeline-marker-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--bs-pipeline-marker-border);
+    background: var(--bs-pipeline-marker-bg);
+    color: var(--bs-pipeline-marker-color);
+    font-size: var(--bs-pipeline-marker-font-size);
+    font-weight: var(--bs-pipeline-marker-font-weight);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.tc-pipeline-marker-num {
+    display: block;
+    line-height: 1;
+}
+
+// Check icon inside the complete marker
+.tc-pipeline-check-icon {
+    display: block;
+    width: var(--bs-pipeline-check-icon-size);
+    height: var(--bs-pipeline-check-icon-size);
+    stroke: currentColor;
+}
+
+// Step title — muted by default, sharpens on active/complete
+.tc-pipeline-title {
+    font-size: var(--bs-pipeline-title-font-size);
+    font-weight: var(--bs-pipeline-title-font-weight);
+    color: var(--bs-pipeline-title-color);
+    text-align: center;
+    line-height: 1.35;
+    border-radius: 0;
+}
+
+// Visually-hidden text for screen readers (e.g. "(complete)")
+.tc-pipeline-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+// State: complete
+.tc-pipeline-step--complete {
+    .tc-pipeline-marker {
+        border-color: var(--bs-pipeline-complete-color);
+        background: var(--bs-pipeline-complete-color);
+        color: #fff;
+    }
+
+    .tc-pipeline-title {
+        color: var(--bs-pipeline-complete-title-color);
+    }
+}
+
+// State: live — accent-colored marker with pulsing ring, bold title
+.tc-pipeline-step--live {
+    .tc-pipeline-marker {
+        border-color: var(--bs-pipeline-live-color);
+        background: var(--bs-pipeline-live-color);
+        color: #fff;
+
+        // Expanding ring pulse via ::after (50% border-radius = circle, sanctioned)
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--bs-pipeline-live-color);
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.7;
+            animation: tc-pipeline-pulse var(--bs-pipeline-pulse-duration) ease-out infinite;
+        }
+    }
+
+    .tc-pipeline-title {
+        color: var(--bs-pipeline-live-title-color);
+        font-weight: var(--bs-pipeline-live-title-font-weight);
+    }
+}
+
+// Reduced motion: disable the live-marker pulse ring entirely
+@media (prefers-reduced-motion: reduce) {
+    .tc-pipeline-step--live .tc-pipeline-marker::after {
+        animation: none;
+        opacity: 0;
+    }
+}
