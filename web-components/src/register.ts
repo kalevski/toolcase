@@ -111,6 +111,7 @@ import { Pipeline } from './Pipeline'
 import { PluginGrid } from './PluginGrid'
 import { PricingCard } from './PricingCard'
 import { QueuedFile } from './QueuedFile'
+import { QuickStart } from './QuickStart'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -231,4 +232,5 @@ export function register(): void {
     customElements.define('tc-plugin-grid', PluginGrid)
     customElements.define('tc-pricing-card', PricingCard)
     customElements.define('tc-queued-file', QueuedFile)
+    customElements.define('tc-quick-start', QuickStart)
 }

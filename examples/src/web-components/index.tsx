@@ -96,6 +96,7 @@ import MaintainerCardDemo from './MaintainerCardDemo'
 import MetricTileDemo from './MetricTileDemo'
 import MetricGridDemo from './MetricGridDemo'
 import MigrationGuideDemo from './MigrationGuideDemo'
+import QuickStartDemo from './QuickStartDemo'
 import PageFooterDemo from './PageFooterDemo'
 import PhaseGridDemo from './PhaseGridDemo'
 import PinnedFeatureShowcaseDemo from './PinnedFeatureShowcaseDemo'
@@ -219,6 +220,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'metric-tile', category: 'Components', element: <MetricTileDemo /> },
     { key: 'metric-grid', category: 'Content', element: <MetricGridDemo /> },
     { key: 'migration-guide', category: 'Content', element: <MigrationGuideDemo /> },
+    { key: 'quick-start', category: 'Content', element: <QuickStartDemo /> },
     { key: 'page-footer', category: 'Content', element: <PageFooterDemo /> },
     { key: 'phase-grid', category: 'Content', element: <PhaseGridDemo /> },
     { key: 'pinned-feature-showcase', category: 'Content', element: <PinnedFeatureShowcaseDemo /> },
