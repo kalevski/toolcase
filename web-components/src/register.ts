@@ -102,6 +102,7 @@ import { LinkedProvidersCard } from './LinkedProvidersCard'
 import { LogoCloud } from './LogoCloud'
 import { MaintainerCard } from './MaintainerCard'
 import { MetricTile } from './MetricTile'
+import { MetricGrid } from './MetricGrid'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -213,4 +214,5 @@ export function register(): void {
     customElements.define('tc-logo-cloud', LogoCloud)
     customElements.define('tc-maintainer-card', MaintainerCard)
     customElements.define('tc-metric-tile', MetricTile)
+    customElements.define('tc-metric-grid', MetricGrid)
 }
