@@ -121,6 +121,7 @@ import { SponsorWall } from './SponsorWall'
 import { SprintChain } from './SprintChain'
 import { StatCard } from './StatCard'
 import { StateMachine } from './StateMachine'
+import { Stepper } from './Stepper'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -251,4 +252,5 @@ export function register(): void {
     customElements.define('tc-sprint-chain', SprintChain)
     customElements.define('tc-stat-card', StatCard)
     customElements.define('tc-state-machine', StateMachine)
+    customElements.define('tc-stepper', Stepper)
 }
