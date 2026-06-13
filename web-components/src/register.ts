@@ -90,6 +90,7 @@ import { DifferenceCard } from './DifferenceCard'
 import { ListCard } from './ListCard'
 import { StatusCard } from './StatusCard'
 import { DashboardContent } from './DashboardContent'
+import { DownloadStats } from './DownloadStats'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -189,4 +190,5 @@ export function register(): void {
     customElements.define('tc-list-card', ListCard)
     customElements.define('tc-status-card', StatusCard)
     customElements.define('tc-dashboard-content', DashboardContent)
+    customElements.define('tc-download-stats', DownloadStats)
 }

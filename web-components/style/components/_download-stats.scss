@@ -1,0 +1,147 @@
+// tc-download-stats — package download statistics card with stat cells and optional sparkline.
+// All cosmetics flow through --bs-download-stats-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; 1px hairline frame; fainter inner cell separators.
+
+@use '../foundation/tokens' as *;
+
+tc-download-stats {
+    --bs-download-stats-bg: var(--tc-surface);
+    --bs-download-stats-border-color: var(--tc-border);
+    --bs-download-stats-shadow: var(--tc-shadow-sm);
+    --bs-download-stats-padding-y: 1rem;
+    --bs-download-stats-padding-x: 1.25rem;
+    --bs-download-stats-icon-size: 1rem;
+    --bs-download-stats-icon-color: var(--tc-text-muted);
+    --bs-download-stats-package-color: var(--tc-text-muted);
+    --bs-download-stats-package-font-size: 0.8125rem;
+    --bs-download-stats-number-color: var(--tc-text);
+    --bs-download-stats-number-font-size: 1.375rem;
+    --bs-download-stats-period-color: var(--tc-text-muted);
+    --bs-download-stats-period-font-size: 0.6875rem;
+    --bs-download-stats-cell-separator-color: var(--tc-slate-100);
+    --bs-download-stats-sparkline-color: var(--tc-text-muted);
+    --bs-download-stats-sparkline-height: 36px;
+}
+
+.tc-download-stats {
+    background: var(--bs-download-stats-bg);
+    border: 1px solid var(--bs-download-stats-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-download-stats-shadow);
+}
+
+// ── Header row ────────────────────────────────────────────────────────────────
+
+.tc-download-stats__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: calc(var(--bs-download-stats-padding-y) * 0.75) var(--bs-download-stats-padding-x);
+    border-bottom: 1px solid var(--bs-download-stats-border-color);
+}
+
+.tc-download-stats__icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--bs-download-stats-icon-color);
+    flex-shrink: 0;
+}
+
+.tc-download-stats__icon-svg {
+    width: var(--bs-download-stats-icon-size);
+    height: var(--bs-download-stats-icon-size);
+    stroke: currentColor;
+    fill: none;
+}
+
+.tc-download-stats__package {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-download-stats-package-font-size);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--bs-download-stats-package-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    // Reset <code> defaults
+    background: none;
+    padding: 0;
+    border-radius: 0;
+}
+
+// ── Stat cells ────────────────────────────────────────────────────────────────
+
+.tc-download-stats__cells {
+    display: flex;
+}
+
+.tc-download-stats__cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: var(--bs-download-stats-padding-y) var(--bs-download-stats-padding-x);
+    flex: 1 1 0;
+    min-width: 0;
+
+    // Inner separators are fainter than the outer frame (slate-100 vs --tc-border/slate-200).
+    & + & {
+        border-left: 1px solid var(--bs-download-stats-cell-separator-color);
+    }
+}
+
+.tc-download-stats__number {
+    display: block;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-download-stats-number-font-size);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--bs-download-stats-number-color);
+    white-space: nowrap;
+}
+
+.tc-download-stats__period {
+    display: block;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-download-stats-period-font-size);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-download-stats-period-color);
+    white-space: nowrap;
+}
+
+// ── Sparkline ─────────────────────────────────────────────────────────────────
+
+.tc-download-stats__sparkline {
+    padding: 0 var(--bs-download-stats-padding-x) var(--bs-download-stats-padding-y);
+    border-top: 1px solid var(--bs-download-stats-cell-separator-color);
+    padding-top: calc(var(--bs-download-stats-padding-y) * 0.5);
+}
+
+.tc-download-stats__sparkline-svg {
+    display: block;
+    width: 100%;
+    height: var(--bs-download-stats-sparkline-height);
+    overflow: visible;
+}
+
+.tc-download-stats__sparkline-line {
+    fill: none;
+    stroke: var(--bs-download-stats-sparkline-color);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tc-download-stats__sparkline-dot {
+    fill: var(--bs-download-stats-sparkline-color);
+}
+
+// Honour prefers-reduced-motion: freeze any transitions on the sparkline elements.
+@media (prefers-reduced-motion: reduce) {
+    .tc-download-stats__sparkline-line,
+    .tc-download-stats__sparkline-dot {
+        transition: none;
+    }
+}
