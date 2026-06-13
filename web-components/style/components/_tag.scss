@@ -1,0 +1,96 @@
+// tc-tag — badge-like rectangular tag with optional remove button. Sharp corners.
+// All cosmetics flow through --bs-tag-* custom properties backed by --tc-* tokens.
+// Default (secondary): slate-100 fill, slate-200 hairline, slate-800 text.
+// Colored variants: soft tint bg + dark emphasis text + variant-color hairline.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+tc-tag {
+    --bs-tag-padding-x: 0.5rem;
+    --bs-tag-padding-y: 0.25rem;
+    --bs-tag-font-size: 0.8125rem;
+    --bs-tag-font-weight: 500;
+    --bs-tag-border-width: 1px;
+    --bs-tag-bg: var(--tc-surface-muted);
+    --bs-tag-color: var(--tc-text);
+    --bs-tag-border-color: var(--tc-border);
+    --bs-tag-remove-icon-size: 0.75rem;
+}
+
+.tc-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: var(--bs-tag-padding-y) var(--bs-tag-padding-x);
+    font-size: var(--bs-tag-font-size);
+    font-weight: var(--bs-tag-font-weight);
+    line-height: 1;
+    white-space: nowrap;
+    vertical-align: middle;
+    color: var(--bs-tag-color);
+    background-color: var(--bs-tag-bg);
+    border: var(--bs-tag-border-width) solid var(--bs-tag-border-color);
+    border-radius: 0;
+}
+
+// Colored variants — soft bg tint + dark emphasis text + solid variant hairline
+@each $name in ('primary', 'info', 'success', 'warning', 'danger') {
+    .tc-tag-#{$name} {
+        --bs-tag-bg: #{map.get($theme-colors-soft, $name)};
+        --bs-tag-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-tag-border-color: #{map.get($theme-colors, $name)};
+    }
+}
+
+.tc-tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // Bleed into tag's right padding so the button touches the tag edge
+    margin: calc(-1 * var(--bs-tag-padding-y)) calc(-1 * var(--bs-tag-padding-x))
+        calc(-1 * var(--bs-tag-padding-y)) 0;
+    padding: var(--bs-tag-padding-y) var(--bs-tag-padding-x);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-tag-remove-icon-size);
+        height: var(--bs-tag-remove-icon-size);
+        display: block;
+        // inherit currentColor stroke from parent
+        pointer-events: none;
+    }
+
+    &:hover {
+        background-color: var(--tc-surface-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:active {
+        background-color: var(--tc-border);
+    }
+}
+
+// Coarse pointer — extend hit area toward 44 px minimum
+@media (pointer: coarse) {
+    .tc-tag-remove {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-tag-remove {
+        transition: none;
+    }
+}
