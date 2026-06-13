@@ -106,6 +106,7 @@ import { MetricGrid } from './MetricGrid'
 import { MigrationGuide } from './MigrationGuide'
 import { PageFooter } from './PageFooter'
 import { PhaseGrid } from './PhaseGrid'
+import { PinnedFeatureShowcase } from './PinnedFeatureShowcase'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -221,4 +222,5 @@ export function register(): void {
     customElements.define('tc-migration-guide', MigrationGuide)
     customElements.define('tc-page-footer', PageFooter)
     customElements.define('tc-phase-grid', PhaseGrid)
+    customElements.define('tc-pinned-feature-showcase', PinnedFeatureShowcase)
 }

@@ -1,0 +1,226 @@
+// tc-pinned-feature-showcase — two-column showcase with sticky/centred left panel.
+// Left: sticky panel — eyebrow, title, description, optional media, optional CTAs.
+// Right: scrollable list of feature items with optional lucide icons.
+// Design rails: sharp corners (border-radius: 0), slate neutrals, 1px hairlines, no overlay shadows.
+// Sticky is CSS-only on desktop; JS adds --centered when the panel fits in the viewport.
+
+@use '../foundation/tokens' as *;
+
+tc-pinned-feature-showcase {
+    // Layout
+    --bs-pinned-feature-showcase-sticky-top: 4rem;
+    --bs-pinned-feature-showcase-gap: 4rem;
+    --bs-pinned-feature-showcase-panel-width: 40%;
+
+    // Eyebrow — mono micro-label, muted, uppercase
+    --bs-pinned-feature-showcase-eyebrow-color: var(--tc-text-muted);
+    --bs-pinned-feature-showcase-eyebrow-font-size: 0.6875rem;
+    --bs-pinned-feature-showcase-eyebrow-letter-spacing: 0.08em;
+
+    // Title — Inter, ≤ 600 weight
+    --bs-pinned-feature-showcase-title-color: var(--tc-text);
+    --bs-pinned-feature-showcase-title-font-size: 1.75rem;
+    --bs-pinned-feature-showcase-title-font-weight: 600;
+    --bs-pinned-feature-showcase-title-letter-spacing: -0.01em;
+
+    // Description
+    --bs-pinned-feature-showcase-desc-color: var(--tc-text-muted);
+    --bs-pinned-feature-showcase-desc-font-size: 1rem;
+
+    // Items list
+    --bs-pinned-feature-showcase-item-padding-y: 1.5rem;
+    --bs-pinned-feature-showcase-item-border: var(--tc-border);
+    --bs-pinned-feature-showcase-item-gap: 1rem;
+
+    // Item title — Inter, ≤ 600 weight
+    --bs-pinned-feature-showcase-item-title-color: var(--tc-text);
+    --bs-pinned-feature-showcase-item-title-font-size: 1.0625rem;
+    --bs-pinned-feature-showcase-item-title-font-weight: 600;
+
+    // Item description
+    --bs-pinned-feature-showcase-item-desc-color: var(--tc-text-muted);
+    --bs-pinned-feature-showcase-item-desc-font-size: 0.9375rem;
+
+    // Item icon — slate-tinted lucide SVG via currentColor
+    --bs-pinned-feature-showcase-item-icon-size: 1.25rem;
+    --bs-pinned-feature-showcase-item-icon-color: var(--tc-text-muted);
+}
+
+.tc-pinned-feature-showcase {
+    border-radius: 0;
+}
+
+// Two-column grid: single column on mobile, side-by-side on md+
+.tc-pinned-feature-showcase-inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    align-items: start;
+
+    @include media-up(md) {
+        grid-template-columns: var(--bs-pinned-feature-showcase-panel-width) 1fr;
+        gap: var(--bs-pinned-feature-showcase-gap);
+    }
+}
+
+// Left panel — sticky on desktop; JS toggles --centered when it fits in the viewport
+.tc-pinned-feature-showcase-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-self: start;
+
+    @include media-up(md) {
+        position: sticky;
+        top: var(--bs-pinned-feature-showcase-sticky-top);
+        transition: top 0.2s ease, transform 0.2s ease;
+    }
+
+    // Vertically centred state: panel height + 2×offset fits in viewport
+    &--centered {
+        @include media-up(md) {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+}
+
+// Lead section: eyebrow + title + description + ctas
+.tc-pinned-feature-showcase-lead {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+// Eyebrow — mono uppercase micro-label
+.tc-pinned-feature-showcase-eyebrow {
+    display: block;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-pinned-feature-showcase-eyebrow-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-pinned-feature-showcase-eyebrow-letter-spacing);
+    color: var(--bs-pinned-feature-showcase-eyebrow-color);
+    line-height: 1.4;
+}
+
+.tc-pinned-feature-showcase-title {
+    margin: 0;
+    font-family: var(--bs-font-sans-serif);
+    font-size: var(--bs-pinned-feature-showcase-title-font-size);
+    font-weight: var(--bs-pinned-feature-showcase-title-font-weight);
+    color: var(--bs-pinned-feature-showcase-title-color);
+    letter-spacing: var(--bs-pinned-feature-showcase-title-letter-spacing);
+    line-height: 1.25;
+}
+
+.tc-pinned-feature-showcase-description {
+    margin: 0;
+    font-size: var(--bs-pinned-feature-showcase-desc-font-size);
+    color: var(--bs-pinned-feature-showcase-desc-color);
+    line-height: 1.6;
+}
+
+// CTAs slot container — hides when empty
+.tc-pinned-feature-showcase-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Media container — holds the slot or the <img> fallback; hides when empty
+.tc-pinned-feature-showcase-media {
+    border-radius: 0;
+    overflow: hidden;
+
+    &:empty {
+        display: none;
+    }
+}
+
+.tc-pinned-feature-showcase-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+}
+
+// Right: feature item list
+.tc-pinned-feature-showcase-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+// Item row — icon + content, separated by 1px hairlines
+.tc-pinned-feature-showcase-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--bs-pinned-feature-showcase-item-gap);
+    padding: var(--bs-pinned-feature-showcase-item-padding-y) 0;
+    border-radius: 0;
+
+    // Top hairline on every item; last item also gets a bottom hairline
+    border-top: 1px solid var(--bs-pinned-feature-showcase-item-border);
+
+    &:last-child {
+        border-bottom: 1px solid var(--bs-pinned-feature-showcase-item-border);
+    }
+}
+
+// Icon — lucide inline SVG, slate-tinted via currentColor, decorative (aria-hidden)
+.tc-pinned-feature-showcase-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--bs-pinned-feature-showcase-item-icon-color);
+    margin-top: 0.125rem; // optical alignment with the first text line
+
+    svg {
+        width: var(--bs-pinned-feature-showcase-item-icon-size);
+        height: var(--bs-pinned-feature-showcase-item-icon-size);
+    }
+}
+
+.tc-pinned-feature-showcase-item-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.tc-pinned-feature-showcase-item-title {
+    margin: 0;
+    font-family: var(--bs-font-sans-serif);
+    font-size: var(--bs-pinned-feature-showcase-item-title-font-size);
+    font-weight: var(--bs-pinned-feature-showcase-item-title-font-weight);
+    color: var(--bs-pinned-feature-showcase-item-title-color);
+    line-height: 1.35;
+}
+
+.tc-pinned-feature-showcase-item-description {
+    margin: 0;
+    font-size: var(--bs-pinned-feature-showcase-item-desc-font-size);
+    color: var(--bs-pinned-feature-showcase-item-desc-color);
+    line-height: 1.55;
+}
+
+// Honour prefers-reduced-motion: freeze the sticky transition and centring transform
+@media (prefers-reduced-motion: reduce) {
+    .tc-pinned-feature-showcase-panel {
+        transition: none;
+
+        &--centered {
+            transition: none;
+        }
+    }
+}

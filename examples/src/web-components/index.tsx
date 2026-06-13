@@ -98,6 +98,7 @@ import MetricGridDemo from './MetricGridDemo'
 import MigrationGuideDemo from './MigrationGuideDemo'
 import PageFooterDemo from './PageFooterDemo'
 import PhaseGridDemo from './PhaseGridDemo'
+import PinnedFeatureShowcaseDemo from './PinnedFeatureShowcaseDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -216,4 +217,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'migration-guide', category: 'Content', element: <MigrationGuideDemo /> },
     { key: 'page-footer', category: 'Content', element: <PageFooterDemo /> },
     { key: 'phase-grid', category: 'Content', element: <PhaseGridDemo /> },
+    { key: 'pinned-feature-showcase', category: 'Content', element: <PinnedFeatureShowcaseDemo /> },
 ]
