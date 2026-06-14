@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -146,6 +146,7 @@ After `register()` you can author markup directly:
   - [tc-game-showcase-card](#tc-game-showcase-card)
   - [tc-github-stars-card](#tc-github-stars-card)
   - [tc-group](#tc-group)
+  - [tc-hero](#tc-hero)
   - [tc-text](#tc-text)
   - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
@@ -11483,4 +11484,89 @@ Collapsible group container with a header label, optional badge, and optional ac
   const el = document.getElementById('prog')
   el.collapsed = true  // collapse immediately
 </script>
+
+---
+
+### tc-hero
+
+Large hero section with an optional eyebrow label, heading, description, primary and secondary action buttons, an optional background pattern or scattered lucide icons, stat cards, and inline metrics. All content is driven by attributes and JS properties — no slot children.
+
+**Tag:** `tc-hero`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `eyebrow` | string | — | Small uppercase mono label rendered above the title. |
+| `title` | string | — | Main headline text (required for meaningful output). Rendered inside the heading element specified by `title-as`. |
+| `title-as` | `h1`\|`h2`\|`h3`\|`h4`\|`h5`\|`h6` | `h1` | Tag name used to render the heading. Controls semantic heading level. |
+| `description` | string | — | Body copy rendered beneath the title. |
+| `background-pattern-src` | string | — | URL of a background image rendered absolutely behind the hero content. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `primaryAction` | `{ label: string; href?: string; onClick?: () => void } \| null` | `null` | Primary action. Rendered as an `<a>` when `href` is set, else a `<button>`. Ink-gradient primary style. |
+| `secondaryAction` | `{ label: string; href?: string; onClick?: () => void } \| null` | `null` | Optional secondary action. Rendered as an outline button. |
+| `statCards` | `Array<{ label: string; value: string }>` | `[]` | Row of stat cards displayed below the actions. Values rendered in mono. |
+| `metrics` | `Array<{ label: string; value: string }>` | `[]` | Row of inline metric pairs displayed below stat cards. |
+| `bgIcons` | `string[]` | `[]` | Array of lucide icon names (PascalCase or kebab-case) scattered faintly behind the content as `aria-hidden` SVGs. |
+| `onPrimaryAction` | `(() => void) \| null` | `null` | Callback invoked when the primary action is activated (alongside the `tc-action` event). |
+| `onSecondaryAction` | `(() => void) \| null` | `null` | Callback invoked when the secondary action is activated (alongside the `tc-action` event). |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-action` | `{ which: 'primary' \| 'secondary' }` | Fired (bubbles, composed) when either action button is clicked. `detail.which` identifies which button was activated. |
+
+**CSS Custom Properties**
+
+All cosmetic values flow through `--bs-hero-*` vars on the `tc-hero` host:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `--bs-hero-bg` | `var(--tc-surface)` | Section background. |
+| `--bs-hero-border-color` | `var(--tc-border)` | Hairline bottom border colour. |
+| `--bs-hero-padding-x` | `2rem` | Horizontal body padding. |
+| `--bs-hero-padding-y` | `4rem` | Vertical body padding. |
+| `--bs-hero-body-max-width` | `64rem` | Maximum width of the inner body container. |
+| `--bs-hero-eyebrow-color` | `var(--tc-text-muted)` | Eyebrow text colour. |
+| `--bs-hero-title-color` | `var(--tc-text)` | Heading colour. |
+| `--bs-hero-title-font-size` | `clamp(2rem, 4vw, 3.5rem)` | Fluid heading size. |
+| `--bs-hero-title-font-weight` | `600` | Heading weight (capped at semibold). |
+| `--bs-hero-description-color` | `var(--tc-text-muted)` | Description text colour. |
+| `--bs-hero-bg-icon-opacity` | `0.06` | Opacity of scattered background icons. |
+
+**Example**
+
+```html
+<tc-hero
+  eyebrow="Open Source"
+  title="Build faster with toolcase"
+  description="Framework-free web components for modern product teams."
+  id="hero"
+></tc-hero>
+<script>
+  const hero = document.getElementById('hero')
+
+  hero.primaryAction = { label: 'Get Started', href: '/docs' }
+  hero.secondaryAction = { label: 'View on GitHub', href: 'https://github.com' }
+
+  hero.statCards = [
+    { label: 'Total Users', value: '12K+' },
+    { label: 'Packages', value: '340' },
+    { label: 'Uptime', value: '99.9%' },
+  ]
+
+  hero.bgIcons = ['Zap', 'Shield', 'Code', 'Globe', 'Package']
+
+  hero.addEventListener('tc-action', e => {
+    console.log('action:', e.detail.which)
+  })
+
+  hero.onPrimaryAction = () => console.log('primary clicked')
+</script>
+```
 ```

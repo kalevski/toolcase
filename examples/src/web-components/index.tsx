@@ -159,6 +159,7 @@ import FormWizardDemo from './FormWizardDemo'
 import GameShowcaseCardDemo from './GameShowcaseCardDemo'
 import GithubStarsCardDemo from './GithubStarsCardDemo'
 import GroupDemo from './GroupDemo'
+import HeroDemo from './HeroDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -338,4 +339,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'game-showcase-card', category: 'Components', element: <GameShowcaseCardDemo /> },
     { key: 'github-stars-card', category: 'Components', element: <GithubStarsCardDemo /> },
     { key: 'group', category: 'Components', element: <GroupDemo /> },
+    { key: 'hero', category: 'Content', element: <HeroDemo /> },
 ]

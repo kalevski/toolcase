@@ -167,6 +167,7 @@ import { FormWizard } from './FormWizard'
 import { GameShowcaseCard } from './GameShowcaseCard'
 import { GithubStarsCard } from './GithubStarsCard'
 import { Group } from './Group'
+import { Hero } from './Hero'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -343,4 +344,5 @@ export function register(): void {
     customElements.define('tc-game-showcase-card', GameShowcaseCard)
     customElements.define('tc-github-stars-card', GithubStarsCard)
     customElements.define('tc-group', Group)
+    customElements.define('tc-hero', Hero)
 }
