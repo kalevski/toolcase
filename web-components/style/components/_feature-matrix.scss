@@ -1,0 +1,250 @@
+// tc-feature-matrix — feature comparison table with boolean/partial/custom values and highlight columns.
+// All cosmetics flow through --bs-feature-matrix-* custom properties backed by --tc-* tokens.
+// Design rails: sharp corners (border-radius: 0), slate hairlines, status color on icons only.
+
+@use '../foundation/tokens' as *;
+
+tc-feature-matrix {
+    // ── Frame ────────────────────────────────────────────────────────────────
+    --bs-feature-matrix-border: 1px solid var(--tc-border);
+    --bs-feature-matrix-inner-border: 1px solid var(--tc-slate-100);
+    --bs-feature-matrix-bg: var(--tc-surface);
+
+    // ── Optional header ───────────────────────────────────────────────────────
+    --bs-feature-matrix-header-bg: var(--tc-surface-muted);
+    --bs-feature-matrix-header-padding-y: 0.875rem;
+    --bs-feature-matrix-header-padding-x: 1.25rem;
+    --bs-feature-matrix-title-font-size: 1rem;
+    --bs-feature-matrix-title-font-weight: 600;
+    --bs-feature-matrix-title-color: var(--tc-text);
+
+    // ── Column header row ─────────────────────────────────────────────────────
+    --bs-feature-matrix-head-bg: var(--tc-surface-muted);
+    --bs-feature-matrix-head-padding-y: 0.625rem;
+    --bs-feature-matrix-head-padding-x: 1rem;
+    --bs-feature-matrix-col-label-font-size: 0.6875rem;
+    --bs-feature-matrix-col-label-color: var(--tc-text-muted);
+    --bs-feature-matrix-col-label-letter-spacing: 0.06em;
+
+    // ── Feature column (first column) ─────────────────────────────────────────
+    --bs-feature-matrix-feature-min-width: 12rem;
+    --bs-feature-matrix-row-label-font-size: 0.8125rem;
+    --bs-feature-matrix-row-label-color: var(--tc-text);
+    --bs-feature-matrix-row-hint-font-size: 0.71875rem;
+    --bs-feature-matrix-row-hint-color: var(--tc-text-muted);
+
+    // ── Data cells ────────────────────────────────────────────────────────────
+    --bs-feature-matrix-cell-padding-y: 0.625rem;
+    --bs-feature-matrix-cell-padding-x: 1rem;
+    --bs-feature-matrix-indicator-size: 1rem;
+
+    // ── Highlight column band ─────────────────────────────────────────────────
+    --bs-feature-matrix-highlight-bg: var(--tc-surface-muted);
+
+    // ── Row hover ─────────────────────────────────────────────────────────────
+    --bs-feature-matrix-row-hover-bg: var(--tc-surface-hover);
+
+    // ── Status colors (icons only) ────────────────────────────────────────────
+    --bs-feature-matrix-yes-color: var(--tc-success);
+    --bs-feature-matrix-no-color: var(--tc-text-faint);
+    --bs-feature-matrix-partial-color: var(--tc-warning);
+    --bs-feature-matrix-text-value-color: var(--tc-text-muted);
+}
+
+// ── Outer frame ───────────────────────────────────────────────────────────────
+
+.tc-feature-matrix {
+    border: var(--bs-feature-matrix-border);
+    border-radius: 0;
+    background: var(--bs-feature-matrix-bg);
+    overflow: hidden;
+}
+
+// ── Optional header ───────────────────────────────────────────────────────────
+
+.tc-feature-matrix__header {
+    padding: var(--bs-feature-matrix-header-padding-y) var(--bs-feature-matrix-header-padding-x);
+    background: var(--bs-feature-matrix-header-bg);
+    border-bottom: var(--bs-feature-matrix-border);
+}
+
+.tc-feature-matrix__title {
+    margin: 0;
+    font-size: var(--bs-feature-matrix-title-font-size);
+    font-weight: var(--bs-feature-matrix-title-font-weight);
+    color: var(--bs-feature-matrix-title-color);
+    line-height: 1.35;
+}
+
+// ── Scroll wrapper ────────────────────────────────────────────────────────────
+
+.tc-feature-matrix__scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+
+.tc-feature-matrix__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+// ── Shared cell base ──────────────────────────────────────────────────────────
+
+.tc-feature-matrix__cell {
+    padding: var(--bs-feature-matrix-cell-padding-y) var(--bs-feature-matrix-cell-padding-x);
+    vertical-align: middle;
+    border-bottom: var(--bs-feature-matrix-inner-border);
+}
+
+// ── Header row ────────────────────────────────────────────────────────────────
+
+.tc-feature-matrix__head-row {
+    background: var(--bs-feature-matrix-head-bg);
+    border-bottom: var(--bs-feature-matrix-border);
+
+    .tc-feature-matrix__cell {
+        padding: var(--bs-feature-matrix-head-padding-y) var(--bs-feature-matrix-head-padding-x);
+        border-bottom: none;
+    }
+}
+
+.tc-feature-matrix__feature-head {
+    text-align: left;
+    min-width: var(--bs-feature-matrix-feature-min-width);
+    font-size: var(--bs-feature-matrix-col-label-font-size);
+    font-weight: 700;
+    font-family: var(--tc-font-sans);
+    letter-spacing: var(--bs-feature-matrix-col-label-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-feature-matrix-col-label-color);
+}
+
+.tc-feature-matrix__col-head {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.tc-feature-matrix__col-head--highlight {
+    background: var(--bs-feature-matrix-highlight-bg);
+}
+
+.tc-feature-matrix__col-label {
+    display: block;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-feature-matrix-col-label-font-size);
+    font-weight: 700;
+    color: var(--bs-feature-matrix-col-label-color);
+    letter-spacing: var(--bs-feature-matrix-col-label-letter-spacing);
+    text-transform: uppercase;
+}
+
+// ── Feature (row header) ──────────────────────────────────────────────────────
+
+.tc-feature-matrix__feature-cell {
+    text-align: left;
+    font-weight: normal;
+    min-width: var(--bs-feature-matrix-feature-min-width);
+    border-right: var(--bs-feature-matrix-border);
+}
+
+.tc-feature-matrix__row-label {
+    display: block;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-feature-matrix-row-label-font-size);
+    font-weight: 500;
+    color: var(--bs-feature-matrix-row-label-color);
+    line-height: 1.35;
+}
+
+.tc-feature-matrix__row-hint {
+    display: block;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-feature-matrix-row-hint-font-size);
+    color: var(--bs-feature-matrix-row-hint-color);
+    margin-top: 0.25rem;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+// ── Data rows ─────────────────────────────────────────────────────────────────
+
+.tc-feature-matrix__row {
+    &:hover .tc-feature-matrix__cell {
+        background: var(--bs-feature-matrix-row-hover-bg);
+    }
+
+    // Highlighted cells keep their band even on hover — hover is additive.
+    &:hover .tc-feature-matrix__cell--highlight {
+        background: var(--bs-feature-matrix-highlight-bg);
+    }
+
+    &:last-child .tc-feature-matrix__cell {
+        border-bottom: none;
+    }
+}
+
+// ── Value cells ───────────────────────────────────────────────────────────────
+
+.tc-feature-matrix__value-cell {
+    text-align: center;
+}
+
+.tc-feature-matrix__cell--highlight {
+    background: var(--bs-feature-matrix-highlight-bg);
+}
+
+// ── Status indicators ─────────────────────────────────────────────────────────
+
+.tc-feature-matrix__indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        width: var(--bs-feature-matrix-indicator-size);
+        height: var(--bs-feature-matrix-indicator-size);
+    }
+}
+
+.tc-feature-matrix__indicator--yes {
+    color: var(--bs-feature-matrix-yes-color);
+}
+
+.tc-feature-matrix__indicator--no {
+    color: var(--bs-feature-matrix-no-color);
+}
+
+.tc-feature-matrix__indicator--partial {
+    color: var(--bs-feature-matrix-partial-color);
+}
+
+// ── Custom text values ────────────────────────────────────────────────────────
+
+.tc-feature-matrix__value-text {
+    font-family: var(--tc-font-mono);
+    font-size: 0.75rem;
+    color: var(--bs-feature-matrix-text-value-color);
+}
+
+// ── Screen-reader helper (scoped) ─────────────────────────────────────────────
+
+.tc-feature-matrix .tc-feature-matrix__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    // No animations in this component; placeholder for future overrides.
+}
