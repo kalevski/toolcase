@@ -128,6 +128,7 @@ import CardOptionsDemo from './CardOptionsDemo'
 import CdnMapDemo from './CdnMapDemo'
 import ChangelogDemo from './ChangelogDemo'
 import ChipDemo from './ChipDemo'
+import ChipGroupDemo from './ChipGroupDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -276,4 +277,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'cdn-map', category: 'Content', element: <CdnMapDemo /> },
     { key: 'changelog', category: 'Content', element: <ChangelogDemo /> },
     { key: 'chip', category: 'Forms', element: <ChipDemo /> },
+    { key: 'chip-group', category: 'Forms', element: <ChipGroupDemo /> },
 ]

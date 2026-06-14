@@ -136,6 +136,7 @@ import { CardOptions } from './CardOptions'
 import { CdnMap } from './CdnMap'
 import { Changelog } from './Changelog'
 import { Chip } from './Chip'
+import { ChipGroup } from './ChipGroup'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -281,4 +282,5 @@ export function register(): void {
     customElements.define('tc-cdn-map', CdnMap)
     customElements.define('tc-changelog', Changelog)
     customElements.define('tc-chip', Chip)
+    customElements.define('tc-chip-group', ChipGroup)
 }
