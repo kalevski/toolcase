@@ -142,6 +142,7 @@ import CountdownTimerDemo from './CountdownTimerDemo'
 import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 import MetricCardDemo from './MetricCardDemo'
 import SlicesCardDemo from './SlicesCardDemo'
+import DatePickerDemo from './DatePickerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -204,6 +205,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'radio', category: 'Forms', element: <RadioDemo /> },
     { key: 'switch', category: 'Forms', element: <SwitchDemo /> },
     { key: 'range', category: 'Forms', element: <RangeDemo /> },
+    { key: 'date-picker', category: 'Forms', element: <DatePickerDemo /> },
     { key: 'floating-label', category: 'Forms', element: <FloatingLabelDemo /> },
     { key: 'input-group', category: 'Forms', element: <InputGroupDemo /> },
     { key: 'form', category: 'Forms', element: <FormDemo /> },

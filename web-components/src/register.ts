@@ -150,6 +150,7 @@ import { MetricCard } from './MetricCard'
 import { SlicesCard } from './SlicesCard'
 import { DashboardSidebar } from './DashboardSidebar'
 import { DashboardLayout } from './DashboardLayout'
+import { DatePicker } from './DatePicker'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -309,4 +310,5 @@ export function register(): void {
     customElements.define('tc-slices-card', SlicesCard)
     customElements.define('tc-dashboard-sidebar', DashboardSidebar)
     customElements.define('tc-dashboard-layout', DashboardLayout)
+    customElements.define('tc-date-picker', DatePicker)
 }

@@ -1,0 +1,53 @@
+// tc-date-picker — native <input type="date"> wrapped with optional label.
+// Cosmetics flow through --bs-date-picker-* backed by --tc-* tokens.
+
+tc-date-picker {
+    --bs-date-picker-border-color: var(--tc-border-strong);
+    --bs-date-picker-bg: var(--tc-surface);
+    --bs-date-picker-label-color: var(--tc-text);
+    --bs-date-picker-label-size: 13px;
+    --bs-date-picker-disabled-opacity: 0.55;
+}
+
+.tc-date-picker {
+    display: block;
+    width: 100%;
+
+    .form-label {
+        font-size: var(--bs-date-picker-label-size);
+        color: var(--bs-date-picker-label-color);
+    }
+
+    input[type='date'].form-control {
+        --bs-form-control-border-color: var(--bs-date-picker-border-color);
+        --bs-form-control-bg: var(--bs-date-picker-bg);
+
+        border-radius: 0;
+        color-scheme: light;
+
+        &::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.55;
+
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+
+        &:focus {
+            border-color: rgba(30, 41, 59, 0.5);
+            box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+        }
+    }
+}
+
+tc-date-picker[disabled] {
+    opacity: var(--bs-date-picker-disabled-opacity);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-date-picker input[type='date'].form-control {
+        transition: none;
+    }
+}

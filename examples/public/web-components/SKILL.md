@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, DatePicker, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -169,6 +169,7 @@ After `register()` you can author markup directly:
   - [tc-input-group](#tc-input-group)
   - [tc-label](#tc-label)
   - [tc-radio](#tc-radio)
+  - [tc-date-picker](#tc-date-picker)
   - [tc-range](#tc-range)
   - [tc-select](#tc-select)
   - [tc-switch](#tc-switch)
@@ -4217,6 +4218,54 @@ Radio button input.
 ```html
 <tc-radio name="size" value="sm" label="Small"></tc-radio>
 <tc-radio name="size" value="lg" label="Large" checked></tc-radio>
+```
+
+---
+
+### tc-date-picker
+
+Native HTML5 date input wrapper with optional label, min/max constraints, and `tc-change` event.
+
+**Tag:** `tc-date-picker`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | — | Visible label linked to the input via `for`/`id` |
+| `value` | string | `""` | Current date value in ISO `YYYY-MM-DD` format |
+| `min` | string | — | Minimum selectable date (`YYYY-MM-DD`) |
+| `max` | string | — | Maximum selectable date (`YYYY-MM-DD`) |
+| `disabled` | boolean | `false` | Disables the input and dims the component |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | `string \| null` | `null` | Reflects the `label` attribute |
+| `value` | `string` | `""` | Reflects the `value` attribute; reads the live input value |
+| `min` | `string \| null` | `null` | Reflects the `min` attribute |
+| `max` | `string \| null` | `null` | Reflects the `max` attribute |
+| `disabled` | `boolean` | `false` | Reflects the `disabled` attribute |
+| `onChange` | `((value: string) => void) \| null` | `null` | Callback fired alongside `tc-change` |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: string }` | Fired when the selected date changes. Bubbles + composed. |
+
+**Slots:** none
+
+```html
+<tc-date-picker label="Event date" value="2026-06-14" min="2026-01-01" max="2026-12-31"></tc-date-picker>
+<tc-date-picker label="Locked" value="2026-06-14" disabled></tc-date-picker>
+```
+
+```js
+document.querySelector('tc-date-picker').addEventListener('tc-change', e => {
+    console.log('date selected:', e.detail.value)
+})
 ```
 
 ---
