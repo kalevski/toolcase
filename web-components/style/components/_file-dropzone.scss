@@ -1,0 +1,117 @@
+// tc-file-dropzone — drag-and-drop upload zone with supported-format display.
+// All cosmetics flow through --bs-file-dropzone-* custom properties backed by
+// --tc-* tokens. Dashed border, sharp corners, neutral ink; cyan accent on
+// drag-active (the one sanctioned accent use).
+
+tc-file-dropzone {
+    --bs-file-dropzone-border-color: var(--tc-border-strong);
+    --bs-file-dropzone-border-style: dashed;
+    --bs-file-dropzone-border-width: 1px;
+    --bs-file-dropzone-bg: var(--tc-surface);
+    --bs-file-dropzone-padding-y: 2.5rem;
+    --bs-file-dropzone-padding-x: 1.5rem;
+    --bs-file-dropzone-gap: 0.75rem;
+    --bs-file-dropzone-icon-size: 1.5rem;
+    --bs-file-dropzone-icon-color: var(--tc-text-muted);
+    --bs-file-dropzone-prompt-color: var(--tc-text-muted);
+    --bs-file-dropzone-prompt-size: 0.925rem;
+    --bs-file-dropzone-chip-color: var(--tc-text-faint);
+    --bs-file-dropzone-chip-size: 0.75rem;
+    --bs-file-dropzone-chip-border-color: var(--tc-border);
+    --bs-file-dropzone-chip-padding-x: 0.35rem;
+    --bs-file-dropzone-chip-padding-y: 0.1rem;
+    --bs-file-dropzone-active-bg: var(--tc-surface-muted);
+    --bs-file-dropzone-active-border-color: var(--tc-accent);
+    --bs-file-dropzone-transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast);
+}
+
+.tc-file-dropzone {
+    position: relative;
+}
+
+.tc-file-dropzone__area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: var(--bs-file-dropzone-padding-y) var(--bs-file-dropzone-padding-x);
+    gap: var(--bs-file-dropzone-gap);
+    background-color: var(--bs-file-dropzone-bg);
+    border: var(--bs-file-dropzone-border-width) var(--bs-file-dropzone-border-style) var(--bs-file-dropzone-border-color);
+    border-radius: 0;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: var(--bs-file-dropzone-transition);
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+.tc-file-dropzone--active .tc-file-dropzone__area {
+    background-color: var(--bs-file-dropzone-active-bg);
+    border-color: var(--bs-file-dropzone-active-border-color);
+}
+
+.tc-file-dropzone__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-file-dropzone-icon-color);
+
+    svg {
+        width: var(--bs-file-dropzone-icon-size);
+        height: var(--bs-file-dropzone-icon-size);
+        display: block;
+    }
+}
+
+.tc-file-dropzone__prompt {
+    margin: 0;
+    font-size: var(--bs-file-dropzone-prompt-size);
+    color: var(--bs-file-dropzone-prompt-color);
+}
+
+.tc-file-dropzone__formats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    justify-content: center;
+    margin: 0;
+}
+
+.tc-file-dropzone__format-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--bs-file-dropzone-chip-padding-y) var(--bs-file-dropzone-chip-padding-x);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-file-dropzone-chip-size);
+    color: var(--bs-file-dropzone-chip-color);
+    border: 1px solid var(--bs-file-dropzone-chip-border-color);
+    border-radius: 0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+// Visually hidden file input — accessible but not in the tab order
+.tc-file-dropzone__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-file-dropzone__area {
+        transition: none;
+    }
+}

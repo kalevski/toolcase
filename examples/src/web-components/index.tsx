@@ -153,6 +153,7 @@ import EntityProfileCardDemo from './EntityProfileCardDemo'
 import ExtendedSelectDemo from './ExtendedSelectDemo'
 import FAQListDemo from './FAQListDemo'
 import FeatureMatrixDemo from './FeatureMatrixDemo'
+import FileDropzoneDemo from './FileDropzoneDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -326,4 +327,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'extended-select', category: 'Forms', element: <ExtendedSelectDemo /> },
     { key: 'faq-list', category: 'Components', element: <FAQListDemo /> },
     { key: 'feature-matrix', category: 'Components', element: <FeatureMatrixDemo /> },
+    { key: 'file-dropzone', category: 'Forms', element: <FileDropzoneDemo /> },
 ]

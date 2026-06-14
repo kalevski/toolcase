@@ -1,0 +1,127 @@
+import * as LucideIcons from 'lucide-static'
+import { icon } from './icons'
+
+const TAG_NAME = 'tc-file-dropzone'
+
+export interface DropzoneFileFormat {
+    label: string
+    mime?: string
+    extension?: string
+}
+
+function esc(s: string): string {
+    return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+}
+
+function lucideByName(name: string): string {
+    const pascal = name
+        .split('-')
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('')
+    const svgStr = (LucideIcons as Record<string, string>)[pascal]
+    if (!svgStr) return ''
+    return icon(svgStr)
+}
+
+const uploadIconHtml = lucideByName('upload-cloud') || lucideByName('upload')
+
+export class FileDropzone extends HTMLElement {
+    private _initialised = false
+    private _supported: DropzoneFileFormat[] = []
+
+    onFiles: ((files: File[]) => void) | null = null
+
+    static get observedAttributes(): string[] {
+        return []
+    }
+
+    connectedCallback(): void {
+        if (!this._initialised) {
+            this.render()
+            this._initialised = true
+        }
+    }
+
+    get supported(): DropzoneFileFormat[] {
+        return this._supported
+    }
+    set supported(v: DropzoneFileFormat[]) {
+        this._supported = Array.isArray(v) ? v : []
+        if (this._initialised) this.render()
+    }
+
+    private _dispatch(files: File[]): void {
+        this.dispatchEvent(new CustomEvent('tc-files', {
+            bubbles: true,
+            composed: true,
+            detail: { files },
+        }))
+        if (typeof this.onFiles === 'function') this.onFiles(files)
+    }
+
+    private render(): void {
+        this.classList.add('tc-file-dropzone')
+
+        const fmts = this._supported
+        const accept = fmts
+            .flatMap(f => [f.mime, f.extension].filter((x): x is string => !!x))
+            .join(',')
+
+        const formatsHtml = fmts.length > 0
+            ? `<p class="tc-file-dropzone__formats">${fmts.map(f => `<span class="tc-file-dropzone__format-chip">${esc(f.label)}</span>`).join('')}</p>`
+            : ''
+
+        this.innerHTML = `<div class="tc-file-dropzone__area" role="button" tabindex="0" aria-label="Upload files — drag and drop or click to browse"><span class="tc-file-dropzone__icon" aria-hidden="true">${uploadIconHtml}</span><p class="tc-file-dropzone__prompt">Drag &amp; drop files here or click to browse</p>${formatsHtml}</div><input type="file" multiple class="tc-file-dropzone__input" aria-label="Select files to upload" tabindex="-1"${accept ? ` accept="${esc(accept)}"` : ''} />`
+
+        const area = this.querySelector<HTMLElement>('.tc-file-dropzone__area')
+        const input = this.querySelector<HTMLInputElement>('.tc-file-dropzone__input')
+
+        if (!area || !input) return
+
+        area.addEventListener('click', () => input.click())
+
+        area.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                input.click()
+            }
+        })
+
+        area.addEventListener('dragover', (e: DragEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+            this.classList.add('tc-file-dropzone--active')
+        })
+
+        area.addEventListener('dragleave', (e: DragEvent) => {
+            const related = e.relatedTarget as Node | null
+            if (!related || !area.contains(related)) {
+                this.classList.remove('tc-file-dropzone--active')
+            }
+        })
+
+        area.addEventListener('drop', (e: DragEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+            this.classList.remove('tc-file-dropzone--active')
+            const files = e.dataTransfer ? Array.from(e.dataTransfer.files) : []
+            if (files.length > 0) this._dispatch(files)
+        })
+
+        input.addEventListener('change', () => {
+            const files = input.files ? Array.from(input.files) : []
+            if (files.length > 0) this._dispatch(files)
+            input.value = ''
+        })
+    }
+}
+
+declare global {
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: FileDropzone
+    }
+}
