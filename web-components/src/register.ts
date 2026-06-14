@@ -178,6 +178,7 @@ import { Login } from './Login'
 import { Marquee } from './Marquee'
 import { MultiCardSelect } from './MultiCardSelect'
 import { NewsletterSignup } from './NewsletterSignup'
+import { NumberInput } from './NumberInput'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -365,4 +366,5 @@ export function register(): void {
     customElements.define('tc-marquee', Marquee)
     customElements.define('tc-multi-card-select', MultiCardSelect)
     customElements.define('tc-newsletter-signup', NewsletterSignup)
+    customElements.define('tc-number-input', NumberInput)
 }
