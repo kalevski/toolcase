@@ -144,6 +144,7 @@ import { Comparator } from './Comparator'
 import { CompatibilityMatrix } from './CompatibilityMatrix'
 import { ContextMenu } from './ContextMenu'
 import { CoolNav } from './CoolNav'
+import { CountdownTimer } from './CountdownTimer'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -297,4 +298,5 @@ export function register(): void {
     customElements.define('tc-compatibility-matrix', CompatibilityMatrix)
     customElements.define('tc-context-menu', ContextMenu)
     customElements.define('tc-cool-nav', CoolNav)
+    customElements.define('tc-countdown-timer', CountdownTimer)
 }
