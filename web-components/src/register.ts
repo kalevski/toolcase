@@ -170,6 +170,7 @@ import { GithubStarsCard } from './GithubStarsCard'
 import { Group } from './Group'
 import { Hero } from './Hero'
 import { Image as TcImage } from './Image'
+import { InfiniteScroll } from './InfiniteScroll'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -349,4 +350,5 @@ export function register(): void {
     customElements.define('tc-group', Group)
     customElements.define('tc-hero', Hero)
     customElements.define('tc-image', TcImage)
+    customElements.define('tc-infinite-scroll', InfiniteScroll)
 }

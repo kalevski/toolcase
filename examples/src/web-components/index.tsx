@@ -162,6 +162,7 @@ import GithubStarsCardDemo from './GithubStarsCardDemo'
 import GroupDemo from './GroupDemo'
 import HeroDemo from './HeroDemo'
 import ImageDemo from './ImageDemo'
+import InfiniteScrollDemo from './InfiniteScrollDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -344,4 +345,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'group', category: 'Components', element: <GroupDemo /> },
     { key: 'hero', category: 'Content', element: <HeroDemo /> },
     { key: 'image', category: 'Content', element: <ImageDemo /> },
+    { key: 'infinite-scroll', category: 'Components', element: <InfiniteScrollDemo /> },
 ]
