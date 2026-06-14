@@ -171,6 +171,7 @@ import MarqueeDemo from './MarqueeDemo'
 import MultiCardSelectDemo from './MultiCardSelectDemo'
 import NewsletterSignupDemo from './NewsletterSignupDemo'
 import NumberInputDemo from './NumberInputDemo'
+import OTPInputDemo from './OTPInputDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -362,4 +363,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'multi-card-select', category: 'Forms', element: <MultiCardSelectDemo /> },
     { key: 'newsletter-signup', category: 'Forms', element: <NewsletterSignupDemo /> },
     { key: 'number-input', category: 'Forms', element: <NumberInputDemo /> },
+    { key: 'otp-input', category: 'Forms', element: <OTPInputDemo /> },
 ]
