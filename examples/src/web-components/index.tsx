@@ -139,6 +139,7 @@ import CoolNavDemo from './CoolNavDemo'
 import CountdownTimerDemo from './CountdownTimerDemo'
 import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 import MetricCardDemo from './MetricCardDemo'
+import SlicesCardDemo from './SlicesCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -298,4 +299,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'countdown-timer', category: 'Components', element: <CountdownTimerDemo /> },
     { key: 'danger-zone-actions', category: 'Components', element: <DangerZoneActionsDemo /> },
     { key: 'metric-card', category: 'Components', element: <MetricCardDemo /> },
+    { key: 'slices-card', category: 'Components', element: <SlicesCardDemo /> },
 ]

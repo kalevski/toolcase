@@ -1,0 +1,217 @@
+// tc-slices-card — dashboard card with a donut/pie chart and an item legend.
+// White card surface, 1px hairline border, resting shadow, sharp corners by mandate.
+// All cosmetics flow through --bs-slices-card-* custom properties backed by --tc-* tokens.
+// Caller-supplied slice colors are the sanctioned exception; defaults are a quiet slate ramp.
+
+tc-slices-card {
+    --bs-slices-card-bg: var(--tc-surface);
+    --bs-slices-card-border-color: var(--tc-border);
+    --bs-slices-card-shadow: var(--tc-shadow-sm);
+    --bs-slices-card-padding-y: 1rem;
+    --bs-slices-card-padding-x: 1.25rem;
+    --bs-slices-card-header-bg: var(--tc-surface);
+    --bs-slices-card-header-border-color: var(--tc-border);
+    --bs-slices-card-title-color: var(--tc-text-muted);
+    --bs-slices-card-title-font-size: 0.6875rem;
+    --bs-slices-card-title-letter-spacing: 0.08em;
+    --bs-slices-card-total-color: var(--tc-text);
+    --bs-slices-card-total-font-size: 1rem;
+    --bs-slices-card-total-font-weight: 600;
+    --bs-slices-card-legend-gap: 0.375rem;
+    --bs-slices-card-swatch-size: 0.625rem;
+    --bs-slices-card-legend-label-color: var(--tc-text);
+    --bs-slices-card-legend-label-font-size: 0.8125rem;
+    --bs-slices-card-legend-value-color: var(--tc-text-muted);
+    --bs-slices-card-legend-value-font-size: 0.75rem;
+    --bs-slices-card-legend-percent-color: var(--tc-text-muted);
+    --bs-slices-card-legend-percent-font-size: 0.75rem;
+    --bs-slices-card-empty-ring-color: var(--tc-border);
+    --bs-slices-card-skeleton-bg: var(--tc-surface-muted);
+    --bs-slices-card-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+    --bs-slices-card-skeleton-ring-color: var(--tc-surface-muted);
+}
+
+// Wire Bootstrap card shell tokens so .card inherits our component tokens.
+.tc-slices-card {
+    --bs-card-bg: var(--bs-slices-card-bg);
+    --bs-card-border-color: var(--bs-slices-card-border-color);
+    --bs-card-box-shadow: var(--bs-slices-card-shadow);
+    --bs-card-border-radius: 0;
+    --bs-card-spacer-y: var(--bs-slices-card-padding-y);
+    --bs-card-spacer-x: var(--bs-slices-card-padding-x);
+    --bs-card-cap-bg: var(--bs-slices-card-header-bg);
+    --bs-card-cap-border-color: var(--bs-slices-card-header-border-color);
+}
+
+// Card header — optional title row above the body.
+.tc-slices-card-header {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.tc-slices-card-title {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-slices-card-title-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-slices-card-title-letter-spacing);
+    color: var(--bs-slices-card-title-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Card body — chart above, legend below.
+.tc-slices-card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+// Chart area — SVG donut + centered total.
+.tc-slices-card-chart {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+        display: block;
+    }
+}
+
+// Centered total figure overlaid on the donut hole.
+.tc-slices-card-total {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-slices-card-total-font-size);
+    font-weight: var(--bs-slices-card-total-font-weight);
+    line-height: 1;
+    color: var(--bs-slices-card-total-color);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+// Empty ring shown when slices array is empty.
+.tc-slices-card-empty-ring {
+    fill: none;
+    stroke: var(--bs-slices-card-empty-ring-color);
+}
+
+// Legend list — unstyled, full width.
+.tc-slices-card-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-slices-card-legend-gap);
+}
+
+// Legend row — swatch | label (flex-grow) | value | percent
+.tc-slices-card-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+// Color swatch — small square, sharp corners (design mandate).
+.tc-slices-card-swatch {
+    display: inline-block;
+    flex-shrink: 0;
+    width: var(--bs-slices-card-swatch-size);
+    height: var(--bs-slices-card-swatch-size);
+    border-radius: 0;
+}
+
+// Label — primary text, grows to fill available width.
+.tc-slices-card-legend-label {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: var(--bs-slices-card-legend-label-font-size);
+    line-height: 1.4;
+    color: var(--bs-slices-card-legend-label-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Value — monospace, muted, right-aligned numeric.
+.tc-slices-card-legend-value {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-slices-card-legend-value-font-size);
+    line-height: 1.4;
+    color: var(--bs-slices-card-legend-value-color);
+    white-space: nowrap;
+}
+
+// Percent — monospace, muted, narrower.
+.tc-slices-card-legend-percent {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-slices-card-legend-percent-font-size);
+    line-height: 1.4;
+    color: var(--bs-slices-card-legend-percent-color);
+    white-space: nowrap;
+    min-width: 2.75rem;
+    text-align: right;
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-slices-card-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-slices-card-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-slices-card-skeleton-bg) 25%,
+        var(--bs-slices-card-skeleton-shimmer) 50%,
+        var(--bs-slices-card-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-slices-card-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-slices-card-skeleton {
+    display: block;
+    @extend %tc-slices-card-shimmer;
+
+    &--title {
+        width: 40%;
+        height: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+
+    &--legend {
+        width: 70%;
+        height: 0.75rem;
+    }
+}
+
+// Skeleton donut ring — uses the SVG circle's stroke color.
+.tc-slices-card-skeleton-ring {
+    stroke: var(--bs-slices-card-skeleton-ring-color);
+}
+
+// Honour prefers-reduced-motion: freeze shimmer to a static fill.
+@media (prefers-reduced-motion: reduce) {
+    .tc-slices-card-skeleton {
+        animation: none;
+        background: var(--bs-slices-card-skeleton-bg);
+    }
+}
