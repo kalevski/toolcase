@@ -130,6 +130,7 @@ import { UsageSummaryPanel } from './UsageSummaryPanel'
 import { WelcomeGuide } from './WelcomeGuide'
 import { ApiReferenceTable } from './ApiReferenceTable'
 import { Banner } from './Banner'
+import { Build } from './Build'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -269,4 +270,5 @@ export function register(): void {
     customElements.define('tc-welcome-guide', WelcomeGuide)
     customElements.define('tc-api-reference-table', ApiReferenceTable)
     customElements.define('tc-banner', Banner)
+    customElements.define('tc-build', Build)
 }
