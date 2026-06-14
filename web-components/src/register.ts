@@ -146,6 +146,7 @@ import { ContextMenu } from './ContextMenu'
 import { CoolNav } from './CoolNav'
 import { CountdownTimer } from './CountdownTimer'
 import { DangerZoneActions } from './DangerZoneActions'
+import { MetricCard } from './MetricCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -301,4 +302,5 @@ export function register(): void {
     customElements.define('tc-cool-nav', CoolNav)
     customElements.define('tc-countdown-timer', CountdownTimer)
     customElements.define('tc-danger-zone-actions', DangerZoneActions)
+    customElements.define('tc-metric-card', MetricCard)
 }
