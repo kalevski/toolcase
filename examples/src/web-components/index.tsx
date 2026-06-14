@@ -133,6 +133,7 @@ import CodeSnippetDemo from './CodeSnippetDemo'
 import ColorPickerDemo from './ColorPickerDemo'
 import CommandReferenceDemo from './CommandReferenceDemo'
 import ComparatorDemo from './ComparatorDemo'
+import CompatibilityMatrixDemo from './CompatibilityMatrixDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -286,4 +287,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'color-picker', category: 'Forms', element: <ColorPickerDemo /> },
     { key: 'command-reference', category: 'Content', element: <CommandReferenceDemo /> },
     { key: 'comparator', category: 'Components', element: <ComparatorDemo /> },
+    { key: 'compatibility-matrix', category: 'Components', element: <CompatibilityMatrixDemo /> },
 ]
