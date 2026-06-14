@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -188,6 +188,7 @@ After `register()` you can author markup directly:
   - [tc-input-group](#tc-input-group)
   - [tc-label](#tc-label)
   - [tc-radio](#tc-radio)
+  - [tc-radio-group](#tc-radio-group)
   - [tc-date-picker](#tc-date-picker)
   - [tc-range](#tc-range)
   - [tc-select](#tc-select)
@@ -4384,6 +4385,60 @@ Radio button input.
 ```html
 <tc-radio name="size" value="sm" label="Small"></tc-radio>
 <tc-radio name="size" value="lg" label="Large" checked></tc-radio>
+```
+
+---
+
+### tc-radio-group
+
+Group of radio buttons with optional label, inline layout, disabled options, and roving-tabindex keyboard navigation.
+
+**Tag:** `tc-radio-group`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | — | Group label (renders as `<legend>`) |
+| `value` | string | — | Currently selected option value |
+| `name` | string | — | Shared `name` for all radio inputs (defaults to an internal auto-generated id) |
+| `inline` | boolean | false | Render options in a horizontal row |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `options` | `RadioGroupOption[]` | Array of option objects (set via JS, not attribute) |
+| `onChange` | `((value: string) => void) \| null` | Optional callback invoked with the new value on selection |
+
+Each `RadioGroupOption`:
+
+```ts
+{ value: string; label: string; disabled?: boolean }
+```
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: string }` | Fired when the selected option changes (click or arrow-key navigation) |
+
+**Slots:** none
+
+**Keyboard behaviour:** Arrow Down/Right → next enabled option (wrapping); Arrow Up/Left → previous enabled option (wrapping). Only the selected (or first enabled) radio is in the tab order (`tabindex` roving).
+
+```html
+<tc-radio-group id="framework-picker" label="Preferred framework" name="framework"></tc-radio-group>
+<script>
+  const el = document.getElementById('framework-picker')
+  el.options = [
+    { value: 'react', label: 'React' },
+    { value: 'vue',   label: 'Vue' },
+    { value: 'solid', label: 'Solid', disabled: true },
+  ]
+  el.value = 'react'
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+</script>
 ```
 
 ---

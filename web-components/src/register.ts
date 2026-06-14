@@ -181,6 +181,7 @@ import { NewsletterSignup } from './NewsletterSignup'
 import { NumberInput } from './NumberInput'
 import { OTPInput } from './OTPInput'
 import { PhoneInput } from './PhoneInput'
+import { RadioGroup } from './RadioGroup'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -371,4 +372,5 @@ export function register(): void {
     customElements.define('tc-number-input', NumberInput)
     customElements.define('tc-otp-input', OTPInput)
     customElements.define('tc-phone-input', PhoneInput)
+    customElements.define('tc-radio-group', RadioGroup)
 }

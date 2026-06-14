@@ -39,6 +39,7 @@ import SelectDemo from './SelectDemo'
 import CheckDemo from './CheckDemo'
 import CheckboxGroupDemo from './CheckboxGroupDemo'
 import RadioDemo from './RadioDemo'
+import RadioGroupDemo from './RadioGroupDemo'
 import SwitchDemo from './SwitchDemo'
 import RangeDemo from './RangeDemo'
 import FloatingLabelDemo from './FloatingLabelDemo'
@@ -233,6 +234,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'check', category: 'Forms', element: <CheckDemo /> },
     { key: 'checkbox-group', category: 'Forms', element: <CheckboxGroupDemo /> },
     { key: 'radio', category: 'Forms', element: <RadioDemo /> },
+    { key: 'radio-group', category: 'Forms', element: <RadioGroupDemo /> },
     { key: 'switch', category: 'Forms', element: <SwitchDemo /> },
     { key: 'range', category: 'Forms', element: <RangeDemo /> },
     { key: 'date-picker', category: 'Forms', element: <DatePickerDemo /> },
