@@ -174,6 +174,7 @@ import { InfiniteScroll } from './InfiniteScroll'
 import { InstallTabs } from './InstallTabs'
 import { Leaderboard } from './Leaderboard'
 import { LiveFeed } from './LiveFeed'
+import { Login } from './Login'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -357,4 +358,5 @@ export function register(): void {
     customElements.define('tc-install-tabs', InstallTabs)
     customElements.define('tc-leaderboard', Leaderboard)
     customElements.define('tc-live-feed', LiveFeed)
+    customElements.define('tc-login', Login)
 }

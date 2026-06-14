@@ -166,6 +166,7 @@ import InfiniteScrollDemo from './InfiniteScrollDemo'
 import InstallTabsDemo from './InstallTabsDemo'
 import LeaderboardDemo from './LeaderboardDemo'
 import LiveFeedDemo from './LiveFeedDemo'
+import LoginDemo from './LoginDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -352,4 +353,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'infinite-scroll', category: 'Components', element: <InfiniteScrollDemo /> },
     { key: 'install-tabs', category: 'Components', element: <InstallTabsDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
+    { key: 'login', category: 'Layout', element: <LoginDemo /> },
 ]

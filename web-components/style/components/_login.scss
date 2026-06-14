@@ -1,0 +1,266 @@
+// tc-login — two-column login layout: decorative ink aside (background pattern)
+// + white form column (logo slot, title, description, OAuth connect buttons).
+// All cosmetics via --bs-login-* / --tc-* tokens.
+// Sharp corners (border-radius: 0), slate neutrals, ink aside, white form surface.
+// Responsive: collapses to form-only single column at the sm breakpoint (576px).
+
+@use '../foundation/tokens' as *;
+
+tc-login {
+    // ── Layout ──────────────────────────────────────────────────────────────────
+    --bs-login-aside-width: 42%;
+    --bs-login-min-height: 100vh;
+    --bs-login-column-divider: 1px solid var(--tc-border);
+
+    // ── Aside ───────────────────────────────────────────────────────────────────
+    --bs-login-aside-bg: var(--tc-ink);
+
+    // ── Form column ─────────────────────────────────────────────────────────────
+    --bs-login-form-bg: var(--tc-surface);
+    --bs-login-form-padding-x: 3rem;
+    --bs-login-form-padding-y: 3rem;
+    --bs-login-form-max-width: 28rem;
+
+    // ── Logo ────────────────────────────────────────────────────────────────────
+    --bs-login-logo-margin-bottom: 2rem;
+
+    // ── Title ───────────────────────────────────────────────────────────────────
+    --bs-login-title-color: var(--tc-text);
+    --bs-login-title-font-size: 1.5rem;
+    --bs-login-title-font-weight: 600;
+    --bs-login-title-margin-bottom: 0.375rem;
+
+    // ── Description ─────────────────────────────────────────────────────────────
+    --bs-login-desc-color: var(--tc-text-muted);
+    --bs-login-desc-font-size: 0.9375rem;
+    --bs-login-desc-margin-bottom: 0;
+
+    // ── Connect buttons ─────────────────────────────────────────────────────────
+    --bs-login-connect-gap: 0.625rem;
+    --bs-login-connect-btn-height: 2.75rem;
+    --bs-login-connect-btn-font-size: 0.9375rem;
+    --bs-login-connect-btn-font-weight: 500;
+    --bs-login-connect-btn-icon-size: 1.125rem;
+    --bs-login-connect-margin-top: 1.75rem;
+
+    // ── Skeleton ─────────────────────────────────────────────────────────────────
+    --bs-login-skel-bg: var(--tc-surface-muted);
+    --bs-login-skel-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// ── Root layout ────────────────────────────────────────────────────────────────
+
+.tc-login {
+    display: flex;
+    flex-direction: row;
+    min-height: var(--bs-login-min-height);
+}
+
+// ── Aside (left / decorative column) ──────────────────────────────────────────
+
+.tc-login-aside {
+    position: relative;
+    width: var(--bs-login-aside-width);
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--bs-login-aside-bg);
+    border-right: var(--bs-login-column-divider);
+}
+
+.tc-login-aside-pattern {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.tc-login-aside-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    opacity: 0.35;
+    mix-blend-mode: luminosity;
+}
+
+// ── Form column (right) ────────────────────────────────────────────────────────
+
+.tc-login-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-login-form-bg);
+    padding: var(--bs-login-form-padding-y) var(--bs-login-form-padding-x);
+}
+
+.tc-login-form-inner {
+    width: 100%;
+    max-width: var(--bs-login-form-max-width);
+}
+
+// ── Logo region ────────────────────────────────────────────────────────────────
+
+.tc-login-logo {
+    margin-bottom: var(--bs-login-logo-margin-bottom);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// ── Title ─────────────────────────────────────────────────────────────────────
+
+.tc-login-title {
+    margin: 0 0 var(--bs-login-title-margin-bottom);
+    font-size: var(--bs-login-title-font-size);
+    font-weight: var(--bs-login-title-font-weight);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--bs-login-title-color);
+    border-radius: 0;
+}
+
+// ── Description ───────────────────────────────────────────────────────────────
+
+.tc-login-description {
+    margin: 0.375rem 0 var(--bs-login-desc-margin-bottom);
+    font-size: var(--bs-login-desc-font-size);
+    line-height: 1.6;
+    color: var(--bs-login-desc-color);
+}
+
+// ── Connect button group ───────────────────────────────────────────────────────
+
+.tc-login-connect {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-login-connect-gap);
+    margin-top: var(--bs-login-connect-margin-top);
+}
+
+.tc-login-connect-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    height: var(--bs-login-connect-btn-height);
+    font-size: var(--bs-login-connect-btn-font-size);
+    font-weight: var(--bs-login-connect-btn-font-weight);
+    border-radius: 0;
+    transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast),
+        transform var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+}
+
+.tc-login-connect-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.tc-login-connect-btn-svg {
+    width: var(--bs-login-connect-btn-icon-size);
+    height: var(--bs-login-connect-btn-icon-size);
+    display: block;
+    stroke: currentColor;
+    fill: none;
+}
+
+// ── Loading skeleton ───────────────────────────────────────────────────────────
+
+@keyframes tc-login-shimmer {
+    from {
+        background-position: -200% center;
+    }
+    to {
+        background-position: 200% center;
+    }
+}
+
+.tc-login-skel {
+    background: linear-gradient(
+        90deg,
+        var(--bs-login-skel-bg) 25%,
+        var(--bs-login-skel-shimmer) 50%,
+        var(--bs-login-skel-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-login-shimmer 1.4s ease infinite;
+    border-radius: 0;
+    margin-bottom: 0.75rem;
+}
+
+.tc-login-skel--title {
+    height: 1.75rem;
+    width: 55%;
+}
+
+.tc-login-skel--desc {
+    height: 1rem;
+    width: 75%;
+    margin-bottom: 1.75rem;
+}
+
+.tc-login-skel--btn {
+    height: var(--bs-login-connect-btn-height);
+    width: 100%;
+    margin-bottom: var(--bs-login-connect-gap);
+}
+
+// ── Coarse touch targets ───────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-login-connect-btn {
+        min-height: 44px;
+    }
+}
+
+// ── Responsive: collapse to single column (form only) ─────────────────────────
+
+@media (max-width: 575.98px) {
+    .tc-login {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .tc-login-aside {
+        display: none;
+    }
+
+    tc-login {
+        --bs-login-form-padding-x: 1.5rem;
+        --bs-login-form-padding-y: 2rem;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-login-connect-btn {
+        transition: none;
+
+        &:hover:not(:disabled) {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+
+    .tc-login-skel {
+        animation: none;
+        background: var(--bs-login-skel-bg);
+    }
+}
