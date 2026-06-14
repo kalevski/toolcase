@@ -143,6 +143,7 @@ import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 import MetricCardDemo from './MetricCardDemo'
 import SlicesCardDemo from './SlicesCardDemo'
 import DatePickerDemo from './DatePickerDemo'
+import DiffViewerDemo from './DiffViewerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -306,4 +307,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'danger-zone-actions', category: 'Components', element: <DangerZoneActionsDemo /> },
     { key: 'metric-card', category: 'Components', element: <MetricCardDemo /> },
     { key: 'slices-card', category: 'Components', element: <SlicesCardDemo /> },
+    { key: 'diff-viewer', category: 'Components', element: <DiffViewerDemo /> },
 ]
