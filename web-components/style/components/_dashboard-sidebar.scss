@@ -1,0 +1,60 @@
+// tc-dashboard-sidebar — vertical sidebar shell for dashboard layouts.
+// Three regions: brand (top), menu (scrollable middle), panel (pinned bottom).
+// Slate neutrals only; 2px cyan brand dot is the sole accent (on slotted brand content).
+// Drive every cosmetic value through --bs-dashboard-sidebar-* custom properties.
+
+tc-dashboard-sidebar {
+    --bs-dashboard-sidebar-width: 15rem;
+    --bs-dashboard-sidebar-bg: var(--tc-surface-hover);
+    --bs-dashboard-sidebar-color: var(--tc-text);
+    --bs-dashboard-sidebar-border: var(--tc-border);
+    --bs-dashboard-sidebar-brand-padding: 1rem;
+    --bs-dashboard-sidebar-menu-padding: 0.5rem 0;
+    --bs-dashboard-sidebar-panel-padding: 0.75rem 1rem;
+    --bs-dashboard-sidebar-panel-border: var(--tc-border);
+}
+
+.tc-dashboard-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: var(--bs-dashboard-sidebar-width);
+    min-width: var(--bs-dashboard-sidebar-width);
+    height: 100%;
+    background: var(--bs-dashboard-sidebar-bg);
+    color: var(--bs-dashboard-sidebar-color);
+    border-right: 1px solid var(--bs-dashboard-sidebar-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-dashboard-sidebar-brand {
+    flex: 0 0 auto;
+    padding: var(--bs-dashboard-sidebar-brand-padding);
+    border-bottom: 1px solid var(--bs-dashboard-sidebar-border);
+}
+
+.tc-dashboard-sidebar-menu {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: var(--bs-dashboard-sidebar-menu-padding);
+    min-height: 0;
+
+    // Inner hairlines between menu items — courtesy of slotted child components.
+    // Authors place their nav items directly; we ensure clean scroll.
+    -webkit-overflow-scrolling: touch;
+}
+
+.tc-dashboard-sidebar-panel {
+    flex: 0 0 auto;
+    padding: var(--bs-dashboard-sidebar-panel-padding);
+    border-top: 1px solid var(--bs-dashboard-sidebar-panel-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-dashboard-sidebar,
+    .tc-dashboard-sidebar-brand,
+    .tc-dashboard-sidebar-menu,
+    .tc-dashboard-sidebar-panel {
+        transition: none;
+    }
+}

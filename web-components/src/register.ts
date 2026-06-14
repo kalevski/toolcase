@@ -148,6 +148,7 @@ import { CountdownTimer } from './CountdownTimer'
 import { DangerZoneActions } from './DangerZoneActions'
 import { MetricCard } from './MetricCard'
 import { SlicesCard } from './SlicesCard'
+import { DashboardSidebar } from './DashboardSidebar'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -305,4 +306,5 @@ export function register(): void {
     customElements.define('tc-danger-zone-actions', DangerZoneActions)
     customElements.define('tc-metric-card', MetricCard)
     customElements.define('tc-slices-card', SlicesCard)
+    customElements.define('tc-dashboard-sidebar', DashboardSidebar)
 }
