@@ -1,0 +1,442 @@
+// tc-timeline — vertical timeline of chronological events.
+// Variants: default | glass | outlined | elevated | minimal.
+// Connectors: gradient | solid | dashed.
+// Statuses: completed = --tc-success, active = --tc-app-accent, upcoming = muted slate.
+// Sharp corners (border-radius: 0) on cards and tags; 50% only on the circular node.
+
+@use '../foundation/tokens' as *;
+
+tc-timeline {
+    // ── Card surface ──────────────────────────────────────────────────────────
+    --bs-timeline-card-bg: var(--tc-surface);
+    --bs-timeline-card-border-color: var(--tc-border);
+    --bs-timeline-card-padding-x: 1.25rem;
+    --bs-timeline-card-padding-y: 0.875rem;
+
+    // ── Connector spine ──────────────────────────────────────────────────────
+    --bs-timeline-line-color: var(--tc-border);
+    --bs-timeline-line-width: 1px;
+    --bs-timeline-line-solid-color: var(--tc-border-strong);
+    --bs-timeline-line-solid-width: 2px;
+
+    // ── Node geometry ────────────────────────────────────────────────────────
+    --bs-timeline-node-col-width: 2.5rem;
+    --bs-timeline-node-size: 0.875rem;
+    --bs-timeline-node-icon-size: 2rem;
+    --bs-timeline-node-gutter: 0.875rem;
+
+    // ── Status node colors (status dot only; never full-card fills) ──────────
+    --bs-timeline-completed-bg: var(--tc-success);
+    --bs-timeline-completed-border: var(--tc-success);
+    --bs-timeline-active-bg: var(--tc-app-accent);
+    --bs-timeline-active-border: var(--tc-app-accent);
+    --bs-timeline-upcoming-bg: var(--tc-surface);
+    --bs-timeline-upcoming-border: var(--tc-border);
+
+    // ── Typography ───────────────────────────────────────────────────────────
+    --bs-timeline-date-color: var(--tc-text-muted);
+    --bs-timeline-date-font-size: 0.6875rem;
+    --bs-timeline-title-color: var(--tc-text);
+    --bs-timeline-title-font-size: 0.9375rem;
+    --bs-timeline-title-font-weight: 600;
+    --bs-timeline-subtitle-color: var(--tc-text-muted);
+    --bs-timeline-subtitle-font-size: 0.8125rem;
+    --bs-timeline-description-color: var(--tc-text-muted);
+    --bs-timeline-description-font-size: 0.875rem;
+    --bs-timeline-meta-color: var(--tc-text-faint);
+    --bs-timeline-meta-font-size: 0.6875rem;
+
+    // ── Badge ────────────────────────────────────────────────────────────────
+    --bs-timeline-badge-bg: var(--tc-surface-muted);
+    --bs-timeline-badge-color: var(--tc-text-muted);
+    --bs-timeline-badge-border-color: var(--tc-border);
+    --bs-timeline-badge-font-size: 0.6875rem;
+
+    // ── Tags ─────────────────────────────────────────────────────────────────
+    --bs-timeline-tag-bg: var(--tc-surface-muted);
+    --bs-timeline-tag-color: var(--tc-text);
+    --bs-timeline-tag-border-color: var(--tc-border);
+    --bs-timeline-tag-font-size: 0.75rem;
+
+    // ── Progress ─────────────────────────────────────────────────────────────
+    --bs-timeline-progress-height: 0.25rem;
+    --bs-timeline-progress-bg: var(--tc-surface-muted);
+    --bs-timeline-progress-fill: var(--tc-app-accent);
+
+    // ── Item spacing ─────────────────────────────────────────────────────────
+    --bs-timeline-item-gap: 1.5rem;
+
+    // ── Elevated variant shadow ───────────────────────────────────────────────
+    --bs-timeline-elevated-shadow: var(--tc-shadow-sm);
+
+    // ── Glass variant surface ─────────────────────────────────────────────────
+    --bs-timeline-glass-bg: rgba(255, 255, 255, 0.72);
+
+    // ── Skeleton ─────────────────────────────────────────────────────────────
+    --bs-timeline-skeleton-bg: var(--tc-surface-muted);
+    --bs-timeline-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// ── Outer block ──────────────────────────────────────────────────────────────
+
+.tc-timeline {
+    position: relative;
+}
+
+// ── Connector spine ──────────────────────────────────────────────────────────
+
+.tc-timeline-line {
+    position: absolute;
+    left: calc(50% - var(--bs-timeline-line-width) / 2);
+    top: 0;
+    bottom: 0;
+    width: var(--bs-timeline-line-width);
+    background: var(--bs-timeline-line-color);
+    pointer-events: none;
+
+    &--gradient {
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            var(--bs-timeline-line-color) 8%,
+            var(--bs-timeline-line-color) 92%,
+            transparent
+        );
+    }
+
+    &--solid {
+        left: calc(50% - var(--bs-timeline-line-solid-width) / 2);
+        width: var(--bs-timeline-line-solid-width);
+        background: var(--bs-timeline-line-solid-color);
+    }
+
+    &--dashed {
+        width: 0;
+        background: none;
+        border-left: 2px dashed var(--bs-timeline-line-color);
+        left: 50%;
+    }
+}
+
+// ── Items list ───────────────────────────────────────────────────────────────
+
+.tc-timeline-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+// ── Individual item ──────────────────────────────────────────────────────────
+
+.tc-timeline-item {
+    display: grid;
+    grid-template-columns: 1fr var(--bs-timeline-node-col-width) 1fr;
+    gap: 0 var(--bs-timeline-node-gutter);
+    align-items: start;
+
+    & + & {
+        margin-top: calc(var(--bs-timeline-item-gap) - var(--timeline-item-overlap, 0px));
+    }
+
+    // Accent color override: sets node dot fill + border to the per-item color
+    &[style*='--tl-item-accent'] .tc-timeline-node--dot {
+        border-color: var(--tl-item-accent);
+        background: var(--tl-item-accent);
+    }
+}
+
+// Left item: card in column 1, node in column 2
+.tc-timeline-item--left {
+    > .tc-timeline-node {
+        grid-column: 2;
+    }
+
+    > .tc-timeline-card {
+        grid-column: 1;
+        grid-row: 1;
+    }
+}
+
+// Right item: node in column 2, card in column 3
+.tc-timeline-item--right {
+    > .tc-timeline-node {
+        grid-column: 2;
+    }
+
+    > .tc-timeline-card {
+        grid-column: 3;
+        grid-row: 1;
+    }
+}
+
+// ── Node marker ──────────────────────────────────────────────────────────────
+
+.tc-timeline-node {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: start;
+    justify-self: center;
+    position: relative;
+    z-index: 2;
+    margin-top: 0.75rem; // align with card header baseline
+
+    &--dot {
+        width: var(--bs-timeline-node-size);
+        height: var(--bs-timeline-node-size);
+        border-radius: 50%; // the ONE sanctioned curve — circular marker
+        border: 2px solid var(--bs-timeline-upcoming-border);
+        background: var(--bs-timeline-upcoming-bg);
+        flex-shrink: 0;
+    }
+
+    &--completed {
+        background: var(--bs-timeline-completed-bg);
+        border-color: var(--bs-timeline-completed-border);
+    }
+
+    &--active {
+        background: var(--bs-timeline-active-bg);
+        border-color: var(--bs-timeline-active-border);
+    }
+
+    &--upcoming {
+        background: var(--bs-timeline-upcoming-bg);
+        border-color: var(--bs-timeline-upcoming-border);
+    }
+
+    &--skeleton {
+        background: var(--bs-timeline-skeleton-bg);
+        border-color: transparent;
+        animation: none;
+    }
+
+    &--icon {
+        width: var(--bs-timeline-node-icon-size);
+        height: var(--bs-timeline-node-icon-size);
+        border-radius: 50%; // icon chip circle
+        background: var(--tc-surface-muted);
+        border: 1px solid var(--bs-timeline-card-border-color);
+        flex-shrink: 0;
+    }
+}
+
+.tc-timeline-node-dot {
+    display: none; // placeholder span; may be used for future pulse animation
+}
+
+.tc-timeline-icon-svg {
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+    fill: none;
+    color: var(--tc-text-muted);
+}
+
+// ── Card ─────────────────────────────────────────────────────────────────────
+
+.tc-timeline-card {
+    background: var(--bs-timeline-card-bg);
+    border: 1px solid var(--bs-timeline-card-border-color);
+    border-radius: 0;
+    padding: var(--bs-timeline-card-padding-y) var(--bs-timeline-card-padding-x);
+}
+
+// Variant: outlined — transparent fill, border visible
+.tc-timeline--outlined .tc-timeline-card {
+    background: transparent;
+}
+
+// Variant: elevated — low shadow layer
+.tc-timeline--elevated .tc-timeline-card {
+    box-shadow: var(--bs-timeline-elevated-shadow);
+}
+
+// Variant: glass — translucent surface with backdrop blur
+.tc-timeline--glass .tc-timeline-card {
+    background: var(--bs-timeline-glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+// Variant: minimal — no card chrome
+.tc-timeline--minimal .tc-timeline-card {
+    background: transparent;
+    border-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+// ── Card header ──────────────────────────────────────────────────────────────
+
+.tc-timeline-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.tc-timeline-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.tc-timeline-date {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-timeline-date-font-size);
+    color: var(--bs-timeline-date-color);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tc-timeline-meta {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-timeline-meta-font-size);
+    color: var(--bs-timeline-meta-color);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+// ── Badge ────────────────────────────────────────────────────────────────────
+
+.tc-timeline-badge {
+    display: inline-block;
+    padding: 0.09375rem 0.4375rem;
+    font-size: var(--bs-timeline-badge-font-size);
+    font-weight: 500;
+    background: var(--bs-timeline-badge-bg);
+    color: var(--bs-timeline-badge-color);
+    border: 1px solid var(--bs-timeline-badge-border-color);
+    border-radius: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+// ── Title / subtitle / description ───────────────────────────────────────────
+
+.tc-timeline-title {
+    margin: 0;
+    font-size: var(--bs-timeline-title-font-size);
+    font-weight: var(--bs-timeline-title-font-weight);
+    color: var(--bs-timeline-title-color);
+    line-height: 1.35;
+}
+
+.tc-timeline-subtitle {
+    margin: 0.1875rem 0 0;
+    font-size: var(--bs-timeline-subtitle-font-size);
+    color: var(--bs-timeline-subtitle-color);
+    line-height: 1.4;
+}
+
+.tc-timeline-description {
+    margin: 0.5rem 0 0;
+    font-size: var(--bs-timeline-description-font-size);
+    color: var(--bs-timeline-description-color);
+    line-height: 1.5;
+}
+
+// ── Tags ─────────────────────────────────────────────────────────────────────
+
+.tc-timeline-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0.625rem;
+}
+
+.tc-timeline-tag {
+    display: inline-block;
+    padding: 0.0625rem 0.4375rem;
+    font-size: var(--bs-timeline-tag-font-size);
+    background: var(--bs-timeline-tag-bg);
+    color: var(--bs-timeline-tag-color);
+    border: 1px solid var(--bs-timeline-tag-border-color);
+    border-radius: 0;
+    white-space: nowrap;
+}
+
+// ── Progress bar ──────────────────────────────────────────────────────────────
+
+.tc-timeline-progress {
+    height: var(--bs-timeline-progress-height);
+    background: var(--bs-timeline-progress-bg);
+    border-radius: 0;
+    overflow: hidden;
+    margin-top: 0.75rem;
+}
+
+.tc-timeline-progress-bar {
+    height: 100%;
+    background: var(--bs-timeline-progress-fill);
+    border-radius: 0;
+    transition: width 300ms ease;
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-timeline-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-timeline-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-timeline-skeleton-bg) 25%,
+        var(--bs-timeline-skeleton-shimmer) 50%,
+        var(--bs-timeline-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-timeline-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-timeline-card--skeleton {
+    border-color: var(--bs-timeline-card-border-color);
+    min-height: 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.375rem;
+}
+
+.tc-timeline-skeleton {
+    display: block;
+    border-radius: 0;
+    @extend %tc-timeline-shimmer;
+
+    &--date {
+        height: 0.625rem;
+        width: 5rem;
+    }
+
+    &--title {
+        height: 0.875rem;
+        width: 60%;
+    }
+
+    &--desc {
+        height: 0.75rem;
+        width: 85%;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze shimmer, keep flat fill visible
+@media (prefers-reduced-motion: reduce) {
+    .tc-timeline-skeleton {
+        animation: none;
+        background: var(--bs-timeline-skeleton-bg);
+    }
+
+    .tc-timeline-progress-bar {
+        transition: none;
+    }
+}
