@@ -144,6 +144,7 @@ import MetricCardDemo from './MetricCardDemo'
 import SlicesCardDemo from './SlicesCardDemo'
 import DatePickerDemo from './DatePickerDemo'
 import DiffViewerDemo from './DiffViewerDemo'
+import DrawerDemo from './DrawerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -302,6 +303,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'comparator', category: 'Components', element: <ComparatorDemo /> },
     { key: 'compatibility-matrix', category: 'Components', element: <CompatibilityMatrixDemo /> },
     { key: 'context-menu', category: 'Overlays & Feedback', element: <ContextMenuDemo /> },
+    { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
     { key: 'cool-nav', category: 'Navigation', element: <CoolNavDemo /> },
     { key: 'countdown-timer', category: 'Components', element: <CountdownTimerDemo /> },
     { key: 'danger-zone-actions', category: 'Components', element: <DangerZoneActionsDemo /> },
