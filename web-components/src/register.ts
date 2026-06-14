@@ -128,6 +128,7 @@ import { TierLadder } from './TierLadder'
 import { Timeline } from './Timeline'
 import { UsageSummaryPanel } from './UsageSummaryPanel'
 import { WelcomeGuide } from './WelcomeGuide'
+import { ApiReferenceTable } from './ApiReferenceTable'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -265,4 +266,5 @@ export function register(): void {
     customElements.define('tc-timeline', Timeline)
     customElements.define('tc-usage-summary-panel', UsageSummaryPanel)
     customElements.define('tc-welcome-guide', WelcomeGuide)
+    customElements.define('tc-api-reference-table', ApiReferenceTable)
 }

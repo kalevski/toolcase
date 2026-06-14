@@ -120,6 +120,7 @@ import TierLadderDemo from './TierLadderDemo'
 import TimelineDemo from './TimelineDemo'
 import UsageSummaryPanelDemo from './UsageSummaryPanelDemo'
 import WelcomeGuideDemo from './WelcomeGuideDemo'
+import ApiReferenceTableDemo from './ApiReferenceTableDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -260,4 +261,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'timeline', category: 'Components', element: <TimelineDemo /> },
     { key: 'usage-summary-panel', category: 'Components', element: <UsageSummaryPanelDemo /> },
     { key: 'welcome-guide', category: 'Components', element: <WelcomeGuideDemo /> },
+    { key: 'api-reference-table', category: 'Content', element: <ApiReferenceTableDemo /> },
 ]

@@ -1,0 +1,241 @@
+// tc-api-reference-table — documentation-style API reference table with grouped sections,
+// monospace name/signature/returns columns, and deprecation badges.
+// All cosmetics flow through --bs-api-reference-table-* custom properties backed by --tc-* tokens.
+// Design: sharp corners (border-radius: 0), 1px --tc-border outer frame,
+// slate-100 inner row separators (fainter than outer), faint slate header cap.
+// Machine-facing text in JetBrains Mono; prose descriptions in Inter.
+// Status color reserved for the deprecation badge only — no decorative accent.
+
+@use '../foundation/tokens' as *;
+
+tc-api-reference-table {
+    // Outer frame
+    --bs-api-reference-table-border-color: var(--tc-border);
+    --bs-api-reference-table-border: 1px solid var(--bs-api-reference-table-border-color);
+    --bs-api-reference-table-bg: var(--tc-surface);
+    --bs-api-reference-table-border-radius: 0;
+
+    // Title header cap
+    --bs-api-reference-table-title-bg: var(--tc-surface-muted);
+    --bs-api-reference-table-title-color: var(--tc-text);
+    --bs-api-reference-table-title-font-size: 0.9375rem;
+    --bs-api-reference-table-title-font-weight: 600;
+    --bs-api-reference-table-title-padding-y: 0.75rem;
+    --bs-api-reference-table-title-padding-x: 1rem;
+    --bs-api-reference-table-title-border: 1px solid var(--bs-api-reference-table-border-color);
+
+    // Group heading — mono uppercase micro-label
+    --bs-api-reference-table-group-heading-color: var(--tc-text-faint);
+    --bs-api-reference-table-group-heading-font-size: 0.6875rem;
+    --bs-api-reference-table-group-heading-letter-spacing: 0.08em;
+    --bs-api-reference-table-group-heading-padding-y: 0.5rem;
+    --bs-api-reference-table-group-heading-padding-x: 1rem;
+    --bs-api-reference-table-group-heading-bg: var(--tc-slate-50);
+    --bs-api-reference-table-group-separator: 1px solid var(--bs-api-reference-table-border-color);
+
+    // Table header
+    --bs-api-reference-table-thead-bg: var(--tc-slate-50);
+    --bs-api-reference-table-thead-color: var(--tc-text-muted);
+    --bs-api-reference-table-thead-font-size: 0.75rem;
+    --bs-api-reference-table-thead-letter-spacing: 0.04em;
+    --bs-api-reference-table-thead-padding-y: 0.5rem;
+    --bs-api-reference-table-thead-padding-x: 0.875rem;
+    --bs-api-reference-table-thead-border: 1px solid var(--bs-api-reference-table-border-color);
+
+    // Table rows — inner separators are slate-100, fainter than the outer 1px frame
+    --bs-api-reference-table-row-border: 1px solid var(--tc-slate-100);
+    --bs-api-reference-table-row-padding-y: 0.625rem;
+    --bs-api-reference-table-row-padding-x: 0.875rem;
+    --bs-api-reference-table-row-bg: var(--tc-surface);
+    --bs-api-reference-table-row-bg-depr: var(--tc-warning-bg);
+
+    // Column text — monospace for name/signature/returns, Inter for description
+    --bs-api-reference-table-name-color: var(--tc-text);
+    --bs-api-reference-table-name-font-size: 0.8125rem;
+    --bs-api-reference-table-sig-color: var(--tc-text-muted);
+    --bs-api-reference-table-sig-font-size: 0.8125rem;
+    --bs-api-reference-table-returns-color: var(--tc-text);
+    --bs-api-reference-table-returns-font-size: 0.8125rem;
+    --bs-api-reference-table-desc-color: var(--tc-text-muted);
+    --bs-api-reference-table-desc-font-size: 0.8125rem;
+
+    // Deprecation badge — warning/danger color, status only
+    --bs-api-reference-table-depr-badge-bg: var(--tc-warning-bg);
+    --bs-api-reference-table-depr-badge-color: var(--tc-warning);
+    --bs-api-reference-table-depr-badge-font-size: 0.6875rem;
+    --bs-api-reference-table-depr-badge-icon-size: 0.8125rem;
+    --bs-api-reference-table-depr-note-color: var(--tc-text-muted);
+    --bs-api-reference-table-depr-note-font-size: 0.75rem;
+}
+
+.tc-api-reference-table {
+    border: var(--bs-api-reference-table-border);
+    border-radius: var(--bs-api-reference-table-border-radius);
+    background: var(--bs-api-reference-table-bg);
+    overflow: hidden;
+}
+
+// ── Title header cap ─────────────────────────────────────────────────────────
+
+.tc-api-reference-table-title {
+    padding: var(--bs-api-reference-table-title-padding-y) var(--bs-api-reference-table-title-padding-x);
+    background: var(--bs-api-reference-table-title-bg);
+    border-bottom: var(--bs-api-reference-table-title-border);
+    font-size: var(--bs-api-reference-table-title-font-size);
+    font-weight: var(--bs-api-reference-table-title-font-weight);
+    color: var(--bs-api-reference-table-title-color);
+    line-height: 1.4;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// ── Group block ───────────────────────────────────────────────────────────────
+
+.tc-api-reference-group {
+    & + & {
+        border-top: var(--bs-api-reference-table-group-separator);
+    }
+}
+
+.tc-api-reference-group-heading {
+    padding: var(--bs-api-reference-table-group-heading-padding-y)
+        var(--bs-api-reference-table-group-heading-padding-x);
+    background: var(--bs-api-reference-table-group-heading-bg);
+    border-bottom: var(--bs-api-reference-table-thead-border);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-api-reference-table-group-heading-font-size);
+    font-weight: 600;
+    letter-spacing: var(--bs-api-reference-table-group-heading-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-api-reference-table-group-heading-color);
+    line-height: 1.5;
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+
+.tc-api-reference-table-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+
+    thead tr {
+        background: var(--bs-api-reference-table-thead-bg);
+        border-bottom: var(--bs-api-reference-table-thead-border);
+    }
+
+    th {
+        padding: var(--bs-api-reference-table-thead-padding-y) var(--bs-api-reference-table-thead-padding-x);
+        font-family: var(--tc-font-mono);
+        font-size: var(--bs-api-reference-table-thead-font-size);
+        font-weight: 600;
+        letter-spacing: var(--bs-api-reference-table-thead-letter-spacing);
+        text-transform: uppercase;
+        color: var(--bs-api-reference-table-thead-color);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    tbody tr {
+        background: var(--bs-api-reference-table-row-bg);
+
+        &:not(:last-child) {
+            border-bottom: var(--bs-api-reference-table-row-border);
+        }
+
+        &.tc-api-item--deprecated {
+            background: var(--bs-api-reference-table-row-bg-depr);
+        }
+    }
+
+    td {
+        padding: var(--bs-api-reference-table-row-padding-y) var(--bs-api-reference-table-row-padding-x);
+        vertical-align: top;
+        line-height: 1.5;
+    }
+}
+
+// ── Column styles ─────────────────────────────────────────────────────────────
+
+.tc-api-name {
+    white-space: nowrap;
+
+    code {
+        font-family: var(--tc-font-mono);
+        font-size: var(--bs-api-reference-table-name-font-size);
+        font-weight: 500;
+        color: var(--bs-api-reference-table-name-color);
+        background: transparent;
+        padding: 0;
+    }
+}
+
+.tc-api-signature {
+    code {
+        font-family: var(--tc-font-mono);
+        font-size: var(--bs-api-reference-table-sig-font-size);
+        color: var(--bs-api-reference-table-sig-color);
+        background: transparent;
+        padding: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+}
+
+.tc-api-returns {
+    white-space: nowrap;
+
+    code {
+        font-family: var(--tc-font-mono);
+        font-size: var(--bs-api-reference-table-returns-font-size);
+        color: var(--bs-api-reference-table-returns-color);
+        background: transparent;
+        padding: 0;
+    }
+}
+
+.tc-api-desc {
+    min-width: 12rem;
+}
+
+.tc-api-reference-desc {
+    margin: 0;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-api-reference-table-desc-font-size);
+    color: var(--bs-api-reference-table-desc-color);
+    line-height: 1.55;
+}
+
+// ── Deprecation badge ─────────────────────────────────────────────────────────
+
+.tc-api-deprecated-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.375rem;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-api-reference-table-depr-badge-font-size);
+    font-weight: 600;
+    color: var(--bs-api-reference-table-depr-badge-color);
+    background: var(--bs-api-reference-table-depr-badge-bg);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0;
+
+    svg {
+        width: var(--bs-api-reference-table-depr-badge-icon-size);
+        height: var(--bs-api-reference-table-depr-badge-icon-size);
+        flex-shrink: 0;
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+.tc-api-deprecated-note {
+    margin: 0.25rem 0 0;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-api-reference-table-depr-note-font-size);
+    color: var(--bs-api-reference-table-depr-note-color);
+    line-height: 1.5;
+    font-style: italic;
+}
