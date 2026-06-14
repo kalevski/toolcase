@@ -154,6 +154,7 @@ import ExtendedSelectDemo from './ExtendedSelectDemo'
 import FAQListDemo from './FAQListDemo'
 import FeatureMatrixDemo from './FeatureMatrixDemo'
 import FileDropzoneDemo from './FileDropzoneDemo'
+import FileTagsDemo from './FileTagsDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -328,4 +329,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'faq-list', category: 'Components', element: <FAQListDemo /> },
     { key: 'feature-matrix', category: 'Components', element: <FeatureMatrixDemo /> },
     { key: 'file-dropzone', category: 'Forms', element: <FileDropzoneDemo /> },
+    { key: 'file-tags', category: 'Forms', element: <FileTagsDemo /> },
 ]

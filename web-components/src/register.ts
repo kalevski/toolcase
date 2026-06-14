@@ -162,6 +162,7 @@ import { FAQList } from './FAQList'
 import { FeatureMatrix } from './FeatureMatrix'
 import { File } from './File'
 import { FileDropzone } from './FileDropzone'
+import { FileTags } from './FileTags'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -333,4 +334,5 @@ export function register(): void {
     customElements.define('tc-feature-matrix', FeatureMatrix)
     customElements.define('tc-file', File)
     customElements.define('tc-file-dropzone', FileDropzone)
+    customElements.define('tc-file-tags', FileTags)
 }

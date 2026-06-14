@@ -1,0 +1,289 @@
+// tc-file-tags — tag picker with selected chips, a searchable add-menu, and
+// optional readonly mode. Sharp corners (border-radius: 0) throughout.
+// All cosmetics flow through --bs-file-tags-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-file-tags {
+    --bs-file-tags-gap: 0.375rem;
+
+    // Chips
+    --bs-file-tags-chip-bg: var(--tc-surface-muted);
+    --bs-file-tags-chip-border-color: var(--tc-border);
+    --bs-file-tags-chip-text-color: var(--tc-text);
+    --bs-file-tags-chip-font-size: 0.8125rem;
+    --bs-file-tags-chip-padding-x: 0.5rem;
+    --bs-file-tags-chip-padding-y: 0.25rem;
+    --bs-file-tags-chip-gap: 0.375rem;
+    --bs-file-tags-chip-accent-width: 2px;
+    // --bs-file-tags-chip-color is intentionally NOT set here;
+    // it defaults to transparent on .tc-file-tags-chip and is overridden inline per chip when a tag has a color.
+
+    // Remove button
+    --bs-file-tags-remove-icon-size: 0.75rem;
+    --bs-file-tags-remove-bg-hover: var(--tc-border);
+
+    // Add button
+    --bs-file-tags-add-color: var(--tc-text-muted);
+    --bs-file-tags-add-border-color: var(--tc-border);
+    --bs-file-tags-add-bg-hover: var(--tc-surface-muted);
+    --bs-file-tags-add-color-hover: var(--tc-text);
+    --bs-file-tags-add-font-size: 0.8125rem;
+    --bs-file-tags-add-padding-x: 0.5rem;
+    --bs-file-tags-add-padding-y: 0.25rem;
+    --bs-file-tags-add-icon-size: 0.875rem;
+    --bs-file-tags-add-gap: 0.25rem;
+
+    // Menu dropdown
+    --bs-file-tags-menu-bg: var(--tc-surface);
+    --bs-file-tags-menu-border-color: var(--tc-border);
+    --bs-file-tags-menu-shadow: var(--tc-shadow-lg);
+    --bs-file-tags-menu-min-width: 180px;
+    --bs-file-tags-menu-max-height: 200px;
+    --bs-file-tags-menu-z-index: var(--tc-z-dropdown, 1060);
+
+    // Search input
+    --bs-file-tags-search-border-color: var(--tc-border);
+    --bs-file-tags-search-font-size: 0.8125rem;
+    --bs-file-tags-search-padding-x: 0.5rem;
+    --bs-file-tags-search-padding-y: 0.375rem;
+
+    // Options
+    --bs-file-tags-option-color: var(--tc-text);
+    --bs-file-tags-option-font-size: 0.8125rem;
+    --bs-file-tags-option-padding-x: 0.5rem;
+    --bs-file-tags-option-padding-y: 0.375rem;
+    --bs-file-tags-option-hover-bg: var(--tc-surface-muted);
+    --bs-file-tags-option-active-bg: var(--tc-app-accent);
+    --bs-file-tags-option-active-color: #fff;
+    --bs-file-tags-no-results-color: var(--tc-text-faint);
+    --bs-file-tags-no-results-font-size: 0.8125rem;
+}
+
+// ── Chip row ───────────────────────────────────────────────────────────────
+
+.tc-file-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--bs-file-tags-gap);
+}
+
+.tc-file-tags-chips {
+    display: contents; // let chips participate directly in the flex row
+}
+
+// ── Selected chip ──────────────────────────────────────────────────────────
+
+.tc-file-tags-chip {
+    // Local default: no accent stripe. Overridden inline per chip when tag.color is set.
+    --bs-file-tags-chip-color: transparent;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-file-tags-chip-gap);
+    padding: var(--bs-file-tags-chip-padding-y) var(--bs-file-tags-chip-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-file-tags-chip-font-size);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--bs-file-tags-chip-text-color);
+    background-color: var(--bs-file-tags-chip-bg);
+    border: 1px solid var(--bs-file-tags-chip-border-color);
+    // Left stripe: transparent (no color) or tag color (when set inline via style="--bs-file-tags-chip-color:…")
+    border-left: var(--bs-file-tags-chip-accent-width) solid var(--bs-file-tags-chip-color);
+    border-radius: 0;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.tc-file-tags-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-left: 0.125rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-file-tags-remove-icon-size);
+        height: var(--bs-file-tags-remove-icon-size);
+        display: block;
+        pointer-events: none;
+    }
+
+    &:hover {
+        background-color: var(--bs-file-tags-remove-bg-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 1px;
+    }
+}
+
+// ── Add button + menu wrapper ──────────────────────────────────────────────
+
+.tc-file-tags-add-wrap {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.tc-file-tags-add {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-file-tags-add-gap);
+    padding: var(--bs-file-tags-add-padding-y) var(--bs-file-tags-add-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-file-tags-add-font-size);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--bs-file-tags-add-color);
+    background: transparent;
+    border: 1px solid var(--bs-file-tags-add-border-color);
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-file-tags-add-icon-size);
+        height: var(--bs-file-tags-add-icon-size);
+        display: block;
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+
+    &:hover {
+        background-color: var(--bs-file-tags-add-bg-hover);
+        color: var(--bs-file-tags-add-color-hover);
+        border-color: var(--bs-file-tags-add-border-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Dropdown menu ──────────────────────────────────────────────────────────
+
+.tc-file-tags-menu {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: var(--bs-file-tags-menu-z-index);
+    display: none;
+    min-width: var(--bs-file-tags-menu-min-width);
+    background-color: var(--bs-file-tags-menu-bg);
+    border: 1px solid var(--bs-file-tags-menu-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-file-tags-menu-shadow);
+
+    &.tc-file-tags-menu--open {
+        display: block;
+    }
+}
+
+// ── Search input ───────────────────────────────────────────────────────────
+
+.tc-file-tags-search {
+    display: block;
+    width: 100%;
+    padding: var(--bs-file-tags-search-padding-y) var(--bs-file-tags-search-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-file-tags-search-font-size);
+    color: var(--tc-text);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--bs-file-tags-search-border-color);
+    border-radius: 0;
+    outline: none;
+    box-sizing: border-box;
+
+    &::placeholder {
+        color: var(--tc-text-faint);
+    }
+
+    &:focus {
+        border-bottom-color: var(--tc-app-accent);
+        box-shadow: 0 1px 0 0 var(--tc-app-accent);
+        outline: none;
+    }
+}
+
+// ── Options list ───────────────────────────────────────────────────────────
+
+.tc-file-tags-options {
+    overflow-y: auto;
+    max-height: var(--bs-file-tags-menu-max-height);
+    padding: 0.25rem;
+}
+
+.tc-file-tags-option {
+    display: block;
+    padding: var(--bs-file-tags-option-padding-y) var(--bs-file-tags-option-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-file-tags-option-font-size);
+    color: var(--bs-file-tags-option-color);
+    cursor: pointer;
+    border-radius: 0;
+    white-space: nowrap;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus {
+        background-color: var(--bs-file-tags-option-hover-bg);
+        outline: none;
+    }
+
+    &:focus-visible {
+        outline: none;
+    }
+
+    &.tc-file-tags-option--active {
+        background-color: var(--bs-file-tags-option-active-bg);
+        color: var(--bs-file-tags-option-active-color);
+    }
+}
+
+.tc-file-tags-no-results {
+    padding: var(--bs-file-tags-option-padding-y) var(--bs-file-tags-option-padding-x);
+    font-size: var(--bs-file-tags-no-results-font-size);
+    color: var(--bs-file-tags-no-results-color);
+    font-style: italic;
+}
+
+// ── Touch targets ──────────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-file-tags-add,
+    .tc-file-tags-option {
+        min-height: 2.75rem;
+    }
+
+    .tc-file-tags-chip-remove {
+        min-width: 1.75rem;
+        min-height: 1.75rem;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-file-tags-add,
+    .tc-file-tags-chip-remove,
+    .tc-file-tags-option {
+        transition: none;
+    }
+}
