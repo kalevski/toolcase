@@ -137,6 +137,7 @@ import CompatibilityMatrixDemo from './CompatibilityMatrixDemo'
 import ContextMenuDemo from './ContextMenuDemo'
 import CoolNavDemo from './CoolNavDemo'
 import CountdownTimerDemo from './CountdownTimerDemo'
+import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -294,4 +295,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'context-menu', category: 'Overlays & Feedback', element: <ContextMenuDemo /> },
     { key: 'cool-nav', category: 'Navigation', element: <CoolNavDemo /> },
     { key: 'countdown-timer', category: 'Components', element: <CountdownTimerDemo /> },
+    { key: 'danger-zone-actions', category: 'Components', element: <DangerZoneActionsDemo /> },
 ]

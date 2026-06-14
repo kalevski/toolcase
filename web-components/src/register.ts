@@ -145,6 +145,7 @@ import { CompatibilityMatrix } from './CompatibilityMatrix'
 import { ContextMenu } from './ContextMenu'
 import { CoolNav } from './CoolNav'
 import { CountdownTimer } from './CountdownTimer'
+import { DangerZoneActions } from './DangerZoneActions'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -299,4 +300,5 @@ export function register(): void {
     customElements.define('tc-context-menu', ContextMenu)
     customElements.define('tc-cool-nav', CoolNav)
     customElements.define('tc-countdown-timer', CountdownTimer)
+    customElements.define('tc-danger-zone-actions', DangerZoneActions)
 }
