@@ -143,6 +143,7 @@ import { CommandReference } from './CommandReference'
 import { Comparator } from './Comparator'
 import { CompatibilityMatrix } from './CompatibilityMatrix'
 import { ContextMenu } from './ContextMenu'
+import { CoolNav } from './CoolNav'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -295,4 +296,5 @@ export function register(): void {
     customElements.define('tc-comparator', Comparator)
     customElements.define('tc-compatibility-matrix', CompatibilityMatrix)
     customElements.define('tc-context-menu', ContextMenu)
+    customElements.define('tc-cool-nav', CoolNav)
 }

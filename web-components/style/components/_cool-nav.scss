@@ -1,0 +1,323 @@
+// tc-cool-nav — responsive navigation bar with collapsible menu, scroll
+// detection, and login CTA. Toolcase motif: translucent surface, 1px hairline
+// bottom, sharp corners, JetBrains Mono brand + cyan dot, underline-only active
+// marker, primary gradient login CTA.
+
+@use '../foundation/tokens' as *;
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+
+tc-cool-nav {
+    // Public custom properties — override to theme
+    --bs-cool-nav-bg: var(--tc-surface);
+    --bs-cool-nav-color: var(--tc-text);
+    --bs-cool-nav-border: var(--tc-border);
+    --bs-cool-nav-brand-color: var(--tc-text);
+    --bs-cool-nav-brand-dot: var(--tc-accent);
+    --bs-cool-nav-link-color: var(--tc-text-muted);
+    --bs-cool-nav-link-hover-color: var(--tc-accent-fg);
+    --bs-cool-nav-link-active-color: var(--tc-text);
+    --bs-cool-nav-link-active-line: var(--tc-app-accent);
+    --bs-cool-nav-toggler-color: var(--tc-text);
+    --bs-cool-nav-collapse-bg: var(--tc-surface);
+    --bs-cool-nav-scrolled-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.06);
+    --bs-cool-nav-py: 0.75rem;
+    --bs-cool-nav-scrolled-py: 0.5rem;
+}
+
+// ── Dark theme ─────────────────────────────────────────────────────────────────
+
+tc-cool-nav.tc-cool-nav--dark {
+    --bs-cool-nav-bg: var(--tc-ink);
+    --bs-cool-nav-color: var(--tc-text-inverse);
+    --bs-cool-nav-border: rgba(255, 255, 255, 0.08);
+    --bs-cool-nav-brand-color: var(--tc-text-inverse);
+    --bs-cool-nav-link-color: rgba(255, 255, 255, 0.65);
+    --bs-cool-nav-link-hover-color: var(--tc-accent);
+    --bs-cool-nav-link-active-color: var(--tc-text-inverse);
+    --bs-cool-nav-toggler-color: var(--tc-text-inverse);
+    --bs-cool-nav-collapse-bg: var(--tc-ink-2);
+    --bs-cool-nav-scrolled-shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.3);
+}
+
+// ── Sticky positioning ─────────────────────────────────────────────────────────
+
+tc-cool-nav.tc-cool-nav--sticky {
+    position: sticky;
+    top: 0;
+    z-index: var(--tc-z-sticky);
+}
+
+// ── Inner nav bar ─────────────────────────────────────────────────────────────
+
+.tc-cool-nav-inner {
+    display: block;
+    background: var(--bs-cool-nav-bg);
+    color: var(--bs-cool-nav-color);
+    border-bottom: 1px solid var(--bs-cool-nav-border);
+    transition:
+        padding var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
+    padding: var(--bs-cool-nav-py) 0;
+}
+
+tc-cool-nav.tc-cool-nav-scrolled .tc-cool-nav-inner {
+    padding: var(--bs-cool-nav-scrolled-py) 0;
+    box-shadow: var(--bs-cool-nav-scrolled-shadow);
+}
+
+// ── Layout container ──────────────────────────────────────────────────────────
+
+.tc-cool-nav-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    padding: 0 1rem;
+    gap: 0.5rem;
+}
+
+// ── Brand ─────────────────────────────────────────────────────────────────────
+
+.tc-cool-nav-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--bs-cool-nav-brand-color);
+    font-family: var(--tc-font-mono);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    flex-shrink: 0;
+
+    &:hover,
+    &:focus {
+        color: var(--bs-cool-nav-brand-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// The signature cyan square dot
+.tc-cool-nav-brand-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background-color: var(--bs-cool-nav-brand-dot);
+    flex-shrink: 0;
+}
+
+.tc-cool-nav-brand-slot {
+    display: contents;
+}
+
+// ── Toggler ───────────────────────────────────────────────────────────────────
+
+.tc-cool-nav-toggler {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--bs-cool-nav-border);
+    color: var(--bs-cool-nav-toggler-color);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto; // push to the right on small viewports
+
+    svg {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: rgba(128, 128, 128, 0.08);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// Per-breakpoint: toggler is hidden at/above the named breakpoint
+@each $bp, $min in $grid-breakpoints {
+    .tc-cool-nav-toggler--#{$bp} {
+        @media (min-width: #{$min}) {
+            display: none;
+        }
+    }
+}
+
+// ── Collapse (mobile menu) ────────────────────────────────────────────────────
+
+// Base: collapsed (hidden, full-width, stacked below brand row via flex-wrap)
+.tc-cool-nav-collapse {
+    display: none;
+    width: 100%;
+    order: 1;
+    background: var(--bs-cool-nav-collapse-bg);
+    border-top: 1px solid var(--bs-cool-nav-border);
+    flex-direction: column;
+    padding: 0.5rem 0;
+
+    &.tc-cool-nav-collapse--open {
+        display: flex;
+    }
+}
+
+// Per-breakpoint: above the named breakpoint the collapse is always a flex row
+@each $bp, $min in $grid-breakpoints {
+    .tc-cool-nav-collapse--expand-#{$bp} {
+        @media (min-width: #{$min}) {
+            display: flex !important;
+            flex-direction: row;
+            align-items: center;
+            order: 0;
+            border-top: none;
+            padding: 0;
+            background: transparent;
+            width: auto;
+            flex: 1;
+        }
+    }
+}
+
+// ── Nav items list ────────────────────────────────────────────────────────────
+
+.tc-cool-nav-items {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+}
+
+// Switch to row at each named breakpoint
+@each $bp, $min in $grid-breakpoints {
+    .tc-cool-nav-collapse--expand-#{$bp} .tc-cool-nav-items {
+        @media (min-width: #{$min}) {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.125rem;
+        }
+    }
+}
+
+// ── Nav links ─────────────────────────────────────────────────────────────────
+
+.tc-cool-nav-item {
+    display: block;
+}
+
+.tc-cool-nav-link {
+    display: block;
+    padding: 0.6rem 1rem;
+    color: var(--bs-cool-nav-link-color);
+    font-family: var(--tc-font-sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    position: relative;
+    transition: color var(--tc-transition-fast);
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--bs-cool-nav-link-hover-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+@media (pointer: coarse) {
+    .tc-cool-nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+// Active state: ink text; at large viewports a 2px underline (no fill/radius)
+.tc-cool-nav-link--active {
+    color: var(--bs-cool-nav-link-active-color);
+    font-weight: 600;
+}
+
+@each $bp, $min in $grid-breakpoints {
+    .tc-cool-nav-collapse--expand-#{$bp} .tc-cool-nav-link--active {
+        @media (min-width: #{$min}) {
+            &::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 1rem;
+                right: 1rem;
+                height: 2px;
+                background: var(--bs-cool-nav-link-active-line);
+            }
+        }
+    }
+}
+
+// ── End region (right slot + login CTA) ───────────────────────────────────────
+
+.tc-cool-nav-end {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    flex-shrink: 0;
+}
+
+@each $bp, $min in $grid-breakpoints {
+    .tc-cool-nav-collapse--expand-#{$bp} .tc-cool-nav-end {
+        @media (min-width: #{$min}) {
+            padding: 0;
+        }
+    }
+}
+
+.tc-cool-nav-right-slot {
+    display: contents;
+}
+
+// ── Login CTA ─────────────────────────────────────────────────────────────────
+
+.tc-cool-nav-login {
+    flex-shrink: 0;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+@media (pointer: coarse) {
+    .tc-cool-nav-login {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-cool-nav-inner {
+        transition: none;
+    }
+}
