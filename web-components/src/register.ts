@@ -176,6 +176,7 @@ import { Leaderboard } from './Leaderboard'
 import { LiveFeed } from './LiveFeed'
 import { Login } from './Login'
 import { Marquee } from './Marquee'
+import { MultiCardSelect } from './MultiCardSelect'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -361,4 +362,5 @@ export function register(): void {
     customElements.define('tc-live-feed', LiveFeed)
     customElements.define('tc-login', Login)
     customElements.define('tc-marquee', Marquee)
+    customElements.define('tc-multi-card-select', MultiCardSelect)
 }
