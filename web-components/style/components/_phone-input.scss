@@ -1,0 +1,311 @@
+// tc-phone-input — international phone input with country selector and dial-code prefix.
+// Input-group motif: one --tc-border-strong frame with a 1px internal separator (no double borders).
+// Dropdown overlay uses --tc-shadow-lg. Sharp corners (border-radius: 0) throughout.
+// All cosmetic values flow through --bs-phone-input-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Host custom properties ────────────────────────────────────────────────────
+
+tc-phone-input {
+    --bs-phone-input-border: var(--tc-border-strong);
+    --bs-phone-input-bg: var(--tc-surface);
+    --bs-phone-input-text: var(--tc-text);
+    --bs-phone-input-muted: var(--tc-text-muted);
+    --bs-phone-input-placeholder: var(--tc-text-faint);
+    --bs-phone-input-trigger-bg: var(--tc-surface-muted);
+    --bs-phone-input-trigger-hover-bg: var(--tc-surface-hover);
+    --bs-phone-input-focus-ring: var(--tc-focus-ring);
+    --bs-phone-input-dropdown-bg: var(--tc-surface);
+    --bs-phone-input-dropdown-border: var(--tc-border);
+    --bs-phone-input-dropdown-shadow: var(--tc-shadow-lg);
+    --bs-phone-input-dropdown-z: var(--tc-z-dropdown);
+    --bs-phone-input-option-hover-bg: var(--tc-surface-muted);
+    --bs-phone-input-option-active-bg: var(--tc-app-accent);
+    --bs-phone-input-option-active-text: #fff;
+    --bs-phone-input-error-color: var(--tc-danger);
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-phone-input-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bs-phone-input-text);
+}
+
+// ── Wrap (position root for the dropdown) ─────────────────────────────────────
+
+.tc-phone-input-wrap {
+    position: relative;
+}
+
+// ── Input group: one outer border, 1px internal separator ─────────────────────
+
+.tc-phone-input-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--bs-phone-input-border);
+    background: var(--bs-phone-input-bg);
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus-within {
+        border-color: rgba(30, 41, 59, 0.5);
+        box-shadow: var(--bs-phone-input-focus-ring);
+    }
+
+    .tc-phone-input--error & {
+        border-color: var(--bs-phone-input-error-color);
+
+        &:focus-within {
+            border-color: var(--bs-phone-input-error-color);
+            box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.15);
+        }
+    }
+}
+
+// ── Country trigger ───────────────────────────────────────────────────────────
+
+.tc-phone-input-country {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--bs-phone-input-text);
+    white-space: nowrap;
+    cursor: pointer;
+    background: var(--bs-phone-input-trigger-bg);
+    border: none;
+    // 1px right-hand separator — not a double border since the group owns the outer frame
+    border-right: 1px solid var(--bs-phone-input-border);
+    border-radius: 0;
+    outline: none;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: 0.8125rem;
+        height: 0.8125rem;
+        display: block;
+        flex-shrink: 0;
+        pointer-events: none;
+        color: var(--bs-phone-input-muted);
+    }
+
+    &:hover {
+        background: var(--bs-phone-input-trigger-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: inset 0 0 0 2px var(--tc-app-accent);
+    }
+}
+
+.tc-phone-input-flag {
+    font-size: 1.1em;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.tc-phone-input-dial {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.8125rem;
+    color: var(--bs-phone-input-muted);
+    flex-shrink: 0;
+}
+
+// ── Number input ──────────────────────────────────────────────────────────────
+
+.tc-phone-input-number {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.375rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.925rem;
+    line-height: 1.5;
+    color: var(--bs-phone-input-text);
+    background: var(--bs-phone-input-bg);
+    border: none;
+    border-radius: 0;
+    // Focus ring is provided by the parent group's :focus-within
+    outline: none;
+
+    &::placeholder {
+        color: var(--bs-phone-input-placeholder);
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+// ── Dropdown overlay ──────────────────────────────────────────────────────────
+
+.tc-phone-input-dropdown {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: var(--bs-phone-input-dropdown-z);
+    display: none;
+    flex-direction: column;
+    width: 280px;
+    max-height: 280px;
+    overflow: hidden;
+    background: var(--bs-phone-input-dropdown-bg);
+    border: 1px solid var(--bs-phone-input-dropdown-border);
+    border-radius: 0;
+    box-shadow: var(--bs-phone-input-dropdown-shadow);
+
+    &.tc-phone-input-dropdown--open {
+        display: flex;
+    }
+}
+
+// ── Dropdown search ───────────────────────────────────────────────────────────
+
+.tc-phone-input-search-wrap {
+    padding: 0.375rem;
+    border-bottom: 1px solid var(--bs-phone-input-dropdown-border);
+    flex-shrink: 0;
+}
+
+.tc-phone-input-search {
+    display: block;
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--bs-phone-input-text);
+    background: var(--bs-phone-input-trigger-bg);
+    border: 1px solid var(--bs-phone-input-dropdown-border);
+    border-radius: 0;
+    outline: none;
+    box-sizing: border-box;
+
+    &::placeholder {
+        color: var(--bs-phone-input-placeholder);
+        opacity: 1;
+    }
+
+    &:focus {
+        border-color: rgba(30, 41, 59, 0.4);
+        box-shadow: 0 0 0 0.15rem rgba(30, 41, 59, 0.1);
+        outline: none;
+    }
+}
+
+// ── Country list ──────────────────────────────────────────────────────────────
+
+.tc-phone-input-list {
+    overflow-y: auto;
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+// ── Country option ────────────────────────────────────────────────────────────
+
+.tc-phone-input-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--bs-phone-input-text);
+    cursor: pointer;
+    user-select: none;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--bs-phone-input-option-hover-bg);
+    }
+
+    &--active {
+        background: var(--bs-phone-input-option-active-bg);
+        color: var(--bs-phone-input-option-active-text);
+
+        .tc-phone-input-option-dial {
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+}
+
+.tc-phone-input-option-flag {
+    font-size: 1.05em;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.tc-phone-input-option-name {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-phone-input-option-dial {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.75rem;
+    color: var(--bs-phone-input-muted);
+    flex-shrink: 0;
+}
+
+// ── No-results message ────────────────────────────────────────────────────────
+
+.tc-phone-input-no-results {
+    padding: 0.75rem 0.625rem;
+    font-size: 0.875rem;
+    color: var(--bs-phone-input-muted);
+    text-align: center;
+    font-style: italic;
+}
+
+// ── Error message ─────────────────────────────────────────────────────────────
+
+.tc-phone-input-error {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.8125rem;
+    color: var(--bs-phone-input-error-color);
+}
+
+// ── Touch targets (WCAG 2.5.5 — 44px on coarse pointer) ──────────────────────
+
+@media (pointer: coarse) {
+    .tc-phone-input-country,
+    .tc-phone-input-number {
+        min-height: 44px;
+    }
+
+    .tc-phone-input-option {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-phone-input-group {
+        transition:
+            border-color var(--tc-transition-fast),
+            box-shadow var(--tc-transition-fast);
+    }
+
+    .tc-phone-input-country,
+    .tc-phone-input-option {
+        transition: none;
+    }
+}
