@@ -134,6 +134,7 @@ import ChipDemo from './ChipDemo'
 import ChipGroupDemo from './ChipGroupDemo'
 import CodeSnippetDemo from './CodeSnippetDemo'
 import ColorPickerDemo from './ColorPickerDemo'
+import IconPickerDemo from './IconPickerDemo'
 import CommandReferenceDemo from './CommandReferenceDemo'
 import ComparatorDemo from './ComparatorDemo'
 import CompatibilityMatrixDemo from './CompatibilityMatrixDemo'
@@ -315,6 +316,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'chip-group', category: 'Forms', element: <ChipGroupDemo /> },
     { key: 'code-snippet', category: 'Components', element: <CodeSnippetDemo /> },
     { key: 'color-picker', category: 'Forms', element: <ColorPickerDemo /> },
+    { key: 'icon-picker', category: 'Forms', element: <IconPickerDemo /> },
     { key: 'command-reference', category: 'Content', element: <CommandReferenceDemo /> },
     { key: 'comparator', category: 'Components', element: <ComparatorDemo /> },
     { key: 'compatibility-matrix', category: 'Components', element: <CompatibilityMatrixDemo /> },
