@@ -169,6 +169,7 @@ import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarqueeDemo from './MarqueeDemo'
 import MultiCardSelectDemo from './MultiCardSelectDemo'
+import NewsletterSignupDemo from './NewsletterSignupDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -358,4 +359,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
     { key: 'marquee', category: 'Content', element: <MarqueeDemo /> },
     { key: 'multi-card-select', category: 'Forms', element: <MultiCardSelectDemo /> },
+    { key: 'newsletter-signup', category: 'Forms', element: <NewsletterSignupDemo /> },
 ]
