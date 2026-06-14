@@ -1,0 +1,144 @@
+// tc-card-options — selectable card option grid (radiogroup pattern).
+// All cosmetics flow through --bs-card-options-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; 1px gap-as-border grid; accent border on selected card.
+// No shadows; flat selectable surfaces; check indicator for selection emphasis.
+
+tc-card-options {
+    --bs-card-options-border-color: var(--tc-border-strong);
+    --bs-card-options-bg: var(--tc-surface);
+    --bs-card-options-hover-bg: var(--tc-surface-muted);
+    --bs-card-options-selected-accent: var(--tc-app-accent);
+    --bs-card-options-card-padding-y: 1.25rem;
+    --bs-card-options-card-padding-x: 1rem;
+    --bs-card-options-label-color: var(--tc-text);
+    --bs-card-options-label-size: 0.9375rem;
+    --bs-card-options-desc-color: var(--tc-text-muted);
+    --bs-card-options-desc-size: 0.8125rem;
+    --bs-card-options-icon-size: 1.5rem;
+    --bs-card-options-image-height: 3rem;
+    --bs-card-options-check-size: 1rem;
+    --bs-card-options-columns: 3;
+}
+
+// Host element IS the grid; background bleeds through 1px gaps as hairline borders.
+.tc-card-options {
+    display: grid;
+    grid-template-columns: repeat(var(--bs-card-options-columns), 1fr);
+    gap: 1px;
+    background-color: var(--bs-card-options-border-color);
+    border-radius: 0;
+}
+
+.tc-card-options-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: var(--bs-card-options-card-padding-y) var(--bs-card-options-card-padding-x);
+    min-height: 44px;
+    background: var(--bs-card-options-bg);
+    border-radius: 0;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    transition: background 0.1s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    @media (pointer: coarse) {
+        min-height: 56px;
+    }
+
+    &:hover {
+        background: var(--bs-card-options-hover-bg);
+    }
+
+    // Inset outline keeps the focus ring inside the card without expanding the grid.
+    &:focus-visible {
+        outline: 2px solid var(--bs-card-options-selected-accent);
+        outline-offset: -2px;
+        z-index: 1;
+    }
+
+    // Inset box-shadow provides the accent border on the selected card without
+    // affecting the 1px gap layout. The check indicator becomes visible.
+    &.is-selected {
+        box-shadow: inset 0 0 0 2px var(--bs-card-options-selected-accent);
+        z-index: 1;
+
+        .tc-card-options-check {
+            opacity: 1;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-card-options-card {
+        transition: none;
+    }
+}
+
+.tc-card-options-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-card-options-label-color);
+
+    svg {
+        width: var(--bs-card-options-icon-size);
+        height: var(--bs-card-options-icon-size);
+    }
+}
+
+.tc-card-options-image {
+    height: var(--bs-card-options-image-height);
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 0;
+}
+
+.tc-card-options-label {
+    display: block;
+    font-size: var(--bs-card-options-label-size);
+    font-weight: 500;
+    color: var(--bs-card-options-label-color);
+    line-height: 1.3;
+}
+
+.tc-card-options-desc {
+    display: block;
+    font-size: var(--bs-card-options-desc-size);
+    color: var(--bs-card-options-desc-color);
+    line-height: 1.4;
+}
+
+// Absolutely positioned; hidden by default; revealed when the card is selected.
+// aria-hidden so screen readers rely on aria-checked, not color/icon alone.
+.tc-card-options-check {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-card-options-check-size);
+    height: var(--bs-card-options-check-size);
+    color: var(--bs-card-options-selected-accent);
+    border-radius: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-card-options-check {
+        transition: none;
+    }
+}

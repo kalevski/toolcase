@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -142,6 +142,7 @@ After `register()` you can author markup directly:
   - [tc-toast](#tc-toast)
   - [tc-tooltip](#tc-tooltip)
 - [Forms](#forms)
+  - [tc-card-options](#tc-card-options)
   - [tc-check](#tc-check)
   - [tc-floating-label](#tc-floating-label)
   - [tc-form](#tc-form)
@@ -3217,6 +3218,56 @@ Tooltip positioned by Popper.js.
 ---
 
 ## Forms
+
+### tc-card-options
+
+Grid of selectable card options (radiogroup). Options are set via the `options` JS property. Fires `tc-change` when the selection changes. Fully keyboard-accessible: Arrow keys move selection, Enter/Space confirms.
+
+**Tag:** `tc-card-options`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | string | — | Key of the selected option |
+| `columns` | number | `3` | Number of grid columns |
+| `aria-label` | string | `"Options"` | Accessible label for the radiogroup |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `options` | `CardOption[]` | Array of option objects (set via JS, not attribute) |
+| `onChange` | `((key: string) => void) \| null` | Optional callback fired alongside `tc-change` |
+
+Each `CardOption`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `key` | string | Unique identifier; becomes the selected value |
+| `label` | string | Visible card title |
+| `description` | string? | Optional sub-label below the title |
+| `icon` | string? | Lucide icon name, PascalCase or kebab-case (e.g. `"Shield"`, `"shield-check"`) |
+| `image` | string? | Image `src` URL; used when `icon` is absent |
+
+**Events:** `tc-change` with `{ detail: { key: string } }`
+
+**Slots:** none — the option grid is generated from the `options` property.
+
+```html
+<tc-card-options id="plan-picker" value="starter" columns="3" aria-label="Choose a plan"></tc-card-options>
+<script>
+const el = document.getElementById('plan-picker')
+el.options = [
+    { key: 'starter', label: 'Starter', icon: 'Zap', description: 'Up to 3 projects' },
+    { key: 'pro',     label: 'Pro',     icon: 'Star', description: 'Unlimited projects' },
+    { key: 'enterprise', label: 'Enterprise', icon: 'Shield', description: 'Custom limits' },
+]
+el.addEventListener('tc-change', e => console.log('selected:', e.detail.key))
+</script>
+```
+
+---
 
 ### tc-check
 
