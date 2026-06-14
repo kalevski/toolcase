@@ -44,6 +44,7 @@ import { Textarea } from './Textarea'
 import { Select } from './Select'
 import { Option } from './Option'
 import { Check } from './Check'
+import { CheckboxGroup } from './CheckboxGroup'
 import { Radio } from './Radio'
 import { Switch } from './Switch'
 import { Range } from './Range'
@@ -187,6 +188,7 @@ export function register(): void {
     customElements.define('tc-select', Select)
     customElements.define('tc-option', Option)
     customElements.define('tc-check', Check)
+    customElements.define('tc-checkbox-group', CheckboxGroup)
     customElements.define('tc-radio', Radio)
     customElements.define('tc-switch', Switch)
     customElements.define('tc-range', Range)

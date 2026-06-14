@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -146,6 +146,7 @@ After `register()` you can author markup directly:
 - [Forms](#forms)
   - [tc-card-options](#tc-card-options)
   - [tc-check](#tc-check)
+  - [tc-checkbox-group](#tc-checkbox-group)
   - [tc-floating-label](#tc-floating-label)
   - [tc-form](#tc-form)
   - [tc-helper-text](#tc-helper-text)
@@ -3292,6 +3293,58 @@ Checkbox input.
 ```html
 <tc-check label="I agree" checked></tc-check>
 <tc-check label="Disabled" disabled></tc-check>
+```
+
+---
+
+### tc-checkbox-group
+
+Coordinated group of checkboxes with an optional group label, inline layout, disabled per-option support, and required validation. Options are set via the `options` JS property. Fires `tc-change` when the selection changes. Works controlled (consumer sets `value`) or uncontrolled (internal state).
+
+**Tag:** `tc-checkbox-group`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | — | Group legend text |
+| `inline` | boolean | false | Lay checkboxes out horizontally |
+| `name` | string | — | `name` applied to every inner checkbox input (for form grouping) |
+| `id` | string | — | Standard HTML `id` on the host element |
+| `required` | boolean | false | Group is invalid until at least one option is checked; sets `aria-required` and `aria-invalid` on the fieldset |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `options` | `CheckboxGroupOption[]` | Array of option objects (set via JS, not attribute) |
+| `value` | `string[]` | Currently checked values; setting updates the checkboxes and re-renders |
+| `onChange` | `((checkedValues: string[]) => void) \| null` | Optional callback fired alongside `tc-change` |
+
+Each `CheckboxGroupOption`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `value` | string | Option value, submitted with the form |
+| `label` | string | Visible label text |
+| `disabled` | boolean? | When true, the option is non-interactive |
+
+**Events:** `tc-change` with `{ detail: { value: string[] } }` — the new set of checked values
+
+**Slots:** none — the option list is generated from the `options` property.
+
+```html
+<tc-checkbox-group id="lang-picker" label="Preferred languages" name="languages"></tc-checkbox-group>
+<script>
+const el = document.getElementById('lang-picker')
+el.options = [
+    { value: 'js',  label: 'JavaScript' },
+    { value: 'ts',  label: 'TypeScript' },
+    { value: 'go',  label: 'Go', disabled: true },
+]
+el.value = ['js'] // pre-select
+el.addEventListener('tc-change', e => console.log('selected:', e.detail.value))
+</script>
 ```
 
 ---

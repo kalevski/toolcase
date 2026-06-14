@@ -37,6 +37,7 @@ import InputDemo from './InputDemo'
 import TextareaDemo from './TextareaDemo'
 import SelectDemo from './SelectDemo'
 import CheckDemo from './CheckDemo'
+import CheckboxGroupDemo from './CheckboxGroupDemo'
 import RadioDemo from './RadioDemo'
 import SwitchDemo from './SwitchDemo'
 import RangeDemo from './RangeDemo'
@@ -184,6 +185,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'textarea', category: 'Forms', element: <TextareaDemo /> },
     { key: 'select', category: 'Forms', element: <SelectDemo /> },
     { key: 'check', category: 'Forms', element: <CheckDemo /> },
+    { key: 'checkbox-group', category: 'Forms', element: <CheckboxGroupDemo /> },
     { key: 'radio', category: 'Forms', element: <RadioDemo /> },
     { key: 'switch', category: 'Forms', element: <SwitchDemo /> },
     { key: 'range', category: 'Forms', element: <RangeDemo /> },

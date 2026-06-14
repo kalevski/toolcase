@@ -1,0 +1,81 @@
+// tc-checkbox-group — coordinated group of checkboxes with optional label.
+// Reuses the .form-check motif from tc-check; adds group-level label,
+// inline-flex layout, required/invalid state hint, and coarse targets.
+
+.tc-checkbox-group {
+    --bs-checkbox-group-label-color: var(--tc-text-muted);
+    --bs-checkbox-group-label-size: 0.8125rem;
+    --bs-checkbox-group-label-weight: 600;
+    --bs-checkbox-group-gap: 0.35rem;
+    --bs-checkbox-group-inline-gap: 1rem;
+    --bs-checkbox-group-invalid-color: var(--tc-danger);
+
+    // Reset fieldset browser defaults
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+    display: block;
+}
+
+.tc-checkbox-group-label {
+    display: block;
+    font-size: var(--bs-checkbox-group-label-size);
+    font-weight: var(--bs-checkbox-group-label-weight);
+    color: var(--bs-checkbox-group-label-color);
+    margin-bottom: var(--bs-checkbox-group-gap);
+    // Reset fieldset legend alignment quirks
+    float: none;
+    padding: 0;
+    width: 100%;
+    line-height: 1.5;
+}
+
+.tc-checkbox-group-options {
+    display: block;
+
+    &--inline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--bs-checkbox-group-inline-gap);
+
+        .form-check {
+            // Collapse default bottom margin inside the flex row
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Invalid state: danger tint on the legend when required and empty
+.tc-checkbox-group[aria-invalid='true'] {
+    .tc-checkbox-group-label {
+        color: var(--bs-checkbox-group-invalid-color);
+    }
+}
+
+// Disabled option rows
+.tc-checkbox-group .form-check:has(input:disabled) {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+// 44 px coarse touch targets on each option row
+@media (pointer: coarse) {
+    .tc-checkbox-group .form-check {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+
+        .form-check-input {
+            margin-top: 0;
+        }
+    }
+}
+
+// Honour prefers-reduced-motion — form-check-input already transitions; flatten here
+@media (prefers-reduced-motion: reduce) {
+    .tc-checkbox-group .form-check-input {
+        transition: none;
+    }
+}
