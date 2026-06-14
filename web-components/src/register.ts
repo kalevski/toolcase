@@ -160,6 +160,7 @@ import { EntityProfileCard } from './EntityProfileCard'
 import { ExtendedSelect } from './ExtendedSelect'
 import { FAQList } from './FAQList'
 import { FeatureMatrix } from './FeatureMatrix'
+import { File } from './File'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -329,4 +330,5 @@ export function register(): void {
     customElements.define('tc-extended-select', ExtendedSelect)
     customElements.define('tc-faq-list', FAQList)
     customElements.define('tc-feature-matrix', FeatureMatrix)
+    customElements.define('tc-file', File)
 }

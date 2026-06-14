@@ -107,6 +107,7 @@ import PinnedFeatureShowcaseDemo from './PinnedFeatureShowcaseDemo'
 import PipelineDemo from './PipelineDemo'
 import PluginGridDemo from './PluginGridDemo'
 import PricingCardDemo from './PricingCardDemo'
+import FileDemo from './FileDemo'
 import QueuedFileDemo from './QueuedFileDemo'
 import SimpleFileDemo from './SimpleFileDemo'
 import RankCellDemo from './RankCellDemo'
@@ -280,6 +281,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'pipeline', category: 'Components', element: <PipelineDemo /> },
     { key: 'plugin-grid', category: 'Components', element: <PluginGridDemo /> },
     { key: 'pricing-card', category: 'Components', element: <PricingCardDemo /> },
+    { key: 'file', category: 'Components', element: <FileDemo /> },
     { key: 'queued-file', category: 'Components', element: <QueuedFileDemo /> },
     { key: 'simple-file', category: 'Content', element: <SimpleFileDemo /> },
     { key: 'sponsor-wall', category: 'Content', element: <SponsorWallDemo /> },
