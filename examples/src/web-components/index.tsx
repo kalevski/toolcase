@@ -155,6 +155,7 @@ import FAQListDemo from './FAQListDemo'
 import FeatureMatrixDemo from './FeatureMatrixDemo'
 import FileDropzoneDemo from './FileDropzoneDemo'
 import FileTagsDemo from './FileTagsDemo'
+import FormWizardDemo from './FormWizardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -330,4 +331,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'feature-matrix', category: 'Components', element: <FeatureMatrixDemo /> },
     { key: 'file-dropzone', category: 'Forms', element: <FileDropzoneDemo /> },
     { key: 'file-tags', category: 'Forms', element: <FileTagsDemo /> },
+    { key: 'form-wizard', category: 'Forms', element: <FormWizardDemo /> },
 ]

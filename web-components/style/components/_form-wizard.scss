@@ -1,0 +1,300 @@
+// tc-form-wizard — multi-step form wizard with tab-strip header, content body,
+// and Back/Next/Complete footer. State ladder: upcoming = slate ring; current =
+// ink-filled circle + 2px underline; done = ink-filled circle + check icon.
+// Sharp corners throughout; step-marker circles are the ONE sanctioned radius.
+
+tc-form-wizard {
+    // ── Marker geometry ────────────────────────────────────────────────────────
+    --bs-form-wizard-marker-size: 2rem;
+    --bs-form-wizard-marker-font-size: 0.8125rem;
+    --bs-form-wizard-marker-font-weight: 600;
+    --bs-form-wizard-check-icon-size: 1rem;
+    --bs-form-wizard-step-icon-size: 1rem;
+
+    // ── State: done (ink circle + check) ─────────────────────────────────────
+    --bs-form-wizard-done-bg: var(--tc-app-accent);
+    --bs-form-wizard-done-border: var(--tc-app-accent);
+    --bs-form-wizard-done-color: #fff;
+
+    // ── State: current (ink circle + underline) ───────────────────────────────
+    --bs-form-wizard-current-bg: var(--tc-app-accent);
+    --bs-form-wizard-current-border: var(--tc-app-accent);
+    --bs-form-wizard-current-color: #fff;
+    --bs-form-wizard-current-underline: var(--tc-app-accent);
+    --bs-form-wizard-current-underline-size: 2px;
+
+    // ── State: upcoming (slate ring) ──────────────────────────────────────────
+    --bs-form-wizard-upcoming-bg: transparent;
+    --bs-form-wizard-upcoming-border: var(--tc-border-strong);
+    --bs-form-wizard-upcoming-color: var(--tc-text-faint);
+
+    // ── Connector hairlines ───────────────────────────────────────────────────
+    --bs-form-wizard-connector-color: var(--tc-border);
+    --bs-form-wizard-connector-done-color: var(--tc-app-accent);
+    --bs-form-wizard-connector-thickness: 1px;
+
+    // ── Labels ────────────────────────────────────────────────────────────────
+    --bs-form-wizard-label-font-size: 0.8125rem;
+    --bs-form-wizard-label-color: var(--tc-text-muted);
+    --bs-form-wizard-label-done-color: var(--tc-text);
+    --bs-form-wizard-label-current-color: var(--tc-text);
+    --bs-form-wizard-label-current-font-weight: 600;
+
+    // ── Body ──────────────────────────────────────────────────────────────────
+    --bs-form-wizard-body-bg: var(--tc-surface);
+    --bs-form-wizard-body-border: 1px solid var(--tc-border);
+    --bs-form-wizard-body-padding: 1.5rem;
+    --bs-form-wizard-body-min-height: 8rem;
+
+    // ── Footer ────────────────────────────────────────────────────────────────
+    --bs-form-wizard-footer-padding: 0.875rem 1.5rem;
+    --bs-form-wizard-footer-border: 1px solid var(--tc-border);
+    --bs-form-wizard-footer-bg: var(--tc-surface);
+
+    // ── Transitions ───────────────────────────────────────────────────────────
+    --bs-form-wizard-body-transition: opacity 0.18s ease;
+    --bs-form-wizard-marker-transition:
+        background var(--tc-transition-fast),
+        border-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+}
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+
+tc-form-wizard {
+    display: flex;
+    flex-direction: column;
+    border: var(--bs-form-wizard-body-border);
+    background: var(--bs-form-wizard-body-bg);
+    border-radius: 0;
+}
+
+// ── Stepper header ────────────────────────────────────────────────────────────
+
+.tc-form-wizard-steps {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0;
+    margin: 0;
+    overflow-x: auto;
+    border-bottom: var(--bs-form-wizard-footer-border);
+    background: var(--bs-form-wizard-footer-bg);
+}
+
+// Tab buttons — one per step
+.tc-form-wizard-tab {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.875rem 1rem 0;
+    padding-bottom: 0;
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    cursor: default;
+    border-radius: 0;
+    text-align: center;
+    flex-shrink: 0;
+    position: relative;
+    // Bottom underline region — 2px placeholder at the bottom
+    &::after {
+        content: '';
+        display: block;
+        height: var(--bs-form-wizard-current-underline-size);
+        background: transparent;
+        margin-top: 0.5rem;
+        width: 100%;
+        transition: background var(--tc-transition-fast);
+        border-radius: 0;
+    }
+}
+
+// Connector: fills remaining space between tabs
+.tc-form-wizard-connector {
+    flex: 1 0 1rem;
+    min-width: 1rem;
+    height: var(--bs-form-wizard-connector-thickness);
+    background: var(--bs-form-wizard-connector-color);
+    align-self: flex-start;
+    // Center vertically on the marker row: push down by half marker size + tab top padding
+    margin-top: calc(0.875rem + var(--bs-form-wizard-marker-size) / 2);
+    border-radius: 0;
+    transition: background var(--tc-transition-fast);
+}
+
+.tc-form-wizard-connector--done {
+    background: var(--bs-form-wizard-connector-done-color);
+}
+
+// Step marker — the ONE sanctioned circle
+.tc-form-wizard-tab-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-form-wizard-marker-size);
+    height: var(--bs-form-wizard-marker-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--bs-form-wizard-upcoming-border);
+    background: var(--bs-form-wizard-upcoming-bg);
+    color: var(--bs-form-wizard-upcoming-color);
+    font-size: var(--bs-form-wizard-marker-font-size);
+    font-weight: var(--bs-form-wizard-marker-font-weight);
+    flex-shrink: 0;
+    transition: var(--bs-form-wizard-marker-transition);
+}
+
+.tc-form-wizard-tab-num {
+    display: block;
+    line-height: 1;
+}
+
+.tc-form-wizard-check-icon {
+    display: block;
+    width: var(--bs-form-wizard-check-icon-size);
+    height: var(--bs-form-wizard-check-icon-size);
+    stroke: currentColor;
+}
+
+.tc-form-wizard-tab-label {
+    font-size: var(--bs-form-wizard-label-font-size);
+    font-weight: 400;
+    color: var(--bs-form-wizard-label-color);
+    line-height: 1.3;
+    white-space: nowrap;
+    transition: color var(--tc-transition-fast), font-weight var(--tc-transition-fast);
+}
+
+.tc-form-wizard-chevron {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+// ── State: done ───────────────────────────────────────────────────────────────
+
+.tc-form-wizard-tab--done {
+    cursor: pointer;
+
+    .tc-form-wizard-tab-marker {
+        background: var(--bs-form-wizard-done-bg);
+        border-color: var(--bs-form-wizard-done-border);
+        color: var(--bs-form-wizard-done-color);
+    }
+
+    .tc-form-wizard-tab-label {
+        color: var(--bs-form-wizard-label-done-color);
+    }
+
+    &:hover .tc-form-wizard-tab-marker {
+        opacity: 0.85;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── State: current (active) ───────────────────────────────────────────────────
+
+.tc-form-wizard-tab--current {
+    cursor: default;
+
+    .tc-form-wizard-tab-marker {
+        background: var(--bs-form-wizard-current-bg);
+        border-color: var(--bs-form-wizard-current-border);
+        color: var(--bs-form-wizard-current-color);
+    }
+
+    .tc-form-wizard-tab-label {
+        color: var(--bs-form-wizard-label-current-color);
+        font-weight: var(--bs-form-wizard-label-current-font-weight);
+    }
+
+    // 2px ink underline
+    &::after {
+        background: var(--bs-form-wizard-current-underline);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── State: upcoming ───────────────────────────────────────────────────────────
+
+.tc-form-wizard-tab--upcoming {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+
+.tc-form-wizard-body {
+    flex: 1;
+    padding: var(--bs-form-wizard-body-padding);
+    min-height: var(--bs-form-wizard-body-min-height);
+    background: var(--bs-form-wizard-body-bg);
+    animation: tc-form-wizard-fade-in 0.18s ease forwards;
+}
+
+@keyframes tc-form-wizard-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.tc-form-wizard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--bs-form-wizard-footer-padding);
+    border-top: var(--bs-form-wizard-footer-border);
+    background: var(--bs-form-wizard-footer-bg);
+    gap: 0.75rem;
+}
+
+.tc-form-wizard-back,
+.tc-form-wizard-next,
+.tc-form-wizard-complete {
+    border-radius: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+// Coarse touch targets
+@media (pointer: coarse) {
+    .tc-form-wizard-tab {
+        min-height: 44px;
+    }
+
+    .tc-form-wizard-back,
+    .tc-form-wizard-next,
+    .tc-form-wizard-complete {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-form-wizard-body {
+        animation: none;
+    }
+
+    .tc-form-wizard-tab-marker,
+    .tc-form-wizard-tab-label,
+    .tc-form-wizard-connector,
+    .tc-form-wizard-tab::after {
+        transition: none;
+    }
+}
