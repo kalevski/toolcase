@@ -1,0 +1,66 @@
+// tc-editable-text — inline editable label that looks like plain text at rest
+// and reveals a form-control treatment on hover/focus.
+
+tc-editable-text {
+    --bs-editable-text-color: var(--tc-text);
+    --bs-editable-text-placeholder-color: var(--tc-text-faint);
+    --bs-editable-text-hover-bg: var(--tc-surface-muted);
+    --bs-editable-text-focus-border: var(--tc-border-strong);
+    --bs-editable-text-focus-ring: var(--tc-focus-ring);
+}
+
+.tc-editable-text__input {
+    // Override form-control defaults for plain-text appearance at rest
+    display: inline-block;
+    width: auto;
+    min-width: 4rem;
+    padding: 0.2rem 0.35rem;
+    font-family: var(--tc-font-sans);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-editable-text-color);
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    transition:
+        background-color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    // Coarse touch target
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
+    &::placeholder {
+        color: var(--bs-editable-text-placeholder-color);
+        opacity: 1;
+    }
+
+    &:hover:not(:disabled):not(:focus) {
+        background-color: var(--bs-editable-text-hover-bg);
+        border-color: var(--bs-editable-text-hover-bg);
+    }
+
+    &:focus,
+    &:focus-visible {
+        background-color: var(--tc-surface);
+        border-color: var(--bs-editable-text-focus-border);
+        box-shadow: var(--bs-editable-text-focus-ring);
+        outline: none;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: transparent;
+        border-color: transparent;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}

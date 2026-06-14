@@ -147,6 +147,7 @@ import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
 import EarlySignupFormDemo from './EarlySignupFormDemo'
 import EcosystemMapDemo from './EcosystemMapDemo'
+import EditableTextDemo from './EditableTextDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -314,4 +315,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'diff-viewer', category: 'Components', element: <DiffViewerDemo /> },
     { key: 'early-signup-form', category: 'Forms', element: <EarlySignupFormDemo /> },
     { key: 'ecosystem-map', category: 'Content', element: <EcosystemMapDemo /> },
+    { key: 'editable-text', category: 'Forms', element: <EditableTextDemo /> },
 ]

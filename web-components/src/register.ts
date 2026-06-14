@@ -155,6 +155,7 @@ import { DiffViewer } from './DiffViewer'
 import { Drawer } from './Drawer'
 import { EarlySignupForm } from './EarlySignupForm'
 import { EcosystemMap } from './EcosystemMap'
+import { EditableText } from './EditableText'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -319,4 +320,5 @@ export function register(): void {
     customElements.define('tc-drawer', Drawer)
     customElements.define('tc-early-signup-form', EarlySignupForm)
     customElements.define('tc-ecosystem-map', EcosystemMap)
+    customElements.define('tc-editable-text', EditableText)
 }
