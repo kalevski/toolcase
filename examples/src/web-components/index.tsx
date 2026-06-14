@@ -125,6 +125,7 @@ import BannerDemo from './BannerDemo'
 import BuildDemo from './BuildDemo'
 import CardOptionsDemo from './CardOptionsDemo'
 import CdnMapDemo from './CdnMapDemo'
+import ChangelogDemo from './ChangelogDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -270,4 +271,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'build', category: 'Content', element: <BuildDemo /> },
     { key: 'card-options', category: 'Forms', element: <CardOptionsDemo /> },
     { key: 'cdn-map', category: 'Content', element: <CdnMapDemo /> },
+    { key: 'changelog', category: 'Content', element: <ChangelogDemo /> },
 ]
