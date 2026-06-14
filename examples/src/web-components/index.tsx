@@ -146,6 +146,7 @@ import DatePickerDemo from './DatePickerDemo'
 import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
 import EarlySignupFormDemo from './EarlySignupFormDemo'
+import EcosystemMapDemo from './EcosystemMapDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -312,4 +313,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'slices-card', category: 'Components', element: <SlicesCardDemo /> },
     { key: 'diff-viewer', category: 'Components', element: <DiffViewerDemo /> },
     { key: 'early-signup-form', category: 'Forms', element: <EarlySignupFormDemo /> },
+    { key: 'ecosystem-map', category: 'Content', element: <EcosystemMapDemo /> },
 ]
