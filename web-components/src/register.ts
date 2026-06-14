@@ -164,6 +164,7 @@ import { File } from './File'
 import { FileDropzone } from './FileDropzone'
 import { FileTags } from './FileTags'
 import { FormWizard } from './FormWizard'
+import { GameShowcaseCard } from './GameShowcaseCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -337,4 +338,5 @@ export function register(): void {
     customElements.define('tc-file-dropzone', FileDropzone)
     customElements.define('tc-file-tags', FileTags)
     customElements.define('tc-form-wizard', FormWizard)
+    customElements.define('tc-game-showcase-card', GameShowcaseCard)
 }
