@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -145,6 +145,7 @@ After `register()` you can author markup directly:
   - [tc-feature-matrix](#tc-feature-matrix)
   - [tc-game-showcase-card](#tc-game-showcase-card)
   - [tc-github-stars-card](#tc-github-stars-card)
+  - [tc-group](#tc-group)
   - [tc-text](#tc-text)
   - [tc-visually-hidden](#tc-visually-hidden)
 - [Navigation](#navigation)
@@ -11391,5 +11392,95 @@ GitHub repository card showing stars, forks, contributors, version, and a CTA li
   el.onStats = stats => console.log('stats resolved', stats)
   el.addEventListener('tc-stats', e => console.log('tc-stats', e.detail))
   el.addEventListener('tc-cta-click', e => console.log('tc-cta-click', e.detail))
+</script>
+```
+
+### tc-group
+
+Collapsible group container with a header label, optional badge, and optional action button. The body region holds arbitrary slotted children and is toggled hidden/visible by clicking the header. Dispatches `tc-toggle` on expand/collapse and `tc-action-click` when the action button is activated. The action does not toggle the group.
+
+**Tag:** `tc-group`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | `""` | Header label text. |
+| `badge` | string | — | Optional badge shown in the header (count or short label). |
+| `default-collapsed` | boolean | false | When present, the group starts in the collapsed state. Only seeds the initial state; does not re-collapse on attribute changes. |
+| `action-label` | string | — | Accessible label for the action button; also rendered as visible text when present. |
+| `action-icon` | string | — | Lucide icon name in PascalCase (e.g. `"Plus"`, `"Settings"`) rendered inside the action button. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `collapsed` | boolean | `false` | Gets or sets the current collapsed state. Setting it patches the DOM in place and dispatches `tc-toggle`. |
+| `onActionClick` | `(() => void) \| null` | `null` | Optional callback fired when the action button is clicked (same timing as `tc-action-click`). |
+| `onToggle` | `((collapsed: boolean) => void) \| null` | `null` | Optional callback fired when the group is toggled (same timing as `tc-toggle`). |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-toggle` | `{ collapsed: boolean }` | Fired (bubbles, composed) when the group expands or collapses. Also calls `onToggle` if set. |
+| `tc-action-click` | `{}` | Fired (bubbles, composed) when the action button is clicked. Does not toggle the group. Also calls `onActionClick` if set. |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| (default) | Body content. Any children of `<tc-group>` are preserved across re-renders and placed inside the collapsible body region (`.tc-group-body`). |
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-group-bg` | `var(--tc-surface)` | Outer container background. |
+| `--bs-group-border-color` | `var(--tc-border)` | Border and hairline colors. |
+| `--bs-group-header-bg` | `var(--tc-surface)` | Header background at rest. |
+| `--bs-group-header-hover-bg` | `var(--tc-surface-muted)` | Header background on hover. |
+| `--bs-group-header-color` | `var(--tc-text)` | Header text color. |
+| `--bs-group-body-bg` | `var(--tc-surface)` | Body region background. |
+| `--bs-group-badge-bg` | `var(--tc-surface-muted)` | Badge chip background. |
+| `--bs-group-badge-color` | `var(--tc-text)` | Badge chip text color. |
+| `--bs-group-action-color` | `var(--tc-text-muted)` | Action button icon color at rest. |
+| `--bs-group-action-hover-bg` | `var(--tc-surface-muted)` | Action button background on hover. |
+
+```html
+<!-- Basic -->
+<tc-group label="Settings">
+  <p>Body content here.</p>
+</tc-group>
+
+<!-- With badge -->
+<tc-group label="Active Users" badge="42">
+  <p>42 users online.</p>
+</tc-group>
+
+<!-- Default collapsed -->
+<tc-group label="Advanced Options" default-collapsed>
+  <p>Hidden by default.</p>
+</tc-group>
+
+<!-- With action button -->
+<tc-group id="docs" label="Documents" badge="7" action-label="Add" action-icon="Plus">
+  <p>List of documents.</p>
+</tc-group>
+<script>
+  const g = document.getElementById('docs')
+  g.onActionClick = () => console.log('add document')
+  g.onToggle = collapsed => console.log('toggled, collapsed:', collapsed)
+  g.addEventListener('tc-action-click', e => console.log('tc-action-click', e.detail))
+  g.addEventListener('tc-toggle', e => console.log('tc-toggle', e.detail))
+</script>
+
+<!-- Programmatic control -->
+<tc-group id="prog" label="Collapsible">
+  <p>Controlled from JS.</p>
+</tc-group>
+<script>
+  const el = document.getElementById('prog')
+  el.collapsed = true  // collapse immediately
 </script>
 ```
