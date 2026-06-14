@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -28,6 +28,7 @@ After `register()` you can author markup directly:
 
 - [Layout](#layout)
   - [tc-basic-layout](#tc-basic-layout)
+  - [tc-dashboard-layout](#tc-dashboard-layout)
   - [tc-dashboard-content](#tc-dashboard-content)
   - [tc-dashboard-sidebar](#tc-dashboard-sidebar)
   - [tc-container](#tc-container)
@@ -234,6 +235,108 @@ None. `tc-basic-layout` is a purely presentational layout element.
 <tc-basic-layout>
     <p>Full-height main area, no brand header.</p>
 </tc-basic-layout>
+```
+
+---
+
+### tc-dashboard-layout
+
+Full-page dashboard shell composing a glass navbar, a collapsible sidebar, and a scrollable content area. Named slots cover the brand, menu, panel, and both navbar ends; unslotted children land in the main content. The sidebar opens/closes via a toggle button, Ctrl+B (Cmd+B), or the `sidebar-open` attribute. Dispatches `tc-toggle-sidebar` on every flip.
+
+**Tag:** `tc-dashboard-layout`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `sidebar-open` | boolean | `true` | When present, the sidebar is expanded. Removed to collapse. Reflected by the `sidebarOpen` JS property. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `sidebarOpen` | `boolean` | Reflected from the `sidebar-open` boolean attribute. Set `true`/`false` to expand/collapse the sidebar programmatically. |
+| `onToggleSidebar` | `((open: boolean) => void) \| null` | Optional callback invoked on every toggle alongside the `tc-toggle-sidebar` CustomEvent. Default `null`. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-toggle-sidebar` | `{ open: boolean }` | Fired when the user toggles the sidebar via the button or keyboard shortcut. |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | Main content — rendered inside `<main class="tc-dashboard-layout__content">`. |
+| `navbar-left` | Content injected to the right of the sidebar-toggle button in the navbar. |
+| `navbar-right` | Content pushed to the far right of the navbar. |
+| `brand` | Logo / wordmark at the top of the sidebar, above the menu. |
+| `sidebar-menu` | Scrollable menu region (middle of the sidebar). |
+| `sidebar-panel` | Pinned panel at the bottom of the sidebar (user info, version badge, etc.). |
+
+**Accessibility**
+
+- The navbar is a `<nav role="navigation" aria-label="Application navigation">`.
+- The sidebar is an `<aside role="navigation" aria-label="Sidebar navigation">`.
+- The toggle `<button>` carries `aria-expanded` (updates in-place on toggle) and `aria-controls` tied to the sidebar's `id`.
+- The toggle is reachable by Tab; Enter/Space activate it natively.
+- Ctrl+B (Cmd+B) toggles the sidebar from anywhere on the page; the handler is removed in `disconnectedCallback`.
+- Touch targets: the toggle is `44px × 44px` under `@media (pointer: coarse)`.
+- `prefers-reduced-motion` disables the sidebar slide transition.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-dashboard-layout-navbar-height` | `3rem` | Height of the top navbar bar. |
+| `--bs-dashboard-layout-navbar-bg` | `rgba(255,255,255,0.85)` | Navbar background (translucent glass). |
+| `--bs-dashboard-layout-navbar-border` | `var(--tc-border)` | Hairline border below the navbar. |
+| `--bs-dashboard-layout-navbar-color` | `var(--tc-text)` | Text/icon color in the navbar. |
+| `--bs-dashboard-layout-navbar-padding-x` | `0.5rem` | Horizontal padding on the navbar. |
+| `--bs-dashboard-layout-sidebar-width` | `15rem` | Expanded width of the sidebar. |
+| `--bs-dashboard-layout-sidebar-bg` | `var(--tc-surface)` | Sidebar background. |
+| `--bs-dashboard-layout-sidebar-border` | `var(--tc-border)` | Hairline borders on sidebar regions. |
+| `--bs-dashboard-layout-sidebar-brand-padding` | `0.75rem 1rem` | Padding around the brand slot. |
+| `--bs-dashboard-layout-sidebar-panel-padding` | `0.75rem 1rem` | Padding around the panel slot. |
+| `--bs-dashboard-layout-content-bg` | `var(--tc-surface-hover)` | Background of the content rail. |
+| `--bs-dashboard-layout-toggle-size` | `2.25rem` | Width and height of the toggle button. |
+| `--bs-dashboard-layout-toggle-hover-bg` | `var(--tc-surface-muted)` | Toggle button hover background. |
+| `--bs-dashboard-layout-transition` | `var(--tc-transition-base)` | Sidebar slide transition. |
+
+```html
+<!-- Full layout -->
+<tc-dashboard-layout style="height: 100vh">
+  <div slot="brand">MyApp</div>
+  <nav slot="sidebar-menu">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/settings">Settings</a>
+  </nav>
+  <div slot="sidebar-panel">user@example.com</div>
+  <span slot="navbar-left">/ Dashboard</span>
+  <div slot="navbar-right"><button>New</button></div>
+  <!-- default content -->
+  <main style="padding:1.5rem">Page content here</main>
+</tc-dashboard-layout>
+
+<!-- Start with sidebar closed -->
+<tc-dashboard-layout id="dl"></tc-dashboard-layout>
+<script>
+  document.getElementById('dl').sidebarOpen = false
+  document.getElementById('dl').onToggleSidebar = open => console.log('sidebar open:', open)
+</script>
+
+<!-- Listen to toggle events -->
+<tc-dashboard-layout id="dl2" style="height:100vh">
+  <div slot="brand">App</div>
+  <nav slot="sidebar-menu"><a href="/">Home</a></nav>
+  <p style="padding:1rem">Content</p>
+</tc-dashboard-layout>
+<script>
+  document.getElementById('dl2').addEventListener('tc-toggle-sidebar', e => {
+    console.log('sidebar is now', e.detail.open ? 'open' : 'closed')
+  })
+</script>
 ```
 
 ---

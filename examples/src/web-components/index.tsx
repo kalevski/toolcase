@@ -86,6 +86,7 @@ import ListCardDemo from './ListCardDemo'
 import StatusCardDemo from './StatusCardDemo'
 import DashboardContentDemo from './DashboardContentDemo'
 import DashboardSidebarDemo from './DashboardSidebarDemo'
+import DashboardLayoutDemo from './DashboardLayoutDemo'
 import DownloadStatsDemo from './DownloadStatsDemo'
 import EmptyStateDemo from './EmptyStateDemo'
 import EntityCellDemo from './EntityCellDemo'
@@ -247,6 +248,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'status-card', category: 'Components', element: <StatusCardDemo /> },
     { key: 'dashboard-content', category: 'Layout', element: <DashboardContentDemo /> },
     { key: 'dashboard-sidebar', category: 'Layout', element: <DashboardSidebarDemo /> },
+    { key: 'dashboard-layout', category: 'Layout', element: <DashboardLayoutDemo /> },
     { key: 'download-stats', category: 'Components', element: <DownloadStatsDemo /> },
     { key: 'empty-state', category: 'Components', element: <EmptyStateDemo /> },
     { key: 'entity-cell', category: 'Components', element: <EntityCellDemo /> },

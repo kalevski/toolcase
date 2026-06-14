@@ -1,0 +1,179 @@
+// tc-dashboard-layout — full-page dashboard shell: top navbar + collapsible sidebar + scrollable content.
+// Slate glass navbar, slate sidebar, slate-50 content rail — sharp corners throughout.
+// Drive every cosmetic value through --bs-dashboard-layout-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-dashboard-layout {
+    --bs-dashboard-layout-navbar-height: 3rem;
+    --bs-dashboard-layout-navbar-bg: rgba(255, 255, 255, 0.85);
+    --bs-dashboard-layout-navbar-border: var(--tc-border);
+    --bs-dashboard-layout-navbar-color: var(--tc-text);
+    --bs-dashboard-layout-navbar-padding-x: 0.5rem;
+    --bs-dashboard-layout-sidebar-width: 15rem;
+    --bs-dashboard-layout-sidebar-bg: var(--tc-surface);
+    --bs-dashboard-layout-sidebar-border: var(--tc-border);
+    --bs-dashboard-layout-sidebar-brand-padding: 0.75rem 1rem;
+    --bs-dashboard-layout-sidebar-panel-padding: 0.75rem 1rem;
+    --bs-dashboard-layout-content-bg: var(--tc-surface-hover);
+    --bs-dashboard-layout-toggle-size: 2.25rem;
+    --bs-dashboard-layout-toggle-hover-bg: var(--tc-surface-muted);
+    --bs-dashboard-layout-transition: var(--tc-transition-base);
+}
+
+// ── Outer wrapper ─────────────────────────────────────────────────────────────
+
+.tc-dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+// ── Navbar ────────────────────────────────────────────────────────────────────
+
+.tc-dashboard-layout__navbar {
+    display: flex;
+    align-items: center;
+    height: var(--bs-dashboard-layout-navbar-height);
+    padding: 0 var(--bs-dashboard-layout-navbar-padding-x);
+    background: var(--bs-dashboard-layout-navbar-bg);
+    border-bottom: 1px solid var(--bs-dashboard-layout-navbar-border);
+    color: var(--bs-dashboard-layout-navbar-color);
+    border-radius: 0;
+    flex-shrink: 0;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    gap: 0;
+}
+
+// ── Toggle button ─────────────────────────────────────────────────────────────
+
+.tc-dashboard-layout__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-dashboard-layout-toggle-size);
+    height: var(--bs-dashboard-layout-toggle-size);
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--bs-dashboard-layout-navbar-color);
+    cursor: pointer;
+    transition: background var(--bs-dashboard-layout-transition);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        stroke: currentColor;
+    }
+
+    &:hover {
+        background: var(--bs-dashboard-layout-toggle-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+}
+
+@media (pointer: coarse) {
+    .tc-dashboard-layout__toggle {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Navbar slots ──────────────────────────────────────────────────────────────
+
+.tc-dashboard-layout__navbar-left {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.tc-dashboard-layout__navbar-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+// ── Body (sidebar + content row) ──────────────────────────────────────────────
+
+.tc-dashboard-layout__body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+
+.tc-dashboard-layout__sidebar {
+    display: flex;
+    flex-direction: column;
+    width: var(--bs-dashboard-layout-sidebar-width);
+    min-width: var(--bs-dashboard-layout-sidebar-width);
+    background: var(--bs-dashboard-layout-sidebar-bg);
+    border-right: 1px solid var(--bs-dashboard-layout-sidebar-border);
+    border-radius: 0;
+    overflow: hidden;
+    transition:
+        width var(--bs-dashboard-layout-transition),
+        min-width var(--bs-dashboard-layout-transition);
+
+    &.tc-dashboard-layout__sidebar--collapsed {
+        width: 0;
+        min-width: 0;
+    }
+}
+
+.tc-dashboard-layout__brand {
+    flex: 0 0 auto;
+    padding: var(--bs-dashboard-layout-sidebar-brand-padding);
+    border-bottom: 1px solid var(--bs-dashboard-layout-sidebar-border);
+}
+
+.tc-dashboard-layout__sidebar-menu {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tc-dashboard-layout__sidebar-panel {
+    flex: 0 0 auto;
+    padding: var(--bs-dashboard-layout-sidebar-panel-padding);
+    border-top: 1px solid var(--bs-dashboard-layout-sidebar-border);
+}
+
+// ── Content ───────────────────────────────────────────────────────────────────
+
+.tc-dashboard-layout__content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    background: var(--bs-dashboard-layout-content-bg);
+    border-radius: 0;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-dashboard-layout__sidebar {
+        transition: none;
+    }
+
+    .tc-dashboard-layout__toggle {
+        transition: none;
+    }
+}
