@@ -1,0 +1,203 @@
+// tc-context-menu — right-click / long-press context menu with nested submenu
+// support and full keyboard navigation.
+// Every cosmetic value flows through --bs-context-menu-* custom properties
+// backed by --tc-* tokens. Sharp corners, overlay shadow, slate neutrals.
+
+@use '../foundation/tokens' as *;
+
+// ── Trigger wrapper ─────────────────────────────────────────────────────────
+
+// The trigger wraps slotted children. Block div so right-clicks anywhere
+// within its area bubble to the trigger's contextmenu listener.
+.tc-context-menu-trigger {
+    user-select: none; // prevent accidental text selection on long-press
+    -webkit-user-select: none;
+}
+
+// ── Floating menu surface ────────────────────────────────────────────────────
+
+.tc-context-menu-list {
+    // ── Theme tokens ────────────────────────────────────────────────────────
+    --bs-context-menu-min-width: 180px;
+    --bs-context-menu-padding-y: 0.25rem;
+    --bs-context-menu-bg: var(--tc-surface);
+    --bs-context-menu-border: 1px solid var(--tc-border);
+    --bs-context-menu-shadow: var(--tc-shadow-lg);
+    --bs-context-menu-z-index: var(--tc-z-dropdown);
+    --bs-context-menu-item-padding-x: 0.625rem;
+    --bs-context-menu-item-padding-y: 0.4375rem;
+    --bs-context-menu-item-font-size: 0.8125rem; // 13px (Inter)
+    --bs-context-menu-item-color: var(--tc-slate-700);
+    --bs-context-menu-item-hover-bg: var(--tc-surface-muted);
+    --bs-context-menu-item-hover-color: var(--tc-text);
+    --bs-context-menu-item-disabled-opacity: 0.45;
+    --bs-context-menu-separator-color: var(--tc-border);
+    --bs-context-menu-separator-margin-y: 0.25rem;
+    --bs-context-menu-danger-color: var(--tc-danger);
+    --bs-context-menu-danger-hover-bg: var(--tc-surface-muted);
+    --bs-context-menu-icon-size: 1em;
+    --bs-context-menu-chevron-size: 0.875em;
+
+    // Top-level menu is fixed to the viewport at pointer coordinates set by JS.
+    position: fixed;
+    z-index: var(--bs-context-menu-z-index);
+    display: none;
+    min-width: var(--bs-context-menu-min-width);
+    padding: var(--bs-context-menu-padding-y) 0;
+    margin: 0;
+    list-style: none;
+    background-color: var(--bs-context-menu-bg);
+    border: var(--bs-context-menu-border);
+    border-radius: 0; // sharp corners — design system rule
+    box-shadow: var(--bs-context-menu-shadow);
+    outline: none;
+
+    &.show {
+        display: block;
+    }
+}
+
+// ── Nested submenu ───────────────────────────────────────────────────────────
+
+.tc-context-menu-list--sub {
+    // Reset fixed positioning — submenus are absolutely positioned relative to
+    // their parent li (which has position: relative via --has-children).
+    position: absolute;
+    top: calc(-1 * var(--bs-context-menu-padding-y));
+    left: 100%;
+    display: none;
+    margin: 0;
+}
+
+// Flip submenu to the left when near the right viewport edge.
+.tc-context-menu-list--flip-x {
+    left: auto;
+    right: 100%;
+}
+
+// ── Items ────────────────────────────────────────────────────────────────────
+
+.tc-context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--bs-context-menu-item-padding-y) var(--bs-context-menu-item-padding-x);
+    font-family: var(--bs-body-font-family, inherit);
+    font-size: var(--bs-context-menu-item-font-size);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-context-menu-item-color);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    list-style: none;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-context-menu-item-hover-color);
+        background-color: var(--bs-context-menu-item-hover-bg);
+        text-decoration: none;
+        outline: none;
+    }
+
+    // Disabled: opacity + pointer-events only, not color override.
+    &--disabled {
+        opacity: var(--bs-context-menu-item-disabled-opacity);
+        pointer-events: none;
+        cursor: default;
+    }
+
+    // Danger variant — status indicator, not decoration.
+    &--danger {
+        color: var(--bs-context-menu-danger-color);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--bs-context-menu-danger-color);
+            background-color: var(--bs-context-menu-danger-hover-bg);
+        }
+    }
+
+    // Parent item whose submenu is currently open — same well as hover.
+    &--has-children {
+        position: relative; // containing block for the absolute submenu
+
+        > .tc-context-menu-list--sub {
+            display: none;
+        }
+    }
+
+    &--open {
+        background-color: var(--bs-context-menu-item-hover-bg);
+
+        > .tc-context-menu-list--sub {
+            display: block;
+        }
+    }
+
+    // Lucide icons inside items.
+    svg {
+        width: var(--bs-context-menu-icon-size);
+        height: var(--bs-context-menu-icon-size);
+        flex-shrink: 0;
+    }
+}
+
+// ── Label ────────────────────────────────────────────────────────────────────
+
+.tc-context-menu-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Chevron (right-arrow for submenus) ───────────────────────────────────────
+
+.tc-context-menu-chevron {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: auto;
+
+    svg {
+        width: var(--bs-context-menu-chevron-size);
+        height: var(--bs-context-menu-chevron-size);
+    }
+}
+
+// ── Separator ────────────────────────────────────────────────────────────────
+
+.tc-context-menu-separator {
+    height: 0;
+    margin: var(--bs-context-menu-separator-margin-y) 0;
+    overflow: hidden;
+    border: 0;
+    border-top: 1px solid var(--bs-context-menu-separator-color);
+    list-style: none;
+}
+
+// ── Touch targets ────────────────────────────────────────────────────────────
+
+// WCAG 2.5.5 — 44 px minimum tappable area on coarse-pointer (touch) devices.
+@media (pointer: coarse) {
+    .tc-context-menu-item {
+        min-height: 44px;
+    }
+}
+
+// Honour prefers-reduced-motion — skip any transition on the submenu slide.
+@media (prefers-reduced-motion: reduce) {
+    .tc-context-menu-list,
+    .tc-context-menu-list--sub,
+    .tc-context-menu-item {
+        transition: none !important;
+    }
+}

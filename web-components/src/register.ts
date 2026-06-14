@@ -142,6 +142,7 @@ import { ColorPicker } from './ColorPicker'
 import { CommandReference } from './CommandReference'
 import { Comparator } from './Comparator'
 import { CompatibilityMatrix } from './CompatibilityMatrix'
+import { ContextMenu } from './ContextMenu'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -293,4 +294,5 @@ export function register(): void {
     customElements.define('tc-command-reference', CommandReference)
     customElements.define('tc-comparator', Comparator)
     customElements.define('tc-compatibility-matrix', CompatibilityMatrix)
+    customElements.define('tc-context-menu', ContextMenu)
 }
