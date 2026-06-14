@@ -157,6 +157,7 @@ import { EarlySignupForm } from './EarlySignupForm'
 import { EcosystemMap } from './EcosystemMap'
 import { EditableText } from './EditableText'
 import { EntityProfileCard } from './EntityProfileCard'
+import { ExtendedSelect } from './ExtendedSelect'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -323,4 +324,5 @@ export function register(): void {
     customElements.define('tc-ecosystem-map', EcosystemMap)
     customElements.define('tc-editable-text', EditableText)
     customElements.define('tc-entity-profile-card', EntityProfileCard)
+    customElements.define('tc-extended-select', ExtendedSelect)
 }

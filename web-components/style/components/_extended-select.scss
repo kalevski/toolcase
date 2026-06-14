@@ -1,0 +1,318 @@
+// tc-extended-select — searchable dropdown with debounced filtering, keyboard
+// navigation, descriptions, and native form-submission support via a hidden
+// <input>. All cosmetic values flow through --bs-extended-select-* custom
+// properties backed by --tc-* tokens. Sharp corners throughout.
+
+tc-extended-select {
+    // ── Public theming contract ──────────────────────────────────────────────
+    --bs-extended-select-trigger-border: 1px solid var(--tc-border-strong);
+    --bs-extended-select-trigger-bg: var(--tc-surface);
+    --bs-extended-select-trigger-color: var(--tc-text);
+    --bs-extended-select-trigger-placeholder-color: var(--tc-text-muted);
+    --bs-extended-select-trigger-focus-shadow: var(--tc-focus-ring);
+    --bs-extended-select-trigger-height: 2.375rem; // ~38px — matches form-control height
+    --bs-extended-select-menu-bg: var(--tc-surface);
+    --bs-extended-select-menu-border: 1px solid var(--tc-border);
+    --bs-extended-select-menu-shadow: var(--tc-shadow-lg);
+    --bs-extended-select-menu-z-index: var(--tc-z-dropdown);
+    --bs-extended-select-option-color: var(--tc-text);
+    --bs-extended-select-option-hover-bg: var(--tc-surface-muted);
+    --bs-extended-select-option-selected-bg: var(--tc-app-accent);
+    --bs-extended-select-option-selected-color: #ffffff;
+    --bs-extended-select-option-desc-color: var(--tc-text-muted);
+    --bs-extended-select-option-font-size: 0.875rem;
+    --bs-extended-select-option-desc-font-size: 0.75rem;
+    --bs-extended-select-search-border: 1px solid var(--tc-border);
+    --bs-extended-select-search-icon-color: var(--tc-text-muted);
+    --bs-extended-select-no-results-color: var(--tc-text-muted);
+    --bs-extended-select-disabled-opacity: 0.55;
+    --bs-extended-select-caret-color: var(--tc-text-muted);
+
+    display: block;
+    position: relative;
+}
+
+// ── Trigger button ───────────────────────────────────────────────────────────
+
+.tc-extended-select__trigger {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: var(--bs-extended-select-trigger-height);
+    padding: 0.4375rem 0.625rem;
+    font-family: var(--bs-body-font-family, inherit);
+    font-size: 0.925rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-extended-select-trigger-color);
+    text-align: left;
+    background-color: var(--bs-extended-select-trigger-bg);
+    border: var(--bs-extended-select-trigger-border);
+    border-radius: 0; // sharp corners — design system rule
+    cursor: pointer;
+    transition: border-color var(--tc-transition-base), box-shadow var(--tc-transition-base);
+    gap: 0.5rem;
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--bs-extended-select-trigger-focus-shadow);
+    }
+
+    &--placeholder {
+        color: var(--bs-extended-select-trigger-placeholder-color);
+    }
+
+    // Caret rotates when the menu is open
+    .tc-extended-select__caret {
+        margin-left: auto;
+        flex-shrink: 0;
+        color: var(--bs-extended-select-caret-color);
+        transition: transform var(--tc-transition-base);
+
+        svg {
+            display: block;
+            width: 1em;
+            height: 1em;
+        }
+    }
+}
+
+// Spinner inside the trigger (only visible when [loading])
+.tc-extended-select__trigger-spinner {
+    display: none;
+    align-items: center;
+    flex-shrink: 0;
+
+    .spinner-border {
+        width: 0.875rem;
+        height: 0.875rem;
+        border-width: 0.15em;
+    }
+}
+
+// Trigger label text
+.tc-extended-select__trigger-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Open state — rotate caret when the trigger is expanded ──────────────────
+
+.tc-extended-select__trigger[aria-expanded='true'] .tc-extended-select__caret {
+    transform: rotate(180deg);
+}
+
+// ── Dropdown menu panel ──────────────────────────────────────────────────────
+
+.tc-extended-select__menu {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    z-index: var(--bs-extended-select-menu-z-index);
+    background-color: var(--bs-extended-select-menu-bg);
+    border: var(--bs-extended-select-menu-border);
+    border-radius: 0;
+    box-shadow: var(--bs-extended-select-menu-shadow);
+    overflow: hidden;
+
+    // Hidden by default — shown via JS adding --open modifier
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition:
+        opacity var(--tc-transition-base),
+        visibility var(--tc-transition-base),
+        transform var(--tc-transition-base);
+
+    &--open {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}
+
+// ── Search row ───────────────────────────────────────────────────────────────
+
+.tc-extended-select__search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    border-bottom: var(--bs-extended-select-search-border);
+    color: var(--bs-extended-select-search-icon-color);
+
+    .tc-extended-select__search-icon {
+        flex-shrink: 0;
+        display: inline-flex;
+
+        svg {
+            width: 0.875rem;
+            height: 0.875rem;
+        }
+    }
+}
+
+.tc-extended-select__search-input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.875rem;
+    color: var(--tc-text);
+    padding: 0;
+    line-height: 1.5;
+
+    &::placeholder {
+        color: var(--bs-extended-select-no-results-color);
+    }
+}
+
+// ── Options list ─────────────────────────────────────────────────────────────
+
+.tc-extended-select__list {
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.tc-extended-select__option {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.125rem 0.5rem;
+    padding: 0.4375rem 0.625rem;
+    font-size: var(--bs-extended-select-option-font-size);
+    color: var(--bs-extended-select-option-color);
+    cursor: pointer;
+    transition: background-color var(--tc-transition-base), color var(--tc-transition-base);
+    border-radius: 0;
+    user-select: none;
+    -webkit-user-select: none;
+
+    &--active:not(.tc-extended-select__option--selected),
+    &:hover:not(.tc-extended-select__option--selected) {
+        background-color: var(--bs-extended-select-option-hover-bg);
+    }
+
+    &--selected {
+        background-color: var(--bs-extended-select-option-selected-bg);
+        color: var(--bs-extended-select-option-selected-color);
+
+        .tc-extended-select__option-desc {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .tc-extended-select__check {
+            margin-left: auto;
+            flex-shrink: 0;
+
+            svg {
+                width: 0.875em;
+                height: 0.875em;
+            }
+        }
+    }
+}
+
+.tc-extended-select__option-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-extended-select__option-desc {
+    width: 100%;
+    flex-basis: 100%;
+    font-size: var(--bs-extended-select-option-desc-font-size);
+    color: var(--bs-extended-select-option-desc-color);
+    line-height: 1.4;
+    white-space: normal;
+}
+
+// Checkmark icon (hidden by default, visible on selected option via rendering)
+.tc-extended-select__check {
+    display: inline-flex;
+    align-items: center;
+}
+
+// ── No-results message ───────────────────────────────────────────────────────
+
+.tc-extended-select__no-results {
+    padding: 0.625rem;
+    font-size: 0.875rem;
+    color: var(--bs-extended-select-no-results-color);
+    text-align: center;
+    list-style: none;
+}
+
+// ── Loading indicator (inside menu) ─────────────────────────────────────────
+
+.tc-extended-select__loading-indicator {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+// ── Loading state — attribute selector rules ─────────────────────────────────
+
+tc-extended-select[loading] {
+    .tc-extended-select__trigger {
+        pointer-events: none;
+        opacity: var(--bs-extended-select-disabled-opacity);
+    }
+
+    .tc-extended-select__trigger-spinner {
+        display: inline-flex;
+    }
+
+    .tc-extended-select__trigger-label {
+        display: none;
+    }
+
+    .tc-extended-select__list,
+    .tc-extended-select__search-wrap {
+        display: none;
+    }
+
+    .tc-extended-select__loading-indicator {
+        display: flex;
+    }
+}
+
+// ── Touch targets (WCAG 2.5.5 — 44 px on coarse-pointer devices) ────────────
+
+@media (pointer: coarse) {
+    .tc-extended-select__trigger {
+        min-height: 44px;
+    }
+
+    .tc-extended-select__option {
+        min-height: 44px;
+        align-items: center;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-extended-select__menu,
+    .tc-extended-select__trigger,
+    .tc-extended-select__option,
+    .tc-extended-select__caret svg {
+        transition: none;
+    }
+}

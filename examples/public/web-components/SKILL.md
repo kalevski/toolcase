@@ -180,6 +180,7 @@ After `register()` you can author markup directly:
   - [tc-textarea](#tc-textarea)
   - [tc-early-signup-form](#tc-early-signup-form)
   - [tc-editable-text](#tc-editable-text)
+  - [tc-extended-select](#tc-extended-select)
 
 ---
 
@@ -10569,4 +10570,78 @@ None. `tc-entity-profile-card` is purely presentational.
 
 <!-- Loading skeleton -->
 <tc-entity-profile-card loading></tc-entity-profile-card>
+```
+
+---
+
+### tc-extended-select
+
+Searchable dropdown with debounced filtering (150 ms), keyboard navigation, optional item descriptions, and native form-submission support via a hidden `<input>`. Implements the combobox/listbox ARIA pattern.
+
+**Tag:** `tc-extended-select`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | string | — | Key of the currently selected item |
+| `name` | string | — | Field name for native form submission (`<input type="hidden">`) |
+| `placeholder` | string | `"Select…"` | Trigger label when nothing is selected |
+| `search-placeholder` | string | `"Search…"` | Placeholder text in the search input |
+| `no-results-text` | string | `"No results"` | Message shown when the filter returns no matches |
+| `loading` | boolean | false | Disables the trigger and shows a spinner; the menu cannot be opened |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | `ExtendedSelectItem[]` | Options list — set via JS property, not attribute |
+| `onChange` | `((value: string) => void) \| null` | Optional callback fired alongside `tc-change` |
+
+Each `ExtendedSelectItem`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `key` | string | Unique identifier; becomes the selected `value` |
+| `label` | string | Primary display text shown in trigger and option row |
+| `description` | string? | Optional secondary line shown in muted text below the label |
+
+**Events:** `tc-change` with `{ detail: { value: string } }`
+
+**Slots:** none — the option list is generated from the `items` JS property.
+
+**Keyboard navigation (while menu is open)**
+
+| Key | Action |
+|-----|--------|
+| `ArrowDown` | Move highlight to next option (wraps) |
+| `ArrowUp` | Move highlight to previous option (wraps) |
+| `Home` | Jump to first option |
+| `End` | Jump to last option |
+| `Enter` | Select highlighted option |
+| `Escape` | Close menu, return focus to trigger |
+
+```html
+<tc-extended-select
+  id="fw-picker"
+  placeholder="Choose a framework…"
+  search-placeholder="Search…"
+  name="framework"
+></tc-extended-select>
+<script>
+const el = document.getElementById('fw-picker')
+el.items = [
+  { key: 'react',   label: 'React',   description: 'UI library by Meta' },
+  { key: 'vue',     label: 'Vue',     description: 'Progressive framework' },
+  { key: 'svelte',  label: 'Svelte',  description: 'Compile-time framework' },
+  { key: 'angular', label: 'Angular', description: 'Platform by Google' },
+]
+el.addEventListener('tc-change', e => console.log('selected:', e.detail.value))
+</script>
+
+<!-- Preselected value -->
+<tc-extended-select value="vue" name="framework"></tc-extended-select>
+
+<!-- Loading state -->
+<tc-extended-select placeholder="Fetching…" loading></tc-extended-select>
 ```

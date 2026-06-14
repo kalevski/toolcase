@@ -149,6 +149,7 @@ import EarlySignupFormDemo from './EarlySignupFormDemo'
 import EcosystemMapDemo from './EcosystemMapDemo'
 import EditableTextDemo from './EditableTextDemo'
 import EntityProfileCardDemo from './EntityProfileCardDemo'
+import ExtendedSelectDemo from './ExtendedSelectDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -318,4 +319,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'ecosystem-map', category: 'Content', element: <EcosystemMapDemo /> },
     { key: 'editable-text', category: 'Forms', element: <EditableTextDemo /> },
     { key: 'entity-profile-card', category: 'Components', element: <EntityProfileCardDemo /> },
+    { key: 'extended-select', category: 'Forms', element: <ExtendedSelectDemo /> },
 ]
