@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -39,6 +39,7 @@ After `register()` you can author markup directly:
   - [tc-action-row-list](#tc-action-row-list)
   - [tc-alert](#tc-alert)
   - [tc-announcement-bar](#tc-announcement-bar)
+  - [tc-banner](#tc-banner)
   - [tc-avatar](#tc-avatar)
   - [tc-badge](#tc-badge)
   - [tc-badge-row](#tc-badge-row)
@@ -609,6 +610,80 @@ Persistent announcement bar with optional CTA link, leading icon, and localStora
 <tc-announcement-bar variant="warning" dismissible persist-dismiss-key="my-app-announcement">
   Maintenance window on Sunday 02:00 UTC.
 </tc-announcement-bar>
+```
+
+---
+
+### tc-banner
+
+Status banner with a leading icon, body content, an optional action slot, and optional localStorage-backed dismissal. Emits `tc-dismiss` when closed. Uses `role="status"` (or `role="alert"` for the error variant) for screen reader announcements.
+
+**Tag:** `tc-banner`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `variant` | `info\|warning\|success\|error` | `info` | Color/tone variant. Selects the left border color, background tint, and default icon. |
+| `dismissible` | boolean | false | Show a close button. Clicking it hides the banner and fires `tc-dismiss`. |
+| `storage-key` | string | — | localStorage key. On connect, if the key is already stored as `"dismissed"`, the banner hides immediately. Clicking close writes the flag so dismissal persists across reloads. |
+| `icon` | string | — | Kebab-case lucide icon name (e.g. `"bell"`, `"rocket"`). Overrides the per-variant default icon (`info` → `info`, `warning` → `triangle-alert`, `success` → `circle-check`, `error` → `circle-x`). |
+| `class` | string | — | Extra classes applied directly to the host element. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `onDismiss` | `(() => void) \| null` | Optional callback fired alongside the `tc-dismiss` event when the banner is dismissed. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-dismiss` | — | Fired (bubbles, composed) when the close button is clicked. |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | Banner body text / HTML. Rendered inside `.tc-banner-content`. |
+| `action` | Optional action element (button, link). Rendered inside `.tc-banner-action` on the right side of the banner. |
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-banner-padding-x` | `1rem` | Horizontal padding. |
+| `--bs-banner-padding-y` | `0.85rem` | Vertical padding. |
+| `--bs-banner-font-size` | `0.9rem` | Banner text size. |
+| `--bs-banner-gap` | `0.75rem` | Gap between icon, content, action, and close button. |
+| `--bs-banner-border-width` | `4px` | Left border width. |
+| `--bs-banner-border-color` | `var(--tc-info)` | Left border and icon color (set by variant). |
+| `--bs-banner-bg` | gradient | 135° tinted gradient fill (set by variant). |
+| `--bs-banner-color` | emphasis | Dark emphasis text color (set by variant). |
+| `--bs-banner-icon-size` | `1rem` | Width/height of the leading icon SVG. |
+| `--bs-banner-close-size` | `28px` | Size of the dismiss button (44px on coarse pointer devices). |
+
+```html
+<!-- Info (default) -->
+<tc-banner>New documentation is available — check it out.</tc-banner>
+
+<!-- Error variant uses role="alert" for immediate announcement -->
+<tc-banner variant="error">Failed to connect to the server.</tc-banner>
+
+<!-- Custom icon -->
+<tc-banner variant="info" icon="bell">You have 3 unread notifications.</tc-banner>
+
+<!-- With action slot -->
+<tc-banner variant="info">
+  A new version is available.
+  <tc-button slot="action" variant="primary" size="sm">Update now</tc-button>
+</tc-banner>
+
+<!-- Dismissible with persistent storage -->
+<tc-banner variant="warning" dismissible storage-key="my-app-banner">
+  Maintenance window on Sunday 02:00 UTC.
+</tc-banner>
 ```
 
 ---

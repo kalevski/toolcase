@@ -121,6 +121,7 @@ import TimelineDemo from './TimelineDemo'
 import UsageSummaryPanelDemo from './UsageSummaryPanelDemo'
 import WelcomeGuideDemo from './WelcomeGuideDemo'
 import ApiReferenceTableDemo from './ApiReferenceTableDemo'
+import BannerDemo from './BannerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -262,4 +263,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'usage-summary-panel', category: 'Components', element: <UsageSummaryPanelDemo /> },
     { key: 'welcome-guide', category: 'Components', element: <WelcomeGuideDemo /> },
     { key: 'api-reference-table', category: 'Content', element: <ApiReferenceTableDemo /> },
+    { key: 'banner', category: 'Components', element: <BannerDemo /> },
 ]
