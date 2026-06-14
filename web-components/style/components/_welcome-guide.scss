@@ -1,0 +1,388 @@
+// tc-welcome-guide — onboarding guide with progress tracking and sequential step completion.
+// All cosmetics via --bs-welcome-guide-* / --tc-* tokens.
+// Sharp corners everywhere (border-radius: 0). Card on --tc-surface with 1px --tc-border hairline.
+// Square check indicator: completed = ink/--tc-success tick, active = accent ring, locked = muted dash.
+// Animated tick respects prefers-reduced-motion.
+
+tc-welcome-guide {
+    // ── Card ──────────────────────────────────────────────────────────────────
+    --bs-welcome-guide-bg: var(--tc-surface);
+    --bs-welcome-guide-border: 1px solid var(--tc-border);
+    --bs-welcome-guide-shadow: var(--tc-shadow-sm);
+    --bs-welcome-guide-padding: 1.5rem;
+    --bs-welcome-guide-border-radius: 0;
+
+    // ── Title ─────────────────────────────────────────────────────────────────
+    --bs-welcome-guide-title-font-size: 1.125rem;
+    --bs-welcome-guide-title-font-weight: 600;
+    --bs-welcome-guide-title-color: var(--tc-text);
+    --bs-welcome-guide-title-font-family: var(--tc-font-sans, 'Inter', sans-serif);
+    --bs-welcome-guide-title-margin-bottom: 0.75rem;
+
+    // ── Messages ──────────────────────────────────────────────────────────────
+    --bs-welcome-guide-message-font-size: 0.875rem;
+    --bs-welcome-guide-message-color: var(--tc-text-muted);
+    --bs-welcome-guide-message-line-height: 1.55;
+    --bs-welcome-guide-message-gap: 0.375rem;
+    --bs-welcome-guide-messages-margin-bottom: 1rem;
+
+    // ── Progress bar ──────────────────────────────────────────────────────────
+    --bs-welcome-guide-progress-height: 0.375rem;
+    --bs-welcome-guide-progress-bg: var(--tc-slate-200, #e2e8f0);
+    --bs-welcome-guide-progress-fill: var(--tc-app-accent);
+    --bs-welcome-guide-progress-margin-bottom: 0.375rem;
+    --bs-welcome-guide-progress-label-font-size: 0.75rem;
+    --bs-welcome-guide-progress-label-color: var(--tc-text-muted);
+    --bs-welcome-guide-progress-margin-top: 1rem;
+
+    // ── Steps list ────────────────────────────────────────────────────────────
+    --bs-welcome-guide-steps-gap: 0.25rem;
+    --bs-welcome-guide-steps-margin-top: 0.75rem;
+    --bs-welcome-guide-step-padding: 0.5rem 0.625rem;
+    --bs-welcome-guide-step-border-radius: 0;
+    --bs-welcome-guide-step-label-font-size: 0.875rem;
+    --bs-welcome-guide-step-label-color: var(--tc-text-muted);
+    --bs-welcome-guide-step-label-font-weight: 400;
+
+    // ── Step states ───────────────────────────────────────────────────────────
+    --bs-welcome-guide-step-active-label-color: var(--tc-text);
+    --bs-welcome-guide-step-active-label-weight: 500;
+    --bs-welcome-guide-step-completed-label-color: var(--tc-text-faint, var(--tc-text-muted));
+    --bs-welcome-guide-step-active-hover-bg: var(--tc-surface-hover);
+
+    // ── Check indicator (square box) ─────────────────────────────────────────
+    --bs-welcome-guide-check-size: 1.125rem;
+    --bs-welcome-guide-check-border-radius: 0;
+    --bs-welcome-guide-check-gap: 0.625rem;
+
+    // Completed: success fill + tick
+    --bs-welcome-guide-check-completed-bg: var(--tc-success);
+    --bs-welcome-guide-check-completed-border: var(--tc-success);
+    --bs-welcome-guide-check-completed-color: #fff;
+
+    // Active: accent border + hover ring
+    --bs-welcome-guide-check-active-bg: transparent;
+    --bs-welcome-guide-check-active-border: var(--tc-app-accent);
+    --bs-welcome-guide-check-active-color: var(--tc-app-accent);
+
+    // Locked: muted slate
+    --bs-welcome-guide-check-locked-bg: transparent;
+    --bs-welcome-guide-check-locked-border: var(--tc-border);
+    --bs-welcome-guide-check-locked-color: var(--tc-text-faint, var(--tc-text-muted));
+
+    // ── Tick animation ────────────────────────────────────────────────────────
+    --bs-welcome-guide-tick-duration: 0.3s;
+
+    // ── Decorative background pattern ─────────────────────────────────────────
+    --bs-welcome-guide-pattern-opacity: 0.08;
+    --bs-welcome-guide-pattern-size: 8rem;
+
+    // ── Skeleton ──────────────────────────────────────────────────────────────
+    --bs-welcome-guide-skel-bg: var(--tc-surface-muted, #f1f5f9);
+    --bs-welcome-guide-skel-shimmer: rgba(255,255,255,0.6);
+}
+
+// ── Card shell ─────────────────────────────────────────────────────────────────
+
+.tc-welcome-guide {
+    position: relative;
+    overflow: hidden;
+    background: var(--bs-welcome-guide-bg);
+    border: var(--bs-welcome-guide-border);
+    box-shadow: var(--bs-welcome-guide-shadow);
+    border-radius: var(--bs-welcome-guide-border-radius);
+}
+
+.tc-welcome-guide-body {
+    position: relative;
+    z-index: 1;
+    padding: var(--bs-welcome-guide-padding);
+}
+
+// ── Decorative background pattern ─────────────────────────────────────────────
+
+.tc-welcome-guide-pattern {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    opacity: var(--bs-welcome-guide-pattern-opacity);
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+}
+
+// ── Title ──────────────────────────────────────────────────────────────────────
+
+.tc-welcome-guide-title {
+    margin: 0 0 var(--bs-welcome-guide-title-margin-bottom);
+    font-size: var(--bs-welcome-guide-title-font-size);
+    font-weight: var(--bs-welcome-guide-title-font-weight);
+    font-family: var(--bs-welcome-guide-title-font-family);
+    color: var(--bs-welcome-guide-title-color);
+    line-height: 1.3;
+    border-radius: 0;
+}
+
+// ── Messages ───────────────────────────────────────────────────────────────────
+
+.tc-welcome-guide-messages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-welcome-guide-message-gap);
+    margin-bottom: var(--bs-welcome-guide-messages-margin-bottom);
+}
+
+.tc-welcome-guide-message {
+    margin: 0;
+    font-size: var(--bs-welcome-guide-message-font-size);
+    color: var(--bs-welcome-guide-message-color);
+    line-height: var(--bs-welcome-guide-message-line-height);
+}
+
+// ── Progress bar ───────────────────────────────────────────────────────────────
+
+.tc-welcome-guide-progress {
+    position: relative;
+    height: var(--bs-welcome-guide-progress-height);
+    background: var(--bs-welcome-guide-progress-bg);
+    border-radius: 0;
+    overflow: hidden;
+    margin-top: var(--bs-welcome-guide-progress-margin-top);
+    margin-bottom: var(--bs-welcome-guide-progress-margin-bottom);
+}
+
+.tc-welcome-guide-progress-bar {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    background: var(--bs-welcome-guide-progress-fill);
+    border-radius: 0;
+    transition: width 0.3s ease;
+}
+
+.tc-welcome-guide-progress-label {
+    margin: 0 0 0;
+    font-size: var(--bs-welcome-guide-progress-label-font-size);
+    color: var(--bs-welcome-guide-progress-label-color);
+    line-height: 1.4;
+}
+
+// ── Steps list ─────────────────────────────────────────────────────────────────
+
+.tc-welcome-guide-steps {
+    list-style: none;
+    margin: var(--bs-welcome-guide-steps-margin-top) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-welcome-guide-steps-gap);
+}
+
+.tc-welcome-guide-step {
+    border-radius: 0;
+}
+
+.tc-welcome-guide-step-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-welcome-guide-check-gap);
+    padding: var(--bs-welcome-guide-step-padding);
+    border-radius: 0;
+    cursor: default;
+    user-select: none;
+    outline: none;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+.tc-welcome-guide-step-label {
+    font-size: var(--bs-welcome-guide-step-label-font-size);
+    color: var(--bs-welcome-guide-step-label-color);
+    font-weight: var(--bs-welcome-guide-step-label-font-weight);
+    line-height: 1.4;
+}
+
+// ── Step state: active ─────────────────────────────────────────────────────────
+
+.tc-welcome-guide-step--active {
+    .tc-welcome-guide-step-inner {
+        cursor: pointer;
+
+        &:hover {
+            background: var(--bs-welcome-guide-step-active-hover-bg);
+        }
+    }
+
+    .tc-welcome-guide-step-label {
+        color: var(--bs-welcome-guide-step-active-label-color);
+        font-weight: var(--bs-welcome-guide-step-active-label-weight);
+    }
+}
+
+// ── Step state: completed ──────────────────────────────────────────────────────
+
+.tc-welcome-guide-step--completed {
+    .tc-welcome-guide-step-label {
+        color: var(--bs-welcome-guide-step-completed-label-color);
+        text-decoration: line-through;
+    }
+}
+
+// ── Square check indicator ─────────────────────────────────────────────────────
+
+.tc-welcome-guide-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-welcome-guide-check-size);
+    height: var(--bs-welcome-guide-check-size);
+    border-radius: var(--bs-welcome-guide-check-border-radius);
+    border: 1.5px solid var(--bs-welcome-guide-check-locked-border);
+    background: var(--bs-welcome-guide-check-locked-bg);
+    color: var(--bs-welcome-guide-check-locked-color);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tc-welcome-guide-check--completed {
+    background: var(--bs-welcome-guide-check-completed-bg);
+    border-color: var(--bs-welcome-guide-check-completed-border);
+    color: var(--bs-welcome-guide-check-completed-color);
+}
+
+.tc-welcome-guide-check--active {
+    background: var(--bs-welcome-guide-check-active-bg);
+    border-color: var(--bs-welcome-guide-check-active-border);
+    color: var(--bs-welcome-guide-check-active-color);
+}
+
+.tc-welcome-guide-check--locked {
+    background: var(--bs-welcome-guide-check-locked-bg);
+    border-color: var(--bs-welcome-guide-check-locked-border);
+    color: var(--bs-welcome-guide-check-locked-color);
+}
+
+// ── Check icon (SVG tick inside completed box) ─────────────────────────────────
+
+.tc-welcome-guide-check-tick {
+    width: 0.75rem;
+    height: 0.75rem;
+    display: block;
+}
+
+.tc-welcome-guide-check-dash {
+    width: 0.75rem;
+    height: 0.75rem;
+    display: block;
+}
+
+// ── Animated tick stroke draw ──────────────────────────────────────────────────
+
+@keyframes tc-welcome-guide-tick-draw {
+    from {
+        stroke-dashoffset: 20;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.tc-welcome-guide-check-tick-path {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 0;
+    animation: tc-welcome-guide-tick-draw var(--bs-welcome-guide-tick-duration) ease forwards;
+}
+
+// ── Skeleton loading ───────────────────────────────────────────────────────────
+
+@keyframes tc-welcome-guide-shimmer {
+    from {
+        background-position: -200% center;
+    }
+    to {
+        background-position: 200% center;
+    }
+}
+
+.tc-welcome-guide-skel {
+    background: linear-gradient(
+        90deg,
+        var(--bs-welcome-guide-skel-bg) 25%,
+        var(--bs-welcome-guide-skel-shimmer) 50%,
+        var(--bs-welcome-guide-skel-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-welcome-guide-shimmer 1.4s ease infinite;
+    border-radius: 0;
+}
+
+.tc-welcome-guide-skel--title {
+    height: 1.25rem;
+    width: 60%;
+    margin-bottom: 0.75rem;
+}
+
+.tc-welcome-guide-skel--msg {
+    height: 0.875rem;
+    width: 90%;
+    margin-bottom: 0.375rem;
+}
+
+.tc-welcome-guide-skel--msg-short {
+    width: 70%;
+    margin-bottom: 1rem;
+}
+
+.tc-welcome-guide-skel--progress {
+    height: var(--bs-welcome-guide-progress-height);
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.tc-welcome-guide-skel--check {
+    width: var(--bs-welcome-guide-check-size);
+    height: var(--bs-welcome-guide-check-size);
+    flex-shrink: 0;
+    display: inline-flex;
+    border: none;
+}
+
+.tc-welcome-guide-skel--step-label {
+    height: 0.875rem;
+    width: 50%;
+    display: inline-block;
+}
+
+// ── 44px coarse touch targets on active step ───────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-welcome-guide-step--active .tc-welcome-guide-step-inner {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-welcome-guide-progress-bar,
+    .tc-welcome-guide-check,
+    .tc-welcome-guide-step-inner {
+        transition: none;
+    }
+
+    .tc-welcome-guide-check-tick-path {
+        animation: none;
+        stroke-dashoffset: 0;
+    }
+
+    .tc-welcome-guide-skel {
+        animation: none;
+        background: var(--bs-welcome-guide-skel-bg);
+    }
+}
