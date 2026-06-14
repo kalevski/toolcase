@@ -171,6 +171,7 @@ import { Group } from './Group'
 import { Hero } from './Hero'
 import { Image as TcImage } from './Image'
 import { InfiniteScroll } from './InfiniteScroll'
+import { InstallTabs } from './InstallTabs'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -351,4 +352,5 @@ export function register(): void {
     customElements.define('tc-hero', Hero)
     customElements.define('tc-image', TcImage)
     customElements.define('tc-infinite-scroll', InfiniteScroll)
+    customElements.define('tc-install-tabs', InstallTabs)
 }

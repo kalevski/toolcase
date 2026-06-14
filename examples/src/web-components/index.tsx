@@ -163,6 +163,7 @@ import GroupDemo from './GroupDemo'
 import HeroDemo from './HeroDemo'
 import ImageDemo from './ImageDemo'
 import InfiniteScrollDemo from './InfiniteScrollDemo'
+import InstallTabsDemo from './InstallTabsDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -346,4 +347,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'hero', category: 'Content', element: <HeroDemo /> },
     { key: 'image', category: 'Content', element: <ImageDemo /> },
     { key: 'infinite-scroll', category: 'Components', element: <InfiniteScrollDemo /> },
+    { key: 'install-tabs', category: 'Components', element: <InstallTabsDemo /> },
 ]
