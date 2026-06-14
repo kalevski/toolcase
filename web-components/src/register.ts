@@ -165,6 +165,7 @@ import { FileDropzone } from './FileDropzone'
 import { FileTags } from './FileTags'
 import { FormWizard } from './FormWizard'
 import { GameShowcaseCard } from './GameShowcaseCard'
+import { GithubStarsCard } from './GithubStarsCard'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -339,4 +340,5 @@ export function register(): void {
     customElements.define('tc-file-tags', FileTags)
     customElements.define('tc-form-wizard', FormWizard)
     customElements.define('tc-game-showcase-card', GameShowcaseCard)
+    customElements.define('tc-github-stars-card', GithubStarsCard)
 }

@@ -157,6 +157,7 @@ import FileDropzoneDemo from './FileDropzoneDemo'
 import FileTagsDemo from './FileTagsDemo'
 import FormWizardDemo from './FormWizardDemo'
 import GameShowcaseCardDemo from './GameShowcaseCardDemo'
+import GithubStarsCardDemo from './GithubStarsCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -334,4 +335,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'file-tags', category: 'Forms', element: <FileTagsDemo /> },
     { key: 'form-wizard', category: 'Forms', element: <FormWizardDemo /> },
     { key: 'game-showcase-card', category: 'Components', element: <GameShowcaseCardDemo /> },
+    { key: 'github-stars-card', category: 'Components', element: <GithubStarsCardDemo /> },
 ]

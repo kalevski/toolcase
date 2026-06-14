@@ -1,0 +1,266 @@
+// tc-github-stars-card — GitHub repository card showing stars, forks, contributors, version, and a CTA.
+// All cosmetics flow through --bs-github-stars-card-* custom properties backed by --tc-* tokens.
+// Sharp corners by design mandate; no decorative color (status color only on error state).
+
+@use '../foundation/tokens' as *;
+
+tc-github-stars-card {
+    // Card surface
+    --bs-github-stars-card-bg: var(--tc-surface);
+    --bs-github-stars-card-border: 1px solid var(--tc-border);
+    --bs-github-stars-card-shadow: var(--tc-shadow-sm);
+    --bs-github-stars-card-border-radius: 0;
+
+    // Header
+    --bs-github-stars-card-head-padding: 0.875rem 1rem 0.75rem;
+    --bs-github-stars-card-head-gap: 0.5rem;
+    --bs-github-stars-card-gh-icon-size: 1rem;
+    --bs-github-stars-card-gh-icon-color: var(--tc-text-muted);
+    --bs-github-stars-card-slug-color: var(--tc-text);
+    --bs-github-stars-card-slug-font-size: 0.875rem;
+
+    // Stats row
+    --bs-github-stars-card-stats-divider: 1px solid var(--tc-border);
+    --bs-github-stars-card-stat-padding: 0.625rem 1rem;
+    --bs-github-stars-card-stat-icon-size: 0.875rem;
+    --bs-github-stars-card-stat-icon-color: var(--tc-text-muted);
+    --bs-github-stars-card-stat-value-color: var(--tc-text);
+    --bs-github-stars-card-stat-value-font-size: 0.9375rem;
+    --bs-github-stars-card-stat-label-color: var(--tc-text-muted);
+    --bs-github-stars-card-stat-label-font-size: 0.6875rem;
+
+    // CTA
+    --bs-github-stars-card-cta-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-github-stars-card-cta-color: #fff;
+    --bs-github-stars-card-cta-font-size: 0.875rem;
+    --bs-github-stars-card-cta-padding: 0.625rem 1rem;
+    --bs-github-stars-card-cta-hover-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+
+    // Error state
+    --bs-github-stars-card-error-color: var(--tc-danger);
+    --bs-github-stars-card-error-font-size: 0.8125rem;
+
+    // Skeleton
+    --bs-github-stars-card-skeleton-bg: var(--tc-surface-muted);
+    --bs-github-stars-card-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// ── Card wrapper ──────────────────────────────────────────────────────────────
+
+.tc-github-stars-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-github-stars-card-bg);
+    border: var(--bs-github-stars-card-border);
+    box-shadow: var(--bs-github-stars-card-shadow);
+    border-radius: var(--bs-github-stars-card-border-radius);
+    overflow: hidden;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.tc-github-stars-card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-github-stars-card-head-gap);
+    padding: var(--bs-github-stars-card-head-padding);
+    border-bottom: var(--bs-github-stars-card-stats-divider);
+}
+
+.tc-github-stars-card-gh-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: var(--bs-github-stars-card-gh-icon-size);
+    height: var(--bs-github-stars-card-gh-icon-size);
+    color: var(--bs-github-stars-card-gh-icon-color);
+
+    svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+.tc-github-stars-card-slug {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-github-stars-card-slug-font-size);
+    font-weight: 500;
+    color: var(--bs-github-stars-card-slug-color);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+
+    &:hover {
+        text-decoration: underline;
+        color: var(--bs-github-stars-card-slug-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Stats row ─────────────────────────────────────────────────────────────────
+
+.tc-github-stars-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.tc-github-stars-card-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1875rem;
+    flex: 1 0 auto;
+    padding: var(--bs-github-stars-card-stat-padding);
+    min-width: 4rem;
+
+    // Hairline separator between cells (not before the first one)
+    + .tc-github-stars-card-stat {
+        border-left: var(--bs-github-stars-card-stats-divider);
+    }
+}
+
+.tc-github-stars-card-stat-icon {
+    display: inline-flex;
+    width: var(--bs-github-stars-card-stat-icon-size);
+    height: var(--bs-github-stars-card-stat-icon-size);
+    color: var(--bs-github-stars-card-stat-icon-color);
+    flex-shrink: 0;
+
+    svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+.tc-github-stars-card-stat-value {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-github-stars-card-stat-value-font-size);
+    font-weight: 600;
+    color: var(--bs-github-stars-card-stat-value-color);
+    line-height: 1.2;
+    text-align: center;
+}
+
+.tc-github-stars-card-version {
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.tc-github-stars-card-stat-label {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-github-stars-card-stat-label-font-size);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-github-stars-card-stat-label-color);
+    text-align: center;
+}
+
+// ── Error state ───────────────────────────────────────────────────────────────
+
+.tc-github-stars-card-error {
+    padding: 0.5rem 1rem;
+    font-size: var(--bs-github-stars-card-error-font-size);
+    color: var(--bs-github-stars-card-error-color);
+    border-top: var(--bs-github-stars-card-stats-divider);
+}
+
+// ── Footer / CTA ──────────────────────────────────────────────────────────────
+
+.tc-github-stars-card-footer {
+    margin-top: auto;
+    border-top: var(--bs-github-stars-card-stats-divider);
+}
+
+.tc-github-stars-card-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: var(--bs-github-stars-card-cta-padding);
+    background: var(--bs-github-stars-card-cta-bg);
+    color: var(--bs-github-stars-card-cta-color);
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: var(--bs-github-stars-card-cta-font-size);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    text-decoration: none;
+    border-radius: 0;
+    transition: transform var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+    cursor: pointer;
+
+    &:hover {
+        color: var(--bs-github-stars-card-cta-color);
+        transform: translateY(-1px);
+        box-shadow: var(--bs-github-stars-card-cta-hover-shadow);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-accent);
+        outline-offset: -2px;
+        color: var(--bs-github-stars-card-cta-color);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-github-stars-card-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-github-stars-card-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-github-stars-card-skeleton-bg) 25%,
+        var(--bs-github-stars-card-skeleton-shimmer) 50%,
+        var(--bs-github-stars-card-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-github-stars-card-shimmer 1.5s infinite linear;
+}
+
+.tc-github-stars-card-skeleton {
+    @extend %tc-github-stars-card-shimmer;
+    display: block;
+    border-radius: 0;
+
+    &--slug {
+        width: 8rem;
+        height: 0.875rem;
+    }
+
+    &--stat {
+        height: 3.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-github-stars-card-skeleton {
+        animation: none;
+        background: var(--bs-github-stars-card-skeleton-bg);
+    }
+}
