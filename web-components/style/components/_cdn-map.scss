@@ -1,0 +1,118 @@
+// tc-cdn-map — grid-backed surface with positioned CDN node markers.
+// Markers are circles (border-radius: 50%); everything else is sharp (border-radius: 0).
+// Primary nodes use --tc-app-accent (slate ink); accent nodes use --tc-accent (cyan, rare).
+// All cosmetics flow through --bs-cdn-map-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-cdn-map {
+    --bs-cdn-map-surface: var(--tc-surface);
+    --bs-cdn-map-border-color: var(--tc-border);
+    --bs-cdn-map-grid-color: var(--tc-border);
+    --bs-cdn-map-grid-size: 28px;
+    --bs-cdn-map-primary-color: var(--tc-app-accent);
+    --bs-cdn-map-accent-color: var(--tc-accent);
+    --bs-cdn-map-label-color: var(--tc-text-muted);
+    --bs-cdn-map-label-font-size: 0.7rem;
+    --bs-cdn-map-node-size: 10px;
+    --bs-cdn-map-glow-spread: 20px;
+
+    position: relative;
+    background: var(--bs-cdn-map-surface);
+    border: 1px solid var(--bs-cdn-map-border-color);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-cdn-map {
+    &__grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(var(--bs-cdn-map-grid-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--bs-cdn-map-grid-color) 1px, transparent 1px);
+        background-size: var(--bs-cdn-map-grid-size) var(--bs-cdn-map-grid-size);
+        opacity: 0.2;
+        pointer-events: none;
+    }
+
+    // Each node is absolutely positioned on the map surface and centered on its coordinates.
+    // Flex column stacks the dot above the optional label.
+    &__node {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    // The visible dot — always a circle (border-radius: 50%)
+    &__node-dot {
+        display: block;
+        width: var(--bs-cdn-map-node-size);
+        height: var(--bs-cdn-map-node-size);
+        border-radius: 50%;
+        flex-shrink: 0;
+        position: relative;
+
+        // Glow ring is a pseudo-element centered on the dot itself
+        &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: calc(var(--bs-cdn-map-node-size) + var(--bs-cdn-map-glow-spread));
+            height: calc(var(--bs-cdn-map-node-size) + var(--bs-cdn-map-glow-spread));
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .is-primary & {
+            background: var(--bs-cdn-map-primary-color);
+
+            &::before {
+                background: radial-gradient(circle, rgba(30, 41, 59, 0.14) 0%, transparent 70%);
+            }
+        }
+
+        .is-accent & {
+            background: var(--bs-cdn-map-accent-color);
+
+            &::before {
+                background: radial-gradient(circle, rgba(6, 182, 212, 0.24) 0%, transparent 70%);
+                animation: tc-cdn-map-pulse 2.4s ease-in-out infinite;
+            }
+        }
+    }
+
+    // Mono micro-label below the dot
+    &__node-label {
+        font-family: var(--bs-font-monospace, monospace);
+        font-size: var(--bs-cdn-map-label-font-size);
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bs-cdn-map-label-color);
+        white-space: nowrap;
+        line-height: 1;
+    }
+}
+
+@keyframes tc-cdn-map-pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.8);
+        opacity: 0.1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-cdn-map__node-dot::before {
+        animation: none;
+    }
+}

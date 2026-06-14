@@ -132,6 +132,7 @@ import { ApiReferenceTable } from './ApiReferenceTable'
 import { Banner } from './Banner'
 import { Build } from './Build'
 import { CardOptions } from './CardOptions'
+import { CdnMap } from './CdnMap'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -273,4 +274,5 @@ export function register(): void {
     customElements.define('tc-banner', Banner)
     customElements.define('tc-build', Build)
     customElements.define('tc-card-options', CardOptions)
+    customElements.define('tc-cdn-map', CdnMap)
 }

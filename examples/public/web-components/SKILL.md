@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -72,6 +72,7 @@ After `register()` you can author markup directly:
   - [tc-asset-row-list](#tc-asset-row-list)
   - [tc-brief-card](#tc-brief-card)
   - [tc-bundle-bar](#tc-bundle-bar)
+  - [tc-cdn-map](#tc-cdn-map)
   - [tc-callout-quote](#tc-callout-quote)
   - [tc-chart-container](#tc-chart-container)
   - [tc-sparkline](#tc-sparkline)
@@ -4540,6 +4541,58 @@ The segment track carries `role="progressbar"` with `aria-valuenow` (filled coun
     <strong slot="name">Custom name</strong>
     <em slot="meta">slot meta</em>
 </tc-bundle-bar>
+```
+
+---
+
+### tc-cdn-map
+
+Grid-backed surface with positioned CDN node markers. Primary nodes use the slate ink accent (`--tc-app-accent`); accent nodes use the rare cyan `--tc-accent` for highlight PoPs. Supports an accessible `aria-label` summarising the node distribution and per-node `aria-label` attributes. No slot children — set nodes via the JS `nodes` property.
+
+**Tag:** `tc-cdn-map`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `height` | `number \| string` | `360` | Height of the map surface. A bare integer is treated as pixels (`360` → `360px`). Any CSS length string is used directly (`"50vh"`, `"240px"`). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `nodes` | `CdnMapNode[]` | Array of node descriptors rendered as positioned markers. Each node has `top: string`, `left: string` (percentage or CSS position values), optional `label?: string`, and optional `variant?: 'primary' \| 'accent'` (defaults to primary). Setting this property triggers a re-render. |
+
+**`CdnMapNode` shape**
+
+```ts
+interface CdnMapNode {
+  top: string        // CSS top (e.g. "30%", "80px")
+  left: string       // CSS left (e.g. "55%", "120px")
+  label?: string     // Optional visible label (mono micro-label) and aria-label
+  variant?: 'primary' | 'accent'  // Default: 'primary'
+}
+```
+
+**Events**
+
+None. `tc-cdn-map` is a purely presentational element.
+
+**Slots**
+
+None. The component owns its surface and all marker rendering.
+
+**Example**
+
+```html
+<tc-cdn-map id="map" height="240"></tc-cdn-map>
+<script>
+  document.getElementById('map').nodes = [
+    { top: '20%', left: '15%', variant: 'primary', label: 'NYC' },
+    { top: '35%', left: '55%', variant: 'accent',  label: 'AMS' },
+    { top: '60%', left: '30%', variant: 'primary', label: 'LAX' },
+  ]
+</script>
 ```
 
 ---
