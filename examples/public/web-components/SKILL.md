@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardContent, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Brand, BriefCard, BundleBar, CalloutQuote, ChartContainer, Sparkline, TrendIndicator, LeaderboardTrend, CodeLabelCell, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EmptyState, GoodFirstIssues, HeroStatsBar, Heading, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, Text, VisuallyHidden), navigation (Breadcrumb, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (Modal, Offcanvas, Popover, Toast, Tooltip), and forms (Check, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, Option, Radio, Range, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -38,6 +38,7 @@ After `register()` you can author markup directly:
   - [tc-action-items](#tc-action-items)
   - [tc-action-row-list](#tc-action-row-list)
   - [tc-alert](#tc-alert)
+  - [tc-announcement-bar](#tc-announcement-bar)
   - [tc-avatar](#tc-avatar)
   - [tc-badge](#tc-badge)
   - [tc-badge-row](#tc-badge-row)
@@ -553,6 +554,60 @@ Contextual feedback message.
 
 ```html
 <tc-alert variant="success" dismissible>Operation completed.</tc-alert>
+```
+
+---
+
+### tc-announcement-bar
+
+Persistent announcement bar with optional CTA link, leading icon, and localStorage-backed dismissal. Emits `tc-dismiss` when closed.
+
+**Tag:** `tc-announcement-bar`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `variant` | `info\|success\|warning\|announce` | `info` | Color/tone variant |
+| `cta-label` | string | — | CTA link text. Rendered only when `cta-href` is also set. |
+| `cta-href` | string | — | CTA link URL. Rendered only when `cta-label` is also set. |
+| `dismissible` | boolean | false | Show a close button. Clicking it hides the bar and fires `tc-dismiss`. |
+| `persist-dismiss-key` | string | — | localStorage key. On connect, if the key is already stored as `"dismissed"`, the bar hides immediately. Clicking close writes the flag so dismissal persists across reloads. |
+| `icon-name` | string | — | Kebab-case lucide icon name (e.g. `"info"`, `"bell"`). Falls back to a `slot="icon"` child when both are provided. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `onDismiss` | `(() => void) \| null` | Optional callback fired alongside the `tc-dismiss` event when the bar is dismissed. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-dismiss` | — | Fired (bubbles, composed) when the close button is clicked. |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | Bar message text / HTML. |
+| `icon` | Optional leading icon element. Overrides `icon-name` when present. |
+
+```html
+<!-- Minimal -->
+<tc-announcement-bar variant="info">New docs are available.</tc-announcement-bar>
+
+<!-- With icon and CTA -->
+<tc-announcement-bar variant="announce" icon-name="megaphone"
+  cta-label="Learn more" cta-href="/changelog">
+  Toolcase v3 is now open-source.
+</tc-announcement-bar>
+
+<!-- Dismissible with persistent storage -->
+<tc-announcement-bar variant="warning" dismissible persist-dismiss-key="my-app-announcement">
+  Maintenance window on Sunday 02:00 UTC.
+</tc-announcement-bar>
 ```
 
 ---

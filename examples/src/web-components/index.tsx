@@ -8,6 +8,7 @@ import RowDemo from './RowDemo'
 import ColDemo from './ColDemo'
 import AccordionDemo from './AccordionDemo'
 import AlertDemo from './AlertDemo'
+import AnnouncementBarDemo from './AnnouncementBarDemo'
 import BadgeDemo from './BadgeDemo'
 import BrandDemo from './BrandDemo'
 import BadgeRowDemo from './BadgeRowDemo'
@@ -148,6 +149,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'col', category: 'Layout', element: <ColDemo /> },
     { key: 'accordion', category: 'Components', element: <AccordionDemo /> },
     { key: 'alert', category: 'Components', element: <AlertDemo /> },
+    { key: 'announcement-bar', category: 'Components', element: <AnnouncementBarDemo /> },
     { key: 'badge', category: 'Components', element: <BadgeDemo /> },
     { key: 'brand', category: 'Content', element: <BrandDemo /> },
     { key: 'badge-row', category: 'Components', element: <BadgeRowDemo /> },

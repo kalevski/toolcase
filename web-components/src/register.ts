@@ -10,6 +10,7 @@ import { Col } from './Col'
 import { Accordion } from './Accordion'
 import { AccordionItem } from './AccordionItem'
 import { Alert } from './Alert'
+import { AnnouncementBar } from './AnnouncementBar'
 import { Badge } from './Badge'
 import { BadgeRow } from './BadgeRow'
 import { Breadcrumb } from './Breadcrumb'
@@ -144,6 +145,7 @@ export function register(): void {
     customElements.define('tc-accordion', Accordion)
     customElements.define('tc-accordion-item', AccordionItem)
     customElements.define('tc-alert', Alert)
+    customElements.define('tc-announcement-bar', AnnouncementBar)
     customElements.define('tc-badge', Badge)
     customElements.define('tc-badge-row', BadgeRow)
     customElements.define('tc-breadcrumb', Breadcrumb)
