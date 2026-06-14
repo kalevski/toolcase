@@ -153,6 +153,7 @@ import { DashboardLayout } from './DashboardLayout'
 import { DatePicker } from './DatePicker'
 import { DiffViewer } from './DiffViewer'
 import { Drawer } from './Drawer'
+import { EarlySignupForm } from './EarlySignupForm'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -315,4 +316,5 @@ export function register(): void {
     customElements.define('tc-date-picker', DatePicker)
     customElements.define('tc-diff-viewer', DiffViewer)
     customElements.define('tc-drawer', Drawer)
+    customElements.define('tc-early-signup-form', EarlySignupForm)
 }

@@ -1,0 +1,358 @@
+// tc-early-signup-form — email signup panel with a benefits list, inline
+// validation, and a confirmation success state. Light variant on --tc-surface
+// with a 1px --tc-border hairline; dark variant on --tc-ink with white text.
+// All cosmetics flow through --bs-early-signup-form-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Host-level custom property declarations ───────────────────────────────────
+
+tc-early-signup-form {
+    // Light (default) surface
+    --bs-early-signup-form-bg: var(--tc-surface);
+    --bs-early-signup-form-border: 1px solid var(--tc-border);
+    --bs-early-signup-form-color: var(--tc-text);
+    --bs-early-signup-form-muted-color: var(--tc-text-muted);
+    --bs-early-signup-form-eyebrow-color: var(--tc-text-faint);
+    --bs-early-signup-form-input-bg: var(--tc-surface);
+    --bs-early-signup-form-input-color: var(--tc-text);
+    --bs-early-signup-form-input-border: var(--tc-border-strong);
+    --bs-early-signup-form-input-focus-ring: var(--tc-focus-ring);
+    --bs-early-signup-form-input-placeholder-color: var(--tc-text-faint);
+    --bs-early-signup-form-submit-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-early-signup-form-submit-color: #fff;
+    --bs-early-signup-form-submit-border: var(--tc-app-accent);
+    --bs-early-signup-form-check-color: var(--tc-success);
+    --bs-early-signup-form-error-color: var(--tc-danger);
+    --bs-early-signup-form-success-color: var(--tc-success);
+    --bs-early-signup-form-reset-color: var(--tc-text-muted);
+    --bs-early-signup-form-reset-hover-color: var(--tc-text);
+    --bs-early-signup-form-padding: 2rem;
+    --bs-early-signup-form-gap: 1.5rem;
+    --bs-early-signup-form-inner-gap: 1.25rem;
+}
+
+// ── Dark variant overrides ────────────────────────────────────────────────────
+
+tc-early-signup-form.tc-early-signup-form--dark {
+    --bs-early-signup-form-bg: var(--tc-ink);
+    --bs-early-signup-form-border: 1px solid rgba(255, 255, 255, 0.1);
+    --bs-early-signup-form-color: #fff;
+    --bs-early-signup-form-muted-color: rgba(255, 255, 255, 0.65);
+    --bs-early-signup-form-eyebrow-color: rgba(255, 255, 255, 0.45);
+    --bs-early-signup-form-input-bg: rgba(255, 255, 255, 0.06);
+    --bs-early-signup-form-input-color: #fff;
+    --bs-early-signup-form-input-border: rgba(255, 255, 255, 0.25);
+    --bs-early-signup-form-input-placeholder-color: rgba(255, 255, 255, 0.35);
+    --bs-early-signup-form-check-color: #34d399;
+    --bs-early-signup-form-success-color: #34d399;
+    --bs-early-signup-form-reset-color: rgba(255, 255, 255, 0.45);
+    --bs-early-signup-form-reset-hover-color: rgba(255, 255, 255, 0.85);
+}
+
+// ── Outer panel ───────────────────────────────────────────────────────────────
+
+.tc-early-signup-form {
+    background: var(--bs-early-signup-form-bg);
+    border: var(--bs-early-signup-form-border);
+    border-radius: 0;
+    color: var(--bs-early-signup-form-color);
+}
+
+// ── Two-column inner layout ───────────────────────────────────────────────────
+
+.tc-early-signup-form__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-early-signup-form-gap);
+    padding: var(--bs-early-signup-form-padding);
+
+    @include media-up(lg) {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 3rem;
+    }
+}
+
+// ── Intro column (eyebrow + title + subtitle + benefits) ──────────────────────
+
+.tc-early-signup-form__intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-early-signup-form-inner-gap);
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+// Eyebrow — monospace micro-label, uppercase, spaced
+.tc-early-signup-form__eyebrow {
+    display: block;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bs-early-signup-form-eyebrow-color);
+    line-height: 1.4;
+}
+
+.tc-early-signup-form__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-early-signup-form-color);
+}
+
+.tc-early-signup-form__subtitle {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--bs-early-signup-form-muted-color);
+}
+
+// Benefits list
+.tc-early-signup-form__benefits {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-early-signup-form__benefit {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.tc-early-signup-form__benefit-icon {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+    color: var(--bs-early-signup-form-check-color);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        display: block;
+    }
+}
+
+.tc-early-signup-form__benefit-text {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--bs-early-signup-form-muted-color);
+}
+
+// ── Form column ───────────────────────────────────────────────────────────────
+
+.tc-early-signup-form__form-area {
+    flex: 0 1 380px;
+    min-width: 0;
+    width: 100%;
+
+    @include media-up(lg) {
+        width: auto;
+    }
+}
+
+.tc-early-signup-form__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+// Email input
+.tc-early-signup-form__input {
+    display: block;
+    width: 100%;
+    padding: 0.5625rem 0.875rem;
+    font-family: inherit;
+    font-size: 0.925rem;
+    line-height: 1.6;
+    color: var(--bs-early-signup-form-input-color);
+    background-color: var(--bs-early-signup-form-input-bg);
+    border: 1px solid var(--bs-early-signup-form-input-border);
+    border-radius: 0;
+    outline: none;
+    transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+
+    &::placeholder {
+        color: var(--bs-early-signup-form-input-placeholder-color);
+    }
+
+    &:focus {
+        border-color: var(--tc-app-accent);
+        box-shadow: var(--bs-early-signup-form-input-focus-ring);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    // 44px coarse touch target
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// Validation error — uses --tc-danger (status-only token)
+.tc-early-signup-form__error {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--bs-early-signup-form-error-color);
+    min-height: 0;
+    transition: opacity var(--tc-transition-fast);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Submit button — primary ink-gradient, hover lift
+.tc-early-signup-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-family: inherit;
+    font-size: 0.925rem;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: 0.025em;
+    color: var(--bs-early-signup-form-submit-color);
+    background: var(--bs-early-signup-form-submit-bg);
+    border: 1px solid var(--bs-early-signup-form-submit-border);
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        transform var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    &:disabled {
+        opacity: 0.65;
+        pointer-events: none;
+        transform: none;
+    }
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    // 44px coarse touch target
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// Helper text — mono micro-label under the button
+.tc-early-signup-form__helper {
+    margin: 0;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    color: var(--bs-early-signup-form-muted-color);
+}
+
+// ── Success state ─────────────────────────────────────────────────────────────
+
+.tc-early-signup-form__success {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.tc-early-signup-form__success-icon {
+    display: block;
+    color: var(--bs-early-signup-form-success-color);
+
+    svg {
+        width: 2rem;
+        height: 2rem;
+        display: block;
+    }
+}
+
+.tc-early-signup-form__success-title {
+    display: block;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--bs-early-signup-form-color);
+    line-height: 1.3;
+}
+
+.tc-early-signup-form__success-message {
+    display: block;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--bs-early-signup-form-muted-color);
+
+    code {
+        font-family: var(--bs-font-monospace);
+        font-size: 0.875em;
+    }
+}
+
+// "Use a different email" reset link-button
+.tc-early-signup-form__reset {
+    display: inline;
+    padding: 0;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-early-signup-form-reset-color);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    transition: color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-early-signup-form-reset-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-early-signup-form__input,
+    .tc-early-signup-form__submit,
+    .tc-early-signup-form__reset {
+        transition: none;
+    }
+
+    .tc-early-signup-form__submit:hover:not(:disabled) {
+        transform: none;
+        box-shadow: none;
+    }
+}

@@ -145,6 +145,7 @@ import SlicesCardDemo from './SlicesCardDemo'
 import DatePickerDemo from './DatePickerDemo'
 import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
+import EarlySignupFormDemo from './EarlySignupFormDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -310,4 +311,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'metric-card', category: 'Components', element: <MetricCardDemo /> },
     { key: 'slices-card', category: 'Components', element: <SlicesCardDemo /> },
     { key: 'diff-viewer', category: 'Components', element: <DiffViewerDemo /> },
+    { key: 'early-signup-form', category: 'Forms', element: <EarlySignupFormDemo /> },
 ]
