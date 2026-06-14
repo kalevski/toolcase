@@ -139,6 +139,7 @@ import { Chip } from './Chip'
 import { ChipGroup } from './ChipGroup'
 import { CodeSnippet } from './CodeSnippet'
 import { ColorPicker } from './ColorPicker'
+import { CommandReference } from './CommandReference'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -287,4 +288,5 @@ export function register(): void {
     customElements.define('tc-chip-group', ChipGroup)
     customElements.define('tc-code-snippet', CodeSnippet)
     customElements.define('tc-color-picker', ColorPicker)
+    customElements.define('tc-command-reference', CommandReference)
 }
