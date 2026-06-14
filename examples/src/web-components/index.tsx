@@ -164,6 +164,7 @@ import HeroDemo from './HeroDemo'
 import ImageDemo from './ImageDemo'
 import InfiniteScrollDemo from './InfiniteScrollDemo'
 import InstallTabsDemo from './InstallTabsDemo'
+import LeaderboardDemo from './LeaderboardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -278,6 +279,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'feature-card', category: 'Components', element: <FeatureCardDemo /> },
     { key: 'good-first-issues', category: 'Components', element: <GoodFirstIssuesDemo /> },
     { key: 'hero-stats-bar', category: 'Components', element: <HeroStatsBarDemo /> },
+    { key: 'leaderboard', category: 'Components', element: <LeaderboardDemo /> },
     { key: 'leaderboard-trend', category: 'Components', element: <LeaderboardTrendDemo /> },
     { key: 'linked-providers-card', category: 'Components', element: <LinkedProvidersCardDemo /> },
     { key: 'logo-cloud', category: 'Content', element: <LogoCloudDemo /> },
