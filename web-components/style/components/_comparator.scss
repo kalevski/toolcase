@@ -1,0 +1,315 @@
+// tc-comparator — side-by-side technology comparison table with auto winner detection.
+// All cosmetics flow through --bs-comparator-* custom properties backed by --tc-* tokens.
+// Design rails: sharp corners, slate neutrals, 1px hairlines, status color for
+// check/x indicators and winner highlight only. No shadows.
+
+@use '../foundation/tokens' as *;
+
+tc-comparator {
+    // ── Layout ──────────────────────────────────────────────────────────────
+    --bs-comparator-border: 1px solid var(--tc-border);
+    --bs-comparator-inner-border: 1px solid var(--tc-slate-100);
+    --bs-comparator-bg: var(--tc-surface);
+
+    // ── Header ──────────────────────────────────────────────────────────────
+    --bs-comparator-header-bg: var(--tc-surface-muted);
+    --bs-comparator-header-padding-y: 0.875rem;
+    --bs-comparator-header-padding-x: 1.25rem;
+    --bs-comparator-title-font-size: 1rem;
+    --bs-comparator-title-font-weight: 600;
+    --bs-comparator-title-color: var(--tc-text);
+    --bs-comparator-desc-font-size: 0.875rem;
+    --bs-comparator-desc-color: var(--tc-text-muted);
+
+    // ── Tech header row ──────────────────────────────────────────────────────
+    --bs-comparator-tech-head-bg: var(--tc-surface-muted);
+    --bs-comparator-tech-head-padding-y: 0.75rem;
+    --bs-comparator-tech-head-padding-x: 1rem;
+    --bs-comparator-tech-name-font-size: 0.9375rem;
+    --bs-comparator-tech-name-font-weight: 600;
+    --bs-comparator-tech-name-color: var(--tc-text);
+    --bs-comparator-tech-label-font-size: 0.6875rem;
+    --bs-comparator-tech-label-color: var(--tc-text-muted);
+    --bs-comparator-tech-label-letter-spacing: 0.06em;
+    --bs-comparator-tech-icon-size: 1.125rem;
+    --bs-comparator-tech-icon-color: var(--tc-text-muted);
+
+    // ── Feature rows ─────────────────────────────────────────────────────────
+    --bs-comparator-row-padding-y: 0.625rem;
+    --bs-comparator-row-padding-x: 1rem;
+    --bs-comparator-feature-label-font-size: 0.875rem;
+    --bs-comparator-feature-label-color: var(--tc-text);
+    --bs-comparator-feature-desc-font-size: 0.75rem;
+    --bs-comparator-feature-desc-color: var(--tc-text-muted);
+
+    // ── Status indicators ────────────────────────────────────────────────────
+    --bs-comparator-indicator-size: 1rem;
+    --bs-comparator-yes-color: var(--tc-success);
+    --bs-comparator-no-color: var(--tc-text-faint);
+
+    // ── Winner highlight (restrained slate/accent tint) ───────────────────
+    --bs-comparator-winner-bg: var(--tc-surface-muted);
+    --bs-comparator-winner-indicator-yes-color: var(--tc-success);
+
+    // ── Summary row ──────────────────────────────────────────────────────────
+    --bs-comparator-summary-bg: var(--tc-surface-muted);
+    --bs-comparator-summary-border: 1px solid var(--tc-border);
+    --bs-comparator-tally-font-size: 0.6875rem;
+    --bs-comparator-tally-color: var(--tc-text-muted);
+    --bs-comparator-tally-letter-spacing: 0.06em;
+    --bs-comparator-tally-label-font-size: 0.6875rem;
+    --bs-comparator-tally-label-color: var(--tc-text-faint);
+    --bs-comparator-tally-label-letter-spacing: 0.06em;
+
+    // ── Skeleton ─────────────────────────────────────────────────────────────
+    --bs-comparator-skel-bg: var(--tc-surface-muted);
+    --bs-comparator-skel-cell-width: 2rem;
+    --bs-comparator-skel-label-width: 6rem;
+    --bs-comparator-skel-height: 0.75rem;
+    --bs-comparator-skel-radius: 2px;
+}
+
+// ── Outer frame ───────────────────────────────────────────────────────────────
+
+.tc-comparator {
+    border: var(--bs-comparator-border);
+    border-radius: 0;
+    background: var(--bs-comparator-bg);
+    overflow: hidden;
+}
+
+// ── Optional header (title + description) ─────────────────────────────────────
+
+.tc-comparator__header {
+    padding: var(--bs-comparator-header-padding-y) var(--bs-comparator-header-padding-x);
+    background: var(--bs-comparator-header-bg);
+    border-bottom: var(--bs-comparator-border);
+}
+
+.tc-comparator__title {
+    margin: 0;
+    font-size: var(--bs-comparator-title-font-size);
+    font-weight: var(--bs-comparator-title-font-weight);
+    color: var(--bs-comparator-title-color);
+    line-height: 1.35;
+}
+
+.tc-comparator__desc {
+    margin: 0.25rem 0 0;
+    font-size: var(--bs-comparator-desc-font-size);
+    color: var(--bs-comparator-desc-color);
+    line-height: 1.5;
+}
+
+// ── Table wrapper ─────────────────────────────────────────────────────────────
+
+.tc-comparator-table {
+    overflow-x: auto;
+}
+
+.tc-comparator__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+// ── Shared cell base ──────────────────────────────────────────────────────────
+
+.tc-comparator__cell {
+    padding: var(--bs-comparator-row-padding-y) var(--bs-comparator-row-padding-x);
+    vertical-align: middle;
+    border-bottom: var(--bs-comparator-inner-border);
+
+    // Column widths: equal left/right quarters, feature centre fills the rest
+    &.tc-comparator__cell--left,
+    &.tc-comparator__cell--right {
+        width: 28%;
+        text-align: center;
+    }
+
+    &.tc-comparator__cell--feature {
+        // feature label sits in the centre column
+        text-align: left;
+    }
+}
+
+// ── Tech header row ───────────────────────────────────────────────────────────
+
+.tc-comparator__head-row {
+    background: var(--bs-comparator-tech-head-bg);
+    border-bottom: var(--bs-comparator-border);
+
+    .tc-comparator__cell {
+        padding: var(--bs-comparator-tech-head-padding-y) var(--bs-comparator-tech-head-padding-x);
+        border-bottom: none;
+    }
+}
+
+.tc-comparator__tech {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.tc-comparator__tech-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-comparator-tech-icon-color);
+
+    svg {
+        width: var(--bs-comparator-tech-icon-size);
+        height: var(--bs-comparator-tech-icon-size);
+    }
+}
+
+.tc-comparator__tech-name {
+    font-size: var(--bs-comparator-tech-name-font-size);
+    font-weight: var(--bs-comparator-tech-name-font-weight);
+    color: var(--bs-comparator-tech-name-color);
+    font-family: var(--bs-body-font-family);
+    line-height: 1.25;
+}
+
+.tc-comparator__tech-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-comparator-tech-label-font-size);
+    color: var(--bs-comparator-tech-label-color);
+    letter-spacing: var(--bs-comparator-tech-label-letter-spacing);
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+// ── Feature rows ──────────────────────────────────────────────────────────────
+
+.tc-comparator__row + .tc-comparator__row .tc-comparator__cell {
+    border-top: none;
+}
+
+.tc-comparator__feature-label {
+    display: block;
+    font-size: var(--bs-comparator-feature-label-font-size);
+    color: var(--bs-comparator-feature-label-color);
+    line-height: 1.4;
+}
+
+.tc-comparator__feature-desc {
+    display: block;
+    margin-top: 0.125rem;
+    font-size: var(--bs-comparator-feature-desc-font-size);
+    color: var(--bs-comparator-feature-desc-color);
+    line-height: 1.4;
+}
+
+// ── Value renderers ───────────────────────────────────────────────────────────
+
+.tc-comparator__value {
+    font-size: var(--bs-comparator-feature-label-font-size);
+    color: var(--bs-comparator-feature-label-color);
+    font-family: var(--tc-font-mono);
+}
+
+.tc-comparator__indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        width: var(--bs-comparator-indicator-size);
+        height: var(--bs-comparator-indicator-size);
+    }
+}
+
+.tc-comparator__indicator--yes {
+    color: var(--bs-comparator-yes-color);
+}
+
+.tc-comparator__indicator--no {
+    color: var(--bs-comparator-no-color);
+}
+
+// ── Winner highlight ──────────────────────────────────────────────────────────
+
+.tc-comparator__cell--winner {
+    background: var(--bs-comparator-winner-bg);
+
+    .tc-comparator__indicator--yes {
+        color: var(--bs-comparator-winner-indicator-yes-color);
+    }
+}
+
+// ── Summary row ───────────────────────────────────────────────────────────────
+
+.tc-comparator__summary {
+    background: var(--bs-comparator-summary-bg);
+
+    .tc-comparator__cell {
+        border-top: var(--bs-comparator-summary-border);
+        border-bottom: none;
+    }
+}
+
+.tc-comparator__tally {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-comparator-tally-font-size);
+    font-weight: 600;
+    color: var(--bs-comparator-tally-color);
+    letter-spacing: var(--bs-comparator-tally-letter-spacing);
+    text-transform: uppercase;
+}
+
+.tc-comparator__tally-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-comparator-tally-label-font-size);
+    color: var(--bs-comparator-tally-label-color);
+    letter-spacing: var(--bs-comparator-tally-label-letter-spacing);
+    text-transform: uppercase;
+}
+
+// ── Screen-reader only helper (scoped to comparator) ─────────────────────────
+
+.tc-comparator .tc-comparator__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+// ── Loading skeleton rows ─────────────────────────────────────────────────────
+
+.tc-comparator__skel-cell,
+.tc-comparator__skel-label {
+    display: inline-block;
+    background: var(--bs-comparator-skel-bg);
+    border-radius: var(--bs-comparator-skel-radius);
+    height: var(--bs-comparator-skel-height);
+    animation: tc-comparator-pulse 1.5s ease-in-out infinite;
+}
+
+.tc-comparator__skel-cell {
+    width: var(--bs-comparator-skel-cell-width);
+}
+
+.tc-comparator__skel-label {
+    width: var(--bs-comparator-skel-label-width);
+}
+
+@keyframes tc-comparator-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-comparator__skel-cell,
+    .tc-comparator__skel-label {
+        animation: none;
+    }
+}
