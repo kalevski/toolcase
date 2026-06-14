@@ -138,6 +138,7 @@ import { Changelog } from './Changelog'
 import { Chip } from './Chip'
 import { ChipGroup } from './ChipGroup'
 import { CodeSnippet } from './CodeSnippet'
+import { ColorPicker } from './ColorPicker'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -285,4 +286,5 @@ export function register(): void {
     customElements.define('tc-chip', Chip)
     customElements.define('tc-chip-group', ChipGroup)
     customElements.define('tc-code-snippet', CodeSnippet)
+    customElements.define('tc-color-picker', ColorPicker)
 }

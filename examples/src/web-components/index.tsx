@@ -130,6 +130,7 @@ import ChangelogDemo from './ChangelogDemo'
 import ChipDemo from './ChipDemo'
 import ChipGroupDemo from './ChipGroupDemo'
 import CodeSnippetDemo from './CodeSnippetDemo'
+import ColorPickerDemo from './ColorPickerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -280,4 +281,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'chip', category: 'Forms', element: <ChipDemo /> },
     { key: 'chip-group', category: 'Forms', element: <ChipGroupDemo /> },
     { key: 'code-snippet', category: 'Components', element: <CodeSnippetDemo /> },
+    { key: 'color-picker', category: 'Forms', element: <ColorPickerDemo /> },
 ]
