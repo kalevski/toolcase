@@ -16,6 +16,7 @@ import { Alert } from './Alert'
 import { AnnouncementBar } from './AnnouncementBar'
 import { Badge } from './Badge'
 import { BadgeRow } from './BadgeRow'
+import { BarChart } from './BarChart'
 import { BenchmarkChart } from './BenchmarkChart'
 import { BitmapFontGenerator } from './BitmapFontGenerator'
 import { Breadcrumb } from './Breadcrumb'
@@ -229,6 +230,7 @@ export function register(): void {
     customElements.define('tc-badge', Badge)
     customElements.define('tc-badge-row', BadgeRow)
     customElements.define('tc-area-chart', AreaChart)
+    customElements.define('tc-bar-chart', BarChart)
     customElements.define('tc-benchmark-chart', BenchmarkChart)
     customElements.define('tc-bitmap-font-generator', BitmapFontGenerator)
     customElements.define('tc-breadcrumb', Breadcrumb)

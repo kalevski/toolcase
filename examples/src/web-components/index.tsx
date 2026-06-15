@@ -13,6 +13,7 @@ import BadgeDemo from './BadgeDemo'
 import BrandDemo from './BrandDemo'
 import BadgeRowDemo from './BadgeRowDemo'
 import AreaChartDemo from './AreaChartDemo'
+import BarChartDemo from './BarChartDemo'
 import BenchmarkChartDemo from './BenchmarkChartDemo'
 import BitmapFontGeneratorDemo from './BitmapFontGeneratorDemo'
 import BreadcrumbDemo from './BreadcrumbDemo'
@@ -235,6 +236,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'brand', category: 'Content', element: <BrandDemo /> },
     { key: 'badge-row', category: 'Components', element: <BadgeRowDemo /> },
     { key: 'area-chart', category: 'Components', element: <AreaChartDemo /> },
+    { key: 'bar-chart', category: 'Components', element: <BarChartDemo /> },
     { key: 'benchmark-chart', category: 'Components', element: <BenchmarkChartDemo /> },
     { key: 'bitmap-font-generator', category: 'Components', element: <BitmapFontGeneratorDemo /> },
     { key: 'button', category: 'Components', element: <ButtonDemo /> },

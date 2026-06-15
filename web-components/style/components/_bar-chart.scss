@@ -1,0 +1,238 @@
+// tc-bar-chart — SVG bar chart in vertical (columns) or horizontal (rows)
+// orientation, with category/value axis labels, an interactive tooltip, and
+// optional per-bar value labels. Slate neutrals carry it: the chart frame sits
+// on --tc-surface behind a 1px hairline; baseline/axis lines are faint slate
+// hairlines; category + value labels are mono micro-labels in --tc-text-muted.
+// Bar fills default to the slate ink ramp (--tc-app-accent) unless an item
+// supplies its own colour; the cyan --tc-accent is the one rare emphasis slot.
+// The tooltip is overlay tier — ink surface, white text, elevation shadow, a
+// 3px colored left stripe per the toast/tooltip motif. Sharp corners (radius 0)
+// on every bar, the frame, and the tooltip. No shadows on the flat chart
+// surface itself (only the overlay tooltip). Every cosmetic value flows through
+// a --bs-bar-chart-* custom property.
+
+tc-bar-chart {
+    // bar ramp — slate ink primary, one cyan emphasis, then down the slate ramp
+    --bs-bar-chart-series-1: var(--tc-app-accent);
+    --bs-bar-chart-series-2: var(--tc-accent);
+    --bs-bar-chart-series-3: var(--tc-slate-500);
+    --bs-bar-chart-series-4: var(--tc-slate-400);
+    --bs-bar-chart-series-5: var(--tc-slate-600);
+    --bs-bar-chart-series-6: var(--tc-slate-300);
+
+    --bs-bar-chart-bg: var(--tc-surface);
+    --bs-bar-chart-border: 1px solid var(--tc-border);
+    --bs-bar-chart-grid-color: var(--tc-slate-100);
+    --bs-bar-chart-axis-color: var(--tc-slate-200);
+    --bs-bar-chart-label-color: var(--tc-text-muted);
+    --bs-bar-chart-label-size: 11px;
+    --bs-bar-chart-value-color: var(--tc-text);
+    --bs-bar-chart-title-color: var(--tc-text);
+    --bs-bar-chart-subtitle-color: var(--tc-text-muted);
+
+    // bar state ladder
+    --bs-bar-chart-bar-opacity: 1;
+    --bs-bar-chart-bar-hover-opacity: 0.82;
+    --bs-bar-chart-focus-ring: var(--tc-focus-ring, var(--tc-accent));
+
+    --bs-bar-chart-tooltip-bg: var(--tc-ink);
+    --bs-bar-chart-tooltip-color: #fff;
+    --bs-bar-chart-tooltip-stripe-width: 3px;
+    --bs-bar-chart-tooltip-shadow: var(--tc-shadow-md);
+
+    --bs-bar-chart-skeleton-bg: var(--tc-surface-muted);
+
+    display: block;
+}
+
+.tc-bar-chart__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-bar-chart-bg);
+    border: var(--bs-bar-chart-border);
+    border-radius: 0;
+}
+
+// --- header ---
+.tc-bar-chart__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-bar-chart__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-bar-chart-title-color);
+}
+
+.tc-bar-chart__subtitle {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--bs-bar-chart-subtitle-color);
+}
+
+// --- plot ---
+.tc-bar-chart__plot {
+    position: relative;
+}
+
+.tc-bar-chart__svg {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    touch-action: none;
+}
+
+.tc-bar-chart__grid {
+    stroke: var(--bs-bar-chart-grid-color);
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.tc-bar-chart__axis {
+    stroke: var(--bs-bar-chart-axis-color);
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.tc-bar-chart__axis-label,
+.tc-bar-chart__cat-label {
+    fill: var(--bs-bar-chart-label-color);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-bar-chart-label-size);
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-bar-chart__value {
+    fill: var(--bs-bar-chart-value-color);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-bar-chart-label-size);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+// --- bars + state ladder ---
+.tc-bar-chart__bar {
+    cursor: pointer;
+    outline: none;
+}
+
+.tc-bar-chart__hit {
+    fill: transparent;
+}
+
+.tc-bar-chart__rect {
+    fill: var(--tc-bar-color, var(--bs-bar-chart-series-1));
+    fill-opacity: var(--bs-bar-chart-bar-opacity);
+    transition: fill-opacity 0.12s ease;
+}
+
+// hover = a subtle slate well/brighten over the whole bar group
+.tc-bar-chart__bar:hover .tc-bar-chart__rect {
+    fill-opacity: var(--bs-bar-chart-bar-hover-opacity);
+}
+
+// clickable bars show a visible focus ring on keyboard focus. SVG `outline`
+// renders inconsistently, so paint the ring as a stroke on the bar rect plus
+// an outline fallback on the hit rect for UAs that honour it.
+.tc-bar-chart__bar:focus-visible {
+    outline: none;
+}
+
+.tc-bar-chart__bar:focus-visible .tc-bar-chart__rect {
+    stroke: var(--bs-bar-chart-focus-ring);
+    stroke-width: 2;
+    paint-order: stroke;
+}
+
+.tc-bar-chart__bar:focus-visible .tc-bar-chart__hit {
+    outline: 2px solid var(--bs-bar-chart-focus-ring);
+    outline-offset: -1px;
+}
+
+// --- empty ---
+.tc-bar-chart__empty {
+    padding: 1.5rem 0;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    text-align: center;
+}
+
+// --- tooltip (overlay tier) ---
+.tc-bar-chart__tooltip {
+    position: absolute;
+    z-index: var(--tc-z-tooltip, 1070);
+    transform: translate(-50%, calc(-100% - 10px));
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    min-width: 0;
+    padding: 0.3125rem 0.5rem;
+    background: var(--bs-bar-chart-tooltip-bg);
+    color: var(--bs-bar-chart-tooltip-color);
+    border-radius: 0;
+    border-left: var(--bs-bar-chart-tooltip-stripe-width) solid var(--tc-bar-color, var(--tc-accent));
+    box-shadow: var(--bs-bar-chart-tooltip-shadow);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.tc-bar-chart__tooltip[hidden] {
+    display: none;
+}
+
+.tc-bar-chart__tooltip-name {
+    font-family: var(--tc-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.tc-bar-chart__tooltip-value {
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+// --- loading skeleton ---
+.tc-bar-chart__skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--bs-bar-chart-skeleton-bg) 25%,
+        var(--tc-surface-hover) 37%,
+        var(--bs-bar-chart-skeleton-bg) 63%
+    );
+    background-size: 200% 100%;
+    animation: tc-bar-chart-shimmer 1.4s ease infinite;
+}
+
+.tc-bar-chart__skeleton--title {
+    width: 40%;
+    height: 0.95rem;
+}
+
+.tc-bar-chart__skeleton--plot {
+    width: 100%;
+}
+
+@keyframes tc-bar-chart-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-bar-chart__skeleton {
+        animation: none;
+        background: var(--bs-bar-chart-skeleton-bg);
+    }
+
+    .tc-bar-chart__rect,
+    .tc-bar-chart__tooltip {
+        transition: none;
+    }
+}
