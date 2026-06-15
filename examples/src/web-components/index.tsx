@@ -185,6 +185,7 @@ import SingleCardSelectDemo from './SingleCardSelectDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
 import TagInputDemo from './TagInputDemo'
+import TerminalWindowDemo from './TerminalWindowDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -390,4 +391,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
     { key: 'table', category: 'Content', element: <TableDemo /> },
     { key: 'tag-input', category: 'Forms', element: <TagInputDemo /> },
+    { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
 ]
