@@ -187,6 +187,7 @@ import InstallTabsDemo from './InstallTabsDemo'
 import LeaderboardDemo from './LeaderboardDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
+import MarkdownEditorDemo from './MarkdownEditorDemo'
 import MarqueeDemo from './MarqueeDemo'
 import MultiCardSelectDemo from './MultiCardSelectDemo'
 import NewsletterSignupDemo from './NewsletterSignupDemo'
@@ -279,6 +280,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'scrollspy', category: 'Navigation', element: <ScrollspyDemo /> },
     { key: 'input', category: 'Forms', element: <InputDemo /> },
     { key: 'textarea', category: 'Forms', element: <TextareaDemo /> },
+    { key: 'markdown-editor', category: 'Forms', element: <MarkdownEditorDemo /> },
     { key: 'select', category: 'Forms', element: <SelectDemo /> },
     { key: 'check', category: 'Forms', element: <CheckDemo /> },
     { key: 'checkbox-group', category: 'Forms', element: <CheckboxGroupDemo /> },

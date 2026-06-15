@@ -197,6 +197,7 @@ import { LineChart } from './LineChart'
 import { PieChart } from './PieChart'
 import { LiveFeed } from './LiveFeed'
 import { Login } from './Login'
+import { MarkdownEditor } from './MarkdownEditor'
 import { Marquee } from './Marquee'
 import { MultiCardSelect } from './MultiCardSelect'
 import { NewsletterSignup } from './NewsletterSignup'
@@ -426,6 +427,7 @@ export function register(): void {
     customElements.define('tc-pie-chart', PieChart)
     customElements.define('tc-live-feed', LiveFeed)
     customElements.define('tc-login', Login)
+    customElements.define('tc-markdown-editor', MarkdownEditor)
     customElements.define('tc-marquee', Marquee)
     customElements.define('tc-multi-card-select', MultiCardSelect)
     customElements.define('tc-newsletter-signup', NewsletterSignup)
