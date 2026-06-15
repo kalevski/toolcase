@@ -12,6 +12,7 @@ import AnnouncementBarDemo from './AnnouncementBarDemo'
 import BadgeDemo from './BadgeDemo'
 import BrandDemo from './BrandDemo'
 import BadgeRowDemo from './BadgeRowDemo'
+import BenchmarkChartDemo from './BenchmarkChartDemo'
 import BreadcrumbDemo from './BreadcrumbDemo'
 import ButtonDemo from './ButtonDemo'
 import ButtonGroupDemo from './ButtonGroupDemo'
@@ -231,6 +232,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'badge', category: 'Components', element: <BadgeDemo /> },
     { key: 'brand', category: 'Content', element: <BrandDemo /> },
     { key: 'badge-row', category: 'Components', element: <BadgeRowDemo /> },
+    { key: 'benchmark-chart', category: 'Components', element: <BenchmarkChartDemo /> },
     { key: 'button', category: 'Components', element: <ButtonDemo /> },
     { key: 'button-group', category: 'Components', element: <ButtonGroupDemo /> },
     { key: 'card', category: 'Components', element: <CardDemo /> },

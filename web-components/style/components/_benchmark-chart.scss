@@ -1,0 +1,146 @@
+// tc-benchmark-chart — horizontal benchmark bar chart (SVG) comparing values
+// with leader highlighting and linear/log scale. Slate neutrals carry it:
+// muted track, slate-ink bar fill, the leader gets the one sanctioned emphasis
+// (a 135° slate-ink gradient). Sharp corners everywhere, hairline row
+// separators, machine-facing value numbers in JetBrains Mono. Every cosmetic
+// value flows through a --bs-benchmark-chart-* custom property.
+
+tc-benchmark-chart {
+    --bs-benchmark-chart-row-height: 40px;
+    --bs-benchmark-chart-track-bg: var(--tc-surface-muted);
+    --bs-benchmark-chart-bar-fill: var(--tc-app-accent);
+    --bs-benchmark-chart-leader-from: var(--tc-app-accent);
+    --bs-benchmark-chart-leader-to: #2b3a51;
+    --bs-benchmark-chart-sep-color: var(--tc-border);
+    --bs-benchmark-chart-label-color: var(--tc-text);
+    --bs-benchmark-chart-value-color: var(--tc-text);
+    --bs-benchmark-chart-unit-color: var(--tc-text-muted);
+    --bs-benchmark-chart-title-color: var(--tc-text);
+    --bs-benchmark-chart-caption-color: var(--tc-text-muted);
+    --bs-benchmark-chart-hover-bg: var(--tc-surface-muted);
+    --bs-benchmark-chart-label-size: 0.8125rem;
+    --bs-benchmark-chart-value-size: 0.78rem;
+
+    background: none;
+    border: none;
+}
+
+.tc-benchmark-chart__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-benchmark-chart__header {
+    display: flex;
+    align-items: baseline;
+}
+
+.tc-benchmark-chart__title,
+.tc-benchmark-chart__title-slot {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-benchmark-chart-title-color);
+}
+
+.tc-benchmark-chart__svg {
+    display: block;
+    width: 100%;
+    overflow: visible;
+}
+
+// --- rows ---
+.tc-benchmark-chart__row-bg {
+    fill: transparent;
+    transition: fill var(--tc-transition-fast);
+}
+
+.tc-benchmark-chart__track {
+    fill: var(--bs-benchmark-chart-track-bg);
+}
+
+.tc-benchmark-chart__fill {
+    // Per-bar color overrides the default slate-ink fill when provided.
+    fill: var(--bs-benchmark-chart-bar-color, var(--bs-benchmark-chart-bar-fill));
+    transition: width var(--tc-transition-base);
+}
+
+// Leader bar — the one sanctioned place for emphasis. The 135° slate-ink
+// gradient is applied as an inline `fill:url(#…)` style in markup so it beats
+// the base fill rule above; the gradient stops read from these tokens.
+.tc-benchmark-chart__leader-stop--from {
+    stop-color: var(--bs-benchmark-chart-leader-from);
+}
+
+.tc-benchmark-chart__leader-stop--to {
+    stop-color: var(--bs-benchmark-chart-leader-to);
+}
+
+.tc-benchmark-chart__sep {
+    stroke: var(--bs-benchmark-chart-sep-color);
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.tc-benchmark-chart__label {
+    fill: var(--bs-benchmark-chart-label-color);
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-benchmark-chart-label-size);
+}
+
+.tc-benchmark-chart__row--leader .tc-benchmark-chart__label {
+    font-weight: 600;
+}
+
+.tc-benchmark-chart__value {
+    fill: var(--bs-benchmark-chart-value-color);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-benchmark-chart-value-size);
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-benchmark-chart__unit {
+    fill: var(--bs-benchmark-chart-unit-color);
+}
+
+// --- interactive rows ---
+.tc-benchmark-chart__row[role='button'] {
+    cursor: pointer;
+}
+
+.tc-benchmark-chart__row[role='button']:hover .tc-benchmark-chart__row-bg {
+    fill: var(--bs-benchmark-chart-hover-bg);
+}
+
+.tc-benchmark-chart__row[role='button']:focus {
+    outline: none;
+}
+
+.tc-benchmark-chart__row[role='button']:focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+}
+
+// --- caption + empty ---
+.tc-benchmark-chart__caption {
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-benchmark-chart-caption-color);
+}
+
+.tc-benchmark-chart__empty {
+    padding: 1.25rem 0;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-benchmark-chart__fill {
+        transition: none;
+    }
+}
