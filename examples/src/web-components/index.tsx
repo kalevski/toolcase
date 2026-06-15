@@ -160,6 +160,7 @@ import SlicesCardDemo from './SlicesCardDemo'
 import DatePickerDemo from './DatePickerDemo'
 import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
+import LightboxDemo from './LightboxDemo'
 import CommandPaletteDemo from './CommandPaletteDemo'
 import EarlySignupFormDemo from './EarlySignupFormDemo'
 import EcosystemMapDemo from './EcosystemMapDemo'
@@ -390,6 +391,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'compatibility-matrix', category: 'Components', element: <CompatibilityMatrixDemo /> },
     { key: 'context-menu', category: 'Overlays & Feedback', element: <ContextMenuDemo /> },
     { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
+    { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
     { key: 'command-palette', category: 'Overlays & Feedback', element: <CommandPaletteDemo /> },
     { key: 'cool-nav', category: 'Navigation', element: <CoolNavDemo /> },
     { key: 'countdown-timer', category: 'Components', element: <CountdownTimerDemo /> },

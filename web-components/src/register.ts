@@ -191,6 +191,7 @@ import { JSONSchemaDef } from './JSONSchemaDef'
 import { InfiniteScroll } from './InfiniteScroll'
 import { InstallTabs } from './InstallTabs'
 import { Leaderboard } from './Leaderboard'
+import { Lightbox } from './Lightbox'
 import { LineChart } from './LineChart'
 import { PieChart } from './PieChart'
 import { LiveFeed } from './LiveFeed'
@@ -418,6 +419,7 @@ export function register(): void {
     customElements.define('tc-infinite-scroll', InfiniteScroll)
     customElements.define('tc-install-tabs', InstallTabs)
     customElements.define('tc-leaderboard', Leaderboard)
+    customElements.define('tc-lightbox', Lightbox)
     customElements.define('tc-line-chart', LineChart)
     customElements.define('tc-pie-chart', PieChart)
     customElements.define('tc-live-feed', LiveFeed)
