@@ -54,6 +54,7 @@ import RangeDemo from './RangeDemo'
 import FloatingLabelDemo from './FloatingLabelDemo'
 import InputGroupDemo from './InputGroupDemo'
 import FormDemo from './FormDemo'
+import FormInputDemo from './FormInputDemo'
 import DividerDemo from './DividerDemo'
 import HeadingDemo from './HeadingDemo'
 import HelperTextDemo from './HelperTextDemo'
@@ -287,6 +288,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'floating-label', category: 'Forms', element: <FloatingLabelDemo /> },
     { key: 'input-group', category: 'Forms', element: <InputGroupDemo /> },
     { key: 'form', category: 'Forms', element: <FormDemo /> },
+    { key: 'form-input', category: 'Forms', element: <FormInputDemo /> },
     { key: 'divider', category: 'Components', element: <DividerDemo /> },
     { key: 'heading', category: 'Content', element: <HeadingDemo /> },
     { key: 'helper-text', category: 'Forms', element: <HelperTextDemo /> },

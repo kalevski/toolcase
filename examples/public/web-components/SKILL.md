@@ -209,6 +209,7 @@ After `register()` you can author markup directly:
   - [tc-icon-picker](#tc-icon-picker)
   - [tc-floating-label](#tc-floating-label)
   - [tc-form](#tc-form)
+  - [tc-form-input](#tc-form-input)
   - [tc-helper-text](#tc-helper-text)
   - [tc-input](#tc-input)
   - [tc-input-group](#tc-input-group)
@@ -5664,6 +5665,64 @@ Form wrapper with HTML5 constraint validation.
     <tc-input label="Name" required></tc-input>
     <tc-button type="submit" variant="primary">Submit</tc-button>
 </tc-form>
+```
+
+---
+
+### tc-form-input
+
+Universal form-input dispatcher (port of react-components `FormInput`). The `type` attribute selects which native control to render, with built-in validation, a helper line, a danger-toned error line, and full ARIA wiring. Composes the shared form classes (`.form-control`, `.form-select`, `.form-check`, `.form-range`) so it stays self-contained. On every input/change it reads the control value, coerces it to the right JS type (boolean for checkbox/switch/single-radio, number for number/range, string otherwise), runs each `validate` function, computes the error message (preferring the `error` attribute, then a validator message, then `onErrorMessage`), toggles `is-invalid` + `aria-invalid` + `aria-describedby`, then fires `tc-change` and calls `onChange(value, hasError)`.
+
+**Tag:** `tc-form-input`
+
+**`type` values (18):** `text`, `email`, `password`, `number`, `tel`, `url`, `search`, `textarea`, `dropdown` (alias `select`), `checkbox`, `radio`, `switch`, `date`, `time`, `datetime`, `color`, `range`, `file`. `datetime` renders a native `datetime-local` input; `radio` renders a single boolean radio unless `options` are supplied, in which case it renders a radiogroup.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `type` | string | `text` | Which control to render (see list above) |
+| `label` | string | — | Field label; gets a required asterisk when `required` |
+| `help` / `helper` | string | — | Helper/hint text shown under the control |
+| `error` | string | — | Externally-forced error message (overrides validators) |
+| `name` | string | — | `name` applied to the inner control(s) |
+| `id` | string | — | Standard HTML `id` on the host element |
+| `placeholder` | string | — | Placeholder text (text controls; first option for dropdown) |
+| `disabled` | boolean | false | Disables the control and dims the field |
+| `required` | boolean | false | Participates in validation; sets `aria-required` |
+| `loading` | boolean | false | Renders a spinner placeholder and disables interaction |
+| `min` / `max` / `step` | string | — | Forwarded to number/range/date controls |
+| `rows` | string | — | Forwarded to the `textarea` control |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `unknown` | Current value (string/number/boolean by type). Setting re-seeds the control |
+| `defaultValue` | `unknown` | Seeds the control on first render when `value` is unset |
+| `validate` | `FormInputValidator \| FormInputValidator[]` | Each `(value) => true \| string \| { valid: boolean; message?: string }` — `true` is valid, a string is an error message |
+| `onErrorMessage` | `(result) => string` | Derives the display message from a validation result |
+| `onChange` | `((value: unknown, hasError: boolean) => void) \| null` | Optional callback fired alongside `tc-change` |
+| `options` | `{ value: string; label: string; disabled?: boolean }[]` | Options for `dropdown`/`radio` (also accepts slotted `<option>` children) |
+
+**Events:** `tc-change` with `{ detail: { value: unknown, hasError: boolean } }` — fired on input/change after validation.
+
+**Slots:** `<option>` children are accepted for `dropdown`/`radio` types when the `options` property is not set.
+
+```html
+<tc-form-input type="email" label="Email" help="We'll never share it." required></tc-form-input>
+<script>
+const el = document.querySelector('tc-form-input')
+el.validate = (v) => /.+@.+\..+/.test(String(v)) ? true : 'Enter a valid email'
+el.addEventListener('tc-change', (e) => console.log(e.detail.value, e.detail.hasError))
+
+// Dropdown via the options property
+const country = document.createElement('tc-form-input')
+country.type = 'dropdown'
+country.label = 'Country'
+country.options = [{ value: 'us', label: 'United States' }, { value: 'jp', label: 'Japan' }]
+document.body.append(country)
+</script>
 ```
 
 ---
