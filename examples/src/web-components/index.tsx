@@ -169,6 +169,7 @@ import FormWizardDemo from './FormWizardDemo'
 import GameShowcaseCardDemo from './GameShowcaseCardDemo'
 import GithubStarsCardDemo from './GithubStarsCardDemo'
 import GroupDemo from './GroupDemo'
+import HeatmapDemo from './HeatmapDemo'
 import HeroDemo from './HeroDemo'
 import ImageDemo from './ImageDemo'
 import InfiniteScrollDemo from './InfiniteScrollDemo'
@@ -397,6 +398,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'game-showcase-card', category: 'Components', element: <GameShowcaseCardDemo /> },
     { key: 'github-stars-card', category: 'Components', element: <GithubStarsCardDemo /> },
     { key: 'group', category: 'Components', element: <GroupDemo /> },
+    { key: 'heatmap', category: 'Components', element: <HeatmapDemo /> },
     { key: 'hero', category: 'Content', element: <HeroDemo /> },
     { key: 'image', category: 'Content', element: <ImageDemo /> },
     { key: 'infinite-scroll', category: 'Components', element: <InfiniteScrollDemo /> },
