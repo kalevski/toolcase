@@ -177,6 +177,7 @@ import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
 import RatingDemo from './RatingDemo'
 import ResizablePanelDemo from './ResizablePanelDemo'
+import RoadmapDemo from './RoadmapDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -304,6 +305,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'quick-start', category: 'Content', element: <QuickStartDemo /> },
     { key: 'page-footer', category: 'Content', element: <PageFooterDemo /> },
     { key: 'phase-grid', category: 'Content', element: <PhaseGridDemo /> },
+    { key: 'roadmap', category: 'Content', element: <RoadmapDemo /> },
     { key: 'pinned-feature-showcase', category: 'Content', element: <PinnedFeatureShowcaseDemo /> },
     { key: 'pipeline', category: 'Components', element: <PipelineDemo /> },
     { key: 'plugin-grid', category: 'Components', element: <PluginGridDemo /> },

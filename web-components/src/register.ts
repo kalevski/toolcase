@@ -185,6 +185,7 @@ import { RadioGroup } from './RadioGroup'
 import { RangeSlider } from './RangeSlider'
 import { Rating } from './Rating'
 import { ResizablePanel } from './ResizablePanel'
+import { Roadmap } from './Roadmap'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -379,4 +380,5 @@ export function register(): void {
     customElements.define('tc-range-slider', RangeSlider)
     customElements.define('tc-rating', Rating)
     customElements.define('tc-resizable-panel', ResizablePanel)
+    customElements.define('tc-roadmap', Roadmap)
 }
