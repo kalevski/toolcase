@@ -187,6 +187,7 @@ import UserPanelDemo from './UserPanelDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
+import AdvancedTableDemo from './AdvancedTableDemo'
 import TagInputDemo from './TagInputDemo'
 import TerminalWindowDemo from './TerminalWindowDemo'
 import TestimonialCarouselDemo from './TestimonialCarouselDemo'
@@ -402,6 +403,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
     { key: 'vertical-item-list', category: 'Navigation', element: <VerticalItemListDemo /> },
     { key: 'table', category: 'Content', element: <TableDemo /> },
+    { key: 'advanced-table', category: 'Content', element: <AdvancedTableDemo /> },
     { key: 'tag-input', category: 'Forms', element: <TagInputDemo /> },
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },

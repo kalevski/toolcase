@@ -1,0 +1,304 @@
+// tc-advanced-table — data table with a filter toolbar, sortable headers, a
+// translucent loading overlay, and a paginated footer. Composes the plain table
+// chrome of tc-table: white surface, 1px --tc-border outer frame, slate-100 inner
+// row hairlines, a faint --tc-surface-muted header cap. Sharp corners everywhere
+// (border-radius: 0). Mono (JetBrains) for the pagination summary. Colour is never
+// used decoratively — the chrome is pure slate; status colour only ever arrives
+// from caller-projected row cells.
+
+tc-advanced-table {
+    --bs-advanced-table-bg:               var(--tc-surface);
+    --bs-advanced-table-border:           1px solid var(--tc-border);
+    --bs-advanced-table-head-bg:          var(--tc-surface-muted);
+    --bs-advanced-table-head-border:      1px solid var(--tc-border-strong);
+    --bs-advanced-table-head-hover-bg:    var(--tc-surface-muted);
+    --bs-advanced-table-row-hairline:     1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-advanced-table-th-color:         var(--tc-text-muted);
+    --bs-advanced-table-th-active-color:  var(--tc-text);
+    --bs-advanced-table-th-font-size:     0.6875rem;
+    --bs-advanced-table-td-color:         var(--tc-text);
+    --bs-advanced-table-td-font-size:     0.875rem;
+    --bs-advanced-table-cell-padding-y:   0.625rem;
+    --bs-advanced-table-cell-padding-x:   0.75rem;
+
+    --bs-advanced-table-toolbar-gap:      0.75rem;
+    --bs-advanced-table-filter-label-color: var(--tc-text-muted);
+    --bs-advanced-table-filter-label-size:  0.6875rem;
+
+    --bs-advanced-table-overlay-scrim:    rgba(255, 255, 255, 0.66);
+    --bs-advanced-table-spinner-color:    var(--tc-text-muted);
+
+    --bs-advanced-table-summary-color:    var(--tc-text-muted);
+    --bs-advanced-table-page-border:      1px solid var(--tc-border-strong);
+    --bs-advanced-table-page-color:       var(--tc-text);
+    --bs-advanced-table-page-hover-bg:    var(--tc-surface-muted);
+
+    --bs-advanced-table-tap-target:       44px;
+}
+
+.tc-advanced-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-radius: 0;
+}
+
+// ── Filter toolbar ────────────────────────────────────────────────────────────
+
+.tc-advanced-table-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--bs-advanced-table-toolbar-gap);
+}
+
+.tc-advanced-table-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 12rem;
+    flex: 1 1 12rem;
+}
+
+.tc-advanced-table-filter-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-advanced-table-filter-label-size);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--bs-advanced-table-filter-label-color);
+}
+
+.tc-advanced-table-filter-control {
+    border-radius: 0;
+}
+
+// ── Body wrap (overlay anchor) ────────────────────────────────────────────────
+
+.tc-advanced-table-body-wrap {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: var(--bs-advanced-table-border);
+    background: var(--bs-advanced-table-bg);
+    border-radius: 0;
+}
+
+.tc-advanced-table-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bs-advanced-table-bg);
+    color: var(--bs-advanced-table-td-color);
+    font-size: var(--bs-advanced-table-td-font-size);
+    table-layout: auto;
+    border-radius: 0;
+    margin: 0;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.tc-advanced-table-head {
+    background: var(--bs-advanced-table-head-bg);
+}
+
+.tc-advanced-table-th {
+    padding: var(--bs-advanced-table-cell-padding-y) var(--bs-advanced-table-cell-padding-x);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-advanced-table-th-font-size);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--bs-advanced-table-th-color);
+    text-align: left;
+    border-bottom: var(--bs-advanced-table-head-border);
+    white-space: nowrap;
+    border-radius: 0;
+    vertical-align: middle;
+}
+
+.tc-advanced-table-th--center { text-align: center; }
+.tc-advanced-table-th--right  { text-align: right; }
+
+.tc-advanced-table-th-label {
+    display: inline;
+}
+
+// Sortable header button — fills the cell so the whole header is the hit area and
+// the slate-well hover reads as a column affordance.
+.tc-advanced-table-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: color var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        color: var(--bs-advanced-table-th-active-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.55;
+        pointer-events: none;
+    }
+}
+
+.tc-advanced-table-th--center .tc-advanced-table-sort { justify-content: center; }
+.tc-advanced-table-th--right  .tc-advanced-table-sort { justify-content: flex-end; }
+
+// Header hover well on the whole sortable cell.
+.tc-advanced-table-th:has(.tc-advanced-table-sort):hover {
+    background: var(--bs-advanced-table-head-hover-bg);
+}
+
+.tc-advanced-table-sort-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex-shrink: 0;
+    color: var(--tc-text-faint);
+}
+
+// Active sorted column: the resolved direction chevron takes the strong ink.
+.tc-advanced-table-sort--active {
+    color: var(--bs-advanced-table-th-active-color);
+
+    .tc-advanced-table-sort-icon {
+        color: var(--bs-advanced-table-th-active-color);
+    }
+}
+
+// ── Body cells (projected rows) ───────────────────────────────────────────────
+
+.tc-advanced-table-body > tr > td,
+.tc-advanced-table-body > tr > th {
+    padding: var(--bs-advanced-table-cell-padding-y) var(--bs-advanced-table-cell-padding-x);
+    color: var(--bs-advanced-table-td-color);
+    border-bottom: var(--bs-advanced-table-row-hairline);
+    vertical-align: middle;
+}
+
+.tc-advanced-table-body > tr:last-child > td,
+.tc-advanced-table-body > tr:last-child > th {
+    border-bottom: none;
+}
+
+// ── Loading overlay ───────────────────────────────────────────────────────────
+
+.tc-advanced-table-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-advanced-table-overlay-scrim);
+    // Blocks interaction with the rows beneath while data refreshes.
+    pointer-events: all;
+    border-radius: 0;
+}
+
+.tc-advanced-table-spinner {
+    color: var(--bs-advanced-table-spinner-color);
+}
+
+// ── Pagination footer ─────────────────────────────────────────────────────────
+
+.tc-advanced-table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.tc-advanced-table-page-summary {
+    font-family: var(--tc-font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--bs-advanced-table-summary-color);
+}
+
+.tc-advanced-table-page-controls {
+    display: inline-flex;
+    // Grouped controls collapse borders: one frame, 1px internal separator.
+    border: var(--bs-advanced-table-page-border);
+    border-radius: 0;
+}
+
+.tc-advanced-table-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    padding: 0;
+    background: var(--bs-advanced-table-bg);
+    border: 0;
+    border-radius: 0;
+    color: var(--bs-advanced-table-page-color);
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast, 0.15s ease);
+
+    & + & {
+        border-left: var(--bs-advanced-table-page-border);
+    }
+
+    &:hover {
+        background: var(--bs-advanced-table-page-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        pointer-events: none;
+    }
+}
+
+.tc-advanced-table-page-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+// ── Coarse pointer: ≥44px touch targets ───────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-advanced-table-sort,
+    .tc-advanced-table-page-btn {
+        min-height: var(--bs-advanced-table-tap-target);
+    }
+
+    .tc-advanced-table-page-btn {
+        min-width: var(--bs-advanced-table-tap-target);
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-advanced-table-sort,
+    .tc-advanced-table-page-btn {
+        transition: none;
+    }
+    // The spinner motif slows rather than vanishes (handled by the global reset),
+    // keeping the loading state legible.
+}

@@ -1,5 +1,6 @@
 import { Brand } from './Brand'
 import { Avatar } from './Avatar'
+import { AdvancedTable } from './AdvancedTable'
 import { ActionHeader } from './ActionHeader'
 import { ActionItems } from './ActionItems'
 import { ActionRowList } from './ActionRowList'
@@ -404,6 +405,7 @@ export function register(): void {
     customElements.define('tc-single-card-select', SingleCardSelect)
     customElements.define('tc-tab-sections', TabSections)
     customElements.define('tc-table', Table)
+    customElements.define('tc-advanced-table', AdvancedTable)
     customElements.define('tc-terminal-window', TerminalWindow)
     customElements.define('tc-testimonial-carousel', TestimonialCarousel)
     customElements.define('tc-time-picker', TimePicker)
