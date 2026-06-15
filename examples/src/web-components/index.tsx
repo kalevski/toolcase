@@ -209,6 +209,7 @@ import RoadmapDemo from './RoadmapDemo'
 import SideNavDemo from './SideNavDemo'
 import TreeViewDemo from './TreeViewDemo'
 import UserPanelDemo from './UserPanelDemo'
+import PhysicsEditorDemo from './PhysicsEditorDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
@@ -453,6 +454,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'audio-mixer', category: 'Components', element: <AudioMixerDemo /> },
     { key: 'node-editor', category: 'Components', element: <NodeEditorDemo /> },
     { key: 'normal-map-generator', category: 'Components', element: <NormalMapGeneratorDemo /> },
+    { key: 'physics-editor', category: 'Components', element: <PhysicsEditorDemo /> },
     { key: 'tag-input', category: 'Forms', element: <TagInputDemo /> },
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },

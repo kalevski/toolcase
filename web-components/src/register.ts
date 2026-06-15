@@ -209,6 +209,7 @@ import { NormalMapGenerator } from './NormalMapGenerator'
 import { NumberInput } from './NumberInput'
 import { OTPInput } from './OTPInput'
 import { PhoneInput } from './PhoneInput'
+import { PhysicsEditor } from './PhysicsEditor'
 import { RadioGroup } from './RadioGroup'
 import { RangeSlider } from './RangeSlider'
 import { Rating } from './Rating'
@@ -444,6 +445,7 @@ export function register(): void {
     customElements.define('tc-number-input', NumberInput)
     customElements.define('tc-otp-input', OTPInput)
     customElements.define('tc-phone-input', PhoneInput)
+    customElements.define('tc-physics-editor', PhysicsEditor)
     customElements.define('tc-radio-group', RadioGroup)
     customElements.define('tc-range-slider', RangeSlider)
     customElements.define('tc-rating', Rating)
