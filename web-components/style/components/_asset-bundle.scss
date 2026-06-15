@@ -1,0 +1,633 @@
+// tc-asset-bundle — asset bundle card: target engine, included/excluded tag
+// chips, file-type counts, build references, and a collapsible Advanced section.
+// All cosmetics flow through --bs-asset-bundle-* custom properties backed by
+// --tc-* tokens. Sharp corners everywhere; slate neutrals carry the card; colour
+// is status only (included = success tint, excluded = danger tint). Mono for
+// counts and build refs. Card motif: white surface, 1px hairline, shadow-sm,
+// faint ink-gradient header cap.
+
+@use '../foundation/tokens' as *;
+
+tc-asset-bundle {
+    --bs-asset-bundle-bg: var(--tc-surface);
+    --bs-asset-bundle-border-color: var(--tc-border);
+    --bs-asset-bundle-shadow: var(--tc-shadow-sm);
+    --bs-asset-bundle-header-cap: linear-gradient(180deg, rgba(30, 41, 59, 0.035), rgba(30, 41, 59, 0));
+    --bs-asset-bundle-padding-x: 1rem;
+    --bs-asset-bundle-padding-y: 0.875rem;
+    --bs-asset-bundle-gap: 0.875rem;
+    --bs-asset-bundle-name-color: var(--tc-text);
+    --bs-asset-bundle-target-color: var(--tc-text-muted);
+    --bs-asset-bundle-target-icon-size: 1rem;
+    --bs-asset-bundle-section-title-color: var(--tc-text-faint);
+    --bs-asset-bundle-divider-color: var(--tc-border);
+
+    // Tag chips
+    --bs-asset-bundle-tag-included-bg: var(--tc-success-bg, rgba(22, 163, 74, 0.1));
+    --bs-asset-bundle-tag-included-color: var(--tc-success);
+    --bs-asset-bundle-tag-included-border: rgba(22, 163, 74, 0.25);
+    --bs-asset-bundle-tag-excluded-bg: var(--tc-danger-bg, rgba(220, 38, 38, 0.1));
+    --bs-asset-bundle-tag-excluded-color: var(--tc-danger);
+    --bs-asset-bundle-tag-excluded-border: rgba(220, 38, 38, 0.25);
+
+    // Counts / build refs (mono)
+    --bs-asset-bundle-count-bg: var(--tc-surface-muted);
+    --bs-asset-bundle-count-label-color: var(--tc-text-muted);
+    --bs-asset-bundle-count-value-color: var(--tc-text);
+    --bs-asset-bundle-build-ref-color: var(--tc-text);
+    --bs-asset-bundle-build-ref-bg: var(--tc-surface-muted);
+
+    // Category badge
+    --bs-asset-bundle-category-bg: var(--tc-surface-muted);
+    --bs-asset-bundle-category-color: var(--tc-text-muted);
+
+    // Toggle / menu state ladder
+    --bs-asset-bundle-control-color: var(--tc-text-muted);
+    --bs-asset-bundle-control-hover-bg: var(--tc-surface-muted);
+    --bs-asset-bundle-control-hover-color: var(--tc-text);
+    --bs-asset-bundle-control-active-bg: var(--tc-app-accent);
+    --bs-asset-bundle-control-active-color: #{$white};
+
+    --bs-asset-bundle-skeleton-bg: var(--tc-surface-muted);
+    --bs-asset-bundle-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// ── Card shell ────────────────────────────────────────────────────────────────
+
+.tc-asset-bundle {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-asset-bundle-bg);
+    border: 1px solid var(--bs-asset-bundle-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-asset-bundle-shadow);
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+
+.tc-asset-bundle-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: var(--bs-asset-bundle-padding-y) var(--bs-asset-bundle-padding-x);
+    background: var(--bs-asset-bundle-header-cap);
+    border-bottom: 1px solid var(--bs-asset-bundle-divider-color);
+    border-radius: 0;
+}
+
+.tc-asset-bundle-heading {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3125rem;
+}
+
+.tc-asset-bundle-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-asset-bundle-name-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-asset-bundle-target {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    color: var(--bs-asset-bundle-target-color);
+}
+
+.tc-asset-bundle-target-icon {
+    width: var(--bs-asset-bundle-target-icon-size);
+    height: var(--bs-asset-bundle-target-icon-size);
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+.tc-asset-bundle-target-name {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+}
+
+.tc-asset-bundle-category {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.4375rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bs-asset-bundle-category-color);
+    background: var(--bs-asset-bundle-category-bg);
+    border-radius: 0;
+}
+
+// ── Body ───────────────────────────────────────────────────────────────────────
+
+.tc-asset-bundle-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-asset-bundle-gap);
+    padding: var(--bs-asset-bundle-padding-y) var(--bs-asset-bundle-padding-x);
+}
+
+.tc-asset-bundle-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-asset-bundle-section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-asset-bundle-section-title-color);
+}
+
+.tc-asset-bundle-section-icon {
+    width: 0.8125rem;
+    height: 0.8125rem;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+// ── Tag chips ──────────────────────────────────────────────────────────────────
+
+.tc-asset-bundle-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.tc-asset-bundle-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.1875rem 0.4375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    border: 1px solid transparent;
+    border-radius: 0;
+
+    &--included {
+        color: var(--bs-asset-bundle-tag-included-color);
+        background: var(--bs-asset-bundle-tag-included-bg);
+        border-color: var(--bs-asset-bundle-tag-included-border);
+    }
+
+    &--excluded {
+        color: var(--bs-asset-bundle-tag-excluded-color);
+        background: var(--bs-asset-bundle-tag-excluded-bg);
+        border-color: var(--bs-asset-bundle-tag-excluded-border);
+    }
+}
+
+.tc-asset-bundle-tag-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+// ── File counts ────────────────────────────────────────────────────────────────
+
+.tc-asset-bundle-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.tc-asset-bundle-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.1875rem 0.4375rem;
+    background: var(--bs-asset-bundle-count-bg);
+    border-radius: 0;
+}
+
+.tc-asset-bundle-count-label {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--bs-asset-bundle-count-label-color);
+}
+
+.tc-asset-bundle-count-value {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-asset-bundle-count-value-color);
+}
+
+// ── Build references ───────────────────────────────────────────────────────────
+
+.tc-asset-bundle-builds {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.tc-asset-bundle-build-ref {
+    padding: 0.1875rem 0.4375rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    color: var(--bs-asset-bundle-build-ref-color);
+    background: var(--bs-asset-bundle-build-ref-bg);
+    border-radius: 0;
+}
+
+.tc-asset-bundle-build-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1875rem 0.4375rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--bs-asset-bundle-control-color);
+    background: var(--tc-surface);
+    border: 1px solid var(--bs-asset-bundle-border-color);
+    border-radius: 0;
+
+    // Interactive chips are <button>; static chip is a <span>.
+    &[data-tag] {
+        cursor: pointer;
+        transition:
+            background-color var(--tc-transition-fast),
+            color var(--tc-transition-fast),
+            border-color var(--tc-transition-fast);
+
+        &:hover {
+            color: var(--bs-asset-bundle-control-hover-color);
+            background: var(--bs-asset-bundle-control-hover-bg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--tc-app-accent);
+            outline-offset: 2px;
+        }
+    }
+
+    &--active {
+        color: var(--bs-asset-bundle-control-active-color);
+        background: var(--bs-asset-bundle-control-active-bg);
+        border-color: var(--bs-asset-bundle-control-active-bg);
+
+        &:hover {
+            color: var(--bs-asset-bundle-control-active-color);
+            background: var(--bs-asset-bundle-control-active-bg);
+        }
+    }
+
+    &--static {
+        color: var(--bs-asset-bundle-build-ref-color);
+        background: var(--bs-asset-bundle-build-ref-bg);
+        border-color: transparent;
+    }
+}
+
+// ── Advanced (collapsible) ─────────────────────────────────────────────────────
+
+.tc-asset-bundle-advanced {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: var(--bs-asset-bundle-gap);
+    border-top: 1px solid var(--bs-asset-bundle-divider-color);
+}
+
+.tc-asset-bundle-advanced-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    align-self: flex-start;
+    padding: 0.3125rem 0.5rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-asset-bundle-control-color);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-asset-bundle-control-hover-color);
+        background: var(--bs-asset-bundle-control-hover-bg);
+    }
+
+    &:active {
+        color: var(--bs-asset-bundle-control-active-color);
+        background: var(--bs-asset-bundle-control-active-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &[aria-expanded='true'] .tc-asset-bundle-advanced-caret svg {
+        transform: rotate(180deg);
+    }
+}
+
+.tc-asset-bundle-section-icon,
+.tc-asset-bundle-advanced-toggle svg {
+    flex-shrink: 0;
+}
+
+.tc-asset-bundle-advanced-toggle svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
+    stroke: currentColor;
+    fill: none;
+}
+
+.tc-asset-bundle-advanced-caret svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    transition: transform var(--tc-transition-base);
+}
+
+.tc-asset-bundle-advanced-panel {
+    display: none;
+    flex-direction: column;
+    gap: 0.375rem;
+
+    &.show {
+        display: flex;
+    }
+}
+
+.tc-asset-bundle-opt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.3125rem 0.4375rem;
+    background: var(--bs-asset-bundle-count-bg);
+    border-radius: 0;
+}
+
+.tc-asset-bundle-opt-label {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--bs-asset-bundle-target-color);
+}
+
+.tc-asset-bundle-opt-value {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-asset-bundle-count-value-color);
+}
+
+.tc-asset-bundle-opt-bool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+
+    &--on {
+        color: var(--tc-success);
+    }
+
+    &--off {
+        color: var(--tc-text-faint);
+    }
+}
+
+.tc-asset-bundle-opt-icon {
+    width: 0.8125rem;
+    height: 0.8125rem;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+// ── Action menu ────────────────────────────────────────────────────────────────
+
+.tc-asset-bundle-menu-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.tc-asset-bundle-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: var(--bs-asset-bundle-control-color);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        color var(--tc-transition-fast),
+        background-color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-asset-bundle-control-hover-color);
+        background-color: var(--bs-asset-bundle-control-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+.tc-asset-bundle-menu-icon {
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+.tc-asset-bundle-menu {
+    --bs-asset-bundle-menu-min-width: 170px;
+    --bs-asset-bundle-menu-item-color: #{$slate-700};
+
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: var(--tc-z-dropdown);
+    display: none;
+    min-width: var(--bs-asset-bundle-menu-min-width);
+    padding: 0.25rem;
+    margin-top: 2px;
+    background-color: var(--tc-surface);
+    border: 1px solid var(--bs-asset-bundle-border-color);
+    border-radius: 0;
+    box-shadow: var(--tc-shadow-lg);
+
+    &.show {
+        display: block;
+    }
+
+    .tc-asset-bundle-menu-divider {
+        height: 0;
+        margin: 0.25rem 0;
+        border: 0;
+        border-top: 1px solid var(--tc-border);
+    }
+}
+
+.tc-asset-bundle-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.4375rem 0.625rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-asset-bundle-menu-item-color);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-asset-bundle-control-hover-color);
+        background-color: var(--bs-asset-bundle-control-hover-bg);
+        text-decoration: none;
+    }
+
+    &:active {
+        color: var(--bs-asset-bundle-control-active-color);
+        background-color: var(--bs-asset-bundle-control-active-bg);
+    }
+
+    &[disabled],
+    &:disabled {
+        color: var(--tc-text-faint);
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    &--danger {
+        color: var(--tc-danger);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--tc-danger);
+            background-color: var(--bs-asset-bundle-control-hover-bg);
+        }
+    }
+}
+
+.tc-asset-bundle-menu-item-icon {
+    width: 0.9375rem;
+    height: 0.9375rem;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+// ── Loading skeleton ───────────────────────────────────────────────────────────
+
+@keyframes tc-asset-bundle-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.tc-asset-bundle-skeleton {
+    display: block;
+    height: 0.875rem;
+    background: linear-gradient(
+        90deg,
+        var(--bs-asset-bundle-skeleton-bg) 25%,
+        var(--bs-asset-bundle-skeleton-shimmer) 50%,
+        var(--bs-asset-bundle-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-asset-bundle-shimmer 1.5s infinite linear;
+    border-radius: 0;
+
+    &--name {
+        height: 1rem;
+        max-width: 55%;
+    }
+
+    &--target {
+        height: 0.75rem;
+        max-width: 30%;
+        margin-top: 0.4rem;
+    }
+
+    &--bar {
+        max-width: 100%;
+    }
+
+    &--short {
+        max-width: 60%;
+    }
+}
+
+.tc-asset-bundle--loading .tc-asset-bundle-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-asset-bundle-skeleton {
+        animation: none;
+        background: var(--bs-asset-bundle-skeleton-bg);
+    }
+
+    .tc-asset-bundle-advanced-caret svg {
+        transition: none;
+    }
+}
+
+// ── Touch targets (WCAG 2.5.5) ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-asset-bundle-menu-trigger {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .tc-asset-bundle-menu-item,
+    .tc-asset-bundle-advanced-toggle,
+    .tc-asset-bundle-build-tag[data-tag] {
+        min-height: 44px;
+    }
+}

@@ -129,6 +129,7 @@ import WelcomeGuideDemo from './WelcomeGuideDemo'
 import ApiReferenceTableDemo from './ApiReferenceTableDemo'
 import BannerDemo from './BannerDemo'
 import BuildDemo from './BuildDemo'
+import AssetBundleDemo from './AssetBundleDemo'
 import CardOptionsDemo from './CardOptionsDemo'
 import CdnMapDemo from './CdnMapDemo'
 import ChangelogDemo from './ChangelogDemo'
@@ -286,6 +287,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'tag', category: 'Content', element: <TagDemo /> },
     { key: 'asset-row', category: 'Components', element: <AssetRowDemo /> },
     { key: 'asset-row-list', category: 'Components', element: <AssetRowListDemo /> },
+    { key: 'asset-bundle', category: 'Components', element: <AssetBundleDemo /> },
     { key: 'brief-card', category: 'Content', element: <BriefCardDemo /> },
     { key: 'bundle-bar', category: 'Content', element: <BundleBarDemo /> },
     { key: 'callout-quote', category: 'Content', element: <CalloutQuoteDemo /> },

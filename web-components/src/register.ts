@@ -76,6 +76,7 @@ import { Tag } from './Tag'
 import { TagInput } from './TagInput'
 import { AssetRow } from './AssetRow'
 import { AssetRowList } from './AssetRowList'
+import { AssetBundle } from './AssetBundle'
 import { BasicLayout } from './BasicLayout'
 import { BriefCard } from './BriefCard'
 import { BundleBar } from './BundleBar'
@@ -287,6 +288,7 @@ export function register(): void {
     customElements.define('tc-tag-input', TagInput)
     customElements.define('tc-asset-row', AssetRow)
     customElements.define('tc-asset-row-list', AssetRowList)
+    customElements.define('tc-asset-bundle', AssetBundle)
     customElements.define('tc-basic-layout', BasicLayout)
     customElements.define('tc-brief-card', BriefCard)
     customElements.define('tc-bundle-bar', BundleBar)
