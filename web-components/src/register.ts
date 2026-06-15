@@ -1,3 +1,4 @@
+import { AmmoCounter } from './AmmoCounter'
 import { Brand } from './Brand'
 import { AreaChart } from './AreaChart'
 import { Avatar } from './Avatar'
@@ -231,6 +232,7 @@ export function register(): void {
         return
     }
     customElements.define('tc-brand', Brand)
+    customElements.define('tc-ammo-counter', AmmoCounter)
     customElements.define('tc-avatar', Avatar)
     customElements.define('tc-action-header', ActionHeader)
     customElements.define('tc-action-items', ActionItems)
