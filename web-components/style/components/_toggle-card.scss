@@ -1,0 +1,187 @@
+// tc-toggle-card — clickable card with an integrated toggle switch for on/off
+// states. The whole card is the click target (host carries role="switch").
+// All cosmetics flow through --bs-toggle-card-* custom properties backed by
+// --tc-* tokens. Sharp corners (border-radius: 0) on the card; the only
+// sanctioned curves are the switch pill track (999px) and circular knob (50%).
+
+tc-toggle-card {
+    --bs-toggle-card-bg: var(--tc-surface);
+    --bs-toggle-card-border-color: var(--tc-border);
+    --bs-toggle-card-hover-bg: var(--tc-surface-hover);
+    --bs-toggle-card-hover-border-color: var(--tc-border-strong);
+    --bs-toggle-card-on-accent: var(--tc-app-accent);
+    --bs-toggle-card-padding-y: 0.875rem;
+    --bs-toggle-card-padding-x: 1rem;
+    --bs-toggle-card-gap: 0.875rem;
+    --bs-toggle-card-icon-color: var(--tc-text-muted);
+    --bs-toggle-card-icon-size: 1.25rem;
+    --bs-toggle-card-label-color: var(--tc-text);
+    --bs-toggle-card-label-size: 0.925rem;
+    --bs-toggle-card-hint-color: var(--tc-text-muted);
+    --bs-toggle-card-hint-size: 0.8125rem;
+
+    // Switch motif — mirrors tc-switch geometry.
+    --bs-toggle-card-switch-track-off: var(--tc-border-strong);
+    --bs-toggle-card-switch-knob: #ffffff;
+    --bs-toggle-card-switch-width: 40px;
+    --bs-toggle-card-switch-height: 22px;
+    --bs-toggle-card-switch-knob-size: 18px;
+}
+
+.tc-toggle-card {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-toggle-card-gap);
+    padding: var(--bs-toggle-card-padding-y) var(--bs-toggle-card-padding-x);
+    background: var(--bs-toggle-card-bg);
+    border: 1px solid var(--bs-toggle-card-border-color);
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        background-color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
+    &:hover:not(.tc-toggle-card--disabled):not(.tc-toggle-card--loading) {
+        background: var(--bs-toggle-card-hover-bg);
+        border-color: var(--bs-toggle-card-hover-border-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--bs-toggle-card-on-accent);
+        outline-offset: 2px;
+    }
+
+    // Checked card: a subtle ink-accent left marker + border tint — never a loud fill.
+    &.tc-toggle-card--on {
+        border-color: var(--bs-toggle-card-on-accent);
+        box-shadow: inset 3px 0 0 0 var(--bs-toggle-card-on-accent);
+
+        .tc-toggle-card-icon {
+            color: var(--bs-toggle-card-on-accent);
+        }
+    }
+
+    // Disabled = opacity + no interaction (never color-only).
+    &.tc-toggle-card--disabled {
+        opacity: 0.55;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    &.tc-toggle-card--loading {
+        cursor: progress;
+        pointer-events: none;
+    }
+}
+
+.tc-toggle-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--bs-toggle-card-icon-color);
+    transition: color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-toggle-card-icon-size);
+        height: var(--bs-toggle-card-icon-size);
+    }
+}
+
+.tc-toggle-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tc-toggle-card-label {
+    font-family: var(--tc-font-sans, inherit);
+    font-size: var(--bs-toggle-card-label-size);
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--bs-toggle-card-label-color);
+}
+
+.tc-toggle-card-hint {
+    font-size: var(--bs-toggle-card-hint-size);
+    line-height: 1.4;
+    color: var(--bs-toggle-card-hint-color);
+}
+
+// Badge motif — soft status look; rectangular, mono micro-label.
+.tc-toggle-card-badge {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+    display: inline-block;
+    padding: 0.125rem 0.4rem;
+    font-family: var(--tc-font-mono, monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--tc-text-muted);
+    background: var(--tc-surface-muted);
+    border: 1px solid var(--tc-border);
+    border-radius: 0;
+}
+
+// Switch motif: pill track (999px) + pure-circle knob (50%); checked = ink gradient.
+.tc-toggle-card-switch {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-block;
+    width: var(--bs-toggle-card-switch-width);
+    height: var(--bs-toggle-card-switch-height);
+    background-color: var(--bs-toggle-card-switch-track-off);
+    border-radius: 999px;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+    transition: background-color var(--tc-transition-base);
+}
+
+.tc-toggle-card-knob {
+    position: absolute;
+    top: 50%;
+    left: 2px;
+    transform: translateY(-50%);
+    width: var(--bs-toggle-card-switch-knob-size);
+    height: var(--bs-toggle-card-switch-knob-size);
+    background: var(--bs-toggle-card-switch-knob);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0.5px rgba(15, 23, 42, 0.08);
+    transition: left var(--tc-transition-base);
+}
+
+.tc-toggle-card--on {
+    .tc-toggle-card-switch {
+        background-color: var(--bs-toggle-card-on-accent);
+        background-image: linear-gradient(135deg, var(--bs-toggle-card-on-accent), #2b3a51);
+        box-shadow: none;
+    }
+
+    .tc-toggle-card-knob {
+        // Track width − knob − inset on both sides.
+        left: calc(var(--bs-toggle-card-switch-width) - var(--bs-toggle-card-switch-knob-size) - 2px);
+    }
+}
+
+.tc-toggle-card-spinner {
+    flex-shrink: 0;
+    width: var(--bs-toggle-card-switch-height);
+    height: var(--bs-toggle-card-switch-height);
+    color: var(--bs-toggle-card-on-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    // Keep the state-conveying colour transitions; freeze positional motion.
+    .tc-toggle-card-knob {
+        transition: none;
+    }
+}

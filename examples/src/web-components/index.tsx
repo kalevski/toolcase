@@ -188,6 +188,7 @@ import TagInputDemo from './TagInputDemo'
 import TerminalWindowDemo from './TerminalWindowDemo'
 import TestimonialCarouselDemo from './TestimonialCarouselDemo'
 import TimePickerDemo from './TimePickerDemo'
+import ToggleCardDemo from './ToggleCardDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -396,4 +397,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },
     { key: 'time-picker', category: 'Forms', element: <TimePickerDemo /> },
+    { key: 'toggle-card', category: 'Forms', element: <ToggleCardDemo /> },
 ]
