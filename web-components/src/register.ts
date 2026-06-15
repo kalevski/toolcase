@@ -187,6 +187,7 @@ import { Hero } from './Hero'
 import { Image as TcImage } from './Image'
 import { ImageCrop } from './ImageCrop'
 import { JSONEditor } from './JSONEditor'
+import { JSONSchemaDef } from './JSONSchemaDef'
 import { InfiniteScroll } from './InfiniteScroll'
 import { InstallTabs } from './InstallTabs'
 import { Leaderboard } from './Leaderboard'
@@ -413,6 +414,7 @@ export function register(): void {
     customElements.define('tc-image', TcImage)
     customElements.define('tc-image-crop', ImageCrop)
     customElements.define('tc-json-editor', JSONEditor)
+    customElements.define('tc-json-schema-def', JSONSchemaDef)
     customElements.define('tc-infinite-scroll', InfiniteScroll)
     customElements.define('tc-install-tabs', InstallTabs)
     customElements.define('tc-leaderboard', Leaderboard)
