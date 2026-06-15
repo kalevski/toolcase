@@ -183,6 +183,7 @@ import RoadmapDemo from './RoadmapDemo'
 import SideNavDemo from './SideNavDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
 import TabSectionsDemo from './TabSectionsDemo'
+import TableDemo from './TableDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -386,4 +387,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
     { key: 'single-card-select', category: 'Forms', element: <SingleCardSelectDemo /> },
     { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
+    { key: 'table', category: 'Content', element: <TableDemo /> },
 ]

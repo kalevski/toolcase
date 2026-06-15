@@ -191,6 +191,7 @@ import { Roadmap } from './Roadmap'
 import { SideNav } from './SideNav'
 import { SingleCardSelect } from './SingleCardSelect'
 import { TabSections } from './TabSections'
+import { Table } from './Table'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -391,4 +392,5 @@ export function register(): void {
     customElements.define('tc-side-nav', SideNav)
     customElements.define('tc-single-card-select', SingleCardSelect)
     customElements.define('tc-tab-sections', TabSections)
+    customElements.define('tc-table', Table)
 }
