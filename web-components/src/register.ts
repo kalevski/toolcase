@@ -201,6 +201,7 @@ import { TreeView } from './TreeView'
 import { UserPanel } from './UserPanel'
 import { VersionPicker } from './VersionPicker'
 import { VerticalItemList } from './VerticalItemList'
+import { VideoEmbed } from './VideoEmbed'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -411,4 +412,5 @@ export function register(): void {
     customElements.define('tc-user-panel', UserPanel)
     customElements.define('tc-version-picker', VersionPicker)
     customElements.define('tc-vertical-item-list', VerticalItemList)
+    customElements.define('tc-video-embed', VideoEmbed)
 }

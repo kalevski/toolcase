@@ -193,6 +193,7 @@ import TestimonialCarouselDemo from './TestimonialCarouselDemo'
 import TimePickerDemo from './TimePickerDemo'
 import ToggleCardDemo from './ToggleCardDemo'
 import VerticalItemListDemo from './VerticalItemListDemo'
+import VideoEmbedDemo from './VideoEmbedDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -406,4 +407,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },
     { key: 'time-picker', category: 'Forms', element: <TimePickerDemo /> },
     { key: 'toggle-card', category: 'Forms', element: <ToggleCardDemo /> },
+    { key: 'video-embed', category: 'Components', element: <VideoEmbedDemo /> },
 ]
