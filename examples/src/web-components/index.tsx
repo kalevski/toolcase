@@ -194,6 +194,7 @@ import MarqueeDemo from './MarqueeDemo'
 import MultiCardSelectDemo from './MultiCardSelectDemo'
 import NewsletterSignupDemo from './NewsletterSignupDemo'
 import NodeEditorDemo from './NodeEditorDemo'
+import NormalMapGeneratorDemo from './NormalMapGeneratorDemo'
 import NumberInputDemo from './NumberInputDemo'
 import OTPInputDemo from './OTPInputDemo'
 import PhoneInputDemo from './PhoneInputDemo'
@@ -449,6 +450,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'advanced-table', category: 'Content', element: <AdvancedTableDemo /> },
     { key: 'audio-mixer', category: 'Components', element: <AudioMixerDemo /> },
     { key: 'node-editor', category: 'Components', element: <NodeEditorDemo /> },
+    { key: 'normal-map-generator', category: 'Components', element: <NormalMapGeneratorDemo /> },
     { key: 'tag-input', category: 'Forms', element: <TagInputDemo /> },
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },
