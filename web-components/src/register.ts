@@ -35,6 +35,7 @@ import { Placeholder } from './Placeholder'
 import { Popover } from './Popover'
 import { Progress } from './Progress'
 import { ProgressBar } from './ProgressBar'
+import { ScrollArea } from './ScrollArea'
 import { Scrollspy } from './Scrollspy'
 import { Spinner } from './Spinner'
 import { Toast } from './Toast'
@@ -230,6 +231,7 @@ export function register(): void {
     customElements.define('tc-popover', Popover)
     customElements.define('tc-progress', Progress)
     customElements.define('tc-progress-bar', ProgressBar)
+    customElements.define('tc-scroll-area', ScrollArea)
     customElements.define('tc-scrollspy', Scrollspy)
     customElements.define('tc-spinner', Spinner)
     customElements.define('tc-toast', Toast)

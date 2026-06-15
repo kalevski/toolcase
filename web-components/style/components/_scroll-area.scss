@@ -1,0 +1,65 @@
+// tc-scroll-area — scrollable container with configurable max dimensions and axis.
+// Sharp corners (border-radius: 0) throughout; no outer border by default (the
+// consumer is expected to wrap it) — a single optional 1px hairline can be
+// switched on via --bs-scroll-area-border. A thin slate scrollbar (Firefox
+// scrollbar-* + WebKit ::-webkit-scrollbar) keeps the chrome quiet. Every
+// cosmetic value flows through --bs-scroll-area-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ─────────────────────────────────────────────────────────
+
+tc-scroll-area {
+    --bs-scroll-area-border: 0;
+    --bs-scroll-area-border-color: var(--tc-border);
+    --bs-scroll-area-radius: 0;
+    --bs-scroll-area-scrollbar-size: 8px;
+    --bs-scroll-area-thumb-color: var(--tc-border-strong);
+    --bs-scroll-area-track-color: transparent;
+}
+
+// ── Scroll container ────────────────────────────────────────────────────────────
+
+.tc-scroll-area {
+    position: relative;
+    max-width: 100%;
+    border: var(--bs-scroll-area-border) solid var(--bs-scroll-area-border-color);
+    border-radius: var(--bs-scroll-area-radius);
+
+    // Firefox — thin slate thumb over a quiet track.
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-scroll-area-thumb-color) var(--bs-scroll-area-track-color);
+
+    // WebKit / Blink — thin slate scrollbar, sharp thumb, transparent track.
+    &::-webkit-scrollbar {
+        width: var(--bs-scroll-area-scrollbar-size);
+        height: var(--bs-scroll-area-scrollbar-size);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--bs-scroll-area-thumb-color);
+        border-radius: 0;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--bs-scroll-area-track-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+.tc-scroll-area-content {
+    min-width: 0;
+    min-height: 0;
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-scroll-area {
+        scroll-behavior: auto;
+    }
+}

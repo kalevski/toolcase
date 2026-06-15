@@ -177,6 +177,7 @@ import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
 import RatingDemo from './RatingDemo'
 import ResizablePanelDemo from './ResizablePanelDemo'
+import ScrollAreaDemo from './ScrollAreaDemo'
 import RoadmapDemo from './RoadmapDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
@@ -205,6 +206,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'container', category: 'Layout', element: <ContainerDemo /> },
     { key: 'row', category: 'Layout', element: <RowDemo /> },
     { key: 'col', category: 'Layout', element: <ColDemo /> },
+    { key: 'scroll-area', category: 'Layout', element: <ScrollAreaDemo /> },
     { key: 'accordion', category: 'Components', element: <AccordionDemo /> },
     { key: 'alert', category: 'Components', element: <AlertDemo /> },
     { key: 'announcement-bar', category: 'Components', element: <AnnouncementBarDemo /> },
