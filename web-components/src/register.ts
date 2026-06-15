@@ -188,6 +188,7 @@ import { Rating } from './Rating'
 import { ResizablePanel } from './ResizablePanel'
 import { Roadmap } from './Roadmap'
 import { SideNav } from './SideNav'
+import { SingleCardSelect } from './SingleCardSelect'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -385,4 +386,5 @@ export function register(): void {
     customElements.define('tc-resizable-panel', ResizablePanel)
     customElements.define('tc-roadmap', Roadmap)
     customElements.define('tc-side-nav', SideNav)
+    customElements.define('tc-single-card-select', SingleCardSelect)
 }
