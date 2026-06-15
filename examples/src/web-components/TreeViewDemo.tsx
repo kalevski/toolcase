@@ -1,0 +1,175 @@
+import React, { useEffect, useRef, useState } from 'react'
+import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+
+// ── Static tree data (set via the `.nodes` JS property) ──────────────────────────
+
+const FILE_TREE = [
+    {
+        key: 'src',
+        label: 'src',
+        icon: 'folder',
+        children: [
+            {
+                key: 'components',
+                label: 'components',
+                icon: 'folder',
+                children: [
+                    { key: 'button.ts', label: 'Button.ts', icon: 'file-code' },
+                    { key: 'badge.ts', label: 'Badge.ts', icon: 'file-code' },
+                    { key: 'tree-view.ts', label: 'TreeView.ts', icon: 'file-code' },
+                ],
+            },
+            { key: 'index.ts', label: 'index.ts', icon: 'file-code' },
+            { key: 'register.ts', label: 'register.ts', icon: 'file-code', disabled: true },
+        ],
+    },
+    {
+        key: 'style',
+        label: 'style',
+        icon: 'folder',
+        children: [
+            { key: 'index.scss', label: 'index.scss', icon: 'file' },
+            { key: 'reset.scss', label: 'reset.scss', icon: 'file' },
+        ],
+    },
+    { key: 'readme', label: 'README.md', icon: 'file-text' },
+]
+
+const PERMISSIONS = [
+    {
+        key: 'read',
+        label: 'Read',
+        icon: 'eye',
+        children: [
+            { key: 'read:files', label: 'Files' },
+            { key: 'read:metadata', label: 'Metadata' },
+        ],
+    },
+    {
+        key: 'write',
+        label: 'Write',
+        icon: 'pencil',
+        children: [
+            { key: 'write:files', label: 'Files' },
+            { key: 'write:share', label: 'Share links' },
+        ],
+    },
+    { key: 'admin', label: 'Admin', icon: 'shield', disabled: true },
+]
+
+// An async branch — children are fetched on first expand (simulated latency).
+const ASYNC_TREE = [
+    {
+        key: 'remote',
+        label: 'Remote workspace',
+        icon: 'cloud',
+        loadChildren: () =>
+            new Promise(resolve =>
+                setTimeout(
+                    () =>
+                        resolve([
+                            { key: 'remote/app', label: 'app', icon: 'folder' },
+                            { key: 'remote/api', label: 'api', icon: 'folder' },
+                            { key: 'remote/readme', label: 'README.md', icon: 'file-text' },
+                        ]),
+                    900,
+                ),
+            ),
+    },
+    { key: 'local', label: 'Local cache', icon: 'hard-drive' },
+]
+
+const TreeViewDemo: React.FC = () => {
+    const singleRef = useRef<any>(null)
+    const checkboxRef = useRef<any>(null)
+    const asyncRef = useRef<any>(null)
+
+    const [selected, setSelected] = useState<string>('—')
+    const [checked, setChecked] = useState<string[]>([])
+    const [expanded, setExpanded] = useState<string[]>(['src'])
+
+    useEffect(() => {
+        const el = singleRef.current
+        if (!el) return
+        el.nodes = FILE_TREE
+        el.expanded = ['src', 'components']
+        const onSelect = (e: any) => setSelected(e.detail.keys[0] ?? '—')
+        const onExpand = (e: any) => setExpanded(e.detail.keys)
+        el.addEventListener('tc-select', onSelect)
+        el.addEventListener('tc-expand-change', onExpand)
+        return () => {
+            el.removeEventListener('tc-select', onSelect)
+            el.removeEventListener('tc-expand-change', onExpand)
+        }
+    }, [])
+
+    useEffect(() => {
+        const el = checkboxRef.current
+        if (!el) return
+        el.nodes = PERMISSIONS
+        el.expanded = ['read', 'write']
+        const onSelect = (e: any) => setChecked(e.detail.keys)
+        el.addEventListener('tc-select', onSelect)
+        return () => el.removeEventListener('tc-select', onSelect)
+    }, [])
+
+    useEffect(() => {
+        const el = asyncRef.current
+        if (!el) return
+        el.nodes = ASYNC_TREE
+    }, [])
+
+    return (
+        <div className="py-4">
+            <div className="container">
+                <div className="row">
+                    <div className="col-12">
+                        <RichPageHeader
+                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
+                            title="TreeView"
+                            description="Hierarchical tree navigation with expand/collapse, optional multi-select checkboxes, async lazy-loaded branches, and full keyboard support."
+                        />
+
+                        <div className="d-flex flex-column gap-4 mt-4">
+
+                            <SectionCard title="Single select — chevron expand, leaf select (JS property)">
+                                <div style={{ maxWidth: 360, border: '1px solid var(--tc-border, #e2e8f0)' }}>
+                                    {/* @ts-ignore */}
+                                    <tc-tree-view ref={singleRef} />
+                                </div>
+                                <p className="mt-3 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
+                                    Selected <code>tc-select</code>: <strong>{selected}</strong>
+                                    {' · '}
+                                    Expanded <code>tc-expand-change</code>: <strong>{expanded.join(', ') || '—'}</strong>
+                                </p>
+                            </SectionCard>
+
+                            <SectionCard title="Checkbox mode — multi-select with parent aggregation">
+                                <div style={{ maxWidth: 360, border: '1px solid var(--tc-border, #e2e8f0)' }}>
+                                    {/* @ts-ignore */}
+                                    <tc-tree-view ref={checkboxRef} checkbox-mode />
+                                </div>
+                                <p className="mt-3 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
+                                    Checked keys: <strong>{checked.join(', ') || '—'}</strong>
+                                </p>
+                            </SectionCard>
+
+                            <SectionCard title="Async branch — children fetched on first expand (spinner)">
+                                <div style={{ maxWidth: 360, border: '1px solid var(--tc-border, #e2e8f0)' }}>
+                                    {/* @ts-ignore */}
+                                    <tc-tree-view ref={asyncRef} />
+                                </div>
+                                <p className="mt-3 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
+                                    Expand <em>Remote workspace</em> to lazy-load its children.
+                                </p>
+                            </SectionCard>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default TreeViewDemo
