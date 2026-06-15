@@ -179,6 +179,7 @@ import RatingDemo from './RatingDemo'
 import ResizablePanelDemo from './ResizablePanelDemo'
 import ScrollAreaDemo from './ScrollAreaDemo'
 import RoadmapDemo from './RoadmapDemo'
+import SideNavDemo from './SideNavDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -378,4 +379,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'phone-input', category: 'Forms', element: <PhoneInputDemo /> },
     { key: 'range-slider', category: 'Forms', element: <RangeSliderDemo /> },
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
+    { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
 ]

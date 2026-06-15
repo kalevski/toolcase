@@ -187,6 +187,7 @@ import { RangeSlider } from './RangeSlider'
 import { Rating } from './Rating'
 import { ResizablePanel } from './ResizablePanel'
 import { Roadmap } from './Roadmap'
+import { SideNav } from './SideNav'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -383,4 +384,5 @@ export function register(): void {
     customElements.define('tc-rating', Rating)
     customElements.define('tc-resizable-panel', ResizablePanel)
     customElements.define('tc-roadmap', Roadmap)
+    customElements.define('tc-side-nav', SideNav)
 }
