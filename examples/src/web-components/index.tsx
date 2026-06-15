@@ -192,6 +192,7 @@ import TerminalWindowDemo from './TerminalWindowDemo'
 import TestimonialCarouselDemo from './TestimonialCarouselDemo'
 import TimePickerDemo from './TimePickerDemo'
 import ToggleCardDemo from './ToggleCardDemo'
+import VerticalItemListDemo from './VerticalItemListDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -398,6 +399,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'user-panel', category: 'Components', element: <UserPanelDemo /> },
     { key: 'single-card-select', category: 'Forms', element: <SingleCardSelectDemo /> },
     { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
+    { key: 'vertical-item-list', category: 'Navigation', element: <VerticalItemListDemo /> },
     { key: 'table', category: 'Content', element: <TableDemo /> },
     { key: 'tag-input', category: 'Forms', element: <TagInputDemo /> },
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
