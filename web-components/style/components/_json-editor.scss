@@ -1,0 +1,365 @@
+// tc-json-editor — schema-driven form editor for JSON objects with collapsible
+// groups, array management, and typed fields. Sharp corners throughout; slate
+// neutrals carry the design. All cosmetic values flow through --bs-json-editor-*
+// backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-json-editor {
+    --bs-json-editor-bg: var(--tc-surface);
+    --bs-json-editor-border-color: var(--tc-border);
+    --bs-json-editor-row-border: var(--tc-slate-100, #f1f5f9);
+    --bs-json-editor-row-padding-y: 0.5rem;
+    --bs-json-editor-row-padding-x: 0.75rem;
+    --bs-json-editor-row-hover-bg: var(--tc-surface-hover);
+    --bs-json-editor-key-color: var(--tc-text);
+    --bs-json-editor-key-size: 13px;
+    --bs-json-editor-header-bg: var(--tc-surface-muted);
+    --bs-json-editor-header-hover-bg: var(--tc-surface-hover);
+    --bs-json-editor-header-color: var(--tc-text);
+    --bs-json-editor-rail-color: var(--tc-border);
+    --bs-json-editor-count-color: var(--tc-text-muted);
+    --bs-json-editor-icon-color: var(--tc-text-muted);
+    --bs-json-editor-icon-hover-bg: var(--tc-surface-muted);
+    --bs-json-editor-icon-hover-color: var(--tc-text);
+    --bs-json-editor-chevron-size: 0.9rem;
+    --bs-json-editor-icon-size: 0.9rem;
+    --bs-json-editor-error-color: var(--tc-danger);
+    --bs-json-editor-muted-color: var(--tc-text-muted);
+    --bs-json-editor-mono: var(--bs-font-monospace, ui-monospace, monospace);
+}
+
+.tc-json-editor {
+    background: var(--bs-json-editor-bg);
+    border: 1px solid var(--bs-json-editor-border-color);
+    border-radius: 0;
+}
+
+// ── Disabled ─────────────────────────────────────────────────────────────────
+
+tc-json-editor[disabled] .tc-json-editor,
+.tc-json-editor--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+// ── Leaf field row ───────────────────────────────────────────────────────────
+
+.tc-json-editor-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: var(--bs-json-editor-row-padding-y) var(--bs-json-editor-row-padding-x);
+    border-bottom: 1px solid var(--bs-json-editor-row-border);
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    &:hover {
+        background: var(--bs-json-editor-row-hover-bg);
+    }
+}
+
+.tc-json-editor-key {
+    flex: 0 0 35%;
+    max-width: 35%;
+    margin: 0;
+    font-family: var(--bs-json-editor-mono);
+    font-size: var(--bs-json-editor-key-size);
+    color: var(--bs-json-editor-key-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-json-editor-field {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+
+.tc-json-editor-control {
+    width: 100%;
+}
+
+.tc-json-editor-switch {
+    margin: 0;
+    min-height: auto;
+    padding-left: 2.5em;
+}
+
+// ── Groups (object + array) ──────────────────────────────────────────────────
+
+.tc-json-editor-group {
+    border-bottom: 1px solid var(--bs-json-editor-row-border);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.tc-json-editor-group-header {
+    display: flex;
+    align-items: center;
+    background: var(--bs-json-editor-header-bg);
+    border-bottom: 1px solid var(--bs-json-editor-border-color);
+}
+
+.tc-json-editor-toggle {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+    padding: var(--bs-json-editor-row-padding-y) var(--bs-json-editor-row-padding-x);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: var(--bs-json-editor-header-color);
+    font-family: var(--bs-json-editor-mono);
+    font-size: var(--bs-json-editor-key-size);
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        background: var(--bs-json-editor-header-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+.tc-json-editor-group-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+// chevron-down base, rotated -90deg when collapsed (points right), 0deg open.
+.tc-json-editor-chevron {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    transform: rotate(-90deg);
+    transition: transform var(--tc-transition-base, 0.2s cubic-bezier(0.4, 0, 0.2, 1));
+
+    svg {
+        display: block;
+        width: var(--bs-json-editor-chevron-size);
+        height: var(--bs-json-editor-chevron-size);
+        color: var(--bs-json-editor-muted-color);
+    }
+}
+
+.tc-json-editor-chevron--open {
+    transform: rotate(0deg);
+}
+
+.tc-json-editor-count {
+    flex-shrink: 0;
+    padding: 0 0.5rem;
+    font-family: var(--bs-json-editor-mono);
+    font-size: 0.6875rem;
+    color: var(--bs-json-editor-count-color);
+    white-space: nowrap;
+}
+
+// Nested group/array bodies indent with a left hairline rail.
+.tc-json-editor-group-body,
+.tc-json-editor-array {
+    background: var(--bs-json-editor-bg);
+}
+
+.tc-json-editor-group .tc-json-editor-group-body > .tc-json-editor-row,
+.tc-json-editor-group .tc-json-editor-group-body > .tc-json-editor-group,
+.tc-json-editor-group .tc-json-editor-array > .tc-json-editor-array-item,
+.tc-json-editor-group .tc-json-editor-array > .tc-json-editor-array-row {
+    margin-left: 0.75rem;
+    border-left: 1px solid var(--bs-json-editor-rail-color);
+}
+
+// ── Array list ───────────────────────────────────────────────────────────────
+
+.tc-json-editor-array-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--bs-json-editor-row-padding-y) var(--bs-json-editor-row-padding-x);
+    border-bottom: 1px solid var(--bs-json-editor-row-border);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    .tc-json-editor-control {
+        flex: 1 1 auto;
+    }
+}
+
+.tc-json-editor-array-item {
+    border-bottom: 1px solid var(--bs-json-editor-row-border);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.tc-json-editor-array-item-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.375rem var(--bs-json-editor-row-padding-x);
+    background: var(--bs-json-editor-bg);
+}
+
+.tc-json-editor-array-index {
+    font-family: var(--bs-json-editor-mono);
+    font-size: 0.6875rem;
+    color: var(--bs-json-editor-count-color);
+}
+
+// ── Icon buttons (add / remove) — ghost-icon hover-well ladder ───────────────
+
+.tc-json-editor-icon-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: var(--bs-json-editor-icon-color);
+    cursor: pointer;
+    transition: background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+
+    svg {
+        width: var(--bs-json-editor-icon-size);
+        height: var(--bs-json-editor-icon-size);
+        pointer-events: none;
+    }
+
+    &:hover {
+        background: var(--bs-json-editor-icon-hover-bg);
+        color: var(--bs-json-editor-icon-hover-color);
+    }
+
+    &:active {
+        background: var(--tc-border);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.tc-json-editor-add {
+    margin: 0 0.25rem;
+}
+
+// ── Empty / error / muted ────────────────────────────────────────────────────
+
+.tc-json-editor-empty {
+    padding: var(--bs-json-editor-row-padding-y) var(--bs-json-editor-row-padding-x);
+    font-family: var(--bs-json-editor-mono);
+    font-size: 0.75rem;
+    color: var(--bs-json-editor-muted-color);
+}
+
+.tc-json-editor-error {
+    padding: var(--bs-json-editor-row-padding-y) var(--bs-json-editor-row-padding-x);
+    color: var(--bs-json-editor-error-color);
+    font-size: 0.8125rem;
+}
+
+// ── Loading skeleton ─────────────────────────────────────────────────────────
+
+.tc-json-editor-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: var(--bs-json-editor-row-padding-y) var(--bs-json-editor-row-padding-x);
+    border-bottom: 1px solid var(--bs-json-editor-row-border);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.tc-json-editor-skeleton-key,
+.tc-json-editor-skeleton-field {
+    height: 0.9rem;
+    border-radius: 0;
+    background: linear-gradient(
+        90deg,
+        var(--tc-surface-muted) 25%,
+        var(--tc-surface-hover) 37%,
+        var(--tc-surface-muted) 63%
+    );
+    background-size: 200% 100%;
+    animation: tc-json-editor-shimmer 1.4s ease infinite;
+}
+
+.tc-json-editor-skeleton-key {
+    flex: 0 0 35%;
+}
+
+.tc-json-editor-skeleton-field {
+    flex: 1 1 auto;
+    height: 1.9rem;
+}
+
+@keyframes tc-json-editor-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// ── Touch targets — WCAG 2.5.5 ───────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-json-editor-toggle {
+        min-height: 44px;
+    }
+
+    .tc-json-editor-icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+// Freeze decorative transforms/animation; keep state-conveying background/color.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-json-editor-chevron {
+        transition: none;
+    }
+
+    .tc-json-editor-skeleton-key,
+    .tc-json-editor-skeleton-field {
+        animation: none;
+        background: var(--tc-surface-muted);
+    }
+}
