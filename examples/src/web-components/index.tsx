@@ -177,6 +177,7 @@ import NumberInputDemo from './NumberInputDemo'
 import OTPInputDemo from './OTPInputDemo'
 import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
+import AudioMixerDemo from './AudioMixerDemo'
 import RatingDemo from './RatingDemo'
 import SliderDemo from './SliderDemo'
 import ResizablePanelDemo from './ResizablePanelDemo'
@@ -406,6 +407,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'vertical-item-list', category: 'Navigation', element: <VerticalItemListDemo /> },
     { key: 'table', category: 'Content', element: <TableDemo /> },
     { key: 'advanced-table', category: 'Content', element: <AdvancedTableDemo /> },
+    { key: 'audio-mixer', category: 'Components', element: <AudioMixerDemo /> },
     { key: 'tag-input', category: 'Forms', element: <TagInputDemo /> },
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },
