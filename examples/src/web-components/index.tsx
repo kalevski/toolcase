@@ -176,6 +176,7 @@ import OTPInputDemo from './OTPInputDemo'
 import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
 import RatingDemo from './RatingDemo'
+import SliderDemo from './SliderDemo'
 import ResizablePanelDemo from './ResizablePanelDemo'
 import ScrollAreaDemo from './ScrollAreaDemo'
 import RoadmapDemo from './RoadmapDemo'
@@ -244,6 +245,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'radio', category: 'Forms', element: <RadioDemo /> },
     { key: 'radio-group', category: 'Forms', element: <RadioGroupDemo /> },
     { key: 'rating', category: 'Forms', element: <RatingDemo /> },
+    { key: 'slider', category: 'Forms', element: <SliderDemo /> },
     { key: 'switch', category: 'Forms', element: <SwitchDemo /> },
     { key: 'range', category: 'Forms', element: <RangeDemo /> },
     { key: 'date-picker', category: 'Forms', element: <DatePickerDemo /> },
