@@ -1,0 +1,95 @@
+// tc-anchor — purely structural layout primitive. Absolutely positions its
+// slotted content at a corner/edge (or centre) of the nearest positioned
+// ancestor. No visible chrome: positioning is the only concern. All cosmetics
+// flow through --bs-anchor-* custom properties (here, just the inset offset).
+//
+// display: block registered in foundation/_reset.scss. Position is keyed off the
+// `position` attribute; the base rule defaults to top-left so an anchor with no
+// (or an unrecognised) `position` attribute still lands sensibly — matching the
+// JS getter's top-left fallback.
+
+tc-anchor {
+    --bs-anchor-inset: 0px;
+
+    position: absolute;
+
+    // Default placement (top-left) — also the fallback for an absent/invalid
+    // position attribute.
+    top: var(--bs-anchor-inset);
+    right: auto;
+    bottom: auto;
+    left: var(--bs-anchor-inset);
+    transform: none;
+}
+
+tc-anchor[position="top-left"] {
+    top: var(--bs-anchor-inset);
+    right: auto;
+    bottom: auto;
+    left: var(--bs-anchor-inset);
+    transform: none;
+}
+
+tc-anchor[position="top"] {
+    top: var(--bs-anchor-inset);
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+tc-anchor[position="top-right"] {
+    top: var(--bs-anchor-inset);
+    right: var(--bs-anchor-inset);
+    bottom: auto;
+    left: auto;
+    transform: none;
+}
+
+tc-anchor[position="left"] {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: var(--bs-anchor-inset);
+    transform: translateY(-50%);
+}
+
+tc-anchor[position="center"] {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+tc-anchor[position="right"] {
+    top: 50%;
+    right: var(--bs-anchor-inset);
+    bottom: auto;
+    left: auto;
+    transform: translateY(-50%);
+}
+
+tc-anchor[position="bottom-left"] {
+    top: auto;
+    right: auto;
+    bottom: var(--bs-anchor-inset);
+    left: var(--bs-anchor-inset);
+    transform: none;
+}
+
+tc-anchor[position="bottom"] {
+    top: auto;
+    right: auto;
+    bottom: var(--bs-anchor-inset);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+tc-anchor[position="bottom-right"] {
+    top: auto;
+    right: var(--bs-anchor-inset);
+    bottom: var(--bs-anchor-inset);
+    left: auto;
+    transform: none;
+}

@@ -1,4 +1,5 @@
 import { JSX } from 'react'
+import AnchorDemo from './AnchorDemo'
 import AvatarDemo from './AvatarDemo'
 import ActionHeaderDemo from './ActionHeaderDemo'
 import ActionItemsDemo from './ActionItemsDemo'
@@ -309,6 +310,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'label', category: 'Forms', element: <LabelDemo /> },
     { key: 'link', category: 'Content', element: <LinkDemo /> },
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
+    { key: 'anchor', category: 'Layout', element: <AnchorDemo /> },
     { key: 'text', category: 'Content', element: <TextDemo /> },
     { key: 'visually-hidden', category: 'Components', element: <VisuallyHiddenDemo /> },
     { key: 'pulse-indicator', category: 'Components', element: <PulseIndicatorDemo /> },

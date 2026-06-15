@@ -1,4 +1,5 @@
 import { AmmoCounter } from './AmmoCounter'
+import { Anchor } from './Anchor'
 import { Brand } from './Brand'
 import { AreaChart } from './AreaChart'
 import { Avatar } from './Avatar'
@@ -304,6 +305,7 @@ export function register(): void {
     customElements.define('tc-kbd', Kbd)
     customElements.define('tc-label', Label)
     customElements.define('tc-link', Link)
+    customElements.define('tc-anchor', Anchor)
     customElements.define('tc-spacer', Spacer)
     customElements.define('tc-text', Text)
     customElements.define('tc-visually-hidden', VisuallyHidden)
