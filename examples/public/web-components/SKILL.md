@@ -138,6 +138,7 @@ After `register()` you can author markup directly:
   - [tc-rich-page-header](#tc-rich-page-header)
   - [tc-api-reference-table](#tc-api-reference-table)
   - [tc-scoring-rules](#tc-scoring-rules)
+  - [tc-achievement-list](#tc-achievement-list)
   - [tc-section-card](#tc-section-card)
   - [tc-simple-file](#tc-simple-file)
   - [tc-sponsor-wall](#tc-sponsor-wall)
@@ -11094,6 +11095,113 @@ el.rules = [
         description: 'Log in on any day to maintain your streak.',
         points: '+1',
         suffix: 'pt',
+    },
+]
+</script>
+```
+
+---
+
+### tc-achievement-list
+
+Scrollable list of achievements with locked, in-progress, and unlocked states and an optional progress bar. Ported from the game-components `gc-achievement-list`, restyled to the toolcase design system (no fantasy chrome). Set achievements exclusively via the `achievements` JS property. Secret achievements are masked (`???` name, hidden description, lock-style glyph) until unlocked. Non-interactive — no hover state, no events.
+
+**Tag:** `tc-achievement-list`
+
+**Attributes**
+
+None. All content is supplied via the `achievements` JS property. The host receives `role="list"` automatically (unless an explicit `role` is already set).
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `achievements` | `Achievement[]` | `[]` | Array of achievement descriptors (see shape below). Re-renders the list on each set; the getter returns a copy. |
+
+**Achievement shape**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | `string` | yes | Stable identifier, written to the row's `data-id` attribute. |
+| `name` | `string` | yes | Achievement name — Inter 500, `--tc-text`. Hidden behind `???` while `secret` and not `unlocked`. |
+| `description` | `string` | no | Secondary description line below the name — `--tc-text-muted`, smaller. Replaced by "Hidden achievement." while secret. |
+| `icon` | `string` | no | Lucide icon name (kebab-case or PascalCase, e.g. `"swords"` or `"Swords"`). Rendered as inline SVG inside the icon tile. Falls back to a default glyph per state (`award` unlocked, `lock` locked, `help-circle` secret). |
+| `unlocked` | `boolean` | no | When true, the row is marked unlocked — ink-filled icon tile and emphasised points. |
+| `progress` | `number` | no | Current progress value. A progress bar shows only when the row is locked and both `progress` and `target` are numbers with `target > 0`. |
+| `target` | `number` | no | Progress target (denominator). Required alongside `progress` to render the bar. |
+| `points` | `number` | no | Point value shown in JetBrains Mono on the right. Hidden for secret rows. |
+| `secret` | `boolean` | no | When true (and not `unlocked`), masks the name, description, points, and icon. |
+
+**Events**
+
+None. `tc-achievement-list` is purely presentational.
+
+**Slots**
+
+None.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-achievement-list-max-height` | `360px` | Max height before the list scrolls vertically. |
+| `--bs-achievement-list-bg` | `var(--tc-surface)` | List background. |
+| `--bs-achievement-list-border-color` | `var(--tc-border)` | Outer 1px hairline frame color. |
+| `--bs-achievement-list-row-border-color` | `var(--tc-border)` | 1px hairline separator between rows. |
+| `--bs-achievement-list-row-padding-y` | `0.75rem` | Vertical padding per row. |
+| `--bs-achievement-list-row-padding-x` | `1rem` | Horizontal padding per row. |
+| `--bs-achievement-list-row-gap` | `0.75rem` | Gap between icon, text, and points. |
+| `--bs-achievement-list-icon-size` | `2rem` | Width/height of the square icon tile. |
+| `--bs-achievement-list-icon-glyph-size` | `1.125rem` | Icon SVG width/height. |
+| `--bs-achievement-list-icon-bg` | `var(--tc-surface-muted)` | Icon tile background (locked/in-progress). |
+| `--bs-achievement-list-icon-border-color` | `var(--tc-border)` | Icon tile border color. |
+| `--bs-achievement-list-icon-color` | `var(--tc-text-muted)` | Icon glyph color (locked/in-progress). |
+| `--bs-achievement-list-name-color` | `var(--tc-text)` | Achievement name color. |
+| `--bs-achievement-list-name-font-size` | `0.9375rem` | Name font size. |
+| `--bs-achievement-list-description-color` | `var(--tc-text-muted)` | Description text color. |
+| `--bs-achievement-list-description-font-size` | `0.8125rem` | Description font size. |
+| `--bs-achievement-list-points-color` | `var(--tc-text-muted)` | Points color (locked/in-progress). |
+| `--bs-achievement-list-points-font-size` | `0.8125rem` | Points font size. |
+| `--bs-achievement-list-progress-track-bg` | `var(--tc-slate-200)` | Progress track background. |
+| `--bs-achievement-list-progress-fill` | `var(--tc-app-accent)` | Progress fill color (ink). |
+| `--bs-achievement-list-progress-height` | `0.375rem` | Progress bar height. |
+| `--bs-achievement-list-progress-count-color` | `var(--tc-text-muted)` | Progress count text color. |
+| `--bs-achievement-list-progress-count-font-size` | `0.6875rem` | Progress count font size. |
+| `--bs-achievement-list-unlocked-icon-bg` | `var(--tc-app-accent)` | Icon tile background when unlocked. |
+| `--bs-achievement-list-unlocked-icon-color` | `#fff` | Icon glyph color when unlocked. |
+| `--bs-achievement-list-unlocked-icon-border-color` | `var(--tc-app-accent)` | Icon tile border when unlocked. |
+| `--bs-achievement-list-unlocked-points-color` | `var(--tc-text)` | Points color when unlocked. |
+| `--bs-achievement-list-locked-opacity` | `0.6` | Opacity applied to locked rows. |
+
+```html
+<tc-achievement-list id="achievements"></tc-achievement-list>
+
+<script>
+const el = document.getElementById('achievements')
+el.achievements = [
+    {
+        id: 'first-blood',
+        name: 'First Blood',
+        description: 'Defeat your first enemy.',
+        icon: 'swords',
+        unlocked: true,
+        points: 10,
+    },
+    {
+        id: 'explorer',
+        name: 'Explorer',
+        description: 'Discover 25 hidden locations across the world.',
+        icon: 'map',
+        progress: 18,
+        target: 25,
+        points: 50,
+    },
+    {
+        id: 'secret-ending',
+        name: 'The True Ending',
+        description: 'You should not be able to read this.',
+        secret: true,
+        points: 250,
     },
 ]
 </script>
