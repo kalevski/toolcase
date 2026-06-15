@@ -242,6 +242,14 @@ const MIGRATIONS: string[] = [
         created_at      TEXT NOT NULL
     );
     `,
+    // v5 — performance: the dashboard summary, per-run costBetween and global
+    // cost-per-day all filter telemetry by (project, created_at range); the
+    // existing idx_telemetry_latest(project, task, id) doesn't serve that. The
+    // audit log filters by project. Both additive (CREATE INDEX), no data change.
+    `
+    CREATE INDEX IF NOT EXISTS idx_telemetry_project_created ON telemetry(project, created_at);
+    CREATE INDEX IF NOT EXISTS idx_audit_project ON audit(project, id DESC);
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

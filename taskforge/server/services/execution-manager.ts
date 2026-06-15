@@ -139,6 +139,18 @@ export class DirtyTreeError extends Error {
     }
 }
 
+/**
+ * The model family (`opus` / `sonnet` / `haiku`) named in a string, or null if
+ * none. Used to scope the usage gate: a `/usage` bucket whose label names a
+ * specific model (e.g. the Sonnet-only weekly limit) only constrains tasks that
+ * run that model — generic buckets ("session", "week (all models)") name no
+ * family and constrain everything.
+ */
+export function modelFamily(s: string): string | null {
+    const m = s.toLowerCase().match(/\b(opus|sonnet|haiku)\b/)
+    return m ? m[1] : null
+}
+
 const DEFAULT_PREAMBLE = `You are an autonomous engineer resolving a single queued task.
 
 - The task is provided inline below — implement it end-to-end.
@@ -237,8 +249,8 @@ class ExecutionManager extends EventEmitter {
     }
 
     private async acquireLock(repo: string): Promise<void> {
-        const r = this.get(repo)
-        if (r.state !== 'IDLE') throw new LockHeldError('A run is already in progress for this repo')
+        // The IDLE→claimed transition is owned by start() (set synchronously
+        // before its first await), so no state re-check is needed here.
         await fs.mkdir(projectTasksDir(repo), { recursive: true })
         // A present .lock with no in-memory run is stale (process restart) → reclaim.
         await fs.writeFile(this.lockPath(repo), String(process.pid), 'utf8').catch(() => {})
@@ -267,16 +279,26 @@ class ExecutionManager extends EventEmitter {
         if (agentSessionsBusy(repo)) {
             throw new LockHeldError('An agent session is running for this project')
         }
+        // Claim the slot synchronously — flip state before the first `await` so a
+        // concurrent start() observes non-IDLE and is rejected. Closes a
+        // double-start race across the (async) clean-tree gate + lock write that
+        // would otherwise let two runs spawn for the same repo.
+        r.state = 'RUNNING'
 
-        // §6.14 clean-repo gate (only when actually executing, not for dry runs)
-        if (!opts.dryRun) {
-            const clean = await isClean(repo).catch(() => true)
-            if (!clean) {
-                throw new DirtyTreeError(await dirtyFiles(repo))
+        try {
+            // §6.14 clean-repo gate (only when actually executing, not for dry runs)
+            if (!opts.dryRun) {
+                const clean = await isClean(repo).catch(() => true)
+                if (!clean) {
+                    throw new DirtyTreeError(await dirtyFiles(repo))
+                }
             }
+            await this.acquireLock(repo)
+        } catch (err) {
+            // roll back the synchronous claim (unless a run object already took over)
+            if (this.runs.get(repo) === r) r.state = 'IDLE'
+            throw err
         }
-
-        await this.acquireLock(repo)
 
         // reset run state
         const run = freshRun()
@@ -487,7 +509,7 @@ class ExecutionManager extends EventEmitter {
                 // §usage gate — after each executed task, before starting the next,
                 // pause if usage is at/above the threshold (avoids limit failures).
                 if (executed && config.usageGateEnabled) {
-                    await this.usageGate(repo, rel)
+                    await this.usageGate(repo, rel, opts.model)
                     if (r.forceRequested) {
                         reason = 'force-stopped'
                         return
@@ -967,6 +989,7 @@ class ExecutionManager extends EventEmitter {
         let isError = false
         let sessionId: string | undefined
         let usage: AgentUsage | null = null
+        let exitCode: number | null = null
 
         const parser = createAgentStreamParser({
             onText: (text) => this.log(repo, 'output', text, rel),
@@ -991,7 +1014,7 @@ class ExecutionManager extends EventEmitter {
             })
             child.on('close', (code) => {
                 parser.flush()
-                ;(child as any)._exitCode = code
+                exitCode = code
                 resolve()
             })
             child.on('error', (err) => {
@@ -1001,7 +1024,7 @@ class ExecutionManager extends EventEmitter {
         })
 
         r.child = null
-        const exit = (child as any)._exitCode ?? child.exitCode
+        const exit = exitCode ?? child.exitCode
         return {
             exit,
             isError,
@@ -1163,15 +1186,36 @@ class ExecutionManager extends EventEmitter {
      * so a parser/CLI hiccup never wedges the queue. Honors stop/force (the shared
      * `sleep` resolves early; we re-check the flags each loop).
      */
-    private async usageGate(repo: string, nextRel: string): Promise<void> {
+    private async usageGate(repo: string, nextRel: string, runModel: string): Promise<void> {
         const r = this.get(repo)
         const threshold = effectiveSettings(repo).usageGateThreshold
+
+        // Resolve the model the next task will actually run under (run model +
+        // optional per-task override) so we only gate on buckets that constrain
+        // it. Without this, a model-specific bucket at the threshold (e.g. the
+        // Sonnet-only weekly limit) would pause an Opus/Haiku task that bucket
+        // does not affect.
+        let taskModel = runModel
+        try {
+            const parsed = parseTask(await readTaskFile(repo, nextRel), nextRel)
+            if (parsed.model && this.isKnownModel(parsed.model)) taskModel = parsed.model
+        } catch {
+            /* unreadable file — gate on the run model */
+        }
+        const taskFamily = modelFamily(resolveModel(taskModel))
+
         for (;;) {
             if (r.stopRequested || r.forceRequested) return
             let peak: number
             try {
                 const snap = await refreshUsage(Date.now())
-                peak = snap.entries.reduce((m, e) => Math.max(m, e.percent), 0)
+                // Generic buckets (no model named) always apply; a model-specific
+                // bucket applies only when the next task runs that model.
+                peak = snap.entries.reduce((m, e) => {
+                    const fam = modelFamily(e.label)
+                    if (fam && fam !== taskFamily) return m
+                    return Math.max(m, e.percent)
+                }, 0)
             } catch (err: any) {
                 this.log(repo, 'comment', `usage check skipped (${err?.message ?? err}) — continuing`, nextRel)
                 return // fail-open
