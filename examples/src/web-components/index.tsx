@@ -102,6 +102,7 @@ import DownloadStatsDemo from './DownloadStatsDemo'
 import EmptyStateDemo from './EmptyStateDemo'
 import EntityCellDemo from './EntityCellDemo'
 import FeatureCardDemo from './FeatureCardDemo'
+import AbilityCardDemo from './AbilityCardDemo'
 import GoodFirstIssuesDemo from './GoodFirstIssuesDemo'
 import HeroStatsBarDemo from './HeroStatsBarDemo'
 import LeaderboardTrendDemo from './LeaderboardTrendDemo'
@@ -340,6 +341,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'empty-state', category: 'Components', element: <EmptyStateDemo /> },
     { key: 'entity-cell', category: 'Components', element: <EntityCellDemo /> },
     { key: 'feature-card', category: 'Components', element: <FeatureCardDemo /> },
+    { key: 'ability-card', category: 'Content', element: <AbilityCardDemo /> },
     { key: 'good-first-issues', category: 'Components', element: <GoodFirstIssuesDemo /> },
     { key: 'hero-stats-bar', category: 'Components', element: <HeroStatsBarDemo /> },
     { key: 'leaderboard', category: 'Components', element: <LeaderboardDemo /> },

@@ -108,6 +108,7 @@ import { DownloadStats } from './DownloadStats'
 import { EmptyState } from './EmptyState'
 import { EntityCell } from './EntityCell'
 import { FeatureCard } from './FeatureCard'
+import { AbilityCard } from './AbilityCard'
 import { GoodFirstIssues } from './GoodFirstIssues'
 import { HeroStatsBar } from './HeroStatsBar'
 import { LeaderboardTrend } from './LeaderboardTrend'
@@ -336,6 +337,7 @@ export function register(): void {
     customElements.define('tc-empty-state', EmptyState)
     customElements.define('tc-entity-cell', EntityCell)
     customElements.define('tc-feature-card', FeatureCard)
+    customElements.define('tc-ability-card', AbilityCard)
     customElements.define('tc-good-first-issues', GoodFirstIssues)
     customElements.define('tc-hero-stats-bar', HeroStatsBar)
     customElements.define('tc-leaderboard-trend', LeaderboardTrend)

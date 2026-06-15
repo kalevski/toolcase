@@ -1,0 +1,216 @@
+// tc-ability-card — ability portrait tile: an icon chip, rarity micro-label,
+// ability name, optional hotkey (keybind), description, and a meta grid of
+// cooldown / cost / range. Ported from the game-components gc-ability-card, but
+// stripped of fantasy chrome — flat slate surface, hairline borders, sharp
+// corners, mono machine-text. Rarity is conveyed by a single muted accent on
+// the micro-label, not by gilded frames or glows.
+// All cosmetics flow through --bs-ability-card-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-ability-card {
+    --bs-ability-card-bg: var(--tc-surface);
+    --bs-ability-card-border-color: var(--tc-border);
+    --bs-ability-card-shadow: var(--tc-shadow-sm);
+    --bs-ability-card-shadow-hover: var(--tc-shadow-hover);
+    --bs-ability-card-padding-y: 1rem;
+    --bs-ability-card-padding-x: 1rem;
+    --bs-ability-card-gap: 0.75rem;
+    --bs-ability-card-head-gap: 0.75rem;
+
+    --bs-ability-card-icon-bg: var(--tc-surface-muted);
+    --bs-ability-card-icon-color: var(--tc-text);
+    --bs-ability-card-icon-size: 1.375rem;
+    --bs-ability-card-icon-tile-size: 2.75rem;
+
+    --bs-ability-card-rarity-color: var(--tc-text-faint);
+    --bs-ability-card-name-color: var(--tc-text);
+    --bs-ability-card-name-weight: 600;
+    --bs-ability-card-desc-color: var(--tc-text-muted);
+
+    --bs-ability-card-keybind-bg: var(--tc-surface-muted);
+    --bs-ability-card-keybind-border: var(--tc-border-strong);
+    --bs-ability-card-keybind-color: var(--tc-text);
+
+    --bs-ability-card-meta-border: var(--tc-border);
+    --bs-ability-card-meta-row-border: var(--tc-surface-muted);
+    --bs-ability-card-meta-label-color: var(--tc-text-faint);
+    --bs-ability-card-meta-value-color: var(--tc-text);
+}
+
+// Per-rarity accent — sanctioned status tokens only, kept muted. Drives the
+// rarity micro-label colour; themes can override --bs-ability-card-rarity-color.
+tc-ability-card[data-rarity='uncommon'] {
+    --bs-ability-card-rarity-color: var(--tc-success);
+}
+tc-ability-card[data-rarity='rare'] {
+    --bs-ability-card-rarity-color: var(--tc-info);
+}
+tc-ability-card[data-rarity='epic'] {
+    --bs-ability-card-rarity-color: var(--tc-app-accent);
+}
+tc-ability-card[data-rarity='legendary'] {
+    --bs-ability-card-rarity-color: var(--tc-warning);
+}
+
+.tc-ability-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-ability-card-gap);
+    padding: var(--bs-ability-card-padding-y) var(--bs-ability-card-padding-x);
+    background: var(--bs-ability-card-bg);
+    border: 1px solid var(--bs-ability-card-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-ability-card-shadow);
+    transition:
+        box-shadow var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+
+    &:hover {
+        box-shadow: var(--bs-ability-card-shadow-hover);
+        transform: translateY(-1px);
+    }
+}
+
+// Head row: icon chip + name block + hotkey pushed to the trailing edge.
+.tc-ability-card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--bs-ability-card-head-gap);
+}
+
+// Icon chip — flat slate square, sharp corners.
+.tc-ability-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-ability-card-icon-tile-size);
+    height: var(--bs-ability-card-icon-tile-size);
+    flex-shrink: 0;
+    background: var(--bs-ability-card-icon-bg);
+    border-radius: 0;
+    color: var(--bs-ability-card-icon-color);
+
+    &:empty {
+        display: none;
+    }
+
+    svg {
+        width: var(--bs-ability-card-icon-size);
+        height: var(--bs-ability-card-icon-size);
+    }
+}
+
+// Name block grows to fill, pushing the keybind to the right.
+.tc-ability-card-headtext {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+// Rarity — JetBrains Mono micro-label, uppercase, tinted by the rarity accent.
+.tc-ability-card-rarity {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    color: var(--bs-ability-card-rarity-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Ability name — slate ink, weight 600.
+.tc-ability-card-name {
+    font-size: 0.9375rem;
+    font-weight: var(--bs-ability-card-name-weight);
+    color: var(--bs-ability-card-name-color);
+    line-height: 1.35;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Hotkey — mono kbd cap, hairline frame, sharp corners.
+.tc-ability-card-keybind {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 1.75rem;
+    height: 1.75rem;
+    padding: 0 0.5rem;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--bs-ability-card-keybind-color);
+    background: var(--bs-ability-card-keybind-bg);
+    border: 1px solid var(--bs-ability-card-keybind-border);
+    border-radius: 0;
+}
+
+// Description — muted body text.
+.tc-ability-card-description {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--bs-ability-card-desc-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Meta grid — cooldown / cost / range as label↔value rows separated by hairlines.
+.tc-ability-card-meta {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--bs-ability-card-meta-border);
+}
+
+.tc-ability-card-meta-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.375rem 0;
+    border-bottom: 1px solid var(--bs-ability-card-meta-row-border);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.tc-ability-card-meta-label {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-ability-card-meta-label-color);
+}
+
+.tc-ability-card-meta-value {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-ability-card-meta-value-color);
+    text-align: right;
+}
+
+// Honour prefers-reduced-motion: freeze the lift, keep the shadow transition.
+@media (prefers-reduced-motion: reduce) {
+    .tc-ability-card {
+        transition: box-shadow var(--tc-transition-fast);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
