@@ -185,6 +185,7 @@ import { Image as TcImage } from './Image'
 import { InfiniteScroll } from './InfiniteScroll'
 import { InstallTabs } from './InstallTabs'
 import { Leaderboard } from './Leaderboard'
+import { LineChart } from './LineChart'
 import { LiveFeed } from './LiveFeed'
 import { Login } from './Login'
 import { Marquee } from './Marquee'
@@ -404,6 +405,7 @@ export function register(): void {
     customElements.define('tc-infinite-scroll', InfiniteScroll)
     customElements.define('tc-install-tabs', InstallTabs)
     customElements.define('tc-leaderboard', Leaderboard)
+    customElements.define('tc-line-chart', LineChart)
     customElements.define('tc-live-feed', LiveFeed)
     customElements.define('tc-login', Login)
     customElements.define('tc-marquee', Marquee)
