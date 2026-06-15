@@ -177,6 +177,7 @@ import GroupDemo from './GroupDemo'
 import HeatmapDemo from './HeatmapDemo'
 import HeroDemo from './HeroDemo'
 import ImageDemo from './ImageDemo'
+import ImageCropDemo from './ImageCropDemo'
 import InfiniteScrollDemo from './InfiniteScrollDemo'
 import InstallTabsDemo from './InstallTabsDemo'
 import LeaderboardDemo from './LeaderboardDemo'
@@ -410,6 +411,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'heatmap', category: 'Components', element: <HeatmapDemo /> },
     { key: 'hero', category: 'Content', element: <HeroDemo /> },
     { key: 'image', category: 'Content', element: <ImageDemo /> },
+    { key: 'image-crop', category: 'Forms', element: <ImageCropDemo /> },
     { key: 'infinite-scroll', category: 'Components', element: <InfiniteScrollDemo /> },
     { key: 'install-tabs', category: 'Components', element: <InstallTabsDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },

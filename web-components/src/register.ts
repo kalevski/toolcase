@@ -185,6 +185,7 @@ import { Group } from './Group'
 import { Heatmap } from './Heatmap'
 import { Hero } from './Hero'
 import { Image as TcImage } from './Image'
+import { ImageCrop } from './ImageCrop'
 import { InfiniteScroll } from './InfiniteScroll'
 import { InstallTabs } from './InstallTabs'
 import { Leaderboard } from './Leaderboard'
@@ -409,6 +410,7 @@ export function register(): void {
     customElements.define('tc-heatmap', Heatmap)
     customElements.define('tc-hero', Hero)
     customElements.define('tc-image', TcImage)
+    customElements.define('tc-image-crop', ImageCrop)
     customElements.define('tc-infinite-scroll', InfiniteScroll)
     customElements.define('tc-install-tabs', InstallTabs)
     customElements.define('tc-leaderboard', Leaderboard)

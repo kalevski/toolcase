@@ -1,0 +1,261 @@
+// tc-image-crop — canvas-based image cropper: an interactive stage drawing the
+// source image, a translucent ink scrim that dims everything outside a crop
+// window (rectangular, or a perfect circle when `circular` — the one sanctioned
+// curve here), and a toolbar with a zoom slider, an ink-gradient apply button,
+// and a ghost reset button. Slate field, hairline frame, sharp corners
+// everywhere. Colour is status only (the error message). Every cosmetic value
+// flows through --bs-image-crop-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-image-crop {
+    --bs-image-crop-field: var(--tc-surface-muted);
+    --bs-image-crop-border: var(--tc-border);
+    --bs-image-crop-window-border: var(--tc-border-strong);
+    --bs-image-crop-scrim: rgba(15, 23, 42, 0.55);
+
+    --bs-image-crop-stage-height: 22rem;
+
+    --bs-image-crop-toolbar-gap: 0.75rem;
+    --bs-image-crop-label-color: var(--tc-text-muted);
+    --bs-image-crop-label-size: 0.6875rem;
+
+    --bs-image-crop-zoom-track: var(--tc-border-strong);
+    --bs-image-crop-zoom-thumb-bg: var(--tc-surface);
+    --bs-image-crop-zoom-thumb-border: var(--tc-app-accent);
+
+    --bs-image-crop-btn-radius: 0;
+    --bs-image-crop-btn-border: var(--tc-border-strong);
+    --bs-image-crop-btn-color: var(--tc-text);
+    --bs-image-crop-btn-hover-bg: var(--tc-surface-muted);
+    --bs-image-crop-btn-primary-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-image-crop-btn-primary-color: #fff;
+    --bs-image-crop-btn-primary-lift: 0 4px 15px rgba(30, 41, 59, 0.3);
+
+    --bs-image-crop-error-color: var(--tc-danger);
+
+    --bs-image-crop-focus-outline: 2px solid var(--tc-app-accent);
+}
+
+.tc-image-crop {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-image-crop-toolbar-gap);
+}
+
+// ── Stage ──────────────────────────────────────────────────────────────────────
+
+.tc-image-crop-stage {
+    position: relative;
+    width: 100%;
+    height: var(--bs-image-crop-stage-height);
+    overflow: hidden;
+    border: 1px solid var(--bs-image-crop-border);
+    border-radius: 0;
+    background: var(--bs-image-crop-field);
+    cursor: grab;
+
+    &--grabbing {
+        cursor: grabbing;
+    }
+}
+
+.tc-image-crop-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    // The stage paints the slate field; the canvas only draws the image.
+    background: transparent;
+    touch-action: none;
+    cursor: inherit;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:focus-visible {
+        outline: var(--bs-image-crop-focus-outline);
+        outline-offset: -2px;
+    }
+}
+
+// The mask never intercepts pointer events — the canvas underneath owns panning.
+.tc-image-crop-mask {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+// A single element whose huge spread box-shadow dims everything outside it; the
+// element itself stays transparent (the bright crop window). The 1px outline
+// traces the frame edge.
+.tc-image-crop-window {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid var(--bs-image-crop-window-border);
+    border-radius: 0;
+    box-shadow: 0 0 0 100vmax var(--bs-image-crop-scrim);
+}
+
+.tc-image-crop--circular .tc-image-crop-window {
+    border-radius: 50%;
+}
+
+// ── Error ──────────────────────────────────────────────────────────────────────
+
+.tc-image-crop-error {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-image-crop-error-color);
+}
+
+// ── Toolbar ────────────────────────────────────────────────────────────────────
+
+.tc-image-crop-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-image-crop-toolbar-gap);
+}
+
+.tc-image-crop-zoom-field {
+    display: flex;
+    flex: 1 1 12rem;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.tc-image-crop-zoom-label {
+    font-family: var(--tc-font-mono, ui-monospace, 'JetBrains Mono', 'SFMono-Regular', monospace);
+    font-size: var(--bs-image-crop-label-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-image-crop-label-color);
+}
+
+.tc-image-crop-zoom {
+    flex: 1 1 auto;
+    height: 1.25rem;
+    padding: 0;
+    appearance: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:focus-visible {
+        outline: var(--bs-image-crop-focus-outline);
+        outline-offset: 4px;
+    }
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        background-color: var(--bs-image-crop-zoom-track);
+        border: 0;
+        border-radius: 0;
+    }
+
+    &::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+        margin-top: -5px;
+        appearance: none;
+        background-color: var(--bs-image-crop-zoom-thumb-bg);
+        border: 1.5px solid var(--bs-image-crop-zoom-thumb-border);
+        border-radius: 50%;
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        background-color: var(--bs-image-crop-zoom-track);
+        border: 0;
+        border-radius: 0;
+    }
+
+    &::-moz-range-progress {
+        height: 6px;
+        background-color: var(--tc-app-accent);
+    }
+
+    &::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background-color: var(--bs-image-crop-zoom-thumb-bg);
+        border: 1.5px solid var(--bs-image-crop-zoom-thumb-border);
+        border-radius: 50%;
+        box-shadow: var(--tc-shadow-sm);
+    }
+}
+
+.tc-image-crop-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.tc-image-crop-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.925rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    border-radius: var(--bs-image-crop-btn-radius);
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), transform var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus-visible {
+        outline: var(--bs-image-crop-focus-outline);
+        outline-offset: 2px;
+    }
+
+    &--ghost {
+        background: transparent;
+        color: var(--bs-image-crop-btn-color);
+        border-color: var(--bs-image-crop-btn-border);
+
+        &:hover {
+            background: var(--bs-image-crop-btn-hover-bg);
+        }
+    }
+
+    &--primary {
+        background: var(--bs-image-crop-btn-primary-bg);
+        color: var(--bs-image-crop-btn-primary-color);
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--bs-image-crop-btn-primary-lift);
+        }
+    }
+}
+
+.tc-image-crop-apply-icon {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+}
+
+// Functional motion only; freeze the decorative button lift under reduced motion
+// but keep state-conveying colour transitions.
+@media (prefers-reduced-motion: reduce) {
+    .tc-image-crop-btn {
+        transition: background-color var(--tc-transition-fast);
+
+        &--primary:hover {
+            transform: none;
+        }
+    }
+}
