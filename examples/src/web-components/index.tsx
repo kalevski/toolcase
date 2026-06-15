@@ -1,6 +1,7 @@
 import { JSX } from 'react'
 import AnchorDemo from './AnchorDemo'
 import AvatarDemo from './AvatarDemo'
+import ArtboardBackdropDemo from './ArtboardBackdropDemo'
 import ActionHeaderDemo from './ActionHeaderDemo'
 import ActionItemsDemo from './ActionItemsDemo'
 import ActionRowListDemo from './ActionRowListDemo'
@@ -249,6 +250,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'row', category: 'Layout', element: <RowDemo /> },
     { key: 'col', category: 'Layout', element: <ColDemo /> },
     { key: 'scroll-area', category: 'Layout', element: <ScrollAreaDemo /> },
+    { key: 'artboard-backdrop', category: 'Layout', element: <ArtboardBackdropDemo /> },
     { key: 'accordion', category: 'Components', element: <AccordionDemo /> },
     { key: 'alert', category: 'Components', element: <AlertDemo /> },
     { key: 'announcement-bar', category: 'Components', element: <AnnouncementBarDemo /> },

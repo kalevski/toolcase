@@ -1,0 +1,76 @@
+// tc-artboard-backdrop — decorative full-bleed backdrop surface. The
+// game-components original leaned on gilded frames, glows, and fantasy fills;
+// here it is reduced to the design-system voice: a flat slate-ramp surface, a
+// single 1px hairline, sharp corners (border-radius: 0), and no shadow (this is
+// a base surface, not an overlay). Three `kind` tones (dark ink / muted scene /
+// light parchment) and a five-step padding scale, all driven through
+// --bs-artboard-backdrop-* so themes re-skin via vars alone.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-artboard-backdrop {
+    --bs-artboard-backdrop-bg: var(--tc-ink);
+    --bs-artboard-backdrop-color: var(--tc-text-inverse);
+    --bs-artboard-backdrop-border-color: transparent;
+    --bs-artboard-backdrop-radius: 0;
+    --bs-artboard-backdrop-padding: 1.5rem;
+}
+
+// ── Surface ─────────────────────────────────────────────────────────────────────
+
+.tc-artboard-backdrop {
+    position: relative;
+    width: 100%;
+    color: var(--bs-artboard-backdrop-color);
+    background: var(--bs-artboard-backdrop-bg);
+    border: 1px solid var(--bs-artboard-backdrop-border-color);
+    border-radius: var(--bs-artboard-backdrop-radius);
+    padding: var(--bs-artboard-backdrop-padding);
+}
+
+// ── Tones (kind) ────────────────────────────────────────────────────────────────
+// Neutrals carry the design; no decorative colour. `dark` is the ink surface
+// (white text), `scene` a muted slate well, `parch` a plain light paper with a
+// visible hairline.
+
+.tc-artboard-backdrop--dark {
+    --bs-artboard-backdrop-bg: var(--tc-ink);
+    --bs-artboard-backdrop-color: var(--tc-text-inverse);
+    --bs-artboard-backdrop-border-color: transparent;
+}
+
+.tc-artboard-backdrop--scene {
+    --bs-artboard-backdrop-bg: var(--tc-surface-muted);
+    --bs-artboard-backdrop-color: var(--tc-text);
+    --bs-artboard-backdrop-border-color: var(--tc-border);
+}
+
+.tc-artboard-backdrop--parch {
+    --bs-artboard-backdrop-bg: var(--tc-surface);
+    --bs-artboard-backdrop-color: var(--tc-text);
+    --bs-artboard-backdrop-border-color: var(--tc-border);
+}
+
+// ── Padding scale ───────────────────────────────────────────────────────────────
+
+.tc-artboard-backdrop--pad-none {
+    --bs-artboard-backdrop-padding: 0;
+}
+
+.tc-artboard-backdrop--pad-sm {
+    --bs-artboard-backdrop-padding: 0.75rem;
+}
+
+.tc-artboard-backdrop--pad-md {
+    --bs-artboard-backdrop-padding: 1.5rem;
+}
+
+.tc-artboard-backdrop--pad-lg {
+    --bs-artboard-backdrop-padding: 2.5rem;
+}
+
+.tc-artboard-backdrop--pad-xl {
+    --bs-artboard-backdrop-padding: 4rem;
+}
