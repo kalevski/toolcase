@@ -182,6 +182,7 @@ import ScrollAreaDemo from './ScrollAreaDemo'
 import RoadmapDemo from './RoadmapDemo'
 import SideNavDemo from './SideNavDemo'
 import TreeViewDemo from './TreeViewDemo'
+import UserPanelDemo from './UserPanelDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
@@ -392,6 +393,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
     { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
     { key: 'tree-view', category: 'Navigation', element: <TreeViewDemo /> },
+    { key: 'user-panel', category: 'Components', element: <UserPanelDemo /> },
     { key: 'single-card-select', category: 'Forms', element: <SingleCardSelectDemo /> },
     { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
     { key: 'table', category: 'Content', element: <TableDemo /> },

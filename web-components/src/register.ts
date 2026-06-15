@@ -198,6 +198,7 @@ import { TestimonialCarousel } from './TestimonialCarousel'
 import { TimePicker } from './TimePicker'
 import { ToggleCard } from './ToggleCard'
 import { TreeView } from './TreeView'
+import { UserPanel } from './UserPanel'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -405,4 +406,5 @@ export function register(): void {
     customElements.define('tc-time-picker', TimePicker)
     customElements.define('tc-toggle-card', ToggleCard)
     customElements.define('tc-tree-view', TreeView)
+    customElements.define('tc-user-panel', UserPanel)
 }

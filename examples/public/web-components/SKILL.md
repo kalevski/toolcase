@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -121,6 +121,7 @@ After `register()` you can author markup directly:
   - [tc-plugin-grid](#tc-plugin-grid)
   - [tc-pricing-card](#tc-pricing-card)
   - [tc-file](#tc-file)
+  - [tc-user-panel](#tc-user-panel)
   - [tc-queued-file](#tc-queued-file)
   - [tc-rank-cell](#tc-rank-cell)
   - [tc-rich-page-header](#tc-rich-page-header)
@@ -9127,6 +9128,98 @@ None. All content is driven by attributes and JS properties.
 
 <!-- Loading skeleton -->
 <tc-file loading></tc-file>
+```
+
+---
+
+### tc-user-panel
+
+User profile panel with a circular avatar (image or initials chip), a display name, a plan micro-label, and a trailing settings icon button. When `menuItems` are supplied the name/plan area becomes a dropdown trigger that opens an overlay menu. Sharp corners (`border-radius: 0`) everywhere except the circular avatar (`50%`); slate neutrals throughout.
+
+**Tag:** `tc-user-panel`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `username` | string | — | Required display name. Used as the avatar `alt` / label and to derive initials when `initials` is absent. |
+| `avatar-src` | string | — | Avatar image URL. When present, renders an `<img>`; otherwise a circular initials chip is shown. |
+| `initials` | string | — | Fallback avatar text shown when `avatar-src` is absent. Derived from `username` when omitted. |
+| `plan` | string | `Free` | Plan label rendered as an uppercase mono micro-label below the name. |
+| `icon` | string | `settings` | Lucide icon name for the settings button (rendered as inline SVG). `gear` aliases to `settings`. |
+| `icon-highlighted` | boolean | `false` | Applies the rare cyan `--tc-accent` accent to the settings icon button. |
+| `loading` | boolean | `false` | Renders skeleton avatar/name/plan placeholders and disables interaction. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `menuItems` | `UserPanelMenuItem[]` | `[]` | Dropdown menu items — each `{ key: string, label: string, icon?: string }`. When non-empty, the panel becomes a dropdown trigger. |
+| `onIconClick` | `(() => void) \| null` | `null` | Callback invoked alongside `tc-icon-click` when the settings button is clicked. |
+| `onMenuClick` | `((key: string) => void) \| null` | `null` | Callback invoked alongside `tc-menu-click` when a menu item is chosen. |
+
+Each attribute is also reflected as a same-named JS property (e.g. `avatarSrc`, `iconHighlighted`).
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-icon-click` | `{}` | Fired (bubbles, composed) when the settings icon button is clicked. |
+| `tc-menu-click` | `{ key: string }` | Fired (bubbles, composed) when a menu item is activated by click or keyboard. |
+
+**Slots**
+
+None. All content is driven by attributes and JS properties.
+
+**Accessibility**
+
+The settings button is a real `<button>` with `aria-label="Settings"`. When `menuItems` are present the name/plan trigger carries `role="button"`, `aria-haspopup="menu"`, and `aria-expanded`; the menu has `role="menu"` and items `role="menuitem"`. Outside-click and `Escape` close the menu (`Escape` returns focus to the trigger); arrow keys / Home / End move between items. Icons are decorative (`aria-hidden`); the avatar image carries `alt` text (the initials chip is labelled).
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-user-panel-bg` | `var(--tc-surface)` | Panel background |
+| `--bs-user-panel-gap` | `0.625rem` | Gap between avatar / info / icon |
+| `--bs-user-panel-avatar-size` | `2rem` | Circular avatar diameter |
+| `--bs-user-panel-avatar-bg` | `var(--tc-app-accent)` | Initials chip background |
+| `--bs-user-panel-avatar-color` | `#fff` | Initials chip text color |
+| `--bs-user-panel-name-color` | `var(--tc-text)` | Display name color |
+| `--bs-user-panel-plan-color` | `var(--tc-text-muted)` | Plan micro-label color |
+| `--bs-user-panel-trigger-hover-bg` | `var(--tc-surface-muted)` | Trigger (info) hover fill |
+| `--bs-user-panel-icon-color` | `var(--tc-text-muted)` | Settings icon color |
+| `--bs-user-panel-icon-hover-bg` | `var(--tc-surface-muted)` | Settings icon hover fill |
+| `--bs-user-panel-icon-active-bg` | `var(--tc-app-accent)` | Settings icon active fill |
+| `--bs-user-panel-icon-highlight-color` | `var(--tc-accent)` | Highlighted icon accent |
+| `--bs-user-panel-menu-bg` | `var(--tc-surface)` | Dropdown menu background |
+| `--bs-user-panel-menu-border-color` | `var(--tc-border)` | Dropdown menu hairline |
+| `--bs-user-panel-menu-shadow` | `var(--tc-shadow-lg)` | Dropdown overlay shadow |
+| `--bs-user-panel-menu-item-hover-bg` | `var(--tc-surface-muted)` | Menu item hover fill |
+| `--bs-user-panel-menu-item-active-bg` | `var(--tc-app-accent)` | Menu item active fill |
+| `--bs-user-panel-skeleton-bg` | `var(--tc-surface-muted)` | Loading skeleton fill |
+
+```html
+<!-- Avatar image, Pro plan -->
+<tc-user-panel avatar-src="https://example.com/jane.jpg" username="Jane Smith" plan="Pro"></tc-user-panel>
+
+<!-- Initials fallback, highlighted settings icon -->
+<tc-user-panel username="Daniel Kalevski" initials="DK" icon-highlighted></tc-user-panel>
+
+<!-- With dropdown menu + events -->
+<tc-user-panel id="up" username="Daniel Kalevski" plan="Pro"></tc-user-panel>
+<script>
+  const up = document.querySelector('#up')
+  up.menuItems = [
+    { key: 'profile', label: 'Profile', icon: 'user' },
+    { key: 'billing', label: 'Billing', icon: 'credit-card' },
+    { key: 'signout', label: 'Sign out', icon: 'log-out' },
+  ]
+  up.addEventListener('tc-icon-click', () => console.log('settings'))
+  up.addEventListener('tc-menu-click', e => console.log('menu:', e.detail.key))
+</script>
+
+<!-- Loading skeleton -->
+<tc-user-panel loading></tc-user-panel>
 ```
 
 ---
