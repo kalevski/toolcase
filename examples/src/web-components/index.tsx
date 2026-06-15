@@ -175,6 +175,7 @@ import NumberInputDemo from './NumberInputDemo'
 import OTPInputDemo from './OTPInputDemo'
 import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
+import RatingDemo from './RatingDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -236,6 +237,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'checkbox-group', category: 'Forms', element: <CheckboxGroupDemo /> },
     { key: 'radio', category: 'Forms', element: <RadioDemo /> },
     { key: 'radio-group', category: 'Forms', element: <RadioGroupDemo /> },
+    { key: 'rating', category: 'Forms', element: <RatingDemo /> },
     { key: 'switch', category: 'Forms', element: <SwitchDemo /> },
     { key: 'range', category: 'Forms', element: <RangeDemo /> },
     { key: 'date-picker', category: 'Forms', element: <DatePickerDemo /> },
