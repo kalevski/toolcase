@@ -1,5 +1,6 @@
 import { JSX } from 'react'
 import AnchorDemo from './AnchorDemo'
+import AspectRatioBoxDemo from './AspectRatioBoxDemo'
 import AvatarDemo from './AvatarDemo'
 import ArtboardBackdropDemo from './ArtboardBackdropDemo'
 import ActionHeaderDemo from './ActionHeaderDemo'
@@ -315,6 +316,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'link', category: 'Content', element: <LinkDemo /> },
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
     { key: 'anchor', category: 'Layout', element: <AnchorDemo /> },
+    { key: 'aspect-ratio-box', category: 'Layout', element: <AspectRatioBoxDemo /> },
     { key: 'text', category: 'Content', element: <TextDemo /> },
     { key: 'visually-hidden', category: 'Components', element: <VisuallyHiddenDemo /> },
     { key: 'pulse-indicator', category: 'Components', element: <PulseIndicatorDemo /> },
