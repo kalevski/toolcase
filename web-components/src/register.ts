@@ -184,6 +184,7 @@ import { PhoneInput } from './PhoneInput'
 import { RadioGroup } from './RadioGroup'
 import { RangeSlider } from './RangeSlider'
 import { Rating } from './Rating'
+import { ResizablePanel } from './ResizablePanel'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -377,4 +378,5 @@ export function register(): void {
     customElements.define('tc-radio-group', RadioGroup)
     customElements.define('tc-range-slider', RangeSlider)
     customElements.define('tc-rating', Rating)
+    customElements.define('tc-resizable-panel', ResizablePanel)
 }

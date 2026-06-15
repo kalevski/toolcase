@@ -176,6 +176,7 @@ import OTPInputDemo from './OTPInputDemo'
 import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
 import RatingDemo from './RatingDemo'
+import ResizablePanelDemo from './ResizablePanelDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -372,4 +373,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'otp-input', category: 'Forms', element: <OTPInputDemo /> },
     { key: 'phone-input', category: 'Forms', element: <PhoneInputDemo /> },
     { key: 'range-slider', category: 'Forms', element: <RangeSliderDemo /> },
+    { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
 ]
