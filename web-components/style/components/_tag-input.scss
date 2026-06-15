@@ -1,0 +1,339 @@
+// tc-tag-input — tag input with autocomplete recommendations and optional
+// create-on-type. A form-surface control holds committed tag chips and a text
+// field; an overlay listbox of suggestions sits under the control.
+// Sharp corners (border-radius: 0) throughout. All cosmetics flow through
+// --bs-tag-input-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-tag-input {
+    --bs-tag-input-gap: 0.375rem;
+
+    // Field label
+    --bs-tag-input-label-color: var(--tc-text);
+    --bs-tag-input-label-font-size: 13px;
+
+    // Control (form surface)
+    --bs-tag-input-bg: var(--tc-surface);
+    --bs-tag-input-border-color: var(--tc-border-strong);
+    --bs-tag-input-text-color: var(--tc-text);
+    --bs-tag-input-placeholder-color: var(--tc-text-faint);
+    --bs-tag-input-focus-border: rgba(30, 41, 59, 0.5);
+    --bs-tag-input-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-tag-input-padding-x: 0.5rem;
+    --bs-tag-input-padding-y: 0.375rem;
+
+    // Tag chips (pure slate — no per-tag colour)
+    --bs-tag-input-chip-bg: var(--tc-surface-muted);
+    --bs-tag-input-chip-border-color: var(--tc-border);
+    --bs-tag-input-chip-text-color: var(--tc-text);
+    --bs-tag-input-chip-font-size: 0.8125rem;
+    --bs-tag-input-chip-padding-x: 0.5rem;
+    --bs-tag-input-chip-padding-y: 0.25rem;
+    --bs-tag-input-remove-icon-size: 0.75rem;
+    --bs-tag-input-remove-bg-hover: var(--tc-surface-muted);
+    --bs-tag-input-remove-bg-active: var(--tc-border);
+
+    // Suggestion menu (overlay)
+    --bs-tag-input-menu-bg: var(--tc-surface);
+    --bs-tag-input-menu-border-color: var(--tc-border);
+    --bs-tag-input-menu-shadow: var(--tc-shadow-lg);
+    --bs-tag-input-menu-z-index: var(--tc-z-dropdown, 1060);
+    --bs-tag-input-menu-max-height: 220px;
+
+    // Options
+    --bs-tag-input-option-color: var(--tc-text);
+    --bs-tag-input-option-font-size: 0.8125rem;
+    --bs-tag-input-option-padding-x: 0.5rem;
+    --bs-tag-input-option-padding-y: 0.375rem;
+    --bs-tag-input-option-hover-bg: var(--tc-surface-muted);
+    --bs-tag-input-option-active-bg: var(--tc-app-accent);
+    --bs-tag-input-option-active-color: #fff;
+    --bs-tag-input-check-icon-size: 0.875rem;
+
+    // Meta (counter / hint)
+    --bs-tag-input-meta-color: var(--tc-text-muted);
+    --bs-tag-input-meta-font-size: 0.75rem;
+
+    // Skeleton
+    --bs-tag-input-skeleton-bg: var(--tc-surface-muted);
+    --bs-tag-input-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+    --bs-tag-input-skeleton-height: 2.5rem;
+}
+
+.tc-tag-input {
+    display: block;
+}
+
+// ── Label ───────────────────────────────────────────────────────────────────
+
+.tc-tag-input-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: var(--bs-tag-input-label-font-size);
+    font-weight: 500;
+    color: var(--bs-tag-input-label-color);
+}
+
+// ── Wrap (anchor for the absolutely-positioned overlay) ──────────────────────
+
+.tc-tag-input-wrap {
+    position: relative;
+}
+
+// ── Control (form surface) ───────────────────────────────────────────────────
+
+.tc-tag-input-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-tag-input-gap);
+    min-height: 2.5rem;
+    padding: var(--bs-tag-input-padding-y) var(--bs-tag-input-padding-x);
+    background: var(--bs-tag-input-bg);
+    border: 1px solid var(--bs-tag-input-border-color);
+    border-radius: 0;
+    cursor: text;
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus-within {
+        border-color: var(--bs-tag-input-focus-border);
+        box-shadow: var(--bs-tag-input-focus-ring);
+    }
+}
+
+// ── Text field ───────────────────────────────────────────────────────────────
+
+.tc-tag-input-field {
+    flex: 1 1 8rem;
+    min-width: 6rem;
+    padding: 0.125rem 0;
+    font-family: inherit;
+    font-size: 0.875rem;
+    color: var(--bs-tag-input-text-color);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    outline: none;
+
+    &::placeholder {
+        color: var(--bs-tag-input-placeholder-color);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+// ── Tag chips ────────────────────────────────────────────────────────────────
+
+.tc-tag-input-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: var(--bs-tag-input-chip-padding-y) var(--bs-tag-input-chip-padding-x);
+    font-size: var(--bs-tag-input-chip-font-size);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--bs-tag-input-chip-text-color);
+    background-color: var(--bs-tag-input-chip-bg);
+    border: 1px solid var(--bs-tag-input-chip-border-color);
+    border-radius: 0;
+    user-select: none;
+}
+
+.tc-tag-input-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    // Bleed into the chip's right padding so the button meets the chip edge.
+    margin: calc(-1 * var(--bs-tag-input-chip-padding-y)) calc(-1 * var(--bs-tag-input-chip-padding-x))
+        calc(-1 * var(--bs-tag-input-chip-padding-y)) 0;
+    padding: var(--bs-tag-input-chip-padding-y) var(--bs-tag-input-chip-padding-x);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-tag-input-remove-icon-size);
+        height: var(--bs-tag-input-remove-icon-size);
+        display: block;
+        pointer-events: none;
+    }
+
+    &:hover {
+        background-color: var(--bs-tag-input-remove-bg-hover);
+    }
+
+    &:active {
+        background-color: var(--bs-tag-input-remove-bg-active);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 1px;
+    }
+}
+
+// ── Suggestion menu (overlay) ────────────────────────────────────────────────
+
+.tc-tag-input-menu {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    z-index: var(--bs-tag-input-menu-z-index);
+    display: none;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+    max-height: var(--bs-tag-input-menu-max-height);
+    overflow-y: auto;
+    background-color: var(--bs-tag-input-menu-bg);
+    border: 1px solid var(--bs-tag-input-menu-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-tag-input-menu-shadow);
+
+    &.tc-tag-input-menu--open {
+        display: block;
+    }
+}
+
+.tc-tag-input-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: var(--bs-tag-input-option-padding-y) var(--bs-tag-input-option-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-tag-input-option-font-size);
+    color: var(--bs-tag-input-option-color);
+    cursor: pointer;
+    border-radius: 0;
+    white-space: nowrap;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    &:hover {
+        background-color: var(--bs-tag-input-option-hover-bg);
+    }
+
+    &.tc-tag-input-menu-item--active {
+        background-color: var(--bs-tag-input-option-active-bg);
+        color: var(--bs-tag-input-option-active-color);
+    }
+}
+
+.tc-tag-input-menu-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Check icon: only visible on the highlighted/active option.
+.tc-tag-input-menu-check {
+    display: inline-flex;
+    flex-shrink: 0;
+    visibility: hidden;
+
+    svg {
+        width: var(--bs-tag-input-check-icon-size);
+        height: var(--bs-tag-input-check-icon-size);
+        display: block;
+        pointer-events: none;
+    }
+}
+
+.tc-tag-input-menu-item--active .tc-tag-input-menu-check {
+    visibility: visible;
+}
+
+// ── Meta (counter + limit hint) ──────────────────────────────────────────────
+
+.tc-tag-input-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.375rem;
+    font-size: var(--bs-tag-input-meta-font-size);
+    color: var(--bs-tag-input-meta-color);
+}
+
+.tc-tag-input-counter {
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-tag-input-hint {
+    color: var(--tc-text-muted);
+    font-style: italic;
+}
+
+// ── Disabled ─────────────────────────────────────────────────────────────────
+
+.tc-tag-input--disabled {
+    opacity: 0.6;
+
+    .tc-tag-input-control {
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+}
+
+// ── Loading skeleton ─────────────────────────────────────────────────────────
+
+@keyframes tc-tag-input-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.tc-tag-input-skeleton {
+    display: block;
+    min-height: 0;
+    height: var(--bs-tag-input-skeleton-height);
+    border-color: transparent;
+    background: linear-gradient(
+        90deg,
+        var(--bs-tag-input-skeleton-bg) 25%,
+        var(--bs-tag-input-skeleton-shimmer) 50%,
+        var(--bs-tag-input-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-tag-input-shimmer 1.5s infinite linear;
+}
+
+// ── Coarse touch targets ─────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-tag-input-control {
+        min-height: 2.75rem;
+    }
+
+    .tc-tag-input-menu-item {
+        min-height: 2.75rem;
+    }
+
+    .tc-tag-input-remove {
+        min-width: 1.75rem;
+        min-height: 1.75rem;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-tag-input-control,
+    .tc-tag-input-remove,
+    .tc-tag-input-menu-item {
+        transition: none;
+    }
+
+    .tc-tag-input-skeleton {
+        animation: none;
+        background: var(--bs-tag-input-skeleton-bg);
+    }
+}

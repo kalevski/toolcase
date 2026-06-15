@@ -72,6 +72,7 @@ import { SocialLinks } from './SocialLinks'
 import { Stamp } from './Stamp'
 import { StatusDot } from './StatusDot'
 import { Tag } from './Tag'
+import { TagInput } from './TagInput'
 import { AssetRow } from './AssetRow'
 import { AssetRowList } from './AssetRowList'
 import { BasicLayout } from './BasicLayout'
@@ -273,6 +274,7 @@ export function register(): void {
     customElements.define('tc-stamp', Stamp)
     customElements.define('tc-status-dot', StatusDot)
     customElements.define('tc-tag', Tag)
+    customElements.define('tc-tag-input', TagInput)
     customElements.define('tc-asset-row', AssetRow)
     customElements.define('tc-asset-row-list', AssetRowList)
     customElements.define('tc-basic-layout', BasicLayout)

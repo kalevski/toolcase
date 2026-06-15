@@ -184,6 +184,7 @@ import SideNavDemo from './SideNavDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
+import TagInputDemo from './TagInputDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -388,4 +389,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'single-card-select', category: 'Forms', element: <SingleCardSelectDemo /> },
     { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
     { key: 'table', category: 'Content', element: <TableDemo /> },
+    { key: 'tag-input', category: 'Forms', element: <TagInputDemo /> },
 ]
