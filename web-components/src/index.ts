@@ -1,5 +1,6 @@
 export { register } from './register'
 export * from './Brand'
+export * from './AreaChart'
 export * from './Avatar'
 export * from './AudioMixer'
 export * from './ActionHeader'

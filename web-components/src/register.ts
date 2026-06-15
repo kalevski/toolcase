@@ -1,4 +1,5 @@
 import { Brand } from './Brand'
+import { AreaChart } from './AreaChart'
 import { Avatar } from './Avatar'
 import { AdvancedTable } from './AdvancedTable'
 import { AudioMixer } from './AudioMixer'
@@ -227,6 +228,7 @@ export function register(): void {
     customElements.define('tc-announcement-bar', AnnouncementBar)
     customElements.define('tc-badge', Badge)
     customElements.define('tc-badge-row', BadgeRow)
+    customElements.define('tc-area-chart', AreaChart)
     customElements.define('tc-benchmark-chart', BenchmarkChart)
     customElements.define('tc-bitmap-font-generator', BitmapFontGenerator)
     customElements.define('tc-breadcrumb', Breadcrumb)
