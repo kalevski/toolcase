@@ -202,6 +202,7 @@ import { MarkdownEditor } from './MarkdownEditor'
 import { Marquee } from './Marquee'
 import { MultiCardSelect } from './MultiCardSelect'
 import { NewsletterSignup } from './NewsletterSignup'
+import { NodeEditor } from './NodeEditor'
 import { NumberInput } from './NumberInput'
 import { OTPInput } from './OTPInput'
 import { PhoneInput } from './PhoneInput'
@@ -433,6 +434,7 @@ export function register(): void {
     customElements.define('tc-marquee', Marquee)
     customElements.define('tc-multi-card-select', MultiCardSelect)
     customElements.define('tc-newsletter-signup', NewsletterSignup)
+    customElements.define('tc-node-editor', NodeEditor)
     customElements.define('tc-number-input', NumberInput)
     customElements.define('tc-otp-input', OTPInput)
     customElements.define('tc-phone-input', PhoneInput)
