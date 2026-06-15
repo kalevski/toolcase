@@ -230,6 +230,7 @@ import { UserPanel } from './UserPanel'
 import { VersionPicker } from './VersionPicker'
 import { VerticalItemList } from './VerticalItemList'
 import { VideoEmbed } from './VideoEmbed'
+import { VirtualList } from './VirtualList'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -469,4 +470,5 @@ export function register(): void {
     customElements.define('tc-version-picker', VersionPicker)
     customElements.define('tc-vertical-item-list', VerticalItemList)
     customElements.define('tc-video-embed', VideoEmbed)
+    customElements.define('tc-virtual-list', VirtualList)
 }

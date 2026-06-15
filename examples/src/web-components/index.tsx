@@ -222,6 +222,7 @@ import TimePickerDemo from './TimePickerDemo'
 import ToggleCardDemo from './ToggleCardDemo'
 import VerticalItemListDemo from './VerticalItemListDemo'
 import VideoEmbedDemo from './VideoEmbedDemo'
+import VirtualListDemo from './VirtualListDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -434,6 +435,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'json-editor', category: 'Forms', element: <JSONEditorDemo /> },
     { key: 'json-schema-def', category: 'Forms', element: <JSONSchemaDefDemo /> },
     { key: 'infinite-scroll', category: 'Components', element: <InfiniteScrollDemo /> },
+    { key: 'virtual-list', category: 'Components', element: <VirtualListDemo /> },
     { key: 'install-tabs', category: 'Components', element: <InstallTabsDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
