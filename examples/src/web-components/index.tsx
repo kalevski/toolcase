@@ -16,6 +16,7 @@ import AreaChartDemo from './AreaChartDemo'
 import BarChartDemo from './BarChartDemo'
 import BenchmarkChartDemo from './BenchmarkChartDemo'
 import FunnelChartDemo from './FunnelChartDemo'
+import GanttChartDemo from './GanttChartDemo'
 import BitmapFontGeneratorDemo from './BitmapFontGeneratorDemo'
 import BreadcrumbDemo from './BreadcrumbDemo'
 import ButtonDemo from './ButtonDemo'
@@ -239,6 +240,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'area-chart', category: 'Components', element: <AreaChartDemo /> },
     { key: 'bar-chart', category: 'Components', element: <BarChartDemo /> },
     { key: 'funnel-chart', category: 'Components', element: <FunnelChartDemo /> },
+    { key: 'gantt-chart', category: 'Components', element: <GanttChartDemo /> },
     { key: 'benchmark-chart', category: 'Components', element: <BenchmarkChartDemo /> },
     { key: 'bitmap-font-generator', category: 'Components', element: <BitmapFontGeneratorDemo /> },
     { key: 'button', category: 'Components', element: <ButtonDemo /> },

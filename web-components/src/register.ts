@@ -175,6 +175,7 @@ import { FileDropzone } from './FileDropzone'
 import { FileTags } from './FileTags'
 import { FormWizard } from './FormWizard'
 import { FunnelChart } from './FunnelChart'
+import { GanttChart } from './GanttChart'
 import { GameShowcaseCard } from './GameShowcaseCard'
 import { GithubStarsCard } from './GithubStarsCard'
 import { Group } from './Group'
@@ -392,6 +393,7 @@ export function register(): void {
     customElements.define('tc-file-tags', FileTags)
     customElements.define('tc-form-wizard', FormWizard)
     customElements.define('tc-funnel-chart', FunnelChart)
+    customElements.define('tc-gantt-chart', GanttChart)
     customElements.define('tc-game-showcase-card', GameShowcaseCard)
     customElements.define('tc-github-stars-card', GithubStarsCard)
     customElements.define('tc-group', Group)
