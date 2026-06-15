@@ -194,6 +194,7 @@ import { SingleCardSelect } from './SingleCardSelect'
 import { TabSections } from './TabSections'
 import { Table } from './Table'
 import { TerminalWindow } from './TerminalWindow'
+import { TestimonialCarousel } from './TestimonialCarousel'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -397,4 +398,5 @@ export function register(): void {
     customElements.define('tc-tab-sections', TabSections)
     customElements.define('tc-table', Table)
     customElements.define('tc-terminal-window', TerminalWindow)
+    customElements.define('tc-testimonial-carousel', TestimonialCarousel)
 }
