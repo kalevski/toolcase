@@ -149,6 +149,7 @@ import { Chip } from './Chip'
 import { ChipGroup } from './ChipGroup'
 import { CodeSnippet } from './CodeSnippet'
 import { ColorPicker } from './ColorPicker'
+import { CommandPalette } from './CommandPalette'
 import { CommandReference } from './CommandReference'
 import { Comparator } from './Comparator'
 import { CompatibilityMatrix } from './CompatibilityMatrix'
@@ -370,6 +371,7 @@ export function register(): void {
     customElements.define('tc-chip-group', ChipGroup)
     customElements.define('tc-code-snippet', CodeSnippet)
     customElements.define('tc-color-picker', ColorPicker)
+    customElements.define('tc-command-palette', CommandPalette)
     customElements.define('tc-command-reference', CommandReference)
     customElements.define('tc-comparator', Comparator)
     customElements.define('tc-compatibility-matrix', CompatibilityMatrix)
