@@ -182,6 +182,7 @@ import ScrollAreaDemo from './ScrollAreaDemo'
 import RoadmapDemo from './RoadmapDemo'
 import SideNavDemo from './SideNavDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
+import TabSectionsDemo from './TabSectionsDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -384,4 +385,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
     { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
     { key: 'single-card-select', category: 'Forms', element: <SingleCardSelectDemo /> },
+    { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
 ]
