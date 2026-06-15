@@ -89,6 +89,7 @@ interface GitResult {
     stdout: string
     stderr: string
     code: number | null
+    signal: NodeJS.Signals | null
 }
 
 function run(
@@ -116,14 +117,22 @@ function run(
         child.stdout.on('data', (d) => (stdout += d.toString()))
         child.stderr.on('data', (d) => (stderr += d.toString()))
         child.on('error', (err) => reject(new GitError(err.message, null, stderr)))
-        child.on('close', (code) => resolve({ stdout, stderr, code }))
+        child.on('close', (code, signal) => resolve({ stdout, stderr, code, signal }))
     })
 }
 
-async function git(project: string, argv: string[], extraEnv?: Record<string, string>): Promise<string> {
-    const res = await run(projectRepoDir(project), argv, extraEnv)
+async function git(
+    project: string,
+    argv: string[],
+    extraEnv?: Record<string, string>,
+    timeoutMs: number = config.gitTimeoutMs,
+): Promise<string> {
+    const res = await run(projectRepoDir(project), argv, extraEnv, timeoutMs || undefined)
     if (res.code !== 0) {
-        throw new GitError(`git ${argv.join(' ')} failed (exit ${res.code})`, res.code, res.stderr)
+        const why = res.signal
+            ? `killed by ${res.signal}${res.signal === 'SIGKILL' ? ' — likely timed out' : ''}`
+            : `exit ${res.code}`
+        throw new GitError(`git ${argv.join(' ')} failed (${why})`, res.code, res.stderr)
     }
     return res.stdout
 }
@@ -143,7 +152,7 @@ export async function clone(project: string, url: string, branch?: string): Prom
         argv.push('--branch', branch)
     }
     argv.push('--', url, projectRepoDir(project))
-    const res = await run(projectPath(project), argv)
+    const res = await run(projectPath(project), argv, {}, config.gitRemoteTimeoutMs || undefined)
     if (res.code !== 0) {
         // Surface git's own fatal line (last stderr line), redacted of any creds,
         // so "exit 128" becomes diagnosable (auth vs not-found vs ssh-key vs net).
@@ -333,7 +342,7 @@ export async function push(project: string): Promise<void> {
     // When an HTTPS token is provided, feed it via a one-shot credential helper
     // so it never touches the argv or the run log.
     const argv = [...tokenCredentialArgs(), 'push', '-u', 'origin', branch]
-    await git(project, argv)
+    await git(project, argv, undefined, config.gitRemoteTimeoutMs)
 }
 
 // ── read-only history (git page) ─────────────────────────────────────────────
@@ -376,12 +385,12 @@ export async function recentCommits(project: string, limit = 15): Promise<GitCom
 
 /** Fetch every remote and prune deleted upstream branches. */
 export async function fetchRemote(project: string): Promise<void> {
-    await git(project, [...tokenCredentialArgs(), 'fetch', '--all', '--prune'])
+    await git(project, [...tokenCredentialArgs(), 'fetch', '--all', '--prune'], undefined, config.gitRemoteTimeoutMs)
 }
 
 /** Fast-forward-only pull of the current branch's upstream. Refuses to create a merge commit. */
 export async function pull(project: string): Promise<void> {
-    await git(project, [...tokenCredentialArgs(), 'pull', '--ff-only'])
+    await git(project, [...tokenCredentialArgs(), 'pull', '--ff-only'], undefined, config.gitRemoteTimeoutMs)
 }
 
 /** Hard-reset to HEAD and remove untracked files/dirs — wipes the working tree clean. Destructive. */
