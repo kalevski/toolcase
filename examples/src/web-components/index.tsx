@@ -152,6 +152,7 @@ import CompatibilityMatrixDemo from './CompatibilityMatrixDemo'
 import ContextMenuDemo from './ContextMenuDemo'
 import CoolNavDemo from './CoolNavDemo'
 import CountdownTimerDemo from './CountdownTimerDemo'
+import CycleWheelDemo from './CycleWheelDemo'
 import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 import MetricCardDemo from './MetricCardDemo'
 import SlicesCardDemo from './SlicesCardDemo'
@@ -434,4 +435,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'time-picker', category: 'Forms', element: <TimePickerDemo /> },
     { key: 'toggle-card', category: 'Forms', element: <ToggleCardDemo /> },
     { key: 'video-embed', category: 'Components', element: <VideoEmbedDemo /> },
+    { key: 'cycle-wheel', category: 'Components', element: <CycleWheelDemo /> },
 ]
