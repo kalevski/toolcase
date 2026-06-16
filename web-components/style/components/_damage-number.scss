@@ -1,0 +1,99 @@
+// tc-damage-number — a floating combat number that rises and fades, then fires
+// `tc-done`. Ported from gc-damage-number, but re-skinned to the toolcase voice:
+// no gilded frames, glows, or fantasy fills — just JetBrains Mono digits in the
+// slate/status palette, sharp corners, hairline-free (it is text, not a box).
+//
+// The float distance/scale and the fade are the *information* (a damage tick),
+// so the animation is allowed — but it honours prefers-reduced-motion below by
+// dropping the transform and keeping only the opacity fade.
+//
+// Duration is driven from the host inline style (--bs-damage-number-duration),
+// written by the element in sync with its `done` timer. All other cosmetics flow
+// through --bs-damage-number-* custom properties.
+
+tc-damage-number {
+    --bs-damage-number-duration: 700ms;
+    --bs-damage-number-font-size: 1.125rem;
+    --bs-damage-number-font-weight: 500;
+    --bs-damage-number-letter-spacing: 0.04em;
+    --bs-damage-number-color: var(--tc-text);
+    --bs-damage-number-crit-font-size: 1.625rem;
+    --bs-damage-number-crit-font-weight: 600;
+    --bs-damage-number-crit-color: var(--tc-danger);
+    --bs-damage-number-heal-color: var(--tc-success);
+    --bs-damage-number-miss-font-size: 0.8125rem;
+    --bs-damage-number-miss-color: var(--tc-text-muted);
+    --bs-damage-number-rise: 60px;
+    --bs-damage-number-z-index: var(--tc-z-tooltip, 1070);
+
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    // Purely a visual overlay — never intercept clicks on whatever sits beneath.
+    pointer-events: none;
+}
+
+.tc-damage-number-text {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-damage-number-font-size);
+    font-weight: var(--bs-damage-number-font-weight);
+    letter-spacing: var(--bs-damage-number-letter-spacing);
+    color: var(--bs-damage-number-color);
+    border-radius: 0;
+    animation: tc-damage-number-rise var(--bs-damage-number-duration) ease-out forwards;
+    will-change: transform, opacity;
+}
+
+.tc-damage-number-text[data-variant='crit'] {
+    font-size: var(--bs-damage-number-crit-font-size);
+    font-weight: var(--bs-damage-number-crit-font-weight);
+    letter-spacing: 0.06em;
+    color: var(--bs-damage-number-crit-color);
+}
+
+.tc-damage-number-text[data-variant='heal'] {
+    color: var(--bs-damage-number-heal-color);
+}
+
+.tc-damage-number-text[data-variant='miss'] {
+    font-size: var(--bs-damage-number-miss-font-size);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--bs-damage-number-miss-color);
+}
+
+@keyframes tc-damage-number-rise {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(calc(var(--bs-damage-number-rise) * -0.2)) scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(calc(var(--bs-damage-number-rise) * -1)) scale(0.95);
+        opacity: 0;
+    }
+}
+
+// Reduced motion: drop the rise/scale transform (decorative travel) but keep the
+// opacity fade — the appear-then-disappear is the state-conveying part.
+@media (prefers-reduced-motion: reduce) {
+    .tc-damage-number-text {
+        animation: tc-damage-number-fade var(--bs-damage-number-duration) ease-out forwards;
+    }
+
+    @keyframes tc-damage-number-fade {
+        0% {
+            opacity: 0;
+        }
+        20% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+}
