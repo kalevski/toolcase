@@ -171,6 +171,7 @@ import CompatibilityMatrixDemo from './CompatibilityMatrixDemo'
 import ContextMenuDemo from './ContextMenuDemo'
 import CoolNavDemo from './CoolNavDemo'
 import CountdownTimerDemo from './CountdownTimerDemo'
+import CreditsScrollDemo from './CreditsScrollDemo'
 import CycleWheelDemo from './CycleWheelDemo'
 import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 import MetricCardDemo from './MetricCardDemo'
@@ -448,6 +449,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'command-palette', category: 'Overlays & Feedback', element: <CommandPaletteDemo /> },
     { key: 'cool-nav', category: 'Navigation', element: <CoolNavDemo /> },
     { key: 'countdown-timer', category: 'Components', element: <CountdownTimerDemo /> },
+    { key: 'credits-scroll', category: 'Components', element: <CreditsScrollDemo /> },
     { key: 'danger-zone-actions', category: 'Components', element: <DangerZoneActionsDemo /> },
     { key: 'metric-card', category: 'Components', element: <MetricCardDemo /> },
     { key: 'slices-card', category: 'Components', element: <SlicesCardDemo /> },

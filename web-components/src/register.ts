@@ -176,6 +176,7 @@ import { CompatibilityMatrix } from './CompatibilityMatrix'
 import { ContextMenu } from './ContextMenu'
 import { CoolNav } from './CoolNav'
 import { CountdownTimer } from './CountdownTimer'
+import { CreditsScroll } from './CreditsScroll'
 import { CycleWheel } from './CycleWheel'
 import { DangerZoneActions } from './DangerZoneActions'
 import { MetricCard } from './MetricCard'
@@ -436,6 +437,7 @@ export function register(): void {
     customElements.define('tc-context-menu', ContextMenu)
     customElements.define('tc-cool-nav', CoolNav)
     customElements.define('tc-countdown-timer', CountdownTimer)
+    customElements.define('tc-credits-scroll', CreditsScroll)
     customElements.define('tc-cycle-wheel', CycleWheel)
     customElements.define('tc-danger-zone-actions', DangerZoneActions)
     customElements.define('tc-metric-card', MetricCard)
