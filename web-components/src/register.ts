@@ -264,6 +264,7 @@ import { DeadzoneSlider } from './DeadzoneSlider'
 import { DebugOverlay } from './DebugOverlay'
 import { DialogueBox } from './DialogueBox'
 import { FOVSlider } from './FOVSlider'
+import { FPSCapSelect } from './FPSCapSelect'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -537,4 +538,5 @@ export function register(): void {
     customElements.define('tc-debug-overlay', DebugOverlay)
     customElements.define('tc-dialogue-box', DialogueBox)
     customElements.define('tc-fov-slider', FOVSlider)
+    customElements.define('tc-fps-cap-select', FPSCapSelect)
 }

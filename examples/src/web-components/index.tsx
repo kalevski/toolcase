@@ -225,6 +225,7 @@ import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
 import DeadzoneSliderDemo from './DeadzoneSliderDemo'
 import FOVSliderDemo from './FOVSliderDemo'
+import FPSCapSelectDemo from './FPSCapSelectDemo'
 import AudioMixerDemo from './AudioMixerDemo'
 import RatingDemo from './RatingDemo'
 import SliderDemo from './SliderDemo'
@@ -503,6 +504,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'range-slider', category: 'Forms', element: <RangeSliderDemo /> },
     { key: 'deadzone-slider', category: 'Forms', element: <DeadzoneSliderDemo /> },
     { key: 'fov-slider', category: 'Forms', element: <FOVSliderDemo /> },
+    { key: 'fps-cap-select', category: 'Forms', element: <FPSCapSelectDemo /> },
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
     { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
     { key: 'tree-view', category: 'Navigation', element: <TreeViewDemo /> },

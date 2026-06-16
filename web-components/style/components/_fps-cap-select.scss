@@ -1,0 +1,45 @@
+// tc-fps-cap-select — preset FPS-cap picker on the shared setting-row scaffold
+// (`_setting-row.scss`). The control is the design-system `.form-select` (flat
+// hairline box, inline chevron, sharp corners) constrained to a compact width
+// and given a mono, machine-facing readout font for the frame-rate presets. All
+// cosmetics flow through `--bs-fps-cap-select-*`; the fantasy chrome of the
+// gc-* original is dropped.
+
+tc-fps-cap-select {
+    --bs-fps-cap-select-width: 9rem;
+    --bs-fps-cap-select-font: var(--tc-font-mono);
+    --bs-fps-cap-select-font-size: 0.75rem;
+    --bs-fps-cap-select-letter-spacing: 0.04em;
+    --bs-fps-cap-select-color: var(--tc-text);
+    --bs-fps-cap-select-bg: var(--tc-surface);
+    --bs-fps-cap-select-border-color: var(--tc-border-strong);
+    --bs-fps-cap-select-focus-border-color: rgba(30, 41, 59, 0.5);
+    --bs-fps-cap-select-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-fps-cap-select-disabled-color: var(--tc-text-muted);
+    --bs-fps-cap-select-disabled-bg: var(--tc-surface-muted);
+}
+
+.tc-fps-cap-select__select {
+    // Re-skin the shared .form-select via the component's own contract so themes
+    // can re-paint the FPS picker without touching every select on the page.
+    --bs-form-select-border-color: var(--bs-fps-cap-select-border-color);
+    --bs-form-select-focus-border-color: var(--bs-fps-cap-select-focus-border-color);
+    --bs-form-select-focus-box-shadow: var(--bs-fps-cap-select-focus-ring);
+
+    width: var(--bs-fps-cap-select-width);
+    font-family: var(--bs-fps-cap-select-font);
+    font-size: var(--bs-fps-cap-select-font-size);
+    letter-spacing: var(--bs-fps-cap-select-letter-spacing);
+    color: var(--bs-fps-cap-select-color);
+    background-color: var(--bs-fps-cap-select-bg);
+
+    // Coarse pointers get a 44px hit area without resizing the visual control.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
+    &:disabled {
+        color: var(--bs-fps-cap-select-disabled-color);
+        background-color: var(--bs-fps-cap-select-disabled-bg);
+    }
+}
