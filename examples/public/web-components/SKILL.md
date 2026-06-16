@@ -173,6 +173,7 @@ After `register()` you can author markup directly:
   - [tc-stat-card](#tc-stat-card)
   - [tc-state-machine](#tc-state-machine)
   - [tc-team-list](#tc-team-list)
+  - [tc-friends-list](#tc-friends-list)
   - [tc-tier-ladder](#tc-tier-ladder)
   - [tc-timeline](#tc-timeline)
   - [tc-usage-summary-panel](#tc-usage-summary-panel)
@@ -4230,6 +4231,107 @@ document.querySelector('#tl2').members = [
     { id: '1', name: 'Dave Kumar',  initials: 'DK', email: 'dave@example.com' },
     { id: '2', name: 'Eva Müller',  avatarUrl: 'https://example.com/eva.jpg', email: 'eva@example.com', role: 'Lead' },
 ]
+</script>
+```
+
+---
+
+### tc-friends-list
+
+Friends roster with online/status pips, activity text, optional rank chips, and message/invite actions. Friends are set via the JS `friends` property. Rows are auto-sorted by status (`in-game` → `online` → `busy` → `away` → `offline`) then alphabetically by name. The header shows the list title and an online/total count. Restyled from the game-components `gc-friends-list` to the toolcase design system: slate neutrals, hairline borders, sharp corners (the status pip is the only sanctioned `border-radius`), status as the only color, and JetBrains Mono for the header micro-labels and rank chips.
+
+**Tag:** `tc-friends-list`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `list-title` | string | `"Friends"` | Header title. Mirrored by the `listTitle` JS property. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `friends` | `Friend[]` | Array of friend objects. Set via `el.friends = [...]`. Getter returns a copy; setter triggers a re-render. |
+| `listTitle` | `string` | Reflects the `list-title` attribute. |
+| `onInvite` | `((detail: { id: string }) => void) \| null` | Optional callback fired alongside the `tc-invite` event. |
+| `onMessage` | `((detail: { id: string }) => void) \| null` | Optional callback fired alongside the `tc-message` event. |
+
+`Friend` shape:
+
+```ts
+type FriendStatus = 'online' | 'away' | 'busy' | 'offline' | 'in-game'
+
+interface Friend {
+    id: string
+    name: string
+    status?: FriendStatus   // defaults to 'offline'
+    activity?: string       // sub-line; falls back to "Offline" only for offline friends
+    rank?: string           // optional mono rank chip
+}
+```
+
+**Events**
+
+| Event | `detail` | Description |
+|-------|----------|-------------|
+| `tc-invite` | `{ id: string }` | Fired when a row's invite action is clicked. `bubbles`, `composed`. |
+| `tc-message` | `{ id: string }` | Fired when a row's message action is clicked. `bubbles`, `composed`. |
+
+**Slots**
+
+None. All content is driven by the `friends` JS property.
+
+**Accessibility**
+
+- The inner `<ul>` carries `role="list"`; each friend `<li>` carries `role="listitem"`.
+- The status pip carries `role="img"` with an `aria-label`/`title` of the human-readable status (e.g. "In game", "Online").
+- Action buttons carry descriptive `aria-label`s ("Message {name}", "Invite {name}") and use inline lucide SVG icons.
+- Action buttons show a visible `:focus-visible` outline and expand to 44px touch targets under coarse pointers.
+- Row and action hover transitions respect `prefers-reduced-motion`.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-friends-list-bg` | `var(--tc-surface)` | List background. |
+| `--bs-friends-list-border` | `var(--tc-border)` | Outer border color. |
+| `--bs-friends-list-separator` | `var(--tc-slate-100)` | Inner row separator hairline. |
+| `--bs-friends-list-header-bg` | `var(--tc-surface-muted)` | Header background. |
+| `--bs-friends-list-header-border` | `var(--tc-border)` | Header bottom border. |
+| `--bs-friends-list-title-color` | `var(--tc-text-muted)` | Header title color. |
+| `--bs-friends-list-count-color` | `var(--tc-text-faint)` | Online/total count color. |
+| `--bs-friends-list-row-hover-bg` | `var(--tc-surface-hover)` | Row background on hover. |
+| `--bs-friends-list-name-color` | `var(--tc-text)` | Friend name text color. |
+| `--bs-friends-list-name-weight` | `500` | Friend name font weight. |
+| `--bs-friends-list-activity-color` | `var(--tc-text-muted)` | Activity sub-line color. |
+| `--bs-friends-list-rank-bg` | `var(--tc-surface-muted)` | Rank chip background. |
+| `--bs-friends-list-rank-color` | `var(--tc-text-muted)` | Rank chip text color. |
+| `--bs-friends-list-pip-size` | `8px` | Status pip diameter. |
+| `--bs-friends-list-pip-color` | _(set per status)_ | Status pip fill. Set automatically from each row's status. |
+| `--bs-friends-list-action-color` | `var(--tc-text-muted)` | Action icon color at rest. |
+| `--bs-friends-list-action-hover-bg` | `var(--tc-surface-muted)` | Action background on hover. |
+| `--bs-friends-list-action-hover-color` | `var(--tc-text)` | Action icon color on hover. |
+| `--bs-friends-list-action-size` | `1.75rem` | Action button box size (44px under coarse pointers). |
+| `--bs-friends-list-status-online` | `var(--tc-success)` | `online` pip color. |
+| `--bs-friends-list-status-in-game` | `var(--tc-info)` | `in-game` pip color. |
+| `--bs-friends-list-status-busy` | `var(--tc-danger)` | `busy` pip color. |
+| `--bs-friends-list-status-away` | `var(--tc-warning)` | `away` pip color. |
+| `--bs-friends-list-status-offline` | `var(--tc-text-faint)` | `offline` pip color. |
+
+```html
+<tc-friends-list id="fl1" list-title="Squad"></tc-friends-list>
+
+<script>
+const fl = document.querySelector('#fl1')
+fl.friends = [
+    { id: '1', name: 'Aria',    status: 'in-game', activity: 'Ranked — Round 3', rank: 'Diamond' },
+    { id: '2', name: 'Kestrel', status: 'online' },
+    { id: '3', name: 'Vesper',  status: 'busy',   activity: 'Do not disturb' },
+    { id: '4', name: 'Onyx',    status: 'offline' },
+]
+fl.addEventListener('tc-invite',  e => console.log('invite',  e.detail.id))
+fl.addEventListener('tc-message', e => console.log('message', e.detail.id))
 </script>
 ```
 

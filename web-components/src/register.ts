@@ -85,6 +85,7 @@ import { Skeleton } from './Skeleton'
 import { SocialLinks } from './SocialLinks'
 import { Stamp } from './Stamp'
 import { StatusDot } from './StatusDot'
+import { FriendsList } from './FriendsList'
 import { Tag } from './Tag'
 import { TagInput } from './TagInput'
 import { AssetRow } from './AssetRow'
@@ -357,6 +358,7 @@ export function register(): void {
     customElements.define('tc-social-links', SocialLinks)
     customElements.define('tc-stamp', Stamp)
     customElements.define('tc-status-dot', StatusDot)
+    customElements.define('tc-friends-list', FriendsList)
     customElements.define('tc-tag', Tag)
     customElements.define('tc-tag-input', TagInput)
     customElements.define('tc-asset-row', AssetRow)
