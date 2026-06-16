@@ -219,6 +219,7 @@ import { JSONEditor } from './JSONEditor'
 import { JSONSchemaDef } from './JSONSchemaDef'
 import { InfiniteScroll } from './InfiniteScroll'
 import { InstallTabs } from './InstallTabs'
+import { InteractPrompt } from './InteractPrompt'
 import { Leaderboard } from './Leaderboard'
 import { Lightbox } from './Lightbox'
 import { LineChart } from './LineChart'
@@ -502,6 +503,7 @@ export function register(): void {
     customElements.define('tc-json-schema-def', JSONSchemaDef)
     customElements.define('tc-infinite-scroll', InfiniteScroll)
     customElements.define('tc-install-tabs', InstallTabs)
+    customElements.define('tc-interact-prompt', InteractPrompt)
     customElements.define('tc-leaderboard', Leaderboard)
     customElements.define('tc-lightbox', Lightbox)
     customElements.define('tc-line-chart', LineChart)

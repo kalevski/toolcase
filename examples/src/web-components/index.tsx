@@ -221,6 +221,7 @@ import JSONEditorDemo from './JSONEditorDemo'
 import JSONSchemaDefDemo from './JSONSchemaDefDemo'
 import InfiniteScrollDemo from './InfiniteScrollDemo'
 import InstallTabsDemo from './InstallTabsDemo'
+import InteractPromptDemo from './InteractPromptDemo'
 import LeaderboardDemo from './LeaderboardDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
@@ -515,6 +516,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'infinite-scroll', category: 'Components', element: <InfiniteScrollDemo /> },
     { key: 'virtual-list', category: 'Components', element: <VirtualListDemo /> },
     { key: 'install-tabs', category: 'Components', element: <InstallTabsDemo /> },
+    { key: 'interact-prompt', category: 'Overlays & Feedback', element: <InteractPromptDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
     { key: 'marquee', category: 'Content', element: <MarqueeDemo /> },
