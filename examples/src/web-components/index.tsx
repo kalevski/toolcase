@@ -90,6 +90,7 @@ import BuffIconDemo from './BuffIconDemo'
 import BrightnessCalibrationDemo from './BrightnessCalibrationDemo'
 import CalloutQuoteDemo from './CalloutQuoteDemo'
 import ChartContainerDemo from './ChartContainerDemo'
+import ChatWindowDemo from './ChatWindowDemo'
 import SparklineDemo from './SparklineDemo'
 import TrendIndicatorDemo from './TrendIndicatorDemo'
 import CodeLabelCellDemo from './CodeLabelCellDemo'
@@ -347,6 +348,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'brightness-calibration', category: 'Components', element: <BrightnessCalibrationDemo /> },
     { key: 'callout-quote', category: 'Content', element: <CalloutQuoteDemo /> },
     { key: 'chart-container', category: 'Components', element: <ChartContainerDemo /> },
+    { key: 'chat-window', category: 'Components', element: <ChatWindowDemo /> },
     { key: 'sparkline', category: 'Components', element: <SparklineDemo /> },
     { key: 'trend-indicator', category: 'Components', element: <TrendIndicatorDemo /> },
     { key: 'code-label-cell', category: 'Components', element: <CodeLabelCellDemo /> },

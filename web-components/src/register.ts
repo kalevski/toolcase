@@ -97,6 +97,7 @@ import { BuffIcon } from './BuffIcon'
 import { BrightnessCalibration } from './BrightnessCalibration'
 import { CalloutQuote } from './CalloutQuote'
 import { ChartContainer } from './ChartContainer'
+import { ChatWindow } from './ChatWindow'
 import { Sparkline } from './Sparkline'
 import { TrendIndicator } from './TrendIndicator'
 import { CodeLabelCell } from './CodeLabelCell'
@@ -344,6 +345,7 @@ export function register(): void {
     customElements.define('tc-brightness-calibration', BrightnessCalibration)
     customElements.define('tc-callout-quote', CalloutQuote)
     customElements.define('tc-chart-container', ChartContainer)
+    customElements.define('tc-chat-window', ChatWindow)
     customElements.define('tc-sparkline', Sparkline)
     customElements.define('tc-trend-indicator', TrendIndicator)
     customElements.define('tc-code-label-cell', CodeLabelCell)
