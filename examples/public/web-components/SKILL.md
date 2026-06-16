@@ -94,6 +94,8 @@ After `register()` you can author markup directly:
   - [tc-brief-card](#tc-brief-card)
   - [tc-bundle-bar](#tc-bundle-bar)
   - [tc-boss-bar](#tc-boss-bar)
+  - [tc-buff-bar](#tc-buff-bar)
+  - [tc-buff-icon](#tc-buff-icon)
   - [tc-brightness-calibration](#tc-brightness-calibration)
   - [tc-cdn-map](#tc-cdn-map)
   - [tc-changelog](#tc-changelog)
@@ -8022,6 +8024,126 @@ None. `tc-boss-bar` is attribute-driven.
 <script>
     document.getElementById('boss').phaseTicks = [0.25, 0.5, 0.75]
 </script>
+```
+
+---
+
+### tc-buff-bar
+
+A horizontal row of active buff / debuff status icons, each composed from `tc-buff-icon`. Every entry can carry a duration (rendered as a mono caption and an optional radial cooldown sweep) and a stack count (a small mono ink badge). Ported from the game-components `gc-buff-bar` and restyled to the toolcase design system — flat slate tiles, hairline borders, sharp corners, mono machine-text, and a single status accent stripe distinguishing buffs from debuffs. The entry list is driven by the `buffs` JS property; only the icon size and inter-icon gap are attributes. Purely presentational: no events. Renders a `role="list"` of `role="listitem"` cells, each labelled by its entry `name`.
+
+**Tag:** `tc-buff-bar`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `icon-size` | number | `36` | Pixel size of each composed `tc-buff-icon` tile. Non-positive / non-numeric values fall back to `36`. |
+| `gap` | string | `"6px"` | Any CSS length used as the gap between icons (written to `--bs-buff-bar-gap`). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `buffs` | `BuffEntry[]` | The active buffs/debuffs to render. Set as a JS property (not an attribute); re-renders the bar. Non-array values reset to `[]`. |
+| `iconSize` | `number` | Reflects the `icon-size` attribute. |
+| `gap` | `string` | Reflects the `gap` attribute. |
+
+`BuffEntry` shape: `{ id: string; icon?: string; name?: string; remaining?: number; duration?: number; stacks?: number; debuff?: boolean }`. `icon` is a [lucide](https://lucide.dev) icon name (e.g. `"Flame"`); an unknown name falls back to its escaped text. `remaining` is the seconds left (formatted as `Ns` or `NmNs`); when both `remaining` and `duration` are present a radial cooldown sweep dims the spent fraction. `stacks` greater than `1` renders a `×N` badge. `debuff: true` flips the entry to the danger accent.
+
+**Events**
+
+None. `tc-buff-bar` is a purely presentational element.
+
+**Slots**
+
+None. Content is driven by the `buffs` JS property.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-buff-bar-gap` | `6px` | Gap between buff icons (also settable via the `gap` attribute). |
+| `--bs-buff-bar-cooldown-overlay` | `rgba(15, 23, 42, 0.55)` | Translucent ink mask dimming the spent portion of a cooldown sweep. |
+| `--bs-buff-bar-stack-bg` | `var(--tc-app-accent)` | Stack-count badge background. |
+| `--bs-buff-bar-stack-color` | `var(--tc-surface)` | Stack-count badge text color. |
+| `--bs-buff-bar-stack-font-size` | `0.5625rem` | Stack-count badge font size. |
+
+Each entry's tile is themed through the `tc-buff-icon` custom properties below.
+
+**Example**
+
+```html
+<tc-buff-bar id="buffs"></tc-buff-bar>
+<script>
+    document.getElementById('buffs').buffs = [
+        { id: 'haste', icon: 'Zap', name: 'Haste', remaining: 12, duration: 20 },
+        { id: 'regen', icon: 'Heart', name: 'Regeneration', remaining: 45, duration: 60, stacks: 3 },
+        { id: 'poison', icon: 'Skull', name: 'Poison', remaining: 6, duration: 10, debuff: true },
+    ]
+</script>
+
+<!-- Larger icons and a wider gap -->
+<tc-buff-bar id="big" icon-size="48" gap="12px"></tc-buff-bar>
+```
+
+---
+
+### tc-buff-icon
+
+A single buff / debuff status icon: a square slate tile with a centred lucide glyph and an optional mono duration caption pinned to the bottom edge. Ported from the game-components `gc-buff-icon` and restyled to the toolcase design system — flat surface, hairline border, sharp corners, mono machine-text. Buff vs debuff is conveyed by a single 2px status accent stripe across the top (success for buffs, danger for debuffs). Composed by `tc-buff-bar`, but usable standalone. Purely presentational: no events, no slots.
+
+**Tag:** `tc-buff-icon`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `glyph` | string | `""` | A [lucide](https://lucide.dev) icon name (e.g. `"Shield"`). An unknown name falls back to its escaped text (handy for single-letter buffs). |
+| `time` | string | `""` | Duration caption rendered on the ink strip at the bottom of the tile. |
+| `kind` | `"buff"` \| `"debuff"` | `"buff"` | Status kind; selects the accent-stripe color. Any value other than `"debuff"` resolves to `"buff"`. Reflected to `data-kind`. |
+| `color` | string | `""` | Optional CSS color overriding the glyph color (written to `--bs-buff-icon-glyph-color`). |
+| `size` | number | `36` | Pixel size of the tile. Non-positive / non-numeric values fall back to `36`. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `glyph` | `string` | Reflects the `glyph` attribute. |
+| `time` | `string` | Reflects the `time` attribute. |
+| `kind` | `"buff" \| "debuff"` | Reflects the `kind` attribute. |
+| `color` | `string` | Reflects the `color` attribute. |
+| `size` | `number` | Reflects the `size` attribute. |
+
+**Events**
+
+None. `tc-buff-icon` is a purely presentational element.
+
+**Slots**
+
+None. `tc-buff-icon` is attribute-driven.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-buff-icon-size` | `36px` | Tile width and height (also settable via the `size` attribute). |
+| `--bs-buff-icon-bg` | `var(--tc-surface)` | Tile background. |
+| `--bs-buff-icon-border-color` | `var(--tc-border-strong)` | 1px hairline border color. |
+| `--bs-buff-icon-glyph-color` | `var(--tc-text)` | Glyph color (overridden by the `color` attribute). |
+| `--bs-buff-icon-glyph-scale` | `0.5` | Glyph SVG size as a fraction of the tile size. |
+| `--bs-buff-icon-accent` | `var(--tc-text-faint)` | Top accent-stripe color (overridden per `data-kind`). |
+| `--bs-buff-icon-time-bg` | `var(--tc-ink)` | Duration-caption strip background. |
+| `--bs-buff-icon-time-color` | `var(--tc-surface)` | Duration-caption text color. |
+| `--bs-buff-icon-time-font-size` | `0.5625rem` | Duration-caption font size. |
+
+Per-kind accent overrides: `buff` → `var(--tc-success)`, `debuff` → `var(--tc-danger)`.
+
+**Example**
+
+```html
+<tc-buff-icon kind="buff" glyph="Zap" time="12s" size="40"></tc-buff-icon>
+<tc-buff-icon kind="debuff" glyph="Skull" time="6s" size="40"></tc-buff-icon>
 ```
 
 ---

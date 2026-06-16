@@ -92,6 +92,8 @@ import { BasicLayout } from './BasicLayout'
 import { BriefCard } from './BriefCard'
 import { BundleBar } from './BundleBar'
 import { BossBar } from './BossBar'
+import { BuffBar } from './BuffBar'
+import { BuffIcon } from './BuffIcon'
 import { BrightnessCalibration } from './BrightnessCalibration'
 import { CalloutQuote } from './CalloutQuote'
 import { ChartContainer } from './ChartContainer'
@@ -335,6 +337,8 @@ export function register(): void {
     customElements.define('tc-brief-card', BriefCard)
     customElements.define('tc-bundle-bar', BundleBar)
     customElements.define('tc-boss-bar', BossBar)
+    customElements.define('tc-buff-icon', BuffIcon)
+    customElements.define('tc-buff-bar', BuffBar)
     customElements.define('tc-brightness-calibration', BrightnessCalibration)
     customElements.define('tc-callout-quote', CalloutQuote)
     customElements.define('tc-chart-container', ChartContainer)

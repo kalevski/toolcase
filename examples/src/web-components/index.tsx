@@ -83,6 +83,7 @@ import BasicLayoutDemo from './BasicLayoutDemo'
 import BriefCardDemo from './BriefCardDemo'
 import BundleBarDemo from './BundleBarDemo'
 import BossBarDemo from './BossBarDemo'
+import BuffBarDemo from './BuffBarDemo'
 import BrightnessCalibrationDemo from './BrightnessCalibrationDemo'
 import CalloutQuoteDemo from './CalloutQuoteDemo'
 import ChartContainerDemo from './ChartContainerDemo'
@@ -336,6 +337,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'brief-card', category: 'Content', element: <BriefCardDemo /> },
     { key: 'bundle-bar', category: 'Content', element: <BundleBarDemo /> },
     { key: 'boss-bar', category: 'Content', element: <BossBarDemo /> },
+    { key: 'buff-bar', category: 'Content', element: <BuffBarDemo /> },
     { key: 'brightness-calibration', category: 'Components', element: <BrightnessCalibrationDemo /> },
     { key: 'callout-quote', category: 'Content', element: <CalloutQuoteDemo /> },
     { key: 'chart-container', category: 'Components', element: <ChartContainerDemo /> },

@@ -1,0 +1,59 @@
+// tc-buff-bar — a horizontal row of active buff / debuff icons, each composed
+// from tc-buff-icon, with an optional radial cooldown sweep and a stack-count
+// badge. Ported from the game-components gc-buff-bar, stripped of the fantasy
+// chrome (gilded cells, glows) — the icons carry the design-system slate look
+// and the bar only owns the row layout, the cooldown mask, and the stack badge.
+// All cosmetics flow through --bs-buff-bar-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-buff-bar {
+    --bs-buff-bar-gap: 6px;
+    // Translucent ink mask dimming the spent portion of a cooldown.
+    --bs-buff-bar-cooldown-overlay: rgba(15, 23, 42, 0.55);
+    --bs-buff-bar-stack-bg: var(--tc-app-accent);
+    --bs-buff-bar-stack-color: var(--tc-surface);
+    --bs-buff-bar-stack-font-size: 0.5625rem;
+}
+
+.tc-buff-bar__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--bs-buff-bar-gap);
+}
+
+// Cell wraps a single tc-buff-icon and anchors the cooldown mask + stack badge.
+.tc-buff-bar__cell {
+    position: relative;
+    display: inline-flex;
+    line-height: 0;
+}
+
+// Cooldown sweep: --cd is the spent angle (0–360deg); the dim fills clockwise.
+.tc-buff-bar__cooldown {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: conic-gradient(
+        var(--bs-buff-bar-cooldown-overlay) 0deg var(--cd, 0deg),
+        transparent var(--cd, 0deg) 360deg
+    );
+}
+
+// Stack count — small mono ink badge in the top-right corner. Sharp corners.
+.tc-buff-bar__stack {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 1rem;
+    padding: 0 0.1875rem;
+    background: var(--bs-buff-bar-stack-bg);
+    color: var(--bs-buff-bar-stack-color);
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-buff-bar-stack-font-size);
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+    border-radius: 0;
+}
