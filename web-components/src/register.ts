@@ -182,6 +182,7 @@ import { ContextMenu } from './ContextMenu'
 import { CoolNav } from './CoolNav'
 import { CountdownTimer } from './CountdownTimer'
 import { DamageNumber } from './DamageNumber'
+import { HitMarker } from './HitMarker'
 import { CreditsScroll } from './CreditsScroll'
 import { CycleWheel } from './CycleWheel'
 import { DangerZoneActions } from './DangerZoneActions'
@@ -463,6 +464,7 @@ export function register(): void {
     customElements.define('tc-cool-nav', CoolNav)
     customElements.define('tc-countdown-timer', CountdownTimer)
     customElements.define('tc-damage-number', DamageNumber)
+    customElements.define('tc-hit-marker', HitMarker)
     customElements.define('tc-credits-scroll', CreditsScroll)
     customElements.define('tc-cycle-wheel', CycleWheel)
     customElements.define('tc-danger-zone-actions', DangerZoneActions)
