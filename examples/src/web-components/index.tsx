@@ -240,6 +240,7 @@ import VirtualListDemo from './VirtualListDemo'
 import CircularProgressDemo from './CircularProgressDemo'
 import CompassBarDemo from './CompassBarDemo'
 import CompassRoseDemo from './CompassRoseDemo'
+import ControllerLayoutPreviewDemo from './ControllerLayoutPreviewDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -500,4 +501,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'circular-progress', category: 'Components', element: <CircularProgressDemo /> },
     { key: 'compass-bar', category: 'Content', element: <CompassBarDemo /> },
     { key: 'compass-rose', category: 'Content', element: <CompassRoseDemo /> },
+    { key: 'controller-layout-preview', category: 'Content', element: <ControllerLayoutPreviewDemo /> },
 ]
