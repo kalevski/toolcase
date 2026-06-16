@@ -51,6 +51,7 @@ import SelectDemo from './SelectDemo'
 import CheckDemo from './CheckDemo'
 import CheckboxGroupDemo from './CheckboxGroupDemo'
 import CharacterCreateDemo from './CharacterCreateDemo'
+import CharacterSelectDemo from './CharacterSelectDemo'
 import RadioDemo from './RadioDemo'
 import RadioGroupDemo from './RadioGroupDemo'
 import VersionPickerDemo from './VersionPickerDemo'
@@ -302,6 +303,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'check', category: 'Forms', element: <CheckDemo /> },
     { key: 'checkbox-group', category: 'Forms', element: <CheckboxGroupDemo /> },
     { key: 'character-create', category: 'Forms', element: <CharacterCreateDemo /> },
+    { key: 'character-select', category: 'Forms', element: <CharacterSelectDemo /> },
     { key: 'radio', category: 'Forms', element: <RadioDemo /> },
     { key: 'radio-group', category: 'Forms', element: <RadioGroupDemo /> },
     { key: 'version-picker', category: 'Forms', element: <VersionPickerDemo /> },

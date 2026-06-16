@@ -159,6 +159,7 @@ import { CardOptions } from './CardOptions'
 import { CdnMap } from './CdnMap'
 import { Changelog } from './Changelog'
 import { CharacterCreate } from './CharacterCreate'
+import { CharacterSelect } from './CharacterSelect'
 import { Chip } from './Chip'
 import { ChipGroup } from './ChipGroup'
 import { CodeSnippet } from './CodeSnippet'
@@ -405,6 +406,7 @@ export function register(): void {
     customElements.define('tc-cdn-map', CdnMap)
     customElements.define('tc-changelog', Changelog)
     customElements.define('tc-character-create', CharacterCreate)
+    customElements.define('tc-character-select', CharacterSelect)
     customElements.define('tc-chip', Chip)
     customElements.define('tc-chip-group', ChipGroup)
     customElements.define('tc-code-snippet', CodeSnippet)
