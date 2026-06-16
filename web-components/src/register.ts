@@ -5,6 +5,7 @@ import { Brand } from './Brand'
 import { AreaChart } from './AreaChart'
 import { Avatar } from './Avatar'
 import { ArtboardBackdrop } from './ArtboardBackdrop'
+import { BlurOverlay } from './BlurOverlay'
 import { AdvancedTable } from './AdvancedTable'
 import { AudioMixer } from './AudioMixer'
 import { ActionHeader } from './ActionHeader'
@@ -243,6 +244,7 @@ export function register(): void {
     customElements.define('tc-avatar', Avatar)
     customElements.define('tc-aspect-ratio-box', AspectRatioBox)
     customElements.define('tc-artboard-backdrop', ArtboardBackdrop)
+    customElements.define('tc-blur-overlay', BlurOverlay)
     customElements.define('tc-action-header', ActionHeader)
     customElements.define('tc-action-items', ActionItems)
     customElements.define('tc-action-row-list', ActionRowList)

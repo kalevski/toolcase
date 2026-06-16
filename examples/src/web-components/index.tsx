@@ -3,6 +3,7 @@ import AnchorDemo from './AnchorDemo'
 import AspectRatioBoxDemo from './AspectRatioBoxDemo'
 import AvatarDemo from './AvatarDemo'
 import ArtboardBackdropDemo from './ArtboardBackdropDemo'
+import BlurOverlayDemo from './BlurOverlayDemo'
 import ActionHeaderDemo from './ActionHeaderDemo'
 import ActionItemsDemo from './ActionItemsDemo'
 import ActionRowListDemo from './ActionRowListDemo'
@@ -410,6 +411,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'comparator', category: 'Components', element: <ComparatorDemo /> },
     { key: 'compatibility-matrix', category: 'Components', element: <CompatibilityMatrixDemo /> },
     { key: 'context-menu', category: 'Overlays & Feedback', element: <ContextMenuDemo /> },
+    { key: 'blur-overlay', category: 'Overlays & Feedback', element: <BlurOverlayDemo /> },
     { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
     { key: 'command-palette', category: 'Overlays & Feedback', element: <CommandPaletteDemo /> },

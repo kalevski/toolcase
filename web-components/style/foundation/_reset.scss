@@ -304,6 +304,12 @@ tc-drawer {
     display: block;
 }
 
+// Fixed full-surface scrim; the SCSS partial flips it to a centred flex
+// container, but it must not default to inline.
+tc-blur-overlay {
+    display: block;
+}
+
 tc-lightbox {
     display: block;
 }

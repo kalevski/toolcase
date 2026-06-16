@@ -1,0 +1,72 @@
+// tc-blur-overlay — full-surface backdrop-blur scrim (pause / dialog overlay).
+// The game-components original leaned on a flat translucent black wash; here it
+// is voiced for the design system: a slate-ink scrim on the fixed overlay tier
+// (--tc-z-*), sharp edges, no decorative chrome, with the slotted content
+// centred over the blurred surface. Every cosmetic value flows through
+// --bs-blur-overlay-* so themes re-skin via vars alone (the public theming
+// contract); the two free-form knobs (blur amount, background) are also
+// settable per-instance via the matching inline custom properties the element
+// writes from its `blur-amount` / `background` attributes.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-blur-overlay {
+    --bs-blur-overlay-blur:    8px;
+    --bs-blur-overlay-bg:      rgba(15, 23, 42, 0.45); // slate-900 @ 45%
+    --bs-blur-overlay-z:       var(--tc-z-modal-backdrop);
+    --bs-blur-overlay-gap:     1rem;
+    --bs-blur-overlay-padding: 1.5rem;
+    --bs-blur-overlay-fade:    var(--tc-transition-base);
+}
+
+// ── Scrim surface ───────────────────────────────────────────────────────────────
+// The host IS the overlay: it pins to the viewport, blurs whatever sits behind
+// it, and centres its slotted content. Sharp by mandate (border-radius: 0); the
+// blur + ink wash are the only chrome.
+
+.tc-blur-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-blur-overlay-z);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--bs-blur-overlay-gap);
+    padding: var(--bs-blur-overlay-padding);
+
+    border-radius: 0;
+    background: var(--bs-blur-overlay-bg);
+    backdrop-filter: blur(var(--bs-blur-overlay-blur));
+    -webkit-backdrop-filter: blur(var(--bs-blur-overlay-blur));
+
+    // The scrim appearing is a state change — fade it in. Decorative motion, so
+    // it is frozen (not removed) under prefers-reduced-motion below.
+    animation: tc-blur-overlay-fade-in var(--bs-blur-overlay-fade);
+}
+
+@keyframes tc-blur-overlay-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+// Coarse pointers: loosen the gap so any slotted buttons/dialog keep room to
+// breathe. Hit targets themselves are owned by the slotted controls.
+@media (pointer: coarse) {
+    .tc-blur-overlay {
+        --bs-blur-overlay-gap: 1.25rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-blur-overlay {
+        animation: none;
+    }
+}
