@@ -1,0 +1,145 @@
+// tc-brightness-calibration — gamma/brightness calibration view with reference
+// swatches. Card surface (--tc-surface), 1px hairline (--tc-border), resting
+// shadow (--tc-shadow-sm). Sharp corners everywhere (border-radius: 0).
+// The three reference bands are a functional grayscale ramp (dark → mid →
+// bright); a `brightness()` filter (--bs-brightness-calibration-gamma, written
+// by the element) is applied to the whole preview so the user can calibrate.
+// The percentage readout is machine-facing → JetBrains Mono.
+// All cosmetics flow through --bs-brightness-calibration-* backed by --tc-* tokens.
+
+tc-brightness-calibration {
+    --bs-brightness-calibration-bg: var(--tc-surface);
+    --bs-brightness-calibration-border-color: var(--tc-border);
+    --bs-brightness-calibration-shadow: var(--tc-shadow-sm);
+    --bs-brightness-calibration-padding: 1rem;
+    --bs-brightness-calibration-gap: 0.875rem;
+
+    // Functional grayscale reference ramp.
+    --bs-brightness-calibration-band-dark: var(--tc-slate-900);
+    --bs-brightness-calibration-band-mid: var(--tc-slate-500);
+    --bs-brightness-calibration-band-bright: var(--tc-slate-50);
+    --bs-brightness-calibration-band-height: 3.5rem;
+    --bs-brightness-calibration-band-border-color: var(--tc-border);
+    --bs-brightness-calibration-band-label-dark: rgba(255, 255, 255, 0.32);
+    --bs-brightness-calibration-band-label-mid: rgba(255, 255, 255, 0.92);
+    --bs-brightness-calibration-band-label-bright: var(--tc-slate-900);
+    --bs-brightness-calibration-band-label-font-size: 0.75rem;
+
+    // Live brightness filter — overwritten inline by the element on each change.
+    --bs-brightness-calibration-gamma: brightness(1);
+
+    --bs-brightness-calibration-row-gap: 0.75rem;
+    --bs-brightness-calibration-row-label-color: var(--tc-text);
+    --bs-brightness-calibration-row-label-font-size: 0.8125rem;
+    --bs-brightness-calibration-row-value-color: var(--tc-text-muted);
+    --bs-brightness-calibration-row-value-font-size: 0.8125rem;
+}
+
+// ── Panel card shell ─────────────────────────────────────────────────────────
+
+.tc-brightness-calibration {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-brightness-calibration-gap);
+    padding: var(--bs-brightness-calibration-padding);
+    background: var(--bs-brightness-calibration-bg);
+    border: 1px solid var(--bs-brightness-calibration-border-color);
+    box-shadow: var(--bs-brightness-calibration-shadow);
+    border-radius: 0;
+}
+
+// ── Reference swatch ramp ────────────────────────────────────────────────────
+// 1px-gap grid of three equal bands; the gap shows the hairline border colour
+// so the swatches read as separated surfaces, not a single block.
+
+.tc-brightness-calibration__preview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--bs-brightness-calibration-band-border-color);
+    border: 1px solid var(--bs-brightness-calibration-band-border-color);
+    border-radius: 0;
+    // Calibration filter — conveys state, eased per the motion scale.
+    filter: var(--bs-brightness-calibration-gamma);
+    transition: filter var(--tc-transition-base);
+}
+
+.tc-brightness-calibration__band {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--bs-brightness-calibration-band-height);
+    padding: 0.5rem;
+    border-radius: 0;
+    text-align: center;
+}
+
+.tc-brightness-calibration__band--dark {
+    background: var(--bs-brightness-calibration-band-dark);
+}
+
+.tc-brightness-calibration__band--mid {
+    background: var(--bs-brightness-calibration-band-mid);
+}
+
+.tc-brightness-calibration__band--bright {
+    background: var(--bs-brightness-calibration-band-bright);
+}
+
+.tc-brightness-calibration__band-label {
+    font-size: var(--bs-brightness-calibration-band-label-font-size);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.tc-brightness-calibration__band--dark .tc-brightness-calibration__band-label {
+    color: var(--bs-brightness-calibration-band-label-dark);
+}
+
+.tc-brightness-calibration__band--mid .tc-brightness-calibration__band-label {
+    color: var(--bs-brightness-calibration-band-label-mid);
+}
+
+.tc-brightness-calibration__band--bright .tc-brightness-calibration__band-label {
+    color: var(--bs-brightness-calibration-band-label-bright);
+}
+
+// ── Control row — label · slider · percentage readout ────────────────────────
+
+.tc-brightness-calibration__row {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-brightness-calibration-row-gap);
+}
+
+.tc-brightness-calibration__row-label {
+    font-size: var(--bs-brightness-calibration-row-label-font-size);
+    font-weight: 500;
+    color: var(--bs-brightness-calibration-row-label-color);
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+
+.tc-brightness-calibration__input {
+    flex: 1;
+    min-width: 0;
+}
+
+.tc-brightness-calibration__row-value {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-brightness-calibration-row-value-font-size);
+    font-weight: 500;
+    color: var(--bs-brightness-calibration-row-value-color);
+    line-height: 1.4;
+    flex-shrink: 0;
+    min-width: 2.75rem;
+    text-align: right;
+}
+
+// Honour prefers-reduced-motion: the brightness filter conveys state, so keep
+// it as an instant change rather than a decorative ease.
+@media (prefers-reduced-motion: reduce) {
+    .tc-brightness-calibration__preview {
+        transition: none;
+    }
+}
