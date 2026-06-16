@@ -82,6 +82,7 @@ import AssetRowListDemo from './AssetRowListDemo'
 import BasicLayoutDemo from './BasicLayoutDemo'
 import BriefCardDemo from './BriefCardDemo'
 import BundleBarDemo from './BundleBarDemo'
+import BossBarDemo from './BossBarDemo'
 import CalloutQuoteDemo from './CalloutQuoteDemo'
 import ChartContainerDemo from './ChartContainerDemo'
 import SparklineDemo from './SparklineDemo'
@@ -333,6 +334,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'asset-bundle', category: 'Components', element: <AssetBundleDemo /> },
     { key: 'brief-card', category: 'Content', element: <BriefCardDemo /> },
     { key: 'bundle-bar', category: 'Content', element: <BundleBarDemo /> },
+    { key: 'boss-bar', category: 'Content', element: <BossBarDemo /> },
     { key: 'callout-quote', category: 'Content', element: <CalloutQuoteDemo /> },
     { key: 'chart-container', category: 'Components', element: <ChartContainerDemo /> },
     { key: 'sparkline', category: 'Components', element: <SparklineDemo /> },
