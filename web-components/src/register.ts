@@ -268,6 +268,7 @@ import { FOVSlider } from './FOVSlider'
 import { FPSCapSelect } from './FPSCapSelect'
 import { FullscreenToggle } from './FullscreenToggle'
 import { GameOverScreen } from './GameOverScreen'
+import { GamepadButtonPrompt } from './GamepadButtonPrompt'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -545,4 +546,5 @@ export function register(): void {
     customElements.define('tc-fps-cap-select', FPSCapSelect)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
     customElements.define('tc-game-over-screen', GameOverScreen)
+    customElements.define('tc-gamepad-button-prompt', GamepadButtonPrompt)
 }
