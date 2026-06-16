@@ -165,6 +165,7 @@ After `register()` you can author markup directly:
   - [tc-scoring-rules](#tc-scoring-rules)
   - [tc-credits-list](#tc-credits-list)
   - [tc-achievement-list](#tc-achievement-list)
+  - [tc-game-over-screen](#tc-game-over-screen)
   - [tc-battle-pass](#tc-battle-pass)
   - [tc-section-card](#tc-section-card)
   - [tc-simple-file](#tc-simple-file)
@@ -13813,6 +13814,91 @@ el.achievements = [
         points: 250,
     },
 ]
+</script>
+```
+
+---
+
+### tc-game-over-screen
+
+Game-over / result end screen: a centred region with a mono uppercase eyebrow, a status-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-game-over-screen` (a `gc-result-screen` defaulting to "Game Over" / "Defeat" in a danger tone), restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons.
+
+**Tag:** `tc-game-over-screen`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `title-text` | string | `Game Over` | The large title heading |
+| `subtitle` | string | — | Optional supporting line under the divider |
+| `title-color` | `gold\|danger\|parch` | `danger` | Status tone of the title (`danger` → danger ramp, `gold` → warning ramp, `parch` → neutral slate) |
+| `eyebrow` | string | `Defeat` | The mono uppercase micro-label above the title |
+
+The host element automatically gains `role="region"` (unless one is already set).
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `stats` | `GameOverStat[]` | Stat rows (set via JS, not attribute); setting re-renders |
+| `rewards` | `GameOverReward[]` | Reward chips shown in the reward strip |
+| `actions` | `GameOverAction[]` | Action buttons rendered at the bottom |
+| `titleText` | string | Mirror of the `title-text` attribute |
+| `subtitle` | string | Mirror of the `subtitle` attribute |
+| `titleColor` | `gold\|danger\|parch` | Mirror of the `title-color` attribute |
+| `eyebrow` | string | Mirror of the `eyebrow` attribute |
+| `onAction` | `((id: string) => void) \| null` | Optional callback fired alongside `tc-action` |
+
+Each `GameOverStat`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Stat name |
+| `value` | string \| number | Stat value (numbers are locale-formatted) |
+
+Each `GameOverReward`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Reward name |
+| `glyph` | string? | Short symbol/initials shown before the label (rendered as text, `aria-hidden`) |
+| `amount` | number \| string? | Optional amount shown after the label (numbers are locale-formatted) |
+| `color` | string? | Optional CSS colour applied to the glyph |
+
+Each `GameOverAction`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique key emitted in the `tc-action` `detail` |
+| `label` | string | Button text |
+| `variant` | `default\|primary\|danger\|ghost`? | Button style (`default` → secondary, `primary` → ink, `danger` → danger, `ghost` → outline) |
+
+**Events**
+
+| Event | `detail` | Fired when |
+|-------|----------|------------|
+| `tc-action` | `{ id: string }` | An action button is clicked |
+
+**Slots:** none — the eyebrow, title, subtitle, stats, rewards, and actions are all generated from attributes / JS properties.
+
+```html
+<tc-game-over-screen id="over" subtitle="The colony has fallen."></tc-game-over-screen>
+<script>
+const el = document.getElementById('over')
+el.stats = [
+    { label: 'Score', value: 18420 },
+    { label: 'Waves cleared', value: 12 },
+]
+el.rewards = [
+    { glyph: '◈', label: 'Gold', amount: 320, color: 'var(--tc-warning)' },
+    { glyph: '★', label: 'XP', amount: 1500 },
+]
+el.actions = [
+    { id: 'retry', label: 'Try Again', variant: 'primary' },
+    { id: 'menu', label: 'Main Menu' },
+    { id: 'quit', label: 'Quit', variant: 'ghost' },
+]
+el.addEventListener('tc-action', e => console.log('action', e.detail.id))
 </script>
 ```
 

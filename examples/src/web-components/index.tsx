@@ -52,6 +52,7 @@ import CheckDemo from './CheckDemo'
 import CheckboxGroupDemo from './CheckboxGroupDemo'
 import CharacterCreateDemo from './CharacterCreateDemo'
 import CharacterSelectDemo from './CharacterSelectDemo'
+import GameOverScreenDemo from './GameOverScreenDemo'
 import RadioDemo from './RadioDemo'
 import RadioGroupDemo from './RadioGroupDemo'
 import VersionPickerDemo from './VersionPickerDemo'
@@ -433,6 +434,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'scoring-rules', category: 'Content', element: <ScoringRulesDemo /> },
     { key: 'credits-list', category: 'Content', element: <CreditsListDemo /> },
     { key: 'achievement-list', category: 'Content', element: <AchievementListDemo /> },
+    { key: 'game-over-screen', category: 'Content', element: <GameOverScreenDemo /> },
     { key: 'battle-pass', category: 'Components', element: <BattlePassDemo /> },
     { key: 'section-card', category: 'Components', element: <SectionCardDemo /> },
     { key: 'sprint-chain', category: 'Content', element: <SprintChainDemo /> },
