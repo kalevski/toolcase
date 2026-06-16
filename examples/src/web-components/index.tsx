@@ -177,6 +177,7 @@ import SlicesCardDemo from './SlicesCardDemo'
 import DatePickerDemo from './DatePickerDemo'
 import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
+import ConfirmDialogDemo from './ConfirmDialogDemo'
 import LightboxDemo from './LightboxDemo'
 import CommandPaletteDemo from './CommandPaletteDemo'
 import ComboBoxDemo from './ComboBoxDemo'
@@ -436,6 +437,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'context-menu', category: 'Overlays & Feedback', element: <ContextMenuDemo /> },
     { key: 'blur-overlay', category: 'Overlays & Feedback', element: <BlurOverlayDemo /> },
     { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
+    { key: 'confirm-dialog', category: 'Overlays & Feedback', element: <ConfirmDialogDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
     { key: 'command-palette', category: 'Overlays & Feedback', element: <CommandPaletteDemo /> },
     { key: 'cool-nav', category: 'Navigation', element: <CoolNavDemo /> },
