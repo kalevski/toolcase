@@ -246,6 +246,7 @@ import { VideoEmbed } from './VideoEmbed'
 import { VirtualList } from './VirtualList'
 import { CircularProgress } from './CircularProgress'
 import { CompassBar } from './CompassBar'
+import { CompassRose } from './CompassRose'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -501,4 +502,5 @@ export function register(): void {
     customElements.define('tc-virtual-list', VirtualList)
     customElements.define('tc-circular-progress', CircularProgress)
     customElements.define('tc-compass-bar', CompassBar)
+    customElements.define('tc-compass-rose', CompassRose)
 }

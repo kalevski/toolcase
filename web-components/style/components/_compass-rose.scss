@@ -1,0 +1,108 @@
+// tc-compass-rose — radial compass rose showing a facing direction. Ported from
+// the game-components gc-compass-rose but re-skinned to the toolcase design
+// system: a flat slate face, 1px hairline ring, mono cardinal labels, and the
+// slate ink accent for the north-pointing needle. The needle rotates to the
+// current heading; that rotation transition is decorative motion, frozen under
+// prefers-reduced-motion (the final orientation — the information — is kept).
+//
+// The face circle and hub are genuinely circular, so border-radius / circular
+// SVG geometry is sanctioned here. Every other surface stays sharp.
+//
+// Every cosmetic value flows through --bs-compass-rose-* custom properties — the
+// public theming contract.
+
+tc-compass-rose {
+    --bs-compass-rose-size: 160px;
+    --bs-compass-rose-rotation: 0deg;
+
+    --bs-compass-rose-face-bg: var(--tc-surface);
+    --bs-compass-rose-ring-color: var(--tc-border-strong);
+    --bs-compass-rose-ring-width: 1.5;
+
+    --bs-compass-rose-tick-color: var(--tc-text-faint);
+    --bs-compass-rose-tick-width: 1.5;
+
+    --bs-compass-rose-needle-n-color: var(--tc-app-accent);
+    --bs-compass-rose-needle-s-color: var(--tc-slate-300);
+    --bs-compass-rose-hub-color: var(--tc-app-accent);
+
+    --bs-compass-rose-label-color: var(--tc-text-muted);
+    --bs-compass-rose-label-n-color: var(--tc-text);
+    --bs-compass-rose-label-size: 11px;
+    --bs-compass-rose-label-spacing: 0.06em;
+
+    --bs-compass-rose-transition: var(--tc-transition-base);
+}
+
+.tc-compass-rose {
+    box-sizing: border-box;
+}
+
+.tc-compass-rose__face {
+    display: block;
+    width: var(--bs-compass-rose-size);
+    height: var(--bs-compass-rose-size);
+}
+
+// Single circle does double duty: surface fill + hairline ring frame.
+.tc-compass-rose__ring {
+    fill: var(--bs-compass-rose-face-bg);
+    stroke: var(--bs-compass-rose-ring-color);
+    stroke-width: var(--bs-compass-rose-ring-width);
+}
+
+// Short cardinal index ticks at N/E/S/W for a machine-instrument read.
+.tc-compass-rose__tick {
+    stroke: var(--bs-compass-rose-tick-color);
+    stroke-width: var(--bs-compass-rose-tick-width);
+    stroke-linecap: square;
+}
+
+// The needle group spins around the face centre; this is the only motion.
+.tc-compass-rose__needle {
+    transform: rotate(var(--bs-compass-rose-rotation));
+    transform-box: view-box;
+    transform-origin: center;
+    transition: transform var(--bs-compass-rose-transition);
+}
+
+.tc-compass-rose__needle-n {
+    fill: var(--bs-compass-rose-needle-n-color);
+}
+
+.tc-compass-rose__needle-s {
+    fill: var(--bs-compass-rose-needle-s-color);
+}
+
+.tc-compass-rose__hub {
+    fill: var(--bs-compass-rose-hub-color);
+}
+
+.tc-compass-rose__label {
+    font-family: var(--tc-font-mono);
+    // Sized in user units within the 100×100 face so it scales with the rose.
+    font-size: var(--bs-compass-rose-label-size);
+    letter-spacing: var(--bs-compass-rose-label-spacing);
+    fill: var(--bs-compass-rose-label-color);
+    text-transform: uppercase;
+}
+
+// North label carries the emphasis colour + weight so the rose reads oriented.
+.tc-compass-rose__label--n {
+    fill: var(--bs-compass-rose-label-n-color);
+    font-weight: 600;
+}
+
+// Slightly larger default face under coarse pointers for legibility on touch.
+@media (pointer: coarse) {
+    tc-compass-rose {
+        --bs-compass-rose-size: 184px;
+    }
+}
+
+// Needle rotation tween is decorative — freeze it; the final orientation stays.
+@media (prefers-reduced-motion: reduce) {
+    .tc-compass-rose__needle {
+        transition: none;
+    }
+}

@@ -238,6 +238,7 @@ import VideoEmbedDemo from './VideoEmbedDemo'
 import VirtualListDemo from './VirtualListDemo'
 import CircularProgressDemo from './CircularProgressDemo'
 import CompassBarDemo from './CompassBarDemo'
+import CompassRoseDemo from './CompassRoseDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -496,4 +497,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'cycle-wheel', category: 'Components', element: <CycleWheelDemo /> },
     { key: 'circular-progress', category: 'Components', element: <CircularProgressDemo /> },
     { key: 'compass-bar', category: 'Content', element: <CompassBarDemo /> },
+    { key: 'compass-rose', category: 'Content', element: <CompassRoseDemo /> },
 ]
