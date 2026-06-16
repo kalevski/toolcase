@@ -112,6 +112,7 @@ import { CodeWithOutput } from './CodeWithOutput'
 import { CommunityLinks } from './CommunityLinks'
 import { ConfigPreview } from './ConfigPreview'
 import { ConfirmDialog } from './ConfirmDialog'
+import { InviteToast } from './InviteToast'
 import { ContributorWall } from './ContributorWall'
 import { CookbookGrid } from './CookbookGrid'
 import { CoolButton } from './CoolButton'
@@ -397,6 +398,7 @@ export function register(): void {
     customElements.define('tc-community-links', CommunityLinks)
     customElements.define('tc-config-preview', ConfigPreview)
     customElements.define('tc-confirm-dialog', ConfirmDialog)
+    customElements.define('tc-invite-toast', InviteToast)
     customElements.define('tc-contributor-wall', ContributorWall)
     customElements.define('tc-cookbook-grid', CookbookGrid)
     customElements.define('tc-cool-button', CoolButton)

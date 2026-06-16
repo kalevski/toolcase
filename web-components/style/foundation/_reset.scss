@@ -357,6 +357,12 @@ tc-blur-overlay {
     display: block;
 }
 
+// Fixed-position invite toast; the SCSS partial hides it until [open] and pins
+// it to a screen corner, but the host must not default to inline.
+tc-invite-toast {
+    display: block;
+}
+
 tc-lightbox {
     display: block;
 }
