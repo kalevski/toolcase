@@ -251,6 +251,7 @@ import CompassRoseDemo from './CompassRoseDemo'
 import ControllerLayoutPreviewDemo from './ControllerLayoutPreviewDemo'
 import ControlsRebindListDemo from './ControlsRebindListDemo'
 import CraftingPanelDemo from './CraftingPanelDemo'
+import DebugOverlayDemo from './DebugOverlayDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -522,4 +523,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'controller-layout-preview', category: 'Content', element: <ControllerLayoutPreviewDemo /> },
     { key: 'controls-rebind-list', category: 'Components', element: <ControlsRebindListDemo /> },
     { key: 'crafting-panel', category: 'Components', element: <CraftingPanelDemo /> },
+    { key: 'debug-overlay', category: 'Overlays & Feedback', element: <DebugOverlayDemo /> },
 ]
