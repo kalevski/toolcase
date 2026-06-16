@@ -79,6 +79,7 @@ import { Spacer } from './Spacer'
 import { Text } from './Text'
 import { VisuallyHidden } from './VisuallyHidden'
 import { PulseIndicator } from './PulseIndicator'
+import { Crosshair } from './Crosshair'
 import { SectionFlag } from './SectionFlag'
 import { Skeleton } from './Skeleton'
 import { SocialLinks } from './SocialLinks'
@@ -340,6 +341,7 @@ export function register(): void {
     customElements.define('tc-text', Text)
     customElements.define('tc-visually-hidden', VisuallyHidden)
     customElements.define('tc-pulse-indicator', PulseIndicator)
+    customElements.define('tc-crosshair', Crosshair)
     customElements.define('tc-section-flag', SectionFlag)
     customElements.define('tc-skeleton', Skeleton)
     customElements.define('tc-social-links', SocialLinks)

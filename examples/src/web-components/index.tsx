@@ -73,6 +73,7 @@ import SpacerDemo from './SpacerDemo'
 import TextDemo from './TextDemo'
 import VisuallyHiddenDemo from './VisuallyHiddenDemo'
 import PulseIndicatorDemo from './PulseIndicatorDemo'
+import CrosshairDemo from './CrosshairDemo'
 import SectionFlagDemo from './SectionFlagDemo'
 import SkeletonDemo from './SkeletonDemo'
 import SocialLinksDemo from './SocialLinksDemo'
@@ -345,6 +346,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'text', category: 'Content', element: <TextDemo /> },
     { key: 'visually-hidden', category: 'Components', element: <VisuallyHiddenDemo /> },
     { key: 'pulse-indicator', category: 'Components', element: <PulseIndicatorDemo /> },
+    { key: 'crosshair', category: 'Components', element: <CrosshairDemo /> },
     { key: 'section-flag', category: 'Content', element: <SectionFlagDemo /> },
     { key: 'skeleton', category: 'Components', element: <SkeletonDemo /> },
     { key: 'social-links', category: 'Navigation', element: <SocialLinksDemo /> },
