@@ -1,0 +1,225 @@
+// tc-combo-box — text-input-driven filterable dropdown of options. A trigger
+// button shows the selected label (or placeholder) and a caret; opening reveals
+// an overlay popover with a search field and a listbox of filtered options.
+// All cosmetics flow through --bs-combo-box-* custom properties backed by --tc-*
+// tokens. Sharp corners throughout; shadow only on the overlay popover.
+
+tc-combo-box {
+    // ── Public theming contract ──────────────────────────────────────────────
+    --bs-combo-box-min-width: 180px;
+    --bs-combo-box-trigger-bg: var(--tc-surface);
+    --bs-combo-box-trigger-color: var(--tc-text);
+    --bs-combo-box-trigger-border: 1px solid var(--tc-border-strong);
+    --bs-combo-box-trigger-placeholder-color: var(--tc-text-muted);
+    --bs-combo-box-trigger-focus-shadow: var(--tc-focus-ring);
+    --bs-combo-box-trigger-height: 2.375rem; // ~38px — matches form-control height
+    --bs-combo-box-caret-color: var(--tc-text-muted);
+    --bs-combo-box-popover-bg: var(--tc-surface);
+    --bs-combo-box-popover-border: 1px solid var(--tc-border);
+    --bs-combo-box-popover-shadow: var(--tc-shadow-lg);
+    --bs-combo-box-popover-z: var(--tc-z-dropdown);
+    --bs-combo-box-search-border: 1px solid var(--tc-border);
+    --bs-combo-box-search-bg: var(--tc-surface);
+    --bs-combo-box-search-color: var(--tc-text);
+    --bs-combo-box-search-focus-shadow: var(--tc-focus-ring);
+    --bs-combo-box-option-color: var(--tc-text);
+    --bs-combo-box-option-hover-bg: var(--tc-surface-muted);
+    --bs-combo-box-option-selected-bg: var(--tc-app-accent);
+    --bs-combo-box-option-selected-color: #ffffff;
+    --bs-combo-box-option-font-size: 0.875rem;
+    --bs-combo-box-empty-color: var(--tc-text-muted);
+    --bs-combo-box-disabled-opacity: 0.55;
+
+    position: relative;
+    min-width: var(--bs-combo-box-min-width);
+}
+
+// ── Trigger button ───────────────────────────────────────────────────────────
+
+.tc-combo-box__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: var(--bs-combo-box-trigger-height);
+    padding: 0.4375rem 0.625rem;
+    font-family: var(--bs-body-font-family, inherit);
+    font-size: 0.925rem;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    color: var(--bs-combo-box-trigger-color);
+    background-color: var(--bs-combo-box-trigger-bg);
+    border: var(--bs-combo-box-trigger-border);
+    border-radius: 0; // sharp corners — design system rule
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: border-color var(--tc-transition-base), box-shadow var(--tc-transition-base);
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--bs-combo-box-trigger-focus-shadow);
+    }
+
+    &--placeholder {
+        color: var(--bs-combo-box-trigger-placeholder-color);
+    }
+
+    &:disabled {
+        opacity: var(--bs-combo-box-disabled-opacity);
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+.tc-combo-box__trigger-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-combo-box__caret {
+    display: inline-flex;
+    flex-shrink: 0;
+    margin-left: auto;
+    color: var(--bs-combo-box-caret-color);
+    transition: transform var(--tc-transition-base);
+
+    svg {
+        display: block;
+        width: 1em;
+        height: 1em;
+    }
+}
+
+// Caret rotates when the popover is open
+.tc-combo-box__trigger[aria-expanded='true'] .tc-combo-box__caret {
+    transform: rotate(180deg);
+}
+
+// ── Popover (overlay tier — the only place a shadow is allowed) ──────────────
+
+.tc-combo-box__popover {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    z-index: var(--bs-combo-box-popover-z);
+    background-color: var(--bs-combo-box-popover-bg);
+    border: var(--bs-combo-box-popover-border);
+    border-radius: 0;
+    box-shadow: var(--bs-combo-box-popover-shadow);
+    overflow: hidden;
+}
+
+// ── Search row ───────────────────────────────────────────────────────────────
+
+.tc-combo-box__search {
+    padding: 0.375rem;
+    border-bottom: var(--bs-combo-box-search-border);
+}
+
+.tc-combo-box__search-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.3125rem 0.5rem;
+    // JetBrains Mono — machine-facing query text
+    font-family: var(--tc-font-mono, monospace);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--bs-combo-box-search-color);
+    background-color: var(--bs-combo-box-search-bg);
+    border: var(--bs-combo-box-search-border);
+    border-radius: 0;
+    outline: none;
+    transition: border-color var(--tc-transition-base), box-shadow var(--tc-transition-base);
+
+    &:focus-visible {
+        box-shadow: var(--bs-combo-box-search-focus-shadow);
+    }
+
+    &::placeholder {
+        color: var(--bs-combo-box-empty-color);
+    }
+}
+
+// ── Options list ─────────────────────────────────────────────────────────────
+
+.tc-combo-box__list {
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.tc-combo-box__option {
+    box-sizing: border-box;
+    padding: 0.4375rem 0.625rem;
+    font-size: var(--bs-combo-box-option-font-size);
+    color: var(--bs-combo-box-option-color);
+    background: transparent;
+    border-top: 1px solid var(--tc-surface-muted);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background-color var(--tc-transition-base), color var(--tc-transition-base);
+
+    &:first-child {
+        border-top: 0;
+    }
+
+    &:hover:not(.tc-combo-box__option--selected) {
+        background-color: var(--bs-combo-box-option-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: none;
+        background-color: var(--bs-combo-box-option-hover-bg);
+        box-shadow: inset 0 0 0 2px var(--tc-app-accent);
+    }
+
+    &--selected {
+        color: var(--bs-combo-box-option-selected-color);
+        background-color: var(--bs-combo-box-option-selected-bg);
+    }
+}
+
+// ── Empty / no-matches message ───────────────────────────────────────────────
+
+.tc-combo-box__empty {
+    padding: 0.625rem;
+    font-size: var(--bs-combo-box-option-font-size);
+    color: var(--bs-combo-box-empty-color);
+    text-align: center;
+}
+
+// ── Touch targets (WCAG 2.5.5 — 44 px on coarse-pointer devices) ────────────
+
+@media (pointer: coarse) {
+    .tc-combo-box__trigger {
+        min-height: 44px;
+    }
+
+    .tc-combo-box__option {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+// ── Reduced motion — freeze decorative transforms, keep state transitions ────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-combo-box__caret {
+        transition: none;
+    }
+
+    .tc-combo-box__trigger,
+    .tc-combo-box__search-input,
+    .tc-combo-box__option {
+        // keep color/background/border-color cues, just remove timing emphasis
+        transition: none;
+    }
+}

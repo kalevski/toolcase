@@ -178,6 +178,7 @@ import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
 import LightboxDemo from './LightboxDemo'
 import CommandPaletteDemo from './CommandPaletteDemo'
+import ComboBoxDemo from './ComboBoxDemo'
 import EarlySignupFormDemo from './EarlySignupFormDemo'
 import EcosystemMapDemo from './EcosystemMapDemo'
 import EditableTextDemo from './EditableTextDemo'
@@ -303,6 +304,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'textarea', category: 'Forms', element: <TextareaDemo /> },
     { key: 'markdown-editor', category: 'Forms', element: <MarkdownEditorDemo /> },
     { key: 'select', category: 'Forms', element: <SelectDemo /> },
+    { key: 'combo-box', category: 'Forms', element: <ComboBoxDemo /> },
     { key: 'check', category: 'Forms', element: <CheckDemo /> },
     { key: 'checkbox-group', category: 'Forms', element: <CheckboxGroupDemo /> },
     { key: 'character-create', category: 'Forms', element: <CharacterCreateDemo /> },
