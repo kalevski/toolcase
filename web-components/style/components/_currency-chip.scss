@@ -1,0 +1,54 @@
+// tc-currency-chip — compact currency pill pairing a glyph with a formatted amount.
+// Port of game-components `gc-currency-chip`, restyled to the design system: sharp
+// corners, slate-100 fill, 1px hairline border, ink-accented glyph, mono amount.
+// All cosmetics flow through --bs-currency-chip-* custom properties.
+// The `color` attribute writes --bs-currency-chip-color (the glyph tint) on the host.
+
+tc-currency-chip {
+    // Default glyph tint; overridden by host inline style when `color` is set.
+    --bs-currency-chip-color: var(--tc-app-accent);
+}
+
+.tc-currency-chip {
+    --bs-currency-chip-padding-x: 0.5rem;
+    --bs-currency-chip-padding-y: 0.25rem;
+    --bs-currency-chip-gap: 0.375rem;
+    --bs-currency-chip-font-size: 0.8125rem;
+    --bs-currency-chip-bg: var(--tc-surface-muted);
+    --bs-currency-chip-border-color: var(--tc-border);
+    --bs-currency-chip-border-width: 1px;
+    --bs-currency-chip-amount-color: var(--tc-text);
+    --bs-currency-chip-amount-weight: 500;
+    --bs-currency-chip-glyph-weight: 600;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-currency-chip-gap);
+    padding: var(--bs-currency-chip-padding-y) var(--bs-currency-chip-padding-x);
+    font-size: var(--bs-currency-chip-font-size);
+    line-height: 1;
+    white-space: nowrap;
+    vertical-align: middle;
+    background-color: var(--bs-currency-chip-bg);
+    border: var(--bs-currency-chip-border-width) solid var(--bs-currency-chip-border-color);
+    border-radius: 0;
+}
+
+.tc-currency-chip-glyph {
+    display: inline-flex;
+    align-items: center;
+    // Machine-facing symbol — mono, ink-accented.
+    font-family: var(--tc-font-mono);
+    font-weight: var(--bs-currency-chip-glyph-weight);
+    color: var(--bs-currency-chip-color);
+    line-height: 1;
+}
+
+.tc-currency-chip-amount {
+    // Numeric value — mono with tabular figures so digits stay column-aligned.
+    font-family: var(--tc-font-mono);
+    font-weight: var(--bs-currency-chip-amount-weight);
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-currency-chip-amount-color);
+    line-height: 1;
+}
