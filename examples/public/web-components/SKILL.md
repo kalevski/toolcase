@@ -266,6 +266,7 @@ After `register()` you can author markup directly:
   - [tc-range](#tc-range)
   - [tc-range-slider](#tc-range-slider)
   - [tc-deadzone-slider](#tc-deadzone-slider)
+  - [tc-fov-slider](#tc-fov-slider)
   - [tc-rating](#tc-rating)
   - [tc-slider](#tc-slider)
   - [tc-select](#tc-select)
@@ -7397,6 +7398,54 @@ A stick-deadzone setting row: a label/description text block paired with a 0–1
 <script>
   const el = document.querySelector('tc-deadzone-slider')
   el.value = 0.2
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+</script>
+```
+
+---
+
+### tc-fov-slider
+
+A field-of-view setting row: a label/description text block paired with a range control and a mono degree readout. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-fov-slider` with the fantasy chrome dropped for the toolcase slate/ink look.
+
+**Tag:** `tc-fov-slider`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `row-label` | string | `Field of View` | Row label (set automatically when absent) |
+| `description` | string | — | Optional secondary line beneath the label |
+| `value` | number | `90` | Current field of view, in degrees (`1` step) |
+| `min` | number | `60` | Minimum field of view |
+| `max` | number | `120` | Maximum field of view |
+| `disabled` | boolean | `false` | Disables the range input |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number` | Get or set the field of view (degrees). Getter defaults to `90`. Setting patches the input + readout in place — no full re-render. |
+| `min` | `number` | Get/set the minimum (`min` attribute). Defaults to `60`. |
+| `max` | `number` | Get/set the maximum (`max` attribute). Defaults to `120`. |
+| `rowLabel` | `string` | Get/set the `row-label` attribute. |
+| `description` | `string` | Get/set the `description` attribute. |
+| `disabled` | `boolean` | Get/set the `disabled` attribute. |
+| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every change. Mirrors the `tc-change` event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: number }` | Fired on every range-input change (the field of view in degrees). |
+
+**No slots.**
+
+```html
+<tc-fov-slider row-label="Vertical FOV" description="Widen for ultrawide displays." min="70" max="140" value="103"></tc-fov-slider>
+<script>
+  const el = document.querySelector('tc-fov-slider')
+  el.value = 110
   el.addEventListener('tc-change', e => console.log(e.detail.value))
 </script>
 ```

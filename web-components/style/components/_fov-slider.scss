@@ -1,0 +1,156 @@
+// tc-fov-slider — field-of-view preset control on the shared setting-row
+// scaffold (`_setting-row.scss`). The control is a native range input — flat
+// hairline track, circular ink-ringed thumb (the one sanctioned curve) — paired
+// with a mono degree readout. All cosmetics flow through `--bs-fov-slider-*`;
+// the fantasy chrome of the gc-* original is dropped.
+
+tc-fov-slider {
+    --bs-fov-slider-track-width: 160px;
+    --bs-fov-slider-track-height: 6px;
+    --bs-fov-slider-track-color: var(--tc-border);
+    --bs-fov-slider-fill-color: var(--tc-app-accent);
+    --bs-fov-slider-thumb-size: 16px;
+    --bs-fov-slider-thumb-bg: var(--tc-surface);
+    --bs-fov-slider-thumb-border: var(--tc-app-accent);
+    --bs-fov-slider-thumb-active-bg: var(--tc-surface-muted);
+    --bs-fov-slider-thumb-shadow: var(--tc-shadow-sm);
+    --bs-fov-slider-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-fov-slider-disabled-color: var(--tc-text-faint);
+    --bs-fov-slider-value-color: var(--tc-text-muted);
+    --bs-fov-slider-value-size: 0.6875rem;
+    --bs-fov-slider-value-min-width: 3rem;
+    --bs-fov-slider-gap: 0.625rem;
+}
+
+.tc-fov-slider__control {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-fov-slider-gap);
+}
+
+.tc-fov-slider__input {
+    width: var(--bs-fov-slider-track-width);
+    height: 1.25rem;
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    // Coarse pointers get a 44px hit area without changing the visual track.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:focus-visible {
+        &::-webkit-slider-thumb {
+            box-shadow: var(--bs-fov-slider-focus-ring);
+        }
+
+        &::-moz-range-thumb {
+            box-shadow: var(--bs-fov-slider-focus-ring);
+        }
+    }
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: var(--bs-fov-slider-track-height);
+        cursor: pointer;
+        background-color: var(--bs-fov-slider-track-color);
+        border: 0;
+        border-radius: 0;
+    }
+
+    &::-webkit-slider-thumb {
+        // Centre the thumb on the track regardless of the two sizes.
+        margin-top: calc(
+            (var(--bs-fov-slider-track-height) - var(--bs-fov-slider-thumb-size)) / 2
+        );
+        width: var(--bs-fov-slider-thumb-size);
+        height: var(--bs-fov-slider-thumb-size);
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        background-color: var(--bs-fov-slider-thumb-bg);
+        border: 1.5px solid var(--bs-fov-slider-thumb-border);
+        border-radius: 50%;
+        box-shadow: var(--bs-fov-slider-thumb-shadow);
+        transition: background-color var(--tc-transition-fast);
+
+        &:active {
+            background-color: var(--bs-fov-slider-thumb-active-bg);
+        }
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: var(--bs-fov-slider-track-height);
+        cursor: pointer;
+        background-color: var(--bs-fov-slider-track-color);
+        border: 0;
+        border-radius: 0;
+    }
+
+    // Filled portion of the track (ink up to the thumb) — Firefox only.
+    &::-moz-range-progress {
+        height: var(--bs-fov-slider-track-height);
+        background-color: var(--bs-fov-slider-fill-color);
+    }
+
+    &::-moz-range-thumb {
+        width: var(--bs-fov-slider-thumb-size);
+        height: var(--bs-fov-slider-thumb-size);
+        cursor: pointer;
+        background-color: var(--bs-fov-slider-thumb-bg);
+        border: 1.5px solid var(--bs-fov-slider-thumb-border);
+        border-radius: 50%;
+        box-shadow: var(--bs-fov-slider-thumb-shadow);
+        transition: background-color var(--tc-transition-fast);
+
+        &:active {
+            background-color: var(--bs-fov-slider-thumb-active-bg);
+        }
+    }
+
+    &:disabled {
+        pointer-events: none;
+
+        &::-webkit-slider-thumb {
+            background-color: var(--bs-fov-slider-disabled-color);
+            border-color: var(--bs-fov-slider-disabled-color);
+        }
+
+        &::-moz-range-thumb {
+            background-color: var(--bs-fov-slider-disabled-color);
+            border-color: var(--bs-fov-slider-disabled-color);
+        }
+    }
+}
+
+.tc-fov-slider__value {
+    // Mono, machine-facing degree readout.
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-fov-slider-value-size);
+    letter-spacing: 0.06em;
+    color: var(--bs-fov-slider-value-color);
+    min-width: var(--bs-fov-slider-value-min-width);
+    text-align: right;
+}
+
+// State-conveying colour transitions are cheap; the thumb's hover-fill is the
+// only motion here, so freeze just that under reduced-motion.
+@media (prefers-reduced-motion: reduce) {
+    .tc-fov-slider__input {
+        &::-webkit-slider-thumb {
+            transition: none;
+        }
+
+        &::-moz-range-thumb {
+            transition: none;
+        }
+    }
+}
