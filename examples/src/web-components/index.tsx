@@ -252,6 +252,7 @@ import ControllerLayoutPreviewDemo from './ControllerLayoutPreviewDemo'
 import ControlsRebindListDemo from './ControlsRebindListDemo'
 import CraftingPanelDemo from './CraftingPanelDemo'
 import DebugOverlayDemo from './DebugOverlayDemo'
+import DialogueBoxDemo from './DialogueBoxDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -524,4 +525,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'controls-rebind-list', category: 'Components', element: <ControlsRebindListDemo /> },
     { key: 'crafting-panel', category: 'Components', element: <CraftingPanelDemo /> },
     { key: 'debug-overlay', category: 'Overlays & Feedback', element: <DebugOverlayDemo /> },
+    { key: 'dialogue-box', category: 'Overlays & Feedback', element: <DialogueBoxDemo /> },
 ]

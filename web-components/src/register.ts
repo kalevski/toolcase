@@ -260,6 +260,7 @@ import { CurrencyChip } from './CurrencyChip'
 import { CurrencyDisplay } from './CurrencyDisplay'
 import { DeadzoneSlider } from './DeadzoneSlider'
 import { DebugOverlay } from './DebugOverlay'
+import { DialogueBox } from './DialogueBox'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -529,4 +530,5 @@ export function register(): void {
     customElements.define('tc-currency-display', CurrencyDisplay)
     customElements.define('tc-deadzone-slider', DeadzoneSlider)
     customElements.define('tc-debug-overlay', DebugOverlay)
+    customElements.define('tc-dialogue-box', DialogueBox)
 }
