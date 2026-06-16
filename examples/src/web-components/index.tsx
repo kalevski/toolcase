@@ -1,6 +1,7 @@
 import { JSX } from 'react'
 import AnchorDemo from './AnchorDemo'
 import AspectRatioBoxDemo from './AspectRatioBoxDemo'
+import GildedFrameDemo from './GildedFrameDemo'
 import AvatarDemo from './AvatarDemo'
 import ArtboardBackdropDemo from './ArtboardBackdropDemo'
 import BlurOverlayDemo from './BlurOverlayDemo'
@@ -358,6 +359,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
     { key: 'anchor', category: 'Layout', element: <AnchorDemo /> },
     { key: 'aspect-ratio-box', category: 'Layout', element: <AspectRatioBoxDemo /> },
+    { key: 'gilded-frame', category: 'Layout', element: <GildedFrameDemo /> },
     { key: 'text', category: 'Content', element: <TextDemo /> },
     { key: 'visually-hidden', category: 'Components', element: <VisuallyHiddenDemo /> },
     { key: 'pulse-indicator', category: 'Components', element: <PulseIndicatorDemo /> },

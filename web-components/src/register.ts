@@ -269,6 +269,7 @@ import { FPSCapSelect } from './FPSCapSelect'
 import { FullscreenToggle } from './FullscreenToggle'
 import { GameOverScreen } from './GameOverScreen'
 import { GamepadButtonPrompt } from './GamepadButtonPrompt'
+import { GildedFrame } from './GildedFrame'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -547,4 +548,5 @@ export function register(): void {
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
     customElements.define('tc-game-over-screen', GameOverScreen)
     customElements.define('tc-gamepad-button-prompt', GamepadButtonPrompt)
+    customElements.define('tc-gilded-frame', GildedFrame)
 }
