@@ -74,6 +74,7 @@ import KbdDemo from './KbdDemo'
 import LabelDemo from './LabelDemo'
 import LinkDemo from './LinkDemo'
 import SpacerDemo from './SpacerDemo'
+import GridDemo from './GridDemo'
 import TextDemo from './TextDemo'
 import VisuallyHiddenDemo from './VisuallyHiddenDemo'
 import PulseIndicatorDemo from './PulseIndicatorDemo'
@@ -360,6 +361,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
     { key: 'anchor', category: 'Layout', element: <AnchorDemo /> },
     { key: 'aspect-ratio-box', category: 'Layout', element: <AspectRatioBoxDemo /> },
+    { key: 'grid', category: 'Layout', element: <GridDemo /> },
     { key: 'gilded-frame', category: 'Layout', element: <GildedFrameDemo /> },
     { key: 'text', category: 'Content', element: <TextDemo /> },
     { key: 'visually-hidden', category: 'Components', element: <VisuallyHiddenDemo /> },

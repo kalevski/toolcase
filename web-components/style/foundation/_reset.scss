@@ -332,6 +332,12 @@ tc-compass-bar {
     display: flex;
 }
 
+// tc-grid is a CSS-grid layout primitive; the partial owns the track/gap
+// details but the host must lay out as a grid, not default to inline.
+tc-grid {
+    display: grid;
+}
+
 tc-drawer {
     display: block;
 }

@@ -36,6 +36,7 @@ After `register()` you can author markup directly:
   - [tc-row](#tc-row)
   - [tc-col](#tc-col)
   - [tc-spacer](#tc-spacer)
+  - [tc-grid](#tc-grid)
   - [tc-anchor](#tc-anchor)
   - [tc-aspect-ratio-box](#tc-aspect-ratio-box)
   - [tc-gilded-frame](#tc-gilded-frame)
@@ -665,6 +666,70 @@ None.
     <span>Left</span>
     <tc-spacer axis="horizontal"></tc-spacer>
     <span>Right</span>
+</div>
+```
+
+---
+
+### tc-grid
+
+CSS-grid layout primitive. Set a column and/or row count, a gap, and a uniform cell size; children are laid out directly as grid items. Purely structural — no visible chrome, no shadows, no border-radius. All cosmetics flow through `--bs-grid-*` custom properties.
+
+**Tag:** `tc-grid`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `columns` | string \| number | — | Number of equal-width columns. Produces `grid-template-columns: repeat(<columns>, <cell-size>)`. When omitted, no explicit column track is set. |
+| `rows` | string \| number | — | Number of equal-height rows. Produces `grid-template-rows: repeat(<rows>, <cell-size>)`. When omitted, no explicit row track is set. |
+| `gap` | string \| number | `0` | Gap between cells. Bare numbers are treated as `px` (e.g. `gap="8"` → `8px`); any CSS length string is accepted (`1rem`, `0.5em`, …). |
+| `cell-size` | string \| number | `1fr` | Size of each track in the `repeat()`. Bare numbers are treated as `px` (e.g. `cell-size="64"` → `64px`); any CSS grid track size is accepted (`1fr`, `64px`, `minmax(0, 1fr)`, …). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `columns` | string | Reflects the `columns` attribute. |
+| `rows` | string | Reflects the `rows` attribute. |
+| `gap` | string | Reflects the `gap` attribute. |
+| `cellSize` | string | Reflects the `cell-size` attribute. |
+
+**Events**
+
+None. `tc-grid` is a purely presentational element.
+
+**Slots**
+
+Default slot — the grid items (any elements). They are laid out directly; the element does not wrap or re-render them.
+
+**Theming custom properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-grid-template-columns` | `none` | Resolved column template; written by the element when `columns` is set. |
+| `--bs-grid-template-rows` | `none` | Resolved row template; written by the element when `rows` is set. |
+| `--bs-grid-gap` | `0` | Resolved gap; written by the element when `gap` is set. |
+
+```html
+<!-- Three equal columns, 8px gap -->
+<tc-grid columns="3" gap="8">
+    <div>1</div><div>2</div><div>3</div>
+    <div>4</div><div>5</div><div>6</div>
+</tc-grid>
+
+<!-- Fixed 64px square cells, 4 columns -->
+<tc-grid columns="4" cell-size="64px" gap="1rem">
+    <div>A</div><div>B</div><div>C</div><div>D</div>
+</tc-grid>
+
+<!-- Hairline grid: 1px gap over a slate background -->
+<div style="background: var(--tc-border)">
+    <tc-grid columns="3" gap="1">
+        <div style="background: var(--tc-surface)">cpu</div>
+        <div style="background: var(--tc-surface)">mem</div>
+        <div style="background: var(--tc-surface)">disk</div>
+    </tc-grid>
 </div>
 ```
 

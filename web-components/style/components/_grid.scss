@@ -1,0 +1,23 @@
+// tc-grid — CSS-grid layout primitive (columns / rows / gap / cell-size).
+// Port of game-components' gc-grid, restyled to the toolcase design system:
+// no gilded frame, glow, or fantasy fill — a pure structural element with no
+// chrome of its own. The host lays out its light-DOM children directly.
+//
+// All cosmetics flow through --bs-grid-* custom properties (the public theming
+// contract). The element class (Grid.ts) writes the resolved track/gap values
+// onto the host as inline --bs-grid-* properties; these defaults apply when an
+// attribute is absent. Sharp corners, slate neutrals — honours
+// prefers-reduced-motion implicitly (no animation involved).
+
+tc-grid {
+    // Defaults mirror gc-grid: no template until columns/rows are set, zero gap.
+    --bs-grid-template-columns: none;
+    --bs-grid-template-rows: none;
+    --bs-grid-gap: 0;
+
+    // display: grid is set on the host in foundation/_reset.scss so an unstyled
+    // tc-grid never falls back to inline before this sheet loads.
+    grid-template-columns: var(--bs-grid-template-columns);
+    grid-template-rows: var(--bs-grid-template-rows);
+    gap: var(--bs-grid-gap);
+}
