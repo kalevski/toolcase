@@ -74,6 +74,7 @@ import TextDemo from './TextDemo'
 import VisuallyHiddenDemo from './VisuallyHiddenDemo'
 import PulseIndicatorDemo from './PulseIndicatorDemo'
 import CurrencyChipDemo from './CurrencyChipDemo'
+import CurrencyDisplayDemo from './CurrencyDisplayDemo'
 import CrosshairDemo from './CrosshairDemo'
 import SectionFlagDemo from './SectionFlagDemo'
 import SkeletonDemo from './SkeletonDemo'
@@ -348,6 +349,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'visually-hidden', category: 'Components', element: <VisuallyHiddenDemo /> },
     { key: 'pulse-indicator', category: 'Components', element: <PulseIndicatorDemo /> },
     { key: 'currency-chip', category: 'Content', element: <CurrencyChipDemo /> },
+    { key: 'currency-display', category: 'Content', element: <CurrencyDisplayDemo /> },
     { key: 'crosshair', category: 'Components', element: <CrosshairDemo /> },
     { key: 'section-flag', category: 'Content', element: <SectionFlagDemo /> },
     { key: 'skeleton', category: 'Components', element: <SkeletonDemo /> },

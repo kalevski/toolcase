@@ -1,0 +1,72 @@
+// tc-currency-display — larger currency readout pairing an optional label and
+// currency icon with a prominent formatted amount. Port of game-components
+// `gc-currency-display`, restyled to the design system: sharp corners, slate
+// neutrals, an uppercase mono micro-label, an ink-accented icon, and a JetBrains
+// Mono amount with tabular figures. No gilded frame, glow, or metal fill.
+// All cosmetics flow through --bs-currency-display-* custom properties.
+// The `color` attribute writes --bs-currency-display-color (the icon tint); the
+// `font-size` attribute writes --bs-currency-display-amount-font-size (in px).
+
+tc-currency-display {
+    // Default icon tint; overridden by host inline style when `color` is set.
+    --bs-currency-display-color: var(--tc-app-accent);
+    // Default amount size; overridden by host inline style when `font-size` is set.
+    --bs-currency-display-amount-font-size: 1.75rem;
+}
+
+.tc-currency-display {
+    --bs-currency-display-gap: 0.25rem;
+    --bs-currency-display-readout-gap: 0.5rem;
+    --bs-currency-display-label-color: var(--tc-text-muted);
+    --bs-currency-display-label-font-size: 0.6875rem;
+    --bs-currency-display-label-letter-spacing: 0.08em;
+    --bs-currency-display-label-weight: 500;
+    --bs-currency-display-icon-font-size: 1.25rem;
+    --bs-currency-display-icon-weight: 600;
+    --bs-currency-display-amount-color: var(--tc-text);
+    --bs-currency-display-amount-weight: 600;
+
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--bs-currency-display-gap);
+    vertical-align: middle;
+}
+
+// Label — uppercase JetBrains Mono micro-label in muted slate.
+.tc-currency-display-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-currency-display-label-font-size);
+    font-weight: var(--bs-currency-display-label-weight);
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-currency-display-label-letter-spacing);
+    color: var(--bs-currency-display-label-color);
+}
+
+// Readout row — icon and amount on a shared baseline.
+.tc-currency-display-readout {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--bs-currency-display-readout-gap);
+    line-height: 1;
+}
+
+// Currency icon — machine-facing symbol, mono, ink-accented, scaled relative to
+// the amount so it tracks the `font-size` knob.
+.tc-currency-display-icon {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-currency-display-icon-font-size);
+    font-weight: var(--bs-currency-display-icon-weight);
+    color: var(--bs-currency-display-color);
+    line-height: 1;
+}
+
+// Amount — prominent mono figure with tabular figures so digits stay aligned.
+.tc-currency-display-amount {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-currency-display-amount-font-size);
+    font-weight: var(--bs-currency-display-amount-weight);
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-currency-display-amount-color);
+    line-height: 1.1;
+}
