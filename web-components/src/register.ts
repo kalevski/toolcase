@@ -164,6 +164,7 @@ import { CharacterSelect } from './CharacterSelect'
 import { Chip } from './Chip'
 import { ChipGroup } from './ChipGroup'
 import { CodeSnippet } from './CodeSnippet'
+import { Codex } from './Codex'
 import { ColorPicker } from './ColorPicker'
 import { CommandPalette } from './CommandPalette'
 import { CommandReference } from './CommandReference'
@@ -413,6 +414,7 @@ export function register(): void {
     customElements.define('tc-chip', Chip)
     customElements.define('tc-chip-group', ChipGroup)
     customElements.define('tc-code-snippet', CodeSnippet)
+    customElements.define('tc-codex', Codex)
     customElements.define('tc-color-picker', ColorPicker)
     customElements.define('tc-command-palette', CommandPalette)
     customElements.define('tc-command-reference', CommandReference)

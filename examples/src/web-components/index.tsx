@@ -160,6 +160,7 @@ import ChangelogDemo from './ChangelogDemo'
 import ChipDemo from './ChipDemo'
 import ChipGroupDemo from './ChipGroupDemo'
 import CodeSnippetDemo from './CodeSnippetDemo'
+import CodexDemo from './CodexDemo'
 import ColorPickerDemo from './ColorPickerDemo'
 import IconPickerDemo from './IconPickerDemo'
 import CommandReferenceDemo from './CommandReferenceDemo'
@@ -423,6 +424,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'color-picker', category: 'Forms', element: <ColorPickerDemo /> },
     { key: 'icon-picker', category: 'Forms', element: <IconPickerDemo /> },
     { key: 'command-reference', category: 'Content', element: <CommandReferenceDemo /> },
+    { key: 'codex', category: 'Components', element: <CodexDemo /> },
     { key: 'comparator', category: 'Components', element: <ComparatorDemo /> },
     { key: 'compatibility-matrix', category: 'Components', element: <CompatibilityMatrixDemo /> },
     { key: 'context-menu', category: 'Overlays & Feedback', element: <ContextMenuDemo /> },
