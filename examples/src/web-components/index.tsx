@@ -55,6 +55,7 @@ import CharacterCreateDemo from './CharacterCreateDemo'
 import CharacterSelectDemo from './CharacterSelectDemo'
 import GameOverScreenDemo from './GameOverScreenDemo'
 import GamepadButtonPromptDemo from './GamepadButtonPromptDemo'
+import GraphicsPresetPickerDemo from './GraphicsPresetPickerDemo'
 import RadioDemo from './RadioDemo'
 import RadioGroupDemo from './RadioGroupDemo'
 import VersionPickerDemo from './VersionPickerDemo'
@@ -515,6 +516,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'fov-slider', category: 'Forms', element: <FOVSliderDemo /> },
     { key: 'fps-cap-select', category: 'Forms', element: <FPSCapSelectDemo /> },
     { key: 'fullscreen-toggle', category: 'Forms', element: <FullscreenToggleDemo /> },
+    { key: 'graphics-preset-picker', category: 'Forms', element: <GraphicsPresetPickerDemo /> },
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
     { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
     { key: 'tree-view', category: 'Navigation', element: <TreeViewDemo /> },
