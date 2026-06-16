@@ -308,6 +308,13 @@ tc-roadmap {
     display: block;
 }
 
+// tc-compass-bar lays out as a vertical flex column (track above the heading
+// readout); the partial owns the flex details but the host must not default
+// to inline.
+tc-compass-bar {
+    display: flex;
+}
+
 tc-drawer {
     display: block;
 }

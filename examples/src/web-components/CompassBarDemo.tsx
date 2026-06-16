@@ -1,0 +1,95 @@
+import React, { useEffect, useRef, useState } from 'react'
+import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+
+const CompassBarDemo: React.FC = () => {
+    const cardinalsRef = useRef<any>(null)
+    const markersRef = useRef<any>(null)
+    const narrowRef = useRef<any>(null)
+    const liveRef = useRef<any>(null)
+
+    const [heading, setHeading] = useState(0)
+
+    // Markers shared across the cardinal + marker demos. Most use the default ink
+    // accent; one spends the rare cyan highlight for an objective.
+    useEffect(() => {
+        const markers = [
+            { id: 'obj', heading: 30, label: 'Objective', color: 'var(--tc-accent)' },
+            { id: 'ally', heading: 75, label: 'Ally' },
+            { id: 'home', heading: 350, label: 'Base', icon: '⌂' },
+        ]
+        if (markersRef.current) markersRef.current.markers = markers
+        if (narrowRef.current) narrowRef.current.markers = markers
+    }, [])
+
+    useEffect(() => {
+        if (cardinalsRef.current) {
+            cardinalsRef.current.markers = [{ id: 'waypoint', heading: 120, label: 'Waypoint' }]
+        }
+    }, [])
+
+    // A live-tracking strip: slowly sweep the heading so cardinals and markers
+    // slide across the field of view.
+    useEffect(() => {
+        const el = liveRef.current
+        if (!el) return
+        el.markers = [
+            { id: 'n-marker', heading: 0, label: 'North', color: 'var(--tc-accent)' },
+            { id: 'e-marker', heading: 90, label: 'East' },
+            { id: 's-marker', heading: 180, label: 'South' },
+            { id: 'w-marker', heading: 270, label: 'West' },
+        ]
+        const id = window.setInterval(() => {
+            setHeading(h => (h + 2) % 360)
+        }, 80)
+        return () => window.clearInterval(id)
+    }, [])
+
+    useEffect(() => {
+        if (liveRef.current) liveRef.current.setAttribute('heading', String(heading))
+    }, [heading])
+
+    return (
+        <div className="py-4">
+            <div className="container">
+                <div className="row">
+                    <div className="col-12">
+                        <RichPageHeader
+                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
+                            title="CompassBar"
+                            description="Horizontal compass strip showing a slice of the heading ring (the field of view) with cardinal ticks and positioned markers. Set heading/fov via attributes and markers via the JS markers property. A fixed ink pointer marks the current bearing; the mono readout shows the zero-padded degrees."
+                        />
+
+                        <div className="d-flex flex-column gap-4 mt-4">
+                            <SectionCard title="Heading readout only">
+                                {/* @ts-ignore */}
+                                <tc-compass-bar heading="45" />
+                            </SectionCard>
+
+                            <SectionCard title="With cardinal ticks (show-cardinals)">
+                                {/* @ts-ignore */}
+                                <tc-compass-bar ref={cardinalsRef} heading="60" fov="120" show-cardinals />
+                            </SectionCard>
+
+                            <SectionCard title="Cardinals and markers">
+                                {/* @ts-ignore */}
+                                <tc-compass-bar ref={markersRef} heading="20" fov="140" width="420" show-cardinals />
+                            </SectionCard>
+
+                            <SectionCard title="Narrow field of view (fov=60)">
+                                {/* @ts-ignore */}
+                                <tc-compass-bar ref={narrowRef} heading="40" fov="60" width="360" show-cardinals />
+                            </SectionCard>
+
+                            <SectionCard title="Live heading sweep">
+                                {/* @ts-ignore */}
+                                <tc-compass-bar ref={liveRef} fov="120" width="420" height="36" show-cardinals />
+                            </SectionCard>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default CompassBarDemo

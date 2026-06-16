@@ -1,0 +1,176 @@
+// tc-compass-bar — horizontal heading strip with cardinal ticks and markers.
+// Ported from the game-components gc-compass-bar but re-skinned to the toolcase
+// design system: a flat slate surface, 1px hairline frame, sharp corners, mono
+// machine-facing text, and the ink accent for the centre pointer / markers.
+//
+// Every cosmetic value flows through --bs-compass-bar-* custom properties — the
+// public theming contract. Marker colour can be overridden per-marker via an
+// inline --bs-compass-bar-marker-color on the marker element (set from the
+// CompassMarker.color field).
+
+tc-compass-bar {
+    --bs-compass-bar-width: 320px;
+    --bs-compass-bar-height: 32px;
+    --bs-compass-bar-gap: 0.375rem;
+
+    --bs-compass-bar-track-bg: var(--tc-surface-muted);
+    --bs-compass-bar-track-border: 1px solid var(--tc-border-strong);
+
+    --bs-compass-bar-cardinal-color: var(--tc-text-muted);
+    --bs-compass-bar-cardinal-size: 11px;
+    --bs-compass-bar-cardinal-spacing: 0.12em;
+
+    --bs-compass-bar-center-color: var(--tc-app-accent);
+    --bs-compass-bar-pointer-color: var(--tc-app-accent);
+    --bs-compass-bar-pointer-size: 6px;
+
+    --bs-compass-bar-marker-color: var(--tc-app-accent);
+    --bs-compass-bar-marker-size: 8px;
+    --bs-compass-bar-marker-label-color: var(--tc-text-muted);
+    --bs-compass-bar-marker-label-size: 9px;
+    --bs-compass-bar-marker-label-spacing: 0.1em;
+
+    --bs-compass-bar-heading-color: var(--tc-text);
+    --bs-compass-bar-heading-size: 12px;
+    --bs-compass-bar-heading-spacing: 0.14em;
+
+    // Smooth position tracking as the heading changes; frozen under
+    // prefers-reduced-motion (see the bottom of this file).
+    --bs-compass-bar-transition: var(--tc-transition-fast);
+}
+
+.tc-compass-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-compass-bar-gap);
+    box-sizing: border-box;
+    width: var(--bs-compass-bar-width);
+}
+
+.tc-compass-bar__track {
+    position: relative;
+    width: 100%;
+    height: var(--bs-compass-bar-height);
+    box-sizing: border-box;
+    background: var(--bs-compass-bar-track-bg);
+    border: var(--bs-compass-bar-track-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// Faint full-height centre line marking the "you are here" axis.
+.tc-compass-bar__center {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: var(--bs-compass-bar-center-color);
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+// Downward triangle pinned to the top-centre — the fixed reference indicator.
+// Drawn with borders (no unicode glyph) so it inherits the ink accent and stays
+// sharp.
+.tc-compass-bar__pointer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: var(--bs-compass-bar-pointer-size) solid transparent;
+    border-right: var(--bs-compass-bar-pointer-size) solid transparent;
+    border-top: var(--bs-compass-bar-pointer-size) solid var(--bs-compass-bar-pointer-color);
+    pointer-events: none;
+}
+
+.tc-compass-bar__cardinal {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-compass-bar-cardinal-size);
+    letter-spacing: var(--bs-compass-bar-cardinal-spacing);
+    text-transform: uppercase;
+    color: var(--bs-compass-bar-cardinal-color);
+    line-height: 1;
+    pointer-events: none;
+    transition: left var(--bs-compass-bar-transition);
+}
+
+// Markers stack their tick/glyph above an optional mono micro-label, vertically
+// centred within the track (the track clips overflow, so the label must live
+// inside the track height rather than hanging below it).
+.tc-compass-bar__marker {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--bs-compass-bar-marker-color);
+    pointer-events: none;
+    transition: left var(--bs-compass-bar-transition);
+}
+
+// Default mark: a small sharp diamond (a rotated square — still border-radius 0)
+// in the marker colour.
+.tc-compass-bar__marker-tick {
+    width: var(--bs-compass-bar-marker-size);
+    height: var(--bs-compass-bar-marker-size);
+    transform: rotate(45deg);
+    background: var(--bs-compass-bar-marker-color);
+    flex-shrink: 0;
+}
+
+// When the marker supplies a text glyph, hide the default diamond and render the
+// glyph in its place.
+.tc-compass-bar__marker--glyph .tc-compass-bar__marker-tick {
+    display: none;
+}
+
+.tc-compass-bar__marker-glyph {
+    font-size: var(--bs-compass-bar-cardinal-size);
+    line-height: 1;
+    color: var(--bs-compass-bar-marker-color);
+}
+
+// Mono micro-label beneath the tick.
+.tc-compass-bar__marker-label {
+    white-space: nowrap;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-compass-bar-marker-label-size);
+    letter-spacing: var(--bs-compass-bar-marker-label-spacing);
+    text-transform: uppercase;
+    color: var(--bs-compass-bar-marker-label-color);
+    line-height: 1;
+}
+
+.tc-compass-bar__heading {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-compass-bar-heading-size);
+    letter-spacing: var(--bs-compass-bar-heading-spacing);
+    color: var(--bs-compass-bar-heading-color);
+    line-height: 1;
+}
+
+// Roomier track under coarse pointers so the strip stays legible on touch.
+@media (pointer: coarse) {
+    tc-compass-bar {
+        --bs-compass-bar-height: 40px;
+    }
+}
+
+// Position tracking is decorative motion — freeze it, keep everything else.
+@media (prefers-reduced-motion: reduce) {
+    .tc-compass-bar__cardinal,
+    .tc-compass-bar__marker {
+        transition: none;
+    }
+}
