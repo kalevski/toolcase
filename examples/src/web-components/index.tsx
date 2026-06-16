@@ -114,6 +114,7 @@ import DashboardSidebarDemo from './DashboardSidebarDemo'
 import DashboardLayoutDemo from './DashboardLayoutDemo'
 import DownloadStatsDemo from './DownloadStatsDemo'
 import EmptyStateDemo from './EmptyStateDemo'
+import EyebrowDemo from './EyebrowDemo'
 import EntityCellDemo from './EntityCellDemo'
 import EquipmentDollDemo from './EquipmentDollDemo'
 import FeatureCardDemo from './FeatureCardDemo'
@@ -340,6 +341,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'form', category: 'Forms', element: <FormDemo /> },
     { key: 'form-input', category: 'Forms', element: <FormInputDemo /> },
     { key: 'divider', category: 'Components', element: <DividerDemo /> },
+    { key: 'eyebrow', category: 'Content', element: <EyebrowDemo /> },
     { key: 'heading', category: 'Content', element: <HeadingDemo /> },
     { key: 'helper-text', category: 'Forms', element: <HelperTextDemo /> },
     { key: 'icon', category: 'Content', element: <IconDemo /> },

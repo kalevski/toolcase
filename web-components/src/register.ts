@@ -119,6 +119,7 @@ import { StatusCard } from './StatusCard'
 import { DashboardContent } from './DashboardContent'
 import { DownloadStats } from './DownloadStats'
 import { EmptyState } from './EmptyState'
+import { Eyebrow } from './Eyebrow'
 import { EntityCell } from './EntityCell'
 import { EquipmentDoll } from './EquipmentDoll'
 import { FeatureCard } from './FeatureCard'
@@ -388,6 +389,7 @@ export function register(): void {
     customElements.define('tc-dashboard-content', DashboardContent)
     customElements.define('tc-download-stats', DownloadStats)
     customElements.define('tc-empty-state', EmptyState)
+    customElements.define('tc-eyebrow', Eyebrow)
     customElements.define('tc-entity-cell', EntityCell)
     customElements.define('tc-equipment-doll', EquipmentDoll)
     customElements.define('tc-feature-card', FeatureCard)
