@@ -130,6 +130,7 @@ import { Eyebrow } from './Eyebrow'
 import { EntityCell } from './EntityCell'
 import { EquipmentDoll } from './EquipmentDoll'
 import { ItemCompare } from './ItemCompare'
+import { ItemTooltip } from './ItemTooltip'
 import { FeatureCard } from './FeatureCard'
 import { AbilityCard } from './AbilityCard'
 import { GoodFirstIssues } from './GoodFirstIssues'
@@ -417,6 +418,7 @@ export function register(): void {
     customElements.define('tc-entity-cell', EntityCell)
     customElements.define('tc-equipment-doll', EquipmentDoll)
     customElements.define('tc-item-compare', ItemCompare)
+    customElements.define('tc-item-tooltip', ItemTooltip)
     customElements.define('tc-feature-card', FeatureCard)
     customElements.define('tc-ability-card', AbilityCard)
     customElements.define('tc-good-first-issues', GoodFirstIssues)

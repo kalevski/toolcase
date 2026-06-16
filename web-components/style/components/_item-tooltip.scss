@@ -1,0 +1,204 @@
+// tc-item-tooltip — a hover card describing an item (type, name, rarity, stats,
+// requirements, flavor). Re-skinned from the game-components gc-item-tooltip: no
+// gilded frame, no glow, no parchment fill. A sharp hairline surface at the
+// overlay tier — the only place a shadow is sanctioned — sitting on the fixed
+// tooltip z-layer. Machine-facing figures are mono and tabular; status colour is
+// spent only on the rarity chip and the requirement met / unmet markers. All
+// cosmetics flow through --bs-item-tooltip-* custom properties backed by --tc-*.
+
+tc-item-tooltip {
+    --bs-item-tooltip-surface: var(--tc-surface);
+    --bs-item-tooltip-border-color: var(--tc-border);
+    --bs-item-tooltip-separator-color: var(--tc-border);
+    --bs-item-tooltip-shadow: var(--tc-shadow-lg);
+    --bs-item-tooltip-padding: 0.875rem;
+    --bs-item-tooltip-max-width: 18rem;
+
+    --bs-item-tooltip-name-color: var(--tc-text);
+    --bs-item-tooltip-name-font-size: 0.975rem;
+    --bs-item-tooltip-name-font-weight: 600;
+
+    --bs-item-tooltip-stat-label-color: var(--tc-text-muted);
+    --bs-item-tooltip-stat-value-color: var(--tc-text);
+    --bs-item-tooltip-stat-font-size: 0.8125rem;
+
+    --bs-item-tooltip-req-label-color: var(--tc-text-muted);
+    --bs-item-tooltip-req-value-color: var(--tc-text);
+    --bs-item-tooltip-req-met-color: var(--tc-success);
+    --bs-item-tooltip-req-unmet-color: var(--tc-danger);
+
+    --bs-item-tooltip-flavor-color: var(--tc-text-muted);
+    --bs-item-tooltip-flavor-font-size: 0.8125rem;
+
+    // Rarity accent — defaults to muted for `common`; the higher tiers override
+    // it below (sanctioned status tokens only, kept information-bearing).
+    --bs-item-tooltip-rarity-color: var(--tc-text-muted);
+
+    // The host IS the card. Override the block default from _reset.scss with a
+    // flex column so the sections share a consistent vertical rhythm. Sits on the
+    // fixed tooltip z-layer; the consumer owns positioning.
+    position: relative;
+    z-index: var(--tc-z-tooltip);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    max-width: var(--bs-item-tooltip-max-width);
+    padding: var(--bs-item-tooltip-padding);
+    background: var(--bs-item-tooltip-surface);
+    border: 1px solid var(--bs-item-tooltip-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-item-tooltip-shadow);
+    color: var(--tc-text);
+    font-family: var(--tc-font-sans);
+}
+
+// No item: collapse the host entirely so no bare bordered box lingers. Higher
+// specificity than the grouped tag rule above, so it wins.
+tc-item-tooltip[data-empty] {
+    display: none;
+}
+
+// Per-rarity accent — mirrors the tc-item-slot ramp so the same item reads the
+// same tier across ports. `common` keeps the muted default.
+tc-item-tooltip[data-rarity='uncommon'] {
+    --bs-item-tooltip-rarity-color: var(--tc-success);
+}
+tc-item-tooltip[data-rarity='rare'] {
+    --bs-item-tooltip-rarity-color: var(--tc-info);
+}
+tc-item-tooltip[data-rarity='epic'] {
+    --bs-item-tooltip-rarity-color: var(--tc-app-accent);
+}
+tc-item-tooltip[data-rarity='legendary'] {
+    --bs-item-tooltip-rarity-color: var(--tc-warning);
+}
+tc-item-tooltip[data-rarity='mythic'] {
+    --bs-item-tooltip-rarity-color: var(--tc-danger);
+}
+
+// --- Header ---
+
+.tc-item-tooltip__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+.tc-item-tooltip__name {
+    color: var(--bs-item-tooltip-name-color);
+    font-size: var(--bs-item-tooltip-name-font-size);
+    font-weight: var(--bs-item-tooltip-name-font-weight);
+    line-height: 1.3;
+}
+
+// Rarity chip — a sharp colour-outlined mono micro-label. The colour is the
+// rarity tier (information); the chip stays rectangular (no pill).
+.tc-item-tooltip__rarity {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid currentcolor;
+    border-radius: 0;
+    color: var(--bs-item-tooltip-rarity-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.5;
+    text-transform: uppercase;
+}
+
+// --- Stats ---
+
+.tc-item-tooltip__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-item-tooltip__stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: var(--bs-item-tooltip-stat-font-size);
+    line-height: 1.4;
+}
+
+.tc-item-tooltip__stat-label {
+    color: var(--bs-item-tooltip-stat-label-color);
+}
+
+// Machine-facing figures read as mono, so columns of numbers align.
+.tc-item-tooltip__stat-value {
+    color: var(--bs-item-tooltip-stat-value-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-variant-numeric: tabular-nums;
+}
+
+// --- Requirements ---
+
+// Separated from the stats by a hairline rule, like a grouped inner section.
+.tc-item-tooltip__reqs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--bs-item-tooltip-separator-color);
+}
+
+.tc-item-tooltip__reqs-label {
+    margin-bottom: 0.125rem;
+}
+
+.tc-item-tooltip__req {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: var(--bs-item-tooltip-stat-font-size);
+    line-height: 1.4;
+}
+
+.tc-item-tooltip__req-label {
+    color: var(--bs-item-tooltip-req-label-color);
+}
+
+.tc-item-tooltip__req-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--bs-item-tooltip-req-value-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+// Met / unmet — colour AND a marker icon carry the signal (never colour alone).
+.tc-item-tooltip__req--met .tc-item-tooltip__req-value {
+    color: var(--bs-item-tooltip-req-met-color);
+}
+
+.tc-item-tooltip__req--unmet .tc-item-tooltip__req-value {
+    color: var(--bs-item-tooltip-req-unmet-color);
+}
+
+.tc-item-tooltip__req-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    flex: 0 0 auto;
+}
+
+// --- Flavor ---
+
+// Closing flavour text, separated by a hairline; muted and italic.
+.tc-item-tooltip__flavor {
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--bs-item-tooltip-separator-color);
+    color: var(--bs-item-tooltip-flavor-color);
+    font-size: var(--bs-item-tooltip-flavor-font-size);
+    font-style: italic;
+    line-height: 1.45;
+}
