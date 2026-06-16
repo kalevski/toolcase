@@ -70,6 +70,7 @@ import { FormInput } from './FormInput'
 import { Heading } from './Heading'
 import { HelperText } from './HelperText'
 import { Icon } from './Icon'
+import { IconBadge } from './IconBadge'
 import { IconButton } from './IconButton'
 import { IconPicker } from './IconPicker'
 import { Kbd } from './Kbd'
@@ -352,6 +353,7 @@ export function register(): void {
     customElements.define('tc-heading', Heading)
     customElements.define('tc-helper-text', HelperText)
     customElements.define('tc-icon', Icon)
+    customElements.define('tc-icon-badge', IconBadge)
     customElements.define('tc-icon-button', IconButton)
     customElements.define('tc-icon-picker', IconPicker)
     customElements.define('tc-kbd', Kbd)

@@ -78,6 +78,7 @@ After `register()` you can author markup directly:
   - [tc-eyebrow](#tc-eyebrow)
   - [tc-heading](#tc-heading)
   - [tc-icon](#tc-icon)
+  - [tc-icon-badge](#tc-icon-badge)
   - [tc-icon-button](#tc-icon-button)
   - [tc-kbd](#tc-kbd)
   - [tc-link](#tc-link)
@@ -8439,6 +8440,58 @@ None. The icon SVG is rendered inline; there is no slot for child content.
 
 <!-- Custom wrapper tag -->
 <tc-icon name="Circle" as="div" size="32"></tc-icon>
+```
+
+---
+
+## tc-icon-badge
+
+A single icon badge: a square slate chip with a centred lucide glyph. Ported from the game-components `gc-icon-badge` and restyled to the toolcase design system — flat surface, hairline border, sharp corners. The tile fill (`bg`) and glyph color (`color`) are caller-supplied free-form CSS values; the chip and glyph size scale off the `size` attribute. Purely presentational: no events, no slots.
+
+**Tag:** `tc-icon-badge`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `glyph` | string | `""` | A [lucide](https://lucide.dev) icon name in PascalCase (e.g. `"Star"`). An unknown name falls back to its escaped text (handy for single-letter / numeric badges). |
+| `size` | number | `40` (via CSS) | Pixel width and height of the chip; the glyph scales off it. When absent the SCSS default (`40px`) applies. Non-numeric values are ignored. |
+| `color` | string | `""` | Optional CSS color overriding the glyph color (written to `--bs-icon-badge-color`). |
+| `bg` | string | `""` | Optional CSS color overriding the chip background (written to `--bs-icon-badge-bg`). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `glyph` | `string` | Reflects the `glyph` attribute. |
+| `size` | `number \| null` | Reflects the `size` attribute; `null` when absent or non-numeric. |
+| `color` | `string` | Reflects the `color` attribute. |
+| `bg` | `string` | Reflects the `bg` attribute. |
+
+**Events**
+
+None. `tc-icon-badge` is a purely presentational element.
+
+**Slots**
+
+None. `tc-icon-badge` is attribute-driven.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-icon-badge-size` | `40px` | Chip width and height (also settable via the `size` attribute). |
+| `--bs-icon-badge-bg` | `var(--tc-surface-muted)` | Chip background (overridden by the `bg` attribute). |
+| `--bs-icon-badge-border-color` | `var(--tc-border)` | 1px hairline border color. |
+| `--bs-icon-badge-color` | `var(--tc-text)` | Glyph color (overridden by the `color` attribute). |
+| `--bs-icon-badge-glyph-scale` | `0.5` | Glyph SVG size as a fraction of the chip size. |
+
+**Example**
+
+```html
+<tc-icon-badge glyph="Star"></tc-icon-badge>
+<tc-icon-badge glyph="Check" color="var(--tc-success)" size="56"></tc-icon-badge>
+<tc-icon-badge glyph="Zap" bg="var(--tc-app-accent)" color="#fff"></tc-icon-badge>
 ```
 
 ---
