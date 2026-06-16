@@ -104,6 +104,7 @@ After `register()` you can author markup directly:
   - [tc-boss-bar](#tc-boss-bar)
   - [tc-buff-bar](#tc-buff-bar)
   - [tc-buff-icon](#tc-buff-icon)
+  - [tc-health-bar](#tc-health-bar)
   - [tc-brightness-calibration](#tc-brightness-calibration)
   - [tc-cdn-map](#tc-cdn-map)
   - [tc-compass-bar](#tc-compass-bar)
@@ -9522,6 +9523,78 @@ Per-kind accent overrides: `buff` → `var(--tc-success)`, `debuff` → `var(--t
 ```html
 <tc-buff-icon kind="buff" glyph="Zap" time="12s" size="40"></tc-buff-icon>
 <tc-buff-icon kind="debuff" glyph="Skull" time="6s" size="40"></tc-buff-icon>
+```
+
+---
+
+### tc-health-bar
+
+Value/max resource bar (HP, mana, stamina) — an ink fill over a flat slate track. Optionally renders a label row (a human-readable label plus a mono `value / max` readout), a ghost band behind the fill for recent loss, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. The fill is clamped to `[0, max]`. Ported from the game-components `gc-health-bar` (which extends `ResourceBarBase`); the game-components fantasy chrome (fantasy fills, scanlines, metal textures) is dropped in favour of a flat slate HUD bar, and the track / fill / ghost / tick DOM is shared with the rest of the resource-bar family through an internal helper.
+
+**Tag:** `tc-health-bar`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | number | `0` | Current value. Clamped to `[0, max]` for the fill width and `aria-valuenow`. Non-numeric values fall back to `0`. |
+| `max` | number | `100` | Maximum value. Values `<= 0` (or non-numeric) fall back to `100`. |
+| `ghost` | number | — | Optional "ghost" / recent-loss value drawn as a muted band behind the fill. Only shown when it resolves to a wider band than the current fill. |
+| `segments` | number | `1` | Number of equal slots; `segments - 1` evenly-spaced divider ticks are drawn across the track. Values `< 1` (or non-numeric) fall back to `1`. |
+| `show-text` | boolean | `false` | When present (and no `label` is set), draws a centred mono `value / max` readout inside the track. |
+| `label` | string | `""` | When set, renders a label row above the track with the label and a trailing mono `value / max` readout. Also used as the `aria-label` for the progressbar (defaults to `"Health"`). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number` | Reflects the `value` attribute. |
+| `max` | `number` | Reflects the `max` attribute. |
+| `ghost` | `number \| null` | Reflects the `ghost` attribute; set to `null` to remove it. |
+| `segments` | `number` | Reflects the `segments` attribute. |
+| `showText` | `boolean` | Reflects the `show-text` boolean attribute. |
+| `label` | `string` | Reflects the `label` attribute. |
+
+**Events**
+
+None. `tc-health-bar` is a purely presentational element.
+
+**Slots**
+
+None. `tc-health-bar` is attribute-driven.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-health-bar-gap` | `0.375rem` | Gap between the label row and the track. |
+| `--bs-health-bar-label-color` | `var(--tc-text)` | Label text color. |
+| `--bs-health-bar-label-font-size` | `0.8125rem` | Label font size. |
+| `--bs-health-bar-label-font-weight` | `500` | Label font weight (≤600). |
+| `--bs-health-bar-value-color` | `var(--tc-text-muted)` | `value / max` readout color. |
+| `--bs-health-bar-value-font-size` | `0.75rem` | `value / max` readout font size. |
+| `--bs-health-bar-track-bg` | `var(--tc-slate-200)` | Track background. |
+| `--bs-health-bar-track-height` | `0.625rem` | Track height. |
+| `--bs-health-bar-fill-bg` | `var(--tc-app-accent)` | Value-fill color (ink accent). |
+| `--bs-health-bar-fill-transition` | `width var(--tc-transition-base)` | Fill-width transition (disabled under reduced motion). |
+| `--bs-health-bar-ghost-bg` | `var(--tc-slate-400)` | Ghost / recent-loss band color (shared resource-bar contract). |
+| `--bs-health-bar-tick-color` | `var(--tc-surface)` | Segment-divider color. |
+| `--bs-health-bar-inline-text-color` | `var(--tc-text-muted)` | Inline `value / max` text color. |
+
+**Example**
+
+```html
+<!-- Bare bar -->
+<tc-health-bar value="72" max="100"></tc-health-bar>
+
+<!-- With label and readout -->
+<tc-health-bar label="Health" value="640" max="1000"></tc-health-bar>
+
+<!-- Inline text, no label -->
+<tc-health-bar value="45" max="100" show-text></tc-health-bar>
+
+<!-- Ghost band + segments -->
+<tc-health-bar label="Shield" value="3" max="4" segments="4" ghost="4"></tc-health-bar>
 ```
 
 ---
