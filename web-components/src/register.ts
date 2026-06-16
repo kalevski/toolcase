@@ -249,6 +249,7 @@ import { CircularProgress } from './CircularProgress'
 import { CompassBar } from './CompassBar'
 import { CompassRose } from './CompassRose'
 import { ControllerLayoutPreview } from './ControllerLayoutPreview'
+import { ControlsRebindList } from './ControlsRebindList'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -507,4 +508,5 @@ export function register(): void {
     customElements.define('tc-compass-bar', CompassBar)
     customElements.define('tc-compass-rose', CompassRose)
     customElements.define('tc-controller-layout-preview', ControllerLayoutPreview)
+    customElements.define('tc-controls-rebind-list', ControlsRebindList)
 }
