@@ -1,0 +1,55 @@
+// Shared scaffold for settings-screen rows (tc-deadzone-slider and the other
+// setting-row ports). A label/description text block on the left, a control
+// region on the right, with a 1px top hairline so consecutive rows read as a
+// list. Control cosmetics live in each subclass's own partial — this file owns
+// only the row layout. All values flow through `--bs-setting-row-*`.
+
+.tc-setting-row {
+    --bs-setting-row-gap: 1.5rem;
+    --bs-setting-row-padding-y: 0.75rem;
+    --bs-setting-row-padding-x: 0.875rem;
+    --bs-setting-row-min-height: 44px;
+    --bs-setting-row-border: 1px solid var(--tc-border);
+    --bs-setting-row-label-color: var(--tc-text);
+    --bs-setting-row-label-size: 0.8125rem;
+    --bs-setting-row-label-weight: 500;
+    --bs-setting-row-description-color: var(--tc-text-muted);
+    --bs-setting-row-description-size: 0.75rem;
+    --bs-setting-row-control-gap: 0.5rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--bs-setting-row-gap);
+    box-sizing: border-box;
+    min-height: var(--bs-setting-row-min-height);
+    padding: var(--bs-setting-row-padding-y) var(--bs-setting-row-padding-x);
+    border-top: var(--bs-setting-row-border);
+
+    &__text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    &__label {
+        font-size: var(--bs-setting-row-label-size);
+        font-weight: var(--bs-setting-row-label-weight);
+        color: var(--bs-setting-row-label-color);
+    }
+
+    &__description {
+        font-size: var(--bs-setting-row-description-size);
+        line-height: 1.4;
+        color: var(--bs-setting-row-description-color);
+    }
+
+    &__control {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--bs-setting-row-control-gap);
+    }
+}

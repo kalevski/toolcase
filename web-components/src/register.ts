@@ -258,6 +258,7 @@ import { CraftingPanel } from './CraftingPanel'
 import { CreditsList } from './CreditsList'
 import { CurrencyChip } from './CurrencyChip'
 import { CurrencyDisplay } from './CurrencyDisplay'
+import { DeadzoneSlider } from './DeadzoneSlider'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -525,4 +526,5 @@ export function register(): void {
     customElements.define('tc-credits-list', CreditsList)
     customElements.define('tc-currency-chip', CurrencyChip)
     customElements.define('tc-currency-display', CurrencyDisplay)
+    customElements.define('tc-deadzone-slider', DeadzoneSlider)
 }

@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -261,6 +261,7 @@ After `register()` you can author markup directly:
   - [tc-time-picker](#tc-time-picker)
   - [tc-range](#tc-range)
   - [tc-range-slider](#tc-range-slider)
+  - [tc-deadzone-slider](#tc-deadzone-slider)
   - [tc-rating](#tc-rating)
   - [tc-slider](#tc-slider)
   - [tc-select](#tc-select)
@@ -7134,6 +7135,50 @@ Dual-handle range slider with an optional label, ticks, tooltips, and full keybo
 <script>
   const el = document.querySelector('tc-range-slider')
   el.value = [40, 160]
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+</script>
+```
+
+---
+
+### tc-deadzone-slider
+
+A stick-deadzone setting row: a label/description text block paired with a 0–100% range control and a mono percentage readout. Built on the shared `tc-setting-row` scaffold (a label/control row that future setting rows reuse). Port of game-components `gc-deadzone-slider` with the fantasy chrome dropped for the toolcase slate/ink look.
+
+**Tag:** `tc-deadzone-slider`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `row-label` | string | `Stick deadzone` | Row label (set automatically when absent) |
+| `description` | string | — | Optional secondary line beneath the label |
+| `value` | number | `0.15` | Current deadzone, clamped to `0`–`1` (`0.01` step) |
+| `disabled` | boolean | `false` | Disables the range input |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number` | Get or set the deadzone (`0`–`1`). Getter clamps and defaults to `0.15`. Setting patches the input + readout in place — no full re-render. |
+| `rowLabel` | `string` | Get/set the `row-label` attribute. |
+| `description` | `string` | Get/set the `description` attribute. |
+| `disabled` | `boolean` | Get/set the `disabled` attribute. |
+| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every change. Mirrors the `tc-change` event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: number }` | Fired on every range-input change (the `0`–`1` deadzone). |
+
+**No slots.**
+
+```html
+<tc-deadzone-slider row-label="Left stick deadzone" description="Ignore input below this threshold." value="0.15"></tc-deadzone-slider>
+<script>
+  const el = document.querySelector('tc-deadzone-slider')
+  el.value = 0.2
   el.addEventListener('tc-change', e => console.log(e.detail.value))
 </script>
 ```

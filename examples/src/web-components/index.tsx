@@ -221,6 +221,7 @@ import NumberInputDemo from './NumberInputDemo'
 import OTPInputDemo from './OTPInputDemo'
 import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
+import DeadzoneSliderDemo from './DeadzoneSliderDemo'
 import AudioMixerDemo from './AudioMixerDemo'
 import RatingDemo from './RatingDemo'
 import SliderDemo from './SliderDemo'
@@ -493,6 +494,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'otp-input', category: 'Forms', element: <OTPInputDemo /> },
     { key: 'phone-input', category: 'Forms', element: <PhoneInputDemo /> },
     { key: 'range-slider', category: 'Forms', element: <RangeSliderDemo /> },
+    { key: 'deadzone-slider', category: 'Forms', element: <DeadzoneSliderDemo /> },
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
     { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
     { key: 'tree-view', category: 'Navigation', element: <TreeViewDemo /> },
