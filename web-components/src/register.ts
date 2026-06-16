@@ -241,6 +241,7 @@ import { VersionPicker } from './VersionPicker'
 import { VerticalItemList } from './VerticalItemList'
 import { VideoEmbed } from './VideoEmbed'
 import { VirtualList } from './VirtualList'
+import { CircularProgress } from './CircularProgress'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -491,4 +492,5 @@ export function register(): void {
     customElements.define('tc-vertical-item-list', VerticalItemList)
     customElements.define('tc-video-embed', VideoEmbed)
     customElements.define('tc-virtual-list', VirtualList)
+    customElements.define('tc-circular-progress', CircularProgress)
 }

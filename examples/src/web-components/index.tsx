@@ -233,6 +233,7 @@ import ToggleCardDemo from './ToggleCardDemo'
 import VerticalItemListDemo from './VerticalItemListDemo'
 import VideoEmbedDemo from './VideoEmbedDemo'
 import VirtualListDemo from './VirtualListDemo'
+import CircularProgressDemo from './CircularProgressDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -486,4 +487,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'toggle-card', category: 'Forms', element: <ToggleCardDemo /> },
     { key: 'video-embed', category: 'Components', element: <VideoEmbedDemo /> },
     { key: 'cycle-wheel', category: 'Components', element: <CycleWheelDemo /> },
+    { key: 'circular-progress', category: 'Components', element: <CircularProgressDemo /> },
 ]
