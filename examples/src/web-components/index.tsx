@@ -115,6 +115,7 @@ import EntityCellDemo from './EntityCellDemo'
 import FeatureCardDemo from './FeatureCardDemo'
 import AbilityCardDemo from './AbilityCardDemo'
 import AmmoCounterDemo from './AmmoCounterDemo'
+import ComboCounterDemo from './ComboCounterDemo'
 import GoodFirstIssuesDemo from './GoodFirstIssuesDemo'
 import HeroStatsBarDemo from './HeroStatsBarDemo'
 import LeaderboardTrendDemo from './LeaderboardTrendDemo'
@@ -377,6 +378,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'feature-card', category: 'Components', element: <FeatureCardDemo /> },
     { key: 'ability-card', category: 'Content', element: <AbilityCardDemo /> },
     { key: 'ammo-counter', category: 'Content', element: <AmmoCounterDemo /> },
+    { key: 'combo-counter', category: 'Content', element: <ComboCounterDemo /> },
     { key: 'good-first-issues', category: 'Components', element: <GoodFirstIssuesDemo /> },
     { key: 'hero-stats-bar', category: 'Components', element: <HeroStatsBarDemo /> },
     { key: 'leaderboard', category: 'Components', element: <LeaderboardDemo /> },

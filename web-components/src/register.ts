@@ -1,4 +1,5 @@
 import { AmmoCounter } from './AmmoCounter'
+import { ComboCounter } from './ComboCounter'
 import { Anchor } from './Anchor'
 import { AspectRatioBox } from './AspectRatioBox'
 import { Brand } from './Brand'
@@ -251,6 +252,7 @@ export function register(): void {
     }
     customElements.define('tc-brand', Brand)
     customElements.define('tc-ammo-counter', AmmoCounter)
+    customElements.define('tc-combo-counter', ComboCounter)
     customElements.define('tc-avatar', Avatar)
     customElements.define('tc-aspect-ratio-box', AspectRatioBox)
     customElements.define('tc-artboard-backdrop', ArtboardBackdrop)

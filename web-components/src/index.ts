@@ -1,5 +1,6 @@
 export { register } from './register'
 export * from './AmmoCounter'
+export * from './ComboCounter'
 export * from './Anchor'
 export * from './AspectRatioBox'
 export * from './Brand'
