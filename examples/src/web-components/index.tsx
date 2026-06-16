@@ -159,6 +159,7 @@ import StateMachineDemo from './StateMachineDemo'
 import StepperDemo from './StepperDemo'
 import TeamListDemo from './TeamListDemo'
 import FriendsListDemo from './FriendsListDemo'
+import GuildPanelDemo from './GuildPanelDemo'
 import TierLadderDemo from './TierLadderDemo'
 import TimelineDemo from './TimelineDemo'
 import UsageSummaryPanelDemo from './UsageSummaryPanelDemo'
@@ -450,6 +451,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'stepper', category: 'Navigation', element: <StepperDemo /> },
     { key: 'team-list', category: 'Content', element: <TeamListDemo /> },
     { key: 'friends-list', category: 'Content', element: <FriendsListDemo /> },
+    { key: 'guild-panel', category: 'Content', element: <GuildPanelDemo /> },
     { key: 'tier-ladder', category: 'Components', element: <TierLadderDemo /> },
     { key: 'timeline', category: 'Components', element: <TimelineDemo /> },
     { key: 'usage-summary-panel', category: 'Components', element: <UsageSummaryPanelDemo /> },
