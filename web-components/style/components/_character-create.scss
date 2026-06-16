@@ -1,0 +1,106 @@
+// tc-character-create — character-creation panel (name + appearance/class
+// fields + confirm). Ported from the game-components `gc-character-create`
+// screen, but stripped of the fantasy chrome (gilded frame, metal button,
+// glow): a flat slate card with hairline borders, sharp corners, the shared
+// form controls, and an ink primary action. Every cosmetic value flows through
+// `--bs-character-create-*` so themes can re-skin via vars alone.
+
+tc-character-create {
+    --bs-character-create-gap: 1.25rem;
+    --bs-character-create-padding: 1.25rem;
+    --bs-character-create-bg: var(--tc-surface);
+    --bs-character-create-border-color: var(--tc-border);
+    --bs-character-create-border-width: var(--bs-border-width);
+    --bs-character-create-shadow: var(--tc-shadow-sm);
+
+    --bs-character-create-eyebrow-color: var(--tc-text-muted);
+    --bs-character-create-eyebrow-size: 0.6875rem;
+    --bs-character-create-eyebrow-spacing: 0.1em;
+
+    --bs-character-create-header-gap: 0.5rem;
+    --bs-character-create-fields-gap: 0.85rem;
+    --bs-character-create-field-gap: 0.35rem;
+
+    --bs-character-create-label-color: var(--tc-text);
+    --bs-character-create-label-size: 13px;
+    --bs-character-create-label-weight: 500;
+
+    --bs-character-create-range-value-color: var(--tc-text-muted);
+    --bs-character-create-range-value-size: 12.5px;
+
+    --bs-character-create-footer-border-color: var(--tc-border);
+
+    display: block;
+    padding: var(--bs-character-create-padding);
+    background: var(--bs-character-create-bg);
+    border: var(--bs-character-create-border-width) solid var(--bs-character-create-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-character-create-shadow);
+}
+
+.tc-character-create-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-character-create-header-gap);
+    margin-bottom: var(--bs-character-create-gap);
+}
+
+// Mono micro-label — machine-facing eyebrow above the name field.
+.tc-character-create-eyebrow {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-character-create-eyebrow-size);
+    font-weight: 600;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-character-create-eyebrow-spacing);
+    color: var(--bs-character-create-eyebrow-color);
+}
+
+.tc-character-create-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-character-create-fields-gap);
+}
+
+.tc-character-create-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-character-create-field-gap);
+}
+
+.tc-character-create-field-label {
+    margin-bottom: 0;
+    font-size: var(--bs-character-create-label-size);
+    font-weight: var(--bs-character-create-label-weight);
+    color: var(--bs-character-create-label-color);
+}
+
+// Range field: label on the left, live value (mono) on the right.
+.tc-character-create-range-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.tc-character-create-range-value {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-character-create-range-value-size);
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-character-create-range-value-color);
+}
+
+.tc-character-create-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--bs-character-create-gap);
+    padding-top: var(--bs-character-create-gap);
+    border-top: var(--bs-character-create-border-width) solid var(--bs-character-create-footer-border-color);
+}
+
+// 44px coarse touch target on the confirm action.
+@media (pointer: coarse) {
+    .tc-character-create-confirm {
+        min-height: 44px;
+    }
+}
