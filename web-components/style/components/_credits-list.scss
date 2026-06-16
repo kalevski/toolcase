@@ -1,0 +1,61 @@
+// tc-credits-list — static grouped credits roll (role heading + names).
+// Web-components design system: slate neutrals, sharp corners (border-radius: 0),
+// JetBrains Mono uppercase micro-label for each role, Inter for the names.
+// Centred roll layout; non-interactive, no chrome, no shadows.
+// All cosmetics flow through --bs-credits-list-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-credits-list {
+    --bs-credits-list-section-gap: 2rem;
+    --bs-credits-list-name-gap: 0.25rem;
+    --bs-credits-list-role-name-gap: 0.625rem;
+    --bs-credits-list-role-color: var(--tc-text-faint);
+    --bs-credits-list-role-size: 0.6875rem;
+    --bs-credits-list-role-spacing: 0.12em;
+    --bs-credits-list-name-color: var(--tc-text);
+    --bs-credits-list-name-size: 0.9375rem;
+}
+
+.tc-credits-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-credits-list-section-gap);
+    width: 100%;
+    text-align: center;
+}
+
+.tc-credits-list-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-credits-list-role-name-gap);
+    width: 100%;
+}
+
+// Role heading — machine-facing mono micro-label
+.tc-credits-list-role {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-credits-list-role-size);
+    font-weight: 600;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-credits-list-role-spacing);
+    color: var(--bs-credits-list-role-color);
+}
+
+.tc-credits-list-names {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-credits-list-name-gap);
+}
+
+// Names — human-readable prose (Inter)
+.tc-credits-list-name {
+    font-size: var(--bs-credits-list-name-size);
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--bs-credits-list-name-color);
+}

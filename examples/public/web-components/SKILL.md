@@ -158,6 +158,7 @@ After `register()` you can author markup directly:
   - [tc-rich-page-header](#tc-rich-page-header)
   - [tc-api-reference-table](#tc-api-reference-table)
   - [tc-scoring-rules](#tc-scoring-rules)
+  - [tc-credits-list](#tc-credits-list)
   - [tc-achievement-list](#tc-achievement-list)
   - [tc-battle-pass](#tc-battle-pass)
   - [tc-section-card](#tc-section-card)
@@ -12847,6 +12848,66 @@ el.rules = [
         points: '+1',
         suffix: 'pt',
     },
+]
+</script>
+```
+
+---
+
+### tc-credits-list
+
+Static grouped credits roll — a centred sequence of sections, each pairing a role heading (JetBrains Mono uppercase micro-label) with one or more names (Inter). Set sections exclusively via the `sections` JS property. Non-interactive — no hover state, no events.
+
+**Tag:** `tc-credits-list`
+
+**Attributes**
+
+None. All content is supplied via the `sections` JS property. (The host receives `role="list"` automatically unless one is already set.)
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `sections` | `CreditsSection[]` | `[]` | Array of credit sections (see shape below). Re-renders the roll on each set. |
+
+**CreditsSection shape**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role` | `string` | yes | The credited role — rendered as a JetBrains Mono uppercase micro-label (e.g. `"Lead Engineering"`). |
+| `names` | `string[]` | yes | One or more names credited under the role. Each is rendered on its own line in Inter. |
+
+**Events**
+
+None. `tc-credits-list` is purely presentational.
+
+**Slots**
+
+None.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-credits-list-section-gap` | `2rem` | Vertical gap between credit sections. |
+| `--bs-credits-list-name-gap` | `0.25rem` | Vertical gap between names within a section. |
+| `--bs-credits-list-role-name-gap` | `0.625rem` | Gap between a role heading and its names. |
+| `--bs-credits-list-role-color` | `var(--tc-text-faint)` | Role heading text color. |
+| `--bs-credits-list-role-size` | `0.6875rem` | Role heading font size. |
+| `--bs-credits-list-role-spacing` | `0.12em` | Role heading letter-spacing. |
+| `--bs-credits-list-name-color` | `var(--tc-text)` | Name text color. |
+| `--bs-credits-list-name-size` | `0.9375rem` | Name font size. |
+
+```html
+<tc-credits-list id="credits"></tc-credits-list>
+
+<script>
+const el = document.getElementById('credits')
+el.sections = [
+    { role: 'Game Director', names: ['Mira Calloway'] },
+    { role: 'Lead Engineering', names: ['Tomas Reyes', 'Aiko Nakamura'] },
+    { role: 'Art & Animation', names: ['Priya Anand', 'Lukas Berg', 'Sofia Marek'] },
+    { role: 'Sound Design', names: ['Daniel Cho'] },
 ]
 </script>
 ```

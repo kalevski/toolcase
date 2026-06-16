@@ -252,6 +252,7 @@ import { CompassRose } from './CompassRose'
 import { ControllerLayoutPreview } from './ControllerLayoutPreview'
 import { ControlsRebindList } from './ControlsRebindList'
 import { CraftingPanel } from './CraftingPanel'
+import { CreditsList } from './CreditsList'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -513,4 +514,5 @@ export function register(): void {
     customElements.define('tc-controller-layout-preview', ControllerLayoutPreview)
     customElements.define('tc-controls-rebind-list', ControlsRebindList)
     customElements.define('tc-crafting-panel', CraftingPanel)
+    customElements.define('tc-credits-list', CreditsList)
 }
