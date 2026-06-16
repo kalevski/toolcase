@@ -282,6 +282,7 @@ After `register()` you can author markup directly:
   - [tc-fps-cap-select](#tc-fps-cap-select)
   - [tc-fullscreen-toggle](#tc-fullscreen-toggle)
   - [tc-graphics-preset-picker](#tc-graphics-preset-picker)
+  - [tc-invert-axis-toggle](#tc-invert-axis-toggle)
   - [tc-rating](#tc-rating)
   - [tc-slider](#tc-slider)
   - [tc-select](#tc-select)
@@ -8007,6 +8008,50 @@ A low / medium / high / ultra graphics-preset setting row: a label/description t
 <script>
   const el = document.querySelector('tc-graphics-preset-picker')
   el.value = 'ultra'
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+</script>
+```
+
+---
+
+### tc-invert-axis-toggle
+
+An invert-axis on/off setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-invert-axis-toggle` with the fantasy chrome dropped for the toolcase slate/ink look.
+
+**Tag:** `tc-invert-axis-toggle`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `row-label` | string | `Invert Y axis` | Row label (set automatically when absent) |
+| `description` | string | — | Optional secondary line beneath the label |
+| `checked` | boolean | `false` | Whether axis inversion is on |
+| `disabled` | boolean | `false` | Disables the switch |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `checked` | `boolean` | Get/set the on/off state. Setting patches the switch in place — no full re-render. |
+| `rowLabel` | `string` | Get/set the `row-label` attribute. |
+| `description` | `string` | Get/set the `description` attribute. |
+| `disabled` | `boolean` | Get/set the `disabled` attribute. |
+| `onChange` | `((value: boolean) => void) \| null` | Optional callback fired on every toggle. Mirrors the `tc-change` event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: boolean }` | Fired when the switch is toggled (the new checked state). |
+
+**No slots.**
+
+```html
+<tc-invert-axis-toggle row-label="Invert X axis" description="Flip the horizontal look direction for the camera." checked></tc-invert-axis-toggle>
+<script>
+  const el = document.querySelector('tc-invert-axis-toggle')
+  el.checked = true
   el.addEventListener('tc-change', e => console.log(e.detail.value))
 </script>
 ```

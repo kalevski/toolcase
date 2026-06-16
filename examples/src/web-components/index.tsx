@@ -240,6 +240,7 @@ import DeadzoneSliderDemo from './DeadzoneSliderDemo'
 import FOVSliderDemo from './FOVSliderDemo'
 import FPSCapSelectDemo from './FPSCapSelectDemo'
 import FullscreenToggleDemo from './FullscreenToggleDemo'
+import InvertAxisToggleDemo from './InvertAxisToggleDemo'
 import AudioMixerDemo from './AudioMixerDemo'
 import RatingDemo from './RatingDemo'
 import SliderDemo from './SliderDemo'
@@ -533,6 +534,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'fps-cap-select', category: 'Forms', element: <FPSCapSelectDemo /> },
     { key: 'fullscreen-toggle', category: 'Forms', element: <FullscreenToggleDemo /> },
     { key: 'graphics-preset-picker', category: 'Forms', element: <GraphicsPresetPickerDemo /> },
+    { key: 'invert-axis-toggle', category: 'Forms', element: <InvertAxisToggleDemo /> },
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
     { key: 'side-nav', category: 'Navigation', element: <SideNavDemo /> },
     { key: 'tree-view', category: 'Navigation', element: <TreeViewDemo /> },

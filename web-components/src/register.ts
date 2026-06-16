@@ -277,6 +277,7 @@ import { GameOverScreen } from './GameOverScreen'
 import { GamepadButtonPrompt } from './GamepadButtonPrompt'
 import { GildedFrame } from './GildedFrame'
 import { GraphicsPresetPicker } from './GraphicsPresetPicker'
+import { InvertAxisToggle } from './InvertAxisToggle'
 import { Grid } from './Grid'
 import { GuildPanel } from './GuildPanel'
 
@@ -563,6 +564,7 @@ export function register(): void {
     customElements.define('tc-gamepad-button-prompt', GamepadButtonPrompt)
     customElements.define('tc-gilded-frame', GildedFrame)
     customElements.define('tc-graphics-preset-picker', GraphicsPresetPicker)
+    customElements.define('tc-invert-axis-toggle', InvertAxisToggle)
     customElements.define('tc-grid', Grid)
     customElements.define('tc-guild-panel', GuildPanel)
     customElements.define('tc-hotbar', Hotbar)
