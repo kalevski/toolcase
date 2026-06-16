@@ -134,6 +134,7 @@ import { RankCell } from './RankCell'
 import { RichPageHeader } from './RichPageHeader'
 import { ScoringRules } from './ScoringRules'
 import { AchievementList } from './AchievementList'
+import { BattlePass } from './BattlePass'
 import { SectionCard } from './SectionCard'
 import { SimpleFile } from './SimpleFile'
 import { SponsorWall } from './SponsorWall'
@@ -373,6 +374,7 @@ export function register(): void {
     customElements.define('tc-rich-page-header', RichPageHeader)
     customElements.define('tc-scoring-rules', ScoringRules)
     customElements.define('tc-achievement-list', AchievementList)
+    customElements.define('tc-battle-pass', BattlePass)
     customElements.define('tc-section-card', SectionCard)
     customElements.define('tc-simple-file', SimpleFile)
     customElements.define('tc-sponsor-wall', SponsorWall)

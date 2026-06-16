@@ -1,0 +1,356 @@
+// tc-battle-pass — a battle-pass tier track with a season header, an XP progress
+// bar, and a two-row reward track (premium / free) of claimable reward cells.
+// Ported from the game-components `gc-battle-pass`, restyled to the toolcase
+// design system: the fantasy chrome (gilded frames, glows, metal fills, emoji
+// lock glyphs) is dropped. Slate neutrals carry the design; the ink accent
+// (--tc-app-accent) fills the progress bar, marks the current tier, and accents
+// claimable free cells; cyan (--tc-accent) is spent sparingly on the premium
+// badge and premium-track claimable cells (premium is the genuine highlight).
+// Sharp corners throughout (border-radius: 0); 1px hairline borders; JetBrains
+// Mono for all machine-facing text (eyebrow, level, XP, track labels, tier
+// numbers, badge). All cosmetics flow through --bs-battle-pass-* custom
+// properties (the public theming contract).
+
+@use '../foundation/tokens' as *;
+
+tc-battle-pass {
+    --bs-battle-pass-bg: var(--tc-surface);
+    --bs-battle-pass-border-color: var(--tc-border);
+    --bs-battle-pass-shadow: var(--tc-shadow-sm);
+    --bs-battle-pass-padding: 1rem;
+    --bs-battle-pass-gap: 1rem;
+
+    // Header
+    --bs-battle-pass-eyebrow-color: var(--tc-text-faint);
+    --bs-battle-pass-eyebrow-font-size: 0.6875rem;
+    --bs-battle-pass-season-color: var(--tc-text);
+    --bs-battle-pass-season-font-size: 1.0625rem;
+    --bs-battle-pass-season-font-weight: 600;
+    --bs-battle-pass-end-color: var(--tc-text-muted);
+    --bs-battle-pass-end-font-size: 0.6875rem;
+    --bs-battle-pass-premium-bg: var(--tc-accent);
+    --bs-battle-pass-premium-color: #fff;
+    --bs-battle-pass-premium-font-size: 0.625rem;
+
+    // Progress
+    --bs-battle-pass-level-color: var(--tc-text);
+    --bs-battle-pass-level-font-size: 0.75rem;
+    --bs-battle-pass-bar-bg: var(--tc-slate-200);
+    --bs-battle-pass-bar-fill: var(--tc-app-accent);
+    --bs-battle-pass-bar-height: 0.5rem;
+    --bs-battle-pass-xp-color: var(--tc-text-muted);
+    --bs-battle-pass-xp-font-size: 0.6875rem;
+
+    // Track
+    --bs-battle-pass-track-label-color: var(--tc-text-faint);
+    --bs-battle-pass-track-label-font-size: 0.625rem;
+    --bs-battle-pass-tier-gap: 0.5rem;
+    --bs-battle-pass-tier-current-bg: rgba(30, 41, 59, 0.04);
+    --bs-battle-pass-tier-current-marker: var(--tc-app-accent);
+
+    // Tier level marker
+    --bs-battle-pass-level-marker-size: 1.75rem;
+    --bs-battle-pass-level-marker-bg: var(--tc-surface-muted);
+    --bs-battle-pass-level-marker-border-color: var(--tc-border);
+    --bs-battle-pass-level-marker-color: var(--tc-text-muted);
+    --bs-battle-pass-level-marker-current-bg: var(--tc-app-accent);
+    --bs-battle-pass-level-marker-current-color: #fff;
+
+    // Reward cells
+    --bs-battle-pass-cell-min-width: 6.5rem;
+    --bs-battle-pass-cell-bg: var(--tc-surface);
+    --bs-battle-pass-cell-border-color: var(--tc-border);
+    --bs-battle-pass-cell-color: var(--tc-text);
+    --bs-battle-pass-cell-icon-size: 1.125rem;
+    --bs-battle-pass-cell-label-font-size: 0.75rem;
+
+    --bs-battle-pass-cell-claimable-border-color: var(--tc-app-accent);
+    --bs-battle-pass-cell-premium-border-color: var(--tc-accent);
+    --bs-battle-pass-cell-claimed-bg: var(--tc-app-accent);
+    --bs-battle-pass-cell-claimed-color: #fff;
+    --bs-battle-pass-cell-locked-opacity: 0.5;
+    --bs-battle-pass-cell-empty-bg: var(--tc-surface-hover);
+    --bs-battle-pass-cell-empty-border-color: var(--tc-border);
+
+    display: block;
+}
+
+// ── Card shell ───────────────────────────────────────────────────────────────
+
+.tc-battle-pass {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-battle-pass-gap);
+    padding: var(--bs-battle-pass-padding);
+    background: var(--bs-battle-pass-bg);
+    border: 1px solid var(--bs-battle-pass-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-battle-pass-shadow);
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+
+.tc-battle-pass-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+}
+
+.tc-battle-pass-eyebrow {
+    flex: 0 0 100%;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-battle-pass-eyebrow-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-battle-pass-eyebrow-color);
+}
+
+.tc-battle-pass-season {
+    margin: 0;
+    font-size: var(--bs-battle-pass-season-font-size);
+    font-weight: var(--bs-battle-pass-season-font-weight);
+    line-height: 1.3;
+    color: var(--bs-battle-pass-season-color);
+}
+
+.tc-battle-pass-end {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-battle-pass-end-font-size);
+    color: var(--bs-battle-pass-end-color);
+}
+
+// Premium badge — the one sparing cyan accent; pill is sanctioned for badges.
+.tc-battle-pass-premium-badge {
+    margin-left: auto;
+    align-self: center;
+    padding: 0.1875rem 0.5rem;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-battle-pass-premium-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-battle-pass-premium-color);
+    background: var(--bs-battle-pass-premium-bg);
+    border-radius: 999px;
+}
+
+// ── Progress ─────────────────────────────────────────────────────────────────
+
+.tc-battle-pass-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.tc-battle-pass-level {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-battle-pass-level-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-battle-pass-level-color);
+}
+
+.tc-battle-pass-bar {
+    height: var(--bs-battle-pass-bar-height);
+    background: var(--bs-battle-pass-bar-bg);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-battle-pass-bar-fill {
+    height: 100%;
+    background: var(--bs-battle-pass-bar-fill);
+    border-radius: 0;
+    transition: width 0.4s ease;
+}
+
+.tc-battle-pass-xp {
+    align-self: flex-end;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-battle-pass-xp-font-size);
+    color: var(--bs-battle-pass-xp-color);
+}
+
+// ── Track ────────────────────────────────────────────────────────────────────
+
+.tc-battle-pass-track {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-battle-pass-track-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-battle-pass-track-label-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-battle-pass-track-label-color);
+}
+
+.tc-battle-pass-tiers {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-battle-pass-tier-gap);
+}
+
+.tc-battle-pass-tier {
+    display: flex;
+    align-items: stretch;
+    gap: var(--bs-battle-pass-tier-gap);
+
+    // The current tier reads with a left ink marker + faint well.
+    &.is-current {
+        background: var(--bs-battle-pass-tier-current-bg);
+        box-shadow: inset 3px 0 0 0 var(--bs-battle-pass-tier-current-marker);
+    }
+}
+
+.tc-battle-pass-tier-level {
+    flex: 0 0 auto;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-battle-pass-level-marker-size);
+    height: var(--bs-battle-pass-level-marker-size);
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--bs-battle-pass-level-marker-color);
+    background: var(--bs-battle-pass-level-marker-bg);
+    border: 1px solid var(--bs-battle-pass-level-marker-border-color);
+    border-radius: 0;
+
+    .is-current & {
+        color: var(--bs-battle-pass-level-marker-current-color);
+        background: var(--bs-battle-pass-level-marker-current-bg);
+        border-color: var(--bs-battle-pass-level-marker-current-bg);
+    }
+}
+
+// ── Reward cells ─────────────────────────────────────────────────────────────
+
+.tc-battle-pass-cell {
+    flex: 1 1 0;
+    min-width: var(--bs-battle-pass-cell-min-width);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.5rem 0.625rem;
+    font-family: inherit;
+    text-align: left;
+    color: var(--bs-battle-pass-cell-color);
+    background: var(--bs-battle-pass-cell-bg);
+    border: 1px solid var(--bs-battle-pass-cell-border-color);
+    border-radius: 0;
+    transition:
+        transform var(--tc-transition-base),
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+}
+
+.tc-battle-pass-cell-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        width: var(--bs-battle-pass-cell-icon-size);
+        height: var(--bs-battle-pass-cell-icon-size);
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+.tc-battle-pass-cell-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--bs-battle-pass-cell-label-font-size);
+    font-weight: 500;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Claimable cells are real buttons — hover lifts 1px, the only feedback.
+button.tc-battle-pass-cell.is-claimable {
+    cursor: pointer;
+    border-color: var(--bs-battle-pass-cell-claimable-border-color);
+
+    &.is-premium {
+        border-color: var(--bs-battle-pass-cell-premium-border-color);
+    }
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// Claimed cells are filled ink — the reward is secured.
+.tc-battle-pass-cell.is-claimed {
+    color: var(--bs-battle-pass-cell-claimed-color);
+    background: var(--bs-battle-pass-cell-claimed-bg);
+    border-color: var(--bs-battle-pass-cell-claimed-bg);
+}
+
+// Locked / gated cells recede via opacity (never color-only); disabled removes
+// pointer events.
+.tc-battle-pass-cell.is-locked,
+.tc-battle-pass-cell.is-gated {
+    opacity: var(--bs-battle-pass-cell-locked-opacity);
+}
+
+.tc-battle-pass-cell[disabled] {
+    cursor: default;
+    pointer-events: none;
+}
+
+// Empty slot — a quiet placeholder where a tier offers no reward on a track.
+.tc-battle-pass-cell.is-empty {
+    flex: 1 1 0;
+    min-width: var(--bs-battle-pass-cell-min-width);
+    background: var(--bs-battle-pass-cell-empty-bg);
+    border-style: dashed;
+    border-color: var(--bs-battle-pass-cell-empty-border-color);
+}
+
+// 44px coarse-pointer touch targets for claimable cells.
+@media (pointer: coarse) {
+    .tc-battle-pass-cell {
+        min-height: 44px;
+    }
+}
+
+// The 1px hover lift is decorative; freeze it under reduced motion but keep the
+// state-conveying border/shadow transitions. The progress-fill width transition
+// is decorative (the XP text carries the value), so freeze it too.
+@media (prefers-reduced-motion: reduce) {
+    button.tc-battle-pass-cell.is-claimable:hover {
+        transform: none;
+    }
+
+    .tc-battle-pass-cell {
+        transition:
+            border-color var(--tc-transition-fast),
+            box-shadow var(--tc-transition-fast);
+    }
+
+    .tc-battle-pass-bar-fill {
+        transition: none;
+    }
+}

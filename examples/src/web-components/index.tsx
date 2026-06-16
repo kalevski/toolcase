@@ -130,6 +130,7 @@ import RankCellDemo from './RankCellDemo'
 import RichPageHeaderDemo from './RichPageHeaderDemo'
 import ScoringRulesDemo from './ScoringRulesDemo'
 import AchievementListDemo from './AchievementListDemo'
+import BattlePassDemo from './BattlePassDemo'
 import SectionCardDemo from './SectionCardDemo'
 import SponsorWallDemo from './SponsorWallDemo'
 import SprintChainDemo from './SprintChainDemo'
@@ -383,6 +384,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'rich-page-header', category: 'Components', element: <RichPageHeaderDemo /> },
     { key: 'scoring-rules', category: 'Content', element: <ScoringRulesDemo /> },
     { key: 'achievement-list', category: 'Content', element: <AchievementListDemo /> },
+    { key: 'battle-pass', category: 'Components', element: <BattlePassDemo /> },
     { key: 'section-card', category: 'Components', element: <SectionCardDemo /> },
     { key: 'sprint-chain', category: 'Content', element: <SprintChainDemo /> },
     { key: 'stat-card', category: 'Content', element: <StatCardDemo /> },
