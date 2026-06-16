@@ -246,6 +246,7 @@ import { VerticalItemList } from './VerticalItemList'
 import { VideoEmbed } from './VideoEmbed'
 import { VirtualList } from './VirtualList'
 import { CircularProgress } from './CircularProgress'
+import { CooldownBadge } from './CooldownBadge'
 import { CompassBar } from './CompassBar'
 import { CompassRose } from './CompassRose'
 import { ControllerLayoutPreview } from './ControllerLayoutPreview'
@@ -505,6 +506,7 @@ export function register(): void {
     customElements.define('tc-video-embed', VideoEmbed)
     customElements.define('tc-virtual-list', VirtualList)
     customElements.define('tc-circular-progress', CircularProgress)
+    customElements.define('tc-cooldown-badge', CooldownBadge)
     customElements.define('tc-compass-bar', CompassBar)
     customElements.define('tc-compass-rose', CompassRose)
     customElements.define('tc-controller-layout-preview', ControllerLayoutPreview)

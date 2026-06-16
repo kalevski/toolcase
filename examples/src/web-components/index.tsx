@@ -238,6 +238,7 @@ import VerticalItemListDemo from './VerticalItemListDemo'
 import VideoEmbedDemo from './VideoEmbedDemo'
 import VirtualListDemo from './VirtualListDemo'
 import CircularProgressDemo from './CircularProgressDemo'
+import CooldownBadgeDemo from './CooldownBadgeDemo'
 import CompassBarDemo from './CompassBarDemo'
 import CompassRoseDemo from './CompassRoseDemo'
 import ControllerLayoutPreviewDemo from './ControllerLayoutPreviewDemo'
@@ -500,6 +501,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'video-embed', category: 'Components', element: <VideoEmbedDemo /> },
     { key: 'cycle-wheel', category: 'Components', element: <CycleWheelDemo /> },
     { key: 'circular-progress', category: 'Components', element: <CircularProgressDemo /> },
+    { key: 'cooldown-badge', category: 'Components', element: <CooldownBadgeDemo /> },
     { key: 'compass-bar', category: 'Content', element: <CompassBarDemo /> },
     { key: 'compass-rose', category: 'Content', element: <CompassRoseDemo /> },
     { key: 'controller-layout-preview', category: 'Content', element: <ControllerLayoutPreviewDemo /> },
