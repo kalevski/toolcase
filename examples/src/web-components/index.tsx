@@ -127,6 +127,7 @@ import EquipmentDollDemo from './EquipmentDollDemo'
 import FeatureCardDemo from './FeatureCardDemo'
 import HotbarDemo from './HotbarDemo'
 import InventoryGridDemo from './InventoryGridDemo'
+import ItemCompareDemo from './ItemCompareDemo'
 import AbilityCardDemo from './AbilityCardDemo'
 import AmmoCounterDemo from './AmmoCounterDemo'
 import ComboCounterDemo from './ComboCounterDemo'
@@ -422,6 +423,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'equipment-doll', category: 'Components', element: <EquipmentDollDemo /> },
     { key: 'hotbar', category: 'Components', element: <HotbarDemo /> },
     { key: 'inventory-grid', category: 'Components', element: <InventoryGridDemo /> },
+    { key: 'item-compare', category: 'Components', element: <ItemCompareDemo /> },
     { key: 'feature-card', category: 'Components', element: <FeatureCardDemo /> },
     { key: 'ability-card', category: 'Content', element: <AbilityCardDemo /> },
     { key: 'ammo-counter', category: 'Content', element: <AmmoCounterDemo /> },

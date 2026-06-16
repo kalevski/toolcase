@@ -1,0 +1,149 @@
+// tc-item-compare — side-by-side item stat comparison. Re-skinned from the
+// game-components gc-item-compare: no gilded frames, no glows, no fantasy fills.
+// Two columns share a single hairline frame with a 1px internal separator; the
+// candidate column annotates each numeric stat with a status-coloured delta.
+// Machine-facing labels are mono; selection/emphasis stay slate. All cosmetics
+// flow through --bs-item-compare-* custom properties.
+
+tc-item-compare {
+    --bs-item-compare-surface: var(--tc-surface);
+    --bs-item-compare-border-color: var(--tc-border);
+    --bs-item-compare-separator-color: var(--tc-border);
+    --bs-item-compare-col-padding: 0.875rem;
+
+    --bs-item-compare-name-color: var(--tc-text);
+    --bs-item-compare-name-font-size: 0.925rem;
+    --bs-item-compare-name-font-weight: 600;
+
+    --bs-item-compare-stat-label-color: var(--tc-text-muted);
+    --bs-item-compare-stat-value-color: var(--tc-text);
+    --bs-item-compare-stat-font-size: 0.8125rem;
+
+    --bs-item-compare-empty-color: var(--tc-text-faint);
+
+    --bs-item-compare-delta-up-color: var(--tc-success);
+    --bs-item-compare-delta-down-color: var(--tc-danger);
+    --bs-item-compare-delta-label-color: var(--tc-text-muted);
+    --bs-item-compare-delta-font-size: 0.8125rem;
+}
+
+.tc-item-compare__grid {
+    // One frame, a 1px internal separator — grouped controls collapse borders.
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--bs-item-compare-separator-color);
+    border: 1px solid var(--bs-item-compare-border-color);
+    border-radius: 0;
+}
+
+.tc-item-compare__col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: var(--bs-item-compare-col-padding);
+    background: var(--bs-item-compare-surface);
+}
+
+// Empty column: centre the em-dash placeholder, faint.
+.tc-item-compare__col--empty {
+    .tc-item-compare__empty {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 3rem;
+        color: var(--bs-item-compare-empty-color);
+        font-family: var(--bs-font-monospace, monospace);
+    }
+}
+
+.tc-item-compare__item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-item-compare__name {
+    color: var(--bs-item-compare-name-color);
+    font-size: var(--bs-item-compare-name-font-size);
+    font-weight: var(--bs-item-compare-name-font-weight);
+    line-height: 1.3;
+}
+
+.tc-item-compare__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-item-compare__stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: var(--bs-item-compare-stat-font-size);
+    line-height: 1.4;
+}
+
+.tc-item-compare__stat-label {
+    color: var(--bs-item-compare-stat-label-color);
+}
+
+// Machine-facing figures read as mono, so columns of numbers align.
+.tc-item-compare__stat-value {
+    color: var(--bs-item-compare-stat-value-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-variant-numeric: tabular-nums;
+}
+
+// Difference block sits below the candidate stats, separated by a hairline.
+.tc-item-compare__deltas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--bs-item-compare-separator-color);
+}
+
+.tc-item-compare__deltas-label {
+    margin-bottom: 0.125rem;
+}
+
+.tc-item-compare__delta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: var(--bs-item-compare-delta-font-size);
+    line-height: 1.4;
+}
+
+.tc-item-compare__delta-label {
+    color: var(--bs-item-compare-delta-label-color);
+}
+
+// Colour is information: green up / red down, on the value only.
+.tc-item-compare__delta-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: var(--bs-font-monospace, monospace);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.tc-item-compare__delta--up .tc-item-compare__delta-value {
+    color: var(--bs-item-compare-delta-up-color);
+}
+
+.tc-item-compare__delta--down .tc-item-compare__delta-value {
+    color: var(--bs-item-compare-delta-down-color);
+}
+
+.tc-item-compare__delta-arrow {
+    width: 0.75rem;
+    height: 0.75rem;
+    flex: 0 0 auto;
+}
