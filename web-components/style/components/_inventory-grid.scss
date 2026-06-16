@@ -1,0 +1,131 @@
+// tc-inventory-grid — a grid of inventory item slots with a configurable column
+// count and a selected item id. Ported from the game-components gc-inventory-grid,
+// stripped of the fantasy chrome (gilded border, inset glows, dark gradient
+// fills): the grid is a sharp hairline frame holding a 1px-gap grid of slots.
+// Each slot composes a <tc-item-slot> for the item visuals; the grid owns the
+// frame, the grid layout and the selection wiring. Until tc-item-slot is
+// registered, the :not(:defined) rules below paint the slot cell so the grid
+// renders standalone. All cosmetics flow through --bs-inventory-grid-* custom
+// properties backed by --tc-*.
+
+@use '../foundation/tokens' as *;
+
+tc-inventory-grid {
+    --bs-inventory-grid-cols: 6;
+    --bs-inventory-grid-cell: 56px;
+    --bs-inventory-grid-gap: 0.25rem;
+    --bs-inventory-grid-padding: 0.5rem;
+
+    --bs-inventory-grid-surface: var(--tc-surface);
+    --bs-inventory-grid-border-color: var(--tc-border);
+
+    --bs-inventory-grid-slot-bg: var(--tc-surface);
+    --bs-inventory-grid-slot-border: var(--tc-border-strong);
+    --bs-inventory-grid-slot-empty-border: var(--tc-border);
+    --bs-inventory-grid-slot-hover-bg: var(--tc-surface-muted);
+    --bs-inventory-grid-glyph-color: var(--tc-text);
+    --bs-inventory-grid-empty-color: var(--tc-text-faint);
+
+    --bs-inventory-grid-selected-border: var(--tc-app-accent);
+    --bs-inventory-grid-selected-ring: rgba(30, 41, 59, 0.12);
+
+    --bs-inventory-grid-qty-bg: var(--tc-app-accent);
+    --bs-inventory-grid-qty-color: #fff;
+
+    box-sizing: border-box;
+    padding: var(--bs-inventory-grid-padding);
+    background: var(--bs-inventory-grid-surface);
+    border: 1px solid var(--bs-inventory-grid-border-color);
+    border-radius: 0;
+}
+
+.tc-inventory-grid__cells {
+    display: grid;
+    grid-template-columns: repeat(var(--bs-inventory-grid-cols), var(--bs-inventory-grid-cell));
+    gap: var(--bs-inventory-grid-gap);
+}
+
+// --- Standalone slot rendering ---------------------------------------------
+// These rules apply while tc-item-slot has not been registered (its dependency
+// task ships separately). Once the primitive upgrades, :not(:defined) stops
+// matching and tc-item-slot owns the slot interior; the children the grid
+// injected are wiped by the primitive's own render().
+
+.tc-inventory-grid__slot:not(:defined) {
+    position: relative;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-inventory-grid-cell);
+    height: var(--bs-inventory-grid-cell);
+    background: var(--bs-inventory-grid-slot-bg);
+    border: 1px solid var(--bs-inventory-grid-slot-border);
+    border-radius: 0;
+    color: var(--bs-inventory-grid-glyph-color);
+    cursor: pointer;
+    transition: background var(--tc-transition-fast), border-color var(--tc-transition-fast);
+}
+
+.tc-inventory-grid__slot:not(:defined):hover {
+    background: var(--bs-inventory-grid-slot-hover-bg);
+}
+
+.tc-inventory-grid__slot:not(:defined):focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+}
+
+// Empty slot: dashed hairline, muted — reads as a vacant socket.
+.tc-inventory-grid__slot--empty:not(:defined) {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--bs-inventory-grid-slot-empty-border);
+    color: var(--bs-inventory-grid-empty-color);
+    cursor: default;
+}
+
+// Active = solid-ink border + focus-ring halo (the standard active state).
+.tc-inventory-grid__slot--selected:not(:defined) {
+    border-color: var(--bs-inventory-grid-selected-border);
+    box-shadow: 0 0 0 0.2rem var(--bs-inventory-grid-selected-ring);
+}
+
+// Item glyph — an <img> source or a short initials/glyph label.
+.tc-inventory-grid__glyph {
+    max-width: 70%;
+    max-height: 70%;
+    font-size: calc(var(--bs-inventory-grid-cell) * 0.42);
+    line-height: 1;
+    object-fit: contain;
+}
+
+// Quantity badge — sanctioned mono micro-label in the tile corner. Sharp.
+.tc-inventory-grid__qty {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    padding: 0 0.25rem;
+    background: var(--bs-inventory-grid-qty-bg);
+    color: var(--bs-inventory-grid-qty-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.625rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+// Coarse pointers: guarantee a 44px touch target on the slot cells.
+@media (pointer: coarse) {
+    .tc-inventory-grid__slot:not(:defined) {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    // Keep the colour/background state transitions (they convey selection /
+    // hover); there is no decorative transform to freeze here.
+    .tc-inventory-grid__slot:not(:defined) {
+        transition-duration: 0.001s;
+    }
+}

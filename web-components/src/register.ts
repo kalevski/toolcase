@@ -100,6 +100,7 @@ import { BuffBar } from './BuffBar'
 import { BuffIcon } from './BuffIcon'
 import { HealthBar } from './HealthBar'
 import { Hotbar } from './Hotbar'
+import { InventoryGrid } from './InventoryGrid'
 import { BrightnessCalibration } from './BrightnessCalibration'
 import { CalloutQuote } from './CalloutQuote'
 import { ChartContainer } from './ChartContainer'
@@ -565,4 +566,5 @@ export function register(): void {
     customElements.define('tc-grid', Grid)
     customElements.define('tc-guild-panel', GuildPanel)
     customElements.define('tc-hotbar', Hotbar)
+    customElements.define('tc-inventory-grid', InventoryGrid)
 }
