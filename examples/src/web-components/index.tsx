@@ -115,6 +115,7 @@ import DashboardLayoutDemo from './DashboardLayoutDemo'
 import DownloadStatsDemo from './DownloadStatsDemo'
 import EmptyStateDemo from './EmptyStateDemo'
 import EntityCellDemo from './EntityCellDemo'
+import EquipmentDollDemo from './EquipmentDollDemo'
 import FeatureCardDemo from './FeatureCardDemo'
 import AbilityCardDemo from './AbilityCardDemo'
 import AmmoCounterDemo from './AmmoCounterDemo'
@@ -394,6 +395,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'download-stats', category: 'Components', element: <DownloadStatsDemo /> },
     { key: 'empty-state', category: 'Components', element: <EmptyStateDemo /> },
     { key: 'entity-cell', category: 'Components', element: <EntityCellDemo /> },
+    { key: 'equipment-doll', category: 'Components', element: <EquipmentDollDemo /> },
     { key: 'feature-card', category: 'Components', element: <FeatureCardDemo /> },
     { key: 'ability-card', category: 'Content', element: <AbilityCardDemo /> },
     { key: 'ammo-counter', category: 'Content', element: <AmmoCounterDemo /> },
