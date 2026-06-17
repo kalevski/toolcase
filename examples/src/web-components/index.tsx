@@ -234,6 +234,7 @@ import ListDemo from './ListDemo'
 import ListRowDemo from './ListRowDemo'
 import LobbyDemo from './LobbyDemo'
 import LootListDemo from './LootListDemo'
+import LootPopupDemo from './LootPopupDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -547,6 +548,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'list-row', category: 'Components', element: <ListRowDemo /> },
     { key: 'lobby', category: 'Components', element: <LobbyDemo /> },
     { key: 'loot-list', category: 'Components', element: <LootListDemo /> },
+    { key: 'loot-popup', category: 'Components', element: <LootPopupDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
     { key: 'marquee', category: 'Content', element: <MarqueeDemo /> },

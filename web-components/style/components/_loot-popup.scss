@@ -1,0 +1,277 @@
+// tc-loot-popup — modal loot window with Take All / Discard and optional auto-fade.
+// Overlay tier: full-screen backdrop + centred panel; sharp corners; 1px hairline;
+// single hard shadow. Fantasy chrome (gilded frames, glows, diamond dividers) dropped.
+// All cosmetics flow through --bs-loot-popup-* custom properties.
+
+tc-loot-popup {
+    // Surface + chrome
+    --bs-loot-popup-bg:           var(--tc-surface);
+    --bs-loot-popup-border-color: var(--tc-border);
+    --bs-loot-popup-shadow:       var(--tc-shadow-lg);
+    --bs-loot-popup-width:        420px;
+    --bs-loot-popup-max-width:    calc(100vw - 2rem);
+    --bs-loot-popup-max-height:   calc(100vh - 4rem);
+    --bs-loot-popup-padding:      1.25rem;
+    --bs-loot-popup-gap:          0.75rem;
+
+    // Header
+    --bs-loot-popup-eyebrow-color:    var(--tc-text-muted);
+    --bs-loot-popup-eyebrow-size:     0.6875rem;
+    --bs-loot-popup-title-color:      var(--tc-text);
+    --bs-loot-popup-title-size:       1rem;
+
+    // Z-index band — backdrop below panel, both in the overlay tier.
+    --bs-loot-popup-z-backdrop: var(--tc-z-modal-backdrop);
+    --bs-loot-popup-z-panel:    var(--tc-z-modal);
+
+    // Transition
+    --bs-loot-popup-transition: transform var(--tc-transition-base), opacity var(--tc-transition-base);
+
+    // Backdrop scrim
+    --bs-loot-popup-backdrop-bg:      #0f172a;
+    --bs-loot-popup-backdrop-opacity: 0.5;
+
+    // Action buttons
+    --bs-loot-popup-btn-font-size:           0.8125rem;
+    --bs-loot-popup-btn-min-height:          2.25rem;
+    --bs-loot-popup-btn-bg:                  var(--tc-surface);
+    --bs-loot-popup-btn-color:               var(--tc-text);
+    --bs-loot-popup-btn-border:              1px solid var(--tc-border-strong);
+    --bs-loot-popup-btn-hover-bg:            var(--tc-surface-muted);
+    --bs-loot-popup-btn-hover-color:         var(--tc-text);
+    --bs-loot-popup-btn-primary-bg:          var(--tc-app-accent);
+    --bs-loot-popup-btn-primary-color:       #fff;
+    --bs-loot-popup-btn-primary-hover-bg:    var(--tc-ink, #0f172a);
+    --bs-loot-popup-btn-primary-hover-color: #fff;
+
+    // Close button
+    --bs-loot-popup-close-color:       var(--tc-text-muted);
+    --bs-loot-popup-close-hover-color: var(--tc-text);
+    --bs-loot-popup-close-hover-bg:    var(--tc-surface-muted);
+}
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+
+.tc-loot-popup__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-loot-popup-z-backdrop);
+    background: var(--bs-loot-popup-backdrop-bg);
+    opacity: 0;
+    transition: opacity var(--tc-transition-base);
+
+    tc-loot-popup.tc-loot-popup--open & {
+        opacity: var(--bs-loot-popup-backdrop-opacity);
+    }
+}
+
+// ── Panel ─────────────────────────────────────────────────────────────────────
+
+.tc-loot-popup__panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: var(--bs-loot-popup-z-panel);
+    display: flex;
+    flex-direction: column;
+    width: var(--bs-loot-popup-width);
+    max-width: var(--bs-loot-popup-max-width);
+    max-height: var(--bs-loot-popup-max-height);
+    background: var(--bs-loot-popup-bg);
+    border: 1px solid var(--bs-loot-popup-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-loot-popup-shadow);
+    outline: 0;
+    overflow: hidden;
+    transition: var(--bs-loot-popup-transition);
+
+    // Closed: shifted up, scaled down, hidden.
+    opacity: 0;
+    transform: translateY(-20px) translateX(-50%) scale(0.97);
+
+    // Open: centered, full size.
+    tc-loot-popup.tc-loot-popup--open & {
+        opacity: 1;
+        transform: translateY(-50%) translateX(-50%);
+    }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.tc-loot-popup__header {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: var(--bs-loot-popup-padding);
+    padding-bottom: 0;
+    gap: 0.25rem;
+    position: relative;
+}
+
+.tc-loot-popup__eyebrow {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-loot-popup-eyebrow-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-loot-popup-eyebrow-color);
+    line-height: 1.4;
+}
+
+.tc-loot-popup__title {
+    font-size: var(--bs-loot-popup-title-size);
+    font-weight: 700;
+    color: var(--bs-loot-popup-title-color);
+    margin: 0;
+    line-height: 1.3;
+    padding-right: 2.5rem; // avoid overlap with close button
+}
+
+// ── Close button ──────────────────────────────────────────────────────────────
+
+.tc-loot-popup__close {
+    position: absolute;
+    top: var(--bs-loot-popup-padding);
+    right: var(--bs-loot-popup-padding);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--bs-loot-popup-close-color);
+    cursor: pointer;
+    border-radius: 0;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: var(--bs-loot-popup-close-hover-bg);
+        color: var(--bs-loot-popup-close-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}
+
+// ── Loot list ─────────────────────────────────────────────────────────────────
+
+.tc-loot-popup__list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    margin: var(--bs-loot-popup-padding);
+    margin-bottom: 0;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+
+.tc-loot-popup__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--bs-loot-popup-gap);
+    flex-shrink: 0;
+    padding: var(--bs-loot-popup-padding);
+    border-top: 1px solid var(--bs-loot-popup-border-color);
+}
+
+.tc-loot-popup__btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0 1rem;
+    min-height: var(--bs-loot-popup-btn-min-height);
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-loot-popup-btn-font-size);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    color: var(--bs-loot-popup-btn-color);
+    background: var(--bs-loot-popup-btn-bg);
+    border: var(--bs-loot-popup-btn-border);
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease);
+    white-space: nowrap;
+    line-height: 1;
+
+    &:hover:not(:disabled) {
+        background: var(--bs-loot-popup-btn-hover-bg);
+        color: var(--bs-loot-popup-btn-hover-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// Take All is the primary / ink action.
+.tc-loot-popup__take-all {
+    color: var(--bs-loot-popup-btn-primary-color);
+    background: var(--bs-loot-popup-btn-primary-bg);
+    border-color: transparent;
+
+    &:hover:not(:disabled) {
+        background: var(--bs-loot-popup-btn-primary-hover-bg);
+        color: var(--bs-loot-popup-btn-primary-hover-color);
+    }
+}
+
+// ── Reduced motion — skip transform / opacity animations ──────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-loot-popup__backdrop {
+        transition: none;
+    }
+
+    .tc-loot-popup__panel {
+        transition: none;
+        opacity: 1;
+        transform: translateY(-50%) translateX(-50%);
+    }
+
+    .tc-loot-popup__btn {
+        transition:
+            background var(--tc-transition-fast, 0.15s ease),
+            color var(--tc-transition-fast, 0.15s ease);
+
+        &:hover:not(:disabled) {
+            transform: none;
+        }
+    }
+
+    .tc-loot-popup__close {
+        transition: none;
+    }
+}

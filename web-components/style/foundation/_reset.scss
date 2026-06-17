@@ -361,6 +361,12 @@ tc-confirm-dialog {
     display: block;
 }
 
+// Modal loot overlay; the SCSS partial positions the backdrop and centred panel,
+// but the host must not default to inline.
+tc-loot-popup {
+    display: block;
+}
+
 // Fixed full-surface scrim; the SCSS partial flips it to a centred flex
 // container, but it must not default to inline.
 tc-blur-overlay {
