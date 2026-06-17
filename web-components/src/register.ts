@@ -299,6 +299,7 @@ import { LoadingScreen } from './LoadingScreen'
 import { Lobby } from './Lobby'
 import { MatchmakingScreen } from './MatchmakingScreen'
 import { MainMenu } from './MainMenu'
+import { MenuItem } from './MenuItem'
 import { LootList } from './LootList'
 import { LootPopup } from './LootPopup'
 import { LoreText } from './LoreText'
@@ -610,6 +611,7 @@ export function register(): void {
     customElements.define('tc-lobby', Lobby)
     customElements.define('tc-matchmaking-screen', MatchmakingScreen)
     customElements.define('tc-main-menu', MainMenu)
+    customElements.define('tc-menu-item', MenuItem)
     customElements.define('tc-loot-list', LootList)
     customElements.define('tc-loot-popup', LootPopup)
     customElements.define('tc-lore-text', LoreText)

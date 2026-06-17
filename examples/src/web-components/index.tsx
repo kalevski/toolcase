@@ -236,6 +236,7 @@ import ListRowDemo from './ListRowDemo'
 import LobbyDemo from './LobbyDemo'
 import MatchmakingScreenDemo from './MatchmakingScreenDemo'
 import MainMenuDemo from './MainMenuDemo'
+import MenuItemDemo from './MenuItemDemo'
 import LootListDemo from './LootListDemo'
 import LootPopupDemo from './LootPopupDemo'
 import LiveFeedDemo from './LiveFeedDemo'
@@ -554,6 +555,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'lobby', category: 'Components', element: <LobbyDemo /> },
     { key: 'matchmaking-screen', category: 'Components', element: <MatchmakingScreenDemo /> },
     { key: 'main-menu', category: 'Components', element: <MainMenuDemo /> },
+    { key: 'menu-item', category: 'Components', element: <MenuItemDemo /> },
     { key: 'loot-list', category: 'Components', element: <LootListDemo /> },
     { key: 'loot-popup', category: 'Components', element: <LootPopupDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },

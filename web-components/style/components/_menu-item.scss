@@ -1,0 +1,162 @@
+// tc-menu-item — single interactive menu row (icon, label, optional hotkey badge).
+// Port of gc-menu-item (game-components), restyled to the toolcase design system:
+// slate neutrals, sharp corners, 1px hairline border, ink accent for selected state,
+// JetBrains Mono for the hotkey badge. Game chrome (gilded frames, glows) dropped.
+// All cosmetics flow through --bs-menu-item-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-menu-item {
+    // ── Theme contract ──────────────────────────────────────────────────────────
+    --bs-menu-item-bg: transparent;
+    --bs-menu-item-color: var(--tc-text);
+    --bs-menu-item-padding-y: 0.5rem;
+    --bs-menu-item-padding-x: 0.875rem;
+    --bs-menu-item-gap: 0.5rem;
+    --bs-menu-item-min-height: 2.75rem;
+    --bs-menu-item-border-color: var(--tc-border);
+
+    --bs-menu-item-icon-size: 1rem;
+    --bs-menu-item-icon-color: var(--tc-text-muted);
+
+    --bs-menu-item-hover-bg: var(--tc-surface-muted);
+    --bs-menu-item-hover-color: var(--tc-text);
+
+    --bs-menu-item-selected-bg: var(--tc-app-accent);
+    --bs-menu-item-selected-color: #fff;
+    --bs-menu-item-selected-icon-color: rgba(255, 255, 255, 0.8);
+
+    --bs-menu-item-disabled-opacity: 0.45;
+
+    --bs-menu-item-hotkey-font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    --bs-menu-item-hotkey-font-size: 0.6875rem;
+    --bs-menu-item-hotkey-color: var(--tc-text-muted);
+    --bs-menu-item-hotkey-bg: var(--tc-surface-muted);
+    --bs-menu-item-hotkey-border: 1px solid var(--tc-border);
+    --bs-menu-item-hotkey-selected-color: rgba(255, 255, 255, 0.85);
+    --bs-menu-item-hotkey-selected-bg: rgba(255, 255, 255, 0.12);
+    --bs-menu-item-hotkey-selected-border: 1px solid rgba(255, 255, 255, 0.2);
+
+    // ── Layout ──────────────────────────────────────────────────────────────────
+    display: flex;
+    align-items: center;
+    gap: var(--bs-menu-item-gap);
+    padding: var(--bs-menu-item-padding-y) var(--bs-menu-item-padding-x);
+    min-height: var(--bs-menu-item-min-height);
+    background: var(--bs-menu-item-bg);
+    color: var(--bs-menu-item-color);
+    border: 0;
+    border-bottom: 1px solid var(--bs-menu-item-border-color);
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    transition:
+        background-color var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &:hover:not(.tc-menu-item--selected):not(.tc-menu-item--disabled) {
+        background: var(--bs-menu-item-hover-bg);
+        color: var(--bs-menu-item-hover-color);
+    }
+}
+
+// ── Selected state ─────────────────────────────────────────────────────────────
+
+tc-menu-item.tc-menu-item--selected {
+    background: var(--bs-menu-item-selected-bg);
+    color: var(--bs-menu-item-selected-color);
+
+    .tc-menu-item-icon {
+        color: var(--bs-menu-item-selected-icon-color);
+    }
+}
+
+// ── Disabled state ─────────────────────────────────────────────────────────────
+
+tc-menu-item.tc-menu-item--disabled {
+    opacity: var(--bs-menu-item-disabled-opacity);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+// ── Icon region ────────────────────────────────────────────────────────────────
+
+.tc-menu-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-menu-item-icon-size);
+    height: var(--bs-menu-item-icon-size);
+    color: var(--bs-menu-item-icon-color);
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-menu-item-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ── Hotkey badge ──────────────────────────────────────────────────────────────
+
+.tc-menu-item-hotkey {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem 0.375rem;
+    font-family: var(--bs-menu-item-hotkey-font-family);
+    font-size: var(--bs-menu-item-hotkey-font-size);
+    font-weight: 600;
+    font-style: normal;
+    line-height: 1;
+    color: var(--bs-menu-item-hotkey-color);
+    background: var(--bs-menu-item-hotkey-bg);
+    border: var(--bs-menu-item-hotkey-border);
+    border-radius: 0;
+    white-space: nowrap;
+
+    tc-menu-item.tc-menu-item--selected & {
+        color: var(--bs-menu-item-hotkey-selected-color);
+        background: var(--bs-menu-item-hotkey-selected-bg);
+        border: var(--bs-menu-item-hotkey-selected-border);
+    }
+}
+
+// ── Coarse pointer: 44 px touch target ────────────────────────────────────────
+
+@media (pointer: coarse) {
+    tc-menu-item {
+        --bs-menu-item-min-height: 44px;
+    }
+}
+
+// ── Reduced motion — freeze decorative transitions ────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    tc-menu-item {
+        transition: none;
+    }
+}
