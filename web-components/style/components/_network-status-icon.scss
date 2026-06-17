@@ -1,0 +1,96 @@
+// tc-network-status-icon — 4-bar signal-strength indicator.
+// Bars grow progressively in height from left (shortest) to right (tallest).
+// Active bars are coloured by tier; inactive bars use a muted hairline fill.
+// JetBrains Mono for the optional ping/label text; sharp corners everywhere.
+// All cosmetics flow through --bs-network-status-icon-* custom properties.
+
+tc-network-status-icon {
+    --bs-network-status-icon-size: 16px;
+    --bs-network-status-icon-gap: 0.375rem;
+    --bs-network-status-icon-bar-gap: 2px;
+    --bs-network-status-icon-bar-width: calc(var(--bs-network-status-icon-size) * 0.22);
+    --bs-network-status-icon-bar-radius: 0;
+    --bs-network-status-icon-inactive-color: var(--tc-border-strong, #475569);
+    --bs-network-status-icon-label-font-size: calc(var(--bs-network-status-icon-size) * 0.75);
+    --bs-network-status-icon-label-color: var(--tc-text-muted);
+    // Tier accent colours
+    --bs-network-status-icon-color-offline: var(--tc-text-faint, #94a3b8);
+    --bs-network-status-icon-color-bad: var(--tc-danger, #ef4444);
+    --bs-network-status-icon-color-warning: var(--tc-warning, #f59e0b);
+    --bs-network-status-icon-color-ok: var(--tc-accent, #22d3ee);
+    --bs-network-status-icon-color-good: var(--tc-success, #22c55e);
+}
+
+.tc-network-status-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-network-status-icon-gap);
+    line-height: 1;
+}
+
+// ── Bar group ──────────────────────────────────────────────────────────────────
+
+.tc-network-status-icon-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: var(--bs-network-status-icon-bar-gap);
+    height: var(--bs-network-status-icon-size);
+}
+
+// ── Individual bars ────────────────────────────────────────────────────────────
+// Each bar grows in height proportional to its step (1=25%, 2=50%, 3=75%, 4=100%).
+
+.tc-network-status-icon-bar {
+    display: inline-block;
+    width: var(--bs-network-status-icon-bar-width);
+    border-radius: var(--bs-network-status-icon-bar-radius);
+    background-color: var(--bs-network-status-icon-inactive-color);
+    flex-shrink: 0;
+
+    &[data-step="1"] { height: 25%; }
+    &[data-step="2"] { height: 50%; }
+    &[data-step="3"] { height: 75%; }
+    &[data-step="4"] { height: 100%; }
+}
+
+// Active bars adopt the tier colour from the host data-tier attribute.
+
+tc-network-status-icon[data-tier="offline"] .tc-network-status-icon-bar.is-active {
+    background-color: var(--bs-network-status-icon-color-offline);
+}
+
+tc-network-status-icon[data-tier="bad"] .tc-network-status-icon-bar.is-active {
+    background-color: var(--bs-network-status-icon-color-bad);
+}
+
+tc-network-status-icon[data-tier="warning"] .tc-network-status-icon-bar.is-active {
+    background-color: var(--bs-network-status-icon-color-warning);
+}
+
+tc-network-status-icon[data-tier="ok"] .tc-network-status-icon-bar.is-active {
+    background-color: var(--bs-network-status-icon-color-ok);
+}
+
+tc-network-status-icon[data-tier="good"] .tc-network-status-icon-bar.is-active {
+    background-color: var(--bs-network-status-icon-color-good);
+}
+
+// ── Label ──────────────────────────────────────────────────────────────────────
+
+.tc-network-status-icon-label {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-network-status-icon-label-font-size);
+    font-weight: 500;
+    color: var(--bs-network-status-icon-label-color);
+    letter-spacing: 0.03em;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-network-status-icon-bar {
+        transition: none;
+    }
+}
