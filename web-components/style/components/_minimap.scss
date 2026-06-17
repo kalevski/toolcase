@@ -1,0 +1,90 @@
+// tc-minimap — positioned-marker map surface with a fixed player dot at centre.
+// Entity markers are circles (border-radius: 50%); everything else is sharp (border-radius: 0).
+// Player marker uses --tc-app-accent (ink); entity markers default to --tc-accent (cyan).
+// All cosmetics flow through --bs-minimap-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-minimap {
+    --bs-minimap-size: 200px;
+    --bs-minimap-surface: var(--tc-surface);
+    --bs-minimap-border-color: var(--tc-border);
+    --bs-minimap-bg-image: none;
+    --bs-minimap-bg-color: var(--tc-slate-900);
+    --bs-minimap-grid-color: var(--tc-border);
+    --bs-minimap-grid-size: 20px;
+    --bs-minimap-marker-color: var(--tc-accent);
+    --bs-minimap-marker-size: 8px;
+    --bs-minimap-player-color: var(--tc-app-accent);
+    --bs-minimap-player-size: 10px;
+
+    position: relative;
+    width: var(--bs-minimap-size);
+    height: var(--bs-minimap-size);
+    border: 1px solid var(--bs-minimap-border-color);
+    border-radius: 0;
+    background: var(--bs-minimap-surface);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.tc-minimap {
+    // Rotating surface that holds the background and markers; the player dot stays fixed.
+    &__surface {
+        position: absolute;
+        inset: 0;
+        transform-origin: center center;
+    }
+
+    // Tiled grid background; optional image overlay via --bs-minimap-bg-image.
+    &__bg {
+        position: absolute;
+        inset: 0;
+        background-color: var(--bs-minimap-bg-color);
+        background-image:
+            var(--bs-minimap-bg-image),
+            linear-gradient(var(--bs-minimap-grid-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--bs-minimap-grid-color) 1px, transparent 1px);
+        background-size:
+            100% 100%,
+            var(--bs-minimap-grid-size) var(--bs-minimap-grid-size),
+            var(--bs-minimap-grid-size) var(--bs-minimap-grid-size);
+        opacity: 0.85;
+        pointer-events: none;
+    }
+
+    // Entity marker — circles are sanctioned; uses per-marker --bs-minimap-marker-color override.
+    &__marker {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        width: var(--bs-minimap-marker-size);
+        height: var(--bs-minimap-marker-size);
+        border-radius: 50%;
+        background: var(--bs-minimap-marker-color);
+        pointer-events: none;
+    }
+
+    // Player marker — fixed at the centre of the host (not inside the rotating surface).
+    // The 2px white ring separates it visually from the rotating background.
+    &__player {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: var(--bs-minimap-player-size);
+        height: var(--bs-minimap-player-size);
+        border-radius: 50%;
+        background: var(--bs-minimap-player-color);
+        outline: 2px solid var(--bs-minimap-surface);
+        outline-offset: 0;
+        z-index: 1;
+        pointer-events: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-minimap__marker,
+    .tc-minimap__player {
+        animation: none;
+    }
+}
