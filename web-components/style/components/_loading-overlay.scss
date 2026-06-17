@@ -1,0 +1,252 @@
+// tc-loading-overlay — full-surface loading overlay. Ported from
+// `gc-loading-overlay` but voiced for the web-components design system: flat
+// slate ink scrim, sharp panel, standard spinner-border ring, no game chrome.
+// Visibility is driven by the `[open]` attribute; the CSS hides the host when
+// `[open]` is absent. Every cosmetic value flows through --bs-loading-overlay-*
+// custom properties (the public theming contract).
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-loading-overlay {
+    // Backdrop
+    --bs-loading-overlay-backdrop-bg:    rgba(15, 23, 42, 0.65); // slate-900 @ 65%
+
+    // Panel card
+    --bs-loading-overlay-panel-bg:       var(--tc-surface);
+    --bs-loading-overlay-panel-border:   1px solid var(--tc-border);
+    --bs-loading-overlay-panel-shadow:   var(--tc-shadow-lg);
+    --bs-loading-overlay-panel-padding:  2rem;
+    --bs-loading-overlay-panel-gap:      1.25rem;
+    --bs-loading-overlay-panel-width:    min(340px, calc(100vw - 2rem));
+
+    // Spinner ring
+    --bs-loading-overlay-spinner-color:  var(--tc-app-accent);
+    --bs-loading-overlay-spinner-size:   36px;
+    --bs-loading-overlay-spinner-width:  3px;
+
+    // Label + percent
+    --bs-loading-overlay-label-color:    var(--tc-text);
+    --bs-loading-overlay-label-size:     0.925rem;
+    --bs-loading-overlay-pct-color:      var(--tc-text-muted);
+    --bs-loading-overlay-pct-size:       0.8125rem;
+
+    // Progress bar track + fill
+    --bs-loading-overlay-bar-bg:         var(--tc-border);
+    --bs-loading-overlay-bar-fill:       var(--tc-app-accent);
+    --bs-loading-overlay-bar-height:     3px;
+
+    // Tip
+    --bs-loading-overlay-tip-color:      var(--tc-text-faint);
+    --bs-loading-overlay-tip-size:       0.8125rem;
+
+    // Stacking: sits on the modal tier
+    --bs-loading-overlay-z:              var(--tc-z-modal);
+
+    // Fade-in duration
+    --bs-loading-overlay-fade:           var(--tc-transition-base);
+}
+
+// ── Hidden when [open] is absent ────────────────────────────────────────────────
+// The host defaults to display: block from _reset.scss. Suppress it when not open.
+
+tc-loading-overlay:not([open]) {
+    display: none;
+}
+
+// ── Host when open: fixed full-surface flex container ───────────────────────────
+// Positions the host on the fixed overlay tier and centres the panel.
+
+tc-loading-overlay[open] {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-loading-overlay-z);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    animation: tc-loading-overlay-fade-in var(--bs-loading-overlay-fade) both;
+}
+
+@keyframes tc-loading-overlay-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+// ── Backdrop: full-fill semi-transparent wash ───────────────────────────────────
+// Positioned absolutely inside the host; pointer-events disabled so the panel
+// can receive focus-management clicks without the backdrop intercepting them.
+
+.tc-loading-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--bs-loading-overlay-backdrop-bg);
+    border-radius: 0;
+    pointer-events: none;
+}
+
+// ── Panel: centered content card ────────────────────────────────────────────────
+// Sits above the backdrop (z-index: 1); sharp corners per design mandate;
+// overlay-tier shadow (the only place shadows are sanctioned).
+
+.tc-loading-overlay-panel {
+    position: relative;
+    z-index: 1;
+    width: var(--bs-loading-overlay-panel-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-loading-overlay-panel-gap);
+    padding: var(--bs-loading-overlay-panel-padding);
+    background: var(--bs-loading-overlay-panel-bg);
+    border: var(--bs-loading-overlay-panel-border);
+    box-shadow: var(--bs-loading-overlay-panel-shadow);
+    border-radius: 0; // sharp by mandate
+}
+
+// ── Spinner ring ─────────────────────────────────────────────────────────────────
+// Composed from .spinner-border (defined in _spinner.scss). Override Bootstrap
+// spinner defaults to apply component tokens: size, border-width, arc colour.
+// The ring circle is a sanctioned use of border-radius: 50%.
+
+.tc-loading-overlay-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tc-loading-overlay-spinner-ring {
+    // Drive size and border-width via the spinner vars so Bootstrap's own
+    // width/height/border declarations pick up the overrides.
+    --bs-spinner-width:        var(--bs-loading-overlay-spinner-size);
+    --bs-spinner-height:       var(--bs-loading-overlay-spinner-size);
+    --bs-spinner-border-width: var(--bs-loading-overlay-spinner-width);
+
+    // Arc colour (used via currentcolor on border-top-color)
+    color: var(--bs-loading-overlay-spinner-color);
+
+    // Refile the track and restore the arc; cascade order ensures these win
+    // over .spinner-border since _loading-overlay.scss is forwarded after
+    // _spinner.scss in _index.scss.
+    border-color:     var(--tc-border-strong);
+    border-top-color: currentcolor;
+}
+
+// ── Label row ────────────────────────────────────────────────────────────────────
+// Horizontal pair: descriptive label (left) + mono percentage (right).
+
+.tc-loading-overlay-label-row {
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.tc-loading-overlay-label {
+    font-size: var(--bs-loading-overlay-label-size);
+    color: var(--bs-loading-overlay-label-color);
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    // Prevent long labels from overflowing the panel
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Percentage is machine-facing text — JetBrains Mono, tabular figures.
+.tc-loading-overlay-pct {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-loading-overlay-pct-size);
+    color: var(--bs-loading-overlay-pct-color);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+// ── Progress bar ─────────────────────────────────────────────────────────────────
+// Thin hairline track (sharp); fill slides to width when determinate.
+// Indeterminate variant animates the fill across the track.
+
+.tc-loading-overlay-bar {
+    width: 100%;
+    height: var(--bs-loading-overlay-bar-height);
+    background: var(--bs-loading-overlay-bar-bg);
+    border-radius: 0; // sharp by mandate
+    overflow: hidden;
+    position: relative;
+}
+
+.tc-loading-overlay-bar-fill {
+    height: 100%;
+    background: var(--bs-loading-overlay-bar-fill);
+    border-radius: 0;
+    transition: width var(--tc-transition-base);
+}
+
+// Indeterminate: slide a 40% fill segment across the full track width.
+.tc-loading-overlay-bar--indeterminate .tc-loading-overlay-bar-fill {
+    width: 40%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    animation: tc-loading-overlay-bar-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes tc-loading-overlay-bar-slide {
+    0%   { left: -50%; }
+    100% { left: 110%; }
+}
+
+// ── Tip line ─────────────────────────────────────────────────────────────────────
+// Machine-facing secondary text (status messages, file paths, etc.) — mono,
+// small, faint, centered.
+
+.tc-loading-overlay-tip {
+    width: 100%;
+    font-size: var(--bs-loading-overlay-tip-size);
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    color: var(--bs-loading-overlay-tip-color);
+    text-align: center;
+    letter-spacing: 0.025em;
+    // Prevent long tip strings from overflowing
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Coarse pointer: loosen panel padding ─────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-loading-overlay-panel {
+        padding: 2.25rem 1.5rem;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────────
+// Freeze decorative transforms/animations; preserve state-conveying color
+// transitions. The spinner is state-conveying (user knows something is
+// happening) so we slow it rather than removing it.
+
+@media (prefers-reduced-motion: reduce) {
+    tc-loading-overlay[open] {
+        animation: none;
+    }
+
+    .tc-loading-overlay-spinner-ring {
+        // Slow the ring — it is informational, not decorative.
+        animation-duration: 1.5s;
+    }
+
+    .tc-loading-overlay-bar-fill {
+        // Freeze the width transition on the determinate bar.
+        transition: none;
+    }
+
+    // Freeze the indeterminate slide; show the fill statically positioned.
+    .tc-loading-overlay-bar--indeterminate .tc-loading-overlay-bar-fill {
+        animation: none;
+        left: 30%;
+    }
+}

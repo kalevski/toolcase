@@ -382,6 +382,12 @@ tc-letterbox-bars {
     display: block;
 }
 
+// Fixed full-surface loading overlay; the SCSS partial hides it until [open]
+// and positions it on the modal tier, but the host must not default to inline.
+tc-loading-overlay {
+    display: block;
+}
+
 tc-editable-text,
 tc-chip,
 tc-button,
