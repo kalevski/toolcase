@@ -1,0 +1,149 @@
+// tc-level-header — level / stage title header banner.
+// Port of gc-level-header; drops the game-components fantasy chrome in favour of
+// flat slate HUD aesthetics: sharp corners, 1px hairline border, JetBrains Mono
+// machine-facing text, ink accent for the XP fill.
+// All cosmetics flow through --bs-level-header-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-level-header {
+    --bs-level-header-bg:                   var(--tc-surface);
+    --bs-level-header-border-color:         var(--tc-border);
+    --bs-level-header-padding-y:            0.75rem;
+    --bs-level-header-padding-x:            1rem;
+    --bs-level-header-gap:                  0.75rem;
+
+    --bs-level-header-badge-bg:             var(--tc-app-accent);
+    --bs-level-header-badge-color:          #fff;
+    --bs-level-header-badge-size:           3rem;
+    --bs-level-header-badge-label-size:     0.5625rem;
+    --bs-level-header-badge-value-size:     1.125rem;
+    --bs-level-header-badge-letter-spacing: 0.1em;
+
+    --bs-level-header-title-color:          var(--tc-text);
+    --bs-level-header-title-font-size:      0.9375rem;
+    --bs-level-header-title-font-weight:    600;
+
+    --bs-level-header-track-bg:             var(--tc-slate-200);
+    --bs-level-header-track-height:         0.5rem;
+    --bs-level-header-fill-bg:              var(--tc-app-accent);
+    --bs-level-header-fill-transition:      width var(--tc-transition-base);
+
+    --bs-level-header-meta-gap:             0.25rem;
+    --bs-level-header-xp-color:             var(--tc-text-muted);
+    --bs-level-header-xp-font-size:         0.75rem;
+    --bs-level-header-next-color:           var(--tc-text-faint);
+    --bs-level-header-next-font-size:       0.75rem;
+}
+
+.tc-level-header {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--bs-level-header-gap);
+    padding: var(--bs-level-header-padding-y) var(--bs-level-header-padding-x);
+    background: var(--bs-level-header-bg);
+    border: 1px solid var(--bs-level-header-border-color);
+    border-radius: 0;
+    width: 100%;
+}
+
+// Left badge — solid ink tile with the level number.
+.tc-level-header__badge {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-level-header-badge-size);
+    height: var(--bs-level-header-badge-size);
+    background: var(--bs-level-header-badge-bg);
+    color: var(--bs-level-header-badge-color);
+    border-radius: 0;
+}
+
+.tc-level-header__badge-label {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-level-header-badge-label-size);
+    font-weight: 600;
+    letter-spacing: var(--bs-level-header-badge-letter-spacing);
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.tc-level-header__badge-value {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-level-header-badge-value-size);
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+// Right body — title, XP bar, meta row.
+.tc-level-header__body {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.tc-level-header__title {
+    display: block;
+    font-size: var(--bs-level-header-title-font-size);
+    font-weight: var(--bs-level-header-title-font-weight);
+    color: var(--bs-level-header-title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// XP progress track.
+.tc-level-header__track {
+    position: relative;
+    width: 100%;
+    height: var(--bs-level-header-track-height);
+    background: var(--bs-level-header-track-bg);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-level-header__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    height: 100%;
+    background: var(--bs-level-header-fill-bg);
+    transition: var(--bs-level-header-fill-transition);
+}
+
+// Meta row — mono XP readout (left) + optional next-unlock label (right).
+.tc-level-header__meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--bs-level-header-meta-gap);
+    min-width: 0;
+}
+
+.tc-level-header__xp {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-level-header-xp-font-size);
+    color: var(--bs-level-header-xp-color);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.tc-level-header__next {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-level-header-next-font-size);
+    color: var(--bs-level-header-next-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-level-header__fill {
+        transition: none;
+    }
+}

@@ -289,6 +289,7 @@ import { GuildPanel } from './GuildPanel'
 import { KeyBinder } from './KeyBinder'
 import { LegalScreen } from './LegalScreen'
 import { LetterboxBars } from './LetterboxBars'
+import { LevelHeader } from './LevelHeader'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -587,4 +588,5 @@ export function register(): void {
     customElements.define('tc-key-binder', KeyBinder)
     customElements.define('tc-legal-screen', LegalScreen)
     customElements.define('tc-letterbox-bars', LetterboxBars)
+    customElements.define('tc-level-header', LevelHeader)
 }
