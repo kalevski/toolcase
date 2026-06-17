@@ -230,6 +230,7 @@ import { Leaderboard } from './Leaderboard'
 import { Lightbox } from './Lightbox'
 import { LineChart } from './LineChart'
 import { PieChart } from './PieChart'
+import { KillFeed } from './KillFeed'
 import { LiveFeed } from './LiveFeed'
 import { Login } from './Login'
 import { MarkdownEditor } from './MarkdownEditor'
@@ -520,6 +521,7 @@ export function register(): void {
     customElements.define('tc-lightbox', Lightbox)
     customElements.define('tc-line-chart', LineChart)
     customElements.define('tc-pie-chart', PieChart)
+    customElements.define('tc-kill-feed', KillFeed)
     customElements.define('tc-live-feed', LiveFeed)
     customElements.define('tc-login', Login)
     customElements.define('tc-markdown-editor', MarkdownEditor)

@@ -229,6 +229,7 @@ import InfiniteScrollDemo from './InfiniteScrollDemo'
 import InstallTabsDemo from './InstallTabsDemo'
 import InteractPromptDemo from './InteractPromptDemo'
 import LeaderboardDemo from './LeaderboardDemo'
+import KillFeedDemo from './KillFeedDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -531,6 +532,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'virtual-list', category: 'Components', element: <VirtualListDemo /> },
     { key: 'install-tabs', category: 'Components', element: <InstallTabsDemo /> },
     { key: 'interact-prompt', category: 'Overlays & Feedback', element: <InteractPromptDemo /> },
+    { key: 'kill-feed', category: 'Components', element: <KillFeedDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
     { key: 'marquee', category: 'Content', element: <MarqueeDemo /> },

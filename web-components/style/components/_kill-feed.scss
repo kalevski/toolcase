@@ -1,0 +1,86 @@
+// tc-kill-feed — stacking kill/event feed of transient rows.
+// Slate neutrals; JetBrains Mono for names; 1px hairline row separators; sharp corners everywhere.
+// Killer and victim colours are set per-entry via inline --bs-kill-feed-*-color on each span.
+// All cosmetics flow through --bs-kill-feed-* custom properties.
+
+tc-kill-feed {
+    --bs-kill-feed-bg: var(--tc-surface);
+    --bs-kill-feed-border: 1px solid var(--tc-border);
+    --bs-kill-feed-row-border: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-kill-feed-name-font-size: 0.8125rem;
+    --bs-kill-feed-killer-color: var(--tc-text);
+    --bs-kill-feed-victim-color: var(--tc-text-muted);
+    --bs-kill-feed-weapon-color: var(--tc-text-faint);
+    --bs-kill-feed-weapon-font-size: 0.75rem;
+    --bs-kill-feed-headshot-color: var(--tc-accent);
+    --bs-kill-feed-headshot-font-size: 0.6875rem;
+}
+
+.tc-kill-feed {
+    display: flex;
+    flex-direction: column;
+    border: var(--bs-kill-feed-border);
+    background: var(--bs-kill-feed-bg);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Row ───────────────────────────────────────────────────────────────────────
+
+.tc-kill-feed-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-bottom: var(--bs-kill-feed-row-border);
+    min-height: 36px;
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+@media (pointer: coarse) {
+    .tc-kill-feed-row {
+        min-height: 44px;
+    }
+}
+
+// ── Row parts ─────────────────────────────────────────────────────────────────
+
+.tc-kill-feed-killer {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-kill-feed-name-font-size);
+    font-weight: 500;
+    color: var(--bs-kill-feed-killer-color);
+    flex-shrink: 0;
+    line-height: 1.4;
+}
+
+.tc-kill-feed-weapon {
+    font-size: var(--bs-kill-feed-weapon-font-size);
+    color: var(--bs-kill-feed-weapon-color);
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.tc-kill-feed-headshot {
+    font-size: var(--bs-kill-feed-headshot-font-size);
+    color: var(--bs-kill-feed-headshot-color);
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.tc-kill-feed-victim {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-kill-feed-name-font-size);
+    color: var(--bs-kill-feed-victim-color);
+    flex-shrink: 0;
+    line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-kill-feed-row {
+        transition: none;
+    }
+}
