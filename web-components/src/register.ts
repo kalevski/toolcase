@@ -303,6 +303,7 @@ import { MenuItem } from './MenuItem'
 import { LootList } from './LootList'
 import { LootPopup } from './LootPopup'
 import { LoreText } from './LoreText'
+import { MetalButton } from './MetalButton'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -615,4 +616,5 @@ export function register(): void {
     customElements.define('tc-loot-list', LootList)
     customElements.define('tc-loot-popup', LootPopup)
     customElements.define('tc-lore-text', LoreText)
+    customElements.define('tc-metal-button', MetalButton)
 }
