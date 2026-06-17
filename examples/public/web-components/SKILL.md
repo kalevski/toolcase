@@ -233,6 +233,7 @@ After `register()` you can author markup directly:
   - [tc-menu-item](#tc-menu-item)
   - [tc-metal-button](#tc-metal-button)
   - [tc-minimap](#tc-minimap)
+  - [tc-mute-list](#tc-mute-list)
   - [tc-matchmaking-screen](#tc-matchmaking-screen)
   - [tc-level-header](#tc-level-header)
   - [tc-level-select](#tc-level-select)
@@ -22037,5 +22038,85 @@ None. `tc-minimap` is attribute- and property-driven.
         { id: 'enemy-1',   x: 120, y: 80,  color: 'var(--tc-danger)'            },
         { id: 'objective', x: 100, y: 100, color: 'var(--tc-warning)', size: 14 },
     ];
+</script>
+```
+
+### tc-mute-list
+
+A list of muted players with optional per-entry reason, timestamp, and a per-row Unmute button. Players are set via the JS `players` property. Clicking Unmute fires `tc-unmute` with the player id. No shadow root; light DOM; `display: block`.
+
+**Tag:** `tc-mute-list`
+
+#### Attributes
+
+None. All content is driven by the `players` JS property.
+
+#### JS Properties
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `players` | `MutedPlayer[]` | `[]` | Array of muted-player descriptors to render. Setting this property re-renders the list. |
+| `onUnmute` | `((id: string) => void) \| null` | `null` | Optional callback — called in addition to the `tc-unmute` event when the Unmute button is clicked. |
+
+**`MutedPlayer` shape**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `id` | `string` | yes | Unique player identifier. Stamped as `data-id` on the row element and forwarded in the `tc-unmute` event detail. |
+| `name` | `string` | yes | Display name shown in JetBrains Mono. |
+| `mutedAt` | `string` | no | Human-readable timestamp string (e.g. `"2d ago"`). Displayed to the right of the name. |
+| `reason` | `string` | no | Optional mute reason displayed as a muted sub-label below the name. |
+
+#### Events
+
+| Event | Detail | Description |
+|---|---|---|
+| `tc-unmute` | `{ id: string }` | Fired when the Unmute button for a row is clicked. `id` is the `MutedPlayer.id` of that row. Bubbles and is composed. |
+
+#### Slots
+
+None. `tc-mute-list` is property-driven; all content is generated.
+
+#### CSS Custom Properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-mute-list-bg` | `var(--tc-surface)` | Panel background. |
+| `--bs-mute-list-border` | `1px solid var(--tc-border)` | Outer 1 px hairline border. |
+| `--bs-mute-list-row-border` | `1px solid var(--tc-border)` | Row separator hairline. |
+| `--bs-mute-list-row-hover-bg` | `var(--tc-surface-hover)` | Row hover background. |
+| `--bs-mute-list-name-font-size` | `0.8125rem` | Player name font size. |
+| `--bs-mute-list-name-color` | `var(--tc-text)` | Player name colour. |
+| `--bs-mute-list-reason-font-size` | `0.75rem` | Reason sub-label font size. |
+| `--bs-mute-list-reason-color` | `var(--tc-text-muted)` | Reason sub-label colour. |
+| `--bs-mute-list-time-font-size` | `0.6875rem` | Timestamp font size. |
+| `--bs-mute-list-time-color` | `var(--tc-text-faint)` | Timestamp colour. |
+| `--bs-mute-list-btn-font-size` | `0.75rem` | Unmute button font size. |
+| `--bs-mute-list-btn-min-height` | `1.75rem` | Unmute button minimum height (44 px under coarse pointer). |
+| `--bs-mute-list-btn-bg` | `var(--tc-surface)` | Unmute button background. |
+| `--bs-mute-list-btn-color` | `var(--tc-text)` | Unmute button text colour. |
+| `--bs-mute-list-btn-border` | `1px solid var(--tc-border-strong)` | Unmute button border. |
+| `--bs-mute-list-btn-hover-bg` | `var(--tc-app-accent)` | Unmute button hover background (ink). |
+| `--bs-mute-list-btn-hover-color` | `#fff` | Unmute button hover text colour. |
+| `--bs-mute-list-empty-color` | `var(--tc-text-faint)` | Empty-state text colour. |
+
+#### Example
+
+```html
+<tc-mute-list id="mutes"></tc-mute-list>
+
+<script>
+    const mutes = document.getElementById('mutes');
+
+    mutes.players = [
+        { id: 'p1', name: 'ToxicWizard92', mutedAt: '2d ago', reason: 'Spam' },
+        { id: 'p2', name: 'ChatBot_AFK',   mutedAt: '1w ago' },
+    ];
+
+    mutes.addEventListener('tc-unmute', e => {
+        console.log('unmuted player id:', e.detail.id);
+        // Remove from list after unmute:
+        mutes.players = mutes.players.filter(p => p.id !== e.detail.id);
+    });
 </script>
 ```

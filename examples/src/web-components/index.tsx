@@ -298,6 +298,7 @@ import LoadingOverlayDemo from './LoadingOverlayDemo'
 import LoadingScreenDemo from './LoadingScreenDemo'
 import LoreTextDemo from './LoreTextDemo'
 import MinimapDemo from './MinimapDemo'
+import MuteListDemo from './MuteListDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -616,4 +617,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'loading-screen', category: 'Overlays & Feedback', element: <LoadingScreenDemo /> },
     { key: 'lore-text', category: 'Content', element: <LoreTextDemo /> },
     { key: 'minimap', category: 'Components', element: <MinimapDemo /> },
+    { key: 'mute-list', category: 'Components', element: <MuteListDemo /> },
 ]

@@ -1,0 +1,194 @@
+// tc-mute-list — list of muted players with a per-row Unmute action.
+// Slate neutrals; JetBrains Mono for names, reasons, and timestamps.
+// Sharp corners; 1px hairlines. All cosmetics flow through --bs-mute-list-* custom properties.
+
+tc-mute-list {
+    // Panel
+    --bs-mute-list-bg: var(--tc-surface);
+    --bs-mute-list-border: 1px solid var(--tc-border);
+
+    // Rows
+    --bs-mute-list-row-border: 1px solid var(--tc-border);
+    --bs-mute-list-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+
+    // Player name
+    --bs-mute-list-name-font-size: 0.8125rem;
+    --bs-mute-list-name-color: var(--tc-text);
+
+    // Reason (sub-label)
+    --bs-mute-list-reason-font-size: 0.75rem;
+    --bs-mute-list-reason-color: var(--tc-text-muted);
+
+    // Timestamp
+    --bs-mute-list-time-font-size: 0.6875rem;
+    --bs-mute-list-time-color: var(--tc-text-faint);
+
+    // Unmute button
+    --bs-mute-list-btn-font-size: 0.75rem;
+    --bs-mute-list-btn-min-height: 1.75rem;
+    --bs-mute-list-btn-bg: var(--tc-surface);
+    --bs-mute-list-btn-color: var(--tc-text);
+    --bs-mute-list-btn-border: 1px solid var(--tc-border-strong);
+    --bs-mute-list-btn-hover-bg: var(--tc-app-accent);
+    --bs-mute-list-btn-hover-color: #fff;
+
+    // Empty state
+    --bs-mute-list-empty-color: var(--tc-text-faint);
+}
+
+// ── Panel shell ────────────────────────────────────────────────────────────────
+
+.tc-mute-list {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-mute-list-bg);
+    border: var(--bs-mute-list-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Individual row ─────────────────────────────────────────────────────────────
+
+.tc-mute-list-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: var(--bs-mute-list-row-border);
+    min-height: 44px;
+    background: transparent;
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-mute-list-row-hover-bg);
+    }
+}
+
+// ── Text group (name + reason) ─────────────────────────────────────────────────
+
+.tc-mute-list-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tc-mute-list-name {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-mute-list-name-font-size);
+    font-weight: 500;
+    color: var(--bs-mute-list-name-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.tc-mute-list-reason {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-mute-list-reason-font-size);
+    color: var(--bs-mute-list-reason-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+// ── Meta strip (timestamp + button) ───────────────────────────────────────────
+
+.tc-mute-list-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.tc-mute-list-time {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-mute-list-time-font-size);
+    color: var(--bs-mute-list-time-color);
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+// ── Unmute button ──────────────────────────────────────────────────────────────
+
+.tc-mute-list-unmute {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0 0.625rem;
+    min-height: var(--bs-mute-list-btn-min-height);
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-mute-list-btn-font-size);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    color: var(--bs-mute-list-btn-color);
+    background: var(--bs-mute-list-btn-bg);
+    border: var(--bs-mute-list-btn-border);
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease);
+    white-space: nowrap;
+    line-height: 1;
+
+    &:hover:not(:disabled) {
+        background: var(--bs-mute-list-btn-hover-bg);
+        color: var(--bs-mute-list-btn-hover-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────────
+
+.tc-mute-list-empty {
+    padding: 1rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--bs-mute-list-empty-color);
+    text-align: center;
+    margin: 0;
+}
+
+// ── 44 px coarse touch targets ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-mute-list-unmute {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-mute-list-row,
+    .tc-mute-list-unmute {
+        transition:
+            background var(--tc-transition-fast, 0.15s ease),
+            color var(--tc-transition-fast, 0.15s ease);
+    }
+
+    .tc-mute-list-unmute:hover:not(:disabled) {
+        transform: none;
+    }
+}
