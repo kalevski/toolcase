@@ -233,6 +233,7 @@ import KillFeedDemo from './KillFeedDemo'
 import ListDemo from './ListDemo'
 import ListRowDemo from './ListRowDemo'
 import LobbyDemo from './LobbyDemo'
+import MainMenuDemo from './MainMenuDemo'
 import LootListDemo from './LootListDemo'
 import LootPopupDemo from './LootPopupDemo'
 import LiveFeedDemo from './LiveFeedDemo'
@@ -548,6 +549,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'list', category: 'Components', element: <ListDemo /> },
     { key: 'list-row', category: 'Components', element: <ListRowDemo /> },
     { key: 'lobby', category: 'Components', element: <LobbyDemo /> },
+    { key: 'main-menu', category: 'Components', element: <MainMenuDemo /> },
     { key: 'loot-list', category: 'Components', element: <LootListDemo /> },
     { key: 'loot-popup', category: 'Components', element: <LootPopupDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
