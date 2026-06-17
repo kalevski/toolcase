@@ -230,6 +230,7 @@ import InstallTabsDemo from './InstallTabsDemo'
 import InteractPromptDemo from './InteractPromptDemo'
 import LeaderboardDemo from './LeaderboardDemo'
 import KillFeedDemo from './KillFeedDemo'
+import ListDemo from './ListDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -537,6 +538,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'install-tabs', category: 'Components', element: <InstallTabsDemo /> },
     { key: 'interact-prompt', category: 'Overlays & Feedback', element: <InteractPromptDemo /> },
     { key: 'kill-feed', category: 'Components', element: <KillFeedDemo /> },
+    { key: 'list', category: 'Components', element: <ListDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
     { key: 'marquee', category: 'Content', element: <MarqueeDemo /> },

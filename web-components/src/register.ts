@@ -231,6 +231,7 @@ import { Lightbox } from './Lightbox'
 import { LineChart } from './LineChart'
 import { PieChart } from './PieChart'
 import { KillFeed } from './KillFeed'
+import { List } from './List'
 import { LiveFeed } from './LiveFeed'
 import { Login } from './Login'
 import { MarkdownEditor } from './MarkdownEditor'
@@ -526,6 +527,7 @@ export function register(): void {
     customElements.define('tc-line-chart', LineChart)
     customElements.define('tc-pie-chart', PieChart)
     customElements.define('tc-kill-feed', KillFeed)
+    customElements.define('tc-list', List)
     customElements.define('tc-live-feed', LiveFeed)
     customElements.define('tc-login', Login)
     customElements.define('tc-markdown-editor', MarkdownEditor)
