@@ -280,6 +280,7 @@ import KeyBinderDemo from './KeyBinderDemo'
 import DebugOverlayDemo from './DebugOverlayDemo'
 import DialogueBoxDemo from './DialogueBoxDemo'
 import LegalScreenDemo from './LegalScreenDemo'
+import LetterboxBarsDemo from './LetterboxBarsDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -580,4 +581,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'dialogue-box', category: 'Overlays & Feedback', element: <DialogueBoxDemo /> },
     { key: 'key-binder', category: 'Forms', element: <KeyBinderDemo /> },
     { key: 'legal-screen', category: 'Content', element: <LegalScreenDemo /> },
+    { key: 'letterbox-bars', category: 'Overlays & Feedback', element: <LetterboxBarsDemo /> },
 ]

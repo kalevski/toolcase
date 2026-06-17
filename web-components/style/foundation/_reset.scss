@@ -371,6 +371,13 @@ tc-lightbox {
     display: block;
 }
 
+// Absolutely-positioned cinematic overlay; the SCSS partial fills the parent
+// positioned container and slides two ink bars in/out, but the host must not
+// default to inline.
+tc-letterbox-bars {
+    display: block;
+}
+
 tc-editable-text,
 tc-chip,
 tc-button,

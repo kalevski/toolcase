@@ -1,0 +1,81 @@
+// tc-letterbox-bars — animated cinematic letterbox bars for cutscenes and
+// reveal transitions. Ported from `gc-letterbox-bars` but voiced for the
+// web-components design system: no game chrome, no gilded fills — just two
+// flat ink bars that slide in from the top and bottom edges when [show] is
+// set and slide back out when [show] is removed. Every cosmetic value flows
+// through --bs-letterbox-bars-* so themes re-skin via vars alone.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-letterbox-bars {
+    --bs-letterbox-bars-height:   80px;
+    --bs-letterbox-bars-color:    var(--tc-ink);
+    --bs-letterbox-bars-duration: 0.4s;
+    // Sits above the scene content inside the positioned container; keeps bars
+    // in front of absolutely-positioned children without escaping the stacking
+    // context of the container itself.
+    --bs-letterbox-bars-z: 1;
+}
+
+// ── Host surface ────────────────────────────────────────────────────────────────
+// The host fills its nearest positioned ancestor and acts as a transparent
+// passthrough — pointer events are disabled so interactive content behind the
+// bars (e.g. a scene viewport or video) remains clickable.
+
+tc-letterbox-bars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: var(--bs-letterbox-bars-z);
+    border-radius: 0;
+}
+
+// ── Individual bars ─────────────────────────────────────────────────────────────
+// Both bars start off-screen (translated out of the visible area). The
+// transition slides them into place when [show] is set on the host.
+
+.tc-letterbox-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--bs-letterbox-bars-height);
+    background: var(--bs-letterbox-bars-color);
+    // Sharp by mandate — no border-radius on rectangles.
+    border-radius: 0;
+    transition: transform var(--bs-letterbox-bars-duration) ease;
+}
+
+.tc-letterbox-bar--top {
+    top: 0;
+    transform: translateY(-100%);
+}
+
+.tc-letterbox-bar--bottom {
+    bottom: 0;
+    transform: translateY(100%);
+}
+
+// ── Show state ──────────────────────────────────────────────────────────────────
+// Attribute selector drives the visible state; no JS re-render needed.
+
+tc-letterbox-bars[show] {
+    .tc-letterbox-bar--top {
+        transform: translateY(0);
+    }
+
+    .tc-letterbox-bar--bottom {
+        transform: translateY(0);
+    }
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+// Freeze the transition; the bars still appear/disappear, just instantly.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-letterbox-bar {
+        transition: none;
+    }
+}
