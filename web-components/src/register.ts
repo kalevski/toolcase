@@ -280,6 +280,7 @@ import { DeadzoneSlider } from './DeadzoneSlider'
 import { DebugOverlay } from './DebugOverlay'
 import { DialogueBox } from './DialogueBox'
 import { FOVSlider } from './FOVSlider'
+import { MouseSensitivity } from './MouseSensitivity'
 import { FPSCapSelect } from './FPSCapSelect'
 import { FullscreenToggle } from './FullscreenToggle'
 import { GameOverScreen } from './GameOverScreen'
@@ -591,6 +592,7 @@ export function register(): void {
     customElements.define('tc-debug-overlay', DebugOverlay)
     customElements.define('tc-dialogue-box', DialogueBox)
     customElements.define('tc-fov-slider', FOVSlider)
+    customElements.define('tc-mouse-sensitivity', MouseSensitivity)
     customElements.define('tc-fps-cap-select', FPSCapSelect)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
     customElements.define('tc-game-over-screen', GameOverScreen)

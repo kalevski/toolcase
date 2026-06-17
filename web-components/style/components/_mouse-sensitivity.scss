@@ -1,0 +1,178 @@
+// tc-mouse-sensitivity — mouse-sensitivity preset control on the shared setting-
+// row scaffold (`_setting-row.scss`). The control is one or two native range
+// inputs (main + optional ADS) — flat hairline tracks, circular ink-ringed
+// thumbs (the one sanctioned curve) — each paired with a mono decimal readout.
+// All cosmetics flow through `--bs-mouse-sensitivity-*`; the fantasy chrome of
+// the gc-* original is dropped.
+
+tc-mouse-sensitivity {
+    --bs-mouse-sensitivity-track-width: 140px;
+    --bs-mouse-sensitivity-track-height: 6px;
+    --bs-mouse-sensitivity-track-color: var(--tc-border);
+    --bs-mouse-sensitivity-fill-color: var(--tc-app-accent);
+    --bs-mouse-sensitivity-thumb-size: 16px;
+    --bs-mouse-sensitivity-thumb-bg: var(--tc-surface);
+    --bs-mouse-sensitivity-thumb-border: var(--tc-app-accent);
+    --bs-mouse-sensitivity-thumb-active-bg: var(--tc-surface-muted);
+    --bs-mouse-sensitivity-thumb-shadow: var(--tc-shadow-sm);
+    --bs-mouse-sensitivity-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-mouse-sensitivity-disabled-color: var(--tc-text-faint);
+    --bs-mouse-sensitivity-key-color: var(--tc-text-muted);
+    --bs-mouse-sensitivity-key-size: 0.6875rem;
+    --bs-mouse-sensitivity-key-min-width: 2.5rem;
+    --bs-mouse-sensitivity-value-color: var(--tc-text-muted);
+    --bs-mouse-sensitivity-value-size: 0.6875rem;
+    --bs-mouse-sensitivity-value-min-width: 2.5rem;
+    --bs-mouse-sensitivity-row-gap: 0.375rem;
+    --bs-mouse-sensitivity-col-gap: 0.625rem;
+}
+
+.tc-mouse-sensitivity__control {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-mouse-sensitivity-row-gap);
+}
+
+.tc-mouse-sensitivity__row {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-mouse-sensitivity-col-gap);
+}
+
+// Mono uppercase micro-label identifying which slider ("Main" / "ADS").
+.tc-mouse-sensitivity__key {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-mouse-sensitivity-key-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-mouse-sensitivity-key-color);
+    min-width: var(--bs-mouse-sensitivity-key-min-width);
+}
+
+.tc-mouse-sensitivity__input {
+    width: var(--bs-mouse-sensitivity-track-width);
+    height: 1.25rem;
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    // Coarse pointers get a 44px hit area without changing the visual track.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:focus-visible {
+        &::-webkit-slider-thumb {
+            box-shadow: var(--bs-mouse-sensitivity-focus-ring);
+        }
+
+        &::-moz-range-thumb {
+            box-shadow: var(--bs-mouse-sensitivity-focus-ring);
+        }
+    }
+
+    &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: var(--bs-mouse-sensitivity-track-height);
+        cursor: pointer;
+        background-color: var(--bs-mouse-sensitivity-track-color);
+        border: 0;
+        border-radius: 0;
+    }
+
+    &::-webkit-slider-thumb {
+        // Centre the thumb on the track regardless of the two sizes.
+        margin-top: calc(
+            (var(--bs-mouse-sensitivity-track-height) - var(--bs-mouse-sensitivity-thumb-size)) / 2
+        );
+        width: var(--bs-mouse-sensitivity-thumb-size);
+        height: var(--bs-mouse-sensitivity-thumb-size);
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        background-color: var(--bs-mouse-sensitivity-thumb-bg);
+        border: 1.5px solid var(--bs-mouse-sensitivity-thumb-border);
+        border-radius: 50%;
+        box-shadow: var(--bs-mouse-sensitivity-thumb-shadow);
+        transition: background-color var(--tc-transition-fast);
+
+        &:active {
+            background-color: var(--bs-mouse-sensitivity-thumb-active-bg);
+        }
+    }
+
+    &::-moz-range-track {
+        width: 100%;
+        height: var(--bs-mouse-sensitivity-track-height);
+        cursor: pointer;
+        background-color: var(--bs-mouse-sensitivity-track-color);
+        border: 0;
+        border-radius: 0;
+    }
+
+    // Filled portion of the track (ink up to the thumb) — Firefox only.
+    &::-moz-range-progress {
+        height: var(--bs-mouse-sensitivity-track-height);
+        background-color: var(--bs-mouse-sensitivity-fill-color);
+    }
+
+    &::-moz-range-thumb {
+        width: var(--bs-mouse-sensitivity-thumb-size);
+        height: var(--bs-mouse-sensitivity-thumb-size);
+        cursor: pointer;
+        background-color: var(--bs-mouse-sensitivity-thumb-bg);
+        border: 1.5px solid var(--bs-mouse-sensitivity-thumb-border);
+        border-radius: 50%;
+        box-shadow: var(--bs-mouse-sensitivity-thumb-shadow);
+        transition: background-color var(--tc-transition-fast);
+
+        &:active {
+            background-color: var(--bs-mouse-sensitivity-thumb-active-bg);
+        }
+    }
+
+    &:disabled {
+        pointer-events: none;
+
+        &::-webkit-slider-thumb {
+            background-color: var(--bs-mouse-sensitivity-disabled-color);
+            border-color: var(--bs-mouse-sensitivity-disabled-color);
+        }
+
+        &::-moz-range-thumb {
+            background-color: var(--bs-mouse-sensitivity-disabled-color);
+            border-color: var(--bs-mouse-sensitivity-disabled-color);
+        }
+    }
+}
+
+.tc-mouse-sensitivity__value {
+    // Mono, machine-facing decimal readout.
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-mouse-sensitivity-value-size);
+    letter-spacing: 0.06em;
+    color: var(--bs-mouse-sensitivity-value-color);
+    min-width: var(--bs-mouse-sensitivity-value-min-width);
+    text-align: right;
+}
+
+// State-conveying colour transitions are cheap; the thumb's hover-fill is the
+// only motion here, so freeze just that under reduced-motion.
+@media (prefers-reduced-motion: reduce) {
+    .tc-mouse-sensitivity__input {
+        &::-webkit-slider-thumb {
+            transition: none;
+        }
+
+        &::-moz-range-thumb {
+            transition: none;
+        }
+    }
+}

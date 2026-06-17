@@ -254,6 +254,7 @@ import PhoneInputDemo from './PhoneInputDemo'
 import RangeSliderDemo from './RangeSliderDemo'
 import DeadzoneSliderDemo from './DeadzoneSliderDemo'
 import FOVSliderDemo from './FOVSliderDemo'
+import MouseSensitivityDemo from './MouseSensitivityDemo'
 import FPSCapSelectDemo from './FPSCapSelectDemo'
 import FullscreenToggleDemo from './FullscreenToggleDemo'
 import InvertAxisToggleDemo from './InvertAxisToggleDemo'
@@ -572,6 +573,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'range-slider', category: 'Forms', element: <RangeSliderDemo /> },
     { key: 'deadzone-slider', category: 'Forms', element: <DeadzoneSliderDemo /> },
     { key: 'fov-slider', category: 'Forms', element: <FOVSliderDemo /> },
+    { key: 'mouse-sensitivity', category: 'Forms', element: <MouseSensitivityDemo /> },
     { key: 'fps-cap-select', category: 'Forms', element: <FPSCapSelectDemo /> },
     { key: 'fullscreen-toggle', category: 'Forms', element: <FullscreenToggleDemo /> },
     { key: 'graphics-preset-picker', category: 'Forms', element: <GraphicsPresetPickerDemo /> },
