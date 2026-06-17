@@ -231,6 +231,7 @@ import InteractPromptDemo from './InteractPromptDemo'
 import LeaderboardDemo from './LeaderboardDemo'
 import KillFeedDemo from './KillFeedDemo'
 import ListDemo from './ListDemo'
+import ListRowDemo from './ListRowDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -539,6 +540,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'interact-prompt', category: 'Overlays & Feedback', element: <InteractPromptDemo /> },
     { key: 'kill-feed', category: 'Components', element: <KillFeedDemo /> },
     { key: 'list', category: 'Components', element: <ListDemo /> },
+    { key: 'list-row', category: 'Components', element: <ListRowDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
     { key: 'marquee', category: 'Content', element: <MarqueeDemo /> },
