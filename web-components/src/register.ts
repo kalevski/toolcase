@@ -298,6 +298,7 @@ import { LoadingScreen } from './LoadingScreen'
 import { Lobby } from './Lobby'
 import { LootList } from './LootList'
 import { LootPopup } from './LootPopup'
+import { LoreText } from './LoreText'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -605,4 +606,5 @@ export function register(): void {
     customElements.define('tc-lobby', Lobby)
     customElements.define('tc-loot-list', LootList)
     customElements.define('tc-loot-popup', LootPopup)
+    customElements.define('tc-lore-text', LoreText)
 }
