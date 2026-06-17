@@ -108,6 +108,7 @@ After `register()` you can author markup directly:
   - [tc-buff-bar](#tc-buff-bar)
   - [tc-buff-icon](#tc-buff-icon)
   - [tc-health-bar](#tc-health-bar)
+  - [tc-mana-bar](#tc-mana-bar)
   - [tc-brightness-calibration](#tc-brightness-calibration)
   - [tc-cdn-map](#tc-cdn-map)
   - [tc-compass-bar](#tc-compass-bar)
@@ -10182,6 +10183,78 @@ None. `tc-health-bar` is attribute-driven.
 
 <!-- Ghost band + segments -->
 <tc-health-bar label="Shield" value="3" max="4" segments="4" ghost="4"></tc-health-bar>
+```
+
+---
+
+### tc-mana-bar
+
+Value/max resource bar for mana (MP) — a cyan-accent fill over a flat slate track. Structurally identical to `tc-health-bar`; styled with `--tc-accent` (cyan) so both bars are visually distinct at a glance in a game HUD. Supports an optional label row (human-readable label + mono `value / max` readout), a ghost band behind the fill for recent mana drain, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. Ported from the game-components `gc-mana-bar` (which extends `ResourceBarBase`); the fantasy chrome is dropped in favour of flat slate chrome; the track / fill / ghost / tick DOM is shared with the rest of the resource-bar family through the `internal/resourceBar` helper.
+
+**Tag:** `tc-mana-bar`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | number | `0` | Current value. Clamped to `[0, max]` for the fill width and `aria-valuenow`. Non-numeric values fall back to `0`. |
+| `max` | number | `100` | Maximum value. Values `<= 0` (or non-numeric) fall back to `100`. |
+| `ghost` | number | — | Optional "ghost" / recent-drain value drawn as a muted band behind the fill. Only shown when it resolves to a wider band than the current fill. |
+| `segments` | number | `1` | Number of equal slots; `segments - 1` evenly-spaced divider ticks are drawn across the track. Values `< 1` (or non-numeric) fall back to `1`. |
+| `show-text` | boolean | `false` | When present (and no `label` is set), draws a centred mono `value / max` readout inside the track. |
+| `label` | string | `""` | When set, renders a label row above the track with the label and a trailing mono `value / max` readout. Also used as the `aria-label` for the progressbar (defaults to `"Mana"`). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number` | Reflects the `value` attribute. |
+| `max` | `number` | Reflects the `max` attribute. |
+| `ghost` | `number \| null` | Reflects the `ghost` attribute; set to `null` to remove it. |
+| `segments` | `number` | Reflects the `segments` attribute. |
+| `showText` | `boolean` | Reflects the `show-text` boolean attribute. |
+| `label` | `string` | Reflects the `label` attribute. |
+
+**Events**
+
+None. `tc-mana-bar` is a purely presentational element.
+
+**Slots**
+
+None. `tc-mana-bar` is attribute-driven.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-mana-bar-gap` | `0.375rem` | Gap between the label row and the track. |
+| `--bs-mana-bar-label-color` | `var(--tc-text)` | Label text color. |
+| `--bs-mana-bar-label-font-size` | `0.8125rem` | Label font size. |
+| `--bs-mana-bar-label-font-weight` | `500` | Label font weight (≤600). |
+| `--bs-mana-bar-value-color` | `var(--tc-text-muted)` | `value / max` readout color. |
+| `--bs-mana-bar-value-font-size` | `0.75rem` | `value / max` readout font size. |
+| `--bs-mana-bar-track-bg` | `var(--tc-slate-200)` | Track background. |
+| `--bs-mana-bar-track-height` | `0.625rem` | Track height. |
+| `--bs-mana-bar-fill-bg` | `var(--tc-accent)` | Value-fill color (cyan accent; overridable). |
+| `--bs-mana-bar-fill-transition` | `width var(--tc-transition-base)` | Fill-width transition (disabled under reduced motion). |
+| `--bs-mana-bar-ghost-bg` | `var(--tc-slate-400)` | Ghost / recent-drain band color (shared resource-bar contract). |
+| `--bs-mana-bar-tick-color` | `var(--tc-surface)` | Segment-divider color. |
+| `--bs-mana-bar-inline-text-color` | `var(--tc-text-muted)` | Inline `value / max` text color. |
+
+**Example**
+
+```html
+<!-- Bare bar -->
+<tc-mana-bar value="60" max="100"></tc-mana-bar>
+
+<!-- With label and readout -->
+<tc-mana-bar label="Mana" value="480" max="800"></tc-mana-bar>
+
+<!-- Inline text, no label -->
+<tc-mana-bar value="30" max="100" show-text></tc-mana-bar>
+
+<!-- Ghost band + segments -->
+<tc-mana-bar label="Charges" value="3" max="5" segments="5" ghost="4"></tc-mana-bar>
 ```
 
 ---

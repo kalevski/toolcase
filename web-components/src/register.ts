@@ -100,6 +100,7 @@ import { BossBar } from './BossBar'
 import { BuffBar } from './BuffBar'
 import { BuffIcon } from './BuffIcon'
 import { HealthBar } from './HealthBar'
+import { ManaBar } from './ManaBar'
 import { Hotbar } from './Hotbar'
 import { InventoryGrid } from './InventoryGrid'
 import { ItemSlot } from './ItemSlot'
@@ -407,6 +408,7 @@ export function register(): void {
     customElements.define('tc-buff-icon', BuffIcon)
     customElements.define('tc-buff-bar', BuffBar)
     customElements.define('tc-health-bar', HealthBar)
+    customElements.define('tc-mana-bar', ManaBar)
     customElements.define('tc-brightness-calibration', BrightnessCalibration)
     customElements.define('tc-callout-quote', CalloutQuote)
     customElements.define('tc-chart-container', ChartContainer)
