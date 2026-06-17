@@ -294,6 +294,7 @@ import { LetterboxBars } from './LetterboxBars'
 import { LevelHeader } from './LevelHeader'
 import { LevelSelect } from './LevelSelect'
 import { LoadingOverlay } from './LoadingOverlay'
+import { LoadingScreen } from './LoadingScreen'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -597,4 +598,5 @@ export function register(): void {
     customElements.define('tc-level-header', LevelHeader)
     customElements.define('tc-level-select', LevelSelect)
     customElements.define('tc-loading-overlay', LoadingOverlay)
+    customElements.define('tc-loading-screen', LoadingScreen)
 }

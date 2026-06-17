@@ -286,6 +286,7 @@ import LetterboxBarsDemo from './LetterboxBarsDemo'
 import LevelHeaderDemo from './LevelHeaderDemo'
 import LevelSelectDemo from './LevelSelectDemo'
 import LoadingOverlayDemo from './LoadingOverlayDemo'
+import LoadingScreenDemo from './LoadingScreenDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -592,4 +593,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'level-header', category: 'Components', element: <LevelHeaderDemo /> },
     { key: 'level-select', category: 'Components', element: <LevelSelectDemo /> },
     { key: 'loading-overlay', category: 'Overlays & Feedback', element: <LoadingOverlayDemo /> },
+    { key: 'loading-screen', category: 'Overlays & Feedback', element: <LoadingScreenDemo /> },
 ]

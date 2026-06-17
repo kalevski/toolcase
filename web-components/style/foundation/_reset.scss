@@ -388,6 +388,12 @@ tc-loading-overlay {
     display: block;
 }
 
+// Full-viewport loading screen; the SCSS partial overrides display to flex and
+// positions it fixed, but the host must not default to inline.
+tc-loading-screen {
+    display: block;
+}
+
 tc-editable-text,
 tc-chip,
 tc-button,
