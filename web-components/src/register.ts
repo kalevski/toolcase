@@ -305,6 +305,7 @@ import { LootList } from './LootList'
 import { LootPopup } from './LootPopup'
 import { LoreText } from './LoreText'
 import { MetalButton } from './MetalButton'
+import { NavButton } from './NavButton'
 import { Minimap } from './Minimap'
 import { MuteList } from './MuteList'
 
@@ -621,6 +622,7 @@ export function register(): void {
     customElements.define('tc-loot-popup', LootPopup)
     customElements.define('tc-lore-text', LoreText)
     customElements.define('tc-metal-button', MetalButton)
+    customElements.define('tc-nav-button', NavButton)
     customElements.define('tc-minimap', Minimap)
     customElements.define('tc-mute-list', MuteList)
 }

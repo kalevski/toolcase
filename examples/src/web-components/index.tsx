@@ -238,6 +238,7 @@ import MatchmakingScreenDemo from './MatchmakingScreenDemo'
 import MainMenuDemo from './MainMenuDemo'
 import MenuItemDemo from './MenuItemDemo'
 import MetalButtonDemo from './MetalButtonDemo'
+import NavButtonDemo from './NavButtonDemo'
 import LootListDemo from './LootListDemo'
 import LootPopupDemo from './LootPopupDemo'
 import LiveFeedDemo from './LiveFeedDemo'
@@ -561,6 +562,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'main-menu', category: 'Components', element: <MainMenuDemo /> },
     { key: 'menu-item', category: 'Components', element: <MenuItemDemo /> },
     { key: 'metal-button', category: 'Components', element: <MetalButtonDemo /> },
+    { key: 'nav-button', category: 'Navigation', element: <NavButtonDemo /> },
     { key: 'loot-list', category: 'Components', element: <LootListDemo /> },
     { key: 'loot-popup', category: 'Components', element: <LootPopupDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
