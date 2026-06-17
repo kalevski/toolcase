@@ -275,6 +275,7 @@ import CompassRoseDemo from './CompassRoseDemo'
 import ControllerLayoutPreviewDemo from './ControllerLayoutPreviewDemo'
 import ControlsRebindListDemo from './ControlsRebindListDemo'
 import CraftingPanelDemo from './CraftingPanelDemo'
+import KeyBinderDemo from './KeyBinderDemo'
 import DebugOverlayDemo from './DebugOverlayDemo'
 import DialogueBoxDemo from './DialogueBoxDemo'
 
@@ -574,4 +575,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'crafting-panel', category: 'Components', element: <CraftingPanelDemo /> },
     { key: 'debug-overlay', category: 'Overlays & Feedback', element: <DebugOverlayDemo /> },
     { key: 'dialogue-box', category: 'Overlays & Feedback', element: <DialogueBoxDemo /> },
+    { key: 'key-binder', category: 'Forms', element: <KeyBinderDemo /> },
 ]

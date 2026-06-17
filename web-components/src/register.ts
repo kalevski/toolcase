@@ -285,6 +285,7 @@ import { GraphicsPresetPicker } from './GraphicsPresetPicker'
 import { InvertAxisToggle } from './InvertAxisToggle'
 import { Grid } from './Grid'
 import { GuildPanel } from './GuildPanel'
+import { KeyBinder } from './KeyBinder'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -579,4 +580,5 @@ export function register(): void {
     customElements.define('tc-hotbar', Hotbar)
     customElements.define('tc-inventory-grid', InventoryGrid)
     customElements.define('tc-item-slot', ItemSlot)
+    customElements.define('tc-key-binder', KeyBinder)
 }
