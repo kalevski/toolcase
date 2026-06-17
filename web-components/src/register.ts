@@ -309,6 +309,7 @@ import { NavButton } from './NavButton'
 import { NetworkStatusIcon } from './NetworkStatusIcon'
 import { Minimap } from './Minimap'
 import { MuteList } from './MuteList'
+import { ObjectiveMarker } from './ObjectiveMarker'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -627,4 +628,5 @@ export function register(): void {
     customElements.define('tc-network-status-icon', NetworkStatusIcon)
     customElements.define('tc-minimap', Minimap)
     customElements.define('tc-mute-list', MuteList)
+    customElements.define('tc-objective-marker', ObjectiveMarker)
 }

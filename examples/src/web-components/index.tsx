@@ -301,6 +301,7 @@ import LoreTextDemo from './LoreTextDemo'
 import MinimapDemo from './MinimapDemo'
 import MuteListDemo from './MuteListDemo'
 import NetworkStatusIconDemo from './NetworkStatusIconDemo'
+import ObjectiveMarkerDemo from './ObjectiveMarkerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -622,4 +623,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'minimap', category: 'Components', element: <MinimapDemo /> },
     { key: 'mute-list', category: 'Components', element: <MuteListDemo /> },
     { key: 'network-status-icon', category: 'Components', element: <NetworkStatusIconDemo /> },
+    { key: 'objective-marker', category: 'Components', element: <ObjectiveMarkerDemo /> },
 ]
