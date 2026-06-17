@@ -72,6 +72,7 @@ import IconDemo from './IconDemo'
 import IconBadgeDemo from './IconBadgeDemo'
 import IconButtonDemo from './IconButtonDemo'
 import KbdDemo from './KbdDemo'
+import KeyDemo from './KeyDemo'
 import LabelDemo from './LabelDemo'
 import LinkDemo from './LinkDemo'
 import SpacerDemo from './SpacerDemo'
@@ -369,6 +370,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'icon-badge', category: 'Content', element: <IconBadgeDemo /> },
     { key: 'icon-button', category: 'Components', element: <IconButtonDemo /> },
     { key: 'kbd', category: 'Content', element: <KbdDemo /> },
+    { key: 'key', category: 'Content', element: <KeyDemo /> },
     { key: 'label', category: 'Forms', element: <LabelDemo /> },
     { key: 'link', category: 'Content', element: <LinkDemo /> },
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },

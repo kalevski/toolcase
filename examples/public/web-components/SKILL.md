@@ -81,6 +81,7 @@ After `register()` you can author markup directly:
   - [tc-icon-badge](#tc-icon-badge)
   - [tc-icon-button](#tc-icon-button)
   - [tc-kbd](#tc-kbd)
+  - [tc-key](#tc-key)
   - [tc-link](#tc-link)
   - [tc-list-group](#tc-list-group)
   - [tc-placeholder](#tc-placeholder)
@@ -8816,6 +8817,72 @@ None. `tc-kbd` is a purely presentational element.
 
 <!-- Extra class on wrapper -->
 <tc-kbd class-name="my-key">Space</tc-kbd>
+```
+
+---
+
+## tc-key
+
+Single keyboard key glyph. A sharp square mono cap for annotating individual keyboard keys in documentation, instructions, and UI prompts. Distinct from `tc-kbd` (which handles multi-key combos with separators); `tc-key` displays exactly one key. Styled per the web-components design system: JetBrains Mono, 1px hairline borders, sharp corners, slate neutral surface, and an ink-accent active state.
+
+**Tag:** `tc-key`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `size` | `sm\|md\|lg` | `md` | Key cap size — controls font size, padding, and minimum width |
+| `variant` | `default\|active` | `default` | Visual state. `active` applies the ink accent color and border to highlight a currently-pressed or selected key |
+
+**JS Properties**
+
+None beyond the reflected attributes above.
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| _(default)_ | The key label — typically a key name (`Esc`, `Enter`, `Ctrl`) or an arrow glyph (`↑`) |
+
+**Events**
+
+None. `tc-key` is a purely presentational element.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-key-font-family` | `var(--bs-font-monospace)` | Key cap font |
+| `--bs-key-font-size` | `0.71875rem` (~11.5px) | Font size for `md` |
+| `--bs-key-font-size-sm` | `0.625rem` (~10px) | Font size for `sm` |
+| `--bs-key-font-size-lg` | `0.875rem` (~14px) | Font size for `lg` |
+| `--bs-key-font-weight` | `500` | Key cap font weight |
+| `--bs-key-color` | `var(--tc-text)` | Key cap glyph color |
+| `--bs-key-bg` | `var(--tc-surface-muted)` | Key cap background fill |
+| `--bs-key-border-color` | `var(--tc-border-strong)` | Key cap border color |
+| `--bs-key-border-width` | `1px` | Key cap border width (bottom is 2px) |
+| `--bs-key-padding-x` | `0.4em` | Horizontal padding (md) |
+| `--bs-key-padding-y` | `0.2em` | Vertical padding (md) |
+| `--bs-key-active-color` | `var(--tc-app-accent)` | Glyph color in the active variant |
+| `--bs-key-active-bg` | 8% ink tint | Background fill in the active variant |
+| `--bs-key-active-border-color` | `var(--tc-app-accent)` | Border color in the active variant |
+| `--bs-key-min-width` | `1.75em` | Minimum width for `md` (keeps single-char keys square-ish) |
+
+```html
+<!-- Default -->
+<tc-key>Enter</tc-key>
+
+<!-- Size variants -->
+<tc-key size="sm">Ctrl</tc-key>
+<tc-key size="md">Ctrl</tc-key>
+<tc-key size="lg">Ctrl</tc-key>
+
+<!-- Active state -->
+<tc-key variant="active">Space</tc-key>
+
+<!-- Arrow glyphs -->
+<tc-key size="sm">↑</tc-key>
+<tc-key size="sm">↓</tc-key>
 ```
 
 ---

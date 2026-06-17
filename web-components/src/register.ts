@@ -74,6 +74,7 @@ import { IconBadge } from './IconBadge'
 import { IconButton } from './IconButton'
 import { IconPicker } from './IconPicker'
 import { Kbd } from './Kbd'
+import { Key } from './Key'
 import { Label } from './Label'
 import { Link } from './Link'
 import { Spacer } from './Spacer'
@@ -364,6 +365,7 @@ export function register(): void {
     customElements.define('tc-icon-button', IconButton)
     customElements.define('tc-icon-picker', IconPicker)
     customElements.define('tc-kbd', Kbd)
+    customElements.define('tc-key', Key)
     customElements.define('tc-label', Label)
     customElements.define('tc-link', Link)
     customElements.define('tc-anchor', Anchor)
