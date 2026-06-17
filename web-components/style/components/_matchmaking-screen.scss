@@ -1,0 +1,277 @@
+// tc-matchmaking-screen — searching / connecting / found / failed / idle
+// state panel with a status ring, eyebrow + title header, meta strip, and
+// accept/cancel actions. Ported from gc-matchmaking-screen (game-components)
+// but restyled to the toolcase design system: slate surface, sharp panel,
+// hairline borders, JetBrains Mono for machine-facing text, ink accent for
+// primary actions. No game chrome (no glows, no gilded frames, no textures).
+// All cosmetics flow through --bs-matchmaking-screen-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ───────────────────────────────────────────────────────
+
+tc-matchmaking-screen {
+    --bs-matchmaking-screen-bg:              var(--tc-surface);
+    --bs-matchmaking-screen-border:          var(--tc-border);
+    --bs-matchmaking-screen-max-width:       380px;
+    --bs-matchmaking-screen-padding-x:       1.5rem;
+    --bs-matchmaking-screen-padding-y:       2rem;
+    --bs-matchmaking-screen-gap:             1.25rem;
+
+    // Ring
+    --bs-matchmaking-screen-ring-size:       4rem;
+    --bs-matchmaking-screen-ring-border:     var(--tc-border);
+    --bs-matchmaking-screen-ring-color:      var(--tc-text-muted);
+    --bs-matchmaking-screen-ring-spin-color: var(--tc-app-accent);
+    --bs-matchmaking-screen-ring-found-bg:   transparent;
+    --bs-matchmaking-screen-ring-found-border: var(--tc-success);
+    --bs-matchmaking-screen-ring-found-color:  var(--tc-success);
+    --bs-matchmaking-screen-ring-failed-border: var(--tc-danger);
+    --bs-matchmaking-screen-ring-failed-color:  var(--tc-danger);
+
+    // Eyebrow (mono micro-label)
+    --bs-matchmaking-screen-eyebrow-color:   var(--tc-text-muted);
+    --bs-matchmaking-screen-eyebrow-size:    10.5px;
+
+    // Title
+    --bs-matchmaking-screen-title-color:     var(--tc-text);
+    --bs-matchmaking-screen-title-size:      1.0625rem;
+    --bs-matchmaking-screen-title-weight:    600;
+
+    // Meta strip (key/value pairs: Mode, Region, Elapsed, ETA)
+    --bs-matchmaking-screen-meta-bg:         var(--tc-surface-muted);
+    --bs-matchmaking-screen-meta-border:     var(--tc-border);
+    --bs-matchmaking-screen-meta-key-color:  var(--tc-text-faint);
+    --bs-matchmaking-screen-meta-val-color:  var(--tc-text);
+
+    // Buttons
+    --bs-matchmaking-screen-btn-color:       var(--tc-text);
+    --bs-matchmaking-screen-btn-bg:          var(--tc-surface);
+    --bs-matchmaking-screen-btn-border:      var(--tc-border);
+    --bs-matchmaking-screen-btn-hover-bg:    var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-matchmaking-screen-btn-accept-bg:   var(--tc-app-accent);
+    --bs-matchmaking-screen-btn-accept-color: #fff;
+    --bs-matchmaking-screen-btn-min-height:  2.25rem;
+}
+
+// ── Host ─────────────────────────────────────────────────────────────────────
+
+tc-matchmaking-screen {
+    display: block;
+}
+
+// ── Root panel ───────────────────────────────────────────────────────────────
+
+.tc-matchmaking-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--bs-matchmaking-screen-gap);
+    padding: var(--bs-matchmaking-screen-padding-y) var(--bs-matchmaking-screen-padding-x);
+    background: var(--bs-matchmaking-screen-bg);
+    border: 1px solid var(--bs-matchmaking-screen-border);
+    border-radius: 0;
+    width: 100%;
+    max-width: var(--bs-matchmaking-screen-max-width);
+    box-sizing: border-box;
+}
+
+// ── State indicator ring ─────────────────────────────────────────────────────
+// A sanctioned circle (per design system — spinner rings are the exception).
+// Sharp panels elsewhere; this ring is the focal visual element of the screen.
+
+.tc-matchmaking-screen-ring {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-matchmaking-screen-ring-size);
+    height: var(--bs-matchmaking-screen-ring-size);
+    border-radius: 50%; // sanctioned circle
+    border: 1px solid var(--bs-matchmaking-screen-ring-border);
+    color: var(--bs-matchmaking-screen-ring-color);
+    flex-shrink: 0;
+}
+
+// Searching / connecting — accent colour, spinning icon
+.tc-matchmaking-screen-ring--spin {
+    border-color: var(--bs-matchmaking-screen-ring-spin-color);
+    color: var(--bs-matchmaking-screen-ring-spin-color);
+}
+
+// Found — success green ring + check
+.tc-matchmaking-screen-ring--found {
+    border-color: var(--bs-matchmaking-screen-ring-found-border);
+    color: var(--bs-matchmaking-screen-ring-found-color);
+    background: var(--bs-matchmaking-screen-ring-found-bg);
+}
+
+// Failed — danger red ring + x
+.tc-matchmaking-screen-ring--failed {
+    border-color: var(--bs-matchmaking-screen-ring-failed-border);
+    color: var(--bs-matchmaking-screen-ring-failed-color);
+}
+
+// Icon inside the ring — sized down to fit comfortably
+.tc-matchmaking-screen-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+// Spin animation — continuous rotation on the loader arc
+@keyframes tc-matchmaking-screen-spin {
+    to { transform: rotate(360deg); }
+}
+
+.tc-matchmaking-screen-ring--spin .tc-matchmaking-screen-icon {
+    animation: tc-matchmaking-screen-spin 1s linear infinite;
+}
+
+// ── Header: eyebrow + title ─────────────────────────────────────────────────
+
+.tc-matchmaking-screen-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+// Eyebrow — mono micro-label, uppercase, muted; identifies the screen context
+.tc-matchmaking-screen-eyebrow {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-matchmaking-screen-eyebrow-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-matchmaking-screen-eyebrow-color);
+    line-height: 1.4;
+}
+
+// Title — state-driven heading
+.tc-matchmaking-screen-title {
+    font-size: var(--bs-matchmaking-screen-title-size);
+    font-weight: var(--bs-matchmaking-screen-title-weight);
+    color: var(--bs-matchmaking-screen-title-color);
+    line-height: 1.3;
+}
+
+// ── Meta strip ───────────────────────────────────────────────────────────────
+// Stacked key/value pairs (Mode, Region, Elapsed, ETA) in a bordered box
+// below the header. JetBrains Mono for all machine-facing values.
+
+.tc-matchmaking-screen-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0;
+    background: var(--bs-matchmaking-screen-meta-bg);
+    border: 1px solid var(--bs-matchmaking-screen-meta-border);
+    border-radius: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.tc-matchmaking-screen-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    padding: 0.375rem 0.75rem;
+    border-right: 1px solid var(--bs-matchmaking-screen-meta-border);
+
+    &:last-child {
+        border-right: none;
+    }
+}
+
+.tc-matchmaking-screen-meta-key {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-matchmaking-screen-meta-key-color);
+}
+
+.tc-matchmaking-screen-meta-val {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-matchmaking-screen-meta-val-color);
+    font-variant-numeric: tabular-nums;
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+
+.tc-matchmaking-screen-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.tc-matchmaking-screen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    min-height: var(--bs-matchmaking-screen-btn-min-height);
+    border: 1px solid var(--bs-matchmaking-screen-btn-border);
+    border-radius: 0;
+    background: var(--bs-matchmaking-screen-btn-bg);
+    color: var(--bs-matchmaking-screen-btn-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        background-color var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        opacity var(--tc-transition-fast, 0.15s ease);
+
+    &:hover:not(:disabled) {
+        background: var(--bs-matchmaking-screen-btn-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    // Accept (or primary action) — ink fill
+    &.tc-matchmaking-screen-btn--accept {
+        background: var(--bs-matchmaking-screen-btn-accept-bg);
+        color: var(--bs-matchmaking-screen-btn-accept-color);
+        border-color: var(--bs-matchmaking-screen-btn-accept-bg);
+        font-weight: 600;
+
+        &:hover:not(:disabled) {
+            opacity: 0.88;
+            background: var(--bs-matchmaking-screen-btn-accept-bg);
+        }
+    }
+}
+
+// ── Coarse pointer — 44 px minimum touch targets ─────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-matchmaking-screen-btn {
+        --bs-matchmaking-screen-btn-min-height: 44px;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-matchmaking-screen-ring--spin .tc-matchmaking-screen-icon {
+        animation: none;
+    }
+
+    .tc-matchmaking-screen-btn {
+        transition: none;
+    }
+}

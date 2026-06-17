@@ -405,6 +405,12 @@ tc-loading-screen {
     display: block;
 }
 
+// Matchmaking status panel; the SCSS partial owns the inner flex layout,
+// but the host must not default to inline.
+tc-matchmaking-screen {
+    display: block;
+}
+
 tc-editable-text,
 tc-chip,
 tc-button,
