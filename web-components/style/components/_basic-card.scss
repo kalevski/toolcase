@@ -4,7 +4,10 @@
 
 @use '../foundation/tokens' as *;
 
-tc-basic-card {
+tc-basic-card,
+tc-colored-card {
+    // Accent (tc-colored-card / `color` attr): default falls back to slate-muted.
+    --bs-basic-card-accent: var(--tc-text-muted);
     --bs-basic-card-bg: var(--tc-surface);
     --bs-basic-card-border-color: var(--tc-border);
     --bs-basic-card-shadow: var(--tc-shadow-sm);
@@ -62,6 +65,16 @@ tc-basic-card {
     height: var(--bs-basic-card-icon-svg-size);
     stroke: currentColor;
     fill: none;
+}
+
+// Accent treatment (tc-colored-card / `color` attr): the icon chip carries a 12%
+// soft tint of --bs-basic-card-accent behind the full-accent glyph. This is not
+// decoration — the color categorises the metric. color-mix() gives the tint
+// without needing an alpha channel on the accent.
+.tc-basic-card--accent .tc-basic-card-icon {
+    background: color-mix(in srgb, var(--bs-basic-card-accent) 12%, var(--bs-basic-card-bg));
+    color: var(--bs-basic-card-accent);
+    border-color: transparent;
 }
 
 // Text block — flex column, primary above secondary.

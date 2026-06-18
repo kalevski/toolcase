@@ -3,7 +3,8 @@
 // Three sizes scale icon and text proportionally.
 // All cosmetics via --bs-trend-indicator-* backed by --tc-* tokens.
 
-tc-trend-indicator {
+tc-trend-indicator,
+tc-leaderboard-trend {
     vertical-align: middle;
 }
 

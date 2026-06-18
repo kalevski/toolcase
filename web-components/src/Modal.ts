@@ -1,64 +1,25 @@
 import { Modal as BsModal } from './internal/Modal'
+import { BsOverlay, escapeHtml, type OverlayPlugin } from './internal/bs-overlay'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-modal'
 
-export class Modal extends HTMLElement {
-
-    private _bsModal: BsModal | null = null
+/**
+ * tc-modal — a Bootstrap modal wrapper on the shared {@link BsOverlay} scaffold.
+ * Modal specifics: the `.modal` dialog markup with size / centered / scrollable /
+ * fullscreen options, a `footer` slot, the static-backdrop option, and the
+ * `.bs.modal` event namespace.
+ */
+export class Modal extends BsOverlay {
     private _bodyNodes: Node[] = []
     private _footerNodes: Node[] = []
-    private _initialised = false
-    private _syncing = false
 
     static get observedAttributes(): string[] {
         return ['open', 'title', 'size', 'centered', 'scrollable', 'static-backdrop', 'fullscreen']
     }
 
-    constructor() {
-        super()
-    }
-
-    connectedCallback(): void {
-        if (!this._initialised) {
-            this._bodyNodes = Array.from(this.childNodes).filter(
-                n => !(n instanceof Element && n.getAttribute('slot') === 'footer'),
-            )
-            this._footerNodes = Array.from(this.childNodes).filter(
-                n => n instanceof Element && n.getAttribute('slot') === 'footer',
-            )
-            this._initialised = true
-        }
-        this.render()
-        this._initPlugin()
-        if (this.open) this._bsModal?.show()
-    }
-
-    disconnectedCallback(): void {
-        this._teardown()
-    }
-
-    attributeChangedCallback(name: string): void {
-        if (!this.isConnected || !this._initialised || this._syncing) return
-        if (name === 'open') {
-            if (this.open) {
-                this._bsModal?.show()
-            } else {
-                this._bsModal?.hide()
-            }
-        } else {
-            this._teardown()
-            this.render()
-            this._initPlugin()
-        }
-    }
-
-    get open(): boolean {
-        return this.hasAttribute('open')
-    }
-    set open(v: boolean) {
-        if (v) this.setAttribute('open', '')
-        else this.removeAttribute('open')
+    protected get eventNs(): string {
+        return 'modal'
     }
 
     get title(): string {
@@ -106,41 +67,21 @@ export class Modal extends HTMLElement {
         this.setAttribute('fullscreen', v)
     }
 
-    show(): void {
-        this._bsModal?.show()
+    protected captureSlots(): void {
+        this._bodyNodes = Array.from(this.childNodes).filter(
+            n => !(n instanceof Element && n.getAttribute('slot') === 'footer'),
+        )
+        this._footerNodes = Array.from(this.childNodes).filter(
+            n => n instanceof Element && n.getAttribute('slot') === 'footer',
+        )
     }
 
-    hide(): void {
-        this._bsModal?.hide()
+    protected createPlugin(): OverlayPlugin {
+        const backdrop: boolean | 'static' = this.staticBackdrop ? 'static' : true
+        return new BsModal(this, { backdrop }) as unknown as OverlayPlugin
     }
 
-    toggle(): void {
-        this._bsModal?.toggle()
-    }
-
-    private _onShow = (): void => {
-        this._syncing = true
-        this.setAttribute('open', '')
-        this._syncing = false
-        this.dispatchEvent(new CustomEvent('tc-show', { bubbles: true, composed: true }))
-    }
-
-    private _onShown = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-shown', { bubbles: true, composed: true }))
-    }
-
-    private _onHide = (): void => {
-        this._syncing = true
-        this.removeAttribute('open')
-        this._syncing = false
-        this.dispatchEvent(new CustomEvent('tc-hide', { bubbles: true, composed: true }))
-    }
-
-    private _onHidden = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-hidden', { bubbles: true, composed: true }))
-    }
-
-    private render(): void {
+    protected render(): void {
         const dialogClasses = ['modal-dialog']
 
         if (this.centered) dialogClasses.push('modal-dialog-centered')
@@ -168,9 +109,10 @@ export class Modal extends HTMLElement {
 
         const hasFooter = this._footerNodes.length > 0
         const footerHtml = hasFooter ? '<div class="modal-footer"></div>' : ''
-        const titleText = this._escapeHtml(this.getAttribute('title') ?? '')
+        const titleText = escapeHtml(this.getAttribute('title') ?? '')
 
-        this.innerHTML = `<div class="${dialogClasses.join(' ')}">` +
+        this.innerHTML =
+            `<div class="${dialogClasses.join(' ')}">` +
             `<div class="modal-content">` +
             `<div class="modal-header">` +
             `<h5 class="modal-title">${titleText}</h5>` +
@@ -187,34 +129,6 @@ export class Modal extends HTMLElement {
         if (hasFooter) {
             const footer = this.querySelector('.modal-footer')
             if (footer) this._footerNodes.forEach(n => footer.appendChild(n))
-        }
-    }
-
-    private _escapeHtml(s: string): string {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-    }
-
-    private _initPlugin(): void {
-        const backdrop: boolean | 'static' = this.staticBackdrop ? 'static' : true
-        this._bsModal = new BsModal(this, { backdrop })
-        this.addEventListener('show.bs.modal', this._onShow)
-        this.addEventListener('shown.bs.modal', this._onShown)
-        this.addEventListener('hide.bs.modal', this._onHide)
-        this.addEventListener('hidden.bs.modal', this._onHidden)
-    }
-
-    private _teardown(): void {
-        this.removeEventListener('show.bs.modal', this._onShow)
-        this.removeEventListener('shown.bs.modal', this._onShown)
-        this.removeEventListener('hide.bs.modal', this._onHide)
-        this.removeEventListener('hidden.bs.modal', this._onHidden)
-        if (this._bsModal) {
-            this._bsModal.dispose()
-            this._bsModal = null
         }
     }
 }

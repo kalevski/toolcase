@@ -9,6 +9,48 @@ export interface PauseMenuItem {
     badge?: string
 }
 
+// Opt-in default item set (the classic resume / restart / quit list). Seeded
+// when `default-items` is present, or always for the tc-pause-screen preset.
+const DEFAULT_ITEMS: PauseMenuItem[] = [
+    { id: 'resume', label: 'Resume' },
+    { id: 'restart', label: 'Restart' },
+    { id: 'quit', label: 'Quit' },
+]
+
+interface PauseConfig {
+    eyebrow: string
+    titleAttr: string
+    defaultTitle: string
+    footer: boolean
+    seedDefaultItems: boolean
+    routeItemEvents: boolean
+}
+
+// Per-tag presentation/behaviour. tc-pause-menu is the bare canonical (a footer
+// Resume button, no seeded items, items fire only tc-select). tc-pause-screen is
+// the preset alias: no footer, the resume/restart/quit default item set, and
+// selecting resume/restart/quit also re-dispatches the matching convenience
+// event (tc-resume / tc-restart / tc-quit).
+const TAG_CONFIG: Record<string, PauseConfig> = {
+    'tc-pause-menu': {
+        eyebrow: 'Paused',
+        titleAttr: 'menu-title',
+        defaultTitle: 'Game Paused',
+        footer: true,
+        seedDefaultItems: false,
+        routeItemEvents: false,
+    },
+    'tc-pause-screen': {
+        eyebrow: 'Game Paused',
+        titleAttr: 'screen-title',
+        defaultTitle: 'Paused',
+        footer: false,
+        seedDefaultItems: true,
+        routeItemEvents: true,
+    },
+}
+const DEFAULT_CONFIG = TAG_CONFIG['tc-pause-menu']
+
 function esc(s: string): string {
     return s
         .replace(/&/g, '&amp;')
@@ -25,6 +67,17 @@ function getFocusable(root: Element): HTMLElement[] {
     ).filter(el => !el.closest('[hidden]') && el.tabIndex >= 0)
 }
 
+/**
+ * tc-pause-menu — a modal pause overlay (backdrop + centred dialog + arrow-nav
+ * menu) with focus trap, scroll lock, Escape-to-close, Tab cycling, Arrow
+ * navigation and Enter/Space activation. Items are supplied via the `items` JS
+ * property and each fires `tc-select`; a footer Resume button fires `tc-resume`.
+ *
+ * tc-pause-screen is a preset alias that drops the footer, seeds a default
+ * resume/restart/quit item set, and re-dispatches tc-resume / tc-restart /
+ * tc-quit for those ids. Knobs (`default-items`, `resume-footer`, `menu-title` /
+ * `screen-title`) let either tag be reconfigured.
+ */
 export class PauseMenu extends HTMLElement {
     private _initialised = false
     private _items: PauseMenuItem[] = []
@@ -32,6 +85,8 @@ export class PauseMenu extends HTMLElement {
     private _idPrefix: string
 
     onResume: (() => void) | null = null
+    onRestart: (() => void) | null = null
+    onQuit: (() => void) | null = null
     onClose: (() => void) | null = null
     onSelect: ((id: string) => void) | null = null
 
@@ -41,7 +96,7 @@ export class PauseMenu extends HTMLElement {
     }
 
     static get observedAttributes(): string[] {
-        return ['open', 'menu-title']
+        return ['open', 'menu-title', 'screen-title', 'default-items', 'resume-footer']
     }
 
     connectedCallback(): void {
@@ -72,6 +127,10 @@ export class PauseMenu extends HTMLElement {
         if (this.open) this._applyOpenState(true)
     }
 
+    private get _config(): PauseConfig {
+        return TAG_CONFIG[this.localName] ?? DEFAULT_CONFIG
+    }
+
     get open(): boolean {
         return this.hasAttribute('open')
     }
@@ -88,8 +147,18 @@ export class PauseMenu extends HTMLElement {
         else this.removeAttribute('menu-title')
     }
 
+    // Alias accessor for the tc-pause-screen preset (drives the `screen-title`
+    // attribute it reads for its title).
+    get screenTitle(): string {
+        return this.getAttribute('screen-title') ?? ''
+    }
+    set screenTitle(v: string) {
+        if (v) this.setAttribute('screen-title', v)
+        else this.removeAttribute('screen-title')
+    }
+
     get items(): PauseMenuItem[] {
-        return this._items.slice()
+        return this._effectiveItems().slice()
     }
     set items(value: PauseMenuItem[]) {
         this._items = Array.isArray(value) ? value.slice() : []
@@ -98,8 +167,24 @@ export class PauseMenu extends HTMLElement {
 
     // ── Private helpers ─────────────────────────────────────────────────────────
 
+    private _shouldSeedDefaults(): boolean {
+        return this.hasAttribute('default-items') || this._config.seedDefaultItems
+    }
+
+    private _showFooter(): boolean {
+        return this.hasAttribute('resume-footer') || this._config.footer
+    }
+
+    // Items to render: explicit items when present, else the default set when
+    // seeding is enabled (preset / `default-items`), else nothing.
+    private _effectiveItems(): PauseMenuItem[] {
+        if (this._items.length) return this._items
+        if (this._shouldSeedDefaults()) return DEFAULT_ITEMS
+        return []
+    }
+
     private _buildItemsHtml(): string {
-        return this._items.map(item => {
+        return this._effectiveItems().map(item => {
             const cls = [
                 'tc-pause-menu__item',
                 item.disabled ? 'tc-pause-menu__item--disabled' : '',
@@ -133,6 +218,20 @@ export class PauseMenu extends HTMLElement {
             detail: { id },
         }))
         if (typeof this.onSelect === 'function') this.onSelect(id)
+
+        // Preset convenience routing — re-dispatch the named lifecycle events for
+        // the canonical resume/restart/quit ids.
+        if (!this._config.routeItemEvents) return
+        if (id === 'resume') {
+            this.dispatchEvent(new CustomEvent('tc-resume', { bubbles: true, composed: true, detail: {} }))
+            if (typeof this.onResume === 'function') this.onResume()
+        } else if (id === 'restart') {
+            this.dispatchEvent(new CustomEvent('tc-restart', { bubbles: true, composed: true, detail: {} }))
+            if (typeof this.onRestart === 'function') this.onRestart()
+        } else if (id === 'quit') {
+            this.dispatchEvent(new CustomEvent('tc-quit', { bubbles: true, composed: true, detail: {} }))
+            if (typeof this.onQuit === 'function') this.onQuit()
+        }
     }
 
     // ── Open / close lifecycle ──────────────────────────────────────────────────
@@ -308,10 +407,17 @@ export class PauseMenu extends HTMLElement {
     // ── Render ──────────────────────────────────────────────────────────────────
 
     private render(): void {
+        const config = this._config
         const isOpen = this.open
         const labelId = `${this._idPrefix}-title`
         const hiddenAttr = isOpen ? '' : ' hidden'
-        const titleText = this.getAttribute('menu-title') ?? 'Game Paused'
+        const titleText = this.getAttribute(config.titleAttr) ?? config.defaultTitle
+
+        const footerHtml = this._showFooter()
+            ? `<div class="tc-pause-menu__footer">` +
+              `<button type="button" class="tc-pause-menu__resume">Resume</button>` +
+              `</div>`
+            : ''
 
         this.innerHTML =
             `<div class="tc-pause-menu__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
@@ -319,15 +425,13 @@ export class PauseMenu extends HTMLElement {
             ` aria-labelledby="${labelId}" tabindex="-1"` +
             ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
             `<div class="tc-pause-menu__header">` +
-            `<span class="tc-pause-menu__eyebrow">Paused</span>` +
+            `<span class="tc-pause-menu__eyebrow">${esc(config.eyebrow)}</span>` +
             `<h2 class="tc-pause-menu__title" id="${labelId}">${esc(titleText)}</h2>` +
             `</div>` +
             `<div class="tc-pause-menu__items" role="menu" aria-label="${esc(titleText)}">` +
             this._buildItemsHtml() +
             `</div>` +
-            `<div class="tc-pause-menu__footer">` +
-            `<button type="button" class="tc-pause-menu__resume">Resume</button>` +
-            `</div>` +
+            footerHtml +
             `</div>`
 
         if (isOpen) this.classList.add('tc-pause-menu--open')
@@ -338,5 +442,6 @@ export class PauseMenu extends HTMLElement {
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: PauseMenu
+        'tc-pause-screen': PauseMenu
     }
 }

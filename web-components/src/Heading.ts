@@ -1,37 +1,17 @@
+import { SlotWrapBase } from './internal/slot-wrap'
+
 const TAG_NAME = 'tc-heading'
 
 export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 const LEVELS: HeadingLevel[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 
-export class Heading extends HTMLElement {
-
-    private _initialised = false
-
+/**
+ * tc-heading — a heading (`h1`–`h6`) with optional gradient ink fill. Built on the
+ * shared {@link SlotWrapBase} slot-wrapping scaffold.
+ */
+export class Heading extends SlotWrapBase {
     static get observedAttributes(): string[] {
         return ['as', 'gradient']
-    }
-
-    constructor() {
-        super()
-    }
-
-    connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-heading-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
-            this._initialised = true
-        }
-    }
-
-    attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-heading-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
-        this.render()
-        const newInner = this.querySelector('.tc-heading-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
     }
 
     get as(): HeadingLevel {
@@ -50,7 +30,11 @@ export class Heading extends HTMLElement {
         else this.removeAttribute('gradient')
     }
 
-    private render(): void {
+    protected getContentEl(): Element | null {
+        return this.querySelector('.tc-heading-content')
+    }
+
+    protected render(): void {
         const level = this.as
         const gradientClass = this.gradient ? ' tc-heading--gradient' : ''
         this.innerHTML = `<${level} class="tc-heading${gradientClass}"><span class="tc-heading-content"></span></${level}>`

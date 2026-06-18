@@ -131,6 +131,21 @@ const BannerDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 </tc-banner>
                             </SectionCard>
+
+                            <SectionCard title="Preset alias: tc-announcement-bar (announce + CTA link)">
+                                <div className="d-flex flex-column gap-2">
+                                    {/* @ts-ignore */}
+                                    <tc-announcement-bar variant="announce" icon-name="megaphone" cta-label="Learn more →" cta-href="#announce">
+                                        Toolcase v3 is here — explore the new component library.
+                                    {/* @ts-ignore */}
+                                    </tc-announcement-bar>
+                                    {/* @ts-ignore */}
+                                    <tc-announcement-bar variant="info" icon-name="info" dismissible persist-dismiss-key="tc-demo-announcement">
+                                        New docs are available — uses the legacy persist-dismiss-key attribute.
+                                    {/* @ts-ignore */}
+                                    </tc-announcement-bar>
+                                </div>
+                            </SectionCard>
                         </div>
                     </div>
                 </div>

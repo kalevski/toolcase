@@ -1,140 +1,30 @@
 import { Tooltip as BsTooltip } from './internal/Tooltip'
+import { OverlayTrigger, type OverlayOptions, type OverlayPlugin } from './internal/overlay-trigger'
 
 const TAG_NAME = 'tc-tooltip'
 
-const VALID_PLACEMENTS = ['top', 'right', 'bottom', 'left', 'auto']
-
-export class Tooltip extends HTMLElement {
-
-    private _bsTooltip: BsTooltip | null = null
-    private _triggerEl: HTMLElement | null = null
-    private _initialised = false
-
-    static get observedAttributes(): string[] {
-        return ['title', 'content', 'placement', 'trigger', 'html']
+/**
+ * tc-tooltip — wraps a Bootstrap Tooltip plugin around this element's first
+ * child. Built on the shared {@link OverlayTrigger} scaffold; the only tooltip
+ * specifics are the default `hover focus` trigger, the `.bs.tooltip` event
+ * namespace, and folding `content` into the plugin's `title` option.
+ */
+export class Tooltip extends OverlayTrigger {
+    protected get defaultTrigger(): string {
+        return 'hover focus'
     }
 
-    constructor() {
-        super()
+    protected get eventNs(): string {
+        return 'tooltip'
     }
 
-    connectedCallback(): void {
-        if (!this._initialised) {
-            this._initialised = true
-        }
-        this._initPlugin()
-    }
-
-    disconnectedCallback(): void {
-        this._teardown()
-    }
-
-    attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        this._teardown()
-        this._initPlugin()
-    }
-
-    get title(): string {
-        return this.getAttribute('title') ?? ''
-    }
-    set title(v: string) {
-        this.setAttribute('title', v)
-    }
-
-    get content(): string {
-        return this.getAttribute('content') ?? ''
-    }
-    set content(v: string) {
-        this.setAttribute('content', v)
-    }
-
-    get placement(): string {
-        return this.getAttribute('placement') ?? 'auto'
-    }
-    set placement(v: string) {
-        this.setAttribute('placement', v)
-    }
-
-    get trigger(): string {
-        return this.getAttribute('trigger') ?? 'hover focus'
-    }
-    set trigger(v: string) {
-        this.setAttribute('trigger', v)
-    }
-
-    get html(): boolean {
-        return this.hasAttribute('html')
-    }
-    set html(v: boolean) {
-        if (v) this.setAttribute('html', '')
-        else this.removeAttribute('html')
-    }
-
-    show(): void {
-        this._bsTooltip?.show()
-    }
-
-    hide(): void {
-        this._bsTooltip?.hide()
-    }
-
-    toggle(): void {
-        this._bsTooltip?.toggle()
-    }
-
-    private _onShow = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-show', { bubbles: true, composed: true }))
-    }
-
-    private _onShown = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-shown', { bubbles: true, composed: true }))
-    }
-
-    private _onHide = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-hide', { bubbles: true, composed: true }))
-    }
-
-    private _onHidden = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-hidden', { bubbles: true, composed: true }))
-    }
-
-    private _initPlugin(): void {
-        const triggerEl = this.firstElementChild as HTMLElement | null
-        if (!triggerEl) return
-        this._triggerEl = triggerEl
-
-        const rawPlacement = this.getAttribute('placement') ?? 'auto'
-        const placement = VALID_PLACEMENTS.includes(rawPlacement) ? rawPlacement : 'auto'
-
-        const titleVal = this.getAttribute('title') ?? this.getAttribute('content') ?? ''
-
-        this._bsTooltip = new BsTooltip(triggerEl, {
-            title: titleVal,
-            placement: placement as any,
-            trigger: (this.getAttribute('trigger') ?? 'hover focus') as any,
-            html: this.hasAttribute('html'),
-        })
-
-        triggerEl.addEventListener('show.bs.tooltip', this._onShow)
-        triggerEl.addEventListener('shown.bs.tooltip', this._onShown)
-        triggerEl.addEventListener('hide.bs.tooltip', this._onHide)
-        triggerEl.addEventListener('hidden.bs.tooltip', this._onHidden)
-    }
-
-    private _teardown(): void {
-        const triggerEl = this._triggerEl
-        if (triggerEl) {
-            triggerEl.removeEventListener('show.bs.tooltip', this._onShow)
-            triggerEl.removeEventListener('shown.bs.tooltip', this._onShown)
-            triggerEl.removeEventListener('hide.bs.tooltip', this._onHide)
-            triggerEl.removeEventListener('hidden.bs.tooltip', this._onHidden)
-        }
-        if (this._bsTooltip) {
-            this._bsTooltip.dispose()
-            this._bsTooltip = null
-        }
-        this._triggerEl = null
+    protected createPlugin(triggerEl: HTMLElement, options: OverlayOptions): OverlayPlugin {
+        return new BsTooltip(triggerEl, {
+            title: options.title || options.content,
+            placement: options.placement as any,
+            trigger: options.trigger as any,
+            html: options.html,
+        }) as unknown as OverlayPlugin
     }
 }
 

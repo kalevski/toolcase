@@ -6,6 +6,11 @@ const TAG_NAME = 'tc-result-screen'
 // a hairline divider, hairline-separated stat rows, a soft reward strip, and a
 // row of `.btn` actions. All cosmetics flow through `--bs-result-screen-*` so
 // themes can re-skin via vars alone.
+//
+// The `variant` attribute (`neutral` | `defeat` | `victory`) seeds the
+// title-text / title-color / eyebrow defaults; tc-game-over-screen (defeat) and
+// tc-victory-screen (victory) are aliases that derive the variant from the tag
+// name. Every seeded default is overridable via the matching attribute.
 
 function esc(s: string): string {
     return s
@@ -21,6 +26,29 @@ const TITLE_COLORS: ResultScreenTitleColor[] = ['gold', 'danger', 'parch']
 
 export type ResultScreenActionVariant = 'default' | 'primary' | 'danger' | 'ghost'
 const ACTION_VARIANTS: ResultScreenActionVariant[] = ['default', 'primary', 'danger', 'ghost']
+
+export type ResultScreenVariant = 'neutral' | 'defeat' | 'victory'
+
+interface VariantDefaults {
+    titleText: string
+    titleColor: ResultScreenTitleColor
+    eyebrow: string
+}
+
+// Default title / color / eyebrow per variant. neutral is the bare result
+// screen; defeat reads "Game Over" in danger; victory reads "Victory!" in gold.
+const VARIANT_DEFAULTS: Record<ResultScreenVariant, VariantDefaults> = {
+    neutral: { titleText: '', titleColor: 'gold', eyebrow: 'Result' },
+    defeat: { titleText: 'Game Over', titleColor: 'danger', eyebrow: 'Defeat' },
+    victory: { titleText: 'Victory!', titleColor: 'gold', eyebrow: 'Triumph' },
+}
+
+// Default variant per registered tag — the alias presets seed their variant from
+// the tag they were defined as.
+const TAG_VARIANTS: Record<string, ResultScreenVariant> = {
+    'tc-game-over-screen': 'defeat',
+    'tc-victory-screen': 'victory',
+}
 
 export interface ResultStat {
     label: string
@@ -62,7 +90,7 @@ export class ResultScreen extends HTMLElement {
     onAction: ((id: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['title-text', 'subtitle', 'title-color', 'eyebrow']
+        return ['title-text', 'subtitle', 'title-color', 'eyebrow', 'variant']
     }
 
     connectedCallback(): void {
@@ -83,8 +111,22 @@ export class ResultScreen extends HTMLElement {
         this.render()
     }
 
+    get variant(): ResultScreenVariant {
+        const raw = this.getAttribute('variant') as ResultScreenVariant
+        if (raw && raw in VARIANT_DEFAULTS) return raw
+        return TAG_VARIANTS[this.localName] ?? 'neutral'
+    }
+    set variant(v: ResultScreenVariant) {
+        if (v) this.setAttribute('variant', v)
+        else this.removeAttribute('variant')
+    }
+
+    private get variantDefaults(): VariantDefaults {
+        return VARIANT_DEFAULTS[this.variant]
+    }
+
     get titleText(): string {
-        return this.getAttribute('title-text') ?? ''
+        return this.getAttribute('title-text') ?? this.variantDefaults.titleText
     }
     set titleText(v: string) {
         if (v) this.setAttribute('title-text', v)
@@ -101,7 +143,7 @@ export class ResultScreen extends HTMLElement {
 
     get titleColor(): ResultScreenTitleColor {
         const raw = this.getAttribute('title-color') as ResultScreenTitleColor
-        return TITLE_COLORS.includes(raw) ? raw : 'gold'
+        return TITLE_COLORS.includes(raw) ? raw : this.variantDefaults.titleColor
     }
     set titleColor(v: ResultScreenTitleColor) {
         if (v) this.setAttribute('title-color', v)
@@ -109,7 +151,7 @@ export class ResultScreen extends HTMLElement {
     }
 
     get eyebrow(): string {
-        return this.getAttribute('eyebrow') ?? 'Result'
+        return this.getAttribute('eyebrow') ?? this.variantDefaults.eyebrow
     }
     set eyebrow(v: string) {
         if (v) this.setAttribute('eyebrow', v)
@@ -219,5 +261,7 @@ export class ResultScreen extends HTMLElement {
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: ResultScreen
+        'tc-game-over-screen': ResultScreen
+        'tc-victory-screen': ResultScreen
     }
 }

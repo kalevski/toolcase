@@ -204,6 +204,13 @@ code, pre, .mono { font-family: var(--font-mono); }
     font-size: 12px;
     color: var(--fg-3);
 }
+.section-subtitle {
+    margin: -8px 0 20px;
+    max-width: 60ch;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg-3);
+}
 
 /* Library cards grid */
 .lib-grid {
@@ -699,6 +706,13 @@ code, pre, .mono { font-family: var(--font-mono); }
 /* dark theme wrapper fills the canvas so the demo sits on dark ground */
 .example__canvas > .theme--dark {
     min-height: calc(100vh - 130px);
+}
+/* web-components theme wrapper: fill the canvas and paint the active theme's
+   surface/text so dark + accent themes get a proper themed ground */
+.example__canvas > .wc-theme-scope {
+    min-height: calc(100vh - 130px);
+    background: var(--tc-surface);
+    color: var(--tc-text);
 }
 
 /* Phaser canvas wrapper */

@@ -20,7 +20,9 @@ export class BasicCard extends HTMLElement {
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['text-a', 'text-b', 'icon', 'loading']
+        // `value` / `text` are the legacy tc-colored-card attribute names, accepted
+        // as aliases of `text-a` / `text-b`; `color` drives the accent-tinted chip.
+        return ['text-a', 'text-b', 'icon', 'loading', 'color', 'value', 'text']
     }
 
     connectedCallback(): void {
@@ -36,17 +38,25 @@ export class BasicCard extends HTMLElement {
     }
 
     get textA(): string {
-        return this.getAttribute('text-a') ?? ''
+        return this.getAttribute('text-a') ?? this.getAttribute('value') ?? ''
     }
     set textA(v: string) {
         this.setAttribute('text-a', v)
     }
 
     get textB(): string {
-        return this.getAttribute('text-b') ?? ''
+        return this.getAttribute('text-b') ?? this.getAttribute('text') ?? ''
     }
     set textB(v: string) {
         this.setAttribute('text-b', v)
+    }
+
+    get color(): string | null {
+        return this.getAttribute('color')
+    }
+    set color(v: string | null) {
+        if (v != null) this.setAttribute('color', v)
+        else this.removeAttribute('color')
     }
 
     get icon(): string | null {
@@ -67,11 +77,18 @@ export class BasicCard extends HTMLElement {
 
     private render(): void {
         const loading = this.loading
+        const color = this.getAttribute('color')
+
+        // Inline --bs-basic-card-accent so the SCSS tint + glyph color pick it up;
+        // the `--accent` modifier switches the icon chip to the tinted treatment.
+        if (color) this.style.setProperty('--bs-basic-card-accent', color)
+        else this.style.removeProperty('--bs-basic-card-accent')
+        const rootClass = color ? 'card tc-basic-card tc-basic-card--accent' : 'card tc-basic-card'
 
         if (loading) {
             this.setAttribute('aria-busy', 'true')
             this.innerHTML = [
-                '<div class="card tc-basic-card">',
+                `<div class="${rootClass}">`,
                 '<div class="card-body tc-basic-card-body">',
                 '<div class="tc-basic-card-icon tc-basic-card-icon--skeleton" aria-hidden="true"></div>',
                 '<div class="tc-basic-card-text">',
@@ -91,7 +108,7 @@ export class BasicCard extends HTMLElement {
                 : ''
 
             this.innerHTML = [
-                '<div class="card tc-basic-card">',
+                `<div class="${rootClass}">`,
                 '<div class="card-body tc-basic-card-body">',
                 iconChipHtml,
                 '<div class="tc-basic-card-text">',

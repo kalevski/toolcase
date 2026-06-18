@@ -1,10 +1,12 @@
-// tc-pause-menu — in-game pause overlay menu.
+// tc-pause-menu — in-game pause overlay menu (and its tc-pause-screen alias).
 // Port of gc-pause-menu (game-components), restyled to the toolcase design system:
 // slate neutrals, sharp corners (border-radius: 0), 1px hairline, overlay-tier shadow.
-// Controlled component — fires tc-close / tc-resume / tc-select; never self-closes.
-// All cosmetics flow through --bs-pause-menu-* custom properties.
+// Controlled component — fires tc-close / tc-resume / tc-restart / tc-quit /
+// tc-select; never self-closes. All cosmetics flow through --bs-pause-menu-*
+// custom properties; tc-pause-screen (full-screen preset) tunes a few of them.
 
-tc-pause-menu {
+tc-pause-menu,
+tc-pause-screen {
     // Surface + chrome
     --bs-pause-menu-bg:           var(--tc-surface);
     --bs-pause-menu-border-color: var(--tc-border);
@@ -282,4 +284,16 @@ tc-pause-menu {
     .tc-pause-menu__item {
         transition: none;
     }
+}
+
+// tc-pause-screen preset — the fuller-bleed pause screen: a wider panel, a
+// heavier scrim, a cyan eyebrow and a larger title than the compact menu.
+tc-pause-screen {
+    --bs-pause-menu-width:           420px;
+    --bs-pause-menu-padding:         1.5rem;
+    --bs-pause-menu-backdrop-opacity: 0.65;
+    --bs-pause-menu-eyebrow-color:   var(--tc-cyan, #22d3ee);
+    --bs-pause-menu-title-size:      1.25rem;
+    --bs-pause-menu-item-min-height: 3rem;
+    --bs-pause-menu-item-disabled-opacity: 0.45;
 }

@@ -19,9 +19,11 @@ const BADGE_ITEMS = [
 const PauseMenuDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
     const eventsRef = useRef<any>(null)
+    const screenRef = useRef<any>(null)
 
     const [basicOpen, setBasicOpen] = useState(false)
     const [eventsOpen, setEventsOpen] = useState(false)
+    const [screenOpen, setScreenOpen] = useState(false)
     const [log, setLog] = useState<string[]>([])
 
     const appendLog = (msg: string) => setLog(l => [msg, ...l].slice(0, 10))
@@ -70,6 +72,32 @@ const PauseMenuDemo: React.FC = () => {
         if (eventsOpen) eventsRef.current.setAttribute('open', '')
         else eventsRef.current.removeAttribute('open')
     }, [eventsOpen])
+
+    // tc-pause-screen preset — default resume/restart/quit items + named events.
+    useEffect(() => {
+        const el = screenRef.current
+        if (!el) return
+        const close = () => setScreenOpen(false)
+        const onResume = () => { appendLog('tc-resume fired'); close() }
+        const onRestart = () => { appendLog('tc-restart fired'); close() }
+        const onQuit = () => { appendLog('tc-quit fired'); close() }
+        el.addEventListener('tc-close', close)
+        el.addEventListener('tc-resume', onResume)
+        el.addEventListener('tc-restart', onRestart)
+        el.addEventListener('tc-quit', onQuit)
+        return () => {
+            el.removeEventListener('tc-close', close)
+            el.removeEventListener('tc-resume', onResume)
+            el.removeEventListener('tc-restart', onRestart)
+            el.removeEventListener('tc-quit', onQuit)
+        }
+    }, [])
+
+    useEffect(() => {
+        if (!screenRef.current) return
+        if (screenOpen) screenRef.current.setAttribute('open', '')
+        else screenRef.current.removeAttribute('open')
+    }, [screenOpen])
 
     return (
         <div className="py-4">
@@ -120,6 +148,20 @@ const PauseMenuDemo: React.FC = () => {
                                             ))}
                                         </ul>
                                     )}
+                                </div>
+                            </SectionCard>
+
+                            <SectionCard title="Preset alias: tc-pause-screen (default items + footer-less)">
+                                <button
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={() => setScreenOpen(true)}
+                                >
+                                    Open pause screen
+                                </button>
+                                {/* @ts-ignore */}
+                                <tc-pause-screen ref={screenRef} screen-title="Realm of Ash" />
+                                <div className="form-text mt-1">
+                                    Seeds resume/restart/quit and re-dispatches tc-resume / tc-restart / tc-quit.
                                 </div>
                             </SectionCard>
                         </div>

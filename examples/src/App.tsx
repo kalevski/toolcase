@@ -85,12 +85,34 @@ const routeThemes: Record<string, { value: string; label: string }[]> = {
         { value: 'default', label: 'Default' },
         { value: 'dark', label: 'Dark' },
     ],
+    'web-components': [
+        { value: 'default', label: 'Default' },
+        { value: 'dungeon', label: 'Dungeon' },
+    ],
 }
 
 const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
     const navigate = useNavigate()
     const themes = routeThemes[route.key]
-    const [theme, setTheme] = useState('default')
+    // Persist the chosen theme per package so it sticks while browsing the section.
+    const themeStorageKey = `tc-examples-theme:${route.key}`
+    const [theme, setTheme] = useState(() => {
+        if (!themes) return 'default'
+        try {
+            return localStorage.getItem(themeStorageKey) ?? 'default'
+        } catch {
+            return 'default'
+        }
+    })
+
+    useEffect(() => {
+        if (!themes) return
+        try {
+            localStorage.setItem(themeStorageKey, theme)
+        } catch {
+            /* ignore unavailable storage */
+        }
+    }, [theme, themes, themeStorageKey])
     const index = route.examples.findIndex((e) => e.key === example.key)
     const prev = index > 0 ? route.examples[index - 1] : null
     const next = index < route.examples.length - 1 ? route.examples[index + 1] : null
@@ -142,7 +164,9 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
                 </div>
             </div>
             <div className={canvasClass}>
-                {route.key === 'react-components' && theme === 'dark' ? (
+                {route.key === 'web-components' ? (
+                    <div className="wc-theme-scope" data-tc-theme={theme}>{children}</div>
+                ) : route.key === 'react-components' && theme === 'dark' ? (
                     <div className="theme theme--dark">{children}</div>
                 ) : (
                     children

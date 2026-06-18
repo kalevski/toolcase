@@ -15,6 +15,13 @@ const ICON_KEYS: Record<TrendDirection, string[]> = {
     neutral: ['Minus', 'ArrowRight'],
 }
 
+// `flat` is accepted as a synonym of `neutral` — the legacy tc-leaderboard-trend
+// preset used `flat`, so the alias keeps working.
+function normalizeDirection(d: string | null): TrendDirection | null {
+    if (d === 'flat') return 'neutral'
+    return DIRECTIONS.includes(d as TrendDirection) ? (d as TrendDirection) : null
+}
+
 function esc(s: string): string {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
@@ -47,14 +54,27 @@ export class TrendIndicator extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
+            // Capture any light-DOM children so they survive the render — used as
+            // the value content when no `value` attribute is set (rich markup).
+            const slotContent = Array.from(this.childNodes)
             this.render()
+            if (!this.hasAttribute('value')) {
+                const inner = this.querySelector('.tc-trend-indicator-value')
+                if (inner) slotContent.forEach(n => inner.appendChild(n))
+            }
             this._initialised = true
         }
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
+        const inner = this.querySelector('.tc-trend-indicator-value')
+        const slotContent = !this.hasAttribute('value') && inner ? Array.from(inner.childNodes) : []
         this.render()
+        if (!this.hasAttribute('value')) {
+            const newInner = this.querySelector('.tc-trend-indicator-value')
+            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        }
     }
 
     get value(): string | null {
@@ -66,8 +86,7 @@ export class TrendIndicator extends HTMLElement {
     }
 
     get direction(): TrendDirection | null {
-        const d = this.getAttribute('direction') as TrendDirection
-        return DIRECTIONS.includes(d) ? d : null
+        return normalizeDirection(this.getAttribute('direction'))
     }
     set direction(v: TrendDirection | null) {
         if (v != null) this.setAttribute('direction', v)
@@ -84,13 +103,10 @@ export class TrendIndicator extends HTMLElement {
 
     private render(): void {
         const rawValue = this.getAttribute('value') ?? ''
-        const rawDirection = this.getAttribute('direction') as TrendDirection | null
         const size = this.size
 
         const direction: TrendDirection =
-            rawDirection && DIRECTIONS.includes(rawDirection)
-                ? rawDirection
-                : inferDirection(rawValue)
+            normalizeDirection(this.getAttribute('direction')) ?? inferDirection(rawValue)
 
         this.setAttribute('aria-label', `trending ${direction} ${rawValue}`.trim())
 
@@ -104,5 +120,6 @@ export class TrendIndicator extends HTMLElement {
 declare global {
     interface HTMLElementTagNameMap {
         [TAG_NAME]: TrendIndicator
+        'tc-leaderboard-trend': TrendIndicator
     }
 }

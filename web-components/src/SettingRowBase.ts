@@ -1,5 +1,5 @@
-// Shared scaffold for settings-screen rows (tc-deadzone-slider and the other
-// setting-row ports). Every row is a label/description text block on the left
+// Shared scaffold for settings-screen rows (tc-setting-slider, tc-toggle-row and
+// the other setting-row ports). Every row is a label/description text block on the left
 // and a control region on the right; subclasses only supply the control markup
 // (renderControl) and wire it up (bindControl). The host carries the
 // `tc-setting-row` class so the shared `_setting-row.scss` partial paints the

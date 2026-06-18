@@ -5,6 +5,7 @@ import { loggingExamples } from '../logging/index'
 import { serializerExamples } from '../serializer/index'
 import { examples as reactComponentExamples } from '../react-components/index'
 import { gameComponentExamples } from '../game-components/index'
+import { webComponentExamples } from '../web-components/index'
 import { phaserExamples } from '../phaser-plus/index'
 import { nodeExamples } from '../node/index'
 import { versions } from '../versions'
@@ -65,6 +66,17 @@ const libs: LibCard[] = [
         examples: reactComponentExamples.length,
         pkg: '@toolcase/react-components',
         path: '/react-components',
+    },
+    {
+        key: 'web-components',
+        scope: '@toolcase/',
+        name: 'web-components',
+        tagline: 'Framework-free HTML5 Web Components with from-scratch toolcase styling — drop into any stack, no React, Vue, or Angular required.',
+        category: 'UI · Web Components',
+        version: versions['web-components'],
+        examples: webComponentExamples.length,
+        pkg: '@toolcase/web-components',
+        path: '/web-components',
     },
     {
         key: 'game-components',
@@ -129,7 +141,7 @@ export const Home = () => {
                     <div className="eyebrow">Index / Libraries</div>
                     <h1 className="page-title">A small set of tools I keep<br/>reaching for, every project.</h1>
                     <p className="page-lead">
-                        Seven npm packages I've built, used, and rewritten across a decade of web apps and games.
+                        Eight npm packages I've built, used, and rewritten across a decade of web apps and games.
                         Documented and demoed here so you can install one in a single line and see how it behaves.
                     </p>
                 </div>

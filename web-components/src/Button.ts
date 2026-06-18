@@ -12,7 +12,20 @@ export class Button extends HTMLElement {
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['variant', 'outline', 'size', 'disabled', 'loading', 'href', 'type']
+        return ['variant', 'outline', 'size', 'disabled', 'loading', 'href', 'type', 'skin']
+    }
+
+    // `skin="metal"` (and the tc-metal-button alias) render the brushed-metal
+    // button skin — its own `tc-metal-button__btn` class scheme with the
+    // default/primary/danger/ghost variants and sm/md/lg sizes.
+    get skin(): 'default' | 'metal' {
+        return this.getAttribute('skin') === 'metal' || this.localName === 'tc-metal-button'
+            ? 'metal'
+            : 'default'
+    }
+    set skin(v: 'default' | 'metal') {
+        if (v === 'metal') this.setAttribute('skin', 'metal')
+        else this.removeAttribute('skin')
     }
 
     constructor() {
@@ -96,6 +109,21 @@ export class Button extends HTMLElement {
     }
 
     private render(): void {
+        // Metal skin — distinct class scheme; its own variant/size sets. Shares the
+        // `.tc-button-content` slot wrapper so the base slot-capture still works.
+        if (this.skin === 'metal') {
+            const metalVariants = ['default', 'primary', 'danger', 'ghost']
+            const rawV = this.getAttribute('variant') ?? ''
+            const mv = metalVariants.includes(rawV) ? rawV : 'default'
+            const metalSizes = ['sm', 'md', 'lg']
+            const rawS = this.getAttribute('size') ?? ''
+            const ms = metalSizes.includes(rawS) ? rawS : 'md'
+            const sizeClass = ms !== 'md' ? ` tc-metal-button__btn--${ms}` : ''
+            const disabledAttr = this.disabled ? ' disabled' : ''
+            this.innerHTML = `<button type="button" class="tc-metal-button__btn tc-metal-button__btn--${mv}${sizeClass}"${disabledAttr}><span class="tc-button-content"></span></button>`
+            return
+        }
+
         const variant = this.variant
         const outline = this.outline
         const size = this.size

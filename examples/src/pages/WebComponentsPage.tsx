@@ -1,9 +1,18 @@
 import { Breadcrumbs, CategorySection, ExampleGrid, InstallBlock, PackageIntro, SkillInstall } from './_chrome'
-import { webComponentExamples, categories } from '../web-components/index'
+import { webComponentExamples, complexities, type WebComponentComplexity } from '../web-components/index'
 import { versions } from '../versions'
 
 const formatLabel = (key: string) =>
     key.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+
+// Demos are grouped by component complexity (derived from the source size of the
+// underlying tc-* element) rather than by domain category.
+const complexityBlurb: Record<WebComponentComplexity, string> = {
+    Primitives: 'Atomic building blocks — single-element wrappers, layout primitives, and tiny display helpers.',
+    Simple: 'Single-purpose styled components with a handful of attributes.',
+    Composite: 'Multi-part components that assemble several pieces — cards, lists, rows, and richer controls.',
+    Advanced: 'Complex, stateful, or data-driven components — tables, editors, charts, panels, and full screens.',
+}
 
 export const WebComponentsPage = () => {
     return (
@@ -24,11 +33,16 @@ export const WebComponentsPage = () => {
             <InstallBlock pkg="@toolcase/web-components" />
             <SkillInstall slug="web-components" pkg="@toolcase/web-components" />
 
-            {categories.map((category) => {
-                const items = webComponentExamples.filter((e) => e.category === category)
+            {complexities.map((complexity) => {
+                const items = webComponentExamples.filter((e) => e.complexity === complexity)
                 if (items.length === 0) return null
                 return (
-                    <CategorySection key={category} title={category} count={items.length}>
+                    <CategorySection
+                        key={complexity}
+                        title={complexity}
+                        count={items.length}
+                        subtitle={complexityBlurb[complexity]}
+                    >
                         <ExampleGrid
                             basePath="/web-components"
                             items={items.map((e) => ({ key: e.key, label: formatLabel(e.key) }))}

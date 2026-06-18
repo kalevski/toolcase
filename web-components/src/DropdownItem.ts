@@ -1,54 +1,16 @@
+import { LinkItemBase } from './internal/link-item'
+
 const TAG_NAME = 'tc-dropdown-item'
 
-export class DropdownItem extends HTMLElement {
-
-    private _initialised = false
-
+/**
+ * tc-dropdown-item — a single dropdown menu entry on the shared
+ * {@link LinkItemBase} slot-wrapping scaffold. Renders an `<li>`-wrapped `<a>`
+ * (when `href` is set) or `<button>`, honouring `active` / `disabled`, or a
+ * `<hr class="dropdown-divider">` when `divider` is present.
+ */
+export class DropdownItem extends LinkItemBase {
     static get observedAttributes(): string[] {
         return ['href', 'active', 'disabled', 'divider']
-    }
-
-    constructor() {
-        super()
-    }
-
-    connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            if (!this.hasAttribute('divider')) {
-                const inner = this.querySelector<HTMLElement>('a, button')
-                if (inner) slotContent.forEach(n => inner.appendChild(n))
-            }
-            this._initialised = true
-        }
-    }
-
-    attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector<HTMLElement>('a, button')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
-        this.render()
-        if (!this.hasAttribute('divider')) {
-            const newInner = this.querySelector<HTMLElement>('a, button')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
-        }
-    }
-
-    get href(): string | null {
-        return this.getAttribute('href')
-    }
-    set href(v: string | null) {
-        if (v != null) this.setAttribute('href', v)
-        else this.removeAttribute('href')
-    }
-
-    get active(): boolean {
-        return this.hasAttribute('active')
-    }
-    set active(v: boolean) {
-        if (v) this.setAttribute('active', '')
-        else this.removeAttribute('active')
     }
 
     get disabled(): boolean {
@@ -67,7 +29,12 @@ export class DropdownItem extends HTMLElement {
         else this.removeAttribute('divider')
     }
 
-    private render(): void {
+    protected getContentEl(): HTMLElement | null {
+        if (this.hasAttribute('divider')) return null
+        return this.querySelector<HTMLElement>('a, button')
+    }
+
+    protected render(): void {
         if (this.hasAttribute('divider')) {
             this.innerHTML = `<li><hr class="dropdown-divider"></li>`
             return

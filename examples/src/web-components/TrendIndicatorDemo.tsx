@@ -50,6 +50,17 @@ const TrendIndicatorDemo: React.FC = () => {
                                 </div>
                             </SectionCard>
 
+                            <SectionCard title="Preset alias: tc-leaderboard-trend (flat = neutral, slotted value)">
+                                <div className="d-flex gap-3 align-items-center flex-wrap">
+                                    {/* @ts-ignore */}
+                                    <tc-leaderboard-trend value="+240" direction="up"></tc-leaderboard-trend>
+                                    {/* @ts-ignore */}
+                                    <tc-leaderboard-trend value="-130" direction="down"></tc-leaderboard-trend>
+                                    {/* @ts-ignore */}
+                                    <tc-leaderboard-trend direction="flat">no change</tc-leaderboard-trend>
+                                </div>
+                            </SectionCard>
+
                             <SectionCard title="Inline within a metric row">
                                 <p className="mb-0" style={{ fontSize: '1rem', lineHeight: '2' }}>
                                     Revenue <strong>$42,180</strong>{' '}

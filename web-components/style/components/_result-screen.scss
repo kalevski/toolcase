@@ -6,7 +6,9 @@
 // `.btn` actions. Every cosmetic value flows through `--bs-result-screen-*` so
 // themes can re-skin via vars alone.
 
-tc-result-screen {
+tc-result-screen,
+tc-game-over-screen,
+tc-victory-screen {
     --bs-result-screen-max-width: 32rem;
     --bs-result-screen-padding: 2rem;
     --bs-result-screen-gap: 1rem;

@@ -186,10 +186,12 @@ export const ExampleGrid = ({
 export const CategorySection = ({
     title,
     count,
+    subtitle,
     children,
 }: {
     title: string
     count?: number
+    subtitle?: string
     children: ReactNode
 }) => (
     <>
@@ -199,6 +201,7 @@ export const CategorySection = ({
                 <span className="count">{String(count).padStart(2, '0')} / {String(count).padStart(2, '0')}</span>
             )}
         </div>
+        {subtitle && <p className="section-subtitle">{subtitle}</p>}
         {children}
     </>
 )

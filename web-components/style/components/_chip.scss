@@ -5,7 +5,8 @@
 @use 'sass:map';
 @use '../foundation/tokens' as *;
 
-tc-chip {
+tc-chip,
+tc-tag {
     // Override the reset.scss inline-block to inline-flex so the chip button
     // and remove button sit side-by-side in a unified visual unit.
     display: inline-flex;
@@ -72,6 +73,12 @@ tc-chip {
         pointer-events: none;
         cursor: default;
     }
+}
+
+// Static chips (tc-tag, or tc-chip[static]) render a non-interactive <span> root.
+tc-tag .tc-chip,
+tc-chip[static] .tc-chip {
+    cursor: default;
 }
 
 // Colored variants — soft bg tint + dark emphasis text + solid variant hairline.

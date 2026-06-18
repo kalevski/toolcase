@@ -1,53 +1,23 @@
+import { LinkItemBase } from './internal/link-item'
+
 const TAG_NAME = 'tc-breadcrumb-item'
 
-export class BreadcrumbItem extends HTMLElement {
-
-    private _initialised = false
-
+/**
+ * tc-breadcrumb-item — a single breadcrumb crumb on the shared
+ * {@link LinkItemBase} slot-wrapping scaffold. Renders a linked crumb (`<a>`)
+ * unless it is `active` (or has no `href`), in which case it becomes a plain
+ * `<span>` marked `aria-current="page"`.
+ */
+export class BreadcrumbItem extends LinkItemBase {
     static get observedAttributes(): string[] {
         return ['href', 'active']
     }
 
-    constructor() {
-        super()
+    protected getContentEl(): HTMLElement | null {
+        return this.querySelector<HTMLElement>('.tc-breadcrumb-item-content')
     }
 
-    connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-breadcrumb-item-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
-            this._initialised = true
-        }
-    }
-
-    attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-breadcrumb-item-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
-        this.render()
-        const newInner = this.querySelector('.tc-breadcrumb-item-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
-    }
-
-    get href(): string | null {
-        return this.getAttribute('href')
-    }
-    set href(v: string | null) {
-        if (v != null) this.setAttribute('href', v)
-        else this.removeAttribute('href')
-    }
-
-    get active(): boolean {
-        return this.hasAttribute('active')
-    }
-    set active(v: boolean) {
-        if (v) this.setAttribute('active', '')
-        else this.removeAttribute('active')
-    }
-
-    private render(): void {
+    protected render(): void {
         const active = this.active
         const href = this.getAttribute('href')
 

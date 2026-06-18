@@ -78,6 +78,18 @@ const ToggleRowDemo: React.FC = () => {
                                     />
                                 </div>
                             </SectionCard>
+
+                            <SectionCard title="Setting presets (just a row-label)">
+                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                                    {/* @ts-ignore */}
+                                    <tc-toggle-row row-label="V-Sync" checked />
+                                    {/* @ts-ignore */}
+                                    <tc-toggle-row row-label="Invert Y axis" />
+                                </div>
+                                <div className="form-text mt-1">
+                                    The former tc-vsync-toggle / tc-invert-axis-toggle presets are just tc-toggle-row with a fixed row-label.
+                                </div>
+                            </SectionCard>
                         </div>
                     </div>
                 </div>

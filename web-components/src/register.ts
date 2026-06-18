@@ -19,7 +19,6 @@ import { Col } from './Col'
 import { Accordion } from './Accordion'
 import { AccordionItem } from './AccordionItem'
 import { Alert } from './Alert'
-import { AnnouncementBar } from './AnnouncementBar'
 import { Badge } from './Badge'
 import { BadgeRow } from './BadgeRow'
 import { BarChart } from './BarChart'
@@ -87,8 +86,6 @@ import { Skeleton } from './Skeleton'
 import { SocialLinks } from './SocialLinks'
 import { Stamp } from './Stamp'
 import { StatusDot } from './StatusDot'
-import { FriendsList } from './FriendsList'
-import { Tag } from './Tag'
 import { TagInput } from './TagInput'
 import { AssetRow } from './AssetRow'
 import { AssetRowList } from './AssetRowList'
@@ -99,9 +96,7 @@ import { BundleBar } from './BundleBar'
 import { BossBar } from './BossBar'
 import { BuffBar } from './BuffBar'
 import { BuffIcon } from './BuffIcon'
-import { HealthBar } from './HealthBar'
-import { ManaBar } from './ManaBar'
-import { StaminaBar } from './StaminaBar'
+import { ResourceBar } from './ResourceBar'
 import { Hotbar } from './Hotbar'
 import { InventoryGrid } from './InventoryGrid'
 import { ItemSlot } from './ItemSlot'
@@ -122,7 +117,6 @@ import { CookbookGrid } from './CookbookGrid'
 import { CoolButton } from './CoolButton'
 import { ActivityCard } from './ActivityCard'
 import { BasicCard } from './BasicCard'
-import { ColoredCard } from './ColoredCard'
 import { DifferenceCard } from './DifferenceCard'
 import { ListCard } from './ListCard'
 import { StatusCard } from './StatusCard'
@@ -138,7 +132,6 @@ import { FeatureCard } from './FeatureCard'
 import { AbilityCard } from './AbilityCard'
 import { GoodFirstIssues } from './GoodFirstIssues'
 import { HeroStatsBar } from './HeroStatsBar'
-import { LeaderboardTrend } from './LeaderboardTrend'
 import { LinkedProvidersCard } from './LinkedProvidersCard'
 import { LogoCloud } from './LogoCloud'
 import { MaintainerCard } from './MaintainerCard'
@@ -156,7 +149,7 @@ import { QuickStart } from './QuickStart'
 import { RankCell } from './RankCell'
 import { RichPageHeader } from './RichPageHeader'
 import { ScoringRules } from './ScoringRules'
-import { AchievementList } from './AchievementList'
+import { DataList } from './DataList'
 import { BattlePass } from './BattlePass'
 import { SectionCard } from './SectionCard'
 import { SimpleFile } from './SimpleFile'
@@ -165,7 +158,6 @@ import { SprintChain } from './SprintChain'
 import { StatCard } from './StatCard'
 import { StateMachine } from './StateMachine'
 import { Stepper } from './Stepper'
-import { TeamList } from './TeamList'
 import { TierLadder } from './TierLadder'
 import { Timeline } from './Timeline'
 import { UsageSummaryPanel } from './UsageSummaryPanel'
@@ -278,27 +270,20 @@ import { CompassRose } from './CompassRose'
 import { ControllerLayoutPreview } from './ControllerLayoutPreview'
 import { ControlsRebindList } from './ControlsRebindList'
 import { CraftingPanel } from './CraftingPanel'
-import { CreditsList } from './CreditsList'
 import { CurrencyChip } from './CurrencyChip'
 import { CurrencyDisplay } from './CurrencyDisplay'
-import { DeadzoneSlider } from './DeadzoneSlider'
+import { SettingSlider } from './SettingSlider'
 import { DebugOverlay } from './DebugOverlay'
 import { DialogueBox } from './DialogueBox'
-import { FOVSlider } from './FOVSlider'
 import { MouseSensitivity } from './MouseSensitivity'
-import { VolumeSlider } from './VolumeSlider'
 import { FPSCapSelect } from './FPSCapSelect'
 import { SelectRow } from './SelectRow'
 import { FullscreenToggle } from './FullscreenToggle'
-import { VSyncToggle } from './VSyncToggle'
 import { ToggleRow } from './ToggleRow'
-import { GameOverScreen } from './GameOverScreen'
 import { ResultScreen } from './ResultScreen'
-import { VictoryScreen } from './VictoryScreen'
 import { GamepadButtonPrompt } from './GamepadButtonPrompt'
 import { GildedFrame } from './GildedFrame'
 import { GraphicsPresetPicker } from './GraphicsPresetPicker'
-import { InvertAxisToggle } from './InvertAxisToggle'
 import { Grid } from './Grid'
 import { GuildPanel } from './GuildPanel'
 import { KeyBinder } from './KeyBinder'
@@ -323,13 +308,11 @@ import { LoreText } from './LoreText'
 import { Subtitle } from './Subtitle'
 import { Title } from './Title'
 import { TitleScreen } from './TitleScreen'
-import { MetalButton } from './MetalButton'
 import { NavButton } from './NavButton'
 import { NetworkStatusIcon } from './NetworkStatusIcon'
 import { PlatformIcon } from './PlatformIcon'
 import { PingDisplay } from './PingDisplay'
 import { Minimap } from './Minimap'
-import { MuteList } from './MuteList'
 import { PlayerCard } from './PlayerCard'
 import { PlayerFrame } from './PlayerFrame'
 import { ObjectiveMarker } from './ObjectiveMarker'
@@ -338,7 +321,6 @@ import { PageIndicator } from './PageIndicator'
 import { ParticleEmitter } from './ParticleEmitter'
 import { Panel, PanelHeader } from './Panel'
 import { PauseMenu } from './PauseMenu'
-import { PauseScreen } from './PauseScreen'
 import { PerkPicker } from './PerkPicker'
 import { Portrait } from './Portrait'
 import { PressAnyKey } from './PressAnyKey'
@@ -349,7 +331,6 @@ import { ReportDialog } from './ReportDialog'
 import { ResetToDefaults } from './ResetToDefaults'
 import { RuneCorner } from './RuneCorner'
 import { SafeArea } from './SafeArea'
-import { SaveSlotList } from './SaveSlotList'
 import { SettingsCategoryList } from './SettingsCategoryList'
 import { ScoreDisplay } from './ScoreDisplay'
 import { StatRow } from './StatRow'
@@ -382,7 +363,6 @@ export function register(): void {
     customElements.define('tc-accordion', Accordion)
     customElements.define('tc-accordion-item', AccordionItem)
     customElements.define('tc-alert', Alert)
-    customElements.define('tc-announcement-bar', AnnouncementBar)
     customElements.define('tc-badge', Badge)
     customElements.define('tc-badge-row', BadgeRow)
     customElements.define('tc-area-chart', AreaChart)
@@ -454,8 +434,8 @@ export function register(): void {
     customElements.define('tc-social-links', SocialLinks)
     customElements.define('tc-stamp', Stamp)
     customElements.define('tc-status-dot', StatusDot)
-    customElements.define('tc-friends-list', FriendsList)
-    customElements.define('tc-tag', Tag)
+    // tc-tag — alias of tc-chip: a non-interactive (static) chip with a remove button.
+    customElements.define('tc-tag', class extends Chip {})
     customElements.define('tc-tag-input', TagInput)
     customElements.define('tc-asset-row', AssetRow)
     customElements.define('tc-asset-row-list', AssetRowList)
@@ -466,9 +446,12 @@ export function register(): void {
     customElements.define('tc-boss-bar', BossBar)
     customElements.define('tc-buff-icon', BuffIcon)
     customElements.define('tc-buff-bar', BuffBar)
-    customElements.define('tc-health-bar', HealthBar)
-    customElements.define('tc-mana-bar', ManaBar)
-    customElements.define('tc-stamina-bar', StaminaBar)
+    customElements.define('tc-resource-bar', ResourceBar)
+    // Presets: HP / mana / stamina aliases of tc-resource-bar; the variant is
+    // derived from the tag name (see ResourceBar.TAG_VARIANTS).
+    customElements.define('tc-health-bar', class extends ResourceBar {})
+    customElements.define('tc-mana-bar', class extends ResourceBar {})
+    customElements.define('tc-stamina-bar', class extends ResourceBar {})
     customElements.define('tc-brightness-calibration', BrightnessCalibration)
     customElements.define('tc-callout-quote', CalloutQuote)
     customElements.define('tc-chart-container', ChartContainer)
@@ -486,7 +469,9 @@ export function register(): void {
     customElements.define('tc-cool-button', CoolButton)
     customElements.define('tc-activity-card', ActivityCard)
     customElements.define('tc-basic-card', BasicCard)
-    customElements.define('tc-colored-card', ColoredCard)
+    // tc-colored-card — alias of tc-basic-card; maps value/text → text-a/text-b
+    // and tints the icon chip from the `color` attribute (see BasicCard).
+    customElements.define('tc-colored-card', class extends BasicCard {})
     customElements.define('tc-difference-card', DifferenceCard)
     customElements.define('tc-list-card', ListCard)
     customElements.define('tc-status-card', StatusCard)
@@ -502,7 +487,9 @@ export function register(): void {
     customElements.define('tc-ability-card', AbilityCard)
     customElements.define('tc-good-first-issues', GoodFirstIssues)
     customElements.define('tc-hero-stats-bar', HeroStatsBar)
-    customElements.define('tc-leaderboard-trend', LeaderboardTrend)
+    // Alias: tc-leaderboard-trend is tc-trend-indicator (direction `flat` maps to
+    // `neutral`; supports slotted value content).
+    customElements.define('tc-leaderboard-trend', class extends TrendIndicator {})
     customElements.define('tc-linked-providers-card', LinkedProvidersCard)
     customElements.define('tc-logo-cloud', LogoCloud)
     customElements.define('tc-maintainer-card', MaintainerCard)
@@ -520,7 +507,7 @@ export function register(): void {
     customElements.define('tc-rank-cell', RankCell)
     customElements.define('tc-rich-page-header', RichPageHeader)
     customElements.define('tc-scoring-rules', ScoringRules)
-    customElements.define('tc-achievement-list', AchievementList)
+    customElements.define('tc-data-list', DataList)
     customElements.define('tc-battle-pass', BattlePass)
     customElements.define('tc-section-card', SectionCard)
     customElements.define('tc-simple-file', SimpleFile)
@@ -529,13 +516,15 @@ export function register(): void {
     customElements.define('tc-stat-card', StatCard)
     customElements.define('tc-state-machine', StateMachine)
     customElements.define('tc-stepper', Stepper)
-    customElements.define('tc-team-list', TeamList)
     customElements.define('tc-tier-ladder', TierLadder)
     customElements.define('tc-timeline', Timeline)
     customElements.define('tc-usage-summary-panel', UsageSummaryPanel)
     customElements.define('tc-welcome-guide', WelcomeGuide)
     customElements.define('tc-api-reference-table', ApiReferenceTable)
     customElements.define('tc-banner', Banner)
+    // Alias: tc-announcement-bar is a persistent-announcement preset of tc-banner
+    // (region role, no auto icon, legacy persist-dismiss-key / icon-name attrs).
+    customElements.define('tc-announcement-bar', class extends Banner {})
     customElements.define('tc-build', Build)
     customElements.define('tc-card-options', CardOptions)
     customElements.define('tc-cdn-map', CdnMap)
@@ -647,27 +636,30 @@ export function register(): void {
     customElements.define('tc-controller-layout-preview', ControllerLayoutPreview)
     customElements.define('tc-controls-rebind-list', ControlsRebindList)
     customElements.define('tc-crafting-panel', CraftingPanel)
-    customElements.define('tc-credits-list', CreditsList)
     customElements.define('tc-currency-chip', CurrencyChip)
     customElements.define('tc-currency-display', CurrencyDisplay)
-    customElements.define('tc-deadzone-slider', DeadzoneSlider)
+    customElements.define('tc-setting-slider', SettingSlider)
+    // Presets: volume (with mute) / deadzone / fov aliases of tc-setting-slider;
+    // range, default value and readout format are seeded from the tag name
+    // (see SettingSlider.TAG_DEFAULTS).
+    customElements.define('tc-volume-slider', class extends SettingSlider {})
+    customElements.define('tc-deadzone-slider', class extends SettingSlider {})
+    customElements.define('tc-fov-slider', class extends SettingSlider {})
     customElements.define('tc-debug-overlay', DebugOverlay)
     customElements.define('tc-dialogue-box', DialogueBox)
-    customElements.define('tc-fov-slider', FOVSlider)
     customElements.define('tc-mouse-sensitivity', MouseSensitivity)
-    customElements.define('tc-volume-slider', VolumeSlider)
     customElements.define('tc-fps-cap-select', FPSCapSelect)
     customElements.define('tc-select-row', SelectRow)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
-    customElements.define('tc-vsync-toggle', VSyncToggle)
     customElements.define('tc-toggle-row', ToggleRow)
-    customElements.define('tc-game-over-screen', GameOverScreen)
     customElements.define('tc-result-screen', ResultScreen)
-    customElements.define('tc-victory-screen', VictoryScreen)
+    // Presets: defeat / victory aliases of tc-result-screen; the variant (and its
+    // title/color/eyebrow defaults) is derived from the tag name.
+    customElements.define('tc-game-over-screen', class extends ResultScreen {})
+    customElements.define('tc-victory-screen', class extends ResultScreen {})
     customElements.define('tc-gamepad-button-prompt', GamepadButtonPrompt)
     customElements.define('tc-gilded-frame', GildedFrame)
     customElements.define('tc-graphics-preset-picker', GraphicsPresetPicker)
-    customElements.define('tc-invert-axis-toggle', InvertAxisToggle)
     customElements.define('tc-grid', Grid)
     customElements.define('tc-guild-panel', GuildPanel)
     customElements.define('tc-hotbar', Hotbar)
@@ -691,13 +683,13 @@ export function register(): void {
     customElements.define('tc-subtitle', Subtitle)
     customElements.define('tc-title', Title)
     customElements.define('tc-title-screen', TitleScreen)
-    customElements.define('tc-metal-button', MetalButton)
+    // tc-metal-button — alias of tc-button with the metal skin baked in.
+    customElements.define('tc-metal-button', class extends Button {})
     customElements.define('tc-nav-button', NavButton)
     customElements.define('tc-network-status-icon', NetworkStatusIcon)
     customElements.define('tc-platform-icon', PlatformIcon)
     customElements.define('tc-ping-display', PingDisplay)
     customElements.define('tc-minimap', Minimap)
-    customElements.define('tc-mute-list', MuteList)
     customElements.define('tc-player-card', PlayerCard)
     customElements.define('tc-player-frame', PlayerFrame)
     customElements.define('tc-objective-marker', ObjectiveMarker)
@@ -707,7 +699,9 @@ export function register(): void {
     customElements.define('tc-panel', Panel)
     customElements.define('tc-panel-header', PanelHeader)
     customElements.define('tc-pause-menu', PauseMenu)
-    customElements.define('tc-pause-screen', PauseScreen)
+    // Preset: full-screen pause-screen alias of tc-pause-menu; the eyebrow,
+    // title attr, default item set and footer are seeded by tag name.
+    customElements.define('tc-pause-screen', class extends PauseMenu {})
     customElements.define('tc-perk-picker', PerkPicker)
     customElements.define('tc-portrait', Portrait)
     customElements.define('tc-press-any-key', PressAnyKey)
@@ -722,7 +716,6 @@ export function register(): void {
     customElements.define('tc-transition-wipe', TransitionWipe)
     customElements.define('tc-shake-container', ShakeContainer)
     customElements.define('tc-vignette-overlay', VignetteOverlay)
-    customElements.define('tc-save-slot-list', SaveSlotList)
     customElements.define('tc-settings-category-list', SettingsCategoryList)
     customElements.define('tc-score-display', ScoreDisplay)
     customElements.define('tc-stat-row', StatRow)

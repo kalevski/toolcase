@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, Speedometer, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, Speedometer, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -50,7 +50,6 @@ After `register()` you can author markup directly:
   - [tc-action-items](#tc-action-items)
   - [tc-action-row-list](#tc-action-row-list)
   - [tc-alert](#tc-alert)
-  - [tc-announcement-bar](#tc-announcement-bar)
   - [tc-banner](#tc-banner)
   - [tc-avatar](#tc-avatar)
   - [tc-audio-mixer](#tc-audio-mixer)
@@ -96,7 +95,6 @@ After `register()` you can author markup directly:
   - [tc-currency-display](#tc-currency-display)
   - [tc-rarity-chip](#tc-rarity-chip)
   - [tc-rune-corner](#tc-rune-corner)
-  - [tc-save-slot-list](#tc-save-slot-list)
   - [tc-settings-category-list](#tc-settings-category-list)
   - [tc-shake-container](#tc-shake-container)
   - [tc-score-display](#tc-score-display)
@@ -120,9 +118,7 @@ After `register()` you can author markup directly:
   - [tc-boss-bar](#tc-boss-bar)
   - [tc-buff-bar](#tc-buff-bar)
   - [tc-buff-icon](#tc-buff-icon)
-  - [tc-health-bar](#tc-health-bar)
-  - [tc-mana-bar](#tc-mana-bar)
-  - [tc-stamina-bar](#tc-stamina-bar)
+  - [tc-resource-bar](#tc-resource-bar)
   - [tc-brightness-calibration](#tc-brightness-calibration)
   - [tc-cdn-map](#tc-cdn-map)
   - [tc-compass-bar](#tc-compass-bar)
@@ -169,7 +165,6 @@ After `register()` you can author markup directly:
   - [tc-good-first-issues](#tc-good-first-issues)
   - [tc-hero-stats-bar](#tc-hero-stats-bar)
   - [tc-leaderboard](#tc-leaderboard)
-  - [tc-leaderboard-trend](#tc-leaderboard-trend)
   - [tc-linked-providers-card](#tc-linked-providers-card)
   - [tc-logo-cloud](#tc-logo-cloud)
   - [tc-maintainer-card](#tc-maintainer-card)
@@ -192,11 +187,8 @@ After `register()` you can author markup directly:
   - [tc-rich-page-header](#tc-rich-page-header)
   - [tc-api-reference-table](#tc-api-reference-table)
   - [tc-scoring-rules](#tc-scoring-rules)
-  - [tc-credits-list](#tc-credits-list)
-  - [tc-achievement-list](#tc-achievement-list)
+  - [tc-data-list](#tc-data-list)
   - [tc-result-screen](#tc-result-screen)
-  - [tc-game-over-screen](#tc-game-over-screen)
-  - [tc-victory-screen](#tc-victory-screen)
   - [tc-legal-screen](#tc-legal-screen)
   - [tc-gamepad-button-prompt](#tc-gamepad-button-prompt)
   - [tc-battle-pass](#tc-battle-pass)
@@ -206,8 +198,6 @@ After `register()` you can author markup directly:
   - [tc-sprint-chain](#tc-sprint-chain)
   - [tc-stat-card](#tc-stat-card)
   - [tc-state-machine](#tc-state-machine)
-  - [tc-team-list](#tc-team-list)
-  - [tc-friends-list](#tc-friends-list)
   - [tc-guild-panel](#tc-guild-panel)
   - [tc-tier-ladder](#tc-tier-ladder)
   - [tc-timeline](#tc-timeline)
@@ -255,7 +245,6 @@ After `register()` you can author markup directly:
   - [tc-menu-item](#tc-menu-item)
   - [tc-metal-button](#tc-metal-button)
   - [tc-minimap](#tc-minimap)
-  - [tc-mute-list](#tc-mute-list)
   - [tc-player-card](#tc-player-card)
   - [tc-player-frame](#tc-player-frame)
   - [tc-matchmaking-screen](#tc-matchmaking-screen)
@@ -274,7 +263,6 @@ After `register()` you can author markup directly:
   - [tc-press-any-key](#tc-press-any-key)
   - [tc-quest-tracker](#tc-quest-tracker)
   - [tc-radial-wheel](#tc-radial-wheel)
-  - [tc-pause-screen](#tc-pause-screen)
   - [tc-level-header](#tc-level-header)
   - [tc-level-select](#tc-level-select)
   - [tc-live-feed](#tc-live-feed)
@@ -351,18 +339,14 @@ After `register()` you can author markup directly:
   - [tc-time-picker](#tc-time-picker)
   - [tc-range](#tc-range)
   - [tc-range-slider](#tc-range-slider)
-  - [tc-deadzone-slider](#tc-deadzone-slider)
-  - [tc-fov-slider](#tc-fov-slider)
+  - [tc-setting-slider](#tc-setting-slider)
   - [tc-mouse-sensitivity](#tc-mouse-sensitivity)
-  - [tc-volume-slider](#tc-volume-slider)
   - [tc-reset-to-defaults](#tc-reset-to-defaults)
   - [tc-fps-cap-select](#tc-fps-cap-select)
   - [tc-select-row](#tc-select-row)
   - [tc-fullscreen-toggle](#tc-fullscreen-toggle)
-  - [tc-vsync-toggle](#tc-vsync-toggle)
   - [tc-toggle-row](#tc-toggle-row)
   - [tc-graphics-preset-picker](#tc-graphics-preset-picker)
-  - [tc-invert-axis-toggle](#tc-invert-axis-toggle)
   - [tc-rating](#tc-rating)
   - [tc-slider](#tc-slider)
   - [tc-select](#tc-select)
@@ -1469,74 +1453,24 @@ Contextual feedback message.
 
 ---
 
-### tc-announcement-bar
-
-Persistent announcement bar with optional CTA link, leading icon, and localStorage-backed dismissal. Emits `tc-dismiss` when closed.
-
-**Tag:** `tc-announcement-bar`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `variant` | `info\|success\|warning\|announce` | `info` | Color/tone variant |
-| `cta-label` | string | — | CTA link text. Rendered only when `cta-href` is also set. |
-| `cta-href` | string | — | CTA link URL. Rendered only when `cta-label` is also set. |
-| `dismissible` | boolean | false | Show a close button. Clicking it hides the bar and fires `tc-dismiss`. |
-| `persist-dismiss-key` | string | — | localStorage key. On connect, if the key is already stored as `"dismissed"`, the bar hides immediately. Clicking close writes the flag so dismissal persists across reloads. |
-| `icon-name` | string | — | Kebab-case lucide icon name (e.g. `"info"`, `"bell"`). Falls back to a `slot="icon"` child when both are provided. |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `onDismiss` | `(() => void) \| null` | Optional callback fired alongside the `tc-dismiss` event when the bar is dismissed. |
-
-**Events**
-
-| Event | Detail | Description |
-|-------|--------|-------------|
-| `tc-dismiss` | — | Fired (bubbles, composed) when the close button is clicked. |
-
-**Slots**
-
-| Slot | Description |
-|------|-------------|
-| *(default)* | Bar message text / HTML. |
-| `icon` | Optional leading icon element. Overrides `icon-name` when present. |
-
-```html
-<!-- Minimal -->
-<tc-announcement-bar variant="info">New docs are available.</tc-announcement-bar>
-
-<!-- With icon and CTA -->
-<tc-announcement-bar variant="announce" icon-name="megaphone"
-  cta-label="Learn more" cta-href="/changelog">
-  Toolcase v3 is now open-source.
-</tc-announcement-bar>
-
-<!-- Dismissible with persistent storage -->
-<tc-announcement-bar variant="warning" dismissible persist-dismiss-key="my-app-announcement">
-  Maintenance window on Sunday 02:00 UTC.
-</tc-announcement-bar>
-```
-
----
-
 ### tc-banner
 
-Status banner with a leading icon, body content, an optional action slot, and optional localStorage-backed dismissal. Emits `tc-dismiss` when closed. Uses `role="status"` (or `role="alert"` for the error variant) for screen reader announcements.
+Status banner with a leading icon, body content, an optional action slot or CTA link, and optional localStorage-backed dismissal. Emits `tc-dismiss` when closed. Uses `role="status"` (or `role="alert"` for the error variant) for screen reader announcements.
 
 **Tag:** `tc-banner`
 
+**Preset alias:** `tc-announcement-bar` is a persistent-announcement preset of `tc-banner` — `role="region"`, no auto per-variant icon, and the legacy `persist-dismiss-key` / `icon-name` attribute names (mapping to `storage-key` / `icon`). Everything below applies identically.
+
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `variant` | `info\|warning\|success\|error` | `info` | Color/tone variant. Selects the left border color, background tint, and default icon. |
+| `variant` | `info\|warning\|success\|error\|announce` | `info` | Color/tone variant. Selects the left border color, background tint, and default icon. `announce` is the cyan brand-announcement tone (used by the announcement-bar preset). |
 | `dismissible` | boolean | false | Show a close button. Clicking it hides the banner and fires `tc-dismiss`. |
-| `storage-key` | string | — | localStorage key. On connect, if the key is already stored as `"dismissed"`, the banner hides immediately. Clicking close writes the flag so dismissal persists across reloads. |
-| `icon` | string | — | Kebab-case lucide icon name (e.g. `"bell"`, `"rocket"`). Overrides the per-variant default icon (`info` → `info`, `warning` → `triangle-alert`, `success` → `circle-check`, `error` → `circle-x`). |
+| `storage-key` | string | — | localStorage key. On connect, if the key is already stored as `"dismissed"`, the banner hides immediately. Clicking close writes the flag so dismissal persists across reloads. (The `tc-announcement-bar` preset reads `persist-dismiss-key` instead.) |
+| `icon` | string | — | Kebab-case lucide icon name (e.g. `"bell"`, `"rocket"`). Overrides the per-variant default icon (`info` → `info`, `warning` → `triangle-alert`, `success` → `circle-check`, `error` → `circle-x`). (The preset reads `icon-name` instead, and has no per-variant default.) |
+| `cta-label` | string | — | CTA link text. Rendered as a `.tc-banner-cta` link only when `cta-href` is also set. |
+| `cta-href` | string | — | CTA link URL. Rendered only when `cta-label` is also set. |
 | `class` | string | — | Extra classes applied directly to the host element. |
 
 **JS Properties**
@@ -1544,6 +1478,7 @@ Status banner with a leading icon, body content, an optional action slot, and op
 | Property | Type | Description |
 |----------|------|-------------|
 | `onDismiss` | `(() => void) \| null` | Optional callback fired alongside the `tc-dismiss` event when the banner is dismissed. |
+| `variant` / `dismissible` / `storageKey` / `iconName` / `ctaLabel` / `ctaHref` | — | Reflect the matching attributes. `storageKey` / `iconName` adapt to the tag's attribute names. |
 
 **Events**
 
@@ -1556,6 +1491,7 @@ Status banner with a leading icon, body content, an optional action slot, and op
 | Slot | Description |
 |------|-------------|
 | *(default)* | Banner body text / HTML. Rendered inside `.tc-banner-content`. |
+| `icon` | Optional leading icon element. Overrides the `icon` / `icon-name` lucide fallback when present. |
 | `action` | Optional action element (button, link). Rendered inside `.tc-banner-action` on the right side of the banner. |
 
 **CSS Custom Properties**
@@ -1571,6 +1507,7 @@ Status banner with a leading icon, body content, an optional action slot, and op
 | `--bs-banner-bg` | gradient | 135° tinted gradient fill (set by variant). |
 | `--bs-banner-color` | emphasis | Dark emphasis text color (set by variant). |
 | `--bs-banner-icon-size` | `1rem` | Width/height of the leading icon SVG. |
+| `--bs-banner-cta-color` | border color | CTA link color (falls back to the variant border color). |
 | `--bs-banner-close-size` | `28px` | Size of the dismiss button (44px on coarse pointer devices). |
 
 ```html
@@ -1593,6 +1530,12 @@ Status banner with a leading icon, body content, an optional action slot, and op
 <tc-banner variant="warning" dismissible storage-key="my-app-banner">
   Maintenance window on Sunday 02:00 UTC.
 </tc-banner>
+
+<!-- Announcement-bar preset (region role, CTA link, announce tone) -->
+<tc-announcement-bar variant="announce" icon-name="megaphone"
+  cta-label="Learn more" cta-href="/changelog">
+  Toolcase v3 is now open-source.
+</tc-announcement-bar>
 ```
 
 ---
@@ -3800,6 +3743,8 @@ None. Content is driven entirely by HTML attributes.
 
 Dashboard card with a caller-supplied color tinting the icon chip and a two-line metric display. Purely presentational; no events.
 
+> **Alias of `tc-basic-card`.** `tc-colored-card` is registered as a thin subclass of `tc-basic-card`: `value` / `text` map to `text-a` / `text-b`, and `color` tints the icon chip. Theme it via the `--bs-basic-card-*` custom properties (the `--bs-colored-card-*` names below are retained only as a guide and resolve through the basic-card vars).
+
 **Tag:** `tc-colored-card`
 
 **Attributes**
@@ -4637,193 +4582,6 @@ None. `tc-plugin-grid` is purely data-driven via the `items` JS property.
 
 <!-- 4-column grid -->
 <tc-plugin-grid id="plugins4" columns="4"></tc-plugin-grid>
-```
-
----
-
-### tc-team-list
-
-List of team members with gradient avatar tiles, names, emails, and optional role chips. Members are set via the JS `members` property. Initials are derived automatically from `name` when the `initials` field is absent. Image avatars are rendered when `avatarUrl` is provided. The avatar circle is the only sanctioned `border-radius`; all other shapes are sharp.
-
-**Tag:** `tc-team-list`
-
-**Attributes**
-
-None. All content is driven by the `members` JS property.
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `members` | `TeamMember[]` | Array of member objects. Set via `el.members = [...]`. Getter/setter; triggers re-render on assignment. |
-
-`TeamMember` shape:
-
-```ts
-interface TeamMember {
-    id: string
-    name: string
-    email?: string
-    role?: string
-    initials?: string   // derived from name (first letters of up to two words) when absent
-    avatarUrl?: string  // when present, renders <img> instead of initials span
-    gradient?: boolean  // defaults to true; renders slate ink gradient background on initials avatar
-}
-```
-
-**Events**
-
-None. `tc-team-list` is purely presentational.
-
-**Slots**
-
-None. All content is driven by the `members` JS property.
-
-**Accessibility**
-
-- The inner `<ul>` carries `role="list"`; each member `<li>` carries `role="listitem"`.
-- Initials avatars carry `aria-hidden="true"` — the member name text is the accessible label.
-- Image avatars receive `alt` set to the member's `name`.
-- Row hover transitions respect `prefers-reduced-motion`.
-
-**CSS Custom Properties**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-team-list-bg` | `var(--tc-surface)` | List background. |
-| `--bs-team-list-border` | `var(--tc-border)` | Outer border color. |
-| `--bs-team-list-separator` | `var(--tc-slate-100)` | Inner row separator hairline. |
-| `--bs-team-list-row-hover-bg` | `var(--tc-surface-hover)` | Row background on hover. |
-| `--bs-team-list-name-color` | `var(--tc-text)` | Member name text color. |
-| `--bs-team-list-name-weight` | `500` | Member name font weight. |
-| `--bs-team-list-email-color` | `var(--tc-text-muted)` | Email address text color. |
-| `--bs-team-list-role-bg` | `var(--tc-surface-muted)` | Role chip background. |
-| `--bs-team-list-role-color` | `var(--tc-text-muted)` | Role chip text color. |
-| `--bs-team-list-avatar-size` | `2.25rem` | Diameter of the avatar circle. |
-| `--bs-team-list-avatar-font-size` | `0.75rem` | Initials font size inside the avatar. |
-| `--bs-team-list-avatar-gradient` | `linear-gradient(135deg, var(--tc-app-accent), #2b3a51)` | Gradient used on initials avatars when `gradient` is true. |
-| `--bs-team-list-avatar-color` | `#fff` | Initials text color on gradient avatars. |
-
-```html
-<tc-team-list id="tl1"></tc-team-list>
-
-<script>
-document.querySelector('#tl1').members = [
-    { id: '1', name: 'Alice Johnson', email: 'alice@example.com', role: 'Engineering' },
-    { id: '2', name: 'Bob Smith',     email: 'bob@example.com',   role: 'Design' },
-    { id: '3', name: 'Carol White',   email: 'carol@example.com', role: 'Product' },
-]
-</script>
-
-<!-- Explicit initials + image avatar -->
-<tc-team-list id="tl2"></tc-team-list>
-<script>
-document.querySelector('#tl2').members = [
-    { id: '1', name: 'Dave Kumar',  initials: 'DK', email: 'dave@example.com' },
-    { id: '2', name: 'Eva Müller',  avatarUrl: 'https://example.com/eva.jpg', email: 'eva@example.com', role: 'Lead' },
-]
-</script>
-```
-
----
-
-### tc-friends-list
-
-Friends roster with online/status pips, activity text, optional rank chips, and message/invite actions. Friends are set via the JS `friends` property. Rows are auto-sorted by status (`in-game` → `online` → `busy` → `away` → `offline`) then alphabetically by name. The header shows the list title and an online/total count. Restyled from the game-components `gc-friends-list` to the toolcase design system: slate neutrals, hairline borders, sharp corners (the status pip is the only sanctioned `border-radius`), status as the only color, and JetBrains Mono for the header micro-labels and rank chips.
-
-**Tag:** `tc-friends-list`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `list-title` | string | `"Friends"` | Header title. Mirrored by the `listTitle` JS property. |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `friends` | `Friend[]` | Array of friend objects. Set via `el.friends = [...]`. Getter returns a copy; setter triggers a re-render. |
-| `listTitle` | `string` | Reflects the `list-title` attribute. |
-| `onInvite` | `((detail: { id: string }) => void) \| null` | Optional callback fired alongside the `tc-invite` event. |
-| `onMessage` | `((detail: { id: string }) => void) \| null` | Optional callback fired alongside the `tc-message` event. |
-
-`Friend` shape:
-
-```ts
-type FriendStatus = 'online' | 'away' | 'busy' | 'offline' | 'in-game'
-
-interface Friend {
-    id: string
-    name: string
-    status?: FriendStatus   // defaults to 'offline'
-    activity?: string       // sub-line; falls back to "Offline" only for offline friends
-    rank?: string           // optional mono rank chip
-}
-```
-
-**Events**
-
-| Event | `detail` | Description |
-|-------|----------|-------------|
-| `tc-invite` | `{ id: string }` | Fired when a row's invite action is clicked. `bubbles`, `composed`. |
-| `tc-message` | `{ id: string }` | Fired when a row's message action is clicked. `bubbles`, `composed`. |
-
-**Slots**
-
-None. All content is driven by the `friends` JS property.
-
-**Accessibility**
-
-- The inner `<ul>` carries `role="list"`; each friend `<li>` carries `role="listitem"`.
-- The status pip carries `role="img"` with an `aria-label`/`title` of the human-readable status (e.g. "In game", "Online").
-- Action buttons carry descriptive `aria-label`s ("Message {name}", "Invite {name}") and use inline lucide SVG icons.
-- Action buttons show a visible `:focus-visible` outline and expand to 44px touch targets under coarse pointers.
-- Row and action hover transitions respect `prefers-reduced-motion`.
-
-**CSS Custom Properties**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-friends-list-bg` | `var(--tc-surface)` | List background. |
-| `--bs-friends-list-border` | `var(--tc-border)` | Outer border color. |
-| `--bs-friends-list-separator` | `var(--tc-slate-100)` | Inner row separator hairline. |
-| `--bs-friends-list-header-bg` | `var(--tc-surface-muted)` | Header background. |
-| `--bs-friends-list-header-border` | `var(--tc-border)` | Header bottom border. |
-| `--bs-friends-list-title-color` | `var(--tc-text-muted)` | Header title color. |
-| `--bs-friends-list-count-color` | `var(--tc-text-faint)` | Online/total count color. |
-| `--bs-friends-list-row-hover-bg` | `var(--tc-surface-hover)` | Row background on hover. |
-| `--bs-friends-list-name-color` | `var(--tc-text)` | Friend name text color. |
-| `--bs-friends-list-name-weight` | `500` | Friend name font weight. |
-| `--bs-friends-list-activity-color` | `var(--tc-text-muted)` | Activity sub-line color. |
-| `--bs-friends-list-rank-bg` | `var(--tc-surface-muted)` | Rank chip background. |
-| `--bs-friends-list-rank-color` | `var(--tc-text-muted)` | Rank chip text color. |
-| `--bs-friends-list-pip-size` | `8px` | Status pip diameter. |
-| `--bs-friends-list-pip-color` | _(set per status)_ | Status pip fill. Set automatically from each row's status. |
-| `--bs-friends-list-action-color` | `var(--tc-text-muted)` | Action icon color at rest. |
-| `--bs-friends-list-action-hover-bg` | `var(--tc-surface-muted)` | Action background on hover. |
-| `--bs-friends-list-action-hover-color` | `var(--tc-text)` | Action icon color on hover. |
-| `--bs-friends-list-action-size` | `1.75rem` | Action button box size (44px under coarse pointers). |
-| `--bs-friends-list-status-online` | `var(--tc-success)` | `online` pip color. |
-| `--bs-friends-list-status-in-game` | `var(--tc-info)` | `in-game` pip color. |
-| `--bs-friends-list-status-busy` | `var(--tc-danger)` | `busy` pip color. |
-| `--bs-friends-list-status-away` | `var(--tc-warning)` | `away` pip color. |
-| `--bs-friends-list-status-offline` | `var(--tc-text-faint)` | `offline` pip color. |
-
-```html
-<tc-friends-list id="fl1" list-title="Squad"></tc-friends-list>
-
-<script>
-const fl = document.querySelector('#fl1')
-fl.friends = [
-    { id: '1', name: 'Aria',    status: 'in-game', activity: 'Ranked — Round 3', rank: 'Diamond' },
-    { id: '2', name: 'Kestrel', status: 'online' },
-    { id: '3', name: 'Vesper',  status: 'busy',   activity: 'Do not disturb' },
-    { id: '4', name: 'Onyx',    status: 'offline' },
-]
-fl.addEventListener('tc-invite',  e => console.log('invite',  e.detail.id))
-fl.addEventListener('tc-message', e => console.log('message', e.detail.id))
-</script>
 ```
 
 ---
@@ -8631,93 +8389,66 @@ Dual-handle range slider with an optional label, ticks, tooltips, and full keybo
 
 ---
 
-### tc-deadzone-slider
+### tc-setting-slider
 
-A stick-deadzone setting row: a label/description text block paired with a 0–100% range control and a mono percentage readout. Built on the shared `tc-setting-row` scaffold (a label/control row that future setting rows reuse). Port of game-components `gc-deadzone-slider` with the fantasy chrome dropped for the toolcase slate/ink look.
+A generic range-slider setting row: a label/description text block paired with a native `<input type="range">` and a mono readout, plus an optional mute button. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). The readout format is driven by `format` (`percent` renders `value × 100 %`; `int` / `float` append `unit`).
 
-**Tag:** `tc-deadzone-slider`
+**Tag:** `tc-setting-slider`
 
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `row-label` | string | `Stick deadzone` | Row label (set automatically when absent) |
-| `description` | string | — | Optional secondary line beneath the label |
-| `value` | number | `0.15` | Current deadzone, clamped to `0`–`1` (`0.01` step) |
-| `disabled` | boolean | `false` | Disables the range input |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `value` | `number` | Get or set the deadzone (`0`–`1`). Getter clamps and defaults to `0.15`. Setting patches the input + readout in place — no full re-render. |
-| `rowLabel` | `string` | Get/set the `row-label` attribute. |
-| `description` | `string` | Get/set the `description` attribute. |
-| `disabled` | `boolean` | Get/set the `disabled` attribute. |
-| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every change. Mirrors the `tc-change` event. |
-
-**Events**
-
-| Event | Detail | Description |
-|-------|--------|-------------|
-| `tc-change` | `{ value: number }` | Fired on every range-input change (the `0`–`1` deadzone). |
-
-**No slots.**
-
-```html
-<tc-deadzone-slider row-label="Left stick deadzone" description="Ignore input below this threshold." value="0.15"></tc-deadzone-slider>
-<script>
-  const el = document.querySelector('tc-deadzone-slider')
-  el.value = 0.2
-  el.addEventListener('tc-change', e => console.log(e.detail.value))
-</script>
-```
-
----
-
-### tc-fov-slider
-
-A field-of-view setting row: a label/description text block paired with a range control and a mono degree readout. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-fov-slider` with the fantasy chrome dropped for the toolcase slate/ink look.
-
-**Tag:** `tc-fov-slider`
+**Preset aliases:** `tc-volume-slider` (percent, `with-mute`, default `0.8`), `tc-deadzone-slider` (percent, default `0.15`), `tc-fov-slider` (integer degrees, `60`–`120`, default `90`) are aliases of `tc-setting-slider` that seed their range, default value and readout format from the tag name. Everything below applies identically.
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `row-label` | string | `Field of View` | Row label (set automatically when absent) |
+| `row-label` | string | (per preset) | Row label. The preset aliases set this automatically when absent. |
 | `description` | string | — | Optional secondary line beneath the label |
-| `value` | number | `90` | Current field of view, in degrees (`1` step) |
-| `min` | number | `60` | Minimum field of view |
-| `max` | number | `120` | Maximum field of view |
-| `disabled` | boolean | `false` | Disables the range input |
+| `value` | number | (per preset, else `min`) | Current value. Clamped to `[min, max]`. |
+| `min` | number | `0` | Minimum value |
+| `max` | number | `100` | Maximum value |
+| `step` | number | `1` | Step granularity |
+| `unit` | string | `""` | Suffix appended to the readout for `int` / `float` formats (e.g. `°`). |
+| `format` | `percent` \| `int` \| `float` | `int` | Readout format. `percent` renders `value × 100 %`; `int` rounds and appends `unit`; `float` appends `unit` verbatim. |
+| `with-mute` | boolean | `false` | When present, renders a mute toggle button before the slider (default on for the volume preset). |
+| `muted` | boolean | `false` | When present (and `with-mute`), the range input is disabled and the mute button shows the muted icon. |
+| `disabled` | boolean | `false` | Disables the mute button and the range input. |
 
 **JS Properties**
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `value` | `number` | Get or set the field of view (degrees). Getter defaults to `90`. Setting patches the input + readout in place — no full re-render. |
-| `min` | `number` | Get/set the minimum (`min` attribute). Defaults to `60`. |
-| `max` | `number` | Get/set the maximum (`max` attribute). Defaults to `120`. |
-| `rowLabel` | `string` | Get/set the `row-label` attribute. |
-| `description` | `string` | Get/set the `description` attribute. |
-| `disabled` | `boolean` | Get/set the `disabled` attribute. |
-| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every change. Mirrors the `tc-change` event. |
+| `value` | `number` | Get or set the value (clamped to `[min, max]`). Setting patches the input + readout in place — no full re-render. |
+| `min` / `max` / `step` | `number` | Reflect the matching attributes (with per-preset defaults). |
+| `unit` | `string` | Reflects the `unit` attribute. |
+| `format` | `'percent' \| 'int' \| 'float'` | Reflects the `format` attribute. |
+| `withMute` | `boolean` | Reflects the `with-mute` attribute. |
+| `muted` | `boolean` | Reflects the `muted` attribute. Patched in place (swaps icon, toggles input disabled). |
+| `disabled` | `boolean` | Reflects the `disabled` attribute. |
+| `rowLabel` / `description` | `string` | Reflect the matching attributes. |
+| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every slider change. Mirrors the `tc-change` event. |
+| `onToggleMute` | `(() => void) \| null` | Optional callback fired when the mute button is clicked. Mirrors the `tc-toggle-mute` event. |
 
 **Events**
 
 | Event | Detail | Description |
 |-------|--------|-------------|
-| `tc-change` | `{ value: number }` | Fired on every range-input change (the field of view in degrees). |
+| `tc-change` | `{ value: number }` | Fired on every range-input change. |
+| `tc-toggle-mute` | `{}` | Fired when the mute button is clicked (only with `with-mute`). The consumer toggles the `muted` attribute. |
 
 **No slots.**
 
 ```html
-<tc-fov-slider row-label="Vertical FOV" description="Widen for ultrawide displays." min="70" max="140" value="103"></tc-fov-slider>
+<!-- Generic integer slider with a unit -->
+<tc-setting-slider row-label="Render scale" value="100" min="50" max="200" step="5" format="int" unit="%"></tc-setting-slider>
+
+<!-- Presets (range / format / mute inferred from the tag) -->
+<tc-volume-slider row-label="Master volume" value="0.8"></tc-volume-slider>
+<tc-deadzone-slider row-label="Left stick deadzone" value="0.15"></tc-deadzone-slider>
+<tc-fov-slider row-label="Vertical FOV" min="70" max="140" value="103"></tc-fov-slider>
 <script>
-  const el = document.querySelector('tc-fov-slider')
-  el.value = 110
+  const el = document.querySelector('tc-volume-slider')
   el.addEventListener('tc-change', e => console.log(e.detail.value))
+  el.addEventListener('tc-toggle-mute', () => { el.muted = !el.muted })
 </script>
 ```
 
@@ -8770,55 +8501,6 @@ A mouse-sensitivity setting row: a label/description text block paired with one 
   el.value = 2
   el.ads = 1.0
   el.addEventListener('tc-change', e => console.log(e.detail.key, e.detail.value))
-</script>
-```
-
----
-
-### tc-volume-slider
-
-A volume setting row: a mute toggle button, a 0–100% range slider, and a mono percentage readout. Built on the shared `tc-setting-row` scaffold. Port of game-components `gc-volume-slider` with the fantasy chrome dropped for the toolcase slate/ink look.
-
-**Tag:** `tc-volume-slider`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `row-label` | string | `Volume` | Row label (set automatically when absent) |
-| `description` | string | — | Optional secondary line beneath the label |
-| `value` | number | `0.8` | Current volume, clamped to `0`–`1` (`0.01` step) |
-| `muted` | boolean | `false` | When present, the range input is disabled and the mute button shows the muted icon |
-| `disabled` | boolean | `false` | Disables both the mute button and the range input |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `value` | `number` | Get or set the volume (`0`–`1`). Getter clamps and defaults to `0.8`. Setting patches the input + readout in place — no full re-render. |
-| `muted` | `boolean` | Get/set the `muted` attribute. Patched in place (swaps icon, toggles input disabled) — no full re-render. |
-| `disabled` | `boolean` | Get/set the `disabled` attribute. |
-| `rowLabel` | `string` | Get/set the `row-label` attribute. |
-| `description` | `string` | Get/set the `description` attribute. |
-| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every slider change. Mirrors the `tc-change` event. |
-| `onToggleMute` | `(() => void) \| null` | Optional callback fired when the mute button is clicked. Mirrors the `tc-toggle-mute` event. |
-
-**Events**
-
-| Event | Detail | Description |
-|-------|--------|-------------|
-| `tc-change` | `{ value: number }` | Fired on every range-input change (the `0`–`1` volume). |
-| `tc-toggle-mute` | `{}` | Fired when the mute button is clicked. The consumer is responsible for toggling the `muted` attribute. |
-
-**No slots.**
-
-```html
-<tc-volume-slider row-label="Master volume" description="Controls overall game audio." value="0.8"></tc-volume-slider>
-<script>
-  const el = document.querySelector('tc-volume-slider')
-  el.value = 0.5
-  el.addEventListener('tc-change', e => console.log(e.detail.value))
-  el.addEventListener('tc-toggle-mute', () => { el.muted = !el.muted })
 </script>
 ```
 
@@ -9010,53 +8692,9 @@ A fullscreen on/off setting row: a label/description text block paired with a pi
 
 ---
 
-### tc-vsync-toggle
-
-A vsync on/off setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-vsync-toggle` with the fantasy chrome dropped for the toolcase slate/ink look; defaults its label to `V-Sync`.
-
-**Tag:** `tc-vsync-toggle`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `row-label` | string | `V-Sync` | Row label (set automatically when absent) |
-| `description` | string | — | Optional secondary line beneath the label |
-| `checked` | boolean | `false` | Whether vsync is on |
-| `disabled` | boolean | `false` | Disables the switch |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `checked` | `boolean` | Get/set the on/off state. Setting patches the switch in place — no full re-render. |
-| `rowLabel` | `string` | Get/set the `row-label` attribute. |
-| `description` | `string` | Get/set the `description` attribute. |
-| `disabled` | `boolean` | Get/set the `disabled` attribute. |
-| `onChange` | `((value: boolean) => void) \| null` | Optional callback fired on every toggle. Mirrors the `tc-change` event. |
-
-**Events**
-
-| Event | Detail | Description |
-|-------|--------|-------------|
-| `tc-change` | `{ value: boolean }` | Fired when the switch is toggled (the new checked state). |
-
-**No slots.**
-
-```html
-<tc-vsync-toggle row-label="Vertical sync" description="Synchronise the frame rate with the display refresh rate." checked></tc-vsync-toggle>
-<script>
-  const el = document.querySelector('tc-vsync-toggle')
-  el.checked = true
-  el.addEventListener('tc-change', e => console.log(e.detail.value))
-</script>
-```
-
----
-
 ### tc-toggle-row
 
-A generic labeled boolean toggle setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-toggle-row` with the fantasy chrome dropped for the toolcase slate/ink look.
+A generic labeled boolean toggle setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-toggle-row` with the fantasy chrome dropped for the toolcase slate/ink look. For named setting presets (V-Sync, invert-axis, …) just set `row-label` — `<tc-toggle-row row-label="V-Sync" checked>`.
 
 **Tag:** `tc-toggle-row`
 
@@ -9140,51 +8778,6 @@ A low / medium / high / ultra graphics-preset setting row: a label/description t
 </script>
 ```
 
----
-
-### tc-invert-axis-toggle
-
-An invert-axis on/off setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-invert-axis-toggle` with the fantasy chrome dropped for the toolcase slate/ink look.
-
-**Tag:** `tc-invert-axis-toggle`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `row-label` | string | `Invert Y axis` | Row label (set automatically when absent) |
-| `description` | string | — | Optional secondary line beneath the label |
-| `checked` | boolean | `false` | Whether axis inversion is on |
-| `disabled` | boolean | `false` | Disables the switch |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `checked` | `boolean` | Get/set the on/off state. Setting patches the switch in place — no full re-render. |
-| `rowLabel` | `string` | Get/set the `row-label` attribute. |
-| `description` | `string` | Get/set the `description` attribute. |
-| `disabled` | `boolean` | Get/set the `disabled` attribute. |
-| `onChange` | `((value: boolean) => void) \| null` | Optional callback fired on every toggle. Mirrors the `tc-change` event. |
-
-**Events**
-
-| Event | Detail | Description |
-|-------|--------|-------------|
-| `tc-change` | `{ value: boolean }` | Fired when the switch is toggled (the new checked state). |
-
-**No slots.**
-
-```html
-<tc-invert-axis-toggle row-label="Invert X axis" description="Flip the horizontal look direction for the camera." checked></tc-invert-axis-toggle>
-<script>
-  const el = document.querySelector('tc-invert-axis-toggle')
-  el.checked = true
-  el.addEventListener('tc-change', e => console.log(e.detail.value))
-</script>
-```
-
----
 
 ### tc-rating
 
@@ -10284,6 +9877,8 @@ None.
 
 Badge-like rectangular tag with color variants and an optional remove button. Sharp corners (`border-radius: 0`). Default `secondary` uses the slate tint palette; colored variants use the soft tint background, dark emphasis text, and a hairline in the variant color. The remove button dispatches `tc-remove` and does **not** remove the element from the DOM — the host controls removal (controlled pattern).
 
+> **Alias of `tc-chip`.** `tc-tag` is registered as a thin subclass of `tc-chip` that always renders the non-interactive (static `<span>`) form — no `tc-click`, no `aria-pressed`. It supports the same `variant` / `removable` attributes and `tc-remove` event; theme it via the `--bs-chip-*` custom properties.
+
 **Tag:** `tc-tag`
 
 **Attributes**
@@ -10999,11 +10594,13 @@ Per-kind accent overrides: `buff` → `var(--tc-success)`, `debuff` → `var(--t
 
 ---
 
-### tc-health-bar
+### tc-resource-bar
 
-Value/max resource bar (HP, mana, stamina) — an ink fill over a flat slate track. Optionally renders a label row (a human-readable label plus a mono `value / max` readout), a ghost band behind the fill for recent loss, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. The fill is clamped to `[0, max]`. Ported from the game-components `gc-health-bar` (which extends `ResourceBarBase`); the game-components fantasy chrome (fantasy fills, scanlines, metal textures) is dropped in favour of a flat slate HUD bar, and the track / fill / ghost / tick DOM is shared with the rest of the resource-bar family through an internal helper.
+Value/max resource bar for a game HUD (HP, mana, stamina, …) — an ink fill over a flat slate track. Optionally renders a label row (a human-readable label plus a mono `value / max` readout), a ghost band behind the fill for recent loss, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. The fill is clamped to `[0, max]`. The `variant` attribute selects the fill color. The track / fill / ghost / tick DOM is shared across the resource-bar family through an internal helper. The game-components fantasy chrome (fantasy fills, scanlines, metal textures) is dropped in favour of a flat slate HUD bar.
 
-**Tag:** `tc-health-bar`
+**Tag:** `tc-resource-bar`
+
+**Preset aliases:** `tc-health-bar` (variant `health`, ink accent), `tc-mana-bar` (variant `mana`, cyan), `tc-stamina-bar` (variant `stamina`, green) are aliases of `tc-resource-bar` that default `variant` from their tag name. Use them as drop-in shorthands; everything below applies identically.
 
 **Attributes**
 
@@ -11014,7 +10611,8 @@ Value/max resource bar (HP, mana, stamina) — an ink fill over a flat slate tra
 | `ghost` | number | — | Optional "ghost" / recent-loss value drawn as a muted band behind the fill. Only shown when it resolves to a wider band than the current fill. |
 | `segments` | number | `1` | Number of equal slots; `segments - 1` evenly-spaced divider ticks are drawn across the track. Values `< 1` (or non-numeric) fall back to `1`. |
 | `show-text` | boolean | `false` | When present (and no `label` is set), draws a centred mono `value / max` readout inside the track. |
-| `label` | string | `""` | When set, renders a label row above the track with the label and a trailing mono `value / max` readout. Also used as the `aria-label` for the progressbar (defaults to `"Health"`). |
+| `label` | string | `""` | When set, renders a label row above the track with the label and a trailing mono `value / max` readout. Also used as the `aria-label` for the progressbar (defaults to the variant name, or `"Resource"`). |
+| `variant` | `health` \| `mana` \| `stamina` \| string | — | Selects the fill-color modifier. Known variants get a built-in fill (`health`/ink, `mana`/cyan, `stamina`/green); a custom variant is themable via `--bs-resource-bar-fill-bg`. The preset alias tags default this from their tag name. |
 
 **JS Properties**
 
@@ -11026,191 +10624,48 @@ Value/max resource bar (HP, mana, stamina) — an ink fill over a flat slate tra
 | `segments` | `number` | Reflects the `segments` attribute. |
 | `showText` | `boolean` | Reflects the `show-text` boolean attribute. |
 | `label` | `string` | Reflects the `label` attribute. |
+| `variant` | `string` | Reflects the `variant` attribute. |
 
 **Events**
 
-None. `tc-health-bar` is a purely presentational element.
+None. `tc-resource-bar` is a purely presentational element.
 
 **Slots**
 
-None. `tc-health-bar` is attribute-driven.
+None. `tc-resource-bar` is attribute-driven.
 
 **CSS Custom Properties**
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `--bs-health-bar-gap` | `0.375rem` | Gap between the label row and the track. |
-| `--bs-health-bar-label-color` | `var(--tc-text)` | Label text color. |
-| `--bs-health-bar-label-font-size` | `0.8125rem` | Label font size. |
-| `--bs-health-bar-label-font-weight` | `500` | Label font weight (≤600). |
-| `--bs-health-bar-value-color` | `var(--tc-text-muted)` | `value / max` readout color. |
-| `--bs-health-bar-value-font-size` | `0.75rem` | `value / max` readout font size. |
-| `--bs-health-bar-track-bg` | `var(--tc-slate-200)` | Track background. |
-| `--bs-health-bar-track-height` | `0.625rem` | Track height. |
-| `--bs-health-bar-fill-bg` | `var(--tc-app-accent)` | Value-fill color (ink accent). |
-| `--bs-health-bar-fill-transition` | `width var(--tc-transition-base)` | Fill-width transition (disabled under reduced motion). |
-| `--bs-health-bar-ghost-bg` | `var(--tc-slate-400)` | Ghost / recent-loss band color (shared resource-bar contract). |
-| `--bs-health-bar-tick-color` | `var(--tc-surface)` | Segment-divider color. |
-| `--bs-health-bar-inline-text-color` | `var(--tc-text-muted)` | Inline `value / max` text color. |
+| `--bs-resource-bar-gap` | `0.375rem` | Gap between the label row and the track. |
+| `--bs-resource-bar-label-color` | `var(--tc-text)` | Label text color. |
+| `--bs-resource-bar-label-font-size` | `0.8125rem` | Label font size. |
+| `--bs-resource-bar-label-font-weight` | `500` | Label font weight (≤600). |
+| `--bs-resource-bar-value-color` | `var(--tc-text-muted)` | `value / max` readout color. |
+| `--bs-resource-bar-value-font-size` | `0.75rem` | `value / max` readout font size. |
+| `--bs-resource-bar-track-bg` | `var(--tc-slate-200)` | Track background. |
+| `--bs-resource-bar-track-height` | `0.625rem` | Track height. |
+| `--bs-resource-bar-fill-bg` | `var(--tc-app-accent)` | Value-fill color. Overridden per variant (`--mana` → `--tc-accent`, `--stamina` → `--tc-success`); set directly for a custom variant. |
+| `--bs-resource-bar-fill-transition` | `width var(--tc-transition-base)` | Fill-width transition (disabled under reduced motion). |
+| `--bs-resource-bar-ghost-bg` | `var(--tc-slate-400)` | Ghost / recent-loss band color. |
+| `--bs-resource-bar-tick-color` | `var(--tc-surface)` | Segment-divider color. |
+| `--bs-resource-bar-inline-text-color` | `var(--tc-text-muted)` | Inline `value / max` text color. |
 
 **Example**
 
 ```html
-<!-- Bare bar -->
-<tc-health-bar value="72" max="100"></tc-health-bar>
+<!-- Variants -->
+<tc-resource-bar variant="health" label="Health" value="72" max="100"></tc-resource-bar>
+<tc-resource-bar variant="mana" label="Mana" value="60" max="100"></tc-resource-bar>
+<tc-resource-bar variant="stamina" label="Stamina" value="45" max="100"></tc-resource-bar>
 
-<!-- With label and readout -->
-<tc-health-bar label="Health" value="640" max="1000"></tc-health-bar>
-
-<!-- Inline text, no label -->
-<tc-health-bar value="45" max="100" show-text></tc-health-bar>
-
-<!-- Ghost band + segments -->
-<tc-health-bar label="Shield" value="3" max="4" segments="4" ghost="4"></tc-health-bar>
-```
-
----
-
-### tc-mana-bar
-
-Value/max resource bar for mana (MP) — a cyan-accent fill over a flat slate track. Structurally identical to `tc-health-bar`; styled with `--tc-accent` (cyan) so both bars are visually distinct at a glance in a game HUD. Supports an optional label row (human-readable label + mono `value / max` readout), a ghost band behind the fill for recent mana drain, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. Ported from the game-components `gc-mana-bar` (which extends `ResourceBarBase`); the fantasy chrome is dropped in favour of flat slate chrome; the track / fill / ghost / tick DOM is shared with the rest of the resource-bar family through the `internal/resourceBar` helper.
-
-**Tag:** `tc-mana-bar`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | number | `0` | Current value. Clamped to `[0, max]` for the fill width and `aria-valuenow`. Non-numeric values fall back to `0`. |
-| `max` | number | `100` | Maximum value. Values `<= 0` (or non-numeric) fall back to `100`. |
-| `ghost` | number | — | Optional "ghost" / recent-drain value drawn as a muted band behind the fill. Only shown when it resolves to a wider band than the current fill. |
-| `segments` | number | `1` | Number of equal slots; `segments - 1` evenly-spaced divider ticks are drawn across the track. Values `< 1` (or non-numeric) fall back to `1`. |
-| `show-text` | boolean | `false` | When present (and no `label` is set), draws a centred mono `value / max` readout inside the track. |
-| `label` | string | `""` | When set, renders a label row above the track with the label and a trailing mono `value / max` readout. Also used as the `aria-label` for the progressbar (defaults to `"Mana"`). |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `value` | `number` | Reflects the `value` attribute. |
-| `max` | `number` | Reflects the `max` attribute. |
-| `ghost` | `number \| null` | Reflects the `ghost` attribute; set to `null` to remove it. |
-| `segments` | `number` | Reflects the `segments` attribute. |
-| `showText` | `boolean` | Reflects the `show-text` boolean attribute. |
-| `label` | `string` | Reflects the `label` attribute. |
-
-**Events**
-
-None. `tc-mana-bar` is a purely presentational element.
-
-**Slots**
-
-None. `tc-mana-bar` is attribute-driven.
-
-**CSS Custom Properties**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-mana-bar-gap` | `0.375rem` | Gap between the label row and the track. |
-| `--bs-mana-bar-label-color` | `var(--tc-text)` | Label text color. |
-| `--bs-mana-bar-label-font-size` | `0.8125rem` | Label font size. |
-| `--bs-mana-bar-label-font-weight` | `500` | Label font weight (≤600). |
-| `--bs-mana-bar-value-color` | `var(--tc-text-muted)` | `value / max` readout color. |
-| `--bs-mana-bar-value-font-size` | `0.75rem` | `value / max` readout font size. |
-| `--bs-mana-bar-track-bg` | `var(--tc-slate-200)` | Track background. |
-| `--bs-mana-bar-track-height` | `0.625rem` | Track height. |
-| `--bs-mana-bar-fill-bg` | `var(--tc-accent)` | Value-fill color (cyan accent; overridable). |
-| `--bs-mana-bar-fill-transition` | `width var(--tc-transition-base)` | Fill-width transition (disabled under reduced motion). |
-| `--bs-mana-bar-ghost-bg` | `var(--tc-slate-400)` | Ghost / recent-drain band color (shared resource-bar contract). |
-| `--bs-mana-bar-tick-color` | `var(--tc-surface)` | Segment-divider color. |
-| `--bs-mana-bar-inline-text-color` | `var(--tc-text-muted)` | Inline `value / max` text color. |
-
-**Example**
-
-```html
-<!-- Bare bar -->
-<tc-mana-bar value="60" max="100"></tc-mana-bar>
-
-<!-- With label and readout -->
-<tc-mana-bar label="Mana" value="480" max="800"></tc-mana-bar>
-
-<!-- Inline text, no label -->
+<!-- Preset alias tags (variant inferred from the tag name) -->
+<tc-health-bar label="HP" value="640" max="1000"></tc-health-bar>
 <tc-mana-bar value="30" max="100" show-text></tc-mana-bar>
 
 <!-- Ghost band + segments -->
-<tc-mana-bar label="Charges" value="3" max="5" segments="5" ghost="4"></tc-mana-bar>
-```
-
----
-
-### tc-stamina-bar
-
-Value/max resource bar for stamina (SP) — a green success fill over a flat slate track. Structurally identical to `tc-health-bar` and `tc-mana-bar`; styled with `--tc-success` (green) so all three resource bars are visually distinct at a glance in a game HUD. Supports an optional label row (human-readable label + mono `value / max` readout), a ghost band behind the fill for recent stamina drain, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. Ported from the game-components `gc-stamina-bar` (which extends `ResourceBarBase`); the fantasy chrome is dropped in favour of flat slate chrome; the track / fill / ghost / tick DOM is shared with the rest of the resource-bar family through the `internal/resourceBar` helper.
-
-**Tag:** `tc-stamina-bar`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | number | `0` | Current value. Clamped to `[0, max]` for the fill width and `aria-valuenow`. Non-numeric values fall back to `0`. |
-| `max` | number | `100` | Maximum value. Values `<= 0` (or non-numeric) fall back to `100`. |
-| `ghost` | number | — | Optional "ghost" / recent-drain value drawn as a muted band behind the fill. Only shown when it resolves to a wider band than the current fill. |
-| `segments` | number | `1` | Number of equal slots; `segments - 1` evenly-spaced divider ticks are drawn across the track. Values `< 1` (or non-numeric) fall back to `1`. |
-| `show-text` | boolean | `false` | When present (and no `label` is set), draws a centred mono `value / max` readout inside the track. |
-| `label` | string | `""` | When set, renders a label row above the track with the label and a trailing mono `value / max` readout. Also used as the `aria-label` for the progressbar (defaults to `"Stamina"`). |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `value` | `number` | Reflects the `value` attribute. |
-| `max` | `number` | Reflects the `max` attribute. |
-| `ghost` | `number \| null` | Reflects the `ghost` attribute; set to `null` to remove it. |
-| `segments` | `number` | Reflects the `segments` attribute. |
-| `showText` | `boolean` | Reflects the `show-text` boolean attribute. |
-| `label` | `string` | Reflects the `label` attribute. |
-
-**Events**
-
-None. `tc-stamina-bar` is a purely presentational element.
-
-**Slots**
-
-None. `tc-stamina-bar` is attribute-driven.
-
-**CSS Custom Properties**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-stamina-bar-gap` | `0.375rem` | Gap between the label row and the track. |
-| `--bs-stamina-bar-label-color` | `var(--tc-text)` | Label text color. |
-| `--bs-stamina-bar-label-font-size` | `0.8125rem` | Label font size. |
-| `--bs-stamina-bar-label-font-weight` | `500` | Label font weight (≤600). |
-| `--bs-stamina-bar-value-color` | `var(--tc-text-muted)` | `value / max` readout color. |
-| `--bs-stamina-bar-value-font-size` | `0.75rem` | `value / max` readout font size. |
-| `--bs-stamina-bar-track-bg` | `var(--tc-slate-200)` | Track background. |
-| `--bs-stamina-bar-track-height` | `0.625rem` | Track height. |
-| `--bs-stamina-bar-fill-bg` | `var(--tc-success)` | Value-fill color (green success; overridable). |
-| `--bs-stamina-bar-fill-transition` | `width var(--tc-transition-base)` | Fill-width transition (disabled under reduced motion). |
-| `--bs-stamina-bar-ghost-bg` | `var(--tc-slate-400)` | Ghost / recent-drain band color (shared resource-bar contract). |
-| `--bs-stamina-bar-tick-color` | `var(--tc-surface)` | Segment-divider color. |
-| `--bs-stamina-bar-inline-text-color` | `var(--tc-text-muted)` | Inline `value / max` text color. |
-
-**Example**
-
-```html
-<!-- Bare bar -->
-<tc-stamina-bar value="72" max="100"></tc-stamina-bar>
-
-<!-- With label and readout -->
-<tc-stamina-bar label="Stamina" value="640" max="1000"></tc-stamina-bar>
-
-<!-- Inline text, no label -->
-<tc-stamina-bar value="45" max="100" show-text></tc-stamina-bar>
-
-<!-- Ghost band + segments -->
-<tc-stamina-bar label="Endurance" value="3" max="5" segments="5" ghost="4"></tc-stamina-bar>
+<tc-resource-bar label="Shield" value="3" max="4" segments="4" ghost="4"></tc-resource-bar>
 ```
 
 ---
@@ -12226,16 +11681,18 @@ None. `tc-chat-window` is purely data-driven via the `messages` and `channels` J
 
 ### tc-trend-indicator
 
-Trend badge with a directional arrow icon and formatted value. Direction is determined by the explicit `direction` attribute or inferred from the numeric sign of `value`. Three sizes scale icon and text together. Purely presentational — no interaction, no events.
+Trend badge with a directional arrow icon and formatted value. Direction is determined by the explicit `direction` attribute or inferred from the numeric sign of `value`. Three sizes scale icon and text together. When no `value` attribute is set, light-DOM child nodes are projected as the value content (rich markup). Purely presentational — no interaction, no events.
 
 **Tag:** `tc-trend-indicator`
+
+**Preset alias:** `tc-leaderboard-trend` is an alias of `tc-trend-indicator` (it accepts `direction="flat"` as a synonym of `neutral`). Everything below applies identically.
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `value` | string | `""` | The displayed value text (e.g. `"+12%"`, `"-8.3"`, `"0"`). When `direction` is absent and the value parses to a number, direction is inferred from its sign. |
-| `direction` | `'up' \| 'down' \| 'neutral'` | inferred | Explicit direction. Overrides sign inference. When absent, positive numbers → `up`, negative → `down`, zero or non-numeric → `neutral`. |
+| `value` | string | `""` | The displayed value text (e.g. `"+12%"`, `"-8.3"`, `"0"`). When `direction` is absent and the value parses to a number, direction is inferred from its sign. When omitted entirely, slotted child nodes are used as the value content. |
+| `direction` | `'up' \| 'down' \| 'neutral' \| 'flat'` | inferred | Explicit direction. Overrides sign inference. `flat` is a synonym of `neutral`. When absent, positive numbers → `up`, negative → `down`, zero or non-numeric → `neutral`. |
 | `size` | `'small' \| 'default' \| 'large'` | `'default'` | Scale variant — adjusts icon size, font size, and gap together. |
 
 **JS Properties**
@@ -12252,7 +11709,9 @@ None. `tc-trend-indicator` is purely presentational.
 
 **Slots**
 
-None. All content is generated from attributes.
+| Slot | Description |
+|------|-------------|
+| *(default)* | Value content used when the `value` attribute is absent. Projected into the inner `.tc-trend-indicator-value` span (e.g. `<strong>+5</strong> pts`). |
 
 **Accessibility**
 
@@ -14390,66 +13849,6 @@ Renders a semantic `<table>` with `<thead>`, `<tbody>`, and `<th scope="col">` c
 
 ---
 
-### tc-leaderboard-trend
-
-Small directional trend indicator with a Lucide arrow icon and a value. Three directions drive the icon shape and color. Designed to sit inline within table cells, metric rows, or leaderboard entries. Purely presentational — no interaction, no events.
-
-**Tag:** `tc-leaderboard-trend`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `value` | string | — | The trend value text (e.g. `"+240"`, `"-8%"`). When set, rendered as escaped text. When omitted, slotted children are projected into the value span instead. |
-| `direction` | `'up' \| 'down' \| 'flat'` | `'flat'` | Direction of the trend. Drives the arrow icon and color. `up` → `--tc-success`, `down` → `--tc-danger`, `flat` → `--tc-text-muted`. |
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `value` | `string \| null` | Reflects the `value` attribute. |
-| `direction` | `LeaderboardTrendDirection` | Reflects the `direction` attribute. Defaults to `'flat'` when the attribute is absent or invalid. |
-
-**Events**
-
-None. `tc-leaderboard-trend` is purely presentational.
-
-**Slots**
-
-| Slot | Description |
-|------|-------------|
-| *(default)* | Value content when the `value` attribute is absent. Projected into the inner `.tc-leaderboard-trend-value` span. Useful for rich markup (e.g. `<strong>+5</strong> pts`). |
-
-**Accessibility**
-
-The arrow icon SVG carries `aria-hidden="true"` so it is decorative. Direction is conveyed by both icon shape and color — not color alone. Reduced motion is honoured globally via the `prefers-reduced-motion` reset.
-
-**CSS Custom Properties**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-leaderboard-trend-color` | direction-mapped | Text and icon color. `up` → `--tc-success`, `down` → `--tc-danger`, `flat` → `--tc-text-muted`. |
-| `--bs-leaderboard-trend-icon-size` | `0.875em` | Icon width and height (relative to the element's font size). |
-| `--bs-leaderboard-trend-font-size` | `12px` | Value text font size (JetBrains Mono, weight 500). |
-| `--bs-leaderboard-trend-gap` | `0.25rem` | Gap between the icon and the value text. |
-
-```html
-<!-- Attribute value with explicit direction -->
-<tc-leaderboard-trend value="+12%" direction="up"></tc-leaderboard-trend>
-<tc-leaderboard-trend value="-8%" direction="down"></tc-leaderboard-trend>
-<tc-leaderboard-trend value="0%" direction="flat"></tc-leaderboard-trend>
-
-<!-- Slotted value (no value attribute) -->
-<tc-leaderboard-trend direction="up"><strong>+5</strong> pts</tc-leaderboard-trend>
-
-<!-- Inline in a table cell -->
-<td>
-    <tc-leaderboard-trend value="+240" direction="up"></tc-leaderboard-trend>
-</td>
-```
-
----
-
 ### tc-linked-providers-card
 
 Section card listing OAuth providers with custom icons and brand colors. A fixed header shows the card title; the body renders one row per provider with an icon tile, label, optional connected-account sub-label, and a connect/disconnect action button. Dispatches `tc-toggle` when an action button is clicked. Empty-state fallback when the `providers` array is empty.
@@ -16203,187 +15602,112 @@ el.rules = [
 
 ---
 
-### tc-credits-list
+### tc-data-list
 
-Static grouped credits roll — a centred sequence of sections, each pairing a role heading (JetBrains Mono uppercase micro-label) with one or more names (Inter). Set sections exclusively via the `sections` JS property. Non-interactive — no hover state, no events.
+Generic, data-driven row list. Owns the skeleton every domain list repeats — an `items` array that re-renders on assignment, an optional `list-title` header, an `empty-text` fallback, delegated per-row action buttons, and an optional single-select listbox mode. Domain rendering is supplied at the call site through the `renderRow` function property, so one element replaces the family of near-identical "render an array of rows" components (mute / team / credits / achievement / … lists). Each row must carry a `data-id`; a per-row button marks itself with `data-action="…"`.
 
-**Tag:** `tc-credits-list`
-
-**Attributes**
-
-None. All content is supplied via the `sections` JS property. (The host receives `role="list"` automatically unless one is already set.)
-
-**JS Properties**
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `sections` | `CreditsSection[]` | `[]` | Array of credit sections (see shape below). Re-renders the roll on each set. |
-
-**CreditsSection shape**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `role` | `string` | yes | The credited role — rendered as a JetBrains Mono uppercase micro-label (e.g. `"Lead Engineering"`). |
-| `names` | `string[]` | yes | One or more names credited under the role. Each is rendered on its own line in Inter. |
-
-**Events**
-
-None. `tc-credits-list` is purely presentational.
-
-**Slots**
-
-None.
-
-**CSS custom properties (theming)**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-credits-list-section-gap` | `2rem` | Vertical gap between credit sections. |
-| `--bs-credits-list-name-gap` | `0.25rem` | Vertical gap between names within a section. |
-| `--bs-credits-list-role-name-gap` | `0.625rem` | Gap between a role heading and its names. |
-| `--bs-credits-list-role-color` | `var(--tc-text-faint)` | Role heading text color. |
-| `--bs-credits-list-role-size` | `0.6875rem` | Role heading font size. |
-| `--bs-credits-list-role-spacing` | `0.12em` | Role heading letter-spacing. |
-| `--bs-credits-list-name-color` | `var(--tc-text)` | Name text color. |
-| `--bs-credits-list-name-size` | `0.9375rem` | Name font size. |
-
-```html
-<tc-credits-list id="credits"></tc-credits-list>
-
-<script>
-const el = document.getElementById('credits')
-el.sections = [
-    { role: 'Game Director', names: ['Mira Calloway'] },
-    { role: 'Lead Engineering', names: ['Tomas Reyes', 'Aiko Nakamura'] },
-    { role: 'Art & Animation', names: ['Priya Anand', 'Lukas Berg', 'Sofia Marek'] },
-    { role: 'Sound Design', names: ['Daniel Cho'] },
-]
-</script>
-```
-
----
-
-### tc-achievement-list
-
-Scrollable list of achievements with locked, in-progress, and unlocked states and an optional progress bar. Ported from the game-components `gc-achievement-list`, restyled to the toolcase design system (no fantasy chrome). Set achievements exclusively via the `achievements` JS property. Secret achievements are masked (`???` name, hidden description, lock-style glyph) until unlocked. Non-interactive — no hover state, no events.
-
-**Tag:** `tc-achievement-list`
-
-**Attributes**
-
-None. All content is supplied via the `achievements` JS property. The host receives `role="list"` automatically (unless an explicit `role` is already set).
-
-**JS Properties**
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `achievements` | `Achievement[]` | `[]` | Array of achievement descriptors (see shape below). Re-renders the list on each set; the getter returns a copy. |
-
-**Achievement shape**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | `string` | yes | Stable identifier, written to the row's `data-id` attribute. |
-| `name` | `string` | yes | Achievement name — Inter 500, `--tc-text`. Hidden behind `???` while `secret` and not `unlocked`. |
-| `description` | `string` | no | Secondary description line below the name — `--tc-text-muted`, smaller. Replaced by "Hidden achievement." while secret. |
-| `icon` | `string` | no | Lucide icon name (kebab-case or PascalCase, e.g. `"swords"` or `"Swords"`). Rendered as inline SVG inside the icon tile. Falls back to a default glyph per state (`award` unlocked, `lock` locked, `help-circle` secret). |
-| `unlocked` | `boolean` | no | When true, the row is marked unlocked — ink-filled icon tile and emphasised points. |
-| `progress` | `number` | no | Current progress value. A progress bar shows only when the row is locked and both `progress` and `target` are numbers with `target > 0`. |
-| `target` | `number` | no | Progress target (denominator). Required alongside `progress` to render the bar. |
-| `points` | `number` | no | Point value shown in JetBrains Mono on the right. Hidden for secret rows. |
-| `secret` | `boolean` | no | When true (and not `unlocked`), masks the name, description, points, and icon. |
-
-**Events**
-
-None. `tc-achievement-list` is purely presentational.
-
-**Slots**
-
-None.
-
-**CSS custom properties (theming)**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-achievement-list-max-height` | `360px` | Max height before the list scrolls vertically. |
-| `--bs-achievement-list-bg` | `var(--tc-surface)` | List background. |
-| `--bs-achievement-list-border-color` | `var(--tc-border)` | Outer 1px hairline frame color. |
-| `--bs-achievement-list-row-border-color` | `var(--tc-border)` | 1px hairline separator between rows. |
-| `--bs-achievement-list-row-padding-y` | `0.75rem` | Vertical padding per row. |
-| `--bs-achievement-list-row-padding-x` | `1rem` | Horizontal padding per row. |
-| `--bs-achievement-list-row-gap` | `0.75rem` | Gap between icon, text, and points. |
-| `--bs-achievement-list-icon-size` | `2rem` | Width/height of the square icon tile. |
-| `--bs-achievement-list-icon-glyph-size` | `1.125rem` | Icon SVG width/height. |
-| `--bs-achievement-list-icon-bg` | `var(--tc-surface-muted)` | Icon tile background (locked/in-progress). |
-| `--bs-achievement-list-icon-border-color` | `var(--tc-border)` | Icon tile border color. |
-| `--bs-achievement-list-icon-color` | `var(--tc-text-muted)` | Icon glyph color (locked/in-progress). |
-| `--bs-achievement-list-name-color` | `var(--tc-text)` | Achievement name color. |
-| `--bs-achievement-list-name-font-size` | `0.9375rem` | Name font size. |
-| `--bs-achievement-list-description-color` | `var(--tc-text-muted)` | Description text color. |
-| `--bs-achievement-list-description-font-size` | `0.8125rem` | Description font size. |
-| `--bs-achievement-list-points-color` | `var(--tc-text-muted)` | Points color (locked/in-progress). |
-| `--bs-achievement-list-points-font-size` | `0.8125rem` | Points font size. |
-| `--bs-achievement-list-progress-track-bg` | `var(--tc-slate-200)` | Progress track background. |
-| `--bs-achievement-list-progress-fill` | `var(--tc-app-accent)` | Progress fill color (ink). |
-| `--bs-achievement-list-progress-height` | `0.375rem` | Progress bar height. |
-| `--bs-achievement-list-progress-count-color` | `var(--tc-text-muted)` | Progress count text color. |
-| `--bs-achievement-list-progress-count-font-size` | `0.6875rem` | Progress count font size. |
-| `--bs-achievement-list-unlocked-icon-bg` | `var(--tc-app-accent)` | Icon tile background when unlocked. |
-| `--bs-achievement-list-unlocked-icon-color` | `#fff` | Icon glyph color when unlocked. |
-| `--bs-achievement-list-unlocked-icon-border-color` | `var(--tc-app-accent)` | Icon tile border when unlocked. |
-| `--bs-achievement-list-unlocked-points-color` | `var(--tc-text)` | Points color when unlocked. |
-| `--bs-achievement-list-locked-opacity` | `0.6` | Opacity applied to locked rows. |
-
-```html
-<tc-achievement-list id="achievements"></tc-achievement-list>
-
-<script>
-const el = document.getElementById('achievements')
-el.achievements = [
-    {
-        id: 'first-blood',
-        name: 'First Blood',
-        description: 'Defeat your first enemy.',
-        icon: 'swords',
-        unlocked: true,
-        points: 10,
-    },
-    {
-        id: 'explorer',
-        name: 'Explorer',
-        description: 'Discover 25 hidden locations across the world.',
-        icon: 'map',
-        progress: 18,
-        target: 25,
-        points: 50,
-    },
-    {
-        id: 'secret-ending',
-        name: 'The True Ending',
-        description: 'You should not be able to read this.',
-        secret: true,
-        points: 250,
-    },
-]
-</script>
-```
-
----
-
-### tc-result-screen
-
-Match / round result screen: a centred region with a mono uppercase eyebrow, a status-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-result-screen`, restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons. `tc-game-over-screen` uses the same layout with defeat-specific defaults.
-
-**Tag:** `tc-result-screen`
+**Tag:** `tc-data-list`
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `title-text` | string | `''` | The large title heading |
+| `list-title` | string | — | Optional header label shown above the rows. Omit for a bare list. |
+| `empty-text` | string | `Nothing to show.` | Text rendered when `items` is empty. |
+| `selectable` | boolean | absent | When present, the body becomes a `listbox`, rows become focusable `option`s, and clicking/Enter/Space on a row selects it (`tc-select`). |
+| `selected-id` | string | — | The currently selected row's id (selectable mode). Reflected onto rows as `aria-selected` + a `--selected` modifier without a full rebuild. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `items` | `any[]` | `[]` | Row data. Re-renders on each set; the getter returns a copy. |
+| `renderRow` | `(item, index) => string` | `null` | Row renderer returning the full markup for one row (typically an `<li class="tc-data-list__row" data-id="…">`). Without it, a built-in row reads `id` / `label` / `secondary` / `trailing` off each item. |
+| `selectedId` | `string` | `''` | Get/set the selected row id (mirrors `selected-id`). |
+| `onAction` | `(detail: { action, id }) => void` \| `null` | `null` | Callback mirror of the `tc-action` event. |
+| `onSelect` | `(detail: { id }) => void` \| `null` | `null` | Callback mirror of the `tc-select` event. |
+
+**Row markup contract**
+
+`renderRow` returns whatever markup you like, but the delegated handlers rely on two hooks: the row root carries `data-id="<id>"`, and any actionable button carries `data-action="<name>"`. Reusable BEM parts ship in the stylesheet: `__row` (with `--selected`), `__icon`, `__text` + `__primary` / `__secondary`, `__trailing`, `__action`, `__empty`.
+
+**Events**
+
+| Event | `detail` | Fired when |
+|-------|----------|-----------|
+| `tc-action` | `{ action: string, id: string }` | A `[data-action]` button inside a row is clicked. `action` is the button's `data-action`; `id` is the row's `data-id`. |
+| `tc-select` | `{ id: string }` | A row is selected in `selectable` mode (click or Enter/Space). Also updates `selected-id`. |
+
+Both bubble and are `composed`.
+
+**Slots**
+
+None. Content is driven by `items` + `renderRow`.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-data-list-bg` | `var(--tc-surface)` | Panel background. |
+| `--bs-data-list-border` | `1px solid var(--tc-border)` | Outer frame. |
+| `--bs-data-list-separator` | `1px solid var(--tc-border)` | Row/header separators. |
+| `--bs-data-list-row-hover-bg` | `var(--tc-surface-hover)` | Row hover background. |
+| `--bs-data-list-row-selected-bg` | `var(--tc-surface-muted)` | Selected row background (selectable mode). |
+| `--bs-data-list-header-bg` | `var(--tc-surface-muted)` | Header strip background. |
+| `--bs-data-list-title-color` | `var(--tc-text)` | Header title color. |
+| `--bs-data-list-primary-color` | `var(--tc-text)` | Primary line color. |
+| `--bs-data-list-secondary-color` | `var(--tc-text-muted)` | Secondary line color. |
+| `--bs-data-list-trailing-color` | `var(--tc-text-faint)` | Trailing meta color (mono). |
+| `--bs-data-list-action-bg` | `var(--tc-surface)` | Action button background. |
+| `--bs-data-list-action-hover-bg` | `var(--tc-app-accent)` | Action button hover background. |
+| `--bs-data-list-action-hover-color` | `#fff` | Action button hover text. |
+| `--bs-data-list-empty-color` | `var(--tc-text-faint)` | Empty-state text color. |
+
+```html
+<tc-data-list id="mutes" empty-text="No muted players."></tc-data-list>
+
+<script>
+const el = document.getElementById('mutes')
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+
+el.renderRow = (p) =>
+    `<li class="tc-data-list__row" data-id="${esc(p.id)}" role="listitem">` +
+    `<div class="tc-data-list__text">` +
+    `<span class="tc-data-list__primary">${esc(p.name)}</span>` +
+    (p.reason ? `<span class="tc-data-list__secondary">${esc(p.reason)}</span>` : '') +
+    `</div>` +
+    `<button type="button" class="tc-data-list__action" data-action="unmute">Unmute</button>` +
+    `</li>`
+
+el.items = [
+    { id: '1', name: 'ToxicWizard92', reason: 'Spam' },
+    { id: '2', name: 'ChatBot_AFK' },
+]
+
+el.addEventListener('tc-action', e => {
+    // e.detail = { action: 'unmute', id: '1' }
+})
+</script>
+```
+
+---
+### tc-result-screen
+
+Match / round result screen: a centred region with a mono uppercase eyebrow, a status-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-result-screen`, restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons.
+
+**Tag:** `tc-result-screen`
+
+**Preset aliases:** `tc-game-over-screen` (variant `defeat` — "Game Over" / danger) and `tc-victory-screen` (variant `victory` — "Victory!" / gold) are aliases of `tc-result-screen` that infer the variant from the tag name. Everything below applies identically.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `variant` | `neutral\|defeat\|victory` | `neutral` (per tag) | Seeds the `title-text` / `title-color` / `eyebrow` defaults. `defeat` → "Game Over" / danger / "Defeat"; `victory` → "Victory!" / gold / "Triumph"; `neutral` → "" / gold / "Result". The alias tags default this from their tag name. |
+| `title-text` | string | (per variant) | The large title heading |
 | `subtitle` | string | — | Optional supporting line under the divider |
-| `title-color` | `gold\|danger\|parch` | `gold` | Status tone of the title (`gold` → warning ramp, `danger` → danger ramp, `parch` → neutral slate) |
-| `eyebrow` | string | `Result` | The mono uppercase micro-label above the title |
+| `title-color` | `gold\|danger\|parch` | (per variant) | Status tone of the title (`gold` → warning ramp, `danger` → danger ramp, `parch` → neutral slate) |
+| `eyebrow` | string | (per variant) | The mono uppercase micro-label above the title |
 
 The host element automatically gains `role="region"` (unless one is already set).
 
@@ -16394,6 +15718,7 @@ The host element automatically gains `role="region"` (unless one is already set)
 | `stats` | `ResultStat[]` | Stat rows (set via JS, not attribute); setting re-renders |
 | `rewards` | `ResultReward[]` | Reward chips shown in the reward strip |
 | `actions` | `ResultAction[]` | Action buttons rendered at the bottom |
+| `variant` | `neutral\|defeat\|victory` | Mirror of the `variant` attribute |
 | `titleText` | string | Mirror of the `title-text` attribute |
 | `subtitle` | string | Mirror of the `subtitle` attribute |
 | `titleColor` | `gold\|danger\|parch` | Mirror of the `title-color` attribute |
@@ -16478,175 +15803,6 @@ el.actions = [
     { id: 'continue', label: 'Continue', variant: 'primary' },
     { id: 'replay', label: 'Replay' },
     { id: 'menu', label: 'Main Menu', variant: 'ghost' },
-]
-el.addEventListener('tc-action', e => console.log('action', e.detail.id))
-</script>
-```
-
----
-
-### tc-game-over-screen
-
-Game-over / result end screen: a centred region with a mono uppercase eyebrow, a status-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-game-over-screen` (a `gc-result-screen` defaulting to "Game Over" / "Defeat" in a danger tone), restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons.
-
-**Tag:** `tc-game-over-screen`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `title-text` | string | `Game Over` | The large title heading |
-| `subtitle` | string | — | Optional supporting line under the divider |
-| `title-color` | `gold\|danger\|parch` | `danger` | Status tone of the title (`danger` → danger ramp, `gold` → warning ramp, `parch` → neutral slate) |
-| `eyebrow` | string | `Defeat` | The mono uppercase micro-label above the title |
-
-The host element automatically gains `role="region"` (unless one is already set).
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `stats` | `GameOverStat[]` | Stat rows (set via JS, not attribute); setting re-renders |
-| `rewards` | `GameOverReward[]` | Reward chips shown in the reward strip |
-| `actions` | `GameOverAction[]` | Action buttons rendered at the bottom |
-| `titleText` | string | Mirror of the `title-text` attribute |
-| `subtitle` | string | Mirror of the `subtitle` attribute |
-| `titleColor` | `gold\|danger\|parch` | Mirror of the `title-color` attribute |
-| `eyebrow` | string | Mirror of the `eyebrow` attribute |
-| `onAction` | `((id: string) => void) \| null` | Optional callback fired alongside `tc-action` |
-
-Each `GameOverStat`:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `label` | string | Stat name |
-| `value` | string \| number | Stat value (numbers are locale-formatted) |
-
-Each `GameOverReward`:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `label` | string | Reward name |
-| `glyph` | string? | Short symbol/initials shown before the label (rendered as text, `aria-hidden`) |
-| `amount` | number \| string? | Optional amount shown after the label (numbers are locale-formatted) |
-| `color` | string? | Optional CSS colour applied to the glyph |
-
-Each `GameOverAction`:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique key emitted in the `tc-action` `detail` |
-| `label` | string | Button text |
-| `variant` | `default\|primary\|danger\|ghost`? | Button style (`default` → secondary, `primary` → ink, `danger` → danger, `ghost` → outline) |
-
-**Events**
-
-| Event | `detail` | Fired when |
-|-------|----------|------------|
-| `tc-action` | `{ id: string }` | An action button is clicked |
-
-**Slots:** none — the eyebrow, title, subtitle, stats, rewards, and actions are all generated from attributes / JS properties.
-
-```html
-<tc-game-over-screen id="over" subtitle="The colony has fallen."></tc-game-over-screen>
-<script>
-const el = document.getElementById('over')
-el.stats = [
-    { label: 'Score', value: 18420 },
-    { label: 'Waves cleared', value: 12 },
-]
-el.rewards = [
-    { glyph: '◈', label: 'Gold', amount: 320, color: 'var(--tc-warning)' },
-    { glyph: '★', label: 'XP', amount: 1500 },
-]
-el.actions = [
-    { id: 'retry', label: 'Try Again', variant: 'primary' },
-    { id: 'menu', label: 'Main Menu' },
-    { id: 'quit', label: 'Quit', variant: 'ghost' },
-]
-el.addEventListener('tc-action', e => console.log('action', e.detail.id))
-</script>
-```
-
----
-
-### tc-victory-screen
-
-Victory end screen: a centred region with a mono uppercase eyebrow, a gold-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-victory-screen` (a `gc-result-screen` defaulting to "Victory!" / "Triumph" in a gold tone), restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons.
-
-**Tag:** `tc-victory-screen`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `title-text` | string | `Victory!` | The large title heading |
-| `subtitle` | string | — | Optional supporting line under the divider |
-| `title-color` | `gold\|danger\|parch` | `gold` | Status tone of the title (`gold` → warning ramp, `danger` → danger ramp, `parch` → neutral slate) |
-| `eyebrow` | string | `Triumph` | The mono uppercase micro-label above the title |
-
-The host element automatically gains `role="region"` (unless one is already set).
-
-**JS Properties**
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `stats` | `VictoryStat[]` | Stat rows (set via JS, not attribute); setting re-renders |
-| `rewards` | `VictoryReward[]` | Reward chips shown in the reward strip |
-| `actions` | `VictoryAction[]` | Action buttons rendered at the bottom |
-| `titleText` | string | Mirror of the `title-text` attribute |
-| `subtitle` | string | Mirror of the `subtitle` attribute |
-| `titleColor` | `gold\|danger\|parch` | Mirror of the `title-color` attribute |
-| `eyebrow` | string | Mirror of the `eyebrow` attribute |
-| `onAction` | `((id: string) => void) \| null` | Optional callback fired alongside `tc-action` |
-
-Each `VictoryStat`:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `label` | string | Stat name |
-| `value` | string \| number | Stat value (numbers are locale-formatted) |
-
-Each `VictoryReward`:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `label` | string | Reward name |
-| `glyph` | string? | Short symbol/initials shown before the label (rendered as text, `aria-hidden`) |
-| `amount` | number \| string? | Optional amount shown after the label (numbers are locale-formatted) |
-| `color` | string? | Optional CSS colour applied to the glyph |
-
-Each `VictoryAction`:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique key emitted in the `tc-action` `detail` |
-| `label` | string | Button text |
-| `variant` | `default\|primary\|danger\|ghost`? | Button style (`default` → secondary, `primary` → ink, `danger` → danger, `ghost` → outline) |
-
-**Events**
-
-| Event | `detail` | Fired when |
-|-------|----------|------------|
-| `tc-action` | `{ id: string }` | An action button is clicked |
-
-**Slots:** none — the eyebrow, title, subtitle, stats, rewards, and actions are all generated from attributes / JS properties.
-
-```html
-<tc-victory-screen id="win" subtitle="All waves repelled. The colony stands."></tc-victory-screen>
-<script>
-const el = document.getElementById('win')
-el.stats = [
-    { label: 'Score', value: 24800 },
-    { label: 'Waves cleared', value: 20 },
-]
-el.rewards = [
-    { glyph: '◈', label: 'Gold', amount: 640, color: 'var(--tc-warning)' },
-    { glyph: '★', label: 'XP', amount: 3000 },
-]
-el.actions = [
-    { id: 'continue', label: 'Continue', variant: 'primary' },
-    { id: 'menu', label: 'Main Menu' },
 ]
 el.addEventListener('tc-action', e => console.log('action', e.detail.id))
 </script>
@@ -23403,6 +22559,8 @@ End-of-match statistics panel. Port of `gc-stats-screen` (game-components), rest
 
 Primary call-to-action button ported from `gc-metal-button` (game-components), restyled to the toolcase design system. Game-specific chrome (metal textures, gilded frames, glows) is dropped; the button renders with slate neutrals, sharp corners (`border-radius: 0`), a 1px hairline border, and the ink primary gradient for the `primary` variant. Slotted children become the button label. Disabled state is enforced natively on the inner `<button>`. No shadow root; light DOM; `display: inline-block`.
 
+> **Alias of `tc-button`.** `tc-metal-button` is a thin subclass of `tc-button` with `skin="metal"` baked in (equivalent to `<tc-button skin="metal">`). It keeps the metal `variant` (default / primary / danger / ghost) and `size` (sm / md / lg) sets and the `tc-metal-button__btn` class scheme.
+
 **Tag:** `tc-metal-button`
 
 **Attributes**
@@ -23544,86 +22702,6 @@ None. `tc-minimap` is attribute- and property-driven.
         { id: 'enemy-1',   x: 120, y: 80,  color: 'var(--tc-danger)'            },
         { id: 'objective', x: 100, y: 100, color: 'var(--tc-warning)', size: 14 },
     ];
-</script>
-```
-
-### tc-mute-list
-
-A list of muted players with optional per-entry reason, timestamp, and a per-row Unmute button. Players are set via the JS `players` property. Clicking Unmute fires `tc-unmute` with the player id. No shadow root; light DOM; `display: block`.
-
-**Tag:** `tc-mute-list`
-
-#### Attributes
-
-None. All content is driven by the `players` JS property.
-
-#### JS Properties
-
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `players` | `MutedPlayer[]` | `[]` | Array of muted-player descriptors to render. Setting this property re-renders the list. |
-| `onUnmute` | `((id: string) => void) \| null` | `null` | Optional callback — called in addition to the `tc-unmute` event when the Unmute button is clicked. |
-
-**`MutedPlayer` shape**
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string` | yes | Unique player identifier. Stamped as `data-id` on the row element and forwarded in the `tc-unmute` event detail. |
-| `name` | `string` | yes | Display name shown in JetBrains Mono. |
-| `mutedAt` | `string` | no | Human-readable timestamp string (e.g. `"2d ago"`). Displayed to the right of the name. |
-| `reason` | `string` | no | Optional mute reason displayed as a muted sub-label below the name. |
-
-#### Events
-
-| Event | Detail | Description |
-|---|---|---|
-| `tc-unmute` | `{ id: string }` | Fired when the Unmute button for a row is clicked. `id` is the `MutedPlayer.id` of that row. Bubbles and is composed. |
-
-#### Slots
-
-None. `tc-mute-list` is property-driven; all content is generated.
-
-#### CSS Custom Properties
-
-| Property | Default | Description |
-|---|---|---|
-| `--bs-mute-list-bg` | `var(--tc-surface)` | Panel background. |
-| `--bs-mute-list-border` | `1px solid var(--tc-border)` | Outer 1 px hairline border. |
-| `--bs-mute-list-row-border` | `1px solid var(--tc-border)` | Row separator hairline. |
-| `--bs-mute-list-row-hover-bg` | `var(--tc-surface-hover)` | Row hover background. |
-| `--bs-mute-list-name-font-size` | `0.8125rem` | Player name font size. |
-| `--bs-mute-list-name-color` | `var(--tc-text)` | Player name colour. |
-| `--bs-mute-list-reason-font-size` | `0.75rem` | Reason sub-label font size. |
-| `--bs-mute-list-reason-color` | `var(--tc-text-muted)` | Reason sub-label colour. |
-| `--bs-mute-list-time-font-size` | `0.6875rem` | Timestamp font size. |
-| `--bs-mute-list-time-color` | `var(--tc-text-faint)` | Timestamp colour. |
-| `--bs-mute-list-btn-font-size` | `0.75rem` | Unmute button font size. |
-| `--bs-mute-list-btn-min-height` | `1.75rem` | Unmute button minimum height (44 px under coarse pointer). |
-| `--bs-mute-list-btn-bg` | `var(--tc-surface)` | Unmute button background. |
-| `--bs-mute-list-btn-color` | `var(--tc-text)` | Unmute button text colour. |
-| `--bs-mute-list-btn-border` | `1px solid var(--tc-border-strong)` | Unmute button border. |
-| `--bs-mute-list-btn-hover-bg` | `var(--tc-app-accent)` | Unmute button hover background (ink). |
-| `--bs-mute-list-btn-hover-color` | `#fff` | Unmute button hover text colour. |
-| `--bs-mute-list-empty-color` | `var(--tc-text-faint)` | Empty-state text colour. |
-
-#### Example
-
-```html
-<tc-mute-list id="mutes"></tc-mute-list>
-
-<script>
-    const mutes = document.getElementById('mutes');
-
-    mutes.players = [
-        { id: 'p1', name: 'ToxicWizard92', mutedAt: '2d ago', reason: 'Spam' },
-        { id: 'p2', name: 'ChatBot_AFK',   mutedAt: '1w ago' },
-    ];
-
-    mutes.addEventListener('tc-unmute', e => {
-        console.log('unmuted player id:', e.detail.id);
-        // Remove from list after unmute:
-        mutes.players = mutes.players.filter(p => p.id !== e.detail.id);
-    });
 </script>
 ```
 
@@ -24542,12 +23620,16 @@ In-game pause overlay with a full-screen backdrop, an optional eyebrow + title h
 
 **Tag:** `tc-pause-menu`
 
+**Preset alias:** `tc-pause-screen` is a full-screen preset of `tc-pause-menu` that drops the footer, seeds a default resume/restart/quit item set, reads `screen-title` instead of `menu-title`, and re-dispatches `tc-resume` / `tc-restart` / `tc-quit` for those item ids. Everything below applies identically.
+
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `open` | boolean | `false` | Shows the overlay when present; removing it hides it. |
-| `menu-title` | string | `"Game Paused"` | Heading shown inside the panel. |
+| `menu-title` | string | `"Game Paused"` | Heading shown inside the panel (the `tc-pause-screen` preset reads `screen-title`, default `"Paused"`). |
+| `default-items` | boolean | `false` | When present, seeds the resume/restart/quit default item set if no `items` are supplied (always on for `tc-pause-screen`). |
+| `resume-footer` | boolean | `false` | Forces the footer Resume button on (default on for `tc-pause-menu`, off for `tc-pause-screen`). |
 
 **JS Properties**
 
@@ -24555,8 +23637,11 @@ In-game pause overlay with a full-screen backdrop, an optional eyebrow + title h
 |----------|------|---------|-------------|
 | `open` | `boolean` | `false` | Reflects the `open` attribute. |
 | `menuTitle` | `string` | `""` | Reflects the `menu-title` attribute. |
-| `items` | `PauseMenuItem[]` | `[]` | Array of menu items. Setting this after connect surgically updates the items list without re-rendering the panel. |
+| `screenTitle` | `string` | `""` | Reflects the `screen-title` attribute (used by the `tc-pause-screen` preset). |
+| `items` | `PauseMenuItem[]` | `[]` | Array of menu items (resolves to the default set when seeding is enabled and none are supplied). Setting this after connect surgically updates the items list without re-rendering the panel. |
 | `onResume` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-resume`. |
+| `onRestart` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-restart` (preset id-routing only). |
+| `onQuit` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-quit` (preset id-routing only). |
 | `onClose` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-close`. |
 | `onSelect` | `((id: string) => void) \| null` | `null` | Optional callback fired alongside `tc-select`. |
 
@@ -24573,7 +23658,9 @@ In-game pause overlay with a full-screen backdrop, an optional eyebrow + title h
 
 | Event | Detail | Description |
 |-------|--------|-------------|
-| `tc-resume` | `{}` | Fired when the Resume button is clicked. Does **not** self-close. |
+| `tc-resume` | `{}` | Fired when the footer Resume button is clicked (or, under the preset's id-routing, a `resume` item is activated). Does **not** self-close. |
+| `tc-restart` | `{}` | Fired when a `restart` item is activated (preset id-routing only). |
+| `tc-quit` | `{}` | Fired when a `quit` item is activated (preset id-routing only). |
 | `tc-close` | `{}` | Fired on `Escape` key, backdrop click, or — if the consumer wires it up — close actions. Does **not** mutate `open`. |
 | `tc-select` | `{ id: string }` | Fired when a non-disabled menu item is activated (click, `Enter`, or `Space`). |
 
@@ -24625,102 +23712,6 @@ In-game pause overlay with a full-screen backdrop, an optional eyebrow + title h
         console.log('selected:', e.detail.id)
         menu.removeAttribute('open')
     })
-</script>
-```
-
----
-
-### tc-pause-screen
-
-Full-screen pause overlay with a backdrop, a mono eyebrow label, a custom title heading, and a keyboard-navigable item list. Port of `gc-pause-screen` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners (border-radius: 0), 1px hairline borders, overlay-tier shadow. Controlled component — fires `tc-close` / `tc-resume` / `tc-restart` / `tc-quit` / `tc-select`; the consumer sets `open` to `false` to actually dismiss. Focus trap, scroll lock, and keyboard (`Escape`, `ArrowDown`/`Up`, `Enter`/`Space`, `Tab`) handling included. Default items are Resume, Restart, and Quit; set `items` via the JS property to customise. No shadow root; light DOM; `display: block`.
-
-**Tag:** `tc-pause-screen`
-
-**Attributes**
-
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `open` | boolean | `false` | Shows the overlay when present; removing it hides it. |
-| `screen-title` | string | `"Paused"` | Title heading shown inside the panel. |
-
-**JS Properties**
-
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `open` | `boolean` | `false` | Reflects the `open` attribute. |
-| `screenTitle` | `string` | `"Paused"` | Reflects the `screen-title` attribute. |
-| `items` | `PauseScreenItem[]` | `[Resume, Restart, Quit]` | Array of menu items. Falls back to the default three items when set to an empty array. Setting this after connect surgically updates the list without re-rendering the panel. |
-| `onResume` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-resume`. |
-| `onRestart` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-restart`. |
-| `onQuit` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-quit`. |
-| `onClose` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-close`. |
-| `onSelect` | `((id: string) => void) \| null` | `null` | Optional callback fired alongside `tc-select`. |
-
-**PauseScreenItem shape**
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | `string` | yes | Unique item identifier, returned in `tc-select` detail. Items with `id: 'resume'`, `'restart'`, or `'quit'` also fire their dedicated events. |
-| `label` | `string` | yes | Display text for the item row. |
-| `disabled` | `boolean` | no | Prevents selection and applies the disabled style. |
-| `badge` | `string` | no | Optional mono badge rendered on the trailing edge. |
-
-**Events**
-
-| Event | Detail | Description |
-|-------|--------|-------------|
-| `tc-resume` | `{}` | Fired when an item with `id: 'resume'` is activated. Does **not** self-close. |
-| `tc-restart` | `{}` | Fired when an item with `id: 'restart'` is activated. |
-| `tc-quit` | `{}` | Fired when an item with `id: 'quit'` is activated. |
-| `tc-select` | `{ id: string }` | Fired for every non-disabled item activation (click, `Enter`, or `Space`). |
-| `tc-close` | `{}` | Fired on `Escape` key or backdrop click. Does **not** mutate `open`. |
-
-**CSS custom properties**
-
-| Property | Default | Description |
-|----------|---------|-------------|
-| `--bs-pause-screen-bg` | `var(--tc-surface)` | Panel background. |
-| `--bs-pause-screen-border-color` | `var(--tc-border)` | Panel and item divider border colour. |
-| `--bs-pause-screen-shadow` | `var(--tc-shadow-lg)` | Panel box-shadow (overlay tier). |
-| `--bs-pause-screen-width` | `420px` | Default panel width. |
-| `--bs-pause-screen-max-width` | `calc(100vw - 2rem)` | Maximum panel width (viewport responsive). |
-| `--bs-pause-screen-max-height` | `calc(100vh - 4rem)` | Maximum panel height. |
-| `--bs-pause-screen-padding` | `1.5rem` | Header and item padding. |
-| `--bs-pause-screen-backdrop-bg` | `#0f172a` | Backdrop scrim colour. |
-| `--bs-pause-screen-backdrop-opacity` | `0.65` | Backdrop opacity (open state). |
-| `--bs-pause-screen-z-backdrop` | `var(--tc-z-modal-backdrop)` | Backdrop z-index. |
-| `--bs-pause-screen-z-panel` | `var(--tc-z-modal)` | Panel z-index. |
-| `--bs-pause-screen-eyebrow-color` | `var(--tc-cyan, #22d3ee)` | Eyebrow micro-label colour (cyan accent). |
-| `--bs-pause-screen-title-color` | `var(--tc-text)` | Title heading colour. |
-| `--bs-pause-screen-item-min-height` | `3rem` | Item row min-height (44 px under coarse pointer). |
-| `--bs-pause-screen-item-color` | `var(--tc-text)` | Item text colour. |
-| `--bs-pause-screen-item-hover-bg` | `var(--tc-surface-muted)` | Item hover/focus background. |
-| `--bs-pause-screen-item-active-color` | `var(--tc-app-accent)` | Item text colour on hover/focus. |
-| `--bs-pause-screen-item-disabled-color` | `var(--tc-text-faint)` | Disabled item text colour. |
-| `--bs-pause-screen-badge-bg` | `var(--tc-surface-muted)` | Badge background. |
-| `--bs-pause-screen-badge-color` | `var(--tc-text-muted)` | Badge text colour. |
-
-```html
-<button onclick="document.querySelector('#ps').setAttribute('open','')">Pause</button>
-
-<tc-pause-screen id="ps" screen-title="Realm of Ash"></tc-pause-screen>
-
-<script>
-    const screen = document.querySelector('#ps')
-
-    // Optional: override default items
-    screen.items = [
-        { id: 'resume',   label: 'Resume' },
-        { id: 'settings', label: 'Settings', badge: 'New' },
-        { id: 'restart',  label: 'Restart' },
-        { id: 'quit',     label: 'Quit', disabled: true },
-    ]
-
-    screen.addEventListener('tc-resume',  () => screen.removeAttribute('open'))
-    screen.addEventListener('tc-close',   () => screen.removeAttribute('open'))
-    screen.addEventListener('tc-restart', () => console.log('restart'))
-    screen.addEventListener('tc-quit',    () => console.log('quit'))
-    screen.addEventListener('tc-select',  e => console.log('selected:', e.detail.id))
 </script>
 ```
 
@@ -25631,113 +24622,6 @@ None. `tc-rune-corner` renders entirely from its attributes and CSS.
 </div>
 ```
 
-
----
-
-### tc-save-slot-list
-
-Save/load slot list with per-slot metadata, autosave badge, selected state, and action buttons (Load, Save/Overwrite, Delete). Port of `gc-save-slot-list` (game-components), restyled to the slate/ink design system with sharp corners, JetBrains Mono, 1px hairline borders, and `--bs-save-slot-list-*` custom properties as the theming contract.
-
-**Tag:** `tc-save-slot-list`
-
-#### Attributes
-
-| Attribute | Type | Default | Description |
-|---|---|---|---|
-| `mode` | `'load' \| 'save'` | `'load'` | Determines which action buttons are shown: `load` shows Load + Delete; `save` shows Save/Overwrite + Delete |
-| `selected-id` | `string` | `''` | ID of the currently selected slot; adds an ink accent left-border to that row |
-
-#### JS Properties
-
-| Property | Type | Description |
-|---|---|---|
-| `slots` | `SaveSlot[]` | Array of save slot objects to render. Setting re-renders the list. |
-| `mode` | `SaveSlotMode` | Reflects the `mode` attribute |
-| `selectedId` | `string` | Reflects the `selected-id` attribute |
-| `onSelect` | `((id: string) => void) \| null` | Callback fired when a row is selected by click or keyboard |
-| `onLoad` | `((id: string) => void) \| null` | Callback fired when the Load button is clicked |
-| `onSave` | `((id: string) => void) \| null` | Callback fired when the Save/Overwrite button is clicked |
-| `onDelete` | `((id: string) => void) \| null` | Callback fired when the Delete button is clicked |
-
-**`SaveSlot` shape:**
-
-| Field | Type | Description |
-|---|---|---|
-| `id` | `string` | Unique slot identifier |
-| `name` | `string?` | Display name of the save |
-| `timestamp` | `string?` | Human-readable time string shown at the row end |
-| `location` | `string?` | In-game location label |
-| `level` | `number?` | Player level shown in meta row |
-| `playtime` | `string?` | Formatted playtime string |
-| `empty` | `boolean?` | When `true` renders an "Empty Slot" placeholder; Load mode suppresses all action buttons |
-| `autosave` | `boolean?` | When `true` adds an "Auto" badge and disables the Save button in save mode; suppresses Delete in both modes |
-
-#### Events
-
-| Event | `detail` | Description |
-|---|---|---|
-| `tc-select` | `{ id: string }` | Fired when a row background is clicked or activated with Enter/Space |
-| `tc-load` | `{ id: string }` | Fired when the Load button is clicked (load mode only) |
-| `tc-save` | `{ id: string }` | Fired when the Save/Overwrite button is clicked (save mode only) |
-| `tc-delete` | `{ id: string }` | Fired when the Delete button is clicked |
-
-#### Slots
-
-None. All content is driven by the `slots` JS property.
-
-#### CSS Custom Properties
-
-| Property | Default | Description |
-|---|---|---|
-| `--bs-save-slot-list-bg` | `var(--tc-surface)` | Panel background |
-| `--bs-save-slot-list-border` | `1px solid var(--tc-border)` | Panel outer border |
-| `--bs-save-slot-list-row-border` | `1px solid var(--tc-border)` | Row divider |
-| `--bs-save-slot-list-row-hover-bg` | `var(--tc-surface-hover, …)` | Row hover background |
-| `--bs-save-slot-list-row-selected-bg` | `var(--tc-surface-muted)` | Selected row background |
-| `--bs-save-slot-list-row-selected-border-color` | `var(--tc-app-accent)` | Selected row left-border accent color |
-| `--bs-save-slot-list-name-color` | `var(--tc-text)` | Slot name text color |
-| `--bs-save-slot-list-name-font-size` | `0.875rem` | Slot name font size |
-| `--bs-save-slot-list-name-empty-color` | `var(--tc-text-faint)` | Empty slot label color |
-| `--bs-save-slot-list-meta-color` | `var(--tc-text-muted)` | Meta field text color |
-| `--bs-save-slot-list-meta-font-size` | `0.75rem` | Meta field font size |
-| `--bs-save-slot-list-timestamp-color` | `var(--tc-text-faint)` | Timestamp text color |
-| `--bs-save-slot-list-timestamp-font-size` | `0.6875rem` | Timestamp font size |
-| `--bs-save-slot-list-autosave-bg` | `transparent` | Autosave badge background |
-| `--bs-save-slot-list-autosave-color` | `var(--tc-text-muted)` | Autosave badge text color |
-| `--bs-save-slot-list-autosave-border-color` | `var(--tc-border-strong)` | Autosave badge border color |
-| `--bs-save-slot-list-btn-font-size` | `0.75rem` | Action button font size |
-| `--bs-save-slot-list-btn-min-height` | `1.75rem` | Action button minimum height |
-| `--bs-save-slot-list-btn-bg` | `var(--tc-surface)` | Action button background |
-| `--bs-save-slot-list-btn-color` | `var(--tc-text)` | Action button text color |
-| `--bs-save-slot-list-btn-border` | `1px solid var(--tc-border-strong)` | Action button border |
-| `--bs-save-slot-list-btn-hover-bg` | `var(--tc-app-accent)` | Action button hover background |
-| `--bs-save-slot-list-btn-hover-color` | `#fff` | Action button hover text color |
-| `--bs-save-slot-list-btn-disabled-opacity` | `0.45` | Disabled button opacity |
-| `--bs-save-slot-list-btn-danger-color` | `var(--tc-danger, #ef4444)` | Delete button text color |
-| `--bs-save-slot-list-btn-danger-border-color` | `var(--tc-danger, #ef4444)` | Delete button border color |
-| `--bs-save-slot-list-btn-danger-hover-bg` | `var(--tc-danger, #ef4444)` | Delete button hover background |
-| `--bs-save-slot-list-btn-danger-hover-color` | `#fff` | Delete button hover text color |
-| `--bs-save-slot-list-empty-color` | `var(--tc-text-faint)` | Empty-state message color |
-
-#### Example
-
-```html
-<tc-save-slot-list id="saves" mode="load" selected-id="s1"></tc-save-slot-list>
-
-<script>
-  const el = document.getElementById('saves')
-
-  el.slots = [
-    { id: 'auto', name: 'Auto Save', timestamp: '2 min ago', location: 'Ember Keep', level: 24, playtime: '12h 04m', autosave: true },
-    { id: 's1', name: 'The Long Road', timestamp: 'Yesterday', location: 'Vale of Mist', level: 22, playtime: '11h 02m' },
-    { id: 's2', empty: true },
-  ]
-
-  el.addEventListener('tc-select', e => console.log('selected', e.detail.id))
-  el.addEventListener('tc-load',   e => console.log('load',     e.detail.id))
-  el.addEventListener('tc-delete', e => console.log('delete',   e.detail.id))
-</script>
-```
 
 ---
 

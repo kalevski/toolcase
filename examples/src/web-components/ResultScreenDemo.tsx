@@ -29,6 +29,8 @@ const ResultScreenDemo: React.FC = () => {
     const fullRef = useRef<any>(null)
     const victoryRef = useRef<any>(null)
     const minimalRef = useRef<any>(null)
+    const defeatRef = useRef<any>(null)
+    const winRef = useRef<any>(null)
 
     const [lastAction, setLastAction] = useState<string>('(none yet — click an action)')
 
@@ -56,6 +58,16 @@ const ResultScreenDemo: React.FC = () => {
         const el = minimalRef.current
         if (!el) return
         el.actions = [{ id: 'continue', label: 'Continue', variant: 'primary' }]
+    }, [])
+
+    useEffect(() => {
+        const el = defeatRef.current
+        if (el) el.actions = ACTIONS
+        const win = winRef.current
+        if (win) {
+            win.stats = STATS
+            win.actions = VICTORY_ACTIONS
+        }
     }, [])
 
     return (
@@ -106,6 +118,16 @@ const ResultScreenDemo: React.FC = () => {
                             <SectionCard title="Minimal (defaults + a single action)">
                                 {/* @ts-ignore */}
                                 <tc-result-screen ref={minimalRef} title-text="Round Complete" />
+                            </SectionCard>
+
+                            <SectionCard title='Variant="defeat" (seeds "Game Over" / danger)'>
+                                {/* @ts-ignore */}
+                                <tc-result-screen ref={defeatRef} variant="defeat" subtitle="The colony has fallen." />
+                            </SectionCard>
+
+                            <SectionCard title="Preset alias tag: tc-victory-screen">
+                                {/* @ts-ignore */}
+                                <tc-victory-screen ref={winRef} subtitle="All waves repelled. The colony stands." />
                             </SectionCard>
                         </div>
                     </div>
