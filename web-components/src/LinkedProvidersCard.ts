@@ -29,7 +29,7 @@ export class LinkedProvidersCard extends HTMLElement {
     private _brandColors: Record<string, string> = {}
     private _iconForProvider: ((key: string) => string) | null = null
 
-    ontoggle: ((key: string, connected: boolean) => void) | null = null
+    onToggle: ((key: string, connected: boolean) => void) | null = null
 
     static get observedAttributes(): string[] {
         return ['title', 'empty-label']
@@ -122,7 +122,7 @@ export class LinkedProvidersCard extends HTMLElement {
             composed: true,
             detail: { key, connected },
         }))
-        if (typeof this.ontoggle === 'function') this.ontoggle(key, connected)
+        if (typeof this.onToggle === 'function') this.onToggle(key, connected)
     }
 
     private render(): void {

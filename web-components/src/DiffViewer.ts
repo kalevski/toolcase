@@ -84,17 +84,23 @@ export class DiffViewer extends HTMLElement {
         this.render()
     }
 
+    // `before`/`after` shadow the inherited ChildNode methods of the same name;
+    // the accessor pairs are the public tc-diff-viewer API (documented + demoed).
+    // @ts-expect-error TS2416/TS2423 — string accessor over an inherited method
     get before(): string {
         return this._before
     }
+    // @ts-expect-error TS2416 — see getter above
     set before(v: string) {
         this._before = typeof v === 'string' ? v : ''
         if (this._initialised) this.render()
     }
 
+    // @ts-expect-error TS2416/TS2423 — string accessor over an inherited method
     get after(): string {
         return this._after
     }
+    // @ts-expect-error TS2416 — see getter above
     set after(v: string) {
         this._after = typeof v === 'string' ? v : ''
         if (this._initialised) this.render()

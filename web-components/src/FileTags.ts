@@ -1,5 +1,7 @@
 import { Plus, X } from 'lucide-static'
 import { icon } from './icons'
+// Re-uses the canonical FileTag shape owned by tc-file so both file ports agree.
+import type { FileTag } from './File'
 
 const TAG_NAME = 'tc-file-tags'
 
@@ -14,12 +16,6 @@ function esc(s: string): string {
 // Pre-compute at module load — these icons are always in the rendered HTML
 const plusIconHtml = icon(Plus)
 const xIconHtml = icon(X)
-
-export interface FileTag {
-    id: string
-    label: string
-    color?: string
-}
 
 export class FileTags extends HTMLElement {
     private _initialised = false

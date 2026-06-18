@@ -192,7 +192,7 @@ export class LiveFeed extends HTMLElement {
         const ariaLabel = header ? esc(header) : 'Live feed'
         this.innerHTML = `<div class="tc-live-feed">${headerHtml}<div class="tc-live-feed-body" role="log" aria-live="polite" aria-label="${ariaLabel}">${rowsHtml}</div></div>`
 
-        const body = this.querySelector('.tc-live-feed-body')
+        const body = this.querySelector<HTMLElement>('.tc-live-feed-body')
         if (body) {
             body.addEventListener('click', this._onBodyClick)
             body.addEventListener('keydown', this._onBodyKeydown)

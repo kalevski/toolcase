@@ -532,7 +532,9 @@ export class NormalMapGenerator extends HTMLElement {
         if (!c || !this._normal) return
         const ctx = c.getContext('2d')
         if (!ctx) return
-        ctx.putImageData(new ImageData(this._normal, this._width, this._height), 0, 0)
+        // ImageData expects an ArrayBuffer-backed Uint8ClampedArray; ours is always
+        // ArrayBuffer-backed at runtime — the cast bridges the lib.dom generic gap.
+        ctx.putImageData(new ImageData(this._normal as Uint8ClampedArray<ArrayBuffer>, this._width, this._height), 0, 0)
     }
 
     private _emitGenerate(): void {
@@ -558,7 +560,7 @@ export class NormalMapGenerator extends HTMLElement {
         scratch.width = this._width
         scratch.height = this._height
         const sctx = scratch.getContext('2d')
-        if (sctx) sctx.putImageData(new ImageData(shaded, this._width, this._height), 0, 0)
+        if (sctx) sctx.putImageData(new ImageData(shaded as Uint8ClampedArray<ArrayBuffer>, this._width, this._height), 0, 0)
         return scratch
     }
 

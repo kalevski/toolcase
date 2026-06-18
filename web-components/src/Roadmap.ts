@@ -68,7 +68,7 @@ export class Roadmap extends HTMLElement {
     private _columns: RoadmapColumn[] = []
 
     // Optional callback mirroring the tc-select CustomEvent.
-    onselect: ((detail: { columnStatus: RoadmapStatus; item: RoadmapItem }) => void) | null = null
+    onSelect: ((detail: { columnStatus: RoadmapStatus; item: RoadmapItem }) => void) | null = null
 
     static get observedAttributes(): string[] {
         return ['layout', 'title-text']
@@ -121,7 +121,7 @@ export class Roadmap extends HTMLElement {
                 detail,
             }),
         )
-        if (typeof this.onselect === 'function') this.onselect(detail)
+        if (typeof this.onSelect === 'function') this.onSelect(detail)
     }
 
     private _renderItem(item: RoadmapItem, colIdx: number, itemIdx: number): string {

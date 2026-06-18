@@ -555,7 +555,11 @@ export function register(): void {
     customElements.define('tc-dashboard-sidebar', DashboardSidebar)
     customElements.define('tc-dashboard-layout', DashboardLayout)
     customElements.define('tc-date-picker', DatePicker)
-    customElements.define('tc-diff-viewer', DiffViewer)
+    // tc-diff-viewer intentionally exposes `before`/`after` string properties as its
+    // public API (documented + used by demos), which shadow the inherited ChildNode
+    // methods of the same name. Harmless at runtime; the cast satisfies the structural
+    // CustomElementConstructor check that the repurposed member names would otherwise fail.
+    customElements.define('tc-diff-viewer', DiffViewer as unknown as CustomElementConstructor)
     customElements.define('tc-drawer', Drawer)
     customElements.define('tc-early-signup-form', EarlySignupForm)
     customElements.define('tc-ecosystem-map', EcosystemMap)

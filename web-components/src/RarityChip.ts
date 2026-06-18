@@ -1,10 +1,12 @@
+// Re-uses the canonical ItemRarity union owned by tc-item-slot so every rarity-
+// aware port shares one source of truth.
+import type { ItemRarity } from './ItemSlot'
+
 const TAG_NAME = 'tc-rarity-chip'
 
 function esc(s: string): string {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
-
-export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'
 
 const RARITIES: ItemRarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
 

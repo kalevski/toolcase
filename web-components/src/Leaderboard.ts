@@ -65,7 +65,7 @@ export class Leaderboard extends HTMLElement {
     private _entries: LeaderboardEntry[] = []
     private _columns: LeaderboardColumns = {}
 
-    onselect: ((entry: LeaderboardEntry) => void) | null = null
+    onSelect: ((entry: LeaderboardEntry) => void) | null = null
 
     static get observedAttributes(): string[] {
         return []
@@ -111,7 +111,7 @@ export class Leaderboard extends HTMLElement {
                 detail: { id: entry.id, entry },
             }),
         )
-        if (typeof this.onselect === 'function') this.onselect(entry)
+        if (typeof this.onSelect === 'function') this.onSelect(entry)
     }
 
     private render(): void {

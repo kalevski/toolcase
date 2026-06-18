@@ -3,7 +3,7 @@ import { icon } from './icons'
 
 const TAG_NAME = 'tc-list-card'
 
-export interface ListItem {
+export interface ListCardItem {
     id?: string
     icon?: string
     label: string
@@ -25,7 +25,7 @@ function resolveIcon(name: string): string {
 
 export class ListCard extends HTMLElement {
     private _initialised = false
-    private _items: ListItem[] = []
+    private _items: ListCardItem[] = []
 
     static get observedAttributes(): string[] {
         return ['title', 'ordered', 'loading', 'loading-count']
@@ -43,18 +43,18 @@ export class ListCard extends HTMLElement {
         this.render()
     }
 
-    get title(): string | null {
-        return this.getAttribute('title')
+    get title(): string {
+        return this.getAttribute('title') ?? ''
     }
     set title(v: string | null) {
         if (v != null) this.setAttribute('title', v)
         else this.removeAttribute('title')
     }
 
-    get items(): ListItem[] {
+    get items(): ListCardItem[] {
         return this._items
     }
-    set items(v: ListItem[]) {
+    set items(v: ListCardItem[]) {
         this._items = Array.isArray(v) ? v : []
         if (this._initialised) this.render()
     }

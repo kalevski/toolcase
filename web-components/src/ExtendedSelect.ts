@@ -224,7 +224,7 @@ export class ExtendedSelect extends HTMLElement {
         const searchInput = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
         if (searchInput) searchInput.addEventListener('input', this._onSearchInput)
 
-        const list = this.querySelector('.tc-extended-select__list')
+        const list = this.querySelector<HTMLElement>('.tc-extended-select__list')
         if (list) {
             list.addEventListener('click', this._onListClick)
             list.addEventListener('mouseover', this._onListMouseOver)

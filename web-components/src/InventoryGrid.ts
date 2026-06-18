@@ -1,16 +1,10 @@
-const TAG_NAME = 'tc-inventory-grid'
+// Re-uses the canonical InventoryItem owned by tc-item-slot so the same data
+// drives both ports. The grid fallback only renders id/name/icon/qty (rarity/
+// cooldown/lock are fantasy chrome owned by tc-item-slot when that primitive is
+// present); the extra optional fields are simply ignored here.
+import type { InventoryItem } from './ItemSlot'
 
-// An item occupying an inventory cell. Mirrors the game-components InventoryItem
-// shape so the same data drives the composed tc-item-slot; the design-system
-// port only renders id/name/icon/qty for its standalone fallback (rarity/cooldown/
-// lock are fantasy chrome owned by tc-item-slot when that primitive is present).
-export interface InventoryItem {
-    id: string
-    name?: string
-    icon?: string
-    qty?: number
-    [key: string]: unknown
-}
+const TAG_NAME = 'tc-inventory-grid'
 
 export interface InventoryGridEventMap {
     'tc-select': CustomEvent<{ item: InventoryItem | null, index: number }>

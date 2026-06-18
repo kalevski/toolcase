@@ -101,8 +101,8 @@ export class CommandReference extends HTMLElement {
         this.setAttribute('search-placeholder', v)
     }
 
-    get title(): string | null {
-        return this.getAttribute('title')
+    get title(): string {
+        return this.getAttribute('title') ?? ''
     }
     set title(v: string | null) {
         if (v != null) this.setAttribute('title', v)

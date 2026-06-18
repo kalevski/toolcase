@@ -29,6 +29,9 @@
     "dependencies": {
         "dropzone": "^6.0.0-beta.2"
     },
+    "devDependencies": {
+        "bootstrap": "^5.3.3"
+    },
     "author": {
         "name": "Daniel Kalevski",
         "url": "https://kalevski.dev"

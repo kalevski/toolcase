@@ -114,7 +114,7 @@ export class Marquee extends HTMLElement {
         const itemWrappers = Array.from(copy1.querySelectorAll(':scope > .tc-marquee-item'))
         this._slotNodes = itemWrappers
             .map(w => w.firstChild)
-            .filter((n): n is Node => n !== null)
+            .filter((n): n is ChildNode => n !== null)
     }
 
     private _distributeSlotNodes(): void {

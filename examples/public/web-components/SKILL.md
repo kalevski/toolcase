@@ -3961,15 +3961,15 @@ Dashboard card rendering a list of items with optional ranking numbers, leading 
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `items` | `ListItem[]` | Array of list items to render. Set via JS property. Default: `[]`. Re-renders on assignment. |
+| `items` | `ListCardItem[]` | Array of list items to render. Set via JS property. Default: `[]`. Re-renders on assignment. |
 | `title` | `string \| null` | Reflects the `title` attribute. |
 | `ordered` | `boolean` | Reflects the `ordered` attribute. |
 | `loading` | `boolean` | Reflects the `loading` attribute. |
 | `loadingCount` | `number` | Reflects the `loading-count` attribute. |
 
-`ListItem` shape:
+`ListCardItem` shape:
 ```ts
-interface ListItem {
+interface ListCardItem {
     id?: string              // optional unique key (not rendered)
     icon?: string            // Lucide icon name in PascalCase (e.g. "Github", "Star"). Shown when ordered=false.
     label: string            // primary row label (required)
@@ -13921,7 +13921,7 @@ None. All data is supplied via JS properties.
 |----------|------|---------|-------------|
 | `entries` | `LeaderboardEntry[]` | `[]` | Array of row data. Set via `el.entries = [...]`. Triggers a re-render. |
 | `columns` | `LeaderboardColumns` | `{}` (all visible) | Column visibility and header overrides. Each key (`rank`, `dev`, `tier`, `sprints`, `trend`, `points`) can be `false` (hidden) or a `string` (custom header label). `undefined` shows the column with the default label. |
-| `onselect` | `function \| null` | `null` | Optional callback fired when an interactive row is selected. Receives the `LeaderboardEntry` object. |
+| `onSelect` | `function \| null` | `null` | Optional callback fired when an interactive row is selected. Receives the `LeaderboardEntry` object. |
 
 **LeaderboardEntry shape**
 
@@ -13996,7 +13996,7 @@ Renders a semantic `<table>` with `<thead>`, `<tbody>`, and `<th scope="col">` c
   })
 
   // Or use the callback property:
-  document.getElementById('board').onselect = entry => console.log('Selected:', entry.name)
+  document.getElementById('board').onSelect = entry => console.log('Selected:', entry.name)
 </script>
 ```
 
@@ -14092,7 +14092,7 @@ Section card listing OAuth providers with custom icons and brand colors. A fixed
 | `providers` | `LinkedProvider[]` | `[]` | Array of provider objects. Setting it re-renders the list. |
 | `brandColors` | `Record<string, string>` | `{}` | Maps a provider key to a CSS color string applied to that provider's icon tile. Only the tile is tinted — all other UI stays slate. |
 | `iconForProvider` | `((key: string) => string) or null` | `null` | Optional function returning a lucide icon name (PascalCase) for a given provider key. Falls back to provider.icon, then to 'Link'. |
-| `ontoggle` | `((key: string, connected: boolean) => void) or null` | `null` | Optional callback fired alongside the `tc-toggle` custom event. |
+| `onToggle` | `((key: string, connected: boolean) => void) or null` | `null` | Optional callback fired alongside the `tc-toggle` custom event. |
 
 `LinkedProvider` shape:
 
@@ -14855,7 +14855,7 @@ Kanban or stacked roadmap board with status columns (`shipped` / `in-progress` /
 | `columns` | `RoadmapColumn[]` | Array of status columns. Setting re-renders the whole board. Default `[]`. |
 | `layout` | `'kanban' \| 'stacked'` | Reflects the `layout` attribute. |
 | `titleText` | `string \| null` | Reflects the `title-text` attribute. |
-| `onselect` | `((detail: { columnStatus, item }) => void) \| null` | Optional callback fired alongside the `tc-select` event. Default `null`. |
+| `onSelect` | `((detail: { columnStatus, item }) => void) \| null` | Optional callback fired alongside the `tc-select` event. Default `null`. |
 
 **`RoadmapColumn` shape**
 
