@@ -1,0 +1,88 @@
+// tc-panel & tc-panel-header — themed surface panel with an optional header.
+// Sharp corners throughout; all cosmetics via --bs-panel-* / --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Custom-property defaults ───────────────────────────────────────────────────
+
+tc-panel {
+    --bs-panel-bg: var(--tc-surface);
+    --bs-panel-border-color: var(--tc-border);
+    --bs-panel-body-padding: 1rem;
+}
+
+tc-panel-header {
+    --bs-panel-header-bg: var(--tc-surface);
+    --bs-panel-header-border-color: var(--tc-border);
+    --bs-panel-header-color: var(--tc-text);
+    --bs-panel-header-padding-y: 0.5rem;
+    --bs-panel-header-padding-x: 0.75rem;
+    --bs-panel-header-font-size: 0.875rem;
+    --bs-panel-header-icon-size: 1rem;
+    --bs-panel-header-icon-color: var(--tc-text-muted);
+}
+
+// ── Panel container ────────────────────────────────────────────────────────────
+
+.tc-panel {
+    background: var(--bs-panel-bg);
+    border-radius: 0;
+}
+
+.tc-panel--bordered {
+    border: 1px solid var(--bs-panel-border-color);
+}
+
+.tc-panel-header-slot {
+    display: block;
+}
+
+.tc-panel-body {
+    padding: var(--bs-panel-body-padding);
+}
+
+// ── Panel header element ───────────────────────────────────────────────────────
+
+.tc-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--bs-panel-header-padding-y) var(--bs-panel-header-padding-x);
+    background: var(--bs-panel-header-bg);
+    color: var(--bs-panel-header-color);
+    font-size: var(--bs-panel-header-font-size);
+    font-weight: 500;
+}
+
+// Bottom hairline separator between header and body when the panel is bordered
+.tc-panel--bordered .tc-panel-header {
+    border-bottom: 1px solid var(--bs-panel-header-border-color);
+}
+
+.tc-panel-header-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--bs-panel-header-icon-color);
+
+    svg {
+        width: var(--bs-panel-header-icon-size);
+        height: var(--bs-panel-header-icon-size);
+        display: block;
+    }
+}
+
+.tc-panel-header-heading {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.tc-panel-header-action {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}

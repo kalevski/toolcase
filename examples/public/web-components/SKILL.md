@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -238,6 +238,8 @@ After `register()` you can author markup directly:
   - [tc-network-status-icon](#tc-network-status-icon)
   - [tc-objective-marker](#tc-objective-marker)
   - [tc-page-indicator](#tc-page-indicator)
+  - [tc-panel](#tc-panel)
+  - [tc-panel-header](#tc-panel-header)
   - [tc-level-header](#tc-level-header)
   - [tc-level-select](#tc-level-select)
   - [tc-live-feed](#tc-live-feed)
@@ -22422,4 +22424,136 @@ None. `tc-page-indicator` is entirely attribute-driven; all content is generated
     // Or via callback:
     pager.onSelect = index => console.log('Selected page', index);
 </script>
+```
+
+---
+
+### tc-panel
+
+A themed surface panel — a lightweight container with an optional 1px hairline border and optional header. Compose `tc-panel-header` as a first child to add a heading row.
+
+**Tag:** `tc-panel`
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `bordered` | `boolean` | `false` | Adds a 1px hairline border around the panel. |
+
+#### JS Properties
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `bordered` | `boolean` | `false` | Reflects the `bordered` attribute. |
+
+#### Events
+
+None. `tc-panel` is a presentational container with no interactive events.
+
+#### Slots
+
+`tc-panel` distributes its children automatically:
+
+| Slot | Description |
+|---|---|
+| `tc-panel-header` children | Placed above the body in a dedicated header slot. |
+| Everything else | Rendered inside `.tc-panel-body` with `1rem` padding. |
+
+#### CSS Custom Properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-panel-bg` | `var(--tc-surface)` | Panel background color. |
+| `--bs-panel-border-color` | `var(--tc-border)` | Border color when `bordered` is set. |
+| `--bs-panel-body-padding` | `1rem` | Padding around the body content area. |
+
+#### Usage
+
+```html
+<!-- Plain panel (no border) -->
+<tc-panel>
+    <p>Body content here.</p>
+</tc-panel>
+
+<!-- Bordered panel -->
+<tc-panel bordered>
+    <p>Content with a 1px hairline border.</p>
+</tc-panel>
+
+<!-- Panel with header -->
+<tc-panel bordered>
+    <tc-panel-header heading="Settings" icon="Settings"></tc-panel-header>
+    <p>Body content below the header.</p>
+</tc-panel>
+
+<!-- Header with action slot -->
+<tc-panel bordered>
+    <tc-panel-header heading="Recent Activity" icon="Activity">
+        <button slot="action" class="btn btn-sm btn-outline-secondary">View all</button>
+    </tc-panel-header>
+    <ul>
+        <li>Deploy completed</li>
+        <li>PR merged</li>
+    </ul>
+</tc-panel>
+```
+
+---
+
+### tc-panel-header
+
+The header sub-element for `tc-panel`. Renders a heading row with an optional Lucide icon on the left and an optional action slot on the right. Gains a bottom hairline divider automatically when inside a `tc-panel--bordered` panel.
+
+**Tag:** `tc-panel-header`
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `heading` | `string` | `''` | Header text. |
+| `icon` | `string` | — | Lucide icon name (PascalCase, e.g. `Settings`, `Activity`). |
+
+#### JS Properties
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `heading` | `string` | `''` | Reflects the `heading` attribute. |
+| `icon` | `string \| null` | `null` | Reflects the `icon` attribute. |
+
+#### Events
+
+None. `tc-panel-header` is a presentational element with no interactive events.
+
+#### Slots
+
+| Slot | Description |
+|---|---|
+| `action` | Trailing action area (e.g. buttons, icon-buttons). Rendered inside `.tc-panel-header-action` on the right. |
+
+#### CSS Custom Properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-panel-header-bg` | `var(--tc-surface)` | Header background color. |
+| `--bs-panel-header-border-color` | `var(--tc-border)` | Color of the bottom hairline separator (shown in bordered panels). |
+| `--bs-panel-header-color` | `var(--tc-text)` | Header text color. |
+| `--bs-panel-header-padding-y` | `0.5rem` | Vertical padding. |
+| `--bs-panel-header-padding-x` | `0.75rem` | Horizontal padding. |
+| `--bs-panel-header-font-size` | `0.875rem` | Heading font size. |
+| `--bs-panel-header-icon-size` | `1rem` | Icon width and height. |
+| `--bs-panel-header-icon-color` | `var(--tc-text-muted)` | Icon color. |
+
+#### Usage
+
+```html
+<!-- Heading only -->
+<tc-panel-header heading="Panel Title"></tc-panel-header>
+
+<!-- Heading with icon -->
+<tc-panel-header heading="Settings" icon="Settings"></tc-panel-header>
+
+<!-- Heading with action -->
+<tc-panel-header heading="Activity" icon="Activity">
+    <button slot="action" class="btn btn-sm btn-outline-secondary">View all</button>
+</tc-panel-header>
 ```
