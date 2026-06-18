@@ -325,6 +325,7 @@ import RuneCornerDemo from './RuneCornerDemo'
 import SafeAreaDemo from './SafeAreaDemo'
 import SaveSlotListDemo from './SaveSlotListDemo'
 import ScoreDisplayDemo from './ScoreDisplayDemo'
+import ScreenFlashDemo from './ScreenFlashDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -547,6 +548,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
     { key: 'confirm-dialog', category: 'Overlays & Feedback', element: <ConfirmDialogDemo /> },
     { key: 'report-player-dialog', category: 'Overlays & Feedback', element: <ReportPlayerDialogDemo /> },
+    { key: 'screen-flash', category: 'Overlays & Feedback', element: <ScreenFlashDemo /> },
     { key: 'invite-toast', category: 'Overlays & Feedback', element: <InviteToastDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
     { key: 'command-palette', category: 'Overlays & Feedback', element: <CommandPaletteDemo /> },

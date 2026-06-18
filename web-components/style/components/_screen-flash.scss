@@ -1,0 +1,55 @@
+// tc-screen-flash — full-screen flash effect for damage hits and scene
+// transitions. Ported from `gc-screen-flash` but voiced for the web-components
+// design system: no shadow DOM, no game chrome, no gilded fills — a flat fill
+// div that JS animates via inline opacity on demand. All cosmetics flow through
+// --bs-screen-flash-* custom properties (the public theming contract).
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-screen-flash {
+    // Default flash color; overridden inline by the flash-color attribute.
+    --bs-screen-flash-color: #ffffff;
+
+    // Top of the stacking order — screen flash must cover all other layers.
+    --bs-screen-flash-z: var(--tc-z-tooltip, 1070);
+}
+
+// ── Host surface ────────────────────────────────────────────────────────────────
+// Fixed full-viewport cover; pointer-events disabled so the flash never blocks
+// interaction beneath it. The host itself has no visual chrome — all rendering
+// is on the inner fill div.
+
+tc-screen-flash {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: var(--bs-screen-flash-z);
+    border-radius: 0;
+}
+
+// ── Fill div ────────────────────────────────────────────────────────────────────
+// Starts at opacity 0. JS sets an inline opacity (peak) then transitions back
+// to 0. The `background` property is set inline by the flash-color attribute;
+// --bs-screen-flash-color is the CSS-var fallback when no inline value is set.
+// Sharp by mandate — no border-radius on full-surface fills.
+
+.tc-screen-flash-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--bs-screen-flash-color);
+    opacity: 0;
+    border-radius: 0;
+    // Inline transition is written by _flash(); this rule is the safe base state.
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+// JS checks matchMedia and skips the fade when prefers-reduced-motion is active;
+// this rule is a belt-and-suspenders guard in case an inline transition leaks.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-screen-flash-fill {
+        transition: none !important;
+    }
+}

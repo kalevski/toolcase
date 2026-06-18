@@ -467,6 +467,13 @@ tc-matchmaking-screen {
     display: block;
 }
 
+// Fixed full-viewport flash overlay; the SCSS partial positions it fixed and
+// keeps it transparent until JS triggers a flash, but the host must not
+// default to inline.
+tc-screen-flash {
+    display: block;
+}
+
 tc-editable-text,
 tc-chip,
 tc-rarity-chip,

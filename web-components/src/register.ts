@@ -295,6 +295,7 @@ import { GuildPanel } from './GuildPanel'
 import { KeyBinder } from './KeyBinder'
 import { LegalScreen } from './LegalScreen'
 import { LetterboxBars } from './LetterboxBars'
+import { ScreenFlash } from './ScreenFlash'
 import { LevelHeader } from './LevelHeader'
 import { LevelSelect } from './LevelSelect'
 import { LoadingOverlay } from './LoadingOverlay'
@@ -674,6 +675,7 @@ export function register(): void {
     customElements.define('tc-reset-to-defaults', ResetToDefaults)
     customElements.define('tc-rune-corner', RuneCorner)
     customElements.define('tc-safe-area', SafeArea)
+    customElements.define('tc-screen-flash', ScreenFlash)
     customElements.define('tc-save-slot-list', SaveSlotList)
     customElements.define('tc-score-display', ScoreDisplay)
 }
