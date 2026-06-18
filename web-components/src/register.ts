@@ -285,6 +285,7 @@ import { MouseSensitivity } from './MouseSensitivity'
 import { FPSCapSelect } from './FPSCapSelect'
 import { FullscreenToggle } from './FullscreenToggle'
 import { GameOverScreen } from './GameOverScreen'
+import { ResultScreen } from './ResultScreen'
 import { GamepadButtonPrompt } from './GamepadButtonPrompt'
 import { GildedFrame } from './GildedFrame'
 import { GraphicsPresetPicker } from './GraphicsPresetPicker'
@@ -619,6 +620,7 @@ export function register(): void {
     customElements.define('tc-fps-cap-select', FPSCapSelect)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
     customElements.define('tc-game-over-screen', GameOverScreen)
+    customElements.define('tc-result-screen', ResultScreen)
     customElements.define('tc-gamepad-button-prompt', GamepadButtonPrompt)
     customElements.define('tc-gilded-frame', GildedFrame)
     customElements.define('tc-graphics-preset-picker', GraphicsPresetPicker)
