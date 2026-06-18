@@ -326,6 +326,7 @@ import { Portrait } from './Portrait'
 import { PressAnyKey } from './PressAnyKey'
 import { QuestTracker } from './QuestTracker'
 import { RarityChip } from './RarityChip'
+import { ReportPlayerDialog } from './ReportPlayerDialog'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -662,4 +663,5 @@ export function register(): void {
     customElements.define('tc-press-any-key', PressAnyKey)
     customElements.define('tc-quest-tracker', QuestTracker)
     customElements.define('tc-rarity-chip', RarityChip)
+    customElements.define('tc-report-player-dialog', ReportPlayerDialog)
 }

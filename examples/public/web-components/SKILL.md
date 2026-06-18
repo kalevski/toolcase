@@ -294,6 +294,7 @@ After `register()` you can author markup directly:
   - [tc-modal](#tc-modal)
   - [tc-offcanvas](#tc-offcanvas)
   - [tc-popover](#tc-popover)
+  - [tc-report-player-dialog](#tc-report-player-dialog)
   - [tc-toast](#tc-toast)
   - [tc-tooltip](#tc-tooltip)
 - [Forms](#forms)
@@ -23834,3 +23835,110 @@ None. All content is driven by the `options` JS property.
   })
 </script>
 ```
+
+---
+
+### tc-report-player-dialog
+
+Player-report moderation modal with a reason radio group, an optional comment textarea, and Cancel / Submit Report actions. Port of `gc-report-player-dialog` (game-components), restyled to the slate design system (sharp corners, 1px hairline, overlay-tier shadow, danger-red submit). Controlled component — fires `tc-cancel` or `tc-submit`; the consumer sets `open` to `false` to dismiss. Focus trap, scroll lock, and keyboard (`Escape`) handling included. No shadow root; light DOM; `display: block`.
+
+**Tag:** `tc-report-player-dialog`
+
+---
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `open` | boolean | `false` | Shows the dialog when present; remove to hide. Handled by `_applyOpenState` — CSS transition plays on change. |
+| `player-name` | string | `''` | Display name of the player being reported. Rendered as the dialog title. |
+
+---
+
+#### JS Properties
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `open` | `boolean` | `false` | Mirrors the `open` attribute. |
+| `playerName` | `string` | `''` | Mirrors the `player-name` attribute. |
+| `reasons` | `string[]` | Default reason list | Array of report-reason strings rendered as the radio group. Resetting this property clears any selected reason. |
+| `onCancel` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-cancel`. |
+| `onSubmit` | `((reason: string, comment: string) => void) \| null` | `null` | Optional callback fired alongside `tc-submit`. |
+
+---
+
+#### Events
+
+| Event | Detail shape | Fired when |
+|---|---|---|
+| `tc-cancel` | `{}` | User clicks Cancel, the × close button, the backdrop, or presses Escape. |
+| `tc-submit` | `{ reason: string, comment: string }` | User clicks Submit Report with a reason selected. `comment` is an empty string when the textarea is left blank. |
+
+---
+
+#### Custom Properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-report-player-dialog-bg` | `var(--tc-surface)` | Panel background. |
+| `--bs-report-player-dialog-border-color` | `var(--tc-border)` | Panel border colour. |
+| `--bs-report-player-dialog-shadow` | `var(--tc-shadow-lg)` | Panel box-shadow (overlay tier). |
+| `--bs-report-player-dialog-width` | `460px` | Default panel width. |
+| `--bs-report-player-dialog-max-width` | `calc(100vw - 2rem)` | Maximum panel width (viewport responsive). |
+| `--bs-report-player-dialog-max-height` | `calc(100vh - 4rem)` | Maximum panel height. |
+| `--bs-report-player-dialog-padding` | `1.25rem` | Header, body, and actions padding. |
+| `--bs-report-player-dialog-gap` | `0.75rem` | Gap between action buttons and body items. |
+| `--bs-report-player-dialog-eyebrow-color` | `var(--tc-text-muted)` | "Report Player" eyebrow micro-label colour. |
+| `--bs-report-player-dialog-eyebrow-size` | `0.6875rem` | Eyebrow font size. |
+| `--bs-report-player-dialog-title-color` | `var(--tc-text)` | Player name heading colour. |
+| `--bs-report-player-dialog-title-size` | `1rem` | Player name heading font size. |
+| `--bs-report-player-dialog-z-backdrop` | `var(--tc-z-modal-backdrop)` | Backdrop z-index. |
+| `--bs-report-player-dialog-z-panel` | `var(--tc-z-modal)` | Panel z-index. |
+| `--bs-report-player-dialog-backdrop-bg` | `#0f172a` | Backdrop scrim colour. |
+| `--bs-report-player-dialog-backdrop-opacity` | `0.5` | Backdrop opacity when open. |
+| `--bs-report-player-dialog-message-color` | `var(--tc-text-muted)` | Instruction message text colour. |
+| `--bs-report-player-dialog-reason-color` | `var(--tc-text)` | Reason label text colour. |
+| `--bs-report-player-dialog-reason-hover-bg` | `var(--tc-surface-muted)` | Reason row hover background. |
+| `--bs-report-player-dialog-reason-checked-bg` | `var(--tc-surface-hover)` | Reason row background when selected. |
+| `--bs-report-player-dialog-reason-checked-color` | `var(--tc-app-accent)` | Reason label colour when selected. |
+| `--bs-report-player-dialog-radio-size` | `1rem` | Custom radio indicator diameter. |
+| `--bs-report-player-dialog-radio-border` | `1px solid var(--tc-border-strong)` | Radio indicator border. |
+| `--bs-report-player-dialog-radio-checked-bg` | `var(--tc-app-accent)` | Radio fill colour when checked. |
+| `--bs-report-player-dialog-btn-submit-bg` | `var(--tc-danger, #dc2626)` | Submit button background (danger red). |
+| `--bs-report-player-dialog-btn-submit-color` | `#fff` | Submit button text colour. |
+
+---
+
+#### Slots
+
+None. All content is driven by attributes and the `reasons` JS property.
+
+---
+
+#### Example
+
+```html
+<tc-report-player-dialog id="rp-dialog" player-name="ShadowStriker99"></tc-report-player-dialog>
+
+<button onclick="document.getElementById('rp-dialog').setAttribute('open', '')">
+  Report ShadowStriker99
+</button>
+
+<script>
+  const dialog = document.getElementById('rp-dialog')
+
+  // Optional: override the default reason list
+  dialog.reasons = ['Cheating', 'Toxic chat', 'AFK farming', 'Other']
+
+  dialog.addEventListener('tc-cancel', () => {
+    dialog.removeAttribute('open')
+  })
+
+  dialog.addEventListener('tc-submit', e => {
+    console.log('Reason:', e.detail.reason)
+    console.log('Comment:', e.detail.comment)
+    dialog.removeAttribute('open')
+  })
+</script>
+```
+

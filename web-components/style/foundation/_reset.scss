@@ -384,6 +384,12 @@ tc-loot-popup {
     display: block;
 }
 
+// Player-report modal overlay; the SCSS partial positions the backdrop and
+// centred panel, but the host must not default to inline.
+tc-report-player-dialog {
+    display: block;
+}
+
 // In-game pause overlay; the SCSS partial positions the backdrop and centred
 // panel, but the host must not default to inline.
 tc-pause-menu {

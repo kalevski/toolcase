@@ -204,6 +204,7 @@ import DatePickerDemo from './DatePickerDemo'
 import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
 import ConfirmDialogDemo from './ConfirmDialogDemo'
+import ReportPlayerDialogDemo from './ReportPlayerDialogDemo'
 import InviteToastDemo from './InviteToastDemo'
 import LightboxDemo from './LightboxDemo'
 import CommandPaletteDemo from './CommandPaletteDemo'
@@ -537,6 +538,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'blur-overlay', category: 'Overlays & Feedback', element: <BlurOverlayDemo /> },
     { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
     { key: 'confirm-dialog', category: 'Overlays & Feedback', element: <ConfirmDialogDemo /> },
+    { key: 'report-player-dialog', category: 'Overlays & Feedback', element: <ReportPlayerDialogDemo /> },
     { key: 'invite-toast', category: 'Overlays & Feedback', element: <InviteToastDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
     { key: 'command-palette', category: 'Overlays & Feedback', element: <CommandPaletteDemo /> },
