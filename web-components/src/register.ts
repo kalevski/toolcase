@@ -286,6 +286,7 @@ import { DebugOverlay } from './DebugOverlay'
 import { DialogueBox } from './DialogueBox'
 import { FOVSlider } from './FOVSlider'
 import { MouseSensitivity } from './MouseSensitivity'
+import { VolumeSlider } from './VolumeSlider'
 import { FPSCapSelect } from './FPSCapSelect'
 import { SelectRow } from './SelectRow'
 import { FullscreenToggle } from './FullscreenToggle'
@@ -647,6 +648,7 @@ export function register(): void {
     customElements.define('tc-dialogue-box', DialogueBox)
     customElements.define('tc-fov-slider', FOVSlider)
     customElements.define('tc-mouse-sensitivity', MouseSensitivity)
+    customElements.define('tc-volume-slider', VolumeSlider)
     customElements.define('tc-fps-cap-select', FPSCapSelect)
     customElements.define('tc-select-row', SelectRow)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)

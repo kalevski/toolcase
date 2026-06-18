@@ -352,6 +352,7 @@ After `register()` you can author markup directly:
   - [tc-deadzone-slider](#tc-deadzone-slider)
   - [tc-fov-slider](#tc-fov-slider)
   - [tc-mouse-sensitivity](#tc-mouse-sensitivity)
+  - [tc-volume-slider](#tc-volume-slider)
   - [tc-reset-to-defaults](#tc-reset-to-defaults)
   - [tc-fps-cap-select](#tc-fps-cap-select)
   - [tc-select-row](#tc-select-row)
@@ -8766,6 +8767,55 @@ A mouse-sensitivity setting row: a label/description text block paired with one 
   el.value = 2
   el.ads = 1.0
   el.addEventListener('tc-change', e => console.log(e.detail.key, e.detail.value))
+</script>
+```
+
+---
+
+### tc-volume-slider
+
+A volume setting row: a mute toggle button, a 0–100% range slider, and a mono percentage readout. Built on the shared `tc-setting-row` scaffold. Port of game-components `gc-volume-slider` with the fantasy chrome dropped for the toolcase slate/ink look.
+
+**Tag:** `tc-volume-slider`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `row-label` | string | `Volume` | Row label (set automatically when absent) |
+| `description` | string | — | Optional secondary line beneath the label |
+| `value` | number | `0.8` | Current volume, clamped to `0`–`1` (`0.01` step) |
+| `muted` | boolean | `false` | When present, the range input is disabled and the mute button shows the muted icon |
+| `disabled` | boolean | `false` | Disables both the mute button and the range input |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number` | Get or set the volume (`0`–`1`). Getter clamps and defaults to `0.8`. Setting patches the input + readout in place — no full re-render. |
+| `muted` | `boolean` | Get/set the `muted` attribute. Patched in place (swaps icon, toggles input disabled) — no full re-render. |
+| `disabled` | `boolean` | Get/set the `disabled` attribute. |
+| `rowLabel` | `string` | Get/set the `row-label` attribute. |
+| `description` | `string` | Get/set the `description` attribute. |
+| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every slider change. Mirrors the `tc-change` event. |
+| `onToggleMute` | `(() => void) \| null` | Optional callback fired when the mute button is clicked. Mirrors the `tc-toggle-mute` event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: number }` | Fired on every range-input change (the `0`–`1` volume). |
+| `tc-toggle-mute` | `{}` | Fired when the mute button is clicked. The consumer is responsible for toggling the `muted` attribute. |
+
+**No slots.**
+
+```html
+<tc-volume-slider row-label="Master volume" description="Controls overall game audio." value="0.8"></tc-volume-slider>
+<script>
+  const el = document.querySelector('tc-volume-slider')
+  el.value = 0.5
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+  el.addEventListener('tc-toggle-mute', () => { el.muted = !el.muted })
 </script>
 ```
 

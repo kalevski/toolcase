@@ -271,6 +271,7 @@ import RangeSliderDemo from './RangeSliderDemo'
 import DeadzoneSliderDemo from './DeadzoneSliderDemo'
 import FOVSliderDemo from './FOVSliderDemo'
 import MouseSensitivityDemo from './MouseSensitivityDemo'
+import VolumeSliderDemo from './VolumeSliderDemo'
 import ResetToDefaultsDemo from './ResetToDefaultsDemo'
 import FPSCapSelectDemo from './FPSCapSelectDemo'
 import SelectRowDemo from './SelectRowDemo'
@@ -640,6 +641,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'deadzone-slider', category: 'Forms', element: <DeadzoneSliderDemo /> },
     { key: 'fov-slider', category: 'Forms', element: <FOVSliderDemo /> },
     { key: 'mouse-sensitivity', category: 'Forms', element: <MouseSensitivityDemo /> },
+    { key: 'volume-slider', category: 'Forms', element: <VolumeSliderDemo /> },
     { key: 'reset-to-defaults', category: 'Forms', element: <ResetToDefaultsDemo /> },
     { key: 'fps-cap-select', category: 'Forms', element: <FPSCapSelectDemo /> },
     { key: 'select-row', category: 'Forms', element: <SelectRowDemo /> },
