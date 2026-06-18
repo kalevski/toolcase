@@ -333,6 +333,7 @@ import { MuteList } from './MuteList'
 import { PlayerCard } from './PlayerCard'
 import { PlayerFrame } from './PlayerFrame'
 import { ObjectiveMarker } from './ObjectiveMarker'
+import { WaypointMarker } from './WaypointMarker'
 import { PageIndicator } from './PageIndicator'
 import { ParticleEmitter } from './ParticleEmitter'
 import { Panel, PanelHeader } from './Panel'
@@ -695,6 +696,7 @@ export function register(): void {
     customElements.define('tc-player-card', PlayerCard)
     customElements.define('tc-player-frame', PlayerFrame)
     customElements.define('tc-objective-marker', ObjectiveMarker)
+    customElements.define('tc-waypoint-marker', WaypointMarker)
     customElements.define('tc-page-indicator', PageIndicator)
     customElements.define('tc-particle-emitter', ParticleEmitter)
     customElements.define('tc-panel', Panel)

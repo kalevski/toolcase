@@ -331,6 +331,7 @@ import NetworkStatusIconDemo from './NetworkStatusIconDemo'
 import PingDisplayDemo from './PingDisplayDemo'
 import PlatformIconDemo from './PlatformIconDemo'
 import ObjectiveMarkerDemo from './ObjectiveMarkerDemo'
+import WaypointMarkerDemo from './WaypointMarkerDemo'
 import PageIndicatorDemo from './PageIndicatorDemo'
 import PanelDemo from './PanelDemo'
 import ParticleEmitterDemo from './ParticleEmitterDemo'
@@ -702,6 +703,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'platform-icon', category: 'Components', element: <PlatformIconDemo /> },
     { key: 'ping-display', category: 'Components', element: <PingDisplayDemo /> },
     { key: 'objective-marker', category: 'Components', element: <ObjectiveMarkerDemo /> },
+    { key: 'waypoint-marker', category: 'Components', element: <WaypointMarkerDemo /> },
     { key: 'page-indicator', category: 'Navigation', element: <PageIndicatorDemo /> },
     { key: 'panel', category: 'Components', element: <PanelDemo /> },
     { key: 'particle-emitter', category: 'Components', element: <ParticleEmitterDemo /> },
