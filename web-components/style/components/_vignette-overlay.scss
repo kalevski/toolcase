@@ -1,0 +1,65 @@
+// tc-vignette-overlay — edge vignette overlay for damage / low-health feedback.
+// Ported from `gc-vignette-overlay` but voiced for the web-components design
+// system: no game chrome, no gilded fills — a radial-gradient ::after pseudo-
+// element on top of slotted content. Every cosmetic value flows through
+// --bs-vignette-overlay-* so themes re-skin via vars alone.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-vignette-overlay {
+    // Opacity of the vignette gradient layer; overridden inline by the
+    // `intensity` attribute (clamped to [0, 1] by the element class).
+    --bs-vignette-overlay-intensity: 0.6;
+
+    // Color at the vignette edges; overridden inline by the `vignette-color`
+    // attribute. Black is the canonical low-health / cinematic choice.
+    --bs-vignette-overlay-color: #000000;
+}
+
+// ── Host surface ────────────────────────────────────────────────────────────────
+// The host wraps slotted content and establishes a positioned context so the
+// ::after pseudo-element can be absolutely positioned inside it.
+
+tc-vignette-overlay {
+    position: relative;
+    display: block;
+    border-radius: 0;
+}
+
+// ── Vignette gradient layer ─────────────────────────────────────────────────────
+// ::after paints on top of the slot content in DOM order (no z-index needed —
+// positioned non-stacked elements are above normal-flow blocks). pointer-events
+// is disabled so the overlay never blocks interaction.
+//
+// The gradient transitions from fully transparent at the centre to
+// --bs-vignette-overlay-color at the edges; `opacity` drives the strength so
+// any color (including RGBA values) works transparently.
+
+tc-vignette-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 30%,
+        var(--bs-vignette-overlay-color) 100%
+    );
+    opacity: var(--bs-vignette-overlay-intensity);
+    border-radius: 0;
+}
+
+// ── Content wrapper ─────────────────────────────────────────────────────────────
+// Holds the slotted children. No visual chrome — purely structural.
+
+.tc-vignette-overlay-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+// The vignette is purely static (no animation). No overrides needed, but
+// preserve the state-conveying opacity in case a caller animates it via JS.

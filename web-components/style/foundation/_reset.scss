@@ -518,6 +518,12 @@ tc-shake-container {
     display: block;
 }
 
+// Edge vignette overlay wrapper; the SCSS partial positions the ::after
+// gradient on top of slotted content, but the host must not default to inline.
+tc-vignette-overlay {
+    display: block;
+}
+
 tc-editable-text,
 tc-chip,
 tc-rarity-chip,

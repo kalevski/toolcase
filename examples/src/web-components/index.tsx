@@ -343,6 +343,7 @@ import SpeedometerDemo from './SpeedometerDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
 import TransitionWipeDemo from './TransitionWipeDemo'
 import ShakeContainerDemo from './ShakeContainerDemo'
+import VignetteOverlayDemo from './VignetteOverlayDemo'
 import ScrollTextDemo from './ScrollTextDemo'
 import ShopPanelDemo from './ShopPanelDemo'
 import StatsScreenDemo from './StatsScreenDemo'
@@ -576,6 +577,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'report-player-dialog', category: 'Overlays & Feedback', element: <ReportPlayerDialogDemo /> },
     { key: 'screen-flash', category: 'Overlays & Feedback', element: <ScreenFlashDemo /> },
     { key: 'transition-wipe', category: 'Overlays & Feedback', element: <TransitionWipeDemo /> },
+    { key: 'vignette-overlay', category: 'Overlays & Feedback', element: <VignetteOverlayDemo /> },
     { key: 'shake-container', category: 'Components', element: <ShakeContainerDemo /> },
     { key: 'invite-toast', category: 'Overlays & Feedback', element: <InviteToastDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
