@@ -290,6 +290,7 @@ import { VolumeSlider } from './VolumeSlider'
 import { FPSCapSelect } from './FPSCapSelect'
 import { SelectRow } from './SelectRow'
 import { FullscreenToggle } from './FullscreenToggle'
+import { VSyncToggle } from './VSyncToggle'
 import { ToggleRow } from './ToggleRow'
 import { GameOverScreen } from './GameOverScreen'
 import { ResultScreen } from './ResultScreen'
@@ -652,6 +653,7 @@ export function register(): void {
     customElements.define('tc-fps-cap-select', FPSCapSelect)
     customElements.define('tc-select-row', SelectRow)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
+    customElements.define('tc-vsync-toggle', VSyncToggle)
     customElements.define('tc-toggle-row', ToggleRow)
     customElements.define('tc-game-over-screen', GameOverScreen)
     customElements.define('tc-result-screen', ResultScreen)
