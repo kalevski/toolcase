@@ -314,6 +314,7 @@ import { LootPopup } from './LootPopup'
 import { LoreText } from './LoreText'
 import { Subtitle } from './Subtitle'
 import { Title } from './Title'
+import { TitleScreen } from './TitleScreen'
 import { MetalButton } from './MetalButton'
 import { NavButton } from './NavButton'
 import { NetworkStatusIcon } from './NetworkStatusIcon'
@@ -670,6 +671,7 @@ export function register(): void {
     customElements.define('tc-lore-text', LoreText)
     customElements.define('tc-subtitle', Subtitle)
     customElements.define('tc-title', Title)
+    customElements.define('tc-title-screen', TitleScreen)
     customElements.define('tc-metal-button', MetalButton)
     customElements.define('tc-nav-button', NavButton)
     customElements.define('tc-network-status-icon', NetworkStatusIcon)

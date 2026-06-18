@@ -1,0 +1,143 @@
+// tc-title-screen — full-viewport game title / start screen.
+// Port of gc-title-screen (game-components); game chrome (diamond dividers,
+// gilded frames, glows, fantasy fills, metal textures) replaced with the
+// slate design system: sharp corners, 1px hairline divider, JetBrains Mono
+// eyebrow, no textures. The component covers the entire viewport when present
+// in the DOM; add/remove it (or toggle [hidden]) to show or hide it.
+// All cosmetics flow through --bs-title-screen-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ───────────────────────────────────────────────────────
+
+tc-title-screen {
+    // Full-screen surface background
+    --bs-title-screen-bg:              var(--tc-surface);
+
+    // Z-index — modal tier to cover page content
+    --bs-title-screen-z:               var(--tc-z-modal);
+
+    // Fade-in animation duration
+    --bs-title-screen-fade:            var(--tc-transition-base);
+
+    // Panel sizing + spacing
+    --bs-title-screen-panel-max-width: 520px;
+    --bs-title-screen-panel-padding-x: 2rem;
+    --bs-title-screen-panel-padding-y: 3rem;
+    --bs-title-screen-panel-gap:       1.25rem;
+
+    // Eyebrow — mono micro-label (cyan accent, machine-facing)
+    --bs-title-screen-eyebrow-color:   var(--tc-cyan, #22d3ee);
+    --bs-title-screen-eyebrow-size:    10.5px;
+
+    // Title heading
+    --bs-title-screen-title-color:     var(--tc-text);
+    --bs-title-screen-title-size:      2rem;
+    --bs-title-screen-title-weight:    700;
+
+    // Hairline divider
+    --bs-title-screen-divider-color:   var(--tc-border);
+
+    // Subtitle
+    --bs-title-screen-subtitle-color:  var(--tc-text-muted);
+    --bs-title-screen-subtitle-size:   0.9375rem;
+}
+
+// ── Host: fixed full-viewport shell ─────────────────────────────────────────
+// The display: block from _reset.scss is overridden here to the centred flex
+// container. No [open] attribute needed — add/remove the element or set
+// [hidden] to control visibility.
+
+tc-title-screen {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-title-screen-z);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-title-screen-bg);
+    border-radius: 0;
+    animation: tc-title-screen-fade-in var(--bs-title-screen-fade) both;
+}
+
+@keyframes tc-title-screen-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+// ── Panel: centred content column ────────────────────────────────────────────
+// No card chrome — the title screen IS the page at this moment.
+
+.tc-title-screen__panel {
+    width: 100%;
+    max-width: var(--bs-title-screen-panel-max-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-title-screen-panel-gap);
+    padding: var(--bs-title-screen-panel-padding-y) var(--bs-title-screen-panel-padding-x);
+    text-align: center;
+}
+
+// ── Eyebrow — mono micro-label ───────────────────────────────────────────────
+// JetBrains Mono per design system convention for machine-facing text.
+// Cyan accent spent sparingly — marks the primary call-to-action prompt.
+
+.tc-title-screen__eyebrow {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-title-screen-eyebrow-size);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bs-title-screen-eyebrow-color);
+    line-height: 1.4;
+}
+
+// ── Title heading ─────────────────────────────────────────────────────────────
+
+.tc-title-screen__title {
+    font-size: var(--bs-title-screen-title-size);
+    font-weight: var(--bs-title-screen-title-weight);
+    color: var(--bs-title-screen-title-color);
+    margin: 0;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+// ── Hairline divider — replaces the gc diamond+rule decoration ────────────────
+// Sharp per mandate; 1px height; full panel width.
+
+.tc-title-screen__divider {
+    width: 100%;
+    height: 1px;
+    background: var(--bs-title-screen-divider-color);
+    border-radius: 0;
+    flex-shrink: 0;
+}
+
+// ── Subtitle ──────────────────────────────────────────────────────────────────
+
+.tc-title-screen__subtitle {
+    font-size: var(--bs-title-screen-subtitle-size);
+    color: var(--bs-title-screen-subtitle-color);
+    margin: 0;
+    line-height: 1.5;
+}
+
+// ── Coarse pointer ────────────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-title-screen__panel {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    tc-title-screen {
+        animation: none;
+    }
+}
