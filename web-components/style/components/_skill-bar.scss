@@ -1,0 +1,108 @@
+// tc-skill-bar — a horizontal toolbar of ability cards, each composed from
+// tc-ability-card. Ported from the game-components gc-skill-bar but without
+// the fantasy chrome (radial glows, gilded frames, conic overlays). The slot
+// wrapper owns interactivity, selection, and cooldown state; tc-ability-card
+// provides the visual card chrome.
+// All cosmetics flow through --bs-skill-bar-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-skill-bar {
+    --bs-skill-bar-gap: 0.5rem;
+    --bs-skill-bar-slot-size: 180px;
+
+    // Selected state — ink accent (1 px extra border + glow ring)
+    --bs-skill-bar-selected-border: var(--tc-app-accent);
+    --bs-skill-bar-selected-shadow: 0 0 0 1px var(--tc-app-accent), var(--tc-shadow-sm);
+
+    // Disabled state
+    --bs-skill-bar-disabled-opacity: 0.45;
+
+    // Cooldown overlay
+    --bs-skill-bar-cd-bg: rgba(10, 12, 15, 0.72);
+    --bs-skill-bar-cd-label-color: #fff;
+    --bs-skill-bar-cd-label-size: 1.25rem;
+    --bs-skill-bar-cd-bar-color: var(--tc-info);
+    --bs-skill-bar-cd-bar-height: 3px;
+}
+
+// Inner row — flex wrap so the bar reflows on narrow containers.
+.tc-skill-bar__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--bs-skill-bar-gap);
+}
+
+// Slot wrapper — owns interactivity and state classes; tc-ability-card is the child.
+.tc-skill-bar__slot {
+    position: relative;
+    min-width: var(--bs-skill-bar-slot-size);
+    cursor: pointer;
+    outline: none;
+
+    // Ensure coarse-pointer touch target height (44 px minimum).
+    min-height: 44px;
+
+    // Focus ring — visible for keyboard users, suppressed for pointer.
+    &:focus-visible {
+        box-shadow: var(--tc-focus-ring);
+        z-index: 1;
+    }
+
+    // Selected state — accent border on the inner ability card.
+    &.tc-skill-bar__slot--selected .tc-ability-card {
+        border-color: var(--bs-skill-bar-selected-border);
+        box-shadow: var(--bs-skill-bar-selected-shadow);
+    }
+
+    // Disabled state — dim the whole slot; block pointer events.
+    &.tc-skill-bar__slot--disabled {
+        opacity: var(--bs-skill-bar-disabled-opacity);
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+// Cooldown overlay — covers the ability card with a muted dark film.
+.tc-skill-bar__cd {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-skill-bar-cd-bg);
+    pointer-events: none;
+    // Sharp corners match the card underneath.
+    border-radius: 0;
+}
+
+// Progress strip at the bottom of the cooldown overlay.
+.tc-skill-bar__cd-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: var(--bs-skill-bar-cd-bar-height);
+    width: calc(var(--cd-pct, 0) * 100%);
+    background: var(--bs-skill-bar-cd-bar-color);
+}
+
+// Remaining-time label — JetBrains Mono, centred in the overlay.
+.tc-skill-bar__cd-label {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-skill-bar-cd-label-size);
+    font-weight: 700;
+    color: var(--bs-skill-bar-cd-label-color);
+    line-height: 1;
+    position: relative; // stacks above the bar strip
+}
+
+// Honour prefers-reduced-motion — freeze the lift on the inner ability card.
+@media (prefers-reduced-motion: reduce) {
+    .tc-skill-bar__slot .tc-ability-card {
+        transition: box-shadow var(--tc-transition-fast);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}

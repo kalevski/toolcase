@@ -339,6 +339,7 @@ import { SettingsCategoryList } from './SettingsCategoryList'
 import { ScoreDisplay } from './ScoreDisplay'
 import { ScrollText } from './ScrollText'
 import { ShopPanel } from './ShopPanel'
+import { SkillBar } from './SkillBar'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -688,4 +689,5 @@ export function register(): void {
     customElements.define('tc-score-display', ScoreDisplay)
     customElements.define('tc-scroll-text', ScrollText)
     customElements.define('tc-shop-panel', ShopPanel)
+    customElements.define('tc-skill-bar', SkillBar)
 }
