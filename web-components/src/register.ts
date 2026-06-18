@@ -266,6 +266,7 @@ import { Toggle } from './Toggle'
 import { ToggleCard } from './ToggleCard'
 import { TreeView } from './TreeView'
 import { UserPanel } from './UserPanel'
+import { VersionLabel } from './VersionLabel'
 import { VersionPicker } from './VersionPicker'
 import { VerticalItemList } from './VerticalItemList'
 import { VideoEmbed } from './VideoEmbed'
@@ -716,4 +717,5 @@ export function register(): void {
     customElements.define('tc-skill-tree', SkillTree)
     customElements.define('tc-stack', Stack)
     customElements.define('tc-stats-screen', StatsScreen)
+    customElements.define('tc-version-label', VersionLabel)
 }

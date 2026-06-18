@@ -345,6 +345,7 @@ import ShakeContainerDemo from './ShakeContainerDemo'
 import ScrollTextDemo from './ScrollTextDemo'
 import ShopPanelDemo from './ShopPanelDemo'
 import StatsScreenDemo from './StatsScreenDemo'
+import VersionLabelDemo from './VersionLabelDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -710,4 +711,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'scroll-text', category: 'Content', element: <ScrollTextDemo /> },
     { key: 'shop-panel', category: 'Components', element: <ShopPanelDemo /> },
     { key: 'stats-screen', category: 'Components', element: <StatsScreenDemo /> },
+    { key: 'version-label', category: 'Content', element: <VersionLabelDemo /> },
 ]
