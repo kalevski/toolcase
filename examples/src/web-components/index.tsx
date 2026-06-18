@@ -135,6 +135,7 @@ import ItemCompareDemo from './ItemCompareDemo'
 import ItemTooltipDemo from './ItemTooltipDemo'
 import AbilityCardDemo from './AbilityCardDemo'
 import SkillBarDemo from './SkillBarDemo'
+import SkillTreeDemo from './SkillTreeDemo'
 import AmmoCounterDemo from './AmmoCounterDemo'
 import ComboCounterDemo from './ComboCounterDemo'
 import GoodFirstIssuesDemo from './GoodFirstIssuesDemo'
@@ -490,6 +491,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'feature-card', category: 'Components', element: <FeatureCardDemo /> },
     { key: 'ability-card', category: 'Content', element: <AbilityCardDemo /> },
     { key: 'skill-bar', category: 'Components', element: <SkillBarDemo /> },
+    { key: 'skill-tree', category: 'Components', element: <SkillTreeDemo /> },
     { key: 'ammo-counter', category: 'Content', element: <AmmoCounterDemo /> },
     { key: 'combo-counter', category: 'Content', element: <ComboCounterDemo /> },
     { key: 'good-first-issues', category: 'Components', element: <GoodFirstIssuesDemo /> },
