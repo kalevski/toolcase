@@ -1,0 +1,277 @@
+// tc-party-panel — party member panel with portraits, health, status.
+// Port of gc-party-panel (game-components), restyled to the toolcase design
+// system: slate neutrals, hairline borders, sharp corners (border-radius: 0),
+// JetBrains Mono for machine-facing text, ink accent (--tc-app-accent) for
+// primary actions. All cosmetics flow through --bs-party-panel-* custom
+// properties.
+
+@use '../foundation/tokens' as *;
+
+tc-party-panel {
+    --bs-party-panel-bg: var(--tc-surface);
+    --bs-party-panel-border: var(--tc-border);
+    --bs-party-panel-header-bg: var(--tc-surface-muted);
+    --bs-party-panel-header-border: var(--tc-border);
+    --bs-party-panel-eyebrow-color: var(--tc-text-muted);
+    --bs-party-panel-count-color: var(--tc-text-faint);
+    --bs-party-panel-slot-bg: var(--tc-surface);
+    --bs-party-panel-slot-border: var(--tc-border);
+    --bs-party-panel-slot-empty-bg: var(--tc-surface);
+    --bs-party-panel-slot-empty-color: var(--tc-text-faint);
+    --bs-party-panel-slot-empty-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-party-panel-slot-filled-bg: var(--tc-surface);
+    --bs-party-panel-slot-ready-bg: var(--tc-surface-muted);
+    --bs-party-panel-member-name-color: var(--tc-text);
+    --bs-party-panel-role-bg: var(--tc-surface-muted);
+    --bs-party-panel-role-color: var(--tc-text-muted);
+    --bs-party-panel-host-badge-color: var(--tc-app-accent);
+    --bs-party-panel-ready-color: var(--tc-success);
+    --bs-party-panel-waiting-color: var(--tc-text-faint);
+    --bs-party-panel-actions-bg: var(--tc-surface-muted);
+    --bs-party-panel-btn-bg: var(--tc-surface);
+    --bs-party-panel-btn-color: var(--tc-text);
+    --bs-party-panel-btn-border: var(--tc-border);
+    --bs-party-panel-btn-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-party-panel-btn-hover-color: var(--tc-text);
+    --bs-party-panel-btn-min-height: 2.25rem;
+    --bs-party-panel-btn-leave-bg: var(--tc-surface);
+    --bs-party-panel-btn-leave-color: var(--tc-text);
+    --bs-party-panel-btn-disabled-opacity: 0.45;
+}
+
+.tc-party-panel {
+    background: var(--bs-party-panel-bg);
+    border: 1px solid var(--bs-party-panel-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+
+.tc-party-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.875rem;
+    background: var(--bs-party-panel-header-bg);
+    border-bottom: 1px solid var(--bs-party-panel-header-border);
+}
+
+.tc-party-panel-eyebrow {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-party-panel-eyebrow-color);
+}
+
+.tc-party-panel-count {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: var(--bs-party-panel-count-color);
+    letter-spacing: 0.025em;
+}
+
+// ── Slot grid ────────────────────────────────────────────────────────────────
+
+.tc-party-panel-slots {
+    display: flex;
+    flex-direction: column;
+}
+
+.tc-party-panel-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    min-height: 2.75rem;
+    border-bottom: 1px solid var(--bs-party-panel-slot-border);
+    background: var(--bs-party-panel-slot-bg);
+    text-align: left;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &.tc-party-panel-slot--empty {
+        cursor: pointer;
+        border: none;
+        border-bottom: 1px solid var(--bs-party-panel-slot-border);
+        background: var(--bs-party-panel-slot-empty-bg);
+        width: 100%;
+        color: var(--bs-party-panel-slot-empty-color);
+        transition: background-color var(--tc-transition-fast, 0.15s ease);
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover {
+            background: var(--bs-party-panel-slot-empty-hover-bg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--tc-app-accent);
+            outline-offset: -2px;
+        }
+    }
+
+    &.tc-party-panel-slot--filled {
+        background: var(--bs-party-panel-slot-filled-bg);
+    }
+
+    &.tc-party-panel-slot--ready {
+        background: var(--bs-party-panel-slot-ready-bg);
+    }
+}
+
+.tc-party-panel-invite-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--bs-party-panel-slot-empty-color);
+    flex-shrink: 0;
+}
+
+.tc-party-panel-invite-label {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bs-party-panel-slot-empty-color);
+}
+
+.tc-party-panel-member-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bs-party-panel-member-name-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-party-panel-member-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.tc-party-panel-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.375rem;
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    background: var(--bs-party-panel-role-bg);
+    color: var(--bs-party-panel-role-color);
+    border-radius: 0;
+    white-space: nowrap;
+}
+
+.tc-party-panel-host-badge {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-party-panel-host-badge-color);
+}
+
+.tc-party-panel-ready-badge {
+    flex-shrink: 0;
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    &.tc-party-panel-ready-badge--ready {
+        color: var(--bs-party-panel-ready-color);
+    }
+
+    &.tc-party-panel-ready-badge--waiting {
+        color: var(--bs-party-panel-waiting-color);
+    }
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+
+.tc-party-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background: var(--bs-party-panel-actions-bg);
+    border-top: 1px solid var(--bs-party-panel-slot-border);
+}
+
+.tc-party-panel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.875rem;
+    min-height: var(--bs-party-panel-btn-min-height);
+    border: 1px solid var(--bs-party-panel-btn-border);
+    border-radius: 0;
+    background: var(--bs-party-panel-btn-bg);
+    color: var(--bs-party-panel-btn-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        background-color var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        opacity var(--tc-transition-fast, 0.15s ease);
+
+    &:hover:not(:disabled) {
+        background: var(--bs-party-panel-btn-hover-bg);
+        color: var(--bs-party-panel-btn-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: var(--bs-party-panel-btn-disabled-opacity);
+        cursor: not-allowed;
+    }
+
+    &.tc-party-panel-btn--leave {
+        background: var(--bs-party-panel-btn-leave-bg);
+        color: var(--bs-party-panel-btn-leave-color);
+    }
+}
+
+// 44 px coarse touch targets
+@media (pointer: coarse) {
+    .tc-party-panel-btn {
+        --bs-party-panel-btn-min-height: 44px;
+    }
+
+    .tc-party-panel-slot--empty {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-party-panel-btn,
+    .tc-party-panel-slot--empty {
+        transition: none;
+    }
+}

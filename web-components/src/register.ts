@@ -298,6 +298,7 @@ import { LevelSelect } from './LevelSelect'
 import { LoadingOverlay } from './LoadingOverlay'
 import { LoadingScreen } from './LoadingScreen'
 import { Lobby } from './Lobby'
+import { PartyPanel } from './PartyPanel'
 import { MatchmakingScreen } from './MatchmakingScreen'
 import { MainMenu } from './MainMenu'
 import { MenuItem } from './MenuItem'
@@ -620,6 +621,7 @@ export function register(): void {
     customElements.define('tc-loading-overlay', LoadingOverlay)
     customElements.define('tc-loading-screen', LoadingScreen)
     customElements.define('tc-lobby', Lobby)
+    customElements.define('tc-party-panel', PartyPanel)
     customElements.define('tc-matchmaking-screen', MatchmakingScreen)
     customElements.define('tc-main-menu', MainMenu)
     customElements.define('tc-menu-item', MenuItem)
