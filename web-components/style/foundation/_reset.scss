@@ -434,6 +434,12 @@ tc-letterbox-bars {
     display: block;
 }
 
+// Absolutely-positioned decorative corner accent; the SCSS partial sizes and
+// clips the host, but the element must not default to inline.
+tc-rune-corner {
+    display: block;
+}
+
 // Fixed full-surface loading overlay; the SCSS partial hides it until [open]
 // and positions it on the modal tier, but the host must not default to inline.
 tc-loading-overlay {

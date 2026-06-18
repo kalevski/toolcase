@@ -1,0 +1,56 @@
+// tc-rune-corner — decorative corner accent. Ported from `gc-rune-corner` but
+// re-voiced for the web-components design system: gilded frames and fantasy
+// fills are replaced with a flat ink-colored L-shaped clip. All cosmetics flow
+// through --bs-rune-corner-* so themes re-skin via vars alone.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-rune-corner {
+    --bs-rune-corner-size:  14px;
+    --bs-rune-corner-bg:    var(--tc-app-accent);
+    --bs-rune-corner-opacity: 1;
+}
+
+// ── Host surface ────────────────────────────────────────────────────────────────
+// Absolutely positioned in each corner of the nearest positioned ancestor.
+// pointer-events: none so interactive content behind the accent is clickable.
+
+tc-rune-corner {
+    position: absolute;
+    width:  var(--bs-rune-corner-size);
+    height: var(--bs-rune-corner-size);
+    pointer-events: none;
+    border-radius: 0;
+    background: var(--bs-rune-corner-bg);
+    opacity: var(--bs-rune-corner-opacity);
+    // L-shaped clip: leaves a thin border strip along the top and left edges.
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+}
+
+// ── Corner placement ────────────────────────────────────────────────────────────
+// Each [at] value places the host and rotates the clip to the correct corner.
+
+tc-rune-corner[at="tl"] {
+    top:  0;
+    left: 0;
+}
+
+tc-rune-corner[at="tr"] {
+    top:   0;
+    right: 0;
+    transform: scaleX(-1);
+}
+
+tc-rune-corner[at="bl"] {
+    bottom: 0;
+    left:   0;
+    transform: scaleY(-1);
+}
+
+tc-rune-corner[at="br"] {
+    bottom: 0;
+    right:  0;
+    transform: scale(-1, -1);
+}

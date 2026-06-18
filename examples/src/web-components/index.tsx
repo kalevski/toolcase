@@ -321,6 +321,7 @@ import PageIndicatorDemo from './PageIndicatorDemo'
 import PanelDemo from './PanelDemo'
 import ParticleEmitterDemo from './ParticleEmitterDemo'
 import RarityChipDemo from './RarityChipDemo'
+import RuneCornerDemo from './RuneCornerDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -662,4 +663,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'press-any-key', category: 'Components', element: <PressAnyKeyDemo /> },
     { key: 'quest-tracker', category: 'Components', element: <QuestTrackerDemo /> },
     { key: 'rarity-chip', category: 'Content', element: <RarityChipDemo /> },
+    { key: 'rune-corner', category: 'Components', element: <RuneCornerDemo /> },
 ]

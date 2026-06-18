@@ -329,6 +329,7 @@ import { QuestTracker } from './QuestTracker'
 import { RarityChip } from './RarityChip'
 import { ReportPlayerDialog } from './ReportPlayerDialog'
 import { ResetToDefaults } from './ResetToDefaults'
+import { RuneCorner } from './RuneCorner'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -668,4 +669,5 @@ export function register(): void {
     customElements.define('tc-rarity-chip', RarityChip)
     customElements.define('tc-report-player-dialog', ReportPlayerDialog)
     customElements.define('tc-reset-to-defaults', ResetToDefaults)
+    customElements.define('tc-rune-corner', RuneCorner)
 }
