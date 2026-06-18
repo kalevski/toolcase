@@ -283,6 +283,7 @@ import { DialogueBox } from './DialogueBox'
 import { FOVSlider } from './FOVSlider'
 import { MouseSensitivity } from './MouseSensitivity'
 import { FPSCapSelect } from './FPSCapSelect'
+import { SelectRow } from './SelectRow'
 import { FullscreenToggle } from './FullscreenToggle'
 import { GameOverScreen } from './GameOverScreen'
 import { ResultScreen } from './ResultScreen'
@@ -624,6 +625,7 @@ export function register(): void {
     customElements.define('tc-fov-slider', FOVSlider)
     customElements.define('tc-mouse-sensitivity', MouseSensitivity)
     customElements.define('tc-fps-cap-select', FPSCapSelect)
+    customElements.define('tc-select-row', SelectRow)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
     customElements.define('tc-game-over-screen', GameOverScreen)
     customElements.define('tc-result-screen', ResultScreen)
