@@ -1,0 +1,37 @@
+// Dungeon › tc-rarity-chip — mono caps chip tinted + bordered by rarity, on a
+// translucent black fill (per the fantasy contract §11.1).
+
+tc-theme[name='dungeon'] {
+    .tc-rarity-chip {
+        --bs-rarity-chip-letter-spacing: 0.18em;
+        --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
+        --bs-rarity-chip-color: var(--fg-common);
+        --bs-rarity-chip-border-color: var(--fg-common);
+    }
+
+    .tc-rarity-chip--uncommon {
+        --bs-rarity-chip-color: var(--fg-uncommon);
+        --bs-rarity-chip-border-color: var(--fg-uncommon);
+        --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
+    }
+    .tc-rarity-chip--rare {
+        --bs-rarity-chip-color: var(--fg-rare);
+        --bs-rarity-chip-border-color: var(--fg-rare);
+        --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
+    }
+    .tc-rarity-chip--epic {
+        --bs-rarity-chip-color: var(--fg-epic);
+        --bs-rarity-chip-border-color: var(--fg-epic);
+        --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
+    }
+    .tc-rarity-chip--legendary {
+        --bs-rarity-chip-color: var(--fg-legendary);
+        --bs-rarity-chip-border-color: var(--fg-legendary);
+        --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
+    }
+    .tc-rarity-chip--mythic {
+        --bs-rarity-chip-color: var(--fg-mythic);
+        --bs-rarity-chip-border-color: var(--fg-mythic);
+        --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
+    }
+}

@@ -1,0 +1,13 @@
+// Dungeon › tc-lore-text — italic flavor prose with a gold rule on the left edge.
+
+tc-theme[name='dungeon'] {
+    tc-lore-text {
+        --bs-lore-text-color: var(--fg-parch-3);
+        --bs-lore-text-border-color: var(--fg-gold-deep);
+    }
+
+    .tc-lore-text__content {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
+}

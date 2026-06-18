@@ -1,0 +1,32 @@
+// Dungeon › tc-portrait — gilded medallion. Radial bronze fill, 2px gold border,
+// inset gold-bright ring + drop shadow, display-caps initials. Circle variant kept.
+
+tc-theme[name='dungeon'] {
+    tc-portrait {
+        --bs-portrait-bg: radial-gradient(70% 70% at 50% 30%, #6a4a2a, #2a1a0a 80%);
+        --bs-portrait-border-color: var(--fg-gold-deep);
+        --bs-portrait-glyph-color: var(--fg-gold-bright);
+        --bs-portrait-level-bg: linear-gradient(180deg, #3a2a1c, #1a120a);
+        --bs-portrait-level-color: var(--fg-gold-bright);
+        --bs-portrait-level-border: 1px solid var(--fg-gold-deep);
+    }
+
+    .tc-portrait {
+        border-width: 2px;
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-bright),
+            inset 0 0 12px rgba(0, 0, 0, 0.6),
+            0 0 0 1px #000,
+            0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .tc-portrait__glyph {
+        font-family: var(--fg-display);
+        font-weight: 700;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-portrait__level {
+        font-family: var(--fg-mono);
+    }
+}

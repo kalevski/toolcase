@@ -14,3 +14,8 @@
 @use './foundation';
 @use './components';
 @use './themes/default';
+
+//   (4) Dungeon theme — opt-in fantasy skin (gilded bronze, parchment, ink).
+//       Scoped under `tc-theme[name="dungeon"]`, so it is inert until a wrapper
+//       opts in; everything outside the wrapper keeps the default voice.
+@use './themes/dungeon';

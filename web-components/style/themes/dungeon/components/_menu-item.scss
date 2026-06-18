@@ -1,0 +1,39 @@
+// Dungeon › tc-menu-item — gilded menu row. Display caps, left gold marker on
+// selected, gradient highlight wash, mono hotkey cap.
+
+tc-theme[name='dungeon'] {
+    tc-menu-item {
+        --bs-menu-item-bg: transparent;
+        --bs-menu-item-color: var(--fg-parch);
+        --bs-menu-item-border-color: rgba(201, 169, 97, 0.15);
+        --bs-menu-item-icon-color: var(--fg-gold);
+        --bs-menu-item-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-menu-item-hover-color: var(--fg-gold-bright);
+        --bs-menu-item-selected-bg: transparent;
+        --bs-menu-item-selected-color: var(--fg-gold-bright);
+        --bs-menu-item-selected-icon-color: var(--fg-gold-bright);
+        --bs-menu-item-hotkey-font-family: var(--fg-mono);
+        --bs-menu-item-hotkey-color: var(--fg-parch-3);
+        --bs-menu-item-hotkey-bg: rgba(0, 0, 0, 0.4);
+        --bs-menu-item-hotkey-border: 1px solid var(--fg-gold-deep);
+        --bs-menu-item-hotkey-selected-color: var(--fg-gold-bright);
+        --bs-menu-item-hotkey-selected-bg: rgba(0, 0, 0, 0.4);
+        --bs-menu-item-hotkey-selected-border: 1px solid var(--fg-gold);
+
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        border-left: 2px solid transparent;
+    }
+
+    .tc-menu-item-label {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    // Selected: gold left marker + gradient highlight wash (no solid fill).
+    tc-menu-item.tc-menu-item--selected {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.22), transparent 70%);
+        border-left-color: var(--fg-gold-bright);
+    }
+}

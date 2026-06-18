@@ -1,0 +1,224 @@
+// Dungeon theme — foundation token layer.
+//
+// An OPT-IN fantasy skin for @toolcase/web-components. It applies only inside a
+// theme root: `<tc-theme name="dungeon"> … </tc-theme>`. Everything outside the
+// wrapper keeps the default toolcase (slate / product) voice.
+//
+// HOW IT WORKS — read this before authoring a component override:
+//   Every tc-* component drives its cosmetics through --bs-<component>-* custom
+//   properties whose DEFAULTS resolve to --tc-* design tokens (e.g.
+//   `--bs-panel-bg: var(--tc-surface)`). Re-pointing the --tc-* tokens here, at
+//   the theme root, therefore re-skins the colours / borders / type of ALL 111
+//   matched components in one shot. The per-component partials in ./components/
+//   only need to add the fantasy STRUCTURE that a flat token swap can't carry:
+//   gilded bevel shadow stacks, corner notches, display-caps typography, diamond
+//   ornaments, gradient fills wired to non-tokenised properties.
+//
+// AESTHETIC (mirrors game-components): aged parchment, gilded bronze, ink, runes.
+// Square frames (no radius except circles/diamonds), beveled gold rules, dark
+// wood / leather backdrops, mono numerals, serif display caps with wide tracking.
+//
+// FONTS: 'Cinzel' (display) and 'EB Garamond' (body) are NOT bundled — load them
+// on the host page (e.g. Google Fonts) for the full look; both degrade to Georgia
+// serif. 'JetBrains Mono' is shared with the default theme.
+
+@use '../../foundation/tokens' as *;
+
+tc-theme[name='dungeon'] {
+    color-scheme: dark;
+
+    // `tc-theme` is display:contents (no box), so `background` would not paint —
+    // for a dungeon backdrop, wrap content in `tc-artboard-backdrop` or set the
+    // gradient on your own container. `color` / `font-family` / the custom
+    // properties below all inherit through the contents box to descendants.
+    color: var(--fg-parch);
+    font-family: var(--fg-body);
+
+    // ── Fantasy palette (--fg-*) — the dungeon design tokens ─────────────────
+    // Surfaces — wood / ink / leather
+    --fg-ink: #1a140d;
+    --fg-ink-2: #221912;
+    --fg-leather: #2a1f14;
+    --fg-leather-2: #3a2a1c;
+    --fg-leather-3: #4a3422;
+
+    // Parchment / cream
+    --fg-parch: #e8dcc4;
+    --fg-parch-2: #d6c5a3;
+    --fg-parch-3: #b8a47e;
+    --fg-parch-dim: #8b7a5e;
+
+    // Metals — gold scale is the primary accent
+    --fg-gold: #c9a961;
+    --fg-gold-bright: #f0d27a;
+    --fg-gold-deep: #8b6f3a;
+    --fg-gold-shadow: #5a4422;
+    --fg-bronze: #8b6f3a;
+    --fg-copper: #a06a3a;
+    --fg-silver: #c5cfd6;
+
+    // Element / resource colors
+    --fg-blood: #a8302a;
+    --fg-blood-bright: #d44a3a;
+    --fg-mana: #3a6cc9;
+    --fg-mana-bright: #5a8cf0;
+    --fg-stamina: #6f9f3a;
+    --fg-stamina-bright: #9fc55a;
+    --fg-arcane: #8a4ec9;
+    --fg-arcane-bright: #b878e8;
+    --fg-poison: #6fb04a;
+    --fg-fire: #e07330;
+    --fg-frost: #5fb8d4;
+
+    // Rarity scale (item slots, chips, glow)
+    --fg-common: #9c9489;
+    --fg-uncommon: #5fa84a;
+    --fg-rare: #4a7fcf;
+    --fg-epic: #a44dd0;
+    --fg-legendary: #e8a23a;
+    --fg-mythic: #e04d6a;
+
+    // Typography families
+    --fg-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+    --fg-body: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    --fg-mono: 'JetBrains Mono', 'Ubuntu Mono', Consolas, ui-monospace, monospace;
+
+    // ── Reusable signature recipes (referenced by component partials) ────────
+    // The gilded square panel — THE dungeon surface.
+    --fg-panel-bg:
+        linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+        radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+    // Inset bevel stack + drop shadow (outer dark ring → gold rings → top highlight).
+    --fg-panel-shadow:
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+        inset 0 0 0 2px var(--fg-gold-deep),
+        inset 0 0 0 3px var(--fg-gold-shadow),
+        inset 0 2px 0 rgba(255, 220, 150, 0.08),
+        0 8px 24px rgba(0, 0, 0, 0.6);
+    // "Light catches the top edge" highlight band — apply to every framed surface.
+    --fg-bevel-top: inset 0 1px 0 rgba(232, 200, 120, 0.2);
+    // Slot / button base fills.
+    --fg-slot-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+    --fg-button-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+    --fg-keycap-bg: linear-gradient(180deg, #3a2a1c, #1a120a);
+    // Gold rule + diamond divider ornament.
+    --fg-rule: linear-gradient(
+        90deg,
+        transparent,
+        var(--fg-gold-deep) 30%,
+        var(--fg-gold) 50%,
+        var(--fg-gold-deep) 70%,
+        transparent
+    );
+    --fg-gold-edge: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    // Corner-notch glyph (Panel::before/::after, rune corner).
+    --fg-notch-fill: linear-gradient(
+        135deg,
+        var(--fg-gold-bright),
+        var(--fg-gold) 35%,
+        var(--fg-gold-deep) 60%,
+        #2a1c0e
+    );
+    --fg-notch-clip: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+    // Scanline overlay for resource bar fills.
+    --fg-scanlines: repeating-linear-gradient(90deg, transparent 0 9px, rgba(0, 0, 0, 0.18) 9px 10px);
+
+    // ── Remap toolcase tokens (--tc-*) onto the fantasy palette ──────────────
+    // This block alone flips every component's colours / borders / type, because
+    // the --bs-<component>-* defaults all resolve through these tokens.
+    --tc-font-sans: var(--fg-body);
+    --tc-font-mono: var(--fg-mono);
+
+    --tc-white: #ffffff;
+    --tc-black: #000000;
+
+    --tc-surface: #211a12;
+    --tc-surface-muted: var(--fg-leather);
+    --tc-surface-hover: var(--fg-leather-2);
+    --tc-surface-dark: var(--fg-ink);
+    --tc-border: var(--fg-gold-deep);
+    --tc-border-strong: var(--fg-gold);
+    --tc-text: var(--fg-parch);
+    --tc-text-muted: var(--fg-parch-3);
+    --tc-text-faint: var(--fg-parch-dim);
+    --tc-text-inverse: var(--fg-ink);
+    --tc-emphasis: var(--fg-gold-bright);
+
+    --tc-ink: var(--fg-ink);
+    --tc-ink-2: var(--fg-ink-2);
+
+    --tc-app-accent: var(--fg-gold);
+    --tc-app-accent-hover: var(--fg-gold-bright);
+    --tc-app-accent-contrast: var(--fg-ink);
+
+    --tc-accent: var(--fg-gold-bright);
+    --tc-accent-fg: var(--fg-gold);
+    --tc-accent-soft: rgba(201, 169, 97, 0.16);
+    --tc-accent-hex: #c9a961;
+
+    --tc-success: var(--fg-stamina);
+    --tc-success-bg: rgba(111, 159, 58, 0.18);
+    --tc-info: var(--fg-mana);
+    --tc-info-bg: rgba(58, 108, 201, 0.18);
+    --tc-warning: var(--fg-legendary);
+    --tc-warning-bg: rgba(232, 162, 58, 0.18);
+    --tc-danger: var(--fg-blood);
+    --tc-danger-bg: rgba(168, 48, 42, 0.2);
+
+    // Shadows lean dark + heavy in the dungeon; surfaces lean on gold borders.
+    --tc-shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.6);
+    --tc-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.5);
+    --tc-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --tc-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.7);
+
+    --tc-transition-fast: 0.12s ease;
+    --tc-transition-base: 0.2s ease-out;
+
+    --tc-focus-ring: 0 0 0 2px var(--fg-gold-bright);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--fg-gold);
+    --bs-primary-rgb: 201, 169, 97;
+    --bs-secondary: var(--fg-copper);
+    --bs-secondary-rgb: 160, 106, 58;
+    --bs-success: var(--fg-stamina);
+    --bs-success-rgb: 111, 159, 58;
+    --bs-danger: var(--fg-blood);
+    --bs-danger-rgb: 168, 48, 42;
+    --bs-warning: var(--fg-legendary);
+    --bs-warning-rgb: 232, 162, 58;
+    --bs-info: var(--fg-mana);
+    --bs-info-rgb: 58, 108, 201;
+    --bs-light: var(--fg-parch);
+    --bs-light-rgb: 232, 220, 196;
+    --bs-dark: var(--fg-ink);
+    --bs-dark-rgb: 26, 20, 13;
+
+    --bs-font-sans-serif: var(--fg-body);
+    --bs-font-monospace: var(--fg-mono);
+    --bs-body-font-family: var(--fg-body);
+    --bs-body-bg: var(--fg-ink);
+    --bs-body-bg-rgb: 26, 20, 13;
+    --bs-body-color: var(--fg-parch);
+    --bs-body-color-rgb: 232, 220, 196;
+    --bs-emphasis-color: var(--fg-gold-bright);
+    --bs-emphasis-color-rgb: 240, 210, 122;
+
+    --bs-secondary-color: var(--fg-parch-3);
+    --bs-secondary-bg: var(--fg-leather);
+    --bs-tertiary-color: var(--fg-parch-dim);
+    --bs-tertiary-bg: var(--fg-leather-2);
+
+    --bs-border-color: var(--fg-gold-deep);
+    --bs-border-color-translucent: rgba(201, 169, 97, 0.25);
+    --bs-border-radius: 0;
+
+    --bs-link-color: var(--fg-gold-bright);
+    --bs-link-hover-color: var(--fg-gold);
+
+    --bs-box-shadow-sm: var(--tc-shadow-sm);
+    --bs-box-shadow: var(--tc-shadow-md);
+    --bs-box-shadow-lg: var(--tc-shadow-lg);
+
+    --bs-focus-ring-color: rgba(240, 210, 122, 0.4);
+}

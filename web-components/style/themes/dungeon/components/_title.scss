@@ -1,0 +1,15 @@
+// Dungeon › tc-title — display caps title in gold-bright with a glow.
+
+tc-theme[name='dungeon'] {
+    tc-title {
+        --bs-title-color: var(--fg-gold-bright);
+        --bs-title-font-weight: 700;
+        --bs-title-letter-spacing: 0.1em;
+    }
+
+    .tc-title-content {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        text-shadow: 0 2px 0 #000, 0 0 22px rgba(232, 200, 120, 0.35);
+    }
+}

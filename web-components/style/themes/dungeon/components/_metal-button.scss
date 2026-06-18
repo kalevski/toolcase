@@ -1,0 +1,75 @@
+// Dungeon › tc-metal-button — beveled metal button with gilded display-caps label.
+// Token swap recolours the fills/borders; the inner-button rules add the metal
+// bevel shadow + display caps + brightness hover that vars don't expose.
+
+tc-theme[name='dungeon'] {
+    tc-metal-button {
+        --bs-metal-button-color: var(--fg-gold-bright);
+        --bs-metal-button-bg: var(--fg-button-bg);
+        --bs-metal-button-border-color: var(--fg-gold-deep);
+        --bs-metal-button-hover-bg: var(--fg-button-bg);
+        --bs-metal-button-hover-color: var(--fg-gold-bright);
+        --bs-metal-button-hover-border-color: var(--fg-gold-deep);
+        --bs-metal-button-active-bg: var(--fg-button-bg);
+        --bs-metal-button-active-color: var(--fg-gold-bright);
+        --bs-metal-button-active-border-color: var(--fg-gold-deep);
+        --bs-metal-button-focus-ring-color: rgba(240, 210, 122, 0.4);
+    }
+
+    tc-metal-button[variant='primary'] {
+        --bs-metal-button-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-metal-button-border-color: var(--fg-gold);
+        --bs-metal-button-color: var(--fg-gold-bright);
+        --bs-metal-button-hover-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-metal-button-hover-border-color: var(--fg-gold);
+        --bs-metal-button-active-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-metal-button-active-border-color: var(--fg-gold);
+    }
+
+    tc-metal-button[variant='danger'] {
+        --bs-metal-button-bg: linear-gradient(180deg, #5a1a16, #2a0a08);
+        --bs-metal-button-border-color: var(--fg-blood);
+        --bs-metal-button-color: #f4c4be;
+        --bs-metal-button-hover-bg: linear-gradient(180deg, #5a1a16, #2a0a08);
+        --bs-metal-button-hover-border-color: var(--fg-blood);
+        --bs-metal-button-active-bg: linear-gradient(180deg, #5a1a16, #2a0a08);
+        --bs-metal-button-active-border-color: var(--fg-blood);
+    }
+
+    tc-metal-button[variant='ghost'] {
+        --bs-metal-button-bg: transparent;
+        --bs-metal-button-border-color: var(--fg-gold-deep);
+        --bs-metal-button-color: var(--fg-parch);
+        --bs-metal-button-hover-bg: rgba(201, 169, 97, 0.1);
+        --bs-metal-button-hover-border-color: var(--fg-gold);
+        --bs-metal-button-active-bg: rgba(201, 169, 97, 0.14);
+    }
+
+    .tc-metal-button__btn {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        &:hover {
+            filter: brightness(1.15);
+        }
+
+        &:active {
+            filter: brightness(0.9);
+            transform: translateY(1px);
+        }
+    }
+
+    // Drop the slate primary-hover glow from the default theme.
+    tc-metal-button[variant='primary'] .tc-metal-button__btn:hover {
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.3),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+    }
+}

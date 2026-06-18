@@ -1,0 +1,14 @@
+// Dungeon › tc-character-create — TODO: dungeon override not yet implemented.
+//
+// Most of the reskin is already inherited from the foundation token remap
+// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
+// component still needs (gilded bevel, corner notches, display caps, gradient
+// fills) by overriding its --bs-character-create-* vars and .tc-* rules below.
+// Follow the per-component recipe in web-components/dungeon-theme.md.
+//
+// Design source:  game-components/style/components/_character-create.scss
+// Target classes: web-components/style/components/_character-create.scss
+
+tc-theme[name='dungeon'] {
+    // TODO: implement dungeon override for tc-character-create
+}

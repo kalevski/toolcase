@@ -1,0 +1,35 @@
+// Dungeon › tc-artboard-backdrop — full-bleed dungeon backdrop. This is the
+// recommended way to paint the dungeon surface (the tc-theme wrapper is
+// display:contents and cannot carry a background). Mirrors the gc-* dark / scene
+// / parch radial gradients.
+
+tc-theme[name='dungeon'] {
+    tc-artboard-backdrop {
+        --bs-artboard-backdrop-bg: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+        --bs-artboard-backdrop-color: var(--fg-parch);
+        --bs-artboard-backdrop-border-color: transparent;
+    }
+
+    .tc-artboard-backdrop--dark {
+        --bs-artboard-backdrop-bg: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+        --bs-artboard-backdrop-color: var(--fg-parch);
+        --bs-artboard-backdrop-border-color: transparent;
+    }
+
+    .tc-artboard-backdrop--scene {
+        --bs-artboard-backdrop-bg:
+            radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+            linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+        --bs-artboard-backdrop-color: var(--fg-parch);
+        --bs-artboard-backdrop-border-color: var(--fg-gold-deep);
+    }
+
+    .tc-artboard-backdrop--parch {
+        --bs-artboard-backdrop-bg:
+            radial-gradient(120% 100% at 30% 10%, rgba(255, 240, 200, 0.12), transparent 60%),
+            radial-gradient(80% 60% at 80% 90%, rgba(120, 80, 30, 0.18), transparent 70%),
+            linear-gradient(180deg, #e8dcc4 0%, #d6c5a3 100%);
+        --bs-artboard-backdrop-color: var(--fg-ink);
+        --bs-artboard-backdrop-border-color: var(--fg-gold-deep);
+    }
+}

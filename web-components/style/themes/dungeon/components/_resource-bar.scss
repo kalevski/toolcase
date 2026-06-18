@@ -1,0 +1,59 @@
+// Dungeon › tc-resource-bar (+ health / mana / stamina aliases).
+// Dark inset track, gold-deep frame, gradient fantasy fills with a mandatory
+// scanline overlay, mono display-caps label row.
+
+tc-theme[name='dungeon'] {
+    tc-resource-bar,
+    tc-health-bar,
+    tc-mana-bar,
+    tc-stamina-bar {
+        --bs-resource-bar-label-color: var(--fg-parch-3);
+        --bs-resource-bar-value-color: var(--fg-gold-bright);
+        --bs-resource-bar-track-bg: linear-gradient(180deg, #0e0905, #1a120a);
+        --bs-resource-bar-ghost-bg: rgba(255, 220, 200, 0.25);
+        --bs-resource-bar-tick-color: #000;
+        --bs-resource-bar-inline-text-color: var(--fg-parch);
+        // hp by default
+        --bs-resource-bar-fill-bg: linear-gradient(180deg, #e0584a, #a8302a 60%, #5a1410);
+    }
+
+    .tc-resource-bar--health {
+        --bs-resource-bar-fill-bg: linear-gradient(180deg, #e0584a, #a8302a 60%, #5a1410);
+    }
+    .tc-resource-bar--mana {
+        --bs-resource-bar-fill-bg: linear-gradient(180deg, #7aaef0, #3a6cc9 60%, #1a2e6a);
+    }
+    .tc-resource-bar--stamina {
+        --bs-resource-bar-fill-bg: linear-gradient(180deg, #a8d65a, #6f9f3a 60%, #2a4818);
+    }
+
+    .tc-resource-bar__label {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 10px;
+    }
+
+    .tc-resource-bar__track {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    // Mandatory scanline overlay over the fill.
+    .tc-resource-bar__fill::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--fg-scanlines);
+        pointer-events: none;
+    }
+    .tc-resource-bar__fill {
+        position: relative;
+    }
+
+    .tc-resource-bar__inline-text {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.08em;
+        text-shadow: 0 1px 2px #000, 0 0 3px #000;
+    }
+}

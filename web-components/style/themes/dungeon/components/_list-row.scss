@@ -1,0 +1,18 @@
+// Dungeon › tc-list-row — gold hairline rows, gradient highlight + gold marker
+// on the selected row, mono meta values.
+
+tc-theme[name='dungeon'] {
+    tc-list-row {
+        --bs-list-row-bg: transparent;
+        --bs-list-row-border-color: rgba(201, 169, 97, 0.15);
+        --bs-list-row-accent: var(--fg-gold);
+        --bs-list-row-label-color: var(--fg-parch);
+        --bs-list-row-meta-color: var(--fg-parch-3);
+        --bs-list-row-meta-font-family: var(--fg-mono);
+        --bs-list-row-selected-bg: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+    }
+
+    tc-list-row.tc-list-row--selected .tc-list-row-label {
+        color: var(--fg-gold-bright);
+    }
+}

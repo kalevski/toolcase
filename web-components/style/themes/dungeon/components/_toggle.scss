@@ -1,0 +1,33 @@
+// Dungeon › tc-toggle — square gilded switch. Dark inset track with a gold-deep
+// frame, gold gradient knob. Overrides the default pill curves to sharp.
+
+tc-theme[name='dungeon'] {
+    tc-toggle {
+        --bs-toggle-track-width: 44px;
+        --bs-toggle-track-height: 22px;
+        --bs-toggle-track-bg: #0e0905;
+        --bs-toggle-track-hover-bg: #1a120a;
+        --bs-toggle-track-checked-bg: #4a2a0e;
+        --bs-toggle-track-checked-gradient: linear-gradient(180deg, #2a1a08, #4a2a0e);
+        --bs-toggle-track-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        --bs-toggle-knob-size: 18px;
+        --bs-toggle-knob-inset: 1px;
+        --bs-toggle-knob-bg: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-toggle-knob-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 1px 2px rgba(0, 0, 0, 0.6);
+        --bs-toggle-focus-ring: rgba(240, 210, 122, 0.4);
+    }
+
+    // Sharpen the pill track + circular knob to the square dungeon shape.
+    .tc-toggle-track {
+        border: 1px solid var(--fg-gold-deep);
+        border-radius: 0;
+    }
+    .tc-toggle-knob {
+        border-radius: 0;
+    }
+    .tc-toggle--on .tc-toggle-track {
+        border-color: var(--fg-gold);
+    }
+}
