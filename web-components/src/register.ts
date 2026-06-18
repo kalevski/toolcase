@@ -321,6 +321,7 @@ import { Panel, PanelHeader } from './Panel'
 import { PauseMenu } from './PauseMenu'
 import { PauseScreen } from './PauseScreen'
 import { PerkPicker } from './PerkPicker'
+import { Portrait } from './Portrait'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -652,4 +653,5 @@ export function register(): void {
     customElements.define('tc-pause-menu', PauseMenu)
     customElements.define('tc-pause-screen', PauseScreen)
     customElements.define('tc-perk-picker', PerkPicker)
+    customElements.define('tc-portrait', Portrait)
 }
