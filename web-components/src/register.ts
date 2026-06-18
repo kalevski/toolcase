@@ -315,6 +315,7 @@ import { PageIndicator } from './PageIndicator'
 import { ParticleEmitter } from './ParticleEmitter'
 import { Panel, PanelHeader } from './Panel'
 import { PauseMenu } from './PauseMenu'
+import { PauseScreen } from './PauseScreen'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -640,4 +641,5 @@ export function register(): void {
     customElements.define('tc-panel', Panel)
     customElements.define('tc-panel-header', PanelHeader)
     customElements.define('tc-pause-menu', PauseMenu)
+    customElements.define('tc-pause-screen', PauseScreen)
 }

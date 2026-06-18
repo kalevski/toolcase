@@ -384,6 +384,12 @@ tc-pause-menu {
     display: block;
 }
 
+// Full-screen pause overlay; the SCSS partial positions the backdrop and
+// centred panel, but the host must not default to inline.
+tc-pause-screen {
+    display: block;
+}
+
 // Fixed full-surface scrim; the SCSS partial flips it to a centred flex
 // container, but it must not default to inline.
 tc-blur-overlay {

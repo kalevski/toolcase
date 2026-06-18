@@ -243,6 +243,7 @@ After `register()` you can author markup directly:
   - [tc-panel-header](#tc-panel-header)
   - [tc-particle-emitter](#tc-particle-emitter)
   - [tc-pause-menu](#tc-pause-menu)
+  - [tc-pause-screen](#tc-pause-screen)
   - [tc-level-header](#tc-level-header)
   - [tc-level-select](#tc-level-select)
   - [tc-live-feed](#tc-live-feed)
@@ -22839,5 +22840,101 @@ In-game pause overlay with a full-screen backdrop, an optional eyebrow + title h
         console.log('selected:', e.detail.id)
         menu.removeAttribute('open')
     })
+</script>
+```
+
+---
+
+### tc-pause-screen
+
+Full-screen pause overlay with a backdrop, a mono eyebrow label, a custom title heading, and a keyboard-navigable item list. Port of `gc-pause-screen` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners (border-radius: 0), 1px hairline borders, overlay-tier shadow. Controlled component — fires `tc-close` / `tc-resume` / `tc-restart` / `tc-quit` / `tc-select`; the consumer sets `open` to `false` to actually dismiss. Focus trap, scroll lock, and keyboard (`Escape`, `ArrowDown`/`Up`, `Enter`/`Space`, `Tab`) handling included. Default items are Resume, Restart, and Quit; set `items` via the JS property to customise. No shadow root; light DOM; `display: block`.
+
+**Tag:** `tc-pause-screen`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `open` | boolean | `false` | Shows the overlay when present; removing it hides it. |
+| `screen-title` | string | `"Paused"` | Title heading shown inside the panel. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `open` | `boolean` | `false` | Reflects the `open` attribute. |
+| `screenTitle` | `string` | `"Paused"` | Reflects the `screen-title` attribute. |
+| `items` | `PauseScreenItem[]` | `[Resume, Restart, Quit]` | Array of menu items. Falls back to the default three items when set to an empty array. Setting this after connect surgically updates the list without re-rendering the panel. |
+| `onResume` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-resume`. |
+| `onRestart` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-restart`. |
+| `onQuit` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-quit`. |
+| `onClose` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-close`. |
+| `onSelect` | `((id: string) => void) \| null` | `null` | Optional callback fired alongside `tc-select`. |
+
+**PauseScreenItem shape**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | `string` | yes | Unique item identifier, returned in `tc-select` detail. Items with `id: 'resume'`, `'restart'`, or `'quit'` also fire their dedicated events. |
+| `label` | `string` | yes | Display text for the item row. |
+| `disabled` | `boolean` | no | Prevents selection and applies the disabled style. |
+| `badge` | `string` | no | Optional mono badge rendered on the trailing edge. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-resume` | `{}` | Fired when an item with `id: 'resume'` is activated. Does **not** self-close. |
+| `tc-restart` | `{}` | Fired when an item with `id: 'restart'` is activated. |
+| `tc-quit` | `{}` | Fired when an item with `id: 'quit'` is activated. |
+| `tc-select` | `{ id: string }` | Fired for every non-disabled item activation (click, `Enter`, or `Space`). |
+| `tc-close` | `{}` | Fired on `Escape` key or backdrop click. Does **not** mutate `open`. |
+
+**CSS custom properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-pause-screen-bg` | `var(--tc-surface)` | Panel background. |
+| `--bs-pause-screen-border-color` | `var(--tc-border)` | Panel and item divider border colour. |
+| `--bs-pause-screen-shadow` | `var(--tc-shadow-lg)` | Panel box-shadow (overlay tier). |
+| `--bs-pause-screen-width` | `420px` | Default panel width. |
+| `--bs-pause-screen-max-width` | `calc(100vw - 2rem)` | Maximum panel width (viewport responsive). |
+| `--bs-pause-screen-max-height` | `calc(100vh - 4rem)` | Maximum panel height. |
+| `--bs-pause-screen-padding` | `1.5rem` | Header and item padding. |
+| `--bs-pause-screen-backdrop-bg` | `#0f172a` | Backdrop scrim colour. |
+| `--bs-pause-screen-backdrop-opacity` | `0.65` | Backdrop opacity (open state). |
+| `--bs-pause-screen-z-backdrop` | `var(--tc-z-modal-backdrop)` | Backdrop z-index. |
+| `--bs-pause-screen-z-panel` | `var(--tc-z-modal)` | Panel z-index. |
+| `--bs-pause-screen-eyebrow-color` | `var(--tc-cyan, #22d3ee)` | Eyebrow micro-label colour (cyan accent). |
+| `--bs-pause-screen-title-color` | `var(--tc-text)` | Title heading colour. |
+| `--bs-pause-screen-item-min-height` | `3rem` | Item row min-height (44 px under coarse pointer). |
+| `--bs-pause-screen-item-color` | `var(--tc-text)` | Item text colour. |
+| `--bs-pause-screen-item-hover-bg` | `var(--tc-surface-muted)` | Item hover/focus background. |
+| `--bs-pause-screen-item-active-color` | `var(--tc-app-accent)` | Item text colour on hover/focus. |
+| `--bs-pause-screen-item-disabled-color` | `var(--tc-text-faint)` | Disabled item text colour. |
+| `--bs-pause-screen-badge-bg` | `var(--tc-surface-muted)` | Badge background. |
+| `--bs-pause-screen-badge-color` | `var(--tc-text-muted)` | Badge text colour. |
+
+```html
+<button onclick="document.querySelector('#ps').setAttribute('open','')">Pause</button>
+
+<tc-pause-screen id="ps" screen-title="Realm of Ash"></tc-pause-screen>
+
+<script>
+    const screen = document.querySelector('#ps')
+
+    // Optional: override default items
+    screen.items = [
+        { id: 'resume',   label: 'Resume' },
+        { id: 'settings', label: 'Settings', badge: 'New' },
+        { id: 'restart',  label: 'Restart' },
+        { id: 'quit',     label: 'Quit', disabled: true },
+    ]
+
+    screen.addEventListener('tc-resume',  () => screen.removeAttribute('open'))
+    screen.addEventListener('tc-close',   () => screen.removeAttribute('open'))
+    screen.addEventListener('tc-restart', () => console.log('restart'))
+    screen.addEventListener('tc-quit',    () => console.log('quit'))
+    screen.addEventListener('tc-select',  e => console.log('selected:', e.detail.id))
 </script>
 ```
