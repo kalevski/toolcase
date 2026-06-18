@@ -286,6 +286,7 @@ import TreeViewDemo from './TreeViewDemo'
 import UserPanelDemo from './UserPanelDemo'
 import PhysicsEditorDemo from './PhysicsEditorDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
+import TabBarDemo from './TabBarDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
 import AdvancedTableDemo from './AdvancedTableDemo'
@@ -639,6 +640,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'tree-view', category: 'Navigation', element: <TreeViewDemo /> },
     { key: 'user-panel', category: 'Components', element: <UserPanelDemo /> },
     { key: 'single-card-select', category: 'Forms', element: <SingleCardSelectDemo /> },
+    { key: 'tab-bar', category: 'Navigation', element: <TabBarDemo /> },
     { key: 'tab-sections', category: 'Navigation', element: <TabSectionsDemo /> },
     { key: 'vertical-item-list', category: 'Navigation', element: <VerticalItemListDemo /> },
     { key: 'table', category: 'Content', element: <TableDemo /> },

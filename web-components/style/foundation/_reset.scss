@@ -369,6 +369,11 @@ tc-subtitle {
     display: block;
 }
 
+// tc-tab-bar is a flex-row tablist; the host IS the tablist container.
+tc-tab-bar {
+    display: flex;
+}
+
 // tc-compass-bar lays out as a vertical flex column (track above the heading
 // readout); the partial owns the flex details but the host must not default
 // to inline.

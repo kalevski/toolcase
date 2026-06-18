@@ -256,6 +256,7 @@ import { ResizablePanel } from './ResizablePanel'
 import { Roadmap } from './Roadmap'
 import { SideNav } from './SideNav'
 import { SingleCardSelect } from './SingleCardSelect'
+import { TabBar } from './TabBar'
 import { TabSections } from './TabSections'
 import { Table } from './Table'
 import { TerminalWindow } from './TerminalWindow'
@@ -607,6 +608,7 @@ export function register(): void {
     customElements.define('tc-roadmap', Roadmap)
     customElements.define('tc-side-nav', SideNav)
     customElements.define('tc-single-card-select', SingleCardSelect)
+    customElements.define('tc-tab-bar', TabBar)
     customElements.define('tc-tab-sections', TabSections)
     customElements.define('tc-table', Table)
     customElements.define('tc-advanced-table', AdvancedTable)
