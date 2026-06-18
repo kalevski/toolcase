@@ -326,6 +326,7 @@ import SafeAreaDemo from './SafeAreaDemo'
 import SaveSlotListDemo from './SaveSlotListDemo'
 import ScoreDisplayDemo from './ScoreDisplayDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
+import ScrollTextDemo from './ScrollTextDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -672,4 +673,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'rune-corner', category: 'Components', element: <RuneCornerDemo /> },
     { key: 'save-slot-list', category: 'Components', element: <SaveSlotListDemo /> },
     { key: 'score-display', category: 'Content', element: <ScoreDisplayDemo /> },
+    { key: 'scroll-text', category: 'Content', element: <ScrollTextDemo /> },
 ]

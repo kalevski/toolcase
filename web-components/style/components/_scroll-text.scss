@@ -1,0 +1,89 @@
+// tc-scroll-text — scrollable text panel with an optional mono title header.
+// Port of gc-scroll-text; drops game-components fantasy chrome in favour of
+// the web-components design system: sharp corners, 1px hairline border,
+// slate neutral ramp, JetBrains Mono for the machine-facing title.
+// All cosmetics flow through --bs-scroll-text-* custom properties.
+
+tc-scroll-text {
+    --bs-scroll-text-bg:                      var(--tc-surface);
+    --bs-scroll-text-border-color:            var(--tc-border);
+    --bs-scroll-text-max-height:              none;
+
+    --bs-scroll-text-header-color:            var(--tc-text-muted);
+    --bs-scroll-text-header-font-size:        0.6875rem;
+    --bs-scroll-text-header-letter-spacing:   0.08em;
+    --bs-scroll-text-header-padding-y:        0.5rem;
+    --bs-scroll-text-header-padding-x:        1rem;
+    --bs-scroll-text-header-border-color:     var(--tc-border);
+
+    --bs-scroll-text-body-color:              var(--tc-text);
+    --bs-scroll-text-body-font-size:          0.925rem;
+    --bs-scroll-text-body-line-height:        1.65;
+    --bs-scroll-text-body-padding-y:          0.875rem;
+    --bs-scroll-text-body-padding-x:          1rem;
+    --bs-scroll-text-scrollbar-color:         var(--tc-border-strong);
+}
+
+.tc-scroll-text {
+    box-sizing:    border-box;
+    background:    var(--bs-scroll-text-bg);
+    border:        1px solid var(--bs-scroll-text-border-color);
+    border-radius: 0;
+}
+
+// Machine-facing section label: mono, uppercase, muted.
+.tc-scroll-text__header {
+    padding:         var(--bs-scroll-text-header-padding-y) var(--bs-scroll-text-header-padding-x);
+    border-bottom:   1px solid var(--bs-scroll-text-header-border-color);
+    font-family:     'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size:       var(--bs-scroll-text-header-font-size);
+    font-weight:     500;
+    letter-spacing:  var(--bs-scroll-text-header-letter-spacing);
+    text-transform:  uppercase;
+    color:           var(--bs-scroll-text-header-color);
+    user-select:     none;
+}
+
+.tc-scroll-text__body {
+    padding:     var(--bs-scroll-text-body-padding-y) var(--bs-scroll-text-body-padding-x);
+    max-height:  var(--bs-scroll-text-max-height);
+    overflow-y:  auto;
+    color:       var(--bs-scroll-text-body-color);
+    font-size:   var(--bs-scroll-text-body-font-size);
+    line-height: var(--bs-scroll-text-body-line-height);
+
+    // Thin scrollbar: no track background, hairline thumb.
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-scroll-text-scrollbar-color) transparent;
+
+    &::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background:    var(--bs-scroll-text-scrollbar-color);
+        border-radius: 0;
+    }
+
+    // Let multi-paragraph slot content retain natural spacing.
+    p {
+        margin: 0 0 0.5em;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Reduced motion: no change in rendering needed (no animation here),
+// but ensure smooth-scroll behaviour is disabled so the user isn't
+// surprised by inertia on a keyboard page-down.
+@media (prefers-reduced-motion: reduce) {
+    .tc-scroll-text__body {
+        scroll-behavior: auto;
+    }
+}
