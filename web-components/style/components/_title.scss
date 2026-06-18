@@ -1,0 +1,50 @@
+// tc-title — large display title text.
+// Port of gc-title (game-components); drops Shadow DOM and game-specific chrome
+// in favour of the web-components design system: sharp corners, slate neutral
+// ramp, no glows or fantasy fills. All cosmetics flow through --bs-title-* vars.
+
+@use '../foundation/tokens' as *;
+
+tc-title {
+    --bs-title-color:          var(--tc-emphasis);
+    --bs-title-font-size:      2.5rem;
+    --bs-title-font-weight:    700;
+    --bs-title-line-height:    1.15;
+    --bs-title-letter-spacing: -0.02em;
+    --bs-title-max-width:      none;
+}
+
+.tc-title {
+    max-width:     var(--bs-title-max-width, none);
+    border-radius: 0;
+    box-sizing:    border-box;
+}
+
+// Alignment — driven by data-align on the host.
+tc-title[data-align='center'] {
+    text-align:   center;
+    margin-left:  auto;
+    margin-right: auto;
+}
+
+tc-title[data-align='right'] {
+    text-align: right;
+}
+
+tc-title[data-align='left'] {
+    text-align: left;
+}
+
+.tc-title-content {
+    font-size:      var(--bs-title-font-size);
+    font-weight:    var(--bs-title-font-weight);
+    line-height:    var(--bs-title-line-height);
+    letter-spacing: var(--bs-title-letter-spacing);
+    color:          var(--bs-title-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-title-content {
+        transition: none;
+    }
+}
