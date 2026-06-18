@@ -317,6 +317,7 @@ import ObjectiveMarkerDemo from './ObjectiveMarkerDemo'
 import PageIndicatorDemo from './PageIndicatorDemo'
 import PanelDemo from './PanelDemo'
 import ParticleEmitterDemo from './ParticleEmitterDemo'
+import RarityChipDemo from './RarityChipDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -654,4 +655,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'portrait', category: 'Components', element: <PortraitDemo /> },
     { key: 'press-any-key', category: 'Components', element: <PressAnyKeyDemo /> },
     { key: 'quest-tracker', category: 'Components', element: <QuestTrackerDemo /> },
+    { key: 'rarity-chip', category: 'Content', element: <RarityChipDemo /> },
 ]
