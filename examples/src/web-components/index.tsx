@@ -329,6 +329,7 @@ import SafeAreaDemo from './SafeAreaDemo'
 import SaveSlotListDemo from './SaveSlotListDemo'
 import SettingsCategoryListDemo from './SettingsCategoryListDemo'
 import ScoreDisplayDemo from './ScoreDisplayDemo'
+import SpeedometerDemo from './SpeedometerDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
 import ShakeContainerDemo from './ShakeContainerDemo'
 import ScrollTextDemo from './ScrollTextDemo'
@@ -684,6 +685,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'save-slot-list', category: 'Components', element: <SaveSlotListDemo /> },
     { key: 'settings-category-list', category: 'Components', element: <SettingsCategoryListDemo /> },
     { key: 'score-display', category: 'Content', element: <ScoreDisplayDemo /> },
+    { key: 'speedometer', category: 'Content', element: <SpeedometerDemo /> },
     { key: 'scroll-text', category: 'Content', element: <ScrollTextDemo /> },
     { key: 'shop-panel', category: 'Components', element: <ShopPanelDemo /> },
 ]

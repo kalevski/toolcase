@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, Speedometer, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -99,6 +99,7 @@ After `register()` you can author markup directly:
   - [tc-settings-category-list](#tc-settings-category-list)
   - [tc-shake-container](#tc-shake-container)
   - [tc-score-display](#tc-score-display)
+  - [tc-speedometer](#tc-speedometer)
   - [tc-scroll-text](#tc-scroll-text)
   - [tc-shop-panel](#tc-shop-panel)
   - [tc-crosshair](#tc-crosshair)
@@ -24773,6 +24774,67 @@ None. All content is driven by attributes.
   el.score = 99999
   el.multiplier = 3
   el.label = 'Final Score'
+</script>
+```
+
+---
+
+### tc-speedometer
+
+Vehicle speedometer gauge — a semicircular SVG arc indicator with a JetBrains Mono centre readout (speed value, unit, optional gear and RPM). Port of `gc-speedometer`; game-specific fantasy chrome replaced with the slate design system. Purely presentational; attribute-driven with no slots. All cosmetics flow through `--bs-speedometer-*` custom properties.
+
+**Tag:** `tc-speedometer`
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `value` | number | `0` | Current speed value. Displayed as `Math.round(value)`. |
+| `max` | number | `220` | Maximum speed (full arc). Must be > 0. |
+| `rpm` | number \| null | `null` | Optional RPM value. When present, rendered below the unit label. |
+| `unit` | string | `"KM/H"` | Speed unit label displayed below the value. |
+| `gear` | string | `""` | Optional current gear string (e.g. `"3"`, `"N"`, `"R"`). Displayed above the value in ink accent when set. |
+| `size` | number | `160` | Width of the gauge in pixels. Height is 70 % of width (viewBox aspect ratio). Font sizes scale proportionally. |
+
+#### Events
+
+None. `tc-speedometer` is a purely presentational element.
+
+#### Slots
+
+None. All content is driven by attributes.
+
+#### CSS Custom Properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-speedometer-size` | `160px` | Gauge width. Written inline by the element from the `size` attribute. |
+| `--bs-speedometer-bg` | `var(--tc-surface)` | Gauge background colour. |
+| `--bs-speedometer-border-color` | `var(--tc-border)` | 1px hairline border colour. |
+| `--bs-speedometer-track-color` | `var(--tc-border-strong)` | Arc track stroke colour. |
+| `--bs-speedometer-fill-color` | `var(--tc-app-accent)` | Arc fill stroke colour (normal state). |
+| `--bs-speedometer-danger-fill-color` | `var(--tc-danger)` | Arc fill and value colour when `data-danger="true"` (pct ≥ 0.85). |
+| `--bs-speedometer-tick-color` | `var(--tc-text-faint)` | Tick mark stroke colour. |
+| `--bs-speedometer-value-color` | `var(--tc-text)` | Speed value text colour. |
+| `--bs-speedometer-unit-color` | `var(--tc-text-muted)` | Unit label text colour. |
+| `--bs-speedometer-gear-color` | `var(--tc-app-accent)` | Gear indicator text colour. |
+| `--bs-speedometer-rpm-color` | `var(--tc-text-faint)` | RPM line text colour. |
+| `--bs-speedometer-value-font-size` | *(set by `size` attr)* | Value font size; written inline at `size × 0.2` px. |
+| `--bs-speedometer-gear-font-size` | *(set by `size` attr)* | Gear font size; written inline at `size × 0.125` px. |
+| `--bs-speedometer-unit-font-size` | `0.6875rem` | Unit label font size (~11 px). |
+| `--bs-speedometer-rpm-font-size` | `0.625rem` | RPM line font size (~10 px). |
+
+#### Example
+
+```html
+<tc-speedometer value="120" gear="4" rpm="3200"></tc-speedometer>
+
+<script>
+  const el = document.querySelector('tc-speedometer')
+  // update programmatically
+  el.value = 200   // triggers danger state (≥ 85% of default max 220)
+  el.rpm = 6800
+  el.gear = '6'
 </script>
 ```
 

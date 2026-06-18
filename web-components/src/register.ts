@@ -337,6 +337,7 @@ import { SafeArea } from './SafeArea'
 import { SaveSlotList } from './SaveSlotList'
 import { SettingsCategoryList } from './SettingsCategoryList'
 import { ScoreDisplay } from './ScoreDisplay'
+import { Speedometer } from './Speedometer'
 import { ScrollText } from './ScrollText'
 import { ShopPanel } from './ShopPanel'
 import { SkillBar } from './SkillBar'
@@ -688,6 +689,7 @@ export function register(): void {
     customElements.define('tc-save-slot-list', SaveSlotList)
     customElements.define('tc-settings-category-list', SettingsCategoryList)
     customElements.define('tc-score-display', ScoreDisplay)
+    customElements.define('tc-speedometer', Speedometer)
     customElements.define('tc-scroll-text', ScrollText)
     customElements.define('tc-shop-panel', ShopPanel)
     customElements.define('tc-skill-bar', SkillBar)
