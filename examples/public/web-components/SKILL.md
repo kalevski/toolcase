@@ -196,6 +196,7 @@ After `register()` you can author markup directly:
   - [tc-achievement-list](#tc-achievement-list)
   - [tc-result-screen](#tc-result-screen)
   - [tc-game-over-screen](#tc-game-over-screen)
+  - [tc-victory-screen](#tc-victory-screen)
   - [tc-legal-screen](#tc-legal-screen)
   - [tc-gamepad-button-prompt](#tc-gamepad-button-prompt)
   - [tc-battle-pass](#tc-battle-pass)
@@ -16464,6 +16465,90 @@ el.actions = [
     { id: 'retry', label: 'Try Again', variant: 'primary' },
     { id: 'menu', label: 'Main Menu' },
     { id: 'quit', label: 'Quit', variant: 'ghost' },
+]
+el.addEventListener('tc-action', e => console.log('action', e.detail.id))
+</script>
+```
+
+---
+
+### tc-victory-screen
+
+Victory end screen: a centred region with a mono uppercase eyebrow, a gold-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-victory-screen` (a `gc-result-screen` defaulting to "Victory!" / "Triumph" in a gold tone), restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons.
+
+**Tag:** `tc-victory-screen`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `title-text` | string | `Victory!` | The large title heading |
+| `subtitle` | string | — | Optional supporting line under the divider |
+| `title-color` | `gold\|danger\|parch` | `gold` | Status tone of the title (`gold` → warning ramp, `danger` → danger ramp, `parch` → neutral slate) |
+| `eyebrow` | string | `Triumph` | The mono uppercase micro-label above the title |
+
+The host element automatically gains `role="region"` (unless one is already set).
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `stats` | `VictoryStat[]` | Stat rows (set via JS, not attribute); setting re-renders |
+| `rewards` | `VictoryReward[]` | Reward chips shown in the reward strip |
+| `actions` | `VictoryAction[]` | Action buttons rendered at the bottom |
+| `titleText` | string | Mirror of the `title-text` attribute |
+| `subtitle` | string | Mirror of the `subtitle` attribute |
+| `titleColor` | `gold\|danger\|parch` | Mirror of the `title-color` attribute |
+| `eyebrow` | string | Mirror of the `eyebrow` attribute |
+| `onAction` | `((id: string) => void) \| null` | Optional callback fired alongside `tc-action` |
+
+Each `VictoryStat`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Stat name |
+| `value` | string \| number | Stat value (numbers are locale-formatted) |
+
+Each `VictoryReward`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Reward name |
+| `glyph` | string? | Short symbol/initials shown before the label (rendered as text, `aria-hidden`) |
+| `amount` | number \| string? | Optional amount shown after the label (numbers are locale-formatted) |
+| `color` | string? | Optional CSS colour applied to the glyph |
+
+Each `VictoryAction`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique key emitted in the `tc-action` `detail` |
+| `label` | string | Button text |
+| `variant` | `default\|primary\|danger\|ghost`? | Button style (`default` → secondary, `primary` → ink, `danger` → danger, `ghost` → outline) |
+
+**Events**
+
+| Event | `detail` | Fired when |
+|-------|----------|------------|
+| `tc-action` | `{ id: string }` | An action button is clicked |
+
+**Slots:** none — the eyebrow, title, subtitle, stats, rewards, and actions are all generated from attributes / JS properties.
+
+```html
+<tc-victory-screen id="win" subtitle="All waves repelled. The colony stands."></tc-victory-screen>
+<script>
+const el = document.getElementById('win')
+el.stats = [
+    { label: 'Score', value: 24800 },
+    { label: 'Waves cleared', value: 20 },
+]
+el.rewards = [
+    { glyph: '◈', label: 'Gold', amount: 640, color: 'var(--tc-warning)' },
+    { glyph: '★', label: 'XP', amount: 3000 },
+]
+el.actions = [
+    { id: 'continue', label: 'Continue', variant: 'primary' },
+    { id: 'menu', label: 'Main Menu' },
 ]
 el.addEventListener('tc-action', e => console.log('action', e.detail.id))
 </script>

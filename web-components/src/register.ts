@@ -292,6 +292,7 @@ import { FullscreenToggle } from './FullscreenToggle'
 import { ToggleRow } from './ToggleRow'
 import { GameOverScreen } from './GameOverScreen'
 import { ResultScreen } from './ResultScreen'
+import { VictoryScreen } from './VictoryScreen'
 import { GamepadButtonPrompt } from './GamepadButtonPrompt'
 import { GildedFrame } from './GildedFrame'
 import { GraphicsPresetPicker } from './GraphicsPresetPicker'
@@ -651,6 +652,7 @@ export function register(): void {
     customElements.define('tc-toggle-row', ToggleRow)
     customElements.define('tc-game-over-screen', GameOverScreen)
     customElements.define('tc-result-screen', ResultScreen)
+    customElements.define('tc-victory-screen', VictoryScreen)
     customElements.define('tc-gamepad-button-prompt', GamepadButtonPrompt)
     customElements.define('tc-gilded-frame', GildedFrame)
     customElements.define('tc-graphics-preset-picker', GraphicsPresetPicker)

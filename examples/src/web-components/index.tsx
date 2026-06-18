@@ -55,6 +55,7 @@ import CharacterCreateDemo from './CharacterCreateDemo'
 import CharacterSelectDemo from './CharacterSelectDemo'
 import GameOverScreenDemo from './GameOverScreenDemo'
 import ResultScreenDemo from './ResultScreenDemo'
+import VictoryScreenDemo from './VictoryScreenDemo'
 import GamepadButtonPromptDemo from './GamepadButtonPromptDemo'
 import GraphicsPresetPickerDemo from './GraphicsPresetPickerDemo'
 import RadioDemo from './RadioDemo'
@@ -538,6 +539,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'achievement-list', category: 'Content', element: <AchievementListDemo /> },
     { key: 'game-over-screen', category: 'Content', element: <GameOverScreenDemo /> },
     { key: 'result-screen', category: 'Content', element: <ResultScreenDemo /> },
+    { key: 'victory-screen', category: 'Content', element: <VictoryScreenDemo /> },
     { key: 'gamepad-button-prompt', category: 'Content', element: <GamepadButtonPromptDemo /> },
     { key: 'battle-pass', category: 'Components', element: <BattlePassDemo /> },
     { key: 'section-card', category: 'Components', element: <SectionCardDemo /> },
