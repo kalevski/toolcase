@@ -342,6 +342,7 @@ import { PauseScreen } from './PauseScreen'
 import { PerkPicker } from './PerkPicker'
 import { Portrait } from './Portrait'
 import { PressAnyKey } from './PressAnyKey'
+import { Journal } from './Journal'
 import { QuestTracker } from './QuestTracker'
 import { RarityChip } from './RarityChip'
 import { ReportPlayerDialog } from './ReportPlayerDialog'
@@ -706,6 +707,7 @@ export function register(): void {
     customElements.define('tc-perk-picker', PerkPicker)
     customElements.define('tc-portrait', Portrait)
     customElements.define('tc-press-any-key', PressAnyKey)
+    customElements.define('tc-journal', Journal)
     customElements.define('tc-quest-tracker', QuestTracker)
     customElements.define('tc-rarity-chip', RarityChip)
     customElements.define('tc-report-player-dialog', ReportPlayerDialog)
