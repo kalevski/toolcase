@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, Speedometer, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, Speedometer, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, TeamList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -196,6 +196,7 @@ After `register()` you can author markup directly:
   - [tc-achievement-list](#tc-achievement-list)
   - [tc-result-screen](#tc-result-screen)
   - [tc-game-over-screen](#tc-game-over-screen)
+  - [tc-victory-screen](#tc-victory-screen)
   - [tc-legal-screen](#tc-legal-screen)
   - [tc-gamepad-button-prompt](#tc-gamepad-button-prompt)
   - [tc-battle-pass](#tc-battle-pass)
@@ -261,6 +262,7 @@ After `register()` you can author markup directly:
   - [tc-ping-display](#tc-ping-display)
   - [tc-platform-icon](#tc-platform-icon)
   - [tc-objective-marker](#tc-objective-marker)
+  - [tc-waypoint-marker](#tc-waypoint-marker)
   - [tc-page-indicator](#tc-page-indicator)
   - [tc-panel](#tc-panel)
   - [tc-panel-header](#tc-panel-header)
@@ -282,6 +284,7 @@ After `register()` you can author markup directly:
   - [tc-text](#tc-text)
   - [tc-video-embed](#tc-video-embed)
   - [tc-visually-hidden](#tc-visually-hidden)
+  - [tc-version-label](#tc-version-label)
 - [Navigation](#navigation)
   - [tc-breadcrumb](#tc-breadcrumb)
   - [tc-cool-nav](#tc-cool-nav)
@@ -310,6 +313,7 @@ After `register()` you can author markup directly:
   - [tc-lightbox](#tc-lightbox)
   - [tc-loading-overlay](#tc-loading-overlay)
   - [tc-loading-screen](#tc-loading-screen)
+  - [tc-title-screen](#tc-title-screen)
   - [tc-modal](#tc-modal)
   - [tc-offcanvas](#tc-offcanvas)
   - [tc-popover](#tc-popover)
@@ -317,6 +321,8 @@ After `register()` you can author markup directly:
   - [tc-screen-flash](#tc-screen-flash)
   - [tc-toast](#tc-toast)
   - [tc-tooltip](#tc-tooltip)
+  - [tc-transition-wipe](#tc-transition-wipe)
+  - [tc-vignette-overlay](#tc-vignette-overlay)
 - [Forms](#forms)
   - [tc-card-options](#tc-card-options)
   - [tc-character-create](#tc-character-create)
@@ -347,10 +353,13 @@ After `register()` you can author markup directly:
   - [tc-deadzone-slider](#tc-deadzone-slider)
   - [tc-fov-slider](#tc-fov-slider)
   - [tc-mouse-sensitivity](#tc-mouse-sensitivity)
+  - [tc-volume-slider](#tc-volume-slider)
   - [tc-reset-to-defaults](#tc-reset-to-defaults)
   - [tc-fps-cap-select](#tc-fps-cap-select)
   - [tc-select-row](#tc-select-row)
   - [tc-fullscreen-toggle](#tc-fullscreen-toggle)
+  - [tc-vsync-toggle](#tc-vsync-toggle)
+  - [tc-toggle-row](#tc-toggle-row)
   - [tc-graphics-preset-picker](#tc-graphics-preset-picker)
   - [tc-invert-axis-toggle](#tc-invert-axis-toggle)
   - [tc-rating](#tc-rating)
@@ -367,6 +376,7 @@ After `register()` you can author markup directly:
   - [tc-form-wizard](#tc-form-wizard)
   - [tc-multi-card-select](#tc-multi-card-select)
   - [tc-single-card-select](#tc-single-card-select)
+  - [tc-toggle](#tc-toggle)
   - [tc-toggle-card](#tc-toggle-card)
   - [tc-newsletter-signup](#tc-newsletter-signup)
   - [tc-number-input](#tc-number-input)
@@ -5373,6 +5383,71 @@ document.querySelector('[animate-typing]').lines = [
 
 ---
 
+### tc-version-label
+
+Corner build / version stamp — a compact JetBrains Mono inline label that shows version, build hash, and branch name separated by `·` dots.
+
+**Tag:** `tc-version-label`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `version` | string | — | Semver or release tag. Rendered as `v{version}`. |
+| `build` | string | — | Build hash or commit identifier. |
+| `branch` | string | — | Git branch name. Rendered with the ink accent (`--bs-version-label-branch-color`). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `version` | `string` | Reflects the `version` attribute. |
+| `build` | `string` | Reflects the `build` attribute. |
+| `branch` | `string` | Reflects the `branch` attribute. |
+
+**Events:** none — `tc-version-label` is purely presentational.
+
+**Slots:** none — all content is driven by attributes.
+
+**Custom properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-version-label-color` | `var(--tc-text-muted)` | Default text color. |
+| `--bs-version-label-font-size` | `0.6875rem` | Label font size. |
+| `--bs-version-label-font-weight` | `500` | Label font weight. |
+| `--bs-version-label-letter-spacing` | `0.04em` | Label letter spacing. |
+| `--bs-version-label-bg` | `transparent` | Background color. |
+| `--bs-version-label-border-color` | `var(--tc-border)` | 1px hairline border color. |
+| `--bs-version-label-padding-y` | `0.1875rem` | Vertical padding. |
+| `--bs-version-label-padding-x` | `0.5rem` | Horizontal padding. |
+| `--bs-version-label-sep-color` | `var(--tc-border-strong)` | Separator `·` dot color. |
+| `--bs-version-label-version-color` | `var(--tc-text)` | Version segment text color. |
+| `--bs-version-label-build-color` | `var(--tc-text-muted)` | Build segment text color. |
+| `--bs-version-label-branch-color` | `var(--tc-app-accent)` | Branch segment text color (ink accent). |
+| `--bs-version-label-gap` | `0.25rem` | Gap between segments. |
+
+```html
+<!-- Version only -->
+<tc-version-label version="1.2.3"></tc-version-label>
+
+<!-- Version + build -->
+<tc-version-label version="1.2.3" build="a4f9c12"></tc-version-label>
+
+<!-- All three segments -->
+<tc-version-label version="2.0.0" build="deadbeef" branch="main"></tc-version-label>
+
+<!-- HUD corner stamp — override colors to suit a dark surface -->
+<tc-version-label
+  version="0.9.1"
+  build="7b3a8c2"
+  branch="release"
+  style="--bs-version-label-border-color: rgba(255,255,255,0.12); --bs-version-label-color: rgba(255,255,255,0.5);"
+></tc-version-label>
+```
+
+---
+
 ## Navigation
 
 ### tc-breadcrumb
@@ -7219,6 +7294,87 @@ None.
 
 ---
 
+### tc-title-screen
+
+Full-viewport game title / start screen. Covers the entire viewport when present in the DOM; add or remove it (or toggle `[hidden]`) to show or hide it. Port of `gc-title-screen` (game-components) restyled to the toolcase design system — slate surface, sharp corners, 1px hairline divider in place of the diamond decoration, JetBrains Mono eyebrow, no game chrome. The eyebrow defaults to `"Press Start"` and is configurable via attribute. Purely presentational — no events, no slots, no shadow root; `display: block`.
+
+**Tag:** `tc-title-screen`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `eyebrow` | string | `"Press Start"` | Mono uppercase micro-label shown above the title. |
+| `title-text` | string | `""` | Main title heading (`<h1>`). Omitted when empty. |
+| `subtitle` | string | `""` | Secondary text shown below the hairline divider. Omitted when empty. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `eyebrow` | `string` | `"Press Start"` | Reflects the `eyebrow` attribute. |
+| `titleText` | `string` | `""` | Reflects the `title-text` attribute. |
+| `subtitle` | `string` | `""` | Reflects the `subtitle` attribute. |
+
+**Events**
+
+None. `tc-title-screen` is a passive display element.
+
+**Slots**
+
+None. All content is attribute-driven.
+
+**CSS custom properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-title-screen-bg` | `var(--tc-surface)` | Background colour of the full-screen surface. |
+| `--bs-title-screen-z` | `var(--tc-z-modal)` | Stacking layer (fixed `--tc-z-*` scale). |
+| `--bs-title-screen-fade` | `var(--tc-transition-base)` | Fade-in animation duration. |
+| `--bs-title-screen-panel-max-width` | `520px` | Maximum width of the centred content column. |
+| `--bs-title-screen-panel-padding-x` | `2rem` | Horizontal padding of the content panel. |
+| `--bs-title-screen-panel-padding-y` | `3rem` | Vertical padding of the content panel. |
+| `--bs-title-screen-panel-gap` | `1.25rem` | Gap between panel items. |
+| `--bs-title-screen-eyebrow-color` | `var(--tc-cyan, #22d3ee)` | Eyebrow micro-label colour (cyan accent). |
+| `--bs-title-screen-eyebrow-size` | `10.5px` | Eyebrow font size (JetBrains Mono). |
+| `--bs-title-screen-title-color` | `var(--tc-text)` | Title heading colour. |
+| `--bs-title-screen-title-size` | `2rem` | Title heading font size. |
+| `--bs-title-screen-title-weight` | `700` | Title heading font weight. |
+| `--bs-title-screen-divider-color` | `var(--tc-border)` | Hairline divider colour. |
+| `--bs-title-screen-subtitle-color` | `var(--tc-text-muted)` | Subtitle text colour. |
+| `--bs-title-screen-subtitle-size` | `0.9375rem` | Subtitle font size. |
+
+```html
+<!-- Eyebrow only -->
+<tc-title-screen></tc-title-screen>
+
+<!-- Title + default eyebrow -->
+<tc-title-screen title-text="Realm of Ash"></tc-title-screen>
+
+<!-- Full configuration -->
+<tc-title-screen
+    eyebrow="Press Start"
+    title-text="Realm of Ash"
+    subtitle="A world on the edge of ruin.">
+</tc-title-screen>
+
+<!-- Custom eyebrow for attract / credits screens -->
+<tc-title-screen
+    eyebrow="Click anywhere to begin"
+    title-text="The Last Siege"
+    subtitle="An epic strategy experience.">
+</tc-title-screen>
+
+<script>
+    const screen = document.querySelector('tc-title-screen')
+    // Override via JS property
+    screen.titleText = 'New Game +'
+    screen.subtitle  = 'All content unlocked.'
+</script>
+```
+
+---
+
 ### tc-popover
 
 Popover positioned by Popper.js.
@@ -8618,6 +8774,55 @@ A mouse-sensitivity setting row: a label/description text block paired with one 
 
 ---
 
+### tc-volume-slider
+
+A volume setting row: a mute toggle button, a 0–100% range slider, and a mono percentage readout. Built on the shared `tc-setting-row` scaffold. Port of game-components `gc-volume-slider` with the fantasy chrome dropped for the toolcase slate/ink look.
+
+**Tag:** `tc-volume-slider`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `row-label` | string | `Volume` | Row label (set automatically when absent) |
+| `description` | string | — | Optional secondary line beneath the label |
+| `value` | number | `0.8` | Current volume, clamped to `0`–`1` (`0.01` step) |
+| `muted` | boolean | `false` | When present, the range input is disabled and the mute button shows the muted icon |
+| `disabled` | boolean | `false` | Disables both the mute button and the range input |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number` | Get or set the volume (`0`–`1`). Getter clamps and defaults to `0.8`. Setting patches the input + readout in place — no full re-render. |
+| `muted` | `boolean` | Get/set the `muted` attribute. Patched in place (swaps icon, toggles input disabled) — no full re-render. |
+| `disabled` | `boolean` | Get/set the `disabled` attribute. |
+| `rowLabel` | `string` | Get/set the `row-label` attribute. |
+| `description` | `string` | Get/set the `description` attribute. |
+| `onChange` | `((value: number) => void) \| null` | Optional callback fired on every slider change. Mirrors the `tc-change` event. |
+| `onToggleMute` | `(() => void) \| null` | Optional callback fired when the mute button is clicked. Mirrors the `tc-toggle-mute` event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: number }` | Fired on every range-input change (the `0`–`1` volume). |
+| `tc-toggle-mute` | `{}` | Fired when the mute button is clicked. The consumer is responsible for toggling the `muted` attribute. |
+
+**No slots.**
+
+```html
+<tc-volume-slider row-label="Master volume" description="Controls overall game audio." value="0.8"></tc-volume-slider>
+<script>
+  const el = document.querySelector('tc-volume-slider')
+  el.value = 0.5
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+  el.addEventListener('tc-toggle-mute', () => { el.muted = !el.muted })
+</script>
+```
+
+---
+
 ### tc-reset-to-defaults
 
 A two-step reset action row: a label/description text block paired with a Reset button that enters a confirmation state (Confirm reset + Cancel). Confirming fires `tc-reset` and returns to idle; cancelling discards without firing. Built on the shared `tc-setting-row` scaffold. Port of game-components `gc-reset-to-defaults` with the fantasy chrome dropped for the toolcase slate/ink look.
@@ -8797,6 +9002,94 @@ A fullscreen on/off setting row: a label/description text block paired with a pi
 <tc-fullscreen-toggle row-label="Borderless fullscreen" description="Run at the desktop resolution without a window frame." checked></tc-fullscreen-toggle>
 <script>
   const el = document.querySelector('tc-fullscreen-toggle')
+  el.checked = true
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+</script>
+```
+
+---
+
+### tc-vsync-toggle
+
+A vsync on/off setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-vsync-toggle` with the fantasy chrome dropped for the toolcase slate/ink look; defaults its label to `V-Sync`.
+
+**Tag:** `tc-vsync-toggle`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `row-label` | string | `V-Sync` | Row label (set automatically when absent) |
+| `description` | string | — | Optional secondary line beneath the label |
+| `checked` | boolean | `false` | Whether vsync is on |
+| `disabled` | boolean | `false` | Disables the switch |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `checked` | `boolean` | Get/set the on/off state. Setting patches the switch in place — no full re-render. |
+| `rowLabel` | `string` | Get/set the `row-label` attribute. |
+| `description` | `string` | Get/set the `description` attribute. |
+| `disabled` | `boolean` | Get/set the `disabled` attribute. |
+| `onChange` | `((value: boolean) => void) \| null` | Optional callback fired on every toggle. Mirrors the `tc-change` event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: boolean }` | Fired when the switch is toggled (the new checked state). |
+
+**No slots.**
+
+```html
+<tc-vsync-toggle row-label="Vertical sync" description="Synchronise the frame rate with the display refresh rate." checked></tc-vsync-toggle>
+<script>
+  const el = document.querySelector('tc-vsync-toggle')
+  el.checked = true
+  el.addEventListener('tc-change', e => console.log(e.detail.value))
+</script>
+```
+
+---
+
+### tc-toggle-row
+
+A generic labeled boolean toggle setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-toggle-row` with the fantasy chrome dropped for the toolcase slate/ink look.
+
+**Tag:** `tc-toggle-row`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `row-label` | string | — | Row label displayed on the left |
+| `description` | string | — | Optional secondary line beneath the label |
+| `checked` | boolean | `false` | Whether the toggle is on |
+| `disabled` | boolean | `false` | Disables the switch |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `checked` | `boolean` | Get/set the on/off state. Setting patches the switch in place — no full re-render. |
+| `rowLabel` | `string` | Get/set the `row-label` attribute. |
+| `description` | `string` | Get/set the `description` attribute. |
+| `disabled` | `boolean` | Get/set the `disabled` attribute. |
+| `onChange` | `((value: boolean) => void) \| null` | Optional callback fired on every toggle. Mirrors the `tc-change` event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ value: boolean }` | Fired when the switch is toggled (the new checked state). |
+
+**No slots.**
+
+```html
+<tc-toggle-row row-label="Auto-save" description="Save progress automatically." checked></tc-toggle-row>
+<script>
+  const el = document.querySelector('tc-toggle-row')
   el.checked = true
   el.addEventListener('tc-change', e => console.log(e.detail.value))
 </script>
@@ -9036,6 +9329,90 @@ Toggle switch (styled checkbox).
 
 ```html
 <tc-switch label="Enable notifications" checked></tc-switch>
+```
+
+---
+
+### tc-toggle
+
+Atomic standalone on/off switch — a pill-track with a sliding circular knob. The host element IS the switch: it carries `role="switch"`, `aria-checked`, and handles click + Space/Enter. Port of `@toolcase/game-components` `gc-toggle`, restyled to the toolcase design system (slate neutrals, sharp outer corners, sanctioned pill/circle geometry, ink gradient on checked). Use `tc-toggle-card` when you need a card wrapper around the switch.
+
+**Tag:** `tc-toggle`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `on` | boolean | false | The on/off state. Reflected — toggling the switch sets/removes the attribute. |
+| `disabled` | boolean | false | Disables interaction (`opacity` + `pointer-events: none`). Removes the element from the tab order. |
+| `label` | string | — | Sets `aria-label` on the host for screen-reader identification. Required when there is no visible text label alongside the switch. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `on` | boolean | Get/set the on/off state. Reflected to the `on` attribute. |
+| `disabled` | boolean | Reflected boolean. |
+| `label` | `string \| null` | Reflected. |
+| `onChange` | `((on: boolean) => void) \| null` | Optional callback fired alongside the `tc-change` event on every toggle. Default `null`. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ on: boolean }` | Fired (bubbles, composed) whenever the user toggles the switch (click or Space/Enter). `detail.on` is the new state. Not fired while `disabled`. |
+
+**Slots**
+
+None. Content is driven entirely by attributes.
+
+**Accessibility**
+
+- Host carries `role="switch"` with `aria-checked`, is focusable (`tabindex="0"`), and toggles on click or Space/Enter.
+- Disabled removes the host from the tab order (`tabindex="-1"`) and sets `aria-disabled="true"`.
+- Focus is always visible (2px ink outline); `prefers-reduced-motion` is honoured — the knob slide is frozen, colour transitions kept.
+- 44px coarse-pointer touch target via `min-width`/`min-height` on the host under `@media (pointer: coarse)`.
+
+**CSS custom properties (theming)**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-toggle-track-width` | `40px` | Track width |
+| `--bs-toggle-track-height` | `22px` | Track height |
+| `--bs-toggle-track-bg` | `var(--tc-border-strong)` | Track colour when off |
+| `--bs-toggle-track-hover-bg` | `var(--tc-text-faint)` | Track colour on hover (off state) |
+| `--bs-toggle-track-checked-bg` | `var(--tc-app-accent)` | Track base colour when on |
+| `--bs-toggle-track-checked-gradient` | `linear-gradient(135deg, …)` | Ink gradient applied over the checked track |
+| `--bs-toggle-knob-size` | `18px` | Knob diameter |
+| `--bs-toggle-knob-bg` | `#ffffff` | Knob fill |
+| `--bs-toggle-disabled-opacity` | `0.55` | Opacity of the disabled state |
+
+**Examples**
+
+```html
+<!-- Off (default) -->
+<tc-toggle label="Notifications"></tc-toggle>
+
+<!-- On -->
+<tc-toggle on label="Dark mode"></tc-toggle>
+
+<!-- Disabled -->
+<tc-toggle disabled label="Managed by admin"></tc-toggle>
+<tc-toggle on disabled label="Always on"></tc-toggle>
+
+<!-- Listening for changes -->
+<tc-toggle id="t1" label="Auto-save"></tc-toggle>
+<script>
+  document.getElementById('t1').addEventListener('tc-change', e => {
+    console.log('auto-save:', e.detail.on)
+  })
+</script>
+
+<!-- Using the onChange callback -->
+<tc-toggle id="t2" label="Notifications"></tc-toggle>
+<script>
+  document.getElementById('t2').onChange = on => console.log('notifications:', on)
+</script>
 ```
 
 ---
@@ -16185,6 +16562,90 @@ el.actions = [
     { id: 'retry', label: 'Try Again', variant: 'primary' },
     { id: 'menu', label: 'Main Menu' },
     { id: 'quit', label: 'Quit', variant: 'ghost' },
+]
+el.addEventListener('tc-action', e => console.log('action', e.detail.id))
+</script>
+```
+
+---
+
+### tc-victory-screen
+
+Victory end screen: a centred region with a mono uppercase eyebrow, a gold-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-victory-screen` (a `gc-result-screen` defaulting to "Victory!" / "Triumph" in a gold tone), restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons.
+
+**Tag:** `tc-victory-screen`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `title-text` | string | `Victory!` | The large title heading |
+| `subtitle` | string | — | Optional supporting line under the divider |
+| `title-color` | `gold\|danger\|parch` | `gold` | Status tone of the title (`gold` → warning ramp, `danger` → danger ramp, `parch` → neutral slate) |
+| `eyebrow` | string | `Triumph` | The mono uppercase micro-label above the title |
+
+The host element automatically gains `role="region"` (unless one is already set).
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `stats` | `VictoryStat[]` | Stat rows (set via JS, not attribute); setting re-renders |
+| `rewards` | `VictoryReward[]` | Reward chips shown in the reward strip |
+| `actions` | `VictoryAction[]` | Action buttons rendered at the bottom |
+| `titleText` | string | Mirror of the `title-text` attribute |
+| `subtitle` | string | Mirror of the `subtitle` attribute |
+| `titleColor` | `gold\|danger\|parch` | Mirror of the `title-color` attribute |
+| `eyebrow` | string | Mirror of the `eyebrow` attribute |
+| `onAction` | `((id: string) => void) \| null` | Optional callback fired alongside `tc-action` |
+
+Each `VictoryStat`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Stat name |
+| `value` | string \| number | Stat value (numbers are locale-formatted) |
+
+Each `VictoryReward`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `label` | string | Reward name |
+| `glyph` | string? | Short symbol/initials shown before the label (rendered as text, `aria-hidden`) |
+| `amount` | number \| string? | Optional amount shown after the label (numbers are locale-formatted) |
+| `color` | string? | Optional CSS colour applied to the glyph |
+
+Each `VictoryAction`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique key emitted in the `tc-action` `detail` |
+| `label` | string | Button text |
+| `variant` | `default\|primary\|danger\|ghost`? | Button style (`default` → secondary, `primary` → ink, `danger` → danger, `ghost` → outline) |
+
+**Events**
+
+| Event | `detail` | Fired when |
+|-------|----------|------------|
+| `tc-action` | `{ id: string }` | An action button is clicked |
+
+**Slots:** none — the eyebrow, title, subtitle, stats, rewards, and actions are all generated from attributes / JS properties.
+
+```html
+<tc-victory-screen id="win" subtitle="All waves repelled. The colony stands."></tc-victory-screen>
+<script>
+const el = document.getElementById('win')
+el.stats = [
+    { label: 'Score', value: 24800 },
+    { label: 'Waves cleared', value: 20 },
+]
+el.rewards = [
+    { glyph: '◈', label: 'Gold', amount: 640, color: 'var(--tc-warning)' },
+    { glyph: '★', label: 'XP', amount: 3000 },
+]
+el.actions = [
+    { id: 'continue', label: 'Continue', variant: 'primary' },
+    { id: 'menu', label: 'Main Menu' },
 ]
 el.addEventListener('tc-action', e => console.log('action', e.detail.id))
 </script>
@@ -23699,6 +24160,79 @@ None. `tc-objective-marker` is attribute-driven; all content is generated intern
 
 ---
 
+### tc-waypoint-marker
+
+Absolutely-positioned world-space waypoint marker with a configurable Lucide icon glyph, optional label chip, and formatted distance readout (metres / kilometres). Port of `gc-waypoint-marker` restyled to the toolcase design system: slate neutrals, sharp corners, 1px hairlines. Drop it inside a `position: relative` container and set `x`/`y` to world coordinates. The element is `position: absolute` and transforms to pin the glyph tip at the target point. No shadow root; light DOM; `display: inline-flex`.
+
+**Tag:** `tc-waypoint-marker`
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `x` | `number \| null` | `null` | Horizontal position in pixels (`style.left`). Omit to leave unset. |
+| `y` | `number \| null` | `null` | Vertical position in pixels (`style.top`). Omit to leave unset. |
+| `label` | `string` | `''` | Waypoint label displayed below the glyph. Omit for no text chip. |
+| `distance` | `number \| null` | `null` | Distance in metres. Values ≥ 1000 are formatted as `N.Nkm`. Omit for no distance readout. |
+| `color` | `string` | `''` | CSS colour for the glyph and border. Writes `--bs-waypoint-marker-color` inline. |
+| `icon` | `string` | `''` | Lucide icon name (kebab-case, e.g. `navigation`, `flag`, `map-pin`). Defaults to `navigation` when absent. |
+| `size` | `number \| null` | `null` | Glyph icon size in pixels. Writes `--bs-waypoint-marker-size` inline. |
+
+#### JS Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `x` | `number \| null` | Reflects the `x` attribute. |
+| `y` | `number \| null` | Reflects the `y` attribute. |
+| `label` | `string` | Reflects the `label` attribute. |
+| `distance` | `number \| null` | Reflects the `distance` attribute. |
+| `color` | `string` | Reflects the `color` attribute. |
+| `icon` | `string` | Reflects the `icon` attribute. |
+| `size` | `number \| null` | Reflects the `size` attribute. |
+
+#### Events
+
+None. `tc-waypoint-marker` is a purely presentational element.
+
+#### Slots
+
+None. `tc-waypoint-marker` is attribute-driven; all content is generated internally.
+
+#### CSS Custom Properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-waypoint-marker-size` | `18px` | Icon glyph size in pixels (overridden by the `size` attribute when set). |
+| `--bs-waypoint-marker-color` | `var(--tc-app-accent)` | Glyph and chip-border accent colour (overridden by the `color` attribute when set). |
+| `--bs-waypoint-marker-bg` | `var(--tc-surface)` | Background of the label/distance chip. |
+| `--bs-waypoint-marker-border-color` | `var(--tc-border)` | 1px hairline border around the label/distance chip. |
+| `--bs-waypoint-marker-text-color` | `var(--tc-text)` | Label text colour. |
+| `--bs-waypoint-marker-distance-color` | `var(--tc-text-muted)` | Distance readout colour. |
+| `--bs-waypoint-marker-label-size` | `11px` | Label font size. |
+| `--bs-waypoint-marker-distance-size` | `10px` | Distance readout font size. |
+
+#### Example
+
+```html
+<div style="position: relative; height: 200px;">
+    <tc-waypoint-marker x="150" y="120" label="Checkpoint A" distance="42"></tc-waypoint-marker>
+    <tc-waypoint-marker x="340" y="80"  label="Danger Zone"  distance="1250" color="var(--tc-danger)" icon="flag"></tc-waypoint-marker>
+</div>
+
+<!-- JS property update -->
+<tc-waypoint-marker id="wp" label="Enemy Base" distance="0"></tc-waypoint-marker>
+<script>
+    const marker = document.getElementById('wp');
+    marker.x = 200;
+    marker.y = 150;
+    marker.distance = 88;
+    marker.color = 'var(--tc-danger)';
+    marker.icon = 'skull';
+</script>
+```
+
+---
+
 ### tc-page-indicator
 
 Dot page-navigation widget. Renders one circular button per page; clicking or pressing Enter/Space on a dot selects that page and fires `tc-select`.
@@ -25660,5 +26194,167 @@ None. `tc-skill-tree` is entirely data-driven via JS properties and attributes.
 
   tree.addEventListener('tc-select', e => console.log('Selected:', e.detail.id))
   tree.addEventListener('tc-unlock', e => console.log('Unlocked:', e.detail.id))
+</script>
+```
+
+---
+
+### tc-transition-wipe
+
+Full-screen scene-wipe transition overlay. Ported from `gc-transition-wipe` and restyled to the toolcase design system: no shadow DOM, no fantasy chrome — a flat-fill `<div>` that CSS transitions in/out when the `[show]` attribute is toggled. Six direction variants control the animation style: `fade` (opacity), `left`/`right`/`up`/`down` (translate slides), and `iris` (circular clip-path reveal). The host sits `position: fixed; inset: 0`; `pointer-events` are blocked while `[show]` is set so the scene beneath is non-interactive during the transition. A `tc-complete` event fires after `duration` ms to signal that the scene can change.
+
+**Tag:** `tc-transition-wipe`
+
+---
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `show` | boolean | absent | Triggers the wipe-in animation. Set to start; remove to wipe back out. |
+| `direction` | `'fade' \| 'left' \| 'right' \| 'up' \| 'down' \| 'iris'` | `'fade'` | Direction variant. Invalid values fall back to `'fade'`. |
+| `duration` | number (ms) | `400` | Wipe duration in milliseconds. Values ≤ 0 fall back to the default. Must match the CSS transition length so `tc-complete` fires at the right moment. |
+| `wipe-color` | CSS color | `var(--tc-ink)` | Fill color for the wipe surface. Accepts any CSS color value or custom property. Written as an inline `--bs-transition-wipe-color` override. |
+
+---
+
+#### JS Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `show` | `boolean` | Reflects `[show]` (set/remove the boolean attribute) |
+| `direction` | `TransitionWipeDirection` | Reflects `direction`; validated against the allowed list |
+| `duration` | `number` | Reflects `duration` in ms (default `400`) |
+| `wipeColor` | `string` | Reflects `wipe-color` (default `'var(--tc-ink)'`) |
+| `onComplete` | `(() => void) \| null` | Optional callback fired alongside `tc-complete` |
+
+---
+
+#### Events
+
+| Event | Detail | Description |
+|---|---|---|
+| `tc-complete` | `{}` | Fires after `duration` ms when `[show]` is set, signalling that the wipe has covered the screen and the scene can change |
+
+---
+
+#### CSS custom properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-transition-wipe-color` | `var(--tc-ink)` | Wipe fill color (overridden inline by the `wipe-color` attribute) |
+| `--bs-transition-wipe-duration` | `400ms` | Transition duration (overridden inline from the `duration` attribute) |
+| `--bs-transition-wipe-z` | `var(--tc-z-tooltip, 1070)` | Stacking order — sits above all UI layers |
+
+---
+
+#### Slots
+
+None. All content is generated by the component.
+
+---
+
+#### Example
+
+```html
+<!-- Fire a fade wipe on a button click; change the scene on tc-complete -->
+<tc-transition-wipe id="wipe" direction="fade" duration="400"></tc-transition-wipe>
+<script>
+  const wipe = document.querySelector('#wipe')
+
+  wipe.addEventListener('tc-complete', () => {
+    // Scene is covered — swap content here
+    console.log('scene ready to swap')
+    // Remove [show] after the swap so the fill animates back out
+    setTimeout(() => wipe.removeAttribute('show'), 200)
+  })
+
+  document.querySelector('#fire-btn').addEventListener('click', () => {
+    wipe.setAttribute('direction', 'left')
+    wipe.setAttribute('show', '')
+  })
+</script>
+```
+
+---
+
+### tc-vignette-overlay
+
+Edge vignette overlay for damage feedback, cinematic framing, or low-health UI. Ported from `gc-vignette-overlay` (game-components) and restyled to the web-components design system — no Shadow DOM, no game chrome; a block wrapper whose `::after` pseudo-element paints a radial-gradient overlay on top of slotted content. The center is transparent and the edges fade to `vignette-color`; `intensity` (0–1) controls the pseudo-element's opacity. `pointer-events: none` on the overlay keeps content fully interactive. All cosmetics flow through `--bs-vignette-overlay-*` custom properties.
+
+**Tag:** `tc-vignette-overlay`
+
+---
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `intensity` | number (0–1) | `0.6` | Opacity of the vignette gradient. `0` = invisible, `1` = fully opaque. Clamped to [0, 1]; non-finite values fall back to `0.6`. Written as an inline `--bs-vignette-overlay-intensity` override. |
+| `vignette-color` | CSS color | `#000000` | Edge color of the radial gradient (any CSS color value, e.g. `var(--tc-danger)`, `rgba(220,38,38,1)`). Written as an inline `--bs-vignette-overlay-color` override. |
+
+---
+
+#### JS Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `intensity` | `number` | Reflects `intensity` (default `0.6`, clamped 0–1) |
+| `vignetteColor` | `string` | Reflects `vignette-color` (default `#000000`) |
+
+---
+
+#### Events
+
+None. The component is purely presentational.
+
+---
+
+#### CSS custom properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-vignette-overlay-intensity` | `0.6` | Opacity of the vignette `::after` layer (overridden inline by the `intensity` attribute) |
+| `--bs-vignette-overlay-color` | `#000000` | Edge color of the radial gradient (overridden inline by the `vignette-color` attribute) |
+
+---
+
+#### Slots
+
+| Slot | Description |
+|---|---|
+| *(default)* | Content to display inside the vignette frame. The vignette `::after` is painted on top with `pointer-events: none` so the content remains fully interactive. |
+
+---
+
+#### Example
+
+```html
+<!-- Static vignette wrapping a scene viewport -->
+<tc-vignette-overlay style="width: 100%; height: 400px;">
+  <canvas id="scene"></canvas>
+</tc-vignette-overlay>
+
+<!-- Damage flash: red edges at high intensity -->
+<tc-vignette-overlay
+  id="damage"
+  intensity="0"
+  vignette-color="var(--tc-danger)"
+  style="width: 100%; height: 400px;"
+>
+  <canvas id="scene2"></canvas>
+</tc-vignette-overlay>
+<script>
+  const overlay = document.querySelector('#damage')
+
+  function triggerDamage() {
+    // Ramp intensity up then back down for a pulse effect
+    overlay.intensity = 0.8
+    setTimeout(() => { overlay.intensity = 0 }, 300)
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'h') triggerDamage()
+  })
 </script>
 ```

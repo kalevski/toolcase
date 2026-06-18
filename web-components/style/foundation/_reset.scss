@@ -187,6 +187,7 @@ tc-character-create,
 tc-character-select,
 tc-game-over-screen,
 tc-result-screen,
+tc-victory-screen,
 tc-chart-container,
 tc-code-with-output,
 tc-community-links,
@@ -260,10 +261,13 @@ tc-danger-zone-actions,
 tc-deadzone-slider,
 tc-fov-slider,
 tc-mouse-sensitivity,
+tc-volume-slider,
 tc-fps-cap-select,
 tc-select-row,
 tc-reset-to-defaults,
 tc-fullscreen-toggle,
+tc-vsync-toggle,
+tc-toggle-row,
 tc-graphics-preset-picker,
 tc-invert-axis-toggle,
 tc-metric-card,
@@ -477,6 +481,13 @@ tc-loading-screen {
     display: block;
 }
 
+// Full-viewport game title / start screen; the SCSS partial overrides display
+// to a centred flex container and positions it fixed, but the host must not
+// default to inline.
+tc-title-screen {
+    display: block;
+}
+
 // Matchmaking status panel; the SCSS partial owns the inner flex layout,
 // but the host must not default to inline.
 tc-matchmaking-screen {
@@ -496,9 +507,22 @@ tc-screen-flash {
     display: block;
 }
 
+// Fixed full-viewport scene-wipe transition; the SCSS partial positions it
+// fixed and drives direction-based transitions, but the host must not default
+// to inline.
+tc-transition-wipe {
+    display: block;
+}
+
 // Camera-shake wrapper; the SCSS partial owns the inner transform animation,
 // but the host must not default to inline so it can act as a block container.
 tc-shake-container {
+    display: block;
+}
+
+// Edge vignette overlay wrapper; the SCSS partial positions the ::after
+// gradient on top of slotted content, but the host must not default to inline.
+tc-vignette-overlay {
     display: block;
 }
 
@@ -543,7 +567,8 @@ tc-debug-overlay,
 tc-hotbar,
 tc-inventory-grid,
 tc-item-slot,
-tc-icon-picker {
+tc-icon-picker,
+tc-version-label {
     display: inline-block;
 }
 
@@ -561,6 +586,7 @@ tc-visually-hidden {
     display: contents;
 }
 
+tc-toggle,
 tc-icon,
 tc-icon-badge,
 tc-icon-button,
@@ -570,6 +596,7 @@ tc-key-binder,
 tc-network-status-icon,
 tc-ping-display,
 tc-objective-marker,
+tc-waypoint-marker,
 tc-page-indicator,
 tc-rating,
 tc-social-links,

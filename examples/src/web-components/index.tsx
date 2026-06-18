@@ -55,6 +55,7 @@ import CharacterCreateDemo from './CharacterCreateDemo'
 import CharacterSelectDemo from './CharacterSelectDemo'
 import GameOverScreenDemo from './GameOverScreenDemo'
 import ResultScreenDemo from './ResultScreenDemo'
+import VictoryScreenDemo from './VictoryScreenDemo'
 import GamepadButtonPromptDemo from './GamepadButtonPromptDemo'
 import GraphicsPresetPickerDemo from './GraphicsPresetPickerDemo'
 import RadioDemo from './RadioDemo'
@@ -270,10 +271,13 @@ import RangeSliderDemo from './RangeSliderDemo'
 import DeadzoneSliderDemo from './DeadzoneSliderDemo'
 import FOVSliderDemo from './FOVSliderDemo'
 import MouseSensitivityDemo from './MouseSensitivityDemo'
+import VolumeSliderDemo from './VolumeSliderDemo'
 import ResetToDefaultsDemo from './ResetToDefaultsDemo'
 import FPSCapSelectDemo from './FPSCapSelectDemo'
 import SelectRowDemo from './SelectRowDemo'
 import FullscreenToggleDemo from './FullscreenToggleDemo'
+import VSyncToggleDemo from './VSyncToggleDemo'
+import ToggleRowDemo from './ToggleRowDemo'
 import InvertAxisToggleDemo from './InvertAxisToggleDemo'
 import AudioMixerDemo from './AudioMixerDemo'
 import RatingDemo from './RatingDemo'
@@ -294,6 +298,7 @@ import TagInputDemo from './TagInputDemo'
 import TerminalWindowDemo from './TerminalWindowDemo'
 import TestimonialCarouselDemo from './TestimonialCarouselDemo'
 import TimePickerDemo from './TimePickerDemo'
+import ToggleDemo from './ToggleDemo'
 import ToggleCardDemo from './ToggleCardDemo'
 import VerticalItemListDemo from './VerticalItemListDemo'
 import VideoEmbedDemo from './VideoEmbedDemo'
@@ -317,6 +322,7 @@ import LoadingScreenDemo from './LoadingScreenDemo'
 import LoreTextDemo from './LoreTextDemo'
 import SubtitleDemo from './SubtitleDemo'
 import TitleDemo from './TitleDemo'
+import TitleScreenDemo from './TitleScreenDemo'
 import MinimapDemo from './MinimapDemo'
 import MuteListDemo from './MuteListDemo'
 import PlayerCardDemo from './PlayerCardDemo'
@@ -325,6 +331,7 @@ import NetworkStatusIconDemo from './NetworkStatusIconDemo'
 import PingDisplayDemo from './PingDisplayDemo'
 import PlatformIconDemo from './PlatformIconDemo'
 import ObjectiveMarkerDemo from './ObjectiveMarkerDemo'
+import WaypointMarkerDemo from './WaypointMarkerDemo'
 import PageIndicatorDemo from './PageIndicatorDemo'
 import PanelDemo from './PanelDemo'
 import ParticleEmitterDemo from './ParticleEmitterDemo'
@@ -337,10 +344,13 @@ import ScoreDisplayDemo from './ScoreDisplayDemo'
 import StatRowDemo from './StatRowDemo'
 import SpeedometerDemo from './SpeedometerDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
+import TransitionWipeDemo from './TransitionWipeDemo'
 import ShakeContainerDemo from './ShakeContainerDemo'
+import VignetteOverlayDemo from './VignetteOverlayDemo'
 import ScrollTextDemo from './ScrollTextDemo'
 import ShopPanelDemo from './ShopPanelDemo'
 import StatsScreenDemo from './StatsScreenDemo'
+import VersionLabelDemo from './VersionLabelDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -533,6 +543,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'achievement-list', category: 'Content', element: <AchievementListDemo /> },
     { key: 'game-over-screen', category: 'Content', element: <GameOverScreenDemo /> },
     { key: 'result-screen', category: 'Content', element: <ResultScreenDemo /> },
+    { key: 'victory-screen', category: 'Content', element: <VictoryScreenDemo /> },
     { key: 'gamepad-button-prompt', category: 'Content', element: <GamepadButtonPromptDemo /> },
     { key: 'battle-pass', category: 'Components', element: <BattlePassDemo /> },
     { key: 'section-card', category: 'Components', element: <SectionCardDemo /> },
@@ -568,6 +579,8 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'confirm-dialog', category: 'Overlays & Feedback', element: <ConfirmDialogDemo /> },
     { key: 'report-player-dialog', category: 'Overlays & Feedback', element: <ReportPlayerDialogDemo /> },
     { key: 'screen-flash', category: 'Overlays & Feedback', element: <ScreenFlashDemo /> },
+    { key: 'transition-wipe', category: 'Overlays & Feedback', element: <TransitionWipeDemo /> },
+    { key: 'vignette-overlay', category: 'Overlays & Feedback', element: <VignetteOverlayDemo /> },
     { key: 'shake-container', category: 'Components', element: <ShakeContainerDemo /> },
     { key: 'invite-toast', category: 'Overlays & Feedback', element: <InviteToastDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
@@ -630,10 +643,13 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'deadzone-slider', category: 'Forms', element: <DeadzoneSliderDemo /> },
     { key: 'fov-slider', category: 'Forms', element: <FOVSliderDemo /> },
     { key: 'mouse-sensitivity', category: 'Forms', element: <MouseSensitivityDemo /> },
+    { key: 'volume-slider', category: 'Forms', element: <VolumeSliderDemo /> },
     { key: 'reset-to-defaults', category: 'Forms', element: <ResetToDefaultsDemo /> },
     { key: 'fps-cap-select', category: 'Forms', element: <FPSCapSelectDemo /> },
     { key: 'select-row', category: 'Forms', element: <SelectRowDemo /> },
     { key: 'fullscreen-toggle', category: 'Forms', element: <FullscreenToggleDemo /> },
+    { key: 'vsync-toggle', category: 'Forms', element: <VSyncToggleDemo /> },
+    { key: 'toggle-row', category: 'Forms', element: <ToggleRowDemo /> },
     { key: 'graphics-preset-picker', category: 'Forms', element: <GraphicsPresetPickerDemo /> },
     { key: 'invert-axis-toggle', category: 'Forms', element: <InvertAxisToggleDemo /> },
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
@@ -654,6 +670,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },
     { key: 'time-picker', category: 'Forms', element: <TimePickerDemo /> },
+    { key: 'toggle', category: 'Forms', element: <ToggleDemo /> },
     { key: 'toggle-card', category: 'Forms', element: <ToggleCardDemo /> },
     { key: 'video-embed', category: 'Components', element: <VideoEmbedDemo /> },
     { key: 'cycle-wheel', category: 'Components', element: <CycleWheelDemo /> },
@@ -674,6 +691,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'level-select', category: 'Components', element: <LevelSelectDemo /> },
     { key: 'loading-overlay', category: 'Overlays & Feedback', element: <LoadingOverlayDemo /> },
     { key: 'loading-screen', category: 'Overlays & Feedback', element: <LoadingScreenDemo /> },
+    { key: 'title-screen', category: 'Overlays & Feedback', element: <TitleScreenDemo /> },
     { key: 'lore-text', category: 'Content', element: <LoreTextDemo /> },
     { key: 'subtitle', category: 'Content', element: <SubtitleDemo /> },
     { key: 'title', category: 'Content', element: <TitleDemo /> },
@@ -685,6 +703,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'platform-icon', category: 'Components', element: <PlatformIconDemo /> },
     { key: 'ping-display', category: 'Components', element: <PingDisplayDemo /> },
     { key: 'objective-marker', category: 'Components', element: <ObjectiveMarkerDemo /> },
+    { key: 'waypoint-marker', category: 'Components', element: <WaypointMarkerDemo /> },
     { key: 'page-indicator', category: 'Navigation', element: <PageIndicatorDemo /> },
     { key: 'panel', category: 'Components', element: <PanelDemo /> },
     { key: 'particle-emitter', category: 'Components', element: <ParticleEmitterDemo /> },
@@ -702,4 +721,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'scroll-text', category: 'Content', element: <ScrollTextDemo /> },
     { key: 'shop-panel', category: 'Components', element: <ShopPanelDemo /> },
     { key: 'stats-screen', category: 'Components', element: <StatsScreenDemo /> },
+    { key: 'version-label', category: 'Content', element: <VersionLabelDemo /> },
 ]

@@ -1,0 +1,203 @@
+// tc-victory-screen — victory end screen. Port of game-components
+// `gc-victory-screen` (a `gc-result-screen` defaulting to "Victory!" /
+// "Triumph" in a gold tone). Fantasy chrome dropped; flat slate surface with
+// hairline borders, sharp corners, mono machine-facing text, and `.btn` action
+// primitives. Every cosmetic value flows through `--bs-victory-screen-*`.
+
+tc-victory-screen {
+    --bs-victory-screen-max-width: 32rem;
+    --bs-victory-screen-padding: 2rem;
+    --bs-victory-screen-gap: 1rem;
+    --bs-victory-screen-bg: var(--tc-surface);
+    --bs-victory-screen-border-color: var(--tc-border);
+    --bs-victory-screen-shadow: var(--tc-shadow-sm);
+
+    --bs-victory-screen-eyebrow-color: var(--tc-text-muted);
+    --bs-victory-screen-eyebrow-size: 0.6875rem;
+    --bs-victory-screen-eyebrow-spacing: 0.12em;
+
+    --bs-victory-screen-title-size: 2rem;
+    --bs-victory-screen-title-weight: 600;
+    // Resolved per data-title-color below; gold is the VictoryScreen default.
+    --bs-victory-screen-title-color: var(--tc-warning);
+
+    --bs-victory-screen-divider-color: var(--tc-border);
+    --bs-victory-screen-divider-width: 2.5rem;
+
+    --bs-victory-screen-subtitle-color: var(--tc-text-muted);
+    --bs-victory-screen-subtitle-size: 0.9375rem;
+
+    --bs-victory-screen-stat-border-color: var(--tc-border);
+    --bs-victory-screen-stat-label-color: var(--tc-text-muted);
+    --bs-victory-screen-stat-value-color: var(--tc-text);
+
+    --bs-victory-screen-rewards-bg: var(--tc-surface-muted);
+    --bs-victory-screen-rewards-border-color: var(--tc-border);
+    --bs-victory-screen-reward-label-color: var(--tc-text);
+    --bs-victory-screen-reward-amount-color: var(--tc-text-muted);
+    --bs-victory-screen-reward-glyph-color: var(--tc-text);
+}
+
+.tc-victory-screen-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-victory-screen-gap);
+    max-width: var(--bs-victory-screen-max-width);
+    margin-inline: auto;
+    padding: var(--bs-victory-screen-padding);
+    text-align: center;
+    background: var(--bs-victory-screen-bg);
+    border: 1px solid var(--bs-victory-screen-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-victory-screen-shadow);
+
+    // Status tone for the title is selected by data-title-color.
+    // gold maps onto the warning ramp (victory default); danger keeps the
+    // danger ramp; parch is the neutral (slate) reading.
+    &[data-title-color='gold'] {
+        --bs-victory-screen-title-color: var(--tc-warning);
+    }
+    &[data-title-color='danger'] {
+        --bs-victory-screen-title-color: var(--tc-danger);
+    }
+    &[data-title-color='parch'] {
+        --bs-victory-screen-title-color: var(--tc-text);
+    }
+}
+
+// Mono uppercase micro-label above the title.
+.tc-victory-screen-eyebrow {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-victory-screen-eyebrow-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-victory-screen-eyebrow-spacing);
+    color: var(--bs-victory-screen-eyebrow-color);
+}
+
+.tc-victory-screen-title {
+    margin: 0;
+    font-size: var(--bs-victory-screen-title-size);
+    font-weight: var(--bs-victory-screen-title-weight);
+    line-height: 1.1;
+    color: var(--bs-victory-screen-title-color);
+}
+
+// Short centred hairline rule in place of the gc diamond divider.
+.tc-victory-screen-divider {
+    display: block;
+    width: var(--bs-victory-screen-divider-width);
+    height: 0;
+    border-top: 1px solid var(--bs-victory-screen-divider-color);
+}
+
+.tc-victory-screen-subtitle {
+    margin: 0;
+    max-width: 40ch;
+    font-size: var(--bs-victory-screen-subtitle-size);
+    line-height: 1.5;
+    color: var(--bs-victory-screen-subtitle-color);
+}
+
+// Stats: full-width hairline-separated label/value rows.
+.tc-victory-screen-stats {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-top: 1px solid var(--bs-victory-screen-stat-border-color);
+}
+
+.tc-victory-screen-stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bs-victory-screen-stat-border-color);
+}
+
+.tc-victory-screen-stat-label {
+    font-size: 0.8125rem;
+    color: var(--bs-victory-screen-stat-label-color);
+}
+
+.tc-victory-screen-stat-value {
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--bs-victory-screen-stat-value-color);
+}
+
+// Rewards: a soft slate strip with a mono eyebrow and a wrapped chip row.
+.tc-victory-screen-rewards {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bs-victory-screen-rewards-bg);
+    border: 1px solid var(--bs-victory-screen-rewards-border-color);
+    border-radius: 0;
+}
+
+.tc-victory-screen-rewards-eyebrow {
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-victory-screen-eyebrow-color);
+}
+
+.tc-victory-screen-rewards-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.tc-victory-screen-reward {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.tc-victory-screen-reward-glyph {
+    font-family: var(--tc-font-mono);
+    font-weight: 600;
+    color: var(--bs-victory-screen-reward-glyph-color);
+}
+
+.tc-victory-screen-reward-label {
+    font-size: 0.8125rem;
+    color: var(--bs-victory-screen-reward-label-color);
+}
+
+.tc-victory-screen-reward-amount {
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--bs-victory-screen-reward-amount-color);
+}
+
+// Actions: a wrapped row of buttons. Reuses the `.btn` primitive painted by
+// the shared stylesheet; only layout lives here.
+.tc-victory-screen-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.tc-victory-screen-action {
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}

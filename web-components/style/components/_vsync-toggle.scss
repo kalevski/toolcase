@@ -1,0 +1,103 @@
+// tc-vsync-toggle — vsync on/off preset control on the shared
+// setting-row scaffold (`_setting-row.scss`). The control is a pill-track switch
+// (sanctioned pill geometry) with a pure-circle sliding knob — never a check
+// glyph. The checked track carries the signature 135° slate-ink gradient; the
+// off track is a flat slate well. All cosmetics flow through
+// `--bs-vsync-toggle-*`; the fantasy chrome of the gc-* original is dropped.
+
+tc-vsync-toggle {
+    --bs-vsync-toggle-track-width: 40px;
+    --bs-vsync-toggle-track-height: 22px;
+    --bs-vsync-toggle-track-bg: var(--tc-border-strong);
+    --bs-vsync-toggle-track-hover-bg: var(--tc-text-faint);
+    --bs-vsync-toggle-track-checked-bg: var(--tc-app-accent);
+    --bs-vsync-toggle-track-checked-gradient: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-vsync-toggle-track-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+    --bs-vsync-toggle-knob-size: 18px;
+    --bs-vsync-toggle-knob-inset: 2px;
+    --bs-vsync-toggle-knob-bg: #ffffff;
+    --bs-vsync-toggle-knob-border: rgba(15, 23, 42, 0.08);
+    --bs-vsync-toggle-knob-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+    --bs-vsync-toggle-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-vsync-toggle-disabled-opacity: 0.6;
+}
+
+.tc-vsync-toggle__switch {
+    position: relative;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: var(--bs-vsync-toggle-track-width);
+    height: var(--bs-vsync-toggle-track-height);
+    padding: 0;
+    appearance: none;
+    background: var(--bs-vsync-toggle-track-bg);
+    border: 0;
+    border-radius: 999px;
+    box-shadow: var(--bs-vsync-toggle-track-shadow);
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
+
+    // Coarse pointers get a 44px hit area without changing the visual track.
+    @media (pointer: coarse) {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    &:hover {
+        background: var(--bs-vsync-toggle-track-hover-bg);
+    }
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:focus-visible {
+        box-shadow: var(--bs-vsync-toggle-focus-ring);
+    }
+
+    &[data-checked='true'] {
+        background: var(--bs-vsync-toggle-track-checked-bg);
+        background-image: var(--bs-vsync-toggle-track-checked-gradient);
+        box-shadow: none;
+
+        .tc-vsync-toggle__knob {
+            // Slide the knob to the right edge of the track (transform stays
+            // reserved for the translateY centring, so animate `left`).
+            left: calc(
+                var(--bs-vsync-toggle-track-width) - var(--bs-vsync-toggle-knob-size) -
+                    var(--bs-vsync-toggle-knob-inset)
+            );
+        }
+    }
+
+    &:disabled {
+        opacity: var(--bs-vsync-toggle-disabled-opacity);
+        pointer-events: none;
+    }
+}
+
+.tc-vsync-toggle__knob {
+    // Pure circle — the one sanctioned curve. Centred vertically; slides
+    // horizontally from the inset-left rest position to the right edge.
+    position: absolute;
+    top: 50%;
+    left: var(--bs-vsync-toggle-knob-inset);
+    width: var(--bs-vsync-toggle-knob-size);
+    height: var(--bs-vsync-toggle-knob-size);
+    background: var(--bs-vsync-toggle-knob-bg);
+    border: 0.5px solid var(--bs-vsync-toggle-knob-border);
+    border-radius: 50%;
+    box-shadow: var(--bs-vsync-toggle-knob-shadow);
+    transform: translateY(-50%);
+    transition: left var(--tc-transition-base);
+}
+
+// The knob's slide is the only motion here — freeze it under reduced-motion.
+@media (prefers-reduced-motion: reduce) {
+    .tc-vsync-toggle__switch,
+    .tc-vsync-toggle__knob {
+        transition: none;
+    }
+}

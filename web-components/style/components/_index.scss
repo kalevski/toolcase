@@ -60,9 +60,12 @@
 @forward 'deadzone-slider';
 @forward 'fov-slider';
 @forward 'mouse-sensitivity';
+@forward 'volume-slider';
 @forward 'fps-cap-select';
 @forward 'select-row';
 @forward 'fullscreen-toggle';
+@forward 'vsync-toggle';
+@forward 'toggle-row';
 @forward 'graphics-preset-picker';
 @forward 'invert-axis-toggle';
 @forward 'rating';
@@ -278,6 +281,7 @@
 @forward 'terminal-window';
 @forward 'testimonial-carousel';
 @forward 'time-picker';
+@forward 'toggle';
 @forward 'toggle-card';
 @forward 'tree-view';
 @forward 'user-panel';
@@ -297,6 +301,7 @@
 @forward 'dialogue-box';
 @forward 'game-over-screen';
 @forward 'result-screen';
+@forward 'victory-screen';
 @forward 'gamepad-button-prompt';
 @forward 'gilded-frame';
 @forward 'grid';
@@ -313,12 +318,14 @@
 @forward 'lore-text';
 @forward 'subtitle';
 @forward 'title';
+@forward 'title-screen';
 @forward 'pause-menu';
 @forward 'pause-screen';
 @forward 'matchmaking-screen';
 @forward 'minimap';
 @forward 'mute-list';
 @forward 'objective-marker';
+@forward 'waypoint-marker';
 @forward 'page-indicator';
 @forward 'panel';
 @forward 'particle-emitter';
@@ -337,6 +344,8 @@
 @forward 'settings-category-list';
 @forward 'shake-container';
 @forward 'screen-flash';
+@forward 'transition-wipe';
+@forward 'vignette-overlay';
 @forward 'score-display';
 @forward 'stat-row';
 @forward 'speedometer';
@@ -345,3 +354,4 @@
 @forward 'skill-bar';
 @forward 'skill-tree';
 @forward 'stats-screen';
+@forward 'version-label';

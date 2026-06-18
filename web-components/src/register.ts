@@ -262,9 +262,11 @@ import { Table } from './Table'
 import { TerminalWindow } from './TerminalWindow'
 import { TestimonialCarousel } from './TestimonialCarousel'
 import { TimePicker } from './TimePicker'
+import { Toggle } from './Toggle'
 import { ToggleCard } from './ToggleCard'
 import { TreeView } from './TreeView'
 import { UserPanel } from './UserPanel'
+import { VersionLabel } from './VersionLabel'
 import { VersionPicker } from './VersionPicker'
 import { VerticalItemList } from './VerticalItemList'
 import { VideoEmbed } from './VideoEmbed'
@@ -284,11 +286,15 @@ import { DebugOverlay } from './DebugOverlay'
 import { DialogueBox } from './DialogueBox'
 import { FOVSlider } from './FOVSlider'
 import { MouseSensitivity } from './MouseSensitivity'
+import { VolumeSlider } from './VolumeSlider'
 import { FPSCapSelect } from './FPSCapSelect'
 import { SelectRow } from './SelectRow'
 import { FullscreenToggle } from './FullscreenToggle'
+import { VSyncToggle } from './VSyncToggle'
+import { ToggleRow } from './ToggleRow'
 import { GameOverScreen } from './GameOverScreen'
 import { ResultScreen } from './ResultScreen'
+import { VictoryScreen } from './VictoryScreen'
 import { GamepadButtonPrompt } from './GamepadButtonPrompt'
 import { GildedFrame } from './GildedFrame'
 import { GraphicsPresetPicker } from './GraphicsPresetPicker'
@@ -299,7 +305,9 @@ import { KeyBinder } from './KeyBinder'
 import { LegalScreen } from './LegalScreen'
 import { LetterboxBars } from './LetterboxBars'
 import { ScreenFlash } from './ScreenFlash'
+import { TransitionWipe } from './TransitionWipe'
 import { ShakeContainer } from './ShakeContainer'
+import { VignetteOverlay } from './VignetteOverlay'
 import { LevelHeader } from './LevelHeader'
 import { LevelSelect } from './LevelSelect'
 import { LoadingOverlay } from './LoadingOverlay'
@@ -314,6 +322,7 @@ import { LootPopup } from './LootPopup'
 import { LoreText } from './LoreText'
 import { Subtitle } from './Subtitle'
 import { Title } from './Title'
+import { TitleScreen } from './TitleScreen'
 import { MetalButton } from './MetalButton'
 import { NavButton } from './NavButton'
 import { NetworkStatusIcon } from './NetworkStatusIcon'
@@ -324,6 +333,7 @@ import { MuteList } from './MuteList'
 import { PlayerCard } from './PlayerCard'
 import { PlayerFrame } from './PlayerFrame'
 import { ObjectiveMarker } from './ObjectiveMarker'
+import { WaypointMarker } from './WaypointMarker'
 import { PageIndicator } from './PageIndicator'
 import { ParticleEmitter } from './ParticleEmitter'
 import { Panel, PanelHeader } from './Panel'
@@ -621,6 +631,7 @@ export function register(): void {
     customElements.define('tc-terminal-window', TerminalWindow)
     customElements.define('tc-testimonial-carousel', TestimonialCarousel)
     customElements.define('tc-time-picker', TimePicker)
+    customElements.define('tc-toggle', Toggle)
     customElements.define('tc-toggle-card', ToggleCard)
     customElements.define('tc-tree-view', TreeView)
     customElements.define('tc-user-panel', UserPanel)
@@ -643,11 +654,15 @@ export function register(): void {
     customElements.define('tc-dialogue-box', DialogueBox)
     customElements.define('tc-fov-slider', FOVSlider)
     customElements.define('tc-mouse-sensitivity', MouseSensitivity)
+    customElements.define('tc-volume-slider', VolumeSlider)
     customElements.define('tc-fps-cap-select', FPSCapSelect)
     customElements.define('tc-select-row', SelectRow)
     customElements.define('tc-fullscreen-toggle', FullscreenToggle)
+    customElements.define('tc-vsync-toggle', VSyncToggle)
+    customElements.define('tc-toggle-row', ToggleRow)
     customElements.define('tc-game-over-screen', GameOverScreen)
     customElements.define('tc-result-screen', ResultScreen)
+    customElements.define('tc-victory-screen', VictoryScreen)
     customElements.define('tc-gamepad-button-prompt', GamepadButtonPrompt)
     customElements.define('tc-gilded-frame', GildedFrame)
     customElements.define('tc-graphics-preset-picker', GraphicsPresetPicker)
@@ -674,6 +689,7 @@ export function register(): void {
     customElements.define('tc-lore-text', LoreText)
     customElements.define('tc-subtitle', Subtitle)
     customElements.define('tc-title', Title)
+    customElements.define('tc-title-screen', TitleScreen)
     customElements.define('tc-metal-button', MetalButton)
     customElements.define('tc-nav-button', NavButton)
     customElements.define('tc-network-status-icon', NetworkStatusIcon)
@@ -684,6 +700,7 @@ export function register(): void {
     customElements.define('tc-player-card', PlayerCard)
     customElements.define('tc-player-frame', PlayerFrame)
     customElements.define('tc-objective-marker', ObjectiveMarker)
+    customElements.define('tc-waypoint-marker', WaypointMarker)
     customElements.define('tc-page-indicator', PageIndicator)
     customElements.define('tc-particle-emitter', ParticleEmitter)
     customElements.define('tc-panel', Panel)
@@ -700,7 +717,9 @@ export function register(): void {
     customElements.define('tc-rune-corner', RuneCorner)
     customElements.define('tc-safe-area', SafeArea)
     customElements.define('tc-screen-flash', ScreenFlash)
+    customElements.define('tc-transition-wipe', TransitionWipe)
     customElements.define('tc-shake-container', ShakeContainer)
+    customElements.define('tc-vignette-overlay', VignetteOverlay)
     customElements.define('tc-save-slot-list', SaveSlotList)
     customElements.define('tc-settings-category-list', SettingsCategoryList)
     customElements.define('tc-score-display', ScoreDisplay)
@@ -712,4 +731,5 @@ export function register(): void {
     customElements.define('tc-skill-tree', SkillTree)
     customElements.define('tc-stack', Stack)
     customElements.define('tc-stats-screen', StatsScreen)
+    customElements.define('tc-version-label', VersionLabel)
 }
