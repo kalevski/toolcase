@@ -242,6 +242,7 @@ import MetalButtonDemo from './MetalButtonDemo'
 import NavButtonDemo from './NavButtonDemo'
 import LootListDemo from './LootListDemo'
 import LootPopupDemo from './LootPopupDemo'
+import PauseMenuDemo from './PauseMenuDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -572,6 +573,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'nav-button', category: 'Navigation', element: <NavButtonDemo /> },
     { key: 'loot-list', category: 'Components', element: <LootListDemo /> },
     { key: 'loot-popup', category: 'Components', element: <LootPopupDemo /> },
+    { key: 'pause-menu', category: 'Overlays & Feedback', element: <PauseMenuDemo /> },
     { key: 'live-feed', category: 'Components', element: <LiveFeedDemo /> },
     { key: 'login', category: 'Layout', element: <LoginDemo /> },
     { key: 'marquee', category: 'Content', element: <MarqueeDemo /> },

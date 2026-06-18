@@ -242,6 +242,7 @@ After `register()` you can author markup directly:
   - [tc-panel](#tc-panel)
   - [tc-panel-header](#tc-panel-header)
   - [tc-particle-emitter](#tc-particle-emitter)
+  - [tc-pause-menu](#tc-pause-menu)
   - [tc-level-header](#tc-level-header)
   - [tc-level-select](#tc-level-select)
   - [tc-live-feed](#tc-live-feed)
@@ -22745,4 +22746,98 @@ pe.burst()
 pe.addEventListener('tc-burst', e => {
     console.log(`Burst: ${e.detail.count} particles`)
 })
+```
+
+---
+
+### tc-pause-menu
+
+In-game pause overlay with a full-screen backdrop, an optional eyebrow + title header, a keyboard-navigable menu-item list, and a primary Resume button. Port of `gc-pause-menu` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners, 1px hairline, overlay-tier shadow. Controlled component — fires `tc-close` / `tc-resume` / `tc-select`; the consumer sets `open` to `false` to actually dismiss. Focus trap, scroll lock, and keyboard (`Escape`, `ArrowDown`/`Up`, `Enter`/`Space`) handling included. Items are set via the JS `items` property. No shadow root; light DOM; `display: block`.
+
+**Tag:** `tc-pause-menu`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `open` | boolean | `false` | Shows the overlay when present; removing it hides it. |
+| `menu-title` | string | `"Game Paused"` | Heading shown inside the panel. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `open` | `boolean` | `false` | Reflects the `open` attribute. |
+| `menuTitle` | `string` | `""` | Reflects the `menu-title` attribute. |
+| `items` | `PauseMenuItem[]` | `[]` | Array of menu items. Setting this after connect surgically updates the items list without re-rendering the panel. |
+| `onResume` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-resume`. |
+| `onClose` | `(() => void) \| null` | `null` | Optional callback fired alongside `tc-close`. |
+| `onSelect` | `((id: string) => void) \| null` | `null` | Optional callback fired alongside `tc-select`. |
+
+**PauseMenuItem shape**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | `string` | yes | Unique item identifier, returned in `tc-select` detail. |
+| `label` | `string` | yes | Display text for the menu row. |
+| `disabled` | `boolean` | no | Prevents selection and applies the disabled style. |
+| `badge` | `string` | no | Optional mono badge rendered on the trailing edge. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-resume` | `{}` | Fired when the Resume button is clicked. Does **not** self-close. |
+| `tc-close` | `{}` | Fired on `Escape` key, backdrop click, or — if the consumer wires it up — close actions. Does **not** mutate `open`. |
+| `tc-select` | `{ id: string }` | Fired when a non-disabled menu item is activated (click, `Enter`, or `Space`). |
+
+**CSS custom properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-pause-menu-bg` | `var(--tc-surface)` | Panel background. |
+| `--bs-pause-menu-border-color` | `var(--tc-border)` | Panel and item border colour. |
+| `--bs-pause-menu-shadow` | `var(--tc-shadow-lg)` | Panel box-shadow (overlay tier). |
+| `--bs-pause-menu-width` | `360px` | Default panel width. |
+| `--bs-pause-menu-max-width` | `calc(100vw - 2rem)` | Maximum panel width (viewport responsive). |
+| `--bs-pause-menu-max-height` | `calc(100vh - 4rem)` | Maximum panel height. |
+| `--bs-pause-menu-padding` | `1.25rem` | Header and footer padding. |
+| `--bs-pause-menu-backdrop-bg` | `#0f172a` | Backdrop scrim colour. |
+| `--bs-pause-menu-backdrop-opacity` | `0.55` | Backdrop opacity (open state). |
+| `--bs-pause-menu-z-backdrop` | `var(--tc-z-modal-backdrop)` | Backdrop z-index. |
+| `--bs-pause-menu-z-panel` | `var(--tc-z-modal)` | Panel z-index. |
+| `--bs-pause-menu-eyebrow-color` | `var(--tc-text-muted)` | Eyebrow micro-label colour. |
+| `--bs-pause-menu-title-color` | `var(--tc-text)` | Heading colour. |
+| `--bs-pause-menu-item-min-height` | `2.75rem` | Item row min-height (44 px under coarse pointer). |
+| `--bs-pause-menu-item-color` | `var(--tc-text)` | Item text colour. |
+| `--bs-pause-menu-item-hover-bg` | `var(--tc-surface-muted)` | Item hover/focus background. |
+| `--bs-pause-menu-item-disabled-color` | `var(--tc-text-faint)` | Disabled item text colour. |
+| `--bs-pause-menu-badge-bg` | `var(--tc-surface-muted)` | Badge background. |
+| `--bs-pause-menu-badge-color` | `var(--tc-text-muted)` | Badge text colour. |
+| `--bs-pause-menu-resume-bg` | `var(--tc-app-accent)` | Resume button background. |
+| `--bs-pause-menu-resume-color` | `#fff` | Resume button text colour. |
+| `--bs-pause-menu-resume-hover-bg` | `var(--tc-ink, #0f172a)` | Resume button hover background. |
+
+```html
+<button onclick="document.querySelector('#pause').setAttribute('open','')">Pause</button>
+
+<tc-pause-menu id="pause" menu-title="Realm of Ash"></tc-pause-menu>
+
+<script>
+    const menu = document.querySelector('#pause')
+
+    menu.items = [
+        { id: 'resume',   label: 'Resume' },
+        { id: 'settings', label: 'Settings', badge: 'New' },
+        { id: 'load',     label: 'Load Game' },
+        { id: 'quit',     label: 'Quit', disabled: true },
+    ]
+
+    menu.addEventListener('tc-resume', () => menu.removeAttribute('open'))
+    menu.addEventListener('tc-close',  () => menu.removeAttribute('open'))
+    menu.addEventListener('tc-select', e => {
+        console.log('selected:', e.detail.id)
+        menu.removeAttribute('open')
+    })
+</script>
 ```
