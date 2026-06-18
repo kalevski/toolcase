@@ -294,6 +294,7 @@ import TagInputDemo from './TagInputDemo'
 import TerminalWindowDemo from './TerminalWindowDemo'
 import TestimonialCarouselDemo from './TestimonialCarouselDemo'
 import TimePickerDemo from './TimePickerDemo'
+import ToggleDemo from './ToggleDemo'
 import ToggleCardDemo from './ToggleCardDemo'
 import VerticalItemListDemo from './VerticalItemListDemo'
 import VideoEmbedDemo from './VideoEmbedDemo'
@@ -655,6 +656,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'terminal-window', category: 'Content', element: <TerminalWindowDemo /> },
     { key: 'testimonial-carousel', category: 'Content', element: <TestimonialCarouselDemo /> },
     { key: 'time-picker', category: 'Forms', element: <TimePickerDemo /> },
+    { key: 'toggle', category: 'Forms', element: <ToggleDemo /> },
     { key: 'toggle-card', category: 'Forms', element: <ToggleCardDemo /> },
     { key: 'video-embed', category: 'Components', element: <VideoEmbedDemo /> },
     { key: 'cycle-wheel', category: 'Components', element: <CycleWheelDemo /> },

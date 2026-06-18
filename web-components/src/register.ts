@@ -262,6 +262,7 @@ import { Table } from './Table'
 import { TerminalWindow } from './TerminalWindow'
 import { TestimonialCarousel } from './TestimonialCarousel'
 import { TimePicker } from './TimePicker'
+import { Toggle } from './Toggle'
 import { ToggleCard } from './ToggleCard'
 import { TreeView } from './TreeView'
 import { UserPanel } from './UserPanel'
@@ -618,6 +619,7 @@ export function register(): void {
     customElements.define('tc-terminal-window', TerminalWindow)
     customElements.define('tc-testimonial-carousel', TestimonialCarousel)
     customElements.define('tc-time-picker', TimePicker)
+    customElements.define('tc-toggle', Toggle)
     customElements.define('tc-toggle-card', ToggleCard)
     customElements.define('tc-tree-view', TreeView)
     customElements.define('tc-user-panel', UserPanel)
