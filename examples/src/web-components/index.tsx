@@ -244,6 +244,7 @@ import LootListDemo from './LootListDemo'
 import LootPopupDemo from './LootPopupDemo'
 import PauseMenuDemo from './PauseMenuDemo'
 import PauseScreenDemo from './PauseScreenDemo'
+import PerkPickerDemo from './PerkPickerDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -636,4 +637,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'page-indicator', category: 'Navigation', element: <PageIndicatorDemo /> },
     { key: 'panel', category: 'Components', element: <PanelDemo /> },
     { key: 'particle-emitter', category: 'Components', element: <ParticleEmitterDemo /> },
+    { key: 'perk-picker', category: 'Components', element: <PerkPickerDemo /> },
 ]
