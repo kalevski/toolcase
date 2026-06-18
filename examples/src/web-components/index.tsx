@@ -330,6 +330,7 @@ import ScoreDisplayDemo from './ScoreDisplayDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
 import ShakeContainerDemo from './ShakeContainerDemo'
 import ScrollTextDemo from './ScrollTextDemo'
+import ShopPanelDemo from './ShopPanelDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -680,4 +681,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'settings-category-list', category: 'Components', element: <SettingsCategoryListDemo /> },
     { key: 'score-display', category: 'Content', element: <ScoreDisplayDemo /> },
     { key: 'scroll-text', category: 'Content', element: <ScrollTextDemo /> },
+    { key: 'shop-panel', category: 'Components', element: <ShopPanelDemo /> },
 ]
