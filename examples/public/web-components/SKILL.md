@@ -95,6 +95,7 @@ After `register()` you can author markup directly:
   - [tc-currency-display](#tc-currency-display)
   - [tc-rarity-chip](#tc-rarity-chip)
   - [tc-rune-corner](#tc-rune-corner)
+  - [tc-save-slot-list](#tc-save-slot-list)
   - [tc-crosshair](#tc-crosshair)
   - [tc-section-flag](#tc-section-flag)
   - [tc-skeleton](#tc-skeleton)
@@ -24215,3 +24216,110 @@ None. `tc-rune-corner` renders entirely from its attributes and CSS.
 </div>
 ```
 
+
+---
+
+### tc-save-slot-list
+
+Save/load slot list with per-slot metadata, autosave badge, selected state, and action buttons (Load, Save/Overwrite, Delete). Port of `gc-save-slot-list` (game-components), restyled to the slate/ink design system with sharp corners, JetBrains Mono, 1px hairline borders, and `--bs-save-slot-list-*` custom properties as the theming contract.
+
+**Tag:** `tc-save-slot-list`
+
+#### Attributes
+
+| Attribute | Type | Default | Description |
+|---|---|---|---|
+| `mode` | `'load' \| 'save'` | `'load'` | Determines which action buttons are shown: `load` shows Load + Delete; `save` shows Save/Overwrite + Delete |
+| `selected-id` | `string` | `''` | ID of the currently selected slot; adds an ink accent left-border to that row |
+
+#### JS Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `slots` | `SaveSlot[]` | Array of save slot objects to render. Setting re-renders the list. |
+| `mode` | `SaveSlotMode` | Reflects the `mode` attribute |
+| `selectedId` | `string` | Reflects the `selected-id` attribute |
+| `onSelect` | `((id: string) => void) \| null` | Callback fired when a row is selected by click or keyboard |
+| `onLoad` | `((id: string) => void) \| null` | Callback fired when the Load button is clicked |
+| `onSave` | `((id: string) => void) \| null` | Callback fired when the Save/Overwrite button is clicked |
+| `onDelete` | `((id: string) => void) \| null` | Callback fired when the Delete button is clicked |
+
+**`SaveSlot` shape:**
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique slot identifier |
+| `name` | `string?` | Display name of the save |
+| `timestamp` | `string?` | Human-readable time string shown at the row end |
+| `location` | `string?` | In-game location label |
+| `level` | `number?` | Player level shown in meta row |
+| `playtime` | `string?` | Formatted playtime string |
+| `empty` | `boolean?` | When `true` renders an "Empty Slot" placeholder; Load mode suppresses all action buttons |
+| `autosave` | `boolean?` | When `true` adds an "Auto" badge and disables the Save button in save mode; suppresses Delete in both modes |
+
+#### Events
+
+| Event | `detail` | Description |
+|---|---|---|
+| `tc-select` | `{ id: string }` | Fired when a row background is clicked or activated with Enter/Space |
+| `tc-load` | `{ id: string }` | Fired when the Load button is clicked (load mode only) |
+| `tc-save` | `{ id: string }` | Fired when the Save/Overwrite button is clicked (save mode only) |
+| `tc-delete` | `{ id: string }` | Fired when the Delete button is clicked |
+
+#### Slots
+
+None. All content is driven by the `slots` JS property.
+
+#### CSS Custom Properties
+
+| Property | Default | Description |
+|---|---|---|
+| `--bs-save-slot-list-bg` | `var(--tc-surface)` | Panel background |
+| `--bs-save-slot-list-border` | `1px solid var(--tc-border)` | Panel outer border |
+| `--bs-save-slot-list-row-border` | `1px solid var(--tc-border)` | Row divider |
+| `--bs-save-slot-list-row-hover-bg` | `var(--tc-surface-hover, …)` | Row hover background |
+| `--bs-save-slot-list-row-selected-bg` | `var(--tc-surface-muted)` | Selected row background |
+| `--bs-save-slot-list-row-selected-border-color` | `var(--tc-app-accent)` | Selected row left-border accent color |
+| `--bs-save-slot-list-name-color` | `var(--tc-text)` | Slot name text color |
+| `--bs-save-slot-list-name-font-size` | `0.875rem` | Slot name font size |
+| `--bs-save-slot-list-name-empty-color` | `var(--tc-text-faint)` | Empty slot label color |
+| `--bs-save-slot-list-meta-color` | `var(--tc-text-muted)` | Meta field text color |
+| `--bs-save-slot-list-meta-font-size` | `0.75rem` | Meta field font size |
+| `--bs-save-slot-list-timestamp-color` | `var(--tc-text-faint)` | Timestamp text color |
+| `--bs-save-slot-list-timestamp-font-size` | `0.6875rem` | Timestamp font size |
+| `--bs-save-slot-list-autosave-bg` | `transparent` | Autosave badge background |
+| `--bs-save-slot-list-autosave-color` | `var(--tc-text-muted)` | Autosave badge text color |
+| `--bs-save-slot-list-autosave-border-color` | `var(--tc-border-strong)` | Autosave badge border color |
+| `--bs-save-slot-list-btn-font-size` | `0.75rem` | Action button font size |
+| `--bs-save-slot-list-btn-min-height` | `1.75rem` | Action button minimum height |
+| `--bs-save-slot-list-btn-bg` | `var(--tc-surface)` | Action button background |
+| `--bs-save-slot-list-btn-color` | `var(--tc-text)` | Action button text color |
+| `--bs-save-slot-list-btn-border` | `1px solid var(--tc-border-strong)` | Action button border |
+| `--bs-save-slot-list-btn-hover-bg` | `var(--tc-app-accent)` | Action button hover background |
+| `--bs-save-slot-list-btn-hover-color` | `#fff` | Action button hover text color |
+| `--bs-save-slot-list-btn-disabled-opacity` | `0.45` | Disabled button opacity |
+| `--bs-save-slot-list-btn-danger-color` | `var(--tc-danger, #ef4444)` | Delete button text color |
+| `--bs-save-slot-list-btn-danger-border-color` | `var(--tc-danger, #ef4444)` | Delete button border color |
+| `--bs-save-slot-list-btn-danger-hover-bg` | `var(--tc-danger, #ef4444)` | Delete button hover background |
+| `--bs-save-slot-list-btn-danger-hover-color` | `#fff` | Delete button hover text color |
+| `--bs-save-slot-list-empty-color` | `var(--tc-text-faint)` | Empty-state message color |
+
+#### Example
+
+```html
+<tc-save-slot-list id="saves" mode="load" selected-id="s1"></tc-save-slot-list>
+
+<script>
+  const el = document.getElementById('saves')
+
+  el.slots = [
+    { id: 'auto', name: 'Auto Save', timestamp: '2 min ago', location: 'Ember Keep', level: 24, playtime: '12h 04m', autosave: true },
+    { id: 's1', name: 'The Long Road', timestamp: 'Yesterday', location: 'Vale of Mist', level: 22, playtime: '11h 02m' },
+    { id: 's2', empty: true },
+  ]
+
+  el.addEventListener('tc-select', e => console.log('selected', e.detail.id))
+  el.addEventListener('tc-load',   e => console.log('load',     e.detail.id))
+  el.addEventListener('tc-delete', e => console.log('delete',   e.detail.id))
+</script>
+```

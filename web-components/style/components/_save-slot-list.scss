@@ -1,0 +1,283 @@
+// tc-save-slot-list — save/load slot list with per-slot meta, autosave badge, and action buttons.
+// Port of gc-save-slot-list; restyled to the slate/ink design system.
+// All cosmetics flow through --bs-save-slot-list-* custom properties.
+
+tc-save-slot-list {
+    // Panel
+    --bs-save-slot-list-bg: var(--tc-surface);
+    --bs-save-slot-list-border: 1px solid var(--tc-border);
+
+    // Rows
+    --bs-save-slot-list-row-border: 1px solid var(--tc-border);
+    --bs-save-slot-list-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-save-slot-list-row-selected-bg: var(--tc-surface-muted);
+    --bs-save-slot-list-row-selected-border-color: var(--tc-app-accent);
+
+    // Name
+    --bs-save-slot-list-name-color: var(--tc-text);
+    --bs-save-slot-list-name-font-size: 0.875rem;
+    --bs-save-slot-list-name-empty-color: var(--tc-text-faint);
+
+    // Meta
+    --bs-save-slot-list-meta-color: var(--tc-text-muted);
+    --bs-save-slot-list-meta-font-size: 0.75rem;
+
+    // Timestamp
+    --bs-save-slot-list-timestamp-color: var(--tc-text-faint);
+    --bs-save-slot-list-timestamp-font-size: 0.6875rem;
+
+    // Autosave badge
+    --bs-save-slot-list-autosave-bg: transparent;
+    --bs-save-slot-list-autosave-color: var(--tc-text-muted);
+    --bs-save-slot-list-autosave-border-color: var(--tc-border-strong);
+
+    // Buttons
+    --bs-save-slot-list-btn-font-size: 0.75rem;
+    --bs-save-slot-list-btn-min-height: 1.75rem;
+    --bs-save-slot-list-btn-bg: var(--tc-surface);
+    --bs-save-slot-list-btn-color: var(--tc-text);
+    --bs-save-slot-list-btn-border: 1px solid var(--tc-border-strong);
+    --bs-save-slot-list-btn-hover-bg: var(--tc-app-accent);
+    --bs-save-slot-list-btn-hover-color: #fff;
+    --bs-save-slot-list-btn-disabled-opacity: 0.45;
+
+    // Danger button (delete)
+    --bs-save-slot-list-btn-danger-color: var(--tc-danger, #ef4444);
+    --bs-save-slot-list-btn-danger-border-color: var(--tc-danger, #ef4444);
+    --bs-save-slot-list-btn-danger-hover-bg: var(--tc-danger, #ef4444);
+    --bs-save-slot-list-btn-danger-hover-color: #fff;
+
+    // Empty state
+    --bs-save-slot-list-empty-color: var(--tc-text-faint);
+
+    background: var(--bs-save-slot-list-bg);
+    border: var(--bs-save-slot-list-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Body container ─────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-body {
+    display: flex;
+    flex-direction: column;
+}
+
+// ── Row ────────────────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-bottom: var(--bs-save-slot-list-row-border);
+    border-left: 3px solid transparent;
+    min-height: 56px;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-save-slot-list-row-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &.tc-save-slot-list-row--selected {
+        background: var(--bs-save-slot-list-row-selected-bg);
+        border-left-color: var(--bs-save-slot-list-row-selected-border-color);
+    }
+
+    &.tc-save-slot-list-row--empty {
+        cursor: default;
+        opacity: 0.65;
+    }
+}
+
+// ── Text section ───────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tc-save-slot-list-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+// ── Name ───────────────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-name {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-save-slot-list-name-font-size);
+    font-weight: 600;
+    color: var(--bs-save-slot-list-name-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.4;
+
+    &.tc-save-slot-list-name--empty {
+        color: var(--bs-save-slot-list-name-empty-color);
+        font-style: italic;
+        font-weight: 400;
+    }
+}
+
+// ── Autosave badge ─────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-autosave-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.375rem;
+    height: 1.25rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--bs-save-slot-list-autosave-bg);
+    color: var(--bs-save-slot-list-autosave-color);
+    border: 1px solid var(--bs-save-slot-list-autosave-border-color);
+    border-radius: 0;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+// ── Meta row ───────────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.625rem;
+}
+
+.tc-save-slot-list-meta {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-save-slot-list-meta-font-size);
+    color: var(--bs-save-slot-list-meta-color);
+    line-height: 1.4;
+}
+
+.tc-save-slot-list-timestamp {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-save-slot-list-timestamp-font-size);
+    color: var(--bs-save-slot-list-timestamp-color);
+    line-height: 1.4;
+    margin-left: auto;
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+}
+
+// ── Buttons ────────────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.625rem;
+    min-height: var(--bs-save-slot-list-btn-min-height);
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-save-slot-list-btn-font-size);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    color: var(--bs-save-slot-list-btn-color);
+    background: var(--bs-save-slot-list-btn-bg);
+    border: var(--bs-save-slot-list-btn-border);
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease);
+
+    &:hover:not(:disabled) {
+        background: var(--bs-save-slot-list-btn-hover-bg);
+        color: var(--bs-save-slot-list-btn-hover-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: var(--bs-save-slot-list-btn-disabled-opacity);
+        pointer-events: none;
+        cursor: default;
+    }
+
+    &.tc-save-slot-list-btn--danger {
+        color: var(--bs-save-slot-list-btn-danger-color);
+        background: transparent;
+        border-color: var(--bs-save-slot-list-btn-danger-border-color);
+
+        &:hover:not(:disabled) {
+            background: var(--bs-save-slot-list-btn-danger-hover-bg);
+            color: var(--bs-save-slot-list-btn-danger-hover-color);
+            border-color: var(--bs-save-slot-list-btn-danger-hover-bg);
+        }
+    }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────────
+
+.tc-save-slot-list-empty {
+    padding: 1rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--bs-save-slot-list-empty-color);
+    text-align: center;
+    margin: 0;
+}
+
+// ── 44 px coarse touch targets ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-save-slot-list-row {
+        min-height: 64px;
+    }
+
+    .tc-save-slot-list-btn {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-save-slot-list-row,
+    .tc-save-slot-list-btn {
+        transition:
+            background var(--tc-transition-fast, 0.15s ease),
+            color var(--tc-transition-fast, 0.15s ease);
+    }
+
+    .tc-save-slot-list-btn:hover:not(:disabled) {
+        transform: none;
+    }
+}

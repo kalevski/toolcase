@@ -331,6 +331,7 @@ import { ReportPlayerDialog } from './ReportPlayerDialog'
 import { ResetToDefaults } from './ResetToDefaults'
 import { RuneCorner } from './RuneCorner'
 import { SafeArea } from './SafeArea'
+import { SaveSlotList } from './SaveSlotList'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -672,4 +673,5 @@ export function register(): void {
     customElements.define('tc-reset-to-defaults', ResetToDefaults)
     customElements.define('tc-rune-corner', RuneCorner)
     customElements.define('tc-safe-area', SafeArea)
+    customElements.define('tc-save-slot-list', SaveSlotList)
 }
