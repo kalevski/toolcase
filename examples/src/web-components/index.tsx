@@ -304,6 +304,7 @@ import LoadingScreenDemo from './LoadingScreenDemo'
 import LoreTextDemo from './LoreTextDemo'
 import MinimapDemo from './MinimapDemo'
 import MuteListDemo from './MuteListDemo'
+import PlayerCardDemo from './PlayerCardDemo'
 import NetworkStatusIconDemo from './NetworkStatusIconDemo'
 import PingDisplayDemo from './PingDisplayDemo'
 import PlatformIconDemo from './PlatformIconDemo'
@@ -634,6 +635,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'lore-text', category: 'Content', element: <LoreTextDemo /> },
     { key: 'minimap', category: 'Components', element: <MinimapDemo /> },
     { key: 'mute-list', category: 'Components', element: <MuteListDemo /> },
+    { key: 'player-card', category: 'Components', element: <PlayerCardDemo /> },
     { key: 'network-status-icon', category: 'Components', element: <NetworkStatusIconDemo /> },
     { key: 'platform-icon', category: 'Components', element: <PlatformIconDemo /> },
     { key: 'ping-display', category: 'Components', element: <PingDisplayDemo /> },

@@ -312,6 +312,7 @@ import { PlatformIcon } from './PlatformIcon'
 import { PingDisplay } from './PingDisplay'
 import { Minimap } from './Minimap'
 import { MuteList } from './MuteList'
+import { PlayerCard } from './PlayerCard'
 import { ObjectiveMarker } from './ObjectiveMarker'
 import { PageIndicator } from './PageIndicator'
 import { ParticleEmitter } from './ParticleEmitter'
@@ -640,6 +641,7 @@ export function register(): void {
     customElements.define('tc-ping-display', PingDisplay)
     customElements.define('tc-minimap', Minimap)
     customElements.define('tc-mute-list', MuteList)
+    customElements.define('tc-player-card', PlayerCard)
     customElements.define('tc-objective-marker', ObjectiveMarker)
     customElements.define('tc-page-indicator', PageIndicator)
     customElements.define('tc-particle-emitter', ParticleEmitter)
