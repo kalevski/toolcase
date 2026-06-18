@@ -274,6 +274,7 @@ import ResetToDefaultsDemo from './ResetToDefaultsDemo'
 import FPSCapSelectDemo from './FPSCapSelectDemo'
 import SelectRowDemo from './SelectRowDemo'
 import FullscreenToggleDemo from './FullscreenToggleDemo'
+import ToggleRowDemo from './ToggleRowDemo'
 import InvertAxisToggleDemo from './InvertAxisToggleDemo'
 import AudioMixerDemo from './AudioMixerDemo'
 import RatingDemo from './RatingDemo'
@@ -636,6 +637,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'fps-cap-select', category: 'Forms', element: <FPSCapSelectDemo /> },
     { key: 'select-row', category: 'Forms', element: <SelectRowDemo /> },
     { key: 'fullscreen-toggle', category: 'Forms', element: <FullscreenToggleDemo /> },
+    { key: 'toggle-row', category: 'Forms', element: <ToggleRowDemo /> },
     { key: 'graphics-preset-picker', category: 'Forms', element: <GraphicsPresetPickerDemo /> },
     { key: 'invert-axis-toggle', category: 'Forms', element: <InvertAxisToggleDemo /> },
     { key: 'resizable-panel', category: 'Layout', element: <ResizablePanelDemo /> },
