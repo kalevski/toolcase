@@ -256,6 +256,7 @@ import PerkPickerDemo from './PerkPickerDemo'
 import PortraitDemo from './PortraitDemo'
 import PressAnyKeyDemo from './PressAnyKeyDemo'
 import QuestTrackerDemo from './QuestTrackerDemo'
+import JournalDemo from './JournalDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -710,6 +711,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'perk-picker', category: 'Components', element: <PerkPickerDemo /> },
     { key: 'portrait', category: 'Components', element: <PortraitDemo /> },
     { key: 'press-any-key', category: 'Components', element: <PressAnyKeyDemo /> },
+    { key: 'journal', category: 'Components', element: <JournalDemo /> },
     { key: 'quest-tracker', category: 'Components', element: <QuestTrackerDemo /> },
     { key: 'rarity-chip', category: 'Content', element: <RarityChipDemo /> },
     { key: 'rune-corner', category: 'Components', element: <RuneCornerDemo /> },
