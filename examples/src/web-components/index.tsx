@@ -246,6 +246,7 @@ import PauseMenuDemo from './PauseMenuDemo'
 import PauseScreenDemo from './PauseScreenDemo'
 import PerkPickerDemo from './PerkPickerDemo'
 import PortraitDemo from './PortraitDemo'
+import PressAnyKeyDemo from './PressAnyKeyDemo'
 import LiveFeedDemo from './LiveFeedDemo'
 import LoginDemo from './LoginDemo'
 import MarkdownEditorDemo from './MarkdownEditorDemo'
@@ -648,4 +649,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'particle-emitter', category: 'Components', element: <ParticleEmitterDemo /> },
     { key: 'perk-picker', category: 'Components', element: <PerkPickerDemo /> },
     { key: 'portrait', category: 'Components', element: <PortraitDemo /> },
+    { key: 'press-any-key', category: 'Components', element: <PressAnyKeyDemo /> },
 ]
