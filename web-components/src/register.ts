@@ -311,6 +311,7 @@ import { Minimap } from './Minimap'
 import { MuteList } from './MuteList'
 import { ObjectiveMarker } from './ObjectiveMarker'
 import { PageIndicator } from './PageIndicator'
+import { ParticleEmitter } from './ParticleEmitter'
 import { Panel, PanelHeader } from './Panel'
 
 export function register(): void {
@@ -632,6 +633,7 @@ export function register(): void {
     customElements.define('tc-mute-list', MuteList)
     customElements.define('tc-objective-marker', ObjectiveMarker)
     customElements.define('tc-page-indicator', PageIndicator)
+    customElements.define('tc-particle-emitter', ParticleEmitter)
     customElements.define('tc-panel', Panel)
     customElements.define('tc-panel-header', PanelHeader)
 }

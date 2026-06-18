@@ -304,6 +304,7 @@ import NetworkStatusIconDemo from './NetworkStatusIconDemo'
 import ObjectiveMarkerDemo from './ObjectiveMarkerDemo'
 import PageIndicatorDemo from './PageIndicatorDemo'
 import PanelDemo from './PanelDemo'
+import ParticleEmitterDemo from './ParticleEmitterDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -628,4 +629,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'objective-marker', category: 'Components', element: <ObjectiveMarkerDemo /> },
     { key: 'page-indicator', category: 'Navigation', element: <PageIndicatorDemo /> },
     { key: 'panel', category: 'Components', element: <PanelDemo /> },
+    { key: 'particle-emitter', category: 'Components', element: <ParticleEmitterDemo /> },
 ]
