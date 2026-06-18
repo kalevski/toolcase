@@ -328,6 +328,7 @@ import SaveSlotListDemo from './SaveSlotListDemo'
 import SettingsCategoryListDemo from './SettingsCategoryListDemo'
 import ScoreDisplayDemo from './ScoreDisplayDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
+import ShakeContainerDemo from './ShakeContainerDemo'
 import ScrollTextDemo from './ScrollTextDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
@@ -552,6 +553,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'confirm-dialog', category: 'Overlays & Feedback', element: <ConfirmDialogDemo /> },
     { key: 'report-player-dialog', category: 'Overlays & Feedback', element: <ReportPlayerDialogDemo /> },
     { key: 'screen-flash', category: 'Overlays & Feedback', element: <ScreenFlashDemo /> },
+    { key: 'shake-container', category: 'Components', element: <ShakeContainerDemo /> },
     { key: 'invite-toast', category: 'Overlays & Feedback', element: <InviteToastDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },
     { key: 'command-palette', category: 'Overlays & Feedback', element: <CommandPaletteDemo /> },

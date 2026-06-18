@@ -477,6 +477,12 @@ tc-screen-flash {
     display: block;
 }
 
+// Camera-shake wrapper; the SCSS partial owns the inner transform animation,
+// but the host must not default to inline so it can act as a block container.
+tc-shake-container {
+    display: block;
+}
+
 tc-editable-text,
 tc-chip,
 tc-rarity-chip,
