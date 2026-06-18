@@ -324,6 +324,7 @@ import RarityChipDemo from './RarityChipDemo'
 import RuneCornerDemo from './RuneCornerDemo'
 import SafeAreaDemo from './SafeAreaDemo'
 import SaveSlotListDemo from './SaveSlotListDemo'
+import ScoreDisplayDemo from './ScoreDisplayDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -668,4 +669,5 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'rarity-chip', category: 'Content', element: <RarityChipDemo /> },
     { key: 'rune-corner', category: 'Components', element: <RuneCornerDemo /> },
     { key: 'save-slot-list', category: 'Components', element: <SaveSlotListDemo /> },
+    { key: 'score-display', category: 'Content', element: <ScoreDisplayDemo /> },
 ]
