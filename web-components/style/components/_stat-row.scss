@@ -1,0 +1,131 @@
+// tc-stat-row — label + value stat row with an optional trend indicator.
+// Port of gc-stat-row; game-component fantasy chrome replaced with the slate
+// design system. All cosmetics flow through --bs-stat-row-* custom properties
+// backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-stat-row {
+    --bs-stat-row-bg: transparent;
+    --bs-stat-row-border-color: var(--tc-border);
+    --bs-stat-row-padding-y: 0.5rem;
+    --bs-stat-row-padding-x: 0.75rem;
+    --bs-stat-row-gap: 0.5rem;
+
+    // Accent — written as an inline custom property by render() when set.
+    // Rendered as an inset box-shadow on the inner wrapper so it never shifts
+    // row content or layout.
+    --bs-stat-row-accent: transparent;
+    --bs-stat-row-accent-width: 3px;
+
+    --bs-stat-row-label-color: var(--tc-text-muted);
+    --bs-stat-row-label-font-size: 0.6875rem;
+    --bs-stat-row-label-letter-spacing: 0.08em;
+
+    --bs-stat-row-value-color: var(--tc-text);
+    --bs-stat-row-value-font-size: 0.925rem;
+    --bs-stat-row-value-font-weight: 600;
+
+    --bs-stat-row-trend-font-size: 0.75rem;
+    --bs-stat-row-trend-icon-size: 0.875rem;
+    --bs-stat-row-trend-gap: 0.25rem;
+    --bs-stat-row-trend-up-color: var(--tc-success);
+    --bs-stat-row-trend-down-color: var(--tc-danger);
+
+    // Hairline bottom separator lives on the HOST element so tc-stat-row:last-child
+    // can remove it cleanly — the inner .tc-stat-row div is always the only child
+    // so :last-child on it would always match.
+    border-bottom: 1px solid var(--bs-stat-row-border-color);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.tc-stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--bs-stat-row-gap);
+    padding: var(--bs-stat-row-padding-y) var(--bs-stat-row-padding-x);
+    background: var(--bs-stat-row-bg);
+    border-radius: 0;
+
+    // Accent stripe as an inset shadow — never shifts row content or layout.
+    box-shadow: inset var(--bs-stat-row-accent-width) 0 0 0 var(--bs-stat-row-accent);
+}
+
+// Label — uppercase JetBrains Mono micro-label in muted slate.
+.tc-stat-row-label {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-stat-row-label-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-stat-row-label-letter-spacing);
+    color: var(--bs-stat-row-label-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+// Right column — value + optional trend chip, baseline-aligned.
+.tc-stat-row-right {
+    display: flex;
+    align-items: baseline;
+    gap: var(--bs-stat-row-gap);
+    flex-shrink: 0;
+}
+
+// Value — JetBrains Mono, prominent weight.
+.tc-stat-row-value {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-stat-row-value-font-size);
+    font-weight: var(--bs-stat-row-value-font-weight);
+    color: var(--bs-stat-row-value-color);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+// Trend chip — icon + number, colored by direction.
+.tc-stat-row-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-stat-row-trend-gap);
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-stat-row-trend-font-size);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+
+    &.tc-stat-row-trend--up {
+        color: var(--bs-stat-row-trend-up-color);
+    }
+
+    &.tc-stat-row-trend--down {
+        color: var(--bs-stat-row-trend-down-color);
+    }
+}
+
+// Trend icon — inline SVG sized via em so it scales with the chip font.
+.tc-stat-row-trend-icon {
+    width: var(--bs-stat-row-trend-icon-size);
+    height: var(--bs-stat-row-trend-icon-size);
+    flex-shrink: 0;
+}
+
+// 44 px coarse touch target — min-height on the host so the full row is tappable.
+@media (pointer: coarse) {
+    tc-stat-row {
+        min-height: 44px;
+    }
+}
+
+// No animations on this component; placeholder for future additions.
+@media (prefers-reduced-motion: reduce) {
+    .tc-stat-row {
+        transition: none;
+    }
+}
