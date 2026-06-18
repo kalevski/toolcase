@@ -1,0 +1,157 @@
+// tc-settings-category-list — settings sidebar with a nav column and a slotted content area.
+// Port of gc-settings-category-list (game-components), restyled to the slate/ink design system.
+// All cosmetics flow through --bs-settings-category-list-* custom properties.
+
+tc-settings-category-list {
+    // Layout
+    --bs-settings-category-list-nav-width: 200px;
+
+    // Nav column
+    --bs-settings-category-list-nav-bg: transparent;
+    --bs-settings-category-list-nav-border-color: var(--tc-border);
+
+    // Category items
+    --bs-settings-category-list-item-color: var(--tc-text-muted);
+    --bs-settings-category-list-item-hover-color: var(--tc-text);
+    --bs-settings-category-list-item-hover-bg: var(--tc-surface-muted);
+    --bs-settings-category-list-item-font-size: 13px;
+    --bs-settings-category-list-item-letter-spacing: 0.06em;
+
+    // Active item
+    --bs-settings-category-list-item-active-color: var(--tc-app-accent);
+    --bs-settings-category-list-item-active-bg: var(--tc-surface-muted);
+    --bs-settings-category-list-item-active-border-color: var(--tc-app-accent);
+
+    // Icon
+    --bs-settings-category-list-icon-size: 14px;
+    --bs-settings-category-list-icon-color: var(--tc-text-faint);
+    --bs-settings-category-list-icon-active-color: var(--tc-app-accent);
+
+    // Body content area
+    --bs-settings-category-list-body-padding: 1rem 1.25rem;
+
+    display: grid;
+    grid-template-columns: var(--bs-settings-category-list-nav-width) 1fr;
+    grid-template-rows: 1fr;
+    min-height: 0;
+}
+
+// ── Nav column ─────────────────────────────────────────────────────────────────
+
+.tc-settings-category-list-nav {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-settings-category-list-nav-bg);
+    border-right: 1px solid var(--bs-settings-category-list-nav-border-color);
+    min-height: 0;
+}
+
+// ── Category item button ────────────────────────────────────────────────────────
+
+.tc-settings-category-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    min-height: 40px;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-settings-category-list-item-font-size);
+    font-weight: 500;
+    letter-spacing: var(--bs-settings-category-list-item-letter-spacing);
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--bs-settings-category-list-item-color);
+    background: transparent;
+    border: 0;
+    border-left: 2px solid transparent;
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        color: var(--bs-settings-category-list-item-hover-color);
+        background: var(--bs-settings-category-list-item-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    &.tc-settings-category-list-item--active {
+        color: var(--bs-settings-category-list-item-active-color);
+        background: var(--bs-settings-category-list-item-active-bg);
+        border-left-color: var(--bs-settings-category-list-item-active-border-color);
+    }
+}
+
+// ── Icon ───────────────────────────────────────────────────────────────────────
+
+.tc-settings-category-list-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--bs-settings-category-list-icon-color);
+
+    .tc-settings-category-list-icon {
+        width: var(--bs-settings-category-list-icon-size);
+        height: var(--bs-settings-category-list-icon-size);
+        flex-shrink: 0;
+    }
+
+    .tc-settings-category-list-item--active & {
+        color: var(--bs-settings-category-list-icon-active-color);
+    }
+
+    &.tc-settings-category-list-icon-wrap--text {
+        font-size: var(--bs-settings-category-list-icon-size);
+        line-height: 1;
+        font-family: inherit;
+        text-transform: none;
+        letter-spacing: 0;
+        font-style: normal;
+    }
+}
+
+// ── Label ──────────────────────────────────────────────────────────────────────
+
+.tc-settings-category-list-label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Body content area ──────────────────────────────────────────────────────────
+
+.tc-settings-category-list-body {
+    padding: var(--bs-settings-category-list-body-padding);
+    min-width: 0;
+    overflow: auto;
+}
+
+// ── 44 px coarse touch targets ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-settings-category-list-item {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-settings-category-list-item {
+        transition: none;
+    }
+}

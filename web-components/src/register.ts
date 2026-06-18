@@ -334,6 +334,7 @@ import { ResetToDefaults } from './ResetToDefaults'
 import { RuneCorner } from './RuneCorner'
 import { SafeArea } from './SafeArea'
 import { SaveSlotList } from './SaveSlotList'
+import { SettingsCategoryList } from './SettingsCategoryList'
 import { ScoreDisplay } from './ScoreDisplay'
 import { ScrollText } from './ScrollText'
 
@@ -680,6 +681,7 @@ export function register(): void {
     customElements.define('tc-safe-area', SafeArea)
     customElements.define('tc-screen-flash', ScreenFlash)
     customElements.define('tc-save-slot-list', SaveSlotList)
+    customElements.define('tc-settings-category-list', SettingsCategoryList)
     customElements.define('tc-score-display', ScoreDisplay)
     customElements.define('tc-scroll-text', ScrollText)
 }
