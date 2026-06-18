@@ -314,6 +314,7 @@ import LevelSelectDemo from './LevelSelectDemo'
 import LoadingOverlayDemo from './LoadingOverlayDemo'
 import LoadingScreenDemo from './LoadingScreenDemo'
 import LoreTextDemo from './LoreTextDemo'
+import SubtitleDemo from './SubtitleDemo'
 import MinimapDemo from './MinimapDemo'
 import MuteListDemo from './MuteListDemo'
 import PlayerCardDemo from './PlayerCardDemo'
@@ -671,6 +672,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'loading-overlay', category: 'Overlays & Feedback', element: <LoadingOverlayDemo /> },
     { key: 'loading-screen', category: 'Overlays & Feedback', element: <LoadingScreenDemo /> },
     { key: 'lore-text', category: 'Content', element: <LoreTextDemo /> },
+    { key: 'subtitle', category: 'Content', element: <SubtitleDemo /> },
     { key: 'minimap', category: 'Components', element: <MinimapDemo /> },
     { key: 'mute-list', category: 'Components', element: <MuteListDemo /> },
     { key: 'player-card', category: 'Components', element: <PlayerCardDemo /> },
