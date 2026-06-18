@@ -308,6 +308,7 @@ import { LoreText } from './LoreText'
 import { MetalButton } from './MetalButton'
 import { NavButton } from './NavButton'
 import { NetworkStatusIcon } from './NetworkStatusIcon'
+import { PlatformIcon } from './PlatformIcon'
 import { PingDisplay } from './PingDisplay'
 import { Minimap } from './Minimap'
 import { MuteList } from './MuteList'
@@ -635,6 +636,7 @@ export function register(): void {
     customElements.define('tc-metal-button', MetalButton)
     customElements.define('tc-nav-button', NavButton)
     customElements.define('tc-network-status-icon', NetworkStatusIcon)
+    customElements.define('tc-platform-icon', PlatformIcon)
     customElements.define('tc-ping-display', PingDisplay)
     customElements.define('tc-minimap', Minimap)
     customElements.define('tc-mute-list', MuteList)

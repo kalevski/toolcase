@@ -306,6 +306,7 @@ import MinimapDemo from './MinimapDemo'
 import MuteListDemo from './MuteListDemo'
 import NetworkStatusIconDemo from './NetworkStatusIconDemo'
 import PingDisplayDemo from './PingDisplayDemo'
+import PlatformIconDemo from './PlatformIconDemo'
 import ObjectiveMarkerDemo from './ObjectiveMarkerDemo'
 import PageIndicatorDemo from './PageIndicatorDemo'
 import PanelDemo from './PanelDemo'
@@ -634,6 +635,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'minimap', category: 'Components', element: <MinimapDemo /> },
     { key: 'mute-list', category: 'Components', element: <MuteListDemo /> },
     { key: 'network-status-icon', category: 'Components', element: <NetworkStatusIconDemo /> },
+    { key: 'platform-icon', category: 'Components', element: <PlatformIconDemo /> },
     { key: 'ping-display', category: 'Components', element: <PingDisplayDemo /> },
     { key: 'objective-marker', category: 'Components', element: <ObjectiveMarkerDemo /> },
     { key: 'page-indicator', category: 'Navigation', element: <PageIndicatorDemo /> },
