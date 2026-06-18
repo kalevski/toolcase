@@ -440,6 +440,13 @@ tc-rune-corner {
     display: block;
 }
 
+// Layout wrapper that insets content by env(safe-area-inset-*); the SCSS
+// partial applies the padding calc, but the host must be block so it spans
+// its container.
+tc-safe-area {
+    display: block;
+}
+
 // Fixed full-surface loading overlay; the SCSS partial hides it until [open]
 // and positions it on the modal tier, but the host must not default to inline.
 tc-loading-overlay {

@@ -330,6 +330,7 @@ import { RarityChip } from './RarityChip'
 import { ReportPlayerDialog } from './ReportPlayerDialog'
 import { ResetToDefaults } from './ResetToDefaults'
 import { RuneCorner } from './RuneCorner'
+import { SafeArea } from './SafeArea'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -670,4 +671,5 @@ export function register(): void {
     customElements.define('tc-report-player-dialog', ReportPlayerDialog)
     customElements.define('tc-reset-to-defaults', ResetToDefaults)
     customElements.define('tc-rune-corner', RuneCorner)
+    customElements.define('tc-safe-area', SafeArea)
 }

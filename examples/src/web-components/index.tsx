@@ -322,6 +322,7 @@ import PanelDemo from './PanelDemo'
 import ParticleEmitterDemo from './ParticleEmitterDemo'
 import RarityChipDemo from './RarityChipDemo'
 import RuneCornerDemo from './RuneCornerDemo'
+import SafeAreaDemo from './SafeAreaDemo'
 
 export type WebComponentCategory = 'Layout' | 'Content' | 'Components' | 'Overlays & Feedback' | 'Navigation' | 'Forms'
 
@@ -418,6 +419,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'key', category: 'Content', element: <KeyDemo /> },
     { key: 'label', category: 'Forms', element: <LabelDemo /> },
     { key: 'link', category: 'Content', element: <LinkDemo /> },
+    { key: 'safe-area', category: 'Layout', element: <SafeAreaDemo /> },
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
     { key: 'anchor', category: 'Layout', element: <AnchorDemo /> },
     { key: 'aspect-ratio-box', category: 'Layout', element: <AspectRatioBoxDemo /> },
