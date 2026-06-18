@@ -323,6 +323,7 @@ import { PauseScreen } from './PauseScreen'
 import { PerkPicker } from './PerkPicker'
 import { Portrait } from './Portrait'
 import { PressAnyKey } from './PressAnyKey'
+import { QuestTracker } from './QuestTracker'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -656,4 +657,5 @@ export function register(): void {
     customElements.define('tc-perk-picker', PerkPicker)
     customElements.define('tc-portrait', Portrait)
     customElements.define('tc-press-any-key', PressAnyKey)
+    customElements.define('tc-quest-tracker', QuestTracker)
 }

@@ -1,0 +1,236 @@
+// tc-quest-tracker — on-screen quest / objective tracker.
+// Slate neutrals; JetBrains Mono for the header and progress counts; sharp corners; 1px hairlines.
+// Completed objectives are struck through and muted; optional ones carry a faint secondary label.
+// All cosmetics flow through --bs-quest-tracker-* custom properties.
+
+tc-quest-tracker {
+    // Panel
+    --bs-quest-tracker-bg: var(--tc-surface);
+    --bs-quest-tracker-border: 1px solid var(--tc-border);
+
+    // Header
+    --bs-quest-tracker-header-bg: var(--tc-surface-muted);
+    --bs-quest-tracker-header-border: 1px solid var(--tc-border);
+    --bs-quest-tracker-title-color: var(--tc-text-muted);
+    --bs-quest-tracker-title-font-size: 0.6875rem;
+
+    // Quest name
+    --bs-quest-tracker-quest-border: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-quest-tracker-quest-name-color: var(--tc-text);
+    --bs-quest-tracker-quest-name-font-size: 0.8125rem;
+
+    // Objectives
+    --bs-quest-tracker-objective-label-color: var(--tc-text);
+    --bs-quest-tracker-objective-label-font-size: 0.8125rem;
+    --bs-quest-tracker-objective-completed-color: var(--tc-text-faint);
+    --bs-quest-tracker-objective-optional-color: var(--tc-text-faint);
+    --bs-quest-tracker-objective-optional-font-size: 0.6875rem;
+
+    // Check indicator
+    --bs-quest-tracker-check-size: 0.625rem;
+    --bs-quest-tracker-check-color: var(--tc-border-strong);
+    --bs-quest-tracker-check-done-color: var(--tc-app-accent);
+
+    // Progress count
+    --bs-quest-tracker-count-color: var(--tc-text-muted);
+    --bs-quest-tracker-count-font-size: 0.75rem;
+
+    // Progress bar
+    --bs-quest-tracker-bar-bg: var(--tc-border);
+    --bs-quest-tracker-bar-fill: var(--tc-app-accent);
+    --bs-quest-tracker-bar-height: 3px;
+
+    // Empty state
+    --bs-quest-tracker-empty-color: var(--tc-text-faint);
+}
+
+// ── Panel shell ────────────────────────────────────────────────────────────────
+
+.tc-quest-tracker {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-quest-tracker-bg);
+    border: var(--bs-quest-tracker-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--bs-quest-tracker-header-bg);
+    border-bottom: var(--bs-quest-tracker-header-border);
+}
+
+.tc-quest-tracker-title {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-quest-tracker-title-font-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-quest-tracker-title-color);
+    line-height: 1.4;
+}
+
+// ── Quest list ─────────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-quests {
+    display: flex;
+    flex-direction: column;
+}
+
+.tc-quest-tracker-quest {
+    padding: 0.5rem 0.75rem;
+    border-bottom: var(--bs-quest-tracker-quest-border);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.tc-quest-tracker-quest-name {
+    font-size: var(--bs-quest-tracker-quest-name-font-size);
+    font-weight: 600;
+    color: var(--bs-quest-tracker-quest-name-color);
+    line-height: 1.4;
+    margin-bottom: 0.375rem;
+}
+
+// ── Objectives ─────────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-objectives {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-quest-tracker-objective {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-quest-tracker-objective-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 24px;
+}
+
+// ── Check indicator ────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-objective-check {
+    flex-shrink: 0;
+    width: var(--bs-quest-tracker-check-size);
+    height: var(--bs-quest-tracker-check-size);
+    border: 1px solid var(--bs-quest-tracker-check-color);
+    border-radius: 0;
+    background: transparent;
+    transition: background var(--tc-transition-fast, 0.15s ease), border-color var(--tc-transition-fast, 0.15s ease);
+
+    &--done {
+        border-color: var(--bs-quest-tracker-check-done-color);
+        background: var(--bs-quest-tracker-check-done-color);
+        position: relative;
+
+        // Checkmark via clip-path
+        &::after {
+            content: '';
+            display: block;
+            position: absolute;
+            inset: 0;
+            // Small tick: white SVG injected via mask so it recolors correctly
+            background: #fff;
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolyline points='1.5,5.5 4,8 8.5,2' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            mask-size: cover;
+        }
+    }
+}
+
+// ── Objective label ────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-objective-label {
+    font-size: var(--bs-quest-tracker-objective-label-font-size);
+    color: var(--bs-quest-tracker-objective-label-color);
+    line-height: 1.4;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tc-quest-tracker-objective--completed .tc-quest-tracker-objective-label {
+    color: var(--bs-quest-tracker-objective-completed-color);
+    text-decoration: line-through;
+    text-decoration-color: var(--bs-quest-tracker-objective-completed-color);
+}
+
+// ── Optional badge ─────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-objective-optional {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-quest-tracker-objective-optional-font-size);
+    color: var(--bs-quest-tracker-objective-optional-color);
+    flex-shrink: 0;
+    line-height: 1.4;
+}
+
+// ── Progress count ─────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-objective-count {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-quest-tracker-count-font-size);
+    color: var(--bs-quest-tracker-count-color);
+    flex-shrink: 0;
+    line-height: 1.4;
+    margin-left: auto;
+}
+
+// ── Progress bar ───────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-objective-bar {
+    height: var(--bs-quest-tracker-bar-height);
+    background: var(--bs-quest-tracker-bar-bg);
+    border-radius: 0;
+    overflow: hidden;
+    // indented to align with the label (check width + gap)
+    margin-left: calc(var(--bs-quest-tracker-check-size) + 0.375rem);
+}
+
+.tc-quest-tracker-objective-bar-fill {
+    height: 100%;
+    background: var(--bs-quest-tracker-bar-fill);
+    border-radius: 0;
+    transition: width var(--tc-transition-base, 0.2s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────────
+
+.tc-quest-tracker-empty {
+    padding: 1rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--bs-quest-tracker-empty-color);
+    text-align: center;
+    margin: 0;
+}
+
+// ── 44 px coarse touch targets ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-quest-tracker-objective-row {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-quest-tracker-objective-bar-fill {
+        transition: none;
+    }
+
+    .tc-quest-tracker-objective-check {
+        transition: none;
+    }
+}
