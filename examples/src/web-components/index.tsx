@@ -196,6 +196,7 @@ import DamageNumberDemo from './DamageNumberDemo'
 import HitMarkerDemo from './HitMarkerDemo'
 import CreditsScrollDemo from './CreditsScrollDemo'
 import CycleWheelDemo from './CycleWheelDemo'
+import RadialWheelDemo from './RadialWheelDemo'
 import DangerZoneActionsDemo from './DangerZoneActionsDemo'
 import MetricCardDemo from './MetricCardDemo'
 import SlicesCardDemo from './SlicesCardDemo'
@@ -620,6 +621,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'toggle-card', category: 'Forms', element: <ToggleCardDemo /> },
     { key: 'video-embed', category: 'Components', element: <VideoEmbedDemo /> },
     { key: 'cycle-wheel', category: 'Components', element: <CycleWheelDemo /> },
+    { key: 'radial-wheel', category: 'Overlays & Feedback', element: <RadialWheelDemo /> },
     { key: 'circular-progress', category: 'Components', element: <CircularProgressDemo /> },
     { key: 'cooldown-badge', category: 'Components', element: <CooldownBadgeDemo /> },
     { key: 'compass-bar', category: 'Content', element: <CompassBarDemo /> },

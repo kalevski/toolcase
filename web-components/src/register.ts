@@ -194,6 +194,7 @@ import { DamageNumber } from './DamageNumber'
 import { HitMarker } from './HitMarker'
 import { CreditsScroll } from './CreditsScroll'
 import { CycleWheel } from './CycleWheel'
+import { RadialWheel } from './RadialWheel'
 import { DangerZoneActions } from './DangerZoneActions'
 import { MetricCard } from './MetricCard'
 import { SlicesCard } from './SlicesCard'
@@ -522,6 +523,7 @@ export function register(): void {
     customElements.define('tc-hit-marker', HitMarker)
     customElements.define('tc-credits-scroll', CreditsScroll)
     customElements.define('tc-cycle-wheel', CycleWheel)
+    customElements.define('tc-radial-wheel', RadialWheel)
     customElements.define('tc-danger-zone-actions', DangerZoneActions)
     customElements.define('tc-metric-card', MetricCard)
     customElements.define('tc-slices-card', SlicesCard)

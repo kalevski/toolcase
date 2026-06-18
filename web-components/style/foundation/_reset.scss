@@ -396,6 +396,13 @@ tc-pause-screen {
     display: block;
 }
 
+// Radial pie/ability selector overlay; the SCSS partial switches the host to
+// position:fixed when [open] and hides it otherwise, but it must not default
+// to inline.
+tc-radial-wheel {
+    display: block;
+}
+
 // Fixed full-surface scrim; the SCSS partial flips it to a centred flex
 // container, but it must not default to inline.
 tc-blur-overlay {
