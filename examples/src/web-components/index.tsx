@@ -136,6 +136,7 @@ import ItemTooltipDemo from './ItemTooltipDemo'
 import AbilityCardDemo from './AbilityCardDemo'
 import SkillBarDemo from './SkillBarDemo'
 import SkillTreeDemo from './SkillTreeDemo'
+import StackDemo from './StackDemo'
 import AmmoCounterDemo from './AmmoCounterDemo'
 import ComboCounterDemo from './ComboCounterDemo'
 import GoodFirstIssuesDemo from './GoodFirstIssuesDemo'
@@ -432,6 +433,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'link', category: 'Content', element: <LinkDemo /> },
     { key: 'safe-area', category: 'Layout', element: <SafeAreaDemo /> },
     { key: 'spacer', category: 'Layout', element: <SpacerDemo /> },
+    { key: 'stack', category: 'Layout', element: <StackDemo /> },
     { key: 'anchor', category: 'Layout', element: <AnchorDemo /> },
     { key: 'aspect-ratio-box', category: 'Layout', element: <AspectRatioBoxDemo /> },
     { key: 'grid', category: 'Layout', element: <GridDemo /> },

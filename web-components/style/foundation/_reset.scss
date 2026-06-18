@@ -568,6 +568,13 @@ tc-platform-icon {
     display: inline-flex;
 }
 
+// tc-stack is a flexbox layout primitive; display varies by the [inline] attribute
+// (handled in _stack.scss). Register the flex default here so layout is correct
+// before JS runs.
+tc-stack {
+    display: flex;
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
