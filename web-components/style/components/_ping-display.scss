@@ -1,0 +1,53 @@
+// tc-ping-display — compact latency readout.
+// A status pip (filled square) paired with a JetBrains Mono millisecond value.
+// Four tiers: success (<60 ms), warning (<200 ms), danger (≥200 ms), unknown (no ping).
+// All cosmetics flow through --bs-ping-display-* custom properties.
+
+tc-ping-display {
+    --bs-ping-display-gap: 0.375rem;
+    --bs-ping-display-pip-size: 6px;
+    --bs-ping-display-font-size: 0.6875rem;
+    --bs-ping-display-letter-spacing: 0.05em;
+    --bs-ping-display-font-weight: 500;
+    // Tier colours
+    --bs-ping-display-color-unknown: var(--tc-text-faint, #94a3b8);
+    --bs-ping-display-color-success: var(--tc-success, #22c55e);
+    --bs-ping-display-color-warning: var(--tc-warning, #f59e0b);
+    --bs-ping-display-color-danger:  var(--tc-danger, #ef4444);
+    // Active tier colour resolved by data-tier attribute rules below
+    --bs-ping-display-color: var(--bs-ping-display-color-unknown);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-ping-display-gap);
+    line-height: 1;
+}
+
+// ── Tier colour mapping ────────────────────────────────────────────────────────
+
+tc-ping-display[data-tier="success"] { --bs-ping-display-color: var(--bs-ping-display-color-success); }
+tc-ping-display[data-tier="warning"] { --bs-ping-display-color: var(--bs-ping-display-color-warning); }
+tc-ping-display[data-tier="danger"]  { --bs-ping-display-color: var(--bs-ping-display-color-danger); }
+tc-ping-display[data-tier="unknown"] { --bs-ping-display-color: var(--bs-ping-display-color-unknown); }
+
+// ── Pip ───────────────────────────────────────────────────────────────────────
+
+.tc-ping-display-pip {
+    display: inline-block;
+    flex-shrink: 0;
+    width: var(--bs-ping-display-pip-size);
+    height: var(--bs-ping-display-pip-size);
+    background-color: var(--bs-ping-display-color);
+    border-radius: 0;
+}
+
+// ── Value label ───────────────────────────────────────────────────────────────
+
+.tc-ping-display-value {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-ping-display-font-size);
+    font-weight: var(--bs-ping-display-font-weight);
+    letter-spacing: var(--bs-ping-display-letter-spacing);
+    color: var(--bs-ping-display-color);
+    white-space: nowrap;
+}
