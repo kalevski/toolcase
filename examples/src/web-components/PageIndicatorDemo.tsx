@@ -1,0 +1,74 @@
+import React, { useEffect, useRef, useState } from 'react'
+import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
+
+const PageIndicatorDemo: React.FC = () => {
+    const interactiveRef = useRef<any>(null)
+    const [activeIndex, setActiveIndex] = useState(0)
+
+    useEffect(() => {
+        const el = interactiveRef.current
+        if (!el) return
+        const onSelect = (e: Event) => {
+            const ce = e as CustomEvent<{ index: number }>
+            setActiveIndex(ce.detail.index)
+        }
+        el.addEventListener('tc-select', onSelect)
+        return () => el.removeEventListener('tc-select', onSelect)
+    }, [])
+
+    useEffect(() => {
+        if (interactiveRef.current) {
+            interactiveRef.current.setAttribute('index', String(activeIndex))
+        }
+    }, [activeIndex])
+
+    return (
+        <div className="py-4">
+            <div className="container">
+                <div className="row">
+                    <div className="col-12">
+                        <RichPageHeader
+                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
+                            title="Page Indicator"
+                            description="Dot page-navigation widget. Fires tc-select with { index } when a dot is clicked."
+                        />
+
+                        <div className="d-flex flex-column gap-4 mt-4">
+                            <SectionCard title="Default (5 pages, index 2)">
+                                {/* @ts-ignore */}
+                                <tc-page-indicator count="5" index="2" />
+                            </SectionCard>
+
+                            <SectionCard title="Interactive — click a dot">
+                                <div className="d-flex align-items-center gap-3">
+                                    {/* @ts-ignore */}
+                                    <tc-page-indicator ref={interactiveRef} count="7" index="0" />
+                                    <span style={{ fontFamily: 'var(--bs-font-monospace)', fontSize: 12 }}>
+                                        page {activeIndex + 1} / 7
+                                    </span>
+                                </div>
+                            </SectionCard>
+
+                            <SectionCard title="Custom size &amp; gap">
+                                {/* @ts-ignore */}
+                                <tc-page-indicator count="6" index="3" size="12" gap="12px" />
+                            </SectionCard>
+
+                            <SectionCard title="Custom colors">
+                                {/* @ts-ignore */}
+                                <tc-page-indicator
+                                    count="5"
+                                    index="1"
+                                    color="var(--tc-border)"
+                                    active-color="var(--tc-accent)"
+                                />
+                            </SectionCard>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default PageIndicatorDemo

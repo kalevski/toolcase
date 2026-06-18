@@ -310,6 +310,7 @@ import { NetworkStatusIcon } from './NetworkStatusIcon'
 import { Minimap } from './Minimap'
 import { MuteList } from './MuteList'
 import { ObjectiveMarker } from './ObjectiveMarker'
+import { PageIndicator } from './PageIndicator'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -629,4 +630,5 @@ export function register(): void {
     customElements.define('tc-minimap', Minimap)
     customElements.define('tc-mute-list', MuteList)
     customElements.define('tc-objective-marker', ObjectiveMarker)
+    customElements.define('tc-page-indicator', PageIndicator)
 }
