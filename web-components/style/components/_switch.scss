@@ -1,78 +1,139 @@
-// tc-switch — pill track (sanctioned circle/pill geometry) with a sliding
-// knob; the checked track carries the signature slate-ink gradient. The knob
-// is a pure circle — never a check mark.
+// tc-switch — pill-track switch with a pure-circle sliding knob, paired with an
+// optional label. The off track is a crisp slate well with a white, shadowed
+// knob so it reads as a live control; the checked track carries the signature
+// 135° slate-ink gradient; disabled fades the whole row well past the off state
+// so the two never look alike. Knob is a pure circle — never a check glyph.
+// All cosmetics flow through `--bs-switch-*`.
 
-.form-switch {
-    // 18px knob, 2px inset on the 22px track (viewBox 11 ⇒ ×2 scale). A faint
-    // edge ring keeps the white knob crisp on light tracks.
-    --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-5.5 -5.5 11 11'%3e%3ccircle r='4.5' fill='%23ffffff'/%3e%3ccircle r='4.5' fill='none' stroke='rgba(15,23,42,0.08)' stroke-width='0.5'/%3e%3c/svg%3e");
+tc-switch {
+    --bs-switch-track-width: 40px;
+    --bs-switch-track-height: 22px;
+    --bs-switch-track-bg: var(--tc-surface-muted);
+    --bs-switch-track-border: var(--tc-border-strong);
+    --bs-switch-track-hover-bg: var(--tc-border);
+    --bs-switch-track-checked-bg: var(--tc-app-accent);
+    --bs-switch-track-checked-gradient: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-switch-track-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+    --bs-switch-knob-size: 18px;
+    --bs-switch-knob-inset: 2px;
+    --bs-switch-knob-bg: #ffffff;
+    --bs-switch-knob-border: rgba(15, 23, 42, 0.12);
+    --bs-switch-knob-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+    --bs-switch-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-switch-disabled-opacity: 0.45;
+    --bs-switch-gap: 0.625rem;
+    --bs-switch-label-size: 0.9rem;
 
-    padding-left: 3.1rem;
+    display: inline-block;
+}
 
-    .form-check-input {
-        --bs-form-check-bg-image: var(--bs-form-switch-bg);
+.tc-switch__row {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-switch-gap);
 
-        width: 40px;
-        height: 22px;
-        margin-top: 0.15em;
-        margin-left: -3.1rem;
-        background-color: var(--tc-border-strong);
-        background-image: var(--bs-form-check-bg-image);
-        background-position: left center;
-        background-size: contain;
-        border: 0;
-        border-radius: 999px;
-        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
-        transition:
-            background-position var(--tc-transition-base),
-            background-color var(--tc-transition-base),
-            box-shadow var(--tc-transition-base);
+    &--reverse {
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
 
-        &:hover {
-            background-color: var(--tc-text-faint);
+    // Disabled fades the whole row (track + knob + label) far enough that it
+    // never reads as a crisp, interactive off switch.
+    &--disabled {
+        opacity: var(--bs-switch-disabled-opacity);
+        cursor: not-allowed;
+
+        .tc-switch__label {
+            cursor: not-allowed;
         }
+    }
+}
 
-        // Outranks the base checkbox rules (0,3,0) that would otherwise swap
-        // the knob for the check-mark glyph and repaint the fill.
-        &:checked {
-            --bs-form-check-bg-image: var(--bs-form-switch-bg);
+.tc-switch__track {
+    position: relative;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: var(--bs-switch-track-width);
+    height: var(--bs-switch-track-height);
+    padding: 0;
+    appearance: none;
+    background: var(--bs-switch-track-bg);
+    border: 1px solid var(--bs-switch-track-border);
+    border-radius: 999px;
+    box-shadow: var(--bs-switch-track-shadow);
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-base),
+        border-color var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
 
-            background-color: var(--tc-app-accent);
-            background-image:
-                var(--bs-form-check-bg-image),
-                linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-            background-position:
-                right center,
-                center;
-            background-size: contain, cover;
-            box-shadow: none;
-        }
+    // Coarse pointers get a 44px hit area without changing the visual track.
+    @media (pointer: coarse) {
+        min-width: 44px;
+        min-height: 44px;
+    }
 
-        &:focus-visible {
-            box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
-        }
+    &:hover {
+        background: var(--bs-switch-track-hover-bg);
+    }
 
-        &:disabled {
-            opacity: 0.6;
+    &:focus {
+        outline: 0;
+    }
 
-            ~ .form-check-label {
-                opacity: 0.6;
-            }
+    &:focus-visible {
+        box-shadow: var(--bs-switch-focus-ring);
+    }
+
+    &[data-checked='true'] {
+        background: var(--bs-switch-track-checked-bg);
+        background-image: var(--bs-switch-track-checked-gradient);
+        border-color: transparent;
+        box-shadow: none;
+
+        .tc-switch__knob {
+            // Slide the knob to the right edge (transform stays reserved for
+            // the translateY centring, so animate `left`). Account for the 1px
+            // track border so the knob keeps its inset symmetrically.
+            left: calc(
+                var(--bs-switch-track-width) - var(--bs-switch-knob-size) -
+                    var(--bs-switch-knob-inset) - 2px
+            );
         }
     }
 
-    .form-check-label {
-        font-size: 0.9rem;
-        color: var(--tc-text);
+    &:disabled {
+        pointer-events: none;
     }
+}
 
-    &.form-check-reverse {
-        padding-right: 3.1rem;
-        padding-left: 0;
+.tc-switch__knob {
+    // Pure circle — the one sanctioned curve. Centred vertically; slides
+    // horizontally from the inset-left rest position to the right edge.
+    position: absolute;
+    top: 50%;
+    left: var(--bs-switch-knob-inset);
+    width: var(--bs-switch-knob-size);
+    height: var(--bs-switch-knob-size);
+    background: var(--bs-switch-knob-bg);
+    border: 0.5px solid var(--bs-switch-knob-border);
+    border-radius: 50%;
+    box-shadow: var(--bs-switch-knob-shadow);
+    transform: translateY(-50%);
+    transition: left var(--tc-transition-base);
+}
 
-        .form-check-input {
-            margin-right: -3.1rem;
-            margin-left: 0;
-        }
+.tc-switch__label {
+    font-size: var(--bs-switch-label-size);
+    color: var(--tc-text);
+    cursor: pointer;
+    user-select: none;
+}
+
+// The knob's slide is the only motion here — freeze it under reduced-motion.
+@media (prefers-reduced-motion: reduce) {
+    .tc-switch__track,
+    .tc-switch__knob {
+        transition: none;
     }
 }

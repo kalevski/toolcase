@@ -17,7 +17,7 @@ const StampDemo: React.FC = () => (
                     <RichPageHeader
                         chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
                         title="Stamp"
-                        description="Decorative stamp badge pinned to a corner of a relatively-positioned card. Supports six status colors and four corner positions."
+                        description="Approval-stamp badge pinned to a corner of a relatively-positioned card, tilted a few degrees so it reads as pressed-on-paper rather than a flat badge. Supports six status colors, four corner positions, and a themeable rotation angle."
                     />
 
                     <div className="d-flex flex-column gap-4 mt-4">
@@ -77,6 +77,31 @@ const StampDemo: React.FC = () => (
                                     <span className="text-muted" style={{ fontSize: '0.85rem' }}>bottom-left</span>
                                     {/* @ts-ignore */}
                                     <tc-stamp color="success" position="bottom-left" label="New"></tc-stamp>
+                                </div>
+                            </div>
+                        </SectionCard>
+
+                        <SectionCard title="Rotation angle (askew like a real stamp)">
+                            <div className="d-flex flex-wrap gap-4">
+                                <div style={{ ...cardStyle, minWidth: '200px' }}>
+                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>default (-8deg)</span>
+                                    {/* @ts-ignore */}
+                                    <tc-stamp color="success" label="Approved"></tc-stamp>
+                                </div>
+                                <div style={{ ...cardStyle, minWidth: '200px' }}>
+                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>angle="-14"</span>
+                                    {/* @ts-ignore */}
+                                    <tc-stamp color="danger" label="Paid" angle="-14"></tc-stamp>
+                                </div>
+                                <div style={{ ...cardStyle, minWidth: '200px' }}>
+                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>angle="6deg"</span>
+                                    {/* @ts-ignore */}
+                                    <tc-stamp color="info" label="Draft" angle="6deg"></tc-stamp>
+                                </div>
+                                <div style={{ ...cardStyle, minWidth: '200px' }}>
+                                    <span className="text-muted" style={{ fontSize: '0.85rem' }}>inline --bs-stamp-rotation: 0</span>
+                                    {/* @ts-ignore */}
+                                    <tc-stamp color="secondary" label="Flat" style={{ '--bs-stamp-rotation': '0deg' } as React.CSSProperties}></tc-stamp>
                                 </div>
                             </div>
                         </SectionCard>

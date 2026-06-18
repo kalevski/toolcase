@@ -2,10 +2,21 @@ const TAG_NAME = 'tc-switch'
 
 let _idCounter = 0
 
+// tc-switch — pill-track switch with a pure-circle sliding knob, paired with an
+// optional label. Modelled on the tc-fullscreen-toggle control (button +
+// role="switch") rather than the bootstrap form-check: the off track is a crisp
+// slate well with a white, shadowed knob (reads as an interactive control), the
+// checked track carries the signature 135° slate-ink gradient, and the disabled
+// state fades the whole row well past the off state so the two never look alike.
+// All cosmetics flow through `--bs-switch-*`.
 export class Switch extends HTMLElement {
 
     private _inputId: string
+    private _labelId: string
     private _initialised = false
+
+    // Optional callback mirror of the `tc-change` event (see styleguide §events).
+    onChange: ((value: boolean) => void) | null = null
 
     static get observedAttributes(): string[] {
         return ['checked', 'value', 'label', 'disabled', 'reverse']
@@ -13,30 +24,43 @@ export class Switch extends HTMLElement {
 
     constructor() {
         super()
-        this._inputId = `tc-switch-${++_idCounter}`
+        const n = ++_idCounter
+        this._inputId = `tc-switch-${n}`
+        this._labelId = `tc-switch-label-${n}`
     }
 
     connectedCallback(): void {
-        this.addEventListener('change', this._onNativeChange)
         this.render()
         this._initialised = true
     }
 
-    disconnectedCallback(): void {
-        this.removeEventListener('change', this._onNativeChange)
-    }
-
-    attributeChangedCallback(_name: string, _old: string | null, _next: string | null): void {
+    attributeChangedCallback(name: string, _old: string | null, _next: string | null): void {
         if (!this.isConnected || !this._initialised) return
+        // Patch checked/disabled in place — a full re-render would drop the
+        // button's focus on every toggle.
+        if (name === 'checked') {
+            const btn = this.querySelector<HTMLButtonElement>('.tc-switch__track')
+            const checked = this.checked
+            if (btn) {
+                btn.setAttribute('aria-checked', String(checked))
+                btn.dataset.checked = String(checked)
+            }
+            return
+        }
+        if (name === 'disabled') {
+            const btn = this.querySelector<HTMLButtonElement>('.tc-switch__track')
+            if (btn) btn.disabled = this.disabled
+            const row = this.querySelector<HTMLElement>('.tc-switch__row')
+            if (row) row.classList.toggle('tc-switch__row--disabled', this.disabled)
+            return
+        }
         this.render()
     }
 
     get checked(): boolean {
-        return this.querySelector<HTMLInputElement>('input')?.checked ?? this.hasAttribute('checked')
+        return this.hasAttribute('checked')
     }
     set checked(v: boolean) {
-        const input = this.querySelector<HTMLInputElement>('input')
-        if (input) input.checked = v
         if (v) this.setAttribute('checked', '')
         else this.removeAttribute('checked')
     }
@@ -72,35 +96,47 @@ export class Switch extends HTMLElement {
         else this.removeAttribute('reverse')
     }
 
-    private _onNativeChange = (e: Event): void => {
-        const input = e.target as HTMLInputElement
-        if (input.tagName === 'INPUT') {
-            if (input.checked) this.setAttribute('checked', '')
-            else this.removeAttribute('checked')
-        }
-    }
-
     private render(): void {
         const label = this.label
-        const checkedAttr = this.hasAttribute('checked') ? ' checked' : ''
+        const checked = this.checked
         const disabled = this.disabled
         const reverse = this.reverse
-        const value = this.value
 
-        const reverseClass = reverse ? ' form-check-reverse' : ''
+        const reverseClass = reverse ? ' tc-switch__row--reverse' : ''
+        const disabledClass = disabled ? ' tc-switch__row--disabled' : ''
         const disabledAttr = disabled ? ' disabled' : ''
-        const valueAttr = value ? ` value="${esc(value)}"` : ''
+        const labelledBy = label != null ? ` aria-labelledby="${this._labelId}"` : ''
 
         const labelHtml = label != null
-            ? `<label class="form-check-label" for="${this._inputId}">${esc(label)}</label>`
+            ? `<label class="tc-switch__label" id="${this._labelId}" for="${this._inputId}">${esc(label)}</label>`
             : ''
 
         this.innerHTML = [
-            `<div class="form-check form-switch${reverseClass}">`,
-            `<input id="${this._inputId}" class="form-check-input" type="checkbox" role="switch"${valueAttr}${checkedAttr}${disabledAttr}>`,
+            `<div class="tc-switch__row${reverseClass}${disabledClass}">`,
+            `<button type="button" id="${this._inputId}" class="tc-switch__track" role="switch" aria-checked="${checked}" data-checked="${checked}"${labelledBy}${disabledAttr}>`,
+            `<span class="tc-switch__knob"></span>`,
+            `</button>`,
             labelHtml,
             `</div>`,
         ].join('')
+
+        const btn = this.querySelector<HTMLButtonElement>('.tc-switch__track')
+        if (btn) btn.addEventListener('click', this._onToggle)
+        const labelEl = this.querySelector<HTMLLabelElement>('.tc-switch__label')
+        if (labelEl) labelEl.addEventListener('click', this._onToggle)
+    }
+
+    private _onToggle = (): void => {
+        if (this.disabled) return
+        const next = !this.checked
+        this.checked = next
+        this.emit('tc-change', { value: next })
+        this.dispatchEvent(new Event('change', { bubbles: true }))
+        if (typeof this.onChange === 'function') this.onChange(next)
+    }
+
+    private emit(type: string, detail: Record<string, unknown>): void {
+        this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }))
     }
 }
 

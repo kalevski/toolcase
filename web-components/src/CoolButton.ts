@@ -55,14 +55,18 @@ export class CoolButton extends HTMLElement {
         // Re-capture slot nodes from their current DOM containers before re-render.
         if (!this.hasAttribute('label')) {
             const contentEl = this.querySelector('.tc-cool-button-content')
-            if (contentEl) this._mainNodes = Array.from(contentEl.childNodes)
+            if (contentEl) this._mainNodes = Array.from(contentEl.childNodes).filter(n => !this._isSpinner(n))
         }
         if (!this.hasAttribute('addon')) {
             const addonEl = this.querySelector('.tc-cool-button-addon')
-            if (addonEl) this._addonNodes = Array.from(addonEl.childNodes)
+            if (addonEl) this._addonNodes = Array.from(addonEl.childNodes).filter(n => !this._isSpinner(n))
         }
         this.render()
         this._distributeSlots()
+    }
+
+    private _isSpinner(n: Node): boolean {
+        return n instanceof Element && n.classList.contains('tc-cool-button-spinner')
     }
 
     private _handleClick = () => {
@@ -147,38 +151,45 @@ export class CoolButton extends HTMLElement {
         const variantClass = outline ? `btn-outline-${variant}` : `btn-${variant}`
         const sizeClassMap: Record<CoolButtonSize, string> = { small: 'btn-sm', default: '', large: 'btn-lg' }
         const sizeClass = sizeClassMap[size] ? ` ${sizeClassMap[size]}` : ''
+        const loadingClass = loading ? ' tc-cool-button--loading' : ''
 
-        // Spinner lives before the content span so .tc-cool-button-content.childNodes
-        // are always purely user-provided children (never contaminated by spinner).
-        const spinnerHtml = loading
-            ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading…</span>`
-            : ''
+        const hasAddon = this.hasAttribute('addon') || this._addonNodes.length > 0
+
+        // When loading, the spinner is centred over the content region (or over the
+        // addon when the addon is the leading slot). The label/glyph it covers is
+        // hidden in place (kept in flow) so the button keeps its resting width — no
+        // collapse, no jump. The spinner ring may use border-radius (sanctioned circle).
+        const spinnerHtml = `<span class="tc-cool-button-spinner spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
+        const liveRegion = loading ? `<span class="visually-hidden" role="status">Loading…</span>` : ''
 
         // Label attribute text is written directly into the content span;
         // when absent the span is empty and slot children are appended after render.
         const labelText = this.hasAttribute('label') ? esc(this.label ?? '') : ''
-        const contentSpan = `<span class="tc-cool-button-content">${labelText}</span>`
+        const contentSpan = `<span class="tc-cool-button-content">${labelText}${loading && !(hasAddon && addonPosition === 'left') ? spinnerHtml : ''}</span>`
 
-        const hasAddon = this.hasAttribute('addon') || this._addonNodes.length > 0
         const addonText = this.hasAttribute('addon') ? esc(this.addon ?? '') : ''
-        const addonSpan = `<span class="tc-cool-button-addon">${addonText}</span>`
+        // While loading, the spinner replaces the leading addon glyph (sits where
+        // the icon was); a trailing addon keeps its glyph and the spinner overlays
+        // the label instead.
+        const addonSpinner = loading && addonPosition === 'left' ? spinnerHtml : ''
+        const addonSpan = `<span class="tc-cool-button-addon">${addonText}${addonSpinner}</span>`
         const dividerSpan = `<span class="tc-cool-button-divider" aria-hidden="true"></span>`
 
         let innerHtml: string
         if (hasAddon) {
             if (addonPosition === 'left') {
-                // addon | divider | [spinner] content
-                innerHtml = `${addonSpan}${dividerSpan}${spinnerHtml}${contentSpan}`
+                // addon (spinner overlays glyph) | divider | content
+                innerHtml = `${addonSpan}${dividerSpan}${contentSpan}`
             } else {
-                // [spinner] content | divider | addon
-                innerHtml = `${spinnerHtml}${contentSpan}${dividerSpan}${addonSpan}`
+                // content (spinner overlays label) | divider | addon
+                innerHtml = `${contentSpan}${dividerSpan}${addonSpan}`
             }
         } else {
-            innerHtml = `${spinnerHtml}${contentSpan}`
+            innerHtml = contentSpan
         }
 
         const disabledAttr = isDisabled ? ' disabled' : ''
-        this.innerHTML = `<button type="button" class="btn ${variantClass}${sizeClass} tc-cool-button"${disabledAttr}>${innerHtml}</button>`
+        this.innerHTML = `<button type="button" class="btn ${variantClass}${sizeClass} tc-cool-button${loadingClass}"${disabledAttr}>${innerHtml}${liveRegion}</button>`
     }
 }
 

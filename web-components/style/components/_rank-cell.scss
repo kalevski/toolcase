@@ -11,24 +11,36 @@ tc-rank-cell {
     --bs-rank-cell-bronze:       #b45309;
     --bs-rank-cell-stripe-width: 3px;
     --bs-rank-cell-font-size:    0.8125rem;
+    --bs-rank-cell-line-height:  1.2;
     --bs-rank-cell-pad-x:        0.5rem;
     --bs-rank-cell-pad-y:        0.1875rem;
+    --bs-rank-cell-min-width:    2.25rem;
 }
 
 .tc-rank-cell {
     display: inline-flex;
     align-items: center;
+    // Centre the number on the main axis too, so it reads centred when the cell
+    // is stretched to a fixed table-column width (not just hugged to content).
+    justify-content: center;
+    // Pin a stable min-width off the digit count so same-pad cells line up in a
+    // column and the stripe/number stay on one consistent baseline.
+    min-width: var(--bs-rank-cell-min-width);
     padding: var(--bs-rank-cell-pad-y) var(--bs-rank-cell-pad-x);
     background: var(--tc-surface);
     border: 1px solid var(--tc-border);
     border-left-width: var(--bs-rank-cell-stripe-width);
     border-left-color: var(--tc-border);
     border-radius: 0;
+    // Sit centred on the host line box (matters inside a table <td>).
+    vertical-align: middle;
     font-family: 'JetBrains Mono', 'JetBrainsMono NF', monospace;
     font-size: var(--bs-rank-cell-font-size);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
-    line-height: 1;
+    // A touch above 1 gives the mono digits even space top and bottom so they
+    // optically centre instead of riding high against a line-height:1 box.
+    line-height: var(--bs-rank-cell-line-height);
     white-space: nowrap;
     color: var(--tc-text-muted);
 }
@@ -49,5 +61,9 @@ tc-rank-cell {
 }
 
 .tc-rank-cell-number {
-    line-height: 1;
+    display: inline-block;
+    // Inherit the cell's line-height so the glyph box is centred by the flex
+    // alignment rather than collapsing to a font-size-tall box that rides high.
+    line-height: inherit;
+    text-align: center;
 }

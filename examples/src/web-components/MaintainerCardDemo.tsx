@@ -1,10 +1,15 @@
 import React, { useEffect, useRef } from 'react'
 import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
+// Icons resolve through lucide-static by name (kebab → PascalCase). Brand
+// glyphs (Github/Twitter/…) were dropped from lucide-static, so use generic
+// icons that still exist: a code glyph for the repo, a chat bubble for social,
+// a globe for the website.
 const LINKS_FULL = [
-    { key: 'github', href: '#', label: 'GitHub', icon: 'github' },
-    { key: 'twitter', href: '#', label: 'X (Twitter)', icon: 'twitter' },
-    { key: 'globe', href: '#', label: 'Website', icon: 'globe' },
+    { key: 'repo', href: '#', label: 'Source code', icon: 'code' },
+    { key: 'social', href: '#', label: 'Social', icon: 'message-circle' },
+    { key: 'website', href: '#', label: 'Website', icon: 'globe' },
+    { key: 'email', href: '#', label: 'Email', icon: 'mail' },
 ]
 
 const MaintainerCardDemo: React.FC = () => {

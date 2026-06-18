@@ -61,4 +61,19 @@ tc-metric-grid {
     box-shadow: none;
     background: var(--bs-metric-grid-bg);
     border-radius: 0;
+    // Pin every cell's content to the top so labels share a baseline across the
+    // row and the grid stretch (default) keeps the cells equal-height and uniform.
+    align-self: stretch;
+    align-items: flex-start;
+}
+
+// Mixed icon / no-icon grids misaligned the label/value column: an icon-less
+// tile started flush-left while its neighbours were indented by the icon chip.
+// When the grid carries any icon, reserve the same leading gutter on the bodies
+// of the icon-less tiles so every label and value lines up on one left edge.
+// Fully icon-less grids are left untouched (no phantom gutter).
+.tc-metric-grid:has(.tc-metric-tile-icon)
+    > .tc-metric-tile:not(:has(.tc-metric-tile-icon))
+    .tc-metric-tile-body {
+    margin-left: calc(var(--bs-metric-tile-icon-size, 1.25rem) + var(--bs-metric-tile-gap, 0.75rem));
 }

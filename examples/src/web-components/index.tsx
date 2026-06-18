@@ -210,7 +210,7 @@ import DatePickerDemo from './DatePickerDemo'
 import DiffViewerDemo from './DiffViewerDemo'
 import DrawerDemo from './DrawerDemo'
 import ConfirmDialogDemo from './ConfirmDialogDemo'
-import ReportPlayerDialogDemo from './ReportPlayerDialogDemo'
+import ReportDialogDemo from './ReportDialogDemo'
 import InviteToastDemo from './InviteToastDemo'
 import LightboxDemo from './LightboxDemo'
 import CommandPaletteDemo from './CommandPaletteDemo'
@@ -577,7 +577,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'blur-overlay', category: 'Overlays & Feedback', element: <BlurOverlayDemo /> },
     { key: 'drawer', category: 'Overlays & Feedback', element: <DrawerDemo /> },
     { key: 'confirm-dialog', category: 'Overlays & Feedback', element: <ConfirmDialogDemo /> },
-    { key: 'report-player-dialog', category: 'Overlays & Feedback', element: <ReportPlayerDialogDemo /> },
+    { key: 'report-dialog', category: 'Overlays & Feedback', element: <ReportDialogDemo /> },
     { key: 'screen-flash', category: 'Overlays & Feedback', element: <ScreenFlashDemo /> },
     { key: 'transition-wipe', category: 'Overlays & Feedback', element: <TransitionWipeDemo /> },
     { key: 'vignette-overlay', category: 'Overlays & Feedback', element: <VignetteOverlayDemo /> },

@@ -4,6 +4,7 @@ import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react
 const HeroDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
     const fullRef = useRef<any>(null)
+    const minimalRef = useRef<any>(null)
     const statsRef = useRef<any>(null)
     const metricsRef = useRef<any>(null)
     const bgIconsRef = useRef<any>(null)
@@ -15,24 +16,38 @@ const HeroDemo: React.FC = () => {
         }
     }, [])
 
+    // Mirrors the react Hero demo's "Full Featured" scenario: eyebrow, title,
+    // description, both actions, stat cards AND a centered metrics band.
     useEffect(() => {
         if (fullRef.current) {
             fullRef.current.primaryAction = {
-                label: 'Start for Free',
+                label: 'Get Started Free',
                 onClick: () => console.log('primary action clicked'),
             }
             fullRef.current.secondaryAction = {
-                label: 'See Demo',
+                label: 'View Docs',
                 onClick: () => console.log('secondary action clicked'),
             }
             fullRef.current.statCards = [
-                { label: 'Total Users', value: '12K+' },
-                { label: 'Packages', value: '340' },
-                { label: 'Uptime', value: '99.9%' },
+                { label: 'Active players', value: '12,482' },
+                { label: 'Avg. session time', value: '32m' },
+                { label: 'Retention', value: '91%' },
+            ]
+            fullRef.current.metrics = [
+                { label: 'studio teams', value: '180+' },
+                { label: 'ms response', value: '28ms' },
+                { label: 'uptime', value: '99.99%' },
             ]
             fullRef.current.addEventListener('tc-action', (e: CustomEvent) => {
                 console.log('tc-action', e.detail)
             })
+        }
+    }, [])
+
+    // Mirrors the react Hero demo's "Minimal (No Stats)" scenario.
+    useEffect(() => {
+        if (minimalRef.current) {
+            minimalRef.current.primaryAction = { label: 'Start Building', href: '#' }
         }
     }, [])
 
@@ -91,13 +106,22 @@ const HeroDemo: React.FC = () => {
                                 />
                             </SectionCard>
 
-                            <SectionCard title="Full — eyebrow, title, description, actions (onClick), stat cards + tc-action event">
+                            <SectionCard title="Full Featured — eyebrow, title, description, actions (onClick), stat cards + metrics + tc-action event">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     ref={fullRef}
-                                    eyebrow="Now in beta"
-                                    title="Ship production-ready UI in minutes"
-                                    description="Drop tc-* elements into any stack — React, Vue, Svelte, or plain HTML. No build step required."
+                                    eyebrow="Now in public beta"
+                                    title="Ship your web games faster"
+                                    description="A cloud platform built for indie game developers. Host, deploy and scale your browser games with zero infrastructure headaches."
+                                />
+                            </SectionCard>
+
+                            <SectionCard title="Minimal (No Stats) — title, description, single action">
+                                {/* @ts-ignore */}
+                                <tc-hero
+                                    ref={minimalRef}
+                                    title="Build amazing games"
+                                    description="Everything you need to create, test, and publish browser-based games."
                                 />
                             </SectionCard>
 

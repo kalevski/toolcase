@@ -24,20 +24,16 @@ export class FullscreenToggle extends SettingRowBase {
 
     attributeChangedCallback(name: string, old: string | null, next: string | null): void {
         if (!this.isConnected || !this._initialised) return
-        // Patch checked/disabled in place — a full re-render would drop the
-        // button's focus on every toggle.
+        // Patch checked/disabled on the embedded tc-switch in place — a full
+        // re-render would drop the control's focus on every toggle.
         if (name === 'checked') {
-            const btn = this.querySelector<HTMLButtonElement>('.tc-fullscreen-toggle__switch')
-            const checked = this.checked
-            if (btn) {
-                btn.setAttribute('aria-checked', String(checked))
-                btn.dataset.checked = String(checked)
-            }
+            const sw = this.querySelector<HTMLElement>('tc-switch')
+            if (sw) (sw as any).checked = this.checked
             return
         }
         if (name === 'disabled') {
-            const btn = this.querySelector<HTMLButtonElement>('.tc-fullscreen-toggle__switch')
-            if (btn) btn.disabled = this.disabled
+            const sw = this.querySelector<HTMLElement>('tc-switch')
+            if (sw) (sw as any).disabled = this.disabled
             return
         }
         super.attributeChangedCallback(name, old, next)
@@ -60,31 +56,19 @@ export class FullscreenToggle extends SettingRowBase {
     }
 
     protected renderControl(): string {
-        const checked = this.checked
+        const checkedAttr = this.checked ? ' checked' : ''
         const disabledAttr = this.disabled ? ' disabled' : ''
-        return `
-            <button
-                type="button"
-                class="tc-fullscreen-toggle__switch"
-                role="switch"
-                aria-checked="${checked}"
-                data-checked="${checked}"
-                aria-label="${this.escape(this.rowLabel)}"${disabledAttr}
-            >
-                <span class="tc-fullscreen-toggle__knob"></span>
-            </button>
-        `
+        // The control is a plain tc-switch (no label — the setting-row scaffold
+        // supplies label + description). Cosmetics live in _switch.scss.
+        return `<tc-switch class="tc-fullscreen-toggle__switch"${checkedAttr}${disabledAttr}></tc-switch>`
     }
 
     protected bindControl(): void {
-        const btn = this.querySelector<HTMLButtonElement>('.tc-fullscreen-toggle__switch')
-        if (!btn) return
-        btn.addEventListener('click', () => {
-            if (this.disabled) return
-            const next = !this.checked
+        const sw = this.querySelector<HTMLElement>('tc-switch')
+        if (!sw) return
+        sw.addEventListener('tc-change', (e: Event) => {
+            const next = (e as CustomEvent<{ value: boolean }>).detail?.value ?? !this.checked
             this.checked = next
-            btn.dataset.checked = String(next)
-            btn.setAttribute('aria-checked', String(next))
             this.emit('tc-change', { value: next })
             if (typeof this.onChange === 'function') this.onChange(next)
         })

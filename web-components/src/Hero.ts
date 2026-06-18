@@ -246,7 +246,7 @@ export class Hero extends HTMLElement {
             ? `<div class="tc-hero-actions">${primaryHtml}${secondaryHtml}</div>`
             : ''
 
-        // Stat cards
+        // Stat cards (centered row, sits inside the main column under the actions)
         const statCardsHtml = this._statCards.length
             ? `<div class="tc-hero-stats">${this._statCards.map(s =>
                 `<div class="tc-hero-stat-card">` +
@@ -256,27 +256,37 @@ export class Hero extends HTMLElement {
             ).join('')}</div>`
             : ''
 
-        // Metrics
+        // Metrics live in a separate centered band below a hairline separator,
+        // mirroring the react Hero's __separator + __bottom structure.
         const metricsHtml = this._metrics.length
-            ? `<div class="tc-hero-metrics">${this._metrics.map(m =>
-                `<div class="tc-hero-metric">` +
-                `<span class="tc-hero-metric-value">${esc(m.value)}</span>` +
-                `<span class="tc-hero-metric-label">${esc(m.label)}</span>` +
-                `</div>`
-            ).join('')}</div>`
+            ? '<div class="tc-hero-separator" aria-hidden="true"></div>' +
+              '<div class="tc-hero-bottom"><div class="tc-hero-bottom-inner">' +
+              `<div class="tc-hero-metrics">${this._metrics.map(m =>
+                  `<div class="tc-hero-metric">` +
+                  `<span class="tc-hero-metric-value">${esc(m.value)}</span>` +
+                  `<span class="tc-hero-metric-label">${esc(m.label)}</span>` +
+                  `</div>`
+              ).join('')}</div>` +
+              '</div></div>'
             : ''
 
+        // Main region: centered text column (eyebrow → title → description →
+        // actions → stat cards) inside a max-width grid, mirroring the react Hero.
         this.innerHTML = [
             '<section class="tc-hero">',
             backgroundHtml,
+            '<div class="tc-hero-main">',
+            '<div class="tc-hero-grid">',
             '<div class="tc-hero-body">',
             eyebrowHtml,
             titleHtml,
             descriptionHtml,
             actionsHtml,
             statCardsHtml,
-            metricsHtml,
             '</div>',
+            '</div>',
+            '</div>',
+            metricsHtml,
             '</section>',
         ].join('')
 

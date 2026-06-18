@@ -1,10 +1,11 @@
 // tc-multi-card-select — multi-select card grid (checkgroup pattern).
 // All cosmetics flow through --bs-multi-card-select-* custom properties backed by --tc-* tokens.
-// Sharp corners (border-radius: 0); slate neutrals; 1px gap-as-border grid;
+// Sharp corners (border-radius: 0); slate neutrals; discrete boxed cards — each option is a
+// 1px-bordered box with a real gap between boxes (matching tc-single-card-select).
 // Ink fill (--tc-app-accent) on selected cards with white text and a visible check.
 
 tc-multi-card-select {
-    --bs-multi-card-select-border-color: var(--tc-border-strong);
+    --bs-multi-card-select-border-color: var(--tc-border);
     --bs-multi-card-select-bg: var(--tc-surface);
     --bs-multi-card-select-hover-bg: var(--tc-surface-muted);
     --bs-multi-card-select-selected-bg: var(--tc-app-accent);
@@ -17,16 +18,16 @@ tc-multi-card-select {
     --bs-multi-card-select-check-size: 1rem;
     --bs-multi-card-select-card-padding-y: 1.25rem;
     --bs-multi-card-select-card-padding-x: 1rem;
+    --bs-multi-card-select-gap: 0.5rem;
     --bs-multi-card-select-skeleton-bg: var(--tc-surface-muted);
     --bs-multi-card-select-columns: 2;
 }
 
-// Host IS the grid; background bleeds through 1px gaps as hairline borders.
+// Host IS the grid; a real gap separates each bordered card box.
 .tc-multi-card-select {
     display: grid;
     grid-template-columns: repeat(var(--bs-multi-card-select-columns), 1fr);
-    gap: 1px;
-    background-color: var(--bs-multi-card-select-border-color);
+    gap: var(--bs-multi-card-select-gap);
     border-radius: 0;
 }
 
@@ -39,11 +40,12 @@ tc-multi-card-select {
     padding: var(--bs-multi-card-select-card-padding-y) var(--bs-multi-card-select-card-padding-x);
     min-height: 44px;
     background: var(--bs-multi-card-select-bg);
+    border: 1px solid var(--bs-multi-card-select-border-color);
     border-radius: 0;
     cursor: pointer;
     text-align: center;
     position: relative;
-    transition: background 0.1s ease, color 0.1s ease;
+    transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 
@@ -53,17 +55,19 @@ tc-multi-card-select {
 
     &:hover:not(.tc-multi-card-select-card--disabled):not(.is-selected) {
         background: var(--bs-multi-card-select-hover-bg);
+        border-color: var(--bs-multi-card-select-desc-color);
     }
 
     &:focus-visible {
         outline: 2px solid var(--bs-multi-card-select-selected-bg);
-        outline-offset: -2px;
+        outline-offset: 2px;
         z-index: 1;
     }
 
-    // Ink fill: accent background + white text on selected cards.
+    // Ink fill: accent background + border + white text on selected cards.
     &.is-selected {
         background: var(--bs-multi-card-select-selected-bg);
+        border-color: var(--bs-multi-card-select-selected-bg);
         z-index: 1;
 
         .tc-multi-card-select-label {

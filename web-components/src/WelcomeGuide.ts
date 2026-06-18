@@ -24,10 +24,23 @@ function deriveStepState(steps: WelcomeGuideStep[], idx: number): StepState {
     return 'locked'
 }
 
-// Animated SVG tick path for the completed check indicator
-const TICK_SVG = `<svg class="tc-welcome-guide-check-tick" aria-hidden="true" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline class="tc-welcome-guide-check-tick-path" points="1.5,6 5,9.5 10.5,2.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`
-
-const DASH_SVG = `<svg class="tc-welcome-guide-check-dash" aria-hidden="true" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2.5" y1="6" x2="9.5" y2="6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg>`
+// Custom step indicator — square box with an animated SVG tick (completed),
+// a hover ring (active/clickable) or a muted dash (locked). Mirrors the
+// react-components WelcomeGuideCheck so the checklist carries its own visuals.
+function checkSvg(state: StepState): string {
+    if (state === 'completed') {
+        return (
+            `<svg class="tc-welcome-guide__check-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">` +
+            `<path class="tc-welcome-guide__check-tick" d="M3.5 8.5 L6.5 11.5 L12.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"/>` +
+            `</svg>`
+        )
+    }
+    return (
+        `<svg class="tc-welcome-guide__check-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">` +
+        `<line class="tc-welcome-guide__check-dash" x1="4.5" y1="8" x2="11.5" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>` +
+        `</svg>`
+    )
+}
 
 export class WelcomeGuide extends HTMLElement {
     private _initialised = false
@@ -121,94 +134,111 @@ export class WelcomeGuide extends HTMLElement {
         const patternSrc = this.getAttribute('background-pattern-src')
         const patternAlt = this.getAttribute('background-pattern-alt') ?? ''
 
-        if (loading) {
-            this.innerHTML = this._renderLoading()
-            return
-        }
+        // Left (dark hero) panel — title + messages over the gradient glow.
+        const patternHtml =
+            !loading && patternSrc
+                ? `<div class="tc-welcome-guide__background" aria-hidden="true"><img class="tc-welcome-guide__background-pattern" src="${esc(patternSrc)}" alt="${esc(patternAlt)}" loading="lazy" aria-hidden="true" /></div>`
+                : ''
 
+        const messagesHtml = this._messages
+            .map(m => `<li class="tc-welcome-guide__message">${esc(m)}</li>`)
+            .join('')
+
+        const leftHtml =
+            `<div class="tc-welcome-guide__left">` +
+            patternHtml +
+            `<div class="tc-welcome-guide__left-content">` +
+            (title ? `<h3 class="tc-welcome-guide__title">${esc(title)}</h3>` : '') +
+            (messagesHtml ? `<ul class="tc-welcome-guide__messages">${messagesHtml}</ul>` : '') +
+            `</div>` +
+            `</div>`
+
+        // Right (light checklist) panel — progress + steps.
+        const rightHtml = loading ? this._renderLoadingRight() : this._renderRight()
+
+        this.innerHTML =
+            `<div class="component component-welcome-guide tc-welcome-guide"${loading ? ' aria-busy="true"' : ''}>` +
+            leftHtml +
+            rightHtml +
+            `</div>`
+    }
+
+    private _renderRight(): string {
         const total = this._steps.length
         const completed = this._steps.filter(s => s.completed).length
         const pct = total > 0 ? Math.round((completed / total) * 100) : 0
 
-        const patternHtml = patternSrc
-            ? `<img class="tc-welcome-guide-pattern" src="${esc(patternSrc)}" alt="${esc(patternAlt)}" aria-hidden="true" />`
-            : ''
-
-        const messagesHtml = this._messages
-            .map(m => `<p class="tc-welcome-guide-message">${esc(m)}</p>`)
-            .join('')
-
         const progressHtml =
-            `<div class="tc-welcome-guide-progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Progress: ${completed} of ${total} steps completed">` +
-            `<div class="tc-welcome-guide-progress-bar" style="width:${pct}%"></div>` +
+            `<div class="tc-welcome-guide__progress-wrap">` +
+            `<div class="tc-welcome-guide__progress-header">` +
+            `<span class="tc-welcome-guide__progress-label">${completed} of ${total} complete</span>` +
+            `<span class="tc-welcome-guide__progress-value">${pct}%</span>` +
             `</div>` +
-            `<p class="tc-welcome-guide-progress-label" aria-hidden="true">${completed}/${total} completed</p>`
-
-        const stepsHtml = this._steps.map((step, idx) => {
-            const state = deriveStepState(this._steps, idx)
-            const isActive = state === 'active'
-            const isCompleted = state === 'completed'
-            const isLocked = state === 'locked'
-
-            let checkHtml: string
-            if (isCompleted) {
-                checkHtml = `<span class="tc-welcome-guide-check tc-welcome-guide-check--completed" aria-hidden="true">${TICK_SVG}</span>`
-            } else if (isActive) {
-                checkHtml = `<span class="tc-welcome-guide-check tc-welcome-guide-check--active" aria-hidden="true"></span>`
-            } else {
-                checkHtml = `<span class="tc-welcome-guide-check tc-welcome-guide-check--locked" aria-hidden="true">${DASH_SVG}</span>`
-            }
-
-            const stateLabel = isCompleted ? ' (completed)' : isLocked ? ' (locked)' : ''
-            const ariaLabel = `${esc(step.label)}${stateLabel}`
-            const ariaDisabled = !isActive ? ' aria-disabled="true"' : ''
-            const tabIndex = isActive ? ' tabindex="0"' : ' tabindex="-1"'
-            const dataKey = `data-wg-key="${esc(step.key)}"`
-
-            return (
-                `<li class="tc-welcome-guide-step tc-welcome-guide-step--${state}" role="listitem">` +
-                `<div role="button" class="tc-welcome-guide-step-inner" aria-label="${ariaLabel}"${ariaDisabled}${tabIndex} ${dataKey}>` +
-                checkHtml +
-                `<span class="tc-welcome-guide-step-label">${esc(step.label)}</span>` +
-                `</div>` +
-                `</li>`
-            )
-        }).join('')
-
-        this.innerHTML =
-            `<div class="tc-welcome-guide">` +
-            patternHtml +
-            `<div class="tc-welcome-guide-body">` +
-            (title ? `<h2 class="tc-welcome-guide-title">${esc(title)}</h2>` : '') +
-            (messagesHtml ? `<div class="tc-welcome-guide-messages">${messagesHtml}</div>` : '') +
-            progressHtml +
-            `<ul class="tc-welcome-guide-steps" role="list" aria-label="Onboarding steps">` +
-            stepsHtml +
-            `</ul>` +
+            `<div class="tc-welcome-guide__progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${completed} of ${total} complete">` +
+            `<div class="tc-welcome-guide__progress-bar" style="width:${pct}%"></div>` +
             `</div>` +
             `</div>`
+
+        const stepsHtml = this._steps
+            .map((step, idx) => {
+                const state = deriveStepState(this._steps, idx)
+                const isActive = state === 'active'
+                const isCompleted = state === 'completed'
+                const isLocked = state === 'locked'
+
+                const stepClass = [
+                    'tc-welcome-guide__step',
+                    isCompleted ? 'tc-welcome-guide__step--completed' : '',
+                    isActive ? 'tc-welcome-guide__step--active' : '',
+                ]
+                    .filter(Boolean)
+                    .join(' ')
+
+                const checkHtml =
+                    `<span class="tc-welcome-guide__check tc-welcome-guide__check--${state}" aria-hidden="true">` +
+                    checkSvg(state) +
+                    `</span>`
+
+                const stateLabel = isCompleted ? ' (completed)' : isLocked ? ' (locked)' : ''
+                const ariaLabel = `${esc(step.label)}${stateLabel}`
+                const ariaDisabled = !isActive ? ' aria-disabled="true"' : ''
+                const tabIndex = isActive ? ' tabindex="0"' : ' tabindex="-1"'
+                const dataKey = `data-wg-key="${esc(step.key)}"`
+
+                return (
+                    `<li class="${stepClass}" role="checkbox" aria-checked="${isCompleted}" aria-label="${ariaLabel}"${ariaDisabled}${tabIndex} ${dataKey}>` +
+                    checkHtml +
+                    `<span class="tc-welcome-guide__step-label">${esc(step.label)}</span>` +
+                    `</li>`
+                )
+            })
+            .join('')
+
+        return (
+            `<div class="tc-welcome-guide__right">` +
+            progressHtml +
+            `<ul class="tc-welcome-guide__steps" role="list" aria-label="Onboarding steps">` +
+            stepsHtml +
+            `</ul>` +
+            `</div>`
+        )
     }
 
-    private _renderLoading(): string {
+    private _renderLoadingRight(): string {
         return (
-            `<div class="tc-welcome-guide tc-welcome-guide--loading" role="status" aria-busy="true">` +
+            `<div class="tc-welcome-guide__right" role="status" aria-busy="true">` +
             `<span class="visually-hidden">Loading…</span>` +
-            `<div class="tc-welcome-guide-body">` +
-            `<div class="tc-welcome-guide-skel tc-welcome-guide-skel--title" aria-hidden="true"></div>` +
-            `<div class="tc-welcome-guide-skel tc-welcome-guide-skel--msg" aria-hidden="true"></div>` +
-            `<div class="tc-welcome-guide-skel tc-welcome-guide-skel--msg tc-welcome-guide-skel--msg-short" aria-hidden="true"></div>` +
-            `<div class="tc-welcome-guide-skel tc-welcome-guide-skel--progress" aria-hidden="true"></div>` +
-            `<ul class="tc-welcome-guide-steps" role="list" aria-hidden="true">` +
-            Array.from({ length: 3 }, () =>
-                `<li class="tc-welcome-guide-step">` +
-                `<div class="tc-welcome-guide-step-inner">` +
-                `<span class="tc-welcome-guide-check tc-welcome-guide-skel tc-welcome-guide-skel--check"></span>` +
-                `<span class="tc-welcome-guide-skel tc-welcome-guide-skel--step-label"></span>` +
-                `</div>` +
-                `</li>`
+            `<div class="tc-welcome-guide__skel tc-welcome-guide__skel--progress" aria-hidden="true"></div>` +
+            `<ul class="tc-welcome-guide__steps" role="list" aria-hidden="true">` +
+            Array.from(
+                { length: 4 },
+                () =>
+                    `<li class="tc-welcome-guide__step">` +
+                    `<span class="tc-welcome-guide__check tc-welcome-guide__skel tc-welcome-guide__skel--check"></span>` +
+                    `<span class="tc-welcome-guide__skel tc-welcome-guide__skel--step-label"></span>` +
+                    `</li>`
             ).join('') +
             `</ul>` +
-            `</div>` +
             `</div>`
         )
     }

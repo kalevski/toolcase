@@ -18,11 +18,12 @@ const objectRefList = [
     { value: 'Settings', label: 'Settings' },
 ]
 
-// Initial uncontrolled value — a serialized array of property definitions.
+// Initial uncontrolled value — a serialized array of property definitions, some
+// carrying a default value.
 const defaultValue = JSON.stringify([
-    { key: 'id', type: 'string', required: true },
-    { key: 'age', type: 'integer' },
-    { key: 'active', type: 'boolean', required: true },
+    { key: 'id', type: 'string' },
+    { key: 'age', type: 'integer', default: '18' },
+    { key: 'active', type: 'boolean', default: 'true' },
     { key: 'owner', type: 'ref', ref: 'User' },
     { key: 'tags', type: 'array', ref: 'string' },
     { key: 'profile', type: 'object', ref: 'Profile' },
@@ -32,8 +33,8 @@ const defaultValue = JSON.stringify([
 // inline duplicate-name validation error.
 const duplicateValue = JSON.stringify([
     { key: 'name', type: 'string' },
-    { key: 'email', type: 'string' },
-    { key: 'name', type: 'string', required: true },
+    { key: 'email', type: 'string', default: 'none@example.com' },
+    { key: 'name', type: 'string' },
 ])
 
 const JSONSchemaDefDemo: React.FC = () => {
@@ -78,7 +79,7 @@ const JSONSchemaDefDemo: React.FC = () => {
                         <RichPageHeader
                             chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
                             title="JSON Schema Definition"
-                            description="Visual editor for defining JSON schema properties — editable schema name, per-property type selection, conditional $ref selectors, required toggles, reordering, and inline duplicate-name validation. Emits the serialized definition on every change."
+                            description="Compact visual editor for defining JSON schema properties — editable schema name, per-property type selection, conditional $ref selectors, default-value inputs, reordering, and inline duplicate-name validation. Emits the serialized definition on every change."
                         />
 
                         <div className="row mt-4 g-4">

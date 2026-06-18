@@ -1,6 +1,10 @@
-// tc-early-signup-form — email signup panel with a benefits list, inline
-// validation, and a confirmation success state. Light variant on --tc-surface
-// with a 1px --tc-border hairline; dark variant on --tc-ink with white text.
+// tc-early-signup-form — a "join the early access / waitlist" card. A two-zone
+// layout: a left content zone (brand-dot + mono eyebrow, headline, supporting
+// copy, hairline-separated benefit rows, a mono social-proof micro-stat) and a
+// right form zone (mono field-label, a hairline-collapsed input-group with a
+// slate-ink submit, a mono footnote), divided by a 1px --tc-border hairline.
+// Light variant on --tc-surface; dark variant on --tc-ink with white text.
+// A confirmation success state replaces the form zone after submit.
 // All cosmetics flow through --bs-early-signup-form-* backed by --tc-* tokens.
 
 @use '../foundation/tokens' as *;
@@ -11,20 +15,31 @@ tc-early-signup-form {
     // Light (default) surface
     --bs-early-signup-form-bg: var(--tc-surface);
     --bs-early-signup-form-border: 1px solid var(--tc-border);
+    --bs-early-signup-form-shadow: var(--tc-shadow-sm);
+    --bs-early-signup-form-divider: var(--tc-border);
     --bs-early-signup-form-color: var(--tc-text);
     --bs-early-signup-form-muted-color: var(--tc-text-muted);
+    --bs-early-signup-form-faint-color: var(--tc-text-faint);
     --bs-early-signup-form-eyebrow-color: var(--tc-text-faint);
+    --bs-early-signup-form-dot-color: var(--tc-accent);
+    // A whisper-faint slate corner accent — structure, never decoration.
+    --bs-early-signup-form-corner: var(--tc-surface-hover);
+    --bs-early-signup-form-form-bg: var(--tc-surface-hover);
     --bs-early-signup-form-input-bg: var(--tc-surface);
     --bs-early-signup-form-input-color: var(--tc-text);
     --bs-early-signup-form-input-border: var(--tc-border-strong);
+    --bs-early-signup-form-input-focus-border: var(--tc-app-accent);
     --bs-early-signup-form-input-focus-ring: var(--tc-focus-ring);
     --bs-early-signup-form-input-placeholder-color: var(--tc-text-faint);
+    --bs-early-signup-form-field-label-color: var(--tc-text-faint);
     --bs-early-signup-form-submit-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
     --bs-early-signup-form-submit-color: #fff;
     --bs-early-signup-form-submit-border: var(--tc-app-accent);
+    --bs-early-signup-form-benefit-divider: var(--tc-border);
     --bs-early-signup-form-check-color: var(--tc-success);
     --bs-early-signup-form-error-color: var(--tc-danger);
     --bs-early-signup-form-success-color: var(--tc-success);
+    --bs-early-signup-form-stat-color: var(--tc-text-muted);
     --bs-early-signup-form-reset-color: var(--tc-text-muted);
     --bs-early-signup-form-reset-hover-color: var(--tc-text);
     --bs-early-signup-form-padding: 2rem;
@@ -37,15 +52,28 @@ tc-early-signup-form {
 tc-early-signup-form.tc-early-signup-form--dark {
     --bs-early-signup-form-bg: var(--tc-ink);
     --bs-early-signup-form-border: 1px solid rgba(255, 255, 255, 0.1);
+    --bs-early-signup-form-shadow: var(--tc-shadow-lg);
+    --bs-early-signup-form-divider: rgba(255, 255, 255, 0.1);
     --bs-early-signup-form-color: #fff;
     --bs-early-signup-form-muted-color: rgba(255, 255, 255, 0.65);
+    --bs-early-signup-form-faint-color: rgba(255, 255, 255, 0.4);
     --bs-early-signup-form-eyebrow-color: rgba(255, 255, 255, 0.45);
+    --bs-early-signup-form-corner: rgba(255, 255, 255, 0.04);
+    --bs-early-signup-form-form-bg: rgba(255, 255, 255, 0.03);
     --bs-early-signup-form-input-bg: rgba(255, 255, 255, 0.06);
     --bs-early-signup-form-input-color: #fff;
     --bs-early-signup-form-input-border: rgba(255, 255, 255, 0.25);
+    --bs-early-signup-form-input-focus-border: rgba(255, 255, 255, 0.6);
+    --bs-early-signup-form-input-focus-ring: 0 0 0 0.2rem rgba(255, 255, 255, 0.12);
     --bs-early-signup-form-input-placeholder-color: rgba(255, 255, 255, 0.35);
+    --bs-early-signup-form-field-label-color: rgba(255, 255, 255, 0.45);
+    --bs-early-signup-form-submit-bg: #fff;
+    --bs-early-signup-form-submit-color: var(--tc-ink);
+    --bs-early-signup-form-submit-border: #fff;
+    --bs-early-signup-form-benefit-divider: rgba(255, 255, 255, 0.1);
     --bs-early-signup-form-check-color: #34d399;
     --bs-early-signup-form-success-color: #34d399;
+    --bs-early-signup-form-stat-color: rgba(255, 255, 255, 0.6);
     --bs-early-signup-form-reset-color: rgba(255, 255, 255, 0.45);
     --bs-early-signup-form-reset-hover-color: rgba(255, 255, 255, 0.85);
 }
@@ -53,15 +81,33 @@ tc-early-signup-form.tc-early-signup-form--dark {
 // ── Outer panel ───────────────────────────────────────────────────────────────
 
 .tc-early-signup-form {
+    position: relative;
     background: var(--bs-early-signup-form-bg);
     border: var(--bs-early-signup-form-border);
     border-radius: 0;
     color: var(--bs-early-signup-form-color);
+    box-shadow: var(--bs-early-signup-form-shadow);
+    overflow: hidden;
+
+    // A faint slate corner accent — a 1px-edged triangle bled off the top-right
+    // corner. Reads as structure, not decoration; sits under the content.
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 4rem;
+        height: 4rem;
+        background: var(--bs-early-signup-form-corner);
+        clip-path: polygon(100% 0, 0 0, 100% 100%);
+        pointer-events: none;
+    }
 }
 
 // ── Two-column inner layout ───────────────────────────────────────────────────
 
 .tc-early-signup-form__inner {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--bs-early-signup-form-gap);
@@ -69,12 +115,13 @@ tc-early-signup-form.tc-early-signup-form--dark {
 
     @include media-up(lg) {
         flex-direction: row;
-        align-items: flex-start;
-        gap: 3rem;
+        align-items: stretch;
+        gap: 0; // the hairline divider + zone padding own the spacing now
+        padding: 0;
     }
 }
 
-// ── Intro column (eyebrow + title + subtitle + benefits) ──────────────────────
+// ── Intro zone (eyebrow + title + subtitle + benefits + stat) ─────────────────
 
 .tc-early-signup-form__intro {
     display: flex;
@@ -82,25 +129,46 @@ tc-early-signup-form.tc-early-signup-form--dark {
     gap: var(--bs-early-signup-form-inner-gap);
     flex: 1 1 0;
     min-width: 0;
+
+    @include media-up(lg) {
+        padding: var(--bs-early-signup-form-padding);
+        // Vertical hairline between the two zones.
+        border-right: 1px solid var(--bs-early-signup-form-divider);
+    }
 }
 
-// Eyebrow — monospace micro-label, uppercase, spaced
+// Eyebrow — a 2px cyan brand-dot + mono micro-label, uppercase, spaced.
 .tc-early-signup-form__eyebrow {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    line-height: 1.4;
+}
+
+// The brand dot — the one sanctioned spend of the accent here. 2px square.
+.tc-early-signup-form__dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--bs-early-signup-form-dot-color);
+    border-radius: 0; // sharp by mandate — a 2px brand square
+}
+
+.tc-early-signup-form__eyebrow-text {
     font-family: var(--bs-font-monospace);
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--bs-early-signup-form-eyebrow-color);
-    line-height: 1.4;
 }
 
 .tc-early-signup-form__title {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.625rem;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
     color: var(--bs-early-signup-form-color);
 }
 
@@ -111,82 +179,151 @@ tc-early-signup-form.tc-early-signup-form--dark {
     color: var(--bs-early-signup-form-muted-color);
 }
 
-// Benefits list
+// Benefits — hairline-separated check rows. The inner separators are fainter
+// than the outer card frame (a 1px slate hairline between each row).
 .tc-early-signup-form__benefits {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    border-top: 1px solid var(--bs-early-signup-form-benefit-divider);
 }
 
 .tc-early-signup-form__benefit {
     display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--bs-early-signup-form-benefit-divider);
 }
 
 .tc-early-signup-form__benefit-icon {
     flex-shrink: 0;
-    margin-top: 0.1rem;
+    display: inline-flex;
     color: var(--bs-early-signup-form-check-color);
 
     svg {
-        width: 1rem;
-        height: 1rem;
+        width: 0.875rem;
+        height: 0.875rem;
         display: block;
+        stroke-width: 2.5;
     }
 }
 
 .tc-early-signup-form__benefit-text {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     line-height: 1.5;
-    color: var(--bs-early-signup-form-muted-color);
+    color: var(--bs-early-signup-form-color);
 }
 
-// ── Form column ───────────────────────────────────────────────────────────────
+// Social-proof micro-stat — mono, faint, with a small live pulse dot.
+.tc-early-signup-form__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    margin-top: auto; // push to the bottom of the intro zone
+    font-family: var(--bs-font-monospace);
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    color: var(--bs-early-signup-form-stat-color);
+}
+
+.tc-early-signup-form__stat-pulse {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%; // a circle — sanctioned
+    background: var(--bs-early-signup-form-success-color);
+    box-shadow: 0 0 0 0 var(--bs-early-signup-form-success-color);
+    animation: tc-esf-pulse 2s ease-out infinite;
+}
+
+@keyframes tc-esf-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+    }
+}
+
+// ── Form zone ─────────────────────────────────────────────────────────────────
 
 .tc-early-signup-form__form-area {
-    flex: 0 1 380px;
+    flex: 0 1 360px;
     min-width: 0;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
     @include media-up(lg) {
         width: auto;
+        padding: var(--bs-early-signup-form-padding);
+        // A faint slate well distinguishes the form zone from the content zone.
+        background: var(--bs-early-signup-form-form-bg);
     }
 }
 
 .tc-early-signup-form__form {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.625rem;
 }
 
-// Email input
-.tc-early-signup-form__input {
+// Mono field micro-label above the input group.
+.tc-early-signup-form__field-label {
     display: block;
-    width: 100%;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bs-early-signup-form-field-label-color);
+}
+
+// Input group — input + submit share one border-strong frame, collapsing the
+// internal border into a single 1px separator (no double borders).
+.tc-early-signup-form__field {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--bs-early-signup-form-input-border);
+    border-radius: 0;
+    background: var(--bs-early-signup-form-input-bg);
+    transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+
+    // Focus the whole group when the input within is focused.
+    &:focus-within {
+        border-color: var(--bs-early-signup-form-input-focus-border);
+        box-shadow: var(--bs-early-signup-form-input-focus-ring);
+    }
+}
+
+// Email input — borderless inside the shared frame.
+.tc-early-signup-form__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: block;
     padding: 0.5625rem 0.875rem;
     font-family: inherit;
     font-size: 0.925rem;
     line-height: 1.6;
     color: var(--bs-early-signup-form-input-color);
-    background-color: var(--bs-early-signup-form-input-bg);
-    border: 1px solid var(--bs-early-signup-form-input-border);
+    background: transparent;
+    border: 0;
     border-radius: 0;
     outline: none;
-    transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
     -webkit-appearance: none;
     appearance: none;
 
     &::placeholder {
         color: var(--bs-early-signup-form-input-placeholder-color);
-    }
-
-    &:focus {
-        border-color: var(--tc-app-accent);
-        box-shadow: var(--bs-early-signup-form-input-focus-ring);
     }
 
     &:disabled {
@@ -200,29 +337,19 @@ tc-early-signup-form.tc-early-signup-form--dark {
     }
 }
 
-// Validation error — uses --tc-danger (status-only token)
-.tc-early-signup-form__error {
-    margin: 0;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-    color: var(--bs-early-signup-form-error-color);
-    min-height: 0;
-    transition: opacity var(--tc-transition-fast);
-
-    &:empty {
-        display: none;
-    }
-}
-
-// Submit button — primary ink-gradient, hover lift
+// Submit — primary ink button, attached to the input with a 1px separator.
+// Hover lifts the icon one pixel (the group is fixed, so the arrow carries the
+// motion); the button itself keeps the signature glow on hover.
 .tc-early-signup-form__submit {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
+    padding: 0.5rem 1.125rem;
+    margin: -1px; // overlap the frame so the ink button owns its own edge
     font-family: inherit;
-    font-size: 0.925rem;
+    font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.6;
     letter-spacing: 0.025em;
@@ -232,13 +359,14 @@ tc-early-signup-form.tc-early-signup-form--dark {
     border-radius: 0;
     cursor: pointer;
     white-space: nowrap;
-    transition:
-        transform var(--tc-transition-fast),
-        box-shadow var(--tc-transition-fast);
+    transition: box-shadow var(--tc-transition-fast);
 
     &:hover:not(:disabled) {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+        box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+
+        .tc-early-signup-form__submit-icon {
+            transform: translateX(2px);
+        }
     }
 
     &:focus-visible {
@@ -253,27 +381,58 @@ tc-early-signup-form.tc-early-signup-form--dark {
     &:disabled {
         opacity: 0.65;
         pointer-events: none;
-        transform: none;
     }
 
     svg {
         width: 1rem;
         height: 1rem;
-    }
-
-    // 44px coarse touch target
-    @media (pointer: coarse) {
-        min-height: 44px;
+        display: block;
     }
 }
 
-// Helper text — mono micro-label under the button
+.tc-early-signup-form__submit-icon {
+    display: inline-flex;
+    transition: transform var(--tc-transition-fast);
+}
+
+// Validation error — uses --tc-danger (status-only token).
+.tc-early-signup-form__error {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--bs-early-signup-form-error-color);
+    min-height: 0;
+    transition: opacity var(--tc-transition-fast);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Helper / privacy footnote — mono micro-label with a small check mark.
 .tc-early-signup-form__helper {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
     margin: 0;
     font-family: var(--bs-font-monospace);
     font-size: 0.6875rem;
+    letter-spacing: 0.02em;
     line-height: 1.5;
-    color: var(--bs-early-signup-form-muted-color);
+    color: var(--bs-early-signup-form-faint-color);
+}
+
+.tc-early-signup-form__helper-mark {
+    flex-shrink: 0;
+    display: inline-flex;
+    color: var(--bs-early-signup-form-check-color);
+
+    svg {
+        width: 0.75rem;
+        height: 0.75rem;
+        display: block;
+        stroke-width: 2.5;
+    }
 }
 
 // ── Success state ─────────────────────────────────────────────────────────────
@@ -281,16 +440,17 @@ tc-early-signup-form.tc-early-signup-form--dark {
 .tc-early-signup-form__success {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 0.625rem;
 }
 
 .tc-early-signup-form__success-icon {
-    display: block;
+    display: inline-flex;
     color: var(--bs-early-signup-form-success-color);
 
     svg {
-        width: 2rem;
-        height: 2rem;
+        width: 1.75rem;
+        height: 1.75rem;
         display: block;
     }
 }
@@ -301,6 +461,7 @@ tc-early-signup-form.tc-early-signup-form--dark {
     font-weight: 600;
     color: var(--bs-early-signup-form-color);
     line-height: 1.3;
+    outline: none; // focused programmatically for SR announce; no visible ring
 }
 
 .tc-early-signup-form__success-message {
@@ -312,23 +473,26 @@ tc-early-signup-form.tc-early-signup-form--dark {
     code {
         font-family: var(--bs-font-monospace);
         font-size: 0.875em;
+        color: var(--bs-early-signup-form-color);
     }
 }
 
-// "Use a different email" reset link-button
+// "Use a different email" reset link-button.
 .tc-early-signup-form__reset {
     display: inline;
     padding: 0;
-    font-family: inherit;
-    font-size: 0.8125rem;
+    margin-top: 0.25rem;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.6875rem;
     font-weight: 500;
+    letter-spacing: 0.04em;
     color: var(--bs-early-signup-form-reset-color);
     background: none;
     border: 0;
     border-radius: 0;
     cursor: pointer;
     text-decoration: underline;
-    text-underline-offset: 0.15em;
+    text-underline-offset: 0.2em;
     transition: color var(--tc-transition-fast);
 
     &:hover {
@@ -338,7 +502,6 @@ tc-early-signup-form.tc-early-signup-form--dark {
     &:focus-visible {
         outline: 2px solid var(--tc-app-accent);
         outline-offset: 2px;
-        border-radius: 2px;
     }
 }
 
@@ -346,13 +509,22 @@ tc-early-signup-form.tc-early-signup-form--dark {
 
 @media (prefers-reduced-motion: reduce) {
     .tc-early-signup-form__input,
+    .tc-early-signup-form__field,
     .tc-early-signup-form__submit,
+    .tc-early-signup-form__submit-icon,
     .tc-early-signup-form__reset {
         transition: none;
     }
 
     .tc-early-signup-form__submit:hover:not(:disabled) {
-        transform: none;
         box-shadow: none;
+
+        .tc-early-signup-form__submit-icon {
+            transform: none;
+        }
+    }
+
+    .tc-early-signup-form__stat-pulse {
+        animation: none;
     }
 }

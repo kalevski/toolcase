@@ -8,7 +8,9 @@ tc-danger-zone-actions {
     // ── Component tokens ──────────────────────────────────────────────────
     --bs-danger-zone-actions-border-color: var(--tc-danger);
     --bs-danger-zone-actions-bg: var(--tc-danger-bg);
-    --bs-danger-zone-actions-separator-color: var(--tc-border);
+    // Inner separators share the container's danger red so consecutive rows
+    // read as one cohesive danger-zone frame, not a neutral list.
+    --bs-danger-zone-actions-separator-color: var(--tc-danger);
     --bs-danger-zone-actions-title-color: var(--tc-text);
     --bs-danger-zone-actions-desc-color: var(--tc-text-muted);
     --bs-danger-zone-actions-padding-x: 1rem;

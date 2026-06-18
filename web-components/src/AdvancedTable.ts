@@ -1,5 +1,5 @@
 import { icon } from './icons'
-import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from 'lucide-static'
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
 
 const TAG_NAME = 'tc-advanced-table'
 
@@ -8,10 +8,6 @@ const TAG_NAME = 'tc-advanced-table'
 const chevronUpIcon = icon(ChevronUp, 'tc-advanced-table-sort-icon')
 const chevronDownIcon = icon(ChevronDown, 'tc-advanced-table-sort-icon')
 const chevronsUpDownIcon = icon(ChevronsUpDown, 'tc-advanced-table-sort-icon')
-
-// Pagination prev/next arrows.
-const prevArrowIcon = icon(ChevronLeft, 'tc-advanced-table-page-icon')
-const nextArrowIcon = icon(ChevronRight, 'tc-advanced-table-page-icon')
 
 export type AdvancedTableAlign = 'left' | 'center' | 'right'
 const ALIGNS: AdvancedTableAlign[] = ['left', 'center', 'right']
@@ -84,12 +80,17 @@ export class AdvancedTable extends HTMLElement {
         this.addEventListener('input', this._onInput)
         this.addEventListener('change', this._onChange)
         this.addEventListener('click', this._onClick)
+        // The footer pager is a canonical <tc-pagination> that emits its own
+        // tc-page-change ({ page }). Intercept it before it bubbles to consumers
+        // and translate the 1-based page into this table's offset model.
+        this.addEventListener('tc-page-change', this._onPaginationPage)
     }
 
     disconnectedCallback(): void {
         this.removeEventListener('input', this._onInput)
         this.removeEventListener('change', this._onChange)
         this.removeEventListener('click', this._onClick)
+        this.removeEventListener('tc-page-change', this._onPaginationPage)
     }
 
     attributeChangedCallback(): void {
@@ -192,14 +193,19 @@ export class AdvancedTable extends HTMLElement {
         if (sortBtn && this.contains(sortBtn)) {
             if (this.loading || sortBtn.disabled) return
             this._cycleSort(sortBtn.dataset.sortKey ?? '')
-            return
         }
+    }
 
-        const pageBtn = el.closest<HTMLButtonElement>('[data-page-dir]')
-        if (pageBtn && this.contains(pageBtn)) {
-            if (this.loading || pageBtn.disabled) return
-            this._page(pageBtn.dataset.pageDir === 'prev' ? 'prev' : 'next')
-        }
+    // The nested tc-pagination dispatches tc-page-change with a 1-based { page }.
+    // Swallow it (so consumers only ever see this table's own offset-based event)
+    // and forward as an offset jump.
+    private _onPaginationPage = (e: Event): void => {
+        const target = e.target as HTMLElement
+        if (!(target instanceof HTMLElement) || target.tagName.toLowerCase() !== 'tc-pagination') return
+        e.stopPropagation()
+        const page = (e as CustomEvent).detail?.page
+        if (typeof page !== 'number') return
+        this._goToPage(page)
     }
 
     // ── Behaviour ─────────────────────────────────────────────────────────────
@@ -234,14 +240,14 @@ export class AdvancedTable extends HTMLElement {
         if (typeof this.onSortChange === 'function') this.onSortChange(next)
     }
 
-    private _page(dir: 'prev' | 'next'): void {
+    private _goToPage(page: number): void {
+        if (this.loading) return
         const limit = this.limit
-        const offset = this.offset
         const total = this.total
-        let next = dir === 'prev' ? offset - limit : offset + limit
-        next = Math.max(0, next)            // clamp lower bound
-        if (next >= total) return           // out of [0, total) — at a boundary
-        if (next === offset) return
+        const pageCount = Math.max(1, Math.ceil(total / limit))
+        const clamped = Math.min(Math.max(1, page), pageCount)
+        const next = (clamped - 1) * limit
+        if (next === this.offset) return
 
         this.setAttribute('offset', String(next))   // → attributeChangedCallback → render
         this.dispatchEvent(new CustomEvent('tc-page-change', {
@@ -357,21 +363,21 @@ export class AdvancedTable extends HTMLElement {
         if (total <= 0) return ''
         const limit = this.limit
         const offset = this.offset
-        const loading = this.loading
 
         const start = Math.min(offset + 1, total)
         const end = Math.min(offset + limit, total)
-        const prevDisabled = offset <= 0 || loading
-        const nextDisabled = offset + limit >= total || loading
+        const pageCount = Math.max(1, Math.ceil(total / limit))
+        const current = Math.min(Math.floor(offset / limit) + 1, pageCount)
 
         const summary = `<span class="tc-advanced-table-page-summary">${start}–${end} of ${total}</span>`
-        const prev = `<button type="button" class="tc-advanced-table-page-btn" data-page-dir="prev" ` +
-            `aria-label="Previous page"${prevDisabled ? ' disabled' : ''}>${prevArrowIcon}</button>`
-        const next = `<button type="button" class="tc-advanced-table-page-btn" data-page-dir="next" ` +
-            `aria-label="Next page"${nextDisabled ? ' disabled' : ''}>${nextArrowIcon}</button>`
+        // Reuse the canonical pager — its joined border / mono numerals / ink active
+        // page are the shared pagination motif; we only feed it total + current and
+        // listen for its tc-page-change (handled in _onPaginationPage).
+        const pager = pageCount > 1
+            ? `<tc-pagination size="sm" total="${pageCount}" current="${current}"></tc-pagination>`
+            : ''
 
-        return `<div class="tc-advanced-table-pagination">${summary}` +
-            `<div class="tc-advanced-table-page-controls">${prev}${next}</div></div>`
+        return `<div class="tc-advanced-table-pagination">${summary}${pager}</div>`
     }
 
     private render(): void {

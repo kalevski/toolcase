@@ -89,6 +89,16 @@ const RadialWheelDemo: React.FC = () => {
                                 <SmallWheelExample />
                             </SectionCard>
 
+                            <SectionCard title="Paginated — many options across pages">
+                                <p className="text-muted mb-3">
+                                    With more options than <code>per-page</code> (here 8), the wheel
+                                    pages through groups. Use the centred dot indicator below the
+                                    disc, or the <kbd>←</kbd>/<kbd>→</kbd> arrow keys, to switch
+                                    pages. The hub shows the current page when nothing is hovered.
+                                </p>
+                                <PaginatedWheelExample />
+                            </SectionCard>
+
                             <SectionCard title="Custom properties">
                                 <pre className="text-muted" style={{ fontSize: '0.8rem' }}>{`tc-radial-wheel {
   --bs-radial-wheel-backdrop-opacity: 0.7;
@@ -151,6 +161,66 @@ const SmallWheelExample: React.FC = () => {
             {last && <span className="text-muted">Selected: <code>{last}</code></span>}
             {/* @ts-ignore */}
             <tc-radial-wheel ref={ref} radius="80" option-size="48" />
+        </>
+    )
+}
+
+/** Pagination demo — 14 options paged 8-at-a-time across two wheels. */
+const PaginatedWheelExample: React.FC = () => {
+    const ref = useRef<any>(null)
+    const [open, setOpen] = useState(false)
+    const [last, setLast] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (!ref.current) return
+        ref.current.options = [
+            { id: 'sword',   icon: '⚔',  label: 'Sword' },
+            { id: 'axe',     icon: '🪓', label: 'Axe' },
+            { id: 'bow',     icon: '🏹', label: 'Bow' },
+            { id: 'staff',   icon: '✦',  label: 'Staff' },
+            { id: 'shield',  icon: '🛡', label: 'Shield' },
+            { id: 'potion',  icon: '⚕',  label: 'Potion' },
+            { id: 'bomb',    icon: '💣', label: 'Bomb' },
+            { id: 'key',     icon: '🗝', label: 'Key' },
+            { id: 'map',     icon: '🗺', label: 'Map' },
+            { id: 'torch',   icon: '🔦', label: 'Torch' },
+            { id: 'rope',    icon: '➰', label: 'Rope' },
+            { id: 'scroll',  icon: '📜', label: 'Scroll' },
+            { id: 'gem',     icon: '💎', label: 'Gem' },
+            { id: 'ring',    icon: '💍', label: 'Ring' },
+        ]
+    }, [])
+
+    useEffect(() => {
+        if (!ref.current) return
+        if (open) ref.current.setAttribute('open', '')
+        else ref.current.removeAttribute('open')
+    }, [open])
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        const onSelect = (e: CustomEvent) => {
+            setLast(e.detail.id)
+            setOpen(false)
+        }
+        const onClose = () => setOpen(false)
+        el.addEventListener('tc-select', onSelect)
+        el.addEventListener('tc-close', onClose)
+        return () => {
+            el.removeEventListener('tc-select', onSelect)
+            el.removeEventListener('tc-close', onClose)
+        }
+    }, [])
+
+    return (
+        <>
+            <button type="button" className="btn btn-primary me-3" onClick={() => setOpen(true)}>
+                Open wheel (14 options, per-page=8)
+            </button>
+            {last && <span className="text-muted">Selected: <code>{last}</code></span>}
+            {/* @ts-ignore */}
+            <tc-radial-wheel ref={ref} radius="120" option-size="52" per-page="8" center-label="Inventory" />
         </>
     )
 }

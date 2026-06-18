@@ -1,14 +1,17 @@
 import React, { useEffect, useRef } from 'react'
 import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
+// Logo placeholders via placehold.co (slate-200 bg / slate-500 ink), sized to
+// each tier's logo box. Same source used in CardDemo; via.placeholder.com is
+// defunct (DNS dead), which is why these were previously broken.
 const TIERS_FULL = [
     {
         name: 'Platinum',
         label: 'Platinum',
         size: 'xl',
         logos: [
-            { src: 'https://via.placeholder.com/160x64/e2e8f0/64748b?text=Acme+Corp', alt: 'Acme Corp', href: '#' },
-            { src: 'https://via.placeholder.com/160x64/e2e8f0/64748b?text=Globex', alt: 'Globex', href: '#' },
+            { src: 'https://placehold.co/160x64/e2e8f0/64748b?text=Acme+Corp', alt: 'Acme Corp', href: '#' },
+            { src: 'https://placehold.co/160x64/e2e8f0/64748b?text=Globex', alt: 'Globex', href: '#' },
         ],
     },
     {
@@ -16,9 +19,9 @@ const TIERS_FULL = [
         label: 'Gold',
         size: 'lg',
         logos: [
-            { src: 'https://via.placeholder.com/120x48/e2e8f0/64748b?text=Initech', alt: 'Initech', href: '#' },
-            { src: 'https://via.placeholder.com/120x48/e2e8f0/64748b?text=Umbrella', alt: 'Umbrella', href: '#' },
-            { src: 'https://via.placeholder.com/120x48/e2e8f0/64748b?text=Stark+Ind', alt: 'Stark Industries', href: '#' },
+            { src: 'https://placehold.co/120x48/e2e8f0/64748b?text=Initech', alt: 'Initech', href: '#' },
+            { src: 'https://placehold.co/120x48/e2e8f0/64748b?text=Umbrella', alt: 'Umbrella', href: '#' },
+            { src: 'https://placehold.co/120x48/e2e8f0/64748b?text=Stark+Ind', alt: 'Stark Industries', href: '#' },
         ],
     },
     {
@@ -26,10 +29,10 @@ const TIERS_FULL = [
         label: 'Silver',
         size: 'md',
         logos: [
-            { src: 'https://via.placeholder.com/96x38/e2e8f0/64748b?text=Hooli', alt: 'Hooli', href: '#' },
-            { src: 'https://via.placeholder.com/96x38/e2e8f0/64748b?text=Pied+Piper', alt: 'Pied Piper' },
-            { src: 'https://via.placeholder.com/96x38/e2e8f0/64748b?text=Dunder+Mifflin', alt: 'Dunder Mifflin', href: '#' },
-            { src: 'https://via.placeholder.com/96x38/e2e8f0/64748b?text=Vandelay', alt: 'Vandelay Industries' },
+            { src: 'https://placehold.co/96x38/e2e8f0/64748b?text=Hooli', alt: 'Hooli', href: '#' },
+            { src: 'https://placehold.co/96x38/e2e8f0/64748b?text=Pied+Piper', alt: 'Pied Piper' },
+            { src: 'https://placehold.co/96x38/e2e8f0/64748b?text=Dunder+Mifflin', alt: 'Dunder Mifflin', href: '#' },
+            { src: 'https://placehold.co/96x38/e2e8f0/64748b?text=Vandelay', alt: 'Vandelay Industries' },
         ],
     },
     {
@@ -37,11 +40,11 @@ const TIERS_FULL = [
         label: 'Community',
         size: 'sm',
         logos: [
-            { src: 'https://via.placeholder.com/72x28/e2e8f0/64748b?text=Lo+Fidelity', alt: 'Lo Fidelity' },
-            { src: 'https://via.placeholder.com/72x28/e2e8f0/64748b?text=Bluth+Co', alt: "Bluth's Original", href: '#' },
-            { src: 'https://via.placeholder.com/72x28/e2e8f0/64748b?text=Planet+Expr', alt: 'Planet Express' },
-            { src: 'https://via.placeholder.com/72x28/e2e8f0/64748b?text=Soylent', alt: 'Soylent Corp', href: '#' },
-            { src: 'https://via.placeholder.com/72x28/e2e8f0/64748b?text=Aperture', alt: 'Aperture Science', href: '#' },
+            { src: 'https://placehold.co/72x28/e2e8f0/64748b?text=Lo+Fidelity', alt: 'Lo Fidelity' },
+            { src: 'https://placehold.co/72x28/e2e8f0/64748b?text=Bluth+Co', alt: "Bluth's Original", href: '#' },
+            { src: 'https://placehold.co/72x28/e2e8f0/64748b?text=Planet+Expr', alt: 'Planet Express' },
+            { src: 'https://placehold.co/72x28/e2e8f0/64748b?text=Soylent', alt: 'Soylent Corp', href: '#' },
+            { src: 'https://placehold.co/72x28/e2e8f0/64748b?text=Aperture', alt: 'Aperture Science', href: '#' },
         ],
     },
 ]
@@ -51,9 +54,9 @@ const TIERS_SINGLE = [
         name: 'Partners',
         size: 'lg',
         logos: [
-            { src: 'https://via.placeholder.com/120x48/e2e8f0/64748b?text=Acme', alt: 'Acme', href: '#' },
-            { src: 'https://via.placeholder.com/120x48/e2e8f0/64748b?text=Globex', alt: 'Globex' },
-            { src: 'https://via.placeholder.com/120x48/e2e8f0/64748b?text=Initech', alt: 'Initech', href: '#' },
+            { src: 'https://placehold.co/120x48/e2e8f0/64748b?text=Acme', alt: 'Acme', href: '#' },
+            { src: 'https://placehold.co/120x48/e2e8f0/64748b?text=Globex', alt: 'Globex' },
+            { src: 'https://placehold.co/120x48/e2e8f0/64748b?text=Initech', alt: 'Initech', href: '#' },
         ],
     },
 ]

@@ -8,7 +8,7 @@ const CUSTOM_REASONS = [
     'Abusive voice chat',
 ]
 
-const ReportPlayerDialogDemo: React.FC = () => {
+const ReportDialogDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
     const customRef = useRef<any>(null)
     const eventsRef = useRef<any>(null)
@@ -94,7 +94,7 @@ const ReportPlayerDialogDemo: React.FC = () => {
                     <div className="col-12">
                         <RichPageHeader
                             chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ReportPlayerDialog"
+                            title="ReportDialog"
                             description="Player-report moderation modal with a reason radio group, optional comment textarea, and Cancel / Submit Report actions. Controlled — fires tc-cancel or tc-submit; the consumer sets open to false to dismiss."
                         />
 
@@ -107,7 +107,7 @@ const ReportPlayerDialogDemo: React.FC = () => {
                                     Report ShadowStriker99
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-report-player-dialog
+                                <tc-report-dialog
                                     ref={basicRef}
                                     player-name="ShadowStriker99"
                                 />
@@ -121,7 +121,7 @@ const ReportPlayerDialogDemo: React.FC = () => {
                                     Report NightRaider
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-report-player-dialog
+                                <tc-report-dialog
                                     ref={customRef}
                                     player-name="NightRaider"
                                 />
@@ -135,7 +135,7 @@ const ReportPlayerDialogDemo: React.FC = () => {
                                     Open event demo
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-report-player-dialog
+                                <tc-report-dialog
                                     ref={eventsRef}
                                     player-name="EventTarget42"
                                 />
@@ -160,4 +160,4 @@ const ReportPlayerDialogDemo: React.FC = () => {
     )
 }
 
-export default ReportPlayerDialogDemo
+export default ReportDialogDemo

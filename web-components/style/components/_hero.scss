@@ -8,9 +8,13 @@
 tc-hero {
     --bs-hero-bg: var(--tc-surface);
     --bs-hero-border-color: var(--tc-border);
-    --bs-hero-padding-x: 2rem;
-    --bs-hero-padding-y: 4rem;
-    --bs-hero-body-max-width: 64rem;
+    // Main region padding mirrors the react Hero's clamp() vertical rhythm.
+    --bs-hero-padding-x: clamp(1.5rem, 6vw, 7rem);
+    --bs-hero-padding-y: clamp(2.5rem, 5vw, 5rem);
+    // Outer grid cap (react: 960px) and inner text-column cap (react: 640px).
+    --bs-hero-grid-max-width: 60rem;
+    --bs-hero-body-max-width: 40rem;
+    --bs-hero-grid-gap: clamp(1.25rem, 4vw, 1.75rem);
 
     --bs-hero-eyebrow-color: var(--tc-text-muted);
     --bs-hero-eyebrow-font-size: 0.6875rem;
@@ -88,16 +92,37 @@ tc-hero {
     fill: none;
 }
 
-// ── Foreground body ───────────────────────────────────────────────────────────
+// ── Foreground main region ────────────────────────────────────────────────────
+// Centered, vertically padded region (react: .component-hero__main) that holds
+// the single-column grid. Everything in the hero text column is centered.
 
-.tc-hero-body {
+.tc-hero-main {
     position: relative;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--bs-hero-padding-y) var(--bs-hero-padding-x);
+    text-align: center;
+}
+
+.tc-hero-grid {
+    width: 100%;
+    max-width: var(--bs-hero-grid-max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--bs-hero-grid-gap);
+}
+
+.tc-hero-body {
     max-width: var(--bs-hero-body-max-width);
     margin: 0 auto;
-    padding: var(--bs-hero-padding-y) var(--bs-hero-padding-x);
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 1.25rem;
 }
 
@@ -123,25 +148,32 @@ tc-hero {
     line-height: 1.15;
     letter-spacing: -0.02em;
     color: var(--bs-hero-title-color);
+    text-align: center;
 }
 
 // ── Description ───────────────────────────────────────────────────────────────
 
 .tc-hero-description {
-    margin: 0;
+    margin: 0 auto;
     font-size: var(--bs-hero-description-font-size);
     line-height: 1.7;
     color: var(--bs-hero-description-color);
-    max-width: 48rem;
+    max-width: var(--bs-hero-body-max-width);
+    text-align: center;
 }
 
 // ── Actions row ───────────────────────────────────────────────────────────────
+// Mobile: stacked, full-width buttons. ≥576px: centered row (react parity).
 
 .tc-hero-actions {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: var(--bs-hero-actions-gap);
-    align-items: center;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+    max-width: 22rem;
 }
 
 // Action buttons inherit .btn styles from _button.scss.
@@ -149,16 +181,20 @@ tc-hero {
 // Secondary: outline button with muted-surface hover wash (defined in .btn-outline-primary).
 
 // ── Stat cards row ────────────────────────────────────────────────────────────
+// Centered, wrapping row sitting under the actions inside the text column.
 
 .tc-hero-stats {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+    justify-content: center;
 }
 
 .tc-hero-stat-card {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 0.25rem;
     padding: var(--bs-hero-stat-card-padding-y) var(--bs-hero-stat-card-padding-x);
     background: var(--bs-hero-stat-card-bg);
@@ -187,18 +223,59 @@ tc-hero {
     color: var(--bs-hero-stat-label-color);
 }
 
-// ── Metrics row ───────────────────────────────────────────────────────────────
+// ── Metrics band ──────────────────────────────────────────────────────────────
+// Metrics drop into a separate band below a hairline separator (react:
+// __separator + __bottom + __bottom-inner), centered in a responsive grid.
+
+.tc-hero-separator {
+    position: relative;
+    z-index: 1;
+    height: 1px;
+    margin: 0 auto;
+    max-width: var(--bs-hero-grid-max-width);
+    background: var(--bs-hero-border-color);
+}
+
+.tc-hero-bottom {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 3.25rem) var(--bs-hero-padding-x);
+}
+
+.tc-hero-bottom-inner {
+    width: 100%;
+    max-width: var(--bs-hero-grid-max-width);
+}
 
 .tc-hero-metrics {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    // Mobile: single column. ≥576px: responsive auto-fit (react parity).
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
     gap: var(--bs-hero-metric-gap);
+    margin: 0;
+    padding: 0;
 }
 
 .tc-hero-metric {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    align-items: center;
+    text-align: center;
+    gap: 0.375rem;
+}
+
+// 3px accent bar above each metric — the react Hero's __metric::before motif,
+// recoloured to the slate ink accent to stay on the product voice.
+.tc-hero-metric::before {
+    content: '';
+    width: 2.5rem;
+    height: 2px;
+    background: var(--tc-app-accent);
+    opacity: 0.6;
 }
 
 .tc-hero-metric-value {
@@ -220,17 +297,20 @@ tc-hero {
     color: var(--bs-hero-metric-label-color);
 }
 
-// ── Responsive ────────────────────────────────────────────────────────────────
+// ── Responsive (mobile-first min-width queries) ────────────────────────────────
+// ≥576px: actions become a centered auto-width row; metrics fan into a
+// responsive multi-column grid — matching the react Hero breakpoints.
 
-@media (max-width: 575.98px) {
-    tc-hero {
-        --bs-hero-padding-x: 1.25rem;
-        --bs-hero-padding-y: 2.5rem;
+@media (min-width: 576px) {
+    .tc-hero-actions {
+        flex-direction: row;
+        align-items: center;
+        width: auto;
+        max-width: none;
     }
 
-    .tc-hero-actions {
-        flex-direction: column;
-        align-items: flex-start;
+    .tc-hero-metrics {
+        grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     }
 }
 

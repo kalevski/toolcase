@@ -37,6 +37,10 @@ tc-radial-wheel {
     --bs-radial-wheel-center-color:    var(--tc-text-muted);
     --bs-radial-wheel-center-size:     0.75rem;
 
+    // Pager dots — sit on the dark backdrop scrim, so they read in light ink.
+    --bs-radial-wheel-pager-color:        rgba(255, 255, 255, 0.45);
+    --bs-radial-wheel-pager-active-color: var(--tc-surface);
+
     // Transition
     --bs-radial-wheel-transition: opacity var(--tc-transition-base, 0.2s cubic-bezier(0.4, 0, 0.2, 1));
 }
@@ -68,6 +72,27 @@ tc-radial-wheel[open] {
     z-index: -1;
     background: var(--bs-radial-wheel-backdrop-bg);
     opacity: var(--bs-radial-wheel-backdrop-opacity);
+}
+
+// ── Stack (disc + pager column) ──────────────────────────────────────────────
+// Centres the disc and pins the pagination dots directly beneath it, both
+// horizontally centred over the backdrop.
+
+.tc-radial-wheel-stack {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+// ── Pager (canonical tc-page-indicator dots, centred below the disc) ──────────
+// Re-skin the indicator's own custom properties so the dots read on the dark
+// scrim; geometry and behaviour come from tc-page-indicator itself.
+
+.tc-radial-wheel-pager {
+    --bs-page-indicator-color:        var(--bs-radial-wheel-pager-color);
+    --bs-page-indicator-active-color: var(--bs-radial-wheel-pager-active-color);
 }
 
 // ── Disc (circular centred hub) ─────────────────────────────────────────────

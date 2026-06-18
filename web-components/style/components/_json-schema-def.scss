@@ -10,8 +10,14 @@ tc-json-schema-def {
     --bs-json-schema-def-bg: var(--tc-surface);
     --bs-json-schema-def-border-color: var(--tc-border);
     --bs-json-schema-def-row-border: var(--tc-slate-100, #f1f5f9);
-    --bs-json-schema-def-row-padding-y: 0.5rem;
+    // Dense editor sizing: tight rows + compact form controls.
+    --bs-json-schema-def-row-padding-y: 0.25rem;
     --bs-json-schema-def-row-padding-x: 0.75rem;
+    --bs-json-schema-def-row-min-height: 30px;
+    --bs-json-schema-def-input-padding-y: 0.1875rem;
+    --bs-json-schema-def-input-padding-x: 0.5rem;
+    --bs-json-schema-def-input-font-size: 13px;
+    --bs-json-schema-def-input-line-height: 1.4;
     --bs-json-schema-def-row-hover-bg: var(--tc-surface-hover);
     --bs-json-schema-def-header-bg: var(--tc-surface-muted);
     --bs-json-schema-def-label-color: var(--tc-text);
@@ -19,7 +25,6 @@ tc-json-schema-def {
     --bs-json-schema-def-name-label-size: 0.6875rem;
     --bs-json-schema-def-key-color: var(--tc-text);
     --bs-json-schema-def-key-size: 13px;
-    --bs-json-schema-def-required-color: var(--tc-text-muted);
     --bs-json-schema-def-icon-color: var(--tc-text-muted);
     --bs-json-schema-def-icon-hover-bg: var(--tc-surface-muted);
     --bs-json-schema-def-icon-hover-color: var(--tc-text);
@@ -65,8 +70,10 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
 
 .tc-json-schema-def-label {
     width: 100%;
-    font-size: 0.9375rem;
+    padding: var(--bs-json-schema-def-input-padding-y) var(--bs-json-schema-def-input-padding-x);
+    font-size: 13px;
     font-weight: 500;
+    line-height: var(--bs-json-schema-def-input-line-height);
     color: var(--bs-json-schema-def-label-color);
 }
 
@@ -89,7 +96,19 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-height: var(--bs-json-schema-def-row-min-height);
     padding: var(--bs-json-schema-def-row-padding-y) var(--bs-json-schema-def-row-padding-x);
+}
+
+// Compact form-control sizing — override the roomy default padding/line-height
+// so the row reads as a dense ~30px grid of cells.
+.tc-json-schema-def-key,
+.tc-json-schema-def-type,
+.tc-json-schema-def-ref,
+.tc-json-schema-def-default {
+    padding: var(--bs-json-schema-def-input-padding-y) var(--bs-json-schema-def-input-padding-x);
+    font-size: var(--bs-json-schema-def-input-font-size);
+    line-height: var(--bs-json-schema-def-input-line-height);
 }
 
 // Property-name keys are machine-facing — render mono.
@@ -112,21 +131,10 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
     min-width: 0;
 }
 
-.tc-json-schema-def-required {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin: 0;
-    font-size: 0.75rem;
-    color: var(--bs-json-schema-def-required-color);
-    white-space: nowrap;
-    cursor: pointer;
-
-    .form-check-input {
-        margin: 0;
-        float: none;
-    }
+// Default-value column — free-text, shares the flex space with the key.
+.tc-json-schema-def-default {
+    flex: 1 1 25%;
+    min-width: 0;
 }
 
 // ── Row action buttons — ghost icon, hover-well ladder ───────────────────────
@@ -253,7 +261,7 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
 .tc-json-schema-def-skeleton-key,
 .tc-json-schema-def-skeleton-field,
 .tc-json-schema-def-skeleton-actions {
-    height: 1.9rem;
+    height: 1.5rem;
     border-radius: 0;
     background: linear-gradient(
         90deg,

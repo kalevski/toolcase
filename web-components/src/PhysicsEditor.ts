@@ -44,6 +44,9 @@ const MIN_SIZE = 4
 // Cap the resolution used to sample alpha for the auto-fit helper — a huge image
 // would make the per-pixel scan slow.
 const MAX_ALPHA_DIM = 512
+// Douglas-Peucker tolerance (alpha-raster px) for the auto-fit silhouette trace.
+// Matches the @toolcase/react-components default `simplifyTolerance`.
+const SIMPLIFY_TOLERANCE = 1.5
 
 let _idCounter = 0
 
@@ -300,51 +303,176 @@ export class PhysicsEditor extends HTMLElement {
         this._announce('Shape deleted')
     }
 
-    /** Best-effort: derive a box shape from the image's opaque region. */
+    /**
+     * Auto-fit: trace the sprite's non-transparent silhouette into a polygon that
+     * hugs the actual image edges (ported from @toolcase/react-components
+     * PhysicsEditor `autoTrace`). Pipeline: alpha mask → Moore-neighbor contour
+     * follow → Douglas-Peucker simplify, then map the pixel-space ring back into
+     * source (natural-image) coordinates — the same space shapes are stored in.
+     */
     autoFit(): void {
         if (this.disabled) return
         if (!this._alphaData || this._natW === 0) {
             this._announce('No image to auto-fit')
             return
         }
-        const data = this._alphaData
         const w = this._alphaW
         const h = this._alphaH
         const thr = this.alphaThreshold
-        let minX = w
-        let minY = h
-        let maxX = -1
-        let maxY = -1
-        for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-                if (data[(y * w + x) * 4 + 3] > thr) {
-                    if (x < minX) minX = x
-                    if (x > maxX) maxX = x
-                    if (y < minY) minY = y
-                    if (y > maxY) maxY = y
-                }
-            }
-        }
-        if (maxX < 0) {
+        // Binary opaque mask from RGBA alpha (`alpha >= threshold`), matching the
+        // react reference's `alphaMask`.
+        const mask = this._alphaMask(this._alphaData, w, h, thr)
+        const contour = this._traceContour(mask, w, h)
+        if (contour.length < 3) {
             this._announce('No opaque region found')
             return
         }
+        const ring = this._simplify(contour, SIMPLIFY_TOLERANCE)
+        if (ring.length < 3) {
+            this._announce('No opaque region found')
+            return
+        }
+        // The alpha raster may be a capped/downscaled copy of the source image;
+        // map pixel-space points back into natural-image coordinates so the polygon
+        // lands exactly on the visible edges regardless of sample resolution.
         const sx = this._natW / w
         const sy = this._natH / h
-        const box: BoxShape = {
-            type: 'box',
-            x: Math.round(minX * sx),
-            y: Math.round(minY * sy),
-            w: Math.round((maxX - minX + 1) * sx),
-            h: Math.round((maxY - minY + 1) * sy),
-        }
+        const points: PhysicsPoint[] = ring.map(([px, py]) => ({
+            x: Math.round(px * sx),
+            y: Math.round(py * sy),
+        }))
+        const polygon: PolygonShape = { type: 'polygon', points }
         this._mutate(() => {
             const next = this._clone(this._shapes)
-            next.push(box)
+            next.push(polygon)
             return next
         })
         this._setSelected(this._shapes.length - 1)
         this._announce('Auto-fit shape added')
+    }
+
+    // ── Auto-fit silhouette trace (ported from react-components autoTrace) ───────
+
+    /** Binary opaque mask from RGBA alpha, `1` where `alpha >= threshold`. */
+    private _alphaMask(rgba: Uint8ClampedArray, w: number, h: number, threshold: number): Uint8Array {
+        const out = new Uint8Array(w * h)
+        const t = Math.max(0, Math.min(255, threshold))
+        for (let i = 0; i < w * h; i++) out[i] = rgba[i * 4 + 3] >= t ? 1 : 0
+        return out
+    }
+
+    /**
+     * Trace the outer boundary of the first opaque blob (row-major) via
+     * Moore-neighbor tracing. Returns a closed ring of pixel points (no duplicated
+     * closing vertex), or `[]` for an empty mask.
+     */
+    private _traceContour(mask: Uint8Array, w: number, h: number): Array<[number, number]> {
+        const at = (x: number, y: number) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : mask[y * w + x])
+
+        let start = -1
+        for (let i = 0; i < w * h; i++) {
+            if (mask[i]) {
+                start = i
+                break
+            }
+        }
+        if (start < 0) return []
+
+        const sx = start % w
+        const sy = (start - sx) / w
+
+        // 8-neighborhood offsets, clockwise starting from west.
+        const N: Array<[number, number]> = [
+            [-1, 0],
+            [-1, -1],
+            [0, -1],
+            [1, -1],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+            [-1, 1],
+        ]
+
+        const contour: Array<[number, number]> = []
+        let px = sx
+        let py = sy
+        let backDir = 0
+        let guard = 0
+        const maxSteps = w * h * 8 + 16
+
+        while (guard++ < maxSteps) {
+            contour.push([px, py])
+            let found = -1
+            for (let k = 1; k <= 8; k++) {
+                const dir = (backDir + k) % 8
+                const nx = px + N[dir][0]
+                const ny = py + N[dir][1]
+                if (at(nx, ny)) {
+                    found = dir
+                    px = nx
+                    py = ny
+                    backDir = (dir + 4) % 8
+                    break
+                }
+            }
+            if (found < 0) break // isolated pixel
+            if (px === sx && py === sy) break // closed the ring at the start
+        }
+
+        return contour
+    }
+
+    /** Perpendicular distance from `p` to the line through `a`,`b`. */
+    private _perpDist(p: [number, number], a: [number, number], b: [number, number]): number {
+        const dx = b[0] - a[0]
+        const dy = b[1] - a[1]
+        const len = Math.hypot(dx, dy)
+        if (len === 0) return Math.hypot(p[0] - a[0], p[1] - a[1])
+        return Math.abs((p[0] - a[0]) * dy - (p[1] - a[1]) * dx) / len
+    }
+
+    /** Douglas-Peucker on an open polyline. */
+    private _dpReduce(pts: Array<[number, number]>, tolerance: number): Array<[number, number]> {
+        if (pts.length < 3) return pts.slice()
+        let maxD = 0
+        let idx = 0
+        const a = pts[0]
+        const b = pts[pts.length - 1]
+        for (let i = 1; i < pts.length - 1; i++) {
+            const d = this._perpDist(pts[i], a, b)
+            if (d > maxD) {
+                maxD = d
+                idx = i
+            }
+        }
+        if (maxD > tolerance) {
+            const left = this._dpReduce(pts.slice(0, idx + 1), tolerance)
+            const right = this._dpReduce(pts.slice(idx), tolerance)
+            return left.slice(0, -1).concat(right)
+        }
+        return [a, b]
+    }
+
+    /**
+     * Simplify a closed ring (Douglas-Peucker). Splits at the two farthest points
+     * so the closure isn't biased by the arbitrary start vertex.
+     */
+    private _simplify(ring: Array<[number, number]>, tolerance: number): Array<[number, number]> {
+        if (ring.length <= 3 || tolerance <= 0) return ring.slice()
+
+        let far = 0
+        let farD = -1
+        for (let i = 1; i < ring.length; i++) {
+            const d = Math.hypot(ring[i][0] - ring[0][0], ring[i][1] - ring[0][1])
+            if (d > farD) {
+                farD = d
+                far = i
+            }
+        }
+        const first = this._dpReduce(ring.slice(0, far + 1), tolerance)
+        const second = this._dpReduce(ring.slice(far).concat([ring[0]]), tolerance)
+        const out = first.slice(0, -1).concat(second.slice(0, -1))
+        return out.length >= 3 ? out : ring.slice()
     }
 
     // ── Image loading + alpha extraction ─────────────────────────────────────────

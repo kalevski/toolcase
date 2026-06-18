@@ -13,6 +13,9 @@ tc-stamp {
     --bs-stamp-letter-spacing: 0.08em;
     --bs-stamp-border-width: 1px;
     --bs-stamp-corner-offset: 0.75rem;
+    // hand-pressed tilt — a real rubber stamp lands a few degrees askew, never axis-aligned.
+    // overridable per-instance via inline `style="--bs-stamp-rotation: -4deg"` or the `angle` attr.
+    --bs-stamp-rotation: -8deg;
     --bs-stamp-color: var(--tc-app-accent);
     --bs-stamp-bg: var(--tc-surface-muted);
 }
@@ -32,6 +35,9 @@ tc-stamp {
     background-color: var(--bs-stamp-bg);
     border: var(--bs-stamp-border-width) solid currentcolor;
     border-radius: 0;
+    // pressed-on-paper tilt; offset to a corner first, then rotate in place.
+    transform: rotate(var(--bs-stamp-rotation));
+    transform-origin: center;
 }
 
 // Color variants — soft bg tint + dark emphasis text from the status palette

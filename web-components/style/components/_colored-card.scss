@@ -38,6 +38,9 @@ tc-colored-card {
 }
 
 .tc-colored-card-body {
+    // .card-body is a plain block here; opt into flex so the icon chip and the
+    // content block sit on one row and stay vertically centred against each other.
+    display: flex;
     flex-direction: row;
     align-items: center;
     gap: var(--bs-colored-card-gap);
@@ -124,10 +127,12 @@ tc-colored-card {
     border-radius: 0;
     @extend %tc-colored-card-shimmer;
 
+    // The skeleton bars live inside .tc-colored-card-content, which already spaces
+    // its children with `gap`; rely on that gap instead of an extra margin so the
+    // loading rhythm matches the rendered value/label stack.
     &--value {
         width: 45%;
         height: 1.25rem;
-        margin-bottom: 0.25rem;
     }
 
     &--text {

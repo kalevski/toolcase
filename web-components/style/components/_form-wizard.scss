@@ -8,8 +8,11 @@ tc-form-wizard {
     --bs-form-wizard-marker-size: 2rem;
     --bs-form-wizard-marker-font-size: 0.8125rem;
     --bs-form-wizard-marker-font-weight: 600;
-    --bs-form-wizard-check-icon-size: 1rem;
-    --bs-form-wizard-step-icon-size: 1rem;
+    // Glyph (check / step icon) sits at ~58% of the 2rem marker — comfortable
+    // padding around it inside the circle.
+    --bs-form-wizard-marker-icon-size: 1.15rem;
+    --bs-form-wizard-check-icon-size: var(--bs-form-wizard-marker-icon-size);
+    --bs-form-wizard-step-icon-size: var(--bs-form-wizard-marker-icon-size);
 
     // ── State: done (ink circle + check) ─────────────────────────────────────
     --bs-form-wizard-done-bg: var(--tc-app-accent);
@@ -156,6 +159,16 @@ tc-form-wizard {
     display: block;
     width: var(--bs-form-wizard-check-icon-size);
     height: var(--bs-form-wizard-check-icon-size);
+    stroke: currentColor;
+}
+
+// Custom step glyphs (lucideByName) render as a bare <svg> inside the marker
+// with no BEM class — constrain them to the step-icon size so they don't
+// burst out of the circle at their intrinsic 24px.
+.tc-form-wizard-tab-marker > svg {
+    display: block;
+    width: var(--bs-form-wizard-step-icon-size);
+    height: var(--bs-form-wizard-step-icon-size);
     stroke: currentColor;
 }
 

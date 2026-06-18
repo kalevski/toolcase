@@ -43,15 +43,22 @@ const EarlySignupFormDemo: React.FC = () => {
         el.benefits = ['Always up to date', 'SLA-backed reliability']
     }, [])
 
-    // Pre-rendered success state (submitted=true simulated via property)
+    // Pre-rendered success state — drive the email field + submit the form
+    // programmatically so the confirmation state renders on mount.
     useEffect(() => {
         const el = successRef.current
         if (!el) return
         el.benefits = ['Instant access confirmation', 'Personal onboarding call']
-        // Trigger the success state by pre-filling and submitting programmatically
-        el.addEventListener('tc-submit', () => {
-            // success state is shown automatically by the component
-        })
+        // Defer a tick so the component has finished its initial render.
+        const id = window.setTimeout(() => {
+            const input = el.querySelector('input[name="email"]') as HTMLInputElement | null
+            const form = el.querySelector('.tc-early-signup-form__form') as HTMLFormElement | null
+            if (input && form) {
+                input.value = 'dev@example.com'
+                form.requestSubmit()
+            }
+        }, 0)
+        return () => window.clearTimeout(id)
     }, [])
 
     return (
@@ -72,12 +79,14 @@ const EarlySignupFormDemo: React.FC = () => {
                                 <tc-early-signup-form
                                     ref={lightRef}
                                     variant="light"
-                                    title="Get early access"
+                                    title="Join the early access list"
                                     eyebrow="Early access"
-                                    subtitle="Be first to know when we ship."
-                                    cta-label="Join the waitlist"
+                                    subtitle="Be first to know when we ship — and help shape what we build."
+                                    field-label="Work email"
+                                    cta-label="Request invite"
                                     placeholder="you@example.com"
                                     helper-text="One email when we launch. No spam, ever."
+                                    stat="2,400+ developers already joined"
                                     success-title="You're on the list."
                                 />
                                 {/* @ts-ignore */}
@@ -100,12 +109,14 @@ const EarlySignupFormDemo: React.FC = () => {
                                 <tc-early-signup-form
                                     ref={darkRef}
                                     variant="dark"
-                                    title="Shape the product"
+                                    title="Shape the product with us"
                                     eyebrow="Beta program"
                                     subtitle="We're building in the open. Your feedback drives what ships next."
+                                    field-label="Company email"
                                     cta-label="Request access"
                                     placeholder="work@company.com"
                                     helper-text="Invite-only beta. Limited spots."
+                                    stat="138 of 200 seats claimed"
                                     success-title="Request received."
                                     success-message="We'll reach out within 48 hours."
                                 />
@@ -135,12 +146,30 @@ const EarlySignupFormDemo: React.FC = () => {
                                 />
                             </SectionCard>
 
+                            <SectionCard title="Success state (submitted on mount)">
+                                {/* @ts-ignore */}
+                                <tc-early-signup-form
+                                    ref={successRef}
+                                    variant="light"
+                                    title="Get early access"
+                                    eyebrow="Early access"
+                                    subtitle="Reserve your spot in the private beta."
+                                    field-label="Work email"
+                                    cta-label="Reserve my spot"
+                                    placeholder="you@example.com"
+                                    stat="2,400+ developers already joined"
+                                    success-title="You're on the list."
+                                    success-message="We'll email you the moment access opens up."
+                                />
+                            </SectionCard>
+
                             <SectionCard title="Validation — try submitting an invalid email">
                                 {/* @ts-ignore */}
                                 <tc-early-signup-form
                                     variant="light"
                                     title="Catch the launch"
                                     eyebrow="Coming soon"
+                                    field-label="Email address"
                                     cta-label="Notify me"
                                     placeholder="hello@domain.com"
                                     helper-text="Enter your best email — we'll only use it once."

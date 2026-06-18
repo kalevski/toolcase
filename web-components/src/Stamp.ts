@@ -4,6 +4,12 @@ function esc(s: string): string {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
+// A bare number is treated as degrees; anything with a CSS angle unit is left as-is.
+function normalizeAngle(v: string): string {
+    const trimmed = v.trim()
+    return /^[+-]?(\d+\.?\d*|\.\d+)$/.test(trimmed) ? `${trimmed}deg` : trimmed
+}
+
 export type StampColor = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info'
 export type StampPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
@@ -15,7 +21,7 @@ export class Stamp extends HTMLElement {
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['label', 'color', 'position']
+        return ['label', 'color', 'position', 'angle']
     }
 
     constructor() {
@@ -71,14 +77,27 @@ export class Stamp extends HTMLElement {
         this.setAttribute('position', v)
     }
 
+    // Optional per-instance tilt override. A bare number is read as degrees;
+    // a value with a unit (deg/rad/turn/grad) is passed through verbatim.
+    // When absent, the SCSS default --bs-stamp-rotation (-8deg) applies.
+    get angle(): string | null {
+        return this.getAttribute('angle')
+    }
+    set angle(v: string | null) {
+        if (v != null) this.setAttribute('angle', v)
+        else this.removeAttribute('angle')
+    }
+
     private render(): void {
         const label = this.getAttribute('label')
         const color = this.color
         const position = this.position
+        const angle = this.angle
 
         const contentHtml = label != null ? esc(label) : ''
+        const styleAttr = angle != null ? ` style="--bs-stamp-rotation:${esc(normalizeAngle(angle))}"` : ''
 
-        this.innerHTML = `<span class="tc-stamp tc-stamp-${color} tc-stamp-${position}"><span class="tc-stamp-content">${contentHtml}</span></span>`
+        this.innerHTML = `<span class="tc-stamp tc-stamp-${color} tc-stamp-${position}"${styleAttr}><span class="tc-stamp-content">${contentHtml}</span></span>`
     }
 }
 

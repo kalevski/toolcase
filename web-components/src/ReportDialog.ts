@@ -1,6 +1,6 @@
 import { closeIcon } from './icons'
 
-const TAG_NAME = 'tc-report-player-dialog'
+const TAG_NAME = 'tc-report-dialog'
 
 let _idCounter = 0
 
@@ -28,7 +28,7 @@ const DEFAULT_REASONS = [
     'Other',
 ]
 
-export class ReportPlayerDialog extends HTMLElement {
+export class ReportDialog extends HTMLElement {
     private _initialised = false
     private _reasons: string[] = DEFAULT_REASONS.slice()
     private _selectedReason = ''
@@ -41,7 +41,7 @@ export class ReportPlayerDialog extends HTMLElement {
 
     constructor() {
         super()
-        this._idPrefix = `tc-report-player-dialog-${++_idCounter}`
+        this._idPrefix = `tc-report-dialog-${++_idCounter}`
     }
 
     static get observedAttributes(): string[] {
@@ -108,8 +108,8 @@ export class ReportPlayerDialog extends HTMLElement {
     // ── Open / close lifecycle ─────────────────────────────────────────────────
 
     private _applyOpenState(opening: boolean): void {
-        const panel = this.querySelector<HTMLElement>('.tc-report-player-dialog__panel')
-        const backdrop = this.querySelector<HTMLElement>('.tc-report-player-dialog__backdrop')
+        const panel = this.querySelector<HTMLElement>('.tc-report-dialog__panel')
+        const backdrop = this.querySelector<HTMLElement>('.tc-report-dialog__backdrop')
 
         if (opening) {
             this._previousFocus = document.activeElement
@@ -117,13 +117,13 @@ export class ReportPlayerDialog extends HTMLElement {
             backdrop?.removeAttribute('hidden')
             // Settle one frame before adding the open class to trigger the transition.
             requestAnimationFrame(() => {
-                this.classList.add('tc-report-player-dialog--open')
+                this.classList.add('tc-report-dialog--open')
                 panel?.setAttribute('aria-hidden', 'false')
                 this._lockScroll()
                 this._trapFocus(panel)
             })
         } else {
-            this.classList.remove('tc-report-player-dialog--open')
+            this.classList.remove('tc-report-dialog--open')
             panel?.setAttribute('aria-hidden', 'true')
             this._restoreScroll()
             this._restoreFocus()
@@ -195,7 +195,7 @@ export class ReportPlayerDialog extends HTMLElement {
             return
         }
         if (e.key === 'Tab') {
-            const panel = this.querySelector<HTMLElement>('.tc-report-player-dialog__panel')
+            const panel = this.querySelector<HTMLElement>('.tc-report-dialog__panel')
             if (!panel) return
             const focusable = getFocusable(panel)
             if (focusable.length === 0) return
@@ -218,14 +218,14 @@ export class ReportPlayerDialog extends HTMLElement {
     private _onClick = (e: MouseEvent): void => {
         const target = e.target as Element | null
         if (!target) return
-        if (target.classList.contains('tc-report-player-dialog__backdrop')) {
+        if (target.classList.contains('tc-report-dialog__backdrop')) {
             this._emitCancel()
-        } else if (target.closest('.tc-report-player-dialog__close')) {
+        } else if (target.closest('.tc-report-dialog__close')) {
             this._emitCancel()
-        } else if (target.closest('.tc-report-player-dialog__cancel')) {
+        } else if (target.closest('.tc-report-dialog__cancel')) {
             this._emitCancel()
         } else {
-            const submitBtn = target.closest<HTMLButtonElement>('.tc-report-player-dialog__submit')
+            const submitBtn = target.closest<HTMLButtonElement>('.tc-report-dialog__submit')
             if (submitBtn && !submitBtn.disabled) this._emitSubmit()
         }
     }
@@ -241,14 +241,14 @@ export class ReportPlayerDialog extends HTMLElement {
     // transition does not replay every time the user picks a reason.
     private _patchReasonSelection(chosenValue: string): void {
         this._selectedReason = chosenValue
-        this.querySelectorAll<HTMLLabelElement>('.tc-report-player-dialog__reason').forEach(label => {
+        this.querySelectorAll<HTMLLabelElement>('.tc-report-dialog__reason').forEach(label => {
             const radio = label.querySelector<HTMLInputElement>('input[type="radio"]')
             if (!radio) return
             const isChosen = radio.value === chosenValue
             radio.checked = isChosen
-            label.classList.toggle('tc-report-player-dialog__reason--checked', isChosen)
+            label.classList.toggle('tc-report-dialog__reason--checked', isChosen)
         })
-        const submitBtn = this.querySelector<HTMLButtonElement>('.tc-report-player-dialog__submit')
+        const submitBtn = this.querySelector<HTMLButtonElement>('.tc-report-dialog__submit')
         if (submitBtn) submitBtn.disabled = !chosenValue
     }
 
@@ -284,45 +284,45 @@ export class ReportPlayerDialog extends HTMLElement {
             const checked = reason === this._selectedReason
             const inputId = `${this._idPrefix}-reason-${idx}`
             return (
-                `<label class="tc-report-player-dialog__reason${checked ? ' tc-report-player-dialog__reason--checked' : ''}" for="${inputId}">` +
+                `<label class="tc-report-dialog__reason${checked ? ' tc-report-dialog__reason--checked' : ''}" for="${inputId}">` +
                 `<input type="radio" id="${inputId}" name="${this._idPrefix}-report-reason" value="${esc(reason)}"${checked ? ' checked' : ''} />` +
-                `<span class="tc-report-player-dialog__radio" aria-hidden="true"></span>` +
-                `<span class="tc-report-player-dialog__reason-label">${esc(reason)}</span>` +
+                `<span class="tc-report-dialog__radio" aria-hidden="true"></span>` +
+                `<span class="tc-report-dialog__reason-label">${esc(reason)}</span>` +
                 `</label>`
             )
         }).join('')
 
         this.innerHTML =
-            `<div class="tc-report-player-dialog__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
-            `<div class="tc-report-player-dialog__panel" role="dialog" aria-modal="true"` +
+            `<div class="tc-report-dialog__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
+            `<div class="tc-report-dialog__panel" role="dialog" aria-modal="true"` +
             ` aria-labelledby="${labelId}" tabindex="-1"` +
             ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
-            `<div class="tc-report-player-dialog__header">` +
-            `<span class="tc-report-player-dialog__eyebrow">Report Player</span>` +
-            `<h2 class="tc-report-player-dialog__title" id="${labelId}">${playerNameText}</h2>` +
-            `<button type="button" class="tc-report-player-dialog__close" aria-label="Close">${closeIcon}</button>` +
+            `<div class="tc-report-dialog__header">` +
+            `<span class="tc-report-dialog__eyebrow">Report Player</span>` +
+            `<h2 class="tc-report-dialog__title" id="${labelId}">${playerNameText}</h2>` +
+            `<button type="button" class="tc-report-dialog__close" aria-label="Close">${closeIcon}</button>` +
             `</div>` +
-            `<div class="tc-report-player-dialog__body">` +
-            `<p class="tc-report-player-dialog__message">Select the reason this player should be reported. Your report stays anonymous.</p>` +
-            `<div class="tc-report-player-dialog__reasons" role="radiogroup" aria-label="Report reason">${reasonsHtml}</div>` +
-            `<textarea class="tc-report-player-dialog__comment" placeholder="Additional details (optional)">${esc(this._comment)}</textarea>` +
+            `<div class="tc-report-dialog__body">` +
+            `<p class="tc-report-dialog__message">Select the reason this player should be reported. Your report stays anonymous.</p>` +
+            `<div class="tc-report-dialog__reasons" role="radiogroup" aria-label="Report reason">${reasonsHtml}</div>` +
+            `<textarea class="tc-report-dialog__comment" placeholder="Additional details (optional)">${esc(this._comment)}</textarea>` +
             `</div>` +
-            `<div class="tc-report-player-dialog__actions">` +
-            `<button type="button" class="tc-report-player-dialog__btn tc-report-player-dialog__cancel">Cancel</button>` +
-            `<button type="button" class="tc-report-player-dialog__btn tc-report-player-dialog__submit"${this._selectedReason ? '' : ' disabled'}>Submit Report</button>` +
+            `<div class="tc-report-dialog__actions">` +
+            `<button type="button" class="tc-report-dialog__btn tc-report-dialog__cancel">Cancel</button>` +
+            `<button type="button" class="tc-report-dialog__btn tc-report-dialog__submit"${this._selectedReason ? '' : ' disabled'}>Submit Report</button>` +
             `</div>` +
             `</div>`
 
         if (isOpen) {
-            this.classList.add('tc-report-player-dialog--open')
+            this.classList.add('tc-report-dialog--open')
         } else {
-            this.classList.remove('tc-report-player-dialog--open')
+            this.classList.remove('tc-report-dialog--open')
         }
     }
 }
 
 declare global {
     interface HTMLElementTagNameMap {
-        [TAG_NAME]: ReportPlayerDialog
+        [TAG_NAME]: ReportDialog
     }
 }

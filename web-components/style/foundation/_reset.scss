@@ -410,7 +410,7 @@ tc-loot-popup {
 
 // Player-report modal overlay; the SCSS partial positions the backdrop and
 // centred panel, but the host must not default to inline.
-tc-report-player-dialog {
+tc-report-dialog {
     display: block;
 }
 

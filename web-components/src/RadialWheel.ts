@@ -20,6 +20,7 @@ export class RadialWheel extends HTMLElement {
     private _initialised = false
     private _options: RadialOption[] = []
     private _hoverId: string | null = null
+    private _page = 0
 
     /** Optional callback fired alongside `tc-select`. */
     onSelect: ((id: string) => void) | null = null
@@ -28,7 +29,7 @@ export class RadialWheel extends HTMLElement {
     onClose: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['open', 'radius', 'option-size', 'center-label']
+        return ['open', 'radius', 'option-size', 'center-label', 'per-page']
     }
 
     connectedCallback(): void {
@@ -89,11 +90,28 @@ export class RadialWheel extends HTMLElement {
         else this.removeAttribute('center-label')
     }
 
+    /** Max options shown on a single wheel; extras spill onto further pages. */
+    get perPage(): number {
+        const raw = this.getAttribute('per-page')
+        if (raw == null) return 10
+        const parsed = parseInt(raw, 10)
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : 10
+    }
+    set perPage(v: number) {
+        this.setAttribute('per-page', String(v))
+    }
+
+    private get _pageCount(): number {
+        return Math.max(1, Math.ceil(this._options.length / this.perPage))
+    }
+
     get options(): RadialOption[] {
         return this._options.slice()
     }
     set options(value: RadialOption[]) {
         this._options = Array.isArray(value) ? value.slice() : []
+        // Clamp the active page into range when the option set shrinks.
+        this._page = Math.min(this._page, this._pageCount - 1)
         if (this._initialised) this.render()
     }
 
@@ -103,11 +121,30 @@ export class RadialWheel extends HTMLElement {
         if (typeof this.onClose === 'function') this.onClose()
     }
 
+    private _setPage(page: number): void {
+        const clamped = Math.min(Math.max(0, page), this._pageCount - 1)
+        if (clamped === this._page) return
+        this._page = clamped
+        this._hoverId = null
+        this.render()
+    }
+
     private _onKeydown = (e: KeyboardEvent): void => {
         if (!this.open) return
         if (e.key === 'Escape') {
             e.preventDefault()
             this._close()
+            return
+        }
+        // Arrow keys page through option groups when more than one page exists.
+        if (this._pageCount > 1) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault()
+                this._setPage(this._page + 1)
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault()
+                this._setPage(this._page - 1)
+            }
         }
     }
 
@@ -124,15 +161,25 @@ export class RadialWheel extends HTMLElement {
         const radius = this.radius
         const size = this.optionSize
         const centerLabel = this.centerLabel
-        const hoverOption = this._options.find(o => o.id === this._hoverId) ?? null
 
         // Expose layout geometry as inline custom properties so the SCSS can
         // drive the disc diameter without knowing the attribute values.
         this.style.setProperty('--tc-rw-radius', `${radius}px`)
         this.style.setProperty('--tc-rw-size', `${size}px`)
 
-        const n = this._options.length
-        const optionsHtml = this._options.map((opt, i) => {
+        // Paginate: only the active page's slice is laid out around the wheel.
+        const perPage = this.perPage
+        const pageCount = this._pageCount
+        this._page = Math.min(Math.max(0, this._page), pageCount - 1)
+        const pageStart = this._page * perPage
+        const pageOptions = this._options.slice(pageStart, pageStart + perPage)
+        const hoverOption = pageOptions.find(o => o.id === this._hoverId) ?? null
+
+        // Distribute the page's items evenly around the full circle. The angle
+        // step is 2π / count, starting at the top (−π/2) and going clockwise, so
+        // a single item lands dead-centre at the top and the gaps stay uniform.
+        const n = pageOptions.length
+        const optionsHtml = pageOptions.map((opt, i) => {
             const angle = (i / Math.max(1, n)) * Math.PI * 2 - Math.PI / 2
             const x = Math.cos(angle) * radius
             const y = Math.sin(angle) * radius
@@ -159,16 +206,38 @@ export class RadialWheel extends HTMLElement {
             )
         }).join('')
 
-        const centerText = hoverOption?.label || centerLabel
+        // Show the page position in the centre when paging and nothing is hovered,
+        // so the hub doubles as the current-page readout (e.g. "1 / 3").
+        const pageLabel = pageCount > 1 ? `${this._page + 1} / ${pageCount}` : ''
+        const centerText = hoverOption?.label || centerLabel || pageLabel
         const centerHtml = `<div class="tc-radial-wheel-center${centerText ? '' : ' tc-radial-wheel-center--empty'}" aria-live="polite">${centerText ? esc(centerText) : ''}</div>`
+
+        // Pagination uses the canonical tc-page-indicator dot row, centred below
+        // the disc inside the stack so it sits clear of the option ring.
+        const pagerHtml = pageCount > 1
+            ? `<tc-page-indicator class="tc-radial-wheel-pager" count="${pageCount}" index="${this._page}" aria-label="Wheel pages"></tc-page-indicator>`
+            : ''
 
         this.innerHTML = (
             `<div class="tc-radial-wheel-backdrop" aria-hidden="true"></div>` +
+            `<div class="tc-radial-wheel-stack">` +
             `<div class="tc-radial-wheel-disc">` +
             centerHtml +
             optionsHtml +
+            `</div>` +
+            pagerHtml +
             `</div>`
         )
+
+        // Wire the page indicator's tc-select to page changes. The indicator is
+        // recreated each render, so the listener is re-attached every time.
+        const pager = this.querySelector<HTMLElement>('.tc-radial-wheel-pager')
+        if (pager) {
+            pager.addEventListener('tc-select', (e: Event) => {
+                const idx = (e as CustomEvent<{ index: number }>).detail?.index
+                if (typeof idx === 'number') this._setPage(idx)
+            })
+        }
 
         // Attach hover listeners on each option button after innerHTML write.
         // Option click listeners also live here since buttons are replaced every render.

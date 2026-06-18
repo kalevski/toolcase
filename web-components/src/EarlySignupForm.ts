@@ -29,6 +29,7 @@ function lucideByName(name: string): string {
 // Pre-compute icons once at module load time
 const checkIconHtml = lucideByName('check')
 const checkCircleIconHtml = lucideByName('check-circle')
+const arrowRightIconHtml = lucideByName('arrow-right')
 
 export class EarlySignupForm extends HTMLElement {
     private _initialised = false
@@ -51,7 +52,7 @@ export class EarlySignupForm extends HTMLElement {
             // NOTE: 'title' is listed so attributeChangedCallback fires on changes.
             // No getter/setter is defined — HTMLElement already reflects title natively.
             'title',
-            'subtitle', 'eyebrow', 'helper-text', 'cta-label',
+            'subtitle', 'eyebrow', 'helper-text', 'cta-label', 'field-label', 'stat',
             'placeholder', 'success-title', 'success-message', 'variant', 'loading',
         ]
     }
@@ -113,6 +114,23 @@ export class EarlySignupForm extends HTMLElement {
     }
     set ctaLabel(v: string) {
         this.setAttribute('cta-label', v)
+    }
+
+    /** Optional mono micro-label rendered above the email field. */
+    get fieldLabel(): string {
+        return this.getAttribute('field-label') ?? 'Email address'
+    }
+    set fieldLabel(v: string) {
+        this.setAttribute('field-label', v)
+    }
+
+    /** Optional social-proof micro-stat, e.g. "2,400+ developers already joined". */
+    get stat(): string | null {
+        return this.getAttribute('stat')
+    }
+    set stat(v: string | null) {
+        if (v != null) this.setAttribute('stat', v)
+        else this.removeAttribute('stat')
     }
 
     get placeholder(): string {
@@ -235,6 +253,8 @@ export class EarlySignupForm extends HTMLElement {
         const eyebrow = this.eyebrow
         const helperText = this.helperText
         const ctaLabel = this.ctaLabel
+        const fieldLabel = this.fieldLabel
+        const stat = this.stat
         const placeholder = this.placeholder
         const successTitle = this.successTitle
         const successMessage = this.successMessage
@@ -242,20 +262,28 @@ export class EarlySignupForm extends HTMLElement {
         const loading = this.loading
         const inputId = `${this._idPrefix}-email`
         const errorId = `${this._idPrefix}-error`
+        const labelId = `${this._idPrefix}-label`
 
         // Manage host classes without wiping user-added ones.
         this.classList.add('tc-early-signup-form')
         VARIANTS.forEach(v => this.classList.remove(`tc-early-signup-form--${v}`))
         this.classList.add(`tc-early-signup-form--${variant}`)
+        this.classList.toggle('tc-early-signup-form--submitted', this._submitted)
 
+        // Eyebrow — a 2px cyan brand-dot + mono micro-label. The dot is the one
+        // sanctioned spend of the accent in this component.
         const eyebrowHtml = eyebrow
-            ? `<span class="tc-early-signup-form__eyebrow">${esc(eyebrow)}</span>`
+            ? `<span class="tc-early-signup-form__eyebrow">
+                   <span class="tc-early-signup-form__dot" aria-hidden="true"></span>
+                   <span class="tc-early-signup-form__eyebrow-text">${esc(eyebrow)}</span>
+               </span>`
             : ''
 
         const subtitleHtml = subtitle
             ? `<p class="tc-early-signup-form__subtitle">${esc(subtitle)}</p>`
             : ''
 
+        // Benefits — hairline-separated check rows.
         const benefitsHtml = this._benefits.length > 0
             ? `<ul class="tc-early-signup-form__benefits" role="list">
                 ${this._benefits.map(b => `
@@ -264,6 +292,15 @@ export class EarlySignupForm extends HTMLElement {
                         <span class="tc-early-signup-form__benefit-text">${esc(b)}</span>
                     </li>`).join('')}
                </ul>`
+            : ''
+
+        // Social-proof micro-stat — mono, faint, hairline-topped footer of the
+        // intro zone.
+        const statHtml = stat
+            ? `<p class="tc-early-signup-form__stat">
+                   <span class="tc-early-signup-form__stat-pulse" aria-hidden="true"></span>
+                   <span class="tc-early-signup-form__stat-text">${esc(stat)}</span>
+               </p>`
             : ''
 
         let formAreaHtml: string
@@ -284,30 +321,37 @@ export class EarlySignupForm extends HTMLElement {
             const disabledAttr = loading ? ' disabled' : ''
             const submitContent = loading
                 ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading…</span>`
-                : esc(ctaLabel)
+                : `<span class="tc-early-signup-form__submit-label">${esc(ctaLabel)}</span><span class="tc-early-signup-form__submit-icon" aria-hidden="true">${arrowRightIconHtml}</span>`
             formAreaHtml = `
                 <form class="tc-early-signup-form__form" novalidate>
-                    <label class="visually-hidden" for="${inputId}">Your email address</label>
-                    <input
-                        id="${inputId}"
-                        name="email"
-                        type="email"
-                        class="tc-early-signup-form__input"
-                        placeholder="${esc(placeholder)}"
-                        value="${esc(this._email)}"
-                        autocomplete="email"${disabledAttr}
-                        required
-                    />
+                    <span class="tc-early-signup-form__field-label" id="${labelId}">${esc(fieldLabel)}</span>
+                    <div class="tc-early-signup-form__field">
+                        <label class="visually-hidden" for="${inputId}">${esc(fieldLabel)}</label>
+                        <input
+                            id="${inputId}"
+                            name="email"
+                            type="email"
+                            class="tc-early-signup-form__input"
+                            placeholder="${esc(placeholder)}"
+                            value="${esc(this._email)}"
+                            autocomplete="email"
+                            aria-labelledby="${labelId}"${disabledAttr}
+                            required
+                        />
+                        <button
+                            type="submit"
+                            class="tc-early-signup-form__submit"${disabledAttr}
+                        >${submitContent}</button>
+                    </div>
                     <p id="${errorId}"
                        class="tc-early-signup-form__error"
                        aria-live="assertive"
                        aria-atomic="true"
                     >${this._error ? esc(this._error) : ''}</p>
-                    <button
-                        type="submit"
-                        class="tc-early-signup-form__submit"${disabledAttr}
-                    >${submitContent}</button>
-                    ${helperText ? `<p class="tc-early-signup-form__helper">${esc(helperText)}</p>` : ''}
+                    ${helperText ? `<p class="tc-early-signup-form__helper">
+                        <span class="tc-early-signup-form__helper-mark" aria-hidden="true">${checkIconHtml}</span>
+                        <span>${esc(helperText)}</span>
+                    </p>` : ''}
                 </form>`
         }
 
@@ -318,6 +362,7 @@ export class EarlySignupForm extends HTMLElement {
                     <h2 class="tc-early-signup-form__title">${esc(titleText)}</h2>
                     ${subtitleHtml}
                     ${benefitsHtml}
+                    ${statHtml}
                 </div>
                 <div class="tc-early-signup-form__form-area">
                     ${formAreaHtml}

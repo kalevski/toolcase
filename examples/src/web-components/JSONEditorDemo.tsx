@@ -66,7 +66,7 @@ const JSONEditorDemo: React.FC = () => {
                         <RichPageHeader
                             chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
                             title="JSON Editor"
-                            description="Schema-driven form editor for JSON objects — typed fields, enum selects, collapsible nested groups, and repeatable arrays. Every edit emits the full updated value object."
+                            description="Compact, schema-driven form editor for JSON objects — typed fields, enum selects, collapsible nested groups, and repeatable arrays packed into a dense grid of key/value rows. Every edit emits the full updated value object."
                         />
 
                         <div className="row mt-4 g-4">

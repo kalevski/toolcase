@@ -29,9 +29,6 @@ tc-advanced-table {
     --bs-advanced-table-spinner-color:    var(--tc-text-muted);
 
     --bs-advanced-table-summary-color:    var(--tc-text-muted);
-    --bs-advanced-table-page-border:      1px solid var(--tc-border-strong);
-    --bs-advanced-table-page-color:       var(--tc-text);
-    --bs-advanced-table-page-hover-bg:    var(--tc-surface-muted);
 
     --bs-advanced-table-tap-target:       44px;
 }
@@ -216,6 +213,10 @@ tc-advanced-table {
 }
 
 // ── Pagination footer ─────────────────────────────────────────────────────────
+//
+// The pager itself is the canonical <tc-pagination> (joined border, mono numerals,
+// solid-ink active page) — styled by _pagination.scss. Here we only lay out the
+// footer row: the mono summary on the left, the pager pushed to the right.
 
 .tc-advanced-table-pagination {
     display: flex;
@@ -232,71 +233,25 @@ tc-advanced-table {
     color: var(--bs-advanced-table-summary-color);
 }
 
-.tc-advanced-table-page-controls {
-    display: inline-flex;
-    // Grouped controls collapse borders: one frame, 1px internal separator.
-    border: var(--bs-advanced-table-page-border);
-    border-radius: 0;
-}
-
-.tc-advanced-table-page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    margin: 0;
-    padding: 0;
-    background: var(--bs-advanced-table-bg);
-    border: 0;
-    border-radius: 0;
-    color: var(--bs-advanced-table-page-color);
-    cursor: pointer;
-    transition: background-color var(--tc-transition-fast, 0.15s ease);
-
-    & + & {
-        border-left: var(--bs-advanced-table-page-border);
-    }
-
-    &:hover {
-        background: var(--bs-advanced-table-page-hover-bg);
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--tc-app-accent);
-        outline-offset: 2px;
-    }
-
-    &:disabled {
-        opacity: 0.45;
-        pointer-events: none;
-    }
-}
-
-.tc-advanced-table-page-icon {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
+// While data refreshes, fade and lock the pager so it matches the disabled
+// controls + blocked rows of the loading state (the overlay only covers the body).
+.tc-advanced-table--loading .tc-advanced-table-pagination tc-pagination {
+    opacity: 0.55;
+    pointer-events: none;
 }
 
 // ── Coarse pointer: ≥44px touch targets ───────────────────────────────────────
 
 @media (pointer: coarse) {
-    .tc-advanced-table-sort,
-    .tc-advanced-table-page-btn {
+    .tc-advanced-table-sort {
         min-height: var(--bs-advanced-table-tap-target);
-    }
-
-    .tc-advanced-table-page-btn {
-        min-width: var(--bs-advanced-table-tap-target);
     }
 }
 
 // ── Reduced motion ────────────────────────────────────────────────────────────
 
 @media (prefers-reduced-motion: reduce) {
-    .tc-advanced-table-sort,
-    .tc-advanced-table-page-btn {
+    .tc-advanced-table-sort {
         transition: none;
     }
     // The spinner motif slows rather than vanishes (handled by the global reset),

@@ -9,8 +9,14 @@ tc-json-editor {
     --bs-json-editor-bg: var(--tc-surface);
     --bs-json-editor-border-color: var(--tc-border);
     --bs-json-editor-row-border: var(--tc-slate-100, #f1f5f9);
-    --bs-json-editor-row-padding-y: 0.5rem;
+    // Dense data-editor sizing: tight rows + compact form controls.
+    --bs-json-editor-row-padding-y: 0.25rem;
     --bs-json-editor-row-padding-x: 0.75rem;
+    --bs-json-editor-row-min-height: 30px;
+    --bs-json-editor-input-padding-y: 0.1875rem;
+    --bs-json-editor-input-padding-x: 0.5rem;
+    --bs-json-editor-input-font-size: 13px;
+    --bs-json-editor-input-line-height: 1.4;
     --bs-json-editor-row-hover-bg: var(--tc-surface-hover);
     --bs-json-editor-key-color: var(--tc-text);
     --bs-json-editor-key-size: 13px;
@@ -49,6 +55,7 @@ tc-json-editor[disabled] .tc-json-editor,
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-height: var(--bs-json-editor-row-min-height);
     padding: var(--bs-json-editor-row-padding-y) var(--bs-json-editor-row-padding-x);
     border-bottom: 1px solid var(--bs-json-editor-row-border);
     transition: background var(--tc-transition-fast, 0.15s ease);
@@ -81,8 +88,13 @@ tc-json-editor[disabled] .tc-json-editor,
     align-items: center;
 }
 
+// Compact form-control sizing — override the roomy default padding/line-height
+// so each row reads as a dense ~30px grid cell.
 .tc-json-editor-control {
     width: 100%;
+    padding: var(--bs-json-editor-input-padding-y) var(--bs-json-editor-input-padding-x);
+    font-size: var(--bs-json-editor-input-font-size);
+    line-height: var(--bs-json-editor-input-line-height);
 }
 
 .tc-json-editor-switch {
@@ -324,7 +336,7 @@ tc-json-editor[disabled] .tc-json-editor,
 
 .tc-json-editor-skeleton-field {
     flex: 1 1 auto;
-    height: 1.9rem;
+    height: 1.5rem;
 }
 
 @keyframes tc-json-editor-shimmer {

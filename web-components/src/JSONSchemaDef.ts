@@ -18,7 +18,8 @@ const PROPERTY_TYPES: SchemaPropertyType[] = ['string', 'number', 'integer', 'bo
 export interface SchemaProperty {
     key: string
     type: SchemaPropertyType
-    required?: boolean
+    /** Optional default value for the property (free-text). */
+    default?: string
     /** Selected reference value for `ref` / `array` / `object` types. */
     ref?: string
 }
@@ -62,7 +63,7 @@ function parseValue(raw: string): SchemaProperty[] {
             key: typeof item.key === 'string' ? item.key : '',
             type,
         }
-        if (item.required === true) prop.required = true
+        if (typeof item.default === 'string' && item.default !== '') prop.default = item.default
         if (needsRef(type) && typeof item.ref === 'string') prop.ref = item.ref
         return prop
     })
@@ -228,7 +229,7 @@ export class JSONSchemaDef extends HTMLElement {
         return JSON.stringify(
             this._props.map(p => {
                 const o: Record<string, unknown> = { key: p.key, type: p.type }
-                if (p.required) o.required = true
+                if (p.default != null && p.default !== '') o.default = p.default
                 if (needsRef(p.type) && p.ref) o.ref = p.ref
                 return o
             }),
@@ -323,13 +324,19 @@ export class JSONSchemaDef extends HTMLElement {
     private _onInput = (e: Event): void => {
         const t = e.target
         if (!(t instanceof HTMLInputElement)) return
-        if (t.getAttribute('data-field') !== 'key') return
+        const field = t.getAttribute('data-field')
         const idx = this._rowIndex(t)
         if (idx < 0) return
-        this._props[idx].key = t.value
-        // Patch validation in place — never re-render on keystroke (preserves caret).
-        this._applyValidation()
-        this._emit()
+        if (field === 'key') {
+            this._props[idx].key = t.value
+            // Patch validation in place — never re-render on keystroke (preserves caret).
+            this._applyValidation()
+            this._emit()
+        } else if (field === 'default') {
+            // Free-text default — patch in place, never re-render (preserves caret).
+            this._props[idx].default = t.value === '' ? undefined : t.value
+            this._emit()
+        }
     }
 
     private _onChange = (e: Event): void => {
@@ -350,9 +357,6 @@ export class JSONSchemaDef extends HTMLElement {
             this._emit()
         } else if (field === 'ref' && t instanceof HTMLSelectElement) {
             this._props[idx].ref = t.value || undefined
-            this._emit()
-        } else if (field === 'required' && t instanceof HTMLInputElement) {
-            this._props[idx].required = t.checked
             this._emit()
         }
     }
@@ -508,11 +512,7 @@ export class JSONSchemaDef extends HTMLElement {
             refSelect = `<select class="form-select tc-json-schema-def-ref" data-field="ref" aria-label="${esc(refLabel)}"${disabledAttr}>${options}</select>`
         }
 
-        const requiredId = `${this._idPrefix}-req-${idx}`
-        const requiredToggle = `<label class="tc-json-schema-def-required" for="${requiredId}">`
-            + `<input id="${requiredId}" type="checkbox" class="form-check-input" data-field="required"${prop.required ? ' checked' : ''} aria-label="Required: ${esc(propLabel)}"${disabledAttr}>`
-            + `<span>required</span>`
-            + `</label>`
+        const defaultInput = `<input type="text" class="form-control tc-json-schema-def-default" data-field="default" placeholder="default" value="${esc(prop.default ?? '')}" aria-label="Default value for ${esc(propLabel)}"${disabledAttr}>`
 
         const actions = `<div class="tc-json-schema-def-row-actions">`
             + `<button type="button" class="tc-json-schema-def-icon-btn" data-action="up" aria-label="Move ${esc(propLabel)} up"${idx === 0 ? ' disabled' : disabledAttr}>${chevronUpIconHtml}</button>`
@@ -527,7 +527,7 @@ export class JSONSchemaDef extends HTMLElement {
             + keyInput
             + typeSelect
             + refSelect
-            + requiredToggle
+            + defaultInput
             + actions
             + `</div>`
             + errEl

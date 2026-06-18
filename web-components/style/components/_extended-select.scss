@@ -24,6 +24,8 @@ tc-extended-select {
     --bs-extended-select-option-desc-font-size: 0.75rem;
     --bs-extended-select-search-border: 1px solid var(--tc-border);
     --bs-extended-select-search-icon-color: var(--tc-text-muted);
+    --bs-extended-select-search-icon-size: 1rem; // ~16px — matches input affordances
+
     --bs-extended-select-no-results-color: var(--tc-text-muted);
     --bs-extended-select-disabled-opacity: 0.55;
     --bs-extended-select-caret-color: var(--tc-text-muted);
@@ -147,14 +149,14 @@ tc-extended-select {
     border-bottom: var(--bs-extended-select-search-border);
     color: var(--bs-extended-select-search-icon-color);
 
+    // icon() puts the BEM class directly on the <svg>, so size & vertically
+    // centre the svg itself — matching the 16px affordance used elsewhere.
     .tc-extended-select__search-icon {
         flex-shrink: 0;
-        display: inline-flex;
-
-        svg {
-            width: 0.875rem;
-            height: 0.875rem;
-        }
+        display: block;
+        width: var(--bs-extended-select-search-icon-size, 1rem);
+        height: var(--bs-extended-select-search-icon-size, 1rem);
+        color: var(--bs-extended-select-search-icon-color);
     }
 }
 

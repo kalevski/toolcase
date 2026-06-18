@@ -15,6 +15,8 @@ tc-speedometer {
     --bs-speedometer-fill-color: var(--tc-app-accent);
     --bs-speedometer-danger-fill-color: var(--tc-danger);
     --bs-speedometer-tick-color: var(--tc-text-faint);
+    --bs-speedometer-needle-color: var(--tc-app-accent);
+    --bs-speedometer-needle-width: 2.5;
 
     --bs-speedometer-value-color: var(--tc-text);
     --bs-speedometer-unit-color: var(--tc-text-muted);
@@ -38,11 +40,14 @@ tc-speedometer {
     box-sizing: border-box;
 }
 
-// SVG fills the full block width; natural height derives from the 100×70 viewBox
-// aspect ratio (70% of the element width).
+// SVG fills the full block width; its height follows the viewBox aspect ratio
+// written inline by render() (--bs-speedometer-aspect). Pinning aspect-ratio
+// (rather than relying on the intrinsic SVG sizing) guarantees the host box
+// matches the arc exactly so there is no dead band below the gauge.
 .tc-speedometer__arc {
     display: block;
     width: 100%;
+    aspect-ratio: var(--bs-speedometer-aspect, 100 / 58);
 }
 
 .tc-speedometer__track {
@@ -56,10 +61,15 @@ tc-speedometer {
     transition: stroke var(--tc-transition-fast);
 }
 
-// Danger state (pct ≥ 0.85) — fill and value colour shift to danger red.
+// Danger state (pct ≥ 0.85) — fill, needle, hub, and value colour shift to red.
 tc-speedometer[data-danger='true'] {
-    .tc-speedometer__fill {
+    .tc-speedometer__fill,
+    .tc-speedometer__needle {
         stroke: var(--bs-speedometer-danger-fill-color);
+    }
+
+    .tc-speedometer__hub {
+        fill: var(--bs-speedometer-danger-fill-color);
     }
 
     .tc-speedometer__value {
@@ -73,13 +83,30 @@ tc-speedometer[data-danger='true'] {
     fill: none;
 }
 
-// Readout sits in the bottom-centre of the gauge face, inside the arc opening.
-// The arc endpoints are at y≈85 % of the SVG height; bottom: 14 % positions the
-// readout just inside that opening.
+// Needle pivots from the arc centre and points at the current value.
+.tc-speedometer__needle {
+    stroke: var(--bs-speedometer-needle-color);
+    stroke-width: var(--bs-speedometer-needle-width);
+    transition: transform var(--tc-transition-fast);
+}
+
+// Hub — the small filled disc at the needle pivot (the true arc centre).
+// SANCTIONED CIRCLE: a genuine circular pivot cap.
+.tc-speedometer__hub {
+    fill: var(--bs-speedometer-needle-color);
+    stroke: var(--bs-speedometer-bg);
+    stroke-width: 1;
+}
+
+// Readout sits inside the open semicircle (the bowl above the arc baseline),
+// centred horizontally on the arc axis. --bs-speedometer-center-y is the arc
+// centre line as a fraction of SVG height (written by render()); anchoring the
+// readout's bottom a hair above that line keeps the value/unit stack in the
+// interior and clear of the needle hub.
 .tc-speedometer__readout {
     position: absolute;
-    bottom: 14%;
     left: 50%;
+    bottom: calc(100% - var(--bs-speedometer-center-y, 86%) + 0.6em);
     transform: translateX(-50%);
     text-align: center;
     white-space: nowrap;
@@ -143,6 +170,7 @@ tc-speedometer[data-danger='true'] {
 // keeping the state-conveying danger colour visible (no animation needed to read it).
 @media (prefers-reduced-motion: reduce) {
     .tc-speedometer__fill,
+    .tc-speedometer__needle,
     .tc-speedometer__value {
         transition: none;
     }

@@ -36,6 +36,30 @@ const DividerDemo: React.FC = () => (
                                 <span>Right</span>
                             </div>
                         </SectionCard>
+
+                        <SectionCard title="Vertical dividers separating inline actions">
+                            <div className="d-flex align-items-center gap-3" style={{ height: '1.5rem' }}>
+                                <a href="#divider">Edit</a>
+                                {/* @ts-ignore */}
+                                <tc-divider vertical></tc-divider>
+                                <a href="#divider">Duplicate</a>
+                                {/* @ts-ignore */}
+                                <tc-divider vertical></tc-divider>
+                                <a href="#divider">Delete</a>
+                            </div>
+                        </SectionCard>
+
+                        <SectionCard title="Vertical divider with taller container">
+                            <div className="d-flex align-items-stretch gap-3" style={{ height: '5rem' }}>
+                                <div className="d-flex align-items-center">Panel A</div>
+                                {/* @ts-ignore */}
+                                <tc-divider vertical></tc-divider>
+                                <div className="d-flex align-items-center">Panel B</div>
+                                {/* @ts-ignore */}
+                                <tc-divider vertical></tc-divider>
+                                <div className="d-flex align-items-center">Panel C</div>
+                            </div>
+                        </SectionCard>
                     </div>
                 </div>
             </div>

@@ -16,11 +16,13 @@
 // ── Inner regions ─────────────────────────────────────────────────────────────
 
 .tc-cool-button-content {
+    position: relative; // anchor for the absolutely-centred loading spinner
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
+    line-height: var(--bs-btn-line-height);
     // Inherits variant bg/color from the parent .btn class.
 }
 
@@ -34,6 +36,7 @@
 }
 
 .tc-cool-button-addon {
+    position: relative; // anchor for the spinner when the addon is the leading slot
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -42,6 +45,74 @@
     background: var(--bs-cool-button-addon-bg, var(--tc-surface-muted));
     color: var(--bs-cool-button-addon-color, var(--tc-text));
     flex-shrink: 0;
+}
+
+// Icon/glyph content (attribute text or slotted children) is sized to the
+// label's font-size and given a tight line-height so leading and trailing
+// addons sit on the same optical baseline as the label — no overflow, no
+// vertical drift from a glyph's intrinsic metrics.
+.tc-cool-button-content,
+.tc-cool-button-addon {
+    font-size: var(--bs-btn-font-size);
+
+    > * {
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
+    }
+
+    // Inline SVG icons track the cap height of the label.
+    svg,
+    img {
+        display: block;
+        width: 1em;
+        height: 1em;
+        flex-shrink: 0;
+    }
+}
+
+// ── Loading state ─────────────────────────────────────────────────────────────
+// The spinner is centred over the region whose label/glyph it covers, while
+// that label is faded to zero opacity. The region keeps its resting width, so
+// toggling `loading` never collapses or shifts the button. Pointer events are
+// already killed by the parent `:disabled` (the element renders `disabled`).
+
+.tc-cool-button-spinner {
+    --bs-spinner-width: 1em;
+    --bs-spinner-height: 1em;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    color: currentcolor; // inherits the region's text color (white on solids)
+    transform: translate(-50%, -50%);
+}
+
+.tc-cool-button--loading {
+    cursor: default;
+
+    // Only the region that hosts the spinner is faded — a trailing addon glyph
+    // stays visible while the spinner overlays the label, and vice-versa.
+    // `visibility: hidden` covers element children (incl. ones with their own
+    // explicit color); `color: transparent` covers the bare label text node.
+    .tc-cool-button-content:has(.tc-cool-button-spinner),
+    .tc-cool-button-addon:has(.tc-cool-button-spinner) {
+        color: transparent;
+
+        > :not(.tc-cool-button-spinner) {
+            visibility: hidden;
+        }
+    }
+
+    // Re-assert the spinner's ink against the now-transparent region color.
+    .tc-cool-button-content .tc-cool-button-spinner {
+        color: var(--bs-btn-color);
+    }
+
+    .tc-cool-button-addon .tc-cool-button-spinner {
+        color: var(--bs-cool-button-addon-color, var(--tc-text));
+    }
 }
 
 // ── Divider tint per solid variant ───────────────────────────────────────────

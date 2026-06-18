@@ -10,6 +10,11 @@
 }
 
 tc-file {
+    // Behave like a block-level form control (matches .form-control):
+    // fill the container width so the entry row stretches end to end.
+    display: block;
+    width: 100%;
+
     --bs-file-bg: var(--tc-surface);
     --bs-file-border-color: var(--tc-border);
     --bs-file-padding-x: 0.875rem;
@@ -85,6 +90,7 @@ tc-file {
 
 .tc-file {
     display: flex;
+    width: 100%;
     align-items: center;
     gap: var(--bs-file-gap);
     padding: var(--bs-file-padding-y) var(--bs-file-padding-x);
@@ -142,9 +148,11 @@ tc-file {
 // ── Editable name input ────────────────────────────────────────────────────
 
 .tc-file-name {
+    // Absorb the free space so the row fills its full width (block form-control
+    // behaviour). The meta / tags / menu stay flex-shrink: 0 to the right.
     flex: 1 1 auto;
+    width: 100%;
     min-width: 4rem;
-    max-width: 20rem;
     font-family: var(--tc-font-sans);
     font-size: var(--bs-file-name-font-size);
     font-weight: 500;
