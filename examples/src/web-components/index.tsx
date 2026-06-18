@@ -100,6 +100,7 @@ import BuffBarDemo from './BuffBarDemo'
 import BuffIconDemo from './BuffIconDemo'
 import HealthBarDemo from './HealthBarDemo'
 import ManaBarDemo from './ManaBarDemo'
+import StaminaBarDemo from './StaminaBarDemo'
 import BrightnessCalibrationDemo from './BrightnessCalibrationDemo'
 import CalloutQuoteDemo from './CalloutQuoteDemo'
 import ChartContainerDemo from './ChartContainerDemo'
@@ -459,6 +460,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'buff-bar', category: 'Content', element: <BuffBarDemo /> },
     { key: 'health-bar', category: 'Content', element: <HealthBarDemo /> },
     { key: 'mana-bar', category: 'Content', element: <ManaBarDemo /> },
+    { key: 'stamina-bar', category: 'Content', element: <StaminaBarDemo /> },
     { key: 'buff-icon', category: 'Content', element: <BuffIconDemo /> },
     { key: 'brightness-calibration', category: 'Components', element: <BrightnessCalibrationDemo /> },
     { key: 'callout-quote', category: 'Content', element: <CalloutQuoteDemo /> },

@@ -120,6 +120,7 @@ After `register()` you can author markup directly:
   - [tc-buff-icon](#tc-buff-icon)
   - [tc-health-bar](#tc-health-bar)
   - [tc-mana-bar](#tc-mana-bar)
+  - [tc-stamina-bar](#tc-stamina-bar)
   - [tc-brightness-calibration](#tc-brightness-calibration)
   - [tc-cdn-map](#tc-cdn-map)
   - [tc-compass-bar](#tc-compass-bar)
@@ -10695,6 +10696,78 @@ None. `tc-mana-bar` is attribute-driven.
 
 <!-- Ghost band + segments -->
 <tc-mana-bar label="Charges" value="3" max="5" segments="5" ghost="4"></tc-mana-bar>
+```
+
+---
+
+### tc-stamina-bar
+
+Value/max resource bar for stamina (SP) — a green success fill over a flat slate track. Structurally identical to `tc-health-bar` and `tc-mana-bar`; styled with `--tc-success` (green) so all three resource bars are visually distinct at a glance in a game HUD. Supports an optional label row (human-readable label + mono `value / max` readout), a ghost band behind the fill for recent stamina drain, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. Ported from the game-components `gc-stamina-bar` (which extends `ResourceBarBase`); the fantasy chrome is dropped in favour of flat slate chrome; the track / fill / ghost / tick DOM is shared with the rest of the resource-bar family through the `internal/resourceBar` helper.
+
+**Tag:** `tc-stamina-bar`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | number | `0` | Current value. Clamped to `[0, max]` for the fill width and `aria-valuenow`. Non-numeric values fall back to `0`. |
+| `max` | number | `100` | Maximum value. Values `<= 0` (or non-numeric) fall back to `100`. |
+| `ghost` | number | — | Optional "ghost" / recent-drain value drawn as a muted band behind the fill. Only shown when it resolves to a wider band than the current fill. |
+| `segments` | number | `1` | Number of equal slots; `segments - 1` evenly-spaced divider ticks are drawn across the track. Values `< 1` (or non-numeric) fall back to `1`. |
+| `show-text` | boolean | `false` | When present (and no `label` is set), draws a centred mono `value / max` readout inside the track. |
+| `label` | string | `""` | When set, renders a label row above the track with the label and a trailing mono `value / max` readout. Also used as the `aria-label` for the progressbar (defaults to `"Stamina"`). |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `value` | `number` | Reflects the `value` attribute. |
+| `max` | `number` | Reflects the `max` attribute. |
+| `ghost` | `number \| null` | Reflects the `ghost` attribute; set to `null` to remove it. |
+| `segments` | `number` | Reflects the `segments` attribute. |
+| `showText` | `boolean` | Reflects the `show-text` boolean attribute. |
+| `label` | `string` | Reflects the `label` attribute. |
+
+**Events**
+
+None. `tc-stamina-bar` is a purely presentational element.
+
+**Slots**
+
+None. `tc-stamina-bar` is attribute-driven.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-stamina-bar-gap` | `0.375rem` | Gap between the label row and the track. |
+| `--bs-stamina-bar-label-color` | `var(--tc-text)` | Label text color. |
+| `--bs-stamina-bar-label-font-size` | `0.8125rem` | Label font size. |
+| `--bs-stamina-bar-label-font-weight` | `500` | Label font weight (≤600). |
+| `--bs-stamina-bar-value-color` | `var(--tc-text-muted)` | `value / max` readout color. |
+| `--bs-stamina-bar-value-font-size` | `0.75rem` | `value / max` readout font size. |
+| `--bs-stamina-bar-track-bg` | `var(--tc-slate-200)` | Track background. |
+| `--bs-stamina-bar-track-height` | `0.625rem` | Track height. |
+| `--bs-stamina-bar-fill-bg` | `var(--tc-success)` | Value-fill color (green success; overridable). |
+| `--bs-stamina-bar-fill-transition` | `width var(--tc-transition-base)` | Fill-width transition (disabled under reduced motion). |
+| `--bs-stamina-bar-ghost-bg` | `var(--tc-slate-400)` | Ghost / recent-drain band color (shared resource-bar contract). |
+| `--bs-stamina-bar-tick-color` | `var(--tc-surface)` | Segment-divider color. |
+| `--bs-stamina-bar-inline-text-color` | `var(--tc-text-muted)` | Inline `value / max` text color. |
+
+**Example**
+
+```html
+<!-- Bare bar -->
+<tc-stamina-bar value="72" max="100"></tc-stamina-bar>
+
+<!-- With label and readout -->
+<tc-stamina-bar label="Stamina" value="640" max="1000"></tc-stamina-bar>
+
+<!-- Inline text, no label -->
+<tc-stamina-bar value="45" max="100" show-text></tc-stamina-bar>
+
+<!-- Ghost band + segments -->
+<tc-stamina-bar label="Endurance" value="3" max="5" segments="5" ghost="4"></tc-stamina-bar>
 ```
 
 ---
