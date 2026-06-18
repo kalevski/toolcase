@@ -1,0 +1,134 @@
+// tc-reset-to-defaults — two-step reset action on the shared setting-row scaffold.
+// "Reset" enters a confirmation state; "Confirm reset" commits; "Cancel" reverts.
+// All cosmetics flow through `--bs-reset-to-defaults-*`.
+
+tc-reset-to-defaults {
+    --bs-reset-to-defaults-btn-height: 32px;
+    --bs-reset-to-defaults-btn-padding-x: 0.875rem;
+    --bs-reset-to-defaults-btn-font-size: 0.8125rem;
+    --bs-reset-to-defaults-btn-font-weight: 500;
+    --bs-reset-to-defaults-btn-letter-spacing: 0.025em;
+    --bs-reset-to-defaults-btn-gap: 0.5rem;
+
+    // Idle reset button — secondary/outline treatment.
+    --bs-reset-to-defaults-reset-bg: transparent;
+    --bs-reset-to-defaults-reset-color: var(--tc-text);
+    --bs-reset-to-defaults-reset-border: 1px solid var(--tc-border-strong);
+    --bs-reset-to-defaults-reset-hover-bg: var(--tc-surface-muted);
+    --bs-reset-to-defaults-reset-hover-border: 1px solid var(--tc-border-strong);
+
+    // Confirm reset button — danger treatment.
+    --bs-reset-to-defaults-confirm-bg: var(--tc-danger);
+    --bs-reset-to-defaults-confirm-color: #fff;
+    --bs-reset-to-defaults-confirm-border: 1px solid var(--tc-danger);
+    --bs-reset-to-defaults-confirm-hover-bg: color-mix(in srgb, var(--tc-danger) 88%, #000 12%);
+    --bs-reset-to-defaults-confirm-hover-border: 1px solid color-mix(in srgb, var(--tc-danger) 88%, #000 12%);
+
+    // Cancel button — ghost treatment.
+    --bs-reset-to-defaults-cancel-bg: transparent;
+    --bs-reset-to-defaults-cancel-color: var(--tc-text-muted);
+    --bs-reset-to-defaults-cancel-border: 1px solid transparent;
+    --bs-reset-to-defaults-cancel-hover-bg: var(--tc-surface-muted);
+    --bs-reset-to-defaults-cancel-hover-border: 1px solid var(--tc-border);
+
+    // Disabled state.
+    --bs-reset-to-defaults-disabled-opacity: 0.45;
+}
+
+.tc-reset-to-defaults__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-reset-to-defaults-btn-gap);
+}
+
+.tc-reset-to-defaults__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--bs-reset-to-defaults-btn-height);
+    padding: 0 var(--bs-reset-to-defaults-btn-padding-x);
+    font-size: var(--bs-reset-to-defaults-btn-font-size);
+    font-weight: var(--bs-reset-to-defaults-btn-font-weight);
+    letter-spacing: var(--bs-reset-to-defaults-btn-letter-spacing);
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    border-radius: 0;
+    border: 0;
+    background: none;
+    text-align: center;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast),
+        transform var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    // Coarse touch targets — minimum 44px tall hit area.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: var(--bs-reset-to-defaults-disabled-opacity);
+        pointer-events: none;
+    }
+
+    // Idle reset — outline style.
+    &--reset {
+        background-color: var(--bs-reset-to-defaults-reset-bg);
+        color: var(--bs-reset-to-defaults-reset-color);
+        border: var(--bs-reset-to-defaults-reset-border);
+
+        &:hover:not(:disabled) {
+            background-color: var(--bs-reset-to-defaults-reset-hover-bg);
+            border: var(--bs-reset-to-defaults-reset-hover-border);
+        }
+    }
+
+    // Confirm reset — danger fill.
+    &--confirm {
+        background-color: var(--bs-reset-to-defaults-confirm-bg);
+        color: var(--bs-reset-to-defaults-confirm-color);
+        border: var(--bs-reset-to-defaults-confirm-border);
+
+        &:hover:not(:disabled) {
+            background-color: var(--bs-reset-to-defaults-confirm-hover-bg);
+            border: var(--bs-reset-to-defaults-confirm-hover-border);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+        }
+    }
+
+    // Cancel — ghost/text.
+    &--cancel {
+        background-color: var(--bs-reset-to-defaults-cancel-bg);
+        color: var(--bs-reset-to-defaults-cancel-color);
+        border: var(--bs-reset-to-defaults-cancel-border);
+
+        &:hover:not(:disabled) {
+            background-color: var(--bs-reset-to-defaults-cancel-hover-bg);
+            border: var(--bs-reset-to-defaults-cancel-hover-border);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-reset-to-defaults__btn {
+        transition: none;
+
+        &--confirm:hover:not(:disabled) {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

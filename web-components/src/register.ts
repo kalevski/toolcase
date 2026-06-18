@@ -327,6 +327,7 @@ import { PressAnyKey } from './PressAnyKey'
 import { QuestTracker } from './QuestTracker'
 import { RarityChip } from './RarityChip'
 import { ReportPlayerDialog } from './ReportPlayerDialog'
+import { ResetToDefaults } from './ResetToDefaults'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -664,4 +665,5 @@ export function register(): void {
     customElements.define('tc-quest-tracker', QuestTracker)
     customElements.define('tc-rarity-chip', RarityChip)
     customElements.define('tc-report-player-dialog', ReportPlayerDialog)
+    customElements.define('tc-reset-to-defaults', ResetToDefaults)
 }
