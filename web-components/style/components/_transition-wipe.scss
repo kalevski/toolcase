@@ -1,0 +1,142 @@
+// tc-transition-wipe — full-screen scene-wipe transition overlay. Ported from
+// `gc-transition-wipe` but voiced for the web-components design system: no
+// shadow DOM, no fantasy chrome, no gilded fills — a single flat-fill div that
+// CSS transitions in/out when [show] is toggled on the host. Direction variants
+// (fade/left/right/up/down/iris) are driven by data-direction on the fill.
+// Every cosmetic value flows through --bs-transition-wipe-* custom properties
+// (the public theming contract).
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-transition-wipe {
+    // Wipe fill color. The design-system default is the ink dark surface so the
+    // wipe reads as a purposeful hard cut; consumers supply any CSS color via
+    // the `wipe-color` attribute which writes through as an inline var override.
+    --bs-transition-wipe-color: var(--tc-ink);
+
+    // Transition duration driven by the `duration` attribute (ms). Written inline
+    // by JS so this default is the safe fallback when JS hasn't applied yet.
+    --bs-transition-wipe-duration: 400ms;
+
+    // Sits above the modal tier so the wipe covers the entire viewport stack.
+    // The fixed --tc-z-* scale: tooltip 1070 > dropdown 1060 > modal 1055.
+    // Using tooltip tier so nothing can bleed through a running wipe.
+    --bs-transition-wipe-z: var(--tc-z-tooltip, 1070);
+}
+
+// ── Host surface ────────────────────────────────────────────────────────────────
+// Fixed full-viewport cover; pointer-events disabled at rest so the wipe never
+// blocks interaction when no transition is running.
+
+tc-transition-wipe {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: var(--bs-transition-wipe-z);
+    border-radius: 0;
+}
+
+// Block pointer events while the wipe fill is visible so the scene behind is
+// non-interactive during the transition.
+tc-transition-wipe[show] {
+    pointer-events: auto;
+}
+
+// ── Fill div ────────────────────────────────────────────────────────────────────
+// Absolute within the fixed host. The fill is the wipe-color surface; CSS
+// transitions animate its opacity / transform / clip-path depending on the
+// data-direction attribute set by JS. Sharp by mandate — no border-radius.
+
+.tc-transition-wipe-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--bs-transition-wipe-color);
+    border-radius: 0;
+    transition:
+        opacity var(--bs-transition-wipe-duration) ease-in-out,
+        transform var(--bs-transition-wipe-duration) ease-in-out,
+        clip-path var(--bs-transition-wipe-duration) ease-in-out;
+}
+
+// ── Direction: fade ─────────────────────────────────────────────────────────────
+// Opacity cross-fade. Rest = transparent; [show] = fully opaque.
+
+.tc-transition-wipe-fill[data-direction='fade'] {
+    opacity: 0;
+}
+
+tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='fade'] {
+    opacity: 1;
+}
+
+// ── Direction: left ─────────────────────────────────────────────────────────────
+// Slide in from the left. Rest = off-screen left; [show] = covers viewport.
+
+.tc-transition-wipe-fill[data-direction='left'] {
+    transform: translateX(-100%);
+}
+
+tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='left'] {
+    transform: translateX(0);
+}
+
+// ── Direction: right ────────────────────────────────────────────────────────────
+// Slide in from the right. Rest = off-screen right; [show] = covers viewport.
+
+.tc-transition-wipe-fill[data-direction='right'] {
+    transform: translateX(100%);
+}
+
+tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='right'] {
+    transform: translateX(0);
+}
+
+// ── Direction: up ───────────────────────────────────────────────────────────────
+// Slide in from the top. Rest = off-screen top; [show] = covers viewport.
+
+.tc-transition-wipe-fill[data-direction='up'] {
+    transform: translateY(-100%);
+}
+
+tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='up'] {
+    transform: translateY(0);
+}
+
+// ── Direction: down ─────────────────────────────────────────────────────────────
+// Slide in from the bottom. Rest = off-screen bottom; [show] = covers viewport.
+
+.tc-transition-wipe-fill[data-direction='down'] {
+    transform: translateY(100%);
+}
+
+tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='down'] {
+    transform: translateY(0);
+}
+
+// ── Direction: iris ─────────────────────────────────────────────────────────────
+// Iris / circular reveal. Rest = fill covers viewport (large circle); [show] =
+// iris closes (circle shrinks to 0) revealing content beneath. This direction
+// is intentionally inverted vs. the slide/fade variants: the fill starts
+// visible and the [show] state hides it — useful for "iris open" reveals where
+// content is uncovered as the wipe runs.
+
+.tc-transition-wipe-fill[data-direction='iris'] {
+    clip-path: circle(150% at 50% 50%);
+}
+
+tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='iris'] {
+    clip-path: circle(0% at 50% 50%);
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+// Disable all transitions; direction-state changes still apply instantly so
+// the wipe functions without animation. The tc-complete event continues to fire
+// after `duration` ms — the consumer's timing contract is unchanged.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-transition-wipe-fill {
+        transition: none !important;
+    }
+}

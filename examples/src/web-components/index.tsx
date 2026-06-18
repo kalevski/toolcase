@@ -340,6 +340,7 @@ import ScoreDisplayDemo from './ScoreDisplayDemo'
 import StatRowDemo from './StatRowDemo'
 import SpeedometerDemo from './SpeedometerDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
+import TransitionWipeDemo from './TransitionWipeDemo'
 import ShakeContainerDemo from './ShakeContainerDemo'
 import ScrollTextDemo from './ScrollTextDemo'
 import ShopPanelDemo from './ShopPanelDemo'
@@ -571,6 +572,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'confirm-dialog', category: 'Overlays & Feedback', element: <ConfirmDialogDemo /> },
     { key: 'report-player-dialog', category: 'Overlays & Feedback', element: <ReportPlayerDialogDemo /> },
     { key: 'screen-flash', category: 'Overlays & Feedback', element: <ScreenFlashDemo /> },
+    { key: 'transition-wipe', category: 'Overlays & Feedback', element: <TransitionWipeDemo /> },
     { key: 'shake-container', category: 'Components', element: <ShakeContainerDemo /> },
     { key: 'invite-toast', category: 'Overlays & Feedback', element: <InviteToastDemo /> },
     { key: 'lightbox', category: 'Overlays & Feedback', element: <LightboxDemo /> },

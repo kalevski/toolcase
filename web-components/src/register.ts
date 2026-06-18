@@ -301,6 +301,7 @@ import { KeyBinder } from './KeyBinder'
 import { LegalScreen } from './LegalScreen'
 import { LetterboxBars } from './LetterboxBars'
 import { ScreenFlash } from './ScreenFlash'
+import { TransitionWipe } from './TransitionWipe'
 import { ShakeContainer } from './ShakeContainer'
 import { LevelHeader } from './LevelHeader'
 import { LevelSelect } from './LevelSelect'
@@ -702,6 +703,7 @@ export function register(): void {
     customElements.define('tc-rune-corner', RuneCorner)
     customElements.define('tc-safe-area', SafeArea)
     customElements.define('tc-screen-flash', ScreenFlash)
+    customElements.define('tc-transition-wipe', TransitionWipe)
     customElements.define('tc-shake-container', ShakeContainer)
     customElements.define('tc-save-slot-list', SaveSlotList)
     customElements.define('tc-settings-category-list', SettingsCategoryList)

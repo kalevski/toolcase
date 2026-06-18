@@ -504,6 +504,13 @@ tc-screen-flash {
     display: block;
 }
 
+// Fixed full-viewport scene-wipe transition; the SCSS partial positions it
+// fixed and drives direction-based transitions, but the host must not default
+// to inline.
+tc-transition-wipe {
+    display: block;
+}
+
 // Camera-shake wrapper; the SCSS partial owns the inner transform animation,
 // but the host must not default to inline so it can act as a block container.
 tc-shake-container {
