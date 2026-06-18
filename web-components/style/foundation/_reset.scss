@@ -476,6 +476,12 @@ tc-matchmaking-screen {
     display: block;
 }
 
+// End-of-match statistics panel; the SCSS partial owns the inner flex layout,
+// but the host must not default to inline.
+tc-stats-screen {
+    display: block;
+}
+
 // Fixed full-viewport flash overlay; the SCSS partial positions it fixed and
 // keeps it transparent until JS triggers a flash, but the host must not
 // default to inline.

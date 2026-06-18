@@ -345,6 +345,7 @@ import { ShopPanel } from './ShopPanel'
 import { SkillBar } from './SkillBar'
 import { SkillTree } from './SkillTree'
 import { Stack } from './Stack'
+import { StatsScreen } from './StatsScreen'
 
 export function register(): void {
     if (customElements.get('tc-button') !== undefined) {
@@ -700,4 +701,5 @@ export function register(): void {
     customElements.define('tc-skill-bar', SkillBar)
     customElements.define('tc-skill-tree', SkillTree)
     customElements.define('tc-stack', Stack)
+    customElements.define('tc-stats-screen', StatsScreen)
 }
