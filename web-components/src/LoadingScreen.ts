@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-loading-screen'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 /**
  * tc-loading-screen — full-viewport loading screen with an eyebrow label,
@@ -19,7 +12,6 @@ function esc(s: string): string {
  * No slots — purely attribute- and JS-property-driven.
  */
 export class LoadingScreen extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['progress', 'label', 'eyebrow', 'title-text', 'tip-title', 'tip-interval']
     }
@@ -162,17 +154,15 @@ export class LoadingScreen extends HTMLElement {
     }
 
     private render(): void {
-        const eyebrow       = this.eyebrow
-        const title         = this.titleText
-        const label         = this.label
-        const progress      = this.progress
+        const eyebrow = this.eyebrow
+        const title = this.titleText
+        const label = this.label
+        const progress = this.progress
         const indeterminate = progress == null
-        const pct           = indeterminate ? 0 : Math.max(0, Math.min(1, progress)) * 100
-        const pctLabel      = indeterminate ? '' : `${Math.round(pct)}%`
+        const pct = indeterminate ? 0 : Math.max(0, Math.min(1, progress)) * 100
+        const pctLabel = indeterminate ? '' : `${Math.round(pct)}%`
 
-        const titleMarkup = title
-            ? `<div class="tc-loading-screen-title">${esc(title)}</div>`
-            : ''
+        const titleMarkup = title ? `<div class="tc-loading-screen-title">${esc(title)}</div>` : ''
 
         const showLabelRow = !!label || !indeterminate
         const labelRow = showLabelRow
@@ -182,17 +172,18 @@ export class LoadingScreen extends HTMLElement {
                </div>`
             : ''
 
-        const barMod       = indeterminate ? ' tc-loading-screen-bar--indeterminate' : ''
-        const fillStyle    = indeterminate ? '' : ` style="width:${pct.toFixed(2)}%"`
+        const barMod = indeterminate ? ' tc-loading-screen-bar--indeterminate' : ''
+        const fillStyle = indeterminate ? '' : ` style="width:${pct.toFixed(2)}%"`
         const ariaValueNow = indeterminate ? '' : ` aria-valuenow="${Math.round(pct)}"`
 
         const tip = this._tips[this._tipIndex] ?? ''
-        const tipMarkup = this._tips.length > 0
-            ? `<div class="tc-loading-screen-tip">
+        const tipMarkup =
+            this._tips.length > 0
+                ? `<div class="tc-loading-screen-tip">
                 <div class="tc-loading-screen-tip-label">${esc(this.tipTitle)}</div>
                 <div class="tc-loading-screen-tip-body">${esc(tip)}</div>
                </div>`
-            : ''
+                : ''
 
         this.innerHTML = `
             <div class="tc-loading-screen-panel">
@@ -215,5 +206,7 @@ export class LoadingScreen extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: LoadingScreen }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: LoadingScreen
+    }
 }

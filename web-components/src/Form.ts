@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-form'
 
 export class Form extends HTMLElement {
-
     private _initialised = false
     private _bodyNodes: Node[] = []
 
@@ -67,7 +66,7 @@ export class Form extends HTMLElement {
 
     private _reattach(): void {
         const body = this.querySelector('.tc-form-body')
-        this._bodyNodes.forEach(n => body?.appendChild(n))
+        this._bodyNodes.forEach((n) => body?.appendChild(n))
     }
 
     private _onSubmit = (event: Event): void => {

@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cookbook-grid'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 const COLUMNS = [2, 3] as const
 export type CookbookGridColumns = 2 | 3
@@ -31,11 +24,13 @@ export class CookbookGrid extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             const hasTitleAttr = this.hasAttribute('title')
-            const slotNodes = hasTitleAttr ? [] : Array.from(this.querySelectorAll('[slot="title"]'))
+            const slotNodes = hasTitleAttr
+                ? []
+                : Array.from(this.querySelectorAll('[slot="title"]'))
             this.render()
             if (!hasTitleAttr) {
                 const slot = this.querySelector('.tc-cookbook-grid-title-slot')
-                if (slot) slotNodes.forEach(n => slot.appendChild(n))
+                if (slot) slotNodes.forEach((n) => slot.appendChild(n))
                 this._updateHeaderVisibility()
             }
             this._initialised = true
@@ -74,13 +69,12 @@ export class CookbookGrid extends HTMLElement {
     private _rerenderWithSlots(): void {
         const hasTitleAttr = this.hasAttribute('title')
         const slot = this.querySelector('.tc-cookbook-grid-title-slot')
-        const slotNodes = (!hasTitleAttr && slot)
-            ? Array.from(slot.querySelectorAll('[slot="title"]'))
-            : []
+        const slotNodes =
+            !hasTitleAttr && slot ? Array.from(slot.querySelectorAll('[slot="title"]')) : []
         this.render()
         if (!hasTitleAttr) {
             const newSlot = this.querySelector('.tc-cookbook-grid-title-slot')
-            if (newSlot) slotNodes.forEach(n => newSlot.appendChild(n))
+            if (newSlot) slotNodes.forEach((n) => newSlot.appendChild(n))
             this._updateHeaderVisibility()
         }
     }
@@ -113,11 +107,14 @@ export class CookbookGrid extends HTMLElement {
             `<pre class="tc-cookbook-grid-item__pre"><code class="tc-cookbook-grid-item__code">${esc(recipe.code)}</code></pre>` +
             `</div>`
 
-        const tagsHtml = recipe.tags && recipe.tags.length > 0
-            ? `<div class="tc-cookbook-grid-item__tags">` +
-              recipe.tags.map(t => `<span class="tc-cookbook-grid-item__tag">${esc(t)}</span>`).join('') +
-              `</div>`
-            : ''
+        const tagsHtml =
+            recipe.tags && recipe.tags.length > 0
+                ? `<div class="tc-cookbook-grid-item__tags">` +
+                  recipe.tags
+                      .map((t) => `<span class="tc-cookbook-grid-item__tag">${esc(t)}</span>`)
+                      .join('') +
+                  `</div>`
+                : ''
 
         const inner =
             `<div class="tc-cookbook-grid-item-inner">` +
@@ -155,7 +152,7 @@ export class CookbookGrid extends HTMLElement {
                 `</div>`
         }
 
-        const itemsHtml = this._recipes.map(r => this._recipeHtml(r)).join('')
+        const itemsHtml = this._recipes.map((r) => this._recipeHtml(r)).join('')
 
         this.innerHTML =
             `${headerHtml}` +

@@ -25,7 +25,16 @@ export class ParticleEmitter extends HTMLElement {
     onBurst: ((count: number) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['burst', 'count', 'particle-size', 'speed', 'lifetime', 'gravity', 'width', 'height']
+        return [
+            'burst',
+            'count',
+            'particle-size',
+            'speed',
+            'lifetime',
+            'gravity',
+            'width',
+            'height',
+        ]
     }
 
     connectedCallback(): void {
@@ -161,11 +170,13 @@ export class ParticleEmitter extends HTMLElement {
                 size: this.particleSize * (0.7 + Math.random() * 0.6),
             })
         }
-        this.dispatchEvent(new CustomEvent('tc-burst', {
-            bubbles: true,
-            composed: true,
-            detail: { count },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-burst', {
+                bubbles: true,
+                composed: true,
+                detail: { count },
+            }),
+        )
         if (typeof this.onBurst === 'function') this.onBurst(count)
         // Skip the animation loop when the user has requested reduced motion
         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

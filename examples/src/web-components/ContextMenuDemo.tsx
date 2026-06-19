@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ContextMenuDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -53,11 +52,14 @@ const ContextMenuDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ContextMenu"
+                        <tc-rich-page-header
+                            title-text="ContextMenu"
                             description="Right-click / long-press context menu with nested submenu support and full keyboard navigation. Set items via the items JS property; listen for tc-select events."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         {lastKey && (
                             <div className="alert alert-info mt-3 py-2">
@@ -66,9 +68,11 @@ const ContextMenuDemo: React.FC = () => {
                         )}
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — right-click the area below">
+                            <tc-section-card title="Basic — right-click the area below">
                                 <p className="text-muted small mb-3">
-                                    Right-click (or long-press on touch) to open the context menu. Keyboard: Arrow keys to navigate, Enter/Space to select, Escape to close.
+                                    Right-click (or long-press on touch) to open the context menu.
+                                    Keyboard: Arrow keys to navigate, Enter/Space to select, Escape
+                                    to close.
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-context-menu ref={basicRef}>
@@ -87,11 +91,12 @@ const ContextMenuDemo: React.FC = () => {
                                         Right-click here
                                     </div>
                                 </tc-context-menu>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With nested submenu">
+                            <tc-section-card title="With nested submenu">
                                 <p className="text-muted small mb-3">
-                                    The Share item has a nested submenu. Hover or press ArrowRight to open it.
+                                    The Share item has a nested submenu. Hover or press ArrowRight
+                                    to open it.
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-context-menu ref={nestedRef}>
@@ -110,7 +115,7 @@ const ContextMenuDemo: React.FC = () => {
                                         Right-click here (nested submenu)
                                     </div>
                                 </tc-context-menu>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

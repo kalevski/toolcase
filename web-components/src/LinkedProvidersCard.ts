@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -9,14 +10,6 @@ export interface LinkedProvider {
     connected?: boolean
     account?: string
     icon?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 const DEFAULT_TITLE = 'Linked providers'
@@ -37,10 +30,14 @@ export class LinkedProvidersCard extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this.addEventListener('click', this._handleClick)
             this.render()
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._handleClick)
     }
 
     disconnectedCallback(): void {
@@ -78,7 +75,7 @@ export class LinkedProvidersCard extends HTMLElement {
         return this._brandColors
     }
     set brandColors(v: Record<string, string>) {
-        this._brandColors = (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}
+        this._brandColors = v && typeof v === 'object' && !Array.isArray(v) ? v : {}
         if (this._initialised) this.render()
     }
 
@@ -93,13 +90,18 @@ export class LinkedProvidersCard extends HTMLElement {
     private _resolveProviderIcon(p: LinkedProvider): string {
         let iconName: string | undefined
         if (this._iconForProvider) {
-            try { iconName = this._iconForProvider(p.key) } catch { /* skip */ }
+            try {
+                iconName = this._iconForProvider(p.key)
+            } catch {
+                /* skip */
+            }
         }
         if (!iconName) iconName = p.icon
         if (!iconName) iconName = FALLBACK_ICON
-        const svgStr = (LucideIcons as Record<string, string>)[iconName]
-            ?? (LucideIcons as Record<string, string>)[FALLBACK_ICON]
-            ?? ''
+        const svgStr =
+            (LucideIcons as Record<string, string>)[iconName] ??
+            (LucideIcons as Record<string, string>)[FALLBACK_ICON] ??
+            ''
         return svgStr ? icon(svgStr, 'tc-linked-providers-card__icon-svg') : ''
     }
 
@@ -117,11 +119,13 @@ export class LinkedProvidersCard extends HTMLElement {
         if (!btn) return
         const key = (btn as HTMLElement).dataset.key ?? ''
         const connected = (btn as HTMLElement).dataset.connected === 'true'
-        this.dispatchEvent(new CustomEvent('tc-toggle', {
-            bubbles: true,
-            composed: true,
-            detail: { key, connected },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-toggle', {
+                bubbles: true,
+                composed: true,
+                detail: { key, connected },
+            }),
+        )
         if (typeof this.onToggle === 'function') this.onToggle(key, connected)
     }
 
@@ -137,37 +141,36 @@ export class LinkedProvidersCard extends HTMLElement {
 
         let contentHtml: string
         if (providers.length === 0) {
-            contentHtml =
-                `<div class="tc-linked-providers-card__empty" role="status">${esc(emptyLabel)}</div>`
+            contentHtml = `<div class="tc-linked-providers-card__empty" role="status">${esc(emptyLabel)}</div>`
         } else {
-            const rows = providers.map(p => {
-                const iconHtml = this._resolveProviderIcon(p)
-                const brandColor = this._brandColors[p.key]
-                const tileStyle = brandColor ? ` style="color: ${esc(brandColor)}"` : ''
-                const accountHtml = p.account
-                    ? `<span class="tc-linked-providers-card__account">${esc(p.account)}</span>`
-                    : ''
-                const connectedDot = p.connected
-                    ? `<span class="tc-linked-providers-card__connected-dot" aria-hidden="true"></span>`
-                    : ''
-                const actionIconHtml = this._resolveActionIcon(p.connected ?? false)
-                const actionLabel = p.connected
-                    ? `Disconnect ${p.label}`
-                    : `Connect ${p.label}`
-                return (
-                    `<li class="tc-linked-providers-card__row" role="listitem">` +
-                    `<span class="tc-linked-providers-card__tile"${tileStyle} aria-hidden="true">${iconHtml}</span>` +
-                    `<span class="tc-linked-providers-card__info">` +
-                    `<span class="tc-linked-providers-card__label">${esc(p.label)}</span>` +
-                    accountHtml +
-                    `</span>` +
-                    connectedDot +
-                    `<button class="tc-linked-providers-card__btn" type="button" ` +
-                    `aria-label="${esc(actionLabel)}" ` +
-                    `data-key="${esc(p.key)}" data-connected="${p.connected ? 'true' : 'false'}">${actionIconHtml}</button>` +
-                    `</li>`
-                )
-            }).join('')
+            const rows = providers
+                .map((p) => {
+                    const iconHtml = this._resolveProviderIcon(p)
+                    const brandColor = this._brandColors[p.key]
+                    const tileStyle = brandColor ? ` style="color: ${esc(brandColor)}"` : ''
+                    const accountHtml = p.account
+                        ? `<span class="tc-linked-providers-card__account">${esc(p.account)}</span>`
+                        : ''
+                    const connectedDot = p.connected
+                        ? `<span class="tc-linked-providers-card__connected-dot" aria-hidden="true"></span>`
+                        : ''
+                    const actionIconHtml = this._resolveActionIcon(p.connected ?? false)
+                    const actionLabel = p.connected ? `Disconnect ${p.label}` : `Connect ${p.label}`
+                    return (
+                        `<li class="tc-linked-providers-card__row" role="listitem">` +
+                        `<span class="tc-linked-providers-card__tile"${tileStyle} aria-hidden="true">${iconHtml}</span>` +
+                        `<span class="tc-linked-providers-card__info">` +
+                        `<span class="tc-linked-providers-card__label">${esc(p.label)}</span>` +
+                        accountHtml +
+                        `</span>` +
+                        connectedDot +
+                        `<button class="tc-linked-providers-card__btn" type="button" ` +
+                        `aria-label="${esc(actionLabel)}" ` +
+                        `data-key="${esc(p.key)}" data-connected="${p.connected ? 'true' : 'false'}">${actionIconHtml}</button>` +
+                        `</li>`
+                    )
+                })
+                .join('')
             contentHtml = `<ul class="tc-linked-providers-card__list" role="list">${rows}</ul>`
         }
 

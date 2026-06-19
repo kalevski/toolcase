@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, Speedometer, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -99,7 +99,6 @@ After `register()` you can author markup directly:
   - [tc-shake-container](#tc-shake-container)
   - [tc-score-display](#tc-score-display)
   - [tc-stat-row](#tc-stat-row)
-  - [tc-speedometer](#tc-speedometer)
   - [tc-scroll-text](#tc-scroll-text)
   - [tc-shop-panel](#tc-shop-panel)
   - [tc-stats-screen](#tc-stats-screen)
@@ -436,7 +435,7 @@ None. `tc-basic-layout` is a purely presentational layout element.
 
 ### tc-dashboard-layout
 
-Full-page dashboard shell composing a glass navbar, a collapsible sidebar, and a scrollable content area. Named slots cover the brand, menu, panel, and both navbar ends; unslotted children land in the main content. The sidebar opens/closes via a toggle button, Ctrl+B (Cmd+B), or the `sidebar-open` attribute. Dispatches `tc-toggle-sidebar` on every flip.
+Full-height dashboard shell: a full-height sidebar on the left, a glass navbar spanning the content column, and a scrollable content area — same layout as the react-components `DashboardLayout`. **Responsive:** below 992px the sidebar becomes a slide-in drawer over a dimmed backdrop (scoped to the component, not the viewport); at ≥992px it is pinned open as a static left rail and the toggle is hidden. Named slots cover the brand, menu, panel, and both navbar ends; unslotted children land in the main content. On mobile the drawer opens/closes via the toggle button, Ctrl+B (Cmd+B), backdrop tap, Escape, or the `sidebar-open` attribute. Dispatches `tc-toggle-sidebar` on every flip.
 
 **Tag:** `tc-dashboard-layout`
 
@@ -444,7 +443,7 @@ Full-page dashboard shell composing a glass navbar, a collapsible sidebar, and a
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `sidebar-open` | boolean | `true` | When present, the sidebar is expanded. Removed to collapse. Reflected by the `sidebarOpen` JS property. |
+| `sidebar-open` | boolean | *(unset)* | When present, the mobile drawer is open. Default closed; on desktop (≥992px) the rail is pinned open by CSS regardless of this attribute. Reflected by the `sidebarOpen` JS property. |
 
 **JS Properties**
 
@@ -476,7 +475,8 @@ Full-page dashboard shell composing a glass navbar, a collapsible sidebar, and a
 - The sidebar is an `<aside role="navigation" aria-label="Sidebar navigation">`.
 - The toggle `<button>` carries `aria-expanded` (updates in-place on toggle) and `aria-controls` tied to the sidebar's `id`.
 - The toggle is reachable by Tab; Enter/Space activate it natively.
-- Ctrl+B (Cmd+B) toggles the sidebar from anywhere on the page; the handler is removed in `disconnectedCallback`.
+- Ctrl+B (Cmd+B) toggles the sidebar and Escape closes it from anywhere on the page; the handler is removed in `disconnectedCallback`.
+- Tapping the dimmed backdrop closes the mobile drawer.
 - Touch targets: the toggle is `44px × 44px` under `@media (pointer: coarse)`.
 - `prefers-reduced-motion` disables the sidebar slide transition.
 
@@ -484,7 +484,7 @@ Full-page dashboard shell composing a glass navbar, a collapsible sidebar, and a
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `--bs-dashboard-layout-navbar-height` | `3rem` | Height of the top navbar bar. |
+| `--bs-dashboard-layout-navbar-height` | `3.75rem` | Height of the top navbar bar. |
 | `--bs-dashboard-layout-navbar-bg` | `rgba(255,255,255,0.85)` | Navbar background (translucent glass). |
 | `--bs-dashboard-layout-navbar-border` | `var(--tc-border)` | Hairline border below the navbar. |
 | `--bs-dashboard-layout-navbar-color` | `var(--tc-text)` | Text/icon color in the navbar. |
@@ -497,7 +497,8 @@ Full-page dashboard shell composing a glass navbar, a collapsible sidebar, and a
 | `--bs-dashboard-layout-content-bg` | `var(--tc-surface-hover)` | Background of the content rail. |
 | `--bs-dashboard-layout-toggle-size` | `2.25rem` | Width and height of the toggle button. |
 | `--bs-dashboard-layout-toggle-hover-bg` | `var(--tc-surface-muted)` | Toggle button hover background. |
-| `--bs-dashboard-layout-transition` | `var(--tc-transition-base)` | Sidebar slide transition. |
+| `--bs-dashboard-layout-overlay-bg` | `rgba(0,0,0,0.5)` | Dimmed backdrop behind the mobile drawer. |
+| `--bs-dashboard-layout-transition` | `var(--tc-transition-base)` | Sidebar slide + backdrop fade transition. |
 
 ```html
 <!-- Full layout -->
@@ -24846,66 +24847,6 @@ None. All content is driven by attributes.
 
 ---
 
-### tc-speedometer
-
-Vehicle speedometer gauge — a semicircular SVG arc indicator with a JetBrains Mono centre readout (speed value, unit, optional gear and RPM). Port of `gc-speedometer`; game-specific fantasy chrome replaced with the slate design system. Purely presentational; attribute-driven with no slots. All cosmetics flow through `--bs-speedometer-*` custom properties.
-
-**Tag:** `tc-speedometer`
-
-#### Attributes
-
-| Attribute | Type | Default | Description |
-|---|---|---|---|
-| `value` | number | `0` | Current speed value. Displayed as `Math.round(value)`. |
-| `max` | number | `220` | Maximum speed (full arc). Must be > 0. |
-| `rpm` | number \| null | `null` | Optional RPM value. When present, rendered below the unit label. |
-| `unit` | string | `"KM/H"` | Speed unit label displayed below the value. |
-| `gear` | string | `""` | Optional current gear string (e.g. `"3"`, `"N"`, `"R"`). Displayed above the value in ink accent when set. |
-| `size` | number | `160` | Width of the gauge in pixels. Height is 70 % of width (viewBox aspect ratio). Font sizes scale proportionally. |
-
-#### Events
-
-None. `tc-speedometer` is a purely presentational element.
-
-#### Slots
-
-None. All content is driven by attributes.
-
-#### CSS Custom Properties
-
-| Property | Default | Description |
-|---|---|---|
-| `--bs-speedometer-size` | `160px` | Gauge width. Written inline by the element from the `size` attribute. |
-| `--bs-speedometer-bg` | `var(--tc-surface)` | Gauge background colour. |
-| `--bs-speedometer-border-color` | `var(--tc-border)` | 1px hairline border colour. |
-| `--bs-speedometer-track-color` | `var(--tc-border-strong)` | Arc track stroke colour. |
-| `--bs-speedometer-fill-color` | `var(--tc-app-accent)` | Arc fill stroke colour (normal state). |
-| `--bs-speedometer-danger-fill-color` | `var(--tc-danger)` | Arc fill and value colour when `data-danger="true"` (pct ≥ 0.85). |
-| `--bs-speedometer-tick-color` | `var(--tc-text-faint)` | Tick mark stroke colour. |
-| `--bs-speedometer-value-color` | `var(--tc-text)` | Speed value text colour. |
-| `--bs-speedometer-unit-color` | `var(--tc-text-muted)` | Unit label text colour. |
-| `--bs-speedometer-gear-color` | `var(--tc-app-accent)` | Gear indicator text colour. |
-| `--bs-speedometer-rpm-color` | `var(--tc-text-faint)` | RPM line text colour. |
-| `--bs-speedometer-value-font-size` | *(set by `size` attr)* | Value font size; written inline at `size × 0.2` px. |
-| `--bs-speedometer-gear-font-size` | *(set by `size` attr)* | Gear font size; written inline at `size × 0.125` px. |
-| `--bs-speedometer-unit-font-size` | `0.6875rem` | Unit label font size (~11 px). |
-| `--bs-speedometer-rpm-font-size` | `0.625rem` | RPM line font size (~10 px). |
-
-#### Example
-
-```html
-<tc-speedometer value="120" gear="4" rpm="3200"></tc-speedometer>
-
-<script>
-  const el = document.querySelector('tc-speedometer')
-  // update programmatically
-  el.value = 200   // triggers danger state (≥ 85% of default max 220)
-  el.rpm = 6800
-  el.gear = '6'
-</script>
-```
-
----
 
 ### tc-scroll-text
 

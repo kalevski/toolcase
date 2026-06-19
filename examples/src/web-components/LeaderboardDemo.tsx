@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 import type { LeaderboardEntry } from '@toolcase/web-components'
 
 const FULL_ENTRIES: LeaderboardEntry[] = [
@@ -91,27 +90,36 @@ const LeaderboardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Leaderboard"
+                        <tc-rich-page-header
+                            title-text="Leaderboard"
                             description="Table-based leaderboard with avatar, tier, sprints, trend, and points columns. Entries are set via the JS property. Interactive rows (with an id) dispatch a tc-select event on click or Enter/Space."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full leaderboard (all columns, interactive rows)">
+                            <tc-section-card title="Full leaderboard (all columns, interactive rows)">
                                 {selected && (
-                                    <p className="mb-3" style={{ fontSize: '0.875rem', color: 'var(--tc-text-muted)' }}>
+                                    <p
+                                        className="mb-3"
+                                        style={{
+                                            fontSize: '0.875rem',
+                                            color: 'var(--tc-text-muted)',
+                                        }}
+                                    >
                                         Selected: <strong>{selected}</strong>
                                     </p>
                                 )}
                                 {/* @ts-ignore */}
                                 <tc-leaderboard ref={fullRef}></tc-leaderboard>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Column-config variant (no Tier/Sprints, custom Trend header)">
+                            <tc-section-card title="Column-config variant (no Tier/Sprints, custom Trend header)">
                                 {/* @ts-ignore */}
                                 <tc-leaderboard ref={compactRef}></tc-leaderboard>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-radio-group'
 
 let _idCounter = 0
@@ -6,14 +7,6 @@ export interface RadioGroupOption {
     value: string
     label: string
     disabled?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class RadioGroup extends HTMLElement {
@@ -37,10 +30,14 @@ export class RadioGroup extends HTMLElement {
         if (!this._initialised) {
             this._value = this.getAttribute('value') ?? ''
             this.render()
-            this.addEventListener('change', this._onNativeChange)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('change', this._onNativeChange)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -59,7 +56,9 @@ export class RadioGroup extends HTMLElement {
         const focusedValue = this.querySelector<HTMLInputElement>('input:focus')?.value ?? null
         this.render()
         if (focusedValue !== null) {
-            for (const input of Array.from(this.querySelectorAll<HTMLInputElement>('input[type="radio"]'))) {
+            for (const input of Array.from(
+                this.querySelectorAll<HTMLInputElement>('input[type="radio"]'),
+            )) {
                 if (input.value === focusedValue) {
                     input.focus()
                     break
@@ -110,7 +109,9 @@ export class RadioGroup extends HTMLElement {
             const focusedValue = this.querySelector<HTMLInputElement>('input:focus')?.value ?? null
             this.render()
             if (focusedValue !== null) {
-                for (const input of Array.from(this.querySelectorAll<HTMLInputElement>('input[type="radio"]'))) {
+                for (const input of Array.from(
+                    this.querySelectorAll<HTMLInputElement>('input[type="radio"]'),
+                )) {
                     if (input.value === focusedValue) {
                         input.focus()
                         break
@@ -136,7 +137,9 @@ export class RadioGroup extends HTMLElement {
         }
 
         if (!tabbableSet) {
-            const first = this.querySelector<HTMLInputElement>('input[type="radio"]:not([disabled])')
+            const first = this.querySelector<HTMLInputElement>(
+                'input[type="radio"]:not([disabled])',
+            )
             if (first) first.setAttribute('tabindex', '0')
         }
     }
@@ -146,7 +149,7 @@ export class RadioGroup extends HTMLElement {
         if (input.type !== 'radio') return
 
         const optValue = input.value
-        const option = this._options.find(o => o.value === optValue)
+        const option = this._options.find((o) => o.value === optValue)
         if (option?.disabled) return
         if (optValue === this._value) return
 
@@ -154,11 +157,13 @@ export class RadioGroup extends HTMLElement {
         // Triggers attributeChangedCallback → _patchCheckedAndTabindex (surgical, no full re-render)
         this.setAttribute('value', optValue)
 
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: optValue },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: optValue },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(optValue)
     }
 
@@ -167,14 +172,15 @@ export class RadioGroup extends HTMLElement {
         if (target.tagName !== 'INPUT' || (target as HTMLInputElement).type !== 'radio') return
 
         const key = e.key
-        if (key !== 'ArrowDown' && key !== 'ArrowRight' && key !== 'ArrowUp' && key !== 'ArrowLeft') return
+        if (key !== 'ArrowDown' && key !== 'ArrowRight' && key !== 'ArrowUp' && key !== 'ArrowLeft')
+            return
 
         e.preventDefault()
 
-        const enabledOptions = this._options.filter(o => !o.disabled)
+        const enabledOptions = this._options.filter((o) => !o.disabled)
         if (enabledOptions.length === 0) return
 
-        const currentIdx = enabledOptions.findIndex(o => o.value === this._value)
+        const currentIdx = enabledOptions.findIndex((o) => o.value === this._value)
         let nextIdx: number
 
         if (key === 'ArrowDown' || key === 'ArrowRight') {
@@ -191,15 +197,18 @@ export class RadioGroup extends HTMLElement {
         this.setAttribute('value', nextOption.value)
 
         // Focus the newly selected input after DOM patch
-        const nextInput = Array.from(this.querySelectorAll<HTMLInputElement>('input[type="radio"]'))
-            .find(inp => inp.value === nextOption.value)
+        const nextInput = Array.from(
+            this.querySelectorAll<HTMLInputElement>('input[type="radio"]'),
+        ).find((inp) => inp.value === nextOption.value)
         if (nextInput) nextInput.focus()
 
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: nextOption.value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: nextOption.value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(nextOption.value)
     }
 
@@ -209,34 +218,37 @@ export class RadioGroup extends HTMLElement {
         // Fallback name ensures same-group browser behavior even without an explicit name attribute
         const name = this.name ?? this._idPrefix
 
-        const selectedEnabled = this._options.find(o => o.value === this._value && !o.disabled)
-        const firstEnabled = this._options.find(o => !o.disabled)
-        const tabbableValue = selectedEnabled ? selectedEnabled.value : (firstEnabled?.value ?? null)
+        const selectedEnabled = this._options.find((o) => o.value === this._value && !o.disabled)
+        const firstEnabled = this._options.find((o) => !o.disabled)
+        const tabbableValue = selectedEnabled
+            ? selectedEnabled.value
+            : (firstEnabled?.value ?? null)
 
         const optionsClass = inline
             ? 'tc-radio-group-options tc-radio-group-options--inline'
             : 'tc-radio-group-options'
 
-        const legendHtml = label != null
-            ? `<legend class="tc-radio-group-label">${esc(label)}</legend>`
-            : ''
+        const legendHtml =
+            label != null ? `<legend class="tc-radio-group-label">${esc(label)}</legend>` : ''
 
-        const optionsHtml = this._options.map((opt, idx) => {
-            const inputId = `${this._idPrefix}-${idx}`
-            const isSelected = opt.value === this._value
-            const isTabbable = opt.value === tabbableValue
-            const checkedAttr = isSelected ? ' checked' : ''
-            const disabledAttr = opt.disabled ? ' disabled aria-disabled="true"' : ''
-            const tabindex = isTabbable ? '0' : '-1'
+        const optionsHtml = this._options
+            .map((opt, idx) => {
+                const inputId = `${this._idPrefix}-${idx}`
+                const isSelected = opt.value === this._value
+                const isTabbable = opt.value === tabbableValue
+                const checkedAttr = isSelected ? ' checked' : ''
+                const disabledAttr = opt.disabled ? ' disabled aria-disabled="true"' : ''
+                const tabindex = isTabbable ? '0' : '-1'
 
-            return [
-                `<div class="form-check">`,
-                `<input type="radio" class="form-check-input" id="${inputId}"`,
-                ` name="${esc(name)}" value="${esc(opt.value)}"${checkedAttr}${disabledAttr} tabindex="${tabindex}">`,
-                `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
-                `</div>`,
-            ].join('')
-        }).join('')
+                return [
+                    `<div class="form-check">`,
+                    `<input type="radio" class="form-check-input" id="${inputId}"`,
+                    ` name="${esc(name)}" value="${esc(opt.value)}"${checkedAttr}${disabledAttr} tabindex="${tabindex}">`,
+                    `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
+                    `</div>`,
+                ].join('')
+            })
+            .join('')
 
         this.innerHTML = [
             `<fieldset class="tc-radio-group">`,

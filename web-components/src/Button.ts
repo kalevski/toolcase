@@ -1,14 +1,22 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-button'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type ButtonVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 export type ButtonSize = 'sm' | 'lg'
 export type ButtonType = 'button' | 'submit' | 'reset'
 
-const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: ButtonVariant[] = [...VARIANTS_FULL]
 const SIZES: ButtonSize[] = ['sm', 'lg']
 
 export class Button extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -37,7 +45,7 @@ export class Button extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-button-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -48,7 +56,7 @@ export class Button extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-button-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get variant(): ButtonVariant {

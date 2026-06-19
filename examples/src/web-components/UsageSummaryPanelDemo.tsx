@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const UsageSummaryPanelDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -37,49 +36,54 @@ const UsageSummaryPanelDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="UsageSummaryPanel"
+                        <tc-rich-page-header
+                            title-text="UsageSummaryPanel"
                             description="Usage-metrics panel with progress bars for resource consumption. Set items via the usage JS property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Basic usage — multiple resources">
+                            <tc-section-card title="Basic usage — multiple resources">
                                 <div style={{ maxWidth: 400 }}>
                                     {/* @ts-ignore */}
                                     <tc-usage-summary-panel title="Resource Usage" ref={basicRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Near-limit and over-limit (warn) rows">
+                            <tc-section-card title="Near-limit and over-limit (warn) rows">
                                 <div style={{ maxWidth: 400 }}>
                                     {/* @ts-ignore */}
                                     <tc-usage-summary-panel title="Plan Limits" ref={warnRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton (default 3 rows)">
+                            <tc-section-card title="Loading skeleton (default 3 rows)">
                                 <div style={{ maxWidth: 400 }}>
                                     {/* @ts-ignore */}
                                     <tc-usage-summary-panel title="Usage" loading />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton — custom count">
+                            <tc-section-card title="Loading skeleton — custom count">
                                 <div style={{ maxWidth: 400 }}>
                                     {/* @ts-ignore */}
-                                    <tc-usage-summary-panel loading loading-count="4" ref={loadingRef} />
+                                    <tc-usage-summary-panel
+                                        loading
+                                        loading-count="4"
+                                        ref={loadingRef}
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No title — inline panel">
+                            <tc-section-card title="No title — inline panel">
                                 <div style={{ maxWidth: 400 }}>
                                     {/* @ts-ignore */}
                                     <tc-usage-summary-panel ref={fullRef} />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

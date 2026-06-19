@@ -1,5 +1,5 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-tier-ladder'
 
@@ -11,24 +11,6 @@ export interface TierItem {
     name: string
     range: string
     color?: TierColor
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr, 'tc-tier-ladder-current-icon')
 }
 
 const checkIconHtml = lucideByName('check')
@@ -119,7 +101,7 @@ export class TierLadder extends HTMLElement {
             listHtml = `<ol class="tc-tier-ladder-list"><li class="tc-tier-ladder-empty">No tiers defined.</li></ol>`
         } else {
             const rowsHtml = this._tiers
-                .map(tier => this._tierRowHtml(tier, tier.id === currentId))
+                .map((tier) => this._tierRowHtml(tier, tier.id === currentId))
                 .join('')
             listHtml = `<ol class="tc-tier-ladder-list">${rowsHtml}</ol>`
         }

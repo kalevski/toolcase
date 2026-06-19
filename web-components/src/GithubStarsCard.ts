@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-github-stars-card'
@@ -8,23 +9,6 @@ export interface GithubStatsData {
     forks?: number
     contributors?: number
     version?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string, cls?: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    return svg ? icon(svg, cls) : ''
 }
 
 // Pre-compute unconditionally rendered icons at module load time.
@@ -86,7 +70,7 @@ export class GithubStarsCard extends HTMLElement {
         return this._stats
     }
     set stats(v: GithubStatsData) {
-        this._stats = (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}
+        this._stats = v && typeof v === 'object' && !Array.isArray(v) ? v : {}
         if (this._initialised) this.render()
     }
 
@@ -143,25 +127,33 @@ export class GithubStarsCard extends HTMLElement {
         const ctrl = new AbortController()
         this._pendingFetch = ctrl
 
-        fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`, {
-            signal: ctrl.signal,
-        })
-            .then(r => r.json())
+        fetch(
+            `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+            {
+                signal: ctrl.signal,
+            },
+        )
+            .then((r) => r.json())
             .then((data: Record<string, unknown>) => {
                 if (ctrl.signal.aborted) return
                 this._liveStats = {
-                    stars: typeof data.stargazers_count === 'number' ? data.stargazers_count : undefined,
+                    stars:
+                        typeof data.stargazers_count === 'number'
+                            ? data.stargazers_count
+                            : undefined,
                     forks: typeof data.forks_count === 'number' ? data.forks_count : undefined,
                 }
                 this._fetchError = false
                 this._pendingFetch = null
                 this.render()
                 const resolved = this._mergedStats()
-                this.dispatchEvent(new CustomEvent('tc-stats', {
-                    bubbles: true,
-                    composed: true,
-                    detail: { stats: resolved },
-                }))
+                this.dispatchEvent(
+                    new CustomEvent('tc-stats', {
+                        bubbles: true,
+                        composed: true,
+                        detail: { stats: resolved },
+                    }),
+                )
                 if (typeof this.onStats === 'function') this.onStats(resolved)
             })
             .catch((err: unknown) => {
@@ -193,14 +185,20 @@ export class GithubStarsCard extends HTMLElement {
         const repo = this.repo
         const ctaLabel = this.ctaLabel
         // Show skeleton only when fetch is pending AND there are no pre-loaded stats to show.
-        const loading = this.fetchLive && !this._liveStats && !this._fetchError && (!!owner && !!repo) && !this._hasPreloadedStats()
+        const loading =
+            this.fetchLive &&
+            !this._liveStats &&
+            !this._fetchError &&
+            !!owner &&
+            !!repo &&
+            !this._hasPreloadedStats()
         const repoUrl = `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`
         const merged = this._mergedStats()
 
         if (loading) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            const slugLabel = (owner && repo) ? `${esc(owner)}/${esc(repo)}` : ''
+            const slugLabel = owner && repo ? `${esc(owner)}/${esc(repo)}` : ''
             this.innerHTML = [
                 '<div class="tc-github-stars-card" aria-hidden="true">',
                 '<div class="tc-github-stars-card-head">',
@@ -222,57 +220,66 @@ export class GithubStarsCard extends HTMLElement {
         this.removeAttribute('role')
         this.removeAttribute('aria-busy')
 
-        const slugHtml = (owner && repo)
-            ? `<a class="tc-github-stars-card-slug" href="${esc(repoUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(owner)}/${esc(repo)} on GitHub">${esc(owner)}/${esc(repo)}</a>`
-            : `<span class="tc-github-stars-card-slug">${esc(owner || '–')}/${esc(repo || '–')}</span>`
+        const slugHtml =
+            owner && repo
+                ? `<a class="tc-github-stars-card-slug" href="${esc(repoUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(owner)}/${esc(repo)} on GitHub">${esc(owner)}/${esc(repo)}</a>`
+                : `<span class="tc-github-stars-card-slug">${esc(owner || '–')}/${esc(repo || '–')}</span>`
 
         const statCells: string[] = []
 
         if (merged.stars !== undefined) {
-            statCells.push([
-                '<div class="tc-github-stars-card-stat">',
-                `<span class="tc-github-stars-card-stat-icon" aria-label="Stars">${starIconHtml}</span>`,
-                `<span class="tc-github-stars-card-stat-value">${esc(humanise(merged.stars))}</span>`,
-                '<span class="tc-github-stars-card-stat-label">stars</span>',
-                '</div>',
-            ].join(''))
+            statCells.push(
+                [
+                    '<div class="tc-github-stars-card-stat">',
+                    `<span class="tc-github-stars-card-stat-icon" aria-label="Stars">${starIconHtml}</span>`,
+                    `<span class="tc-github-stars-card-stat-value">${esc(humanise(merged.stars))}</span>`,
+                    '<span class="tc-github-stars-card-stat-label">stars</span>',
+                    '</div>',
+                ].join(''),
+            )
         }
 
         if (merged.forks !== undefined) {
-            statCells.push([
-                '<div class="tc-github-stars-card-stat">',
-                `<span class="tc-github-stars-card-stat-icon" aria-label="Forks">${forkIconHtml}</span>`,
-                `<span class="tc-github-stars-card-stat-value">${esc(humanise(merged.forks))}</span>`,
-                '<span class="tc-github-stars-card-stat-label">forks</span>',
-                '</div>',
-            ].join(''))
+            statCells.push(
+                [
+                    '<div class="tc-github-stars-card-stat">',
+                    `<span class="tc-github-stars-card-stat-icon" aria-label="Forks">${forkIconHtml}</span>`,
+                    `<span class="tc-github-stars-card-stat-value">${esc(humanise(merged.forks))}</span>`,
+                    '<span class="tc-github-stars-card-stat-label">forks</span>',
+                    '</div>',
+                ].join(''),
+            )
         }
 
         if (merged.contributors !== undefined) {
-            statCells.push([
-                '<div class="tc-github-stars-card-stat">',
-                `<span class="tc-github-stars-card-stat-icon" aria-label="Contributors">${usersIconHtml}</span>`,
-                `<span class="tc-github-stars-card-stat-value">${esc(humanise(merged.contributors))}</span>`,
-                '<span class="tc-github-stars-card-stat-label">contributors</span>',
-                '</div>',
-            ].join(''))
+            statCells.push(
+                [
+                    '<div class="tc-github-stars-card-stat">',
+                    `<span class="tc-github-stars-card-stat-icon" aria-label="Contributors">${usersIconHtml}</span>`,
+                    `<span class="tc-github-stars-card-stat-value">${esc(humanise(merged.contributors))}</span>`,
+                    '<span class="tc-github-stars-card-stat-label">contributors</span>',
+                    '</div>',
+                ].join(''),
+            )
         }
 
         if (merged.version) {
-            statCells.push([
-                '<div class="tc-github-stars-card-stat">',
-                `<span class="tc-github-stars-card-stat-icon" aria-label="Version">${tagIconHtml}</span>`,
-                `<span class="tc-github-stars-card-stat-value tc-github-stars-card-version">${esc(merged.version)}</span>`,
-                '<span class="tc-github-stars-card-stat-label">latest</span>',
-                '</div>',
-            ].join(''))
+            statCells.push(
+                [
+                    '<div class="tc-github-stars-card-stat">',
+                    `<span class="tc-github-stars-card-stat-icon" aria-label="Version">${tagIconHtml}</span>`,
+                    `<span class="tc-github-stars-card-stat-value tc-github-stars-card-version">${esc(merged.version)}</span>`,
+                    '<span class="tc-github-stars-card-stat-label">latest</span>',
+                    '</div>',
+                ].join(''),
+            )
         }
 
         const errorHtml = this._fetchError
             ? '<div class="tc-github-stars-card-error" role="alert">Could not load live stats.</div>'
             : ''
 
-        const ctaUrl = (owner && repo) ? `${repoUrl}` : '#'
+        const ctaUrl = owner && repo ? `${repoUrl}` : '#'
         const ctaHtml = [
             `<a class="tc-github-stars-card-cta" href="${esc(ctaUrl)}" target="_blank" rel="noopener noreferrer"`,
             ` aria-label="${esc(ctaLabel)} — ${esc(owner)}/${esc(repo)}"`,
@@ -300,11 +307,13 @@ export class GithubStarsCard extends HTMLElement {
         const ctaEl = this.querySelector<HTMLAnchorElement>('.tc-github-stars-card-cta')
         if (ctaEl) {
             ctaEl.addEventListener('click', () => {
-                this.dispatchEvent(new CustomEvent('tc-cta-click', {
-                    bubbles: true,
-                    composed: true,
-                    detail: { owner, repo },
-                }))
+                this.dispatchEvent(
+                    new CustomEvent('tc-cta-click', {
+                        bubbles: true,
+                        composed: true,
+                        detail: { owner, repo },
+                    }),
+                )
             })
         }
     }

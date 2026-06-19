@@ -1,13 +1,21 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-spinner'
 
 export type SpinnerType = 'border' | 'grow' | 'dots' | 'bars' | 'pulse' | 'orbit'
-export type SpinnerVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type SpinnerVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
 const TYPES: SpinnerType[] = ['border', 'grow', 'dots', 'bars', 'pulse', 'orbit']
-const VARIANTS: SpinnerVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: SpinnerVariant[] = [...VARIANTS_FULL]
 
 export class Spinner extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['type', 'variant', 'size', 'label']
     }
@@ -64,7 +72,8 @@ export class Spinner extends HTMLElement {
 
         const variantClass = variant ? ` text-${variant}` : ''
         const sizeClass = small ? ` spinner-${type}-sm` : ''
-        const segments = type === 'dots' || type === 'bars' ? '<span></span><span></span><span></span>' : ''
+        const segments =
+            type === 'dots' || type === 'bars' ? '<span></span><span></span><span></span>' : ''
 
         this.innerHTML = `<div class="spinner-${type}${variantClass}${sizeClass}" role="status">${segments}<span class="visually-hidden">${label}</span></div>`
     }

@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-subtitle'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type SubtitleAlign = 'left' | 'right' | 'center'
 const ALIGNS: SubtitleAlign[] = ['left', 'right', 'center']
@@ -110,5 +103,7 @@ export class Subtitle extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: Subtitle }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: Subtitle
+    }
 }

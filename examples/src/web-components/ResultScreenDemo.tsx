@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const STATS = [
     { label: 'Time', value: '14:32' },
@@ -75,14 +74,17 @@ const ResultScreenDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ResultScreen"
+                        <tc-rich-page-header
+                            title-text="ResultScreen"
                             description="Match / round result screen: a centred region with a mono eyebrow, a status-toned title, a hairline divider, an optional subtitle, hairline-separated stat rows, a soft reward strip, and a row of action buttons. Stats, rewards, and actions are supplied via JS properties; title text/colour, subtitle, and eyebrow are attributes. Emits tc-action with the clicked action's id."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full screen (stats + rewards + actions)">
+                            <tc-section-card title="Full screen (stats + rewards + actions)">
                                 {/* @ts-ignore */}
                                 <tc-result-screen
                                     ref={fullRef}
@@ -92,9 +94,9 @@ const ResultScreenDemo: React.FC = () => {
                                 <div className="form-text mt-3">
                                     Last action: <code>{lastAction}</code>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Title colour: gold (victory tone)">
+                            <tc-section-card title="Title colour: gold (victory tone)">
                                 {/* @ts-ignore */}
                                 <tc-result-screen
                                     ref={victoryRef}
@@ -103,9 +105,9 @@ const ResultScreenDemo: React.FC = () => {
                                     title-color="gold"
                                     subtitle="Every wave repelled. The stage is yours."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Title colour: danger (defeat tone)">
+                            <tc-section-card title="Title colour: danger (defeat tone)">
                                 {/* @ts-ignore */}
                                 <tc-result-screen
                                     title-text="Defeat"
@@ -113,22 +115,29 @@ const ResultScreenDemo: React.FC = () => {
                                     title-color="danger"
                                     subtitle="You were overrun at the final gate."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal (defaults + a single action)">
+                            <tc-section-card title="Minimal (defaults + a single action)">
                                 {/* @ts-ignore */}
                                 <tc-result-screen ref={minimalRef} title-text="Round Complete" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title='Variant="defeat" (seeds "Game Over" / danger)'>
+                            <tc-section-card title='Variant="defeat" (seeds "Game Over" / danger)'>
                                 {/* @ts-ignore */}
-                                <tc-result-screen ref={defeatRef} variant="defeat" subtitle="The colony has fallen." />
-                            </SectionCard>
+                                <tc-result-screen
+                                    ref={defeatRef}
+                                    variant="defeat"
+                                    subtitle="The colony has fallen."
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Preset alias tag: tc-victory-screen">
+                            <tc-section-card title="Preset alias tag: tc-victory-screen">
                                 {/* @ts-ignore */}
-                                <tc-victory-screen ref={winRef} subtitle="All waves repelled. The colony stands." />
-                            </SectionCard>
+                                <tc-victory-screen
+                                    ref={winRef}
+                                    subtitle="All waves repelled. The colony stands."
+                                />
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

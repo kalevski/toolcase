@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PipelineDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -45,27 +44,30 @@ const PipelineDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Pipeline"
+                        <tc-rich-page-header
+                            title-text="Pipeline"
                             description="Horizontal pipeline / steps visualization with numbered markers, state (default / live / complete), and hairline connectors. Set steps via the JS steps property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Build pipeline (live step)">
+                            <tc-section-card title="Build pipeline (live step)">
                                 {/* @ts-ignore */}
                                 <tc-pipeline ref={basicRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Deployment pipeline (5 steps, live mid-way)">
+                            <tc-section-card title="Deployment pipeline (5 steps, live mid-way)">
                                 {/* @ts-ignore */}
                                 <tc-pipeline ref={mixedRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="All complete">
+                            <tc-section-card title="All complete">
                                 {/* @ts-ignore */}
                                 <tc-pipeline ref={completeRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

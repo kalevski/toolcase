@@ -1,15 +1,11 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-currency-chip'
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 // Port of game-components `gc-currency-chip`: a compact currency pill pairing a
 // leading glyph (currency symbol or short icon string) with a formatted amount.
 // Purely attribute-driven, no slots, no events. The fantasy chrome (gilded frame,
 // metal fill) is dropped — this renders as a sharp slate chip per the design system.
 export class CurrencyChip extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

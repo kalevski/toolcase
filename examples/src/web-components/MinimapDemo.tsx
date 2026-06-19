@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MinimapDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -48,37 +47,45 @@ const MinimapDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Minimap"
+                        <tc-rich-page-header
+                            title-text="Minimap"
                             description="Positioned-marker map surface with a fixed player dot at centre. World coordinates are projected onto the surface; the rotation attribute spins the map around the player. Entity markers are circles; all other chrome is sharp. Set markers via the JS markers property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic minimap with entity markers">
+                            <tc-section-card title="Basic minimap with entity markers">
                                 {/* @ts-ignore */}
                                 <tc-minimap ref={basicRef} world-width="100" world-height="100" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Rotated 45°">
+                            <tc-section-card title="Rotated 45°">
                                 {/* @ts-ignore */}
-                                <tc-minimap ref={rotatedRef} world-width="100" world-height="100" rotation="45" />
-                            </SectionCard>
+                                <tc-minimap
+                                    ref={rotatedRef}
+                                    world-width="100"
+                                    world-height="100"
+                                    rotation="45"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Large map (300px) with custom world bounds">
+                            <tc-section-card title="Large map (300px) with custom world bounds">
                                 {/* @ts-ignore */}
                                 <tc-minimap ref={largeRef} size="300" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Empty minimap">
+                            <tc-section-card title="Empty minimap">
                                 {/* @ts-ignore */}
                                 <tc-minimap ref={emptyRef} world-width="100" world-height="100" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom size via attribute (size=160)">
+                            <tc-section-card title="Custom size via attribute (size=160)">
                                 {/* @ts-ignore */}
                                 <tc-minimap size="160" world-width="100" world-height="100" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 import type { TableColumn } from '@toolcase/web-components'
 
 interface UserRow {
@@ -107,49 +106,66 @@ const TableDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Table"
+                        <tc-rich-page-header
+                            title-text="Table"
                             description="Flexible table with sortable columns, loading skeletons, and optional row-click handlers. Columns, data, and rowKey are set via JS properties; rows become interactive when an onrowclick callback is set and emit a tc-row-click event."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Sortable + striped + hoverable + render column">
+                            <tc-section-card title="Sortable + striped + hoverable + render column">
                                 {/* @ts-ignore */}
                                 <tc-table ref={sortableRef} striped hoverable></tc-table>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Compact + borderless">
+                            <tc-section-card title="Compact + borderless">
                                 {/* @ts-ignore */}
                                 <tc-table ref={compactRef} compact borderless hoverable></tc-table>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Sticky header (height-constrained, scroll the box)">
+                            <tc-section-card title="Sticky header (height-constrained, scroll the box)">
                                 <div style={{ maxHeight: 220 }}>
                                     {/* @ts-ignore */}
-                                    <tc-table ref={stickyRef} sticky-header hoverable striped></tc-table>
+                                    <tc-table
+                                        ref={stickyRef}
+                                        sticky-header
+                                        hoverable
+                                        striped
+                                    ></tc-table>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Row click → tc-row-click">
+                            <tc-section-card title="Row click → tc-row-click">
                                 {clicked && (
-                                    <p className="mb-3" style={{ fontSize: '0.875rem', color: 'var(--tc-text-muted)' }}>
+                                    <p
+                                        className="mb-3"
+                                        style={{
+                                            fontSize: '0.875rem',
+                                            color: 'var(--tc-text-muted)',
+                                        }}
+                                    >
                                         Last clicked row: <strong>{clicked}</strong>
                                     </p>
                                 )}
                                 {/* @ts-ignore */}
                                 <tc-table ref={clickRef} hoverable></tc-table>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Empty state">
+                            <tc-section-card title="Empty state">
                                 {/* @ts-ignore */}
-                                <tc-table ref={emptyRef} empty-message="No contributors yet"></tc-table>
-                            </SectionCard>
+                                <tc-table
+                                    ref={emptyRef}
+                                    empty-message="No contributors yet"
+                                ></tc-table>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-table ref={loadingRef} loading loading-rows="4"></tc-table>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

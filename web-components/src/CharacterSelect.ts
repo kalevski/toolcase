@@ -1,4 +1,6 @@
-import * as LucideIcons from 'lucide-static'
+import { isImageSrc } from './internal/image'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-character-select'
@@ -10,31 +12,12 @@ export interface CharacterEntry {
     locked?: boolean
     portrait?: string
     description?: string
-    stats?: { label: string, value: string | number }[]
+    stats?: { label: string; value: string | number }[]
 }
 
 export interface CharacterSelectEventMap {
     'tc-select': CustomEvent<{ id: string }>
     'tc-confirm': CustomEvent<{ id: string }>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    if (!svg) return ''
-    return icon(svg)
 }
 
 // Locked tiles carry a lucide lock glyph instead of the game-components 🔒 emoji
@@ -43,9 +26,6 @@ const lockIconHtml = lucideByName('lock')
 
 // A portrait that looks like an image source is rendered as an <img>; otherwise
 // the string is treated as a short glyph/initials label inside the tile.
-function isImageSrc(value: string): boolean {
-    return /^(https?:|\/|\.\/|\.\.\/|data:image\/)/.test(value) || /\.(png|jpe?g|gif|svg|webp|avif)$/i.test(value)
-}
 
 export class CharacterSelect extends HTMLElement {
     private _initialised = false
@@ -63,11 +43,15 @@ export class CharacterSelect extends HTMLElement {
         if (!this._initialised) {
             this.setAttribute('role', 'listbox')
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('dblclick', this._onDblClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback
+        // removes them, and a move/remount (React reconciliation) disconnects
+        // then reconnects without re-running the one-time init above. Adding the
+        // same handler reference twice is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('dblclick', this._onDblClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -154,9 +138,11 @@ export class CharacterSelect extends HTMLElement {
     private _portraitMarkup(character: CharacterEntry): string {
         const portrait = character.portrait
         if (portrait && isImageSrc(portrait)) {
-            return `<span class="tc-character-select-portrait">`
-                + `<img src="${esc(portrait)}" alt="" />`
-                + `</span>`
+            return (
+                `<span class="tc-character-select-portrait">` +
+                `<img src="${esc(portrait)}" alt="" />` +
+                `</span>`
+            )
         }
         const glyph = portrait || character.name.charAt(0).toUpperCase()
         return `<span class="tc-character-select-portrait" aria-hidden="true">${esc(glyph)}</span>`
@@ -169,59 +155,69 @@ export class CharacterSelect extends HTMLElement {
         const description = character.description
             ? `<p class="tc-character-select-detail-description">${esc(character.description)}</p>`
             : ''
-        const stats = (character.stats || []).map(stat =>
-            `<div class="tc-character-select-detail-stat">`
-            + `<span class="tc-character-select-detail-stat-label">${esc(stat.label)}</span>`
-            + `<span class="tc-character-select-detail-stat-value">${esc(this.formatValue(stat.value))}</span>`
-            + `</div>`
-        ).join('')
+        const stats = (character.stats || [])
+            .map(
+                (stat) =>
+                    `<div class="tc-character-select-detail-stat">` +
+                    `<span class="tc-character-select-detail-stat-label">${esc(stat.label)}</span>` +
+                    `<span class="tc-character-select-detail-stat-value">${esc(this.formatValue(stat.value))}</span>` +
+                    `</div>`,
+            )
+            .join('')
         const statsBlock = stats
             ? `<div class="tc-character-select-detail-stats">${stats}</div>`
             : ''
-        return `${role}`
-            + `<h3 class="tc-character-select-detail-name">${esc(character.name)}</h3>`
-            + description
-            + statsBlock
+        return (
+            `${role}` +
+            `<h3 class="tc-character-select-detail-name">${esc(character.name)}</h3>` +
+            description +
+            statsBlock
+        )
     }
 
     private render(): void {
         this.classList.add('tc-character-select')
 
         const selected = this.selectedId
-        const active = this._characters.find(c => c.id === selected) ?? null
+        const active = this._characters.find((c) => c.id === selected) ?? null
 
-        const tilesMarkup = this._characters.map(character => {
-            const isSelected = character.id === selected
-            const locked = !!character.locked
-            const classes = ['tc-character-select-tile']
-            if (isSelected) classes.push('is-selected')
-            if (locked) classes.push('is-locked')
-            const roleMarkup = character.role
-                ? `<span class="tc-character-select-tile-role">${esc(character.role)}</span>`
-                : ''
-            const lockMarkup = locked
-                ? `<span class="tc-character-select-lock" aria-hidden="true">${lockIconHtml}</span>`
-                : ''
-            return `<div role="option" class="${classes.join(' ')}"`
-                + ` data-id="${esc(character.id)}"`
-                + ` tabindex="${locked ? '-1' : '0'}"`
-                + ` aria-selected="${isSelected ? 'true' : 'false'}"`
-                + ` aria-disabled="${locked ? 'true' : 'false'}">`
-                + this._portraitMarkup(character)
-                + `<span class="tc-character-select-tile-body">`
-                + `<span class="tc-character-select-tile-name">${esc(character.name)}</span>`
-                + roleMarkup
-                + `</span>`
-                + lockMarkup
-                + `</div>`
-        }).join('')
+        const tilesMarkup = this._characters
+            .map((character) => {
+                const isSelected = character.id === selected
+                const locked = !!character.locked
+                const classes = ['tc-character-select-tile']
+                if (isSelected) classes.push('is-selected')
+                if (locked) classes.push('is-locked')
+                const roleMarkup = character.role
+                    ? `<span class="tc-character-select-tile-role">${esc(character.role)}</span>`
+                    : ''
+                const lockMarkup = locked
+                    ? `<span class="tc-character-select-lock" aria-hidden="true">${lockIconHtml}</span>`
+                    : ''
+                return (
+                    `<div role="option" class="${classes.join(' ')}"` +
+                    ` data-id="${esc(character.id)}"` +
+                    ` tabindex="${locked ? '-1' : '0'}"` +
+                    ` aria-selected="${isSelected ? 'true' : 'false'}"` +
+                    ` aria-disabled="${locked ? 'true' : 'false'}">` +
+                    this._portraitMarkup(character) +
+                    `<span class="tc-character-select-tile-body">` +
+                    `<span class="tc-character-select-tile-name">${esc(character.name)}</span>` +
+                    roleMarkup +
+                    `</span>` +
+                    lockMarkup +
+                    `</div>`
+                )
+            })
+            .join('')
 
         const detailMarkup = active
             ? this._detailMarkup(active)
             : `<p class="tc-character-select-detail-empty">Select a character.</p>`
 
-        this.innerHTML = `<div class="tc-character-select-grid">${tilesMarkup}</div>`
-            + `<div class="tc-character-select-detail">${detailMarkup}</div>`
+        this.innerHTML =
+            `<div class="tc-character-select-grid">${tilesMarkup}</div>` +
+            `<div class="tc-character-select-detail">${detailMarkup}</div>`
     }
 }
 

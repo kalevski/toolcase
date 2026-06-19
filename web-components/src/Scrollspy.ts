@@ -3,7 +3,6 @@ import { ScrollSpy as BsScrollSpy } from './internal/ScrollSpy'
 const TAG_NAME = 'tc-scrollspy'
 
 export class Scrollspy extends HTMLElement {
-
     private _bsScrollspy: BsScrollSpy | null = null
 
     static get observedAttributes(): string[] {
@@ -54,11 +53,13 @@ export class Scrollspy extends HTMLElement {
 
     private _onActivate = (event: Event): void => {
         const relatedTarget = (event as any).relatedTarget
-        this.dispatchEvent(new CustomEvent('tc-activate', {
-            bubbles: true,
-            composed: true,
-            detail: { relatedTarget },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-activate', {
+                bubbles: true,
+                composed: true,
+                detail: { relatedTarget },
+            }),
+        )
     }
 
     private _applyAttrs(): void {
@@ -87,7 +88,11 @@ export class Scrollspy extends HTMLElement {
         // Bootstrap 5.3 replaced the offset option with rootMargin (Intersection Observer).
         const rootMargin = offsetPx > 0 ? `0px 0px -${offsetPx}px 0px` : undefined
 
-        this._bsScrollspy = new BsScrollSpy(this, { target, smoothScroll, ...(rootMargin ? { rootMargin } : {}) })
+        this._bsScrollspy = new BsScrollSpy(this, {
+            target,
+            smoothScroll,
+            ...(rootMargin ? { rootMargin } : {}),
+        })
         this.addEventListener('activate.bs.scrollspy', this._onActivate)
     }
 

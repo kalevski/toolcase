@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FIELDS = [
     {
@@ -41,7 +40,9 @@ const CharacterCreateDemo: React.FC = () => {
 
         const onName = (e: Event) => setLiveName((e as CustomEvent<{ value: string }>).detail.value)
         const onConfirm = (e: Event) => {
-            const detail = (e as CustomEvent<{ name: string, values: Record<string, string | number> }>).detail
+            const detail = (
+                e as CustomEvent<{ name: string; values: Record<string, string | number> }>
+            ).detail
             setSummary(JSON.stringify({ name: detail.name, ...detail.values }))
         }
         el.addEventListener('tc-name', onName)
@@ -65,14 +66,17 @@ const CharacterCreateDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CharacterCreate"
+                        <tc-rich-page-header
+                            title-text="CharacterCreate"
                             description="Character-creation panel: a name field plus a data-driven list of appearance/class fields (text, select, number, range) and a confirm action. Fields are set via the `fields` JS property; emits tc-name, tc-change, and tc-confirm."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default (data-driven fields, uncontrolled)">
+                            <tc-section-card title="Default (data-driven fields, uncontrolled)">
                                 {/* @ts-ignore */}
                                 <tc-character-create ref={basicRef} />
                                 <div className="form-text mt-3">
@@ -81,12 +85,15 @@ const CharacterCreateDemo: React.FC = () => {
                                 <div className="form-text">
                                     Last confirmed: <code>{summary}</code>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Controlled (pre-filled name + values)">
+                            <tc-section-card title="Controlled (pre-filled name + values)">
                                 {/* @ts-ignore */}
-                                <tc-character-create ref={controlledRef} confirm-label="Create hero" />
-                            </SectionCard>
+                                <tc-character-create
+                                    ref={controlledRef}
+                                    confirm-label="Create hero"
+                                />
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

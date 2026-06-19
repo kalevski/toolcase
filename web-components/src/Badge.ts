@@ -1,11 +1,19 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-badge'
 
-export type BadgeVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type BadgeVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
-const VARIANTS: BadgeVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: BadgeVariant[] = [...VARIANTS_FULL]
 
 export class Badge extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -22,7 +30,7 @@ export class Badge extends HTMLElement {
             this.render()
             if (!this.hasAttribute('text')) {
                 const inner = this.querySelector('.tc-badge-content')
-                if (inner) slotContent.forEach(n => inner.appendChild(n))
+                if (inner) slotContent.forEach((n) => inner.appendChild(n))
             }
             this._initialised = true
         }
@@ -35,7 +43,7 @@ export class Badge extends HTMLElement {
         this.render()
         if (!this.hasAttribute('text')) {
             const newInner = this.querySelector('.tc-badge-content')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 

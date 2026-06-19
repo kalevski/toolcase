@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const VideoEmbedDemo: React.FC = () => {
     return (
@@ -7,14 +6,17 @@ const VideoEmbedDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="VideoEmbed"
+                        <tc-rich-page-header
+                            title-text="VideoEmbed"
                             description="Responsive embedded video player. Detects the provider from the source URL — YouTube, Vimeo, Loom build the correct iframe embed; native files (.mp4/.webm/…) render a <video>. Drives a responsive aspect-ratio frame; forwards autoplay / loop / muted / controls."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="YouTube embed">
+                            <tc-section-card title="YouTube embed">
                                 <div style={{ maxWidth: 640 }}>
                                     {/* @ts-ignore */}
                                     <tc-video-embed
@@ -22,9 +24,9 @@ const VideoEmbedDemo: React.FC = () => {
                                         title="Sample YouTube video"
                                     ></tc-video-embed>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Vimeo embed">
+                            <tc-section-card title="Vimeo embed">
                                 <div style={{ maxWidth: 640 }}>
                                     {/* @ts-ignore */}
                                     <tc-video-embed
@@ -32,9 +34,9 @@ const VideoEmbedDemo: React.FC = () => {
                                         title="Sample Vimeo video"
                                     ></tc-video-embed>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Native .mp4 — poster + controls">
+                            <tc-section-card title="Native .mp4 — poster + controls">
                                 <div style={{ maxWidth: 640 }}>
                                     {/* @ts-ignore */}
                                     <tc-video-embed
@@ -44,9 +46,9 @@ const VideoEmbedDemo: React.FC = () => {
                                         controls="true"
                                     ></tc-video-embed>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Non-16:9 aspect-ratio (1:1 square)">
+                            <tc-section-card title="Non-16:9 aspect-ratio (1:1 square)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-video-embed
@@ -55,7 +57,7 @@ const VideoEmbedDemo: React.FC = () => {
                                         title="Square aspect-ratio embed"
                                     ></tc-video-embed>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 import type { ActionHeaderAction } from '@toolcase/web-components'
 
 const BASIC_ACTIONS: ActionHeaderAction[] = [
@@ -26,7 +25,10 @@ const ActionHeaderDemo: React.FC = () => {
 
     useEffect(() => {
         if (basicRef.current) {
-            const el = basicRef.current as HTMLElement & { actions: ActionHeaderAction[]; onExec: (key: string) => void }
+            const el = basicRef.current as HTMLElement & {
+                actions: ActionHeaderAction[]
+                onExec: (key: string) => void
+            }
             el.actions = BASIC_ACTIONS
             el.onExec = (key: string) => alert(`Exec: ${key}`)
         }
@@ -39,7 +41,10 @@ const ActionHeaderDemo: React.FC = () => {
             el.actions = DISABLED_ACTIONS
         }
         if (allDisabledRef.current) {
-            const el = allDisabledRef.current as HTMLElement & { actions: ActionHeaderAction[]; disabled: boolean }
+            const el = allDisabledRef.current as HTMLElement & {
+                actions: ActionHeaderAction[]
+                disabled: boolean
+            }
             el.actions = BASIC_ACTIONS
             el.disabled = true
         }
@@ -50,40 +55,43 @@ const ActionHeaderDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ActionHeader"
+                        <tc-rich-page-header
+                            title-text="ActionHeader"
                             description="A flex header row with a content region on the left and a row of action buttons on the right. Actions dispatch a tc-exec event when clicked."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic (label + icon actions)">
+                            <tc-section-card title="Basic (label + icon actions)">
                                 {/* @ts-ignore */}
                                 <tc-action-header ref={basicRef}>
                                     <strong>Users</strong>
                                 </tc-action-header>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Icon-only actions">
+                            <tc-section-card title="Icon-only actions">
                                 {/* @ts-ignore */}
                                 <tc-action-header ref={iconRef}>
                                     <span>Documents</span>
                                 </tc-action-header>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Partially disabled (action-level)">
+                            <tc-section-card title="Partially disabled (action-level)">
                                 {/* @ts-ignore */}
                                 <tc-action-header ref={disabledRef}>
                                     <span>Draft</span>
                                 </tc-action-header>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Fully disabled (host-level)">
+                            <tc-section-card title="Fully disabled (host-level)">
                                 {/* @ts-ignore */}
                                 <tc-action-header ref={allDisabledRef}>
                                     <span>Read-only section</span>
                                 </tc-action-header>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

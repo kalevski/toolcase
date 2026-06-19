@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ImageDemo: React.FC = () => {
     const brokenRef = useRef<any>(null)
@@ -19,14 +18,17 @@ const ImageDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Image"
+                        <tc-rich-page-header
+                            title-text="Image"
                             description="Image wrapper with a loading shimmer skeleton, optional aspect ratio, configurable object-fit, and an error fallback (default broken-image icon or custom slotted content)."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Successful image — aspect-ratio 16/9">
+                            <tc-section-card title="Successful image — aspect-ratio 16/9">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-image
@@ -36,9 +38,9 @@ const ImageDemo: React.FC = () => {
                                         object-fit="cover"
                                     ></tc-image>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="object-fit: contain — same image, different fit">
+                            <tc-section-card title="object-fit: contain — same image, different fit">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-image
@@ -48,9 +50,9 @@ const ImageDemo: React.FC = () => {
                                         object-fit="contain"
                                     ></tc-image>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Broken src — default broken-image fallback">
+                            <tc-section-card title="Broken src — default broken-image fallback">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-image
@@ -59,9 +61,9 @@ const ImageDemo: React.FC = () => {
                                         aspect-ratio="16/9"
                                     ></tc-image>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Broken src — custom slotted fallback">
+                            <tc-section-card title="Broken src — custom slotted fallback">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-image
@@ -70,14 +72,25 @@ const ImageDemo: React.FC = () => {
                                         alt="Photo unavailable"
                                         aspect-ratio="16/9"
                                     >
-                                        <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--tc-text-muted)', fontSize: '0.875rem' }}>
-                                            <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>Photo unavailable</div>
+                                        <div
+                                            style={{
+                                                textAlign: 'center',
+                                                padding: '1rem',
+                                                color: 'var(--tc-text-muted)',
+                                                fontSize: '0.875rem',
+                                            }}
+                                        >
+                                            <div
+                                                style={{ fontWeight: 500, marginBottom: '0.25rem' }}
+                                            >
+                                                Photo unavailable
+                                            </div>
                                             <div>This image could not be loaded.</div>
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-image>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

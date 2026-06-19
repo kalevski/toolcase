@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MetricGridDemo: React.FC = () => {
     const itemsRef = useRef<any>(null)
@@ -12,7 +11,13 @@ const MetricGridDemo: React.FC = () => {
             itemsRef.current.items = [
                 { label: 'Total Users', value: '12,480', icon: 'Users' },
                 { label: 'Revenue', value: '$24,500', unit: 'USD', icon: 'DollarSign' },
-                { label: 'Avg Response', value: '142', unit: 'ms', icon: 'Zap', hint: 'P50 over 24 h' },
+                {
+                    label: 'Avg Response',
+                    value: '142',
+                    unit: 'ms',
+                    icon: 'Zap',
+                    hint: 'P50 over 24 h',
+                },
             ]
         }
         if (threeColRef.current) {
@@ -43,47 +48,61 @@ const MetricGridDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="MetricGrid"
+                        <tc-rich-page-header
+                            title-text="MetricGrid"
                             description="CSS-grid container for metric tiles with configurable column count. Set tiles via the items JS property or drop tc-metric-tile markup as children."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="items property (3 columns — default)">
+                            <tc-section-card title="items property (3 columns — default)">
                                 {/* @ts-ignore */}
                                 <tc-metric-grid ref={itemsRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="3 columns (explicit)">
+                            <tc-section-card title="3 columns (explicit)">
                                 {/* @ts-ignore */}
                                 <tc-metric-grid columns="3" ref={threeColRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="4 columns">
+                            <tc-section-card title="4 columns">
                                 {/* @ts-ignore */}
                                 <tc-metric-grid columns="4" ref={fourColRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="2 columns">
+                            <tc-section-card title="2 columns">
                                 {/* @ts-ignore */}
                                 <tc-metric-grid columns="2" ref={twoColRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted children (raw tc-metric-tile markup)">
+                            <tc-section-card title="Slotted children (raw tc-metric-tile markup)">
                                 {/* @ts-ignore */}
                                 <tc-metric-grid columns="3">
                                     {/* @ts-ignore */}
-                                    <tc-metric-tile label="Build Status" value="Passing" icon="CheckCircle" />
+                                    <tc-metric-tile
+                                        label="Build Status"
+                                        value="Passing"
+                                        icon="CheckCircle"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-metric-tile label="Coverage" value="94.2" unit="%" icon="Shield" />
+                                    <tc-metric-tile
+                                        label="Coverage"
+                                        value="94.2"
+                                        unit="%"
+                                        icon="Shield"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-metric-tile label="Open PRs" value="7" hint="2 awaiting review" />
+                                    <tc-metric-tile
+                                        label="Open PRs"
+                                        value="7"
+                                        hint="2 awaiting review"
+                                    />
                                     {/* @ts-ignore */}
                                 </tc-metric-grid>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const LobbyDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -45,9 +44,9 @@ const LobbyDemo: React.FC = () => {
             { id: '1', name: 'Aria', ready: false, host: true },
             { id: '2', name: 'Kestrel', ready: false },
         ]
-        const onLeave = () => setLog(l => ['tc-leave fired', ...l].slice(0, 6))
-        const onReady = () => setLog(l => ['tc-ready fired', ...l].slice(0, 6))
-        const onStart = () => setLog(l => ['tc-start fired', ...l].slice(0, 6))
+        const onLeave = () => setLog((l) => ['tc-leave fired', ...l].slice(0, 6))
+        const onReady = () => setLog((l) => ['tc-ready fired', ...l].slice(0, 6))
+        const onStart = () => setLog((l) => ['tc-start fired', ...l].slice(0, 6))
         el.addEventListener('tc-leave', onLeave)
         el.addEventListener('tc-ready', onReady)
         el.addEventListener('tc-start', onStart)
@@ -63,19 +62,26 @@ const LobbyDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Lobby"
+                        <tc-rich-page-header
+                            title-text="Lobby"
                             description="Multiplayer lobby panel with player slots, ready state, and start controls. Players are set via the JS players property. The host player's slot controls the Start Match button; can-start enables it."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — 4-slot, no mode/map">
+                            <tc-section-card title="Basic — 4-slot, no mode/map">
                                 {/* @ts-ignore */}
-                                <tc-lobby ref={basicRef} capacity="4" style={{ maxWidth: '480px' }} />
-                            </SectionCard>
+                                <tc-lobby
+                                    ref={basicRef}
+                                    capacity="4"
+                                    style={{ maxWidth: '480px' }}
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="With mode, map, host player, can-start">
+                            <tc-section-card title="With mode, map, host player, can-start">
                                 {/* @ts-ignore */}
                                 <tc-lobby
                                     ref={hostRef}
@@ -85,9 +91,9 @@ const LobbyDemo: React.FC = () => {
                                     can-start
                                     style={{ maxWidth: '480px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With rank chips">
+                            <tc-section-card title="With rank chips">
                                 {/* @ts-ignore */}
                                 <tc-lobby
                                     ref={rankedRef}
@@ -96,29 +102,38 @@ const LobbyDemo: React.FC = () => {
                                     map-name="Mirage"
                                     style={{ maxWidth: '480px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Local player marked ready (is-ready attribute)">
+                            <tc-section-card title="Local player marked ready (is-ready attribute)">
                                 {/* @ts-ignore */}
                                 <tc-lobby capacity="4" is-ready style={{ maxWidth: '480px' }} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Events — Leave / Ready Up / Start">
+                            <tc-section-card title="Events — Leave / Ready Up / Start">
                                 {/* @ts-ignore */}
-                                <tc-lobby ref={eventsRef} capacity="4" can-start style={{ maxWidth: '480px' }} />
+                                <tc-lobby
+                                    ref={eventsRef}
+                                    capacity="4"
+                                    can-start
+                                    style={{ maxWidth: '480px' }}
+                                />
                                 <div className="mt-3">
                                     <strong className="d-block mb-1">Event log</strong>
                                     {log.length === 0 ? (
-                                        <span className="text-muted">Click Leave, Ready Up, or Start Match…</span>
+                                        <span className="text-muted">
+                                            Click Leave, Ready Up, or Start Match…
+                                        </span>
                                     ) : (
                                         <ul className="mb-0">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

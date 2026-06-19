@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const NumberInputDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -52,15 +51,17 @@ const NumberInputDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="NumberInput"
+                        <tc-rich-page-header
+                            title-text="NumberInput"
                             description="Controlled numeric input with increment/decrement steppers, arrow-key support, min/max clamping, precision formatting, and optional prefix/suffix addons."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Default — min / max / step">
+                            <tc-section-card title="Default — min / max / step">
                                 <div style={{ maxWidth: 260 }}>
                                     {/* @ts-ignore */}
                                     <tc-number-input
@@ -71,12 +72,15 @@ const NumberInputDemo: React.FC = () => {
                                         step="1"
                                     />
                                     <div className="form-text mt-1">
-                                        Committed value: <strong>{basicValue === '' ? '(empty)' : basicValue}</strong>
+                                        Committed value:{' '}
+                                        <strong>
+                                            {basicValue === '' ? '(empty)' : basicValue}
+                                        </strong>
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Step + Precision (temperature, 0.5 °C)">
+                            <tc-section-card title="Step + Precision (temperature, 0.5 °C)">
                                 <div style={{ maxWidth: 260 }}>
                                     {/* @ts-ignore */}
                                     <tc-number-input
@@ -88,12 +92,13 @@ const NumberInputDemo: React.FC = () => {
                                         precision="1"
                                     />
                                     <div className="form-text mt-1">
-                                        Committed value: <strong>{stepValue === '' ? '(empty)' : stepValue}</strong>
+                                        Committed value:{' '}
+                                        <strong>{stepValue === '' ? '(empty)' : stepValue}</strong>
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Prefix / Suffix addons">
+                            <tc-section-card title="Prefix / Suffix addons">
                                 <div style={{ maxWidth: 280 }}>
                                     {/* @ts-ignore */}
                                     <tc-number-input
@@ -106,12 +111,15 @@ const NumberInputDemo: React.FC = () => {
                                         precision="2"
                                     />
                                     <div className="form-text mt-1">
-                                        Committed value: <strong>{prefixValue === '' ? '(empty)' : prefixValue}</strong>
+                                        Committed value:{' '}
+                                        <strong>
+                                            {prefixValue === '' ? '(empty)' : prefixValue}
+                                        </strong>
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Error state">
+                            <tc-section-card title="Error state">
                                 <div style={{ maxWidth: 260 }}>
                                     {/* @ts-ignore */}
                                     <tc-number-input
@@ -123,15 +131,14 @@ const NumberInputDemo: React.FC = () => {
                                         error="Must be at least 18"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No label">
+                            <tc-section-card title="No label">
                                 <div style={{ maxWidth: 180 }}>
                                     {/* @ts-ignore */}
                                     <tc-number-input min="0" max="100" value="42" />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

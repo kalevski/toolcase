@@ -1,14 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-ping-display'
 
 export type PingTier = 'unknown' | 'success' | 'warning' | 'danger'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class PingDisplay extends HTMLElement {
     private _initialised = false

@@ -1,18 +1,10 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-press-any-key'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Keys that should NOT trigger tc-continue; they are modifier-only presses.
 const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Control', 'Alt', 'Meta'])
 
 export class PressAnyKey extends HTMLElement {
-
     private _initialised = false
 
     /** Optional callback invoked synchronously alongside the tc-continue event. */
@@ -84,5 +76,7 @@ export class PressAnyKey extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: PressAnyKey }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: PressAnyKey
+    }
 }

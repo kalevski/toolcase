@@ -10,7 +10,6 @@ const TAG_NAME = 'tc-toggle-row'
 // game-components `gc-toggle-row` with the fantasy chrome dropped for the
 // toolcase slate/ink look. All cosmetics flow through `--bs-toggle-row-*`.
 export class ToggleRow extends SettingRowBase {
-
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
     onChange: ((value: boolean) => void) | null = null
 

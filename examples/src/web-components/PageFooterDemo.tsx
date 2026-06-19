@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MENUS = [
     {
@@ -90,14 +89,17 @@ const PageFooterDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PageFooter"
+                        <tc-rich-page-header
+                            title-text="PageFooter"
                             description="Full-site footer with brand column, navigation menus, social links, optional CTA block, and a legal bar. Menus, socialLinks, legalLinks, and cta are set via JS properties."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full footer (CTA + menus + social + legal)">
+                            <tc-section-card title="Full footer (CTA + menus + social + legal)">
                                 {/* @ts-ignore */}
                                 <tc-page-footer
                                     ref={fullRef}
@@ -106,9 +108,9 @@ const PageFooterDemo: React.FC = () => {
                                     description="Framework-free components and utilities for ambitious applications."
                                     legal-text="© 2026 Toolcase. All rights reserved."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Without CTA (menus + social + legal)">
+                            <tc-section-card title="Without CTA (menus + social + legal)">
                                 {/* @ts-ignore */}
                                 <tc-page-footer
                                     ref={noCtaRef}
@@ -117,16 +119,16 @@ const PageFooterDemo: React.FC = () => {
                                     description="Open-source components for modern web applications."
                                     legal-text="© 2026 Toolcase, Inc."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal (brand + legal text only)">
+                            <tc-section-card title="Minimal (brand + legal text only)">
                                 {/* @ts-ignore */}
                                 <tc-page-footer
                                     ref={minimalRef}
                                     brand="toolcase"
                                     legal-text="© 2026 Toolcase."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

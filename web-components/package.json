@@ -11,6 +11,11 @@
             "import": "./lib/index.module.js",
             "require": "./lib/index.main.js"
         },
+        "./react": {
+            "types": "./lib/react.d.ts",
+            "import": "./lib/react.module.js",
+            "require": "./lib/react.main.js"
+        },
         "./style.css": "./lib/index.css"
     },
     "sideEffects": [
@@ -21,10 +26,21 @@
     "scripts": {
         "dev": "tsup --watch",
         "build": "tsup && sass style/index.scss:lib/index.css --no-source-map --style=compressed",
-        "build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed"
+        "build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed",
+        "gen:react-types": "node scripts/gen-react-types.mjs"
     },
     "peerDependencies": {
-        "@toolcase/base": "3.x.x"
+        "@toolcase/base": "3.x.x",
+        "react": ">=18"
+    },
+    "peerDependenciesMeta": {
+        "react": {
+            "optional": true
+        }
+    },
+    "devDependencies": {
+        "react": "^19.1.0",
+        "@types/react": "^19.1.0"
     },
     "dependencies": {
         "@popperjs/core": "^2.11.8",

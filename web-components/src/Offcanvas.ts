@@ -93,7 +93,7 @@ export class Offcanvas extends BsOverlay {
             `<div class="offcanvas-body"></div>`
 
         const body = this.querySelector('.offcanvas-body')
-        if (body) this._bodyNodes.forEach(n => body.appendChild(n))
+        if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
     }
 }
 

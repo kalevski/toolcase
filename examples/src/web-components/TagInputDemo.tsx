@@ -1,8 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const LANGUAGES = [
-    'TypeScript', 'JavaScript', 'Python', 'Rust', 'Go', 'Java', 'C#', 'Ruby', 'Swift', 'Kotlin',
+    'TypeScript',
+    'JavaScript',
+    'Python',
+    'Rust',
+    'Go',
+    'Java',
+    'C#',
+    'Ruby',
+    'Swift',
+    'Kotlin',
 ]
 
 const FRAMEWORKS = ['React', 'Vue', 'Svelte', 'Angular', 'Solid']
@@ -50,14 +58,17 @@ const TagInputDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="TagInput"
+                        <tc-rich-page-header
+                            title-text="TagInput"
                             description="Tag input with autocomplete recommendations and optional create-on-type. Typed text filters the suggestion list; Enter/comma commits, Backspace on an empty field removes the last tag. Fires tc-change with the updated tags array."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Recommendations + allow-create">
+                            <tc-section-card title="Recommendations + allow-create">
                                 {/* @ts-ignore */}
                                 <tc-tag-input
                                     ref={pickerRef}
@@ -68,9 +79,9 @@ const TagInputDemo: React.FC = () => {
                                 <div className="form-text mt-2">
                                     Current tags: {tags.length ? tags.join(', ') : '(none)'}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Capped at 3 tags (max-tags)">
+                            <tc-section-card title="Capped at 3 tags (max-tags)">
                                 {/* @ts-ignore */}
                                 <tc-tag-input
                                     ref={cappedRef}
@@ -78,17 +89,17 @@ const TagInputDemo: React.FC = () => {
                                     placeholder="Pick up to three…"
                                     max-tags="3"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <tc-tag-input ref={disabledRef} label="Stack" disabled />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-tag-input label="Tags" loading />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

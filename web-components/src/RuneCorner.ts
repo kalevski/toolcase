@@ -4,7 +4,6 @@ export type RuneCornerPosition = 'tl' | 'tr' | 'bl' | 'br'
 const POSITIONS: RuneCornerPosition[] = ['tl', 'tr', 'bl', 'br']
 
 export class RuneCorner extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

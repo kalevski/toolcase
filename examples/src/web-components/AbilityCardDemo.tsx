@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const AbilityCardDemo: React.FC = () => {
     return (
@@ -7,14 +6,17 @@ const AbilityCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="AbilityCard"
+                        <tc-rich-page-header
+                            title-text="AbilityCard"
                             description="An ability portrait tile: an icon chip, rarity micro-label, ability name, optional hotkey, description, and a meta grid of cooldown / cost / range. Ported from the game-components gc-ability-card and restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-text."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full card — icon, hotkey, description, and meta">
+                            <tc-section-card title="Full card — icon, hotkey, description, and meta">
                                 <div className="d-flex flex-wrap gap-3">
                                     <div style={{ width: 280 }}>
                                         {/* @ts-ignore */}
@@ -42,9 +44,9 @@ const AbilityCardDemo: React.FC = () => {
                                         />
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Rarity ramp — common → legendary">
+                            <tc-section-card title="Rarity ramp — common → legendary">
                                 <div className="d-flex flex-wrap gap-3">
                                     {/* @ts-ignore */}
                                     <tc-ability-card
@@ -97,14 +99,14 @@ const AbilityCardDemo: React.FC = () => {
                                         range="1000"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal — name only">
+                            <tc-section-card title="Minimal — name only">
                                 <div style={{ width: 240 }}>
                                     {/* @ts-ignore */}
                                     <tc-ability-card ability-name="Basic Attack" rarity="common" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

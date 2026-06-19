@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { icon } from './icons'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
 
@@ -42,16 +43,7 @@ export interface AdvancedTableColumn {
     width?: string
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 export class AdvancedTable extends HTMLElement {
-
     private _initialised = false
 
     private _filters: AdvancedTableFilter[] = []
@@ -74,7 +66,7 @@ export class AdvancedTable extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const body = this.querySelector('.tc-advanced-table-body')
-            if (body) slotContent.forEach(n => body.appendChild(n))
+            if (body) slotContent.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
         this.addEventListener('input', this._onInput)
@@ -142,7 +134,7 @@ export class AdvancedTable extends HTMLElement {
         return this._filterValues
     }
     set filterValues(v: Record<string, any>) {
-        this._filterValues = (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}
+        this._filterValues = v && typeof v === 'object' && !Array.isArray(v) ? v : {}
         if (this._initialised) this._rerenderWithSlots()
     }
 
@@ -158,7 +150,7 @@ export class AdvancedTable extends HTMLElement {
         return this._sort
     }
     set sort(v: AdvancedTableSort | null) {
-        this._sort = (v && typeof v === 'object' && typeof v.column === 'string') ? v : null
+        this._sort = v && typeof v === 'object' && typeof v.column === 'string' ? v : null
         if (this._initialised) this._rerenderWithSlots()
     }
 
@@ -201,7 +193,8 @@ export class AdvancedTable extends HTMLElement {
     // and forward as an offset jump.
     private _onPaginationPage = (e: Event): void => {
         const target = e.target as HTMLElement
-        if (!(target instanceof HTMLElement) || target.tagName.toLowerCase() !== 'tc-pagination') return
+        if (!(target instanceof HTMLElement) || target.tagName.toLowerCase() !== 'tc-pagination')
+            return
         e.stopPropagation()
         const page = (e as CustomEvent).detail?.page
         if (typeof page !== 'number') return
@@ -213,11 +206,13 @@ export class AdvancedTable extends HTMLElement {
     private _emitFilter(key: string, value: any): void {
         // Filter events do NOT re-render — the consumer owns filterValues and
         // re-renders by setting it back, so input focus is never disturbed here.
-        this.dispatchEvent(new CustomEvent('tc-filter-change', {
-            bubbles: true,
-            composed: true,
-            detail: { key, value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-filter-change', {
+                bubbles: true,
+                composed: true,
+                detail: { key, value },
+            }),
+        )
         if (typeof this.onFilterChange === 'function') this.onFilterChange(key, value)
     }
 
@@ -232,11 +227,13 @@ export class AdvancedTable extends HTMLElement {
         this._sort = next
         this._rerenderWithSlots()
 
-        this.dispatchEvent(new CustomEvent('tc-sort-change', {
-            bubbles: true,
-            composed: true,
-            detail: { column: next?.column ?? null, direction: next?.direction ?? null },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-sort-change', {
+                bubbles: true,
+                composed: true,
+                detail: { column: next?.column ?? null, direction: next?.direction ?? null },
+            }),
+        )
         if (typeof this.onSortChange === 'function') this.onSortChange(next)
     }
 
@@ -249,12 +246,14 @@ export class AdvancedTable extends HTMLElement {
         const next = (clamped - 1) * limit
         if (next === this.offset) return
 
-        this.setAttribute('offset', String(next))   // → attributeChangedCallback → render
-        this.dispatchEvent(new CustomEvent('tc-page-change', {
-            bubbles: true,
-            composed: true,
-            detail: { offset: next },
-        }))
+        this.setAttribute('offset', String(next)) // → attributeChangedCallback → render
+        this.dispatchEvent(
+            new CustomEvent('tc-page-change', {
+                bubbles: true,
+                composed: true,
+                detail: { offset: next },
+            }),
+        )
         if (typeof this.onPageChange === 'function') this.onPageChange(next)
     }
 
@@ -273,14 +272,18 @@ export class AdvancedTable extends HTMLElement {
         this.render()
 
         const newBody = this.querySelector('.tc-advanced-table-body')
-        if (newBody) rows.forEach(n => newBody.appendChild(n))
+        if (newBody) rows.forEach((n) => newBody.appendChild(n))
 
         if (focusKey) {
             const el = this.querySelector<HTMLElement>(`[data-filter-key="${focusKey}"]`)
             if (el) {
                 el.focus()
                 if (el instanceof HTMLInputElement && caret != null) {
-                    try { el.setSelectionRange(caret, caret) } catch { /* non-text input */ }
+                    try {
+                        el.setSelectionRange(caret, caret)
+                    } catch {
+                        /* non-text input */
+                    }
                 }
             }
         }
@@ -290,32 +293,41 @@ export class AdvancedTable extends HTMLElement {
         if (this._filters.length === 0) return ''
         const loading = this.loading
 
-        const controls = this._filters.map(f => {
-            const raw = this._filterValues[f.key]
-            const value = raw == null ? '' : String(raw)
-            const disabledAttr = loading ? ' disabled' : ''
-            const key = esc(f.key)
-            const label = esc(f.label)
+        const controls = this._filters
+            .map((f) => {
+                const raw = this._filterValues[f.key]
+                const value = raw == null ? '' : String(raw)
+                const disabledAttr = loading ? ' disabled' : ''
+                const key = esc(f.key)
+                const label = esc(f.label)
 
-            let control: string
-            if (f.type === 'select') {
-                const placeholder = f.placeholder
-                    ? `<option value=""${value === '' ? ' selected' : ''}>${esc(f.placeholder)}</option>`
-                    : ''
-                const opts = (f.options ?? []).map(o =>
-                    `<option value="${esc(o.value)}"${o.value === value ? ' selected' : ''}>${esc(o.label)}</option>`
-                ).join('')
-                control = `<select class="form-select form-select-sm tc-advanced-table-filter-control" ` +
-                    `data-filter-key="${key}" aria-label="${label}"${disabledAttr}>${placeholder}${opts}</select>`
-            } else {
-                const ph = f.placeholder ? ` placeholder="${esc(f.placeholder)}"` : ''
-                control = `<input type="text" class="form-control form-control-sm tc-advanced-table-filter-control" ` +
-                    `data-filter-key="${key}" value="${esc(value)}" aria-label="${label}"${ph}${disabledAttr}>`
-            }
+                let control: string
+                if (f.type === 'select') {
+                    const placeholder = f.placeholder
+                        ? `<option value=""${value === '' ? ' selected' : ''}>${esc(f.placeholder)}</option>`
+                        : ''
+                    const opts = (f.options ?? [])
+                        .map(
+                            (o) =>
+                                `<option value="${esc(o.value)}"${o.value === value ? ' selected' : ''}>${esc(o.label)}</option>`,
+                        )
+                        .join('')
+                    control =
+                        `<select class="form-select form-select-sm tc-advanced-table-filter-control" ` +
+                        `data-filter-key="${key}" aria-label="${label}"${disabledAttr}>${placeholder}${opts}</select>`
+                } else {
+                    const ph = f.placeholder ? ` placeholder="${esc(f.placeholder)}"` : ''
+                    control =
+                        `<input type="text" class="form-control form-control-sm tc-advanced-table-filter-control" ` +
+                        `data-filter-key="${key}" value="${esc(value)}" aria-label="${label}"${ph}${disabledAttr}>`
+                }
 
-            return `<div class="tc-advanced-table-filter">` +
-                `<label class="tc-advanced-table-filter-label">${label}</label>${control}</div>`
-        }).join('')
+                return (
+                    `<div class="tc-advanced-table-filter">` +
+                    `<label class="tc-advanced-table-filter-label">${label}</label>${control}</div>`
+                )
+            })
+            .join('')
 
         return `<div class="tc-advanced-table-toolbar" role="group" aria-label="Filters">${controls}</div>`
     }
@@ -326,36 +338,49 @@ export class AdvancedTable extends HTMLElement {
         }
         const loading = this.loading
 
-        const cells = this._columns.map(col => {
-            const align: AdvancedTableAlign = (col.align && ALIGNS.includes(col.align)) ? col.align : 'left'
-            const styleParts: string[] = []
-            if (col.width) styleParts.push(`width: ${esc(col.width)}`)
-            styleParts.push(`text-align: ${align}`)
-            const style = ` style="${styleParts.join('; ')}"`
-            const label = `<span class="tc-advanced-table-th-label">${esc(col.label)}</span>`
+        const cells = this._columns
+            .map((col) => {
+                const align: AdvancedTableAlign =
+                    col.align && ALIGNS.includes(col.align) ? col.align : 'left'
+                const styleParts: string[] = []
+                if (col.width) styleParts.push(`width: ${esc(col.width)}`)
+                styleParts.push(`text-align: ${align}`)
+                const style = ` style="${styleParts.join('; ')}"`
+                const label = `<span class="tc-advanced-table-th-label">${esc(col.label)}</span>`
 
-            if (!this._sortableColumns.includes(col.key)) {
-                return `<th scope="col" class="tc-advanced-table-th tc-advanced-table-th--${align}"${style}>${label}</th>`
-            }
+                if (!this._sortableColumns.includes(col.key)) {
+                    return `<th scope="col" class="tc-advanced-table-th tc-advanced-table-th--${align}"${style}>${label}</th>`
+                }
 
-            const active = !!this._sort && this._sort.column === col.key
-            const ariaSort = active ? (this._sort!.direction === 'asc' ? 'ascending' : 'descending') : 'none'
-            const sortIcon = active
-                ? (this._sort!.direction === 'asc' ? chevronUpIcon : chevronDownIcon)
-                : chevronsUpDownIcon
-            const disabledAttr = loading ? ' disabled' : ''
-            return `<th scope="col" class="tc-advanced-table-th tc-advanced-table-th--${align}" aria-sort="${ariaSort}"${style}>` +
-                `<button type="button" class="tc-advanced-table-sort${active ? ' tc-advanced-table-sort--active' : ''}" ` +
-                `data-sort-key="${esc(col.key)}"${disabledAttr}>${label}${sortIcon}</button></th>`
-        }).join('')
+                const active = !!this._sort && this._sort.column === col.key
+                const ariaSort = active
+                    ? this._sort!.direction === 'asc'
+                        ? 'ascending'
+                        : 'descending'
+                    : 'none'
+                const sortIcon = active
+                    ? this._sort!.direction === 'asc'
+                        ? chevronUpIcon
+                        : chevronDownIcon
+                    : chevronsUpDownIcon
+                const disabledAttr = loading ? ' disabled' : ''
+                return (
+                    `<th scope="col" class="tc-advanced-table-th tc-advanced-table-th--${align}" aria-sort="${ariaSort}"${style}>` +
+                    `<button type="button" class="tc-advanced-table-sort${active ? ' tc-advanced-table-sort--active' : ''}" ` +
+                    `data-sort-key="${esc(col.key)}"${disabledAttr}>${label}${sortIcon}</button></th>`
+                )
+            })
+            .join('')
 
         return `<thead class="tc-advanced-table-head"><tr>${cells}</tr></thead>`
     }
 
     private _renderOverlay(): string {
-        return `<div class="tc-advanced-table-overlay" role="status" aria-busy="true">` +
+        return (
+            `<div class="tc-advanced-table-overlay" role="status" aria-busy="true">` +
             `<span class="spinner-border tc-advanced-table-spinner" role="status">` +
             `<span class="visually-hidden">Loading…</span></span></div>`
+        )
     }
 
     private _renderPagination(): string {
@@ -373,9 +398,10 @@ export class AdvancedTable extends HTMLElement {
         // Reuse the canonical pager — its joined border / mono numerals / ink active
         // page are the shared pagination motif; we only feed it total + current and
         // listen for its tc-page-change (handled in _onPaginationPage).
-        const pager = pageCount > 1
-            ? `<tc-pagination size="sm" total="${pageCount}" current="${current}"></tc-pagination>`
-            : ''
+        const pager =
+            pageCount > 1
+                ? `<tc-pagination size="sm" total="${pageCount}" current="${current}"></tc-pagination>`
+                : ''
 
         return `<div class="tc-advanced-table-pagination">${summary}${pager}</div>`
     }
@@ -387,15 +413,15 @@ export class AdvancedTable extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-advanced-table${loading ? ' tc-advanced-table--loading' : ''}">` +
-                this._renderToolbar() +
-                `<div class="tc-advanced-table-body-wrap">` +
-                    `<table class="table tc-advanced-table-table">` +
-                        this._renderHead() +
-                        `<tbody class="tc-advanced-table-body"></tbody>` +
-                    `</table>` +
-                    (loading ? this._renderOverlay() : '') +
-                `</div>` +
-                this._renderPagination() +
+            this._renderToolbar() +
+            `<div class="tc-advanced-table-body-wrap">` +
+            `<table class="table tc-advanced-table-table">` +
+            this._renderHead() +
+            `<tbody class="tc-advanced-table-body"></tbody>` +
+            `</table>` +
+            (loading ? this._renderOverlay() : '') +
+            `</div>` +
+            this._renderPagination() +
             `</div>`
     }
 }

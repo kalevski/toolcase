@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-sponsor-wall'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type SponsorTierSize = 'xl' | 'lg' | 'md' | 'sm'
 
@@ -75,12 +68,12 @@ export class SponsorWall extends HTMLElement {
     }
 
     private _tierHtml(tier: SponsorTier): string {
-        const size: string = (tier.size && SIZES.includes(tier.size)) ? tier.size : 'md'
+        const size: string = tier.size && SIZES.includes(tier.size) ? tier.size : 'md'
         const label = tier.label ?? tier.name
         const labelHtml = label
             ? `<div class="tc-sponsor-tier-label" aria-hidden="true">${esc(label)}</div>`
             : ''
-        const logosHtml = tier.logos.map(l => this._logoHtml(l)).join('')
+        const logosHtml = tier.logos.map((l) => this._logoHtml(l)).join('')
 
         return (
             `<div class="tc-sponsor-tier tc-sponsor-tier--${size}" ` +
@@ -99,7 +92,7 @@ export class SponsorWall extends HTMLElement {
             ? `<div class="tc-sponsor-wall-title">${esc(titleAttr)}</div>`
             : ''
 
-        const tiersHtml = this._tiers.map(t => this._tierHtml(t)).join('')
+        const tiersHtml = this._tiers.map((t) => this._tierHtml(t)).join('')
 
         this.innerHTML = `${titleHtml}${tiersHtml}`
     }

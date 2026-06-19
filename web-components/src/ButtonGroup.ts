@@ -5,7 +5,6 @@ export type ButtonGroupSize = 'sm' | 'lg'
 const SIZES: ButtonGroupSize[] = ['sm', 'lg']
 
 export class ButtonGroup extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -21,7 +20,7 @@ export class ButtonGroup extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector<HTMLElement>('[role="group"]')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }

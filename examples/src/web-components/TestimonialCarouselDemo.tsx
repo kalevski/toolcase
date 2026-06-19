@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SAMPLE = [
     {
@@ -55,25 +54,32 @@ const TestimonialCarouselDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Testimonial Carousel"
+                        <tc-rich-page-header
+                            title-text="Testimonial Carousel"
                             description="One testimonial at a time with prev/next arrow controls and a row of dot indicators. Supports autoplay, keyboard navigation, and ratings."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Manual navigation (arrows + dots)">
+                            <tc-section-card title="Manual navigation (arrows + dots)">
                                 <p className="text-muted small mb-3">
-                                    Use the arrows, click a dot, or focus the carousel and press ← / →.
-                                    Last <code>tc-change</code>: {lastChange}
+                                    Use the arrows, click a dot, or focus the carousel and press ← /
+                                    →. Last <code>tc-change</code>: {lastChange}
                                 </p>
                                 {/* @ts-ignore */}
-                                <tc-testimonial-carousel ref={manualRef} aria-label="Customer testimonials" />
-                            </SectionCard>
+                                <tc-testimonial-carousel
+                                    ref={manualRef}
+                                    aria-label="Customer testimonials"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Autoplay (interval=3000ms)">
+                            <tc-section-card title="Autoplay (interval=3000ms)">
                                 <p className="text-muted small mb-3">
-                                    Auto-advances every 3 seconds. Pauses on hover, on focus, and when the tab is hidden.
+                                    Auto-advances every 3 seconds. Pauses on hover, on focus, and
+                                    when the tab is hidden.
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-testimonial-carousel
@@ -82,7 +88,7 @@ const TestimonialCarouselDemo: React.FC = () => {
                                     interval="3000"
                                     aria-label="Autoplaying customer testimonials"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

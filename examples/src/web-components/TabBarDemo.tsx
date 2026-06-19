@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const defaultTabs = [
     { id: 'overview', label: 'Overview' },
@@ -75,22 +74,23 @@ const TabBarDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="TabBar"
+                    <tc-rich-page-header
+                        title-text="TabBar"
                         description="Horizontal tab switcher bar with icons, a disabled state, size variants, and full ARIA tablist keyboard navigation (ArrowLeft/Right, Home/End)."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-
-                        <SectionCard title="Default (md, icons, disabled tab)">
+                        <tc-section-card title="Default (md, icons, disabled tab)">
                             <BasicExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Controlled (sm, active-id driven by tc-change)">
+                        <tc-section-card title="Controlled (sm, active-id driven by tc-change)">
                             <ControlledExample />
-                        </SectionCard>
-
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

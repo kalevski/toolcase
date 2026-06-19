@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { ArrowDown, ArrowUp } from 'lucide-static'
 import { icon } from './icons'
 
@@ -23,15 +24,6 @@ export interface CompareItem {
     stats?: CompareStat[]
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 function formatValue(v: string | number): string {
     return typeof v === 'number' ? v.toLocaleString() : v
 }
@@ -51,7 +43,6 @@ const arrowDownIcon = icon(ArrowDown, 'tc-item-compare__delta-arrow')
 // events, no slots. All cosmetics flow through --bs-item-compare-* custom
 // properties.
 export class ItemCompare extends HTMLElement {
-
     private _initialised = false
     private _current: CompareItem | null = null
     private _candidate: CompareItem | null = null
@@ -93,15 +84,17 @@ export class ItemCompare extends HTMLElement {
     private computeDeltas(): Record<string, number> | null {
         if (!this._current || !this._candidate) return null
         const map: Record<string, number> = {}
-        const currentStats = (this._current.stats ?? []).filter(s => typeof s.value === 'number')
-        const candidateStats = (this._candidate.stats ?? []).filter(s => typeof s.value === 'number')
+        const currentStats = (this._current.stats ?? []).filter((s) => typeof s.value === 'number')
+        const candidateStats = (this._candidate.stats ?? []).filter(
+            (s) => typeof s.value === 'number',
+        )
         const allLabels = new Set<string>([
-            ...currentStats.map(s => s.label),
-            ...candidateStats.map(s => s.label),
+            ...currentStats.map((s) => s.label),
+            ...candidateStats.map((s) => s.label),
         ])
         for (const label of allLabels) {
-            const cur = currentStats.find(s => s.label === label)?.value as number | undefined
-            const cand = candidateStats.find(s => s.label === label)?.value as number | undefined
+            const cur = currentStats.find((s) => s.label === label)?.value as number | undefined
+            const cand = candidateStats.find((s) => s.label === label)?.value as number | undefined
             const diff = (cand ?? 0) - (cur ?? 0)
             if (diff !== 0) map[label] = diff
         }
@@ -109,26 +102,32 @@ export class ItemCompare extends HTMLElement {
     }
 
     private renderStats(item: CompareItem): string {
-        const rows = (item.stats ?? []).map(s => `
+        const rows = (item.stats ?? [])
+            .map(
+                (s) => `
             <div class="tc-item-compare__stat">
                 <span class="tc-item-compare__stat-label">${esc(s.label)}</span>
                 <span class="tc-item-compare__stat-value">${esc(formatValue(s.value))}</span>
             </div>
-        `).join('')
+        `,
+            )
+            .join('')
         return rows ? `<div class="tc-item-compare__stats">${rows}</div>` : ''
     }
 
     private renderDeltas(deltas: Record<string, number> | null): string {
         if (!deltas) return ''
-        const rows = Object.entries(deltas).map(([label, diff]) => {
-            const dir = diff > 0 ? 'up' : 'down'
-            const arrow = diff > 0 ? arrowUpIcon : arrowDownIcon
-            const sign = diff > 0 ? '+' : ''
-            return `<div class="tc-item-compare__delta tc-item-compare__delta--${dir}">
+        const rows = Object.entries(deltas)
+            .map(([label, diff]) => {
+                const dir = diff > 0 ? 'up' : 'down'
+                const arrow = diff > 0 ? arrowUpIcon : arrowDownIcon
+                const sign = diff > 0 ? '+' : ''
+                return `<div class="tc-item-compare__delta tc-item-compare__delta--${dir}">
                 <span class="tc-item-compare__delta-label">${esc(label)}</span>
                 <span class="tc-item-compare__delta-value">${arrow}${sign}${diff.toLocaleString()}</span>
             </div>`
-        }).join('')
+            })
+            .join('')
         if (!rows) return ''
         return `<div class="tc-item-compare__deltas">
             <tc-eyebrow class="tc-item-compare__deltas-label">Difference</tc-eyebrow>
@@ -136,7 +135,11 @@ export class ItemCompare extends HTMLElement {
         </div>`
     }
 
-    private renderColumn(item: CompareItem | null, label: string, deltas: Record<string, number> | null): string {
+    private renderColumn(
+        item: CompareItem | null,
+        label: string,
+        deltas: Record<string, number> | null,
+    ): string {
         const labelMarkup = `<tc-eyebrow class="tc-item-compare__col-label">${esc(label)}</tc-eyebrow>`
         if (!item) {
             return `<div class="tc-item-compare__col tc-item-compare__col--empty">

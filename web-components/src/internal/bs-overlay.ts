@@ -1,3 +1,4 @@
+import { esc } from "./esc"
 // Shared scaffold for tc-modal and tc-offcanvas. Both wrap a Bootstrap overlay
 // plugin around the host element: capture their light-DOM children once, render
 // the BS markup, init the plugin, and bridge the plugin's show/shown/hide/hidden
@@ -14,11 +15,7 @@ export interface OverlayPlugin {
 }
 
 export function escapeHtml(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+    return esc(s)
 }
 
 export abstract class BsOverlay extends HTMLElement {

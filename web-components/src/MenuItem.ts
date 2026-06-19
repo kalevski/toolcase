@@ -1,25 +1,8 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-menu-item'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 export class MenuItem extends HTMLElement {
     private _initialised = false
@@ -107,11 +90,13 @@ export class MenuItem extends HTMLElement {
 
     private _emitSelect(): void {
         const label = this.label
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { label },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { label },
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(label)
     }
 

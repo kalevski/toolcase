@@ -1,24 +1,31 @@
 // Dungeon › tc-popover — lore-callout bubble with a gold-framed plaque look.
 // The arrow triangles are filled with --bs-popover-bg, so that var MUST stay a
 // flat colour (never a gradient). Token swap + bevel + display-caps header.
+//
+// PORTALED: the Tooltip/Popover plugin appends the tip to <body>, outside any
+// theme wrapper, then copies the active theme onto the tip via `data-tc-theme`
+// (see internal/Tooltip.ts _applyThemeContext). So the tip is matched BOTH as a
+// descendant of a theme root (in-scope use) AND as the self-attributed element
+// (portaled use) — hence the `.popover[data-tc-theme='dungeon']` selectors.
 
-tc-theme[name='dungeon'],
-[data-tc-theme='dungeon'] {
-    // 1. Token swap — keep bg flat so the CSS border-triangle arrow stays clean.
-    .popover {
-        --bs-popover-bg: #211a12;
-        --bs-popover-border-color: var(--fg-gold);
-        --bs-popover-header-bg: var(--fg-leather-2);
+// 1. Token swap — keep bg flat so the CSS border-triangle arrow stays clean.
+tc-theme[name='dungeon'] .popover,
+[data-tc-theme='dungeon'] .popover,
+.popover[data-tc-theme='dungeon'] {
+    --bs-popover-bg: #211a12;
+    --bs-popover-border-color: var(--fg-gold);
+    --bs-popover-header-bg: var(--fg-leather-2);
 
-        // 2. Gilded bevel stack (inset highlight + drop shadow ring).
-        box-shadow: var(--fg-panel-shadow);
-    }
+    // 2. Gilded bevel stack (inset highlight + drop shadow ring).
+    box-shadow: var(--fg-panel-shadow);
+}
 
-    // 3. Display caps on the header cap — callout title reads as a plaque label.
-    .popover-header {
-        font-family: var(--fg-display);
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        font-weight: 600;
-    }
+// 3. Display caps on the header cap — callout title reads as a plaque label.
+tc-theme[name='dungeon'] .popover-header,
+[data-tc-theme='dungeon'] .popover-header,
+.popover[data-tc-theme='dungeon'] .popover-header {
+    font-family: var(--fg-display);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
 }

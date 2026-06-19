@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PhaseGridDemo: React.FC = () => {
     const threeColRef = useRef<any>(null)
@@ -64,29 +63,30 @@ const PhaseGridDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PhaseGrid"
+                        <tc-rich-page-header
+                            title-text="PhaseGrid"
                             description="Grid of phase/timeline cards with status indicators, optional description, tags, and shell commands. Status is conveyed by icon + label — not color alone."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="3 columns — mixed statuses, tags, and commands">
+                            <tc-section-card title="3 columns — mixed statuses, tags, and commands">
                                 {/* @ts-ignore */}
                                 <tc-phase-grid columns="3" ref={threeColRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="2 columns — blocked and upcoming">
+                            <tc-section-card title="2 columns — blocked and upcoming">
                                 {/* @ts-ignore */}
                                 <tc-phase-grid columns="2" ref={twoColRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="4 columns — compact (no descriptions)">
+                            <tc-section-card title="4 columns — compact (no descriptions)">
                                 {/* @ts-ignore */}
                                 <tc-phase-grid columns="4" ref={fourColRef} />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

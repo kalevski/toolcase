@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 import type { ActionItem } from './ActionItems'
 
@@ -13,30 +14,12 @@ export interface FileTag {
 // Re-export for consumers who need the type when setting menuItems
 export type { ActionItem as FileMenuItem }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B'
     const k = 1024
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
     const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1)
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 // Pre-computed module-level icon constants (always rendered)
@@ -76,7 +59,8 @@ class TcFile extends HTMLElement {
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const draftValue = this.querySelector<HTMLInputElement>('input.tc-file-name:focus')?.value ?? null
+        const draftValue =
+            this.querySelector<HTMLInputElement>('input.tc-file-name:focus')?.value ?? null
         if (this._isMenuOpen) this._closeMenu(false)
         this.render()
         if (draftValue !== null) {
@@ -182,12 +166,16 @@ class TcFile extends HTMLElement {
                 this._patchMenuItems()
             } else {
                 // Visibility changed — structural re-render required
-                const draftValue = this.querySelector<HTMLInputElement>('input.tc-file-name:focus')?.value ?? null
+                const draftValue =
+                    this.querySelector<HTMLInputElement>('input.tc-file-name:focus')?.value ?? null
                 if (this._isMenuOpen) this._closeMenu(false)
                 this.render()
                 if (draftValue !== null) {
                     const newInput = this.querySelector<HTMLInputElement>('input.tc-file-name')
-                    if (newInput) { newInput.value = draftValue; newInput.focus() }
+                    if (newInput) {
+                        newInput.value = draftValue
+                        newInput.focus()
+                    }
                 }
             }
         }
@@ -208,14 +196,17 @@ class TcFile extends HTMLElement {
         }
         const wrap = this.querySelector<HTMLElement>('.tc-file-menu-wrap')
         if (wrap) {
-            wrap.classList.toggle('tc-file-menu-wrap--hidden', this.readonly || this._menuItems.length === 0)
+            wrap.classList.toggle(
+                'tc-file-menu-wrap--hidden',
+                this.readonly || this._menuItems.length === 0,
+            )
         }
     }
 
     private _buildTagsHtml(): string {
-        const tagMap = new Map(this._tags.map(t => [t.id, t]))
+        const tagMap = new Map(this._tags.map((t) => [t.id, t]))
         return this._tagIds
-            .map(id => {
+            .map((id) => {
                 const tag = tagMap.get(id)
                 if (!tag) return ''
                 const styleAttr = tag.color ? ` style="--tc-file-chip-color:${esc(tag.color)}"` : ''
@@ -243,7 +234,9 @@ class TcFile extends HTMLElement {
     }
 
     private _wireMenuItemClicks(menuEl: HTMLElement): void {
-        Array.from(menuEl.querySelectorAll<HTMLButtonElement>('.tc-file-menu-item:not([disabled])')).forEach(btn => {
+        Array.from(
+            menuEl.querySelectorAll<HTMLButtonElement>('.tc-file-menu-item:not([disabled])'),
+        ).forEach((btn) => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._menuItems.length) {
@@ -261,7 +254,7 @@ class TcFile extends HTMLElement {
         if (menuEl) menuEl.classList.add('show')
 
         const enabled = Array.from(
-            this.querySelectorAll<HTMLButtonElement>('.tc-file-menu-item:not([disabled])')
+            this.querySelectorAll<HTMLButtonElement>('.tc-file-menu-item:not([disabled])'),
         )
         if (enabled.length > 0) enabled[0].focus()
 
@@ -290,11 +283,13 @@ class TcFile extends HTMLElement {
     }
 
     private _selectMenuItem(key: string): void {
-        this.dispatchEvent(new CustomEvent('tc-menu-item-click', {
-            bubbles: true,
-            composed: true,
-            detail: { key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-menu-item-click', {
+                bubbles: true,
+                composed: true,
+                detail: { key },
+            }),
+        )
         if (typeof this.onMenuItemClick === 'function') this.onMenuItemClick(key)
         this._closeMenu()
     }
@@ -323,11 +318,13 @@ class TcFile extends HTMLElement {
             // At that point the input is blurred (:focus doesn't match) so no draft
             // preservation loop occurs.
             this.setAttribute('name', draft)
-            this.dispatchEvent(new CustomEvent('tc-name-change', {
-                bubbles: true,
-                composed: true,
-                detail: { name: draft },
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-name-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { name: draft },
+                }),
+            )
             if (typeof this.onNameChange === 'function') this.onNameChange(draft)
         }
     }
@@ -341,7 +338,7 @@ class TcFile extends HTMLElement {
 
     private _onMenuKeydown = (e: KeyboardEvent): void => {
         const enabled = Array.from(
-            this.querySelectorAll<HTMLButtonElement>('.tc-file-menu-item:not([disabled])')
+            this.querySelectorAll<HTMLButtonElement>('.tc-file-menu-item:not([disabled])'),
         )
         if (!enabled.length) return
         const focused = document.activeElement as HTMLButtonElement
@@ -412,26 +409,25 @@ class TcFile extends HTMLElement {
         let nameHtml: string
         if (readonly) {
             nameHtml =
-                `<span class="tc-file-name tc-file-name--readonly">${esc(nameVal)}</span>` +
-                extHtml
+                `<span class="tc-file-name tc-file-name--readonly">${esc(nameVal)}</span>` + extHtml
         } else {
             nameHtml =
                 `<input type="text" class="tc-file-name" value="${esc(nameVal)}" aria-label="File name" />` +
                 extHtml
         }
 
-        const sizeHtml = sizeBytes > 0
-            ? `<span class="tc-file-size">${esc(formatBytes(sizeBytes))}</span>`
-            : ''
-        const itemsHtml = itemCount > 0
-            ? `<span class="tc-file-items">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>`
-            : ''
-        const metaHtml = sizeHtml || itemsHtml
-            ? `<div class="tc-file-meta">${sizeHtml}${itemsHtml}</div>`
-            : ''
+        const sizeHtml =
+            sizeBytes > 0 ? `<span class="tc-file-size">${esc(formatBytes(sizeBytes))}</span>` : ''
+        const itemsHtml =
+            itemCount > 0
+                ? `<span class="tc-file-items">${itemCount} item${itemCount !== 1 ? 's' : ''}</span>`
+                : ''
+        const metaHtml =
+            sizeHtml || itemsHtml ? `<div class="tc-file-meta">${sizeHtml}${itemsHtml}</div>` : ''
 
         const menuWrapHidden = readonly || this._menuItems.length === 0
-        const menuWrapClass = 'tc-file-menu-wrap' + (menuWrapHidden ? ' tc-file-menu-wrap--hidden' : '')
+        const menuWrapClass =
+            'tc-file-menu-wrap' + (menuWrapHidden ? ' tc-file-menu-wrap--hidden' : '')
 
         // Menu dropdown is always rendered so _patchMenuItems() can find it.
         const menuHtml =

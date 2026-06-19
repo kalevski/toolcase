@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PlayerCardDemo: React.FC = () => {
     const statsRef = useRef<any>(null)
@@ -40,7 +39,7 @@ const PlayerCardDemo: React.FC = () => {
             { id: 'report', label: 'Report', danger: true },
         ]
         const onAction = (e: CustomEvent<{ id: string }>) => {
-            setLog(l => [`tc-action fired: id="${e.detail.id}"`, ...l].slice(0, 6))
+            setLog((l) => [`tc-action fired: id="${e.detail.id}"`, ...l].slice(0, 6))
         }
         el.addEventListener('tc-action', onAction)
         return () => el.removeEventListener('tc-action', onAction)
@@ -51,29 +50,52 @@ const PlayerCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PlayerCard"
+                        <tc-rich-page-header
+                            title-text="PlayerCard"
                             description="Player summary card with name, optional title, rank, level, online-status pip, a stats grid, and action buttons. Stats and actions are set via JS properties; all other data flows through attributes."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Presence statuses">
+                            <tc-section-card title="Presence statuses">
                                 <div className="d-flex flex-wrap gap-3">
                                     {/* @ts-ignore */}
-                                    <tc-player-card player-name="Aria" online-status="online" style={{ width: '240px' }} />
+                                    <tc-player-card
+                                        player-name="Aria"
+                                        online-status="online"
+                                        style={{ width: '240px' }}
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-player-card player-name="Kestrel" online-status="away" style={{ width: '240px' }} />
+                                    <tc-player-card
+                                        player-name="Kestrel"
+                                        online-status="away"
+                                        style={{ width: '240px' }}
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-player-card player-name="Vesper" online-status="busy" style={{ width: '240px' }} />
+                                    <tc-player-card
+                                        player-name="Vesper"
+                                        online-status="busy"
+                                        style={{ width: '240px' }}
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-player-card player-name="Onyx" online-status="in-game" style={{ width: '240px' }} />
+                                    <tc-player-card
+                                        player-name="Onyx"
+                                        online-status="in-game"
+                                        style={{ width: '240px' }}
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-player-card player-name="Cipher" online-status="offline" style={{ width: '240px' }} />
+                                    <tc-player-card
+                                        player-name="Cipher"
+                                        online-status="offline"
+                                        style={{ width: '240px' }}
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With card-title, rank, and level">
+                            <tc-section-card title="With card-title, rank, and level">
                                 {/* @ts-ignore */}
                                 <tc-player-card
                                     player-name="Aria"
@@ -83,9 +105,9 @@ const PlayerCardDemo: React.FC = () => {
                                     online-status="online"
                                     style={{ maxWidth: '320px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With stats grid">
+                            <tc-section-card title="With stats grid">
                                 {/* @ts-ignore */}
                                 <tc-player-card
                                     ref={statsRef}
@@ -96,9 +118,9 @@ const PlayerCardDemo: React.FC = () => {
                                     online-status="in-game"
                                     style={{ maxWidth: '400px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With action buttons (including a danger action)">
+                            <tc-section-card title="With action buttons (including a danger action)">
                                 {/* @ts-ignore */}
                                 <tc-player-card
                                     ref={actionsRef}
@@ -108,9 +130,9 @@ const PlayerCardDemo: React.FC = () => {
                                     online-status="online"
                                     style={{ maxWidth: '320px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Events — tc-action">
+                            <tc-section-card title="Events — tc-action">
                                 {/* @ts-ignore */}
                                 <tc-player-card
                                     ref={eventsRef}
@@ -125,12 +147,14 @@ const PlayerCardDemo: React.FC = () => {
                                     ) : (
                                         <ul className="mb-0">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

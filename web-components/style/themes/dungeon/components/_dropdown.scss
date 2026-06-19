@@ -6,7 +6,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // -------------------------------------------------------------------------
     // 1. Token swap — all defaults live on .dropdown-menu (class, not host).
     // -------------------------------------------------------------------------
@@ -21,6 +20,14 @@ tc-theme[name='dungeon'],
 
         // 2. Gilded bevel — the panel shadow stack over the base box-shadow.
         box-shadow: var(--fg-panel-shadow);
+
+        // Frosted fill — the base applies --bs-dropdown-bg via background-color,
+        //    which silently drops the --fg-panel-bg gradient and leaves the menu
+        //    transparent. Paint a translucent fill on background-image instead and
+        //    blur what shows through, so the menu reads as gilded smoked glass.
+        background-image: var(--fg-overlay-bg);
+        backdrop-filter: var(--fg-overlay-blur);
+        -webkit-backdrop-filter: var(--fg-overlay-blur);
     }
 
     // -------------------------------------------------------------------------

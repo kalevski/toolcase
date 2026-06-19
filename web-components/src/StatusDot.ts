@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-status-dot'
 
 let _uidCounter = 0
@@ -15,12 +16,7 @@ const STATUS_ARIA_LABELS: Record<StatusDotStatus, string> = {
     away: 'Away',
 }
 
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
 export class StatusDot extends HTMLElement {
-
     private _initialised = false
     private _labelId: string
 

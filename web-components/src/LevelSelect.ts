@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -22,14 +23,6 @@ export interface LevelEdge {
     to: string
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function resolveLucide(name: string, cls?: string): string {
     const pascal = name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
     const titled = pascal.charAt(0).toUpperCase() + pascal.slice(1)
@@ -46,7 +39,10 @@ function firstLucide(names: string[], cls?: string): string {
 }
 
 const LOCK_ICON = firstLucide(['Lock', 'LockKeyhole', 'LockClosed'], 'tc-level-select__glyph-icon')
-const CHECK_ICON = firstLucide(['Check', 'CheckCircle2', 'CheckCircle'], 'tc-level-select__glyph-icon')
+const CHECK_ICON = firstLucide(
+    ['Check', 'CheckCircle2', 'CheckCircle'],
+    'tc-level-select__glyph-icon',
+)
 
 export class LevelSelect extends HTMLElement {
     private _initialised = false
@@ -79,25 +75,39 @@ export class LevelSelect extends HTMLElement {
         return Number.isFinite(parsed) ? parsed : fallback
     }
 
-    get selectedId(): string { return this.getAttribute('selected-id') ?? '' }
+    get selectedId(): string {
+        return this.getAttribute('selected-id') ?? ''
+    }
     set selectedId(v: string) {
         if (v) this.setAttribute('selected-id', v)
         else this.removeAttribute('selected-id')
     }
 
-    get width(): number { return this._numAttr('width', 600) }
-    set width(v: number) { this.setAttribute('width', String(v)) }
+    get width(): number {
+        return this._numAttr('width', 600)
+    }
+    set width(v: number) {
+        this.setAttribute('width', String(v))
+    }
 
-    get height(): number { return this._numAttr('height', 360) }
-    set height(v: number) { this.setAttribute('height', String(v)) }
+    get height(): number {
+        return this._numAttr('height', 360)
+    }
+    set height(v: number) {
+        this.setAttribute('height', String(v))
+    }
 
-    get nodes(): LevelNode[] { return this._nodes.slice() }
+    get nodes(): LevelNode[] {
+        return this._nodes.slice()
+    }
     set nodes(v: LevelNode[]) {
         this._nodes = Array.isArray(v) ? v.slice() : []
         if (this._initialised) this.render()
     }
 
-    get edges(): LevelEdge[] { return this._edges.slice() }
+    get edges(): LevelEdge[] {
+        return this._edges.slice()
+    }
     set edges(v: LevelEdge[]) {
         this._edges = Array.isArray(v) ? v.slice() : []
         if (this._initialised) this.render()
@@ -119,9 +129,10 @@ export class LevelSelect extends HTMLElement {
         const filled = Math.max(0, Math.min(max, best))
         let stars = ''
         for (let i = 0; i < max; i++) {
-            const cls = i < filled
-                ? 'tc-level-select__star tc-level-select__star--filled'
-                : 'tc-level-select__star'
+            const cls =
+                i < filled
+                    ? 'tc-level-select__star tc-level-select__star--filled'
+                    : 'tc-level-select__star'
             stars += `<span class="${cls}" aria-hidden="true">★</span>`
         }
         return `<span class="tc-level-select__stars" aria-label="${filled} of ${max} stars">${stars}</span>`
@@ -145,39 +156,44 @@ export class LevelSelect extends HTMLElement {
         const w = this.width
         const h = this.height
         const selected = this.selectedId
-        const nodeMap = new Map(this._nodes.map(n => [n.id, n]))
+        const nodeMap = new Map(this._nodes.map((n) => [n.id, n]))
 
-        const edgesMarkup = this._edges.map(e => {
-            const a = nodeMap.get(e.from)
-            const b = nodeMap.get(e.to)
-            if (!a || !b) return ''
-            const cls = (a.completed && b.completed)
-                ? 'tc-level-select__edge tc-level-select__edge--completed'
-                : 'tc-level-select__edge'
-            return `<line class="${cls}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" />`
-        }).join('')
+        const edgesMarkup = this._edges
+            .map((e) => {
+                const a = nodeMap.get(e.from)
+                const b = nodeMap.get(e.to)
+                if (!a || !b) return ''
+                const cls =
+                    a.completed && b.completed
+                        ? 'tc-level-select__edge tc-level-select__edge--completed'
+                        : 'tc-level-select__edge'
+                return `<line class="${cls}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" />`
+            })
+            .join('')
 
-        const nodesMarkup = this._nodes.map(n => {
-            const isSelected = n.id === selected
-            let cls = 'tc-level-select__node'
-            if (n.locked) {
-                cls += ' tc-level-select__node--locked'
-            } else if (isSelected) {
-                cls += ' tc-level-select__node--selected'
-            } else if (n.completed) {
-                cls += ' tc-level-select__node--completed'
-            }
+        const nodesMarkup = this._nodes
+            .map((n) => {
+                const isSelected = n.id === selected
+                let cls = 'tc-level-select__node'
+                if (n.locked) {
+                    cls += ' tc-level-select__node--locked'
+                } else if (isSelected) {
+                    cls += ' tc-level-select__node--selected'
+                } else if (n.completed) {
+                    cls += ' tc-level-select__node--completed'
+                }
 
-            const labelHtml = n.label
-                ? `<span class="tc-level-select__label">${esc(n.label)}</span>`
-                : ''
+                const labelHtml = n.label
+                    ? `<span class="tc-level-select__label">${esc(n.label)}</span>`
+                    : ''
 
-            const starsHtml = typeof n.bestStars === 'number'
-                ? this._renderStars(n.bestStars, n.stars ?? 3)
-                : ''
+                const starsHtml =
+                    typeof n.bestStars === 'number'
+                        ? this._renderStars(n.bestStars, n.stars ?? 3)
+                        : ''
 
-            // Nodes are centered on (x, y); SVG edges also target (x, y).
-            return `<div
+                // Nodes are centered on (x, y); SVG edges also target (x, y).
+                return `<div
                 role="option"
                 tabindex="${n.locked ? '-1' : '0'}"
                 class="${cls}"
@@ -189,7 +205,8 @@ export class LevelSelect extends HTMLElement {
                 ${labelHtml}
                 ${starsHtml}
             </div>`
-        }).join('')
+            })
+            .join('')
 
         if (!this.hasAttribute('role')) this.setAttribute('role', 'listbox')
         if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', 'Level select')
@@ -241,5 +258,7 @@ export class LevelSelect extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: LevelSelect }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: LevelSelect
+    }
 }

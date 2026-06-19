@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type Level = 'info' | 'success' | 'warning' | 'danger'
 
@@ -17,7 +16,13 @@ function makeTimestamp(): string {
 }
 
 const INITIAL_EVENTS: DemoEvent[] = [
-    { id: 'e1', time: '10:00:01', label: 'Service started', level: 'success', icon: 'circle-check' },
+    {
+        id: 'e1',
+        time: '10:00:01',
+        label: 'Service started',
+        level: 'success',
+        icon: 'circle-check',
+    },
     { id: 'e2', time: '10:00:04', label: 'Connected to database', level: 'info' },
     { id: 'e3', time: '10:00:07', label: 'Config loaded from /etc/app.conf', level: 'info' },
     { id: 'e4', time: '10:00:12', label: 'Cache warming up (72%)' },
@@ -106,24 +111,27 @@ const LiveFeedDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="LiveFeed"
+                        <tc-rich-page-header
+                            title-text="LiveFeed"
                             description="Vertical feed of timestamped events with optional REC indicator and auto-scroll. Set events via the JS events property; newer events appear at the bottom."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — events with levels">
+                            <tc-section-card title="Basic — events with levels">
                                 {/* @ts-ignore */}
                                 <tc-live-feed ref={basicRef} header="// SYSTEM LOG" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Recording indicator">
+                            <tc-section-card title="Recording indicator">
                                 {/* @ts-ignore */}
                                 <tc-live-feed ref={recordingRef} header="// LIVE FEED" recording />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Auto-scroll (new events every 1.5 s)">
+                            <tc-section-card title="Auto-scroll (new events every 1.5 s)">
                                 {/* @ts-ignore */}
                                 <tc-live-feed
                                     ref={autoScrollRef}
@@ -131,9 +139,9 @@ const LiveFeedDemo: React.FC = () => {
                                     recording
                                     auto-scroll
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="max-rows=5 — oldest trimmed automatically (new events every 2 s)">
+                            <tc-section-card title="max-rows=5 — oldest trimmed automatically (new events every 2 s)">
                                 {/* @ts-ignore */}
                                 <tc-live-feed
                                     ref={maxRowsRef}
@@ -141,9 +149,9 @@ const LiveFeedDemo: React.FC = () => {
                                     max-rows="5"
                                     auto-scroll
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="tc-row-click event — click any row">
+                            <tc-section-card title="tc-row-click event — click any row">
                                 {/* @ts-ignore */}
                                 <tc-live-feed ref={clickRef} header="// EVENTS" />
                                 {clickedRow && (
@@ -151,7 +159,7 @@ const LiveFeedDemo: React.FC = () => {
                                         ✓ <code>tc-row-click</code> → {clickedRow}
                                     </div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

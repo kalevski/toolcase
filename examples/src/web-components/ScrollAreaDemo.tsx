@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const paragraphStyle: React.CSSProperties = {
     margin: '0 0 0.75rem',
@@ -16,75 +15,96 @@ const ScrollAreaDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Scroll Area"
+                        <tc-rich-page-header
+                            title-text="Scroll Area"
                             description="A scrollable container with configurable max dimensions and scroll axis. A thin slate scrollbar keeps the chrome quiet; the region becomes keyboard-scrollable only when its content overflows."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Vertical (axis=y)">
+                            <tc-section-card title="Vertical (axis=y)">
                                 <div style={{ border: '1px solid var(--tc-border, #e2e8f0)' }}>
                                     {/* @ts-ignore */}
                                     <tc-scroll-area axis="y" max-height="220">
                                         <div style={{ padding: '1rem' }}>
-                                            {rows.map(n => (
+                                            {rows.map((n) => (
                                                 <p key={n} style={paragraphStyle}>
-                                                    <strong>Row {n}.</strong> The default axis is vertical:
-                                                    overflow-y is auto and overflow-x is hidden. Scroll down to
-                                                    reveal the remaining rows.
+                                                    <strong>Row {n}.</strong> The default axis is
+                                                    vertical: overflow-y is auto and overflow-x is
+                                                    hidden. Scroll down to reveal the remaining
+                                                    rows.
                                                 </p>
                                             ))}
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-scroll-area>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Horizontal (axis=x)">
+                            <tc-section-card title="Horizontal (axis=x)">
                                 <div style={{ border: '1px solid var(--tc-border, #e2e8f0)' }}>
                                     {/* @ts-ignore */}
                                     <tc-scroll-area axis="x" max-width="100%">
-                                        <div style={{ display: 'flex', gap: '0.75rem', padding: '1rem', width: 'max-content' }}>
-                                            {rows.map(n => (
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                gap: '0.75rem',
+                                                padding: '1rem',
+                                                width: 'max-content',
+                                            }}
+                                        >
+                                            {rows.map((n) => (
                                                 <div
                                                     key={n}
                                                     style={{
                                                         flex: '0 0 auto',
                                                         width: 160,
                                                         padding: '1rem',
-                                                        background: 'var(--tc-surface-hover, #f8fafc)',
+                                                        background:
+                                                            'var(--tc-surface-hover, #f8fafc)',
                                                         fontSize: '0.875rem',
                                                         color: 'var(--tc-text, #1e293b)',
                                                     }}
                                                 >
                                                     <strong>Card {n}</strong>
-                                                    <p className="mb-0 mt-2">Scrolls horizontally only.</p>
+                                                    <p className="mb-0 mt-2">
+                                                        Scrolls horizontally only.
+                                                    </p>
                                                 </div>
                                             ))}
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-scroll-area>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Both axes (axis=both)">
+                            <tc-section-card title="Both axes (axis=both)">
                                 <div style={{ border: '1px solid var(--tc-border, #e2e8f0)' }}>
                                     {/* @ts-ignore */}
                                     <tc-scroll-area axis="both" max-height="220" max-width="100%">
                                         <div style={{ width: 900, padding: '1rem' }}>
-                                            {rows.map(n => (
-                                                <p key={n} style={{ ...paragraphStyle, whiteSpace: 'nowrap' }}>
-                                                    <strong>Line {n}.</strong> This content is wider than the
-                                                    container and taller than the max-height, so both
-                                                    scrollbars appear when axis is "both".
+                                            {rows.map((n) => (
+                                                <p
+                                                    key={n}
+                                                    style={{
+                                                        ...paragraphStyle,
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                >
+                                                    <strong>Line {n}.</strong> This content is wider
+                                                    than the container and taller than the
+                                                    max-height, so both scrollbars appear when axis
+                                                    is "both".
                                                 </p>
                                             ))}
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-scroll-area>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

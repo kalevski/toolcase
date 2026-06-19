@@ -18,7 +18,6 @@ const TAG_NAME = 'tc-screen-flash'
  * Events: `tc-done` fires (bubbles, composed) when the fade-out completes.
  */
 export class ScreenFlash extends HTMLElement {
-
     private _initialised = false
     private _timer: ReturnType<typeof setTimeout> | null = null
     private _lastTrigger: string | null = null
@@ -145,11 +144,13 @@ export class ScreenFlash extends HTMLElement {
     }
 
     private _emitDone(): void {
-        this.dispatchEvent(new CustomEvent('tc-done', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-done', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this.onDone === 'function') this.onDone()
     }
 }

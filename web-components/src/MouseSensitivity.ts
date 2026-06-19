@@ -9,7 +9,6 @@ const TAG_NAME = 'tc-mouse-sensitivity'
 // toolcase slate/ink look.
 
 export class MouseSensitivity extends SettingRowBase {
-
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
     onChange: ((key: 'main' | 'ads', value: number) => void) | null = null
 
@@ -28,8 +27,12 @@ export class MouseSensitivity extends SettingRowBase {
         // Patch value in place — avoids destroying the active input element
         // (and any in-progress drag) on every `input` event.
         if (name === 'value') {
-            const input = this.querySelector<HTMLInputElement>('.tc-mouse-sensitivity__input[data-key="main"]')
-            const display = this.querySelector<HTMLElement>('.tc-mouse-sensitivity__value[data-key="main"]')
+            const input = this.querySelector<HTMLInputElement>(
+                '.tc-mouse-sensitivity__input[data-key="main"]',
+            )
+            const display = this.querySelector<HTMLElement>(
+                '.tc-mouse-sensitivity__value[data-key="main"]',
+            )
             const v = this.value
             if (input && input.value !== String(v)) input.value = String(v)
             if (display) display.textContent = v.toFixed(2)
@@ -41,8 +44,12 @@ export class MouseSensitivity extends SettingRowBase {
             const newAds = this.ads
             if (newAds !== null && adsRow !== null) {
                 // Row already visible and stays visible — patch in place.
-                const input = this.querySelector<HTMLInputElement>('.tc-mouse-sensitivity__input[data-key="ads"]')
-                const display = this.querySelector<HTMLElement>('.tc-mouse-sensitivity__value[data-key="ads"]')
+                const input = this.querySelector<HTMLInputElement>(
+                    '.tc-mouse-sensitivity__input[data-key="ads"]',
+                )
+                const display = this.querySelector<HTMLElement>(
+                    '.tc-mouse-sensitivity__value[data-key="ads"]',
+                )
                 if (input && input.value !== String(newAds)) input.value = String(newAds)
                 if (display) display.textContent = newAds.toFixed(2)
                 return
@@ -86,7 +93,9 @@ export class MouseSensitivity extends SettingRowBase {
         const main = this.value
         const ads = this.ads
         const disabledAttr = this.disabled ? ' disabled' : ''
-        const adsRow = ads != null ? `
+        const adsRow =
+            ads != null
+                ? `
             <div class="tc-mouse-sensitivity__row tc-mouse-sensitivity__row--ads">
                 <span class="tc-mouse-sensitivity__key">ADS</span>
                 <input
@@ -101,7 +110,8 @@ export class MouseSensitivity extends SettingRowBase {
                 />
                 <span class="tc-mouse-sensitivity__value" data-key="ads">${ads.toFixed(2)}</span>
             </div>
-        ` : ''
+        `
+                : ''
         return `
             <div class="tc-mouse-sensitivity__control">
                 <div class="tc-mouse-sensitivity__row">
@@ -125,12 +135,12 @@ export class MouseSensitivity extends SettingRowBase {
 
     protected bindControl(): void {
         const inputs = this.querySelectorAll<HTMLInputElement>('.tc-mouse-sensitivity__input')
-        inputs.forEach(input => {
+        inputs.forEach((input) => {
             input.addEventListener('input', () => {
                 const key = (input.dataset.key ?? 'main') as 'main' | 'ads'
                 const v = parseFloat(input.value)
                 const display = this.querySelector<HTMLElement>(
-                    `.tc-mouse-sensitivity__value[data-key="${key}"]`
+                    `.tc-mouse-sensitivity__value[data-key="${key}"]`,
                 )
                 if (display) display.textContent = v.toFixed(2)
                 if (key === 'main') this.setAttribute('value', String(v))

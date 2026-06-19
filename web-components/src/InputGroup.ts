@@ -5,7 +5,6 @@ export type InputGroupSize = 'sm' | 'lg'
 const SIZES: InputGroupSize[] = ['sm', 'lg']
 
 export class InputGroup extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -21,7 +20,7 @@ export class InputGroup extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector<HTMLElement>('.input-group')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }

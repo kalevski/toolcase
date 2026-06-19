@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SUPPORTED_FORMATS = [
     { label: 'PNG', mime: 'image/png', extension: '.png' },
@@ -45,14 +44,17 @@ const FileDropzoneDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="FileDropzone"
+                        <tc-rich-page-header
+                            title-text="FileDropzone"
                             description="Drag-and-drop upload zone with optional supported-format chips. Fires tc-files with the selected File array on both drop and native file-picker selection."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="With supported formats">
+                            <tc-section-card title="With supported formats">
                                 {/* @ts-ignore */}
                                 <tc-file-dropzone ref={withFormatsRef} />
                                 {droppedFiles.length > 0 && (
@@ -60,12 +62,12 @@ const FileDropzoneDemo: React.FC = () => {
                                         Files received: {droppedFiles.join(', ')}
                                     </div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No format restriction">
+                            <tc-section-card title="No format restriction">
                                 {/* @ts-ignore */}
                                 <tc-file-dropzone ref={plainRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

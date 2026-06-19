@@ -3,7 +3,6 @@ import { Tab as BsTab } from './internal/Tab'
 const TAG_NAME = 'tc-nav-item'
 
 export class NavItem extends HTMLElement {
-
     private _bsTab: BsTab | null = null
     private _anchorEl: HTMLAnchorElement | null = null
     private _slotContent: Node[] = []
@@ -127,7 +126,7 @@ export class NavItem extends HTMLElement {
 
         this.innerHTML = ''
         this.appendChild(a)
-        this._slotContent.forEach(n => a.appendChild(n))
+        this._slotContent.forEach((n) => a.appendChild(n))
         this._anchorEl = a
     }
 

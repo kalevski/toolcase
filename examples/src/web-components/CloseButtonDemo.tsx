@@ -1,38 +1,40 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CloseButtonDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Close Button"
+                    <tc-rich-page-header
+                        title-text="Close Button"
                         description="Bootstrap standalone close button (×) with disabled and aria-label support."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default">
+                        <tc-section-card title="Default">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-close-button></tc-close-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Custom aria-label">
+                        <tc-section-card title="Custom aria-label">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-close-button aria-label="Dismiss"></tc-close-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled">
+                        <tc-section-card title="Disabled">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-close-button disabled></tc-close-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

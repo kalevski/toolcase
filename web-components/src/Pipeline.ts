@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Check } from 'lucide-static'
 import { icon } from './icons'
 
@@ -10,14 +11,6 @@ export interface PipelineStep {
     state?: PipelineStepState
     description?: string
     label?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 const checkIconHtml = icon(Check, 'tc-pipeline-check-icon')
@@ -53,32 +46,34 @@ export class Pipeline extends HTMLElement {
     private render(): void {
         const total = this._steps.length
 
-        const items = this._steps.map((step, index) => {
-            const state = step.state ?? 'default'
-            const isLive = state === 'live'
-            const isComplete = state === 'complete'
-            const ariaCurrent = isLive ? ' aria-current="step"' : ''
-            const num = index + 1
-            const isLast = index === total - 1
+        const items = this._steps
+            .map((step, index) => {
+                const state = step.state ?? 'default'
+                const isLive = state === 'live'
+                const isComplete = state === 'complete'
+                const ariaCurrent = isLive ? ' aria-current="step"' : ''
+                const num = index + 1
+                const isLast = index === total - 1
 
-            const markerContent = isComplete
-                ? checkIconHtml
-                : `<span class="tc-pipeline-marker-num" aria-hidden="true">${num}</span>`
+                const markerContent = isComplete
+                    ? checkIconHtml
+                    : `<span class="tc-pipeline-marker-num" aria-hidden="true">${num}</span>`
 
-            const completeSrLabel = isComplete
-                ? `<span class="tc-pipeline-sr-only"> (complete)</span>`
-                : ''
+                const completeSrLabel = isComplete
+                    ? `<span class="tc-pipeline-sr-only"> (complete)</span>`
+                    : ''
 
-            const connectorHtml = !isLast
-                ? `<span class="tc-pipeline-connector" aria-hidden="true"></span>`
-                : ''
+                const connectorHtml = !isLast
+                    ? `<span class="tc-pipeline-connector" aria-hidden="true"></span>`
+                    : ''
 
-            return `<li class="tc-pipeline-step tc-pipeline-step--${esc(state)}"${ariaCurrent}>
+                return `<li class="tc-pipeline-step tc-pipeline-step--${esc(state)}"${ariaCurrent}>
                 <span class="tc-pipeline-marker">${markerContent}</span>
                 <span class="tc-pipeline-title">${esc(String(step.title))}${completeSrLabel}</span>
                 ${connectorHtml}
             </li>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML = `<ol class="tc-pipeline">${items}</ol>`
     }

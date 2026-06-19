@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const RECIPES = [
     {
@@ -62,7 +61,9 @@ const CraftingPanelDemo: React.FC = () => {
             console.log('[tc-crafting-panel] tc-craft:', e.detail.id)
             // Simulate a brief crafting cycle.
             el.crafting = true
-            window.setTimeout(() => { el.crafting = false }, 900)
+            window.setTimeout(() => {
+                el.crafting = false
+            }, 900)
         }
         el.addEventListener('tc-select', onSelect as EventListener)
         el.addEventListener('tc-craft', onCraft as EventListener)
@@ -77,19 +78,22 @@ const CraftingPanelDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CraftingPanel"
+                        <tc-rich-page-header
+                            title-text="CraftingPanel"
                             description="Crafting UI: a recipe list, the selected recipe's ingredient requirements, and a craft action. Set rows via the recipes JS property; selecting a row fires tc-select, and the craft button fires tc-craft. Ingredients with insufficient stock read in the danger colour and the craft button disables until the recipe is affordable."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic (Iron Sword pre-selected)">
+                            <tc-section-card title="Basic (Iron Sword pre-selected)">
                                 {/* @ts-ignore */}
                                 <tc-crafting-panel ref={basicRef}></tc-crafting-panel>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Interactive (select a recipe, then Craft)">
+                            <tc-section-card title="Interactive (select a recipe, then Craft)">
                                 {/* @ts-ignore */}
                                 <tc-crafting-panel ref={interactiveRef}></tc-crafting-panel>
                                 <p className="mt-3 mb-0 text-secondary">
@@ -97,7 +101,7 @@ const CraftingPanelDemo: React.FC = () => {
                                     {' · '}
                                     Last crafted: <strong>{crafted ?? '— none yet —'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

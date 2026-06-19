@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-video-embed'
 
 const DEFAULT_ASPECT = 16 / 9
@@ -29,7 +30,9 @@ function youtubeId(src: string): string | null {
 function vimeoId(src: string): string | null {
     let m = src.match(/player\.vimeo\.com\/video\/(\d+)/)
     if (m) return m[1]
-    m = src.match(/vimeo\.com\/(?:channels\/[\w-]+\/|groups\/[\w-]+\/videos\/|album\/\d+\/video\/)?(\d+)/)
+    m = src.match(
+        /vimeo\.com\/(?:channels\/[\w-]+\/|groups\/[\w-]+\/videos\/|album\/\d+\/video\/)?(\d+)/,
+    )
     if (m) return m[1]
     return null
 }
@@ -53,15 +56,22 @@ interface EmbedOptions {
 function buildEmbedUrl(provider: VideoProvider, id: string, o: EmbedOptions): string {
     const p: string[] = []
     if (provider === 'youtube') {
-        if (o.autoplay) { p.push('autoplay=1'); p.push('mute=1') }
-        else if (o.muted) p.push('mute=1')
-        if (o.loop) { p.push('loop=1'); p.push(`playlist=${id}`) }
+        if (o.autoplay) {
+            p.push('autoplay=1')
+            p.push('mute=1')
+        } else if (o.muted) p.push('mute=1')
+        if (o.loop) {
+            p.push('loop=1')
+            p.push(`playlist=${id}`)
+        }
         if (!o.controls) p.push('controls=0')
         return `https://www.youtube.com/embed/${id}${p.length ? `?${p.join('&')}` : ''}`
     }
     if (provider === 'vimeo') {
-        if (o.autoplay) { p.push('autoplay=1'); p.push('muted=1') }
-        else if (o.muted) p.push('muted=1')
+        if (o.autoplay) {
+            p.push('autoplay=1')
+            p.push('muted=1')
+        } else if (o.muted) p.push('muted=1')
         if (o.loop) p.push('loop=1')
         if (!o.controls) p.push('controls=0')
         return `https://player.vimeo.com/video/${id}${p.length ? `?${p.join('&')}` : ''}`
@@ -72,22 +82,15 @@ function buildEmbedUrl(provider: VideoProvider, id: string, o: EmbedOptions): st
     return `https://www.loom.com/embed/${id}${p.length ? `?${p.join('&')}` : ''}`
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function prefersReducedMotion(): boolean {
-    return typeof window !== 'undefined'
-        && typeof window.matchMedia === 'function'
-        && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    return (
+        typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
 }
 
 export class VideoEmbed extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -191,32 +194,37 @@ export class VideoEmbed extends HTMLElement {
                 const titleAttr = title ? ` title="${esc(title)}"` : ''
                 // Autoplay requires muted under browser policy.
                 const wantMuted = muted || autoplay
-                media = `<video class="tc-video-embed-media tc-video-embed-video"`
-                    + ` src="${esc(src)}"${posterAttr}`
-                    + (controls ? ' controls' : '')
-                    + (autoplay ? ' autoplay' : '')
-                    + (loop ? ' loop' : '')
-                    + (wantMuted ? ' muted' : '')
-                    + ' playsinline'
-                    + titleAttr
-                    + '></video>'
+                media =
+                    `<video class="tc-video-embed-media tc-video-embed-video"` +
+                    ` src="${esc(src)}"${posterAttr}` +
+                    (controls ? ' controls' : '') +
+                    (autoplay ? ' autoplay' : '') +
+                    (loop ? ' loop' : '') +
+                    (wantMuted ? ' muted' : '') +
+                    ' playsinline' +
+                    titleAttr +
+                    '></video>'
             } else {
-                const id = provider === 'youtube' ? youtubeId(src)
-                    : provider === 'vimeo' ? vimeoId(src)
-                        : loomId(src)
+                const id =
+                    provider === 'youtube'
+                        ? youtubeId(src)
+                        : provider === 'vimeo'
+                          ? vimeoId(src)
+                          : loomId(src)
                 // If the id can't be parsed, fall back to the raw URL (it may already
                 // be an embed URL the provider understands).
                 const embedSrc = id
                     ? buildEmbedUrl(provider, id, { autoplay, loop, muted, controls })
                     : src
                 const titleAttr = title ? esc(title) : 'Video'
-                media = `<iframe class="tc-video-embed-media tc-video-embed-iframe"`
-                    + ` src="${esc(embedSrc)}"`
-                    + ` title="${titleAttr}"`
-                    + ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"'
-                    + ' allowfullscreen'
-                    + ' loading="lazy"'
-                    + '></iframe>'
+                media =
+                    `<iframe class="tc-video-embed-media tc-video-embed-iframe"` +
+                    ` src="${esc(embedSrc)}"` +
+                    ` title="${titleAttr}"` +
+                    ' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"' +
+                    ' allowfullscreen' +
+                    ' loading="lazy"' +
+                    '></iframe>'
             }
         }
 

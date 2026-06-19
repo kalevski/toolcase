@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type ConfirmVariant = {
     key: string
@@ -17,7 +16,8 @@ const VARIANTS: ConfirmVariant[] = [
     {
         key: 'default',
         sectionTitle: 'default — primary confirm',
-        description: 'Yes/no confirmation. Press Enter to confirm, Escape or the backdrop to cancel.',
+        description:
+            'Yes/no confirmation. Press Enter to confirm, Escape or the backdrop to cancel.',
         dialogTitle: 'Publish this release?',
         eyebrow: 'Confirm',
         message: 'This will make version 2.4.0 available to everyone. You can roll back later.',
@@ -52,7 +52,7 @@ const ConfirmDialogDemo: React.FC = () => {
 
     useEffect(() => {
         const cleanups: Array<() => void> = []
-        VARIANTS.forEach(v => {
+        VARIANTS.forEach((v) => {
             const el = refs.current[v.key]
             if (!el) return
             const onConfirm = () => {
@@ -70,7 +70,7 @@ const ConfirmDialogDemo: React.FC = () => {
                 el.removeEventListener('tc-cancel', onCancel)
             })
         })
-        return () => cleanups.forEach(fn => fn())
+        return () => cleanups.forEach((fn) => fn())
     }, [])
 
     return (
@@ -78,19 +78,22 @@ const ConfirmDialogDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Confirm Dialog"
+                        <tc-rich-page-header
+                            title-text="Confirm Dialog"
                             description="Centred yes/no confirmation modal with focus trap and keyboard handling. Controlled component — fires tc-confirm or tc-cancel; set open to false in the handler to close."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="last action">
+                            <tc-section-card title="last action">
                                 <code>{lastResult}</code>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            {VARIANTS.map(v => (
-                                <SectionCard key={v.key} title={v.sectionTitle}>
+                            {VARIANTS.map((v) => (
+                                <tc-section-card key={v.key} title={v.sectionTitle}>
                                     <p className="text-muted mb-3">{v.description}</p>
                                     <button
                                         className={`btn ${v.danger ? 'btn-danger' : 'btn-primary'}`}
@@ -100,7 +103,9 @@ const ConfirmDialogDemo: React.FC = () => {
                                     </button>
                                     {/* @ts-ignore */}
                                     <tc-confirm-dialog
-                                        ref={(el: HTMLElement | null) => { refs.current[v.key] = el }}
+                                        ref={(el: HTMLElement | null) => {
+                                            refs.current[v.key] = el
+                                        }}
                                         open={openKey === v.key || undefined}
                                         dialog-title={v.dialogTitle}
                                         eyebrow={v.eyebrow}
@@ -109,7 +114,7 @@ const ConfirmDialogDemo: React.FC = () => {
                                         cancel-label={v.cancelLabel}
                                         danger={v.danger || undefined}
                                     />
-                                </SectionCard>
+                                </tc-section-card>
                             ))}
                         </div>
                     </div>

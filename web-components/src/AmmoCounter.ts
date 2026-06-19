@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-ammo-counter'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type AmmoCounterState = 'normal' | 'low' | 'reloading'
 

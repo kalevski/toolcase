@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PluginGridDemo: React.FC = () => {
     const threeColRef = useRef<any>(null)
@@ -11,14 +10,16 @@ const PluginGridDemo: React.FC = () => {
         const items = [
             {
                 name: 'tc-auth',
-                description: 'Pluggable authentication middleware for Fastify with JWT and session support.',
+                description:
+                    'Pluggable authentication middleware for Fastify with JWT and session support.',
                 iconName: 'Shield',
                 install: 'npm install @toolcase/tc-auth',
                 downloads: 48200,
             },
             {
                 name: 'tc-logger',
-                description: 'Structured logging plugin with OTLP exporter and ring-buffer reporter.',
+                description:
+                    'Structured logging plugin with OTLP exporter and ring-buffer reporter.',
                 iconName: 'FileText',
                 install: 'npm install @toolcase/tc-logger',
                 downloads: 127000,
@@ -65,34 +66,39 @@ const PluginGridDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PluginGrid"
+                        <tc-rich-page-header
+                            title-text="PluginGrid"
                             description="Responsive grid of plugin cards. Supply plugins via the items JS property. The columns attribute (2 | 3 | 4, default 3) controls layout. Clicking the copy icon dispatches a tc-copy event."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="3 columns (default) with tc-copy event">
+                            <tc-section-card title="3 columns (default) with tc-copy event">
                                 {/* @ts-ignore */}
-                                <tc-plugin-grid columns="3" title-text="Community Plugins" ref={titledRef} />
-                            </SectionCard>
+                                <tc-plugin-grid
+                                    columns="3"
+                                    title-text="Community Plugins"
+                                    ref={titledRef}
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="3 columns — items property">
+                            <tc-section-card title="3 columns — items property">
                                 {/* @ts-ignore */}
                                 <tc-plugin-grid columns="3" ref={threeColRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="2 columns">
+                            <tc-section-card title="2 columns">
                                 {/* @ts-ignore */}
                                 <tc-plugin-grid columns="2" ref={twoColRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="4 columns">
+                            <tc-section-card title="4 columns">
                                 {/* @ts-ignore */}
                                 <tc-plugin-grid columns="4" ref={fourColRef} />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

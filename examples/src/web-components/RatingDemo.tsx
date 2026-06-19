@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useRatingValue(initial: number): [number, React.RefObject<any>] {
     const [value, setValue] = useState<number>(initial)
@@ -15,7 +14,7 @@ function useRatingValue(initial: number): [number, React.RefObject<any>] {
         }
         el.addEventListener('tc-change', handler)
         return () => el.removeEventListener('tc-change', handler)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return [value, ref]
@@ -30,44 +29,52 @@ const RatingDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Rating"
+                        <tc-rich-page-header
+                            title-text="Rating"
                             description="Interactive star rating with optional half-stars, keyboard navigation, custom icons, size variants, and a read-only display mode."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Interactive — tc-change listener">
+                            <tc-section-card title="Interactive — tc-change listener">
                                 <div className="d-flex align-items-center gap-3">
                                     {/* @ts-ignore */}
                                     <tc-rating ref={ref1} count="5"></tc-rating>
                                     <span className="form-text m-0">Selected: {v1} of 5</span>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Half-stars (allow-half)">
+                            <tc-section-card title="Half-stars (allow-half)">
                                 <div className="d-flex align-items-center gap-3">
                                     {/* @ts-ignore */}
                                     <tc-rating ref={ref2} count="5" allow-half></tc-rating>
                                     <span className="form-text m-0">Selected: {v2} of 5</span>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Read-only">
+                            <tc-section-card title="Read-only">
                                 <div className="d-flex flex-column gap-2">
                                     {/* @ts-ignore */}
                                     <tc-rating value="4" count="5" read-only></tc-rating>
                                     {/* @ts-ignore */}
-                                    <tc-rating value="3.5" count="5" allow-half read-only></tc-rating>
+                                    <tc-rating
+                                        value="3.5"
+                                        count="5"
+                                        allow-half
+                                        read-only
+                                    ></tc-rating>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom icon (heart)">
+                            <tc-section-card title="Custom icon (heart)">
                                 {/* @ts-ignore */}
                                 <tc-rating value="3" count="5" icon="heart"></tc-rating>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Size variants">
+                            <tc-section-card title="Size variants">
                                 <div className="d-flex flex-column gap-3">
                                     {/* @ts-ignore */}
                                     <tc-rating value="3" count="5" size="small"></tc-rating>
@@ -76,7 +83,7 @@ const RatingDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-rating value="3" count="5" size="large"></tc-rating>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

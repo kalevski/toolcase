@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-infinite-scroll'
 
 export class InfiniteScroll extends HTMLElement {
-
     private _initialised = false
     private _observer: IntersectionObserver | null = null
     private _intersecting = false
@@ -51,16 +50,17 @@ export class InfiniteScroll extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             const all = Array.from(this.childNodes)
-            this._contentNodes = all.filter(n => {
+            this._contentNodes = all.filter((n) => {
                 if (!(n instanceof Element)) return true
                 const slot = n.getAttribute('data-slot')
                 return slot !== 'loading' && slot !== 'end'
             })
             this._loadingNodes = all.filter(
-                n => n instanceof Element && (n as Element).getAttribute('data-slot') === 'loading'
+                (n) =>
+                    n instanceof Element && (n as Element).getAttribute('data-slot') === 'loading',
             )
             this._endNodes = all.filter(
-                n => n instanceof Element && (n as Element).getAttribute('data-slot') === 'end'
+                (n) => n instanceof Element && (n as Element).getAttribute('data-slot') === 'end',
             )
             this.render()
             this._distributeSlots()
@@ -113,9 +113,9 @@ export class InfiniteScroll extends HTMLElement {
         const contentEl = this.querySelector('.tc-infinite-scroll-content')
         const loadingEl = this.querySelector('.tc-infinite-scroll-loading')
         const endEl = this.querySelector('.tc-infinite-scroll-end')
-        if (contentEl) this._contentNodes.forEach(n => contentEl.appendChild(n))
-        if (loadingEl) this._loadingNodes.forEach(n => loadingEl.appendChild(n))
-        if (endEl) this._endNodes.forEach(n => endEl.appendChild(n))
+        if (contentEl) this._contentNodes.forEach((n) => contentEl.appendChild(n))
+        if (loadingEl) this._loadingNodes.forEach((n) => loadingEl.appendChild(n))
+        if (endEl) this._endNodes.forEach((n) => endEl.appendChild(n))
     }
 
     private _buildObserver(): void {
@@ -133,7 +133,7 @@ export class InfiniteScroll extends HTMLElement {
             {
                 threshold: this.threshold,
                 rootMargin: this.rootMargin,
-            }
+            },
         )
 
         this._observer.observe(sentinel)
@@ -142,11 +142,13 @@ export class InfiniteScroll extends HTMLElement {
     private _tryFire(): void {
         if (this._intersecting && this.hasMore && !this.loading && !this._fired) {
             this._fired = true
-            this.dispatchEvent(new CustomEvent('tc-load-more', {
-                bubbles: true,
-                composed: true,
-                detail: {},
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-load-more', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {},
+                }),
+            )
             if (typeof this.onLoadMore === 'function') this.onLoadMore()
         }
     }
@@ -157,12 +159,14 @@ export class InfiniteScroll extends HTMLElement {
         const hasCustomLoading = this._loadingNodes.length > 0
         const hasCustomEnd = this._endNodes.length > 0
 
-        const defaultSpinner = hasCustomLoading ? '' :
-            `<div class="spinner-border spinner-border-sm tc-infinite-scroll__spinner" aria-hidden="true"></div>` +
-            `<span class="visually-hidden">Loading…</span>`
+        const defaultSpinner = hasCustomLoading
+            ? ''
+            : `<div class="spinner-border spinner-border-sm tc-infinite-scroll__spinner" aria-hidden="true"></div>` +
+              `<span class="visually-hidden">Loading…</span>`
 
-        const defaultEnd = hasCustomEnd ? '' :
-            `<span class="tc-infinite-scroll__end-label">End</span>`
+        const defaultEnd = hasCustomEnd
+            ? ''
+            : `<span class="tc-infinite-scroll__end-label">End</span>`
 
         const loadingVisible = loading ? ' tc-infinite-scroll-loading--visible' : ''
         const endVisible = !hasMore ? ' tc-infinite-scroll-end--visible' : ''

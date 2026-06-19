@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ALL_STATES_ITEMS = [
     { id: '1', label: 'API Gateway', status: 'ok' as const, detail: 'Healthy' },
@@ -34,49 +33,50 @@ const StatusCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="StatusCard"
+                        <tc-rich-page-header
+                            title-text="StatusCard"
                             description="Dashboard card showing a list of status indicator rows — ok, warning, error, and inactive states with icons and optional detail text."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="All four states — with title (JS property)">
+                            <tc-section-card title="All four states — with title (JS property)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-status-card ref={allStatesRef} title="System Health" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Mixed — no title, optional detail (JS property)">
+                            <tc-section-card title="Mixed — no title, optional detail (JS property)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-status-card ref={mixedRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — default count (4 rows)">
+                            <tc-section-card title="Loading state — default count (4 rows)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-status-card title="System Health" loading />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — 6 rows (loading-count attribute)">
+                            <tc-section-card title="Loading state — 6 rows (loading-count attribute)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-status-card title="Services" loading loading-count="6" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading — no title">
+                            <tc-section-card title="Loading — no title">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-status-card loading />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-command-reference'
@@ -14,24 +15,6 @@ export interface CommandItem {
     description?: string
     flags?: CommandFlag[]
     aliases?: string[]
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const searchIconHtml = lucideByName('search')
@@ -62,11 +45,15 @@ export class CommandReference extends HTMLElement {
             this.render()
             if (!this.hasAttribute('title')) {
                 const titleEl = this.querySelector('.tc-command-reference-title')
-                if (titleEl) this._titleNodes.forEach(n => titleEl.appendChild(n))
+                if (titleEl) this._titleNodes.forEach((n) => titleEl.appendChild(n))
             }
-            this.addEventListener('input', this._onNativeInput)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('input', this._onNativeInput)
     }
 
     disconnectedCallback(): void {
@@ -120,11 +107,13 @@ export class CommandReference extends HTMLElement {
             newInput.value = savedVal
             newInput.focus()
         }
-        this.dispatchEvent(new CustomEvent('tc-search', {
-            bubbles: true,
-            composed: true,
-            detail: { query: this._query },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-search', {
+                bubbles: true,
+                composed: true,
+                detail: { query: this._query },
+            }),
+        )
     }
 
     private _rerenderWithSlots(): void {
@@ -135,21 +124,25 @@ export class CommandReference extends HTMLElement {
         this.render()
         if (!this.hasAttribute('title')) {
             const newTitleEl = this.querySelector('.tc-command-reference-title')
-            if (newTitleEl) this._titleNodes.forEach(n => newTitleEl.appendChild(n))
+            if (newTitleEl) this._titleNodes.forEach((n) => newTitleEl.appendChild(n))
         }
     }
 
     private _filterCommands(): CommandItem[] {
         const q = this._query.trim().toLowerCase()
         if (!q) return this._commands
-        return this._commands.filter(cmd => {
+        return this._commands.filter((cmd) => {
             if (cmd.name.toLowerCase().includes(q)) return true
             if (cmd.description?.toLowerCase().includes(q)) return true
-            if (cmd.aliases?.some(a => a.toLowerCase().includes(q))) return true
-            if (cmd.flags?.some(f =>
-                f.flag.toLowerCase().includes(q) ||
-                f.description?.toLowerCase().includes(q)
-            )) return true
+            if (cmd.aliases?.some((a) => a.toLowerCase().includes(q))) return true
+            if (
+                cmd.flags?.some(
+                    (f) =>
+                        f.flag.toLowerCase().includes(q) ||
+                        f.description?.toLowerCase().includes(q),
+                )
+            )
+                return true
             return false
         })
     }
@@ -167,38 +160,40 @@ export class CommandReference extends HTMLElement {
 
         let aliasesHtml = ''
         if (cmd.aliases && cmd.aliases.length > 0) {
-            const chips = cmd.aliases.map(a =>
-                `<span class="tc-command-reference-alias">${esc(a)}</span>`
-            ).join('')
+            const chips = cmd.aliases
+                .map((a) => `<span class="tc-command-reference-alias">${esc(a)}</span>`)
+                .join('')
             aliasesHtml =
                 `<div class="tc-command-reference-aliases">` +
-                    `<span class="tc-command-reference-aliases-label">Aliases</span>` +
-                    chips +
+                `<span class="tc-command-reference-aliases-label">Aliases</span>` +
+                chips +
                 `</div>`
         }
 
         let flagsHtml = ''
         if (cmd.flags && cmd.flags.length > 0) {
-            const flagItems = cmd.flags.map(f => {
-                const descPart = f.description
-                    ? `<span class="tc-command-reference-flag-desc">${esc(f.description)}</span>`
-                    : ''
-                return (
-                    `<li class="tc-command-reference-flag">` +
+            const flagItems = cmd.flags
+                .map((f) => {
+                    const descPart = f.description
+                        ? `<span class="tc-command-reference-flag-desc">${esc(f.description)}</span>`
+                        : ''
+                    return (
+                        `<li class="tc-command-reference-flag">` +
                         `<code class="tc-command-reference-flag-name">${esc(f.flag)}</code>` +
                         descPart +
-                    `</li>`
-                )
-            }).join('')
+                        `</li>`
+                    )
+                })
+                .join('')
             flagsHtml = `<ul class="tc-command-reference-flags">${flagItems}</ul>`
         }
 
         return (
             `<div class="tc-command-reference-item">` +
-                headerHtml +
-                descHtml +
-                aliasesHtml +
-                flagsHtml +
+            headerHtml +
+            descHtml +
+            aliasesHtml +
+            flagsHtml +
             `</div>`
         )
     }
@@ -213,44 +208,38 @@ export class CommandReference extends HTMLElement {
             const inputId = `${this._idPrefix}-search`
             searchHtml =
                 `<div class="tc-command-reference-search">` +
-                    `<label for="${esc(inputId)}" class="visually-hidden">${esc(this.searchPlaceholder)}</label>` +
-                    `<div class="tc-command-reference-search-wrap">` +
-                        `<span class="tc-command-reference-search-icon" aria-hidden="true">${searchIconHtml}</span>` +
-                        `<input` +
-                            ` id="${esc(inputId)}"` +
-                            ` type="text"` +
-                            ` class="tc-command-reference-input"` +
-                            ` placeholder="${esc(this.searchPlaceholder)}"` +
-                            ` value="${esc(this._query)}"` +
-                            ` autocomplete="off"` +
-                            ` aria-label="${esc(this.searchPlaceholder)}"` +
-                        ` />` +
-                    `</div>` +
+                `<label for="${esc(inputId)}" class="visually-hidden">${esc(this.searchPlaceholder)}</label>` +
+                `<div class="tc-command-reference-search-wrap">` +
+                `<span class="tc-command-reference-search-icon" aria-hidden="true">${searchIconHtml}</span>` +
+                `<input` +
+                ` id="${esc(inputId)}"` +
+                ` type="text"` +
+                ` class="tc-command-reference-input"` +
+                ` placeholder="${esc(this.searchPlaceholder)}"` +
+                ` value="${esc(this._query)}"` +
+                ` autocomplete="off"` +
+                ` aria-label="${esc(this.searchPlaceholder)}"` +
+                ` />` +
+                `</div>` +
                 `</div>`
         }
 
         const filtered = this._filterCommands()
         let bodyHtml: string
         if (filtered.length === 0) {
-            const emptyMsg = this._query
-                ? 'No commands match your search.'
-                : 'No commands.'
+            const emptyMsg = this._query ? 'No commands match your search.' : 'No commands.'
             bodyHtml = `<div class="tc-command-reference-empty">${esc(emptyMsg)}</div>`
         } else {
-            bodyHtml = filtered.map(cmd => this._renderCommand(cmd)).join('')
+            bodyHtml = filtered.map((cmd) => this._renderCommand(cmd)).join('')
         }
 
         const listHtml =
             `<div class="tc-command-reference-list" role="region" aria-label="Commands" tabindex="0">` +
-                bodyHtml +
+            bodyHtml +
             `</div>`
 
         this.innerHTML =
-            `<div class="tc-command-reference">` +
-                titleHtml +
-                searchHtml +
-                listHtml +
-            `</div>`
+            `<div class="tc-command-reference">` + titleHtml + searchHtml + listHtml + `</div>`
     }
 }
 

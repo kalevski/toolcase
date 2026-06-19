@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const LINKS_GHOST = [
     { kind: 'github', href: '#', label: 'GitHub' },
@@ -58,42 +57,45 @@ const SocialLinksDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="SocialLinks"
+                        <tc-rich-page-header
+                            title-text="SocialLinks"
                             description="Horizontal row of social-media icon links. Set links via the JS links property. Two variants (ghost / filled) and three sizes (sm / md / lg)."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Ghost variant (default)">
+                            <tc-section-card title="Ghost variant (default)">
                                 {/* @ts-ignore */}
                                 <tc-social-links ref={ghostRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Filled variant">
+                            <tc-section-card title="Filled variant">
                                 {/* @ts-ignore */}
                                 <tc-social-links ref={filledRef} variant="filled" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Size sm">
+                            <tc-section-card title="Size sm">
                                 {/* @ts-ignore */}
                                 <tc-social-links ref={smRef} size="sm" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Size md (default)">
+                            <tc-section-card title="Size md (default)">
                                 {/* @ts-ignore */}
                                 <tc-social-links ref={mdRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Size lg">
+                            <tc-section-card title="Size lg">
                                 {/* @ts-ignore */}
                                 <tc-social-links ref={lgRef} size="lg" variant="filled" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="All kinds">
+                            <tc-section-card title="All kinds">
                                 {/* @ts-ignore */}
                                 <tc-social-links ref={allRef} variant="filled" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

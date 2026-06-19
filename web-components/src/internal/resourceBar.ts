@@ -1,3 +1,4 @@
+import { esc } from "./esc"
 // Shared rendering logic for the resource-bar family — tc-boss-bar today, and
 // the HP / mana / stamina bars (game-components' ResourceBarBase) as they land.
 // Centralises the percentage math, HTML escaping, and the track / fill / ghost /
@@ -8,12 +9,7 @@
 
 /** Escape a user-supplied string before injecting into innerHTML. */
 export function escapeHtml(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
+    return esc(value)
 }
 
 function clamp(value: number, lo: number, hi: number): number {

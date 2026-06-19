@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const DEMO_ENTRIES = [
     {
@@ -74,7 +73,8 @@ const JournalDemo: React.FC = () => {
         if (!el) return
         el.entries = DEMO_ENTRIES
 
-        const onSelect = (e: CustomEvent) => setLog(l => [`tc-select  id="${e.detail.id}"`, ...l].slice(0, 8))
+        const onSelect = (e: CustomEvent) =>
+            setLog((l) => [`tc-select  id="${e.detail.id}"`, ...l].slice(0, 8))
         el.addEventListener('tc-select', onSelect as EventListener)
         return () => el.removeEventListener('tc-select', onSelect as EventListener)
     }, [])
@@ -84,44 +84,59 @@ const JournalDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Journal"
+                        <tc-rich-page-header
+                            title-text="Journal"
                             description="Quest / lore journal pairing an entry list with a detail view. Each entry carries a state, an optional description and body, objectives with checkboxes, and rewards. Selecting a row updates the detail pane and fires tc-select."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Active quest selected — objectives and rewards">
+                            <tc-section-card title="Active quest selected — objectives and rewards">
                                 {/* @ts-ignore */}
-                                <tc-journal ref={basicRef} selected-id="q1" style={{ maxWidth: '760px' }} />
-                            </SectionCard>
+                                <tc-journal
+                                    ref={basicRef}
+                                    selected-id="q1"
+                                    style={{ maxWidth: '760px' }}
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Completed quest — struck-through objectives">
+                            <tc-section-card title="Completed quest — struck-through objectives">
                                 {/* @ts-ignore */}
-                                <tc-journal ref={completedRef} selected-id="q2" style={{ maxWidth: '760px' }} />
-                            </SectionCard>
+                                <tc-journal
+                                    ref={completedRef}
+                                    selected-id="q2"
+                                    style={{ maxWidth: '760px' }}
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Empty state — no entries provided">
+                            <tc-section-card title="Empty state — no entries provided">
                                 {/* @ts-ignore */}
                                 <tc-journal ref={emptyRef} style={{ maxWidth: '760px' }} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Events — tc-select">
+                            <tc-section-card title="Events — tc-select">
                                 {/* @ts-ignore */}
                                 <tc-journal ref={eventsRef} style={{ maxWidth: '760px' }} />
                                 <div className="mt-3">
                                     <strong className="d-block mb-1">Event log</strong>
                                     {log.length === 0 ? (
-                                        <span className="text-muted">Click an entry to see events…</span>
+                                        <span className="text-muted">
+                                            Click an entry to see events…
+                                        </span>
                                     ) : (
                                         <ul className="mb-0 ps-0 list-unstyled">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

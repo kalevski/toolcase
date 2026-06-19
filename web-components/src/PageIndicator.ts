@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-page-indicator'
 
 export class PageIndicator extends HTMLElement {
-
     private _initialised = false
     private _clickHandler = (e: Event) => this._onClick(e)
     private _keydownHandler = (e: KeyboardEvent) => this._onKeydown(e)
@@ -111,11 +110,13 @@ export class PageIndicator extends HTMLElement {
     private _select(index: number): void {
         if (index === this.index) return
         this.index = index
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { index },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { index },
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(index)
     }
 
@@ -145,7 +146,7 @@ export class PageIndicator extends HTMLElement {
                 ? 'tc-page-indicator-dot tc-page-indicator-dot--active'
                 : 'tc-page-indicator-dot'
             dots.push(
-                `<button type="button" class="${cls}" data-pi="${i}" aria-label="Page ${i + 1}" aria-current="${isActive ? 'page' : 'false'}"></button>`
+                `<button type="button" class="${cls}" data-pi="${i}" aria-label="Page ${i + 1}" aria-current="${isActive ? 'page' : 'false'}"></button>`,
             )
         }
         this.innerHTML = dots.join('')

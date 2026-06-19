@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-battle-pass'
@@ -18,25 +19,6 @@ export interface BattlePassTier {
 
 export interface BattlePassEventMap {
     'tc-claim': CustomEvent<{ level: number; track: 'free' | 'premium' }>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 // State glyphs (resolved once) — lucide inline SVG, never unicode/emoji. The
@@ -170,12 +152,13 @@ export class BattlePass extends HTMLElement {
         const seasonName = this.seasonName
         const seasonEnd = this.seasonEnd
 
-        const currentTier = this._tiers.find(t => t.level === currentLevel)
+        const currentTier = this._tiers.find((t) => t.level === currentLevel)
         const xpRequired = currentTier?.xpRequired ?? 0
-        const xpPct = xpRequired > 0 ? Math.max(0, Math.min(100, (currentXp / xpRequired) * 100)) : 0
+        const xpPct =
+            xpRequired > 0 ? Math.max(0, Math.min(100, (currentXp / xpRequired) * 100)) : 0
 
         const tiersMarkup = this._tiers
-            .map(tier => {
+            .map((tier) => {
                 const locked = tier.level > currentLevel
                 const gated = !hasPremium
                 const isCurrent = tier.level === currentLevel
@@ -222,13 +205,17 @@ export class BattlePass extends HTMLElement {
             </div>
         `
 
-        this.querySelectorAll<HTMLButtonElement>('.tc-battle-pass-cell.is-claimable').forEach(el => {
-            el.addEventListener('click', () => {
-                const level = parseInt(el.dataset.level || '0', 10)
-                const track = (el.dataset.track === 'premium' ? 'premium' : 'free') as 'free' | 'premium'
-                this.emitClaim(level, track)
-            })
-        })
+        this.querySelectorAll<HTMLButtonElement>('.tc-battle-pass-cell.is-claimable').forEach(
+            (el) => {
+                el.addEventListener('click', () => {
+                    const level = parseInt(el.dataset.level || '0', 10)
+                    const track = (el.dataset.track === 'premium' ? 'premium' : 'free') as
+                        | 'free'
+                        | 'premium'
+                    this.emitClaim(level, track)
+                })
+            },
+        )
     }
 }
 

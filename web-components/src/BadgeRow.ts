@@ -1,24 +1,26 @@
+import { VARIANTS_FULL } from './internal/variants'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-badge-row'
 
 export type BadgeRowSize = 'sm' | 'md'
-export type BadgeRowVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type BadgeRowVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
 const SIZES: BadgeRowSize[] = ['sm', 'md']
-const VARIANTS: BadgeRowVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: BadgeRowVariant[] = [...VARIANTS_FULL]
 
 export interface BadgeRowItem {
     label: string
     value?: string | number
     color?: string
     variant?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class BadgeRow extends HTMLElement {
@@ -62,23 +64,27 @@ export class BadgeRow extends HTMLElement {
 
         // Manage own classes without wiping user-added ones (className pass-through)
         this.classList.add('tc-badge-row', 'd-flex', 'flex-wrap', 'gap-2')
-        SIZES.forEach(s => this.classList.remove(`tc-badge-row--${s}`))
+        SIZES.forEach((s) => this.classList.remove(`tc-badge-row--${s}`))
         this.classList.add(`tc-badge-row--${size}`)
         this.setAttribute('role', 'list')
 
-        this.innerHTML = this._badges.map(badge => {
-            const variant = badge.variant && (VARIANTS as string[]).includes(badge.variant)
-                ? badge.variant
-                : null
-            const variantClass = variant ? ` tc-badge-row-item--${variant}` : ''
-            const colorStyle = badge.color
-                ? ` style="--bs-badge-row-color: ${esc(badge.color)}"`
-                : ''
-            const valueHtml = badge.value != null
-                ? `<span class="tc-badge-row-value">${esc(String(badge.value))}</span>`
-                : ''
-            return `<span class="tc-badge-row-item${variantClass}" role="listitem"${colorStyle}><span class="tc-badge-row-label">${esc(badge.label)}</span>${valueHtml}</span>`
-        }).join('')
+        this.innerHTML = this._badges
+            .map((badge) => {
+                const variant =
+                    badge.variant && (VARIANTS as string[]).includes(badge.variant)
+                        ? badge.variant
+                        : null
+                const variantClass = variant ? ` tc-badge-row-item--${variant}` : ''
+                const colorStyle = badge.color
+                    ? ` style="--bs-badge-row-color: ${esc(badge.color)}"`
+                    : ''
+                const valueHtml =
+                    badge.value != null
+                        ? `<span class="tc-badge-row-value">${esc(String(badge.value))}</span>`
+                        : ''
+                return `<span class="tc-badge-row-item${variantClass}" role="listitem"${colorStyle}><span class="tc-badge-row-label">${esc(badge.label)}</span>${valueHtml}</span>`
+            })
+            .join('')
     }
 }
 

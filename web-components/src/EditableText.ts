@@ -1,7 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-editable-text'
 
 export class EditableText extends HTMLElement {
-
     private _initialised = false
     private _committedValue = ''
 
@@ -102,11 +102,13 @@ export class EditableText extends HTMLElement {
     }
 
     private _fireChange(value: string): void {
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -121,10 +123,6 @@ export class EditableText extends HTMLElement {
 
         this.innerHTML = `<input type="text" class="form-control tc-editable-text__input"${disabledAttr}${placeholderAttr}${ariaAttr} value="${esc(this._committedValue)}">`
     }
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 declare global {

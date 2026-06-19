@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const DifferenceCardDemo: React.FC = () => {
     const formattedRef = useRef<any>(null)
@@ -7,7 +6,11 @@ const DifferenceCardDemo: React.FC = () => {
     useEffect(() => {
         if (formattedRef.current) {
             formattedRef.current.formatValue = (v: number) =>
-                new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v)
+                new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    maximumFractionDigits: 0,
+                }).format(v)
         }
     }, [])
 
@@ -16,15 +19,17 @@ const DifferenceCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="DifferenceCard"
+                        <tc-rich-page-header
+                            title-text="DifferenceCard"
                             description="Dashboard card showing a metric value with a directional delta chip (percentage change vs the previous period)."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Up — positive delta (revenue growth)">
+                            <tc-section-card title="Up — positive delta (revenue growth)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-difference-card
@@ -34,9 +39,9 @@ const DifferenceCardDemo: React.FC = () => {
                                         period="vs last month"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Down — negative delta (user churn)">
+                            <tc-section-card title="Down — negative delta (user churn)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-difference-card
@@ -46,9 +51,9 @@ const DifferenceCardDemo: React.FC = () => {
                                         period="vs last week"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Flat — zero delta (stable metric)">
+                            <tc-section-card title="Flat — zero delta (stable metric)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-difference-card
@@ -58,9 +63,9 @@ const DifferenceCardDemo: React.FC = () => {
                                         period="vs yesterday"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom formatValue (USD currency — set via ref)">
+                            <tc-section-card title="Custom formatValue (USD currency — set via ref)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-difference-card
@@ -71,9 +76,9 @@ const DifferenceCardDemo: React.FC = () => {
                                         period="vs Q1"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state">
+                            <tc-section-card title="Loading state">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-difference-card
@@ -83,8 +88,7 @@ const DifferenceCardDemo: React.FC = () => {
                                         loading
                                     />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

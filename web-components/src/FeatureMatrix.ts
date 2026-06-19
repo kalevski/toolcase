@@ -1,5 +1,5 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-feature-matrix'
 
@@ -17,24 +17,6 @@ export interface MatrixRow {
     values: Record<string, MatrixValue>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
-
 // Pre-compute icons once at module load.
 const checkIconHtml = lucideByName('check')
 const xIconHtml = lucideByName('x')
@@ -44,21 +26,21 @@ function renderValueCell(value: MatrixValue): string {
     if (value === true) {
         return (
             `<span class="tc-feature-matrix__indicator tc-feature-matrix__indicator--yes" aria-label="Supported">` +
-                checkIconHtml +
+            checkIconHtml +
             `</span>`
         )
     }
     if (value === false) {
         return (
             `<span class="tc-feature-matrix__indicator tc-feature-matrix__indicator--no" aria-label="Not supported">` +
-                xIconHtml +
+            xIconHtml +
             `</span>`
         )
     }
     if (value === 'partial') {
         return (
             `<span class="tc-feature-matrix__indicator tc-feature-matrix__indicator--partial" aria-label="Partial">` +
-                minusIconHtml +
+            minusIconHtml +
             `</span>`
         )
     }
@@ -83,7 +65,7 @@ export class FeatureMatrix extends HTMLElement {
             }
             this.render()
             const slot = this.querySelector('.tc-feature-matrix__title-slot')
-            if (slot) this._titleSlotNodes.forEach(n => slot.appendChild(n))
+            if (slot) this._titleSlotNodes.forEach((n) => slot.appendChild(n))
             this._initialised = true
         }
     }
@@ -119,7 +101,7 @@ export class FeatureMatrix extends HTMLElement {
         }
         this.render()
         const newSlot = this.querySelector('.tc-feature-matrix__title-slot')
-        if (newSlot) this._titleSlotNodes.forEach(n => newSlot.appendChild(n))
+        if (newSlot) this._titleSlotNodes.forEach((n) => newSlot.appendChild(n))
     }
 
     private render(): void {
@@ -132,22 +114,24 @@ export class FeatureMatrix extends HTMLElement {
         if (titleAttr) {
             headerHtml =
                 `<div class="tc-feature-matrix__header">` +
-                    `<p class="tc-feature-matrix__title">${esc(titleAttr)}</p>` +
+                `<p class="tc-feature-matrix__title">${esc(titleAttr)}</p>` +
                 `</div>`
         } else if (this._titleSlotNodes.length > 0) {
             headerHtml =
                 `<div class="tc-feature-matrix__header">` +
-                    `<div class="tc-feature-matrix__title-slot"></div>` +
+                `<div class="tc-feature-matrix__title-slot"></div>` +
                 `</div>`
         }
 
         // Header row: feature label corner + one <th> per column.
         const colHeadCells = columns
-            .map(col => {
-                const highlightClass = col.highlight ? ' tc-feature-matrix__col-head--highlight' : ''
+            .map((col) => {
+                const highlightClass = col.highlight
+                    ? ' tc-feature-matrix__col-head--highlight'
+                    : ''
                 return (
                     `<th scope="col" class="tc-feature-matrix__cell tc-feature-matrix__col-head${highlightClass}">` +
-                        `<span class="tc-feature-matrix__col-label">${esc(col.label)}</span>` +
+                    `<span class="tc-feature-matrix__col-label">${esc(col.label)}</span>` +
                     `</th>`
                 )
             })
@@ -155,23 +139,25 @@ export class FeatureMatrix extends HTMLElement {
 
         const theadHtml =
             `<thead>` +
-                `<tr class="tc-feature-matrix__head-row">` +
-                    `<th scope="col" class="tc-feature-matrix__cell tc-feature-matrix__feature-head">Feature</th>` +
-                    colHeadCells +
-                `</tr>` +
+            `<tr class="tc-feature-matrix__head-row">` +
+            `<th scope="col" class="tc-feature-matrix__cell tc-feature-matrix__feature-head">Feature</th>` +
+            colHeadCells +
+            `</tr>` +
             `</thead>`
 
         // Body: one <tr> per row, first cell is the feature label + hint.
         const tbodyHtml = rows
-            .map(row => {
+            .map((row) => {
                 const valueCells = columns
-                    .map(col => {
+                    .map((col) => {
                         const raw = row.values?.[col.id]
                         const value: MatrixValue = raw !== undefined ? raw : false
-                        const highlightClass = col.highlight ? ' tc-feature-matrix__cell--highlight' : ''
+                        const highlightClass = col.highlight
+                            ? ' tc-feature-matrix__cell--highlight'
+                            : ''
                         return (
                             `<td class="tc-feature-matrix__cell tc-feature-matrix__value-cell${highlightClass}">` +
-                                renderValueCell(value) +
+                            renderValueCell(value) +
                             `</td>`
                         )
                     })
@@ -183,11 +169,11 @@ export class FeatureMatrix extends HTMLElement {
 
                 return (
                     `<tr class="tc-feature-matrix__row">` +
-                        `<th scope="row" class="tc-feature-matrix__cell tc-feature-matrix__feature-cell">` +
-                            `<span class="tc-feature-matrix__row-label">${esc(row.label)}</span>` +
-                            hintHtml +
-                        `</th>` +
-                        valueCells +
+                    `<th scope="row" class="tc-feature-matrix__cell tc-feature-matrix__feature-cell">` +
+                    `<span class="tc-feature-matrix__row-label">${esc(row.label)}</span>` +
+                    hintHtml +
+                    `</th>` +
+                    valueCells +
                     `</tr>`
                 )
             })
@@ -195,13 +181,13 @@ export class FeatureMatrix extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-feature-matrix">` +
-                headerHtml +
-                `<div class="tc-feature-matrix__scroll">` +
-                    `<table class="tc-feature-matrix__table">` +
-                        theadHtml +
-                        `<tbody>${tbodyHtml}</tbody>` +
-                    `</table>` +
-                `</div>` +
+            headerHtml +
+            `<div class="tc-feature-matrix__scroll">` +
+            `<table class="tc-feature-matrix__table">` +
+            theadHtml +
+            `<tbody>${tbodyHtml}</tbody>` +
+            `</table>` +
+            `</div>` +
             `</div>`
     }
 }

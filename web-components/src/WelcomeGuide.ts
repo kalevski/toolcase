@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-welcome-guide'
 
 export interface WelcomeGuideStep {
@@ -8,18 +9,10 @@ export interface WelcomeGuideStep {
 
 type StepState = 'completed' | 'active' | 'locked'
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function deriveStepState(steps: WelcomeGuideStep[], idx: number): StepState {
     if (steps[idx].completed) return 'completed'
     // first not-completed step is active
-    const firstActiveIdx = steps.findIndex(s => !s.completed)
+    const firstActiveIdx = steps.findIndex((s) => !s.completed)
     if (idx === firstActiveIdx) return 'active'
     return 'locked'
 }
@@ -55,11 +48,15 @@ export class WelcomeGuide extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this.addEventListener('click', this._handleClick)
-            this.addEventListener('keydown', this._handleKeydown)
             this.render()
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._handleClick)
+        this.addEventListener('keydown', this._handleKeydown)
     }
 
     disconnectedCallback(): void {
@@ -141,7 +138,7 @@ export class WelcomeGuide extends HTMLElement {
                 : ''
 
         const messagesHtml = this._messages
-            .map(m => `<li class="tc-welcome-guide__message">${esc(m)}</li>`)
+            .map((m) => `<li class="tc-welcome-guide__message">${esc(m)}</li>`)
             .join('')
 
         const leftHtml =
@@ -165,7 +162,7 @@ export class WelcomeGuide extends HTMLElement {
 
     private _renderRight(): string {
         const total = this._steps.length
-        const completed = this._steps.filter(s => s.completed).length
+        const completed = this._steps.filter((s) => s.completed).length
         const pct = total > 0 ? Math.round((completed / total) * 100) : 0
 
         const progressHtml =
@@ -236,7 +233,7 @@ export class WelcomeGuide extends HTMLElement {
                     `<li class="tc-welcome-guide__step">` +
                     `<span class="tc-welcome-guide__check tc-welcome-guide__skel tc-welcome-guide__skel--check"></span>` +
                     `<span class="tc-welcome-guide__skel tc-welcome-guide__skel--step-label"></span>` +
-                    `</li>`
+                    `</li>`,
             ).join('') +
             `</ul>` +
             `</div>`

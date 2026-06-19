@@ -1,16 +1,9 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
 const PANEL_TAG = 'tc-panel'
 const HEADER_TAG = 'tc-panel-header'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // ── tc-panel ──────────────────────────────────────────────────────────────────
 
@@ -26,18 +19,18 @@ export class Panel extends HTMLElement {
         if (!this._initialised) {
             // Separate tc-panel-header children from body children before render
             this._headerNodes = Array.from(this.childNodes).filter(
-                n => n instanceof Element && n.tagName.toLowerCase() === HEADER_TAG
+                (n) => n instanceof Element && n.tagName.toLowerCase() === HEADER_TAG,
             )
             const bodyNodes = Array.from(this.childNodes).filter(
-                n => !(n instanceof Element && n.tagName.toLowerCase() === HEADER_TAG)
+                (n) => !(n instanceof Element && n.tagName.toLowerCase() === HEADER_TAG),
             )
 
             this.render()
 
             const headerSlot = this.querySelector('.tc-panel-header-slot')
-            if (headerSlot) this._headerNodes.forEach(n => headerSlot.appendChild(n))
+            if (headerSlot) this._headerNodes.forEach((n) => headerSlot.appendChild(n))
             const body = this.querySelector('.tc-panel-body')
-            if (body) bodyNodes.forEach(n => body.appendChild(n))
+            if (body) bodyNodes.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
     }
@@ -48,7 +41,7 @@ export class Panel extends HTMLElement {
         const headerSlot = this.querySelector('.tc-panel-header-slot')
         if (headerSlot) {
             const inSlot = Array.from(headerSlot.childNodes).filter(
-                n => n instanceof Element && n.tagName.toLowerCase() === HEADER_TAG
+                (n) => n instanceof Element && n.tagName.toLowerCase() === HEADER_TAG,
             )
             if (inSlot.length > 0) this._headerNodes = inSlot
         }
@@ -59,9 +52,9 @@ export class Panel extends HTMLElement {
         this.render()
 
         const newHeaderSlot = this.querySelector('.tc-panel-header-slot')
-        if (newHeaderSlot) this._headerNodes.forEach(n => newHeaderSlot.appendChild(n))
+        if (newHeaderSlot) this._headerNodes.forEach((n) => newHeaderSlot.appendChild(n))
         const newBody = this.querySelector('.tc-panel-body')
-        if (newBody) bodyNodes.forEach(n => newBody.appendChild(n))
+        if (newBody) bodyNodes.forEach((n) => newBody.appendChild(n))
     }
 
     get bordered(): boolean {
@@ -77,7 +70,8 @@ export class Panel extends HTMLElement {
         const hasHeader = this._headerNodes.length > 0
         const cls = ['tc-panel', bordered ? 'tc-panel--bordered' : ''].filter(Boolean).join(' ')
 
-        this.innerHTML = `<div class="${cls}">` +
+        this.innerHTML =
+            `<div class="${cls}">` +
             (hasHeader ? `<div class="tc-panel-header-slot"></div>` : '') +
             `<div class="tc-panel-body"></div>` +
             `</div>`
@@ -105,7 +99,7 @@ export class PanelHeader extends HTMLElement {
             this._actionSlotNodes = Array.from(this.querySelectorAll('[slot="action"]'))
             this.render()
             const actionEl = this.querySelector('.tc-panel-header-action')
-            if (actionEl) this._actionSlotNodes.forEach(n => actionEl.appendChild(n))
+            if (actionEl) this._actionSlotNodes.forEach((n) => actionEl.appendChild(n))
             this._initialised = true
         }
     }
@@ -122,7 +116,7 @@ export class PanelHeader extends HTMLElement {
         this.render()
 
         const newActionEl = this.querySelector('.tc-panel-header-action')
-        if (newActionEl) this._actionSlotNodes.forEach(n => newActionEl.appendChild(n))
+        if (newActionEl) this._actionSlotNodes.forEach((n) => newActionEl.appendChild(n))
     }
 
     // NOTE: 'heading' is used instead of 'title' to avoid colliding with
@@ -154,7 +148,8 @@ export class PanelHeader extends HTMLElement {
             : ''
         const actionHtml = hasAction ? `<div class="tc-panel-header-action"></div>` : ''
 
-        this.innerHTML = `<div class="tc-panel-header">` +
+        this.innerHTML =
+            `<div class="tc-panel-header">` +
             iconHtml +
             `<span class="tc-panel-header-heading">${esc(heading)}</span>` +
             actionHtml +

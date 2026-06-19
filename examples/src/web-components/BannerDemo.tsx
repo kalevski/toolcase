@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BannerDemo: React.FC = () => {
     const dismissibleRef = useRef<any>(null)
@@ -21,59 +20,62 @@ const BannerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Banner"
+                        <tc-rich-page-header
+                            title-text="Banner"
                             description="Status banner with a leading icon, body content, an optional action slot, and persistent localStorage-backed dismissal. Supports info, warning, success, and error variants."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Variants">
+                            <tc-section-card title="Variants">
                                 <div className="d-flex flex-column gap-2">
                                     {/* @ts-ignore */}
                                     <tc-banner variant="info">
                                         New documentation is available — check it out.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                     {/* @ts-ignore */}
                                     <tc-banner variant="warning">
                                         Maintenance window scheduled for Sunday 02:00 UTC.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                     {/* @ts-ignore */}
                                     <tc-banner variant="success">
                                         Your changes have been saved successfully.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                     {/* @ts-ignore */}
                                     <tc-banner variant="error">
                                         Failed to connect to the server. Please try again.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom icon (icon attribute)">
+                            <tc-section-card title="Custom icon (icon attribute)">
                                 <div className="d-flex flex-column gap-2">
                                     {/* @ts-ignore */}
                                     <tc-banner variant="info" icon="bell">
                                         You have 3 unread notifications.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                     {/* @ts-ignore */}
                                     <tc-banner variant="success" icon="rocket">
                                         Deployment to production completed in 42 seconds.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                     {/* @ts-ignore */}
                                     <tc-banner variant="warning" icon="clock">
                                         Your session will expire in 5 minutes.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With action slot">
+                            <tc-section-card title="With action slot">
                                 <div className="d-flex flex-column gap-2">
                                     {/* @ts-ignore */}
                                     <tc-banner variant="info">
@@ -81,9 +83,9 @@ const BannerDemo: React.FC = () => {
                                         {/* @ts-ignore */}
                                         <tc-button slot="action" variant="primary" size="sm">
                                             Update now
-                                        {/* @ts-ignore */}
+                                            {/* @ts-ignore */}
                                         </tc-button>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                     {/* @ts-ignore */}
                                     <tc-banner variant="warning">
@@ -91,31 +93,27 @@ const BannerDemo: React.FC = () => {
                                         {/* @ts-ignore */}
                                         <tc-button slot="action" variant="warning" size="sm">
                                             Upgrade plan
-                                        {/* @ts-ignore */}
+                                            {/* @ts-ignore */}
                                         </tc-button>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-banner>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Dismissible — fires tc-dismiss on close">
+                            <tc-section-card title="Dismissible — fires tc-dismiss on close">
                                 <p className="text-muted small mb-2">
                                     {dismissed
                                         ? 'Banner dismissed — tc-dismiss fired (check console).'
                                         : 'Click × to dismiss. The tc-dismiss event is logged to the console.'}
                                 </p>
                                 {/* @ts-ignore */}
-                                <tc-banner
-                                    ref={dismissibleRef}
-                                    variant="warning"
-                                    dismissible
-                                >
+                                <tc-banner ref={dismissibleRef} variant="warning" dismissible>
                                     Scheduled downtime on Friday 23:00 UTC. Save your work.
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-banner>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Persistent dismissal (localStorage-backed)">
+                            <tc-section-card title="Persistent dismissal (localStorage-backed)">
                                 <p className="text-muted small mb-2">
                                     Closing this banner writes <code>"dismissed"</code> to{' '}
                                     <code>localStorage["tc-demo-banner"]</code>. It stays hidden on
@@ -127,25 +125,37 @@ const BannerDemo: React.FC = () => {
                                     dismissible
                                     storage-key="tc-demo-banner"
                                 >
-                                    Toolcase Web Components v3 is now available. Enjoy the new components!
-                                {/* @ts-ignore */}
+                                    Toolcase Web Components v3 is now available. Enjoy the new
+                                    components!
+                                    {/* @ts-ignore */}
                                 </tc-banner>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Preset alias: tc-announcement-bar (announce + CTA link)">
+                            <tc-section-card title="Preset alias: tc-announcement-bar (announce + CTA link)">
                                 <div className="d-flex flex-column gap-2">
                                     {/* @ts-ignore */}
-                                    <tc-announcement-bar variant="announce" icon-name="megaphone" cta-label="Learn more →" cta-href="#announce">
+                                    <tc-announcement-bar
+                                        variant="announce"
+                                        icon-name="megaphone"
+                                        cta-label="Learn more →"
+                                        cta-href="#announce"
+                                    >
                                         Toolcase v3 is here — explore the new component library.
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-announcement-bar>
                                     {/* @ts-ignore */}
-                                    <tc-announcement-bar variant="info" icon-name="info" dismissible persist-dismiss-key="tc-demo-announcement">
-                                        New docs are available — uses the legacy persist-dismiss-key attribute.
-                                    {/* @ts-ignore */}
+                                    <tc-announcement-bar
+                                        variant="info"
+                                        icon-name="info"
+                                        dismissible
+                                        persist-dismiss-key="tc-demo-announcement"
+                                    >
+                                        New docs are available — uses the legacy persist-dismiss-key
+                                        attribute.
+                                        {/* @ts-ignore */}
                                     </tc-announcement-bar>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,6 @@
+import { VARIANTS_CORE } from './internal/variants'
+import { deriveInitials } from './internal/initials'
+import { esc as escapeAttr } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -9,27 +12,14 @@ export type AvatarVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'wa
 
 const SIZES: AvatarSize[] = ['small', 'default', 'large']
 const STATUSES: AvatarStatus[] = ['online', 'offline', 'busy', 'away']
-const VARIANTS: AvatarVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info']
+const VARIANTS: AvatarVariant[] = [...VARIANTS_CORE]
 
-const userPlaceholderIcon = icon((LucideIcons as Record<string, string>)['User'] ?? '', 'tc-avatar-placeholder-icon')
-
-function deriveInitials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean)
-    if (parts.length === 0) return ''
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
-}
-
-function escapeAttr(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
+const userPlaceholderIcon = icon(
+    (LucideIcons as Record<string, string>)['User'] ?? '',
+    'tc-avatar-placeholder-icon',
+)
 
 export class Avatar extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -119,7 +109,10 @@ export class Avatar extends HTMLElement {
         // The host element IS the circle — set its class list and accessible role.
         this.className = `tc-avatar tc-avatar-${size} tc-avatar-${variant}`
         this.setAttribute('role', 'img')
-        this.setAttribute('aria-label', this.getAttribute('alt') ?? this.getAttribute('name') ?? 'Avatar')
+        this.setAttribute(
+            'aria-label',
+            this.getAttribute('alt') ?? this.getAttribute('name') ?? 'Avatar',
+        )
 
         const statusHtml = status
             ? `<span class="tc-avatar-status tc-avatar-status-${status}" role="img" aria-label="${status}"></span>`

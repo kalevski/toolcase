@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -12,14 +13,6 @@ export interface PhaseItem {
     status: PhaseStatus
     tags?: string[]
     command?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 const STATUS_ICON_CANDIDATES: Record<PhaseStatus, string[]> = {
@@ -41,7 +34,10 @@ function resolveStatusIconHtml(status: PhaseStatus): string {
     for (const name of candidates) {
         const svgStr = (LucideIcons as Record<string, string>)[name]
         if (svgStr) {
-            return icon(svgStr, `tc-phase-grid-item-status-icon tc-phase-grid-item-status-icon--${status}`)
+            return icon(
+                svgStr,
+                `tc-phase-grid-item-status-icon tc-phase-grid-item-status-icon--${status}`,
+            )
         }
     }
     return ''
@@ -112,7 +108,9 @@ export class PhaseGrid extends HTMLElement {
         const tagsHtml =
             item.tags && item.tags.length > 0
                 ? `<div class="tc-phase-grid-item-tags">` +
-                  item.tags.map(t => `<span class="tc-phase-grid-item-tag">${esc(t)}</span>`).join('') +
+                  item.tags
+                      .map((t) => `<span class="tc-phase-grid-item-tag">${esc(t)}</span>`)
+                      .join('') +
                   `</div>`
                 : ''
 
@@ -135,7 +133,7 @@ export class PhaseGrid extends HTMLElement {
 
     private render(): void {
         const cols = this.columns
-        const itemsHtml = this._phases.map(item => this._renderItem(item)).join('')
+        const itemsHtml = this._phases.map((item) => this._renderItem(item)).join('')
         this.innerHTML = `<div class="tc-phase-grid" style="--tc-pg-cols:${cols}">${itemsHtml}</div>`
     }
 }

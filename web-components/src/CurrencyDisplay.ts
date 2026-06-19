@@ -1,8 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-currency-display'
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 // Port of game-components `gc-currency-display`: a larger currency readout pairing
 // an optional label and currency icon with a prominent formatted amount. Purely
@@ -15,7 +12,6 @@ function esc(s: string): string {
 // host; the `font-size` attribute writes --bs-currency-display-amount-font-size (in
 // px) so the prominent amount can be scaled per-instance.
 export class CurrencyDisplay extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

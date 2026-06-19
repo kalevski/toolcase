@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ENTRIES = [
     {
@@ -7,7 +6,8 @@ const ENTRIES = [
         name: 'Gloomfang',
         icon: 'skull',
         discovered: true,
-        description: 'A pack hunter that stalks the lower caverns, striking from darkness before retreating.',
+        description:
+            'A pack hunter that stalks the lower caverns, striking from darkness before retreating.',
         stats: [
             { label: 'Threat', value: 'High' },
             { label: 'Health', value: 2400 },
@@ -61,20 +61,23 @@ const CodexDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Codex"
+                        <tc-rich-page-header
+                            title-text="Codex"
                             description="Codex / bestiary browser: a scrollable list of entries paired with a detail panel showing the active entry's description and stats. Entries are supplied via the `entries` JS property; the selection is reflected on the `selected-id` attribute. Emits tc-select on click / Enter / Space. Undiscovered entries render masked (??? + a muted glyph) but stay selectable."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Bestiary (data-driven list + detail panel)">
+                            <tc-section-card title="Bestiary (data-driven list + detail panel)">
                                 {/* @ts-ignore */}
                                 <tc-codex ref={ref} selected-id="gloomfang" />
                                 <div className="form-text mt-3">
                                     Selected: <code>{selected}</code>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

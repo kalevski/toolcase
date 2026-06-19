@@ -8,7 +8,6 @@ const TAG_NAME = 'tc-compass-rose'
  * ink north needle). Purely presentational: no events, no slots.
  */
 export class CompassRose extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

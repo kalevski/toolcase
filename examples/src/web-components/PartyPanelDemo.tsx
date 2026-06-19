@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PartyPanelDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -44,8 +43,8 @@ const PartyPanelDemo: React.FC = () => {
             { id: '1', name: 'Aldric', host: true, ready: true },
             { id: '2', name: 'Brina', ready: false },
         ]
-        const onLeave = () => setLog(l => ['tc-leave fired', ...l].slice(0, 6))
-        const onInvite = () => setLog(l => ['tc-invite fired', ...l].slice(0, 6))
+        const onLeave = () => setLog((l) => ['tc-leave fired', ...l].slice(0, 6))
+        const onInvite = () => setLog((l) => ['tc-invite fired', ...l].slice(0, 6))
         el.addEventListener('tc-leave', onLeave)
         el.addEventListener('tc-invite', onInvite)
         return () => {
@@ -59,49 +58,72 @@ const PartyPanelDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PartyPanel"
+                        <tc-rich-page-header
+                            title-text="PartyPanel"
                             description="Party member panel with portraits, health, and status. Members are set via the JS members property. Empty slots render as Invite buttons that fire tc-invite; the Leave Party button fires tc-leave."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — 4-slot, members with ready state">
+                            <tc-section-card title="Basic — 4-slot, members with ready state">
                                 {/* @ts-ignore */}
-                                <tc-party-panel ref={basicRef} capacity="4" style={{ maxWidth: '420px' }} />
-                            </SectionCard>
+                                <tc-party-panel
+                                    ref={basicRef}
+                                    capacity="4"
+                                    style={{ maxWidth: '420px' }}
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="With role labels">
+                            <tc-section-card title="With role labels">
                                 {/* @ts-ignore */}
-                                <tc-party-panel ref={rolesRef} capacity="4" style={{ maxWidth: '420px' }} />
-                            </SectionCard>
+                                <tc-party-panel
+                                    ref={rolesRef}
+                                    capacity="4"
+                                    style={{ maxWidth: '420px' }}
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Full party (no empty slots)">
+                            <tc-section-card title="Full party (no empty slots)">
                                 {/* @ts-ignore */}
-                                <tc-party-panel ref={fullRef} capacity="4" style={{ maxWidth: '420px' }} />
-                            </SectionCard>
+                                <tc-party-panel
+                                    ref={fullRef}
+                                    capacity="4"
+                                    style={{ maxWidth: '420px' }}
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Empty — no members set">
+                            <tc-section-card title="Empty — no members set">
                                 {/* @ts-ignore */}
                                 <tc-party-panel capacity="4" style={{ maxWidth: '420px' }} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Events — Leave Party / Invite">
+                            <tc-section-card title="Events — Leave Party / Invite">
                                 {/* @ts-ignore */}
-                                <tc-party-panel ref={eventsRef} capacity="4" style={{ maxWidth: '420px' }} />
+                                <tc-party-panel
+                                    ref={eventsRef}
+                                    capacity="4"
+                                    style={{ maxWidth: '420px' }}
+                                />
                                 <div className="mt-3">
                                     <strong className="d-block mb-1">Event log</strong>
                                     {log.length === 0 ? (
-                                        <span className="text-muted">Click Leave Party or an Invite slot…</span>
+                                        <span className="text-muted">
+                                            Click Leave Party or an Invite slot…
+                                        </span>
                                     ) : (
                                         <ul className="mb-0">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

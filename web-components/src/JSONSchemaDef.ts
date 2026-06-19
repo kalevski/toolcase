@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { icon } from './icons'
 import { Plus, ChevronUp, ChevronDown, Trash2 } from 'lucide-static'
 
@@ -11,9 +12,24 @@ const chevronUpIconHtml = icon(ChevronUp)
 const chevronDownIconHtml = icon(ChevronDown)
 const removeIconHtml = icon(Trash2)
 
-export type SchemaPropertyType = 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'ref'
+export type SchemaPropertyType =
+    | 'string'
+    | 'number'
+    | 'integer'
+    | 'boolean'
+    | 'object'
+    | 'array'
+    | 'ref'
 
-const PROPERTY_TYPES: SchemaPropertyType[] = ['string', 'number', 'integer', 'boolean', 'object', 'array', 'ref']
+const PROPERTY_TYPES: SchemaPropertyType[] = [
+    'string',
+    'number',
+    'integer',
+    'boolean',
+    'object',
+    'array',
+    'ref',
+]
 
 export interface SchemaProperty {
     key: string
@@ -27,14 +43,6 @@ export interface SchemaProperty {
 export interface SchemaRefItem {
     value: string
     label?: string
-}
-
-function esc(str: string): string {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 // `ref` types carry a $ref selector; array/object carry an item/object ref.
@@ -98,15 +106,20 @@ export class JSONSchemaDef extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (this._initialised) return
-        if (!this._propsInitialised) this._seedProps()
+        if (!this._initialised) {
+            if (!this._propsInitialised) this._seedProps()
+            this.render()
+            this._initialised = true
+        }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
         this.addEventListener('input', this._onInput)
         this.addEventListener('change', this._onChange)
         this.addEventListener('click', this._onClick)
         this.addEventListener('keydown', this._onKeydown)
         this.addEventListener('focusout', this._onFocusout)
-        this.render()
-        this._initialised = true
     }
 
     disconnectedCallback(): void {
@@ -227,7 +240,7 @@ export class JSONSchemaDef extends HTMLElement {
 
     private _serialize(): string {
         return JSON.stringify(
-            this._props.map(p => {
+            this._props.map((p) => {
                 const o: Record<string, unknown> = { key: p.key, type: p.type }
                 if (p.default != null && p.default !== '') o.default = p.default
                 if (needsRef(p.type) && p.ref) o.ref = p.ref
@@ -245,20 +258,24 @@ export class JSONSchemaDef extends HTMLElement {
 
     private _emit(): void {
         const value = this._serialize()
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
     private _emitLabel(label: string): void {
-        this.dispatchEvent(new CustomEvent('tc-label-change', {
-            bubbles: true,
-            composed: true,
-            detail: { label },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-label-change', {
+                bubbles: true,
+                composed: true,
+                detail: { label },
+            }),
+        )
         if (typeof this.onLabelChange === 'function') this.onLabelChange(label)
     }
 
@@ -286,7 +303,7 @@ export class JSONSchemaDef extends HTMLElement {
 
     private _addProperty(): void {
         if (this.disabled) return
-        const existing = new Set(this._props.map(p => p.key))
+        const existing = new Set(this._props.map((p) => p.key))
         let n = this._props.length + 1
         while (existing.has(`property${n}`)) n++
         this._props.push({ key: `property${n}`, type: 'string' })
@@ -379,7 +396,8 @@ export class JSONSchemaDef extends HTMLElement {
     private _onKeydown = (e: Event): void => {
         const ke = e as KeyboardEvent
         const t = ke.target
-        if (!(t instanceof HTMLInputElement) || !t.classList.contains('tc-json-schema-def-label')) return
+        if (!(t instanceof HTMLInputElement) || !t.classList.contains('tc-json-schema-def-label'))
+            return
         if (ke.key === 'Enter') {
             ke.preventDefault()
             t.blur()
@@ -392,7 +410,8 @@ export class JSONSchemaDef extends HTMLElement {
 
     private _onFocusout = (e: Event): void => {
         const t = (e as FocusEvent).target
-        if (!(t instanceof HTMLInputElement) || !t.classList.contains('tc-json-schema-def-label')) return
+        if (!(t instanceof HTMLInputElement) || !t.classList.contains('tc-json-schema-def-label'))
+            return
         const draft = t.value
         const current = this.getAttribute('label') ?? ''
         if (draft === current) return
@@ -406,7 +425,7 @@ export class JSONSchemaDef extends HTMLElement {
     private _applyValidation(): void {
         const dups = this._duplicateKeys()
         const rows = this.querySelectorAll<HTMLElement>('.tc-json-schema-def-row')
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const idx = parseInt(row.getAttribute('data-idx') ?? '-1', 10)
             const prop = this._props[idx]
             if (!prop) return
@@ -437,7 +456,10 @@ export class JSONSchemaDef extends HTMLElement {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
             const rows = Array.from({ length: 4 })
-                .map(() => `<div class="tc-json-schema-def-skeleton-row" aria-hidden="true"><span class="tc-json-schema-def-skeleton-key"></span><span class="tc-json-schema-def-skeleton-field"></span><span class="tc-json-schema-def-skeleton-actions"></span></div>`)
+                .map(
+                    () =>
+                        `<div class="tc-json-schema-def-skeleton-row" aria-hidden="true"><span class="tc-json-schema-def-skeleton-key"></span><span class="tc-json-schema-def-skeleton-field"></span><span class="tc-json-schema-def-skeleton-actions"></span></div>`,
+                )
                 .join('')
             this.innerHTML = `<div class="tc-json-schema-def tc-json-schema-def--loading">${rows}<span class="visually-hidden">Loading…</span></div>`
             return
@@ -450,21 +472,23 @@ export class JSONSchemaDef extends HTMLElement {
         const disabledClass = disabled ? ' tc-json-schema-def--disabled' : ''
         const dups = this._duplicateKeys()
 
-        const headerHtml = this.hasAttribute('label')
-            ? this._renderHeader(disabledAttr)
-            : ''
+        const headerHtml = this.hasAttribute('label') ? this._renderHeader(disabledAttr) : ''
 
-        const rowsHtml = this._props.length === 0
-            ? `<div class="tc-json-schema-def-empty">No properties defined</div>`
-            : this._props.map((prop, idx) => this._renderRow(prop, idx, dups, disabledAttr)).join('')
+        const rowsHtml =
+            this._props.length === 0
+                ? `<div class="tc-json-schema-def-empty">No properties defined</div>`
+                : this._props
+                      .map((prop, idx) => this._renderRow(prop, idx, dups, disabledAttr))
+                      .join('')
 
         const addHtml = `<button type="button" class="tc-json-schema-def-add" data-action="add"${disabledAttr}>${plusIconHtml}<span>Add property</span></button>`
 
-        this.innerHTML = `<div class="tc-json-schema-def${disabledClass}">`
-            + headerHtml
-            + `<div class="tc-json-schema-def-properties" role="list">${rowsHtml}</div>`
-            + addHtml
-            + `</div>`
+        this.innerHTML =
+            `<div class="tc-json-schema-def${disabledClass}">` +
+            headerHtml +
+            `<div class="tc-json-schema-def-properties" role="list">${rowsHtml}</div>` +
+            addHtml +
+            `</div>`
 
         if (focus) this._restoreFocus(focus)
     }
@@ -472,13 +496,20 @@ export class JSONSchemaDef extends HTMLElement {
     private _renderHeader(disabledAttr: string): string {
         const id = `${this._idPrefix}-name`
         const labelVal = this.getAttribute('label') ?? ''
-        return `<div class="tc-json-schema-def-header">`
-            + `<label class="tc-json-schema-def-name-label" for="${id}">Schema name</label>`
-            + `<input id="${id}" type="text" class="form-control tc-json-schema-def-label" placeholder="Schema name" value="${esc(labelVal)}"${disabledAttr}>`
-            + `</div>`
+        return (
+            `<div class="tc-json-schema-def-header">` +
+            `<label class="tc-json-schema-def-name-label" for="${id}">Schema name</label>` +
+            `<input id="${id}" type="text" class="form-control tc-json-schema-def-label" placeholder="Schema name" value="${esc(labelVal)}"${disabledAttr}>` +
+            `</div>`
+        )
     }
 
-    private _renderRow(prop: SchemaProperty, idx: number, dups: Set<string>, disabledAttr: string): string {
+    private _renderRow(
+        prop: SchemaProperty,
+        idx: number,
+        dups: Set<string>,
+        disabledAttr: string,
+    ): string {
         const propLabel = prop.key || `property ${idx + 1}`
         const errId = `${this._idPrefix}-err-${idx}`
         const message = this._keyErrorMessage(prop.key, dups)
@@ -489,53 +520,62 @@ export class JSONSchemaDef extends HTMLElement {
 
         const keyInput = `<input type="text" class="form-control tc-json-schema-def-key${invalidClass}" data-field="key" placeholder="key" value="${esc(prop.key)}" aria-label="Name for ${esc(propLabel)}"${ariaInvalid}${describedby}${disabledAttr}>`
 
-        const typeOptions = PROPERTY_TYPES.map(t =>
-            `<option value="${t}"${t === prop.type ? ' selected' : ''}>${t}</option>`,
+        const typeOptions = PROPERTY_TYPES.map(
+            (t) => `<option value="${t}"${t === prop.type ? ' selected' : ''}>${t}</option>`,
         ).join('')
         const typeSelect = `<select class="form-select tc-json-schema-def-type" data-field="type" aria-label="Type for ${esc(propLabel)}"${disabledAttr}>${typeOptions}</select>`
 
         let refSelect = ''
         if (needsRef(prop.type)) {
             const refs = this._refsFor(prop.type)
-            const refLabel = prop.type === 'array'
-                ? `Item type for ${propLabel}`
-                : prop.type === 'object'
-                    ? `Object reference for ${propLabel}`
-                    : `Reference for ${propLabel}`
-            const options = refs.length === 0
-                ? `<option value="">— no references —</option>`
-                : refs.map(r => {
-                    const ov = r.value
-                    const ol = r.label ?? r.value
-                    return `<option value="${esc(ov)}"${ov === prop.ref ? ' selected' : ''}>${esc(ol)}</option>`
-                }).join('')
+            const refLabel =
+                prop.type === 'array'
+                    ? `Item type for ${propLabel}`
+                    : prop.type === 'object'
+                      ? `Object reference for ${propLabel}`
+                      : `Reference for ${propLabel}`
+            const options =
+                refs.length === 0
+                    ? `<option value="">— no references —</option>`
+                    : refs
+                          .map((r) => {
+                              const ov = r.value
+                              const ol = r.label ?? r.value
+                              return `<option value="${esc(ov)}"${ov === prop.ref ? ' selected' : ''}>${esc(ol)}</option>`
+                          })
+                          .join('')
             refSelect = `<select class="form-select tc-json-schema-def-ref" data-field="ref" aria-label="${esc(refLabel)}"${disabledAttr}>${options}</select>`
         }
 
         const defaultInput = `<input type="text" class="form-control tc-json-schema-def-default" data-field="default" placeholder="default" value="${esc(prop.default ?? '')}" aria-label="Default value for ${esc(propLabel)}"${disabledAttr}>`
 
-        const actions = `<div class="tc-json-schema-def-row-actions">`
-            + `<button type="button" class="tc-json-schema-def-icon-btn" data-action="up" aria-label="Move ${esc(propLabel)} up"${idx === 0 ? ' disabled' : disabledAttr}>${chevronUpIconHtml}</button>`
-            + `<button type="button" class="tc-json-schema-def-icon-btn" data-action="down" aria-label="Move ${esc(propLabel)} down"${idx === this._props.length - 1 ? ' disabled' : disabledAttr}>${chevronDownIconHtml}</button>`
-            + `<button type="button" class="tc-json-schema-def-icon-btn tc-json-schema-def-remove" data-action="remove" aria-label="Remove ${esc(propLabel)}"${disabledAttr}>${removeIconHtml}</button>`
-            + `</div>`
+        const actions =
+            `<div class="tc-json-schema-def-row-actions">` +
+            `<button type="button" class="tc-json-schema-def-icon-btn" data-action="up" aria-label="Move ${esc(propLabel)} up"${idx === 0 ? ' disabled' : disabledAttr}>${chevronUpIconHtml}</button>` +
+            `<button type="button" class="tc-json-schema-def-icon-btn" data-action="down" aria-label="Move ${esc(propLabel)} down"${idx === this._props.length - 1 ? ' disabled' : disabledAttr}>${chevronDownIconHtml}</button>` +
+            `<button type="button" class="tc-json-schema-def-icon-btn tc-json-schema-def-remove" data-action="remove" aria-label="Remove ${esc(propLabel)}"${disabledAttr}>${removeIconHtml}</button>` +
+            `</div>`
 
         const errEl = `<div class="tc-json-schema-def-key-error" id="${errId}" role="alert"${invalid ? '' : ' hidden'}>${invalid ? esc(message as string) : ''}</div>`
 
-        return `<div class="tc-json-schema-def-row" role="listitem" data-idx="${idx}">`
-            + `<div class="tc-json-schema-def-row-main">`
-            + keyInput
-            + typeSelect
-            + refSelect
-            + defaultInput
-            + actions
-            + `</div>`
-            + errEl
-            + `</div>`
+        return (
+            `<div class="tc-json-schema-def-row" role="listitem" data-idx="${idx}">` +
+            `<div class="tc-json-schema-def-row-main">` +
+            keyInput +
+            typeSelect +
+            refSelect +
+            defaultInput +
+            actions +
+            `</div>` +
+            errEl +
+            `</div>`
+        )
     }
 
     private _restoreFocus(focus: FocusTarget): void {
-        const row = this.querySelector<HTMLElement>(`.tc-json-schema-def-row[data-idx="${focus.idx}"]`)
+        const row = this.querySelector<HTMLElement>(
+            `.tc-json-schema-def-row[data-idx="${focus.idx}"]`,
+        )
         if (!row) return
         let el: HTMLElement | null = null
         if (focus.field === 'key') el = row.querySelector('.tc-json-schema-def-key')

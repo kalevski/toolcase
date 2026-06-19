@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const groupedData = [
     {
@@ -9,7 +8,8 @@ const groupedData = [
                 name: 'connectedCallback',
                 signature: '(): void',
                 returns: 'void',
-                description: 'Called when the element is connected to the document. Initialises the component on first call.',
+                description:
+                    'Called when the element is connected to the document. Initialises the component on first call.',
             },
             {
                 name: 'disconnectedCallback',
@@ -22,7 +22,8 @@ const groupedData = [
                 signature: '(name: string, oldVal: string | null, newVal: string | null): void',
                 returns: 'void',
                 description: 'Called when an observed attribute changes value.',
-                deprecated: 'Use the JS property setters instead of observed attributes for data binding.',
+                deprecated:
+                    'Use the JS property setters instead of observed attributes for data binding.',
             },
         ],
     },
@@ -33,19 +34,22 @@ const groupedData = [
                 name: 'groups',
                 signature: 'ApiReferenceGroup[]',
                 returns: 'ApiReferenceGroup[]',
-                description: 'Array of API groups. Each group has a category label and an items array. Setting re-renders.',
+                description:
+                    'Array of API groups. Each group has a category label and an items array. Setting re-renders.',
             },
             {
                 name: 'items',
                 signature: 'ApiItem[]',
                 returns: 'ApiItem[]',
-                description: 'Flat list of API items rendered as a single ungrouped section when groups is empty.',
+                description:
+                    'Flat list of API items rendered as a single ungrouped section when groups is empty.',
             },
             {
                 name: 'title',
                 signature: 'string | null',
                 returns: 'string | null',
-                description: 'Optional title displayed as a header above the table. Can also be supplied as slotted children.',
+                description:
+                    'Optional title displayed as a header above the table. Can also be supplied as slotted children.',
                 deprecated: true,
             },
         ],
@@ -70,7 +74,8 @@ const flatItems = [
         signature: '(): void',
         returns: 'void',
         description: 'Removes all registered tc-* custom elements.',
-        deprecated: 'Custom elements cannot be unregistered after definition. This method is a no-op.',
+        deprecated:
+            'Custom elements cannot be unregistered after definition. This method is a no-op.',
     },
 ]
 
@@ -92,39 +97,56 @@ const ApiReferenceTableDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ApiReferenceTable"
+                        <tc-rich-page-header
+                            title-text="ApiReferenceTable"
                             description="Documentation-style API reference table. Renders API items grouped by category with name, signature, returns, and description columns. Deprecated items render a warning badge."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Grouped (groups property)">
+                            <tc-section-card title="Grouped (groups property)">
                                 {/* @ts-ignore */}
                                 <tc-api-reference-table ref={groupedRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Flat items (items property, no groups)">
+                            <tc-section-card title="Flat items (items property, no groups)">
                                 {/* @ts-ignore */}
                                 <tc-api-reference-table ref={flatRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With title attribute">
+                            <tc-section-card title="With title attribute">
                                 {/* @ts-ignore */}
                                 <tc-api-reference-table
                                     ref={titledRef}
                                     title="@toolcase/web-components — Public API"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With slotted title (React node)">
+                            <tc-section-card title="With slotted title (React node)">
                                 {/* @ts-ignore */}
                                 <tc-api-reference-table ref={slottedRef}>
-                                    <span style={{ fontFamily: 'var(--tc-font-mono)', fontSize: '0.9375rem', fontWeight: 600 }}>
-                                        tc-api-reference-table <span style={{ color: 'var(--tc-text-muted)', fontWeight: 400 }}>— slotted title</span>
+                                    <span
+                                        style={{
+                                            fontFamily: 'var(--tc-font-mono)',
+                                            fontSize: '0.9375rem',
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        tc-api-reference-table{' '}
+                                        <span
+                                            style={{
+                                                color: 'var(--tc-text-muted)',
+                                                fontWeight: 400,
+                                            }}
+                                        >
+                                            — slotted title
+                                        </span>
                                     </span>
                                 </tc-api-reference-table>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

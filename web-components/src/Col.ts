@@ -4,9 +4,7 @@ type Breakpoint = 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
 
 const BREAKPOINTS: Breakpoint[] = ['sm', 'md', 'lg', 'xl', 'xxl']
 
-const VALID_SPAN = new Set([
-    'auto', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12',
-])
+const VALID_SPAN = new Set(['auto', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'])
 
 function buildColClasses(): string[] {
     const classes: string[] = ['col']
@@ -29,14 +27,13 @@ function buildColClasses(): string[] {
 const ALL_COL_CLASSES = buildColClasses()
 
 export class Col extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return [
             'span',
-            ...BREAKPOINTS.map(bp => `span-${bp}`),
-            ...BREAKPOINTS.map(bp => `offset-${bp}`),
+            ...BREAKPOINTS.map((bp) => `span-${bp}`),
+            ...BREAKPOINTS.map((bp) => `offset-${bp}`),
             'order',
-            ...BREAKPOINTS.map(bp => `order-${bp}`),
+            ...BREAKPOINTS.map((bp) => `order-${bp}`),
         ]
     }
 
@@ -52,11 +49,19 @@ export class Col extends HTMLElement {
         if (this.isConnected) this.render()
     }
 
-    get span(): string | null { return this.getAttribute('span') }
-    set span(v: string | null) { v != null ? this.setAttribute('span', v) : this.removeAttribute('span') }
+    get span(): string | null {
+        return this.getAttribute('span')
+    }
+    set span(v: string | null) {
+        v != null ? this.setAttribute('span', v) : this.removeAttribute('span')
+    }
 
-    get order(): string | null { return this.getAttribute('order') }
-    set order(v: string | null) { v != null ? this.setAttribute('order', v) : this.removeAttribute('order') }
+    get order(): string | null {
+        return this.getAttribute('order')
+    }
+    set order(v: string | null) {
+        v != null ? this.setAttribute('order', v) : this.removeAttribute('order')
+    }
 
     private resolveSpanClasses(): string[] {
         const classes: string[] = []

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -19,14 +20,6 @@ export interface SkillNode {
 export interface SkillTreeEdge {
     from: string
     to: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 function resolveLucide(name: string, cls?: string): string {
@@ -78,7 +71,9 @@ export class SkillTree extends HTMLElement {
         return Number.isFinite(parsed) ? parsed : fallback
     }
 
-    get selectedId(): string { return this.getAttribute('selected-id') ?? '' }
+    get selectedId(): string {
+        return this.getAttribute('selected-id') ?? ''
+    }
     set selectedId(v: string) {
         if (v) this.setAttribute('selected-id', v)
         else this.removeAttribute('selected-id')
@@ -95,19 +90,31 @@ export class SkillTree extends HTMLElement {
         else this.setAttribute('points', String(v))
     }
 
-    get width(): number { return this._numAttr('width', 600) }
-    set width(v: number) { this.setAttribute('width', String(v)) }
+    get width(): number {
+        return this._numAttr('width', 600)
+    }
+    set width(v: number) {
+        this.setAttribute('width', String(v))
+    }
 
-    get height(): number { return this._numAttr('height', 400) }
-    set height(v: number) { this.setAttribute('height', String(v)) }
+    get height(): number {
+        return this._numAttr('height', 400)
+    }
+    set height(v: number) {
+        this.setAttribute('height', String(v))
+    }
 
-    get nodes(): SkillNode[] { return this._nodes.slice() }
+    get nodes(): SkillNode[] {
+        return this._nodes.slice()
+    }
     set nodes(v: SkillNode[]) {
         this._nodes = Array.isArray(v) ? v.slice() : []
         if (this._initialised) this.render()
     }
 
-    get edges(): SkillTreeEdge[] { return this._edges.slice() }
+    get edges(): SkillTreeEdge[] {
+        return this._edges.slice()
+    }
     set edges(v: SkillTreeEdge[]) {
         this._edges = Array.isArray(v) ? v.slice() : []
         if (this._initialised) this.render()
@@ -134,8 +141,10 @@ export class SkillTree extends HTMLElement {
             if (resolved) return resolved
         }
         if (n.unlocked) {
-            return firstLucide(['Check', 'CheckCircle2'], 'tc-skill-tree__glyph-icon')
-                || '<span class="tc-skill-tree__glyph-dot" aria-hidden="true"></span>'
+            return (
+                firstLucide(['Check', 'CheckCircle2'], 'tc-skill-tree__glyph-icon') ||
+                '<span class="tc-skill-tree__glyph-dot" aria-hidden="true"></span>'
+            )
         }
         return '<span class="tc-skill-tree__glyph-dot" aria-hidden="true"></span>'
     }
@@ -145,43 +154,45 @@ export class SkillTree extends HTMLElement {
         const h = this.height
         const selected = this.selectedId
         const points = this.points
-        const nodeMap = new Map(this._nodes.map(n => [n.id, n]))
+        const nodeMap = new Map(this._nodes.map((n) => [n.id, n]))
 
-        const edgesMarkup = this._edges.map(e => {
-            const a = nodeMap.get(e.from)
-            const b = nodeMap.get(e.to)
-            if (!a || !b) return ''
-            const bothUnlocked = a.unlocked && b.unlocked
-            const cls = bothUnlocked
-                ? 'tc-skill-tree__edge tc-skill-tree__edge--unlocked'
-                : 'tc-skill-tree__edge'
-            return `<line class="${cls}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" />`
-        }).join('')
+        const edgesMarkup = this._edges
+            .map((e) => {
+                const a = nodeMap.get(e.from)
+                const b = nodeMap.get(e.to)
+                if (!a || !b) return ''
+                const bothUnlocked = a.unlocked && b.unlocked
+                const cls = bothUnlocked
+                    ? 'tc-skill-tree__edge tc-skill-tree__edge--unlocked'
+                    : 'tc-skill-tree__edge'
+                return `<line class="${cls}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" />`
+            })
+            .join('')
 
-        const nodesMarkup = this._nodes.map(n => {
-            const isSelected = n.id === selected
-            let cls = 'tc-skill-tree__node'
-            if (n.locked) {
-                cls += ' tc-skill-tree__node--locked'
-            } else if (isSelected) {
-                cls += ' tc-skill-tree__node--selected'
-            } else if (n.unlocked) {
-                cls += ' tc-skill-tree__node--unlocked'
-            }
+        const nodesMarkup = this._nodes
+            .map((n) => {
+                const isSelected = n.id === selected
+                let cls = 'tc-skill-tree__node'
+                if (n.locked) {
+                    cls += ' tc-skill-tree__node--locked'
+                } else if (isSelected) {
+                    cls += ' tc-skill-tree__node--selected'
+                } else if (n.unlocked) {
+                    cls += ' tc-skill-tree__node--unlocked'
+                }
 
-            const labelHtml = n.label
-                ? `<span class="tc-skill-tree__label">${esc(n.label)}</span>`
-                : ''
+                const labelHtml = n.label
+                    ? `<span class="tc-skill-tree__label">${esc(n.label)}</span>`
+                    : ''
 
-            const rankHtml = (typeof n.rank === 'number' && typeof n.maxRank === 'number')
-                ? `<span class="tc-skill-tree__rank">${n.rank}/${n.maxRank}</span>`
-                : ''
+                const rankHtml =
+                    typeof n.rank === 'number' && typeof n.maxRank === 'number'
+                        ? `<span class="tc-skill-tree__rank">${n.rank}/${n.maxRank}</span>`
+                        : ''
 
-            const titleAttr = n.description
-                ? ` title="${esc(n.description)}"`
-                : ''
+                const titleAttr = n.description ? ` title="${esc(n.description)}"` : ''
 
-            return `<div
+                return `<div
                 role="treeitem"
                 tabindex="${n.locked ? '-1' : '0'}"
                 class="${cls}"
@@ -193,14 +204,16 @@ export class SkillTree extends HTMLElement {
                 ${labelHtml}
                 ${rankHtml}
             </div>`
-        }).join('')
+            })
+            .join('')
 
-        const pointsHtml = points != null
-            ? `<div class="tc-skill-tree__points">
+        const pointsHtml =
+            points != null
+                ? `<div class="tc-skill-tree__points">
                 <span class="tc-skill-tree__points-label">Points</span>
                 <span class="tc-skill-tree__points-value">${points}</span>
                </div>`
-            : ''
+                : ''
 
         this.innerHTML = `
             ${pointsHtml}
@@ -250,5 +263,7 @@ export class SkillTree extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: SkillTree }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: SkillTree
+    }
 }

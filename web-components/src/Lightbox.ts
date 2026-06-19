@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 // tc-lightbox — modal image gallery (overlay tier). Fully custom (no Bootstrap
 // plugin). Port of @toolcase/react-components Lightbox. All cosmetics flow
 // through --bs-lightbox-* vars backed by --tc-* tokens.
@@ -15,20 +16,12 @@ export interface LightboxImage {
     thumb?: string
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function getFocusable(root: Element): HTMLElement[] {
     return Array.from(
         root.querySelectorAll<HTMLElement>(
             'a[href],area[href],button:not([disabled]),details>summary,[tabindex]:not([tabindex="-1"]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])',
         ),
-    ).filter(el => !el.closest('[hidden]') && el.tabIndex >= 0)
+    ).filter((el) => !el.closest('[hidden]') && el.tabIndex >= 0)
 }
 
 const SWIPE_THRESHOLD = 40
@@ -185,11 +178,13 @@ export class Lightbox extends HTMLElement {
         if (next === this._index) return
         this._index = next
         this._patchActive()
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { index: next },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { index: next },
+            }),
+        )
     }
 
     private _prev(): void {
@@ -203,11 +198,13 @@ export class Lightbox extends HTMLElement {
     // ── Event handlers ───────────────────────────────────────────────────────────
 
     private _requestClose(): void {
-        this.dispatchEvent(new CustomEvent('tc-close', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-close', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this.onclose === 'function') this.onclose()
     }
 
@@ -379,15 +376,19 @@ export class Lightbox extends HTMLElement {
 
         const thumbsHtml = multi
             ? `<div class="tc-lightbox__thumbnails" aria-label="Image thumbnails">` +
-              this._images.map((image, idx) => {
-                  const active = idx === this._index
-                  const cls = `tc-lightbox__thumbnail${active ? ' tc-lightbox__thumbnail--active' : ''}`
-                  const current = active ? ' aria-current="true"' : ''
-                  const src = esc(image.thumb ?? image.src)
-                  const label = esc(`View image ${idx + 1}${image.alt ? `: ${image.alt}` : ''}`)
-                  return `<button type="button" class="${cls}" data-idx="${idx}" aria-label="${label}"${current}>` +
-                      `<img src="${src}" alt="" aria-hidden="true" loading="lazy" /></button>`
-              }).join('') +
+              this._images
+                  .map((image, idx) => {
+                      const active = idx === this._index
+                      const cls = `tc-lightbox__thumbnail${active ? ' tc-lightbox__thumbnail--active' : ''}`
+                      const current = active ? ' aria-current="true"' : ''
+                      const src = esc(image.thumb ?? image.src)
+                      const label = esc(`View image ${idx + 1}${image.alt ? `: ${image.alt}` : ''}`)
+                      return (
+                          `<button type="button" class="${cls}" data-idx="${idx}" aria-label="${label}"${current}>` +
+                          `<img src="${src}" alt="" aria-hidden="true" loading="lazy" /></button>`
+                      )
+                  })
+                  .join('') +
               `</div>`
             : ''
 

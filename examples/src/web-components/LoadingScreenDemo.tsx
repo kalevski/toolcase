@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const TIPS = [
     'Compiling shaders…',
@@ -33,7 +32,7 @@ const LoadingScreenDemo: React.FC = () => {
             return
         }
         const id = setInterval(() => {
-            setProgress(p => {
+            setProgress((p) => {
                 const next = parseFloat((p + 0.04).toFixed(2))
                 if (next >= 1) {
                     setShowDet(false)
@@ -61,15 +60,17 @@ const LoadingScreenDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Loading Screen"
+                        <tc-rich-page-header
+                            title-text="Loading Screen"
                             description="Full-viewport loading screen with an eyebrow label, optional title, progress bar (determinate or indeterminate), and a cycling tip section. Ported from gc-loading-screen and voiced for the web-components design system — slate surface, sharp corners, no game chrome."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Indeterminate">
+                            <tc-section-card title="Indeterminate">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     Without a <code>progress</code> attribute the bar animates
                                     indeterminately. Click to add <code>tc-loading-screen</code> to
@@ -107,15 +108,16 @@ const LoadingScreenDemo: React.FC = () => {
                                         </div>
                                     </>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Determinate with tips">
+                            <tc-section-card title="Determinate with tips">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     Pass a <code>progress</code> value between <code>0</code> and{' '}
                                     <code>1</code> for a determinate bar with a percentage readout.
                                     Set the <code>tips</code> JS property to an array of strings for
-                                    rotating tip text; <code>tip-interval</code> controls the rotation
-                                    speed in milliseconds. This demo auto-advances to 100 % and closes.
+                                    rotating tip text; <code>tip-interval</code> controls the
+                                    rotation speed in milliseconds. This demo auto-advances to 100 %
+                                    and closes.
                                 </p>
                                 <button
                                     className="btn btn-primary"
@@ -136,13 +138,13 @@ const LoadingScreenDemo: React.FC = () => {
                                         tip-title="Did you know"
                                     />
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Indeterminate with cycling tips">
+                            <tc-section-card title="Indeterminate with cycling tips">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
-                                    Tips cycle automatically even without a determinate progress value.
-                                    Set the <code>tips</code> JS property to an array of strings and
-                                    optionally adjust <code>tip-interval</code>.
+                                    Tips cycle automatically even without a determinate progress
+                                    value. Set the <code>tips</code> JS property to an array of
+                                    strings and optionally adjust <code>tip-interval</code>.
                                 </p>
                                 <button
                                     className="btn btn-primary"
@@ -178,8 +180,7 @@ const LoadingScreenDemo: React.FC = () => {
                                         </div>
                                     </>
                                 )}
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

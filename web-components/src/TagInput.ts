@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { X, Check } from 'lucide-static'
 import { icon } from './icons'
 
@@ -5,14 +6,6 @@ const TAG_NAME = 'tc-tag-input'
 
 // Unique-id source for combobox/listbox/label ARIA wiring across instances.
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Pre-compute at module load — these icons are always in the rendered HTML.
 const xIconHtml = icon(X)
@@ -163,7 +156,7 @@ export class TagInput extends HTMLElement {
     private _filtered(): string[] {
         const q = this._input.trim().toLowerCase()
         const tags = this._getTags()
-        return this._recommendations.filter(r => r.toLowerCase().includes(q) && !tags.includes(r))
+        return this._recommendations.filter((r) => r.toLowerCase().includes(q) && !tags.includes(r))
     }
 
     private _showCreate(): boolean {
@@ -180,11 +173,13 @@ export class TagInput extends HTMLElement {
 
     private _updateTags(next: string[]): void {
         if (!this._isControlled()) this._internalTags = next
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { tags: [...next] },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { tags: [...next] },
+            }),
+        )
         if (typeof this.onchangetags === 'function') this.onchangetags([...next])
     }
 
@@ -201,7 +196,7 @@ export class TagInput extends HTMLElement {
 
     private _removeTag(tag: string): void {
         const tags = this._getTags()
-        this._updateTags(tags.filter(t => t !== tag))
+        this._updateTags(tags.filter((t) => t !== tag))
         this._afterTagsChange(false)
     }
 
@@ -220,7 +215,7 @@ export class TagInput extends HTMLElement {
         if (!control) return
         const field = control.querySelector<HTMLInputElement>('.tc-tag-input-field')
         if (!field) return
-        control.querySelectorAll('.tc-tag-input-tag').forEach(n => n.remove())
+        control.querySelectorAll('.tc-tag-input-tag').forEach((n) => n.remove())
         field.insertAdjacentHTML('beforebegin', this._buildChipsHtml())
     }
 
@@ -244,12 +239,14 @@ export class TagInput extends HTMLElement {
     private _buildChipsHtml(): string {
         const tags = this._getTags()
         const disabled = this.disabled
-        return tags.map(tag => {
-            const removeBtn = !disabled
-                ? `<button type="button" class="tc-tag-input-remove" aria-label="Remove ${esc(tag)}" data-value="${esc(tag)}">${xIconHtml}</button>`
-                : ''
-            return `<span class="tc-tag-input-tag">${esc(tag)}${removeBtn}</span>`
-        }).join('')
+        return tags
+            .map((tag) => {
+                const removeBtn = !disabled
+                    ? `<button type="button" class="tc-tag-input-remove" aria-label="Remove ${esc(tag)}" data-value="${esc(tag)}">${xIconHtml}</button>`
+                    : ''
+                return `<span class="tc-tag-input-tag">${esc(tag)}${removeBtn}</span>`
+            })
+            .join('')
     }
 
     private _buildMenuHtml(): string {
@@ -362,9 +359,7 @@ export class TagInput extends HTMLElement {
         const placeholderAttr = tags.length ? '' : this.placeholder
         const max = this.maxTags
 
-        const labelRef = label
-            ? `aria-labelledby="${p}-label"`
-            : `aria-label="Tag input"`
+        const labelRef = label ? `aria-labelledby="${p}-label"` : `aria-label="Tag input"`
 
         const fieldHtml =
             `<input class="tc-tag-input-field" id="${p}-input" type="text" role="combobox"` +
@@ -372,13 +367,15 @@ export class TagInput extends HTMLElement {
             ` aria-controls="${p}-menu" ${labelRef}` +
             ` placeholder="${esc(placeholderAttr)}"${fieldDisabled ? ' disabled' : ''} />`
 
-        const counterHtml = max > 0
-            ? `<span class="tc-tag-input-counter" aria-live="polite">${tags.length}/${max}</span>`
-            : ''
+        const counterHtml =
+            max > 0
+                ? `<span class="tc-tag-input-counter" aria-live="polite">${tags.length}/${max}</span>`
+                : ''
         const hintHidden = !this._atLimit()
-        const hintHtml = max > 0
-            ? `<span class="tc-tag-input-hint" role="status"${hintHidden ? ' hidden' : ''}>Tag limit reached</span>`
-            : ''
+        const hintHtml =
+            max > 0
+                ? `<span class="tc-tag-input-hint" role="status"${hintHidden ? ' hidden' : ''}>Tag limit reached</span>`
+                : ''
 
         const menuLabel = label ? `aria-labelledby="${p}-label"` : `aria-label="Tag suggestions"`
 
@@ -389,7 +386,9 @@ export class TagInput extends HTMLElement {
             `<div class="tc-tag-input-control">${this._buildChipsHtml()}${fieldHtml}</div>` +
             `<ul class="tc-tag-input-menu" id="${p}-menu" role="listbox" ${menuLabel}></ul>` +
             `</div>` +
-            (counterHtml || hintHtml ? `<div class="tc-tag-input-meta">${counterHtml}${hintHtml}</div>` : '') +
+            (counterHtml || hintHtml
+                ? `<div class="tc-tag-input-meta">${counterHtml}${hintHtml}</div>`
+                : '') +
             `</div>`
 
         this._wireListeners()
@@ -407,7 +406,9 @@ export class TagInput extends HTMLElement {
         // clicks are intercepted first and do not bubble to an open.
         if (control) {
             control.addEventListener('click', (e: MouseEvent) => {
-                const removeBtn = (e.target as Element).closest<HTMLButtonElement>('.tc-tag-input-remove')
+                const removeBtn = (e.target as Element).closest<HTMLButtonElement>(
+                    '.tc-tag-input-remove',
+                )
                 if (removeBtn) {
                     e.stopPropagation()
                     const v = removeBtn.dataset.value
@@ -450,7 +451,8 @@ export class TagInput extends HTMLElement {
                     e.preventDefault()
                     if (total > 0) {
                         this._open = true
-                        this._highlightIdx = this._highlightIdx <= 0 ? total - 1 : this._highlightIdx - 1
+                        this._highlightIdx =
+                            this._highlightIdx <= 0 ? total - 1 : this._highlightIdx - 1
                         this._renderMenu()
                     }
                 } else if (e.key === 'Enter' || e.key === ',') {
@@ -475,7 +477,10 @@ export class TagInput extends HTMLElement {
                 const text = e.clipboardData?.getData('text') ?? ''
                 if (!text.includes(',')) return
                 e.preventDefault()
-                const parts = text.split(',').map(t => t.trim()).filter(Boolean)
+                const parts = text
+                    .split(',')
+                    .map((t) => t.trim())
+                    .filter(Boolean)
                 const max = this.maxTags
                 const next = [...this._getTags()]
                 for (const part of parts) {

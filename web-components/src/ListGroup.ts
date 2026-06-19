@@ -3,7 +3,6 @@ const TAG_NAME = 'tc-list-group'
 const BREAKPOINTS = ['sm', 'md', 'lg', 'xl', 'xxl']
 
 export class ListGroup extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -19,7 +18,7 @@ export class ListGroup extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const list = this._listEl()
-            if (list) slotContent.forEach(n => list.appendChild(n))
+            if (list) slotContent.forEach((n) => list.appendChild(n))
             this._initialised = true
         }
     }
@@ -30,7 +29,7 @@ export class ListGroup extends HTMLElement {
         const slotContent = list ? Array.from(list.childNodes) : []
         this.render()
         const newList = this._listEl()
-        if (newList) slotContent.forEach(n => newList.appendChild(n))
+        if (newList) slotContent.forEach((n) => newList.appendChild(n))
     }
 
     get flush(): boolean {

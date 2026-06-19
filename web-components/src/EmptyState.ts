@@ -4,7 +4,6 @@ import { icon } from './icons'
 const TAG_NAME = 'tc-empty-state'
 
 export class EmptyState extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -16,7 +15,7 @@ export class EmptyState extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const body = this.querySelector('.tc-empty-state__body')
-            if (body) slotContent.forEach(n => body.appendChild(n))
+            if (body) slotContent.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
     }
@@ -27,7 +26,7 @@ export class EmptyState extends HTMLElement {
         const slotContent = body ? Array.from(body.childNodes) : []
         this.render()
         const newBody = this.querySelector('.tc-empty-state__body')
-        if (newBody) slotContent.forEach(n => newBody.appendChild(n))
+        if (newBody) slotContent.forEach((n) => newBody.appendChild(n))
     }
 
     get icon(): string | null {

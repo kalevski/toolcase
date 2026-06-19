@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const basicRules = [
     {
@@ -112,33 +111,36 @@ const ScoringRulesDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ScoringRules"
+                        <tc-rich-page-header
+                            title-text="ScoringRules"
                             description="Presentational list of scoring rules with optional icons, titles, descriptions, point values, and accent color markers. Set rules via the rules JS property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic rules (with icons)">
+                            <tc-section-card title="Basic rules (with icons)">
                                 <div style={{ maxWidth: 560 }}>
                                     {/* @ts-ignore */}
                                     <tc-scoring-rules ref={basicRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Accent color markers">
+                            <tc-section-card title="Accent color markers">
                                 <div style={{ maxWidth: 560 }}>
                                     {/* @ts-ignore */}
                                     <tc-scoring-rules ref={accentRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No icons">
+                            <tc-section-card title="No icons">
                                 <div style={{ maxWidth: 560 }}>
                                     {/* @ts-ignore */}
                                     <tc-scoring-rules ref={noIconRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -327,7 +327,6 @@ import SafeAreaDemo from './SafeAreaDemo'
 import SettingsCategoryListDemo from './SettingsCategoryListDemo'
 import ScoreDisplayDemo from './ScoreDisplayDemo'
 import StatRowDemo from './StatRowDemo'
-import SpeedometerDemo from './SpeedometerDemo'
 import ScreenFlashDemo from './ScreenFlashDemo'
 import TransitionWipeDemo from './TransitionWipeDemo'
 import ShakeContainerDemo from './ShakeContainerDemo'
@@ -345,7 +344,12 @@ export type WebComponentDef = {
     element: JSX.Element
 }
 
-export const complexities: WebComponentComplexity[] = ['Primitives', 'Simple', 'Composite', 'Advanced']
+export const complexities: WebComponentComplexity[] = [
+    'Primitives',
+    'Simple',
+    'Composite',
+    'Advanced',
+]
 
 export const webComponentExamples: WebComponentDef[] = [
     { key: 'avatar', complexity: 'Simple', element: <AvatarDemo /> },
@@ -452,7 +456,11 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'buff-bar', complexity: 'Simple', element: <BuffBarDemo /> },
     { key: 'resource-bar', complexity: 'Simple', element: <ResourceBarDemo /> },
     { key: 'buff-icon', complexity: 'Simple', element: <BuffIconDemo /> },
-    { key: 'brightness-calibration', complexity: 'Primitives', element: <BrightnessCalibrationDemo /> },
+    {
+        key: 'brightness-calibration',
+        complexity: 'Primitives',
+        element: <BrightnessCalibrationDemo />,
+    },
     { key: 'callout-quote', complexity: 'Simple', element: <CalloutQuoteDemo /> },
     { key: 'chart-container', complexity: 'Composite', element: <ChartContainerDemo /> },
     { key: 'chat-window', complexity: 'Composite', element: <ChatWindowDemo /> },
@@ -502,7 +510,11 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'page-footer', complexity: 'Composite', element: <PageFooterDemo /> },
     { key: 'phase-grid', complexity: 'Simple', element: <PhaseGridDemo /> },
     { key: 'roadmap', complexity: 'Composite', element: <RoadmapDemo /> },
-    { key: 'pinned-feature-showcase', complexity: 'Composite', element: <PinnedFeatureShowcaseDemo /> },
+    {
+        key: 'pinned-feature-showcase',
+        complexity: 'Composite',
+        element: <PinnedFeatureShowcaseDemo />,
+    },
     { key: 'pipeline', complexity: 'Primitives', element: <PipelineDemo /> },
     { key: 'plugin-grid', complexity: 'Simple', element: <PluginGridDemo /> },
     { key: 'pricing-card', complexity: 'Composite', element: <PricingCardDemo /> },
@@ -515,7 +527,11 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'scoring-rules', complexity: 'Primitives', element: <ScoringRulesDemo /> },
     { key: 'data-list', complexity: 'Composite', element: <DataListDemo /> },
     { key: 'result-screen', complexity: 'Composite', element: <ResultScreenDemo /> },
-    { key: 'gamepad-button-prompt', complexity: 'Primitives', element: <GamepadButtonPromptDemo /> },
+    {
+        key: 'gamepad-button-prompt',
+        complexity: 'Primitives',
+        element: <GamepadButtonPromptDemo />,
+    },
     { key: 'battle-pass', complexity: 'Composite', element: <BattlePassDemo /> },
     { key: 'section-card', complexity: 'Simple', element: <SectionCardDemo /> },
     { key: 'sprint-chain', complexity: 'Simple', element: <SprintChainDemo /> },
@@ -643,7 +659,11 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'cooldown-badge', complexity: 'Simple', element: <CooldownBadgeDemo /> },
     { key: 'compass-bar', complexity: 'Composite', element: <CompassBarDemo /> },
     { key: 'compass-rose', complexity: 'Primitives', element: <CompassRoseDemo /> },
-    { key: 'controller-layout-preview', complexity: 'Simple', element: <ControllerLayoutPreviewDemo /> },
+    {
+        key: 'controller-layout-preview',
+        complexity: 'Simple',
+        element: <ControllerLayoutPreviewDemo />,
+    },
     { key: 'controls-rebind-list', complexity: 'Simple', element: <ControlsRebindListDemo /> },
     { key: 'crafting-panel', complexity: 'Composite', element: <CraftingPanelDemo /> },
     { key: 'debug-overlay', complexity: 'Simple', element: <DebugOverlayDemo /> },
@@ -677,10 +697,13 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'quest-tracker', complexity: 'Simple', element: <QuestTrackerDemo /> },
     { key: 'rarity-chip', complexity: 'Primitives', element: <RarityChipDemo /> },
     { key: 'rune-corner', complexity: 'Primitives', element: <RuneCornerDemo /> },
-    { key: 'settings-category-list', complexity: 'Composite', element: <SettingsCategoryListDemo /> },
+    {
+        key: 'settings-category-list',
+        complexity: 'Composite',
+        element: <SettingsCategoryListDemo />,
+    },
     { key: 'score-display', complexity: 'Simple', element: <ScoreDisplayDemo /> },
     { key: 'stat-row', complexity: 'Simple', element: <StatRowDemo /> },
-    { key: 'speedometer', complexity: 'Composite', element: <SpeedometerDemo /> },
     { key: 'scroll-text', complexity: 'Primitives', element: <ScrollTextDemo /> },
     { key: 'shop-panel', complexity: 'Simple', element: <ShopPanelDemo /> },
     { key: 'stats-screen', complexity: 'Primitives', element: <StatsScreenDemo /> },

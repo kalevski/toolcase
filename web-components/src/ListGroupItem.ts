@@ -1,11 +1,19 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-list-group-item'
 
-export type ListGroupItemVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type ListGroupItemVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
-const VARIANTS: ListGroupItemVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: ListGroupItemVariant[] = [...VARIANTS_FULL]
 
 export class ListGroupItem extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -21,7 +29,7 @@ export class ListGroupItem extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-lgi-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -32,7 +40,7 @@ export class ListGroupItem extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-lgi-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get active(): boolean {

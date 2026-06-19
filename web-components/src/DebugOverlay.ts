@@ -1,21 +1,10 @@
+import { formatNumber } from './internal/format'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-debug-overlay'
 
 export interface DebugRow {
     label: string
     value: string | number
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
-function formatNumber(value: number): string {
-    return Math.round(value).toLocaleString()
 }
 
 // FPS thresholds mirror the game-components source: ≥55 healthy, ≥30 marginal,
@@ -109,7 +98,7 @@ export class DebugOverlay extends HTMLElement {
         const builtInRows: string[] = []
         if (fps != null) {
             builtInRows.push(
-                row('FPS', formatNumber(fps), ` tc-debug-overlay-fps ${fpsClass(fps)}`)
+                row('FPS', formatNumber(fps), ` tc-debug-overlay-fps ${fpsClass(fps)}`),
             )
         }
         if (drawCalls != null) {
@@ -123,9 +112,8 @@ export class DebugOverlay extends HTMLElement {
         }
 
         const customRows = this._rows
-            .map(r => {
-                const value =
-                    typeof r.value === 'number' ? formatNumber(r.value) : String(r.value)
+            .map((r) => {
+                const value = typeof r.value === 'number' ? formatNumber(r.value) : String(r.value)
                 return row(esc(r.label), esc(value))
             })
             .join('')

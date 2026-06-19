@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon, chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-icon-picker'
@@ -6,24 +7,6 @@ const TAG_NAME = 'tc-icon-picker'
 export interface IconOption {
     value: string
     label?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 export class IconPicker extends HTMLElement {
@@ -119,9 +102,8 @@ export class IconPicker extends HTMLElement {
     private _getFilteredIcons(): IconOption[] {
         const q = this._searchValue.trim().toLowerCase()
         if (!q) return this._icons
-        return this._icons.filter(o =>
-            o.value.toLowerCase().includes(q) ||
-            (o.label ?? '').toLowerCase().includes(q)
+        return this._icons.filter(
+            (o) => o.value.toLowerCase().includes(q) || (o.label ?? '').toLowerCase().includes(q),
         )
     }
 
@@ -178,11 +160,13 @@ export class IconPicker extends HTMLElement {
     private _selectIcon(value: string): void {
         this._closePopup(false)
         this.setAttribute('value', value)
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
         this._getTrigger()?.focus()
     }
@@ -211,9 +195,8 @@ export class IconPicker extends HTMLElement {
 
         if (e.key === 'ArrowRight') {
             e.preventDefault()
-            this._highlightIdx = this._highlightIdx < 0
-                ? 0
-                : Math.min(this._highlightIdx + 1, filtered.length - 1)
+            this._highlightIdx =
+                this._highlightIdx < 0 ? 0 : Math.min(this._highlightIdx + 1, filtered.length - 1)
             this._setHighlight(this._highlightIdx)
         } else if (e.key === 'ArrowLeft') {
             e.preventDefault()
@@ -226,9 +209,10 @@ export class IconPicker extends HTMLElement {
             }
         } else if (e.key === 'ArrowDown') {
             e.preventDefault()
-            this._highlightIdx = this._highlightIdx < 0
-                ? 0
-                : Math.min(this._highlightIdx + cols, filtered.length - 1)
+            this._highlightIdx =
+                this._highlightIdx < 0
+                    ? 0
+                    : Math.min(this._highlightIdx + cols, filtered.length - 1)
             this._setHighlight(this._highlightIdx)
         } else if (e.key === 'ArrowUp') {
             e.preventDefault()
@@ -247,9 +231,9 @@ export class IconPicker extends HTMLElement {
     private _renderSkeletonPopup(): string {
         const cols = this.columns
         const count = cols * 3
-        const cells = Array.from({ length: count }).map(() =>
-            `<div class="tc-icon-picker-skeleton-cell" aria-hidden="true"></div>`
-        ).join('')
+        const cells = Array.from({ length: count })
+            .map(() => `<div class="tc-icon-picker-skeleton-cell" aria-hidden="true"></div>`)
+            .join('')
         return `<div class="tc-icon-picker-popup" role="status" aria-busy="true" aria-label="Loading icons"><div class="tc-icon-picker-grid tc-icon-picker-grid--loading" style="grid-template-columns:repeat(${cols},1fr);">${cells}</div><span class="visually-hidden">Loading…</span></div>`
     }
 
@@ -259,16 +243,18 @@ export class IconPicker extends HTMLElement {
         }
         const cols = this.columns
         const currentValue = this.value ?? ''
-        const options = filtered.map((o, i) => {
-            const isSelected = o.value === currentValue
-            const isHighlighted = i === this._highlightIdx
-            const iconHtml = lucideByName(o.value)
-            const title = o.label ?? o.value
-            let cls = 'tc-icon-picker-option'
-            if (isSelected) cls += ' tc-icon-picker-option--selected'
-            if (isHighlighted) cls += ' tc-icon-picker-option--highlighted'
-            return `<button class="${cls}" type="button" role="option" aria-selected="${isSelected}" tabindex="-1" title="${esc(title)}" data-value="${esc(o.value)}">${iconHtml}</button>`
-        }).join('')
+        const options = filtered
+            .map((o, i) => {
+                const isSelected = o.value === currentValue
+                const isHighlighted = i === this._highlightIdx
+                const iconHtml = lucideByName(o.value)
+                const title = o.label ?? o.value
+                let cls = 'tc-icon-picker-option'
+                if (isSelected) cls += ' tc-icon-picker-option--selected'
+                if (isHighlighted) cls += ' tc-icon-picker-option--highlighted'
+                return `<button class="${cls}" type="button" role="option" aria-selected="${isSelected}" tabindex="-1" title="${esc(title)}" data-value="${esc(o.value)}">${iconHtml}</button>`
+            })
+            .join('')
         return `<div class="tc-icon-picker-grid" style="grid-template-columns:repeat(${cols},1fr);">${options}</div>`
     }
 
@@ -314,7 +300,9 @@ export class IconPicker extends HTMLElement {
             const optionsEl = this.querySelector<HTMLElement>('.tc-icon-picker-options')
             if (optionsEl) {
                 optionsEl.addEventListener('click', (e: Event) => {
-                    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.tc-icon-picker-option')
+                    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
+                        '.tc-icon-picker-option',
+                    )
                     if (btn) {
                         const val = btn.dataset.value ?? ''
                         if (val) this._selectIcon(val)

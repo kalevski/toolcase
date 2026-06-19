@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -22,10 +23,6 @@ function normalizeDirection(d: string | null): TrendDirection | null {
     return DIRECTIONS.includes(d as TrendDirection) ? (d as TrendDirection) : null
 }
 
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
 function inferDirection(value: string): TrendDirection {
     const num = parseFloat(value)
     if (!isNaN(num)) {
@@ -45,7 +42,6 @@ function resolveDirectionIcon(direction: TrendDirection): string {
 }
 
 export class TrendIndicator extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -60,7 +56,7 @@ export class TrendIndicator extends HTMLElement {
             this.render()
             if (!this.hasAttribute('value')) {
                 const inner = this.querySelector('.tc-trend-indicator-value')
-                if (inner) slotContent.forEach(n => inner.appendChild(n))
+                if (inner) slotContent.forEach((n) => inner.appendChild(n))
             }
             this._initialised = true
         }
@@ -73,7 +69,7 @@ export class TrendIndicator extends HTMLElement {
         this.render()
         if (!this.hasAttribute('value')) {
             const newInner = this.querySelector('.tc-trend-indicator-value')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 

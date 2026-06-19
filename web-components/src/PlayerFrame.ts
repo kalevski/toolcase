@@ -2,7 +2,12 @@ import { escapeHtml } from './internal/resourceBar'
 
 const TAG_NAME = 'tc-player-frame'
 
-function renderBar(kind: 'hp' | 'mp' | 'stamina', value: number, max: number, label: string): string {
+function renderBar(
+    kind: 'hp' | 'mp' | 'stamina',
+    value: number,
+    max: number,
+    label: string,
+): string {
     const safeMax = max > 0 ? max : 100
     const safeValue = Math.max(0, Math.min(safeMax, value))
     const pct = (safeValue / safeMax) * 100
@@ -23,7 +28,20 @@ export class PlayerFrame extends HTMLElement {
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['name', 'class-name', 'glyph', 'level', 'hp', 'hp-max', 'mp', 'mp-max', 'stamina', 'stamina-max', 'show-mp', 'show-stamina']
+        return [
+            'name',
+            'class-name',
+            'glyph',
+            'level',
+            'hp',
+            'hp-max',
+            'mp',
+            'mp-max',
+            'stamina',
+            'stamina-max',
+            'show-mp',
+            'show-stamina',
+        ]
     }
 
     connectedCallback(): void {
@@ -161,9 +179,10 @@ export class PlayerFrame extends HTMLElement {
 
         // Portrait
         const glyphSpan = `<span class="tc-player-frame__glyph" aria-hidden="true">${glyph ? escapeHtml(glyph) : '&#x2014;'}</span>`
-        const levelBadge = level != null
-            ? `<span class="tc-player-frame__level" aria-hidden="true">${level}</span>`
-            : ''
+        const levelBadge =
+            level != null
+                ? `<span class="tc-player-frame__level" aria-hidden="true">${level}</span>`
+                : ''
 
         // Header row (name + class label)
         const classSpan = classLabel
@@ -173,7 +192,9 @@ export class PlayerFrame extends HTMLElement {
         // Bars
         const hpBar = renderBar('hp', this.hp, this.hpMax, 'Health')
         const mpBar = this.showMp ? renderBar('mp', this.mp, this.mpMax, 'Mana') : ''
-        const staminaBar = this.showStamina ? renderBar('stamina', this.stamina, this.staminaMax, 'Stamina') : ''
+        const staminaBar = this.showStamina
+            ? renderBar('stamina', this.stamina, this.staminaMax, 'Stamina')
+            : ''
 
         this.innerHTML = `
             <div class="tc-player-frame">

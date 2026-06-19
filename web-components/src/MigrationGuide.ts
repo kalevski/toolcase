@@ -1,5 +1,5 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-migration-guide'
 
@@ -9,24 +9,6 @@ export interface MigrationStep {
     before?: string
     after?: string
     language?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const arrowRightIconHtml = lucideByName('arrow-right')
@@ -87,51 +69,55 @@ export class MigrationGuide extends HTMLElement {
         const titleAttr = this.getAttribute('title')
         const title = titleAttr != null ? titleAttr : `Migrating from ${from} to ${to}`
 
-        const stepsHtml = this._steps.length > 0
-            ? `<ol class="tc-migration-guide__steps">${
-                this._steps.map((step, i) => {
-                    const num = String(i + 1).padStart(2, '0')
+        const stepsHtml =
+            this._steps.length > 0
+                ? `<ol class="tc-migration-guide__steps">${this._steps
+                      .map((step, i) => {
+                          const num = String(i + 1).padStart(2, '0')
 
-                    const descHtml = step.description
-                        ? `<p class="tc-migration-step__desc">${esc(step.description)}</p>`
-                        : ''
+                          const descHtml = step.description
+                              ? `<p class="tc-migration-step__desc">${esc(step.description)}</p>`
+                              : ''
 
-                    const beforeHtml = step.before != null
-                        ? `<div class="tc-migration-diff-before"><pre><code>${esc(step.before)}</code></pre></div>`
-                        : ''
-                    const afterHtml = step.after != null
-                        ? `<div class="tc-migration-diff-after"><pre><code>${esc(step.after)}</code></pre></div>`
-                        : ''
+                          const beforeHtml =
+                              step.before != null
+                                  ? `<div class="tc-migration-diff-before"><pre><code>${esc(step.before)}</code></pre></div>`
+                                  : ''
+                          const afterHtml =
+                              step.after != null
+                                  ? `<div class="tc-migration-diff-after"><pre><code>${esc(step.after)}</code></pre></div>`
+                                  : ''
 
-                    const diffHtml = (step.before != null || step.after != null)
-                        ? `<div class="tc-migration-diff">${beforeHtml}${afterHtml}</div>`
-                        : ''
+                          const diffHtml =
+                              step.before != null || step.after != null
+                                  ? `<div class="tc-migration-diff">${beforeHtml}${afterHtml}</div>`
+                                  : ''
 
-                    return (
-                        `<li class="tc-migration-step">` +
-                            `<span class="tc-migration-step__num">${esc(num)}</span>` +
-                            `<div class="tc-migration-step__body">` +
-                                `<p class="tc-migration-step__title">${esc(step.title)}</p>` +
-                                descHtml +
-                                diffHtml +
-                            `</div>` +
-                        `</li>`
-                    )
-                }).join('')
-            }</ol>`
-            : ''
+                          return (
+                              `<li class="tc-migration-step">` +
+                              `<span class="tc-migration-step__num">${esc(num)}</span>` +
+                              `<div class="tc-migration-step__body">` +
+                              `<p class="tc-migration-step__title">${esc(step.title)}</p>` +
+                              descHtml +
+                              diffHtml +
+                              `</div>` +
+                              `</li>`
+                          )
+                      })
+                      .join('')}</ol>`
+                : ''
 
         this.innerHTML =
             `<div class="tc-migration-guide">` +
-                `<div class="tc-migration-guide__header">` +
-                    `<div class="tc-migration-guide__versions">` +
-                        `<span class="tc-migration-guide__version">${esc(from)}</span>` +
-                        `<span class="tc-migration-guide__arrow">${arrowRightIconHtml}</span>` +
-                        `<span class="tc-migration-guide__version">${esc(to)}</span>` +
-                    `</div>` +
-                    `<p class="tc-migration-guide__title">${esc(title)}</p>` +
-                `</div>` +
-                stepsHtml +
+            `<div class="tc-migration-guide__header">` +
+            `<div class="tc-migration-guide__versions">` +
+            `<span class="tc-migration-guide__version">${esc(from)}</span>` +
+            `<span class="tc-migration-guide__arrow">${arrowRightIconHtml}</span>` +
+            `<span class="tc-migration-guide__version">${esc(to)}</span>` +
+            `</div>` +
+            `<p class="tc-migration-guide__title">${esc(title)}</p>` +
+            `</div>` +
+            stepsHtml +
             `</div>`
     }
 }

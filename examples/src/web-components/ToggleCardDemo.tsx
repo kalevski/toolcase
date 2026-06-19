@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ToggleCardDemo: React.FC = () => {
     const notificationsRef = useRef<any>(null)
@@ -26,14 +25,19 @@ const ToggleCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ToggleCard"
+                        <tc-rich-page-header
+                            title-text="ToggleCard"
                             description="Clickable card with an integrated toggle switch for on/off states. The whole card is the click target; Space/Enter toggles when focused. Supports a leading icon, a hint line, a badge, plus disabled and loading states."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title={`Controlled (notifications: ${notifications ? 'on' : 'off'})`}>
+                            <tc-section-card
+                                title={`Controlled (notifications: ${notifications ? 'on' : 'off'})`}
+                            >
                                 <div className="d-flex flex-column gap-2" style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-toggle-card
@@ -44,27 +48,45 @@ const ToggleCardDemo: React.FC = () => {
                                     />
                                 </div>
                                 <div className="d-flex gap-2 mt-3 flex-wrap">
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setNotifications(true)}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setNotifications(true)}
+                                    >
                                         Turn on
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setNotifications(false)}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setNotifications(false)}
+                                    >
                                         Turn off
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Basic toggles (uncontrolled)">
+                            <tc-section-card title="Basic toggles (uncontrolled)">
                                 <div className="d-flex flex-column gap-2" style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
-                                    <tc-toggle-card label="Dark Mode" hint="Use dark theme across the app" icon="moon" />
+                                    <tc-toggle-card
+                                        label="Dark Mode"
+                                        hint="Use dark theme across the app"
+                                        icon="moon"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-toggle-card label="Analytics" hint="Collect anonymous usage data" icon="line-chart" checked />
+                                    <tc-toggle-card
+                                        label="Analytics"
+                                        hint="Collect anonymous usage data"
+                                        icon="line-chart"
+                                        checked
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-toggle-card label="Auto-save" hint="Save changes automatically every 30 seconds" />
+                                    <tc-toggle-card
+                                        label="Auto-save"
+                                        hint="Save changes automatically every 30 seconds"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With badge">
+                            <tc-section-card title="With badge">
                                 <div className="d-flex flex-column gap-2" style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-toggle-card
@@ -82,9 +104,9 @@ const ToggleCardDemo: React.FC = () => {
                                         checked
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled & loading">
+                            <tc-section-card title="Disabled & loading">
                                 <div className="d-flex flex-column gap-2" style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-toggle-card
@@ -95,9 +117,14 @@ const ToggleCardDemo: React.FC = () => {
                                         disabled
                                     />
                                     {/* @ts-ignore */}
-                                    <tc-toggle-card label="Syncing settings" hint="Fetching the latest configuration" icon="refresh-cw" loading />
+                                    <tc-toggle-card
+                                        label="Syncing settings"
+                                        hint="Fetching the latest configuration"
+                                        icon="refresh-cw"
+                                        loading
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

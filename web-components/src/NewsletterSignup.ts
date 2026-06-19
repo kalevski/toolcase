@@ -1,27 +1,10 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-newsletter-signup'
 
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 const mailCheckIconHtml = lucideByName('mail-check')
 
@@ -47,7 +30,11 @@ export class NewsletterSignup extends HTMLElement {
             // NOTE: 'title' is listed so attributeChangedCallback fires on changes.
             // No getter/setter defined — HTMLElement already reflects title natively.
             'title',
-            'description', 'placeholder', 'cta-label', 'success-message', 'privacy-href',
+            'description',
+            'placeholder',
+            'cta-label',
+            'success-message',
+            'privacy-href',
         ]
     }
 
@@ -153,11 +140,13 @@ export class NewsletterSignup extends HTMLElement {
         this._status = 'submitting'
         this.render()
 
-        this.dispatchEvent(new CustomEvent('tc-submit', {
-            bubbles: true,
-            composed: true,
-            detail: { email },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-submit', {
+                bubbles: true,
+                composed: true,
+                detail: { email },
+            }),
+        )
 
         const handleSuccess = (): void => {
             if (!this.isConnected) return
@@ -172,18 +161,17 @@ export class NewsletterSignup extends HTMLElement {
 
         const handleError = (err?: unknown): void => {
             if (!this.isConnected) return
-            const msg = (err instanceof Error && err.message)
-                ? err.message
-                : 'Something went wrong. Please try again.'
+            const msg =
+                err instanceof Error && err.message
+                    ? err.message
+                    : 'Something went wrong. Please try again.'
             this._error = msg
             this._status = 'error'
             this.render()
             this.querySelector<HTMLInputElement>('input[type="email"]')?.focus()
         }
 
-        const promise = typeof this.onSubmit === 'function'
-            ? this.onSubmit(email)
-            : undefined
+        const promise = typeof this.onSubmit === 'function' ? this.onSubmit(email) : undefined
 
         if (promise instanceof Promise) {
             promise.then(handleSuccess, handleError)

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-funnel-chart'
 
 // One funnel step = a stage label, a numeric value, and an optional explicit colour.
@@ -20,14 +21,6 @@ const PALETTE_SIZE = 6
 const DEFAULT_HEIGHT = 320
 // 1px gap between stacked trapezoids (design: hairline separation, not boxes).
 const SEG_GAP = 1
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Tooltip anchor (in SVG user space) + the colour used for the left stripe.
 interface FunnelAnchor {
@@ -166,7 +159,9 @@ export class FunnelChart extends HTMLElement {
     // ---- normalisation ----
 
     private _segColor(index: number, explicit?: string): string {
-        return explicit ? esc(explicit) : `var(--bs-funnel-chart-series-${(index % PALETTE_SIZE) + 1})`
+        return explicit
+            ? esc(explicit)
+            : `var(--bs-funnel-chart-series-${(index % PALETTE_SIZE) + 1})`
     }
 
     private _percent(value: number): number {
@@ -188,12 +183,15 @@ export class FunnelChart extends HTMLElement {
         const data = this._data
         const titleAttr = this.getAttribute('title')
         const subtitle = this.getAttribute('subtitle')
-        const headerHtml = (titleAttr || subtitle)
-            ? `<div class="tc-funnel-chart__header">`
-                + (titleAttr ? `<div class="tc-funnel-chart__title">${esc(titleAttr)}</div>` : '')
-                + (subtitle ? `<div class="tc-funnel-chart__subtitle">${esc(subtitle)}</div>` : '')
-                + `</div>`
-            : ''
+        const headerHtml =
+            titleAttr || subtitle
+                ? `<div class="tc-funnel-chart__header">` +
+                  (titleAttr ? `<div class="tc-funnel-chart__title">${esc(titleAttr)}</div>` : '') +
+                  (subtitle
+                      ? `<div class="tc-funnel-chart__subtitle">${esc(subtitle)}</div>`
+                      : '') +
+                  `</div>`
+                : ''
 
         if (!data.length) {
             this.innerHTML = `<div class="tc-funnel-chart__inner">${headerHtml}<div class="tc-funnel-chart__empty">No data</div></div>`
@@ -204,7 +202,9 @@ export class FunnelChart extends HTMLElement {
         const VH = this.height
         const VW = this._measurePlot()
         // padding keeps focus rings + tapered edges off the SVG border
-        const PX = 8, PT = 6, PB = 6
+        const PX = 8,
+            PT = 6,
+            PB = 6
         const maxW = Math.max(VW - PX * 2, 10)
         const cx = VW / 2
         const availH = Math.max(VH - PT - PB, 10)
@@ -247,25 +247,26 @@ export class FunnelChart extends HTMLElement {
             this._anchors[i] = { ax: cx, ay: y, color }
 
             const labelsHtml = showLabels
-                ? `<text class="tc-funnel-chart__label" x="${cx.toFixed(1)}" y="${(midY - 4).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${esc(step.label)}</text>`
-                    + `<text class="tc-funnel-chart__percent" x="${cx.toFixed(1)}" y="${(midY + 12).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${pct}%</text>`
+                ? `<text class="tc-funnel-chart__label" x="${cx.toFixed(1)}" y="${(midY - 4).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${esc(step.label)}</text>` +
+                  `<text class="tc-funnel-chart__percent" x="${cx.toFixed(1)}" y="${(midY + 12).toFixed(1)}" text-anchor="middle" dominant-baseline="middle">${pct}%</text>`
                 : ''
 
             const ariaName = esc(`${step.label}: ${value} (${pct}%)`)
-            segsHtml += `<g class="tc-funnel-chart__segment" data-idx="${i}" role="button" tabindex="0" aria-label="${ariaName}" style="--tc-funnel-color: ${color}">`
+            segsHtml +=
+                `<g class="tc-funnel-chart__segment" data-idx="${i}" role="button" tabindex="0" aria-label="${ariaName}" style="--tc-funnel-color: ${color}">` +
                 // generous transparent hit/focus target spanning the full row band
-                + `<rect class="tc-funnel-chart__hit" x="${PX}" y="${y.toFixed(1)}" width="${maxW.toFixed(1)}" height="${segH.toFixed(1)}" />`
-                + `<polygon class="tc-funnel-chart__shape" points="${points}" />`
-                + labelsHtml
-                + `</g>`
+                `<rect class="tc-funnel-chart__hit" x="${PX}" y="${y.toFixed(1)}" width="${maxW.toFixed(1)}" height="${segH.toFixed(1)}" />` +
+                `<polygon class="tc-funnel-chart__shape" points="${points}" />` +
+                labelsHtml +
+                `</g>`
         })
 
         const summary = this._summary(data)
         const svgHtml =
-            `<svg class="tc-funnel-chart__svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">`
-            + `<title>${esc(summary)}</title><desc>${esc(summary)}</desc>`
-            + segsHtml
-            + `</svg>`
+            `<svg class="tc-funnel-chart__svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">` +
+            `<title>${esc(summary)}</title><desc>${esc(summary)}</desc>` +
+            segsHtml +
+            `</svg>`
 
         const tooltipHtml = `<div class="tc-funnel-chart__tooltip" role="status" aria-live="polite" hidden></div>`
 
@@ -298,15 +299,16 @@ export class FunnelChart extends HTMLElement {
             ? `<div class="tc-funnel-chart__header"><div class="tc-funnel-chart__skeleton tc-funnel-chart__skeleton--title" aria-hidden="true"></div></div>`
             : ''
         this.innerHTML =
-            `<div class="tc-funnel-chart__inner">`
-            + headHtml
-            + `<div class="tc-funnel-chart__skeleton tc-funnel-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>`
-            + `<span class="visually-hidden">Loading…</span>`
-            + `</div>`
+            `<div class="tc-funnel-chart__inner">` +
+            headHtml +
+            `<div class="tc-funnel-chart__skeleton tc-funnel-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+            `<span class="visually-hidden">Loading…</span>` +
+            `</div>`
     }
 
     private _summary(data: FunnelStep[]): string {
-        const parts = data.slice(0, 12)
+        const parts = data
+            .slice(0, 12)
             .map((d) => `${d.label} ${this._percent(Number(d.value) || 0)}%`)
             .join(', ')
         const more = data.length > 12 ? `, …` : ''
@@ -351,8 +353,8 @@ export class FunnelChart extends HTMLElement {
         tip.setAttribute('aria-label', `${step.label}: ${value} (${pct}%)`)
         tip.style.setProperty('--tc-funnel-color', anchor.color)
         tip.innerHTML =
-            `<span class="tc-funnel-chart__tooltip-name">${esc(step.label)}</span>`
-            + `<span class="tc-funnel-chart__tooltip-value">${value.toLocaleString()} · ${pct}%</span>`
+            `<span class="tc-funnel-chart__tooltip-name">${esc(step.label)}</span>` +
+            `<span class="tc-funnel-chart__tooltip-value">${value.toLocaleString()} · ${pct}%</span>`
         // position in plot pixels: the SVG fills the plot box, viewBox maps 1:1
         // to the rendered box, so scale user coords by the rendered/viewBox ratio
         const svg = this.querySelector<SVGSVGElement>('.tc-funnel-chart__svg')
@@ -370,11 +372,13 @@ export class FunnelChart extends HTMLElement {
         const idx = this._segIndexFromEvent(e)
         if (idx < 0) return
         const step = this._data[idx]
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { step, index: idx } as FunnelSelectDetail,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { step, index: idx } as FunnelSelectDetail,
+            }),
+        )
         if (typeof this._onSelect === 'function') this._onSelect(step, idx)
     }
 

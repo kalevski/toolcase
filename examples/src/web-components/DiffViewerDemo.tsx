@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BEFORE_TS = [
     'interface Config {',
@@ -70,15 +69,17 @@ const DiffViewerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="DiffViewer"
+                        <tc-rich-page-header
+                            title-text="DiffViewer"
                             description="Side-by-side or unified line diff with add/remove highlighting. Set before and after via JS properties for multi-line content."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Split mode — TypeScript (JS property)">
+                            <tc-section-card title="Split mode — TypeScript (JS property)">
                                 {/* @ts-ignore */}
                                 <tc-diff-viewer
                                     ref={splitRef}
@@ -86,9 +87,9 @@ const DiffViewerDemo: React.FC = () => {
                                     language="typescript"
                                     filename="src/server.ts"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Unified mode — Bash (JS property)">
+                            <tc-section-card title="Unified mode — Bash (JS property)">
                                 {/* @ts-ignore */}
                                 <tc-diff-viewer
                                     ref={unifiedRef}
@@ -96,18 +97,18 @@ const DiffViewerDemo: React.FC = () => {
                                     language="bash"
                                     filename="deploy.sh"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Split mode — no filename, attribute-set content">
+                            <tc-section-card title="Split mode — no filename, attribute-set content">
                                 {/* @ts-ignore */}
                                 <tc-diff-viewer
                                     mode="split"
                                     before={'hello world\nfoo bar'}
                                     after={'hello world\nbaz qux\nnew line'}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Unified mode — identical files (no changes)">
+                            <tc-section-card title="Unified mode — identical files (no changes)">
                                 {/* @ts-ignore */}
                                 <tc-diff-viewer
                                     mode="unified"
@@ -115,8 +116,7 @@ const DiffViewerDemo: React.FC = () => {
                                     after={'const x = 1\nconst y = 2'}
                                     filename="unchanged.ts"
                                 />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

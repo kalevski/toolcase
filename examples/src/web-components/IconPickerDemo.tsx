@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ICON_OPTIONS = [
     { value: 'star', label: 'Star' },
@@ -109,41 +108,49 @@ const IconPickerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="IconPicker"
+                        <tc-rich-page-header
+                            title-text="IconPicker"
                             description="Searchable icon-grid dropdown for selecting a lucide icon by name."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic usage">
+                            <tc-section-card title="Basic usage">
                                 <div>
                                     {/* @ts-ignore */}
                                     <tc-icon-picker ref={pickerRef} label="Choose an icon" />
                                     <div className="form-text mt-2">Selected: {selectedValue}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom columns (4)">
+                            <tc-section-card title="Custom columns (4)">
                                 <div>
                                     {/* @ts-ignore */}
-                                    <tc-icon-picker ref={columnsRef} label="Icon" columns="4" value="home" />
+                                    <tc-icon-picker
+                                        ref={columnsRef}
+                                        label="Icon"
+                                        columns="4"
+                                        value="home"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No label">
+                            <tc-section-card title="No label">
                                 <div>
                                     {/* @ts-ignore */}
                                     <tc-icon-picker ref={nolabelRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state">
+                            <tc-section-card title="Loading state">
                                 <div>
                                     {/* @ts-ignore */}
                                     <tc-icon-picker ref={loadingRef} label="Loading…" loading />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

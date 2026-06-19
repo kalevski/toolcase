@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PingDisplayDemo: React.FC = () => {
     const liveRef = useRef<any>(null)
@@ -12,8 +11,14 @@ const PingDisplayDemo: React.FC = () => {
         let ping = 20
         const id = setInterval(() => {
             ping += direction * 25
-            if (ping >= 350) { ping = 350; direction = -1 }
-            if (ping <= 20) { ping = 20; direction = 1 }
+            if (ping >= 350) {
+                ping = 350
+                direction = -1
+            }
+            if (ping <= 20) {
+                ping = 20
+                direction = 1
+            }
             el.ping = ping
         }, 700)
 
@@ -25,15 +30,17 @@ const PingDisplayDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PingDisplay"
+                        <tc-rich-page-header
+                            title-text="PingDisplay"
                             description="Compact latency readout. Tiers: success (<60 ms), warning (<200 ms), danger (≥200 ms), unknown (no ping attribute). Renders a status pip and a JetBrains Mono millisecond value."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="All tiers">
+                            <tc-section-card title="All tiers">
                                 <div className="d-flex align-items-center gap-4 flex-wrap">
                                     {/* @ts-ignore */}
                                     <tc-ping-display ping="22" />
@@ -50,28 +57,35 @@ const PingDisplayDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-ping-display />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Unknown (no ping attribute)">
+                            <tc-section-card title="Unknown (no ping attribute)">
                                 <div className="d-flex align-items-center gap-2">
                                     {/* @ts-ignore */}
                                     <tc-ping-display />
-                                    <span className="text-muted ms-2" style={{ fontSize: '0.8125rem' }}>
-                                        No <code>ping</code> attribute — renders an em-dash in the unknown tier colour
+                                    <span
+                                        className="text-muted ms-2"
+                                        style={{ fontSize: '0.8125rem' }}
+                                    >
+                                        No <code>ping</code> attribute — renders an em-dash in the
+                                        unknown tier colour
                                     </span>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Live ping update (JS property)">
+                            <tc-section-card title="Live ping update (JS property)">
                                 <div className="d-flex align-items-center gap-2">
                                     {/* @ts-ignore */}
                                     <tc-ping-display ref={liveRef} />
-                                    <span className="text-muted ms-2" style={{ fontSize: '0.8125rem' }}>
-                                        Animates 20–350 ms every 700 ms via <code>el.ping = value</code>
+                                    <span
+                                        className="text-muted ms-2"
+                                        style={{ fontSize: '0.8125rem' }}
+                                    >
+                                        Animates 20–350 ms every 700 ms via{' '}
+                                        <code>el.ping = value</code>
                                     </span>
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-usage-summary-panel'
 
 export interface UsageConfig {
@@ -6,14 +7,6 @@ export interface UsageConfig {
     total: number
     measurementUnit: string
     warn?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 const fmt = new Intl.NumberFormat('en', { maximumFractionDigits: 1 })
@@ -78,14 +71,17 @@ export class UsageSummaryPanel extends HTMLElement {
 
         if (loading) {
             const count = this.loadingCount
-            const skeletonRows = Array.from({ length: count }, () => `
+            const skeletonRows = Array.from(
+                { length: count },
+                () => `
                 <div class="tc-usage-summary-panel-row tc-usage-summary-panel-row--skeleton" aria-hidden="true">
                     <div class="tc-usage-summary-panel-row-header">
                         <span class="tc-usage-summary-panel-skeleton tc-usage-summary-panel-skeleton--label"></span>
                         <span class="tc-usage-summary-panel-skeleton tc-usage-summary-panel-skeleton--value"></span>
                     </div>
                     <div class="tc-usage-summary-panel-skeleton tc-usage-summary-panel-skeleton--bar"></div>
-                </div>`).join('')
+                </div>`,
+            ).join('')
 
             this.innerHTML = `
                 <div class="tc-usage-summary-panel" role="status" aria-busy="true" aria-label="Loading usage data">
@@ -98,16 +94,17 @@ export class UsageSummaryPanel extends HTMLElement {
             return
         }
 
-        const rowsHtml = this._usage.map(item => {
-            const pct = computePct(item.used, item.total)
-            const isWarn = !!item.warn || item.used >= item.total
-            const warnClass = isWarn ? ' tc-usage-summary-panel-row--warn' : ''
-            const usedFmt = fmt.format(item.used)
-            const totalFmt = fmt.format(item.total)
-            const valueText = `${esc(usedFmt)} / ${esc(totalFmt)} ${esc(item.measurementUnit)}`
-            const ariaLabel = `${esc(item.label)}: ${pct}%`
+        const rowsHtml = this._usage
+            .map((item) => {
+                const pct = computePct(item.used, item.total)
+                const isWarn = !!item.warn || item.used >= item.total
+                const warnClass = isWarn ? ' tc-usage-summary-panel-row--warn' : ''
+                const usedFmt = fmt.format(item.used)
+                const totalFmt = fmt.format(item.total)
+                const valueText = `${esc(usedFmt)} / ${esc(totalFmt)} ${esc(item.measurementUnit)}`
+                const ariaLabel = `${esc(item.label)}: ${pct}%`
 
-            return `
+                return `
                 <div class="tc-usage-summary-panel-row${warnClass}">
                     <div class="tc-usage-summary-panel-row-header">
                         <span class="tc-usage-summary-panel-label">${esc(item.label)}</span>
@@ -117,7 +114,8 @@ export class UsageSummaryPanel extends HTMLElement {
                         <div class="progress-bar" style="width:${pct}%"></div>
                     </div>
                 </div>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML = `
             <div class="tc-usage-summary-panel">

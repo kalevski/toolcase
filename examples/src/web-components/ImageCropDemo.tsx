@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const DEMO_IMAGE = 'https://picsum.photos/seed/toolcase/800/600'
 
@@ -44,53 +43,82 @@ const ImageCropDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ImageCrop"
+                        <tc-rich-page-header
+                            title-text="ImageCrop"
                             description="Canvas-based image cropper with drag-to-pan, scroll-to-zoom, a zoom slider, an optional aspect ratio, and a circular mask. Apply emits the cropped region as a tc-crop event carrying a Blob."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Square crop (1:1)">
+                            <tc-section-card title="Square crop (1:1)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-image-crop ref={freeRef} src={DEMO_IMAGE} />
                                     {freeUrl && (
                                         <div className="mt-3">
-                                            <p className="text-muted mb-1" style={{ fontSize: '0.85rem' }}>Result:</p>
-                                            <img src={freeUrl} alt="Cropped result" style={{ maxWidth: '100%' }} />
+                                            <p
+                                                className="text-muted mb-1"
+                                                style={{ fontSize: '0.85rem' }}
+                                            >
+                                                Result:
+                                            </p>
+                                            <img
+                                                src={freeUrl}
+                                                alt="Cropped result"
+                                                style={{ maxWidth: '100%' }}
+                                            />
                                         </div>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Wide crop (aspect-ratio 1.777…)">
+                            <tc-section-card title="Wide crop (aspect-ratio 1.777…)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
-                                    <tc-image-crop ref={wideRef} src={DEMO_IMAGE} aspect-ratio={16 / 9} />
+                                    <tc-image-crop
+                                        ref={wideRef}
+                                        src={DEMO_IMAGE}
+                                        aspect-ratio={16 / 9}
+                                    />
                                     {wideUrl && (
                                         <div className="mt-3">
-                                            <img src={wideUrl} alt="Cropped 16:9" style={{ maxWidth: '100%' }} />
+                                            <img
+                                                src={wideUrl}
+                                                alt="Cropped 16:9"
+                                                style={{ maxWidth: '100%' }}
+                                            />
                                         </div>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Circular crop (avatar)">
+                            <tc-section-card title="Circular crop (avatar)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
-                                    <tc-image-crop ref={circleRef} src={DEMO_IMAGE} aspect-ratio={1} circular />
+                                    <tc-image-crop
+                                        ref={circleRef}
+                                        src={DEMO_IMAGE}
+                                        aspect-ratio={1}
+                                        circular
+                                    />
                                     {circleUrl && (
                                         <div className="mt-3">
                                             <img
                                                 src={circleUrl}
                                                 alt="Circular crop"
-                                                style={{ width: 120, height: 120, borderRadius: '50%' }}
+                                                style={{
+                                                    width: 120,
+                                                    height: 120,
+                                                    borderRadius: '50%',
+                                                }}
                                             />
                                         </div>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

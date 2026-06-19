@@ -1,18 +1,10 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-section-flag'
 
 export type SectionFlagAlign = 'left' | 'center'
 const ALIGNS: SectionFlagAlign[] = ['left', 'center']
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 export class SectionFlag extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -59,9 +51,10 @@ export class SectionFlag extends HTMLElement {
         const title = this.title
         const subtitle = this.subtitle
 
-        const subtitleHtml = subtitle != null && subtitle !== ''
-            ? `<div class="tc-section-flag-subtitle">${esc(subtitle)}</div>`
-            : ''
+        const subtitleHtml =
+            subtitle != null && subtitle !== ''
+                ? `<div class="tc-section-flag-subtitle">${esc(subtitle)}</div>`
+                : ''
 
         this.innerHTML = `
             <div class="tc-section-flag tc-section-flag--${esc(align)}">

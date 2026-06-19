@@ -1,8 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-range-slider'
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
 
 function snapToStep(v: number, min: number, max: number, step: number): number {
     if (step <= 0 || max <= min) return Math.min(Math.max(v, min), max)
@@ -17,7 +14,6 @@ function snapToStep(v: number, min: number, max: number, step: number): number {
 }
 
 export class RangeSlider extends HTMLElement {
-
     private _initialised = false
     private _value: [number, number] = [0, 100]
     private _dragging: 'lo' | 'hi' | null = null
@@ -160,11 +156,13 @@ export class RangeSlider extends HTMLElement {
 
     private _fireChange(): void {
         const value: [number, number] = [...this._value] as [number, number]
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -219,7 +217,9 @@ export class RangeSlider extends HTMLElement {
             this._fireChange()
             // Remove dragging class
             const handle = this.querySelector<HTMLElement>(
-                this._dragging === 'lo' ? '.tc-range-slider-handle--lo' : '.tc-range-slider-handle--hi',
+                this._dragging === 'lo'
+                    ? '.tc-range-slider-handle--lo'
+                    : '.tc-range-slider-handle--hi',
             )
             handle?.classList.remove('tc-range-slider-handle--dragging')
             this._cleanupDrag()
@@ -260,26 +260,30 @@ export class RangeSlider extends HTMLElement {
             case 'ArrowLeft':
             case 'ArrowDown':
                 e.preventDefault()
-                if (which === 'lo') lo = Math.min(Math.max(snapToStep(lo - step, min, max, step), min), hi)
+                if (which === 'lo')
+                    lo = Math.min(Math.max(snapToStep(lo - step, min, max, step), min), hi)
                 else hi = Math.min(Math.max(snapToStep(hi - step, min, max, step), lo), max)
                 changed = true
                 break
             case 'ArrowRight':
             case 'ArrowUp':
                 e.preventDefault()
-                if (which === 'lo') lo = Math.min(Math.max(snapToStep(lo + step, min, max, step), min), hi)
+                if (which === 'lo')
+                    lo = Math.min(Math.max(snapToStep(lo + step, min, max, step), min), hi)
                 else hi = Math.min(Math.max(snapToStep(hi + step, min, max, step), lo), max)
                 changed = true
                 break
             case 'PageDown':
                 e.preventDefault()
-                if (which === 'lo') lo = Math.min(Math.max(snapToStep(lo - bigStep, min, max, step), min), hi)
+                if (which === 'lo')
+                    lo = Math.min(Math.max(snapToStep(lo - bigStep, min, max, step), min), hi)
                 else hi = Math.min(Math.max(snapToStep(hi - bigStep, min, max, step), lo), max)
                 changed = true
                 break
             case 'PageUp':
                 e.preventDefault()
-                if (which === 'lo') lo = Math.min(Math.max(snapToStep(lo + bigStep, min, max, step), min), hi)
+                if (which === 'lo')
+                    lo = Math.min(Math.max(snapToStep(lo + bigStep, min, max, step), min), hi)
                 else hi = Math.min(Math.max(snapToStep(hi + bigStep, min, max, step), lo), max)
                 changed = true
                 break
@@ -329,7 +333,7 @@ export class RangeSlider extends HTMLElement {
         const ticks = this.ticks
         const showTooltip = this.showTooltip
 
-        const pct = (v: number) => max === min ? 0 : ((v - min) / (max - min)) * 100
+        const pct = (v: number) => (max === min ? 0 : ((v - min) / (max - min)) * 100)
         const loPct = pct(lo)
         const hiPct = pct(hi)
 
@@ -342,14 +346,15 @@ export class RangeSlider extends HTMLElement {
             const marks: string[] = []
             for (let i = 0; i <= numSteps; i++) {
                 const v = snapToStep(min + i * step, min, max, step)
-                marks.push(`<div class="tc-range-slider-tick" style="left:${pct(v)}%" aria-hidden="true"></div>`)
+                marks.push(
+                    `<div class="tc-range-slider-tick" style="left:${pct(v)}%" aria-hidden="true"></div>`,
+                )
             }
             return `<div class="tc-range-slider-ticks" aria-hidden="true">${marks.join('')}</div>`
         })()
 
-        const labelHtml = label != null
-            ? `<label class="tc-range-slider-label">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label != null ? `<label class="tc-range-slider-label">${esc(label)}</label>` : ''
 
         const html = [
             labelHtml,

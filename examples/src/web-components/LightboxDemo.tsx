@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type GalleryImage = {
     src: string
@@ -9,11 +8,36 @@ type GalleryImage = {
 }
 
 const GALLERY: GalleryImage[] = [
-    { src: 'https://picsum.photos/seed/a1/1200/800', alt: 'Mountains', caption: 'Majestic mountain range at sunrise', thumb: 'https://picsum.photos/seed/a1/200/150' },
-    { src: 'https://picsum.photos/seed/b2/1200/800', alt: 'Forest', caption: 'Ancient forest in autumn', thumb: 'https://picsum.photos/seed/b2/200/150' },
-    { src: 'https://picsum.photos/seed/c3/1200/800', alt: 'Ocean', caption: 'Waves crashing at the shore', thumb: 'https://picsum.photos/seed/c3/200/150' },
-    { src: 'https://picsum.photos/seed/d4/1200/800', alt: 'Desert', caption: 'Sand dunes at golden hour', thumb: 'https://picsum.photos/seed/d4/200/150' },
-    { src: 'https://picsum.photos/seed/e5/1200/800', alt: 'City', caption: 'City lights reflected in rain', thumb: 'https://picsum.photos/seed/e5/200/150' },
+    {
+        src: 'https://picsum.photos/seed/a1/1200/800',
+        alt: 'Mountains',
+        caption: 'Majestic mountain range at sunrise',
+        thumb: 'https://picsum.photos/seed/a1/200/150',
+    },
+    {
+        src: 'https://picsum.photos/seed/b2/1200/800',
+        alt: 'Forest',
+        caption: 'Ancient forest in autumn',
+        thumb: 'https://picsum.photos/seed/b2/200/150',
+    },
+    {
+        src: 'https://picsum.photos/seed/c3/1200/800',
+        alt: 'Ocean',
+        caption: 'Waves crashing at the shore',
+        thumb: 'https://picsum.photos/seed/c3/200/150',
+    },
+    {
+        src: 'https://picsum.photos/seed/d4/1200/800',
+        alt: 'Desert',
+        caption: 'Sand dunes at golden hour',
+        thumb: 'https://picsum.photos/seed/d4/200/150',
+    },
+    {
+        src: 'https://picsum.photos/seed/e5/1200/800',
+        alt: 'City',
+        caption: 'City lights reflected in rain',
+        thumb: 'https://picsum.photos/seed/e5/200/150',
+    },
 ]
 
 const LightboxDemo: React.FC = () => {
@@ -46,35 +70,50 @@ const LightboxDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Lightbox"
+                        <tc-rich-page-header
+                            title-text="Lightbox"
                             description="Full-screen image gallery with keyboard/swipe navigation, thumbnails, captions, and focus management. Controlled component — fires tc-close when dismissed; set open to false to close."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Gallery — click any image to open the lightbox">
+                            <tc-section-card title="Gallery — click any image to open the lightbox">
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                     {GALLERY.map((img, i) => (
                                         <button
                                             key={i}
                                             onClick={() => openAt(i)}
-                                            style={{ border: 'none', padding: 0, cursor: 'pointer', overflow: 'hidden' }}
+                                            style={{
+                                                border: 'none',
+                                                padding: 0,
+                                                cursor: 'pointer',
+                                                overflow: 'hidden',
+                                            }}
                                             aria-label={`Open ${img.alt}`}
                                         >
                                             <img
                                                 src={img.thumb}
                                                 alt={img.alt}
-                                                style={{ display: 'block', width: 180, height: 130, objectFit: 'cover' }}
+                                                style={{
+                                                    display: 'block',
+                                                    width: 180,
+                                                    height: 130,
+                                                    objectFit: 'cover',
+                                                }}
                                             />
                                         </button>
                                     ))}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
                             {/* @ts-ignore */}
                             <tc-lightbox
-                                ref={(el: HTMLElement | null) => { lightboxRef.current = el }}
+                                ref={(el: HTMLElement | null) => {
+                                    lightboxRef.current = el
+                                }}
                                 initial-index={initial}
                                 open={open || undefined}
                             />

@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-tab-sections'
@@ -11,23 +12,6 @@ export interface TabSectionItem {
     content: string
     icon?: string
     disabled?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    return svg ? icon(svg, 'tc-tab-sections-tab-icon') : ''
 }
 
 export class TabSections extends HTMLElement {
@@ -50,10 +34,14 @@ export class TabSections extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
-            this.addEventListener('click', this._onHostClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback
+        // removes them, and a move/remount (React reconciliation) disconnects
+        // then reconnects without re-running the one-time init above. Re-adding
+        // the same handler reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onHostClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -115,29 +103,29 @@ export class TabSections extends HTMLElement {
 
     /** The key whose panel is currently shown. */
     private _getActiveKey(): string {
-        const keys = this._items.map(i => i.key)
+        const keys = this._items.map((i) => i.key)
         if (this._isControlled) {
             return this.getAttribute('active-key') ?? ''
         }
         if (this._internalKey && keys.includes(this._internalKey)) return this._internalKey
         const dflt = this.getAttribute('default-active-key')
         if (dflt && keys.includes(dflt)) return dflt
-        const firstEnabled = this._items.find(i => !i.disabled)
+        const firstEnabled = this._items.find((i) => !i.disabled)
         return firstEnabled?.key ?? this._items[0]?.key ?? ''
     }
 
     /** The key that owns roving tabindex 0 (active-and-enabled, else first enabled). */
     private _getTabbableKey(activeKey: string): string {
-        const active = this._items.find(i => i.key === activeKey)
+        const active = this._items.find((i) => i.key === activeKey)
         if (active && !active.disabled) return activeKey
-        const firstEnabled = this._items.find(i => !i.disabled)
+        const firstEnabled = this._items.find((i) => !i.disabled)
         return firstEnabled?.key ?? activeKey
     }
 
     // ── Selection ──────────────────────────────────────────────────────────────
 
     private _selectTab(key: string, focusTab: boolean): void {
-        const item = this._items.find(i => i.key === key)
+        const item = this._items.find((i) => i.key === key)
         if (!item || item.disabled) return
 
         if (!this._isControlled) {
@@ -150,11 +138,13 @@ export class TabSections extends HTMLElement {
             this._focusTab(key)
         }
 
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { key },
+            }),
+        )
         if (typeof this.onchangetab === 'function') this.onchangetab(key)
     }
 
@@ -169,14 +159,14 @@ export class TabSections extends HTMLElement {
         const activeKey = this._getActiveKey()
         const tabbableKey = this._getTabbableKey(activeKey)
 
-        this.querySelectorAll<HTMLElement>('[role="tab"]').forEach(tab => {
+        this.querySelectorAll<HTMLElement>('[role="tab"]').forEach((tab) => {
             const k = tab.dataset.key ?? ''
             const isActive = k === activeKey
             tab.setAttribute('aria-selected', String(isActive))
             tab.setAttribute('tabindex', k === tabbableKey ? '0' : '-1')
             tab.classList.toggle('tc-tab-sections-tab--active', isActive)
         })
-        this.querySelectorAll<HTMLElement>('[role="tabpanel"]').forEach(panel => {
+        this.querySelectorAll<HTMLElement>('[role="tabpanel"]').forEach((panel) => {
             const k = panel.dataset.key ?? ''
             if (k === activeKey) {
                 panel.removeAttribute('hidden')
@@ -213,10 +203,10 @@ export class TabSections extends HTMLElement {
         }
 
         // Build the enabled-tab ring for arrow navigation.
-        const enabled = this._items.filter(i => !i.disabled)
+        const enabled = this._items.filter((i) => !i.disabled)
         if (enabled.length === 0) return
         const currentKey = tab.dataset.key ?? ''
-        let idx = enabled.findIndex(i => i.key === currentKey)
+        let idx = enabled.findIndex((i) => i.key === currentKey)
         if (idx === -1) idx = 0
 
         let nextIdx = -1
@@ -239,16 +229,16 @@ export class TabSections extends HTMLElement {
             this.setAttribute('aria-busy', 'true')
             this.innerHTML =
                 `<div class="tc-tab-sections tc-tab-sections--loading placeholder-glow" aria-hidden="true">` +
-                    `<div class="tc-tab-sections-nav" role="presentation">` +
-                        `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
-                        `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
-                        `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
-                    `</div>` +
-                    `<div class="tc-tab-sections-panel">` +
-                        `<span class="placeholder tc-tab-sections-line"></span>` +
-                        `<span class="placeholder tc-tab-sections-line"></span>` +
-                        `<span class="placeholder tc-tab-sections-line tc-tab-sections-line--short"></span>` +
-                    `</div>` +
+                `<div class="tc-tab-sections-nav" role="presentation">` +
+                `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
+                `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
+                `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
+                `</div>` +
+                `<div class="tc-tab-sections-panel">` +
+                `<span class="placeholder tc-tab-sections-line"></span>` +
+                `<span class="placeholder tc-tab-sections-line"></span>` +
+                `<span class="placeholder tc-tab-sections-line tc-tab-sections-line--short"></span>` +
+                `</div>` +
                 `</div>` +
                 `<span class="visually-hidden">Loading…</span>`
             return
@@ -260,45 +250,53 @@ export class TabSections extends HTMLElement {
         const activeKey = this._getActiveKey()
         const tabbableKey = this._getTabbableKey(activeKey)
 
-        const tabsHtml = this._items.map((item, i) => {
-            const tabId = `${this._idPrefix}-tab-${i}`
-            const panelId = `${this._idPrefix}-panel-${i}`
-            const isActive = item.key === activeKey
-            const disabled = !!item.disabled
-            const iconHtml = item.icon ? lucideByName(item.icon) : ''
-            return `<button` +
-                ` id="${tabId}"` +
-                ` class="tc-tab-sections-tab${isActive ? ' tc-tab-sections-tab--active' : ''}"` +
-                ` role="tab"` +
-                ` type="button"` +
-                ` data-key="${esc(item.key)}"` +
-                ` aria-selected="${isActive}"` +
-                ` aria-controls="${panelId}"` +
-                ` tabindex="${item.key === tabbableKey ? '0' : '-1'}"` +
-                (disabled ? ' disabled aria-disabled="true"' : '') +
-                `>${iconHtml}<span class="tc-tab-sections-tab-label">${esc(item.label)}</span></button>`
-        }).join('')
+        const tabsHtml = this._items
+            .map((item, i) => {
+                const tabId = `${this._idPrefix}-tab-${i}`
+                const panelId = `${this._idPrefix}-panel-${i}`
+                const isActive = item.key === activeKey
+                const disabled = !!item.disabled
+                const iconHtml = item.icon ? lucideByName(item.icon) : ''
+                return (
+                    `<button` +
+                    ` id="${tabId}"` +
+                    ` class="tc-tab-sections-tab${isActive ? ' tc-tab-sections-tab--active' : ''}"` +
+                    ` role="tab"` +
+                    ` type="button"` +
+                    ` data-key="${esc(item.key)}"` +
+                    ` aria-selected="${isActive}"` +
+                    ` aria-controls="${panelId}"` +
+                    ` tabindex="${item.key === tabbableKey ? '0' : '-1'}"` +
+                    (disabled ? ' disabled aria-disabled="true"' : '') +
+                    `>${iconHtml}<span class="tc-tab-sections-tab-label">${esc(item.label)}</span></button>`
+                )
+            })
+            .join('')
 
-        const panelsHtml = this._items.map((item, i) => {
-            const tabId = `${this._idPrefix}-tab-${i}`
-            const panelId = `${this._idPrefix}-panel-${i}`
-            const isActive = item.key === activeKey
-            return `<div` +
-                ` id="${panelId}"` +
-                ` class="tc-tab-sections-panel"` +
-                ` role="tabpanel"` +
-                ` data-key="${esc(item.key)}"` +
-                ` aria-labelledby="${tabId}"` +
-                ` aria-hidden="${!isActive}"` +
-                ` tabindex="0"` +
-                (isActive ? '' : ' hidden') +
-                `>${item.content ?? ''}</div>`
-        }).join('')
+        const panelsHtml = this._items
+            .map((item, i) => {
+                const tabId = `${this._idPrefix}-tab-${i}`
+                const panelId = `${this._idPrefix}-panel-${i}`
+                const isActive = item.key === activeKey
+                return (
+                    `<div` +
+                    ` id="${panelId}"` +
+                    ` class="tc-tab-sections-panel"` +
+                    ` role="tabpanel"` +
+                    ` data-key="${esc(item.key)}"` +
+                    ` aria-labelledby="${tabId}"` +
+                    ` aria-hidden="${!isActive}"` +
+                    ` tabindex="0"` +
+                    (isActive ? '' : ' hidden') +
+                    `>${item.content ?? ''}</div>`
+                )
+            })
+            .join('')
 
         this.innerHTML =
             `<div class="tc-tab-sections">` +
-                `<div class="tc-tab-sections-nav" role="tablist">${tabsHtml}</div>` +
-                panelsHtml +
+            `<div class="tc-tab-sections-nav" role="tablist">${tabsHtml}</div>` +
+            panelsHtml +
             `</div>`
     }
 }

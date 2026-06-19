@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const traffic = [
     { label: 'Direct', value: 4200 },
@@ -25,8 +24,7 @@ const PieChartDemo: React.FC = () => {
         if (pieRef.current) {
             const el = pieRef.current
             el.data = traffic
-            const handler = (e: any) =>
-                setSelected(`${e.detail.slice.label} (#${e.detail.index})`)
+            const handler = (e: any) => setSelected(`${e.detail.slice.label} (#${e.detail.index})`)
             el.addEventListener('tc-slice-select', handler)
             return () => el.removeEventListener('tc-slice-select', handler)
         }
@@ -41,15 +39,17 @@ const PieChartDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PieChart"
+                        <tc-rich-page-header
+                            title-text="PieChart"
                             description="Inline-SVG pie or donut chart with a percentage distribution and an interactive legend. data is set via a JS property; title/subtitle/donut/center-label/show-legend/height/loading are attributes. Hovering a slice (or its legend row) highlights both, pulls the slice out and shows a tooltip; clicking a legend entry toggles that slice's visibility and fires tc-slice-select."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Pie — legend toggle + slice select">
+                            <tc-section-card title="Pie — legend toggle + slice select">
                                 {/* @ts-ignore */}
                                 <tc-pie-chart
                                     ref={pieRef}
@@ -60,9 +60,9 @@ const PieChartDemo: React.FC = () => {
                                 <p className="text-muted small mt-2 mb-0">
                                     Last selected slice: <strong>{selected ?? 'none'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Donut — center label">
+                            <tc-section-card title="Donut — center label">
                                 {/* @ts-ignore */}
                                 <tc-pie-chart
                                     ref={donutRef}
@@ -72,23 +72,24 @@ const PieChartDemo: React.FC = () => {
                                     subtitle="Percent of the 100 GB plan"
                                     height="280"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Legend hidden">
+                            <tc-section-card title="Legend hidden">
                                 {/* @ts-ignore */}
                                 <tc-pie-chart
-                                    ref={(el: any) => { if (el) el.data = traffic }}
+                                    ref={(el: any) => {
+                                        if (el) el.data = traffic
+                                    }}
                                     show-legend="false"
                                     title="Chart only"
                                     height="240"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-pie-chart loading title="Loading…" height="280" />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

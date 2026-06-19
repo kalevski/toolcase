@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
 
@@ -60,15 +59,17 @@ const LineChartDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="LineChart"
+                        <tc-rich-page-header
+                            title-text="LineChart"
                             description="Inline-SVG line chart with multiple series sharing axes, grid hairlines, point markers and an optional toggle legend. series is set via a JS property; xFormatter/yFormatter are function properties; title/subtitle/height/show-grid/show-legend/loading are attributes. Hovering near a point shows a tooltip and fires tc-point-hover; clicking a legend entry toggles that series."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Multi-series — formatters, legend toggle, hover">
+                            <tc-section-card title="Multi-series — formatters, legend toggle, hover">
                                 {/* @ts-ignore */}
                                 <tc-line-chart
                                     ref={mainRef}
@@ -79,9 +80,9 @@ const LineChartDemo: React.FC = () => {
                                 <p className="text-muted small mt-2 mb-0">
                                     Last hovered point: <strong>{hovered ?? 'none'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Percent y-axis">
+                            <tc-section-card title="Percent y-axis">
                                 {/* @ts-ignore */}
                                 <tc-line-chart
                                     ref={trafficRef}
@@ -89,9 +90,9 @@ const LineChartDemo: React.FC = () => {
                                     subtitle="Desktop vs mobile, % of sessions"
                                     height="280"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Grid + legend hidden">
+                            <tc-section-card title="Grid + legend hidden">
                                 {/* @ts-ignore */}
                                 <tc-line-chart
                                     ref={noGridRef}
@@ -101,13 +102,12 @@ const LineChartDemo: React.FC = () => {
                                     show-grid="false"
                                     show-legend="false"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-line-chart loading title="Loading…" height="280" />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

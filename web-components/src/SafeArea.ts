@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-safe-area'
 
 export class SafeArea extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

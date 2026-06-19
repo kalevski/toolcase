@@ -2,7 +2,15 @@ import { Dropdown as BsDropdown } from './internal/Dropdown'
 
 const TAG_NAME = 'tc-dropdown'
 
-export type DropdownVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type DropdownVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 export type DropdownDirection = 'down' | 'up' | 'start' | 'end'
 export type DropdownAutoClose = 'true' | 'inside' | 'outside' | 'false'
 
@@ -14,7 +22,6 @@ const DIRECTION_CLASS: Record<DropdownDirection, string> = {
 }
 
 export class Dropdown extends HTMLElement {
-
     private _bsDropdown: BsDropdown | null = null
     private _toggleEl: HTMLElement | null = null
     private _initialised = false
@@ -32,7 +39,7 @@ export class Dropdown extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const menu = this.querySelector('.dropdown-menu')
-            if (menu) slotContent.forEach(n => menu.appendChild(n))
+            if (menu) slotContent.forEach((n) => menu.appendChild(n))
             this._initialised = true
         }
         this._initPlugin()
@@ -49,7 +56,7 @@ export class Dropdown extends HTMLElement {
         this._teardown()
         this.render()
         const newMenu = this.querySelector('.dropdown-menu')
-        if (newMenu) slotContent.forEach(n => newMenu.appendChild(n))
+        if (newMenu) slotContent.forEach((n) => newMenu.appendChild(n))
         this._initPlugin()
     }
 
@@ -130,12 +137,14 @@ export class Dropdown extends HTMLElement {
 
         let toggleHtml: string
         if (isSplit) {
-            toggleHtml = `<button type="button" class="btn btn-${variant}">${label}</button>` +
+            toggleHtml =
+                `<button type="button" class="btn btn-${variant}">${label}</button>` +
                 `<button type="button" class="btn btn-${variant} dropdown-toggle dropdown-toggle-split"` +
                 ` data-bs-toggle="dropdown" data-bs-auto-close="${autoClose}" aria-expanded="false">` +
                 `<span class="visually-hidden">Toggle Dropdown</span></button>`
         } else {
-            toggleHtml = `<button type="button" class="btn btn-${variant} dropdown-toggle"` +
+            toggleHtml =
+                `<button type="button" class="btn btn-${variant} dropdown-toggle"` +
                 ` data-bs-toggle="dropdown" data-bs-auto-close="${autoClose}" aria-expanded="false">` +
                 `${label}</button>`
         }

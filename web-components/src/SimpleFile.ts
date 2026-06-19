@@ -1,28 +1,11 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-simple-file'
 
 export type SimpleFileFormat = 'unknown' | 'image' | 'audio' | 'binary'
 const FORMATS: SimpleFileFormat[] = ['unknown', 'image', 'audio', 'binary']
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 // Pre-computed per-format icon HTML
 const FORMAT_ICONS: Record<SimpleFileFormat, string> = {
@@ -83,11 +66,11 @@ export class SimpleFile extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-simple-file tc-simple-file-${fmt}">` +
-                `<span class="tc-simple-file-icon" aria-hidden="true">${iconHtml}</span>` +
-                `<div class="tc-simple-file-text">` +
-                    `<span class="tc-simple-file-name">${nameVal}</span>` +
-                    `<span class="tc-simple-file-ext">${extVal}</span>` +
-                `</div>` +
+            `<span class="tc-simple-file-icon" aria-hidden="true">${iconHtml}</span>` +
+            `<div class="tc-simple-file-text">` +
+            `<span class="tc-simple-file-name">${nameVal}</span>` +
+            `<span class="tc-simple-file-ext">${extVal}</span>` +
+            `</div>` +
             `</div>`
     }
 }

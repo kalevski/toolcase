@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BadgeRowDemo: React.FC = () => {
     const labelOnlyRef = useRef<any>(null)
@@ -66,37 +65,40 @@ const BadgeRowDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BadgeRow"
+                        <tc-rich-page-header
+                            title-text="BadgeRow"
                             description="Horizontal row of paired key/value chips with sharp corners, slate neutrals, and monospaced values. Set badges via the JS badges property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Label only">
+                            <tc-section-card title="Label only">
                                 {/* @ts-ignore */}
                                 <tc-badge-row ref={labelOnlyRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Label + value (md — default)">
+                            <tc-section-card title="Label + value (md — default)">
                                 {/* @ts-ignore */}
                                 <tc-badge-row ref={mdRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Label + value (sm)">
+                            <tc-section-card title="Label + value (sm)">
                                 {/* @ts-ignore */}
                                 <tc-badge-row ref={smRef} size="sm" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Status variants">
+                            <tc-section-card title="Status variants">
                                 {/* @ts-ignore */}
                                 <tc-badge-row ref={variantRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom color per item">
+                            <tc-section-card title="Custom color per item">
                                 {/* @ts-ignore */}
                                 <tc-badge-row ref={colorRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

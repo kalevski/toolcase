@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-hero'
@@ -22,34 +23,23 @@ export interface HeroMetric {
     value: string
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 // Convert kebab-case or lowercase name to PascalCase for lucide-static lookup.
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-        ?? (LucideIcons as Record<string, string>)[name]
-    return svg ?? ''
-}
 
 // Fixed scatter positions for background icons (top/right/bottom/left as percentages).
-const BG_ICON_POSITIONS: Array<{ top?: string; bottom?: string; left?: string; right?: string; rotate: number }> = [
-    { top: '8%',  left: '4%',   rotate: -15 },
-    { top: '15%', right: '6%',  rotate:  20 },
-    { top: '55%', left: '2%',   rotate:   5 },
-    { top: '65%', right: '4%',  rotate: -10 },
-    { top: '38%', left: '12%',  rotate:  30 },
+const BG_ICON_POSITIONS: Array<{
+    top?: string
+    bottom?: string
+    left?: string
+    right?: string
+    rotate: number
+}> = [
+    { top: '8%', left: '4%', rotate: -15 },
+    { top: '15%', right: '6%', rotate: 20 },
+    { top: '55%', left: '2%', rotate: 5 },
+    { top: '65%', right: '4%', rotate: -10 },
+    { top: '38%', left: '12%', rotate: 30 },
     { top: '28%', right: '18%', rotate: -25 },
-    { bottom: '12%', left: '28%', rotate:  15 },
+    { bottom: '12%', left: '28%', rotate: 15 },
 ]
 
 export class Hero extends HTMLElement {
@@ -156,17 +146,20 @@ export class Hero extends HTMLElement {
     }
 
     private _dispatchAction(which: 'primary' | 'secondary'): void {
-        this.dispatchEvent(new CustomEvent('tc-action', {
-            bubbles: true,
-            composed: true,
-            detail: { which },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-action', {
+                bubbles: true,
+                composed: true,
+                detail: { which },
+            }),
+        )
         if (which === 'primary') {
             if (typeof this.onPrimaryAction === 'function') this.onPrimaryAction()
             if (typeof this._primaryAction?.onClick === 'function') this._primaryAction.onClick()
         } else {
             if (typeof this.onSecondaryAction === 'function') this.onSecondaryAction()
-            if (typeof this._secondaryAction?.onClick === 'function') this._secondaryAction.onClick()
+            if (typeof this._secondaryAction?.onClick === 'function')
+                this._secondaryAction.onClick()
         }
     }
 
@@ -189,10 +182,10 @@ export class Hero extends HTMLElement {
                 if (!svg) return ''
                 const pos = BG_ICON_POSITIONS[i]
                 const style = [
-                    pos.top    !== undefined ? `top:${pos.top};`      : '',
+                    pos.top !== undefined ? `top:${pos.top};` : '',
                     pos.bottom !== undefined ? `bottom:${pos.bottom};` : '',
-                    pos.left   !== undefined ? `left:${pos.left};`    : '',
-                    pos.right  !== undefined ? `right:${pos.right};`  : '',
+                    pos.left !== undefined ? `left:${pos.left};` : '',
+                    pos.right !== undefined ? `right:${pos.right};` : '',
                     `transform:rotate(${pos.rotate}deg);`,
                 ].join('')
                 return (
@@ -203,14 +196,13 @@ export class Hero extends HTMLElement {
             })
             .join('')
 
-        const backgroundHtml = (bgPatternSrc || this._bgIcons.length)
-            ? `<div class="tc-hero-bg"${patternStyle}>${bgIconsHtml}</div>`
-            : ''
+        const backgroundHtml =
+            bgPatternSrc || this._bgIcons.length
+                ? `<div class="tc-hero-bg"${patternStyle}>${bgIconsHtml}</div>`
+                : ''
 
         // Eyebrow
-        const eyebrowHtml = eyebrow
-            ? `<span class="tc-hero-eyebrow">${esc(eyebrow)}</span>`
-            : ''
+        const eyebrowHtml = eyebrow ? `<span class="tc-hero-eyebrow">${esc(eyebrow)}</span>` : ''
 
         // Title heading
         const titleHtml = `<${titleAs} class="tc-hero-title">${esc(titleText)}</${titleAs}>`
@@ -242,18 +234,22 @@ export class Hero extends HTMLElement {
             }
         }
 
-        const actionsHtml = (primaryHtml || secondaryHtml)
-            ? `<div class="tc-hero-actions">${primaryHtml}${secondaryHtml}</div>`
-            : ''
+        const actionsHtml =
+            primaryHtml || secondaryHtml
+                ? `<div class="tc-hero-actions">${primaryHtml}${secondaryHtml}</div>`
+                : ''
 
         // Stat cards (centered row, sits inside the main column under the actions)
         const statCardsHtml = this._statCards.length
-            ? `<div class="tc-hero-stats">${this._statCards.map(s =>
-                `<div class="tc-hero-stat-card">` +
-                `<span class="tc-hero-stat-value">${esc(s.value)}</span>` +
-                `<span class="tc-hero-stat-label">${esc(s.label)}</span>` +
-                `</div>`
-            ).join('')}</div>`
+            ? `<div class="tc-hero-stats">${this._statCards
+                  .map(
+                      (s) =>
+                          `<div class="tc-hero-stat-card">` +
+                          `<span class="tc-hero-stat-value">${esc(s.value)}</span>` +
+                          `<span class="tc-hero-stat-label">${esc(s.label)}</span>` +
+                          `</div>`,
+                  )
+                  .join('')}</div>`
             : ''
 
         // Metrics live in a separate centered band below a hairline separator,
@@ -261,12 +257,15 @@ export class Hero extends HTMLElement {
         const metricsHtml = this._metrics.length
             ? '<div class="tc-hero-separator" aria-hidden="true"></div>' +
               '<div class="tc-hero-bottom"><div class="tc-hero-bottom-inner">' +
-              `<div class="tc-hero-metrics">${this._metrics.map(m =>
-                  `<div class="tc-hero-metric">` +
-                  `<span class="tc-hero-metric-value">${esc(m.value)}</span>` +
-                  `<span class="tc-hero-metric-label">${esc(m.label)}</span>` +
-                  `</div>`
-              ).join('')}</div>` +
+              `<div class="tc-hero-metrics">${this._metrics
+                  .map(
+                      (m) =>
+                          `<div class="tc-hero-metric">` +
+                          `<span class="tc-hero-metric-value">${esc(m.value)}</span>` +
+                          `<span class="tc-hero-metric-label">${esc(m.label)}</span>` +
+                          `</div>`,
+                  )
+                  .join('')}</div>` +
               '</div></div>'
             : ''
 

@@ -14,7 +14,6 @@ const DEFAULT_PADDING: GildedFramePadding = 'md'
 // wrapping its slotted content. The dark/leather/transparent tones map onto the
 // slate neutral ramp (ink fill / muted slate / borderless transparent).
 export class GildedFrame extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -31,7 +30,7 @@ export class GildedFrame extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-gilded-frame-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -42,7 +41,7 @@ export class GildedFrame extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-gilded-frame-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get tone(): GildedFrameTone {
@@ -67,8 +66,8 @@ export class GildedFrame extends HTMLElement {
 
         // Manage host classes via classList so author-supplied classes survive.
         this.classList.add('tc-gilded-frame')
-        TONES.forEach(t => this.classList.remove(`tc-gilded-frame--tone-${t}`))
-        PADDINGS.forEach(p => this.classList.remove(`tc-gilded-frame--pad-${p}`))
+        TONES.forEach((t) => this.classList.remove(`tc-gilded-frame--tone-${t}`))
+        PADDINGS.forEach((p) => this.classList.remove(`tc-gilded-frame--pad-${p}`))
         this.classList.add(`tc-gilded-frame--tone-${tone}`)
         this.classList.add(`tc-gilded-frame--pad-${padding}`)
 

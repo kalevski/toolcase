@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SprintChainDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -56,37 +55,40 @@ const SprintChainDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="SprintChain"
+                        <tc-rich-page-header
+                            title-text="SprintChain"
                             description="Timeline/chain visualization of sprint items with past, now, and future states. Set items via the JS items property; current item derived from the current-id attribute."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic chain (current-id derives states)">
+                            <tc-section-card title="Basic chain (current-id derives states)">
                                 {/* @ts-ignore */}
                                 <tc-sprint-chain ref={basicRef} current-id="sp2" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With tags and header slots">
+                            <tc-section-card title="With tags and header slots">
                                 {/* @ts-ignore */}
                                 <tc-sprint-chain ref={taggedRef} current-id="sp3">
                                     <span slot="header">Release roadmap</span>
                                     <span slot="header-end">FY 2026</span>
                                 </tc-sprint-chain>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Multi-row with columns=3">
+                            <tc-section-card title="Multi-row with columns=3">
                                 {/* @ts-ignore */}
                                 <tc-sprint-chain ref={columnsRef} current-id="q4" columns="3">
                                     <span slot="header">Quarterly sprints</span>
                                 </tc-sprint-chain>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Explicit per-item state override">
+                            <tc-section-card title="Explicit per-item state override">
                                 {/* @ts-ignore */}
                                 <tc-sprint-chain ref={explicitRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

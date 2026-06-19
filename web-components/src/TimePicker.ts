@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { X, Clock } from 'lucide-static'
 import { icon } from './icons'
 
@@ -12,14 +13,6 @@ type ColumnName = 'hours' | 'minutes' | 'seconds' | 'period'
 
 const clockIconHtml = icon(Clock)
 const clearIconHtml = icon(X)
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function pad2(n: number): string {
     return String(n).padStart(2, '0')
@@ -56,7 +49,17 @@ export class TimePicker extends HTMLElement {
     onChange: ((value: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['value', 'format', 'minute-step', 'show-seconds', 'label', 'placeholder', 'error', 'disabled', 'clearable']
+        return [
+            'value',
+            'format',
+            'minute-step',
+            'show-seconds',
+            'label',
+            'placeholder',
+            'error',
+            'disabled',
+            'clearable',
+        ]
     }
 
     constructor() {
@@ -253,13 +256,15 @@ export class TimePicker extends HTMLElement {
     // ── Keyboard navigation ─────────────────────────────────────────────────────
 
     private _options(col: ColumnName): HTMLButtonElement[] {
-        return Array.from(this.querySelectorAll<HTMLButtonElement>(`.tc-time-picker-option[data-col="${col}"]`))
+        return Array.from(
+            this.querySelectorAll<HTMLButtonElement>(`.tc-time-picker-option[data-col="${col}"]`),
+        )
     }
 
     private _focusColumn(col: ColumnName): void {
         const opts = this._options(col)
         if (opts.length === 0) return
-        const active = opts.find(o => o.classList.contains('tc-time-picker-option--active'))
+        const active = opts.find((o) => o.classList.contains('tc-time-picker-option--active'))
         ;(active ?? opts[0]).focus()
     }
 
@@ -275,7 +280,11 @@ export class TimePicker extends HTMLElement {
         }
 
         const active = document.activeElement
-        if (!(active instanceof HTMLElement) || !active.classList.contains('tc-time-picker-option') || !this.contains(active)) {
+        if (
+            !(active instanceof HTMLElement) ||
+            !active.classList.contains('tc-time-picker-option') ||
+            !this.contains(active)
+        ) {
             return
         }
         const col = active.dataset.col as ColumnName | undefined
@@ -285,13 +294,17 @@ export class TimePicker extends HTMLElement {
             e.preventDefault()
             const opts = this._options(col)
             const idx = opts.indexOf(active as HTMLButtonElement)
-            const next = e.key === 'ArrowDown' ? Math.min(idx + 1, opts.length - 1) : Math.max(idx - 1, 0)
+            const next =
+                e.key === 'ArrowDown' ? Math.min(idx + 1, opts.length - 1) : Math.max(idx - 1, 0)
             opts[next]?.focus()
         } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
             e.preventDefault()
             const cols = this._columnOrder()
             const ci = cols.indexOf(col)
-            const target = e.key === 'ArrowRight' ? cols[Math.min(ci + 1, cols.length - 1)] : cols[Math.max(ci - 1, 0)]
+            const target =
+                e.key === 'ArrowRight'
+                    ? cols[Math.min(ci + 1, cols.length - 1)]
+                    : cols[Math.max(ci - 1, 0)]
             this._focusColumn(target)
         } else if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
@@ -354,11 +367,13 @@ export class TimePicker extends HTMLElement {
         } else {
             this._patchValue()
         }
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -367,11 +382,13 @@ export class TimePicker extends HTMLElement {
         this.removeAttribute('value')
         if (!had) this._patchValue()
         if (this._isOpen) this._close(false)
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: '' },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: '' },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange('')
     }
 
@@ -406,7 +423,7 @@ export class TimePicker extends HTMLElement {
         const selSec = parsed ? parsed.s : null
         const selPeriod = parsed ? to12h(parsed.h).period : null
 
-        this.querySelectorAll<HTMLButtonElement>('.tc-time-picker-option').forEach(btn => {
+        this.querySelectorAll<HTMLButtonElement>('.tc-time-picker-option').forEach((btn) => {
             const col = btn.dataset.col as ColumnName
             const raw = btn.dataset.value ?? ''
             let isSel = false
@@ -420,8 +437,10 @@ export class TimePicker extends HTMLElement {
     }
 
     private _scrollSelectedIntoView(): void {
-        this._columnOrder().forEach(colName => {
-            const colEl = this.querySelector<HTMLElement>(`.tc-time-picker-column[data-col="${colName}"]`)
+        this._columnOrder().forEach((colName) => {
+            const colEl = this.querySelector<HTMLElement>(
+                `.tc-time-picker-column[data-col="${colName}"]`,
+            )
             if (!colEl) return
             const active = colEl.querySelector<HTMLElement>('.tc-time-picker-option--active')
             if (!active) return
@@ -438,21 +457,24 @@ export class TimePicker extends HTMLElement {
             const list = is12
                 ? Array.from({ length: 12 }, (_, i) => i + 1)
                 : Array.from({ length: 24 }, (_, i) => i)
-            values = list.map(n => ({ raw: String(n), label: pad2(n) }))
+            values = list.map((n) => ({ raw: String(n), label: pad2(n) }))
         } else if (col === 'minutes') {
             const step = this.minuteStep
             const list: number[] = []
             for (let i = 0; i < 60; i += step) list.push(i)
-            values = list.map(n => ({ raw: String(n), label: pad2(n) }))
+            values = list.map((n) => ({ raw: String(n), label: pad2(n) }))
         } else if (col === 'seconds') {
             values = Array.from({ length: 60 }, (_, i) => ({ raw: String(i), label: pad2(i) }))
         } else {
-            values = [{ raw: 'AM', label: 'AM' }, { raw: 'PM', label: 'PM' }]
+            values = [
+                { raw: 'AM', label: 'AM' },
+                { raw: 'PM', label: 'PM' },
+            ]
         }
 
         const opts = values
             .map(
-                v =>
+                (v) =>
                     `<button class="tc-time-picker-option" type="button" role="option" aria-selected="false" tabindex="-1" data-col="${col}" data-value="${esc(v.raw)}">${esc(v.label)}</button>`,
             )
             .join('')
@@ -482,19 +504,31 @@ export class TimePicker extends HTMLElement {
         const describedBy = invalid ? ` aria-describedby="${this._errorId}"` : ''
         const labelledBy = label != null ? ` aria-labelledby="${this._labelId}"` : ''
 
-        const labelHtml = label != null
-            ? `<label class="tc-time-picker-label form-label" id="${this._labelId}">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label != null
+                ? `<label class="tc-time-picker-label form-label" id="${this._labelId}">${esc(label)}</label>`
+                : ''
 
-        const colLabels: Record<ColumnName, string> = { hours: 'Hr', minutes: 'Min', seconds: 'Sec', period: '' }
-        const columnsHtml = this._columnOrder().map(c => this._renderColumn(c, colLabels[c])).join('')
+        const colLabels: Record<ColumnName, string> = {
+            hours: 'Hr',
+            minutes: 'Min',
+            seconds: 'Sec',
+            period: '',
+        }
+        const columnsHtml = this._columnOrder()
+            .map((c) => this._renderColumn(c, colLabels[c]))
+            .join('')
 
         const clearHtml = clearable
             ? `<button class="tc-time-picker-clear" type="button" aria-label="Clear time"${showClear ? '' : ' hidden'}>${clearIconHtml}</button>`
             : ''
 
-        const valueClass = hasValue ? 'tc-time-picker-value' : 'tc-time-picker-value tc-time-picker-value--placeholder'
-        const triggerClass = invalid ? 'tc-time-picker-trigger form-control is-invalid' : 'tc-time-picker-trigger form-control'
+        const valueClass = hasValue
+            ? 'tc-time-picker-value'
+            : 'tc-time-picker-value tc-time-picker-value--placeholder'
+        const triggerClass = invalid
+            ? 'tc-time-picker-trigger form-control is-invalid'
+            : 'tc-time-picker-trigger form-control'
 
         const feedbackHtml = invalid
             ? `<div class="invalid-feedback" id="${this._errorId}">${esc(error as string)}</div>`
@@ -531,7 +565,9 @@ export class TimePicker extends HTMLElement {
         const panel = this._panel()
         if (panel) {
             panel.addEventListener('click', (e: Event) => {
-                const opt = (e.target as HTMLElement).closest<HTMLButtonElement>('.tc-time-picker-option')
+                const opt = (e.target as HTMLElement).closest<HTMLButtonElement>(
+                    '.tc-time-picker-option',
+                )
                 if (opt) this._selectOption(opt)
             })
         }

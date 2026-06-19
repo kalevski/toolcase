@@ -7,6 +7,9 @@ import { register } from '@toolcase/game-components'
 import '@toolcase/game-components/style.css'
 import { register as registerWebComponents } from '@toolcase/web-components'
 import '@toolcase/web-components/style.css'
+// Side-effect import: applies the React JSX typings for every tc-* tag, so the
+// demos can use the custom elements without `{/* @ts-ignore */}`.
+import '@toolcase/web-components/react'
 import './style.css'
 
 window.addEventListener('DOMContentLoaded', () => {

@@ -1,29 +1,32 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ENTRIES_FULL = [
     {
         date: '2026-06-01',
         title: 'v3.0.0 — Major release',
-        description: 'Complete redesign of the component library with new SCSS tokens, improved accessibility, and a framework-free Web Components layer.',
+        description:
+            'Complete redesign of the component library with new SCSS tokens, improved accessibility, and a framework-free Web Components layer.',
         tags: ['breaking', 'feature', 'a11y'],
     },
     {
         date: '2026-04-15',
         title: 'v2.8.0 — Timeline component',
-        description: 'Added tc-timeline with alternating left/right layout, icon nodes, status dots, and progress bars.',
+        description:
+            'Added tc-timeline with alternating left/right layout, icon nodes, status dots, and progress bars.',
         tags: ['feature'],
     },
     {
         date: '2026-03-02',
         title: 'v2.7.0 — Form primitives',
-        description: 'Shipped tc-input, tc-select, tc-check, tc-radio, tc-switch, tc-range, and tc-floating-label with full keyboard support.',
+        description:
+            'Shipped tc-input, tc-select, tc-check, tc-radio, tc-switch, tc-range, and tc-floating-label with full keyboard support.',
         tags: ['feature'],
     },
     {
         date: '2026-01-18',
         title: 'v2.6.2 — Accessibility fixes',
-        description: 'Fixed focus-visible outlines across all interactive elements and added aria-live regions to toast notifications.',
+        description:
+            'Fixed focus-visible outlines across all interactive elements and added aria-live regions to toast notifications.',
         tags: ['fix', 'a11y'],
     },
     {
@@ -69,20 +72,22 @@ const ChangelogDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Changelog"
+                        <tc-rich-page-header
+                            title-text="Changelog"
                             description="Vertical changelog timeline with dates, titles, descriptions, and tags. Set entries via the JS entries property. Supports max-visible truncation with a read-more link and a loading skeleton."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Full changelog (5 entries, all visible)">
+                            <tc-section-card title="Full changelog (5 entries, all visible)">
                                 {/* @ts-ignore */}
                                 <tc-changelog ref={fullRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Truncated — max-visible=2 with read-more link">
+                            <tc-section-card title="Truncated — max-visible=2 with read-more link">
                                 {/* @ts-ignore */}
                                 <tc-changelog
                                     ref={truncatedRef}
@@ -90,13 +95,12 @@ const ChangelogDemo: React.FC = () => {
                                     read-more-href="#changelog"
                                     read-more-label="View full changelog →"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-changelog loading />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

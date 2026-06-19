@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ALL_TAGS = [
     { id: 'bug', label: 'bug', color: '#ef4444' },
@@ -50,14 +49,17 @@ const FileTagsDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="FileTags"
+                        <tc-rich-page-header
+                            title-text="FileTags"
                             description="Tag picker that shows selected tags as removable chips with a searchable add-menu. Fires tc-change with the updated selectedIds array. Supports readonly mode."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Interactive">
+                            <tc-section-card title="Interactive">
                                 {/* @ts-ignore */}
                                 <tc-file-tags ref={interactiveRef} />
                                 {selectedIds.length > 0 && (
@@ -65,17 +67,17 @@ const FileTagsDemo: React.FC = () => {
                                         Selected: {selectedIds.join(', ')}
                                     </div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Readonly">
+                            <tc-section-card title="Readonly">
                                 {/* @ts-ignore */}
                                 <tc-file-tags ref={readonlyRef} readonly />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Empty (no tags available)">
+                            <tc-section-card title="Empty (no tags available)">
                                 {/* @ts-ignore */}
                                 <tc-file-tags />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

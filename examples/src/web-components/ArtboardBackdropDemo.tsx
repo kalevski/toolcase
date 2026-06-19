@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const headingStyle: React.CSSProperties = {
     margin: '0 0 0.25rem',
@@ -16,7 +15,9 @@ const bodyStyle: React.CSSProperties = {
 const Sample = ({ title }: { title: string }) => (
     <>
         <p style={headingStyle}>{title}</p>
-        <p style={bodyStyle}>A full-bleed backdrop surface for staging artwork, previews, or hero content.</p>
+        <p style={bodyStyle}>
+            A full-bleed backdrop surface for staging artwork, previews, or hero content.
+        </p>
     </>
 )
 
@@ -25,52 +26,55 @@ const ArtboardBackdropDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Artboard Backdrop"
+                    <tc-rich-page-header
+                        title-text="Artboard Backdrop"
                         description="Decorative full-bleed backdrop surface. Ported from game-components but re-skinned to the design system — slate ramp tones, sharp corners, hairline borders, no fantasy chrome."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Tones (kind)">
+                        <tc-section-card title="Tones (kind)">
                             <div className="d-flex flex-column gap-3">
                                 {/* @ts-ignore */}
                                 <tc-artboard-backdrop kind="dark">
                                     <Sample title="dark — ink surface" />
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-artboard-backdrop>
                                 {/* @ts-ignore */}
                                 <tc-artboard-backdrop kind="scene">
                                     <Sample title="scene — muted slate well" />
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-artboard-backdrop>
                                 {/* @ts-ignore */}
                                 <tc-artboard-backdrop kind="parch">
                                     <Sample title="parch — light paper" />
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-artboard-backdrop>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Padding scale">
+                        <tc-section-card title="Padding scale">
                             <div className="d-flex flex-column gap-3">
-                                {(['none', 'sm', 'md', 'lg', 'xl'] as const).map(pad => (
+                                {(['none', 'sm', 'md', 'lg', 'xl'] as const).map((pad) => (
                                     // @ts-ignore
                                     <tc-artboard-backdrop key={pad} kind="scene" padding={pad}>
                                         <Sample title={`padding="${pad}"`} />
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-artboard-backdrop>
                                 ))}
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Default (kind=dark, padding=md)">
+                        <tc-section-card title="Default (kind=dark, padding=md)">
                             {/* @ts-ignore */}
                             <tc-artboard-backdrop>
                                 <Sample title="Defaults applied" />
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-artboard-backdrop>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

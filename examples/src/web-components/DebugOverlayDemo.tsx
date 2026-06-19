@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const DebugOverlayDemo: React.FC = () => {
     const customRef = useRef<any>(null)
@@ -37,33 +36,51 @@ const DebugOverlayDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="DebugOverlay"
+                        <tc-rich-page-header
+                            title-text="DebugOverlay"
                             description="Dev/perf overlay rendering an fps readout and key/value stat lines on a dark machine-facing panel. Built-in stats (fps, draw-calls, triangles, mem-mb) are attributes; arbitrary stat lines are set via the JS rows property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Built-in stats (fps colour-codes by threshold)">
+                            <tc-section-card title="Built-in stats (fps colour-codes by threshold)">
                                 <div className="d-flex flex-wrap gap-4">
                                     {/* @ts-ignore */}
-                                    <tc-debug-overlay fps="60" draw-calls="118" triangles="48213" mem-mb="312" />
+                                    <tc-debug-overlay
+                                        fps="60"
+                                        draw-calls="118"
+                                        triangles="48213"
+                                        mem-mb="312"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-debug-overlay fps="42" draw-calls="240" triangles="91044" mem-mb="498" />
+                                    <tc-debug-overlay
+                                        fps="42"
+                                        draw-calls="240"
+                                        triangles="91044"
+                                        mem-mb="498"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-debug-overlay fps="24" draw-calls="512" triangles="184320" mem-mb="742" />
+                                    <tc-debug-overlay
+                                        fps="24"
+                                        draw-calls="512"
+                                        triangles="184320"
+                                        mem-mb="742"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom rows (rows JS property)">
+                            <tc-section-card title="Custom rows (rows JS property)">
                                 {/* @ts-ignore */}
                                 <tc-debug-overlay ref={customRef} fps="58" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Live (fps fluctuates every 600ms)">
+                            <tc-section-card title="Live (fps fluctuates every 600ms)">
                                 {/* @ts-ignore */}
                                 <tc-debug-overlay ref={liveRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

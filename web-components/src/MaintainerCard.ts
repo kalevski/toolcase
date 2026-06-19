@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-maintainer-card'
@@ -8,24 +9,6 @@ export interface MaintainerLink {
     href: string
     label: string
     icon?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const mapPinIconHtml = lucideByName('map-pin')
@@ -123,9 +106,7 @@ export class MaintainerCard extends HTMLElement {
 
         const nameHtml = `<h3 class="tc-maintainer-card__name">${esc(name)}</h3>`
 
-        const roleHtml = roleVal
-            ? `<p class="tc-maintainer-card__role">${esc(roleVal)}</p>`
-            : ''
+        const roleHtml = roleVal ? `<p class="tc-maintainer-card__role">${esc(roleVal)}</p>` : ''
 
         const locationHtml = location
             ? `<p class="tc-maintainer-card__location">` +
@@ -133,22 +114,23 @@ export class MaintainerCard extends HTMLElement {
               `<span>${esc(location)}</span></p>`
             : ''
 
-        const bioHtml = bio
-            ? `<p class="tc-maintainer-card__bio">${esc(bio)}</p>`
-            : ''
+        const bioHtml = bio ? `<p class="tc-maintainer-card__bio">${esc(bio)}</p>` : ''
 
-        const linksHtml = this._links.length > 0
-            ? `<div class="tc-maintainer-card__links" role="list" aria-label="Social links">` +
-              this._links.map(link => {
-                  const svgHtml = link.icon ? lucideByName(link.icon) : ''
-                  return (
-                      `<a class="tc-maintainer-card__link" href="${esc(link.href)}" ` +
-                      `role="listitem" target="_blank" rel="noopener noreferrer" ` +
-                      `aria-label="${esc(link.label)}">${svgHtml}</a>`
-                  )
-              }).join('') +
-              `</div>`
-            : ''
+        const linksHtml =
+            this._links.length > 0
+                ? `<div class="tc-maintainer-card__links" role="list" aria-label="Social links">` +
+                  this._links
+                      .map((link) => {
+                          const svgHtml = link.icon ? lucideByName(link.icon) : ''
+                          return (
+                              `<a class="tc-maintainer-card__link" href="${esc(link.href)}" ` +
+                              `role="listitem" target="_blank" rel="noopener noreferrer" ` +
+                              `aria-label="${esc(link.label)}">${svgHtml}</a>`
+                          )
+                      })
+                      .join('') +
+                  `</div>`
+                : ''
 
         const sponsorInner =
             heartIconHtml +

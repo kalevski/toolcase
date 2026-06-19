@@ -1,11 +1,19 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-progress'
 
-export type ProgressVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type ProgressVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
-const VARIANTS: ProgressVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: ProgressVariant[] = [...VARIANTS_FULL]
 
 export class Progress extends HTMLElement {
-
     private _initialised = false
     private _stacked = false
 
@@ -19,7 +27,9 @@ export class Progress extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            const barChildren = Array.from(this.querySelectorAll<Element>(':scope > tc-progress-bar'))
+            const barChildren = Array.from(
+                this.querySelectorAll<Element>(':scope > tc-progress-bar'),
+            )
             this._stacked = barChildren.length > 0
             this._render(barChildren)
             this._initialised = true
@@ -49,7 +59,7 @@ export class Progress extends HTMLElement {
 
     get max(): number {
         const raw = this.getAttribute('max')
-        return raw !== null ? (parseFloat(raw) || 100) : 100
+        return raw !== null ? parseFloat(raw) || 100 : 100
     }
     set max(v: number) {
         this.setAttribute('max', String(v))
@@ -92,7 +102,7 @@ export class Progress extends HTMLElement {
         if (barChildren.length > 0) {
             this.innerHTML = `<div class="progress-stacked"></div>`
             const stacked = this.querySelector('.progress-stacked')!
-            barChildren.forEach(bar => stacked.appendChild(bar))
+            barChildren.forEach((bar) => stacked.appendChild(bar))
         } else {
             const value = this.value
             const min = this.min

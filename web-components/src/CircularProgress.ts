@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-circular-progress'
 
 export class CircularProgress extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

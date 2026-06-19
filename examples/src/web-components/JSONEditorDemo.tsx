@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // Schema drives the generated fields: mixed primitive types, an enum, a nested
 // object (collapsible group), a primitive array, and an array of objects.
@@ -63,21 +62,24 @@ const JSONEditorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="JSON Editor"
+                        <tc-rich-page-header
+                            title-text="JSON Editor"
                             description="Compact, schema-driven form editor for JSON objects — typed fields, enum selects, collapsible nested groups, and repeatable arrays packed into a dense grid of key/value rows. Every edit emits the full updated value object."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="row mt-4 g-4">
                             <div className="col-12 col-lg-6">
-                                <SectionCard title="Editor (defaultValue + tc-change)">
+                                <tc-section-card title="Editor (defaultValue + tc-change)">
                                     {/* @ts-ignore */}
                                     <tc-json-editor ref={editorRef} schema={schema} />
-                                </SectionCard>
+                                </tc-section-card>
                             </div>
                             <div className="col-12 col-lg-6">
-                                <SectionCard title="Live value">
+                                <tc-section-card title="Live value">
                                     <pre
                                         style={{
                                             margin: 0,
@@ -91,22 +93,22 @@ const JSONEditorDemo: React.FC = () => {
                                     >
                                         {JSON.stringify(value, null, 2)}
                                     </pre>
-                                </SectionCard>
+                                </tc-section-card>
                             </div>
                         </div>
 
                         <div className="mt-4">
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <tc-json-editor ref={disabledRef} schema={schema} disabled />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
 
                         <div className="mt-4">
-                            <SectionCard title="Loading (skeleton)">
+                            <tc-section-card title="Loading (skeleton)">
                                 {/* @ts-ignore */}
                                 <tc-json-editor schema={schema} loading />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

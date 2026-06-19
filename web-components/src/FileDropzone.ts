@@ -1,5 +1,5 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-file-dropzone'
 
@@ -7,24 +7,6 @@ export interface DropzoneFileFormat {
     label: string
     mime?: string
     extension?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const uploadIconHtml = lucideByName('upload-cloud') || lucideByName('upload')
@@ -55,11 +37,13 @@ export class FileDropzone extends HTMLElement {
     }
 
     private _dispatch(files: File[]): void {
-        this.dispatchEvent(new CustomEvent('tc-files', {
-            bubbles: true,
-            composed: true,
-            detail: { files },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-files', {
+                bubbles: true,
+                composed: true,
+                detail: { files },
+            }),
+        )
         if (typeof this.onFiles === 'function') this.onFiles(files)
     }
 
@@ -68,12 +52,13 @@ export class FileDropzone extends HTMLElement {
 
         const fmts = this._supported
         const accept = fmts
-            .flatMap(f => [f.mime, f.extension].filter((x): x is string => !!x))
+            .flatMap((f) => [f.mime, f.extension].filter((x): x is string => !!x))
             .join(',')
 
-        const formatsHtml = fmts.length > 0
-            ? `<p class="tc-file-dropzone__formats">${fmts.map(f => `<span class="tc-file-dropzone__format-chip">${esc(f.label)}</span>`).join('')}</p>`
-            : ''
+        const formatsHtml =
+            fmts.length > 0
+                ? `<p class="tc-file-dropzone__formats">${fmts.map((f) => `<span class="tc-file-dropzone__format-chip">${esc(f.label)}</span>`).join('')}</p>`
+                : ''
 
         this.innerHTML = `<div class="tc-file-dropzone__area" role="button" tabindex="0" aria-label="Upload files — drag and drop or click to browse"><span class="tc-file-dropzone__icon" aria-hidden="true">${uploadIconHtml}</span><p class="tc-file-dropzone__prompt">Drag &amp; drop files here or click to browse</p>${formatsHtml}</div><input type="file" multiple class="tc-file-dropzone__input" aria-label="Select files to upload" tabindex="-1"${accept ? ` accept="${esc(accept)}"` : ''} />`
 

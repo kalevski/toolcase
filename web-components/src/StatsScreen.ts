@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-stats-screen'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export interface StatsScreenStat {
     label: string
@@ -19,7 +12,6 @@ export interface StatsSection {
 }
 
 export class StatsScreen extends HTMLElement {
-
     private _initialised = false
     private _sections: StatsSection[] = []
 
@@ -76,19 +68,24 @@ export class StatsScreen extends HTMLElement {
             ? `<p class="tc-stats-screen-summary">${esc(summary)}</p>`
             : ''
 
-        const sectionsMarkup = this._sections.map(section => {
-            const statsMarkup = section.stats.map(stat =>
-                `<div class="tc-stats-screen-stat">
+        const sectionsMarkup = this._sections
+            .map((section) => {
+                const statsMarkup = section.stats
+                    .map(
+                        (stat) =>
+                            `<div class="tc-stats-screen-stat">
                     <span class="tc-stats-screen-stat-label">${esc(stat.label)}</span>
                     <span class="tc-stats-screen-stat-value">${esc(this._formatValue(stat.value))}</span>
-                </div>`
-            ).join('')
+                </div>`,
+                    )
+                    .join('')
 
-            return `<section class="tc-stats-screen-section">
+                return `<section class="tc-stats-screen-section">
                 <div class="tc-stats-screen-section-title">${esc(section.title)}</div>
                 <div class="tc-stats-screen-section-stats">${statsMarkup}</div>
             </section>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML = `
             <div class="tc-stats-screen">
@@ -105,5 +102,7 @@ export class StatsScreen extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: StatsScreen }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: StatsScreen
+    }
 }

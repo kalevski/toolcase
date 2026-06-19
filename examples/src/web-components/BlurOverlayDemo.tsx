@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type Variant = {
     key: string
@@ -13,7 +12,8 @@ const VARIANTS: Variant[] = [
     {
         key: 'default',
         title: 'Default scrim',
-        description: 'Defaults — 8px blur over a slate-ink wash. Click the backdrop (or Resume) to dismiss.',
+        description:
+            'Defaults — 8px blur over a slate-ink wash. Click the backdrop (or Resume) to dismiss.',
     },
     {
         key: 'strong',
@@ -42,27 +42,35 @@ const panelStyle: React.CSSProperties = {
 
 const BlurOverlayDemo: React.FC = () => {
     const [openKey, setOpenKey] = useState<string | null>(null)
-    const active = VARIANTS.find(v => v.key === openKey) ?? null
+    const active = VARIANTS.find((v) => v.key === openKey) ?? null
 
     return (
         <div className="py-4">
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Blur Overlay"
+                        <tc-rich-page-header
+                            title-text="Blur Overlay"
                             description="Full-surface backdrop-blur scrim for pause screens and dialog backdrops. Ported from game-components but re-skinned to the design system — a slate-ink wash on the fixed overlay tier, sharp edges, no fantasy chrome. Blur amount and background are free-form CSS values."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            {VARIANTS.map(v => (
-                                <SectionCard key={v.key} title={v.title}>
-                                    <p className="mb-3" style={{ opacity: 0.85 }}>{v.description}</p>
-                                    <button className="btn btn-primary" onClick={() => setOpenKey(v.key)}>
+                            {VARIANTS.map((v) => (
+                                <tc-section-card key={v.key} title={v.title}>
+                                    <p className="mb-3" style={{ opacity: 0.85 }}>
+                                        {v.description}
+                                    </p>
+                                    <button
+                                        className="btn btn-primary"
+                                        onClick={() => setOpenKey(v.key)}
+                                    >
                                         Open {v.title.toLowerCase()}
                                     </button>
-                                </SectionCard>
+                                </tc-section-card>
                             ))}
                         </div>
                     </div>
@@ -79,7 +87,9 @@ const BlurOverlayDemo: React.FC = () => {
                     onClick={() => setOpenKey(null)}
                 >
                     <div style={panelStyle} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.125rem', fontWeight: 600 }}>Paused</h3>
+                        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.125rem', fontWeight: 600 }}>
+                            Paused
+                        </h3>
                         <p style={{ margin: '0 0 1rem', opacity: 0.8 }}>
                             The page behind this panel is blurred by the overlay.
                         </p>
@@ -87,7 +97,7 @@ const BlurOverlayDemo: React.FC = () => {
                             Resume
                         </button>
                     </div>
-                {/* @ts-ignore */}
+                    {/* @ts-ignore */}
                 </tc-blur-overlay>
             )}
         </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const DangerZoneActionsDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -12,13 +11,15 @@ const DangerZoneActionsDemo: React.FC = () => {
                 {
                     key: 'delete-account',
                     title: 'Delete account',
-                    description: 'Permanently remove your account and all associated data. This action cannot be undone.',
+                    description:
+                        'Permanently remove your account and all associated data. This action cannot be undone.',
                     buttonLabel: 'Delete account',
                 },
                 {
                     key: 'reset-data',
                     title: 'Reset all data',
-                    description: 'Wipe all project data and start fresh. Your plan and billing will remain active.',
+                    description:
+                        'Wipe all project data and start fresh. Your plan and billing will remain active.',
                     buttonLabel: 'Reset data',
                 },
             ]
@@ -31,14 +32,16 @@ const DangerZoneActionsDemo: React.FC = () => {
                 {
                     key: 'revoke-tokens',
                     title: 'Revoke all tokens',
-                    description: 'Immediately invalidate all active API tokens. Integrations using these tokens will stop working.',
+                    description:
+                        'Immediately invalidate all active API tokens. Integrations using these tokens will stop working.',
                     buttonLabel: 'Revoke tokens',
                     icon: 'KeyRound',
                 },
                 {
                     key: 'delete-workspace',
                     title: 'Delete workspace',
-                    description: 'Remove this workspace and all its members, projects, and resources permanently.',
+                    description:
+                        'Remove this workspace and all its members, projects, and resources permanently.',
                     buttonLabel: 'Delete workspace',
                     icon: 'Trash2',
                 },
@@ -52,14 +55,16 @@ const DangerZoneActionsDemo: React.FC = () => {
                 {
                     key: 'archive-project',
                     title: 'Archive project',
-                    description: 'Move this project to the archive. It will become read-only and hidden from the main list.',
+                    description:
+                        'Move this project to the archive. It will become read-only and hidden from the main list.',
                     buttonLabel: 'Archive',
                     icon: 'Archive',
                 },
                 {
                     key: 'delete-project',
                     title: 'Delete project',
-                    description: 'Permanently delete this project and all its resources. You must archive it first.',
+                    description:
+                        'Permanently delete this project and all its resources. You must archive it first.',
                     buttonLabel: 'Delete project',
                     icon: 'Trash2',
                     disabled: true,
@@ -77,27 +82,32 @@ const DangerZoneActionsDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="DangerZoneActions"
+                        <tc-rich-page-header
+                            title-text="DangerZoneActions"
                             description="List of destructive actions with a danger-colored panel and outline-danger buttons. Set actions via the JS actions property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic">
+                            <tc-section-card title="Basic">
                                 {/* @ts-ignore */}
                                 <tc-danger-zone-actions ref={basicRef}></tc-danger-zone-actions>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With icons">
+                            <tc-section-card title="With icons">
                                 {/* @ts-ignore */}
                                 <tc-danger-zone-actions ref={withIconsRef}></tc-danger-zone-actions>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With disabled action (logs tc-action-click to console)">
+                            <tc-section-card title="With disabled action (logs tc-action-click to console)">
                                 {/* @ts-ignore */}
-                                <tc-danger-zone-actions ref={withDisabledRef}></tc-danger-zone-actions>
-                            </SectionCard>
+                                <tc-danger-zone-actions
+                                    ref={withDisabledRef}
+                                ></tc-danger-zone-actions>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -24,7 +24,6 @@ const DIRECTIONS: TransitionWipeDirection[] = ['fade', 'left', 'right', 'up', 'd
  * `[show]` is set.
  */
 export class TransitionWipe extends HTMLElement {
-
     private _initialised = false
     private _timer: ReturnType<typeof setTimeout> | null = null
 
@@ -106,11 +105,13 @@ export class TransitionWipe extends HTMLElement {
     }
 
     private _emitComplete(): void {
-        this.dispatchEvent(new CustomEvent('tc-complete', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-complete', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this.onComplete === 'function') this.onComplete()
     }
 

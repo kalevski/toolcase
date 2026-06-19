@@ -6,7 +6,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap ───────────────────────────────────────────────────────────
     // Applied on .tc-context-menu-list (where the base declares the defaults).
 
@@ -21,6 +20,14 @@ tc-theme[name='dungeon'],
         // ── Gilded bevel (structural) ────────────────────────────────────────
         // Layers the inset gold-ring stack + drop shadow over the base shadow.
         box-shadow: var(--fg-panel-shadow);
+
+        // ── Frosted fill ─────────────────────────────────────────────────────
+        // --bs-context-menu-bg rides the base background-color, which drops the
+        // --fg-panel-bg gradient and leaves the list transparent. Paint a
+        // translucent fill via background-image + blur for gilded smoked glass.
+        background-image: var(--fg-overlay-bg);
+        backdrop-filter: var(--fg-overlay-blur);
+        -webkit-backdrop-filter: var(--fg-overlay-blur);
     }
 
     // ── Gold-rule separator ──────────────────────────────────────────────────

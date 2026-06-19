@@ -5,7 +5,6 @@ export type VisuallyHiddenAs = 'span' | 'div'
 const AS_TAGS: VisuallyHiddenAs[] = ['span', 'div']
 
 export class VisuallyHidden extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -17,7 +16,7 @@ export class VisuallyHidden extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-visually-hidden-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -28,7 +27,7 @@ export class VisuallyHidden extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-visually-hidden-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get as(): VisuallyHiddenAs {

@@ -1,25 +1,8 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-game-showcase-card'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 // Pre-compute compliance state icons (always rendered, no condition)
 const checkIconHtml = lucideByName('check')
@@ -54,7 +37,9 @@ export class GameShowcaseCard extends HTMLElement {
 
     // Arrow-property handlers: stable references for add/removeEventListener
     private _handleClick = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-click', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-click', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this._onClickProp === 'function') this._onClickProp()
     }
 
@@ -62,7 +47,9 @@ export class GameShowcaseCard extends HTMLElement {
         if (e.key !== 'Enter' && e.key !== ' ') return
         if (!this._onClickProp) return
         e.preventDefault()
-        this.dispatchEvent(new CustomEvent('tc-click', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-click', { bubbles: true, composed: true, detail: {} }),
+        )
         this._onClickProp()
     }
 
@@ -149,12 +136,26 @@ export class GameShowcaseCard extends HTMLElement {
     }
 
     private _recaptureSlots(): void {
-        this._artSlot = Array.from(this.querySelectorAll('.tc-game-showcase-card-art-main [slot="art"]'))
-        this._artPlaceholderSlot = Array.from(this.querySelectorAll('.tc-game-showcase-card-art-placeholder [slot="art-placeholder"]'))
-        this._metaLeftSlot = Array.from(this.querySelectorAll('.tc-game-showcase-card-meta-left [slot="meta-left"]'))
-        this._metaRightSlot = Array.from(this.querySelectorAll('.tc-game-showcase-card-meta-right [slot="meta-right"]'))
-        this._titleSlot = Array.from(this.querySelectorAll('.tc-game-showcase-card-title [slot="title"]'))
-        this._pitchSlot = Array.from(this.querySelectorAll('.tc-game-showcase-card-pitch [slot="pitch"]'))
+        this._artSlot = Array.from(
+            this.querySelectorAll('.tc-game-showcase-card-art-main [slot="art"]'),
+        )
+        this._artPlaceholderSlot = Array.from(
+            this.querySelectorAll(
+                '.tc-game-showcase-card-art-placeholder [slot="art-placeholder"]',
+            ),
+        )
+        this._metaLeftSlot = Array.from(
+            this.querySelectorAll('.tc-game-showcase-card-meta-left [slot="meta-left"]'),
+        )
+        this._metaRightSlot = Array.from(
+            this.querySelectorAll('.tc-game-showcase-card-meta-right [slot="meta-right"]'),
+        )
+        this._titleSlot = Array.from(
+            this.querySelectorAll('.tc-game-showcase-card-title [slot="title"]'),
+        )
+        this._pitchSlot = Array.from(
+            this.querySelectorAll('.tc-game-showcase-card-pitch [slot="pitch"]'),
+        )
     }
 
     private _rerenderWithSlots(): void {
@@ -165,17 +166,17 @@ export class GameShowcaseCard extends HTMLElement {
 
     private _distributeSlots(): void {
         const artMainEl = this.querySelector('.tc-game-showcase-card-art-main')
-        if (artMainEl) this._artSlot.forEach(n => artMainEl.appendChild(n))
+        if (artMainEl) this._artSlot.forEach((n) => artMainEl.appendChild(n))
         const artPhEl = this.querySelector('.tc-game-showcase-card-art-placeholder')
-        if (artPhEl) this._artPlaceholderSlot.forEach(n => artPhEl.appendChild(n))
+        if (artPhEl) this._artPlaceholderSlot.forEach((n) => artPhEl.appendChild(n))
         const metaLeftEl = this.querySelector('.tc-game-showcase-card-meta-left')
-        if (metaLeftEl) this._metaLeftSlot.forEach(n => metaLeftEl.appendChild(n))
+        if (metaLeftEl) this._metaLeftSlot.forEach((n) => metaLeftEl.appendChild(n))
         const metaRightEl = this.querySelector('.tc-game-showcase-card-meta-right')
-        if (metaRightEl) this._metaRightSlot.forEach(n => metaRightEl.appendChild(n))
+        if (metaRightEl) this._metaRightSlot.forEach((n) => metaRightEl.appendChild(n))
         const titleEl = this.querySelector('.tc-game-showcase-card-title')
-        if (titleEl) this._titleSlot.forEach(n => titleEl.appendChild(n))
+        if (titleEl) this._titleSlot.forEach((n) => titleEl.appendChild(n))
         const pitchEl = this.querySelector('.tc-game-showcase-card-pitch')
-        if (pitchEl) this._pitchSlot.forEach(n => pitchEl.appendChild(n))
+        if (pitchEl) this._pitchSlot.forEach((n) => pitchEl.appendChild(n))
     }
 
     // ── Render ────────────────────────────────────────────────────────────────
@@ -203,50 +204,54 @@ export class GameShowcaseCard extends HTMLElement {
         const pitchInner = this._pitchSlot.length === 0 && pitchText ? esc(pitchText) : ''
 
         // Stamps
-        const stampsHtml = this._stamps.map(s => {
-            // Sanitize tone for use in class name (allow alphanumeric + hyphen only)
-            const safeTone = s.tone ? s.tone.replace(/[^a-z0-9-]/gi, '') : ''
-            const toneClass = safeTone ? ` tc-game-showcase-card-stamp--${safeTone}` : ''
-            const stampIconHtml = s.icon
-                ? `<span class="tc-game-showcase-card-stamp-icon" aria-hidden="true">${lucideByName(s.icon)}</span>`
-                : ''
-            return (
-                `<span class="tc-game-showcase-card-stamp${toneClass}">` +
-                stampIconHtml +
-                `<span class="tc-game-showcase-card-stamp-label">${esc(s.label)}</span>` +
-                `</span>`
-            )
-        }).join('')
+        const stampsHtml = this._stamps
+            .map((s) => {
+                // Sanitize tone for use in class name (allow alphanumeric + hyphen only)
+                const safeTone = s.tone ? s.tone.replace(/[^a-z0-9-]/gi, '') : ''
+                const toneClass = safeTone ? ` tc-game-showcase-card-stamp--${safeTone}` : ''
+                const stampIconHtml = s.icon
+                    ? `<span class="tc-game-showcase-card-stamp-icon" aria-hidden="true">${lucideByName(s.icon)}</span>`
+                    : ''
+                return (
+                    `<span class="tc-game-showcase-card-stamp${toneClass}">` +
+                    stampIconHtml +
+                    `<span class="tc-game-showcase-card-stamp-label">${esc(s.label)}</span>` +
+                    `</span>`
+                )
+            })
+            .join('')
 
         // Tags
         const tagsHtml = this._tags
-            .map(t => `<span class="tc-game-showcase-card-tag">${esc(t)}</span>`)
+            .map((t) => `<span class="tc-game-showcase-card-tag">${esc(t)}</span>`)
             .join('')
 
         // Compliance indicators
-        const complianceHtml = this._compliance.map(c => {
-            let stateIcon = ''
-            let stateClass = ''
-            if (c.state === 'pass') {
-                stateIcon = checkIconHtml
-                stateClass = 'tc-game-showcase-card-compliance-item--pass'
-            } else if (c.state === 'warn') {
-                stateIcon = alertTriangleIconHtml
-                stateClass = 'tc-game-showcase-card-compliance-item--warn'
-            } else if (c.state === 'fail') {
-                stateIcon = xIconHtml
-                stateClass = 'tc-game-showcase-card-compliance-item--fail'
-            } else if (c.icon) {
-                stateIcon = lucideByName(c.icon)
-            }
-            const ariaLabel = `${esc(c.label)}: ${esc(c.state)}`
-            return (
-                `<span class="tc-game-showcase-card-compliance-item ${stateClass}" aria-label="${ariaLabel}">` +
-                `<span class="tc-game-showcase-card-compliance-icon" aria-hidden="true">${stateIcon}</span>` +
-                `<span class="tc-game-showcase-card-compliance-label">${esc(c.label)}</span>` +
-                `</span>`
-            )
-        }).join('')
+        const complianceHtml = this._compliance
+            .map((c) => {
+                let stateIcon = ''
+                let stateClass = ''
+                if (c.state === 'pass') {
+                    stateIcon = checkIconHtml
+                    stateClass = 'tc-game-showcase-card-compliance-item--pass'
+                } else if (c.state === 'warn') {
+                    stateIcon = alertTriangleIconHtml
+                    stateClass = 'tc-game-showcase-card-compliance-item--warn'
+                } else if (c.state === 'fail') {
+                    stateIcon = xIconHtml
+                    stateClass = 'tc-game-showcase-card-compliance-item--fail'
+                } else if (c.icon) {
+                    stateIcon = lucideByName(c.icon)
+                }
+                const ariaLabel = `${esc(c.label)}: ${esc(c.state)}`
+                return (
+                    `<span class="tc-game-showcase-card-compliance-item ${stateClass}" aria-label="${ariaLabel}">` +
+                    `<span class="tc-game-showcase-card-compliance-icon" aria-hidden="true">${stateIcon}</span>` +
+                    `<span class="tc-game-showcase-card-compliance-label">${esc(c.label)}</span>` +
+                    `</span>`
+                )
+            })
+            .join('')
 
         const hasArtClass = hasArt ? ' tc-game-showcase-card--has-art' : ''
 

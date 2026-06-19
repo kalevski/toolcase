@@ -1,31 +1,32 @@
 import React, { useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const TitleScreenDemo: React.FC = () => {
-    const [showBasic, setShowBasic]    = useState(false)
-    const [showTitle, setShowTitle]    = useState(false)
-    const [showFull, setShowFull]      = useState(false)
-    const [showCustom, setShowCustom]  = useState(false)
+    const [showBasic, setShowBasic] = useState(false)
+    const [showTitle, setShowTitle] = useState(false)
+    const [showFull, setShowFull] = useState(false)
+    const [showCustom, setShowCustom] = useState(false)
 
     return (
         <div className="py-4">
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Title Screen"
+                        <tc-rich-page-header
+                            title-text="Title Screen"
                             description="Full-viewport game title / start screen. Covers the viewport when present in the DOM; add or remove it (or toggle [hidden]) to show or hide it. Port of gc-title-screen — game chrome (diamond dividers, gilded frames) replaced with the slate design system: sharp corners, 1px hairline divider, JetBrains Mono eyebrow."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Eyebrow only">
+                            <tc-section-card title="Eyebrow only">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
-                                    The minimum configuration — only the <code>eyebrow</code>{' '}
-                                    prompt is shown (default: <code>"Press Start"</code>). The
-                                    title heading and subtitle are omitted when their attributes
-                                    are absent.
+                                    The minimum configuration — only the <code>eyebrow</code> prompt
+                                    is shown (default: <code>"Press Start"</code>). The title
+                                    heading and subtitle are omitted when their attributes are
+                                    absent.
                                 </p>
                                 <button
                                     className="btn btn-primary"
@@ -39,7 +40,14 @@ const TitleScreenDemo: React.FC = () => {
                                     <>
                                         {/* @ts-ignore */}
                                         <tc-title-screen />
-                                        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1061 }}>
+                                        <div
+                                            style={{
+                                                position: 'fixed',
+                                                bottom: '2rem',
+                                                right: '2rem',
+                                                zIndex: 1061,
+                                            }}
+                                        >
                                             <button
                                                 className="btn btn-outline-secondary"
                                                 onClick={() => setShowBasic(false)}
@@ -49,9 +57,9 @@ const TitleScreenDemo: React.FC = () => {
                                         </div>
                                     </>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With title">
+                            <tc-section-card title="With title">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     Adding a <code>title-text</code> attribute renders an{' '}
                                     <code>&lt;h1&gt;</code> heading above the hairline divider.
@@ -68,7 +76,14 @@ const TitleScreenDemo: React.FC = () => {
                                     <>
                                         {/* @ts-ignore */}
                                         <tc-title-screen title-text="Realm of Ash" />
-                                        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1061 }}>
+                                        <div
+                                            style={{
+                                                position: 'fixed',
+                                                bottom: '2rem',
+                                                right: '2rem',
+                                                zIndex: 1061,
+                                            }}
+                                        >
                                             <button
                                                 className="btn btn-outline-secondary"
                                                 onClick={() => setShowTitle(false)}
@@ -78,9 +93,9 @@ const TitleScreenDemo: React.FC = () => {
                                         </div>
                                     </>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Title + subtitle">
+                            <tc-section-card title="Title + subtitle">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     Adding a <code>subtitle</code> attribute renders a muted
                                     paragraph below the hairline divider.
@@ -100,7 +115,14 @@ const TitleScreenDemo: React.FC = () => {
                                             title-text="Realm of Ash"
                                             subtitle="A world on the edge of ruin."
                                         />
-                                        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1061 }}>
+                                        <div
+                                            style={{
+                                                position: 'fixed',
+                                                bottom: '2rem',
+                                                right: '2rem',
+                                                zIndex: 1061,
+                                            }}
+                                        >
                                             <button
                                                 className="btn btn-outline-secondary"
                                                 onClick={() => setShowFull(false)}
@@ -110,9 +132,9 @@ const TitleScreenDemo: React.FC = () => {
                                         </div>
                                     </>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom eyebrow">
+                            <tc-section-card title="Custom eyebrow">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     Override the default <code>"Press Start"</code> eyebrow via the{' '}
                                     <code>eyebrow</code> attribute — useful for attract screens,
@@ -134,7 +156,14 @@ const TitleScreenDemo: React.FC = () => {
                                             title-text="The Last Siege"
                                             subtitle="An epic strategy experience."
                                         />
-                                        <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 1061 }}>
+                                        <div
+                                            style={{
+                                                position: 'fixed',
+                                                bottom: '2rem',
+                                                right: '2rem',
+                                                zIndex: 1061,
+                                            }}
+                                        >
                                             <button
                                                 className="btn btn-outline-secondary"
                                                 onClick={() => setShowCustom(false)}
@@ -144,8 +173,7 @@ const TitleScreenDemo: React.FC = () => {
                                         </div>
                                     </>
                                 )}
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

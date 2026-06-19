@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-page-footer'
@@ -24,24 +25,6 @@ export interface PageFooterCta {
     href: string
     heading?: string
     description?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 export class PageFooter extends HTMLElement {
@@ -75,7 +58,7 @@ export class PageFooter extends HTMLElement {
     private _recaptureBrandSlot(): void {
         if (!this.hasAttribute('brand')) {
             const inContainer = Array.from(
-                this.querySelectorAll('.tc-page-footer-brand-word [slot="brand"]')
+                this.querySelectorAll('.tc-page-footer-brand-word [slot="brand"]'),
             )
             if (inContainer.length > 0) {
                 this._brandSlotNodes = inContainer
@@ -86,7 +69,7 @@ export class PageFooter extends HTMLElement {
     private _distributeBrandSlot(): void {
         if (!this.hasAttribute('brand') && this._brandSlotNodes.length > 0) {
             const container = this.querySelector('.tc-page-footer-brand-word')
-            if (container) this._brandSlotNodes.forEach(n => container.appendChild(n))
+            if (container) this._brandSlotNodes.forEach((n) => container.appendChild(n))
         }
     }
 
@@ -170,13 +153,13 @@ export class PageFooter extends HTMLElement {
         // CTA block
         const ctaHtml = this._cta
             ? `<div class="tc-page-footer-cta">` +
-                  (this._cta.heading
-                      ? `<h2 class="tc-page-footer-cta-heading">${esc(this._cta.heading)}</h2>`
-                      : '') +
-                  (this._cta.description
-                      ? `<p class="tc-page-footer-cta-desc">${esc(this._cta.description)}</p>`
-                      : '') +
-                  `<a class="tc-page-footer-cta-btn" href="${esc(this._cta.href)}">${esc(this._cta.label)}</a>` +
+              (this._cta.heading
+                  ? `<h2 class="tc-page-footer-cta-heading">${esc(this._cta.heading)}</h2>`
+                  : '') +
+              (this._cta.description
+                  ? `<p class="tc-page-footer-cta-desc">${esc(this._cta.description)}</p>`
+                  : '') +
+              `<a class="tc-page-footer-cta-btn" href="${esc(this._cta.href)}">${esc(this._cta.label)}</a>` +
               `</div>`
             : ''
 
@@ -190,18 +173,18 @@ export class PageFooter extends HTMLElement {
         const socialHtml =
             this._socialLinks.length > 0
                 ? `<div class="tc-page-footer-social" role="list" aria-label="Social links">` +
-                      this._socialLinks
-                          .map(link => {
-                              const iconHtml = lucideByName(link.icon)
-                              const label = esc(link.label ?? link.icon)
-                              const href = esc(link.href)
-                              return (
-                                  `<a class="tc-page-footer-social-link" href="${href}"` +
-                                  ` role="listitem" target="_blank" rel="noopener noreferrer"` +
-                                  ` aria-label="${label}">${iconHtml}</a>`
-                              )
-                          })
-                          .join('') +
+                  this._socialLinks
+                      .map((link) => {
+                          const iconHtml = lucideByName(link.icon)
+                          const label = esc(link.label ?? link.icon)
+                          const href = esc(link.href)
+                          return (
+                              `<a class="tc-page-footer-social-link" href="${href}"` +
+                              ` role="listitem" target="_blank" rel="noopener noreferrer"` +
+                              ` aria-label="${label}">${iconHtml}</a>`
+                          )
+                      })
+                      .join('') +
                   `</div>`
                 : ''
 
@@ -216,11 +199,11 @@ export class PageFooter extends HTMLElement {
 
         // Menu columns — each wrapped in a nav landmark
         const menusHtml = this._menus
-            .map(menu => {
+            .map((menu) => {
                 const linksHtml = menu.links
                     .map(
-                        link =>
-                            `<li><a class="tc-page-footer-menu-link" href="${esc(link.href)}">${esc(link.label)}</a></li>`
+                        (link) =>
+                            `<li><a class="tc-page-footer-menu-link" href="${esc(link.href)}">${esc(link.label)}</a></li>`,
                     )
                     .join('')
                 return (
@@ -236,22 +219,22 @@ export class PageFooter extends HTMLElement {
         const legalLinksHtml =
             this._legalLinks.length > 0
                 ? `<nav class="tc-page-footer-legal-nav" aria-label="Legal links">` +
-                      this._legalLinks
-                          .map(
-                              link =>
-                                  `<a class="tc-page-footer-legal-link" href="${esc(link.href)}">${esc(link.label)}</a>`
-                          )
-                          .join('') +
+                  this._legalLinks
+                      .map(
+                          (link) =>
+                              `<a class="tc-page-footer-legal-link" href="${esc(link.href)}">${esc(link.label)}</a>`,
+                      )
+                      .join('') +
                   `</nav>`
                 : ''
 
         const hasLegal = legalText || this._legalLinks.length > 0
         const legalHtml = hasLegal
             ? `<div class="tc-page-footer-legal">` +
-                  (legalText
-                      ? `<span class="tc-page-footer-legal-text">${esc(legalText)}</span>`
-                      : '') +
-                  legalLinksHtml +
+              (legalText
+                  ? `<span class="tc-page-footer-legal-text">${esc(legalText)}</span>`
+                  : '') +
+              legalLinksHtml +
               `</div>`
             : ''
 

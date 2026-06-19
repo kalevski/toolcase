@@ -67,11 +67,13 @@ export class ListRow extends HTMLElement {
     }
 
     private _select(): void {
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect()
     }
 

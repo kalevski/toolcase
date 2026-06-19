@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-chart-container'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function fillRegion(el: Element, val: string | Node | null | undefined): void {
     if (typeof val === 'string') {
@@ -122,9 +115,10 @@ export class ChartContainer extends HTMLElement {
             const subtitleHtml = subtitle
                 ? `<span class="tc-chart-container-subtitle">${esc(subtitle)}</span>`
                 : ''
-            const titleBlockHtml = (titleHtml || subtitleHtml)
-                ? `<div class="tc-chart-container-title-block">${titleHtml}${subtitleHtml}</div>`
-                : ''
+            const titleBlockHtml =
+                titleHtml || subtitleHtml
+                    ? `<div class="tc-chart-container-title-block">${titleHtml}${subtitleHtml}</div>`
+                    : ''
             headerHtml = `<div class="tc-chart-container-header">${titleBlockHtml}<div class="tc-chart-container-actions"></div></div>`
         }
 
@@ -139,7 +133,8 @@ export class ChartContainer extends HTMLElement {
                 '</div>',
             ].join('')
         } else if (empty) {
-            bodyHtml = '<div class="tc-chart-container-body"><div class="tc-chart-container-empty"></div></div>'
+            bodyHtml =
+                '<div class="tc-chart-container-body"><div class="tc-chart-container-empty"></div></div>'
         } else {
             bodyHtml = '<div class="tc-chart-container-body"></div>'
         }
@@ -176,13 +171,14 @@ export class ChartContainer extends HTMLElement {
                 if (this._emptySlot != null) {
                     fillRegion(emptyEl, this._emptySlot)
                 } else {
-                    emptyEl.innerHTML = '<span class="tc-chart-container-empty-text">No data available</span>'
+                    emptyEl.innerHTML =
+                        '<span class="tc-chart-container-empty-text">No data available</span>'
                 }
             }
             return
         }
 
-        this._bodyNodes.forEach(n => bodyEl.appendChild(n))
+        this._bodyNodes.forEach((n) => bodyEl.appendChild(n))
     }
 }
 

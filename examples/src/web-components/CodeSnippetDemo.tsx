@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const JS_CODE = [
     'async function fetchUser(id) {',
@@ -38,10 +37,7 @@ const BASH_CODE = [
     'npm run build',
 ].join('\n')
 
-const SLOT_CODE = [
-    'const greet = (name: string) =>',
-    '  `Hello, ${name}!`',
-].join('\n')
+const SLOT_CODE = ['const greet = (name: string) =>', '  `Hello, ${name}!`'].join('\n')
 
 const CodeSnippetDemo: React.FC = () => {
     const tsCopyRef = useRef<any>(null)
@@ -68,20 +64,22 @@ const CodeSnippetDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CodeSnippet"
+                        <tc-rich-page-header
+                            title-text="CodeSnippet"
                             description="Syntax-highlighted code block with language detection, copy button, and loading skeleton."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="JavaScript (attribute)">
+                            <tc-section-card title="JavaScript (attribute)">
                                 {/* @ts-ignore */}
                                 <tc-code-snippet code={JS_CODE} language="javascript" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="TypeScript with title — tc-copy event + onCopy callback">
+                            <tc-section-card title="TypeScript with title — tc-copy event + onCopy callback">
                                 {/* @ts-ignore */}
                                 <tc-code-snippet
                                     ref={tsCopyRef}
@@ -91,37 +89,39 @@ const CodeSnippetDemo: React.FC = () => {
                                 />
                                 {lastCopied && (
                                     <p className="mt-2 text-muted" style={{ fontSize: '0.8rem' }}>
-                                        <strong>tc-copy fired.</strong> First 40 chars: <code>{lastCopied}</code>
+                                        <strong>tc-copy fired.</strong> First 40 chars:{' '}
+                                        <code>{lastCopied}</code>
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Bash">
+                            <tc-section-card title="Bash">
                                 {/* @ts-ignore */}
-                                <tc-code-snippet code={BASH_CODE} language="bash" title="deploy.sh" />
-                            </SectionCard>
+                                <tc-code-snippet
+                                    code={BASH_CODE}
+                                    language="bash"
+                                    title="deploy.sh"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Copy button hidden (show-copy-button=false)">
+                            <tc-section-card title="Copy button hidden (show-copy-button=false)">
                                 {/* @ts-ignore */}
                                 <tc-code-snippet
                                     code={JS_CODE}
                                     language="javascript"
                                     show-copy-button="false"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted text content (code attribute fallback)">
+                            <tc-section-card title="Slotted text content (code attribute fallback)">
                                 {/* @ts-ignore */}
-                                <tc-code-snippet language="typescript">
-                                    {SLOT_CODE}
-                                </tc-code-snippet>
-                            </SectionCard>
+                                <tc-code-snippet language="typescript">{SLOT_CODE}</tc-code-snippet>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-code-snippet loading language="javascript" title="Loading…" />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BASIC_ITEMS = [
     { id: 'resume', label: 'Resume' },
@@ -26,7 +25,7 @@ const PauseMenuDemo: React.FC = () => {
     const [screenOpen, setScreenOpen] = useState(false)
     const [log, setLog] = useState<string[]>([])
 
-    const appendLog = (msg: string) => setLog(l => [msg, ...l].slice(0, 10))
+    const appendLog = (msg: string) => setLog((l) => [msg, ...l].slice(0, 10))
 
     // Basic demo
     useEffect(() => {
@@ -54,8 +53,14 @@ const PauseMenuDemo: React.FC = () => {
         const el = eventsRef.current
         if (!el) return
         el.items = BADGE_ITEMS
-        const onClose = () => { appendLog('tc-close fired'); setEventsOpen(false) }
-        const onResume = () => { appendLog('tc-resume fired'); setEventsOpen(false) }
+        const onClose = () => {
+            appendLog('tc-close fired')
+            setEventsOpen(false)
+        }
+        const onResume = () => {
+            appendLog('tc-resume fired')
+            setEventsOpen(false)
+        }
         const onSelect = (e: CustomEvent) => appendLog(`tc-select — id: "${e.detail.id}"`)
         el.addEventListener('tc-close', onClose)
         el.addEventListener('tc-resume', onResume)
@@ -78,9 +83,18 @@ const PauseMenuDemo: React.FC = () => {
         const el = screenRef.current
         if (!el) return
         const close = () => setScreenOpen(false)
-        const onResume = () => { appendLog('tc-resume fired'); close() }
-        const onRestart = () => { appendLog('tc-restart fired'); close() }
-        const onQuit = () => { appendLog('tc-quit fired'); close() }
+        const onResume = () => {
+            appendLog('tc-resume fired')
+            close()
+        }
+        const onRestart = () => {
+            appendLog('tc-restart fired')
+            close()
+        }
+        const onQuit = () => {
+            appendLog('tc-quit fired')
+            close()
+        }
         el.addEventListener('tc-close', close)
         el.addEventListener('tc-resume', onResume)
         el.addEventListener('tc-restart', onRestart)
@@ -104,14 +118,17 @@ const PauseMenuDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PauseMenu"
+                        <tc-rich-page-header
+                            title-text="PauseMenu"
                             description="In-game pause overlay with a backdrop, menu items, and a Resume button. Controlled component — fire tc-close / tc-resume to dismiss. Esc and backdrop click emit tc-close. Items are set via the JS items property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — four items, custom title">
+                            <tc-section-card title="Basic — four items, custom title">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setBasicOpen(true)}
@@ -119,13 +136,10 @@ const PauseMenuDemo: React.FC = () => {
                                     Pause game
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-pause-menu
-                                    ref={basicRef}
-                                    menu-title="Realm of Ash"
-                                />
-                            </SectionCard>
+                                <tc-pause-menu ref={basicRef} menu-title="Realm of Ash" />
+                            </tc-section-card>
 
-                            <SectionCard title="Events — tc-select / tc-resume / tc-close, badges, disabled item">
+                            <tc-section-card title="Events — tc-select / tc-resume / tc-close, badges, disabled item">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setEventsOpen(true)}
@@ -133,25 +147,26 @@ const PauseMenuDemo: React.FC = () => {
                                     Pause game
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-pause-menu
-                                    ref={eventsRef}
-                                    menu-title="Event Demo"
-                                />
+                                <tc-pause-menu ref={eventsRef} menu-title="Event Demo" />
                                 <div className="mt-3">
                                     <strong className="d-block mb-1">Event log</strong>
                                     {log.length === 0 ? (
-                                        <span className="text-muted">Open the menu and interact…</span>
+                                        <span className="text-muted">
+                                            Open the menu and interact…
+                                        </span>
                                     ) : (
                                         <ul className="mb-0">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Preset alias: tc-pause-screen (default items + footer-less)">
+                            <tc-section-card title="Preset alias: tc-pause-screen (default items + footer-less)">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setScreenOpen(true)}
@@ -161,9 +176,10 @@ const PauseMenuDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-pause-screen ref={screenRef} screen-title="Realm of Ash" />
                                 <div className="form-text mt-1">
-                                    Seeds resume/restart/quit and re-dispatches tc-resume / tc-restart / tc-quit.
+                                    Seeds resume/restart/quit and re-dispatches tc-resume /
+                                    tc-restart / tc-quit.
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

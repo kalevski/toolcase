@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 // tc-form-input — universal form-input dispatcher (port of react-components
 // FormInput). A single light-DOM custom element whose `type` attribute selects
 // which native control to render, with built-in validation, helper/error lines,
@@ -31,9 +32,25 @@ export type FormInputType =
     | 'file'
 
 const TYPES: FormInputType[] = [
-    'text', 'email', 'password', 'number', 'tel', 'url', 'search', 'textarea',
-    'dropdown', 'select', 'checkbox', 'radio', 'switch', 'date', 'time',
-    'datetime', 'color', 'range', 'file',
+    'text',
+    'email',
+    'password',
+    'number',
+    'tel',
+    'url',
+    'search',
+    'textarea',
+    'dropdown',
+    'select',
+    'checkbox',
+    'radio',
+    'switch',
+    'date',
+    'time',
+    'datetime',
+    'color',
+    'range',
+    'file',
 ]
 
 // Types whose control + label sit on one inline row (form-check motif).
@@ -58,7 +75,6 @@ const isEmpty = (value: unknown): boolean => {
 }
 
 export class FormInput extends HTMLElement {
-
     private _initialised = false
     private _inputId: string
     private _helpId: string
@@ -77,9 +93,21 @@ export class FormInput extends HTMLElement {
 
     static get observedAttributes(): string[] {
         return [
-            'type', 'label', 'help', 'helper', 'error', 'name', 'id',
-            'placeholder', 'disabled', 'required', 'loading',
-            'min', 'max', 'step', 'rows',
+            'type',
+            'label',
+            'help',
+            'helper',
+            'error',
+            'name',
+            'id',
+            'placeholder',
+            'disabled',
+            'required',
+            'loading',
+            'min',
+            'max',
+            'step',
+            'rows',
         ]
     }
 
@@ -92,14 +120,20 @@ export class FormInput extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (this._initialised) return
-        this._captureSlotOptions()
-        this._currentValue = this._valueExplicit !== undefined ? this._valueExplicit : this._defaultValue
-        this.render()
+        if (!this._initialised) {
+            this._captureSlotOptions()
+            this._currentValue =
+                this._valueExplicit !== undefined ? this._valueExplicit : this._defaultValue
+            this.render()
+            this._initialised = true
+            this._runValidation(false)
+        }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
         this.addEventListener('input', this._onControlEvent)
         this.addEventListener('change', this._onControlEvent)
-        this._initialised = true
-        this._runValidation(false)
     }
 
     disconnectedCallback(): void {
@@ -254,12 +288,12 @@ export class FormInput extends HTMLElement {
     // ── Slotted <option> capture ────────────────────────────────────────────
 
     private _captureSlotOptions(): void {
-        const children = Array.from(this.children).filter(c => {
+        const children = Array.from(this.children).filter((c) => {
             const t = c.tagName.toLowerCase()
             return t === 'option' || t === 'tc-option'
         })
         if (children.length === 0) return
-        this._slotOptions = children.map(c => ({
+        this._slotOptions = children.map((c) => ({
             value: c.getAttribute('value') ?? c.textContent?.trim() ?? '',
             label: c.textContent?.trim() ?? '',
             disabled: c.hasAttribute('disabled'),
@@ -284,7 +318,9 @@ export class FormInput extends HTMLElement {
         }
         if (type === 'radio') {
             if (this._hasOptions()) {
-                const checked = this.querySelector<HTMLInputElement>('input.form-check-input:checked')
+                const checked = this.querySelector<HTMLInputElement>(
+                    'input.form-check-input:checked',
+                )
                 return checked ? checked.value : ''
             }
             const input = this.querySelector<HTMLInputElement>('input.form-check-input')
@@ -315,10 +351,13 @@ export class FormInput extends HTMLElement {
             try {
                 const m = this._onErrorMessage(result)
                 if (typeof m === 'string' && m.length > 0) return m
-            } catch { /* fall through */ }
+            } catch {
+                /* fall through */
+            }
         }
         if (typeof result === 'string') return result
-        if (result && typeof result === 'object' && typeof result.message === 'string') return result.message
+        if (result && typeof result === 'object' && typeof result.message === 'string')
+            return result.message
         return 'Invalid value'
     }
 
@@ -356,11 +395,13 @@ export class FormInput extends HTMLElement {
             const sig = `${hasError}::${JSON.stringify(value ?? null)}`
             if (sig === this._lastSignature) return hasError
             this._lastSignature = sig
-            this.dispatchEvent(new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value, hasError },
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { value, hasError },
+                }),
+            )
             if (typeof this.onChange === 'function') this.onChange(value, hasError)
         }
         return hasError
@@ -371,18 +412,18 @@ export class FormInput extends HTMLElement {
 
         const errEl = this.querySelector('.tc-form-input-error')
         if (errEl) {
-            errEl.innerHTML = hasError && message ? `${errorMarkIcon}<span>${esc(message)}</span>` : ''
+            errEl.innerHTML =
+                hasError && message ? `${errorMarkIcon}<span>${esc(message)}</span>` : ''
         }
 
-        const describedBy = [
-            this.help ? this._helpId : '',
-            hasError ? this._errorId : '',
-        ].filter(Boolean).join(' ')
+        const describedBy = [this.help ? this._helpId : '', hasError ? this._errorId : '']
+            .filter(Boolean)
+            .join(' ')
 
         const controls = this.querySelectorAll<HTMLElement>(
             '.form-control, .form-select, .form-range, .form-check-input',
         )
-        controls.forEach(ctrl => {
+        controls.forEach((ctrl) => {
             ctrl.classList.toggle('is-invalid', hasError)
             if (hasError) ctrl.setAttribute('aria-invalid', 'true')
             else ctrl.removeAttribute('aria-invalid')
@@ -403,7 +444,7 @@ export class FormInput extends HTMLElement {
         this.classList.add('tc-form-input')
         this.classList.add(`tc-form-input--${this.type}`)
         // Drop stale type modifiers from a previous render.
-        TYPES.forEach(t => {
+        TYPES.forEach((t) => {
             if (t !== this.type) this.classList.remove(`tc-form-input--${t}`)
         })
 
@@ -425,7 +466,9 @@ export class FormInput extends HTMLElement {
         if (inline) {
             this.innerHTML = [this._renderInlineControl(), helpHtml, errorHtml].join('')
         } else {
-            this.innerHTML = [this._renderLabel(), this._renderControl(), helpHtml, errorHtml].join('')
+            this.innerHTML = [this._renderLabel(), this._renderControl(), helpHtml, errorHtml].join(
+                '',
+            )
         }
 
         // Restore current value into freshly-built controls where needed.
@@ -448,7 +491,9 @@ export class FormInput extends HTMLElement {
 
     private _renderLabel(): string {
         if (!this.label) return ''
-        const req = this.required ? `<span class="tc-form-input-required" aria-hidden="true">*</span>` : ''
+        const req = this.required
+            ? `<span class="tc-form-input-required" aria-hidden="true">*</span>`
+            : ''
         return `<label class="tc-form-input-label" for="${this._inputId}">${esc(this.label)}${req}</label>`
     }
 
@@ -497,7 +542,10 @@ export class FormInput extends HTMLElement {
             case 'range':
                 return `<input id="${id}" type="range" class="form-range"${this._valueAttr()}${this._minMaxStep()}${this._commonAttrs()}>`
             case 'color': {
-                const v = (this._currentValue != null && this._currentValue !== '') ? String(this._currentValue) : '#1e293b'
+                const v =
+                    this._currentValue != null && this._currentValue !== ''
+                        ? String(this._currentValue)
+                        : '#1e293b'
                 return `<input id="${id}" type="color" class="form-control tc-form-input-color" value="${esc(v)}"${this._commonAttrs()}>`
             }
             case 'file':
@@ -515,28 +563,32 @@ export class FormInput extends HTMLElement {
         const ph = this.placeholder
             ? `<option value="" disabled${current === '' ? ' selected' : ''}>${esc(this.placeholder)}</option>`
             : ''
-        const opts = this._optionList().map(o => {
-            const sel = String(o.value) === current ? ' selected' : ''
-            const dis = o.disabled ? ' disabled' : ''
-            return `<option value="${esc(String(o.value))}"${sel}${dis}>${esc(o.label)}</option>`
-        }).join('')
+        const opts = this._optionList()
+            .map((o) => {
+                const sel = String(o.value) === current ? ' selected' : ''
+                const dis = o.disabled ? ' disabled' : ''
+                return `<option value="${esc(String(o.value))}"${sel}${dis}>${esc(o.label)}</option>`
+            })
+            .join('')
         return `<select id="${id}" class="form-select"${this._commonAttrs()}>${ph}${opts}</select>`
     }
 
     private _renderRadioGroup(): string {
         const name = this.name ?? this._inputId
         const current = this._currentValue != null ? String(this._currentValue) : ''
-        const rows = this._optionList().map((o, idx) => {
-            const optId = `${this._inputId}-${idx}`
-            const checked = String(o.value) === current ? ' checked' : ''
-            const dis = (o.disabled || this.disabled) ? ' disabled' : ''
-            return [
-                `<div class="form-check">`,
-                `<input class="form-check-input" type="radio" name="${esc(name)}" id="${optId}" value="${esc(String(o.value))}"${checked}${dis}>`,
-                `<label class="form-check-label" for="${optId}">${esc(o.label)}</label>`,
-                `</div>`,
-            ].join('')
-        }).join('')
+        const rows = this._optionList()
+            .map((o, idx) => {
+                const optId = `${this._inputId}-${idx}`
+                const checked = String(o.value) === current ? ' checked' : ''
+                const dis = o.disabled || this.disabled ? ' disabled' : ''
+                return [
+                    `<div class="form-check">`,
+                    `<input class="form-check-input" type="radio" name="${esc(name)}" id="${optId}" value="${esc(String(o.value))}"${checked}${dis}>`,
+                    `<label class="form-check-label" for="${optId}">${esc(o.label)}</label>`,
+                    `</div>`,
+                ].join('')
+            })
+            .join('')
         const reqAttr = this.required ? ' aria-required="true"' : ''
         return `<div class="tc-form-input-radio-group" role="radiogroup"${reqAttr}>${rows}</div>`
     }
@@ -548,7 +600,9 @@ export class FormInput extends HTMLElement {
         const isSwitch = type === 'switch'
         const wrapClass = isSwitch ? 'form-check form-switch' : 'form-check'
         const inputType = type === 'radio' ? 'radio' : 'checkbox'
-        const req = this.required ? `<span class="tc-form-input-required" aria-hidden="true">*</span>` : ''
+        const req = this.required
+            ? `<span class="tc-form-input-required" aria-hidden="true">*</span>`
+            : ''
         const labelText = this.label ? `${esc(this.label)}${req}` : ''
         const labelHtml = labelText
             ? `<label class="form-check-label" for="${id}">${labelText}</label>`
@@ -574,10 +628,6 @@ export class FormInput extends HTMLElement {
 function nativeType(type: FormInputType): string {
     if (type === 'datetime') return 'datetime-local'
     return type
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 // Inline lucide "x" glyph for the error line (stroke=currentColor flows --tc-danger).

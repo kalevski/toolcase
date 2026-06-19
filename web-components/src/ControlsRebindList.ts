@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-controls-rebind-list'
 
 export interface ControlBinding {
@@ -8,15 +9,6 @@ export interface ControlBinding {
 
 export interface ControlsRebindListEventMap {
     'tc-rebind': CustomEvent<{ id: string }>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 export class ControlsRebindList extends HTMLElement {
@@ -34,10 +26,14 @@ export class ControlsRebindList extends HTMLElement {
         if (!this._initialised) {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'list')
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -62,11 +58,13 @@ export class ControlsRebindList extends HTMLElement {
 
     private _rebind(row: HTMLElement): void {
         const id = row.dataset.id ?? ''
-        this.dispatchEvent(new CustomEvent('tc-rebind', {
-            detail: { id },
-            bubbles: true,
-            composed: true,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-rebind', {
+                detail: { id },
+                bubbles: true,
+                composed: true,
+            }),
+        )
         if (typeof this.onRebind === 'function') this.onRebind(id)
     }
 
@@ -84,21 +82,23 @@ export class ControlsRebindList extends HTMLElement {
     }
 
     private render(): void {
-        const rowsHTML = this._bindings.map(binding => {
-            const key = binding.key ?? ''
-            const keyMarkup = key
-                ? `<kbd class="tc-controls-rebind-list-key">${esc(key)}</kbd>`
-                : `<span class="tc-controls-rebind-list-empty">Unbound</span>`
-            return (
-                `<div class="tc-controls-rebind-list-row" role="listitem" data-id="${esc(binding.id)}" tabindex="0">` +
+        const rowsHTML = this._bindings
+            .map((binding) => {
+                const key = binding.key ?? ''
+                const keyMarkup = key
+                    ? `<kbd class="tc-controls-rebind-list-key">${esc(key)}</kbd>`
+                    : `<span class="tc-controls-rebind-list-empty">Unbound</span>`
+                return (
+                    `<div class="tc-controls-rebind-list-row" role="listitem" data-id="${esc(binding.id)}" tabindex="0">` +
                     `<span class="tc-controls-rebind-list-action">${esc(binding.action)}</span>` +
                     `<div class="tc-controls-rebind-list-control">` +
-                        keyMarkup +
-                        `<span class="tc-controls-rebind-list-rebind">Rebind</span>` +
+                    keyMarkup +
+                    `<span class="tc-controls-rebind-list-rebind">Rebind</span>` +
                     `</div>` +
-                `</div>`
-            )
-        }).join('')
+                    `</div>`
+                )
+            })
+            .join('')
         this.innerHTML = `<div class="tc-controls-rebind-list">${rowsHTML}</div>`
     }
 }

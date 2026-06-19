@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const GildedFrameDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Gilded Frame"
+                    <tc-rich-page-header
+                        title-text="Gilded Frame"
                         description="Hairline-framed surface that wraps its slotted content. A web-components reinterpretation of the game-components gc-gilded-frame: the gilding is dropped for the toolcase voice — sharp corners, slate neutrals, 1px borders. Pick a tone and a padding step."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Tones">
+                        <tc-section-card title="Tones">
                             <div className="d-flex flex-column gap-3">
                                 {/* @ts-ignore */}
                                 <tc-gilded-frame tone="dark">
@@ -23,19 +25,21 @@ const GildedFrameDemo: React.FC = () => (
 
                                 {/* @ts-ignore */}
                                 <tc-gilded-frame tone="leather">
-                                    Leather tone — muted slate fill with the standard hairline border.
+                                    Leather tone — muted slate fill with the standard hairline
+                                    border.
                                     {/* @ts-ignore */}
                                 </tc-gilded-frame>
 
                                 {/* @ts-ignore */}
                                 <tc-gilded-frame tone="transparent">
-                                    Transparent tone — no fill, hairline border only; inherits surrounding text color.
+                                    Transparent tone — no fill, hairline border only; inherits
+                                    surrounding text color.
                                     {/* @ts-ignore */}
                                 </tc-gilded-frame>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Padding scale">
+                        <tc-section-card title="Padding scale">
                             <div className="d-flex flex-column gap-3">
                                 {/* @ts-ignore */}
                                 <tc-gilded-frame tone="leather" padding="none">
@@ -67,9 +71,9 @@ const GildedFrameDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-gilded-frame>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Wrapping rich content">
+                        <tc-section-card title="Wrapping rich content">
                             {/* @ts-ignore */}
                             <tc-gilded-frame tone="dark" padding="lg">
                                 <h5 style={{ marginTop: 0 }}>Framed panel</h5>
@@ -79,7 +83,7 @@ const GildedFrameDemo: React.FC = () => (
                                 </p>
                                 {/* @ts-ignore */}
                             </tc-gilded-frame>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

@@ -93,9 +93,7 @@ export class BuffIcon extends HTMLElement {
         const glyphMarkup = iconSvg || (glyph ? escapeHtml(glyph) : '')
 
         const time = this.time
-        const timeMarkup = time
-            ? `<span class="tc-buff-icon__time">${escapeHtml(time)}</span>`
-            : ''
+        const timeMarkup = time ? `<span class="tc-buff-icon__time">${escapeHtml(time)}</span>` : ''
 
         this.innerHTML =
             `<span class="tc-buff-icon__glyph" aria-hidden="true">${glyphMarkup}</span>` +

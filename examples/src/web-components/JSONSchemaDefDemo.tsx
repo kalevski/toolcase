@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // Reference lists feeding the conditional `$ref` selectors. `refList` backs the
 // `ref` type, `arrayRefList` the array-item type, `objectRefList` the object type.
@@ -76,25 +75,30 @@ const JSONSchemaDefDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="JSON Schema Definition"
+                        <tc-rich-page-header
+                            title-text="JSON Schema Definition"
                             description="Compact visual editor for defining JSON schema properties — editable schema name, per-property type selection, conditional $ref selectors, default-value inputs, reordering, and inline duplicate-name validation. Emits the serialized definition on every change."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="row mt-4 g-4">
                             <div className="col-12 col-lg-7">
-                                <SectionCard title={`Editor — “${schemaName}” (default-value + label)`}>
+                                <tc-section-card
+                                    title={`Editor — “${schemaName}” (default-value + label)`}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-json-schema-def
                                         ref={editorRef}
                                         label="Person"
                                         default-value={defaultValue}
                                     />
-                                </SectionCard>
+                                </tc-section-card>
                             </div>
                             <div className="col-12 col-lg-5">
-                                <SectionCard title="Serialized value">
+                                <tc-section-card title="Serialized value">
                                     <pre
                                         style={{
                                             margin: 0,
@@ -108,19 +112,19 @@ const JSONSchemaDefDemo: React.FC = () => {
                                     >
                                         {JSON.stringify(JSON.parse(value), null, 2)}
                                     </pre>
-                                </SectionCard>
+                                </tc-section-card>
                             </div>
                         </div>
 
                         <div className="mt-4">
-                            <SectionCard title="Duplicate-name validation (two “name” properties)">
+                            <tc-section-card title="Duplicate-name validation (two “name” properties)">
                                 {/* @ts-ignore */}
                                 <tc-json-schema-def ref={dupRef} default-value={duplicateValue} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
 
                         <div className="mt-4">
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <tc-json-schema-def
                                     ref={disabledRef}
@@ -128,14 +132,14 @@ const JSONSchemaDefDemo: React.FC = () => {
                                     default-value={defaultValue}
                                     disabled
                                 />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
 
                         <div className="mt-4">
-                            <SectionCard title="Loading (skeleton)">
+                            <tc-section-card title="Loading (skeleton)">
                                 {/* @ts-ignore */}
                                 <tc-json-schema-def loading />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

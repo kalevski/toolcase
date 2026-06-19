@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-checkbox-group'
 
 let _idCounter = 0
@@ -6,14 +7,6 @@ export interface CheckboxGroupOption {
     value: string
     label: string
     disabled?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class CheckboxGroup extends HTMLElement {
@@ -36,9 +29,13 @@ export class CheckboxGroup extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
-            this.addEventListener('change', this._onNativeChange)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('change', this._onNativeChange)
     }
 
     disconnectedCallback(): void {
@@ -104,13 +101,13 @@ export class CheckboxGroup extends HTMLElement {
 
         const optValue = input.value
         const checked = input.checked
-        const option = this._options.find(o => o.value === optValue)
+        const option = this._options.find((o) => o.value === optValue)
         if (option?.disabled) return
 
         if (checked && !this._value.includes(optValue)) {
             this._value = [...this._value, optValue]
         } else if (!checked) {
-            this._value = this._value.filter(v => v !== optValue)
+            this._value = this._value.filter((v) => v !== optValue)
         }
 
         // Patch aria-invalid in place without full re-render (preserves focus)
@@ -120,11 +117,13 @@ export class CheckboxGroup extends HTMLElement {
             else fieldset.removeAttribute('aria-invalid')
         }
 
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: this._value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: this._value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(this._value)
     }
 
@@ -141,28 +140,29 @@ export class CheckboxGroup extends HTMLElement {
         const ariaRequiredAttr = required ? ' aria-required="true"' : ''
         const ariaInvalidAttr = isInvalid ? ' aria-invalid="true"' : ''
 
-        const legendHtml = label != null
-            ? `<legend class="tc-checkbox-group-label">${esc(label)}</legend>`
-            : ''
+        const legendHtml =
+            label != null ? `<legend class="tc-checkbox-group-label">${esc(label)}</legend>` : ''
 
         const optionsClass = inline
             ? 'tc-checkbox-group-options tc-checkbox-group-options--inline'
             : 'tc-checkbox-group-options'
 
-        const optionsHtml = this._options.map((opt, idx) => {
-            const inputId = `${this._idPrefix}-${idx}`
-            const checkedAttr = this._value.includes(opt.value) ? ' checked' : ''
-            const disabledAttr = opt.disabled ? ' disabled' : ''
-            const nameAttr = name ? ` name="${esc(name)}"` : ''
+        const optionsHtml = this._options
+            .map((opt, idx) => {
+                const inputId = `${this._idPrefix}-${idx}`
+                const checkedAttr = this._value.includes(opt.value) ? ' checked' : ''
+                const disabledAttr = opt.disabled ? ' disabled' : ''
+                const nameAttr = name ? ` name="${esc(name)}"` : ''
 
-            return [
-                `<div class="form-check">`,
-                `<input type="checkbox" class="form-check-input" id="${inputId}"${nameAttr}`,
-                ` value="${esc(opt.value)}"${checkedAttr}${disabledAttr}>`,
-                `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
-                `</div>`,
-            ].join('')
-        }).join('')
+                return [
+                    `<div class="form-check">`,
+                    `<input type="checkbox" class="form-check-input" id="${inputId}"${nameAttr}`,
+                    ` value="${esc(opt.value)}"${checkedAttr}${disabledAttr}>`,
+                    `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
+                    `</div>`,
+                ].join('')
+            })
+            .join('')
 
         this.innerHTML = [
             `<fieldset class="tc-checkbox-group"${ariaRequiredAttr}${ariaInvalidAttr}>`,

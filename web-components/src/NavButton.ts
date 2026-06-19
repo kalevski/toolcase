@@ -1,20 +1,12 @@
+import { esc } from './internal/esc'
 import { chevronLeftIcon, closeIcon } from './icons'
 
 const TAG_NAME = 'tc-nav-button'
-
-function esc(str: string): string {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type NavButtonKind = 'back' | 'close'
 const KINDS: NavButtonKind[] = ['back', 'close']
 
 export class NavButton extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

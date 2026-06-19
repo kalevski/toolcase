@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-title-screen'
 
 // Port of game-components `gc-title-screen`. Game chrome (diamond dividers,
@@ -7,16 +8,7 @@ const TAG_NAME = 'tc-title-screen'
 // optional subtitle. All cosmetics flow through `--bs-title-screen-*` custom
 // properties so themes can re-skin via vars alone.
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 export class TitleScreen extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['title-text', 'subtitle', 'eyebrow']
     }
@@ -59,8 +51,8 @@ export class TitleScreen extends HTMLElement {
 
     private render(): void {
         const titleText = this.titleText
-        const subtitle  = this.subtitle
-        const eyebrow   = this.eyebrow
+        const subtitle = this.subtitle
+        const eyebrow = this.eyebrow
 
         const titleMarkup = titleText
             ? `<h1 class="tc-title-screen__title">${esc(titleText)}</h1>`
@@ -81,5 +73,7 @@ export class TitleScreen extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: TitleScreen }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: TitleScreen
+    }
 }

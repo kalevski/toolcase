@@ -1,5 +1,6 @@
-import * as LucideIcons from 'lucide-static'
-import { icon, chevronLeftIcon, chevronRightIcon } from './icons'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
+import { chevronLeftIcon, chevronRightIcon } from './icons'
 
 const TAG_NAME = 'tc-testimonial-carousel'
 
@@ -17,24 +18,6 @@ export interface Testimonial {
     rating?: number
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
-
 const starIconHtml = lucideByName('star')
 
 // tc-testimonial-carousel — one testimonial shown at a time with prev/next
@@ -44,7 +27,6 @@ const starIconHtml = lucideByName('star')
 // React `items: Testimonial[]` prop maps to a JS property (not an attribute); a
 // slide change emits a `tc-change` CustomEvent with `detail: { index, id }`.
 export class TestimonialCarousel extends HTMLElement {
-
     private _initialised = false
     private _items: Testimonial[] = []
     private _active = 0
@@ -126,18 +108,26 @@ export class TestimonialCarousel extends HTMLElement {
     private _emitChange(): void {
         const item = this._items[this._active]
         if (!item) return
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { index: this._active, id: item.id },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { index: this._active, id: item.id },
+            }),
+        )
     }
 
     // ── Timer ────────────────────────────────────────────────────────────────
 
     private _syncTimer(): void {
         this._clearTimer()
-        if (this.autoplay && this._items.length > 1 && !document.hidden && !this._hovered && !this._focused) {
+        if (
+            this.autoplay &&
+            this._items.length > 1 &&
+            !document.hidden &&
+            !this._hovered &&
+            !this._focused
+        ) {
             this._timerId = setInterval(() => this._goTo(this._active + 1, true), this.interval)
         }
     }
@@ -235,7 +225,9 @@ export class TestimonialCarousel extends HTMLElement {
         const stars: string[] = []
         for (let i = 0; i < STAR_COUNT; i++) {
             const filled = i < r ? ' tc-testimonial-carousel-star--filled' : ''
-            stars.push(`<span class="tc-testimonial-carousel-star${filled}" aria-hidden="true">${starIconHtml}</span>`)
+            stars.push(
+                `<span class="tc-testimonial-carousel-star${filled}" aria-hidden="true">${starIconHtml}</span>`,
+            )
         }
         return (
             `<div class="tc-testimonial-carousel-rating" role="img" aria-label="${r} out of ${STAR_COUNT} stars">` +

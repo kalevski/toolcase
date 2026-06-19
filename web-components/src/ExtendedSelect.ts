@@ -1,13 +1,10 @@
+import { esc } from './internal/esc'
 import { Search, Check } from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-extended-select'
 
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 // Pre-compute at module load — these icons are always in the rendered HTML
 const searchIconHtml = icon(Search, 'tc-extended-select__search-icon')
@@ -151,7 +148,7 @@ export class ExtendedSelect extends HTMLElement {
 
     private _selectedItem(): ExtendedSelectItem | undefined {
         const v = this.value
-        return v ? this._items.find(i => i.key === v) : undefined
+        return v ? this._items.find((i) => i.key === v) : undefined
     }
 
     private _triggerLabelHtml(): string {
@@ -173,7 +170,7 @@ export class ExtendedSelect extends HTMLElement {
         if (hidden) hidden.value = newValue ?? ''
         this._updateTriggerLabel()
         const opts = this.querySelectorAll<HTMLElement>('[role="option"]')
-        opts.forEach(opt => {
+        opts.forEach((opt) => {
             const isSelected = opt.dataset.key === (newValue ?? '')
             opt.setAttribute('aria-selected', String(isSelected && !!newValue))
             opt.classList.toggle('tc-extended-select__option--selected', isSelected && !!newValue)
@@ -185,21 +182,23 @@ export class ExtendedSelect extends HTMLElement {
         if (!this._filteredItems.length) {
             return `<li class="tc-extended-select__no-results" role="presentation">${esc(this.noResultsText)}</li>`
         }
-        return this._filteredItems.map((item, idx) => {
-            const isSelected = !!currentValue && item.key === currentValue
-            const isActive = idx === this._activeIdx
-            let cls = 'tc-extended-select__option'
-            if (isSelected) cls += ' tc-extended-select__option--selected'
-            if (isActive) cls += ' tc-extended-select__option--active'
-            const descHtml = item.description
-                ? `<span class="tc-extended-select__option-desc">${esc(item.description)}</span>`
-                : ''
-            const checkHtml = isSelected
-                ? `<span class="tc-extended-select__check" aria-hidden="true">${checkIconHtml}</span>`
-                : ''
-            // check appears before description so it stays on the label's row (flex-wrap layout)
-            return `<li class="${cls}" role="option" aria-selected="${isSelected}" id="${this._idPrefix}-${idx}" data-key="${esc(item.key)}" tabindex="-1"><span class="tc-extended-select__option-label">${esc(item.label)}</span>${checkHtml}${descHtml}</li>`
-        }).join('')
+        return this._filteredItems
+            .map((item, idx) => {
+                const isSelected = !!currentValue && item.key === currentValue
+                const isActive = idx === this._activeIdx
+                let cls = 'tc-extended-select__option'
+                if (isSelected) cls += ' tc-extended-select__option--selected'
+                if (isActive) cls += ' tc-extended-select__option--active'
+                const descHtml = item.description
+                    ? `<span class="tc-extended-select__option-desc">${esc(item.description)}</span>`
+                    : ''
+                const checkHtml = isSelected
+                    ? `<span class="tc-extended-select__check" aria-hidden="true">${checkIconHtml}</span>`
+                    : ''
+                // check appears before description so it stays on the label's row (flex-wrap layout)
+                return `<li class="${cls}" role="option" aria-selected="${isSelected}" id="${this._idPrefix}-${idx}" data-key="${esc(item.key)}" tabindex="-1"><span class="tc-extended-select__option-label">${esc(item.label)}</span>${checkHtml}${descHtml}</li>`
+            })
+            .join('')
     }
 
     private _renderList(): void {
@@ -221,7 +220,9 @@ export class ExtendedSelect extends HTMLElement {
         const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
         if (trigger) trigger.addEventListener('click', this._onTriggerClick)
 
-        const searchInput = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
+        const searchInput = this.querySelector<HTMLInputElement>(
+            '.tc-extended-select__search-input',
+        )
         if (searchInput) searchInput.addEventListener('input', this._onSearchInput)
 
         const list = this.querySelector<HTMLElement>('.tc-extended-select__list')
@@ -246,7 +247,7 @@ export class ExtendedSelect extends HTMLElement {
         // Pre-highlight selected item
         const v = this.value
         if (v) {
-            const idx = this._filteredItems.findIndex(i => i.key === v)
+            const idx = this._filteredItems.findIndex((i) => i.key === v)
             if (idx !== -1) {
                 this._activeIdx = idx
                 this._setActiveClass()
@@ -340,11 +341,13 @@ export class ExtendedSelect extends HTMLElement {
 
     private _selectItem(key: string): void {
         this.value = key
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: key },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(key)
         this._closeMenu()
     }
@@ -362,9 +365,10 @@ export class ExtendedSelect extends HTMLElement {
             if (!q) {
                 this._filteredItems = this._items
             } else {
-                this._filteredItems = this._items.filter(item =>
-                    item.label.toLowerCase().includes(q) ||
-                    (item.description ?? '').toLowerCase().includes(q)
+                this._filteredItems = this._items.filter(
+                    (item) =>
+                        item.label.toLowerCase().includes(q) ||
+                        (item.description ?? '').toLowerCase().includes(q),
                 )
             }
             this._activeIdx = -1

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-heatmap'
 
 export interface HeatmapCell {
@@ -14,14 +15,6 @@ const DEFAULT_SCALE = ['#f1f5f9', '#cbd5e1', '#94a3b8', '#475569', '#1e293b', '#
 
 const DEFAULT_CELL_SIZE = 32
 const MIN_CELL_SIZE = 12
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
@@ -150,14 +143,16 @@ export class Heatmap extends HTMLElement {
                 .join('')
             this.innerHTML =
                 `<div class="tc-heatmap" aria-hidden="true">` +
-                    (title || subtitle
-                        ? `<div class="tc-heatmap-header">` +
-                              (title ? `<div class="tc-heatmap-skeleton tc-heatmap-skeleton--title"></div>` : '') +
-                          `</div>`
-                        : '') +
-                    `<div class="tc-heatmap-skeleton-grid" style="grid-template-columns: repeat(${skelCols}, ${cellSize}px); --bs-heatmap-cell-size: ${cellSize}px;">` +
-                        skelCells +
-                    `</div>` +
+                (title || subtitle
+                    ? `<div class="tc-heatmap-header">` +
+                      (title
+                          ? `<div class="tc-heatmap-skeleton tc-heatmap-skeleton--title"></div>`
+                          : '') +
+                      `</div>`
+                    : '') +
+                `<div class="tc-heatmap-skeleton-grid" style="grid-template-columns: repeat(${skelCols}, ${cellSize}px); --bs-heatmap-cell-size: ${cellSize}px;">` +
+                skelCells +
+                `</div>` +
                 `</div>` +
                 `<span class="visually-hidden">Loading…</span>`
             return
@@ -171,43 +166,46 @@ export class Heatmap extends HTMLElement {
         const scale = this._colorScale ?? DEFAULT_SCALE
 
         // Value domain across the dataset.
-        const vals = this._data.map(d => d.value).filter(v => Number.isFinite(v))
+        const vals = this._data.map((d) => d.value).filter((v) => Number.isFinite(v))
         const minVal = vals.length ? Math.min(...vals) : 0
         const maxVal = vals.length ? Math.max(...vals) : 0
         const range = maxVal - minVal || 1
 
         // Cell lookup keyed by row::col, rebuilt every render.
-        this._cellLookup = new Map(this._data.map(d => [`${d.row}::${d.col}`, d]))
+        this._cellLookup = new Map(this._data.map((d) => [`${d.row}::${d.col}`, d]))
 
         // ── Header ─────────────────────────────────────────────────────────
         const headerHtml =
             title || subtitle
                 ? `<div class="tc-heatmap-header">` +
-                      (title ? `<div class="tc-heatmap-title">${esc(title)}</div>` : '') +
-                      (subtitle ? `<div class="tc-heatmap-subtitle">${esc(subtitle)}</div>` : '') +
+                  (title ? `<div class="tc-heatmap-title">${esc(title)}</div>` : '') +
+                  (subtitle ? `<div class="tc-heatmap-subtitle">${esc(subtitle)}</div>` : '') +
                   `</div>`
                 : ''
 
         // ── Grid ───────────────────────────────────────────────────────────
         const summary = title || 'Heatmap'
         const colHeadCells = cols
-            .map(col => `<div class="tc-heatmap-col-label" role="columnheader">${esc(String(col))}</div>`)
+            .map(
+                (col) =>
+                    `<div class="tc-heatmap-col-label" role="columnheader">${esc(String(col))}</div>`,
+            )
             .join('')
         const headRow =
             `<div class="tc-heatmap-row tc-heatmap-row--head" role="row">` +
-                `<div class="tc-heatmap-corner" role="columnheader" aria-hidden="true"></div>` +
-                colHeadCells +
+            `<div class="tc-heatmap-corner" role="columnheader" aria-hidden="true"></div>` +
+            colHeadCells +
             `</div>`
 
         const bodyRows = rows
-            .map(row => {
+            .map((row) => {
                 const cells = cols
-                    .map(col => {
+                    .map((col) => {
                         const cell = this._cellLookup.get(`${row}::${col}`)
                         if (cell === undefined) {
                             return (
                                 `<div class="tc-heatmap-cell tc-heatmap-cell--empty" role="cell"` +
-                                    ` aria-label="${esc(String(row))}, ${esc(String(col))}: no data"></div>`
+                                ` aria-label="${esc(String(row))}, ${esc(String(col))}: no data"></div>`
                             )
                         }
                         const t = (cell.value - minVal) / range
@@ -216,16 +214,16 @@ export class Heatmap extends HTMLElement {
                         const aria = `${esc(String(row))}, ${esc(String(col))}: ${esc(String(cell.value))}${labelPart}`
                         return (
                             `<div class="tc-heatmap-cell" role="cell"` +
-                                ` data-row="${esc(String(row))}" data-col="${esc(String(col))}"` +
-                                ` style="background:${fill};"` +
-                                ` aria-label="${aria}"></div>`
+                            ` data-row="${esc(String(row))}" data-col="${esc(String(col))}"` +
+                            ` style="background:${fill};"` +
+                            ` aria-label="${aria}"></div>`
                         )
                     })
                     .join('')
                 return (
                     `<div class="tc-heatmap-row" role="row">` +
-                        `<div class="tc-heatmap-row-label" role="rowheader">${esc(String(row))}</div>` +
-                        cells +
+                    `<div class="tc-heatmap-row-label" role="rowheader">${esc(String(row))}</div>` +
+                    cells +
                     `</div>`
                 )
             })
@@ -236,8 +234,8 @@ export class Heatmap extends HTMLElement {
             ` --bs-heatmap-cell-size: ${cellSize}px;`
         const gridHtml =
             `<div class="tc-heatmap-grid" role="table" aria-label="${esc(summary)}" style="${gridStyle}">` +
-                headRow +
-                bodyRows +
+            headRow +
+            bodyRows +
             `</div>`
 
         // ── Legend ─────────────────────────────────────────────────────────
@@ -246,20 +244,20 @@ export class Heatmap extends HTMLElement {
             const gradient = `linear-gradient(to right, ${scale.join(', ')})`
             legendHtml =
                 `<div class="tc-heatmap-legend" aria-hidden="true">` +
-                    `<span class="tc-heatmap-legend-label">${esc(String(minVal))}</span>` +
-                    `<span class="tc-heatmap-legend-bar" style="background:${gradient};"></span>` +
-                    `<span class="tc-heatmap-legend-label">${esc(String(maxVal))}</span>` +
+                `<span class="tc-heatmap-legend-label">${esc(String(minVal))}</span>` +
+                `<span class="tc-heatmap-legend-bar" style="background:${gradient};"></span>` +
+                `<span class="tc-heatmap-legend-label">${esc(String(maxVal))}</span>` +
                 `</div>`
         }
 
         this.innerHTML =
             `<div class="tc-heatmap">` +
-                headerHtml +
-                `<div class="tc-heatmap-scroll">` +
-                    gridHtml +
-                    `<div class="tc-heatmap-tooltip" role="tooltip" hidden></div>` +
-                `</div>` +
-                legendHtml +
+            headerHtml +
+            `<div class="tc-heatmap-scroll">` +
+            gridHtml +
+            `<div class="tc-heatmap-tooltip" role="tooltip" hidden></div>` +
+            `</div>` +
+            legendHtml +
             `</div>`
 
         this._attachGridListeners()
@@ -299,7 +297,7 @@ export class Heatmap extends HTMLElement {
                     bubbles: true,
                     composed: true,
                     detail: { cell: data, row: data.row, col: data.col, value: data.value },
-                })
+                }),
             )
         })
 

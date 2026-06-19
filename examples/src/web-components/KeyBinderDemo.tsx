@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const KeyBinderDemo: React.FC = () => {
     const interactiveRef = useRef<any>(null)
@@ -26,14 +25,17 @@ const KeyBinderDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Key Binder"
+                        <tc-rich-page-header
+                            title-text="Key Binder"
                             description="Click (or press Enter / Space) to enter capture mode, then press any key to assign the binding. Escape cancels. Emits tc-change with { value, code, key } or tc-cancel. Re-skinned from the game-components gc-key-binder — flat slate surface, no gilded frame, no glow; the bound key label is JetBrains Mono."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Interactive — click to capture next key">
+                            <tc-section-card title="Interactive — click to capture next key">
                                 <div className="d-flex align-items-center gap-3 flex-wrap">
                                     {/* @ts-ignore */}
                                     <tc-key-binder ref={interactiveRef} />
@@ -41,9 +43,9 @@ const KeyBinderDemo: React.FC = () => {
                                 <p className="mt-3 mb-0 text-secondary">
                                     Last event: <code>{lastEvent}</code>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Pre-bound value">
+                            <tc-section-card title="Pre-bound value">
                                 <div className="d-flex align-items-center gap-3 flex-wrap">
                                     {/* @ts-ignore */}
                                     <tc-key-binder value="W" />
@@ -54,34 +56,34 @@ const KeyBinderDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-key-binder value="F1" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Empty / custom placeholder">
+                            <tc-section-card title="Empty / custom placeholder">
                                 <div className="d-flex align-items-center gap-3 flex-wrap">
                                     {/* @ts-ignore */}
                                     <tc-key-binder />
                                     {/* @ts-ignore */}
                                     <tc-key-binder placeholder="Press to bind…" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div className="d-flex align-items-center gap-3 flex-wrap">
                                     {/* @ts-ignore */}
                                     <tc-key-binder value="Space" disabled />
                                     {/* @ts-ignore */}
                                     <tc-key-binder disabled />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Controlled via JS property">
+                            <tc-section-card title="Controlled via JS property">
                                 <div className="d-flex flex-column gap-3">
                                     <div className="d-flex align-items-center gap-3 flex-wrap">
                                         {/* @ts-ignore */}
                                         <tc-key-binder value={boundKey} />
                                     </div>
                                     <div className="d-flex gap-2 flex-wrap">
-                                        {['W', 'A', 'S', 'D', 'Space', 'Shift'].map(k => (
+                                        {['W', 'A', 'S', 'D', 'Space', 'Shift'].map((k) => (
                                             <button
                                                 key={k}
                                                 className="btn btn-sm btn-outline-secondary"
@@ -92,7 +94,7 @@ const KeyBinderDemo: React.FC = () => {
                                         ))}
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

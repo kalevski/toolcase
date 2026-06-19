@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 interface ChatMessage {
     id: string
@@ -25,7 +24,12 @@ const CHANNELS: ChatChannel[] = [
 const INITIAL_MESSAGES: ChatMessage[] = [
     { id: 'm0', sender: 'system', body: 'Connected to general.', system: true },
     { id: 'm1', sender: 'aria', body: 'morning all 👋', color: 'var(--tc-info)' },
-    { id: 'm2', sender: 'kade', body: 'anyone running the raid tonight?', color: 'var(--tc-success)' },
+    {
+        id: 'm2',
+        sender: 'kade',
+        body: 'anyone running the raid tonight?',
+        color: 'var(--tc-success)',
+    },
     { id: 'm3', sender: 'aria', body: 'I am in, give me 10', color: 'var(--tc-info)' },
     { id: 'm4', sender: 'mox', body: 'selling spare keys, DM me', color: 'var(--tc-warning)' },
 ]
@@ -56,7 +60,13 @@ const ChatWindowDemo: React.FC = () => {
             const { channel, text } = e.detail
             el.messages = [
                 ...el.messages,
-                { id: `you-${++_idCounter}`, channel, sender: 'you', body: text, color: 'var(--tc-app-accent)' },
+                {
+                    id: `you-${++_idCounter}`,
+                    channel,
+                    sender: 'you',
+                    body: text,
+                    color: 'var(--tc-app-accent)',
+                },
             ]
         }
         el.addEventListener('tc-send', onSend)
@@ -87,19 +97,22 @@ const ChatWindowDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ChatWindow"
+                        <tc-rich-page-header
+                            title-text="ChatWindow"
                             description="Scrolling chat log with channel tabs and a compose row. Messages and channels are set via JS properties; sending fires tc-send and switching tabs fires tc-channel-change. Newest messages appear at the bottom."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — message log + compose">
+                            <tc-section-card title="Basic — message log + compose">
                                 {/* @ts-ignore */}
                                 <tc-chat-window ref={basicRef} placeholder="Say something..." />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Channels — tabs + echo (your messages appear in the log)">
+                            <tc-section-card title="Channels — tabs + echo (your messages appear in the log)">
                                 {/* @ts-ignore */}
                                 <tc-chat-window
                                     ref={channelsRef}
@@ -107,21 +120,20 @@ const ChatWindowDemo: React.FC = () => {
                                     placeholder="Message #general"
                                     height="320"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Events — tc-send and tc-channel-change">
+                            <tc-section-card title="Events — tc-send and tc-channel-change">
                                 {/* @ts-ignore */}
                                 <tc-chat-window ref={eventsRef} active-channel="general" />
                                 <div className="form-text mt-2">
-                                    Active channel:{' '}
-                                    <code>{activeChannel}</code>
+                                    Active channel: <code>{activeChannel}</code>
                                 </div>
                                 {lastSend && (
                                     <div className="form-text text-success">
                                         ✓ <code>tc-send</code> → {lastSend}
                                     </div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

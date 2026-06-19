@@ -15,7 +15,6 @@ const TAG_NAME = 'tc-letterbox-bars'
  * overrides following the "arbitrary CSS value" porting pattern.
  */
 export class LetterboxBars extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

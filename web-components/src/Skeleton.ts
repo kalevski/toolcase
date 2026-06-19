@@ -11,7 +11,6 @@ function resolveLength(raw: string | null): string | null {
 }
 
 export class Skeleton extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

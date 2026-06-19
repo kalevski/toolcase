@@ -43,6 +43,7 @@ export class Tooltip {
         this._isShown = true
         const tip = this._createTip()
         this._tip = tip
+        this._applyThemeContext(tip)
         document.body.appendChild(tip)
 
         this._popper = createPopper(this._element, tip, {
@@ -81,6 +82,18 @@ export class Tooltip {
     toggle(): void {
         if (this._isShown) this.hide()
         else this.show()
+    }
+
+    // The tip is portaled to <body>, escaping any theme wrapper around the
+    // trigger. Copy the nearest theme marker onto the tip so theme styles
+    // (which also self-match the tip) still apply. Supports both the
+    // `[data-tc-theme]` attribute and the `<tc-theme name="...">` element.
+    private _applyThemeContext(tip: HTMLElement): void {
+        const dataThemed = this._element.closest('[data-tc-theme]')
+        const theme =
+            dataThemed?.getAttribute('data-tc-theme') ??
+            this._element.closest('tc-theme[name]')?.getAttribute('name')
+        if (theme) tip.setAttribute('data-tc-theme', theme)
     }
 
     dispose(): void {

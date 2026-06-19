@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const QuickStartDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -84,32 +83,38 @@ const QuickStartDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="QuickStart"
+                        <tc-rich-page-header
+                            title-text="QuickStart"
                             description="Numbered step-by-step guide with optional code snippets and output sections."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic (three steps with code)">
+                            <tc-section-card title="Basic (three steps with code)">
                                 {/* @ts-ignore */}
                                 <tc-quick-start ref={basicRef}></tc-quick-start>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Steps with code and output">
+                            <tc-section-card title="Steps with code and output">
                                 {/* @ts-ignore */}
                                 <tc-quick-start ref={withOutputRef}></tc-quick-start>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With title-text attribute">
+                            <tc-section-card title="With title-text attribute">
                                 {/* @ts-ignore */}
-                                <tc-quick-start ref={titledRef} title-text="Project Setup"></tc-quick-start>
-                            </SectionCard>
+                                <tc-quick-start
+                                    ref={titledRef}
+                                    title-text="Project Setup"
+                                ></tc-quick-start>
+                            </tc-section-card>
 
-                            <SectionCard title="No steps (empty state)">
+                            <tc-section-card title="No steps (empty state)">
                                 {/* @ts-ignore */}
                                 <tc-quick-start title-text="Getting Started"></tc-quick-start>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

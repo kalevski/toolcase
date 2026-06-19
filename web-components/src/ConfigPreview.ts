@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-config-preview'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export interface ConfigPreviewEntry {
     key: string
@@ -26,21 +19,21 @@ export class ConfigPreview extends HTMLElement {
         if (!this._initialised) {
             // Capture named-slot "live-label" nodes (direct children only)
             const liveLabelNodes = Array.from(this.children).filter(
-                el => el.getAttribute('slot') === 'live-label'
+                (el) => el.getAttribute('slot') === 'live-label',
             ) as Element[]
             // Capture default nodes (excluding named-slot nodes)
             const defaultNodes = Array.from(this.childNodes).filter(
-                n => !(n instanceof Element && n.getAttribute('slot') === 'live-label')
+                (n) => !(n instanceof Element && n.getAttribute('slot') === 'live-label'),
             )
             this.render()
             // Re-append live-label slot children when no attribute overrides them
             if (!this.hasAttribute('live-label')) {
                 const liveLabelEl = this.querySelector('.tc-config-preview-live-label')
-                if (liveLabelEl) liveLabelNodes.forEach(n => liveLabelEl.appendChild(n))
+                if (liveLabelEl) liveLabelNodes.forEach((n) => liveLabelEl.appendChild(n))
             }
             // Re-append default slot children
             const contentEl = this.querySelector('.tc-config-preview-content')
-            if (contentEl) defaultNodes.forEach(n => contentEl.appendChild(n))
+            if (contentEl) defaultNodes.forEach((n) => contentEl.appendChild(n))
             this._initialised = true
         }
     }
@@ -81,43 +74,45 @@ export class ConfigPreview extends HTMLElement {
         // Re-distribute live-label slot children (only when no attribute)
         if (!this.hasAttribute('live-label')) {
             const newLiveLabelEl = this.querySelector('.tc-config-preview-live-label')
-            if (newLiveLabelEl) liveLabelNodes.forEach(n => newLiveLabelEl.appendChild(n))
+            if (newLiveLabelEl) liveLabelNodes.forEach((n) => newLiveLabelEl.appendChild(n))
         }
         // Re-distribute default slot children
         const newContentEl = this.querySelector('.tc-config-preview-content')
-        if (newContentEl) defaultNodes.forEach(n => newContentEl.appendChild(n))
+        if (newContentEl) defaultNodes.forEach((n) => newContentEl.appendChild(n))
     }
 
     private render(): void {
         const liveLabel = this.getAttribute('live-label')
 
         // Build entry lines; no newlines in the HTML to avoid whitespace in <pre>
-        const entriesHtml = this._entries.map(entry => {
-            const keyHtml = `<span class="tc-config-preview-key">${esc(entry.key)}</span>`
+        const entriesHtml = this._entries
+            .map((entry) => {
+                const keyHtml = `<span class="tc-config-preview-key">${esc(entry.key)}</span>`
 
-            let valueClass = 'tc-config-preview-value'
-            let valueText: string
-            if (typeof entry.value === 'string') {
-                valueClass += ' tc-config-preview-value--string'
-                valueText = `&quot;${esc(entry.value)}&quot;`
-            } else if (typeof entry.value === 'number') {
-                valueClass += ' tc-config-preview-value--number'
-                valueText = esc(String(entry.value))
-            } else if (typeof entry.value === 'boolean') {
-                valueClass += ' tc-config-preview-value--boolean'
-                valueText = entry.value ? 'true' : 'false'
-            } else {
-                valueClass += ' tc-config-preview-value--null'
-                valueText = 'null'
-            }
-            const valueHtml = `<span class="${valueClass}">${valueText}</span>`
+                let valueClass = 'tc-config-preview-value'
+                let valueText: string
+                if (typeof entry.value === 'string') {
+                    valueClass += ' tc-config-preview-value--string'
+                    valueText = `&quot;${esc(entry.value)}&quot;`
+                } else if (typeof entry.value === 'number') {
+                    valueClass += ' tc-config-preview-value--number'
+                    valueText = esc(String(entry.value))
+                } else if (typeof entry.value === 'boolean') {
+                    valueClass += ' tc-config-preview-value--boolean'
+                    valueText = entry.value ? 'true' : 'false'
+                } else {
+                    valueClass += ' tc-config-preview-value--null'
+                    valueText = 'null'
+                }
+                const valueHtml = `<span class="${valueClass}">${valueText}</span>`
 
-            const commentHtml = entry.comment
-                ? `<span class="tc-config-preview-comment"> // ${esc(entry.comment)}</span>`
-                : ''
+                const commentHtml = entry.comment
+                    ? `<span class="tc-config-preview-comment"> // ${esc(entry.comment)}</span>`
+                    : ''
 
-            return `<span class="tc-config-preview-line">${keyHtml}: ${valueHtml}${commentHtml}</span>`
-        }).join('')
+                return `<span class="tc-config-preview-line">${keyHtml}: ${valueHtml}${commentHtml}</span>`
+            })
+            .join('')
 
         // Live-label text (attribute takes precedence over slot)
         const liveLabelText = liveLabel != null ? esc(liveLabel) : ''

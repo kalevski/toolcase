@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-pricing-card'
@@ -16,29 +17,20 @@ export interface PricingCardAction {
     disabled?: boolean
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
-
 const checkIconHtml = lucideByName('check')
 const xIconHtml = lucideByName('x')
 const minusIconHtml = lucideByName('minus')
 
-const KNOWN_VARIANTS = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'outline-primary', 'outline-secondary']
+const KNOWN_VARIANTS = [
+    'primary',
+    'secondary',
+    'success',
+    'danger',
+    'warning',
+    'info',
+    'outline-primary',
+    'outline-secondary',
+]
 
 export class PricingCard extends HTMLElement {
     private _initialised = false
@@ -133,11 +125,13 @@ export class PricingCard extends HTMLElement {
         if (!(target instanceof Element)) return
         if (!target.closest('.tc-pricing-card-action')) return
         if (this._action.disabled) return
-        this.dispatchEvent(new CustomEvent('tc-action', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-action', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this._action.onClick === 'function') this._action.onClick()
     }
 
@@ -166,29 +160,32 @@ export class PricingCard extends HTMLElement {
             ? `<p class="tc-pricing-card-desc">${esc(description)}</p>`
             : ''
 
-        const featuresHtml = this._features.length > 0
-            ? `<ul class="tc-pricing-card-features" role="list">` +
-              this._features.map(f => {
-                  const label = typeof f === 'string' ? f : f.label
-                  const included = typeof f === 'string' ? true : (f.included !== false)
-                  const featureIcon = included ? checkIconHtml : (xIconHtml || minusIconHtml)
-                  const iconClass = included
-                      ? 'tc-pricing-card-feature-icon tc-pricing-card-feature-icon--included'
-                      : 'tc-pricing-card-feature-icon tc-pricing-card-feature-icon--excluded'
-                  const srText = included ? 'included' : 'not included'
-                  const liClass = included
-                      ? 'tc-pricing-card-feature'
-                      : 'tc-pricing-card-feature tc-pricing-card-feature--excluded'
-                  return (
-                      `<li class="${liClass}">` +
-                      `<span class="${iconClass}" aria-hidden="true">${featureIcon}</span>` +
-                      `<span class="visually-hidden">${srText}</span>` +
-                      `<span class="tc-pricing-card-feature-label">${esc(label)}</span>` +
-                      `</li>`
-                  )
-              }).join('') +
-              `</ul>`
-            : ''
+        const featuresHtml =
+            this._features.length > 0
+                ? `<ul class="tc-pricing-card-features" role="list">` +
+                  this._features
+                      .map((f) => {
+                          const label = typeof f === 'string' ? f : f.label
+                          const included = typeof f === 'string' ? true : f.included !== false
+                          const featureIcon = included ? checkIconHtml : xIconHtml || minusIconHtml
+                          const iconClass = included
+                              ? 'tc-pricing-card-feature-icon tc-pricing-card-feature-icon--included'
+                              : 'tc-pricing-card-feature-icon tc-pricing-card-feature-icon--excluded'
+                          const srText = included ? 'included' : 'not included'
+                          const liClass = included
+                              ? 'tc-pricing-card-feature'
+                              : 'tc-pricing-card-feature tc-pricing-card-feature--excluded'
+                          return (
+                              `<li class="${liClass}">` +
+                              `<span class="${iconClass}" aria-hidden="true">${featureIcon}</span>` +
+                              `<span class="visually-hidden">${srText}</span>` +
+                              `<span class="tc-pricing-card-feature-label">${esc(label)}</span>` +
+                              `</li>`
+                          )
+                      })
+                      .join('') +
+                  `</ul>`
+                : ''
 
         const rawVariant = action.variant ?? 'primary'
         const btnVariant = KNOWN_VARIANTS.includes(rawVariant) ? rawVariant : 'primary'
@@ -197,9 +194,10 @@ export class PricingCard extends HTMLElement {
         const disabledAttr = action.disabled ? ' aria-disabled="true"' : ''
         const actionLabel = esc(action.label || 'Get started')
 
-        const actionHtml = (action.href && !action.disabled)
-            ? `<a class="${btnClass}${disabledClass}" href="${esc(action.href)}"${disabledAttr}>${actionLabel}</a>`
-            : `<button class="${btnClass}${disabledClass}" type="button"${disabledAttr}>${actionLabel}</button>`
+        const actionHtml =
+            action.href && !action.disabled
+                ? `<a class="${btnClass}${disabledClass}" href="${esc(action.href)}"${disabledAttr}>${actionLabel}</a>`
+                : `<button class="${btnClass}${disabledClass}" type="button"${disabledAttr}>${actionLabel}</button>`
 
         this.innerHTML =
             `<article class="${articleClass}">` +

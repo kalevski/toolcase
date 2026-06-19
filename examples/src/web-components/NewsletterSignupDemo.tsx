@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const NewsletterSignupDemo: React.FC = () => {
     const successRef = useRef<any>(null)
@@ -10,8 +9,7 @@ const NewsletterSignupDemo: React.FC = () => {
     useEffect(() => {
         const el = successRef.current
         if (!el) return
-        el.onSubmit = (_email: string) =>
-            new Promise<void>(resolve => setTimeout(resolve, 1500))
+        el.onSubmit = (_email: string) => new Promise<void>((resolve) => setTimeout(resolve, 1500))
     }, [])
 
     // Variant that rejects — shows submitting → error flow
@@ -20,7 +18,7 @@ const NewsletterSignupDemo: React.FC = () => {
         if (!el) return
         el.onSubmit = (_email: string) =>
             new Promise<void>((_, reject) =>
-                setTimeout(() => reject(new Error('This email is already registered.')), 1500)
+                setTimeout(() => reject(new Error('This email is already registered.')), 1500),
             )
     }, [])
 
@@ -28,7 +26,7 @@ const NewsletterSignupDemo: React.FC = () => {
     useEffect(() => {
         const el = privacyRef.current
         if (!el) return
-        el.onSubmit = () => new Promise<void>(resolve => setTimeout(resolve, 800))
+        el.onSubmit = () => new Promise<void>((resolve) => setTimeout(resolve, 800))
     }, [])
 
     return (
@@ -36,15 +34,17 @@ const NewsletterSignupDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="NewsletterSignup"
+                        <tc-rich-page-header
+                            title-text="NewsletterSignup"
                             description="Email subscription form with async status management (idle → submitting → success / error) and optional privacy-policy link. Fires tc-submit on valid submission and drives state from the onSubmit Promise."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Success flow — resolves after 1.5 s">
+                            <tc-section-card title="Success flow — resolves after 1.5 s">
                                 {/* @ts-ignore */}
                                 <tc-newsletter-signup
                                     ref={successRef}
@@ -55,9 +55,9 @@ const NewsletterSignupDemo: React.FC = () => {
                                     success-message="You're subscribed! Watch your inbox."
                                     style={{ maxWidth: '480px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Error flow — rejects after 1.5 s">
+                            <tc-section-card title="Error flow — rejects after 1.5 s">
                                 {/* @ts-ignore */}
                                 <tc-newsletter-signup
                                     ref={errorRef}
@@ -66,9 +66,9 @@ const NewsletterSignupDemo: React.FC = () => {
                                     cta-label="Request access"
                                     style={{ maxWidth: '480px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With title, description, and privacy-href">
+                            <tc-section-card title="With title, description, and privacy-href">
                                 {/* @ts-ignore */}
                                 <tc-newsletter-signup
                                     ref={privacyRef}
@@ -80,17 +80,16 @@ const NewsletterSignupDemo: React.FC = () => {
                                     privacy-href="/privacy"
                                     style={{ maxWidth: '480px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal — no title or description">
+                            <tc-section-card title="Minimal — no title or description">
                                 {/* @ts-ignore */}
                                 <tc-newsletter-signup
                                     placeholder="Enter your email"
                                     cta-label="Notify me"
                                     style={{ maxWidth: '480px' }}
                                 />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

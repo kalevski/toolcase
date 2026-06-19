@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-tab-bar'
@@ -11,23 +12,6 @@ export interface TabBarItem {
     label: string
     icon?: string
     disabled?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    return svg ? icon(svg, 'tc-tab-bar-tab-icon') : ''
 }
 
 export class TabBar extends HTMLElement {
@@ -44,10 +28,14 @@ export class TabBar extends HTMLElement {
         if (!this._initialised) {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'tablist')
             this.render()
-            this.addEventListener('click', this._onHostClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onHostClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -89,14 +77,14 @@ export class TabBar extends HTMLElement {
     }
 
     private _getTabbableId(activeId: string): string {
-        const active = this._tabs.find(t => t.id === activeId)
+        const active = this._tabs.find((t) => t.id === activeId)
         if (active && !active.disabled) return activeId
-        const firstEnabled = this._tabs.find(t => !t.disabled)
+        const firstEnabled = this._tabs.find((t) => !t.disabled)
         return firstEnabled?.id ?? activeId
     }
 
     private _selectTab(id: string, focusTab: boolean): void {
-        const item = this._tabs.find(t => t.id === id)
+        const item = this._tabs.find((t) => t.id === id)
         if (!item || item.disabled) return
         const prev = this.activeId
         this.activeId = id
@@ -105,11 +93,13 @@ export class TabBar extends HTMLElement {
             if (btn) btn.focus()
         }
         if (id !== prev) {
-            this.dispatchEvent(new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { id },
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { id },
+                }),
+            )
             if (typeof this.onChange === 'function') this.onChange(id)
         }
     }
@@ -117,7 +107,7 @@ export class TabBar extends HTMLElement {
     private _applyActiveState(): void {
         const activeId = this.activeId
         const tabbableId = this._getTabbableId(activeId)
-        this.querySelectorAll<HTMLElement>('[role="tab"]').forEach(btn => {
+        this.querySelectorAll<HTMLElement>('[role="tab"]').forEach((btn) => {
             const id = btn.dataset.id ?? ''
             const isActive = id === activeId
             btn.setAttribute('aria-selected', String(isActive))
@@ -146,10 +136,10 @@ export class TabBar extends HTMLElement {
             return
         }
 
-        const enabled = this._tabs.filter(t => !t.disabled)
+        const enabled = this._tabs.filter((t) => !t.disabled)
         if (enabled.length === 0) return
         const currentId = tab.dataset.id ?? ''
-        let idx = enabled.findIndex(t => t.id === currentId)
+        let idx = enabled.findIndex((t) => t.id === currentId)
         if (idx === -1) idx = 0
 
         let nextIdx = -1
@@ -169,23 +159,27 @@ export class TabBar extends HTMLElement {
         const activeId = this.activeId
         const tabbableId = this._getTabbableId(activeId)
 
-        SIZES.forEach(s => this.classList.remove(`tc-tab-bar--${s}`))
+        SIZES.forEach((s) => this.classList.remove(`tc-tab-bar--${s}`))
         this.classList.add('tc-tab-bar', `tc-tab-bar--${size}`)
 
-        this.innerHTML = this._tabs.map(tab => {
-            const isActive = tab.id === activeId
-            const disabled = !!tab.disabled
-            const iconHtml = tab.icon ? lucideByName(tab.icon) : ''
-            return `<button` +
-                ` type="button"` +
-                ` role="tab"` +
-                ` class="tc-tab-bar-tab${isActive ? ' tc-tab-bar-tab--active' : ''}"` +
-                ` data-id="${esc(tab.id)}"` +
-                ` aria-selected="${isActive}"` +
-                ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"` +
-                (disabled ? ' disabled aria-disabled="true"' : '') +
-                `>${iconHtml}<span class="tc-tab-bar-tab-label">${esc(tab.label)}</span></button>`
-        }).join('')
+        this.innerHTML = this._tabs
+            .map((tab) => {
+                const isActive = tab.id === activeId
+                const disabled = !!tab.disabled
+                const iconHtml = tab.icon ? lucideByName(tab.icon) : ''
+                return (
+                    `<button` +
+                    ` type="button"` +
+                    ` role="tab"` +
+                    ` class="tc-tab-bar-tab${isActive ? ' tc-tab-bar-tab--active' : ''}"` +
+                    ` data-id="${esc(tab.id)}"` +
+                    ` aria-selected="${isActive}"` +
+                    ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"` +
+                    (disabled ? ' disabled aria-disabled="true"' : '') +
+                    `>${iconHtml}<span class="tc-tab-bar-tab-label">${esc(tab.label)}</span></button>`
+                )
+            })
+            .join('')
     }
 }
 

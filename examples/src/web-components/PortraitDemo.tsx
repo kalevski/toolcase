@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PortraitDemo: React.FC = () => {
     return (
@@ -7,15 +6,17 @@ const PortraitDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Portrait"
+                        <tc-rich-page-header
+                            title-text="Portrait"
                             description="Standalone character portrait frame. Displays a glyph (emoji, initials, or image URL) with an optional level badge and a colored ring accent. Port of gc-portrait, restyled to the toolcase design system."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Default glyph portraits">
+                            <tc-section-card title="Default glyph portraits">
                                 <div className="d-flex flex-wrap align-items-start gap-3">
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="⚔️" />
@@ -30,9 +31,9 @@ const PortraitDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="K" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With level badge">
+                            <tc-section-card title="With level badge">
                                 <div className="d-flex flex-wrap align-items-start gap-3">
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="⚔️" level="12" />
@@ -41,9 +42,9 @@ const PortraitDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="🏹" level="99" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom size (size attribute in px)">
+                            <tc-section-card title="Custom size (size attribute in px)">
                                 <div className="d-flex flex-wrap align-items-end gap-3">
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="⚔️" size="32" level="5" />
@@ -54,22 +55,38 @@ const PortraitDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="🏹" size="96" level="51" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Ring accent (ring attribute accepts any CSS color)">
+                            <tc-section-card title="Ring accent (ring attribute accepts any CSS color)">
                                 <div className="d-flex flex-wrap align-items-start gap-3">
                                     {/* @ts-ignore */}
-                                    <tc-portrait glyph="⚔️" level="12" ring="var(--tc-app-accent)" />
+                                    <tc-portrait
+                                        glyph="⚔️"
+                                        level="12"
+                                        ring="var(--tc-app-accent)"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-portrait glyph="🔮" level="34" ring="var(--tc-success, #16a34a)" />
+                                    <tc-portrait
+                                        glyph="🔮"
+                                        level="34"
+                                        ring="var(--tc-success, #16a34a)"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-portrait glyph="🏹" level="7" ring="var(--tc-warning, #d97706)" />
+                                    <tc-portrait
+                                        glyph="🏹"
+                                        level="7"
+                                        ring="var(--tc-warning, #d97706)"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-portrait glyph="🛡️" level="99" ring="var(--tc-danger, #dc2626)" />
+                                    <tc-portrait
+                                        glyph="🛡️"
+                                        level="99"
+                                        ring="var(--tc-danger, #dc2626)"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Circle variant (circle attribute)">
+                            <tc-section-card title="Circle variant (circle attribute)">
                                 <div className="d-flex flex-wrap align-items-start gap-3">
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="⚔️" circle="" />
@@ -78,11 +95,16 @@ const PortraitDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-portrait glyph="🏹" circle="" ring="var(--tc-app-accent)" />
                                     {/* @ts-ignore */}
-                                    <tc-portrait glyph="K" circle="" ring="var(--tc-success, #16a34a)" level="7" />
+                                    <tc-portrait
+                                        glyph="K"
+                                        circle=""
+                                        ring="var(--tc-success, #16a34a)"
+                                        level="7"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Image URL as glyph (auto-detected from URL pattern)">
+                            <tc-section-card title="Image URL as glyph (auto-detected from URL pattern)">
                                 <div className="d-flex flex-wrap align-items-start gap-3">
                                     {/* @ts-ignore */}
                                     <tc-portrait
@@ -99,25 +121,27 @@ const PortraitDemo: React.FC = () => {
                                         ring="var(--tc-app-accent)"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Theming via custom properties">
+                            <tc-section-card title="Theming via custom properties">
                                 {/* @ts-ignore */}
                                 <tc-portrait
                                     glyph="★"
                                     level="99"
                                     size="80"
-                                    style={{
-                                        '--bs-portrait-bg': 'var(--tc-app-accent)',
-                                        '--bs-portrait-glyph-color': '#fff',
-                                        '--bs-portrait-border-color': 'var(--tc-app-accent)',
-                                        '--bs-portrait-level-bg': 'rgba(0,0,0,0.4)',
-                                        '--bs-portrait-level-color': '#fff',
-                                        '--bs-portrait-level-border': '1px solid rgba(255,255,255,0.2)',
-                                    } as React.CSSProperties}
+                                    style={
+                                        {
+                                            '--bs-portrait-bg': 'var(--tc-app-accent)',
+                                            '--bs-portrait-glyph-color': '#fff',
+                                            '--bs-portrait-border-color': 'var(--tc-app-accent)',
+                                            '--bs-portrait-level-bg': 'rgba(0,0,0,0.4)',
+                                            '--bs-portrait-level-color': '#fff',
+                                            '--bs-portrait-level-border':
+                                                '1px solid rgba(255,255,255,0.2)',
+                                        } as React.CSSProperties
+                                    }
                                 />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

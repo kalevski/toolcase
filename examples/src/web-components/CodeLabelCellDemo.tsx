@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CodeLabelCellDemo: React.FC = () => {
     return (
@@ -7,25 +6,37 @@ const CodeLabelCellDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CodeLabelCell"
+                        <tc-rich-page-header
+                            title-text="CodeLabelCell"
                             description="Machine-facing code chip alongside a human-readable display name. Purely presentational — designed to drop into table or list cells."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Standalone pairs">
+                            <tc-section-card title="Standalone pairs">
                                 <div className="d-flex flex-column gap-3">
                                     {/* @ts-ignore */}
-                                    <tc-code-label-cell code="USR_001" name="Alice Johnson"></tc-code-label-cell>
+                                    <tc-code-label-cell
+                                        code="USR_001"
+                                        name="Alice Johnson"
+                                    ></tc-code-label-cell>
                                     {/* @ts-ignore */}
-                                    <tc-code-label-cell code="PRD_42" name="Premium Widget"></tc-code-label-cell>
+                                    <tc-code-label-cell
+                                        code="PRD_42"
+                                        name="Premium Widget"
+                                    ></tc-code-label-cell>
                                     {/* @ts-ignore */}
-                                    <tc-code-label-cell code="ORD-2024-09871" name="Purchase Order #9871"></tc-code-label-cell>
+                                    <tc-code-label-cell
+                                        code="ORD-2024-09871"
+                                        name="Purchase Order #9871"
+                                    ></tc-code-label-cell>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inside a table cell">
+                            <tc-section-card title="Inside a table cell">
                                 <table className="table table-sm table-bordered mb-0">
                                     <thead>
                                         <tr>
@@ -38,7 +49,10 @@ const CodeLabelCellDemo: React.FC = () => {
                                         <tr>
                                             <td>
                                                 {/* @ts-ignore */}
-                                                <tc-code-label-cell code="INV-0001" name="Monthly subscription"></tc-code-label-cell>
+                                                <tc-code-label-cell
+                                                    code="INV-0001"
+                                                    name="Monthly subscription"
+                                                ></tc-code-label-cell>
                                             </td>
                                             <td>Paid</td>
                                             <td>$49.00</td>
@@ -46,7 +60,10 @@ const CodeLabelCellDemo: React.FC = () => {
                                         <tr>
                                             <td>
                                                 {/* @ts-ignore */}
-                                                <tc-code-label-cell code="INV-0002" name="One-time setup fee"></tc-code-label-cell>
+                                                <tc-code-label-cell
+                                                    code="INV-0002"
+                                                    name="One-time setup fee"
+                                                ></tc-code-label-cell>
                                             </td>
                                             <td>Pending</td>
                                             <td>$199.00</td>
@@ -54,23 +71,32 @@ const CodeLabelCellDemo: React.FC = () => {
                                         <tr>
                                             <td>
                                                 {/* @ts-ignore */}
-                                                <tc-code-label-cell code="INV-0003" name="Add-on storage pack"></tc-code-label-cell>
+                                                <tc-code-label-cell
+                                                    code="INV-0003"
+                                                    name="Add-on storage pack"
+                                                ></tc-code-label-cell>
                                             </td>
                                             <td>Overdue</td>
                                             <td>$9.00</td>
                                         </tr>
                                     </tbody>
                                 </table>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Special characters (escaped)">
+                            <tc-section-card title="Special characters (escaped)">
                                 <div className="d-flex flex-column gap-3">
                                     {/* @ts-ignore */}
-                                    <tc-code-label-cell code="<script>" name="XSS &amp; escape test"></tc-code-label-cell>
+                                    <tc-code-label-cell
+                                        code="<script>"
+                                        name="XSS &amp; escape test"
+                                    ></tc-code-label-cell>
                                     {/* @ts-ignore */}
-                                    <tc-code-label-cell code="A&B" name='Quote "example"'></tc-code-label-cell>
+                                    <tc-code-label-cell
+                                        code="A&B"
+                                        name='Quote "example"'
+                                    ></tc-code-label-cell>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

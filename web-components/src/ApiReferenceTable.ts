@@ -1,5 +1,5 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-api-reference-table'
 
@@ -14,24 +14,6 @@ export interface ApiItem {
 export interface ApiReferenceGroup {
     category: string
     items: ApiItem[]
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const deprecationIconHtml = lucideByName('triangle-alert')
@@ -54,7 +36,7 @@ export class ApiReferenceTable extends HTMLElement {
             this.render()
             if (!this.hasAttribute('title')) {
                 const titleEl = this.querySelector('.tc-api-reference-table-title')
-                if (titleEl) this._titleNodes.forEach(n => titleEl.appendChild(n))
+                if (titleEl) this._titleNodes.forEach((n) => titleEl.appendChild(n))
             }
             this._initialised = true
         }
@@ -97,7 +79,7 @@ export class ApiReferenceTable extends HTMLElement {
         this.render()
         if (!this.hasAttribute('title')) {
             const newTitleEl = this.querySelector('.tc-api-reference-table-title')
-            if (newTitleEl) this._titleNodes.forEach(n => newTitleEl.appendChild(n))
+            if (newTitleEl) this._titleNodes.forEach((n) => newTitleEl.appendChild(n))
         }
     }
 
@@ -131,21 +113,22 @@ export class ApiReferenceTable extends HTMLElement {
     }
 
     private _renderGroup(group: ApiReferenceGroup, showHeading: boolean): string {
-        const headingHtml = showHeading && group.category
-            ? `<div class="tc-api-reference-group-heading">${esc(group.category)}</div>`
-            : ''
+        const headingHtml =
+            showHeading && group.category
+                ? `<div class="tc-api-reference-group-heading">${esc(group.category)}</div>`
+                : ''
 
-        const rowsHtml = group.items.map(item => this._renderItem(item)).join('')
+        const rowsHtml = group.items.map((item) => this._renderItem(item)).join('')
 
         const tableHtml =
             `<table class="table tc-api-reference-table-table">` +
-                `<thead><tr>` +
-                    `<th scope="col">Name</th>` +
-                    `<th scope="col">Signature</th>` +
-                    `<th scope="col">Returns</th>` +
-                    `<th scope="col">Description</th>` +
-                `</tr></thead>` +
-                `<tbody>${rowsHtml}</tbody>` +
+            `<thead><tr>` +
+            `<th scope="col">Name</th>` +
+            `<th scope="col">Signature</th>` +
+            `<th scope="col">Returns</th>` +
+            `<th scope="col">Description</th>` +
+            `</tr></thead>` +
+            `<tbody>${rowsHtml}</tbody>` +
             `</table>`
 
         return `<div class="tc-api-reference-group">${headingHtml}${tableHtml}</div>`
@@ -170,9 +153,7 @@ export class ApiReferenceTable extends HTMLElement {
             showHeadings = false
         }
 
-        const groupsHtml = groupsToRender
-            .map(g => this._renderGroup(g, showHeadings))
-            .join('')
+        const groupsHtml = groupsToRender.map((g) => this._renderGroup(g, showHeadings)).join('')
 
         this.innerHTML = `<div class="tc-api-reference-table">${titleHtml}${groupsHtml}</div>`
     }

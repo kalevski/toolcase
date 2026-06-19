@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Menu } from 'lucide-static'
 import { icon } from './icons'
 
@@ -6,14 +7,6 @@ const TAG_NAME = 'tc-cool-nav'
 const menuIcon = icon(Menu)
 
 let _uid = 0
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 const BREAKPOINTS = ['sm', 'md', 'lg', 'xl', 'xxl']
 
@@ -47,7 +40,16 @@ export class CoolNav extends HTMLElement {
     onLogin: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['brand', 'login-label', 'login-href', 'login-variant', 'scroll-offset', 'expand-breakpoint', 'theme', 'sticky']
+        return [
+            'brand',
+            'login-label',
+            'login-href',
+            'login-variant',
+            'scroll-offset',
+            'expand-breakpoint',
+            'theme',
+            'sticky',
+        ]
     }
 
     constructor() {
@@ -160,10 +162,10 @@ export class CoolNav extends HTMLElement {
     private _distributeSlots(): void {
         if (!this.hasAttribute('brand')) {
             const brandEl = this.querySelector('.tc-cool-nav-brand-slot')
-            if (brandEl) this._brandSlotNodes.forEach(n => brandEl.appendChild(n))
+            if (brandEl) this._brandSlotNodes.forEach((n) => brandEl.appendChild(n))
         }
         const rightEl = this.querySelector('.tc-cool-nav-right-slot')
-        if (rightEl) this._rightSlotNodes.forEach(n => rightEl.appendChild(n))
+        if (rightEl) this._rightSlotNodes.forEach((n) => rightEl.appendChild(n))
     }
 
     private _recaptureSlots(): void {
@@ -226,7 +228,9 @@ export class CoolNav extends HTMLElement {
         }
         // Login CTA
         if (target.closest('.tc-cool-nav-login')) {
-            this.dispatchEvent(new CustomEvent('tc-login', { bubbles: true, composed: true, detail: {} }))
+            this.dispatchEvent(
+                new CustomEvent('tc-login', { bubbles: true, composed: true, detail: {} }),
+            )
             if (typeof this.onLogin === 'function') this.onLogin()
         }
     }
@@ -246,7 +250,13 @@ export class CoolNav extends HTMLElement {
             toggler.setAttribute('aria-expanded', open ? 'true' : 'false')
         }
         if (dispatch) {
-            this.dispatchEvent(new CustomEvent('tc-nav-toggle', { bubbles: true, composed: true, detail: { open } }))
+            this.dispatchEvent(
+                new CustomEvent('tc-nav-toggle', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { open },
+                }),
+            )
             if (typeof this.onNavToggle === 'function') this.onNavToggle(open)
         }
     }
@@ -272,7 +282,7 @@ export class CoolNav extends HTMLElement {
             this.classList.remove('tc-cool-nav--sticky')
         }
 
-        THEMES.forEach(t => this.classList.remove(`tc-cool-nav--${t}`))
+        THEMES.forEach((t) => this.classList.remove(`tc-cool-nav--${t}`))
         this.classList.add(`tc-cool-nav--${theme}`)
 
         // Brand area
@@ -288,15 +298,17 @@ export class CoolNav extends HTMLElement {
         }
 
         // Nav items
-        const itemsHtml = this._items.map(item => {
-            const activeAttr = item.active ? ' aria-current="page"' : ''
-            const activeCls = item.active ? ' tc-cool-nav-link--active' : ''
-            return (
-                `<li class="tc-cool-nav-item">` +
-                `<a class="tc-cool-nav-link${activeCls}" href="${esc(item.href)}"${activeAttr}>${esc(item.label)}</a>` +
-                `</li>`
-            )
-        }).join('')
+        const itemsHtml = this._items
+            .map((item) => {
+                const activeAttr = item.active ? ' aria-current="page"' : ''
+                const activeCls = item.active ? ' tc-cool-nav-link--active' : ''
+                return (
+                    `<li class="tc-cool-nav-item">` +
+                    `<a class="tc-cool-nav-link${activeCls}" href="${esc(item.href)}"${activeAttr}>${esc(item.label)}</a>` +
+                    `</li>`
+                )
+            })
+            .join('')
 
         // Login CTA
         let loginHtml = ''

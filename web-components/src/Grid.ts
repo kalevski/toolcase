@@ -10,7 +10,6 @@ function resolveLength(raw: string | null): string {
 }
 
 export class Grid extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -68,7 +67,8 @@ export class Grid extends HTMLElement {
         const rows = this.rows
         const gap = resolveLength(this.getAttribute('gap'))
 
-        if (columns) this.style.setProperty('--bs-grid-template-columns', `repeat(${columns}, ${size})`)
+        if (columns)
+            this.style.setProperty('--bs-grid-template-columns', `repeat(${columns}, ${size})`)
         else this.style.removeProperty('--bs-grid-template-columns')
 
         if (rows) this.style.setProperty('--bs-grid-template-rows', `repeat(${rows}, ${size})`)

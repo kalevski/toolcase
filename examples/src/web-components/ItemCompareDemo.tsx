@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const EQUIPPED = {
     id: 'iron-sword',
@@ -59,27 +58,30 @@ const ItemCompareDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ItemCompare"
+                        <tc-rich-page-header
+                            title-text="ItemCompare"
                             description="A side-by-side item stat comparison: an equipped item next to a candidate, with the candidate column annotated by a per-stat difference block (green up / red down). Set the current and candidate items via the JS properties. Re-skinned from the game-components gc-item-compare to the toolcase design system — no gilded frames, no glows; sharp hairline columns and mono machine-facing figures."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Equipped vs candidate (upgrade)">
+                            <tc-section-card title="Equipped vs candidate (upgrade)">
                                 {/* @ts-ignore */}
                                 <tc-item-compare ref={pairRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Only an equipped item">
+                            <tc-section-card title="Only an equipped item">
                                 {/* @ts-ignore */}
                                 <tc-item-compare ref={emptyRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="A downgrade (deltas trend down)">
+                            <tc-section-card title="A downgrade (deltas trend down)">
                                 {/* @ts-ignore */}
                                 <tc-item-compare ref={downgradeRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

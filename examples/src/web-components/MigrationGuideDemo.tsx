@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MigrationGuideDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -53,7 +52,8 @@ const MigrationGuideDemo: React.FC = () => {
                 },
                 {
                     title: 'Migrate Button variant prop',
-                    description: 'The `type` prop has been renamed to `variant` to align with Bootstrap naming.',
+                    description:
+                        'The `type` prop has been renamed to `variant` to align with Bootstrap naming.',
                     before: `<Button type="primary">Submit</Button>`,
                     after: `<Button variant="primary">Submit</Button>`,
                     language: 'tsx',
@@ -73,7 +73,8 @@ const MigrationGuideDemo: React.FC = () => {
             titledRef.current.steps = [
                 {
                     title: 'Switch to the new API',
-                    description: 'The `register()` call is now required before using any tc-* elements.',
+                    description:
+                        'The `register()` call is now required before using any tc-* elements.',
                     before: `<script src="web-components.js"></script>`,
                     after: [
                         `import { register } from '@toolcase/web-components'`,
@@ -91,32 +92,48 @@ const MigrationGuideDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="MigrationGuide"
+                        <tc-rich-page-header
+                            title-text="MigrationGuide"
                             description="Step-by-step migration guide with a version transition header and before/after code diff panels."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic (two steps, from/to attributes)">
+                            <tc-section-card title="Basic (two steps, from/to attributes)">
                                 {/* @ts-ignore */}
-                                <tc-migration-guide ref={basicRef} from="v1.0" to="v2.0"></tc-migration-guide>
-                            </SectionCard>
+                                <tc-migration-guide
+                                    ref={basicRef}
+                                    from="v1.0"
+                                    to="v2.0"
+                                ></tc-migration-guide>
+                            </tc-section-card>
 
-                            <SectionCard title="Full migration (multi-step with descriptions)">
+                            <tc-section-card title="Full migration (multi-step with descriptions)">
                                 {/* @ts-ignore */}
-                                <tc-migration-guide ref={fullRef} from="v0.x" to="v1.0"></tc-migration-guide>
-                            </SectionCard>
+                                <tc-migration-guide
+                                    ref={fullRef}
+                                    from="v0.x"
+                                    to="v1.0"
+                                ></tc-migration-guide>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom title attribute">
+                            <tc-section-card title="Custom title attribute">
                                 {/* @ts-ignore */}
-                                <tc-migration-guide ref={titledRef} from="0.9" to="1.0" title="Upgrading the web-components package"></tc-migration-guide>
-                            </SectionCard>
+                                <tc-migration-guide
+                                    ref={titledRef}
+                                    from="0.9"
+                                    to="1.0"
+                                    title="Upgrading the web-components package"
+                                ></tc-migration-guide>
+                            </tc-section-card>
 
-                            <SectionCard title="No steps (header only)">
+                            <tc-section-card title="No steps (header only)">
                                 {/* @ts-ignore */}
                                 <tc-migration-guide from="v3" to="v4"></tc-migration-guide>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

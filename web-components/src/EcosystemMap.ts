@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-ecosystem-map'
 
 export interface EcosystemNode {
@@ -18,14 +19,6 @@ export interface EcosystemCore {
 
 const DEFAULT_SIZE = 480
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 export class EcosystemMap extends HTMLElement {
     private _initialised = false
     private _core: EcosystemCore = { name: '' }
@@ -37,11 +30,13 @@ export class EcosystemMap extends HTMLElement {
         const nodeEl = target.closest('[data-em-id]')
         if (!nodeEl) return
         const id = (nodeEl as HTMLElement).dataset.emId ?? ''
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { id },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { id },
+            }),
+        )
     }
 
     private _onKeydown = (e: KeyboardEvent): void => {
@@ -84,7 +79,7 @@ export class EcosystemMap extends HTMLElement {
         return this._core
     }
     set core(v: EcosystemCore) {
-        this._core = (v && typeof v === 'object' && !Array.isArray(v)) ? v : { name: '' }
+        this._core = v && typeof v === 'object' && !Array.isArray(v) ? v : { name: '' }
         if (this._initialised) this._rerenderWithSlots()
     }
 
@@ -119,7 +114,7 @@ export class EcosystemMap extends HTMLElement {
     private _distributeSlots(): void {
         if (this._titleSlotNodes.length > 0 && !this.hasAttribute('title')) {
             const container = this.querySelector('.tc-ecosystem-map__title-slot')
-            if (container) this._titleSlotNodes.forEach(n => container.appendChild(n))
+            if (container) this._titleSlotNodes.forEach((n) => container.appendChild(n))
         }
     }
 
@@ -182,7 +177,9 @@ export class EcosystemMap extends HTMLElement {
                     const textAnchor = cosA > 0.3 ? 'start' : cosA < -0.3 ? 'end' : 'middle'
 
                     const nodeId = esc(`${ri}-${ni}-${node.name}`)
-                    const accentStyle = node.accent ? ` style="--em-node-accent:${esc(node.accent)}"` : ''
+                    const accentStyle = node.accent
+                        ? ` style="--em-node-accent:${esc(node.accent)}"`
+                        : ''
 
                     if (node.href) {
                         nodesSvg += `<a class="tc-ecosystem-map__node-link" href="${esc(node.href)}" target="_blank" rel="noopener noreferrer" data-em-id="${nodeId}"${accentStyle}><circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></a>`
@@ -197,21 +194,27 @@ export class EcosystemMap extends HTMLElement {
         const coreDisc = [
             `<circle class="tc-ecosystem-map__core-disc" cx="${cx}" cy="${cy}" r="${coreRadius.toFixed(1)}" />`,
             `<text class="tc-ecosystem-map__core-name" x="${cx}" y="${cy}" dy="${coreLabelDy}" text-anchor="middle">${esc(core.name)}</text>`,
-            core.label ? `<text class="tc-ecosystem-map__core-label" x="${cx}" y="${cy}" dy="0.85em" text-anchor="middle">${esc(core.label)}</text>` : '',
+            core.label
+                ? `<text class="tc-ecosystem-map__core-label" x="${cx}" y="${cy}" dy="0.85em" text-anchor="middle">${esc(core.label)}</text>`
+                : '',
         ].join('')
 
         const coreListItem = core.name
             ? `<span class="tc-ecosystem-map__node tc-ecosystem-map__node--core">${esc(core.name)}</span>`
             : ''
 
-        const ringListGroups = rings.map((ring, ri) => {
-            const items = ring.items.map(node =>
-                node.href
-                    ? `<a class="tc-ecosystem-map__node" href="${esc(node.href)}" target="_blank" rel="noopener noreferrer">${esc(node.name)}</a>`
-                    : `<span class="tc-ecosystem-map__node">${esc(node.name)}</span>`
-            ).join('')
-            return `<div class="tc-ecosystem-map__list-group"><span class="tc-ecosystem-map__list-label">${esc(ring.label ?? `Ring ${ri + 1}`)}</span><div class="tc-ecosystem-map__list-items">${items}</div></div>`
-        }).join('')
+        const ringListGroups = rings
+            .map((ring, ri) => {
+                const items = ring.items
+                    .map((node) =>
+                        node.href
+                            ? `<a class="tc-ecosystem-map__node" href="${esc(node.href)}" target="_blank" rel="noopener noreferrer">${esc(node.name)}</a>`
+                            : `<span class="tc-ecosystem-map__node">${esc(node.name)}</span>`,
+                    )
+                    .join('')
+                return `<div class="tc-ecosystem-map__list-group"><span class="tc-ecosystem-map__list-label">${esc(ring.label ?? `Ring ${ri + 1}`)}</span><div class="tc-ecosystem-map__list-items">${items}</div></div>`
+            })
+            .join('')
 
         const listHtml = `<div class="tc-ecosystem-map__list"><div class="tc-ecosystem-map__list-group"><span class="tc-ecosystem-map__list-label">Core</span><div class="tc-ecosystem-map__list-items">${coreListItem}</div></div>${ringListGroups}</div>`
 

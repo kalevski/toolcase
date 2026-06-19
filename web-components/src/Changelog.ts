@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-changelog'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export interface ChangelogEntry {
     date: string
@@ -79,7 +72,7 @@ export class Changelog extends HTMLElement {
     private _renderEntry(entry: ChangelogEntry): string {
         const tagsHtml =
             entry.tags && entry.tags.length > 0
-                ? `<div class="tc-changelog-tags">${entry.tags.map(t => `<span class="tc-changelog-tag">${esc(t)}</span>`).join('')}</div>`
+                ? `<div class="tc-changelog-tags">${entry.tags.map((t) => `<span class="tc-changelog-tag">${esc(t)}</span>`).join('')}</div>`
                 : ''
         return (
             `<li class="tc-changelog-item">` +
@@ -127,10 +120,11 @@ export class Changelog extends HTMLElement {
         const href = this.readMoreHref
         const label = this.readMoreLabel
 
-        const itemsHtml = visible.map(e => this._renderEntry(e)).join('')
-        const moreHtml = hasMore && href
-            ? `<a class="tc-changelog-more" href="${esc(href)}">${esc(label)}</a>`
-            : ''
+        const itemsHtml = visible.map((e) => this._renderEntry(e)).join('')
+        const moreHtml =
+            hasMore && href
+                ? `<a class="tc-changelog-more" href="${esc(href)}">${esc(label)}</a>`
+                : ''
 
         this.innerHTML =
             `<div class="tc-changelog">` +

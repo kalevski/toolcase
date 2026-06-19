@@ -3,7 +3,6 @@ const TAG_NAME = 'tc-brightness-calibration'
 const DEFAULT_VALUE = 0.5
 
 export class BrightnessCalibration extends HTMLElement {
-
     private _initialised = false
 
     // Optional callback mirror of the `tc-change` CustomEvent.
@@ -45,11 +44,13 @@ export class BrightnessCalibration extends HTMLElement {
     }
 
     private _emitChange(value: number): void {
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -91,7 +92,9 @@ export class BrightnessCalibration extends HTMLElement {
         if (input) {
             input.addEventListener('input', () => {
                 const parsed = parseFloat(input.value)
-                const clamped = Number.isNaN(parsed) ? DEFAULT_VALUE : Math.max(0, Math.min(1, parsed))
+                const clamped = Number.isNaN(parsed)
+                    ? DEFAULT_VALUE
+                    : Math.max(0, Math.min(1, parsed))
                 // setAttribute triggers _patchValue() which refreshes the
                 // percentage readout and the preview gamma in place.
                 this.setAttribute('value', String(clamped))

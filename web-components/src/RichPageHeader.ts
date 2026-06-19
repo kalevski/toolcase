@@ -1,21 +1,8 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-rich-page-header'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const svgStr = (LucideIcons as Record<string, string>)[name]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 export type RichPageHeaderIconColor =
     | 'violet'
@@ -28,7 +15,14 @@ export type RichPageHeaderIconColor =
     | 'rose'
 
 const ICON_COLORS: RichPageHeaderIconColor[] = [
-    'violet', 'cyan', 'emerald', 'amber', 'pink', 'blue', 'slate', 'rose',
+    'violet',
+    'cyan',
+    'emerald',
+    'amber',
+    'pink',
+    'blue',
+    'slate',
+    'rose',
 ]
 
 export class RichPageHeader extends HTMLElement {
@@ -46,9 +40,9 @@ export class RichPageHeader extends HTMLElement {
             this.render()
 
             const chipsEl = this.querySelector('.tc-rich-page-header-chips')
-            if (chipsEl) chipsSlot.forEach(n => chipsEl.appendChild(n))
+            if (chipsEl) chipsSlot.forEach((n) => chipsEl.appendChild(n))
             const actionsEl = this.querySelector('.tc-rich-page-header-actions')
-            if (actionsEl) actionsSlot.forEach(n => actionsEl.appendChild(n))
+            if (actionsEl) actionsSlot.forEach((n) => actionsEl.appendChild(n))
 
             this._initialised = true
         }
@@ -57,15 +51,19 @@ export class RichPageHeader extends HTMLElement {
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
 
-        const chipsSlot = Array.from(this.querySelectorAll('.tc-rich-page-header-chips [slot="chips"]'))
-        const actionsSlot = Array.from(this.querySelectorAll('.tc-rich-page-header-actions [slot="actions"]'))
+        const chipsSlot = Array.from(
+            this.querySelectorAll('.tc-rich-page-header-chips [slot="chips"]'),
+        )
+        const actionsSlot = Array.from(
+            this.querySelectorAll('.tc-rich-page-header-actions [slot="actions"]'),
+        )
 
         this.render()
 
         const chipsEl = this.querySelector('.tc-rich-page-header-chips')
-        if (chipsEl) chipsSlot.forEach(n => chipsEl.appendChild(n))
+        if (chipsEl) chipsSlot.forEach((n) => chipsEl.appendChild(n))
         const actionsEl = this.querySelector('.tc-rich-page-header-actions')
-        if (actionsEl) actionsSlot.forEach(n => actionsEl.appendChild(n))
+        if (actionsEl) actionsSlot.forEach((n) => actionsEl.appendChild(n))
     }
 
     get titleText(): string | null {
@@ -119,13 +117,12 @@ export class RichPageHeader extends HTMLElement {
             ? `<span class="tc-rich-page-header-icon tc-rich-page-header-icon--${iconColor}" aria-hidden="true">${lucideByName(iconNameAttr)}</span>`
             : ''
 
-        const subHtml = sub != null
-            ? `<p class="tc-rich-page-header-sub">${esc(sub)}</p>`
-            : ''
+        const subHtml = sub != null ? `<p class="tc-rich-page-header-sub">${esc(sub)}</p>` : ''
 
-        const descriptionHtml = description != null
-            ? `<p class="tc-rich-page-header-description">${esc(description)}</p>`
-            : ''
+        const descriptionHtml =
+            description != null
+                ? `<p class="tc-rich-page-header-description">${esc(description)}</p>`
+                : ''
 
         this.innerHTML = `<header class="tc-rich-page-header"><div class="tc-rich-page-header-main">${iconHtml}<div class="tc-rich-page-header-body"><div class="tc-rich-page-header-chips"></div><h1 class="tc-rich-page-header-title">${esc(titleText)}</h1>${subHtml}${descriptionHtml}</div></div><div class="tc-rich-page-header-actions"></div></header>`
     }

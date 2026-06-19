@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const InteractPromptDemo: React.FC = () => {
     const holdRef = useRef<any>(null)
@@ -26,47 +25,79 @@ const InteractPromptDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="InteractPrompt"
+                        <tc-rich-page-header
+                            title-text="InteractPrompt"
                             description="Contextual “press X to interact” prompt. A keycap plus a mono uppercase label, with an optional hold-to-interact progress bar. Visibility is driven by the show attribute."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic prompt">
+                            <tc-section-card title="Basic prompt">
                                 <div className="d-flex flex-wrap gap-4 align-items-start">
                                     {/* @ts-ignore */}
-                                    <tc-interact-prompt show key-label="E" text="Interact"></tc-interact-prompt>
+                                    <tc-interact-prompt
+                                        show
+                                        key-label="E"
+                                        text="Interact"
+                                    ></tc-interact-prompt>
                                     {/* @ts-ignore */}
-                                    <tc-interact-prompt show key-label="F" text="Open chest"></tc-interact-prompt>
+                                    <tc-interact-prompt
+                                        show
+                                        key-label="F"
+                                        text="Open chest"
+                                    ></tc-interact-prompt>
                                     {/* @ts-ignore */}
-                                    <tc-interact-prompt show key-label="Space" text="Jump"></tc-interact-prompt>
+                                    <tc-interact-prompt
+                                        show
+                                        key-label="Space"
+                                        text="Jump"
+                                    ></tc-interact-prompt>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Without a keycap">
+                            <tc-section-card title="Without a keycap">
                                 <div className="d-flex flex-wrap gap-4 align-items-start">
                                     {/* @ts-ignore */}
-                                    <tc-interact-prompt show text="Talk to merchant"></tc-interact-prompt>
+                                    <tc-interact-prompt
+                                        show
+                                        text="Talk to merchant"
+                                    ></tc-interact-prompt>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Hold to interact (animated)">
+                            <tc-section-card title="Hold to interact (animated)">
                                 <div className="d-flex flex-wrap gap-4 align-items-start">
                                     {/* @ts-ignore */}
-                                    <tc-interact-prompt ref={holdRef} show key-label="E" text="Hold to revive"></tc-interact-prompt>
+                                    <tc-interact-prompt
+                                        ref={holdRef}
+                                        show
+                                        key-label="E"
+                                        text="Hold to revive"
+                                    ></tc-interact-prompt>
                                     {/* @ts-ignore */}
-                                    <tc-interact-prompt show key-label="R" text="Hold to revive" hold-progress="0.65"></tc-interact-prompt>
+                                    <tc-interact-prompt
+                                        show
+                                        key-label="R"
+                                        text="Hold to revive"
+                                        hold-progress="0.65"
+                                    ></tc-interact-prompt>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Hidden (show absent)">
+                            <tc-section-card title="Hidden (show absent)">
                                 <p className="text-muted mb-2" style={{ fontSize: '0.85rem' }}>
-                                    Without the <code>show</code> attribute the prompt renders nothing — there is an element below this line, but it is hidden.
+                                    Without the <code>show</code> attribute the prompt renders
+                                    nothing — there is an element below this line, but it is hidden.
                                 </p>
                                 {/* @ts-ignore */}
-                                <tc-interact-prompt key-label="E" text="You should not see this"></tc-interact-prompt>
-                            </SectionCard>
+                                <tc-interact-prompt
+                                    key-label="E"
+                                    text="You should not see this"
+                                ></tc-interact-prompt>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

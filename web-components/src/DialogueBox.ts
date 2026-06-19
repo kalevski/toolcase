@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { chevronDownIcon, chevronRightIcon } from './icons'
 
 const TAG_NAME = 'tc-dialogue-box'
@@ -11,15 +12,6 @@ export interface DialogueChoice {
 export interface DialogueBoxEventMap {
     'tc-choice': CustomEvent<{ id: string }>
     'tc-advance': CustomEvent<Record<string, never>>
-}
-
-function esc(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 function prefersReducedMotion(): boolean {
@@ -148,7 +140,10 @@ export class DialogueBox extends HTMLElement {
         }
         const indicator = this.querySelector('.tc-dialogue-box-indicator') as HTMLElement | null
         if (indicator) {
-            indicator.classList.toggle('is-visible', !this._isTyping() && this._choices.length === 0)
+            indicator.classList.toggle(
+                'is-visible',
+                !this._isTyping() && this._choices.length === 0,
+            )
         }
     }
 
@@ -177,7 +172,7 @@ export class DialogueBox extends HTMLElement {
             : ''
         const choicesMarkup = this._choices.length
             ? `<div class="tc-dialogue-box-choices" role="group" aria-label="Dialogue choices">${this._choices
-                  .map(c => {
+                  .map((c) => {
                       const cls = `tc-dialogue-box-choice${c.disabled ? ' is-disabled' : ''}`
                       const disabledAttr = c.disabled ? ' disabled aria-disabled="true"' : ''
                       return `<button type="button" class="${cls}"${disabledAttr} data-id="${esc(c.id)}"><span class="tc-dialogue-box-choice-marker" aria-hidden="true">${chevronRightIcon}</span><span class="tc-dialogue-box-choice-label">${esc(
@@ -196,11 +191,11 @@ export class DialogueBox extends HTMLElement {
         `
         this._updateTyped()
 
-        this.querySelectorAll<HTMLButtonElement>('.tc-dialogue-box-choice').forEach(el => {
+        this.querySelectorAll<HTMLButtonElement>('.tc-dialogue-box-choice').forEach((el) => {
             const handle = (event: Event): void => {
                 event.stopPropagation()
                 const id = el.dataset.id || ''
-                const c = this._choices.find(x => x.id === id)
+                const c = this._choices.find((x) => x.id === id)
                 if (!c || c.disabled) return
                 this._emit('tc-choice', { id })
                 if (typeof this.onChoice === 'function') this.onChoice(id)

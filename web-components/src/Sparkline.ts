@@ -1,12 +1,9 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-sparkline'
 
 export type SparklineType = 'line' | 'bar'
 
 const TYPES: SparklineType[] = ['line', 'bar']
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 function parseIntAttr(raw: string | null, def: number): number {
     if (raw === null) return def
@@ -15,7 +12,6 @@ function parseIntAttr(raw: string | null, def: number): number {
 }
 
 export class Sparkline extends HTMLElement {
-
     private _initialised = false
     // null = fall back to the data attribute; set by the JS property setter
     private _data: number[] | null = null
@@ -46,7 +42,10 @@ export class Sparkline extends HTMLElement {
         if (this._data !== null) return this._data
         const raw = this.getAttribute('data')
         if (!raw) return []
-        return raw.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n))
+        return raw
+            .split(',')
+            .map((s) => parseFloat(s.trim()))
+            .filter((n) => !isNaN(n))
     }
 
     set data(v: number[]) {
@@ -98,11 +97,12 @@ export class Sparkline extends HTMLElement {
         }
 
         const ariaLabel = this._ariaLabel(data)
-        const inner = data.length === 0
-            ? ''
-            : type === 'bar'
-                ? this._buildBars(data, width, height)
-                : this._buildLine(data, width, height)
+        const inner =
+            data.length === 0
+                ? ''
+                : type === 'bar'
+                  ? this._buildBars(data, width, height)
+                  : this._buildLine(data, width, height)
 
         this.innerHTML = `<svg class="tc-sparkline tc-sparkline--${type}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(ariaLabel)}">${inner}</svg>`
     }
@@ -130,7 +130,7 @@ export class Sparkline extends HTMLElement {
             return `<circle class="tc-sparkline-dot" cx="${cx}" cy="${cy}" r="2.5" />`
         }
 
-        const norm = (v: number): number => range === 0 ? 0.5 : (v - min) / range
+        const norm = (v: number): number => (range === 0 ? 0.5 : (v - min) / range)
 
         const pts = data.map((v, i) => {
             const x = pad + (i / (n - 1)) * (width - pad * 2)
@@ -152,13 +152,15 @@ export class Sparkline extends HTMLElement {
         const minVal = Math.min(...data, 0)
         const range = maxVal - minVal || 1
 
-        return data.map((v, i) => {
-            const x = i * (barW + gap)
-            const norm = Math.max(0, (v - minVal) / range)
-            const barH = Math.max(1, norm * height)
-            const y = height - barH
-            return `<rect class="tc-sparkline-bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" />`
-        }).join('')
+        return data
+            .map((v, i) => {
+                const x = i * (barW + gap)
+                const norm = Math.max(0, (v - minVal) / range)
+                const barH = Math.max(1, norm * height)
+                const y = height - barH
+                return `<rect class="tc-sparkline-bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" />`
+            })
+            .join('')
     }
 }
 

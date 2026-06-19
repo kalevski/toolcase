@@ -1,11 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-pulse-indicator'
 
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
 export class PulseIndicator extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -23,7 +19,7 @@ export class PulseIndicator extends HTMLElement {
             this.render()
             if (!this.hasAttribute('label')) {
                 const labelEl = this.querySelector('.tc-pulse-indicator-label')
-                if (labelEl) slotContent.forEach(n => labelEl.appendChild(n))
+                if (labelEl) slotContent.forEach((n) => labelEl.appendChild(n))
             }
             this._initialised = true
         }
@@ -32,13 +28,12 @@ export class PulseIndicator extends HTMLElement {
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
         const labelEl = this.querySelector('.tc-pulse-indicator-label')
-        const slotContent = (!this.hasAttribute('label') && labelEl)
-            ? Array.from(labelEl.childNodes)
-            : []
+        const slotContent =
+            !this.hasAttribute('label') && labelEl ? Array.from(labelEl.childNodes) : []
         this.render()
         if (!this.hasAttribute('label')) {
             const newLabelEl = this.querySelector('.tc-pulse-indicator-label')
-            if (newLabelEl) slotContent.forEach(n => newLabelEl.appendChild(n))
+            if (newLabelEl) slotContent.forEach((n) => newLabelEl.appendChild(n))
         }
     }
 

@@ -1,6 +1,7 @@
 lib
 node_modules
 .parcel-cache
+.DS_Store
 examples/dist
 !examples/dist/CNAME
 tasks/*.md

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-lobby'
 
 export interface LobbyPlayer {
@@ -14,17 +15,7 @@ export interface LobbyEventMap {
     'tc-start': CustomEvent<Record<string, never>>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 export class Lobby extends HTMLElement {
-
     private _initialised = false
     private _players: LobbyPlayer[] = []
 
@@ -118,14 +109,12 @@ export class Lobby extends HTMLElement {
             'tc-lobby-slot',
             'tc-lobby-slot--filled',
             p.ready ? 'tc-lobby-slot--ready' : '',
-        ].filter(Boolean).join(' ')
+        ]
+            .filter(Boolean)
+            .join(' ')
 
-        const rankHtml = p.rank
-            ? `<span class="tc-lobby-rank">${esc(p.rank)}</span>`
-            : ''
-        const hostHtml = p.host
-            ? `<span class="tc-lobby-host-badge">Host</span>`
-            : ''
+        const rankHtml = p.rank ? `<span class="tc-lobby-rank">${esc(p.rank)}</span>` : ''
+        const hostHtml = p.host ? `<span class="tc-lobby-host-badge">Host</span>` : ''
         const readyHtml = p.ready
             ? `<span class="tc-lobby-ready-badge tc-lobby-ready-badge--ready">Ready</span>`
             : `<span class="tc-lobby-ready-badge tc-lobby-ready-badge--waiting">Waiting</span>`
@@ -140,10 +129,12 @@ export class Lobby extends HTMLElement {
     private render(): void {
         const capacity = this.capacity
         const players = this._players.slice(0, capacity)
-        const isHost = players.some(p => p.host)
+        const isHost = players.some((p) => p.host)
         const filled = players.length
 
-        const slots = Array.from({ length: capacity }, (_, i) => this._renderSlot(i, players)).join('')
+        const slots = Array.from({ length: capacity }, (_, i) => this._renderSlot(i, players)).join(
+            '',
+        )
 
         const metaCells: string[] = []
         if (this.lobbyMode) {

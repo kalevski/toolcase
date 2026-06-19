@@ -3,7 +3,6 @@ import { closeIcon } from './icons'
 const TAG_NAME = 'tc-close-button'
 
 export class CloseButton extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['disabled', 'aria-label']
     }

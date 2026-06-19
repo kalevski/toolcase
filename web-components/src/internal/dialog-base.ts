@@ -1,3 +1,4 @@
+import { esc as escShared } from "./esc"
 // Shared scaffold for centered modal dialogs (tc-confirm-dialog,
 // tc-report-dialog). Owns the open/close lifecycle, the one-frame transition
 // dance, scroll-lock, focus trap + restore, Escape/Tab handling, and backdrop
@@ -9,11 +10,7 @@
 let _idCounter = 0
 
 export function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+    return escShared(s)
 }
 
 function getFocusable(root: Element): HTMLElement[] {
@@ -50,6 +47,14 @@ export abstract class DialogBase extends HTMLElement {
     /** Extra document/element listeners beyond keydown + click. */
     protected attachExtraHandlers(): void {}
     protected detachExtraHandlers(): void {}
+    /** Whether opening locks body scroll. Override to false for non-modal/pinned overlays. */
+    protected shouldLockScroll(): boolean {
+        return true
+    }
+    /** Called synchronously once the dialog has opened (e.g. start an auto-dismiss timer). */
+    protected onOpened(): void {}
+    /** Called synchronously when the dialog begins closing (e.g. clear that timer). */
+    protected onClosing(): void {}
 
     static get observedAttributes(): string[] {
         return ['open']
@@ -109,13 +114,15 @@ export abstract class DialogBase extends HTMLElement {
             requestAnimationFrame(() => {
                 this.classList.add(`${p}--open`)
                 panel?.setAttribute('aria-hidden', 'false')
-                this._lockScroll()
+                if (this.shouldLockScroll()) this._lockScroll()
                 this._trapFocus(panel)
             })
+            this.onOpened()
         } else {
+            this.onClosing()
             this.classList.remove(`${p}--open`)
             panel?.setAttribute('aria-hidden', 'true')
-            this._restoreScroll()
+            if (this.shouldLockScroll()) this._restoreScroll()
             this._restoreFocus()
             const delay = this._getTransitionDuration(panel)
             setTimeout(() => {

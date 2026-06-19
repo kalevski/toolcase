@@ -1,14 +1,22 @@
+import { VARIANTS_FULL } from './internal/variants'
 import { Alert as BsAlert } from './internal/Alert'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-alert'
 
-export type AlertVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type AlertVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
-const VARIANTS: AlertVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: AlertVariant[] = [...VARIANTS_FULL]
 
 export class Alert extends HTMLElement {
-
     private _bsAlert: BsAlert | null = null
     private _initialised = false
 
@@ -25,7 +33,7 @@ export class Alert extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-alert-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
         this._initBsAlert()
@@ -42,7 +50,7 @@ export class Alert extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-alert-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         this._initBsAlert()
     }
 

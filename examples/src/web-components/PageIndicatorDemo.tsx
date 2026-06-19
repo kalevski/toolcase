@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PageIndicatorDemo: React.FC = () => {
     const interactiveRef = useRef<any>(null)
@@ -27,34 +26,42 @@ const PageIndicatorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Page Indicator"
+                        <tc-rich-page-header
+                            title-text="Page Indicator"
                             description="Dot page-navigation widget. Fires tc-select with { index } when a dot is clicked."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default (5 pages, index 2)">
+                            <tc-section-card title="Default (5 pages, index 2)">
                                 {/* @ts-ignore */}
                                 <tc-page-indicator count="5" index="2" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Interactive — click a dot">
+                            <tc-section-card title="Interactive — click a dot">
                                 <div className="d-flex align-items-center gap-3">
                                     {/* @ts-ignore */}
                                     <tc-page-indicator ref={interactiveRef} count="7" index="0" />
-                                    <span style={{ fontFamily: 'var(--bs-font-monospace)', fontSize: 12 }}>
+                                    <span
+                                        style={{
+                                            fontFamily: 'var(--bs-font-monospace)',
+                                            fontSize: 12,
+                                        }}
+                                    >
                                         page {activeIndex + 1} / 7
                                     </span>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom size &amp; gap">
+                            <tc-section-card title="Custom size &amp; gap">
                                 {/* @ts-ignore */}
                                 <tc-page-indicator count="6" index="3" size="12" gap="12px" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom colors">
+                            <tc-section-card title="Custom colors">
                                 {/* @ts-ignore */}
                                 <tc-page-indicator
                                     count="5"
@@ -62,7 +69,7 @@ const PageIndicatorDemo: React.FC = () => {
                                     color="var(--tc-border)"
                                     active-color="var(--tc-accent)"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

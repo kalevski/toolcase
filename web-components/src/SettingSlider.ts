@@ -66,7 +66,6 @@ const TAG_DEFAULTS: Record<string, SliderDefaults> = {
  * defaults from the tag name.
  */
 export class SettingSlider extends SettingRowBase {
-
     // Optional callback mirrors of the tc-change / tc-toggle-mute events.
     onChange: ((value: number) => void) | null = null
     onToggleMute: (() => void) | null = null

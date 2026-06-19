@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-comparator'
@@ -14,24 +15,6 @@ export interface ComparatorFeature {
     left: boolean | string | number
     right: boolean | string | number
     description?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const checkIconHtml = lucideByName('check')
@@ -60,16 +43,16 @@ function renderCellValue(val: boolean | string | number): string {
     if (val === true) {
         return (
             `<span class="tc-comparator__indicator tc-comparator__indicator--yes">` +
-                checkIconHtml +
-                `<span class="tc-comparator__sr-only">Supported</span>` +
+            checkIconHtml +
+            `<span class="tc-comparator__sr-only">Supported</span>` +
             `</span>`
         )
     }
     if (val === false) {
         return (
             `<span class="tc-comparator__indicator tc-comparator__indicator--no">` +
-                xIconHtml +
-                `<span class="tc-comparator__sr-only">Not supported</span>` +
+            xIconHtml +
+            `<span class="tc-comparator__sr-only">Not supported</span>` +
             `</span>`
         )
     }
@@ -86,9 +69,9 @@ function renderTechHead(tech: ComparatorTechnology | null): string {
         : ''
     return (
         `<div class="tc-comparator__tech">` +
-            iconHtml +
-            `<span class="tc-comparator__tech-name">${esc(tech.name)}</span>` +
-            labelHtml +
+        iconHtml +
+        `<span class="tc-comparator__tech-name">${esc(tech.name)}</span>` +
+        labelHtml +
         `</div>`
     )
 }
@@ -190,10 +173,8 @@ export class Comparator extends HTMLElement {
         const headerHtml =
             titleAttr || descAttr
                 ? `<div class="tc-comparator__header">${
-                    titleAttr ? `<p class="tc-comparator__title">${esc(titleAttr)}</p>` : ''
-                }${
-                    descAttr ? `<p class="tc-comparator__desc">${esc(descAttr)}</p>` : ''
-                }</div>`
+                      titleAttr ? `<p class="tc-comparator__title">${esc(titleAttr)}</p>` : ''
+                  }${descAttr ? `<p class="tc-comparator__desc">${esc(descAttr)}</p>` : ''}</div>`
                 : ''
 
         const leftHeadHtml = renderTechHead(this._left)
@@ -201,30 +182,32 @@ export class Comparator extends HTMLElement {
 
         const theadHtml =
             `<thead>` +
-                `<tr class="tc-comparator__head-row">` +
-                    `<th class="tc-comparator__cell tc-comparator__cell--left tc-comparator__tech-head" scope="col">${leftHeadHtml}</th>` +
-                    `<th class="tc-comparator__cell tc-comparator__cell--feature" scope="col"></th>` +
-                    `<th class="tc-comparator__cell tc-comparator__cell--right tc-comparator__tech-head" scope="col">${rightHeadHtml}</th>` +
-                `</tr>` +
+            `<tr class="tc-comparator__head-row">` +
+            `<th class="tc-comparator__cell tc-comparator__cell--left tc-comparator__tech-head" scope="col">${leftHeadHtml}</th>` +
+            `<th class="tc-comparator__cell tc-comparator__cell--feature" scope="col"></th>` +
+            `<th class="tc-comparator__cell tc-comparator__cell--right tc-comparator__tech-head" scope="col">${rightHeadHtml}</th>` +
+            `</tr>` +
             `</thead>`
 
         if (isLoading) {
-            const skeletonRows = Array.from({ length: count }, () =>
-                `<tr class="tc-comparator__row tc-comparator__row--skeleton">` +
+            const skeletonRows = Array.from(
+                { length: count },
+                () =>
+                    `<tr class="tc-comparator__row tc-comparator__row--skeleton">` +
                     `<td class="tc-comparator__cell tc-comparator__cell--left"><span class="tc-comparator__skel-cell"></span></td>` +
                     `<td class="tc-comparator__cell tc-comparator__cell--feature"><span class="tc-comparator__skel-label"></span></td>` +
                     `<td class="tc-comparator__cell tc-comparator__cell--right"><span class="tc-comparator__skel-cell"></span></td>` +
-                `</tr>`,
+                    `</tr>`,
             ).join('')
 
             this.innerHTML =
                 `<div class="tc-comparator">${headerHtml}` +
-                    `<div class="tc-comparator-table">` +
-                        `<table class="tc-comparator__table" aria-busy="true">` +
-                            theadHtml +
-                            `<tbody>${skeletonRows}</tbody>` +
-                        `</table>` +
-                    `</div>` +
+                `<div class="tc-comparator-table">` +
+                `<table class="tc-comparator__table" aria-busy="true">` +
+                theadHtml +
+                `<tbody>${skeletonRows}</tbody>` +
+                `</table>` +
+                `</div>` +
                 `</div>`
             return
         }
@@ -232,7 +215,7 @@ export class Comparator extends HTMLElement {
         // Compute winners
         let leftWins = 0
         let rightWins = 0
-        const winners = features.map(f => {
+        const winners = features.map((f) => {
             const w = compareValues(f.left, f.right)
             if (w === 'left') leftWins++
             if (w === 'right') rightWins++
@@ -255,12 +238,12 @@ export class Comparator extends HTMLElement {
                     : ''
                 return (
                     `<tr class="tc-comparator__row">` +
-                        `<td class="${leftCls}">${renderCellValue(f.left)}</td>` +
-                        `<td class="tc-comparator__cell tc-comparator__cell--feature">` +
-                            `<span class="tc-comparator__feature-label">${esc(f.label)}</span>` +
-                            descHtml +
-                        `</td>` +
-                        `<td class="${rightCls}">${renderCellValue(f.right)}</td>` +
+                    `<td class="${leftCls}">${renderCellValue(f.left)}</td>` +
+                    `<td class="tc-comparator__cell tc-comparator__cell--feature">` +
+                    `<span class="tc-comparator__feature-label">${esc(f.label)}</span>` +
+                    descHtml +
+                    `</td>` +
+                    `<td class="${rightCls}">${renderCellValue(f.right)}</td>` +
                     `</tr>`
                 )
             })
@@ -269,26 +252,26 @@ export class Comparator extends HTMLElement {
         const summaryHtml =
             showSum && features.length > 0
                 ? `<tr class="tc-comparator__summary">` +
-                      `<td class="tc-comparator__cell tc-comparator__cell--left">` +
-                          `<span class="tc-comparator__tally">${leftWins} win${leftWins !== 1 ? 's' : ''}</span>` +
-                      `</td>` +
-                      `<td class="tc-comparator__cell tc-comparator__cell--feature">` +
-                          `<span class="tc-comparator__tally-label">Summary</span>` +
-                      `</td>` +
-                      `<td class="tc-comparator__cell tc-comparator__cell--right">` +
-                          `<span class="tc-comparator__tally">${rightWins} win${rightWins !== 1 ? 's' : ''}</span>` +
-                      `</td>` +
+                  `<td class="tc-comparator__cell tc-comparator__cell--left">` +
+                  `<span class="tc-comparator__tally">${leftWins} win${leftWins !== 1 ? 's' : ''}</span>` +
+                  `</td>` +
+                  `<td class="tc-comparator__cell tc-comparator__cell--feature">` +
+                  `<span class="tc-comparator__tally-label">Summary</span>` +
+                  `</td>` +
+                  `<td class="tc-comparator__cell tc-comparator__cell--right">` +
+                  `<span class="tc-comparator__tally">${rightWins} win${rightWins !== 1 ? 's' : ''}</span>` +
+                  `</td>` +
                   `</tr>`
                 : ''
 
         this.innerHTML =
             `<div class="tc-comparator">${headerHtml}` +
-                `<div class="tc-comparator-table">` +
-                    `<table class="tc-comparator__table">` +
-                        theadHtml +
-                        `<tbody>${featureRowsHtml}${summaryHtml}</tbody>` +
-                    `</table>` +
-                `</div>` +
+            `<div class="tc-comparator-table">` +
+            `<table class="tc-comparator__table">` +
+            theadHtml +
+            `<tbody>${featureRowsHtml}${summaryHtml}</tbody>` +
+            `</table>` +
+            `</div>` +
             `</div>`
     }
 }

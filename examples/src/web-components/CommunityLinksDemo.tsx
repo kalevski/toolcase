@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const LINKS_BASIC = [
     { label: 'GitHub', href: '#', icon: 'github', count: '12.4k' },
@@ -8,11 +7,35 @@ const LINKS_BASIC = [
 ]
 
 const LINKS_FULL = [
-    { label: 'GitHub', href: '#', icon: 'github', count: '12.4k', description: 'Source code & issues' },
-    { label: 'Discord', href: '#', icon: 'discord', count: '8.2k', description: 'Live chat & support' },
+    {
+        label: 'GitHub',
+        href: '#',
+        icon: 'github',
+        count: '12.4k',
+        description: 'Source code & issues',
+    },
+    {
+        label: 'Discord',
+        href: '#',
+        icon: 'discord',
+        count: '8.2k',
+        description: 'Live chat & support',
+    },
     { label: 'Twitter / X', href: '#', icon: 'x', count: '5.1k', description: 'Announcements' },
-    { label: 'YouTube', href: '#', icon: 'youtube', count: '2.3k', description: 'Tutorials & demos' },
-    { label: 'Reddit', href: '#', icon: 'reddit', count: '1.8k', description: 'Community discussions' },
+    {
+        label: 'YouTube',
+        href: '#',
+        icon: 'youtube',
+        count: '2.3k',
+        description: 'Tutorials & demos',
+    },
+    {
+        label: 'Reddit',
+        href: '#',
+        icon: 'reddit',
+        count: '1.8k',
+        description: 'Community discussions',
+    },
     { label: 'npm', href: '#', icon: 'npm', count: '450k', description: 'Package registry' },
 ]
 
@@ -50,36 +73,42 @@ const CommunityLinksDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CommunityLinks"
+                        <tc-rich-page-header
+                            title-text="CommunityLinks"
                             description="Grid of community platform links (GitHub, Discord, etc.) with icons, labels, optional descriptions, and counts. Set links via the JS links property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic (icons + counts, title attribute)">
+                            <tc-section-card title="Basic (icons + counts, title attribute)">
                                 {/* @ts-ignore */}
                                 <tc-community-links ref={basicRef} title="Join our community" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Full (icons + descriptions + counts)">
+                            <tc-section-card title="Full (icons + descriptions + counts)">
                                 {/* @ts-ignore */}
-                                <tc-community-links ref={fullRef} title="Community &amp; resources" />
-                            </SectionCard>
+                                <tc-community-links
+                                    ref={fullRef}
+                                    title="Community &amp; resources"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Without counts or title">
+                            <tc-section-card title="Without counts or title">
                                 {/* @ts-ignore */}
                                 <tc-community-links ref={noCountRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Title via slot">
+                            <tc-section-card title="Title via slot">
                                 {/* @ts-ignore */}
                                 <tc-community-links ref={slotTitleRef}>
                                     <span slot="title" style={{ fontStyle: 'italic' }}>
                                         Slotted heading
                                     </span>
                                 </tc-community-links>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

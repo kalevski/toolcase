@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-switch'
 
 let _idCounter = 0
@@ -10,7 +11,6 @@ let _idCounter = 0
 // state fades the whole row well past the off state so the two never look alike.
 // All cosmetics flow through `--bs-switch-*`.
 export class Switch extends HTMLElement {
-
     private _inputId: string
     private _labelId: string
     private _initialised = false
@@ -107,9 +107,10 @@ export class Switch extends HTMLElement {
         const disabledAttr = disabled ? ' disabled' : ''
         const labelledBy = label != null ? ` aria-labelledby="${this._labelId}"` : ''
 
-        const labelHtml = label != null
-            ? `<label class="tc-switch__label" id="${this._labelId}" for="${this._inputId}">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label != null
+                ? `<label class="tc-switch__label" id="${this._labelId}" for="${this._inputId}">${esc(label)}</label>`
+                : ''
 
         this.innerHTML = [
             `<div class="tc-switch__row${reverseClass}${disabledClass}">`,
@@ -138,10 +139,6 @@ export class Switch extends HTMLElement {
     private emit(type: string, detail: Record<string, unknown>): void {
         this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }))
     }
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 declare global {

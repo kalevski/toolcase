@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SAMPLE_ISSUES = [
     {
@@ -91,51 +90,64 @@ const GoodFirstIssuesDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="GoodFirstIssues"
+                        <tc-rich-page-header
+                            title-text="GoodFirstIssues"
                             description="Bordered list of GitHub good-first-issue items with title links, labels, comment count, and relative update time. Set issues via the JS issues property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Default (no header)">
+                            <tc-section-card title="Default (no header)">
                                 {/* @ts-ignore */}
                                 <tc-good-first-issues ref={defaultRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With title attribute">
+                            <tc-section-card title="With title attribute">
                                 {/* @ts-ignore */}
-                                <tc-good-first-issues ref={titledRef} title="Open for contributions" />
-                            </SectionCard>
+                                <tc-good-first-issues
+                                    ref={titledRef}
+                                    title="Open for contributions"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="With slot=title">
+                            <tc-section-card title="With slot=title">
                                 {/* @ts-ignore */}
                                 <tc-good-first-issues ref={slottedTitleRef}>
                                     <strong slot="title">Good First Issues</strong>
                                 </tc-good-first-issues>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Empty state — default message">
+                            <tc-section-card title="Empty state — default message">
                                 {/* @ts-ignore */}
-                                <tc-good-first-issues ref={emptyDefaultRef} title="Contributions welcome" />
-                            </SectionCard>
+                                <tc-good-first-issues
+                                    ref={emptyDefaultRef}
+                                    title="Contributions welcome"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Empty state — slot=empty">
+                            <tc-section-card title="Empty state — slot=empty">
                                 {/* @ts-ignore */}
                                 <tc-good-first-issues ref={emptySlottedRef} title="Nothing yet">
                                     <span slot="empty">All caught up — check back later.</span>
                                 </tc-good-first-issues>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="tc-issue-click event">
+                            <tc-section-card title="tc-issue-click event">
                                 {/* @ts-ignore */}
                                 <tc-good-first-issues ref={eventRef} title="Click an issue title" />
-                                <p className="mt-3 mb-0" style={{ fontSize: '0.875rem', color: 'var(--tc-text-muted)' }}>
-                                    Last clicked: <span ref={lastClickRef} style={{ fontStyle: 'italic' }}>—</span>
+                                <p
+                                    className="mt-3 mb-0"
+                                    style={{ fontSize: '0.875rem', color: 'var(--tc-text-muted)' }}
+                                >
+                                    Last clicked:{' '}
+                                    <span ref={lastClickRef} style={{ fontStyle: 'italic' }}>
+                                        —
+                                    </span>
                                 </p>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-stat-card'
@@ -19,19 +20,6 @@ const DELTA_ARIA_LABELS: Record<StatCardDeltaKind, string> = {
     neutral: 'no change',
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const svg = (LucideIcons as Record<string, string>)[name]
-    return svg ?? ''
-}
-
 function resolveDeltaIcon(kind: StatCardDeltaKind): string {
     for (const k of DELTA_ICON_KEYS[kind]) {
         const svg = lucideByName(k)
@@ -50,20 +38,28 @@ export class StatCard extends HTMLElement {
     private _valueSlotNodes: Node[] = []
 
     static get observedAttributes(): string[] {
-        return ['icon', 'label', 'value', 'unit', 'delta', 'delta-kind', 'helper', 'footer', 'loading']
+        return [
+            'icon',
+            'label',
+            'value',
+            'unit',
+            'delta',
+            'delta-kind',
+            'helper',
+            'footer',
+            'loading',
+        ]
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this._valueSlotNodes = !this.hasAttribute('value')
-                ? Array.from(this.childNodes)
-                : []
+            this._valueSlotNodes = !this.hasAttribute('value') ? Array.from(this.childNodes) : []
 
             this.render()
 
             if (!this.hasAttribute('value')) {
                 const valueEl = this.querySelector('.tc-stat-card-value')
-                if (valueEl) this._valueSlotNodes.forEach(n => valueEl.appendChild(n))
+                if (valueEl) this._valueSlotNodes.forEach((n) => valueEl.appendChild(n))
             }
 
             this._initialised = true
@@ -85,7 +81,7 @@ export class StatCard extends HTMLElement {
 
         if (!this.hasAttribute('value')) {
             const newValueEl = this.querySelector('.tc-stat-card-value')
-            if (newValueEl) this._valueSlotNodes.forEach(n => newValueEl.appendChild(n))
+            if (newValueEl) this._valueSlotNodes.forEach((n) => newValueEl.appendChild(n))
         }
     }
 
@@ -198,9 +194,7 @@ export class StatCard extends HTMLElement {
             : ''
 
         // Value row (attribute-driven content; slot children injected after render)
-        const unitHtml = unit
-            ? `<span class="tc-stat-card-unit">${esc(unit)}</span>`
-            : ''
+        const unitHtml = unit ? `<span class="tc-stat-card-unit">${esc(unit)}</span>` : ''
         const valueContent = value !== null ? esc(value) : ''
         const valueHtml = [
             '<div class="tc-stat-card-value-row">',
@@ -220,14 +214,10 @@ export class StatCard extends HTMLElement {
             : ''
 
         // Helper text
-        const helperHtml = helper
-            ? `<span class="tc-stat-card-helper">${esc(helper)}</span>`
-            : ''
+        const helperHtml = helper ? `<span class="tc-stat-card-helper">${esc(helper)}</span>` : ''
 
         // Footer
-        const footerHtml = footer
-            ? `<div class="tc-stat-card-footer">${esc(footer)}</div>`
-            : ''
+        const footerHtml = footer ? `<div class="tc-stat-card-footer">${esc(footer)}</div>` : ''
 
         this.innerHTML = [
             '<div class="card tc-stat-card">',

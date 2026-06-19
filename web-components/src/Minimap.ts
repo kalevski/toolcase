@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-minimap'
 
 export interface MinimapMarker {
@@ -8,20 +9,20 @@ export interface MinimapMarker {
     size?: number
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 export class Minimap extends HTMLElement {
     private _initialised = false
     private _markers: MinimapMarker[] = []
 
     static get observedAttributes(): string[] {
-        return ['world-x', 'world-y', 'world-width', 'world-height', 'background-image', 'size', 'rotation']
+        return [
+            'world-x',
+            'world-y',
+            'world-width',
+            'world-height',
+            'background-image',
+            'size',
+            'rotation',
+        ]
     }
 
     connectedCallback(): void {
@@ -43,17 +44,33 @@ export class Minimap extends HTMLElement {
         return Number.isFinite(parsed) ? parsed : fallback
     }
 
-    get worldX(): number { return this.numberAttr('world-x', 0) }
-    set worldX(v: number) { this.setAttribute('world-x', String(v)) }
+    get worldX(): number {
+        return this.numberAttr('world-x', 0)
+    }
+    set worldX(v: number) {
+        this.setAttribute('world-x', String(v))
+    }
 
-    get worldY(): number { return this.numberAttr('world-y', 0) }
-    set worldY(v: number) { this.setAttribute('world-y', String(v)) }
+    get worldY(): number {
+        return this.numberAttr('world-y', 0)
+    }
+    set worldY(v: number) {
+        this.setAttribute('world-y', String(v))
+    }
 
-    get worldWidth(): number { return this.numberAttr('world-width', 100) }
-    set worldWidth(v: number) { this.setAttribute('world-width', String(v)) }
+    get worldWidth(): number {
+        return this.numberAttr('world-width', 100)
+    }
+    set worldWidth(v: number) {
+        this.setAttribute('world-width', String(v))
+    }
 
-    get worldHeight(): number { return this.numberAttr('world-height', 100) }
-    set worldHeight(v: number) { this.setAttribute('world-height', String(v)) }
+    get worldHeight(): number {
+        return this.numberAttr('world-height', 100)
+    }
+    set worldHeight(v: number) {
+        this.setAttribute('world-height', String(v))
+    }
 
     get backgroundImage(): string {
         return this.getAttribute('background-image') ?? ''
@@ -74,8 +91,12 @@ export class Minimap extends HTMLElement {
         else this.setAttribute('size', String(v))
     }
 
-    get rotation(): number { return this.numberAttr('rotation', 0) }
-    set rotation(v: number) { this.setAttribute('rotation', String(v)) }
+    get rotation(): number {
+        return this.numberAttr('rotation', 0)
+    }
+    set rotation(v: number) {
+        this.setAttribute('rotation', String(v))
+    }
 
     get markers(): MinimapMarker[] {
         return this._markers.slice()
@@ -100,19 +121,22 @@ export class Minimap extends HTMLElement {
         const wh = Math.max(1, this.worldHeight)
         const rotation = this.rotation
 
-        const markersMarkup = this._markers.map((m) => {
-            const px = ((m.x - wx) / ww) * 100
-            const py = ((m.y - wy) / wh) * 100
-            if (px < 0 || px > 100 || py < 0 || py > 100) return ''
-            const colorProp = m.color ? `--bs-minimap-marker-color:${esc(m.color)};` : ''
-            const sizeProp = m.size ? `--bs-minimap-marker-size:${m.size}px;` : ''
-            return `<span class="tc-minimap__marker" data-id="${esc(m.id)}" role="img" aria-label="Marker ${esc(m.id)}" style="left:${px.toFixed(2)}%;top:${py.toFixed(2)}%;${colorProp}${sizeProp}"></span>`
-        }).join('')
+        const markersMarkup = this._markers
+            .map((m) => {
+                const px = ((m.x - wx) / ww) * 100
+                const py = ((m.y - wy) / wh) * 100
+                if (px < 0 || px > 100 || py < 0 || py > 100) return ''
+                const colorProp = m.color ? `--bs-minimap-marker-color:${esc(m.color)};` : ''
+                const sizeProp = m.size ? `--bs-minimap-marker-size:${m.size}px;` : ''
+                return `<span class="tc-minimap__marker" data-id="${esc(m.id)}" role="img" aria-label="Marker ${esc(m.id)}" style="left:${px.toFixed(2)}%;top:${py.toFixed(2)}%;${colorProp}${sizeProp}"></span>`
+            })
+            .join('')
 
         const markerCount = this._markers.length
-        const ariaLabel = markerCount === 0
-            ? 'Minimap — no markers'
-            : `Minimap — ${markerCount} marker${markerCount !== 1 ? 's' : ''}`
+        const ariaLabel =
+            markerCount === 0
+                ? 'Minimap — no markers'
+                : `Minimap — ${markerCount} marker${markerCount !== 1 ? 's' : ''}`
 
         this.classList.add('tc-minimap')
         this.setAttribute('role', 'img')

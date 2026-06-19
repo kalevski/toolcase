@@ -1,9 +1,9 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-date-picker'
 
 let _idCounter = 0
 
 export class DatePicker extends HTMLElement {
-
     private _inputId: string
     private _initialised = false
 
@@ -51,7 +51,9 @@ export class DatePicker extends HTMLElement {
     }
 
     get value(): string {
-        return this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
+        return (
+            this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
+        )
     }
     set value(v: string) {
         const input = this.querySelector<HTMLInputElement>('input')
@@ -88,11 +90,13 @@ export class DatePicker extends HTMLElement {
         if (input.tagName !== 'INPUT') return
         const newValue = input.value
         this.setAttribute('value', newValue)
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: newValue },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: newValue },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(newValue)
     }
 
@@ -101,16 +105,18 @@ export class DatePicker extends HTMLElement {
         const disabled = this.disabled
         const min = this.min
         const max = this.max
-        const currentValue = this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
+        const currentValue =
+            this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
 
         const disabledAttr = disabled ? ' disabled' : ''
         const minAttr = min != null ? ` min="${esc(min)}"` : ''
         const maxAttr = max != null ? ` max="${esc(max)}"` : ''
         const valueAttr = currentValue ? ` value="${esc(currentValue)}"` : ''
 
-        const labelHtml = label != null
-            ? `<label class="form-label" for="${this._inputId}">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label != null
+                ? `<label class="form-label" for="${this._inputId}">${esc(label)}</label>`
+                : ''
 
         this.innerHTML = [
             `<div class="tc-date-picker">`,
@@ -119,10 +125,6 @@ export class DatePicker extends HTMLElement {
             `</div>`,
         ].join('')
     }
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 declare global {

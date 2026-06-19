@@ -18,11 +18,11 @@ export class DashboardSidebar extends HTMLElement {
 
             // Distribute slot nodes into their respective containers
             const brandEl = this.querySelector('.tc-dashboard-sidebar-brand')
-            if (brandEl) brandNodes.forEach(n => brandEl.appendChild(n))
+            if (brandEl) brandNodes.forEach((n) => brandEl.appendChild(n))
             const menuEl = this.querySelector('.tc-dashboard-sidebar-menu')
-            if (menuEl) menuNodes.forEach(n => menuEl.appendChild(n))
+            if (menuEl) menuNodes.forEach((n) => menuEl.appendChild(n))
             const panelEl = this.querySelector('.tc-dashboard-sidebar-panel')
-            if (panelEl) panelNodes.forEach(n => panelEl.appendChild(n))
+            if (panelEl) panelNodes.forEach((n) => panelEl.appendChild(n))
 
             this._initialised = true
         }

@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-matchmaking-screen'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type MatchmakingScreenState = 'searching' | 'connecting' | 'found' | 'failed' | 'idle'
 
@@ -18,7 +11,6 @@ export interface MatchmakingScreenEventMap {
 }
 
 export class MatchmakingScreen extends HTMLElement {
-
     private _initialised = false
 
     onAccept: (() => void) | null = null
@@ -43,7 +35,7 @@ export class MatchmakingScreen extends HTMLElement {
 
     get state(): MatchmakingScreenState {
         const raw = this.getAttribute('state') as MatchmakingScreenState | null
-        return (raw && STATES.includes(raw)) ? raw : 'idle'
+        return raw && STATES.includes(raw) ? raw : 'idle'
     }
     set state(v: MatchmakingScreenState) {
         if (v) this.setAttribute('state', v)
@@ -109,23 +101,33 @@ export class MatchmakingScreen extends HTMLElement {
 
     private _titleFor(state: MatchmakingScreenState): string {
         switch (state) {
-            case 'searching':  return 'Searching for Match'
-            case 'connecting': return 'Connecting'
-            case 'found':      return this.foundLabel
-            case 'failed':     return 'Match Failed'
+            case 'searching':
+                return 'Searching for Match'
+            case 'connecting':
+                return 'Connecting'
+            case 'found':
+                return this.foundLabel
+            case 'failed':
+                return 'Match Failed'
             case 'idle':
-            default:           return 'Idle'
+            default:
+                return 'Idle'
         }
     }
 
     private _eyebrowFor(state: MatchmakingScreenState): string {
         switch (state) {
-            case 'searching':  return 'Matchmaking'
-            case 'connecting': return 'Joining'
-            case 'found':      return 'Ready'
-            case 'failed':     return 'Error'
+            case 'searching':
+                return 'Matchmaking'
+            case 'connecting':
+                return 'Joining'
+            case 'found':
+                return 'Ready'
+            case 'failed':
+                return 'Error'
             case 'idle':
-            default:           return 'Matchmaking'
+            default:
+                return 'Matchmaking'
         }
     }
 
@@ -174,31 +176,34 @@ export class MatchmakingScreen extends HTMLElement {
 
         // Meta row — Mode, Region, elapsed, ETA (only for active searching/connecting)
         const metaItems: string[] = []
-        if (mode) metaItems.push(
-            `<div class="tc-matchmaking-screen-meta-item">
+        if (mode)
+            metaItems.push(
+                `<div class="tc-matchmaking-screen-meta-item">
                 <span class="tc-matchmaking-screen-meta-key">Mode</span>
                 <span class="tc-matchmaking-screen-meta-val">${esc(mode)}</span>
-            </div>`
-        )
-        if (region) metaItems.push(
-            `<div class="tc-matchmaking-screen-meta-item">
+            </div>`,
+            )
+        if (region)
+            metaItems.push(
+                `<div class="tc-matchmaking-screen-meta-item">
                 <span class="tc-matchmaking-screen-meta-key">Region</span>
                 <span class="tc-matchmaking-screen-meta-val">${esc(region)}</span>
-            </div>`
-        )
+            </div>`,
+            )
         if (state === 'searching' || state === 'connecting') {
             metaItems.push(
                 `<div class="tc-matchmaking-screen-meta-item">
                     <span class="tc-matchmaking-screen-meta-key">Elapsed</span>
                     <span class="tc-matchmaking-screen-meta-val">${esc(this._formatDuration(elapsed))}</span>
-                </div>`
+                </div>`,
             )
-            if (estimated > 0) metaItems.push(
-                `<div class="tc-matchmaking-screen-meta-item">
+            if (estimated > 0)
+                metaItems.push(
+                    `<div class="tc-matchmaking-screen-meta-item">
                     <span class="tc-matchmaking-screen-meta-key">ETA</span>
                     <span class="tc-matchmaking-screen-meta-val">${esc(this._formatDuration(estimated))}</span>
-                </div>`
-            )
+                </div>`,
+                )
         }
         const metaMarkup = metaItems.length
             ? `<div class="tc-matchmaking-screen-meta">${metaItems.join('')}</div>`
@@ -206,10 +211,13 @@ export class MatchmakingScreen extends HTMLElement {
 
         // State indicator ring — spinning for active, check for found, x for failed
         const isActive = state === 'searching' || state === 'connecting'
-        const ringMod = isActive ? ' tc-matchmaking-screen-ring--spin'
-            : state === 'found' ? ' tc-matchmaking-screen-ring--found'
-                : state === 'failed' ? ' tc-matchmaking-screen-ring--failed'
-                    : ''
+        const ringMod = isActive
+            ? ' tc-matchmaking-screen-ring--spin'
+            : state === 'found'
+              ? ' tc-matchmaking-screen-ring--found'
+              : state === 'failed'
+                ? ' tc-matchmaking-screen-ring--failed'
+                : ''
 
         const ringMarkup = `<div class="tc-matchmaking-screen-ring${ringMod}" aria-hidden="true">
             ${this._iconFor(state)}
@@ -251,5 +259,7 @@ export class MatchmakingScreen extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: MatchmakingScreen }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: MatchmakingScreen
+    }
 }

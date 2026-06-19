@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-command-palette'
@@ -14,24 +15,6 @@ export interface CommandPaletteItem {
     icon?: string
     shortcut?: string
     keywords?: string[]
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const searchIconHtml = lucideByName('search')
@@ -141,15 +124,15 @@ export class CommandPalette extends HTMLElement {
     private _matches(item: CommandPaletteItem, query: string): boolean {
         if (!query) return true
         const haystack = [item.label, ...(item.keywords ?? [])].join(' ').toLowerCase()
-        return query.split(/\s+/).every(word => haystack.includes(word))
+        return query.split(/\s+/).every((word) => haystack.includes(word))
     }
 
     private _computeView(): { groups: PaletteGroup[]; flat: CommandPaletteItem[] } {
         const q = this._query.trim().toLowerCase()
-        const filtered = this._items.filter(it => this._matches(it, q))
+        const filtered = this._items.filter((it) => this._matches(it, q))
         const groups: PaletteGroup[] = []
         const seen = new Map<string, number>()
-        filtered.forEach(it => {
+        filtered.forEach((it) => {
             const g = it.group ?? ''
             if (!seen.has(g)) {
                 seen.set(g, groups.length)
@@ -157,7 +140,7 @@ export class CommandPalette extends HTMLElement {
             }
             groups[seen.get(g)!].items.push(it)
         })
-        const flat = groups.flatMap(g => g.items)
+        const flat = groups.flatMap((g) => g.items)
         return { groups, flat }
     }
 
@@ -192,11 +175,13 @@ export class CommandPalette extends HTMLElement {
     }
 
     private _requestClose(): void {
-        this.dispatchEvent(new CustomEvent('tc-close', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-close', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this.onClose === 'function') this.onClose()
     }
 
@@ -204,11 +189,13 @@ export class CommandPalette extends HTMLElement {
         const { flat } = this._computeView()
         const item = flat[flatIdx]
         if (!item) return
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { item },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { item },
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(item)
         this._requestClose()
     }
@@ -219,7 +206,7 @@ export class CommandPalette extends HTMLElement {
         this._highlighted = idx
         const list = this.querySelector('.tc-command-palette-list')
         if (!list) return
-        list.querySelectorAll<HTMLElement>('.tc-command-palette-item').forEach(el => {
+        list.querySelectorAll<HTMLElement>('.tc-command-palette-item').forEach((el) => {
             const isActive = el.getAttribute('data-idx') === String(idx)
             el.classList.toggle('tc-command-palette-item--active', isActive)
             el.setAttribute('aria-selected', isActive ? 'true' : 'false')
@@ -326,7 +313,7 @@ export class CommandPalette extends HTMLElement {
         return shortcut
             .trim()
             .split(/\s+/)
-            .map(k => `<kbd class="tc-command-palette-key">${esc(k)}</kbd>`)
+            .map((k) => `<kbd class="tc-command-palette-key">${esc(k)}</kbd>`)
             .join('')
     }
 

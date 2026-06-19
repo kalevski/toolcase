@@ -9,7 +9,6 @@ const TAG_NAME = 'tc-reset-to-defaults'
 // toolcase slate/ink look.
 
 export class ResetToDefaults extends SettingRowBase {
-
     // Callback mirror of the `tc-reset` event.
     onReset: (() => void) | null = null
 
@@ -70,7 +69,7 @@ export class ResetToDefaults extends SettingRowBase {
 
         actions.addEventListener('click', (e: Event) => {
             const btn = (e.target as Element).closest<HTMLButtonElement>(
-                '.tc-reset-to-defaults__btn'
+                '.tc-reset-to-defaults__btn',
             )
             if (!btn || btn.disabled) return
 

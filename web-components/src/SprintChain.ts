@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-sprint-chain'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type SprintChainState = 'past' | 'now' | 'future'
 
@@ -43,9 +36,9 @@ export class SprintChain extends HTMLElement {
 
             if (hasHeader) {
                 const startEl = this.querySelector('.tc-sprint-chain-header-start')
-                if (startEl) headerNodes.forEach(n => startEl.appendChild(n))
+                if (startEl) headerNodes.forEach((n) => startEl.appendChild(n))
                 const endEl = this.querySelector('.tc-sprint-chain-header-end')
-                if (endEl) headerEndNodes.forEach(n => endEl.appendChild(n))
+                if (endEl) headerEndNodes.forEach((n) => endEl.appendChild(n))
             }
 
             this._initialised = true
@@ -85,45 +78,48 @@ export class SprintChain extends HTMLElement {
     }
 
     private _rerenderWithSlots(): void {
-        const headerNodes = Array.from(this.querySelectorAll('.tc-sprint-chain-header-start [slot="header"]'))
-        const headerEndNodes = Array.from(this.querySelectorAll('.tc-sprint-chain-header-end [slot="header-end"]'))
+        const headerNodes = Array.from(
+            this.querySelectorAll('.tc-sprint-chain-header-start [slot="header"]'),
+        )
+        const headerEndNodes = Array.from(
+            this.querySelectorAll('.tc-sprint-chain-header-end [slot="header-end"]'),
+        )
         const hasHeader = headerNodes.length > 0 || headerEndNodes.length > 0
 
         this.render(hasHeader)
 
         if (hasHeader) {
             const startEl = this.querySelector('.tc-sprint-chain-header-start')
-            if (startEl) headerNodes.forEach(n => startEl.appendChild(n))
+            if (startEl) headerNodes.forEach((n) => startEl.appendChild(n))
             const endEl = this.querySelector('.tc-sprint-chain-header-end')
-            if (endEl) headerEndNodes.forEach(n => endEl.appendChild(n))
+            if (endEl) headerEndNodes.forEach((n) => endEl.appendChild(n))
         }
     }
 
     private render(showHeader: boolean): void {
         const currentId = this.getAttribute('current-id') ?? ''
         const colsAttr = this.getAttribute('columns')
-        const cols = colsAttr
-            ? Math.max(1, parseInt(colsAttr, 10) || 1)
-            : this._items.length || 1
+        const cols = colsAttr ? Math.max(1, parseInt(colsAttr, 10) || 1) : this._items.length || 1
 
         const headerHtml = showHeader
             ? `<div class="tc-sprint-chain-header"><div class="tc-sprint-chain-header-start"></div><div class="tc-sprint-chain-header-end"></div></div>`
             : ''
 
-        const itemsHtml = this._items.map((it, i) => {
-            const state = it.state ?? deriveState(this._items, currentId, i)
-            const ariaCurrent = state === 'now' ? ' aria-current="step"' : ''
-            const tagHtml = it.tag != null
-                ? `<span class="tc-sprint-chain-tag">${esc(it.tag)}</span>`
-                : ''
-            return (
-                `<li class="tc-sprint-chain-item tc-sprint-chain-item-${state}"${ariaCurrent}>` +
-                `<span class="tc-sprint-chain-node" aria-hidden="true"></span>` +
-                `<span class="tc-sprint-chain-label">${esc(it.label)}</span>` +
-                tagHtml +
-                `</li>`
-            )
-        }).join('')
+        const itemsHtml = this._items
+            .map((it, i) => {
+                const state = it.state ?? deriveState(this._items, currentId, i)
+                const ariaCurrent = state === 'now' ? ' aria-current="step"' : ''
+                const tagHtml =
+                    it.tag != null ? `<span class="tc-sprint-chain-tag">${esc(it.tag)}</span>` : ''
+                return (
+                    `<li class="tc-sprint-chain-item tc-sprint-chain-item-${state}"${ariaCurrent}>` +
+                    `<span class="tc-sprint-chain-node" aria-hidden="true"></span>` +
+                    `<span class="tc-sprint-chain-label">${esc(it.label)}</span>` +
+                    tagHtml +
+                    `</li>`
+                )
+            })
+            .join('')
 
         this.innerHTML =
             `<div class="tc-sprint-chain">` +

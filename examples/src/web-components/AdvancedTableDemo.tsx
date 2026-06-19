@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 import type {
     AdvancedTableColumn,
     AdvancedTableFilter,
@@ -113,7 +112,10 @@ const AdvancedTableDemo: React.FC = () => {
     const loadingRef = useRef<any>(null)
 
     const [filterValues, setFilterValues] = useState<Record<string, any>>(INITIAL_FILTERS)
-    const [sort, setSort] = useState<AdvancedTableSort | null>({ column: 'commits', direction: 'desc' })
+    const [sort, setSort] = useState<AdvancedTableSort | null>({
+        column: 'commits',
+        direction: 'desc',
+    })
     const [offset, setOffset] = useState(0)
 
     // Wire events once. The element drives its own internal sort/offset and emits
@@ -221,7 +223,8 @@ const AdvancedTableDemo: React.FC = () => {
 
     const matchCount = DATA.filter(
         (r) =>
-            (!filterValues.name || r.name.toLowerCase().includes(String(filterValues.name).toLowerCase())) &&
+            (!filterValues.name ||
+                r.name.toLowerCase().includes(String(filterValues.name).toLowerCase())) &&
             (!filterValues.role || r.role === filterValues.role) &&
             (!filterValues.team || r.team === filterValues.team) &&
             r.commits >= (parseInt(String(filterValues.minCommits ?? ''), 10) || 0) &&
@@ -233,14 +236,17 @@ const AdvancedTableDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Advanced Table"
+                        <tc-rich-page-header
+                            title-text="Advanced Table"
                             description="Data table with a filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer driven by the shared tc-pagination component. filters / sortableColumns / sort are set via JS properties, body rows are projected as slotted <tbody> rows, and the element emits tc-filter-change, tc-sort-change, and tc-page-change."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Filters + sortable headers + pagination">
+                            <tc-section-card title="Filters + sortable headers + pagination">
                                 {/* Extra control above the table: a tc-switch wired into
                                     the same filterValues state as the built-in filters. */}
                                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
@@ -251,19 +257,22 @@ const AdvancedTableDemo: React.FC = () => {
                                     ></tc-switch>
                                     <span
                                         className="font-monospace"
-                                        style={{ fontSize: '0.75rem', color: 'var(--tc-text-muted)' }}
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            color: 'var(--tc-text-muted)',
+                                        }}
                                     >
                                         {matchCount} of {DATA.length} match
                                     </span>
                                 </div>
                                 {/* @ts-ignore */}
                                 <tc-advanced-table ref={tableRef}></tc-advanced-table>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading overlay (controls disabled, rows blocked)">
+                            <tc-section-card title="Loading overlay (controls disabled, rows blocked)">
                                 {/* @ts-ignore */}
                                 <tc-advanced-table ref={loadingRef}></tc-advanced-table>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

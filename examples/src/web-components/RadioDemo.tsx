@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const RadioDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Radio"
+                    <tc-rich-page-header
+                        title-text="Radio"
                         description="Bootstrap radio button wrapper with label, grouping via name, inline/reverse layout, and disabled support."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default Group">
+                        <tc-section-card title="Default Group">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-radio label="Option 1" name="group1" value="1" checked />
@@ -22,9 +24,9 @@ const RadioDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-radio label="Option 3" name="group1" value="3" />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Inline">
+                        <tc-section-card title="Inline">
                             <div>
                                 {/* @ts-ignore */}
                                 <tc-radio label="Option A" name="group2" value="a" inline checked />
@@ -33,25 +35,42 @@ const RadioDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-radio label="Option C" name="group2" value="c" inline />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled">
+                        <tc-section-card title="Disabled">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
-                                <tc-radio label="Disabled unchecked" name="group3" value="x" disabled />
+                                <tc-radio
+                                    label="Disabled unchecked"
+                                    name="group3"
+                                    value="x"
+                                    disabled
+                                />
                                 {/* @ts-ignore */}
-                                <tc-radio label="Disabled checked" name="group3" value="y" checked disabled />
+                                <tc-radio
+                                    label="Disabled checked"
+                                    name="group3"
+                                    value="y"
+                                    checked
+                                    disabled
+                                />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Reverse">
+                        <tc-section-card title="Reverse">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-radio label="Reverse layout" name="group4" value="r1" reverse />
                                 {/* @ts-ignore */}
-                                <tc-radio label="Reverse checked" name="group4" value="r2" reverse checked />
+                                <tc-radio
+                                    label="Reverse checked"
+                                    name="group4"
+                                    value="r2"
+                                    reverse
+                                    checked
+                                />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PAGE_SIZE = 10
 const MAX_PAGES = 5
 
 function createItemEl(text: string): HTMLDivElement {
     const el = document.createElement('div')
-    el.style.cssText = 'padding:0.6rem 1rem;border-bottom:1px solid var(--tc-border);font-size:0.875rem;font-family:var(--tc-font-mono)'
+    el.style.cssText =
+        'padding:0.6rem 1rem;border-bottom:1px solid var(--tc-border);font-size:0.875rem;font-family:var(--tc-font-mono)'
     el.textContent = text
     return el
 }
@@ -64,45 +64,94 @@ const InfiniteScrollDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="InfiniteScroll"
+                        <tc-rich-page-header
+                            title-text="InfiniteScroll"
                             description="Intersection Observer wrapper that fires tc-load-more when the sentinel enters the viewport. Set has-more to keep loading; remove it to show the end slot. The loading slot appears while fetching."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Scroll to load more (5 pages × 10 items)">
-                                <div style={{ maxHeight: 400, overflowY: 'auto', border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Scroll to load more (5 pages × 10 items)">
+                                <div
+                                    style={{
+                                        maxHeight: 400,
+                                        overflowY: 'auto',
+                                        border: '1px solid var(--tc-border)',
+                                    }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-infinite-scroll ref={scrollRef} has-more="">
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-infinite-scroll>
                                 </div>
-                                <p className="mt-2 mb-0" style={{ fontSize: '0.8125rem', color: 'var(--tc-text-muted)' }}>
+                                <p
+                                    className="mt-2 mb-0"
+                                    style={{ fontSize: '0.8125rem', color: 'var(--tc-text-muted)' }}
+                                >
                                     {status}
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom loading and end slots">
-                                <div style={{ maxHeight: 300, overflowY: 'auto', border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Custom loading and end slots">
+                                <div
+                                    style={{
+                                        maxHeight: 300,
+                                        overflowY: 'auto',
+                                        border: '1px solid var(--tc-border)',
+                                    }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-infinite-scroll>
-                                        <div style={{ padding: '0.6rem 1rem', fontSize: '0.875rem' }}>Alpha</div>
-                                        <div style={{ padding: '0.6rem 1rem', fontSize: '0.875rem' }}>Beta</div>
-                                        <div style={{ padding: '0.6rem 1rem', fontSize: '0.875rem' }}>Gamma</div>
-                                        <div data-slot="loading" style={{ padding: '0.5rem 1rem', color: 'var(--tc-text-muted)', fontSize: '0.8125rem' }}>
+                                        <div
+                                            style={{ padding: '0.6rem 1rem', fontSize: '0.875rem' }}
+                                        >
+                                            Alpha
+                                        </div>
+                                        <div
+                                            style={{ padding: '0.6rem 1rem', fontSize: '0.875rem' }}
+                                        >
+                                            Beta
+                                        </div>
+                                        <div
+                                            style={{ padding: '0.6rem 1rem', fontSize: '0.875rem' }}
+                                        >
+                                            Gamma
+                                        </div>
+                                        <div
+                                            data-slot="loading"
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                color: 'var(--tc-text-muted)',
+                                                fontSize: '0.8125rem',
+                                            }}
+                                        >
                                             ⏳ Fetching more…
                                         </div>
-                                        <div data-slot="end" style={{ padding: '0.5rem 1rem', color: 'var(--tc-text-faint)', fontSize: '0.75rem', textAlign: 'center' }}>
+                                        <div
+                                            data-slot="end"
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                color: 'var(--tc-text-faint)',
+                                                fontSize: '0.75rem',
+                                                textAlign: 'center',
+                                            }}
+                                        >
                                             — No more items —
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-infinite-scroll>
                                 </div>
-                                <p className="mt-2 mb-0" style={{ fontSize: '0.8125rem', color: 'var(--tc-text-muted)' }}>
-                                    No <code>has-more</code> attribute — end slot is shown immediately.
+                                <p
+                                    className="mt-2 mb-0"
+                                    style={{ fontSize: '0.8125rem', color: 'var(--tc-text-muted)' }}
+                                >
+                                    No <code>has-more</code> attribute — end slot is shown
+                                    immediately.
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

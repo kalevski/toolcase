@@ -1,24 +1,19 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-stat-row'
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 // Resolve a lucide icon by PascalCase key, return empty string when absent.
-function lucideByName(name: string): string {
-    const svg = (LucideIcons as Record<string, string>)[name]
-    return svg ?? ''
-}
 
-const trendUpIconHtml = icon(lucideByName('TrendingUp') || lucideByName('ArrowUp'), 'tc-stat-row-trend-icon')
-const trendDownIconHtml = icon(lucideByName('TrendingDown') || lucideByName('ArrowDown'), 'tc-stat-row-trend-icon')
+const trendUpIconHtml = icon(
+    lucideByName('TrendingUp') || lucideByName('ArrowUp'),
+    'tc-stat-row-trend-icon',
+)
+const trendDownIconHtml = icon(
+    lucideByName('TrendingDown') || lucideByName('ArrowDown'),
+    'tc-stat-row-trend-icon',
+)
 
 export class StatRow extends HTMLElement {
     private _initialised = false
@@ -83,9 +78,10 @@ export class StatRow extends HTMLElement {
         // Format numeric string values with toLocaleString; pass through others.
         const rawValue = this.value
         const numeric = parseFloat(rawValue)
-        const displayValue = Number.isFinite(numeric) && String(numeric) === rawValue
-            ? numeric.toLocaleString()
-            : rawValue
+        const displayValue =
+            Number.isFinite(numeric) && String(numeric) === rawValue
+                ? numeric.toLocaleString()
+                : rawValue
 
         const trend = this.trend
         let trendHtml = ''

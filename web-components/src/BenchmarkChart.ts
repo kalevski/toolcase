@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-benchmark-chart'
 
 export type BenchmarkScale = 'linear' | 'log'
@@ -16,14 +17,6 @@ export interface BenchmarkBar {
 // Unique id per instance so multiple charts don't collide on the SVG
 // gradient referenced by url(#...).
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Mirrors the React BenchmarkChart formatValue: compact K/M, else grouped.
 function formatValue(n: number): string {
@@ -132,7 +125,7 @@ export class BenchmarkChart extends HTMLElement {
     private _redistributeTitle(): void {
         if (this.hasAttribute('title')) return
         const slotContainer = this.querySelector('.tc-benchmark-chart__title-slot')
-        if (slotContainer) this._titleSlotNodes.forEach(n => slotContainer.appendChild(n))
+        if (slotContainer) this._titleSlotNodes.forEach((n) => slotContainer.appendChild(n))
     }
 
     // value/max → 0..1, log-guarded against non-positive values.
@@ -150,12 +143,12 @@ export class BenchmarkChart extends HTMLElement {
         const lowerIsBetter = this.lowerIsBetter
         const interactive = this._isInteractive
 
-        const values = bars.map(b => Number(b.value) || 0)
+        const values = bars.map((b) => Number(b.value) || 0)
         const max = values.length ? Math.max(...values, 1) : 1
         let leaderIndex = -1
         if (values.length) {
             const target = lowerIsBetter ? Math.min(...values) : Math.max(...values)
-            leaderIndex = values.findIndex(v => v === target)
+            leaderIndex = values.findIndex((v) => v === target)
         }
 
         // ---- header (title attribute OR slot="title") ----
@@ -185,59 +178,67 @@ export class BenchmarkChart extends HTMLElement {
 
             const defs = `<defs><linearGradient id="${this._gradientId}" x1="0" y1="0" x2="1" y2="1"><stop class="tc-benchmark-chart__leader-stop tc-benchmark-chart__leader-stop--from" offset="0" /><stop class="tc-benchmark-chart__leader-stop tc-benchmark-chart__leader-stop--to" offset="1" /></linearGradient></defs>`
 
-            const rows = bars.map((bar, i) => {
-                const value = Number(bar.value) || 0
-                const ratio = Math.max(0, Math.min(1, this._ratio(value, max)))
-                const fillW = (trackW * ratio).toFixed(2)
-                const isLeader = i === leaderIndex
-                const cy = i * rowH + rowH / 2
-                const barY = cy - barH / 2
-                const sepY = (i + 1) * rowH
+            const rows = bars
+                .map((bar, i) => {
+                    const value = Number(bar.value) || 0
+                    const ratio = Math.max(0, Math.min(1, this._ratio(value, max)))
+                    const fillW = (trackW * ratio).toFixed(2)
+                    const isLeader = i === leaderIndex
+                    const cy = i * rowH + rowH / 2
+                    const barY = cy - barH / 2
+                    const sepY = (i + 1) * rowH
 
-                const valueText = formatValue(value)
-                const unitText = bar.unit ? ` ${bar.unit}` : ''
+                    const valueText = formatValue(value)
+                    const unitText = bar.unit ? ` ${bar.unit}` : ''
 
-                const rowClasses = [
-                    'tc-benchmark-chart__row',
-                    isLeader ? 'tc-benchmark-chart__row--leader' : '',
-                    bar.baseline ? 'tc-benchmark-chart__row--baseline' : '',
-                ].filter(Boolean).join(' ')
+                    const rowClasses = [
+                        'tc-benchmark-chart__row',
+                        isLeader ? 'tc-benchmark-chart__row--leader' : '',
+                        bar.baseline ? 'tc-benchmark-chart__row--baseline' : '',
+                    ]
+                        .filter(Boolean)
+                        .join(' ')
 
-                const colorStyle = bar.color
-                    ? ` style="--bs-benchmark-chart-bar-color: ${esc(bar.color)}"`
-                    : ''
+                    const colorStyle = bar.color
+                        ? ` style="--bs-benchmark-chart-bar-color: ${esc(bar.color)}"`
+                        : ''
 
-                const interactiveAttrs = interactive
-                    ? ` role="button" tabindex="0" aria-label="${esc(`${bar.label}: ${valueText}${unitText}${isLeader ? ', leader' : ''}`)}"`
-                    : ''
+                    const interactiveAttrs = interactive
+                        ? ` role="button" tabindex="0" aria-label="${esc(`${bar.label}: ${valueText}${unitText}${isLeader ? ', leader' : ''}`)}"`
+                        : ''
 
-                const hintTitle = bar.hint ? `<title>${esc(bar.hint)}</title>` : ''
+                    const hintTitle = bar.hint ? `<title>${esc(bar.hint)}</title>` : ''
 
-                const fillClasses = [
-                    'tc-benchmark-chart__fill',
-                    isLeader ? 'tc-benchmark-chart__fill--leader' : '',
-                ].filter(Boolean).join(' ')
-                // The leader fill is the gradient — set inline so it beats the base
-                // `.tc-benchmark-chart__fill { fill: var(...) }` rule. A colored leader
-                // keeps its own color (handled by the inherited bar-color var).
-                const fillAttr = isLeader && !bar.color
-                    ? ` style="fill:url(#${this._gradientId})"`
-                    : ''
+                    const fillClasses = [
+                        'tc-benchmark-chart__fill',
+                        isLeader ? 'tc-benchmark-chart__fill--leader' : '',
+                    ]
+                        .filter(Boolean)
+                        .join(' ')
+                    // The leader fill is the gradient — set inline so it beats the base
+                    // `.tc-benchmark-chart__fill { fill: var(...) }` rule. A colored leader
+                    // keeps its own color (handled by the inherited bar-color var).
+                    const fillAttr =
+                        isLeader && !bar.color ? ` style="fill:url(#${this._gradientId})"` : ''
 
-                const sep = i < bars.length - 1
-                    ? `<line class="tc-benchmark-chart__sep" x1="0" y1="${sepY}" x2="100%" y2="${sepY}" />`
-                    : ''
+                    const sep =
+                        i < bars.length - 1
+                            ? `<line class="tc-benchmark-chart__sep" x1="0" y1="${sepY}" x2="100%" y2="${sepY}" />`
+                            : ''
 
-                return `<g class="${rowClasses}" data-idx="${i}"${interactiveAttrs}${colorStyle}>`
-                    + hintTitle
-                    + `<rect class="tc-benchmark-chart__row-bg" x="0" y="${i * rowH}" width="100%" height="${rowH}" />`
-                    + `<text class="tc-benchmark-chart__label" x="0" y="${cy}" dominant-baseline="central">${esc(bar.label)}</text>`
-                    + `<rect class="tc-benchmark-chart__track" x="${trackX}%" y="${barY}" width="${trackW}%" height="${barH}" />`
-                    + `<rect class="${fillClasses}" x="${trackX}%" y="${barY}" width="${fillW}%" height="${barH}"${fillAttr} />`
-                    + `<text class="tc-benchmark-chart__value" x="100%" y="${cy}" text-anchor="end" dominant-baseline="central">${esc(valueText)}<tspan class="tc-benchmark-chart__unit">${esc(unitText)}</tspan></text>`
-                    + sep
-                    + `</g>`
-            }).join('')
+                    return (
+                        `<g class="${rowClasses}" data-idx="${i}"${interactiveAttrs}${colorStyle}>` +
+                        hintTitle +
+                        `<rect class="tc-benchmark-chart__row-bg" x="0" y="${i * rowH}" width="100%" height="${rowH}" />` +
+                        `<text class="tc-benchmark-chart__label" x="0" y="${cy}" dominant-baseline="central">${esc(bar.label)}</text>` +
+                        `<rect class="tc-benchmark-chart__track" x="${trackX}%" y="${barY}" width="${trackW}%" height="${barH}" />` +
+                        `<rect class="${fillClasses}" x="${trackX}%" y="${barY}" width="${fillW}%" height="${barH}"${fillAttr} />` +
+                        `<text class="tc-benchmark-chart__value" x="100%" y="${cy}" text-anchor="end" dominant-baseline="central">${esc(valueText)}<tspan class="tc-benchmark-chart__unit">${esc(unitText)}</tspan></text>` +
+                        sep +
+                        `</g>`
+                    )
+                })
+                .join('')
 
             // No viewBox: width="100%" makes the SVG viewport the container's pixel
             // width, so % coordinates resolve against real pixels and px font-sizes
@@ -276,11 +277,13 @@ export class BenchmarkChart extends HTMLElement {
         const idx = parseInt(g.getAttribute('data-idx') ?? '', 10)
         if (isNaN(idx) || idx < 0 || idx >= this._bars.length) return
         const bar = this._bars[idx]
-        this.dispatchEvent(new CustomEvent('tc-bar-click', {
-            bubbles: true,
-            composed: true,
-            detail: { bar, index: idx },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-bar-click', {
+                bubbles: true,
+                composed: true,
+                detail: { bar, index: idx },
+            }),
+        )
         if (typeof this.onBarClick === 'function') this.onBarClick(bar, idx)
     }
 

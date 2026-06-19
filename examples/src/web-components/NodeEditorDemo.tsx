@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type Pos = { x: number; y: number }
 
@@ -10,7 +9,10 @@ const GRAPH = {
             id: 'filter',
             label: 'Filter',
             inputs: [{ id: 'in', label: 'in' }],
-            outputs: [{ id: 'ok', label: 'pass' }, { id: 'rej', label: 'reject' }],
+            outputs: [
+                { id: 'ok', label: 'pass' },
+                { id: 'rej', label: 'reject' },
+            ],
         },
         { id: 'sink', label: 'Sink', inputs: [{ id: 'in', label: 'in' }] },
     ],
@@ -30,7 +32,9 @@ const NodeEditorDemo: React.FC = () => {
     const ref = useRef<any>(null)
     const [selected, setSelected] = useState<string | null>(null)
     const [positions, setPositions] = useState<Record<string, Pos>>(INITIAL_POSITIONS)
-    const [log, setLog] = useState<string>('Drag a node by its header, drag from a "pass"/"reject" port to an input, or scroll to zoom.')
+    const [log, setLog] = useState<string>(
+        'Drag a node by its header, drag from a "pass"/"reject" port to an input, or scroll to zoom.',
+    )
 
     useEffect(() => {
         const el = ref.current
@@ -45,7 +49,7 @@ const NodeEditorDemo: React.FC = () => {
         const onMove = (e: Event) => {
             const { id, pos } = (e as CustomEvent).detail as { id: string; pos: Pos }
             // Reflect the move back into the controlled positions map.
-            setPositions(prev => {
+            setPositions((prev) => {
                 const next = { ...prev, [id]: pos }
                 el.positions = next
                 return next
@@ -73,27 +77,27 @@ const NodeEditorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Node Editor"
+                        <tc-rich-page-header
+                            title-text="Node Editor"
                             description="Canvas-based visual node/graph editor with drag, pan, zoom, and connection creation."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Interactive graph">
+                            <tc-section-card title="Interactive graph">
                                 {/* @ts-ignore */}
-                                <tc-node-editor
-                                    ref={ref}
-                                    selected-id={selected ?? undefined}
-                                />
+                                <tc-node-editor ref={ref} selected-id={selected ?? undefined} />
                                 <div className="form-text mt-2">
                                     <strong>Selected:</strong> {selected ?? '—'} &nbsp;·&nbsp; {log}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <DisabledNodeEditor />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

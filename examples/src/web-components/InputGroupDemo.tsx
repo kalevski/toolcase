@@ -1,31 +1,37 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const InputGroupDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Input Group"
+                    <tc-rich-page-header
+                        title-text="Input Group"
                         description="Bootstrap input group wrapper that joins text addons and controls in source order."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Text Prepend">
+                        <tc-section-card title="Text Prepend">
                             <div style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-input-group>
                                     {/* @ts-ignore */}
                                     <tc-input-group-text>@</tc-input-group-text>
-                                    <input class="form-control" type="text" placeholder="Username" />
+                                    <input
+                                        class="form-control"
+                                        type="text"
+                                        placeholder="Username"
+                                    />
                                     {/* @ts-ignore */}
                                 </tc-input-group>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Button Append">
+                        <tc-section-card title="Button Append">
                             <div style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-input-group>
@@ -35,9 +41,9 @@ const InputGroupDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-input-group>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Text Prepend + Append">
+                        <tc-section-card title="Text Prepend + Append">
                             <div style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-input-group>
@@ -49,9 +55,9 @@ const InputGroupDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-input-group>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Sizes">
+                        <tc-section-card title="Sizes">
                             <div className="d-flex flex-column gap-2" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-input-group size="sm">
@@ -75,7 +81,7 @@ const InputGroupDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-input-group>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ComparatorDemo: React.FC = () => {
     const fullRef = useRef<any>(null)
@@ -15,7 +14,12 @@ const ComparatorDemo: React.FC = () => {
             { label: 'TypeScript support', left: true, right: true },
             { label: 'SSR support', left: true, right: true },
             { label: 'Server components', left: true, right: false },
-            { label: 'Built-in state management', left: false, right: true, description: 'Vue ships Pinia by default' },
+            {
+                label: 'Built-in state management',
+                left: false,
+                right: true,
+                description: 'Vue ships Pinia by default',
+            },
             { label: 'Two-way data binding', left: false, right: true },
             { label: 'Virtual DOM', left: true, right: true },
             { label: 'Mobile framework', left: false, right: false },
@@ -62,49 +66,52 @@ const ComparatorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Comparator"
+                        <tc-rich-page-header
+                            title-text="Comparator"
                             description="Side-by-side comparison table for two technologies with auto winner detection and summary stats."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Boolean features — React vs Vue (with summary)">
+                            <tc-section-card title="Boolean features — React vs Vue (with summary)">
                                 {/* @ts-ignore */}
                                 <tc-comparator
                                     ref={fullRef}
                                     title="React vs Vue"
                                     description="Feature comparison for web application frameworks."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Boolean features — databases (show-summary=false)">
+                            <tc-section-card title="Boolean features — databases (show-summary=false)">
                                 {/* @ts-ignore */}
                                 <tc-comparator
                                     ref={noSummaryRef}
                                     title="PostgreSQL vs SQLite"
                                     show-summary="false"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Mixed boolean + numeric values — Node.js vs Deno">
+                            <tc-section-card title="Mixed boolean + numeric values — Node.js vs Deno">
                                 {/* @ts-ignore */}
                                 <tc-comparator
                                     ref={valueRef}
                                     title="Node.js vs Deno"
                                     description="Runtime comparison with mixed boolean and numeric feature values."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state (5 skeleton rows)">
+                            <tc-section-card title="Loading state (5 skeleton rows)">
                                 {/* @ts-ignore */}
                                 <tc-comparator loading loading-count="5" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal — no title or description">
+                            <tc-section-card title="Minimal — no title or description">
                                 {/* @ts-ignore */}
                                 <tc-comparator ref={minimalRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

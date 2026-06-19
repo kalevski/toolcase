@@ -1,16 +1,39 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PROVIDERS_MIXED = [
-    { key: 'github', label: 'GitHub', connected: true, account: 'jane@example.com', icon: 'Github' },
+    {
+        key: 'github',
+        label: 'GitHub',
+        connected: true,
+        account: 'jane@example.com',
+        icon: 'Github',
+    },
     { key: 'google', label: 'Google', connected: false, icon: 'Globe' },
-    { key: 'discord', label: 'Discord', connected: true, account: 'jane#1234', icon: 'MessageCircle' },
+    {
+        key: 'discord',
+        label: 'Discord',
+        connected: true,
+        account: 'jane#1234',
+        icon: 'MessageCircle',
+    },
     { key: 'twitter', label: 'Twitter / X', connected: false, icon: 'Link' },
 ]
 
 const PROVIDERS_CONNECTED = [
-    { key: 'github', label: 'GitHub', connected: true, account: 'user@example.com', icon: 'Github' },
-    { key: 'slack', label: 'Slack', connected: true, account: 'workspace.slack.com', icon: 'MessageCircle' },
+    {
+        key: 'github',
+        label: 'GitHub',
+        connected: true,
+        account: 'user@example.com',
+        icon: 'Github',
+    },
+    {
+        key: 'slack',
+        label: 'Slack',
+        connected: true,
+        account: 'workspace.slack.com',
+        icon: 'MessageCircle',
+    },
 ]
 
 const BRAND_COLORS: Record<string, string> = {
@@ -36,7 +59,9 @@ const LinkedProvidersCardDemo: React.FC = () => {
             mixedRef.current.brandColors = BRAND_COLORS
             mixedRef.current.addEventListener('tc-toggle', (e: CustomEvent) => {
                 const { key, connected } = e.detail
-                setLastEvent(`tc-toggle: key="${key}", connected=${connected} → will ${connected ? 'disconnect' : 'connect'}`)
+                setLastEvent(
+                    `tc-toggle: key="${key}", connected=${connected} → will ${connected ? 'disconnect' : 'connect'}`,
+                )
             })
         }
     }, [])
@@ -58,7 +83,12 @@ const LinkedProvidersCardDemo: React.FC = () => {
         if (customIconRef.current) {
             customIconRef.current.providers = [
                 { key: 'custom-a', label: 'Custom Provider A', connected: false },
-                { key: 'custom-b', label: 'Custom Provider B', connected: true, account: 'user@custom.io' },
+                {
+                    key: 'custom-b',
+                    label: 'Custom Provider B',
+                    connected: true,
+                    account: 'user@custom.io',
+                },
             ]
             customIconRef.current.iconForProvider = (key: string) => {
                 if (key === 'custom-a') return 'Zap'
@@ -77,37 +107,56 @@ const LinkedProvidersCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="LinkedProvidersCard"
+                        <tc-rich-page-header
+                            title-text="LinkedProvidersCard"
                             description="Section card listing OAuth providers with custom icons and brand colors. Set providers via the JS providers property. Dispatches tc-toggle when an action button is clicked."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Mixed connected + disconnected (with brand colors)">
+                            <tc-section-card title="Mixed connected + disconnected (with brand colors)">
                                 {/* @ts-ignore */}
                                 <tc-linked-providers-card ref={mixedRef} title="Linked providers" />
                                 {lastEvent && (
-                                    <p className="mt-2 mb-0" style={{ fontSize: '0.8125rem', color: 'var(--tc-text-muted)' }}>
+                                    <p
+                                        className="mt-2 mb-0"
+                                        style={{
+                                            fontSize: '0.8125rem',
+                                            color: 'var(--tc-text-muted)',
+                                        }}
+                                    >
                                         Last event: <code>{lastEvent}</code>
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="All connected">
+                            <tc-section-card title="All connected">
                                 {/* @ts-ignore */}
-                                <tc-linked-providers-card ref={connectedRef} title="Active connections" />
-                            </SectionCard>
+                                <tc-linked-providers-card
+                                    ref={connectedRef}
+                                    title="Active connections"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Empty state">
+                            <tc-section-card title="Empty state">
                                 {/* @ts-ignore */}
-                                <tc-linked-providers-card ref={emptyRef} title="Linked providers" empty-label="No providers linked yet." />
-                            </SectionCard>
+                                <tc-linked-providers-card
+                                    ref={emptyRef}
+                                    title="Linked providers"
+                                    empty-label="No providers linked yet."
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Custom icon resolver + brand colors">
+                            <tc-section-card title="Custom icon resolver + brand colors">
                                 {/* @ts-ignore */}
-                                <tc-linked-providers-card ref={customIconRef} title="Custom providers" />
-                            </SectionCard>
+                                <tc-linked-providers-card
+                                    ref={customIconRef}
+                                    title="Custom providers"
+                                />
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

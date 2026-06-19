@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 interface ListItem {
     id: string
@@ -85,33 +84,36 @@ const ListDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="List"
+                        <tc-rich-page-header
+                            title-text="List"
                             description="Generic vertical selectable list with icon, label, and meta cells. Items are set via the JS items property; selection is tracked via selected-id and the tc-select event."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title={`Lucide icons — selected: ${basicSelected}`}>
+                            <tc-section-card title={`Lucide icons — selected: ${basicSelected}`}>
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-list ref={basicRef} selected-id={basicSelected} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`Emoji icons — selected: ${emojiSelected}`}>
+                            <tc-section-card title={`Emoji icons — selected: ${emojiSelected}`}>
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-list ref={emojiRef} selected-id={emojiSelected} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`No icons — selected: ${noIconSelected}`}>
+                            <tc-section-card title={`No icons — selected: ${noIconSelected}`}>
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-list ref={noIconRef} selected-id={noIconSelected} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

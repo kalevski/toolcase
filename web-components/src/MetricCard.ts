@@ -1,16 +1,8 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-metric-card'
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const svg = (LucideIcons as Record<string, string>)[name]
-    return svg ?? ''
-}
 
 function resolveIcon(name: string): string {
     const svg = lucideByName(name)
@@ -151,9 +143,10 @@ export class MetricCard extends HTMLElement {
 
         const valueHtml = `<div class="tc-metric-card-value">${esc(valueText)}</div>`
 
-        const subtitleHtml = subtitleText != null
-            ? `<div class="tc-metric-card-subtitle">${esc(subtitleText)}</div>`
-            : ''
+        const subtitleHtml =
+            subtitleText != null
+                ? `<div class="tc-metric-card-subtitle">${esc(subtitleText)}</div>`
+                : ''
 
         const trend = this.trend
         let sparkHtml = ''

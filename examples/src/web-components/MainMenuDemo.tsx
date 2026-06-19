@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MainMenuDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -60,7 +59,7 @@ const MainMenuDemo: React.FC = () => {
             { id: 'quit', label: 'Quit' },
         ]
         const onSelect = (e: CustomEvent) => {
-            setLog(l => [`tc-select: id="${e.detail.id}"`, ...l].slice(0, 6))
+            setLog((l) => [`tc-select: id="${e.detail.id}"`, ...l].slice(0, 6))
         }
         el.addEventListener('tc-select', onSelect)
         return () => {
@@ -73,19 +72,22 @@ const MainMenuDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Main Menu"
+                        <tc-rich-page-header
+                            title-text="Main Menu"
                             description="Main-menu container of menu items. Items are set via the JS items property. Arrow keys navigate between enabled items; Enter/Space fires tc-select for the highlighted item. Hover also highlights an item. All cosmetics flow through --bs-main-menu-* custom properties."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — no header">
+                            <tc-section-card title="Basic — no header">
                                 {/* @ts-ignore */}
                                 <tc-main-menu ref={basicRef} style={{ maxWidth: '320px' }} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With menu-title and subtitle">
+                            <tc-section-card title="With menu-title and subtitle">
                                 {/* @ts-ignore */}
                                 <tc-main-menu
                                     ref={subtitleRef}
@@ -93,27 +95,27 @@ const MainMenuDemo: React.FC = () => {
                                     subtitle="Version 2.4.1"
                                     style={{ maxWidth: '320px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Pre-selected item (selected-id attribute)">
+                            <tc-section-card title="Pre-selected item (selected-id attribute)">
                                 {/* @ts-ignore */}
                                 <tc-main-menu
                                     ref={disabledRef}
                                     menu-title="Game Mode"
                                     style={{ maxWidth: '320px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Items with badges">
+                            <tc-section-card title="Items with badges">
                                 {/* @ts-ignore */}
                                 <tc-main-menu
                                     ref={badgeRef}
                                     menu-title="Navigation"
                                     style={{ maxWidth: '320px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Events — click or use arrow keys then Enter">
+                            <tc-section-card title="Events — click or use arrow keys then Enter">
                                 {/* @ts-ignore */}
                                 <tc-main-menu
                                     ref={eventsRef}
@@ -124,16 +126,20 @@ const MainMenuDemo: React.FC = () => {
                                 <div className="mt-3">
                                     <strong className="d-block mb-1">Event log</strong>
                                     {log.length === 0 ? (
-                                        <span className="text-muted">Click an item or press Enter on a highlighted item…</span>
+                                        <span className="text-muted">
+                                            Click an item or press Enter on a highlighted item…
+                                        </span>
                                     ) : (
                                         <ul className="mb-0">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

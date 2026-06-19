@@ -6,7 +6,6 @@
 // layout — control cosmetics live in each subclass's own partial.
 
 export abstract class SettingRowBase extends HTMLElement {
-
     protected _initialised = false
 
     static get observedAttributes(): string[] {

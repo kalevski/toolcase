@@ -1,46 +1,58 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const VersionLabelDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="VersionLabel"
+                    <tc-rich-page-header
+                        title-text="VersionLabel"
                         description="Corner build / version stamp — a compact JetBrains Mono inline label showing version, build, and branch info separated by · dots."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-
-                        <SectionCard title="Version only">
+                        <tc-section-card title="Version only">
                             {/* @ts-ignore */}
                             <tc-version-label version="1.2.3" />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Version + build">
+                        <tc-section-card title="Version + build">
                             {/* @ts-ignore */}
                             <tc-version-label version="1.2.3" build="a4f9c12" />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="All three segments">
+                        <tc-section-card title="All three segments">
                             {/* @ts-ignore */}
                             <tc-version-label version="2.0.0" build="deadbeef" branch="main" />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Branch only">
+                        <tc-section-card title="Branch only">
                             {/* @ts-ignore */}
                             <tc-version-label branch="feature/new-hud" />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="HUD corner stamp (dark surface)">
-                            <div style={{ background: '#0f111a', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'flex-end', borderRadius: 0 }}>
+                        <tc-section-card title="HUD corner stamp (dark surface)">
+                            <div
+                                style={{
+                                    background: '#0f111a',
+                                    padding: '0.75rem 1rem',
+                                    display: 'flex',
+                                    justifyContent: 'flex-end',
+                                    borderRadius: 0,
+                                }}
+                            >
                                 {/* @ts-ignore */}
-                                <tc-version-label version="0.9.1" build="7b3a8c2" branch="release" />
+                                <tc-version-label
+                                    version="0.9.1"
+                                    build="7b3a8c2"
+                                    branch="release"
+                                />
                             </div>
-                        </SectionCard>
-
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

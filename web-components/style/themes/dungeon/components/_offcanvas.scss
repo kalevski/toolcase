@@ -23,6 +23,13 @@ tc-theme[name='dungeon'],
             inset 0 0 0 1px var(--fg-gold-shadow),
             inset 0 1px 0 rgba(232, 200, 120, 0.18),
             var(--bs-offcanvas-box-shadow);
+
+        // Frosted fill — --bs-offcanvas-bg rides background-color, which drops
+        // the --fg-panel-bg gradient and leaves the drawer transparent. Paint a
+        // translucent fill via background-image + blur for gilded smoked glass.
+        background-image: var(--fg-overlay-bg);
+        backdrop-filter: var(--fg-overlay-blur);
+        -webkit-backdrop-filter: var(--fg-overlay-blur);
     }
 
     // -------------------------------------------------------------------------

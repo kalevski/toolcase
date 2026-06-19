@@ -10,7 +10,6 @@ function resolveTier(rank: number): RankCellTier {
 }
 
 export class RankCell extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

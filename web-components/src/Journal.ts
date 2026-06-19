@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-journal'
 
 export type JournalState = 'active' | 'completed' | 'failed' | 'inactive'
@@ -24,15 +25,6 @@ export interface JournalEntry {
     objectives?: JournalObjective[]
     state?: JournalState
     rewards?: JournalReward[]
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 function normaliseState(raw: JournalState | undefined): JournalState {
@@ -84,18 +76,20 @@ export class Journal extends HTMLElement {
 
     private render(): void {
         const selected = this.selectedId
-        const active = this._entries.find(e => e.id === selected) ?? null
+        const active = this._entries.find((e) => e.id === selected) ?? null
 
-        const rowsHtml = this._entries.map(e => {
-            const state = normaliseState(e.state)
-            const isSelected = e.id === selected
-            let rowCls = `tc-journal-row tc-journal-row--${state}`
-            if (isSelected) rowCls += ' tc-journal-row--selected'
-            return `<div role="option" tabindex="0" class="${rowCls}" data-id="${esc(e.id)}" aria-selected="${isSelected ? 'true' : 'false'}">
+        const rowsHtml = this._entries
+            .map((e) => {
+                const state = normaliseState(e.state)
+                const isSelected = e.id === selected
+                let rowCls = `tc-journal-row tc-journal-row--${state}`
+                if (isSelected) rowCls += ' tc-journal-row--selected'
+                return `<div role="option" tabindex="0" class="${rowCls}" data-id="${esc(e.id)}" aria-selected="${isSelected ? 'true' : 'false'}">
                 <span class="tc-journal-row-pip" aria-hidden="true"></span>
                 <span class="tc-journal-row-title">${esc(e.title)}</span>
             </div>`
-        }).join('')
+            })
+            .join('')
 
         const listHtml = this._entries.length
             ? `<div class="tc-journal-list" role="listbox">${rowsHtml}</div>`
@@ -130,7 +124,9 @@ export class Journal extends HTMLElement {
 
     private _selectRow(id: string): void {
         this.selectedId = id
-        this.dispatchEvent(new CustomEvent('tc-select', { bubbles: true, composed: true, detail: { id } }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', { bubbles: true, composed: true, detail: { id } }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(id)
     }
 
@@ -141,26 +137,26 @@ export class Journal extends HTMLElement {
         const description = entry.description
             ? `<p class="tc-journal-detail-description">${esc(entry.description)}</p>`
             : ''
-        const body = entry.body
-            ? `<p class="tc-journal-detail-body">${esc(entry.body)}</p>`
-            : ''
+        const body = entry.body ? `<p class="tc-journal-detail-body">${esc(entry.body)}</p>` : ''
 
-        const objectivesHtml = (entry.objectives || []).map(o => {
-            let cls = 'tc-journal-objective'
-            if (o.completed) cls += ' tc-journal-objective--completed'
-            if (o.optional) cls += ' tc-journal-objective--optional'
-            const checkCls = o.completed
-                ? 'tc-journal-objective-check tc-journal-objective-check--done'
-                : 'tc-journal-objective-check'
-            const optionalHtml = o.optional
-                ? `<span class="tc-journal-objective-optional">(optional)</span>`
-                : ''
-            return `<div class="${cls}" data-id="${esc(o.id)}">
+        const objectivesHtml = (entry.objectives || [])
+            .map((o) => {
+                let cls = 'tc-journal-objective'
+                if (o.completed) cls += ' tc-journal-objective--completed'
+                if (o.optional) cls += ' tc-journal-objective--optional'
+                const checkCls = o.completed
+                    ? 'tc-journal-objective-check tc-journal-objective-check--done'
+                    : 'tc-journal-objective-check'
+                const optionalHtml = o.optional
+                    ? `<span class="tc-journal-objective-optional">(optional)</span>`
+                    : ''
+                return `<div class="${cls}" data-id="${esc(o.id)}">
                 <span class="${checkCls}" aria-hidden="true"></span>
                 <span class="tc-journal-objective-label">${esc(o.label)}</span>
                 ${optionalHtml}
             </div>`
-        }).join('')
+            })
+            .join('')
         const objectivesBlock = objectivesHtml
             ? `<div class="tc-journal-detail-section">
                 <span class="tc-journal-detail-eyebrow">Objectives</span>
@@ -168,17 +164,19 @@ export class Journal extends HTMLElement {
             </div>`
             : ''
 
-        const rewardsHtml = (entry.rewards || []).map(r => {
-            const value = typeof r.value === 'number' ? r.value.toLocaleString() : r.value
-            const iconHtml = r.icon
-                ? `<span class="tc-journal-reward-icon" aria-hidden="true">${esc(r.icon)}</span>`
-                : ''
-            return `<div class="tc-journal-reward">
+        const rewardsHtml = (entry.rewards || [])
+            .map((r) => {
+                const value = typeof r.value === 'number' ? r.value.toLocaleString() : r.value
+                const iconHtml = r.icon
+                    ? `<span class="tc-journal-reward-icon" aria-hidden="true">${esc(r.icon)}</span>`
+                    : ''
+                return `<div class="tc-journal-reward">
                 ${iconHtml}
                 <span class="tc-journal-reward-label">${esc(r.label)}</span>
                 <span class="tc-journal-reward-value">${esc(value)}</span>
             </div>`
-        }).join('')
+            })
+            .join('')
         const rewardsBlock = rewardsHtml
             ? `<div class="tc-journal-detail-section">
                 <span class="tc-journal-detail-eyebrow">Rewards</span>

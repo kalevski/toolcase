@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { icon } from './icons'
 import { ChevronDown, Plus, X } from 'lucide-static'
 
@@ -31,14 +32,6 @@ interface ParseResult {
     error: string | null
 }
 
-function esc(str: string): string {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function parseSchema(raw: string): ParseResult {
     const trimmed = (raw ?? '').trim()
     if (trimmed === '') return { ok: true, schema: [], error: null }
@@ -49,7 +42,11 @@ function parseSchema(raw: string): ParseResult {
         return { ok: false, schema: [], error: `Invalid JSON schema: ${(e as Error).message}` }
     }
     if (!Array.isArray(parsed)) {
-        return { ok: false, schema: [], error: 'Schema must be a JSON array of property definitions.' }
+        return {
+            ok: false,
+            schema: [],
+            error: 'Schema must be a JSON array of property definitions.',
+        }
     }
     return { ok: true, schema: parsed as JSONEditorSchemaProperty[], error: null }
 }
@@ -118,7 +115,10 @@ function setValueAtPath(root: Record<string, unknown>, path: Path, val: unknown)
 // Walk the parsed schema following a value path; numeric segments descend into
 // an array property's item-shape (`properties`). Returns the property node whose
 // container the path points at (used by add/remove to know the item shape).
-function schemaPropAtPath(schema: JSONEditorSchemaProperty[], path: Path): JSONEditorSchemaProperty | null {
+function schemaPropAtPath(
+    schema: JSONEditorSchemaProperty[],
+    path: Path,
+): JSONEditorSchemaProperty | null {
     let props: JSONEditorSchemaProperty[] = schema
     let prop: JSONEditorSchemaProperty | null = null
     for (const seg of path) {
@@ -126,7 +126,7 @@ function schemaPropAtPath(schema: JSONEditorSchemaProperty[], path: Path): JSONE
             props = prop?.properties ?? []
             continue
         }
-        prop = props.find(p => p && p.key === seg) ?? null
+        prop = props.find((p) => p && p.key === seg) ?? null
         if (!prop) return null
         props = prop.properties ?? []
     }
@@ -154,16 +154,21 @@ export class JSONEditor extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (this._initialised) return
-        if (!this._dataInitialised) {
-            const { schema } = parseSchema(this.getAttribute('schema') ?? '')
-            this._data = buildDefault(schema)
+        if (!this._initialised) {
+            if (!this._dataInitialised) {
+                const { schema } = parseSchema(this.getAttribute('schema') ?? '')
+                this._data = buildDefault(schema)
+            }
+            this.render()
+            this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
         this.addEventListener('input', this._onInput)
         this.addEventListener('change', this._onChange)
         this.addEventListener('click', this._onClick)
-        this.render()
-        this._initialised = true
     }
 
     disconnectedCallback(): void {
@@ -229,11 +234,13 @@ export class JSONEditor extends HTMLElement {
 
     private _emit(): void {
         const value = clone(this._data)
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -315,9 +322,10 @@ export class JSONEditor extends HTMLElement {
         if (!prop) return
         const arr = getValueAtPath(this._data, path)
         const items = Array.isArray(arr) ? arr : []
-        const newItem = prop.properties && prop.properties.length > 0
-            ? buildDefault(prop.properties)
-            : typeDefault(prop.itemType)
+        const newItem =
+            prop.properties && prop.properties.length > 0
+                ? buildDefault(prop.properties)
+                : typeDefault(prop.itemType)
         items.push(newItem)
         this._dataInitialised = true
         setValueAtPath(this._data, path, items)
@@ -343,7 +351,10 @@ export class JSONEditor extends HTMLElement {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
             const rows = Array.from({ length: 5 })
-                .map(() => `<div class="tc-json-editor-skeleton-row" aria-hidden="true"><span class="tc-json-editor-skeleton-key"></span><span class="tc-json-editor-skeleton-field"></span></div>`)
+                .map(
+                    () =>
+                        `<div class="tc-json-editor-skeleton-row" aria-hidden="true"><span class="tc-json-editor-skeleton-key"></span><span class="tc-json-editor-skeleton-field"></span></div>`,
+                )
                 .join('')
             this.innerHTML = `<div class="tc-json-editor tc-json-editor--loading">${rows}<span class="visually-hidden">Loading…</span></div>`
             return
@@ -359,9 +370,10 @@ export class JSONEditor extends HTMLElement {
         }
 
         const disabledClass = disabled ? ' tc-json-editor--disabled' : ''
-        const body = schema.length > 0
-            ? schema.map(prop => this._renderProperty(prop, [prop.key])).join('')
-            : `<div class="tc-json-editor-empty">No schema properties.</div>`
+        const body =
+            schema.length > 0
+                ? schema.map((prop) => this._renderProperty(prop, [prop.key])).join('')
+                : `<div class="tc-json-editor-empty">No schema properties.</div>`
 
         this.innerHTML = `<div class="tc-json-editor${disabledClass}">${body}</div>`
     }
@@ -390,7 +402,12 @@ export class JSONEditor extends HTMLElement {
         return this._renderField(prop, path, value, label)
     }
 
-    private _renderField(prop: JSONEditorSchemaProperty, path: Path, value: unknown, label: string): string {
+    private _renderField(
+        prop: JSONEditorSchemaProperty,
+        path: Path,
+        value: unknown,
+        label: string,
+    ): string {
         const fieldId = this._fieldId()
         const disabledAttr = this.disabled ? ' disabled' : ''
         const pathAttr = esc(JSON.stringify(path))
@@ -398,26 +415,35 @@ export class JSONEditor extends HTMLElement {
 
         if (Array.isArray(prop.enum) && prop.enum.length > 0) {
             const kind = prop.type === 'number' || prop.type === 'integer' ? prop.type : 'string'
-            const opts = prop.enum.map(opt => {
-                const ov = String(opt)
-                const selected = String(value ?? '') === ov ? ' selected' : ''
-                return `<option value="${esc(ov)}"${selected}>${esc(ov)}</option>`
-            }).join('')
+            const opts = prop.enum
+                .map((opt) => {
+                    const ov = String(opt)
+                    const selected = String(value ?? '') === ov ? ' selected' : ''
+                    return `<option value="${esc(ov)}"${selected}>${esc(ov)}</option>`
+                })
+                .join('')
             control = `<select id="${fieldId}" class="form-select tc-json-editor-control" data-path="${pathAttr}" data-kind="${kind}"${disabledAttr}>${opts}</select>`
         } else if (prop.type === 'boolean') {
             const checked = value === true ? ' checked' : ''
             control = `<div class="form-check form-switch tc-json-editor-switch"><input id="${fieldId}" class="form-check-input" type="checkbox" role="switch" data-path="${pathAttr}" data-kind="boolean"${checked}${disabledAttr}></div>`
         } else if (prop.type === 'number' || prop.type === 'integer') {
-            const v = typeof value === 'number' ? value : (value == null || value === '' ? '' : Number(value))
+            const v =
+                typeof value === 'number'
+                    ? value
+                    : value == null || value === ''
+                      ? ''
+                      : Number(value)
             control = `<input id="${fieldId}" type="number" class="form-control tc-json-editor-control" value="${esc(String(v))}" data-path="${pathAttr}" data-kind="${prop.type}"${disabledAttr}>`
         } else {
             control = `<input id="${fieldId}" type="text" class="form-control tc-json-editor-control" value="${esc(String(value ?? ''))}" data-path="${pathAttr}" data-kind="string"${disabledAttr}>`
         }
 
-        return `<div class="tc-json-editor-row">`
-            + `<label class="tc-json-editor-key" for="${fieldId}">${esc(label)}</label>`
-            + `<div class="tc-json-editor-field">${control}</div>`
-            + `</div>`
+        return (
+            `<div class="tc-json-editor-row">` +
+            `<label class="tc-json-editor-key" for="${fieldId}">${esc(label)}</label>` +
+            `<div class="tc-json-editor-field">${control}</div>` +
+            `</div>`
+        )
     }
 
     private _renderObject(prop: JSONEditorSchemaProperty, path: Path, label: string): string {
@@ -425,15 +451,24 @@ export class JSONEditor extends HTMLElement {
         const collapsed = this._collapsed.has(pathKey)
         const bodyId = this._groupBodyId()
         const props = prop.properties ?? []
-        const childHtml = props.map(child => this._renderProperty(child, [...path, child.key])).join('')
+        const childHtml = props
+            .map((child) => this._renderProperty(child, [...path, child.key]))
+            .join('')
 
-        return `<div class="tc-json-editor-group">`
-            + this._groupHeader(pathKey, bodyId, label, collapsed)
-            + `<div class="tc-json-editor-group-body" id="${bodyId}" role="group" aria-label="${esc(label)}"${collapsed ? ' hidden' : ''}>${childHtml}</div>`
-            + `</div>`
+        return (
+            `<div class="tc-json-editor-group">` +
+            this._groupHeader(pathKey, bodyId, label, collapsed) +
+            `<div class="tc-json-editor-group-body" id="${bodyId}" role="group" aria-label="${esc(label)}"${collapsed ? ' hidden' : ''}>${childHtml}</div>` +
+            `</div>`
+        )
     }
 
-    private _renderArray(prop: JSONEditorSchemaProperty, path: Path, value: unknown, label: string): string {
+    private _renderArray(
+        prop: JSONEditorSchemaProperty,
+        path: Path,
+        value: unknown,
+        label: string,
+    ): string {
         const pathKey = JSON.stringify(path)
         const collapsed = this._collapsed.has(pathKey)
         const bodyId = this._groupBodyId()
@@ -442,51 +477,76 @@ export class JSONEditor extends HTMLElement {
         const disabledAttr = this.disabled ? ' disabled' : ''
         const isObjectArray = !!(prop.properties && prop.properties.length > 0)
 
-        const rows = items.map((item, idx) => {
-            const removeBtn = `<button type="button" class="tc-json-editor-icon-btn tc-json-editor-remove" data-action="remove" data-path="${pathAttr}" data-index="${idx}" aria-label="Remove ${esc(label)} item ${idx + 1}"${disabledAttr}>${removeIconHtml}</button>`
-            if (isObjectArray) {
-                const fields = prop.properties!
-                    .map(child => this._renderProperty(child, [...path, idx, child.key]))
-                    .join('')
-                return `<div class="tc-json-editor-array-item">`
-                    + `<div class="tc-json-editor-array-item-head"><span class="tc-json-editor-array-index">#${idx + 1}</span>${removeBtn}</div>`
-                    + `<div class="tc-json-editor-array-item-fields">${fields}</div>`
-                    + `</div>`
-            }
-            const itemPath = [...path, idx]
-            const itemPathAttr = esc(JSON.stringify(itemPath))
-            const itemId = this._fieldId()
-            const kind = prop.itemType ?? 'string'
-            const itemLabel = `${label} item ${idx + 1}`
-            let control: string
-            if (kind === 'boolean') {
-                const checked = item === true ? ' checked' : ''
-                control = `<div class="form-check form-switch tc-json-editor-switch"><input id="${itemId}" class="form-check-input" type="checkbox" role="switch" aria-label="${esc(itemLabel)}" data-path="${itemPathAttr}" data-kind="boolean"${checked}${disabledAttr}></div>`
-            } else if (kind === 'number' || kind === 'integer') {
-                control = `<input id="${itemId}" type="number" class="form-control tc-json-editor-control" value="${esc(String(typeof item === 'number' ? item : ''))}" aria-label="${esc(itemLabel)}" data-path="${itemPathAttr}" data-kind="${kind}"${disabledAttr}>`
-            } else {
-                control = `<input id="${itemId}" type="text" class="form-control tc-json-editor-control" value="${esc(String(item ?? ''))}" aria-label="${esc(itemLabel)}" data-path="${itemPathAttr}" data-kind="string"${disabledAttr}>`
-            }
-            return `<div class="tc-json-editor-array-row">${control}${removeBtn}</div>`
-        }).join('')
+        const rows = items
+            .map((item, idx) => {
+                const removeBtn = `<button type="button" class="tc-json-editor-icon-btn tc-json-editor-remove" data-action="remove" data-path="${pathAttr}" data-index="${idx}" aria-label="Remove ${esc(label)} item ${idx + 1}"${disabledAttr}>${removeIconHtml}</button>`
+                if (isObjectArray) {
+                    const fields = prop
+                        .properties!.map((child) =>
+                            this._renderProperty(child, [...path, idx, child.key]),
+                        )
+                        .join('')
+                    return (
+                        `<div class="tc-json-editor-array-item">` +
+                        `<div class="tc-json-editor-array-item-head"><span class="tc-json-editor-array-index">#${idx + 1}</span>${removeBtn}</div>` +
+                        `<div class="tc-json-editor-array-item-fields">${fields}</div>` +
+                        `</div>`
+                    )
+                }
+                const itemPath = [...path, idx]
+                const itemPathAttr = esc(JSON.stringify(itemPath))
+                const itemId = this._fieldId()
+                const kind = prop.itemType ?? 'string'
+                const itemLabel = `${label} item ${idx + 1}`
+                let control: string
+                if (kind === 'boolean') {
+                    const checked = item === true ? ' checked' : ''
+                    control = `<div class="form-check form-switch tc-json-editor-switch"><input id="${itemId}" class="form-check-input" type="checkbox" role="switch" aria-label="${esc(itemLabel)}" data-path="${itemPathAttr}" data-kind="boolean"${checked}${disabledAttr}></div>`
+                } else if (kind === 'number' || kind === 'integer') {
+                    control = `<input id="${itemId}" type="number" class="form-control tc-json-editor-control" value="${esc(String(typeof item === 'number' ? item : ''))}" aria-label="${esc(itemLabel)}" data-path="${itemPathAttr}" data-kind="${kind}"${disabledAttr}>`
+                } else {
+                    control = `<input id="${itemId}" type="text" class="form-control tc-json-editor-control" value="${esc(String(item ?? ''))}" aria-label="${esc(itemLabel)}" data-path="${itemPathAttr}" data-kind="string"${disabledAttr}>`
+                }
+                return `<div class="tc-json-editor-array-row">${control}${removeBtn}</div>`
+            })
+            .join('')
 
-        const emptyHtml = items.length === 0 ? `<div class="tc-json-editor-empty">No items</div>` : ''
+        const emptyHtml =
+            items.length === 0 ? `<div class="tc-json-editor-empty">No items</div>` : ''
         const addBtn = `<button type="button" class="tc-json-editor-icon-btn tc-json-editor-add" data-action="add" data-path="${pathAttr}" aria-label="Add item to ${esc(label)}"${disabledAttr}>${plusIconHtml}</button>`
 
-        return `<div class="tc-json-editor-group tc-json-editor-array-group">`
-            + this._groupHeader(pathKey, bodyId, label, collapsed, `<span class="tc-json-editor-count">${items.length} ${items.length === 1 ? 'item' : 'items'}</span>`, addBtn)
-            + `<div class="tc-json-editor-array" id="${bodyId}" role="group" aria-label="${esc(label)}"${collapsed ? ' hidden' : ''}>${rows}${emptyHtml}</div>`
-            + `</div>`
+        return (
+            `<div class="tc-json-editor-group tc-json-editor-array-group">` +
+            this._groupHeader(
+                pathKey,
+                bodyId,
+                label,
+                collapsed,
+                `<span class="tc-json-editor-count">${items.length} ${items.length === 1 ? 'item' : 'items'}</span>`,
+                addBtn,
+            ) +
+            `<div class="tc-json-editor-array" id="${bodyId}" role="group" aria-label="${esc(label)}"${collapsed ? ' hidden' : ''}>${rows}${emptyHtml}</div>` +
+            `</div>`
+        )
     }
 
-    private _groupHeader(pathKey: string, bodyId: string, label: string, collapsed: boolean, extra = '', trailing = ''): string {
+    private _groupHeader(
+        pathKey: string,
+        bodyId: string,
+        label: string,
+        collapsed: boolean,
+        extra = '',
+        trailing = '',
+    ): string {
         const chevron = `<span class="tc-json-editor-chevron${collapsed ? '' : ' tc-json-editor-chevron--open'}" aria-hidden="true">${chevronIconHtml}</span>`
-        return `<div class="tc-json-editor-group-header">`
-            + `<button type="button" class="tc-json-editor-toggle" data-toggle="${esc(pathKey)}" aria-expanded="${!collapsed}" aria-controls="${bodyId}">`
-            + `${chevron}<span class="tc-json-editor-group-label">${esc(label)}</span></button>`
-            + extra
-            + trailing
-            + `</div>`
+        return (
+            `<div class="tc-json-editor-group-header">` +
+            `<button type="button" class="tc-json-editor-toggle" data-toggle="${esc(pathKey)}" aria-expanded="${!collapsed}" aria-controls="${bodyId}">` +
+            `${chevron}<span class="tc-json-editor-group-label">${esc(label)}</span></button>` +
+            extra +
+            trailing +
+            `</div>`
+        )
     }
 }
 

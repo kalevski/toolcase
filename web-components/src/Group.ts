@@ -1,19 +1,10 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon, chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-group'
 
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const svgStr = (LucideIcons as Record<string, string>)[name]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 export class Group extends HTMLElement {
     private _initialised = false
@@ -38,7 +29,7 @@ export class Group extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const body = this.querySelector('.tc-group-body')
-            if (body) slotContent.forEach(n => body.appendChild(n))
+            if (body) slotContent.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
     }
@@ -50,7 +41,7 @@ export class Group extends HTMLElement {
         const slotContent = body ? Array.from(body.childNodes) : []
         this.render()
         const newBody = this.querySelector('.tc-group-body')
-        if (newBody) slotContent.forEach(n => newBody.appendChild(n))
+        if (newBody) slotContent.forEach((n) => newBody.appendChild(n))
     }
 
     get label(): string {
@@ -100,11 +91,13 @@ export class Group extends HTMLElement {
         this._collapsed = v
         if (!this._initialised) return
         this._applyCollapsedState()
-        this.dispatchEvent(new CustomEvent('tc-toggle', {
-            bubbles: true,
-            composed: true,
-            detail: { collapsed: this._collapsed },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-toggle', {
+                bubbles: true,
+                composed: true,
+                detail: { collapsed: this._collapsed },
+            }),
+        )
         if (typeof this.onToggle === 'function') this.onToggle(this._collapsed)
     }
 
@@ -129,21 +122,25 @@ export class Group extends HTMLElement {
     private _onToggleClick = (): void => {
         this._collapsed = !this._collapsed
         this._applyCollapsedState()
-        this.dispatchEvent(new CustomEvent('tc-toggle', {
-            bubbles: true,
-            composed: true,
-            detail: { collapsed: this._collapsed },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-toggle', {
+                bubbles: true,
+                composed: true,
+                detail: { collapsed: this._collapsed },
+            }),
+        )
         if (typeof this.onToggle === 'function') this.onToggle(this._collapsed)
     }
 
     private _onActionClick = (e: Event): void => {
         e.stopPropagation()
-        this.dispatchEvent(new CustomEvent('tc-action-click', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-action-click', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this.onActionClick === 'function') this.onActionClick()
     }
 
@@ -156,16 +153,16 @@ export class Group extends HTMLElement {
         const headerId = `${this._idPrefix}-header`
         const bodyId = `${this._idPrefix}-body`
 
-        const badgeHtml = badge != null
-            ? `<span class="tc-group-badge">${esc(badge)}</span>`
-            : ''
+        const badgeHtml = badge != null ? `<span class="tc-group-badge">${esc(badge)}</span>` : ''
 
         const chevronHtml = `<span class="tc-group-chevron${collapsed ? '' : ' tc-group-chevron--open'}" aria-hidden="true">${chevronDownIcon}</span>`
 
         let actionHtml = ''
         if (actionIcon || actionLabel) {
             const iconHtml = actionIcon ? lucideByName(actionIcon) : ''
-            const labelHtml = actionLabel ? `<span class="tc-group-action-label">${esc(actionLabel)}</span>` : ''
+            const labelHtml = actionLabel
+                ? `<span class="tc-group-action-label">${esc(actionLabel)}</span>`
+                : ''
             const ariaLabel = actionLabel ? ` aria-label="${esc(actionLabel)}"` : ''
             actionHtml = `<button type="button" class="tc-group-action"${ariaLabel}>${iconHtml}${labelHtml}</button>`
         }

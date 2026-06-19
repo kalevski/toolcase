@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-level-header'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class LevelHeader extends HTMLElement {
     private _initialised = false
@@ -34,18 +27,32 @@ export class LevelHeader extends HTMLElement {
         return Number.isFinite(parsed) ? parsed : fallback
     }
 
-    get level(): number { return this._numAttr('level', 1) }
-    set level(v: number) { this.setAttribute('level', String(v)) }
+    get level(): number {
+        return this._numAttr('level', 1)
+    }
+    set level(v: number) {
+        this.setAttribute('level', String(v))
+    }
 
     // title is a native HTMLElement property — use getAttribute in render(), no getter/setter override.
 
-    get xp(): number { return this._numAttr('xp', 0) }
-    set xp(v: number) { this.setAttribute('xp', String(v)) }
+    get xp(): number {
+        return this._numAttr('xp', 0)
+    }
+    set xp(v: number) {
+        this.setAttribute('xp', String(v))
+    }
 
-    get xpMax(): number { return Math.max(1, this._numAttr('xp-max', 100)) }
-    set xpMax(v: number) { this.setAttribute('xp-max', String(v)) }
+    get xpMax(): number {
+        return Math.max(1, this._numAttr('xp-max', 100))
+    }
+    set xpMax(v: number) {
+        this.setAttribute('xp-max', String(v))
+    }
 
-    get nextLabel(): string { return this.getAttribute('next-label') ?? '' }
+    get nextLabel(): string {
+        return this.getAttribute('next-label') ?? ''
+    }
     set nextLabel(v: string) {
         if (v) this.setAttribute('next-label', v)
         else this.removeAttribute('next-label')
@@ -62,7 +69,10 @@ export class LevelHeader extends HTMLElement {
 
         this.classList.add('tc-level-header')
         this.setAttribute('role', 'region')
-        this.setAttribute('aria-label', titleText ? `${esc(titleText)} — Level ${level}` : `Level ${level}`)
+        this.setAttribute(
+            'aria-label',
+            titleText ? `${esc(titleText)} — Level ${level}` : `Level ${level}`,
+        )
 
         const titleHtml = titleText
             ? `<span class="tc-level-header__title">${esc(titleText)}</span>`
@@ -97,5 +107,7 @@ export class LevelHeader extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: LevelHeader }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: LevelHeader
+    }
 }

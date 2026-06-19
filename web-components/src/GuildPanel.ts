@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-guild-panel'
 
 export interface GuildMember {
@@ -6,15 +7,6 @@ export interface GuildMember {
     rank?: string
     online?: boolean
     contribution?: number
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 export class GuildPanel extends HTMLElement {
@@ -104,7 +96,7 @@ export class GuildPanel extends HTMLElement {
     private render(): void {
         const memberCap = this.memberCap
         const memberCount = this._members.length
-        const onlineCount = this._members.filter(m => m.online).length
+        const onlineCount = this._members.filter((m) => m.online).length
         const level = this.level
 
         const tagMarkup = this.tag
@@ -113,36 +105,41 @@ export class GuildPanel extends HTMLElement {
         const mottoMarkup = this.motto
             ? `<p class="tc-guild-panel-motto">&ldquo;${esc(this.motto)}&rdquo;</p>`
             : ''
-        const levelStat = level != null
-            ? `<div class="tc-guild-panel-stat">` +
-              `<span class="tc-guild-panel-stat-label">Level</span>` +
-              `<span class="tc-guild-panel-stat-value">${esc(String(level))}</span>` +
-              `</div>`
-            : ''
+        const levelStat =
+            level != null
+                ? `<div class="tc-guild-panel-stat">` +
+                  `<span class="tc-guild-panel-stat-label">Level</span>` +
+                  `<span class="tc-guild-panel-stat-value">${esc(String(level))}</span>` +
+                  `</div>`
+                : ''
 
         const headcountText = memberCap != null ? `${memberCount}/${memberCap}` : `${memberCount}`
 
-        const membersMarkup = memberCount > 0
-            ? this._members.map(m => {
-                  const online = !!m.online
-                  const cls = `tc-guild-panel-member ${online ? 'tc-guild-panel-member--online' : 'tc-guild-panel-member--offline'}`
-                  const statusLabel = online ? 'Online' : 'Offline'
-                  const rankMarkup = m.rank
-                      ? `<span class="tc-guild-panel-member-rank">${esc(m.rank)}</span>`
-                      : ''
-                  const contribMarkup = typeof m.contribution === 'number'
-                      ? `<span class="tc-guild-panel-member-contribution">${esc(m.contribution.toLocaleString())}</span>`
-                      : ''
-                  return (
-                      `<li class="${cls}" role="listitem" data-id="${esc(m.id)}">` +
-                      `<span class="tc-guild-panel-member-pip" role="img" aria-label="${statusLabel}" title="${statusLabel}"></span>` +
-                      `<span class="tc-guild-panel-member-name">${esc(m.name)}</span>` +
-                      rankMarkup +
-                      contribMarkup +
-                      `</li>`
-                  )
-              }).join('')
-            : `<li class="tc-guild-panel-empty">No members</li>`
+        const membersMarkup =
+            memberCount > 0
+                ? this._members
+                      .map((m) => {
+                          const online = !!m.online
+                          const cls = `tc-guild-panel-member ${online ? 'tc-guild-panel-member--online' : 'tc-guild-panel-member--offline'}`
+                          const statusLabel = online ? 'Online' : 'Offline'
+                          const rankMarkup = m.rank
+                              ? `<span class="tc-guild-panel-member-rank">${esc(m.rank)}</span>`
+                              : ''
+                          const contribMarkup =
+                              typeof m.contribution === 'number'
+                                  ? `<span class="tc-guild-panel-member-contribution">${esc(m.contribution.toLocaleString())}</span>`
+                                  : ''
+                          return (
+                              `<li class="${cls}" role="listitem" data-id="${esc(m.id)}">` +
+                              `<span class="tc-guild-panel-member-pip" role="img" aria-label="${statusLabel}" title="${statusLabel}"></span>` +
+                              `<span class="tc-guild-panel-member-name">${esc(m.name)}</span>` +
+                              rankMarkup +
+                              contribMarkup +
+                              `</li>`
+                          )
+                      })
+                      .join('')
+                : `<li class="tc-guild-panel-empty">No members</li>`
 
         this.innerHTML =
             `<div class="tc-guild-panel">` +

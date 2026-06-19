@@ -1,5 +1,4 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
 
 const TAG_NAME = 'tc-normal-map-generator'
 
@@ -33,15 +32,6 @@ const FLAT_NORMAL: [number, number, number] = [128, 128, 255]
 
 let _idCounter = 0
 
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    return svg ? icon(svg) : ''
-}
-
 const TOOL_META: Array<{ tool: EditorTool; label: string; iconHtml: string }> = [
     { tool: 'brush', label: 'Brush', iconHtml: lucideByName('brush') },
     { tool: 'erase', label: 'Erase', iconHtml: lucideByName('eraser') },
@@ -72,7 +62,12 @@ const clampSample = (height: Float32Array, w: number, h: number, x: number, y: n
 }
 
 /** Luminance heightmap from RGBA (Rec. 601 weights), scaled by `embossHeight`. */
-const toHeightmap = (rgba: Uint8ClampedArray, w: number, h: number, embossHeight: number): Float32Array => {
+const toHeightmap = (
+    rgba: Uint8ClampedArray,
+    w: number,
+    h: number,
+    embossHeight: number,
+): Float32Array => {
     const out = new Float32Array(w * h)
     if (embossHeight === 0) return out
     for (let i = 0; i < out.length; i++) {
@@ -88,7 +83,8 @@ const alphaToDistance = (rgba: Uint8ClampedArray, w: number, h: number): Float32
     const dist = new Float32Array(w * h)
     for (let i = 0; i < dist.length; i++) dist[i] = rgba[i * 4 + 3] === 0 ? 0 : Infinity
 
-    const at = (x: number, y: number): number => (x < 0 || x >= w || y < 0 || y >= h ? 0 : dist[y * w + x])
+    const at = (x: number, y: number): number =>
+        x < 0 || x >= w || y < 0 || y >= h ? 0 : dist[y * w + x]
 
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
@@ -118,7 +114,12 @@ const alphaToDistance = (rgba: Uint8ClampedArray, w: number, h: number): Float32
 }
 
 /** Separable box blur (in place), `radius` px. */
-const blurHeightmap = (height: Float32Array, w: number, h: number, radius: number): Float32Array => {
+const blurHeightmap = (
+    height: Float32Array,
+    w: number,
+    h: number,
+    radius: number,
+): Float32Array => {
     const r = Math.floor(radius)
     if (r <= 0) return height
     const win = r * 2 + 1
@@ -157,7 +158,12 @@ interface HeightOptions {
 }
 
 /** Combined emboss + alpha-bevel heightmap, blurred by `bevelWidth`. */
-const buildHeightmap = (rgba: Uint8ClampedArray, w: number, h: number, opts: HeightOptions): Float32Array => {
+const buildHeightmap = (
+    rgba: Uint8ClampedArray,
+    w: number,
+    h: number,
+    opts: HeightOptions,
+): Float32Array => {
     const height = toHeightmap(rgba, w, h, opts.embossHeight)
     if (opts.bevelWidth > 0) {
         const dist = alphaToDistance(rgba, w, h)
@@ -318,7 +324,16 @@ export class NormalMapGenerator extends HTMLElement {
     }
 
     static get observedAttributes(): string[] {
-        return ['source', 'strength', 'emboss-height', 'bevel-width', 'editable', 'tool', 'preview-mode', 'disabled']
+        return [
+            'source',
+            'strength',
+            'emboss-height',
+            'bevel-width',
+            'editable',
+            'tool',
+            'preview-mode',
+            'disabled',
+        ]
     }
 
     connectedCallback(): void {
@@ -534,7 +549,15 @@ export class NormalMapGenerator extends HTMLElement {
         if (!ctx) return
         // ImageData expects an ArrayBuffer-backed Uint8ClampedArray; ours is always
         // ArrayBuffer-backed at runtime — the cast bridges the lib.dom generic gap.
-        ctx.putImageData(new ImageData(this._normal as Uint8ClampedArray<ArrayBuffer>, this._width, this._height), 0, 0)
+        ctx.putImageData(
+            new ImageData(
+                this._normal as Uint8ClampedArray<ArrayBuffer>,
+                this._width,
+                this._height,
+            ),
+            0,
+            0,
+        )
     }
 
     private _emitGenerate(): void {
@@ -542,7 +565,13 @@ export class NormalMapGenerator extends HTMLElement {
         if (!c || !this._normal) return
         const dataUrl = c.toDataURL('image/png')
         const output: NormalMapOutput = { dataUrl, width: this._width, height: this._height }
-        this.dispatchEvent(new CustomEvent<NormalMapOutput>('tc-generate', { bubbles: true, composed: true, detail: output }))
+        this.dispatchEvent(
+            new CustomEvent<NormalMapOutput>('tc-generate', {
+                bubbles: true,
+                composed: true,
+                detail: output,
+            }),
+        )
         if (typeof this.onGenerate === 'function') this.onGenerate(output)
     }
 
@@ -555,12 +584,24 @@ export class NormalMapGenerator extends HTMLElement {
         if (mode === 'normal') return this._normalCanvas
         // lit / lit-surface — shade into a scratch canvas.
         if (!this._albedo || !this._normal) return this._normalCanvas
-        const shaded = shade(this._albedo, this._normal, this._width, this._height, this._light, mode === 'lit')
+        const shaded = shade(
+            this._albedo,
+            this._normal,
+            this._width,
+            this._height,
+            this._light,
+            mode === 'lit',
+        )
         const scratch = document.createElement('canvas')
         scratch.width = this._width
         scratch.height = this._height
         const sctx = scratch.getContext('2d')
-        if (sctx) sctx.putImageData(new ImageData(shaded as Uint8ClampedArray<ArrayBuffer>, this._width, this._height), 0, 0)
+        if (sctx)
+            sctx.putImageData(
+                new ImageData(shaded as Uint8ClampedArray<ArrayBuffer>, this._width, this._height),
+                0,
+                0,
+            )
         return scratch
     }
 
@@ -607,7 +648,13 @@ export class NormalMapGenerator extends HTMLElement {
         }
     }
 
-    private _drawMaskOverlay(ctx: CanvasRenderingContext2D, ox: number, oy: number, dw: number, dh: number): void {
+    private _drawMaskOverlay(
+        ctx: CanvasRenderingContext2D,
+        ox: number,
+        oy: number,
+        dw: number,
+        dh: number,
+    ): void {
         const mask = this._mask
         if (!mask) return
         const overlay = document.createElement('canvas')
@@ -792,7 +839,7 @@ export class NormalMapGenerator extends HTMLElement {
     private _updateToolbar(): void {
         const tool = this.tool
         const editable = this.editable
-        this.querySelectorAll<HTMLButtonElement>('[data-tool]').forEach(btn => {
+        this.querySelectorAll<HTMLButtonElement>('[data-tool]').forEach((btn) => {
             const t = btn.getAttribute('data-tool') as EditorTool
             const active = t === tool
             btn.classList.toggle('tc-nmg-tool--active', active)
@@ -805,7 +852,7 @@ export class NormalMapGenerator extends HTMLElement {
 
     private _updateSegmented(): void {
         const mode = this.previewMode
-        this.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach(btn => {
+        this.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => {
             const active = btn.getAttribute('data-mode') === mode
             btn.classList.toggle('tc-nmg-seg--active', active)
             btn.setAttribute('aria-selected', active ? 'true' : 'false')
@@ -839,7 +886,13 @@ export class NormalMapGenerator extends HTMLElement {
         ).join('')
     }
 
-    private _sliderHtml(field: string, label: string, min: string, max: string, step: string): string {
+    private _sliderHtml(
+        field: string,
+        label: string,
+        min: string,
+        max: string,
+        step: string,
+    ): string {
         const id = `${this._idPrefix}-${field}`
         return (
             `<div class="tc-nmg-control">` +

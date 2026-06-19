@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ROSTER = [
     { id: '1', name: 'Aria Vex', rank: 'Leader', online: true, contribution: 48230 },
@@ -31,7 +30,7 @@ function FullExample() {
             motto="No retreat, no surrender."
             level={42}
             member-cap={50}
-        />
+        />,
     )
 }
 
@@ -49,7 +48,7 @@ function MinimalExample() {
 
     return panelFrame(
         /* @ts-ignore */
-        <tc-guild-panel ref={ref} guild-name="Night Owls" />
+        <tc-guild-panel ref={ref} guild-name="Night Owls" />,
     )
 }
 
@@ -58,20 +57,23 @@ const GuildPanelDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="GuildPanel"
+                    <tc-rich-page-header
+                        title-text="GuildPanel"
                         description="Guild / clan panel with a header (name, tag, motto), a stats strip (level, members, online), and a member roster. The roster is set via the members JS property. Restyled from the game-components gc-guild-panel to the toolcase design system: slate neutrals, hairline borders, sharp corners, and JetBrains Mono for stat values and rank chips."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Full panel — name, tag, motto, level, cap, roster">
+                        <tc-section-card title="Full panel — name, tag, motto, level, cap, roster">
                             <FullExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Minimal — name + roster only (no tag, motto, level, or cap)">
+                        <tc-section-card title="Minimal — name + roster only (no tag, motto, level, or cap)">
                             <MinimalExample />
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

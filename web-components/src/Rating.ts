@@ -1,4 +1,4 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-rating'
@@ -6,22 +6,11 @@ const TAG_NAME = 'tc-rating'
 export type RatingSize = 'small' | 'default' | 'large'
 const SIZES: RatingSize[] = ['small', 'default', 'large']
 
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
-
 // Star rating: a single role="slider" container holding `count` layered icon
 // glyphs (an empty bg layer + a clipped fill overlay so half-fill can show).
 // `value` is the controlled selection; the React `onChange` becomes both a
 // `tc-change` CustomEvent and an optional `onChange` callback property.
 export class Rating extends HTMLElement {
-
     private _initialised = false
 
     onChange: ((value: number) => void) | null = null
@@ -146,11 +135,13 @@ export class Rating extends HTMLElement {
     }
 
     private _fireChange(value: number): void {
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -242,7 +233,7 @@ export class Rating extends HTMLElement {
                 `<${tag} ${attrs}>` +
                     `<span class="tc-rating-star-bg">${glyph}</span>` +
                     `<span class="tc-rating-star-fill">${glyph}</span>` +
-                `</${tag}>`,
+                    `</${tag}>`,
             )
         }
 

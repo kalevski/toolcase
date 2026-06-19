@@ -15,7 +15,7 @@ export class Title extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-title-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -26,7 +26,7 @@ export class Title extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-title-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     // NOTE: HTMLElement.title is a native reflected attribute — getter/setter
@@ -64,5 +64,7 @@ export class Title extends HTMLElement {
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: Title }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: Title
+    }
 }

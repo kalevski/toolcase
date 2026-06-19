@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-list'
@@ -9,24 +10,6 @@ export interface ListItem {
     icon?: string
     meta?: string
     disabled?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr, 'tc-list-item-icon-svg')
 }
 
 function resolveIcon(raw: string): string {
@@ -83,14 +66,16 @@ export class List extends HTMLElement {
     }
 
     private _select(id: string): void {
-        const item = this._items.find(i => i.id === id)
+        const item = this._items.find((i) => i.id === id)
         if (!item || item.disabled) return
         this.selectedId = id
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { id },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { id },
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(id)
     }
 
@@ -115,7 +100,7 @@ export class List extends HTMLElement {
         }
 
         const options = Array.from(
-            this.querySelectorAll<HTMLElement>('[role="option"]:not([aria-disabled="true"])')
+            this.querySelectorAll<HTMLElement>('[role="option"]:not([aria-disabled="true"])'),
         )
         const idx = options.indexOf(row)
         if (idx === -1) return
@@ -135,36 +120,42 @@ export class List extends HTMLElement {
     private render(): void {
         const selected = this.selectedId
 
-        const itemsHtml = this._items.map(item => {
-            const isSelected = item.id === selected
-            const cls = [
-                'tc-list-item',
-                isSelected ? 'tc-list-item--selected' : '',
-                item.disabled ? 'tc-list-item--disabled' : '',
-            ].filter(Boolean).join(' ')
+        const itemsHtml = this._items
+            .map((item) => {
+                const isSelected = item.id === selected
+                const cls = [
+                    'tc-list-item',
+                    isSelected ? 'tc-list-item--selected' : '',
+                    item.disabled ? 'tc-list-item--disabled' : '',
+                ]
+                    .filter(Boolean)
+                    .join(' ')
 
-            const iconHtml = item.icon ? resolveIcon(item.icon) : ''
-            const labelHtml = item.label != null
-                ? `<span class="tc-list-item-label">${esc(item.label)}</span>`
-                : ''
-            const metaHtml = item.meta != null
-                ? `<span class="tc-list-item-meta">${esc(item.meta)}</span>`
-                : ''
+                const iconHtml = item.icon ? resolveIcon(item.icon) : ''
+                const labelHtml =
+                    item.label != null
+                        ? `<span class="tc-list-item-label">${esc(item.label)}</span>`
+                        : ''
+                const metaHtml =
+                    item.meta != null
+                        ? `<span class="tc-list-item-meta">${esc(item.meta)}</span>`
+                        : ''
 
-            return (
-                `<div` +
-                ` class="${cls}"` +
-                ` role="option"` +
-                ` aria-selected="${isSelected}"` +
-                (item.disabled ? ' aria-disabled="true"' : '') +
-                ` tabindex="${item.disabled ? '-1' : '0'}"` +
-                ` data-id="${esc(item.id)}"` +
-                `>` +
-                iconHtml +
-                `<span class="tc-list-item-body">${labelHtml}${metaHtml}</span>` +
-                `</div>`
-            )
-        }).join('')
+                return (
+                    `<div` +
+                    ` class="${cls}"` +
+                    ` role="option"` +
+                    ` aria-selected="${isSelected}"` +
+                    (item.disabled ? ' aria-disabled="true"' : '') +
+                    ` tabindex="${item.disabled ? '-1' : '0'}"` +
+                    ` data-id="${esc(item.id)}"` +
+                    `>` +
+                    iconHtml +
+                    `<span class="tc-list-item-body">${labelHtml}${metaHtml}</span>` +
+                    `</div>`
+                )
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-list">${itemsHtml}</div>`
     }

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-check'
 
 let _idCounter = 0
@@ -7,12 +8,20 @@ export type CheckState = 'valid' | 'invalid'
 const STATES: CheckState[] = ['valid', 'invalid']
 
 export class Check extends HTMLElement {
-
     private _inputId: string
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['checked', 'value', 'label', 'indeterminate', 'disabled', 'inline', 'reverse', 'state']
+        return [
+            'checked',
+            'value',
+            'label',
+            'indeterminate',
+            'disabled',
+            'inline',
+            'reverse',
+            'state',
+        ]
     }
 
     constructor() {
@@ -36,7 +45,9 @@ export class Check extends HTMLElement {
     }
 
     get checked(): boolean {
-        return this.querySelector<HTMLInputElement>('input')?.checked ?? this.hasAttribute('checked')
+        return (
+            this.querySelector<HTMLInputElement>('input')?.checked ?? this.hasAttribute('checked')
+        )
     }
     set checked(v: boolean) {
         const input = this.querySelector<HTMLInputElement>('input')
@@ -121,19 +132,22 @@ export class Check extends HTMLElement {
 
         const inlineClass = inline ? ' form-check-inline' : ''
         const reverseClass = reverse ? ' form-check-reverse' : ''
-        const stateClass = state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
+        const stateClass =
+            state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
         const disabledAttr = disabled ? ' disabled' : ''
         const valueAttr = value ? ` value="${esc(value)}"` : ''
 
-        const labelHtml = label != null
-            ? `<label class="form-check-label" for="${this._inputId}">${esc(label)}</label>`
-            : ''
-
-        const feedbackHtml = state === 'valid'
-            ? `<div class="valid-feedback">Looks good!</div>`
-            : state === 'invalid'
-                ? `<div class="invalid-feedback">Please check this field.</div>`
+        const labelHtml =
+            label != null
+                ? `<label class="form-check-label" for="${this._inputId}">${esc(label)}</label>`
                 : ''
+
+        const feedbackHtml =
+            state === 'valid'
+                ? `<div class="valid-feedback">Looks good!</div>`
+                : state === 'invalid'
+                  ? `<div class="invalid-feedback">Please check this field.</div>`
+                  : ''
 
         this.innerHTML = [
             `<div class="form-check${inlineClass}${reverseClass}">`,
@@ -147,10 +161,6 @@ export class Check extends HTMLElement {
         const input = this.querySelector<HTMLInputElement>('input')
         if (input) input.indeterminate = indeterminate
     }
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 declare global {

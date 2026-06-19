@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const conversion = [
     { label: 'Visitors', value: 12400 },
@@ -30,7 +29,9 @@ const FunnelChartDemo: React.FC = () => {
         const el = mainRef.current
         if (el) {
             const handler = (e: any) =>
-                setSelected(`${e.detail.step.label} = ${e.detail.step.value} (index ${e.detail.index})`)
+                setSelected(
+                    `${e.detail.step.label} = ${e.detail.step.value} (index ${e.detail.index})`,
+                )
             el.addEventListener('tc-select', handler)
             // also exercise the onSelect callback property
             el.onSelect = (step: any, index: number) =>
@@ -44,15 +45,17 @@ const FunnelChartDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="FunnelChart"
+                        <tc-rich-page-header
+                            title-text="FunnelChart"
                             description="SVG funnel chart visualising a conversion flow as a vertical stack of tapering trapezoids, each labelled with its stage name and its percentage of the first step. data is set via a JS property; title/subtitle/height/show-labels/loading are attributes. Hovering a segment shows a tooltip; clicking/activating one fires tc-select and calls the onSelect callback."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Conversion funnel — labels + click">
+                            <tc-section-card title="Conversion funnel — labels + click">
                                 {/* @ts-ignore */}
                                 <tc-funnel-chart
                                     ref={mainRef}
@@ -63,9 +66,9 @@ const FunnelChartDemo: React.FC = () => {
                                 <p className="text-muted small mt-2 mb-0">
                                     Last selected step: <strong>{selected ?? 'none'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Labels hidden">
+                            <tc-section-card title="Labels hidden">
                                 {/* @ts-ignore */}
                                 <tc-funnel-chart
                                     ref={noLabelsRef}
@@ -74,9 +77,9 @@ const FunnelChartDemo: React.FC = () => {
                                     height="280"
                                     show-labels="false"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Per-step colors">
+                            <tc-section-card title="Per-step colors">
                                 {/* @ts-ignore */}
                                 <tc-funnel-chart
                                     ref={coloredRef}
@@ -84,13 +87,12 @@ const FunnelChartDemo: React.FC = () => {
                                     subtitle="Explicit status colors per step"
                                     height="260"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-funnel-chart loading title="Loading…" height="280" />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

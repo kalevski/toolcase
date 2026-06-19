@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FloatingLabelDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Floating Label"
+                    <tc-rich-page-header
+                        title-text="Floating Label"
                         description="Bootstrap form-floating wrapper that animates the label above a control when focused or filled."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Text inputs">
+                        <tc-section-card title="Text inputs">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-floating-label label="Email address" for="fl-email">
@@ -26,19 +28,23 @@ const FloatingLabelDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-floating-label>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Textarea">
+                        <tc-section-card title="Textarea">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-floating-label label="Comments" for="fl-comment">
-                                    <textarea class="form-control" id="fl-comment" style={{ height: '100px' }} />
+                                    <textarea
+                                        class="form-control"
+                                        id="fl-comment"
+                                        style={{ height: '100px' }}
+                                    />
                                     {/* @ts-ignore */}
                                 </tc-floating-label>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Select">
+                        <tc-section-card title="Select">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-floating-label label="Country" for="fl-country">
@@ -51,17 +57,23 @@ const FloatingLabelDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-floating-label>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled">
+                        <tc-section-card title="Disabled">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-floating-label label="Disabled input" for="fl-dis">
-                                    <input type="text" class="form-control" id="fl-dis" value="Cannot edit" disabled />
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="fl-dis"
+                                        value="Cannot edit"
+                                        disabled
+                                    />
                                     {/* @ts-ignore */}
                                 </tc-floating-label>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

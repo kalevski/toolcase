@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ChipGroupDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -65,32 +64,40 @@ const ChipGroupDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ChipGroup"
+                        <tc-rich-page-header
+                            title-text="ChipGroup"
                             description="Grouped set of interactive chip buttons with optional title, subtitle, and border frame. Composes tc-chip internally. Dispatches tc-toggle with the item id when a chip is activated."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic (tc-toggle logged to console)">
+                            <tc-section-card title="Basic (tc-toggle logged to console)">
                                 {/* @ts-ignore */}
                                 <tc-chip-group ref={basicRef} title="Tags" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Bordered with title">
+                            <tc-section-card title="Bordered with title">
                                 {/* @ts-ignore */}
                                 <tc-chip-group ref={borderedRef} title="Teams" border />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With title and subtitle (bordered)">
+                            <tc-section-card title="With title and subtitle (bordered)">
                                 {/* @ts-ignore */}
-                                <tc-chip-group ref={subtitleRef} title="Issue labels" subtitle="Select one or more labels to filter by" border />
-                            </SectionCard>
+                                <tc-chip-group
+                                    ref={subtitleRef}
+                                    title="Issue labels"
+                                    subtitle="Select one or more labels to filter by"
+                                    border
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="onToggle callback property (logged to console)">
+                            <tc-section-card title="onToggle callback property (logged to console)">
                                 {/* @ts-ignore */}
                                 <tc-chip-group ref={toggleLogRef} title="Options" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

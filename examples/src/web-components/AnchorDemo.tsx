@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // A relatively-positioned stage so tc-anchor children pin to its corners/edges.
 const stageStyle: React.CSSProperties = {
@@ -29,55 +28,86 @@ const AnchorDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Anchor"
+                    <tc-rich-page-header
+                        title-text="Anchor"
                         description="Layout primitive that absolutely positions its slotted content at a corner, edge, or the centre of the nearest positioned ancestor."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="All nine positions (inset 12px)">
+                        <tc-section-card title="All nine positions (inset 12px)">
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="top-left" inset="12"><Chip label="top-left" /></tc-anchor>
+                                <tc-anchor position="top-left" inset="12">
+                                    <Chip label="top-left" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="top" inset="12"><Chip label="top" /></tc-anchor>
+                                <tc-anchor position="top" inset="12">
+                                    <Chip label="top" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="top-right" inset="12"><Chip label="top-right" /></tc-anchor>
+                                <tc-anchor position="top-right" inset="12">
+                                    <Chip label="top-right" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="left" inset="12"><Chip label="left" /></tc-anchor>
+                                <tc-anchor position="left" inset="12">
+                                    <Chip label="left" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="center" inset="12"><Chip label="center" /></tc-anchor>
+                                <tc-anchor position="center" inset="12">
+                                    <Chip label="center" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="right" inset="12"><Chip label="right" /></tc-anchor>
+                                <tc-anchor position="right" inset="12">
+                                    <Chip label="right" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="bottom-left" inset="12"><Chip label="bottom-left" /></tc-anchor>
+                                <tc-anchor position="bottom-left" inset="12">
+                                    <Chip label="bottom-left" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="bottom" inset="12"><Chip label="bottom" /></tc-anchor>
+                                <tc-anchor position="bottom" inset="12">
+                                    <Chip label="bottom" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="bottom-right" inset="12"><Chip label="bottom-right" /></tc-anchor>
+                                <tc-anchor position="bottom-right" inset="12">
+                                    <Chip label="bottom-right" />
+                                </tc-anchor>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Larger inset (1.5rem) — corners only">
+                        <tc-section-card title="Larger inset (1.5rem) — corners only">
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="top-left" inset="1.5rem"><Chip label="top-left" /></tc-anchor>
+                                <tc-anchor position="top-left" inset="1.5rem">
+                                    <Chip label="top-left" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="top-right" inset="1.5rem"><Chip label="top-right" /></tc-anchor>
+                                <tc-anchor position="top-right" inset="1.5rem">
+                                    <Chip label="top-right" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="bottom-left" inset="1.5rem"><Chip label="bottom-left" /></tc-anchor>
+                                <tc-anchor position="bottom-left" inset="1.5rem">
+                                    <Chip label="bottom-left" />
+                                </tc-anchor>
                                 {/* @ts-ignore */}
-                                <tc-anchor position="bottom-right" inset="1.5rem"><Chip label="bottom-right" /></tc-anchor>
+                                <tc-anchor position="bottom-right" inset="1.5rem">
+                                    <Chip label="bottom-right" />
+                                </tc-anchor>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Default position (top-left), zero inset">
+                        <tc-section-card title="Default position (top-left), zero inset">
                             <div style={stageStyle}>
                                 {/* @ts-ignore */}
-                                <tc-anchor><Chip label="pinned to corner" /></tc-anchor>
+                                <tc-anchor>
+                                    <Chip label="pinned to corner" />
+                                </tc-anchor>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

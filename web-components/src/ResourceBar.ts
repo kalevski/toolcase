@@ -137,9 +137,7 @@ export class ResourceBar extends HTMLElement {
 
         // Evenly-spaced segment dividers become tick fractions in (0, 1).
         const ticks =
-            segments > 1
-                ? Array.from({ length: segments - 1 }, (_, i) => (i + 1) / segments)
-                : []
+            segments > 1 ? Array.from({ length: segments - 1 }, (_, i) => (i + 1) / segments) : []
 
         const labelRow = label
             ? `<div class="tc-resource-bar__label-row">` +

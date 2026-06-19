@@ -27,7 +27,6 @@ function readSizes(storageKey: string | null, defaultSizes: [number, number]): [
 }
 
 export class ResizablePanel extends HTMLElement {
-
     private _initialised = false
     private _sizes: [number, number] = [50, 50]
     private _defaultSizes: [number, number] = [50, 50]
@@ -107,7 +106,13 @@ export class ResizablePanel extends HTMLElement {
         return [...this._defaultSizes] as [number, number]
     }
     set defaultSizes(v: [number, number]) {
-        if (!Array.isArray(v) || v.length < 2 || typeof v[0] !== 'number' || typeof v[1] !== 'number') return
+        if (
+            !Array.isArray(v) ||
+            v.length < 2 ||
+            typeof v[0] !== 'number' ||
+            typeof v[1] !== 'number'
+        )
+            return
         this._defaultSizes = [v[0], v[1]]
         if (this._initialised) {
             this._sizes = this._clamp(readSizes(this.storageKey, this._defaultSizes)[0])
@@ -165,11 +170,13 @@ export class ResizablePanel extends HTMLElement {
 
     private _fireResize(): void {
         const sizes: [number, number] = [...this._sizes] as [number, number]
-        this.dispatchEvent(new CustomEvent('tc-resize', {
-            bubbles: true,
-            composed: true,
-            detail: { sizes },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-resize', {
+                bubbles: true,
+                composed: true,
+                detail: { sizes },
+            }),
+        )
         if (typeof this.onResize === 'function') this.onResize(sizes)
     }
 
@@ -310,8 +317,8 @@ export class ResizablePanel extends HTMLElement {
         this.render()
         const newA = this.querySelector('.tc-resizable-panel-pane--first')
         const newB = this.querySelector('.tc-resizable-panel-pane--second')
-        if (newA) aNodes.forEach(n => newA.appendChild(n))
-        if (newB) bNodes.forEach(n => newB.appendChild(n))
+        if (newA) aNodes.forEach((n) => newA.appendChild(n))
+        if (newB) bNodes.forEach((n) => newB.appendChild(n))
     }
 
     private render(): void {

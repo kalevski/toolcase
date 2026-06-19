@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-loot-list'
 
 export type LootItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'
@@ -14,14 +15,6 @@ export interface LootItem {
 export interface LootEntry {
     item: LootItem
     qty?: number
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class LootList extends HTMLElement {
@@ -64,28 +57,30 @@ export class LootList extends HTMLElement {
     }
 
     private render(): void {
-        const rowsHtml = this._items.map(entry => {
-            const icon = entry.item.icon ?? '◆'
-            const name = entry.item.name ?? entry.item.id
-            const rarity = entry.item.rarity ?? ''
-            const qty = entry.qty ?? entry.item.qty ?? 1
-            const qtyHtml = qty > 1
-                ? `<span class="tc-loot-list-qty" aria-label="quantity ${qty}">×${qty}</span>`
-                : ''
-            const rarityCls = RARITIES.includes(rarity as LootItemRarity)
-                ? ` tc-loot-list-row--${rarity}`
-                : ''
-            return `<div class="tc-loot-list-row${rarityCls}" data-id="${esc(entry.item.id)}">
+        const rowsHtml = this._items
+            .map((entry) => {
+                const icon = entry.item.icon ?? '◆'
+                const name = entry.item.name ?? entry.item.id
+                const rarity = entry.item.rarity ?? ''
+                const qty = entry.qty ?? entry.item.qty ?? 1
+                const qtyHtml =
+                    qty > 1
+                        ? `<span class="tc-loot-list-qty" aria-label="quantity ${qty}">×${qty}</span>`
+                        : ''
+                const rarityCls = RARITIES.includes(rarity as LootItemRarity)
+                    ? ` tc-loot-list-row--${rarity}`
+                    : ''
+                return `<div class="tc-loot-list-row${rarityCls}" data-id="${esc(entry.item.id)}">
                 <span class="tc-loot-list-icon" aria-hidden="true">${esc(icon)}</span>
                 <span class="tc-loot-list-name">${esc(name)}</span>
                 ${qtyHtml}
                 <button type="button" class="tc-loot-list-btn tc-loot-list-take" data-action="take">Take</button>
             </div>`
-        }).join('')
+            })
+            .join('')
 
-        const emptyHtml = this._items.length === 0
-            ? `<p class="tc-loot-list-empty">No loot available</p>`
-            : ''
+        const emptyHtml =
+            this._items.length === 0 ? `<p class="tc-loot-list-empty">No loot available</p>` : ''
 
         const allDisabled = this._items.length === 0 ? ' disabled' : ''
 
@@ -107,18 +102,22 @@ export class LootList extends HTMLElement {
                     const row = btn.closest<HTMLElement>('.tc-loot-list-row')
                     if (!row) return
                     const id = row.dataset.id ?? ''
-                    this.dispatchEvent(new CustomEvent('tc-take', {
-                        bubbles: true,
-                        composed: true,
-                        detail: { id },
-                    }))
+                    this.dispatchEvent(
+                        new CustomEvent('tc-take', {
+                            bubbles: true,
+                            composed: true,
+                            detail: { id },
+                        }),
+                    )
                     if (typeof this.onTake === 'function') this.onTake(id)
                 } else if (action === 'take-all') {
-                    this.dispatchEvent(new CustomEvent('tc-take-all', {
-                        bubbles: true,
-                        composed: true,
-                        detail: {},
-                    }))
+                    this.dispatchEvent(
+                        new CustomEvent('tc-take-all', {
+                            bubbles: true,
+                            composed: true,
+                            detail: {},
+                        }),
+                    )
                     if (typeof this.onTakeAll === 'function') this.onTakeAll()
                 }
             })

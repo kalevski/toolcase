@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // ── Static tree data (set via the `.nodes` JS property) ──────────────────────────
 
@@ -64,7 +63,7 @@ const ASYNC_TREE = [
         label: 'Remote workspace',
         icon: 'cloud',
         loadChildren: () =>
-            new Promise(resolve =>
+            new Promise((resolve) =>
                 setTimeout(
                     () =>
                         resolve([
@@ -124,46 +123,63 @@ const TreeViewDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="TreeView"
+                        <tc-rich-page-header
+                            title-text="TreeView"
                             description="Hierarchical tree navigation with expand/collapse, optional multi-select checkboxes, async lazy-loaded branches, and full keyboard support."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Single select — chevron expand, leaf select (JS property)">
-                                <div style={{ maxWidth: 360, border: '1px solid var(--tc-border, #e2e8f0)' }}>
+                            <tc-section-card title="Single select — chevron expand, leaf select (JS property)">
+                                <div
+                                    style={{
+                                        maxWidth: 360,
+                                        border: '1px solid var(--tc-border, #e2e8f0)',
+                                    }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-tree-view ref={singleRef} />
                                 </div>
                                 <p className="mt-3 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
                                     Selected <code>tc-select</code>: <strong>{selected}</strong>
                                     {' · '}
-                                    Expanded <code>tc-expand-change</code>: <strong>{expanded.join(', ') || '—'}</strong>
+                                    Expanded <code>tc-expand-change</code>:{' '}
+                                    <strong>{expanded.join(', ') || '—'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Checkbox mode — multi-select with parent aggregation">
-                                <div style={{ maxWidth: 360, border: '1px solid var(--tc-border, #e2e8f0)' }}>
+                            <tc-section-card title="Checkbox mode — multi-select with parent aggregation">
+                                <div
+                                    style={{
+                                        maxWidth: 360,
+                                        border: '1px solid var(--tc-border, #e2e8f0)',
+                                    }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-tree-view ref={checkboxRef} checkbox-mode />
                                 </div>
                                 <p className="mt-3 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
                                     Checked keys: <strong>{checked.join(', ') || '—'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Async branch — children fetched on first expand (spinner)">
-                                <div style={{ maxWidth: 360, border: '1px solid var(--tc-border, #e2e8f0)' }}>
+                            <tc-section-card title="Async branch — children fetched on first expand (spinner)">
+                                <div
+                                    style={{
+                                        maxWidth: 360,
+                                        border: '1px solid var(--tc-border, #e2e8f0)',
+                                    }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-tree-view ref={asyncRef} />
                                 </div>
                                 <p className="mt-3 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
                                     Expand <em>Remote workspace</em> to lazy-load its children.
                                 </p>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -16,7 +16,6 @@ const TAG_NAME = 'tc-blur-overlay'
  * own the defaults (the "arbitrary CSS value" porting pattern).
  */
 export class BlurOverlay extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['blur-amount', 'background']
     }

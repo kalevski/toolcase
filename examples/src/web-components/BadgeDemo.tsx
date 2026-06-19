@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BadgeDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Badge"
+                    <tc-rich-page-header
+                        title-text="Badge"
                         description="Small count and labelling components. Supports all Bootstrap theme variants and an optional pill shape."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Variants (text attribute)">
+                        <tc-section-card title="Variants (text attribute)">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-badge variant="primary" text="Primary"></tc-badge>
@@ -32,9 +34,9 @@ const BadgeDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-badge variant="dark" text="Dark"></tc-badge>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Pill shape">
+                        <tc-section-card title="Pill shape">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-badge variant="primary" text="Primary" pill></tc-badge>
@@ -53,18 +55,20 @@ const BadgeDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-badge variant="dark" text="Dark" pill></tc-badge>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Slotted children">
+                        <tc-section-card title="Slotted children">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-badge variant="primary">42</tc-badge>
                                 {/* @ts-ignore */}
-                                <tc-badge variant="success" pill>New</tc-badge>
+                                <tc-badge variant="success" pill>
+                                    New
+                                </tc-badge>
                                 {/* @ts-ignore */}
                                 <tc-badge variant="danger">99+</tc-badge>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

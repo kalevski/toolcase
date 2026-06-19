@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-theme'
 
 export class Theme extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['name']
     }

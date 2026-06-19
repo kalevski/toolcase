@@ -78,7 +78,9 @@ export class ActionItems extends HTMLElement {
     }
 
     private _getEnabledItems(): HTMLButtonElement[] {
-        return Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-action-items-item:not([disabled])'))
+        return Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-action-items-item:not([disabled])'),
+        )
     }
 
     private _resolveIcon(name: string): string {
@@ -110,19 +112,23 @@ export class ActionItems extends HTMLElement {
         const menu = this._getMenu()
         if (!menu) return
 
-        menu.innerHTML = this._items.map((item, idx) => {
-            if (item.divider) {
-                return `<div class="dropdown-divider" role="separator"></div>`
-            }
-            const disabled = item.disabled === true
-            const dangerCls = item.danger ? ' tc-action-items-item--danger' : ''
-            const disabledAttr = disabled ? ' disabled aria-disabled="true"' : ''
-            const iconHtml = item.icon ? this._resolveIcon(item.icon) : ''
-            return `<button class="tc-action-items-item dropdown-item${dangerCls}" role="menuitem" type="button" tabindex="-1" data-idx="${idx}"${disabledAttr}>${iconHtml}<span>${item.label}</span></button>`
-        }).join('')
+        menu.innerHTML = this._items
+            .map((item, idx) => {
+                if (item.divider) {
+                    return `<div class="dropdown-divider" role="separator"></div>`
+                }
+                const disabled = item.disabled === true
+                const dangerCls = item.danger ? ' tc-action-items-item--danger' : ''
+                const disabledAttr = disabled ? ' disabled aria-disabled="true"' : ''
+                const iconHtml = item.icon ? this._resolveIcon(item.icon) : ''
+                return `<button class="tc-action-items-item dropdown-item${dangerCls}" role="menuitem" type="button" tabindex="-1" data-idx="${idx}"${disabledAttr}>${iconHtml}<span>${item.label}</span></button>`
+            })
+            .join('')
 
         // Bind click handlers via data-idx so we avoid key escaping in the DOM.
-        Array.from(menu.querySelectorAll<HTMLButtonElement>('.tc-action-items-item:not([disabled])')).forEach(btn => {
+        Array.from(
+            menu.querySelectorAll<HTMLButtonElement>('.tc-action-items-item:not([disabled])'),
+        ).forEach((btn) => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._items.length) {
@@ -212,7 +218,11 @@ export class ActionItems extends HTMLElement {
         } else if (e.key === 'Tab') {
             this._closeMenu(false)
         } else if (e.key === 'Enter' || e.key === ' ') {
-            if (focused && focused.classList.contains('tc-action-items-item') && !focused.disabled) {
+            if (
+                focused &&
+                focused.classList.contains('tc-action-items-item') &&
+                !focused.disabled
+            ) {
                 e.preventDefault()
                 const idx = parseInt(focused.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._items.length) {

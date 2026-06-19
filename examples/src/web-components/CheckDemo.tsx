@@ -1,28 +1,30 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CheckDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Check"
+                    <tc-rich-page-header
+                        title-text="Check"
                         description="Bootstrap checkbox wrapper with label, inline/reverse layout, indeterminate state, validation, and disabled support."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default">
+                        <tc-section-card title="Default">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-check label="Default checkbox" value="option1" />
                                 {/* @ts-ignore */}
                                 <tc-check label="Checked checkbox" value="option2" checked />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Inline">
+                        <tc-section-card title="Inline">
                             <div>
                                 {/* @ts-ignore */}
                                 <tc-check label="Option 1" value="a" inline />
@@ -31,41 +33,41 @@ const CheckDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-check label="Option 3" value="c" inline />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Indeterminate">
+                        <tc-section-card title="Indeterminate">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-check label="Indeterminate state" indeterminate />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled">
+                        <tc-section-card title="Disabled">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-check label="Disabled unchecked" disabled />
                                 {/* @ts-ignore */}
                                 <tc-check label="Disabled checked" checked disabled />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Validation States">
+                        <tc-section-card title="Validation States">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-check label="Valid checkbox" state="valid" checked />
                                 {/* @ts-ignore */}
                                 <tc-check label="Invalid checkbox" state="invalid" />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Reverse">
+                        <tc-section-card title="Reverse">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-check label="Reverse layout" reverse />
                                 {/* @ts-ignore */}
                                 <tc-check label="Reverse checked" reverse checked />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

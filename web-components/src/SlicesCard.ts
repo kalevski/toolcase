@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-slices-card'
 
 export interface SliceItem {
@@ -20,10 +21,6 @@ const DEFAULT_COLORS = [
 
 const DEFAULT_SIZE = 160
 const DEFAULT_STROKE = 24
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 function parseNum(raw: string | null, fallback: number): number {
     if (raw === null) return fallback
@@ -171,19 +168,24 @@ export class SlicesCard extends HTMLElement {
             : ''
 
         // SVG donut circles
-        const circlesHtml = segments.length > 0
-            ? segments.map(seg => [
-                `<circle`,
-                ` cx="${half}" cy="${half}" r="${seg.radius}"`,
-                ` fill="none"`,
-                ` stroke="${esc(seg.color)}"`,
-                ` stroke-width="${strokeWidth}"`,
-                ` stroke-dasharray="${esc(seg.dashArray)}"`,
-                ` stroke-dashoffset="${seg.dashOffset}"`,
-                ` stroke-linecap="round"`,
-                `/>`,
-            ].join('')).join('')
-            : `<circle cx="${half}" cy="${half}" r="${(size - strokeWidth) / 2}" fill="none" class="tc-slices-card-empty-ring" stroke-width="${strokeWidth}" />`
+        const circlesHtml =
+            segments.length > 0
+                ? segments
+                      .map((seg) =>
+                          [
+                              `<circle`,
+                              ` cx="${half}" cy="${half}" r="${seg.radius}"`,
+                              ` fill="none"`,
+                              ` stroke="${esc(seg.color)}"`,
+                              ` stroke-width="${strokeWidth}"`,
+                              ` stroke-dasharray="${esc(seg.dashArray)}"`,
+                              ` stroke-dashoffset="${seg.dashOffset}"`,
+                              ` stroke-linecap="round"`,
+                              `/>`,
+                          ].join(''),
+                      )
+                      .join('')
+                : `<circle cx="${half}" cy="${half}" r="${(size - strokeWidth) / 2}" fill="none" class="tc-slices-card-empty-ring" stroke-width="${strokeWidth}" />`
 
         const totalStr = total.toLocaleString()
         const totalHtml = `<span class="tc-slices-card-total" aria-label="Total: ${esc(totalStr)}">${esc(totalStr)}</span>`
@@ -198,14 +200,18 @@ export class SlicesCard extends HTMLElement {
         ].join('')
 
         // Legend rows
-        const legendItemsHtml = segments.map(seg => [
-            '<li class="tc-slices-card-legend-item">',
-            `<span class="tc-slices-card-swatch" style="background:${esc(seg.color)};" aria-hidden="true"></span>`,
-            `<span class="tc-slices-card-legend-label">${esc(seg.label)}</span>`,
-            `<span class="tc-slices-card-legend-value">${esc(seg.value.toLocaleString())}</span>`,
-            `<span class="tc-slices-card-legend-percent">${seg.percent}%</span>`,
-            '</li>',
-        ].join('')).join('')
+        const legendItemsHtml = segments
+            .map((seg) =>
+                [
+                    '<li class="tc-slices-card-legend-item">',
+                    `<span class="tc-slices-card-swatch" style="background:${esc(seg.color)};" aria-hidden="true"></span>`,
+                    `<span class="tc-slices-card-legend-label">${esc(seg.label)}</span>`,
+                    `<span class="tc-slices-card-legend-value">${esc(seg.value.toLocaleString())}</span>`,
+                    `<span class="tc-slices-card-legend-percent">${seg.percent}%</span>`,
+                    '</li>',
+                ].join(''),
+            )
+            .join('')
 
         const legendHtml = `<ul class="tc-slices-card-legend" role="list" aria-label="Slice breakdown">${legendItemsHtml}</ul>`
 

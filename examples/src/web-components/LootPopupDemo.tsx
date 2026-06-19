@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const LootPopupDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -11,7 +10,7 @@ const LootPopupDemo: React.FC = () => {
     const [eventsOpen, setEventsOpen] = useState(false)
     const [log, setLog] = useState<string[]>([])
 
-    const appendLog = (msg: string) => setLog(l => [msg, ...l].slice(0, 10))
+    const appendLog = (msg: string) => setLog((l) => [msg, ...l].slice(0, 10))
 
     // Basic popup
     useEffect(() => {
@@ -63,8 +62,14 @@ const LootPopupDemo: React.FC = () => {
         ]
         const onTake = (e: CustomEvent) => appendLog(`tc-take — id: "${e.detail.id}"`)
         const onTakeAll = () => appendLog('tc-take-all fired')
-        const onDiscard = () => { appendLog('tc-discard fired'); setEventsOpen(false) }
-        const onClose = () => { appendLog('tc-close fired'); setEventsOpen(false) }
+        const onDiscard = () => {
+            appendLog('tc-discard fired')
+            setEventsOpen(false)
+        }
+        const onClose = () => {
+            appendLog('tc-close fired')
+            setEventsOpen(false)
+        }
         el.addEventListener('tc-take', onTake as EventListener)
         el.addEventListener('tc-take-all', onTakeAll)
         el.addEventListener('tc-discard', onDiscard)
@@ -88,14 +93,17 @@ const LootPopupDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="LootPopup"
+                        <tc-rich-page-header
+                            title-text="LootPopup"
                             description="Modal loot window with Take All / Discard and optional auto-fade. Items are set via the JS items property. Controlled — fire tc-close to dismiss."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — eyebrow, title, and three items">
+                            <tc-section-card title="Basic — eyebrow, title, and three items">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setBasicOpen(true)}
@@ -109,9 +117,9 @@ const LootPopupDemo: React.FC = () => {
                                     eyebrow="Acquired"
                                     discard-label="Leave it"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Auto-fade — closes automatically after 4 s">
+                            <tc-section-card title="Auto-fade — closes automatically after 4 s">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setAutoFadeOpen(true)}
@@ -125,9 +133,9 @@ const LootPopupDemo: React.FC = () => {
                                     eyebrow="Victory Drop"
                                     auto-fade-ms="4000"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Events — tc-take / tc-take-all / tc-discard / tc-close">
+                            <tc-section-card title="Events — tc-take / tc-take-all / tc-discard / tc-close">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setEventsOpen(true)}
@@ -135,23 +143,24 @@ const LootPopupDemo: React.FC = () => {
                                     Open popup
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-loot-popup
-                                    ref={eventsRef}
-                                    popup-title="Event Demo"
-                                />
+                                <tc-loot-popup ref={eventsRef} popup-title="Event Demo" />
                                 <div className="mt-3">
                                     <strong className="d-block mb-1">Event log</strong>
                                     {log.length === 0 ? (
-                                        <span className="text-muted">Open the popup and interact…</span>
+                                        <span className="text-muted">
+                                            Open the popup and interact…
+                                        </span>
                                     ) : (
                                         <ul className="mb-0">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

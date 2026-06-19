@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BASIC_META = [
     { label: 'Location', value: 'San Francisco, CA' },
@@ -38,56 +37,71 @@ const EntityProfileCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="EntityProfileCard"
+                        <tc-rich-page-header
+                            title-text="EntityProfileCard"
                             description="Profile card with a hero section (lead avatar, title, subtitle, chips) and a meta-information grid of label-value pairs."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Title attribute + meta grid (JS property)">
+                            <tc-section-card title="Title attribute + meta grid (JS property)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-entity-profile-card ref={basicRef} title="Anthropic AI" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Lead avatar, title slot, subtitle, chips, and meta">
+                            <tc-section-card title="Lead avatar, title slot, subtitle, chips, and meta">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-entity-profile-card ref={fullRef}>
                                         {/* @ts-ignore */}
                                         <tc-avatar slot="lead" name="Alice Chen" size="lg" />
                                         <strong slot="title">Alice Chen</strong>
-                                        <span slot="subtitle">Senior Frontend Engineer · Anthropic</span>
+                                        <span slot="subtitle">
+                                            Senior Frontend Engineer · Anthropic
+                                        </span>
                                         {/* @ts-ignore */}
-                                        <tc-badge slot="chips" variant="primary">TypeScript</tc-badge>
+                                        <tc-badge slot="chips" variant="primary">
+                                            TypeScript
+                                        </tc-badge>
                                         {/* @ts-ignore */}
-                                        <tc-badge slot="chips" variant="secondary">React</tc-badge>
+                                        <tc-badge slot="chips" variant="secondary">
+                                            React
+                                        </tc-badge>
                                         {/* @ts-ignore */}
-                                        <tc-badge slot="chips" variant="secondary">Web Components</tc-badge>
-                                    {/* @ts-ignore */}
+                                        <tc-badge slot="chips" variant="secondary">
+                                            Web Components
+                                        </tc-badge>
+                                        {/* @ts-ignore */}
                                     </tc-entity-profile-card>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal — title attribute only">
+                            <tc-section-card title="Minimal — title attribute only">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-entity-profile-card title="Open Source Project" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                            <tc-section-card title="Loading skeleton">
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                        gap: '1rem',
+                                    }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-entity-profile-card loading title="Profile" />
                                     {/* @ts-ignore */}
                                     <tc-entity-profile-card loading title="Profile" />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

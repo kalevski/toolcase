@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ResourceBarDemo: React.FC = () => {
     return (
@@ -7,56 +6,84 @@ const ResourceBarDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ResourceBar"
+                        <tc-rich-page-header
+                            title-text="ResourceBar"
                             description="Value/max resource bar for a game HUD — an ink fill over a flat slate track, an optional label row with a mono value/max readout, an optional ghost band for recent loss, and optional even segment dividers. The variant attribute selects the fill color; tc-health-bar / tc-mana-bar / tc-stamina-bar are presets."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Variants (health / mana / stamina)">
+                            <tc-section-card title="Variants (health / mana / stamina)">
                                 <div className="d-flex flex-column gap-3">
                                     {/* @ts-ignore */}
-                                    <tc-resource-bar variant="health" label="Health" value="72" max="100" />
+                                    <tc-resource-bar
+                                        variant="health"
+                                        label="Health"
+                                        value="72"
+                                        max="100"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-resource-bar variant="mana" label="Mana" value="60" max="100" />
+                                    <tc-resource-bar
+                                        variant="mana"
+                                        label="Mana"
+                                        value="60"
+                                        max="100"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-resource-bar variant="stamina" label="Stamina" value="45" max="100" />
+                                    <tc-resource-bar
+                                        variant="stamina"
+                                        label="Stamina"
+                                        value="45"
+                                        max="100"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Preset alias tags">
+                            <tc-section-card title="Preset alias tags">
                                 <div className="d-flex flex-column gap-3">
                                     {/* @ts-ignore */}
                                     <tc-health-bar label="HP" value="640" max="1000" />
                                     {/* @ts-ignore */}
                                     <tc-mana-bar label="MP" value="480" max="800" />
                                     {/* @ts-ignore */}
-                                    <tc-stamina-bar label="SP" value="3" max="5" segments="5" ghost="4" />
+                                    <tc-stamina-bar
+                                        label="SP"
+                                        value="3"
+                                        max="5"
+                                        segments="5"
+                                        ghost="4"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Bare bar (value / max)">
+                            <tc-section-card title="Bare bar (value / max)">
                                 {/* @ts-ignore */}
                                 <tc-resource-bar value="72" max="100" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inline text (show-text, no label)">
+                            <tc-section-card title="Inline text (show-text, no label)">
                                 {/* @ts-ignore */}
                                 <tc-resource-bar value="45" max="100" show-text="" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Ghost band (recent damage)">
+                            <tc-section-card title="Ghost band (recent damage)">
                                 {/* @ts-ignore */}
-                                <tc-resource-bar variant="health" label="Health" value="40" max="100" ghost="70" />
-                            </SectionCard>
+                                <tc-resource-bar
+                                    variant="health"
+                                    label="Health"
+                                    value="40"
+                                    max="100"
+                                    ghost="70"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Segmented (4 slots)">
+                            <tc-section-card title="Segmented (4 slots)">
                                 {/* @ts-ignore */}
                                 <tc-resource-bar label="Shield" value="3" max="4" segments="4" />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

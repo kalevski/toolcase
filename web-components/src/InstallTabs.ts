@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-install-tabs'
@@ -7,23 +8,6 @@ export type InstallManager = 'npm' | 'yarn' | 'pnpm' | 'bun'
 const MANAGERS: InstallManager[] = ['npm', 'yarn', 'pnpm', 'bun']
 
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    return svg ? icon(svg) : ''
-}
 
 const copyIconHtml = lucideByName('copy')
 const checkIconHtml = lucideByName('check')
@@ -76,12 +60,17 @@ export class InstallTabs extends HTMLElement {
         if (!this._initialised) {
             // Resolve the initial active manager from default-manager attribute
             const dm = this.getAttribute('default-manager') as InstallManager | null
-            this._activeManager = dm && this._managers.includes(dm) ? dm : this._managers[0] ?? 'npm'
+            this._activeManager =
+                dm && this._managers.includes(dm) ? dm : (this._managers[0] ?? 'npm')
             this.render()
-            this.addEventListener('click', this._onHostClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onHostClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -143,7 +132,7 @@ export class InstallTabs extends HTMLElement {
         return this._managers
     }
     set managers(v: InstallManager[]) {
-        this._managers = Array.isArray(v) ? v.filter(m => MANAGERS.includes(m)) : [...MANAGERS]
+        this._managers = Array.isArray(v) ? v.filter((m) => MANAGERS.includes(m)) : [...MANAGERS]
         if (!this._managers.includes(this._activeManager as InstallManager)) {
             this._activeManager = this._managers[0] ?? 'npm'
         }
@@ -160,7 +149,10 @@ export class InstallTabs extends HTMLElement {
 
         // Patch ARIA and tabindex in place (no full re-render)
         const tablist = this.querySelector<HTMLElement>('[role="tablist"]')
-        if (!tablist) { this.render(); return }
+        if (!tablist) {
+            this.render()
+            return
+        }
 
         this._managers.forEach((m, i) => {
             const tab = tablist.querySelector<HTMLElement>(`[data-manager="${m}"]`)
@@ -187,18 +179,25 @@ export class InstallTabs extends HTMLElement {
                 if (m === manager) {
                     const codeEl = panel.querySelector<HTMLElement>('.tc-install-tabs-code')
                     const copyBtn = panel.querySelector<HTMLButtonElement>('.tc-install-tabs-copy')
-                    const cmd = buildCommand(m, this.getAttribute('package') ?? '', this.hasAttribute('dev'), this.hasAttribute('global'))
+                    const cmd = buildCommand(
+                        m,
+                        this.getAttribute('package') ?? '',
+                        this.hasAttribute('dev'),
+                        this.hasAttribute('global'),
+                    )
                     if (codeEl) codeEl.textContent = cmd
                     if (copyBtn) copyBtn.setAttribute('data-command', cmd)
                 }
             }
         })
 
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { manager },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { manager },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange({ manager })
     }
 
@@ -265,11 +264,13 @@ export class InstallTabs extends HTMLElement {
             return
         }
 
-        this.dispatchEvent(new CustomEvent('tc-copy', {
-            bubbles: true,
-            composed: true,
-            detail: { manager, command },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-copy', {
+                bubbles: true,
+                composed: true,
+                detail: { manager, command },
+            }),
+        )
         if (typeof this.onCopy === 'function') this.onCopy({ manager, command })
 
         // Briefly swap to check icon
@@ -297,11 +298,12 @@ export class InstallTabs extends HTMLElement {
         const activeManager = this._getActiveManager()
         const managers = this._managers.length > 0 ? this._managers : [...MANAGERS]
 
-        const tabsHtml = managers.map((m, i) => {
-            const tabId = `${this._idPrefix}-tab-${i}`
-            const panelId = `${this._idPrefix}-panel-${i}`
-            const isActive = m === activeManager
-            return `<button
+        const tabsHtml = managers
+            .map((m, i) => {
+                const tabId = `${this._idPrefix}-tab-${i}`
+                const panelId = `${this._idPrefix}-panel-${i}`
+                const isActive = m === activeManager
+                return `<button
                 id="${tabId}"
                 class="tc-install-tabs-tab${isActive ? ' tc-install-tabs-tab--active' : ''}"
                 role="tab"
@@ -311,14 +313,16 @@ export class InstallTabs extends HTMLElement {
                 data-manager="${m}"
                 type="button"
             >${esc(m)}</button>`
-        }).join('')
+            })
+            .join('')
 
-        const panelsHtml = managers.map((m, i) => {
-            const tabId = `${this._idPrefix}-tab-${i}`
-            const panelId = `${this._idPrefix}-panel-${i}`
-            const isActive = m === activeManager
-            const cmd = buildCommand(m, pkg, dev, global)
-            return `<div
+        const panelsHtml = managers
+            .map((m, i) => {
+                const tabId = `${this._idPrefix}-tab-${i}`
+                const panelId = `${this._idPrefix}-panel-${i}`
+                const isActive = m === activeManager
+                const cmd = buildCommand(m, pkg, dev, global)
+                return `<div
                 id="${panelId}"
                 class="tc-install-tabs-panel"
                 role="tabpanel"
@@ -331,15 +335,16 @@ export class InstallTabs extends HTMLElement {
                     aria-label="Copy command"
                     data-command="${esc(cmd)}"
                 >${copyIconHtml}</button></div>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML =
             `<div class="tc-install-tabs">` +
-                `<div class="tc-install-tabs-tablist" role="tablist" aria-label="Package manager">` +
-                    tabsHtml +
-                `</div>` +
-                panelsHtml +
-                `<div class="tc-install-tabs-status" role="status" aria-live="polite" aria-atomic="true"></div>` +
+            `<div class="tc-install-tabs-tablist" role="tablist" aria-label="Package manager">` +
+            tabsHtml +
+            `</div>` +
+            panelsHtml +
+            `<div class="tc-install-tabs-status" role="status" aria-live="polite" aria-atomic="true"></div>` +
             `</div>`
     }
 }

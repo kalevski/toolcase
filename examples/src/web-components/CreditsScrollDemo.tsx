@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SECTIONS = [
     { role: 'Direction', names: ['Aldric Vane', 'Brina Storm'] },
@@ -34,15 +33,19 @@ const CreditsScrollDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CreditsScroll"
+                        <tc-rich-page-header
+                            title-text="CreditsScroll"
                             description="Auto-scrolling end-credits sequence. Click or press Space/Enter to pause and play; fires tc-complete when the track passes the viewport."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title={`Default — sections via JS property (status: ${status})`}>
+                            <tc-section-card
+                                title={`Default — sections via JS property (status: ${status})`}
+                            >
                                 <div style={{ height: 320, maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-credits-scroll
@@ -51,15 +54,14 @@ const CreditsScrollDemo: React.FC = () => {
                                         scroll-title="Toolcase Studio"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Faster scroll, no title">
+                            <tc-section-card title="Faster scroll, no title">
                                 <div style={{ height: 280, maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-credits-scroll ref={fastRef} speed="90" />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

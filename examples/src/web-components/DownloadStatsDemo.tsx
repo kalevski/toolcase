@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SPARKLINE_DATA = [12, 18, 15, 24, 20, 32, 28, 40, 35, 48, 42, 55]
 
@@ -31,14 +30,17 @@ const DownloadStatsDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="DownloadStats"
+                        <tc-rich-page-header
+                            title-text="DownloadStats"
                             description="Package download statistics card showing formatted weekly, monthly, and total download counts with an optional sparkline trend chart. Supports npm, PyPI, and crates.io registries."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="npm — weekly, monthly, total with sparkline">
+                            <tc-section-card title="npm — weekly, monthly, total with sparkline">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-download-stats
@@ -50,9 +52,9 @@ const DownloadStatsDemo: React.FC = () => {
                                         registry="npm"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="PyPI — weekly and total only">
+                            <tc-section-card title="PyPI — weekly and total only">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-download-stats
@@ -63,9 +65,9 @@ const DownloadStatsDemo: React.FC = () => {
                                         registry="pypi"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="crates.io — monthly and total only">
+                            <tc-section-card title="crates.io — monthly and total only">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-download-stats
@@ -76,9 +78,9 @@ const DownloadStatsDemo: React.FC = () => {
                                         registry="crates"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Total only, no sparkline">
+                            <tc-section-card title="Total only, no sparkline">
                                 <div style={{ maxWidth: 280 }}>
                                     {/* @ts-ignore */}
                                     <tc-download-stats
@@ -87,7 +89,7 @@ const DownloadStatsDemo: React.FC = () => {
                                         registry="npm"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

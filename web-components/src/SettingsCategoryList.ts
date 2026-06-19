@@ -1,5 +1,6 @@
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
-import * as LucideIcons from 'lucide-static'
 
 const TAG_NAME = 'tc-settings-category-list'
 
@@ -8,24 +9,6 @@ export interface SettingsCategory {
     label: string
     /** Lucide icon name (kebab-case) or any text / emoji fallback. */
     icon?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr, 'tc-settings-category-list-icon')
 }
 
 export class SettingsCategoryList extends HTMLElement {
@@ -92,7 +75,7 @@ export class SettingsCategoryList extends HTMLElement {
         body.setAttribute('data-tc-settings-body', '')
         body.setAttribute('role', 'tabpanel')
         body.className = 'tc-settings-category-list-body'
-        bodyChildren.forEach(n => body.appendChild(n))
+        bodyChildren.forEach((n) => body.appendChild(n))
         this.replaceChildren(nav, body)
     }
 
@@ -101,23 +84,25 @@ export class SettingsCategoryList extends HTMLElement {
         const nav = this.querySelector<HTMLElement>('[data-tc-settings-nav]')
         if (!nav) return
         const selected = this.selectedId
-        nav.innerHTML = this._categories.map(cat => {
-            const isSelected = cat.id === selected
-            const cls = `tc-settings-category-list-item${isSelected ? ' tc-settings-category-list-item--active' : ''}`
-            let iconHtml = ''
-            if (cat.icon) {
-                const lucide = lucideByName(cat.icon)
-                iconHtml = lucide
-                    ? `<span class="tc-settings-category-list-icon-wrap" aria-hidden="true">${lucide}</span>`
-                    : `<span class="tc-settings-category-list-icon-wrap tc-settings-category-list-icon-wrap--text" aria-hidden="true">${esc(cat.icon)}</span>`
-            }
-            return (
-                `<button type="button" role="tab" tabindex="${isSelected ? '0' : '-1'}" aria-selected="${isSelected}" class="${cls}" data-id="${esc(cat.id)}">` +
-                iconHtml +
-                `<span class="tc-settings-category-list-label">${esc(cat.label)}</span>` +
-                `</button>`
-            )
-        }).join('')
+        nav.innerHTML = this._categories
+            .map((cat) => {
+                const isSelected = cat.id === selected
+                const cls = `tc-settings-category-list-item${isSelected ? ' tc-settings-category-list-item--active' : ''}`
+                let iconHtml = ''
+                if (cat.icon) {
+                    const lucide = lucideByName(cat.icon)
+                    iconHtml = lucide
+                        ? `<span class="tc-settings-category-list-icon-wrap" aria-hidden="true">${lucide}</span>`
+                        : `<span class="tc-settings-category-list-icon-wrap tc-settings-category-list-icon-wrap--text" aria-hidden="true">${esc(cat.icon)}</span>`
+                }
+                return (
+                    `<button type="button" role="tab" tabindex="${isSelected ? '0' : '-1'}" aria-selected="${isSelected}" class="${cls}" data-id="${esc(cat.id)}">` +
+                    iconHtml +
+                    `<span class="tc-settings-category-list-label">${esc(cat.label)}</span>` +
+                    `</button>`
+                )
+            })
+            .join('')
     }
 
     /**
@@ -126,7 +111,7 @@ export class SettingsCategoryList extends HTMLElement {
      */
     private _patchNavSelection(): void {
         const selected = this.selectedId
-        this.querySelectorAll<HTMLElement>('[data-tc-settings-nav] [data-id]').forEach(btn => {
+        this.querySelectorAll<HTMLElement>('[data-tc-settings-nav] [data-id]').forEach((btn) => {
             const isSelected = btn.dataset.id === selected
             btn.classList.toggle('tc-settings-category-list-item--active', isSelected)
             btn.setAttribute('aria-selected', String(isSelected))
@@ -137,11 +122,13 @@ export class SettingsCategoryList extends HTMLElement {
     private _select(id: string): void {
         if (!id || id === this.selectedId) return
         this.selectedId = id
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { id },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { id },
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(id)
     }
 

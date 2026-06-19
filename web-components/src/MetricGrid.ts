@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -5,14 +6,6 @@ const TAG_NAME = 'tc-metric-grid'
 
 const COLUMNS = [2, 3, 4] as const
 export type MetricGridColumns = 2 | 3 | 4
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function resolveIcon(name: string): string {
     const svgStr = (LucideIcons as Record<string, string>)[name]
@@ -41,7 +34,7 @@ export class MetricGrid extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const grid = this.querySelector('.tc-metric-grid')
-            if (grid) slotContent.forEach(n => grid.appendChild(n))
+            if (grid) slotContent.forEach((n) => grid.appendChild(n))
             this._initialised = true
         }
     }
@@ -74,11 +67,11 @@ export class MetricGrid extends HTMLElement {
     private _rerenderWithSlots(): void {
         const grid = this.querySelector('.tc-metric-grid')
         const slotContent = grid
-            ? Array.from(grid.childNodes).filter(n => !this._isGenerated(n))
+            ? Array.from(grid.childNodes).filter((n) => !this._isGenerated(n))
             : []
         this.render()
         const newGrid = this.querySelector('.tc-metric-grid')
-        if (newGrid) slotContent.forEach(n => newGrid.appendChild(n))
+        if (newGrid) slotContent.forEach((n) => newGrid.appendChild(n))
     }
 
     private _renderTile(item: MetricGridItem): string {
@@ -116,7 +109,7 @@ export class MetricGrid extends HTMLElement {
 
     private render(): void {
         const cols = this.columns
-        const tilesHtml = this._items.map(item => this._renderTile(item)).join('')
+        const tilesHtml = this._items.map((item) => this._renderTile(item)).join('')
         this.innerHTML = `<div class="tc-metric-grid tc-metric-grid--cols-${cols}">${tilesHtml}</div>`
     }
 }

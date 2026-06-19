@@ -98,11 +98,13 @@ export class HitMarker extends HTMLElement {
             this._timer = null
             // Auto-hide, then announce completion so the host can recycle/remove.
             this.show = false
-            this.dispatchEvent(new CustomEvent('tc-done', {
-                bubbles: true,
-                composed: true,
-                detail: {},
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-done', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {},
+                }),
+            )
             if (typeof this.ondone === 'function') this.ondone()
         }, this.duration)
     }

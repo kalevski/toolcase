@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MENU_ITEMS = [
     { key: 'retry', label: 'Retry build' },
@@ -26,7 +25,7 @@ const BuildDemo: React.FC = () => {
     useEffect(() => {
         const el = clickableRef.current
         if (!el) return
-        el.onClick = () => setClickCount(n => n + 1)
+        el.onClick = () => setClickCount((n) => n + 1)
     }, [])
 
     return (
@@ -34,15 +33,17 @@ const BuildDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Build"
+                        <tc-rich-page-header
+                            title-text="Build"
                             description="Build status card showing name, date, size, duration, a status icon, an optional badge, and an action menu."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Status variants">
+                            <tc-section-card title="Status variants">
                                 <div className="d-flex flex-column gap-2" style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-build
@@ -75,9 +76,9 @@ const BuildDemo: React.FC = () => {
                                         status="queued"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With badge">
+                            <tc-section-card title="With badge">
                                 <div className="d-flex flex-column gap-2" style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-build
@@ -110,9 +111,11 @@ const BuildDemo: React.FC = () => {
                                         badge-variant="warning"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`Action menu — menuItems via JS property${menuKey ? ` (last: "${menuKey}")` : ''}`}>
+                            <tc-section-card
+                                title={`Action menu — menuItems via JS property${menuKey ? ` (last: "${menuKey}")` : ''}`}
+                            >
                                 <div style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-build
@@ -127,13 +130,19 @@ const BuildDemo: React.FC = () => {
                                     />
                                 </div>
                                 {menuKey && (
-                                    <p className="mt-2 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
-                                        <code>tc-menu-select</code> fired with key: <code>{menuKey}</code>
+                                    <p
+                                        className="mt-2 mb-0 text-muted"
+                                        style={{ fontSize: '0.85rem' }}
+                                    >
+                                        <code>tc-menu-select</code> fired with key:{' '}
+                                        <code>{menuKey}</code>
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`Clickable card — onClick + tc-click (clicked ${clickCount}×)`}>
+                            <tc-section-card
+                                title={`Clickable card — onClick + tc-click (clicked ${clickCount}×)`}
+                            >
                                 <div style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-build
@@ -145,9 +154,9 @@ const BuildDemo: React.FC = () => {
                                         status="pass"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 <div className="d-flex flex-column gap-2" style={{ maxWidth: 520 }}>
                                     {/* @ts-ignore */}
                                     <tc-build loading />
@@ -156,8 +165,7 @@ const BuildDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-build loading />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

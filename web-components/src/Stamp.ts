@@ -1,8 +1,6 @@
+import { VARIANTS_CORE } from './internal/variants'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-stamp'
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 // A bare number is treated as degrees; anything with a CSS angle unit is left as-is.
 function normalizeAngle(v: string): string {
@@ -13,11 +11,10 @@ function normalizeAngle(v: string): string {
 export type StampColor = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info'
 export type StampPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 
-const COLORS: StampColor[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info']
+const COLORS: StampColor[] = [...VARIANTS_CORE]
 const POSITIONS: StampPosition[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right']
 
 export class Stamp extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -34,7 +31,7 @@ export class Stamp extends HTMLElement {
             this.render()
             if (!this.hasAttribute('label')) {
                 const inner = this.querySelector('.tc-stamp-content')
-                if (inner) slotContent.forEach(n => inner.appendChild(n))
+                if (inner) slotContent.forEach((n) => inner.appendChild(n))
             }
             this._initialised = true
         }
@@ -43,13 +40,11 @@ export class Stamp extends HTMLElement {
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
         const inner = this.querySelector('.tc-stamp-content')
-        const slotContent = (!this.hasAttribute('label') && inner)
-            ? Array.from(inner.childNodes)
-            : []
+        const slotContent = !this.hasAttribute('label') && inner ? Array.from(inner.childNodes) : []
         this.render()
         if (!this.hasAttribute('label')) {
             const newInner = this.querySelector('.tc-stamp-content')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 
@@ -95,7 +90,8 @@ export class Stamp extends HTMLElement {
         const angle = this.angle
 
         const contentHtml = label != null ? esc(label) : ''
-        const styleAttr = angle != null ? ` style="--bs-stamp-rotation:${esc(normalizeAngle(angle))}"` : ''
+        const styleAttr =
+            angle != null ? ` style="--bs-stamp-rotation:${esc(normalizeAngle(angle))}"` : ''
 
         this.innerHTML = `<span class="tc-stamp tc-stamp-${color} tc-stamp-${position}"${styleAttr}><span class="tc-stamp-content">${contentHtml}</span></span>`
     }

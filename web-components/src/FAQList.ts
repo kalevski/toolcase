@@ -1,16 +1,9 @@
+import { esc } from './internal/esc'
 import { chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-faq-list'
 
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export interface FAQItem {
     question: string
@@ -136,18 +129,20 @@ export class FAQList extends HTMLElement {
             btn.closest('.tc-faq-list-item')?.classList.toggle('tc-faq-list-item--open', open)
         }
 
-        this.dispatchEvent(new CustomEvent('tc-toggle', {
-            bubbles: true,
-            composed: true,
-            detail: { index: idx, open },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-toggle', {
+                bubbles: true,
+                composed: true,
+                detail: { index: idx, open },
+            }),
+        )
         if (typeof this.onToggle === 'function') this.onToggle(idx, open)
     }
 
     private _distributeSlots(): void {
         if (this._titleSlotNodes.length === 0) return
         const container = this.querySelector('.tc-faq-list-title-slot')
-        if (container) this._titleSlotNodes.forEach(n => container.appendChild(n))
+        if (container) this._titleSlotNodes.forEach((n) => container.appendChild(n))
     }
 
     private render(): void {
@@ -162,32 +157,34 @@ export class FAQList extends HTMLElement {
             titleHtml = `<div class="tc-faq-list-title-row"><div class="tc-faq-list-title tc-faq-list-title-slot"></div></div>`
         }
 
-        const itemsHtml = items.map((item, idx) => {
-            const open = this._openSet.has(idx)
-            const btnId = `${this._idPrefix}-btn-${idx}`
-            const panelId = `${this._idPrefix}-panel-${idx}`
-            const openClass = open ? ' tc-faq-list-item--open' : ''
-            const hiddenAttr = open ? '' : ' hidden'
-            return (
-                `<div class="tc-faq-list-item${openClass}">` +
-                `<button id="${btnId}" class="tc-faq-list-question" type="button" ` +
-                `aria-expanded="${open ? 'true' : 'false'}" aria-controls="${panelId}" data-idx="${idx}">` +
-                `<span class="tc-faq-list-question-text">${esc(item.question)}</span>` +
-                `<span class="tc-faq-list-chevron" aria-hidden="true">${chevronDownIcon}</span>` +
-                `</button>` +
-                `<div id="${panelId}" class="tc-faq-list-answer" role="region" aria-labelledby="${btnId}"${hiddenAttr}>` +
-                `${esc(item.answer)}` +
-                `</div>` +
-                `</div>`
-            )
-        }).join('\n')
+        const itemsHtml = items
+            .map((item, idx) => {
+                const open = this._openSet.has(idx)
+                const btnId = `${this._idPrefix}-btn-${idx}`
+                const panelId = `${this._idPrefix}-panel-${idx}`
+                const openClass = open ? ' tc-faq-list-item--open' : ''
+                const hiddenAttr = open ? '' : ' hidden'
+                return (
+                    `<div class="tc-faq-list-item${openClass}">` +
+                    `<button id="${btnId}" class="tc-faq-list-question" type="button" ` +
+                    `aria-expanded="${open ? 'true' : 'false'}" aria-controls="${panelId}" data-idx="${idx}">` +
+                    `<span class="tc-faq-list-question-text">${esc(item.question)}</span>` +
+                    `<span class="tc-faq-list-chevron" aria-hidden="true">${chevronDownIcon}</span>` +
+                    `</button>` +
+                    `<div id="${panelId}" class="tc-faq-list-answer" role="region" aria-labelledby="${btnId}"${hiddenAttr}>` +
+                    `${esc(item.answer)}` +
+                    `</div>` +
+                    `</div>`
+                )
+            })
+            .join('\n')
 
         let schemaHtml = ''
         if (hasSchema && items.length > 0) {
             const schemaObj = {
                 '@context': 'https://schema.org',
                 '@type': 'FAQPage',
-                mainEntity: items.map(item => ({
+                mainEntity: items.map((item) => ({
                     '@type': 'Question',
                     name: item.question,
                     acceptedAnswer: { '@type': 'Answer', text: item.answer },

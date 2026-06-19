@@ -40,7 +40,6 @@ function resolveLength(raw: string | null): string | null {
  * element only reflects the `inset` attribute into that property.
  */
 export class Anchor extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

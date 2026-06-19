@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Collapse as BsCollapse } from './internal/Collapse'
 
 const TAG_NAME = 'tc-navbar'
@@ -5,7 +6,6 @@ const TAG_NAME = 'tc-navbar'
 let _uid = 0
 
 export class Navbar extends HTMLElement {
-
     private _bsCollapse: BsCollapse | null = null
     private _collapseEl: HTMLElement | null = null
     private _navContent: Node[] = []
@@ -110,7 +110,7 @@ export class Navbar extends HTMLElement {
         const brandHtml = brand
             ? `<a class="navbar-brand" href="#">` +
               `<span class="navbar-brand-dot"></span>` +
-              `${this._escape(brand)}</a>`
+              `${esc(brand)}</a>`
             : ''
         const id = this._collapseId
 
@@ -128,7 +128,7 @@ export class Navbar extends HTMLElement {
         const collapseEl = this.querySelector<HTMLElement>(`#${id}`)
         this._collapseEl = collapseEl
         if (collapseEl) {
-            this._navContent.forEach(n => collapseEl.appendChild(n))
+            this._navContent.forEach((n) => collapseEl.appendChild(n))
         }
     }
 
@@ -143,14 +143,6 @@ export class Navbar extends HTMLElement {
             this._bsCollapse.dispose()
             this._bsCollapse = null
         }
-    }
-
-    private _escape(s: string): string {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
     }
 }
 

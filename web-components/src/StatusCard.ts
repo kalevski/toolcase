@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -26,14 +27,6 @@ const STATUS_ARIA_LABELS: Record<StatusCardStatus, string> = {
     warning: 'warning',
     error: 'error',
     inactive: 'inactive',
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 function resolveStatusIcon(status: StatusCardStatus): string {
@@ -106,12 +99,14 @@ export class StatusCard extends HTMLElement {
 
         let bodyHtml: string
         if (loading) {
-            const rows = Array.from({ length: loadingCount }, () =>
-                '<li class="tc-status-card-item tc-status-card-item--skeleton" role="listitem" aria-hidden="true">' +
-                '<span class="tc-status-card-indicator tc-status-card-indicator--skeleton" aria-hidden="true"></span>' +
-                '<span class="tc-status-card-skeleton tc-status-card-skeleton--label"></span>' +
-                '<span class="tc-status-card-skeleton tc-status-card-skeleton--detail"></span>' +
-                '</li>'
+            const rows = Array.from(
+                { length: loadingCount },
+                () =>
+                    '<li class="tc-status-card-item tc-status-card-item--skeleton" role="listitem" aria-hidden="true">' +
+                    '<span class="tc-status-card-indicator tc-status-card-indicator--skeleton" aria-hidden="true"></span>' +
+                    '<span class="tc-status-card-skeleton tc-status-card-skeleton--label"></span>' +
+                    '<span class="tc-status-card-skeleton tc-status-card-skeleton--detail"></span>' +
+                    '</li>',
             ).join('')
             bodyHtml = [
                 '<ul class="tc-status-card-list" role="list" aria-busy="true">',
@@ -120,23 +115,28 @@ export class StatusCard extends HTMLElement {
                 '</ul>',
             ].join('')
         } else {
-            const rows = this._items.map(item => {
-                const status: StatusCardStatus = STATUSES.includes(item.status) ? item.status : 'inactive'
-                const iconHtml = resolveStatusIcon(status)
-                const statusLabel = STATUS_ARIA_LABELS[status]
-                const detailHtml = item.detail != null
-                    ? `<span class="tc-status-card-detail">${esc(item.detail)}</span>`
-                    : ''
-                return [
-                    '<li class="tc-status-card-item" role="listitem">',
-                    `<span class="tc-status-card-indicator tc-status-card-indicator--${esc(status)}" role="img" aria-label="${esc(statusLabel)}">`,
-                    iconHtml,
-                    '</span>',
-                    `<span class="tc-status-card-label">${esc(item.label)}</span>`,
-                    detailHtml,
-                    '</li>',
-                ].join('')
-            }).join('')
+            const rows = this._items
+                .map((item) => {
+                    const status: StatusCardStatus = STATUSES.includes(item.status)
+                        ? item.status
+                        : 'inactive'
+                    const iconHtml = resolveStatusIcon(status)
+                    const statusLabel = STATUS_ARIA_LABELS[status]
+                    const detailHtml =
+                        item.detail != null
+                            ? `<span class="tc-status-card-detail">${esc(item.detail)}</span>`
+                            : ''
+                    return [
+                        '<li class="tc-status-card-item" role="listitem">',
+                        `<span class="tc-status-card-indicator tc-status-card-indicator--${esc(status)}" role="img" aria-label="${esc(statusLabel)}">`,
+                        iconHtml,
+                        '</span>',
+                        `<span class="tc-status-card-label">${esc(item.label)}</span>`,
+                        detailHtml,
+                        '</li>',
+                    ].join('')
+                })
+                .join('')
             bodyHtml = `<ul class="tc-status-card-list" role="list">${rows}</ul>`
         }
 

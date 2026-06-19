@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const LEGENDARY = {
     id: 'dawnbreaker',
@@ -39,9 +38,7 @@ const RARE = {
         { label: 'Frost Resist', value: 35 },
         { label: 'Mana', value: 60 },
     ],
-    requirements: [
-        { label: 'Level', value: 12, met: true },
-    ],
+    requirements: [{ label: 'Level', value: 12, met: true }],
     flavor: 'Cold to the touch, even in summer.',
 }
 
@@ -67,27 +64,30 @@ const ItemTooltipDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ItemTooltip"
+                        <tc-rich-page-header
+                            title-text="ItemTooltip"
                             description="A hover card describing an item: an optional mono type micro-label, the item name, a rarity chip, a stat list, an optional requirements block (met / unmet), and optional flavor text. Set the item via the JS `item` property. Re-skinned from the game-components gc-item-tooltip to the toolcase design system — no gilded frame, no glow, no parchment fill: a sharp hairline surface at the overlay tier, mono machine-facing figures, and status colour spent only on rarity and requirement markers."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Legendary — stats, requirements, flavor">
+                            <tc-section-card title="Legendary — stats, requirements, flavor">
                                 {/* @ts-ignore */}
                                 <tc-item-tooltip ref={legendaryRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Rare — a smaller trinket">
+                            <tc-section-card title="Rare — a smaller trinket">
                                 {/* @ts-ignore */}
                                 <tc-item-tooltip ref={rareRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Common — stats only">
+                            <tc-section-card title="Common — stats only">
                                 {/* @ts-ignore */}
                                 <tc-item-tooltip ref={commonRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

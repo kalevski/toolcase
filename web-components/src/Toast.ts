@@ -1,10 +1,10 @@
+import { esc } from './internal/esc'
 import { Toast as BsToast } from './internal/Toast'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-toast'
 
 export class Toast extends HTMLElement {
-
     private _bsToast: BsToast | null = null
     private _bodyNodes: Node[] = []
     private _initialised = false
@@ -118,7 +118,7 @@ export class Toast extends HTMLElement {
 
     private render(): void {
         const variant = this.getAttribute('variant')
-        const titleText = this._escapeHtml(this.getAttribute('title') ?? '')
+        const titleText = esc(this.getAttribute('title') ?? '')
         const hasTitle = titleText.length > 0
 
         const classes = ['toast', 'fade']
@@ -139,15 +139,7 @@ export class Toast extends HTMLElement {
         this.innerHTML = headerHtml + `<div class="toast-body"></div>`
 
         const body = this.querySelector('.toast-body')
-        if (body) this._bodyNodes.forEach(n => body.appendChild(n))
-    }
-
-    private _escapeHtml(s: string): string {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
+        if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
     }
 
     private _initPlugin(): void {

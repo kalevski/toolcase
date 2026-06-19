@@ -14,7 +14,6 @@ function resolveLength(raw: string | null): string | null {
 }
 
 export class ScrollArea extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -26,7 +25,7 @@ export class ScrollArea extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-scroll-area-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
             this._syncScrollability()
         }
@@ -38,7 +37,7 @@ export class ScrollArea extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-scroll-area-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         this._syncScrollability()
     }
 
@@ -48,7 +47,8 @@ export class ScrollArea extends HTMLElement {
     private _syncScrollability(): void {
         const area = this.querySelector<HTMLElement>('.tc-scroll-area')
         if (!area) return
-        const overflows = area.scrollHeight > area.clientHeight || area.scrollWidth > area.clientWidth
+        const overflows =
+            area.scrollHeight > area.clientHeight || area.scrollWidth > area.clientWidth
         if (overflows) area.setAttribute('tabindex', '0')
         else area.removeAttribute('tabindex')
     }

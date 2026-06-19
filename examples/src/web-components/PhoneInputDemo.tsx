@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PhoneInputDemo: React.FC = () => {
     const defaultRef = useRef<any>(null)
@@ -35,15 +34,17 @@ const PhoneInputDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PhoneInput"
+                        <tc-rich-page-header
+                            title-text="PhoneInput"
                             description="International phone input with a searchable country selector, dial-code prefix, and form submission support."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Default (United States)">
+                            <tc-section-card title="Default (United States)">
                                 {/* @ts-ignore */}
                                 <tc-phone-input
                                     ref={defaultRef}
@@ -54,9 +55,9 @@ const PhoneInputDemo: React.FC = () => {
                                 <div className="form-text mt-2">
                                     Value: <strong>{defaultValue || '(empty)'}</strong>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Pre-selected country (United Kingdom)">
+                            <tc-section-card title="Pre-selected country (United Kingdom)">
                                 {/* @ts-ignore */}
                                 <tc-phone-input
                                     ref={gbRef}
@@ -67,9 +68,9 @@ const PhoneInputDemo: React.FC = () => {
                                 <div className="form-text mt-2">
                                     Value: <strong>{gbValue || '(empty)'}</strong>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Error state">
+                            <tc-section-card title="Error state">
                                 {/* @ts-ignore */}
                                 <tc-phone-input
                                     ref={errorRef}
@@ -78,9 +79,9 @@ const PhoneInputDemo: React.FC = () => {
                                     value="+1555"
                                     error="Please enter a valid phone number."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inside a form (with name attribute)">
+                            <tc-section-card title="Inside a form (with name attribute)">
                                 {/* @ts-ignore */}
                                 <tc-phone-input
                                     ref={formRef}
@@ -90,11 +91,11 @@ const PhoneInputDemo: React.FC = () => {
                                     placeholder="(555) 000-0000"
                                 />
                                 <div className="form-text mt-2">
-                                    A hidden <code>&lt;input name=&quot;phone&quot;&gt;</code> carries the full
-                                    value (dial code + number) for native form submission.
+                                    A hidden <code>&lt;input name=&quot;phone&quot;&gt;</code>{' '}
+                                    carries the full value (dial code + number) for native form
+                                    submission.
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

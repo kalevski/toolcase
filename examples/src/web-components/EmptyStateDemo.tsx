@@ -1,43 +1,45 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const EmptyStateDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="EmptyState"
+                    <tc-rich-page-header
+                        title-text="EmptyState"
                         description="Centered placeholder shown when data is unavailable. Supports an optional lucide icon and arbitrary slotted content including action buttons."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Icon + message">
+                        <tc-section-card title="Icon + message">
                             {/* @ts-ignore */}
                             <tc-empty-state icon="Inbox">
                                 No messages yet
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-empty-state>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Icon + message + action button">
+                        <tc-section-card title="Icon + message + action button">
                             {/* @ts-ignore */}
                             <tc-empty-state icon="FolderOpen">
                                 No files found
                                 {/* @ts-ignore */}
                                 <tc-button variant="secondary">Upload a file</tc-button>
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-empty-state>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Message only (no icon)">
+                        <tc-section-card title="Message only (no icon)">
                             {/* @ts-ignore */}
                             <tc-empty-state>
                                 Nothing to show here yet.
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-empty-state>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

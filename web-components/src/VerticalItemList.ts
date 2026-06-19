@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-vertical-item-list'
@@ -12,24 +13,7 @@ export interface VerticalItemListItem {
     badge?: string | number
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 // kebab-case lucide name → PascalCase lookup in lucide-static, wrapped in icon().
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr, 'tc-vertical-item-list-icon')
-}
 
 export class VerticalItemList extends HTMLElement {
     private _initialised = false
@@ -54,7 +38,7 @@ export class VerticalItemList extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-vertical-item-list-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
         // Arrow-function references are stable, so re-adding on reconnect is a no-op.
@@ -135,7 +119,7 @@ export class VerticalItemList extends HTMLElement {
 
     /** The currently active item key. */
     private _getActiveKey(): string {
-        const keys = this._items.map(i => i.key)
+        const keys = this._items.map((i) => i.key)
         if (this._isControlled) {
             return this.getAttribute('active-key') ?? ''
         }
@@ -147,7 +131,7 @@ export class VerticalItemList extends HTMLElement {
 
     /** The key that owns roving tabindex 0 (active, else first item). */
     private _getTabbableKey(activeKey: string): string {
-        const keys = this._items.map(i => i.key)
+        const keys = this._items.map((i) => i.key)
         if (keys.includes(activeKey)) return activeKey
         return this._items[0]?.key ?? activeKey
     }
@@ -156,7 +140,7 @@ export class VerticalItemList extends HTMLElement {
 
     private _select(key: string, focus: boolean): void {
         if (this.disabled) return
-        const item = this._items.find(i => i.key === key)
+        const item = this._items.find((i) => i.key === key)
         if (!item) return
 
         if (!this._isControlled) {
@@ -169,11 +153,13 @@ export class VerticalItemList extends HTMLElement {
             this._focusItem(key)
         }
 
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { key },
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(key)
     }
 
@@ -198,7 +184,7 @@ export class VerticalItemList extends HTMLElement {
         const tabbableKey = this._getTabbableKey(activeKey)
         let activeId = ''
 
-        this.querySelectorAll<HTMLElement>('[role="tab"]').forEach(btn => {
+        this.querySelectorAll<HTMLElement>('[role="tab"]').forEach((btn) => {
             const k = btn.dataset.key ?? ''
             const isActive = k === activeKey
             btn.setAttribute('aria-selected', String(isActive))
@@ -268,7 +254,7 @@ export class VerticalItemList extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-vertical-item-list-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     private render(): void {
@@ -283,10 +269,12 @@ export class VerticalItemList extends HTMLElement {
 
         if (loading) {
             this.setAttribute('aria-busy', 'true')
-            const rows = Array.from({ length: this.loadingCount }, () =>
-                '<div class="tc-vertical-item-list-item tc-vertical-item-list-item--skeleton" aria-hidden="true">' +
-                '<span class="tc-vertical-item-list-skeleton"></span>' +
-                '</div>'
+            const rows = Array.from(
+                { length: this.loadingCount },
+                () =>
+                    '<div class="tc-vertical-item-list-item tc-vertical-item-list-item--skeleton" aria-hidden="true">' +
+                    '<span class="tc-vertical-item-list-skeleton"></span>' +
+                    '</div>',
             ).join('')
             menuHtml =
                 '<div class="tc-vertical-item-list-menu" role="presentation">' +
@@ -298,27 +286,37 @@ export class VerticalItemList extends HTMLElement {
             const activeKey = this._getActiveKey()
             const tabbableKey = this._getTabbableKey(activeKey)
 
-            const itemsHtml = this._items.map((item, i) => {
-                const id = `${this._idPrefix}-item-${i}`
-                const isActive = item.key === activeKey
-                if (isActive) activeId = id
-                const iconHtml = item.icon ? lucideByName(item.icon) : ''
-                const textHtml = `<span class="tc-vertical-item-list-text">${esc(item.text)}</span>`
-                const badgeHtml = item.badge != null && item.badge !== ''
-                    ? `<span class="tc-vertical-item-list-badge">${esc(String(item.badge))}</span>`
-                    : ''
-                return `<button` +
-                    ` id="${id}"` +
-                    ` type="button"` +
-                    ` class="tc-vertical-item-list-item${isActive ? ' tc-vertical-item-list-item--active' : ''}"` +
-                    ` role="tab"` +
-                    ` data-key="${esc(item.key)}"` +
-                    ` aria-selected="${isActive}"` +
-                    (isActive ? ' aria-current="true"' : '') +
-                    ` tabindex="${item.key === tabbableKey ? '0' : '-1'}"` +
-                    (disabled ? ' disabled aria-disabled="true"' : '') +
-                    `>${iconHtml}${textHtml}${badgeHtml}</button>`
-            }).join('')
+            const itemsHtml = this._items
+                .map((item, i) => {
+                    const id = `${this._idPrefix}-item-${i}`
+                    const isActive = item.key === activeKey
+                    if (isActive) activeId = id
+                    // Pass the class so the .tc-vertical-item-list-icon sizing rule
+                    // applies — icon() strips the SVG's width/height, so without it the
+                    // glyph renders at its default size (huge).
+                    const iconHtml = item.icon
+                        ? lucideByName(item.icon, 'tc-vertical-item-list-icon')
+                        : ''
+                    const textHtml = `<span class="tc-vertical-item-list-text">${esc(item.text)}</span>`
+                    const badgeHtml =
+                        item.badge != null && item.badge !== ''
+                            ? `<span class="tc-vertical-item-list-badge">${esc(String(item.badge))}</span>`
+                            : ''
+                    return (
+                        `<button` +
+                        ` id="${id}"` +
+                        ` type="button"` +
+                        ` class="tc-vertical-item-list-item${isActive ? ' tc-vertical-item-list-item--active' : ''}"` +
+                        ` role="tab"` +
+                        ` data-key="${esc(item.key)}"` +
+                        ` aria-selected="${isActive}"` +
+                        (isActive ? ' aria-current="true"' : '') +
+                        ` tabindex="${item.key === tabbableKey ? '0' : '-1'}"` +
+                        (disabled ? ' disabled aria-disabled="true"' : '') +
+                        `>${iconHtml}${textHtml}${badgeHtml}</button>`
+                    )
+                })
+                .join('')
 
             menuHtml = `<div class="tc-vertical-item-list-menu" role="tablist" aria-orientation="vertical">${itemsHtml}</div>`
         }
@@ -326,8 +324,8 @@ export class VerticalItemList extends HTMLElement {
         const labelledby = activeId ? ` aria-labelledby="${activeId}"` : ''
         this.innerHTML =
             `<div class="tc-vertical-item-list">` +
-                menuHtml +
-                `<div class="tc-vertical-item-list-content" role="tabpanel" tabindex="0"${labelledby}></div>` +
+            menuHtml +
+            `<div class="tc-vertical-item-list-content" role="tabpanel" tabindex="0"${labelledby}></div>` +
             `</div>`
     }
 }

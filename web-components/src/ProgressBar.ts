@@ -1,11 +1,19 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-progress-bar'
 
-export type ProgressBarVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type ProgressBarVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
-const VARIANTS: ProgressBarVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: ProgressBarVariant[] = [...VARIANTS_FULL]
 
 export class ProgressBar extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

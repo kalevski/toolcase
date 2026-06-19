@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-breadcrumb'
 
 export class Breadcrumb extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -17,7 +16,7 @@ export class Breadcrumb extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const ol = this.querySelector('ol.breadcrumb')
-            if (ol) slotContent.forEach(n => ol.appendChild(n))
+            if (ol) slotContent.forEach((n) => ol.appendChild(n))
             this._updateDivider()
             this._initialised = true
         }

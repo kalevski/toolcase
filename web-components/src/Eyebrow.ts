@@ -6,7 +6,6 @@ const TAG_NAME = 'tc-eyebrow'
 // swaps the fantasy chrome for the web-components design-system micro-label
 // (JetBrains Mono, uppercase, slate-muted), styled via `_eyebrow.scss`.
 export class Eyebrow extends HTMLElement {
-
     private _initialised = false
 
     constructor() {
@@ -18,7 +17,7 @@ export class Eyebrow extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-eyebrow-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }

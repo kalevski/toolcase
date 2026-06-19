@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const OPTIONS = [
     { value: 'js', label: 'JavaScript' },
@@ -18,8 +17,8 @@ const CheckboxGroupDemo: React.FC = () => {
     const [controlledValue, setControlledValue] = useState<string[]>(['js', 'ts'])
 
     useEffect(() => {
-        const els = [basicRef, inlineRef, requiredRef].map(r => r.current)
-        els.forEach(el => {
+        const els = [basicRef, inlineRef, requiredRef].map((r) => r.current)
+        els.forEach((el) => {
             if (el) el.options = OPTIONS
         })
     }, [])
@@ -60,48 +59,76 @@ const CheckboxGroupDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CheckboxGroup"
+                        <tc-rich-page-header
+                            title-text="CheckboxGroup"
                             description="Coordinated group of checkboxes with optional label, inline layout, disabled options, and controlled/uncontrolled value."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default (labelled group, with disabled option)">
+                            <tc-section-card title="Default (labelled group, with disabled option)">
                                 {/* @ts-ignore */}
-                                <tc-checkbox-group ref={basicRef} label="Preferred languages" name="languages" />
+                                <tc-checkbox-group
+                                    ref={basicRef}
+                                    label="Preferred languages"
+                                    name="languages"
+                                />
                                 {selection.length > 0 && (
                                     <div className="form-text mt-2">
                                         Selected: {selection.join(', ')}
                                     </div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inline layout">
+                            <tc-section-card title="Inline layout">
                                 {/* @ts-ignore */}
-                                <tc-checkbox-group ref={inlineRef} label="Preferred languages" name="languages-inline" inline />
-                            </SectionCard>
+                                <tc-checkbox-group
+                                    ref={inlineRef}
+                                    label="Preferred languages"
+                                    name="languages-inline"
+                                    inline
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Controlled value">
+                            <tc-section-card title="Controlled value">
                                 {/* @ts-ignore */}
-                                <tc-checkbox-group ref={controlledRef} label="Controlled selection" name="languages-controlled" />
+                                <tc-checkbox-group
+                                    ref={controlledRef}
+                                    label="Controlled selection"
+                                    name="languages-controlled"
+                                />
                                 <div className="form-text mt-2">
-                                    Controlled value: {controlledValue.length ? controlledValue.join(', ') : '(none)'}
+                                    Controlled value:{' '}
+                                    {controlledValue.length ? controlledValue.join(', ') : '(none)'}
                                 </div>
                                 <div className="d-flex gap-2 mt-2">
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue(['ts'])}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setControlledValue(['ts'])}
+                                    >
                                         Set TypeScript only
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue([])}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setControlledValue([])}
+                                    >
                                         Clear all
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Required (aria-invalid when empty)">
+                            <tc-section-card title="Required (aria-invalid when empty)">
                                 {/* @ts-ignore */}
-                                <tc-checkbox-group ref={requiredRef} label="Select at least one" name="languages-required" required />
-                            </SectionCard>
+                                <tc-checkbox-group
+                                    ref={requiredRef}
+                                    label="Select at least one"
+                                    name="languages-required"
+                                    required
+                                />
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

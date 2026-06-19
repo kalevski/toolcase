@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const cellStyle: React.CSSProperties = {
     display: 'flex',
@@ -23,14 +22,17 @@ const GridDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Grid"
+                    <tc-rich-page-header
+                        title-text="Grid"
                         description="CSS-grid layout primitive — set a column and/or row count, a gap, and a uniform cell size. Children are laid out directly; the element owns no chrome of its own."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Three equal columns (gap 8px)">
+                        <tc-section-card title="Three equal columns (gap 8px)">
                             {/* @ts-ignore */}
                             <tc-grid columns="3" gap="8">
                                 <Cell>1</Cell>
@@ -41,9 +43,9 @@ const GridDemo: React.FC = () => (
                                 <Cell>6</Cell>
                                 {/* @ts-ignore */}
                             </tc-grid>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Fixed cell size (4 columns × 64px, gap 1rem)">
+                        <tc-section-card title="Fixed cell size (4 columns × 64px, gap 1rem)">
                             {/* @ts-ignore */}
                             <tc-grid columns="4" cell-size="64px" gap="1rem">
                                 <Cell>A</Cell>
@@ -52,24 +54,77 @@ const GridDemo: React.FC = () => (
                                 <Cell>D</Cell>
                                 {/* @ts-ignore */}
                             </tc-grid>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Hairline grid (gap 1px over a slate background)">
-                            <div style={{ background: 'var(--tc-border)', border: '1px solid var(--tc-border)' }}>
+                        <tc-section-card title="Hairline grid (gap 1px over a slate background)">
+                            <div
+                                style={{
+                                    background: 'var(--tc-border)',
+                                    border: '1px solid var(--tc-border)',
+                                }}
+                            >
                                 {/* @ts-ignore */}
                                 <tc-grid columns="3" gap="1">
-                                    <div style={{ ...cellStyle, border: 'none', background: 'var(--tc-surface)' }}>cpu</div>
-                                    <div style={{ ...cellStyle, border: 'none', background: 'var(--tc-surface)' }}>mem</div>
-                                    <div style={{ ...cellStyle, border: 'none', background: 'var(--tc-surface)' }}>disk</div>
-                                    <div style={{ ...cellStyle, border: 'none', background: 'var(--tc-surface)' }}>net</div>
-                                    <div style={{ ...cellStyle, border: 'none', background: 'var(--tc-surface)' }}>gpu</div>
-                                    <div style={{ ...cellStyle, border: 'none', background: 'var(--tc-surface)' }}>io</div>
+                                    <div
+                                        style={{
+                                            ...cellStyle,
+                                            border: 'none',
+                                            background: 'var(--tc-surface)',
+                                        }}
+                                    >
+                                        cpu
+                                    </div>
+                                    <div
+                                        style={{
+                                            ...cellStyle,
+                                            border: 'none',
+                                            background: 'var(--tc-surface)',
+                                        }}
+                                    >
+                                        mem
+                                    </div>
+                                    <div
+                                        style={{
+                                            ...cellStyle,
+                                            border: 'none',
+                                            background: 'var(--tc-surface)',
+                                        }}
+                                    >
+                                        disk
+                                    </div>
+                                    <div
+                                        style={{
+                                            ...cellStyle,
+                                            border: 'none',
+                                            background: 'var(--tc-surface)',
+                                        }}
+                                    >
+                                        net
+                                    </div>
+                                    <div
+                                        style={{
+                                            ...cellStyle,
+                                            border: 'none',
+                                            background: 'var(--tc-surface)',
+                                        }}
+                                    >
+                                        gpu
+                                    </div>
+                                    <div
+                                        style={{
+                                            ...cellStyle,
+                                            border: 'none',
+                                            background: 'var(--tc-surface)',
+                                        }}
+                                    >
+                                        io
+                                    </div>
                                     {/* @ts-ignore */}
                                 </tc-grid>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Explicit rows and columns (2 × 3, square cells)">
+                        <tc-section-card title="Explicit rows and columns (2 × 3, square cells)">
                             {/* @ts-ignore */}
                             <tc-grid columns="3" rows="2" cell-size="56" gap="6">
                                 <Cell>R1C1</Cell>
@@ -80,7 +135,7 @@ const GridDemo: React.FC = () => (
                                 <Cell>R2C3</Cell>
                                 {/* @ts-ignore */}
                             </tc-grid>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

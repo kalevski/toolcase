@@ -1,30 +1,40 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const InputDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Input"
+                    <tc-rich-page-header
+                        title-text="Input"
                         description="Bootstrap form-control wrapper with label, sizes, validation states, and help text."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Label &amp; Placeholder">
+                        <tc-section-card title="Label &amp; Placeholder">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
-                                <tc-input label="Email address" type="email" placeholder="name@example.com" />
+                                <tc-input
+                                    label="Email address"
+                                    type="email"
+                                    placeholder="name@example.com"
+                                />
                                 {/* @ts-ignore */}
-                                <tc-input label="Password" type="password" placeholder="Enter password" />
+                                <tc-input
+                                    label="Password"
+                                    type="password"
+                                    placeholder="Enter password"
+                                />
                                 {/* @ts-ignore */}
                                 <tc-input placeholder="No label" />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Sizes">
+                        <tc-section-card title="Sizes">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-input label="Large" size="lg" placeholder="Large input" />
@@ -33,34 +43,50 @@ const InputDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-input label="Small" size="sm" placeholder="Small input" />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Validation States">
+                        <tc-section-card title="Validation States">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
-                                <tc-input label="Valid input" state="valid" value="looks-good@example.com" />
+                                <tc-input
+                                    label="Valid input"
+                                    state="valid"
+                                    value="looks-good@example.com"
+                                />
                                 {/* @ts-ignore */}
-                                <tc-input label="Invalid input" state="invalid" value="not-an-email" />
+                                <tc-input
+                                    label="Invalid input"
+                                    state="invalid"
+                                    value="not-an-email"
+                                />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Help Text">
+                        <tc-section-card title="Help Text">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
-                                <tc-input label="Username" help="Your username must be 3–20 characters long." placeholder="Choose a username" />
+                                <tc-input
+                                    label="Username"
+                                    help="Your username must be 3–20 characters long."
+                                    placeholder="Choose a username"
+                                />
                                 {/* @ts-ignore */}
-                                <tc-input label="API key" help="Keep this secret — treat it like a password." type="password" />
+                                <tc-input
+                                    label="API key"
+                                    help="Keep this secret — treat it like a password."
+                                    type="password"
+                                />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled &amp; Readonly">
+                        <tc-section-card title="Disabled &amp; Readonly">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-input label="Disabled" disabled value="cannot edit this" />
                                 {/* @ts-ignore */}
                                 <tc-input label="Readonly" readonly value="read only value" />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

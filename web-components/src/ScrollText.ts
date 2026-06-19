@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-scroll-text'
-
-function esc(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function resolveLength(raw: string | null): string | null {
     if (raw === null) return null
@@ -25,7 +18,7 @@ export class ScrollText extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const body = this.querySelector('.tc-scroll-text__body')
-            if (body) slotContent.forEach(n => body.appendChild(n))
+            if (body) slotContent.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
     }
@@ -36,7 +29,7 @@ export class ScrollText extends HTMLElement {
         const slotContent = body ? Array.from(body.childNodes) : []
         this.render()
         const newBody = this.querySelector('.tc-scroll-text__body')
-        if (newBody) slotContent.forEach(n => newBody.appendChild(n))
+        if (newBody) slotContent.forEach((n) => newBody.appendChild(n))
     }
 
     get scrollTitle(): string {
@@ -66,14 +59,14 @@ export class ScrollText extends HTMLElement {
         }
 
         const title = this.scrollTitle
-        const titleMarkup = title
-            ? `<div class="tc-scroll-text__header">${esc(title)}</div>`
-            : ''
+        const titleMarkup = title ? `<div class="tc-scroll-text__header">${esc(title)}</div>` : ''
 
         this.innerHTML = `${titleMarkup}<div class="tc-scroll-text__body"></div>`
     }
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: ScrollText }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: ScrollText
+    }
 }

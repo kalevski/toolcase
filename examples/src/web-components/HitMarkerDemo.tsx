@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const HitMarkerDemo: React.FC = () => {
     // The markers pop-and-fade once then auto-clear their `show` attribute;
@@ -12,7 +11,7 @@ const HitMarkerDemo: React.FC = () => {
     useEffect(() => {
         const el = eventRef.current
         if (!el) return
-        const handler = () => setDoneCount(c => c + 1)
+        const handler = () => setDoneCount((c) => c + 1)
         el.addEventListener('tc-done', handler)
         return () => el.removeEventListener('tc-done', handler)
     }, [replayKey])
@@ -22,25 +21,31 @@ const HitMarkerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Hit Marker"
+                        <tc-rich-page-header
+                            title-text="Hit Marker"
                             description="A transient hit-confirmation reticle — four inward-pointing corner ticks that pop in and fade out over a configurable duration, then fire tc-done and auto-clear themselves. Re-skinned to the toolcase voice — sharp slate/status strokes, no fantasy chrome."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="mt-4">
                             <button
                                 type="button"
                                 className="btn btn-dark"
-                                onClick={() => setReplayKey(k => k + 1)}
+                                onClick={() => setReplayKey((k) => k + 1)}
                             >
                                 Replay markers
                             </button>
                         </div>
 
                         <div className="d-flex flex-column gap-4 mt-4" key={replayKey}>
-                            <SectionCard title="Variants">
-                                <div className="d-flex align-items-center gap-5" style={{ minHeight: 80 }}>
+                            <tc-section-card title="Variants">
+                                <div
+                                    className="d-flex align-items-center gap-5"
+                                    style={{ minHeight: 80 }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-hit-marker show size="36" duration="3000" />
                                     {/* @ts-ignore */}
@@ -52,16 +57,16 @@ const HitMarkerDemo: React.FC = () => {
                                     Normal (slate ink) · <code>crit</code> (warning amber) ·{' '}
                                     <code>kill</code> (danger red + Skull glyph).
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom size — slow fade (5 s)">
+                            <tc-section-card title="Custom size — slow fade (5 s)">
                                 <div style={{ minHeight: 100 }}>
                                     {/* @ts-ignore */}
                                     <tc-hit-marker show crit size="72" duration="5000" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="tc-done event">
+                            <tc-section-card title="tc-done event">
                                 <div style={{ minHeight: 80 }}>
                                     {/* @ts-ignore */}
                                     <tc-hit-marker ref={eventRef} show size="36" duration="2000" />
@@ -78,7 +83,7 @@ const HitMarkerDemo: React.FC = () => {
                                         </span>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

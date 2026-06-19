@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -7,14 +8,6 @@ const DIRECTION_ICONS: Record<string, string[]> = {
     up: ['TrendingUp', 'ArrowUp'],
     down: ['TrendingDown', 'ArrowDown'],
     neutral: ['Minus', 'ArrowRight'],
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 function defaultFormat(v: number): string {

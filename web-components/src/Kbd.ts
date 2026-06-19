@@ -1,7 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-kbd'
 
 export class Kbd extends HTMLElement {
-
     private _initialised = false
     private _keys: string[] = []
 
@@ -14,7 +14,7 @@ export class Kbd extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-kbd-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -25,7 +25,7 @@ export class Kbd extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-kbd-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get keys(): string[] {
@@ -58,25 +58,22 @@ export class Kbd extends HTMLElement {
         const sep = this.getAttribute('separator') ?? '+'
 
         if (this._keys.length > 0) {
-            const parts = this._keys.map((k, i) => {
-                const keyHtml = `<kbd class="tc-kbd-key">${this._escapeHtml(k)}</kbd>`
-                if (i < this._keys.length - 1) {
-                    return keyHtml + `<span class="tc-kbd-sep" aria-hidden="true">${this._escapeHtml(sep)}</span>`
-                }
-                return keyHtml
-            }).join('')
+            const parts = this._keys
+                .map((k, i) => {
+                    const keyHtml = `<kbd class="tc-kbd-key">${esc(k)}</kbd>`
+                    if (i < this._keys.length - 1) {
+                        return (
+                            keyHtml +
+                            `<span class="tc-kbd-sep" aria-hidden="true">${esc(sep)}</span>`
+                        )
+                    }
+                    return keyHtml
+                })
+                .join('')
             this.innerHTML = `<span class="${wrapperClass}">${parts}</span>`
         } else {
             this.innerHTML = `<span class="${wrapperClass}"><kbd class="tc-kbd-key"><span class="tc-kbd-content"></span></kbd></span>`
         }
-    }
-
-    private _escapeHtml(s: string): string {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
     }
 }
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const OPTIONS = [
     { value: 'react', label: 'React' },
@@ -17,8 +16,8 @@ const RadioGroupDemo: React.FC = () => {
     const [controlledValue, setControlledValue] = useState<string>('react')
 
     useEffect(() => {
-        const els = [basicRef, inlineRef].map(r => r.current)
-        els.forEach(el => {
+        const els = [basicRef, inlineRef].map((r) => r.current)
+        els.forEach((el) => {
             if (el) el.options = OPTIONS
         })
     }, [])
@@ -59,46 +58,69 @@ const RadioGroupDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="RadioGroup"
+                        <tc-rich-page-header
+                            title-text="RadioGroup"
                             description="Group of radio buttons with optional label, inline layout, disabled options, and controlled/uncontrolled value. Supports roving tabindex and arrow-key navigation."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default (labelled group, with disabled option)">
+                            <tc-section-card title="Default (labelled group, with disabled option)">
                                 {/* @ts-ignore */}
-                                <tc-radio-group ref={basicRef} label="Preferred framework" name="framework" />
+                                <tc-radio-group
+                                    ref={basicRef}
+                                    label="Preferred framework"
+                                    name="framework"
+                                />
                                 {selection && (
-                                    <div className="form-text mt-2">
-                                        Selected: {selection}
-                                    </div>
+                                    <div className="form-text mt-2">Selected: {selection}</div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inline layout">
+                            <tc-section-card title="Inline layout">
                                 {/* @ts-ignore */}
-                                <tc-radio-group ref={inlineRef} label="Preferred framework" name="framework-inline" inline />
-                            </SectionCard>
+                                <tc-radio-group
+                                    ref={inlineRef}
+                                    label="Preferred framework"
+                                    name="framework-inline"
+                                    inline
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Controlled value">
+                            <tc-section-card title="Controlled value">
                                 {/* @ts-ignore */}
-                                <tc-radio-group ref={controlledRef} label="Controlled selection" name="framework-controlled" />
+                                <tc-radio-group
+                                    ref={controlledRef}
+                                    label="Controlled selection"
+                                    name="framework-controlled"
+                                />
                                 <div className="form-text mt-2">
                                     Controlled value: {controlledValue || '(none)'}
                                 </div>
                                 <div className="d-flex gap-2 mt-2">
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue('vue')}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setControlledValue('vue')}
+                                    >
                                         Set Vue
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue('svelte')}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setControlledValue('svelte')}
+                                    >
                                         Set Svelte
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue('')}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setControlledValue('')}
+                                    >
                                         Clear
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

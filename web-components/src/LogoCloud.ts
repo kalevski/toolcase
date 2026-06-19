@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-logo-cloud'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export interface LogoCloudLogo {
     src: string
@@ -75,32 +68,30 @@ export class LogoCloud extends HTMLElement {
         this.style.setProperty('--bs-logo-cloud-columns', String(this.columns))
 
         const titleAttr = this.getAttribute('title')
-        const titleHtml = titleAttr
-            ? `<h2 class="tc-logo-cloud__title">${esc(titleAttr)}</h2>`
-            : ''
+        const titleHtml = titleAttr ? `<h2 class="tc-logo-cloud__title">${esc(titleAttr)}</h2>` : ''
 
-        const logosHtml = this._logos.map(logo => {
-            let widthStyle = ''
-            if (logo.width != null) {
-                widthStyle = ` style="width:${esc(String(logo.width))}px"`
-            }
-            const imgHtml = `<img class="tc-logo-cloud-img" src="${esc(logo.src)}" alt="${esc(logo.alt)}"${widthStyle} loading="lazy">`
+        const logosHtml = this._logos
+            .map((logo) => {
+                let widthStyle = ''
+                if (logo.width != null) {
+                    widthStyle = ` style="width:${esc(String(logo.width))}px"`
+                }
+                const imgHtml = `<img class="tc-logo-cloud-img" src="${esc(logo.src)}" alt="${esc(logo.alt)}"${widthStyle} loading="lazy">`
 
-            if (logo.href) {
-                return (
-                    `<a class="tc-logo-cloud-cell tc-logo-cloud-cell--linked" ` +
-                    `href="${esc(logo.href)}" target="_blank" rel="noopener noreferrer">` +
-                    `${imgHtml}` +
-                    `<span class="visually-hidden">(opens in new tab)</span>` +
-                    `</a>`
-                )
-            }
-            return `<span class="tc-logo-cloud-cell">${imgHtml}</span>`
-        }).join('')
+                if (logo.href) {
+                    return (
+                        `<a class="tc-logo-cloud-cell tc-logo-cloud-cell--linked" ` +
+                        `href="${esc(logo.href)}" target="_blank" rel="noopener noreferrer">` +
+                        `${imgHtml}` +
+                        `<span class="visually-hidden">(opens in new tab)</span>` +
+                        `</a>`
+                    )
+                }
+                return `<span class="tc-logo-cloud-cell">${imgHtml}</span>`
+            })
+            .join('')
 
-        this.innerHTML =
-            `${titleHtml}` +
-            `<div class="tc-logo-cloud-grid">${logosHtml}</div>`
+        this.innerHTML = `${titleHtml}` + `<div class="tc-logo-cloud-grid">${logosHtml}</div>`
     }
 }
 

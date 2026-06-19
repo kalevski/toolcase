@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-nav'
 
 export class Nav extends HTMLElement {
-
     private _ul: HTMLUListElement | null = null
     private _initialised = false
 
@@ -18,7 +17,7 @@ export class Nav extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const ul = this._ul
-            if (ul) slotContent.forEach(n => ul.appendChild(n))
+            if (ul) slotContent.forEach((n) => ul.appendChild(n))
             this._initialised = true
         }
     }
@@ -29,7 +28,7 @@ export class Nav extends HTMLElement {
         const slotContent = ul ? Array.from(ul.childNodes) : []
         this.render()
         const newUl = this._ul
-        if (newUl) slotContent.forEach(n => newUl.appendChild(n))
+        if (newUl) slotContent.forEach((n) => newUl.appendChild(n))
         this._syncNavItems()
     }
 

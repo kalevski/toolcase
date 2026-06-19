@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BitmapFontGeneratorDemo: React.FC = () => {
     const styledRef = useRef<any>(null)
@@ -22,7 +21,9 @@ const BitmapFontGeneratorDemo: React.FC = () => {
 
         const onGenerate = (e: Event) => {
             const detail = (e as CustomEvent).detail
-            setLastOutput(`${detail.format.toUpperCase()} · ${detail.width}×${detail.height}px · ${detail.glyphs.length} glyphs`)
+            setLastOutput(
+                `${detail.format.toUpperCase()} · ${detail.width}×${detail.height}px · ${detail.glyphs.length} glyphs`,
+            )
         }
         el.addEventListener('tc-generate', onGenerate)
         return () => el.removeEventListener('tc-generate', onGenerate)
@@ -33,14 +34,17 @@ const BitmapFontGeneratorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BitmapFontGenerator"
+                        <tc-rich-page-header
+                            title-text="BitmapFontGenerator"
                             description="Canvas bitmap-font atlas generator — solid/gradient fill, stacked outlines, drop shadow, glow, atlas/layout controls, a live preview, and BMFont XML / JSON / .fnt export."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default (attributes only)">
+                            <tc-section-card title="Default (attributes only)">
                                 {/* @ts-ignore */}
                                 <tc-bitmap-font-generator
                                     font-family="Arial"
@@ -48,9 +52,9 @@ const BitmapFontGeneratorDemo: React.FC = () => {
                                     text="Toolcase"
                                     export-format="xml"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Styled (fill / border / shadow / glow via properties)">
+                            <tc-section-card title="Styled (fill / border / shadow / glow via properties)">
                                 {/* @ts-ignore */}
                                 <tc-bitmap-font-generator
                                     ref={styledRef}
@@ -65,12 +69,17 @@ const BitmapFontGeneratorDemo: React.FC = () => {
                                         Last <code>tc-generate</code>: {lastOutput}
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
-                                <tc-bitmap-font-generator font-family="Arial" font-size="40" text="Locked" disabled />
-                            </SectionCard>
+                                <tc-bitmap-font-generator
+                                    font-family="Arial"
+                                    font-size="40"
+                                    text="Locked"
+                                    disabled
+                                />
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

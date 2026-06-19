@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-card-options'
@@ -11,24 +12,6 @@ export interface CardOption {
     icon?: string
     /** Image src URL. Used when icon is absent. */
     image?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 // Pre-compute the check icon — it is always present in every card (hidden via opacity).
@@ -53,9 +36,13 @@ export class CardOptions extends HTMLElement {
                 this.setAttribute('aria-label', 'Options')
             }
             this.render()
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -98,11 +85,13 @@ export class CardOptions extends HTMLElement {
         const prev = this.value
         this.setAttribute('value', key)
         if (key !== prev) {
-            this.dispatchEvent(new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { key },
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { key },
+                }),
+            )
             if (typeof this.onChange === 'function') this.onChange(key)
         }
     }
@@ -140,7 +129,7 @@ export class CardOptions extends HTMLElement {
         const value = this.value
         let hasTabStop = false
         const cards = Array.from(this.querySelectorAll<HTMLElement>('[role="radio"]'))
-        cards.forEach(card => {
+        cards.forEach((card) => {
             const isSelected = card.dataset.key === value
             card.classList.toggle('is-selected', isSelected)
             card.setAttribute('aria-checked', String(isSelected))
@@ -166,38 +155,40 @@ export class CardOptions extends HTMLElement {
         this.setAttribute('role', 'radiogroup')
         this.style.setProperty('--bs-card-options-columns', String(columns))
 
-        const selectedIdx = this._options.findIndex(o => o.key === value)
+        const selectedIdx = this._options.findIndex((o) => o.key === value)
 
-        this.innerHTML = this._options.map((opt, idx) => {
-            const isSelected = opt.key === value
-            const tabindex = isSelected || (selectedIdx < 0 && idx === 0) ? '0' : '-1'
-            const selectedClass = isSelected ? ' is-selected' : ''
+        this.innerHTML = this._options
+            .map((opt, idx) => {
+                const isSelected = opt.key === value
+                const tabindex = isSelected || (selectedIdx < 0 && idx === 0) ? '0' : '-1'
+                const selectedClass = isSelected ? ' is-selected' : ''
 
-            let mediaHtml = ''
-            if (opt.icon) {
-                const iconSvg = lucideByName(opt.icon)
-                if (iconSvg) mediaHtml = `<span class="tc-card-options-icon">${iconSvg}</span>`
-            } else if (opt.image) {
-                mediaHtml = `<img class="tc-card-options-image" src="${esc(opt.image)}" alt="" aria-hidden="true">`
-            }
+                let mediaHtml = ''
+                if (opt.icon) {
+                    const iconSvg = lucideByName(opt.icon)
+                    if (iconSvg) mediaHtml = `<span class="tc-card-options-icon">${iconSvg}</span>`
+                } else if (opt.image) {
+                    mediaHtml = `<img class="tc-card-options-image" src="${esc(opt.image)}" alt="" aria-hidden="true">`
+                }
 
-            const descHtml = opt.description
-                ? `<span class="tc-card-options-desc">${esc(opt.description)}</span>`
-                : ''
+                const descHtml = opt.description
+                    ? `<span class="tc-card-options-desc">${esc(opt.description)}</span>`
+                    : ''
 
-            return [
-                `<div class="tc-card-options-card${selectedClass}"`,
-                ` role="radio" aria-checked="${isSelected}"`,
-                ` tabindex="${tabindex}" data-key="${esc(opt.key)}">`,
-                mediaHtml,
-                `<span class="tc-card-options-label">${esc(opt.label)}</span>`,
-                descHtml,
-                `<span class="tc-card-options-check" aria-hidden="true">${checkIconHtml}</span>`,
-                `</div>`,
-            ].join('')
-        }).join('')
+                return [
+                    `<div class="tc-card-options-card${selectedClass}"`,
+                    ` role="radio" aria-checked="${isSelected}"`,
+                    ` tabindex="${tabindex}" data-key="${esc(opt.key)}">`,
+                    mediaHtml,
+                    `<span class="tc-card-options-label">${esc(opt.label)}</span>`,
+                    descHtml,
+                    `<span class="tc-card-options-check" aria-hidden="true">${checkIconHtml}</span>`,
+                    `</div>`,
+                ].join('')
+            })
+            .join('')
 
-        Array.from(this.querySelectorAll<HTMLElement>('[role="radio"]')).forEach(card => {
+        Array.from(this.querySelectorAll<HTMLElement>('[role="radio"]')).forEach((card) => {
             card.addEventListener('click', () => {
                 const key = card.dataset.key
                 if (key == null) return

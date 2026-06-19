@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MENU_ITEMS = [
     { key: 'edit', icon: 'Pencil', label: 'Edit Bundle' },
@@ -23,7 +22,13 @@ const AssetBundleDemo: React.FC = () => {
         el.includedTags = ['hud', 'buttons', 'icons']
         el.excludedTags = ['debug', 'placeholder']
         el.counts = { textures: 124, fonts: 8, configs: 3 }
-        el.advanced = { compress: true, powerOfTwo: true, trim: false, padding: 2, algorithm: 'maxrects' }
+        el.advanced = {
+            compress: true,
+            powerOfTwo: true,
+            trim: false,
+            padding: 2,
+            algorithm: 'maxrects',
+        }
         el.menuItems = MENU_ITEMS
 
         const onMenu = (e: CustomEvent) => setMenuKey(e.detail.key)
@@ -53,15 +58,17 @@ const AssetBundleDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="AssetBundle"
+                        <tc-rich-page-header
+                            title-text="AssetBundle"
                             description="Asset bundle card showing target engine, included/excluded tags, file-type counts, build references, an action menu, and a collapsible Advanced packing section."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard
+                            <tc-section-card
                                 title={`Unity — full configuration${menuKey ? ` (menu: "${menuKey}")` : ''}${advancedOpen != null ? ` (advanced: ${advancedOpen ? 'open' : 'closed'})` : ''}${buildTag ? ` (build tag: "${buildTag}")` : ''}`}
                             >
                                 <div style={{ maxWidth: 420 }}>
@@ -78,13 +85,14 @@ const AssetBundleDemo: React.FC = () => {
                                     />
                                 </div>
                                 <p className="mt-2 mb-0 text-muted" style={{ fontSize: '0.85rem' }}>
-                                    Toggle <em>Advanced</em> and switch the build-tag chips — events are logged in the card
-                                    title above (<code>tc-menu-click</code>, <code>tc-advanced-toggle</code>,{' '}
+                                    Toggle <em>Advanced</em> and switch the build-tag chips — events
+                                    are logged in the card title above (<code>tc-menu-click</code>,{' '}
+                                    <code>tc-advanced-toggle</code>,{' '}
                                     <code>tc-build-tag-change</code>).
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Godot — character pack">
+                            <tc-section-card title="Godot — character pack">
                                 <div style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
                                     <tc-asset-bundle
@@ -97,15 +105,14 @@ const AssetBundleDemo: React.FC = () => {
                                         default-build-tag="sprint-14"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 <div style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
                                     <tc-asset-bundle loading />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

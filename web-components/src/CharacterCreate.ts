@@ -1,21 +1,13 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-character-create'
 
 export interface CharacterCreateField {
     id: string
     label: string
     type?: 'text' | 'select' | 'number' | 'range'
-    options?: { value: string, label: string }[]
+    options?: { value: string; label: string }[]
     min?: number
     max?: number
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 export class CharacterCreate extends HTMLElement {
@@ -107,10 +99,12 @@ export class CharacterCreate extends HTMLElement {
         const labelHtml = `<label class="form-label tc-character-create-field-label">${esc(field.label)}</label>`
 
         if (type === 'select') {
-            const options = (field.options || []).map((opt) => {
-                const selected = opt.value === valueStr ? ' selected' : ''
-                return `<option value="${esc(opt.value)}"${selected}>${esc(opt.label)}</option>`
-            }).join('')
+            const options = (field.options || [])
+                .map((opt) => {
+                    const selected = opt.value === valueStr ? ' selected' : ''
+                    return `<option value="${esc(opt.value)}"${selected}>${esc(opt.label)}</option>`
+                })
+                .join('')
             return `<div class="tc-character-create-field" data-id="${idAttr}">
                 ${labelHtml}
                 <select class="form-select tc-character-create-control" data-control="select">${options}</select>
@@ -178,9 +172,14 @@ export class CharacterCreate extends HTMLElement {
         this.querySelectorAll<HTMLElement>('.tc-character-create-field').forEach((wrapper) => {
             const id = wrapper.dataset.id || ''
             if (!id) return
-            const control = wrapper.querySelector('[data-control]') as HTMLInputElement | HTMLSelectElement | null
+            const control = wrapper.querySelector('[data-control]') as
+                | HTMLInputElement
+                | HTMLSelectElement
+                | null
             if (!control) return
-            const valueDisplay = wrapper.querySelector('.tc-character-create-range-value') as HTMLElement | null
+            const valueDisplay = wrapper.querySelector(
+                '.tc-character-create-range-value',
+            ) as HTMLElement | null
             const handle = (): void => {
                 const kind = control.dataset.control
                 let value: string | number = control.value
@@ -206,33 +205,44 @@ export class CharacterCreate extends HTMLElement {
         this._restoreFocus(focus)
     }
 
-    private _snapshotFocus(): { key: string, start: number | null, end: number | null } | null {
+    private _snapshotFocus(): { key: string; start: number | null; end: number | null } | null {
         const active = document.activeElement
         if (!(active instanceof HTMLElement) || !this.contains(active)) return null
         const control = active.closest<HTMLElement>('[data-control]')
         if (!control) return null
         const kind = control.dataset.control
-        const key = kind === 'name'
-            ? 'name'
-            : `field:${control.closest('.tc-character-create-field')?.getAttribute('data-id') ?? ''}`
+        const key =
+            kind === 'name'
+                ? 'name'
+                : `field:${control.closest('.tc-character-create-field')?.getAttribute('data-id') ?? ''}`
         let start: number | null = null
         let end: number | null = null
-        if (active instanceof HTMLInputElement && (active.type === 'text' || active.type === 'number')) {
+        if (
+            active instanceof HTMLInputElement &&
+            (active.type === 'text' || active.type === 'number')
+        ) {
             start = active.selectionStart
             end = active.selectionEnd
         }
         return { key, start, end }
     }
 
-    private _restoreFocus(focus: { key: string, start: number | null, end: number | null } | null): void {
+    private _restoreFocus(
+        focus: { key: string; start: number | null; end: number | null } | null,
+    ): void {
         if (!focus) return
-        const selector = focus.key === 'name'
-            ? '.tc-character-create-name'
-            : `.tc-character-create-field[data-id="${CSS.escape(focus.key.slice('field:'.length))}"] [data-control]`
+        const selector =
+            focus.key === 'name'
+                ? '.tc-character-create-name'
+                : `.tc-character-create-field[data-id="${CSS.escape(focus.key.slice('field:'.length))}"] [data-control]`
         const el = this.querySelector<HTMLElement>(selector)
         if (!el) return
         el.focus()
-        if (el instanceof HTMLInputElement && focus.start != null && (el.type === 'text' || el.type === 'number')) {
+        if (
+            el instanceof HTMLInputElement &&
+            focus.start != null &&
+            (el.type === 'text' || el.type === 'number')
+        ) {
             try {
                 el.setSelectionRange(focus.start, focus.end ?? focus.start)
             } catch {

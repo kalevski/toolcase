@@ -1,15 +1,23 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-placeholder'
 
 export type PlaceholderSize = 'xs' | 'sm' | 'lg'
 export type PlaceholderAnimation = 'glow' | 'wave'
-export type PlaceholderVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type PlaceholderVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 
 const SIZES: PlaceholderSize[] = ['xs', 'sm', 'lg']
 const ANIMATIONS: PlaceholderAnimation[] = ['glow', 'wave']
-const VARIANTS: PlaceholderVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: PlaceholderVariant[] = [...VARIANTS_FULL]
 
 export class Placeholder extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -82,7 +90,7 @@ export class Placeholder extends HTMLElement {
         if (slotContent.length > 0) {
             this.innerHTML = `<div class="tc-placeholder-content${animClass}" data-tc-user></div>`
             const wrapper = this.querySelector('.tc-placeholder-content')!
-            slotContent.forEach(n => wrapper.appendChild(n))
+            slotContent.forEach((n) => wrapper.appendChild(n))
         } else {
             const rawWidth = this.getAttribute('width')
             const size = this.size

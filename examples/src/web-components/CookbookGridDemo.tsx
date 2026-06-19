@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const RECIPES_2COL = [
     {
@@ -103,36 +102,46 @@ const CookbookGridDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CookbookGrid"
+                        <tc-rich-page-header
+                            title-text="CookbookGrid"
                             description="Multi-column grid of code-recipe cards with title, description, code snippet, and tags. Set recipes via the JS property. Linked cards animate on hover."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="2-column layout (columns=2, title attribute, linked cards)">
+                            <tc-section-card title="2-column layout (columns=2, title attribute, linked cards)">
                                 {/* @ts-ignore */}
                                 <tc-cookbook-grid ref={twoColRef} columns="2" title="JS Recipes" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="3-column layout (columns=3)">
+                            <tc-section-card title="3-column layout (columns=3)">
                                 {/* @ts-ignore */}
-                                <tc-cookbook-grid ref={threeColRef} columns="3" title="TypeScript Snippets" />
-                            </SectionCard>
+                                <tc-cookbook-grid
+                                    ref={threeColRef}
+                                    columns="3"
+                                    title="TypeScript Snippets"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="No title attribute">
+                            <tc-section-card title="No title attribute">
                                 {/* @ts-ignore */}
                                 <tc-cookbook-grid ref={noTitleRef} columns="2" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Title via slot">
+                            <tc-section-card title="Title via slot">
                                 {/* @ts-ignore */}
                                 <tc-cookbook-grid ref={slotTitleRef} columns="2">
-                                    <span slot="title" style={{ fontStyle: 'italic', fontWeight: 600 }}>
+                                    <span
+                                        slot="title"
+                                        style={{ fontStyle: 'italic', fontWeight: 600 }}
+                                    >
                                         Slotted heading
                                     </span>
                                 </tc-cookbook-grid>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

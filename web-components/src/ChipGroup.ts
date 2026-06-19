@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-chip-group'
 
 export type ChipGroupItem = {
@@ -8,14 +9,6 @@ export type ChipGroupItem = {
     count?: number | string
     disabled?: boolean
     variant?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 let _idCounter = 0
@@ -40,9 +33,13 @@ export class ChipGroup extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
-            this.addEventListener('tc-click', this._onChipClick)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('tc-click', this._onChipClick)
     }
 
     disconnectedCallback(): void {
@@ -102,7 +99,7 @@ export class ChipGroup extends HTMLElement {
         const chip = (e.target as HTMLElement).closest<HTMLElement>('tc-chip[data-cg-id]')
         if (!chip) return
         const id = chip.getAttribute('data-cg-id') ?? ''
-        const item = this._items.find(i => i.id === id)
+        const item = this._items.find((i) => i.id === id)
         if (!item || item.disabled) return
 
         item.selected = !item.selected
@@ -114,11 +111,13 @@ export class ChipGroup extends HTMLElement {
             chip.removeAttribute('selected')
         }
 
-        this.dispatchEvent(new CustomEvent('tc-toggle', {
-            bubbles: true,
-            composed: true,
-            detail: { id },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-toggle', {
+                bubbles: true,
+                composed: true,
+                detail: { id },
+            }),
+        )
         if (typeof this.onToggle === 'function') this.onToggle(id)
     }
 
@@ -130,29 +129,30 @@ export class ChipGroup extends HTMLElement {
         const titleAttr = this.getAttribute('title')
         const subtitleAttr = this.getAttribute('subtitle')
         const hasTitle = this._titleProp != null || (titleAttr != null && titleAttr !== '')
-        const hasSubtitle = this._subtitleProp != null || (subtitleAttr != null && subtitleAttr !== '')
+        const hasSubtitle =
+            this._subtitleProp != null || (subtitleAttr != null && subtitleAttr !== '')
 
         let headerHtml = ''
         if (hasTitle || hasSubtitle) {
             const titleSpan = hasTitle
                 ? `<span class="tc-chip-group-title" id="${titleId}"></span>`
                 : ''
-            const subtitleSpan = hasSubtitle
-                ? `<span class="tc-chip-group-subtitle"></span>`
-                : ''
+            const subtitleSpan = hasSubtitle ? `<span class="tc-chip-group-subtitle"></span>` : ''
             headerHtml = `<div class="tc-chip-group-header">${titleSpan}${subtitleSpan}</div>`
         }
 
         const ariaAttr = hasTitle ? ` aria-labelledby="${titleId}"` : ''
 
-        const chipsHtml = this._items.map(item => {
-            const variantAttr = item.variant ? ` variant="${esc(item.variant)}"` : ''
-            const iconAttr = item.icon ? ` icon="${esc(item.icon)}"` : ''
-            const countAttr = item.count != null ? ` count="${esc(String(item.count))}"` : ''
-            const disabledAttr = item.disabled ? ' disabled' : ''
-            const selectedAttr = item.selected ? ' selected' : ''
-            return `<tc-chip data-cg-id="${esc(item.id)}"${variantAttr}${iconAttr}${countAttr}${disabledAttr}${selectedAttr}>${esc(item.label)}</tc-chip>`
-        }).join('')
+        const chipsHtml = this._items
+            .map((item) => {
+                const variantAttr = item.variant ? ` variant="${esc(item.variant)}"` : ''
+                const iconAttr = item.icon ? ` icon="${esc(item.icon)}"` : ''
+                const countAttr = item.count != null ? ` count="${esc(String(item.count))}"` : ''
+                const disabledAttr = item.disabled ? ' disabled' : ''
+                const selectedAttr = item.selected ? ' selected' : ''
+                return `<tc-chip data-cg-id="${esc(item.id)}"${variantAttr}${iconAttr}${countAttr}${disabledAttr}${selectedAttr}>${esc(item.label)}</tc-chip>`
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-chip-group${borderClass}" role="group"${ariaAttr}>${headerHtml}<div class="tc-chip-group-items">${chipsHtml}</div></div>`
 

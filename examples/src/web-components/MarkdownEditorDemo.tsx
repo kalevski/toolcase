@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const STARTING_MARKDOWN = [
     '# Release notes',
@@ -39,15 +38,17 @@ const MarkdownEditorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="MarkdownEditor"
+                        <tc-rich-page-header
+                            title-text="MarkdownEditor"
                             description="Split-pane markdown editor with Write/Preview tabs and a formatting toolbar. Toolbar actions wrap the current selection; switching to Preview renders a small, safe markdown-to-HTML conversion."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Default — toolbar + write/preview tabs (tc-change)">
+                            <tc-section-card title="Default — toolbar + write/preview tabs (tc-change)">
                                 {/* @ts-ignore */}
                                 <tc-markdown-editor
                                     ref={ref}
@@ -56,28 +57,31 @@ const MarkdownEditorDemo: React.FC = () => {
                                     height="320"
                                 />
                                 <div className="form-text mt-2">{value.length} characters</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No toolbar (toolbar=&quot;false&quot;)">
+                            <tc-section-card title='No toolbar (toolbar="false")'>
                                 {/* @ts-ignore */}
                                 <tc-markdown-editor
                                     label="Plain notes"
                                     toolbar="false"
                                     height="200"
-                                    value={'## No toolbar here\n\nJust the *Write* and *Preview* tabs.'}
+                                    value={
+                                        '## No toolbar here\n\nJust the *Write* and *Preview* tabs.'
+                                    }
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <tc-markdown-editor
                                     label="Locked content"
                                     disabled
                                     height="160"
-                                    value={'# Read only\n\nThis editor is **disabled** — editing and the toolbar are off.'}
+                                    value={
+                                        '# Read only\n\nThis editor is **disabled** — editing and the toolbar are off.'
+                                    }
                                 />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

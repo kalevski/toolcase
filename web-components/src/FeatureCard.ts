@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -5,14 +6,6 @@ const TAG_NAME = 'tc-feature-card'
 
 export type FeatureCardSize = 'default' | 'wide' | 'full'
 const SIZES: FeatureCardSize[] = ['default', 'wide', 'full']
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function resolveIcon(name: string): string {
     const svgStr = (LucideIcons as Record<string, string>)[name]
@@ -54,25 +47,31 @@ export class FeatureCard extends HTMLElement {
     private _rerenderWithSlots(): void {
         // Re-capture from their inner containers (already moved there)
         this._iconSlot = Array.from(this.querySelectorAll('.tc-feature-card-icon [slot="icon"]'))
-        this._eyebrowSlot = Array.from(this.querySelectorAll('.tc-feature-card-eyebrow [slot="eyebrow"]'))
+        this._eyebrowSlot = Array.from(
+            this.querySelectorAll('.tc-feature-card-eyebrow [slot="eyebrow"]'),
+        )
         this._titleSlot = Array.from(this.querySelectorAll('.tc-feature-card-title [slot="title"]'))
-        this._descriptionSlot = Array.from(this.querySelectorAll('.tc-feature-card-description [slot="description"]'))
-        this._visualSlot = Array.from(this.querySelectorAll('.tc-feature-card-visual [slot="visual"]'))
+        this._descriptionSlot = Array.from(
+            this.querySelectorAll('.tc-feature-card-description [slot="description"]'),
+        )
+        this._visualSlot = Array.from(
+            this.querySelectorAll('.tc-feature-card-visual [slot="visual"]'),
+        )
         this.render()
         this._distributeSlots()
     }
 
     private _distributeSlots(): void {
         const iconEl = this.querySelector('.tc-feature-card-icon')
-        if (iconEl) this._iconSlot.forEach(n => iconEl.appendChild(n))
+        if (iconEl) this._iconSlot.forEach((n) => iconEl.appendChild(n))
         const eyebrowEl = this.querySelector('.tc-feature-card-eyebrow')
-        if (eyebrowEl) this._eyebrowSlot.forEach(n => eyebrowEl.appendChild(n))
+        if (eyebrowEl) this._eyebrowSlot.forEach((n) => eyebrowEl.appendChild(n))
         const titleEl = this.querySelector('.tc-feature-card-title')
-        if (titleEl) this._titleSlot.forEach(n => titleEl.appendChild(n))
+        if (titleEl) this._titleSlot.forEach((n) => titleEl.appendChild(n))
         const descEl = this.querySelector('.tc-feature-card-description')
-        if (descEl) this._descriptionSlot.forEach(n => descEl.appendChild(n))
+        if (descEl) this._descriptionSlot.forEach((n) => descEl.appendChild(n))
         const visualEl = this.querySelector('.tc-feature-card-visual')
-        if (visualEl) this._visualSlot.forEach(n => visualEl.appendChild(n))
+        if (visualEl) this._visualSlot.forEach((n) => visualEl.appendChild(n))
     }
 
     // --- Public API ---
@@ -136,22 +135,22 @@ export class FeatureCard extends HTMLElement {
         // Icon region: prefer slotted child, then attribute (lucide name → SVG)
         const hasIconSlot = this._iconSlot.length > 0
         const iconAttr = this.getAttribute('icon')
-        const iconInner = hasIconSlot ? '' : (iconAttr ? resolveIcon(iconAttr) : '')
+        const iconInner = hasIconSlot ? '' : iconAttr ? resolveIcon(iconAttr) : ''
 
         // Eyebrow: prefer slotted child, then attribute text
         const hasEyebrowSlot = this._eyebrowSlot.length > 0
         const eyebrowAttr = this.getAttribute('eyebrow')
-        const eyebrowInner = hasEyebrowSlot ? '' : (eyebrowAttr ? esc(eyebrowAttr) : '')
+        const eyebrowInner = hasEyebrowSlot ? '' : eyebrowAttr ? esc(eyebrowAttr) : ''
 
         // Title: prefer slotted child, then attribute text
         const hasTitleSlot = this._titleSlot.length > 0
         const titleAttr = this.getAttribute('title')
-        const titleInner = hasTitleSlot ? '' : (titleAttr ? esc(titleAttr) : '')
+        const titleInner = hasTitleSlot ? '' : titleAttr ? esc(titleAttr) : ''
 
         // Description: prefer slotted child, then attribute text
         const hasDescSlot = this._descriptionSlot.length > 0
         const descAttr = this.getAttribute('description')
-        const descInner = hasDescSlot ? '' : (descAttr ? esc(descAttr) : '')
+        const descInner = hasDescSlot ? '' : descAttr ? esc(descAttr) : ''
 
         this.innerHTML = [
             `<div class="tc-feature-card${sizeClass}${inlineClass}">`,

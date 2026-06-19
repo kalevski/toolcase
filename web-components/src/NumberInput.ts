@@ -1,17 +1,10 @@
+import { esc } from './internal/esc'
 import { ChevronUp, ChevronDown } from 'lucide-static'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-number-input'
 
 let _idCounter = 0
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 const chevronUpIconHtml = icon(ChevronUp)
 const chevronDownIconHtml = icon(ChevronDown)
@@ -36,7 +29,8 @@ export class NumberInput extends HTMLElement {
 
     // ── value ──────────────────────────────────────────────────────────────
     get value(): number | '' {
-        const raw = this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value')
+        const raw =
+            this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value')
         if (raw === null || raw === '') return ''
         const n = parseFloat(raw)
         return isNaN(n) ? '' : n
@@ -197,11 +191,13 @@ export class NumberInput extends HTMLElement {
         const input = this.querySelector<HTMLInputElement>('input')
         if (input) input.value = newValue === '' ? '' : this._formatValue(newValue)
         this._updateStepperState()
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: newValue },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: newValue },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(newValue)
     }
 
@@ -329,17 +325,20 @@ export class NumberInput extends HTMLElement {
         const ariaValueMax = mx !== null ? ` aria-valuemax="${mx}"` : ''
         const ariaValueNow = current !== '' ? ` aria-valuenow="${current as number}"` : ''
 
-        const labelHtml = label !== null
-            ? `<label class="tc-number-input__label form-label" for="${this._inputId}">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label !== null
+                ? `<label class="tc-number-input__label form-label" for="${this._inputId}">${esc(label)}</label>`
+                : ''
 
-        const prefixHtml = prefix !== null
-            ? `<span class="tc-number-input__addon tc-number-input__addon--prefix input-group-text">${esc(prefix)}</span>`
-            : ''
+        const prefixHtml =
+            prefix !== null
+                ? `<span class="tc-number-input__addon tc-number-input__addon--prefix input-group-text">${esc(prefix)}</span>`
+                : ''
 
-        const suffixHtml = suffix !== null
-            ? `<span class="tc-number-input__addon tc-number-input__addon--suffix input-group-text">${esc(suffix)}</span>`
-            : ''
+        const suffixHtml =
+            suffix !== null
+                ? `<span class="tc-number-input__addon tc-number-input__addon--suffix input-group-text">${esc(suffix)}</span>`
+                : ''
 
         const decDisabled = atMin ? ' disabled aria-disabled="true"' : ' aria-disabled="false"'
         const incDisabled = atMax ? ' disabled aria-disabled="true"' : ' aria-disabled="false"'

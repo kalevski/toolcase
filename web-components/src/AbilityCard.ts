@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -5,14 +6,6 @@ const TAG_NAME = 'tc-ability-card'
 
 export type AbilityCardRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
 const RARITIES: AbilityCardRarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary']
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function resolveIcon(name: string): string {
     const svgStr = (LucideIcons as Record<string, string>)[name]

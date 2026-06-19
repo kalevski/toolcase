@@ -1,15 +1,8 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-metric-tile'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function resolveIcon(name: string): string {
     const svgStr = (LucideIcons as Record<string, string>)[name]
@@ -31,7 +24,7 @@ export class MetricTile extends HTMLElement {
             // Capture default slot children (value) — exclude hint-slot nodes.
             const valueNodes = !this.hasAttribute('value')
                 ? Array.from(this.childNodes).filter(
-                      n => !(n instanceof Element && n.getAttribute('slot') === 'hint')
+                      (n) => !(n instanceof Element && n.getAttribute('slot') === 'hint'),
                   )
                 : []
 
@@ -40,12 +33,12 @@ export class MetricTile extends HTMLElement {
             // Distribute default (value) slot into .tc-metric-tile-value when no value attr.
             if (!this.hasAttribute('value')) {
                 const valueEl = this.querySelector('.tc-metric-tile-value')
-                if (valueEl) valueNodes.forEach(n => valueEl.appendChild(n))
+                if (valueEl) valueNodes.forEach((n) => valueEl.appendChild(n))
             }
             // Distribute hint-slot nodes into .tc-metric-tile-hint when no hint attr.
             if (!this.hasAttribute('hint')) {
                 const hintEl = this.querySelector('.tc-metric-tile-hint')
-                if (hintEl) this._hintSlotNodes.forEach(n => hintEl.appendChild(n))
+                if (hintEl) this._hintSlotNodes.forEach((n) => hintEl.appendChild(n))
             }
 
             this._initialised = true
@@ -72,11 +65,11 @@ export class MetricTile extends HTMLElement {
 
         if (!this.hasAttribute('value')) {
             const newValueEl = this.querySelector('.tc-metric-tile-value')
-            if (newValueEl) valueNodes.forEach(n => newValueEl.appendChild(n))
+            if (newValueEl) valueNodes.forEach((n) => newValueEl.appendChild(n))
         }
         if (!this.hasAttribute('hint')) {
             const newHintEl = this.querySelector('.tc-metric-tile-hint')
-            if (newHintEl) this._hintSlotNodes.forEach(n => newHintEl.appendChild(n))
+            if (newHintEl) this._hintSlotNodes.forEach((n) => newHintEl.appendChild(n))
         }
     }
 
@@ -132,9 +125,7 @@ export class MetricTile extends HTMLElement {
             ? `<span class="tc-metric-tile-icon" aria-hidden="true">${iconSvg}</span>`
             : ''
 
-        const unitHtml = unit
-            ? `<span class="tc-metric-tile-unit">${esc(unit)}</span>`
-            : ''
+        const unitHtml = unit ? `<span class="tc-metric-tile-unit">${esc(unit)}</span>` : ''
 
         // When value attr is set, put text directly in .tc-metric-tile-value.
         // When absent, leave empty — slot children are distributed after render.

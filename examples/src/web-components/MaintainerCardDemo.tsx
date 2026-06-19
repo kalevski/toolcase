@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // Icons resolve through lucide-static by name (kebab → PascalCase). Brand
 // glyphs (Github/Twitter/…) were dropped from lucide-static, so use generic
@@ -26,14 +25,17 @@ const MaintainerCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="MaintainerCard"
+                        <tc-rich-page-header
+                            title-text="MaintainerCard"
                             description="Profile card of a maintainer with avatar, social links, and a sponsor button. Set social links via the JS links property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full card (name, role, bio, location, social links, sponsor)">
+                            <tc-section-card title="Full card (name, role, bio, location, social links, sponsor)">
                                 <div style={{ maxWidth: '320px' }}>
                                     {/* @ts-ignore */}
                                     <tc-maintainer-card
@@ -47,9 +49,9 @@ const MaintainerCardDemo: React.FC = () => {
                                         sponsor-label="Sponsor"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No social links, no sponsor button">
+                            <tc-section-card title="No social links, no sponsor button">
                                 <div style={{ maxWidth: '320px' }}>
                                     {/* @ts-ignore */}
                                     <tc-maintainer-card
@@ -60,9 +62,9 @@ const MaintainerCardDemo: React.FC = () => {
                                         bio="Documentation enthusiast. Making complexity accessible."
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal (name and avatar only)">
+                            <tc-section-card title="Minimal (name and avatar only)">
                                 <div style={{ maxWidth: '320px' }}>
                                     {/* @ts-ignore */}
                                     <tc-maintainer-card
@@ -71,9 +73,9 @@ const MaintainerCardDemo: React.FC = () => {
                                         avatar-url="https://i.pravatar.cc/160?img=5"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom sponsor label">
+                            <tc-section-card title="Custom sponsor label">
                                 <div style={{ maxWidth: '320px' }}>
                                     {/* @ts-ignore */}
                                     <tc-maintainer-card
@@ -85,7 +87,7 @@ const MaintainerCardDemo: React.FC = () => {
                                         sponsor-label="Buy me a coffee"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

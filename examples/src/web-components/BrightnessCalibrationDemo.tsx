@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BrightnessCalibrationDemo: React.FC = () => {
     const ref = useRef<any>(null)
@@ -18,14 +17,17 @@ const BrightnessCalibrationDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Brightness Calibration"
+                        <tc-rich-page-header
+                            title-text="Brightness Calibration"
                             description="Gamma/brightness calibration view with three grayscale reference swatches and a 0–1 brightness slider. Drag the slider until each band matches its instruction."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — live value">
+                            <tc-section-card title="Default — live value">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-brightness-calibration ref={ref} value="0.5" />
@@ -33,21 +35,21 @@ const BrightnessCalibrationDemo: React.FC = () => {
                                         Brightness: {Math.round(value * 100)}%
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Darker preset">
+                            <tc-section-card title="Darker preset">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-brightness-calibration value="0.2" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Brighter preset">
+                            <tc-section-card title="Brighter preset">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-brightness-calibration value="0.85" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

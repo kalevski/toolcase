@@ -1,11 +1,15 @@
-// tc-dashboard-layout — full-page dashboard shell: top navbar + collapsible sidebar + scrollable content.
+// tc-dashboard-layout — full-height dashboard shell mirroring the react-components layout:
+// a full-height sidebar on the left, a navbar spanning only the content column, and a
+// scrollable content area. Mobile-first — under 992px the sidebar becomes an absolutely
+// positioned drawer (scoped to the component, not the viewport) that slides in over a
+// dimmed backdrop; at ≥992px it pins open as a static grid column and the toggle hides.
 // Slate glass navbar, slate sidebar, slate-50 content rail — sharp corners throughout.
 // Drive every cosmetic value through --bs-dashboard-layout-* custom properties.
 
 @use '../foundation/tokens' as *;
 
 tc-dashboard-layout {
-    --bs-dashboard-layout-navbar-height: 3rem;
+    --bs-dashboard-layout-navbar-height: 3.75rem;
     --bs-dashboard-layout-navbar-bg: rgba(255, 255, 255, 0.85);
     --bs-dashboard-layout-navbar-border: var(--tc-border);
     --bs-dashboard-layout-navbar-color: var(--tc-text);
@@ -18,21 +22,41 @@ tc-dashboard-layout {
     --bs-dashboard-layout-content-bg: var(--tc-surface-hover);
     --bs-dashboard-layout-toggle-size: 2.25rem;
     --bs-dashboard-layout-toggle-hover-bg: var(--tc-surface-muted);
+    --bs-dashboard-layout-overlay-bg: rgba(0, 0, 0, 0.5);
     --bs-dashboard-layout-transition: var(--tc-transition-base);
-}
 
-// ── Outer wrapper ─────────────────────────────────────────────────────────────
-
-.tc-dashboard-layout {
-    display: flex;
-    flex-direction: column;
+    display: block;
+    width: 100%;
     height: 100%;
     min-height: 0;
 }
 
-// ── Navbar ────────────────────────────────────────────────────────────────────
+// ── Outer container + grid wrapper ──────────────────────────────────────────────
+
+.tc-dashboard-layout {
+    display: block;
+    height: 100%;
+    min-height: 0;
+    color: var(--bs-dashboard-layout-navbar-color);
+}
+
+// Mobile-first grid: single content column, navbar row over content row.
+// The sidebar overlays as a drawer and so sits outside the column flow here.
+.tc-dashboard-layout__wrapper {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--bs-dashboard-layout-navbar-height) 1fr;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+// ── Navbar ──────────────────────────────────────────────────────────────────────
 
 .tc-dashboard-layout__navbar {
+    grid-column: 1;
+    grid-row: 1;
     display: flex;
     align-items: center;
     height: var(--bs-dashboard-layout-navbar-height);
@@ -41,13 +65,13 @@ tc-dashboard-layout {
     border-bottom: 1px solid var(--bs-dashboard-layout-navbar-border);
     color: var(--bs-dashboard-layout-navbar-color);
     border-radius: 0;
-    flex-shrink: 0;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    z-index: 10;
     gap: 0;
 }
 
-// ── Toggle button ─────────────────────────────────────────────────────────────
+// ── Toggle button ───────────────────────────────────────────────────────────────
 
 .tc-dashboard-layout__toggle {
     display: inline-flex;
@@ -106,39 +130,34 @@ tc-dashboard-layout {
     margin-left: auto;
 }
 
-// ── Body (sidebar + content row) ──────────────────────────────────────────────
-
-.tc-dashboard-layout__body {
-    display: flex;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-}
-
-// ── Sidebar ───────────────────────────────────────────────────────────────────
+// ── Sidebar (mobile drawer) ─────────────────────────────────────────────────────
 
 .tc-dashboard-layout__sidebar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
     display: flex;
     flex-direction: column;
     width: var(--bs-dashboard-layout-sidebar-width);
-    min-width: var(--bs-dashboard-layout-sidebar-width);
+    max-width: 85%;
     background: var(--bs-dashboard-layout-sidebar-bg);
     border-right: 1px solid var(--bs-dashboard-layout-sidebar-border);
     border-radius: 0;
     overflow: hidden;
-    transition:
-        width var(--bs-dashboard-layout-transition),
-        min-width var(--bs-dashboard-layout-transition);
-
-    &.tc-dashboard-layout__sidebar--collapsed {
-        width: 0;
-        min-width: 0;
-    }
+    transform: translateX(-100%);
+    transition: transform var(--bs-dashboard-layout-transition);
+    will-change: transform;
 }
 
 .tc-dashboard-layout__brand {
     flex: 0 0 auto;
-    padding: var(--bs-dashboard-layout-sidebar-brand-padding);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    height: var(--bs-dashboard-layout-navbar-height);
+    padding: 0 1rem;
     border-bottom: 1px solid var(--bs-dashboard-layout-sidebar-border);
 }
 
@@ -155,10 +174,27 @@ tc-dashboard-layout {
     border-top: 1px solid var(--bs-dashboard-layout-sidebar-border);
 }
 
+// ── Backdrop overlay (mobile only) ──────────────────────────────────────────────
+
+.tc-dashboard-layout__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: var(--bs-dashboard-layout-overlay-bg);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity var(--bs-dashboard-layout-transition),
+        visibility var(--bs-dashboard-layout-transition);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
 // ── Content ───────────────────────────────────────────────────────────────────
 
 .tc-dashboard-layout__content {
-    flex: 1 1 auto;
+    grid-column: 1;
+    grid-row: 2;
     overflow-y: auto;
     background: var(--bs-dashboard-layout-content-bg);
     border-radius: 0;
@@ -166,13 +202,64 @@ tc-dashboard-layout {
     -webkit-overflow-scrolling: touch;
 }
 
+// ── Open state (drawer slid in + backdrop revealed) ─────────────────────────────
+
+.tc-dashboard-layout__wrapper--open {
+    .tc-dashboard-layout__sidebar {
+        transform: translateX(0);
+        box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.25);
+    }
+
+    .tc-dashboard-layout__overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+// ── Desktop (≥992px): pinned full-height sidebar, navbar over content column ─────
+
+@include media-up(lg) {
+    .tc-dashboard-layout__wrapper {
+        grid-template-columns: var(--bs-dashboard-layout-sidebar-width) 1fr;
+    }
+
+    .tc-dashboard-layout__navbar {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .tc-dashboard-layout__content {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    // Sidebar leaves the drawer flow and becomes a static left rail spanning both rows.
+    .tc-dashboard-layout__sidebar {
+        position: static;
+        grid-column: 1;
+        grid-row: 1 / 3;
+        max-width: none;
+        transform: none;
+        box-shadow: none;
+        transition: none;
+        z-index: auto;
+    }
+
+    .tc-dashboard-layout__overlay {
+        display: none;
+    }
+
+    // No collapse on desktop — the rail is always visible, so the toggle is redundant.
+    .tc-dashboard-layout__toggle {
+        display: none;
+    }
+}
+
 // ── Reduced motion ────────────────────────────────────────────────────────────
 
 @media (prefers-reduced-motion: reduce) {
-    .tc-dashboard-layout__sidebar {
-        transition: none;
-    }
-
+    .tc-dashboard-layout__sidebar,
+    .tc-dashboard-layout__overlay,
     .tc-dashboard-layout__toggle {
         transition: none;
     }

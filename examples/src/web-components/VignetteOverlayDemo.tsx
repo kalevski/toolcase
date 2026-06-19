@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const stageStyle: React.CSSProperties = {
     width: '100%',
@@ -38,32 +37,35 @@ const VignetteOverlayDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Vignette Overlay"
+                        <tc-rich-page-header
+                            title-text="Vignette Overlay"
                             description="Edge vignette overlay for damage feedback and cinematic framing. A radial-gradient ::after pseudo-element is painted on top of slotted content with pointer-events disabled. Intensity (0–1) and vignette-color (any CSS color) are reflected attributes that write through as CSS custom property overrides. Ported from gc-vignette-overlay and re-voiced for the design system."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Default (intensity=0.6, black edges)">
+                            <tc-section-card title="Default (intensity=0.6, black edges)">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
-                                    The default vignette uses a black radial gradient at 60% opacity.
-                                    Content inside the element is the default slot.
+                                    The default vignette uses a black radial gradient at 60%
+                                    opacity. Content inside the element is the default slot.
                                 </p>
                                 <div style={stageStyle}>
                                     {/* @ts-ignore */}
                                     <tc-vignette-overlay style={{ width: '100%', height: '100%' }}>
                                         <span style={sceneLabel}>Slotted content</span>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-vignette-overlay>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Toggle intensity">
+                            <tc-section-card title="Toggle intensity">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
-                                    Toggle the vignette between visible (<code>0.65</code>) and hidden
-                                    (<code>0</code>) by setting the <code>intensity</code> attribute.
+                                    Toggle the vignette between visible (<code>0.65</code>) and
+                                    hidden (<code>0</code>) by setting the <code>intensity</code>{' '}
+                                    attribute.
                                 </p>
                                 <div style={stageStyle}>
                                     {/* @ts-ignore */}
@@ -72,23 +74,23 @@ const VignetteOverlayDemo: React.FC = () => {
                                         style={{ width: '100%', height: '100%' }}
                                     >
                                         <span style={sceneLabel}>Slotted content</span>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-vignette-overlay>
                                 </div>
                                 <div className="mt-3">
                                     <button
                                         className="btn btn-primary"
-                                        onClick={() => setActive(v => !v)}
+                                        onClick={() => setActive((v) => !v)}
                                     >
                                         {active ? 'Hide vignette' : 'Show vignette'}
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom color (danger red)">
+                            <tc-section-card title="Custom color (danger red)">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
-                                    Pass any CSS color to <code>vignette-color</code> to change
-                                    the edge tone — useful for low-health or status feedback.
+                                    Pass any CSS color to <code>vignette-color</code> to change the
+                                    edge tone — useful for low-health or status feedback.
                                 </p>
                                 <div style={stageStyle}>
                                     {/* @ts-ignore */}
@@ -98,12 +100,12 @@ const VignetteOverlayDemo: React.FC = () => {
                                         style={{ width: '100%', height: '100%' }}
                                     >
                                         <span style={sceneLabel}>Slotted content</span>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-vignette-overlay>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="JS-property driven intensity slider">
+                            <tc-section-card title="JS-property driven intensity slider">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     Drive <code>intensity</code> via the JS property for animation
                                     or reactive updates. Uses a <code>ref</code> to set the property
@@ -116,7 +118,7 @@ const VignetteOverlayDemo: React.FC = () => {
                                         style={{ width: '100%', height: '100%' }}
                                     >
                                         <span style={sceneLabel}>Slotted content</span>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-vignette-overlay>
                                 </div>
                                 <div className="mt-3 d-flex align-items-center gap-3">
@@ -126,7 +128,7 @@ const VignetteOverlayDemo: React.FC = () => {
                                         max="1"
                                         step="0.05"
                                         value={intensity}
-                                        onChange={e => setIntensity(parseFloat(e.target.value))}
+                                        onChange={(e) => setIntensity(parseFloat(e.target.value))}
                                         style={{ flex: 1 }}
                                     />
                                     <span
@@ -139,8 +141,7 @@ const VignetteOverlayDemo: React.FC = () => {
                                         {intensity.toFixed(2)}
                                     </span>
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

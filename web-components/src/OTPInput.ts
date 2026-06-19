@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-otp-input'
 
 let _idCounter = 0
@@ -5,14 +6,6 @@ let _idCounter = 0
 export type OTPInputMode = 'numeric' | 'alphanumeric'
 
 const MODES: OTPInputMode[] = ['numeric', 'alphanumeric']
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class OTPInput extends HTMLElement {
     private _initialised = false
@@ -117,12 +110,16 @@ export class OTPInput extends HTMLElement {
             const val = this.getAttribute('value') ?? ''
             this._cells = Array.from({ length: len }, (_, i) => val[i] ?? '')
             this.render()
-            this.addEventListener('keydown', this._onKeydown)
-            this.addEventListener('input', this._onInput)
-            this.addEventListener('paste', this._onPaste)
-            this.addEventListener('focusin', this._onFocusin)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('keydown', this._onKeydown)
+        this.addEventListener('input', this._onInput)
+        this.addEventListener('paste', this._onPaste)
+        this.addEventListener('focusin', this._onFocusin)
     }
 
     disconnectedCallback(): void {
@@ -308,19 +305,23 @@ export class OTPInput extends HTMLElement {
         const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
         if (hidden) hidden.value = combined
 
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: combined },
-        }))
-        if (typeof this.onChange === 'function') this.onChange(combined)
-
-        if (this._cells.length > 0 && this._cells.every(c => c !== '')) {
-            this.dispatchEvent(new CustomEvent('tc-complete', {
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
                 bubbles: true,
                 composed: true,
                 detail: { value: combined },
-            }))
+            }),
+        )
+        if (typeof this.onChange === 'function') this.onChange(combined)
+
+        if (this._cells.length > 0 && this._cells.every((c) => c !== '')) {
+            this.dispatchEvent(
+                new CustomEvent('tc-complete', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { value: combined },
+                }),
+            )
             if (typeof this.onComplete === 'function') this.onComplete(combined)
         }
     }
@@ -337,7 +338,9 @@ export class OTPInput extends HTMLElement {
         const inputType = masked ? 'password' : 'text'
         const inputMode = mode === 'numeric' ? 'numeric' : 'text'
 
-        const ariaLabelledBy = label ? ` aria-labelledby="${this._labelId}"` : ` aria-label="One-time password"`
+        const ariaLabelledBy = label
+            ? ` aria-labelledby="${this._labelId}"`
+            : ` aria-label="One-time password"`
         const ariaInvalid = hasError ? ' aria-invalid="true"' : ''
         const ariaDescribedBy = hasError ? ` aria-describedby="${this._errorId}"` : ''
 

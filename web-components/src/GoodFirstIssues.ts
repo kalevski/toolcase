@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { MessageSquare, Clock } from 'lucide-static'
 import { icon } from './icons'
 
@@ -19,14 +20,6 @@ export interface GoodFirstIssue {
 
 const messageSquareIcon = icon(MessageSquare, 'tc-good-first-issues-meta-icon')
 const clockIcon = icon(Clock, 'tc-good-first-issues-meta-icon')
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function relativeTime(dateStr: string): string {
     const date = new Date(dateStr)
@@ -90,8 +83,12 @@ export class GoodFirstIssues extends HTMLElement {
     }
 
     private _rerenderWithSlots(): void {
-        this._titleSlot = Array.from(this.querySelectorAll('.tc-good-first-issues-title [slot="title"]'))
-        this._emptySlot = Array.from(this.querySelectorAll('.tc-good-first-issues-empty [slot="empty"]'))
+        this._titleSlot = Array.from(
+            this.querySelectorAll('.tc-good-first-issues-title [slot="title"]'),
+        )
+        this._emptySlot = Array.from(
+            this.querySelectorAll('.tc-good-first-issues-empty [slot="empty"]'),
+        )
         this.render()
         this._distributeSlots()
         this._attachLinkListeners()
@@ -100,26 +97,30 @@ export class GoodFirstIssues extends HTMLElement {
     private _distributeSlots(): void {
         if (this._titleSlot.length > 0) {
             const titleEl = this.querySelector('.tc-good-first-issues-title')
-            if (titleEl) this._titleSlot.forEach(n => titleEl.appendChild(n))
+            if (titleEl) this._titleSlot.forEach((n) => titleEl.appendChild(n))
         }
         if (this._emptySlot.length > 0) {
             const emptyEl = this.querySelector('.tc-good-first-issues-empty')
-            if (emptyEl) this._emptySlot.forEach(n => emptyEl.appendChild(n))
+            if (emptyEl) this._emptySlot.forEach((n) => emptyEl.appendChild(n))
         }
     }
 
     private _attachLinkListeners(): void {
-        const links = this.querySelectorAll<HTMLElement>('.tc-good-first-issues-item-link[data-issue-index]')
-        links.forEach(link => {
+        const links = this.querySelectorAll<HTMLElement>(
+            '.tc-good-first-issues-item-link[data-issue-index]',
+        )
+        links.forEach((link) => {
             link.addEventListener('click', () => {
                 const idx = parseInt(link.getAttribute('data-issue-index') ?? '', 10)
                 const issue = this._issues[idx]
                 if (!issue) return
-                this.dispatchEvent(new CustomEvent('tc-issue-click', {
-                    bubbles: true,
-                    composed: true,
-                    detail: { issue },
-                }))
+                this.dispatchEvent(
+                    new CustomEvent('tc-issue-click', {
+                        bubbles: true,
+                        composed: true,
+                        detail: { issue },
+                    }),
+                )
                 if (typeof this.onIssueClick === 'function') this.onIssueClick(issue)
             })
         })
@@ -130,28 +131,32 @@ export class GoodFirstIssues extends HTMLElement {
             ? `<code class="tc-good-first-issues-item-repo">${esc(issue.repo)}</code>`
             : ''
 
-        const labelsHtml = (issue.labels ?? []).map(label => {
-            const dotHtml = label.color
-                ? `<span class="tc-good-first-issues-label-dot" style="--bs-good-first-issues-label-dot-color: ${esc(label.color)}" aria-hidden="true"></span>`
-                : ''
-            return `<span class="tc-good-first-issues-label">${dotHtml}${esc(label.name)}</span>`
-        }).join('')
+        const labelsHtml = (issue.labels ?? [])
+            .map((label) => {
+                const dotHtml = label.color
+                    ? `<span class="tc-good-first-issues-label-dot" style="--bs-good-first-issues-label-dot-color: ${esc(label.color)}" aria-hidden="true"></span>`
+                    : ''
+                return `<span class="tc-good-first-issues-label">${dotHtml}${esc(label.name)}</span>`
+            })
+            .join('')
 
         const labelsRow = labelsHtml
             ? `<div class="tc-good-first-issues-item-labels">${labelsHtml}</div>`
             : ''
 
-        const commentsHtml = issue.comments != null
-            ? `<span class="tc-good-first-issues-meta-item" aria-label="${esc(String(issue.comments))} comments">${messageSquareIcon}<span>${esc(String(issue.comments))}</span></span>`
-            : ''
+        const commentsHtml =
+            issue.comments != null
+                ? `<span class="tc-good-first-issues-meta-item" aria-label="${esc(String(issue.comments))} comments">${messageSquareIcon}<span>${esc(String(issue.comments))}</span></span>`
+                : ''
 
         const updatedHtml = issue.updatedAt
             ? `<span class="tc-good-first-issues-meta-item" aria-label="Updated ${esc(issue.updatedAt)}">${clockIcon}<span>${esc(relativeTime(issue.updatedAt))}</span></span>`
             : ''
 
-        const metaHtml = (commentsHtml || updatedHtml)
-            ? `<div class="tc-good-first-issues-item-meta">${commentsHtml}${updatedHtml}</div>`
-            : ''
+        const metaHtml =
+            commentsHtml || updatedHtml
+                ? `<div class="tc-good-first-issues-item-meta">${commentsHtml}${updatedHtml}</div>`
+                : ''
 
         return [
             `<li class="tc-good-first-issues-item" role="listitem">`,

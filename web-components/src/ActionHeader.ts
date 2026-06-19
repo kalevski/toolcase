@@ -32,7 +32,7 @@ export class ActionHeader extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-action-header-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -47,7 +47,7 @@ export class ActionHeader extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-action-header-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get actions(): ActionHeaderAction[] {
@@ -61,7 +61,7 @@ export class ActionHeader extends HTMLElement {
             const slotContent = inner ? Array.from(inner.childNodes) : []
             this.render()
             const newInner = this.querySelector('.tc-action-header-content')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 
@@ -88,9 +88,11 @@ export class ActionHeader extends HTMLElement {
         if (!btn) return
         const key = (btn as HTMLElement).dataset['actionKey']
         if (!key) return
-        const action = this._actions.find(a => a.key === key)
+        const action = this._actions.find((a) => a.key === key)
         if (!action || action.disabled) return
-        this.dispatchEvent(new CustomEvent('tc-exec', { bubbles: true, composed: true, detail: { key } }))
+        this.dispatchEvent(
+            new CustomEvent('tc-exec', { bubbles: true, composed: true, detail: { key } }),
+        )
         if (typeof this._onExec === 'function') {
             this._onExec(key)
         }
@@ -106,14 +108,16 @@ export class ActionHeader extends HTMLElement {
         const disabled = this.disabled
         const extraClass = this.className ? ` ${this.className}` : ''
 
-        const actionsHtml = this._actions.map(action => {
-            const variant = action.variant ?? 'secondary'
-            const isDisabled = disabled || !!action.disabled
-            const disabledAttr = isDisabled ? ' disabled' : ''
-            const iconHtml = action.icon ? this._renderIcon(action.icon) : ''
-            const labelHtml = action.label ? `<span>${action.label}</span>` : ''
-            return `<button type="button" class="btn btn-sm btn-${variant}" data-action-key="${action.key}"${disabledAttr}>${iconHtml}${labelHtml}</button>`
-        }).join('')
+        const actionsHtml = this._actions
+            .map((action) => {
+                const variant = action.variant ?? 'secondary'
+                const isDisabled = disabled || !!action.disabled
+                const disabledAttr = isDisabled ? ' disabled' : ''
+                const iconHtml = action.icon ? this._renderIcon(action.icon) : ''
+                const labelHtml = action.label ? `<span>${action.label}</span>` : ''
+                return `<button type="button" class="btn btn-sm btn-${variant}" data-action-key="${action.key}"${disabledAttr}>${iconHtml}${labelHtml}</button>`
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-action-header d-flex align-items-center justify-content-between${extraClass}"><span class="tc-action-header-content"></span><div class="tc-action-header-actions d-flex gap-2">${actionsHtml}</div></div>`
     }

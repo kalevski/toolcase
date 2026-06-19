@@ -13,7 +13,6 @@ const imageOffIconHtml = imageOffSvg ? icon(imageOffSvg, 'tc-image-fallback-icon
 
 // Class named TcImage internally to avoid shadowing the global HTMLImageElement constructor (window.Image).
 class TcImage extends HTMLElement {
-
     onLoad: (() => void) | null = null
     onError: (() => void) | null = null
 
@@ -25,14 +24,18 @@ class TcImage extends HTMLElement {
     private _onImgLoad = (): void => {
         this._state = 'loaded'
         this._patchState()
-        this.dispatchEvent(new CustomEvent('tc-load', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-load', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onLoad === 'function') this.onLoad()
     }
 
     private _onImgError = (): void => {
         this._state = 'error'
         this._patchState()
-        this.dispatchEvent(new CustomEvent('tc-error', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-error', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onError === 'function') this.onError()
     }
 
@@ -104,9 +107,7 @@ class TcImage extends HTMLElement {
         const objectFit = this.objectFit
         const state = this._state
 
-        const wrapperStyle = aspectRatio
-            ? ` style="aspect-ratio:${this._esc(aspectRatio)}"`
-            : ''
+        const wrapperStyle = aspectRatio ? ` style="aspect-ratio:${this._esc(aspectRatio)}"` : ''
         const imgStyle = `object-fit:${objectFit}`
         const skeletonRole = state === 'loading' ? ' role="status"' : ''
         // Omit src when null to avoid spurious browser error events for empty src.
@@ -120,14 +121,14 @@ class TcImage extends HTMLElement {
         const fallbackEl = this.querySelector('.tc-image-fallback')
         if (!fallbackEl) return
         fallbackEl.innerHTML = ''
-        this._fallbackNodes.forEach(n => fallbackEl.appendChild(n))
+        this._fallbackNodes.forEach((n) => fallbackEl.appendChild(n))
     }
 
     private _recaptureFallback(): void {
         const fallbackEl = this.querySelector('.tc-image-fallback')
         if (!fallbackEl) return
         const captured = Array.from(fallbackEl.childNodes).filter(
-            n => !(n instanceof Element && n.classList.contains('tc-image-fallback-default'))
+            (n) => !(n instanceof Element && n.classList.contains('tc-image-fallback-default')),
         )
         if (captured.length > 0) this._fallbackNodes = captured
     }

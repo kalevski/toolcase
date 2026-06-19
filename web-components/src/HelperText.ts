@@ -21,7 +21,6 @@ function resolveIcon(name: string): string {
 }
 
 export class HelperText extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -38,7 +37,7 @@ export class HelperText extends HTMLElement {
             this.render()
             if (!this.hasAttribute('text')) {
                 const inner = this.querySelector('.tc-helper-text-content')
-                if (inner) slotContent.forEach(n => inner.appendChild(n))
+                if (inner) slotContent.forEach((n) => inner.appendChild(n))
             }
             this._initialised = true
         }
@@ -51,7 +50,7 @@ export class HelperText extends HTMLElement {
         this.render()
         if (!this.hasAttribute('text')) {
             const newInner = this.querySelector('.tc-helper-text-content')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 
@@ -101,9 +100,10 @@ export class HelperText extends HTMLElement {
             .filter(Boolean)
             .join(' ')
         const idAttr = id ? ` id="${id}"` : ''
-        const content = text != null
-            ? `<span class="tc-helper-text-content">${text}</span>`
-            : `<span class="tc-helper-text-content"></span>`
+        const content =
+            text != null
+                ? `<span class="tc-helper-text-content">${text}</span>`
+                : `<span class="tc-helper-text-content"></span>`
 
         this.innerHTML = `<div class="${classes}"${idAttr}>${iconHtml}${content}</div>`
     }

@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cooldown-badge'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Format the remaining cooldown the way the game-components source does: m:ss
 // above a minute, whole seconds from 10s up, one decimal under 10s.
@@ -21,7 +14,6 @@ function formatTime(seconds: number): string {
 }
 
 export class CooldownBadge extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -112,20 +104,20 @@ export class CooldownBadge extends HTMLElement {
 
         const customLabel = this.label
         const showLabel = this.showLabel || this.hasAttribute('label')
-        const labelText = customLabel !== ''
-            ? esc(customLabel)
-            : remaining > 0 ? formatTime(remaining) : ''
-        const labelHtml = showLabel && labelText !== ''
-            ? `<span class="tc-cooldown-badge__label" aria-hidden="true">${labelText}</span>`
-            : ''
+        const labelText =
+            customLabel !== '' ? esc(customLabel) : remaining > 0 ? formatTime(remaining) : ''
+        const labelHtml =
+            showLabel && labelText !== ''
+                ? `<span class="tc-cooldown-badge__label" aria-hidden="true">${labelText}</span>`
+                : ''
 
         // Accessible name: the badge is a presentational status, so describe its
         // state on the wrapper and hide the decorative SVG + visual label.
         const aria = ready
-            ? (customLabel || 'Ready')
+            ? customLabel || 'Ready'
             : customLabel
-                ? `${customLabel}: ${formatTime(remaining)} remaining`
-                : `Cooldown ${formatTime(remaining)} remaining`
+              ? `${customLabel}: ${formatTime(remaining)} remaining`
+              : `Cooldown ${formatTime(remaining)} remaining`
 
         const readyClass = ready ? ' tc-cooldown-badge--ready' : ''
 

@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-floating-label'
 
 export class FloatingLabel extends HTMLElement {
-
     private _control: Element | null = null
     private _initialised = false
 

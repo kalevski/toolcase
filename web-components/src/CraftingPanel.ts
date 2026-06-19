@@ -1,3 +1,5 @@
+import { isImageSrc } from './internal/image'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-crafting-panel'
 
 export interface CraftingItem {
@@ -17,7 +19,7 @@ export interface CraftingRecipe {
     name: string
     icon?: string
     inputs: CraftingIngredient[]
-    output: { item: CraftingItem, qty?: number }
+    output: { item: CraftingItem; qty?: number }
 }
 
 export interface CraftingPanelEventMap {
@@ -25,22 +27,10 @@ export interface CraftingPanelEventMap {
     'tc-craft': CustomEvent<{ id: string }>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 // A recipe/item icon that looks like an image source is rendered as an <img>;
 // otherwise the string is treated as a short glyph/initials label inside the
 // sharp icon tile (mirrors the tc-character-select portrait pattern — the
 // design system forbids emoji-as-icon, so free-form data glyphs stay content).
-function isImageSrc(value: string): boolean {
-    return /^(https?:|\/|\.\/|\.\.\/|data:image\/)/.test(value) || /\.(png|jpe?g|gif|svg|webp|avif)$/i.test(value)
-}
 
 export class CraftingPanel extends HTMLElement {
     private _initialised = false
@@ -58,10 +48,14 @@ export class CraftingPanel extends HTMLElement {
         if (!this._initialised) {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'group')
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -103,7 +97,7 @@ export class CraftingPanel extends HTMLElement {
     }
 
     private isAffordable(recipe: CraftingRecipe): boolean {
-        return recipe.inputs.every(ing => {
+        return recipe.inputs.every((ing) => {
             if (typeof ing.available !== 'number') return true
             return ing.available >= ing.qty
         })
@@ -167,29 +161,33 @@ export class CraftingPanel extends HTMLElement {
         const insufficient = have != null && have < ing.qty
         const cls = `tc-crafting-panel-ingredient${insufficient ? ' is-insufficient' : ''}`
         const qtyText = have != null ? `${have}/${ing.qty}` : `${ing.qty}`
-        return `<div class="${cls}">`
-            + this._iconTile('tc-crafting-panel-ingredient-icon', ing.item.icon, name)
-            + `<span class="tc-crafting-panel-ingredient-name">${esc(name)}</span>`
-            + `<span class="tc-crafting-panel-ingredient-qty">${esc(qtyText)}</span>`
-            + `</div>`
+        return (
+            `<div class="${cls}">` +
+            this._iconTile('tc-crafting-panel-ingredient-icon', ing.item.icon, name) +
+            `<span class="tc-crafting-panel-ingredient-name">${esc(name)}</span>` +
+            `<span class="tc-crafting-panel-ingredient-qty">${esc(qtyText)}</span>` +
+            `</div>`
+        )
     }
 
     private _detailMarkup(recipe: CraftingRecipe, crafting: boolean): string {
         const affordable = this.isAffordable(recipe)
-        const ingredients = recipe.inputs.map(ing => this._ingredientMarkup(ing)).join('')
+        const ingredients = recipe.inputs.map((ing) => this._ingredientMarkup(ing)).join('')
         const outputName = recipe.output.item.name ?? recipe.output.item.id
         const outputQty = recipe.output.qty ?? 1
         const disabled = !affordable || crafting
         const btnLabel = crafting ? 'Crafting…' : 'Craft'
-        return `<span class="tc-crafting-panel-eyebrow">Output</span>`
-            + `<div class="tc-crafting-panel-output">`
-            + this._iconTile('tc-crafting-panel-output-icon', recipe.output.item.icon, outputName)
-            + `<span class="tc-crafting-panel-output-name">${esc(outputName)}</span>`
-            + `<span class="tc-crafting-panel-output-qty">×${esc(String(outputQty))}</span>`
-            + `</div>`
-            + `<span class="tc-crafting-panel-eyebrow">Inputs</span>`
-            + `<div class="tc-crafting-panel-ingredients">${ingredients}</div>`
-            + `<button type="button" class="tc-crafting-panel-craft" data-id="${esc(recipe.id)}"${disabled ? ' disabled' : ''}>${btnLabel}</button>`
+        return (
+            `<span class="tc-crafting-panel-eyebrow">Output</span>` +
+            `<div class="tc-crafting-panel-output">` +
+            this._iconTile('tc-crafting-panel-output-icon', recipe.output.item.icon, outputName) +
+            `<span class="tc-crafting-panel-output-name">${esc(outputName)}</span>` +
+            `<span class="tc-crafting-panel-output-qty">×${esc(String(outputQty))}</span>` +
+            `</div>` +
+            `<span class="tc-crafting-panel-eyebrow">Inputs</span>` +
+            `<div class="tc-crafting-panel-ingredients">${ingredients}</div>` +
+            `<button type="button" class="tc-crafting-panel-craft" data-id="${esc(recipe.id)}"${disabled ? ' disabled' : ''}>${btnLabel}</button>`
+        )
     }
 
     private render(): void {
@@ -197,29 +195,38 @@ export class CraftingPanel extends HTMLElement {
 
         const selected = this.selectedId
         const crafting = this.crafting
-        const active = this._recipes.find(r => r.id === selected) ?? null
+        const active = this._recipes.find((r) => r.id === selected) ?? null
 
-        const rowsMarkup = this._recipes.map(r => {
-            const isSelected = r.id === selected
-            const affordable = this.isAffordable(r)
-            const classes = ['tc-crafting-panel-row']
-            if (isSelected) classes.push('is-selected')
-            if (!affordable) classes.push('is-unaffordable')
-            const name = r.name
-            return `<div role="listitem" tabindex="0" class="${classes.join(' ')}"`
-                + ` data-id="${esc(r.id)}"`
-                + ` aria-current="${isSelected ? 'true' : 'false'}">`
-                + this._iconTile('tc-crafting-panel-row-icon', r.icon || r.output.item.icon, name)
-                + `<span class="tc-crafting-panel-row-name">${esc(name)}</span>`
-                + `</div>`
-        }).join('')
+        const rowsMarkup = this._recipes
+            .map((r) => {
+                const isSelected = r.id === selected
+                const affordable = this.isAffordable(r)
+                const classes = ['tc-crafting-panel-row']
+                if (isSelected) classes.push('is-selected')
+                if (!affordable) classes.push('is-unaffordable')
+                const name = r.name
+                return (
+                    `<div role="listitem" tabindex="0" class="${classes.join(' ')}"` +
+                    ` data-id="${esc(r.id)}"` +
+                    ` aria-current="${isSelected ? 'true' : 'false'}">` +
+                    this._iconTile(
+                        'tc-crafting-panel-row-icon',
+                        r.icon || r.output.item.icon,
+                        name,
+                    ) +
+                    `<span class="tc-crafting-panel-row-name">${esc(name)}</span>` +
+                    `</div>`
+                )
+            })
+            .join('')
 
         const detailMarkup = active
             ? this._detailMarkup(active, crafting)
             : `<p class="tc-crafting-panel-detail-empty">Select a recipe.</p>`
 
-        this.innerHTML = `<div class="tc-crafting-panel-list" role="list">${rowsMarkup}</div>`
-            + `<div class="tc-crafting-panel-detail">${detailMarkup}</div>`
+        this.innerHTML =
+            `<div class="tc-crafting-panel-list" role="list">${rowsMarkup}</div>` +
+            `<div class="tc-crafting-panel-detail">${detailMarkup}</div>`
     }
 }
 

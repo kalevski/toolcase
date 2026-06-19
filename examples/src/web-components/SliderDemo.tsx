@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useSliderValue(initial: number): [number, React.RefObject<any>] {
     const [value, setValue] = useState<number>(initial)
@@ -36,38 +35,68 @@ const SliderDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Slider"
+                        <tc-rich-page-header
+                            title-text="Slider"
                             description="Single-handle range slider with keyboard support, optional ticks, tooltip, custom value formatting, and error handling."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — live value">
+                            <tc-section-card title="Default — live value">
                                 <div style={{ maxWidth: 460, padding: '8px 0 20px' }}>
                                     {/* @ts-ignore */}
-                                    <tc-slider ref={ref1} label="Volume" min="0" max="100" value="50" show-tooltip />
+                                    <tc-slider
+                                        ref={ref1}
+                                        label="Volume"
+                                        min="0"
+                                        max="100"
+                                        value="50"
+                                        show-tooltip
+                                    />
                                     <div className="form-text mt-1">Current value: {v1}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Ticks (−20 → 40, step 5)">
+                            <tc-section-card title="Ticks (−20 → 40, step 5)">
                                 <div style={{ maxWidth: 460, padding: '8px 0 24px' }}>
                                     {/* @ts-ignore */}
-                                    <tc-slider ref={ref2} label="Temperature (°C)" min="-20" max="40" step="5" value="0" ticks show-tooltip />
+                                    <tc-slider
+                                        ref={ref2}
+                                        label="Temperature (°C)"
+                                        min="-20"
+                                        max="40"
+                                        step="5"
+                                        value="0"
+                                        ticks
+                                        show-tooltip
+                                    />
                                     <div className="form-text mt-1">Current value: {v2}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom formatValue (currency)">
+                            <tc-section-card title="Custom formatValue (currency)">
                                 <div style={{ maxWidth: 460, padding: '8px 0 20px' }}>
                                     {/* @ts-ignore */}
-                                    <tc-slider ref={fmtRef} label="Budget" min="0" max="500" step="10" value="120" show-tooltip />
-                                    <div className="form-text mt-1">Drag or focus the thumb — the tooltip shows the formatted value.</div>
+                                    <tc-slider
+                                        ref={fmtRef}
+                                        label="Budget"
+                                        min="0"
+                                        max="500"
+                                        step="10"
+                                        value="120"
+                                        show-tooltip
+                                    />
+                                    <div className="form-text mt-1">
+                                        Drag or focus the thumb — the tooltip shows the formatted
+                                        value.
+                                    </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Error state">
+                            <tc-section-card title="Error state">
                                 <div style={{ maxWidth: 460, padding: '8px 0 20px' }}>
                                     {/* @ts-ignore */}
                                     <tc-slider
@@ -81,14 +110,20 @@ const SliderDemo: React.FC = () => {
                                     />
                                     <div className="form-text mt-1">Current value: {v3}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div style={{ maxWidth: 460, padding: '8px 0 20px' }}>
                                     {/* @ts-ignore */}
-                                    <tc-slider label="Disabled slider" min="0" max="100" value="40" disabled />
+                                    <tc-slider
+                                        label="Disabled slider"
+                                        min="0"
+                                        max="100"
+                                        value="40"
+                                        disabled
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

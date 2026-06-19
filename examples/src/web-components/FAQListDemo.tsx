@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FAQ_ITEMS = [
     {
@@ -56,38 +55,51 @@ const FAQListDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="FAQList"
+                        <tc-rich-page-header
+                            title-text="FAQList"
                             description="Collapsible FAQ accordion with optional JSON-LD schema generation for SEO. Items are set via the JS items property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic FAQ list (title attribute)">
+                            <tc-section-card title="Basic FAQ list (title attribute)">
                                 {/* @ts-ignore */}
                                 <tc-faq-list ref={basicRef} title="Frequently Asked Questions" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With JSON-LD schema (schema attribute)">
+                            <tc-section-card title="With JSON-LD schema (schema attribute)">
                                 {/* @ts-ignore */}
-                                <tc-faq-list ref={schemaRef} title="FAQ with Schema.org markup" schema />
-                            </SectionCard>
+                                <tc-faq-list
+                                    ref={schemaRef}
+                                    title="FAQ with Schema.org markup"
+                                    schema
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Default-open items + tc-toggle event">
-                                <p className="mb-3" style={{ fontSize: '0.8125rem', color: 'var(--tc-text-muted)' }}>
-                                    Items 0 and 2 are open by default. Last event: <strong>{lastToggle || '—'}</strong>
+                            <tc-section-card title="Default-open items + tc-toggle event">
+                                <p
+                                    className="mb-3"
+                                    style={{ fontSize: '0.8125rem', color: 'var(--tc-text-muted)' }}
+                                >
+                                    Items 0 and 2 are open by default. Last event:{' '}
+                                    <strong>{lastToggle || '—'}</strong>
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-faq-list ref={evtRef} title="FAQ with default-open items" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted title">
+                            <tc-section-card title="Slotted title">
                                 {/* @ts-ignore */}
                                 <tc-faq-list ref={slotRef}>
-                                    <span>Custom <strong>slotted</strong> title</span>
-                                {/* @ts-ignore */}
+                                    <span>
+                                        Custom <strong>slotted</strong> title
+                                    </span>
+                                    {/* @ts-ignore */}
                                 </tc-faq-list>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

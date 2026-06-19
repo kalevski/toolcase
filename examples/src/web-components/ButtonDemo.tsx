@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ButtonDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Button"
+                    <tc-rich-page-header
+                        title-text="Button"
                         description="Bootstrap button wrapper with variant, outline, size, loading, and link support."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Variants">
+                        <tc-section-card title="Variants">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-button variant="primary">Primary</tc-button>
@@ -32,70 +34,106 @@ const ButtonDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-button variant="dark">Dark</tc-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Outline">
+                        <tc-section-card title="Outline">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
-                                <tc-button variant="primary" outline>Primary</tc-button>
+                                <tc-button variant="primary" outline>
+                                    Primary
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="secondary" outline>Secondary</tc-button>
+                                <tc-button variant="secondary" outline>
+                                    Secondary
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="success" outline>Success</tc-button>
+                                <tc-button variant="success" outline>
+                                    Success
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="danger" outline>Danger</tc-button>
+                                <tc-button variant="danger" outline>
+                                    Danger
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="warning" outline>Warning</tc-button>
+                                <tc-button variant="warning" outline>
+                                    Warning
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="info" outline>Info</tc-button>
+                                <tc-button variant="info" outline>
+                                    Info
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="light" outline>Light</tc-button>
+                                <tc-button variant="light" outline>
+                                    Light
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="dark" outline>Dark</tc-button>
+                                <tc-button variant="dark" outline>
+                                    Dark
+                                </tc-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Sizes">
+                        <tc-section-card title="Sizes">
                             <div className="d-flex flex-wrap align-items-center gap-2">
                                 {/* @ts-ignore */}
-                                <tc-button variant="primary" size="lg">Large</tc-button>
+                                <tc-button variant="primary" size="lg">
+                                    Large
+                                </tc-button>
                                 {/* @ts-ignore */}
                                 <tc-button variant="primary">Default</tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="primary" size="sm">Small</tc-button>
+                                <tc-button variant="primary" size="sm">
+                                    Small
+                                </tc-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Loading">
+                        <tc-section-card title="Loading">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
-                                <tc-button variant="primary" loading>Saving…</tc-button>
+                                <tc-button variant="primary" loading>
+                                    Saving…
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="secondary" loading>Loading…</tc-button>
+                                <tc-button variant="secondary" loading>
+                                    Loading…
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="success" outline loading>Processing…</tc-button>
+                                <tc-button variant="success" outline loading>
+                                    Processing…
+                                </tc-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled">
+                        <tc-section-card title="Disabled">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
-                                <tc-button variant="primary" disabled>Disabled</tc-button>
+                                <tc-button variant="primary" disabled>
+                                    Disabled
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="secondary" outline disabled>Disabled</tc-button>
+                                <tc-button variant="secondary" outline disabled>
+                                    Disabled
+                                </tc-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Link (href)">
+                        <tc-section-card title="Link (href)">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
-                                <tc-button variant="primary" href="#">Link button</tc-button>
+                                <tc-button variant="primary" href="#">
+                                    Link button
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="info" outline href="#">Outline link</tc-button>
+                                <tc-button variant="info" outline href="#">
+                                    Outline link
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="secondary" href="#" disabled>Disabled link</tc-button>
+                                <tc-button variant="secondary" href="#" disabled>
+                                    Disabled link
+                                </tc-button>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

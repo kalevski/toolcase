@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Tag } from 'lucide-static'
 import { icon } from './icons'
 
@@ -16,14 +17,6 @@ export interface VersionOption {
 
 const tagIconHtml = icon(Tag, 'tc-version-picker__label-icon')
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 export class VersionPicker extends HTMLElement {
     private _initialised = false
     private _versions: VersionOption[] = []
@@ -37,11 +30,15 @@ export class VersionPicker extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('change', this._onNativeChange)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback
+        // removes them, and a move/remount (React reconciliation) disconnects
+        // then reconnects without re-running the one-time init above. Adding the
+        // same handler reference twice is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('change', this._onNativeChange)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -95,26 +92,30 @@ export class VersionPicker extends HTMLElement {
     /** Resolve the effective selected value: the matching option, else the first option. */
     private _currentValue(): string {
         const v = this.value
-        if (this._versions.some(o => o.value === v)) return v
+        if (this._versions.some((o) => o.value === v)) return v
         return this._versions[0]?.value ?? ''
     }
 
     private _emit(value: string): void {
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
     private _select(value: string, focusButton: boolean): void {
-        if (!this._versions.some(o => o.value === value)) return
+        if (!this._versions.some((o) => o.value === value)) return
         if (value === this._currentValue()) return
         // Triggers attributeChangedCallback('value') → _patchSelection (surgical)
         this.setAttribute('value', value)
         if (focusButton) {
-            const btn = this.querySelector<HTMLButtonElement>(`.tc-version-picker__option[data-value="${CSS.escape(value)}"]`)
+            const btn = this.querySelector<HTMLButtonElement>(
+                `.tc-version-picker__option[data-value="${CSS.escape(value)}"]`,
+            )
             if (btn) btn.focus()
         }
         this._emit(value)
@@ -123,7 +124,9 @@ export class VersionPicker extends HTMLElement {
     private _patchSelection(): void {
         const current = this._currentValue()
 
-        const buttons = Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-version-picker__option'))
+        const buttons = Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-version-picker__option'),
+        )
         if (buttons.length > 0) {
             for (const btn of buttons) {
                 const active = btn.dataset.value === current
@@ -169,7 +172,7 @@ export class VersionPicker extends HTMLElement {
         e.preventDefault()
 
         const len = this._versions.length
-        const currentIdx = this._versions.findIndex(o => o.value === this._currentValue())
+        const currentIdx = this._versions.findIndex((o) => o.value === this._currentValue())
         let nextIdx: number
         if (key === 'Home') nextIdx = 0
         else if (key === 'End') nextIdx = len - 1
@@ -186,15 +189,17 @@ export class VersionPicker extends HTMLElement {
         const name = this.name
 
         if (variant === 'dropdown') {
-            const optionsHtml = this._versions.map(v => {
-                const ann = [
-                    v.latest ? ' (latest)' : '',
-                    v.lts ? ' (LTS)' : '',
-                    v.deprecated ? ' (deprecated)' : '',
-                ].join('')
-                const selected = v.value === current ? ' selected' : ''
-                return `<option value="${esc(v.value)}"${selected}>${esc(v.label)}${ann}</option>`
-            }).join('')
+            const optionsHtml = this._versions
+                .map((v) => {
+                    const ann = [
+                        v.latest ? ' (latest)' : '',
+                        v.lts ? ' (LTS)' : '',
+                        v.deprecated ? ' (deprecated)' : '',
+                    ].join('')
+                    const selected = v.value === current ? ' selected' : ''
+                    return `<option value="${esc(v.value)}"${selected}>${esc(v.label)}${ann}</option>`
+                })
+                .join('')
 
             const nameAttr = name != null ? ` name="${esc(name)}"` : ''
 
@@ -213,33 +218,42 @@ export class VersionPicker extends HTMLElement {
         }
 
         // segmented
-        const hiddenHtml = name != null
-            ? `<input type="hidden" name="${esc(name)}" value="${esc(current)}">`
-            : ''
+        const hiddenHtml =
+            name != null ? `<input type="hidden" name="${esc(name)}" value="${esc(current)}">` : ''
 
-        const buttonsHtml = this._versions.map(v => {
-            const active = v.value === current
-            const classes = [
-                'tc-version-picker__option',
-                active ? 'tc-version-picker__option--active' : '',
-                v.deprecated ? 'tc-version-picker__option--deprecated' : '',
-            ].filter(Boolean).join(' ')
+        const buttonsHtml = this._versions
+            .map((v) => {
+                const active = v.value === current
+                const classes = [
+                    'tc-version-picker__option',
+                    active ? 'tc-version-picker__option--active' : '',
+                    v.deprecated ? 'tc-version-picker__option--deprecated' : '',
+                ]
+                    .filter(Boolean)
+                    .join(' ')
 
-            const tags = [
-                v.latest ? `<span class="tc-version-picker__tag tc-version-picker__tag--latest">latest</span>` : '',
-                v.lts ? `<span class="tc-version-picker__tag tc-version-picker__tag--lts">LTS</span>` : '',
-                v.deprecated ? `<span class="tc-version-picker__tag tc-version-picker__tag--deprecated">old</span>` : '',
-            ].join('')
+                const tags = [
+                    v.latest
+                        ? `<span class="tc-version-picker__tag tc-version-picker__tag--latest">latest</span>`
+                        : '',
+                    v.lts
+                        ? `<span class="tc-version-picker__tag tc-version-picker__tag--lts">LTS</span>`
+                        : '',
+                    v.deprecated
+                        ? `<span class="tc-version-picker__tag tc-version-picker__tag--deprecated">old</span>`
+                        : '',
+                ].join('')
 
-            return [
-                `<button type="button" class="${classes}"`,
-                ` data-value="${esc(v.value)}" aria-pressed="${active}"`,
-                ` tabindex="${active ? '0' : '-1'}">`,
-                `<span class="tc-version-picker__option-label">${esc(v.label)}</span>`,
-                tags,
-                `</button>`,
-            ].join('')
-        }).join('')
+                return [
+                    `<button type="button" class="${classes}"`,
+                    ` data-value="${esc(v.value)}" aria-pressed="${active}"`,
+                    ` tabindex="${active ? '0' : '-1'}">`,
+                    `<span class="tc-version-picker__option-label">${esc(v.label)}</span>`,
+                    tags,
+                    `</button>`,
+                ].join('')
+            })
+            .join('')
 
         this.innerHTML = [
             `<div class="tc-version-picker tc-version-picker--segmented" role="group" aria-label="Version">`,

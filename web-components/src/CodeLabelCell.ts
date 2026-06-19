@@ -1,15 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-code-label-cell'
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 export class CodeLabelCell extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

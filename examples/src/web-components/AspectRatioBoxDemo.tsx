@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const Fill = ({ label }: { label: string }) => (
     <div
@@ -26,46 +25,49 @@ const AspectRatioBoxDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Aspect Ratio Box"
+                    <tc-rich-page-header
+                        title-text="Aspect Ratio Box"
                         description="Layout primitive that holds its content at a fixed intrinsic aspect ratio. Defaults to 16:9; set the ratio attribute to any width/height pair."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="16:9 (default)">
+                        <tc-section-card title="16:9 (default)">
                             {/* @ts-ignore */}
                             <tc-aspect-ratio-box style={{ maxWidth: 480 }}>
                                 <Fill label="16 : 9" />
                                 {/* @ts-ignore */}
                             </tc-aspect-ratio-box>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="4:3">
+                        <tc-section-card title="4:3">
                             {/* @ts-ignore */}
                             <tc-aspect-ratio-box ratio="4 / 3" style={{ maxWidth: 360 }}>
                                 <Fill label="4 : 3" />
                                 {/* @ts-ignore */}
                             </tc-aspect-ratio-box>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="1:1 (square)">
+                        <tc-section-card title="1:1 (square)">
                             {/* @ts-ignore */}
                             <tc-aspect-ratio-box ratio="1 / 1" style={{ maxWidth: 220 }}>
                                 <Fill label="1 : 1" />
                                 {/* @ts-ignore */}
                             </tc-aspect-ratio-box>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="21:9 (ultrawide)">
+                        <tc-section-card title="21:9 (ultrawide)">
                             {/* @ts-ignore */}
                             <tc-aspect-ratio-box ratio="21 / 9" style={{ maxWidth: 560 }}>
                                 <Fill label="21 : 9" />
                                 {/* @ts-ignore */}
                             </tc-aspect-ratio-box>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Colon syntax (16:9) wrapping an image">
+                        <tc-section-card title="Colon syntax (16:9) wrapping an image">
                             {/* @ts-ignore */}
                             <tc-aspect-ratio-box ratio="16:9" style={{ maxWidth: 480 }}>
                                 <img
@@ -75,7 +77,7 @@ const AspectRatioBoxDemo: React.FC = () => (
                                 />
                                 {/* @ts-ignore */}
                             </tc-aspect-ratio-box>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

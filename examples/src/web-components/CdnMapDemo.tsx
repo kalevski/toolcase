@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CdnMapDemo: React.FC = () => {
     const mixedRef = useRef<any>(null)
@@ -56,37 +55,40 @@ const CdnMapDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CdnMap"
+                        <tc-rich-page-header
+                            title-text="CdnMap"
                             description="Grid-backed surface with positioned CDN node markers. Primary nodes use the slate ink accent; accent (cyan) nodes are used sparingly for highlight PoPs. Set nodes via the JS nodes property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Mixed primary and accent nodes">
+                            <tc-section-card title="Mixed primary and accent nodes">
                                 {/* @ts-ignore */}
                                 <tc-cdn-map ref={mixedRef} height="240" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Primary nodes only">
+                            <tc-section-card title="Primary nodes only">
                                 {/* @ts-ignore */}
                                 <tc-cdn-map ref={primaryOnlyRef} height="200" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Accent nodes only (highlight PoPs)">
+                            <tc-section-card title="Accent nodes only (highlight PoPs)">
                                 {/* @ts-ignore */}
                                 <tc-cdn-map ref={accentOnlyRef} height="200" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Tall map with CSS height string">
+                            <tc-section-card title="Tall map with CSS height string">
                                 {/* @ts-ignore */}
                                 <tc-cdn-map ref={tallRef} height="360px" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Empty map">
+                            <tc-section-card title="Empty map">
                                 {/* @ts-ignore */}
                                 <tc-cdn-map height="160" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

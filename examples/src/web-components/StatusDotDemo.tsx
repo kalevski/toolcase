@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const StatusDotDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="StatusDot"
+                    <tc-rich-page-header
+                        title-text="StatusDot"
                         description="Colour-coded status indicator dot with optional label text and a pulsing ring animation."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Statuses (dot only)">
+                        <tc-section-card title="Statuses (dot only)">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="online"></tc-status-dot>
@@ -24,9 +26,9 @@ const StatusDotDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="offline"></tc-status-dot>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Statuses with labels">
+                        <tc-section-card title="Statuses with labels">
                             <div className="d-flex flex-wrap gap-4 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="online" label="Online"></tc-status-dot>
@@ -37,20 +39,32 @@ const StatusDotDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="offline" label="Offline"></tc-status-dot>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Sizes">
+                        <tc-section-card title="Sizes">
                             <div className="d-flex flex-wrap gap-4 align-items-center">
                                 {/* @ts-ignore */}
-                                <tc-status-dot status="online" size="small" label="Small"></tc-status-dot>
+                                <tc-status-dot
+                                    status="online"
+                                    size="small"
+                                    label="Small"
+                                ></tc-status-dot>
                                 {/* @ts-ignore */}
-                                <tc-status-dot status="online" size="default" label="Default"></tc-status-dot>
+                                <tc-status-dot
+                                    status="online"
+                                    size="default"
+                                    label="Default"
+                                ></tc-status-dot>
                                 {/* @ts-ignore */}
-                                <tc-status-dot status="online" size="large" label="Large"></tc-status-dot>
+                                <tc-status-dot
+                                    status="online"
+                                    size="large"
+                                    label="Large"
+                                ></tc-status-dot>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Pulse animation">
+                        <tc-section-card title="Pulse animation">
                             <div className="d-flex flex-wrap gap-4 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="online" label="Online" pulse></tc-status-dot>
@@ -61,9 +75,9 @@ const StatusDotDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="offline" label="Offline"></tc-status-dot>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Pulse · all sizes">
+                        <tc-section-card title="Pulse · all sizes">
                             <div className="d-flex flex-wrap gap-4 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="online" size="small" pulse></tc-status-dot>
@@ -72,7 +86,7 @@ const StatusDotDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-status-dot status="online" size="large" pulse></tc-status-dot>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

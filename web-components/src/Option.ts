@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-option'
 
 export class Option extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['value', 'selected', 'disabled']
     }

@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-entity-profile-card'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export interface EntityProfileCardMetaItem {
     label: string
@@ -95,16 +88,16 @@ export class EntityProfileCard extends HTMLElement {
     // Re-append stored slot nodes into their newly rendered inner containers.
     private _distributeSlots(): void {
         const leadEl = this.querySelector('.tc-entity-profile-card__lead')
-        if (leadEl) this._leadSlotNodes.forEach(n => leadEl.appendChild(n))
+        if (leadEl) this._leadSlotNodes.forEach((n) => leadEl.appendChild(n))
 
         const titleEl = this.querySelector('.tc-entity-profile-card__title')
-        if (titleEl) this._titleSlotNodes.forEach(n => titleEl.appendChild(n))
+        if (titleEl) this._titleSlotNodes.forEach((n) => titleEl.appendChild(n))
 
         const subtitleEl = this.querySelector('.tc-entity-profile-card__subtitle')
-        if (subtitleEl) this._subtitleSlotNodes.forEach(n => subtitleEl.appendChild(n))
+        if (subtitleEl) this._subtitleSlotNodes.forEach((n) => subtitleEl.appendChild(n))
 
         const chipsEl = this.querySelector('.tc-entity-profile-card__chips')
-        if (chipsEl) this._chipsSlotNodes.forEach(n => chipsEl.appendChild(n))
+        if (chipsEl) this._chipsSlotNodes.forEach((n) => chipsEl.appendChild(n))
     }
 
     private render(): void {
@@ -113,11 +106,13 @@ export class EntityProfileCard extends HTMLElement {
         if (loading) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            const skeletonCells = Array.from({ length: 4 }, () =>
-                '<div class="tc-entity-profile-card__meta-cell">' +
-                '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--meta-label"></div>' +
-                '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--meta-value"></div>' +
-                '</div>'
+            const skeletonCells = Array.from(
+                { length: 4 },
+                () =>
+                    '<div class="tc-entity-profile-card__meta-cell">' +
+                    '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--meta-label"></div>' +
+                    '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--meta-value"></div>' +
+                    '</div>',
             ).join('')
             this.innerHTML = [
                 '<div class="card tc-entity-profile-card" aria-hidden="true">',
@@ -143,9 +138,7 @@ export class EntityProfileCard extends HTMLElement {
         const hasChips = this._chipsSlotNodes.length > 0
 
         // Lead: slot container rendered only when slot children are present
-        const leadHtml = hasLead
-            ? '<div class="tc-entity-profile-card__lead"></div>'
-            : ''
+        const leadHtml = hasLead ? '<div class="tc-entity-profile-card__lead"></div>' : ''
 
         // Title: slot children take priority over the convenience title attribute
         let titleHtml = ''
@@ -161,9 +154,7 @@ export class EntityProfileCard extends HTMLElement {
             : ''
 
         // Chips: slot container rendered only when slot children are present
-        const chipsHtml = hasChips
-            ? '<div class="tc-entity-profile-card__chips"></div>'
-            : ''
+        const chipsHtml = hasChips ? '<div class="tc-entity-profile-card__chips"></div>' : ''
 
         const heroHtml = [
             '<div class="tc-entity-profile-card__hero">',
@@ -174,16 +165,20 @@ export class EntityProfileCard extends HTMLElement {
             '</div>',
         ].join('')
 
-        const metaHtml = this._meta.length > 0
-            ? '<dl class="tc-entity-profile-card__meta">' +
-              this._meta.map(item =>
-                  '<div class="tc-entity-profile-card__meta-cell">' +
-                  `<dt class="tc-entity-profile-card__meta-label">${esc(item.label)}</dt>` +
-                  `<dd class="tc-entity-profile-card__meta-value">${esc(item.value)}</dd>` +
-                  '</div>'
-              ).join('') +
-              '</dl>'
-            : ''
+        const metaHtml =
+            this._meta.length > 0
+                ? '<dl class="tc-entity-profile-card__meta">' +
+                  this._meta
+                      .map(
+                          (item) =>
+                              '<div class="tc-entity-profile-card__meta-cell">' +
+                              `<dt class="tc-entity-profile-card__meta-label">${esc(item.label)}</dt>` +
+                              `<dd class="tc-entity-profile-card__meta-value">${esc(item.value)}</dd>` +
+                              '</div>',
+                      )
+                      .join('') +
+                  '</dl>'
+                : ''
 
         this.innerHTML = [
             '<div class="card tc-entity-profile-card">',

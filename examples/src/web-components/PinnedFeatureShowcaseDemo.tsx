@@ -1,32 +1,41 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ITEMS_FULL = [
     {
         title: 'Zero-dependency bundling',
-        description: 'Ships as pure ESM and CJS — no runtime, no virtual DOM, no framework lock-in.',
+        description:
+            'Ships as pure ESM and CJS — no runtime, no virtual DOM, no framework lock-in.',
         icon: 'package',
     },
     {
         title: 'Design-token driven',
-        description: 'Every cosmetic value flows through --tc-* custom properties so themes are one CSS file.',
+        description:
+            'Every cosmetic value flows through --tc-* custom properties so themes are one CSS file.',
         icon: 'palette',
     },
     {
         title: 'Accessibility first',
-        description: 'Landmark roles, aria-labelledby, keyboard focus, and reduced-motion support out of the box.',
+        description:
+            'Landmark roles, aria-labelledby, keyboard focus, and reduced-motion support out of the box.',
         icon: 'accessibility',
     },
     {
         title: 'Composable via slots',
-        description: 'Named media and ctas slots let you drop in any markup — buttons, images, videos — without re-implementing the shell.',
+        description:
+            'Named media and ctas slots let you drop in any markup — buttons, images, videos — without re-implementing the shell.',
         icon: 'layers',
     },
 ]
 
 const ITEMS_MINIMAL = [
-    { title: 'Fast by default', description: 'No JavaScript required for layout — CSS does the heavy lifting.' },
-    { title: 'Works everywhere', description: 'Drop into React, Vue, Svelte, or plain HTML without a build step.' },
+    {
+        title: 'Fast by default',
+        description: 'No JavaScript required for layout — CSS does the heavy lifting.',
+    },
+    {
+        title: 'Works everywhere',
+        description: 'Drop into React, Vue, Svelte, or plain HTML without a build step.',
+    },
     { title: 'Open source', description: 'MIT licensed. Fork it, extend it, ship it.' },
 ]
 
@@ -40,9 +49,20 @@ const PinnedFeatureShowcaseDemo: React.FC = () => {
         if (minimalRef.current) minimalRef.current.items = ITEMS_MINIMAL
         if (noIconRef.current) {
             noIconRef.current.items = [
-                { title: 'Layered architecture', description: 'Each concern lives in its own layer — no tangled abstractions.' },
-                { title: 'Sharp corners', description: 'The design system intentionally avoids border-radius for a precise, professional look.' },
-                { title: 'Slate neutrals', description: 'A consistent palette of slate greys ensures visual harmony across all components.' },
+                {
+                    title: 'Layered architecture',
+                    description: 'Each concern lives in its own layer — no tangled abstractions.',
+                },
+                {
+                    title: 'Sharp corners',
+                    description:
+                        'The design system intentionally avoids border-radius for a precise, professional look.',
+                },
+                {
+                    title: 'Slate neutrals',
+                    description:
+                        'A consistent palette of slate greys ensures visual harmony across all components.',
+                },
             ]
         }
     }, [])
@@ -52,14 +72,17 @@ const PinnedFeatureShowcaseDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PinnedFeatureShowcase"
+                        <tc-rich-page-header
+                            title-text="PinnedFeatureShowcase"
                             description="Two-column showcase with a sticky/centred left panel and a right-side item list. Set items via the JS items property. Use the media and ctas slots for rich left-panel content."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-5 mt-4">
-                            <SectionCard title="Full showcase (eyebrow, image, CTA buttons, icon items)">
+                            <tc-section-card title="Full showcase (eyebrow, image, CTA buttons, icon items)">
                                 {/* @ts-ignore */}
                                 <tc-pinned-feature-showcase
                                     ref={fullRef}
@@ -70,13 +93,17 @@ const PinnedFeatureShowcaseDemo: React.FC = () => {
                                     image-alt="Code editor screenshot"
                                 >
                                     {/* @ts-ignore */}
-                                    <tc-button slot="ctas" variant="primary">Get started</tc-button>
+                                    <tc-button slot="ctas" variant="primary">
+                                        Get started
+                                    </tc-button>
                                     {/* @ts-ignore */}
-                                    <tc-button slot="ctas" variant="secondary">View docs</tc-button>
+                                    <tc-button slot="ctas" variant="secondary">
+                                        View docs
+                                    </tc-button>
                                 </tc-pinned-feature-showcase>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom media slot (overrides image-src)">
+                            <tc-section-card title="Custom media slot (overrides image-src)">
                                 {/* @ts-ignore */}
                                 <tc-pinned-feature-showcase
                                     eyebrow="Design system"
@@ -85,31 +112,43 @@ const PinnedFeatureShowcaseDemo: React.FC = () => {
                                     image-src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=640&q=80"
                                     image-alt="This image is hidden"
                                 >
-                                    <div slot="media" style={{ background: 'var(--tc-surface-muted)', padding: '2rem', textAlign: 'center', fontFamily: 'var(--bs-font-monospace)', fontSize: '0.875rem', color: 'var(--tc-text-muted)' }}>
+                                    <div
+                                        slot="media"
+                                        style={{
+                                            background: 'var(--tc-surface-muted)',
+                                            padding: '2rem',
+                                            textAlign: 'center',
+                                            fontFamily: 'var(--bs-font-monospace)',
+                                            fontSize: '0.875rem',
+                                            color: 'var(--tc-text-muted)',
+                                        }}
+                                    >
                                         [ custom media slot content ]
                                     </div>
                                     {/* @ts-ignore */}
-                                    <tc-button slot="ctas" variant="primary">Explore tokens</tc-button>
+                                    <tc-button slot="ctas" variant="primary">
+                                        Explore tokens
+                                    </tc-button>
                                 </tc-pinned-feature-showcase>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Items without icons">
+                            <tc-section-card title="Items without icons">
                                 {/* @ts-ignore */}
                                 <tc-pinned-feature-showcase
                                     ref={noIconRef}
                                     title="Thoughtful by design"
                                     description="Every detail is considered — from spacing to motion to colour contrast."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal (title + description + items, no image)">
+                            <tc-section-card title="Minimal (title + description + items, no image)">
                                 {/* @ts-ignore */}
                                 <tc-pinned-feature-showcase
                                     ref={minimalRef}
                                     title="Simple to start"
                                     description="No configuration required. Drop the element in, set items, and you're done."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

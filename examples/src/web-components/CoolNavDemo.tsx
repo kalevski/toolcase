@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const NAV_ITEMS = [
     { label: 'Home', href: '#home', active: true },
@@ -59,11 +58,14 @@ const CoolNavDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CoolNav"
+                        <tc-rich-page-header
+                            title-text="CoolNav"
                             description="Responsive nav bar with collapsible menu, scroll detection, brand slot, login CTA, and light/dark themes."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         {lastEvent && (
                             <div className="alert alert-info mt-3">
@@ -72,8 +74,7 @@ const CoolNavDemo: React.FC = () => {
                         )}
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Basic — brand attribute + login CTA">
+                            <tc-section-card title="Basic — brand attribute + login CTA">
                                 {/* @ts-ignore */}
                                 <tc-cool-nav
                                     ref={basicRef}
@@ -82,32 +83,54 @@ const CoolNavDemo: React.FC = () => {
                                     login-href="#signup"
                                     login-variant="primary"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Brand slot">
+                            <tc-section-card title="Brand slot">
                                 {/* @ts-ignore */}
                                 <tc-cool-nav login-label="Sign in" login-href="#login">
                                     {/* @ts-ignore */}
-                                    <span slot="brand" style={{ fontFamily: 'var(--tc-font-mono)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                        <span style={{ width: 7, height: 7, background: 'var(--tc-accent)', display: 'inline-block' }} />
+                                    <span
+                                        slot="brand"
+                                        style={{
+                                            fontFamily: 'var(--tc-font-mono)',
+                                            fontWeight: 600,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.4rem',
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                width: 7,
+                                                height: 7,
+                                                background: 'var(--tc-accent)',
+                                                display: 'inline-block',
+                                            }}
+                                        />
                                         myapp
                                     </span>
                                     {/* @ts-ignore */}
                                 </tc-cool-nav>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Right slot (extra controls)">
+                            <tc-section-card title="Right slot (extra controls)">
                                 {/* @ts-ignore */}
-                                <tc-cool-nav brand="toolcase" login-label="Log in" login-href="#login">
+                                <tc-cool-nav
+                                    brand="toolcase"
+                                    login-label="Log in"
+                                    login-href="#login"
+                                >
                                     {/* @ts-ignore */}
                                     <span slot="right">
-                                        <button className="btn btn-sm btn-outline-secondary">Changelog</button>
+                                        <button className="btn btn-sm btn-outline-secondary">
+                                            Changelog
+                                        </button>
                                     </span>
                                     {/* @ts-ignore */}
                                 </tc-cool-nav>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Dark theme">
+                            <tc-section-card title="Dark theme">
                                 {/* @ts-ignore */}
                                 <tc-cool-nav
                                     ref={darkRef}
@@ -116,9 +139,9 @@ const CoolNavDemo: React.FC = () => {
                                     login-label="Log in"
                                     login-href="#login"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Sticky + scrolled state preview">
+                            <tc-section-card title="Sticky + scrolled state preview">
                                 {/* @ts-ignore */}
                                 <tc-cool-nav
                                     ref={stickyRef}
@@ -127,17 +150,26 @@ const CoolNavDemo: React.FC = () => {
                                     login-label="Log in"
                                     login-href="#"
                                 />
-                                <p style={{ fontSize: '0.8rem', color: 'var(--tc-text-muted)', marginTop: '0.5rem' }}>
-                                    With <code>sticky</code>, the nav is <code>position: sticky; top: 0</code>. The scrolled (condensed + shadow) state is applied via <code>classList.add</code> in the effect for preview.
+                                <p
+                                    style={{
+                                        fontSize: '0.8rem',
+                                        color: 'var(--tc-text-muted)',
+                                        marginTop: '0.5rem',
+                                    }}
+                                >
+                                    With <code>sticky</code>, the nav is{' '}
+                                    <code>position: sticky; top: 0</code>. The scrolled (condensed +
+                                    shadow) state is applied via <code>classList.add</code> in the
+                                    effect for preview.
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No login CTA">
+                            <tc-section-card title="No login CTA">
                                 {/* @ts-ignore */}
                                 <tc-cool-nav ref={noLoginRef} brand="toolcase" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom expand breakpoint (md)">
+                            <tc-section-card title="Custom expand breakpoint (md)">
                                 {/* @ts-ignore */}
                                 <tc-cool-nav
                                     ref={customBpRef}
@@ -146,8 +178,7 @@ const CoolNavDemo: React.FC = () => {
                                     login-label="Log in"
                                     login-href="#"
                                 />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Button, RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type Step = { key: string; label: string; completed: boolean }
 
@@ -28,7 +27,7 @@ const ALL_DONE_STEPS: Step[] = [
 const DOT_PATTERN_SRC =
     'data:image/svg+xml;utf8,' +
     encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="2" cy="2" r="1.2" fill="#94a3b8"/></svg>`
+        `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="2" cy="2" r="1.2" fill="#94a3b8"/></svg>`,
     )
 
 const WelcomeGuideDemo: React.FC = () => {
@@ -39,21 +38,23 @@ const WelcomeGuideDemo: React.FC = () => {
     const [showPattern, setShowPattern] = useState(true)
 
     const toggleStep = (index: number) => {
-        setSteps(prev => prev.map((s, i) => (i === index ? { ...s, completed: !s.completed } : s)))
+        setSteps((prev) =>
+            prev.map((s, i) => (i === index ? { ...s, completed: !s.completed } : s)),
+        )
     }
 
     // Seed messages once and advance the active step when the user clicks it.
     useEffect(() => {
         const handler = (e: Event) => {
             const key = (e as CustomEvent<{ key: string }>).detail.key
-            setSteps(prev => prev.map(s => (s.key === key ? { ...s, completed: true } : s)))
+            setSteps((prev) => prev.map((s) => (s.key === key ? { ...s, completed: true } : s)))
         }
         const els = [withPatternRef.current, withoutPatternRef.current].filter(Boolean)
-        els.forEach(el => {
+        els.forEach((el) => {
             el.messages = MESSAGES
             el.addEventListener('tc-step-click', handler)
         })
-        return () => els.forEach(el => el.removeEventListener('tc-step-click', handler))
+        return () => els.forEach((el) => el.removeEventListener('tc-step-click', handler))
     }, [])
 
     // Keep both pattern demos in sync with the toggleable step state.
@@ -73,61 +74,66 @@ const WelcomeGuideDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="WelcomeGuide"
+                        <tc-rich-page-header
+                            title-text="WelcomeGuide"
                             description="An onboarding card with a dark gradient hero (title + messages) on the left and a step-progress checklist on the right. The active step (first not-completed) is auto-derived; clicking it fires tc-step-click."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="With background pattern">
+                            <tc-section-card title="With background pattern">
                                 {/* @ts-ignore */}
                                 <tc-welcome-guide
                                     ref={withPatternRef}
                                     title="Getting Started"
-                                    background-pattern-src={showPattern ? DOT_PATTERN_SRC : undefined}
+                                    background-pattern-src={
+                                        showPattern ? DOT_PATTERN_SRC : undefined
+                                    }
                                     background-pattern-alt=""
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Without background pattern">
+                            <tc-section-card title="Without background pattern">
                                 {/* @ts-ignore */}
                                 <tc-welcome-guide ref={withoutPatternRef} title="Getting Started" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Toggle steps">
+                            <tc-section-card title="Toggle steps">
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                                     {steps.map((step, i) => (
-                                        <Button
+                                        <tc-button
                                             key={step.key}
                                             variant={step.completed ? 'success' : 'secondary'}
                                             outline={!step.completed}
-                                            size="small"
+                                            size="sm"
                                             onClick={() => toggleStep(i)}
                                         >
                                             {step.label}
-                                        </Button>
+                                        </tc-button>
                                     ))}
-                                    <Button
+                                    <tc-button
                                         variant="primary"
                                         outline={!showPattern}
-                                        size="small"
-                                        onClick={() => setShowPattern(v => !v)}
+                                        size="sm"
+                                        onClick={() => setShowPattern((v) => !v)}
                                     >
                                         {showPattern ? 'Hide' : 'Show'} Pattern
-                                    </Button>
+                                    </tc-button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-welcome-guide title="Loading…" loading />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="All steps completed">
+                            <tc-section-card title="All steps completed">
                                 {/* @ts-ignore */}
                                 <tc-welcome-guide ref={allDoneRef} title="All done!" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

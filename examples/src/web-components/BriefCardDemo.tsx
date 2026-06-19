@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BriefCardDemo: React.FC = () => {
     const [lastClicked, setLastClicked] = useState<string | null>(null)
@@ -20,14 +19,17 @@ const BriefCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BriefCard"
+                        <tc-rich-page-header
+                            title-text="BriefCard"
                             description="A card displaying a task brief with a difficulty indicator, body, optional icon, and meta info. Supports easy/medium/hard difficulties, lucide icons via the icon attribute, named slots for rich content, and a tc-click event when interactive."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Difficulty variants">
+                            <tc-section-card title="Difficulty variants">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-brief-card
@@ -57,9 +59,9 @@ const BriefCardDemo: React.FC = () => {
                                         meta-right="Database"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With lucide icon (icon attribute)">
+                            <tc-section-card title="With lucide icon (icon attribute)">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-brief-card
@@ -82,9 +84,9 @@ const BriefCardDemo: React.FC = () => {
                                         meta-right="Security"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted icon and title">
+                            <tc-section-card title="Slotted icon and title">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-brief-card
@@ -95,7 +97,18 @@ const BriefCardDemo: React.FC = () => {
                                         meta-right="Infra"
                                     >
                                         <span slot="icon" style={{ display: 'inline-flex' }}>
-                                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <svg
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="18"
+                                                height="18"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
                                                 <ellipse cx="12" cy="5" rx="9" ry="3" />
                                                 <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
                                                 <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
@@ -104,9 +117,9 @@ const BriefCardDemo: React.FC = () => {
                                         <strong slot="title">Shard the users table</strong>
                                     </tc-brief-card>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Clickable card (tc-click event)">
+                            <tc-section-card title="Clickable card (tc-click event)">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-brief-card
@@ -121,12 +134,19 @@ const BriefCardDemo: React.FC = () => {
                                         meta-right="Performance"
                                     />
                                     {lastClicked && (
-                                        <p className="mt-2 mb-0" style={{ fontFamily: 'var(--bs-font-monospace)', fontSize: '0.825rem', color: 'var(--tc-text-muted)' }}>
+                                        <p
+                                            className="mt-2 mb-0"
+                                            style={{
+                                                fontFamily: 'var(--bs-font-monospace)',
+                                                fontSize: '0.825rem',
+                                                color: 'var(--tc-text-muted)',
+                                            }}
+                                        >
                                             Last tc-click → id: <strong>{lastClicked}</strong>
                                         </p>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

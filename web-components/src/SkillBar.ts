@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-skill-bar'
 
 export interface SkillSlot {
@@ -10,14 +11,6 @@ export interface SkillSlot {
     charges?: number
     disabled?: boolean
     selected?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class SkillBar extends HTMLElement {
@@ -36,10 +29,14 @@ export class SkillBar extends HTMLElement {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'toolbar')
             if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', 'Skill Bar')
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -91,11 +88,13 @@ export class SkillBar extends HTMLElement {
     }
 
     private _fire(id: string): void {
-        this.dispatchEvent(new CustomEvent('tc-activate', {
-            bubbles: true,
-            composed: true,
-            detail: { id },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-activate', {
+                bubbles: true,
+                composed: true,
+                detail: { id },
+            }),
+        )
         if (typeof this.onActivate === 'function') this.onActivate({ id })
     }
 
@@ -117,51 +116,54 @@ export class SkillBar extends HTMLElement {
         this.style.setProperty('--bs-skill-bar-slot-size', `${this.slotSize}px`)
         this.style.setProperty('--bs-skill-bar-gap', this.gap)
 
-        const slotsHTML = this._slots.map((slot, index) => {
-            const label = slot.name || slot.id
-            const cdPct = slot.remaining != null && slot.cooldown && slot.cooldown > 0
-                ? Math.max(0, Math.min(1, slot.remaining / slot.cooldown))
-                : null
-            const onCooldown = cdPct != null && cdPct > 0
+        const slotsHTML = this._slots
+            .map((slot, index) => {
+                const label = slot.name || slot.id
+                const cdPct =
+                    slot.remaining != null && slot.cooldown && slot.cooldown > 0
+                        ? Math.max(0, Math.min(1, slot.remaining / slot.cooldown))
+                        : null
+                const onCooldown = cdPct != null && cdPct > 0
 
-            let cls = 'tc-skill-bar__slot'
-            if (slot.selected) cls += ' tc-skill-bar__slot--selected'
-            if (slot.disabled) cls += ' tc-skill-bar__slot--disabled'
-            if (onCooldown) cls += ' tc-skill-bar__slot--on-cooldown'
+                let cls = 'tc-skill-bar__slot'
+                if (slot.selected) cls += ' tc-skill-bar__slot--selected'
+                if (slot.disabled) cls += ' tc-skill-bar__slot--disabled'
+                if (onCooldown) cls += ' tc-skill-bar__slot--on-cooldown'
 
-            const cooldownStr = slot.cooldown ? `${slot.cooldown}s` : ''
-            const costStr = slot.charges != null && slot.charges > 0
-                ? `${slot.charges}x`
-                : ''
+                const cooldownStr = slot.cooldown ? `${slot.cooldown}s` : ''
+                const costStr = slot.charges != null && slot.charges > 0 ? `${slot.charges}x` : ''
 
-            const cdLabel = onCooldown ? String(Math.ceil(slot.remaining!)) : ''
-            const cdOverlay = onCooldown
-                ? `<div class="tc-skill-bar__cd" aria-hidden="true">` +
-                  `<div class="tc-skill-bar__cd-bar" style="--cd-pct: ${cdPct}"></div>` +
-                  `<span class="tc-skill-bar__cd-label">${esc(cdLabel)}</span>` +
-                  `</div>`
-                : ''
+                const cdLabel = onCooldown ? String(Math.ceil(slot.remaining!)) : ''
+                const cdOverlay = onCooldown
+                    ? `<div class="tc-skill-bar__cd" aria-hidden="true">` +
+                      `<div class="tc-skill-bar__cd-bar" style="--cd-pct: ${cdPct}"></div>` +
+                      `<span class="tc-skill-bar__cd-label">${esc(cdLabel)}</span>` +
+                      `</div>`
+                    : ''
 
-            return `<div` +
-                ` class="${cls}"` +
-                ` data-index="${index}"` +
-                ` data-id="${esc(slot.id)}"` +
-                ` role="button"` +
-                ` tabindex="${slot.disabled ? '-1' : '0'}"` +
-                ` aria-label="${esc(label)}"` +
-                ` aria-pressed="${slot.selected ? 'true' : 'false'}"` +
-                ` aria-disabled="${slot.disabled ? 'true' : 'false'}"` +
-                `>` +
-                `<tc-ability-card` +
-                ` ability-name="${esc(label)}"` +
-                (slot.icon ? ` icon="${esc(slot.icon)}"` : '') +
-                (slot.hotkey ? ` keybind="${esc(slot.hotkey)}"` : '') +
-                (cooldownStr ? ` cooldown="${esc(cooldownStr)}"` : '') +
-                (costStr ? ` cost="${esc(costStr)}"` : '') +
-                `></tc-ability-card>` +
-                cdOverlay +
-                `</div>`
-        }).join('')
+                return (
+                    `<div` +
+                    ` class="${cls}"` +
+                    ` data-index="${index}"` +
+                    ` data-id="${esc(slot.id)}"` +
+                    ` role="button"` +
+                    ` tabindex="${slot.disabled ? '-1' : '0'}"` +
+                    ` aria-label="${esc(label)}"` +
+                    ` aria-pressed="${slot.selected ? 'true' : 'false'}"` +
+                    ` aria-disabled="${slot.disabled ? 'true' : 'false'}"` +
+                    `>` +
+                    `<tc-ability-card` +
+                    ` ability-name="${esc(label)}"` +
+                    (slot.icon ? ` icon="${esc(slot.icon)}"` : '') +
+                    (slot.hotkey ? ` keybind="${esc(slot.hotkey)}"` : '') +
+                    (cooldownStr ? ` cooldown="${esc(cooldownStr)}"` : '') +
+                    (costStr ? ` cost="${esc(costStr)}"` : '') +
+                    `></tc-ability-card>` +
+                    cdOverlay +
+                    `</div>`
+                )
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-skill-bar__row">${slotsHTML}</div>`
     }

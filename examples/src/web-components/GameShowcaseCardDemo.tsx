@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const GameShowcaseCardDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -32,9 +31,7 @@ const GameShowcaseCardDemo: React.FC = () => {
     useEffect(() => {
         if (!clickableRef.current) return
         clickableRef.current.tags = ['Puzzle', 'Indie']
-        clickableRef.current.compliance = [
-            { label: 'PEGI 3', state: 'pass' },
-        ]
+        clickableRef.current.compliance = [{ label: 'PEGI 3', state: 'pass' }]
         clickableRef.current.onClick = () => {
             console.log('[GameShowcaseCard] onClick callback fired')
         }
@@ -48,15 +45,17 @@ const GameShowcaseCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="GameShowcaseCard"
+                        <tc-rich-page-header
+                            title-text="GameShowcaseCard"
                             description="Game showcase card with artwork, title, pitch, tags, compliance indicators, and corner stamps. Set stamps/tags/compliance via JS properties; art/meta/title/pitch via slots or attributes."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Basic (title + pitch attributes, tags + compliance via JS property)">
+                            <tc-section-card title="Basic (title + pitch attributes, tags + compliance via JS property)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-game-showcase-card
@@ -65,9 +64,9 @@ const GameShowcaseCardDemo: React.FC = () => {
                                         pitch="An epic fantasy RPG set in a world of ancient dragons and forgotten kingdoms."
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With artwork (slotted image)">
+                            <tc-section-card title="With artwork (slotted image)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-game-showcase-card
@@ -79,7 +78,8 @@ const GameShowcaseCardDemo: React.FC = () => {
                                             style={{
                                                 width: '100%',
                                                 height: '100%',
-                                                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                                                background:
+                                                    'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -96,9 +96,9 @@ const GameShowcaseCardDemo: React.FC = () => {
                                         {/* @ts-ignore */}
                                     </tc-game-showcase-card>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With art placeholder (shown when no art slot provided)">
+                            <tc-section-card title="With art placeholder (shown when no art slot provided)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-game-showcase-card
@@ -122,9 +122,9 @@ const GameShowcaseCardDemo: React.FC = () => {
                                         {/* @ts-ignore */}
                                     </tc-game-showcase-card>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Full-featured (stamps + tags + compliance + meta slots)">
+                            <tc-section-card title="Full-featured (stamps + tags + compliance + meta slots)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-game-showcase-card
@@ -137,7 +137,8 @@ const GameShowcaseCardDemo: React.FC = () => {
                                             style={{
                                                 width: '100%',
                                                 height: '100%',
-                                                background: 'linear-gradient(160deg, #2d1b69 0%, #11998e 100%)',
+                                                background:
+                                                    'linear-gradient(160deg, #2d1b69 0%, #11998e 100%)',
                                             }}
                                         />
                                         <span slot="meta-left">v0.8.4 EA</span>
@@ -145,9 +146,9 @@ const GameShowcaseCardDemo: React.FC = () => {
                                         {/* @ts-ignore */}
                                     </tc-game-showcase-card>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Clickable variant (role=button, keyboard-activatable, dispatches tc-click)">
+                            <tc-section-card title="Clickable variant (role=button, keyboard-activatable, dispatches tc-click)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-game-showcase-card
@@ -157,10 +158,10 @@ const GameShowcaseCardDemo: React.FC = () => {
                                     />
                                 </div>
                                 <p className="mt-2 text-muted" style={{ fontSize: '0.8125rem' }}>
-                                    Click or press Enter/Space to activate. Check the browser console for the event log.
+                                    Click or press Enter/Space to activate. Check the browser
+                                    console for the event log.
                                 </p>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const EcosystemMapDemo: React.FC = () => {
     const twoRingsRef = useRef<any>(null)
@@ -58,10 +57,7 @@ const EcosystemMapDemo: React.FC = () => {
                 },
                 {
                     label: 'Integration',
-                    items: [
-                        { name: '@toolcase/phaser-plus' },
-                        { name: '@toolcase/node' },
-                    ],
+                    items: [{ name: '@toolcase/phaser-plus' }, { name: '@toolcase/node' }],
                 },
             ]
         }
@@ -72,26 +68,29 @@ const EcosystemMapDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="EcosystemMap"
+                        <tc-rich-page-header
+                            title-text="EcosystemMap"
                             description="Concentric ring diagram showing ecosystem relationships. Set core and rings via JS properties. Always renders an inline SVG diagram and a semantic list fallback."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Two rings — official + community packages">
+                            <tc-section-card title="Two rings — official + community packages">
                                 {/* @ts-ignore */}
                                 <tc-ecosystem-map ref={twoRingsRef} title="Package ecosystem" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Three rings — custom size 560px">
+                            <tc-section-card title="Three rings — custom size 560px">
                                 {/* @ts-ignore */}
                                 <tc-ecosystem-map ref={threeRingsRef} size="560" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Empty state — no rings set">
+                            <tc-section-card title="Empty state — no rings set">
                                 {/* @ts-ignore */}
                                 <tc-ecosystem-map title="No packages yet" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

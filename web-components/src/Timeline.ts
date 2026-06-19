@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-timeline'
@@ -25,30 +26,6 @@ export interface TimelineItem {
 
 const VARIANTS: TimelineVariant[] = ['default', 'glass', 'outlined', 'elevated', 'minimal']
 const CONNECTORS: TimelineConnector[] = ['gradient', 'solid', 'dashed']
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    // Try exact name first (PascalCase as given)
-    const direct = (LucideIcons as Record<string, string>)[name]
-    if (direct) return icon(direct, 'tc-timeline-icon-svg')
-    // Convert kebab-case → PascalCase: "check-circle" → "CheckCircle"
-    const pascal = name
-        .split('-')
-        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    if (svg) return icon(svg, 'tc-timeline-icon-svg')
-    // Fallback to Circle
-    const fallback = (LucideIcons as Record<string, string>)['Circle']
-    return fallback ? icon(fallback, 'tc-timeline-icon-svg') : ''
-}
 
 export class Timeline extends HTMLElement {
     private _initialised = false
@@ -155,9 +132,7 @@ export class Timeline extends HTMLElement {
             ? `<span class="tc-timeline-badge">${esc(item.badge)}</span>`
             : ''
 
-        const metaHtml = item.meta
-            ? `<span class="tc-timeline-meta">${esc(item.meta)}</span>`
-            : ''
+        const metaHtml = item.meta ? `<span class="tc-timeline-meta">${esc(item.meta)}</span>` : ''
 
         const subtitleHtml = item.subtitle
             ? `<p class="tc-timeline-subtitle">${esc(item.subtitle)}</p>`
@@ -238,10 +213,7 @@ export class Timeline extends HTMLElement {
         }
 
         this.innerHTML =
-            `<div class="tc-timeline tc-timeline--${variant}">` +
-            lineHtml +
-            itemsHtml +
-            `</div>`
+            `<div class="tc-timeline tc-timeline--${variant}">` + lineHtml + itemsHtml + `</div>`
     }
 }
 

@@ -4,7 +4,6 @@ export type StackDirection = 'vertical' | 'horizontal'
 const DIRECTIONS: StackDirection[] = ['vertical', 'horizontal']
 
 export class Stack extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

@@ -15,7 +15,6 @@ const PADDINGS: ArtboardBackdropPadding[] = ['none', 'sm', 'md', 'lg', 'xl']
  * the host's own classes via `classList`, never wiping its `innerHTML`.
  */
 export class ArtboardBackdrop extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['kind', 'padding']
     }
@@ -49,10 +48,10 @@ export class ArtboardBackdrop extends HTMLElement {
         // so manage component classes surgically to preserve author-added ones.
         this.classList.add('tc-artboard-backdrop')
 
-        KINDS.forEach(k => this.classList.remove(`tc-artboard-backdrop--${k}`))
+        KINDS.forEach((k) => this.classList.remove(`tc-artboard-backdrop--${k}`))
         this.classList.add(`tc-artboard-backdrop--${this.kind}`)
 
-        PADDINGS.forEach(p => this.classList.remove(`tc-artboard-backdrop--pad-${p}`))
+        PADDINGS.forEach((p) => this.classList.remove(`tc-artboard-backdrop--pad-${p}`))
         this.classList.add(`tc-artboard-backdrop--pad-${this.padding}`)
     }
 }

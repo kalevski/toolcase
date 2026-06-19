@@ -3,7 +3,6 @@ import { Collapse as BsCollapse } from './internal/Collapse'
 const TAG_NAME = 'tc-collapse'
 
 export class Collapse extends HTMLElement {
-
     private _bsCollapse: BsCollapse | null = null
     private _collapseEl: HTMLElement | null = null
     private _initialised = false
@@ -22,7 +21,7 @@ export class Collapse extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this._collapseEl
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
         this._initPlugin()
@@ -40,7 +39,7 @@ export class Collapse extends HTMLElement {
             this._teardown()
             this.render()
             const newInner = this._collapseEl
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
             this._initPlugin()
         } else if (name === 'open') {
             if (this.open) {
@@ -104,8 +103,13 @@ export class Collapse extends HTMLElement {
     private render(): void {
         const isOpen = this.hasAttribute('open')
         const isHorizontal = this.hasAttribute('horizontal')
-        const classes = ['collapse', isHorizontal ? 'collapse-horizontal' : '', isOpen ? 'show' : '']
-            .filter(Boolean).join(' ')
+        const classes = [
+            'collapse',
+            isHorizontal ? 'collapse-horizontal' : '',
+            isOpen ? 'show' : '',
+        ]
+            .filter(Boolean)
+            .join(' ')
         const div = document.createElement('div')
         div.className = classes
         this.innerHTML = ''

@@ -1,14 +1,17 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const sampleCommands = [
     {
         name: 'init',
         usage: 'init [directory]',
-        description: 'Initialise a new project in the given directory, or the current directory if omitted.',
+        description:
+            'Initialise a new project in the given directory, or the current directory if omitted.',
         aliases: ['i', 'create'],
         flags: [
-            { flag: '--template <name>', description: 'Starter template to use (default: "blank").' },
+            {
+                flag: '--template <name>',
+                description: 'Starter template to use (default: "blank").',
+            },
             { flag: '--yes', description: 'Skip prompts and accept all defaults.' },
             { flag: '--typescript', description: 'Generate TypeScript configuration files.' },
         ],
@@ -20,7 +23,10 @@ const sampleCommands = [
         aliases: ['b'],
         flags: [
             { flag: '--watch', description: 'Rebuild on file changes.' },
-            { flag: '--minify', description: 'Enable output minification (default: true in production).' },
+            {
+                flag: '--minify',
+                description: 'Enable output minification (default: true in production).',
+            },
             { flag: '--out-dir <path>', description: 'Override the output directory.' },
             { flag: '--sourcemap', description: 'Emit source maps alongside the bundle.' },
         ],
@@ -38,7 +44,8 @@ const sampleCommands = [
     {
         name: 'lint',
         usage: 'lint [files...]',
-        description: 'Run the linter on source files. Exits with a non-zero code if issues are found.',
+        description:
+            'Run the linter on source files. Exits with a non-zero code if issues are found.',
         aliases: ['check'],
         flags: [
             { flag: '--fix', description: 'Auto-fix fixable issues.' },
@@ -48,7 +55,8 @@ const sampleCommands = [
     {
         name: 'test',
         usage: 'test [pattern]',
-        description: 'Execute the test suite. An optional glob pattern narrows which files are run.',
+        description:
+            'Execute the test suite. An optional glob pattern narrows which files are run.',
         aliases: ['t', 'vitest'],
         flags: [
             { flag: '--watch', description: 'Re-run tests on file changes.' },
@@ -100,45 +108,65 @@ const CommandReferenceDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CommandReference"
+                        <tc-rich-page-header
+                            title-text="CommandReference"
                             description="Searchable reference guide for commands with usage, descriptions, flags, and aliases. Filters results by name, description, aliases, and flag text."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full — searchable with flags and aliases">
+                            <tc-section-card title="Full — searchable with flags and aliases">
                                 {/* @ts-ignore */}
-                                <tc-command-reference ref={fullRef} search-placeholder="Filter commands…" />
-                            </SectionCard>
+                                <tc-command-reference
+                                    ref={fullRef}
+                                    search-placeholder="Filter commands…"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Non-searchable (searchable=false)">
+                            <tc-section-card title="Non-searchable (searchable=false)">
                                 {/* @ts-ignore */}
                                 <tc-command-reference ref={noSearchRef} searchable="false" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With title attribute">
+                            <tc-section-card title="With title attribute">
                                 {/* @ts-ignore */}
                                 <tc-command-reference
                                     ref={titledRef}
                                     title="CLI Reference"
                                     search-placeholder="Search commands…"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With slotted title (React node)">
+                            <tc-section-card title="With slotted title (React node)">
                                 {/* @ts-ignore */}
                                 <tc-command-reference ref={slottedRef}>
-                                    <span style={{ fontFamily: 'var(--tc-font-mono)', fontSize: '0.9375rem', fontWeight: 600 }}>
-                                        my-cli <span style={{ color: 'var(--tc-text-muted)', fontWeight: 400 }}>— command reference</span>
+                                    <span
+                                        style={{
+                                            fontFamily: 'var(--tc-font-mono)',
+                                            fontSize: '0.9375rem',
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        my-cli{' '}
+                                        <span
+                                            style={{
+                                                color: 'var(--tc-text-muted)',
+                                                fontWeight: 400,
+                                            }}
+                                        >
+                                            — command reference
+                                        </span>
                                     </span>
                                 </tc-command-reference>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal commands (no flags, some aliases)">
+                            <tc-section-card title="Minimal commands (no flags, some aliases)">
                                 {/* @ts-ignore */}
                                 <tc-command-reference ref={minimalRef} title="Quick Reference" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

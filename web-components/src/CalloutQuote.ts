@@ -1,15 +1,8 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-callout-quote'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 const quoteMarkIcon = icon((LucideIcons as Record<string, string>)['Quote'] ?? '')
 
@@ -31,7 +24,7 @@ export class CalloutQuote extends HTMLElement {
             this.render()
             if (!hasQuoteAttr) {
                 const inner = this.querySelector('.tc-callout-quote-content')
-                if (inner) slotContent.forEach(n => inner.appendChild(n))
+                if (inner) slotContent.forEach((n) => inner.appendChild(n))
             }
             this._initialised = true
         }
@@ -41,11 +34,11 @@ export class CalloutQuote extends HTMLElement {
         if (!this.isConnected || !this._initialised) return
         const hasQuoteAttr = this.hasAttribute('quote')
         const inner = this.querySelector('.tc-callout-quote-content')
-        const slotContent = (!hasQuoteAttr && inner) ? Array.from(inner.childNodes) : []
+        const slotContent = !hasQuoteAttr && inner ? Array.from(inner.childNodes) : []
         this.render()
         if (!hasQuoteAttr) {
             const newInner = this.querySelector('.tc-callout-quote-content')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 
@@ -87,9 +80,8 @@ export class CalloutQuote extends HTMLElement {
         const source = this.getAttribute('source')
         const sourceHref = this.getAttribute('source-href')
 
-        const quoteBody = quote != null
-            ? esc(quote)
-            : `<span class="tc-callout-quote-content"></span>`
+        const quoteBody =
+            quote != null ? esc(quote) : `<span class="tc-callout-quote-content"></span>`
 
         let captionHtml = ''
         if (attribution || source) {

@@ -1,3 +1,5 @@
+import { isImageSrc } from './internal/image'
+import { esc } from './internal/esc'
 // Re-uses the canonical InventoryItem owned by tc-item-slot so the same data
 // drives both ports. The hotbar fallback only renders id/name/icon/qty (rarity/
 // cooldown/lock are fantasy chrome owned by tc-item-slot when that primitive is
@@ -12,32 +14,20 @@ export interface HotbarSlot {
 }
 
 export interface HotbarEventMap {
-    'tc-select': CustomEvent<{ item: InventoryItem | null, index: number }>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
+    'tc-select': CustomEvent<{ item: InventoryItem | null; index: number }>
 }
 
 // An icon that looks like an image source renders as an <img>; otherwise the
 // string is a short glyph/initials label (the design system forbids emoji-as-
 // icon, so free-form data glyphs stay content). Matches the tc-equipment-doll
 // fallback so both game ports read the same item data identically.
-function isImageSrc(value: string): boolean {
-    return /^(https?:|\/|\.\/|\.\.\/|data:image\/)/.test(value) || /\.(png|jpe?g|gif|svg|webp|avif)$/i.test(value)
-}
 
 export class Hotbar extends HTMLElement {
     private _initialised = false
     private _slots: HotbarSlot[] = []
 
     /** Optional callback fired alongside the tc-select CustomEvent. */
-    onSelect: ((detail: { item: InventoryItem | null, index: number }) => void) | null = null
+    onSelect: ((detail: { item: InventoryItem | null; index: number }) => void) | null = null
 
     static get observedAttributes(): string[] {
         return ['slot-size', 'selected-id']
@@ -48,10 +38,14 @@ export class Hotbar extends HTMLElement {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'toolbar')
             if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', 'Hotbar')
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -94,11 +88,13 @@ export class Hotbar extends HTMLElement {
     }
 
     private emit(item: InventoryItem | null, index: number): void {
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            detail: { item, index },
-            bubbles: true,
-            composed: true,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                detail: { item, index },
+                bubbles: true,
+                composed: true,
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect({ item, index })
     }
 
@@ -159,16 +155,18 @@ export class Hotbar extends HTMLElement {
         this.style.setProperty('--bs-hotbar-slot-size', `${size}px`)
 
         const selected = this.selectedId
-        const cellsHTML = this._slots.map((slot, index) => {
-            const item = slot.item ?? null
-            const id = item?.id ?? ''
-            const isSelected = !!id && id === selected
-            const hotkey = slot.hotkey ?? ''
-            const label = item?.name || item?.id || `Slot ${index + 1}`
-            const classes = 'tc-hotbar__slot'
-                + (item ? '' : ' tc-hotbar__slot--empty')
-                + (isSelected ? ' tc-hotbar__slot--selected' : '')
-            return `<tc-item-slot
+        const cellsHTML = this._slots
+            .map((slot, index) => {
+                const item = slot.item ?? null
+                const id = item?.id ?? ''
+                const isSelected = !!id && id === selected
+                const hotkey = slot.hotkey ?? ''
+                const label = item?.name || item?.id || `Slot ${index + 1}`
+                const classes =
+                    'tc-hotbar__slot' +
+                    (item ? '' : ' tc-hotbar__slot--empty') +
+                    (isSelected ? ' tc-hotbar__slot--selected' : '')
+                return `<tc-item-slot
                 class="${classes}"
                 data-index="${index}"
                 role="button"
@@ -180,7 +178,8 @@ export class Hotbar extends HTMLElement {
                 ${isSelected ? 'selected' : ''}
                 ${hotkey ? `hotkey="${esc(hotkey)}"` : ''}
             >${this._slotFallback(item, hotkey)}</tc-item-slot>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-hotbar__row">${cellsHTML}</div>`
 
@@ -188,7 +187,8 @@ export class Hotbar extends HTMLElement {
         // render the rich interior once it is registered (mirrors gc-hotbar).
         const slotEls = this.querySelectorAll<HTMLElement>('.tc-hotbar__slot')
         slotEls.forEach((el, index) => {
-            ;(el as unknown as { item: InventoryItem | null }).item = this._slots[index]?.item ?? null
+            ;(el as unknown as { item: InventoryItem | null }).item =
+                this._slots[index]?.item ?? null
         })
     }
 }

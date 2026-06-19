@@ -1,20 +1,23 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-icon-button'
 
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
 export type IconButtonVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
 export type IconButtonSize = 'small' | 'default' | 'large'
 
-const VARIANTS: IconButtonVariant[] = ['primary', 'secondary', 'info', 'success', 'warning', 'danger']
+const VARIANTS: IconButtonVariant[] = [
+    'primary',
+    'secondary',
+    'info',
+    'success',
+    'warning',
+    'danger',
+]
 const SIZES: IconButtonSize[] = ['small', 'default', 'large']
 
 export class IconButton extends HTMLElement {
-
     private _initialised = false
 
     onClick: (() => void) | null = null

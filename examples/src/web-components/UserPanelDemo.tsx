@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const MENU_ITEMS = [
     { key: 'profile', label: 'Profile', icon: 'user' },
@@ -23,7 +22,7 @@ function IconClickExample() {
     useEffect(() => {
         const el = ref.current
         if (!el) return
-        const onIcon = () => setCount(c => c + 1)
+        const onIcon = () => setCount((c) => c + 1)
         el.addEventListener('tc-icon-click', onIcon)
         return () => el.removeEventListener('tc-icon-click', onIcon)
     }, [])
@@ -32,7 +31,7 @@ function IconClickExample() {
         <div className="d-flex flex-column gap-3">
             {panelFrame(
                 /* @ts-ignore */
-                <tc-user-panel ref={ref} username="Daniel Kalevski" plan="Pro" />
+                <tc-user-panel ref={ref} username="Daniel Kalevski" plan="Pro" />,
             )}
             <p className="small text-muted mb-0">
                 Settings icon clicked: <code>{count}</code> time{count === 1 ? '' : 's'}
@@ -50,7 +49,7 @@ function MenuExample() {
         if (!el) return
         el.menuItems = MENU_ITEMS
         const onMenu = (e: CustomEvent) => {
-            setLog(prev => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
+            setLog((prev) => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
         }
         el.addEventListener('tc-menu-click', onMenu)
         return () => el.removeEventListener('tc-menu-click', onMenu)
@@ -60,12 +59,14 @@ function MenuExample() {
         <div className="d-flex flex-column gap-3">
             {panelFrame(
                 /* @ts-ignore */
-                <tc-user-panel ref={ref} username="Daniel Kalevski" plan="Pro" />
+                <tc-user-panel ref={ref} username="Daniel Kalevski" plan="Pro" />,
             )}
             {log.length > 0 && (
                 <ul className="list-unstyled mb-0 small text-muted">
                     {log.map((entry, i) => (
-                        <li key={i}><code>{entry}</code></li>
+                        <li key={i}>
+                            <code>{entry}</code>
+                        </li>
                     ))}
                 </ul>
             )}
@@ -78,52 +79,59 @@ const UserPanelDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="UserPanel"
+                    <tc-rich-page-header
+                        title-text="UserPanel"
                         description="User profile panel with avatar, name, plan micro-label, a settings icon button, and an optional dropdown menu. Emits tc-icon-click on the settings button and tc-menu-click on menu selection."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Avatar image — Enterprise plan">
+                        <tc-section-card title="Avatar image — Enterprise plan">
                             {panelFrame(
                                 /* @ts-ignore */
                                 <tc-user-panel
                                     avatar-src="https://i.pravatar.cc/150?img=12"
                                     username="Alice Johnson"
                                     plan="Enterprise"
-                                />
+                                />,
                             )}
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Initials fallback — Free plan">
+                        <tc-section-card title="Initials fallback — Free plan">
                             {panelFrame(
                                 /* @ts-ignore */
-                                <tc-user-panel username="Jane Smith" initials="JS" />
+                                <tc-user-panel username="Jane Smith" initials="JS" />,
                             )}
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Highlighted settings icon">
+                        <tc-section-card title="Highlighted settings icon">
                             {panelFrame(
                                 /* @ts-ignore */
-                                <tc-user-panel username="Bob Martin" plan="Starter" icon-highlighted />
+                                <tc-user-panel
+                                    username="Bob Martin"
+                                    plan="Starter"
+                                    icon-highlighted
+                                />,
                             )}
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Settings icon click (tc-icon-click)">
+                        <tc-section-card title="Settings icon click (tc-icon-click)">
                             <IconClickExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Dropdown menu (click the name — Escape / arrows work)">
+                        <tc-section-card title="Dropdown menu (click the name — Escape / arrows work)">
                             <MenuExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Loading skeleton">
+                        <tc-section-card title="Loading skeleton">
                             {panelFrame(
                                 /* @ts-ignore */
-                                <tc-user-panel loading />
+                                <tc-user-panel loading />,
                             )}
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

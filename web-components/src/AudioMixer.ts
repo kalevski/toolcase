@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Play, VolumeX, Headphones, Plus, Trash2, Scissors } from 'lucide-static'
 import { icon } from './icons'
 
@@ -73,14 +74,6 @@ const EMPTY_DOCUMENT: AudioMixerDocument = { durationMs: 0, tracks: [] }
 
 let _fxSeq = 0
 
-function esc(str: string): string {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-}
-
 function clamp(v: number, lo: number, hi: number): number {
     return Math.min(Math.max(v, lo), hi)
 }
@@ -114,7 +107,6 @@ interface DragState {
 }
 
 export class AudioMixer extends HTMLElement {
-
     private _initialised = false
     private _doc: AudioMixerDocument = EMPTY_DOCUMENT
     private _actions: AudioMixerActions = {}
@@ -187,9 +179,10 @@ export class AudioMixer extends HTMLElement {
         return this._doc
     }
     set doc(v: AudioMixerDocument) {
-        this._doc = v && typeof v === 'object' && Array.isArray(v.tracks)
-            ? { durationMs: Number(v.durationMs) || 0, tracks: v.tracks }
-            : EMPTY_DOCUMENT
+        this._doc =
+            v && typeof v === 'object' && Array.isArray(v.tracks)
+                ? { durationMs: Number(v.durationMs) || 0, tracks: v.tracks }
+                : EMPTY_DOCUMENT
         if (this._initialised) this.render()
     }
 
@@ -219,8 +212,8 @@ export class AudioMixer extends HTMLElement {
     }
 
     private _findClip(trackId: string, clipId: string): AudioMixerClip | null {
-        const track = this._doc.tracks.find(t => t.id === trackId)
-        return track?.clips.find(c => c.id === clipId) ?? null
+        const track = this._doc.tracks.find((t) => t.id === trackId)
+        return track?.clips.find((c) => c.id === clipId) ?? null
     }
 
     // ── Event helpers — each fires a CustomEvent AND the matching action ─────
@@ -252,14 +245,15 @@ export class AudioMixer extends HTMLElement {
         const clip = this._findClip(trackId, clipId)
         if (!clip) return
 
-        const edge = (target.closest<HTMLElement>('.tc-audio-mixer-clip-handle')?.dataset.edge) ?? ''
+        const edge = target.closest<HTMLElement>('.tc-audio-mixer-clip-handle')?.dataset.edge ?? ''
         const mode: DragState['mode'] = edge === 'l' ? 'trim-l' : edge === 'r' ? 'trim-r' : 'move'
 
         e.preventDefault()
         // Highlight immediately without a re-render (the consumer re-renders on
         // tc-select, which we defer to pointer-up to avoid killing the drag).
-        this.querySelectorAll('.tc-audio-mixer-clip--selected')
-            .forEach(el => el.classList.remove('tc-audio-mixer-clip--selected'))
+        this.querySelectorAll('.tc-audio-mixer-clip--selected').forEach((el) =>
+            el.classList.remove('tc-audio-mixer-clip--selected'),
+        )
         clipEl.classList.add('tc-audio-mixer-clip--selected')
 
         this._drag = {
@@ -357,12 +351,12 @@ export class AudioMixer extends HTMLElement {
             if (action === 'add-track') {
                 this._actions.addTrack?.()
             } else if (action === 'mute' && trackId) {
-                const track = this._doc.tracks.find(t => t.id === trackId)
+                const track = this._doc.tracks.find((t) => t.id === trackId)
                 const muted = !track?.muted
                 this._emit('tc-track-mute', { trackId, muted })
                 this._actions.toggleMute?.(trackId, muted)
             } else if (action === 'solo' && trackId) {
-                const track = this._doc.tracks.find(t => t.id === trackId)
+                const track = this._doc.tracks.find((t) => t.id === trackId)
                 const solo = !track?.solo
                 this._emit('tc-track-solo', { trackId, solo })
                 this._actions.toggleSolo?.(trackId, solo)
@@ -370,7 +364,7 @@ export class AudioMixer extends HTMLElement {
                 const clipId = btn.dataset.clipId ?? null
                 const effectId = btn.dataset.effectId ?? ''
                 const clip = trackId && clipId ? this._findClip(trackId, clipId) : null
-                const effect = clip?.effects?.find(fx => fx.id === effectId)
+                const effect = clip?.effects?.find((fx) => fx.id === effectId)
                 if (effect) {
                     this._emit('tc-effect-remove', { trackId, clipId, effect })
                     this._actions.removeEffect?.(trackId, clipId, effect)
@@ -431,10 +425,19 @@ export class AudioMixer extends HTMLElement {
         const ruler = target.closest<HTMLElement>('.tc-audio-mixer-ruler')
         if (ruler) {
             const step = e.shiftKey ? 1000 : 100
-            if (e.key === 'ArrowLeft') { e.preventDefault(); this._seek(this.currentMs - step) }
-            else if (e.key === 'ArrowRight') { e.preventDefault(); this._seek(this.currentMs + step) }
-            else if (e.key === 'Home') { e.preventDefault(); this._seek(0) }
-            else if (e.key === 'End') { e.preventDefault(); this._seek(this._totalMs) }
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault()
+                this._seek(this.currentMs - step)
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault()
+                this._seek(this.currentMs + step)
+            } else if (e.key === 'Home') {
+                e.preventDefault()
+                this._seek(0)
+            } else if (e.key === 'End') {
+                e.preventDefault()
+                this._seek(this._totalMs)
+            }
             return
         }
 
@@ -543,46 +546,47 @@ export class AudioMixer extends HTMLElement {
 
         const toolbar =
             `<div class="tc-audio-mixer-toolbar">` +
-                `<button type="button" class="tc-audio-mixer-btn tc-audio-mixer-btn--primary" ` +
-                    `data-action="add-track" data-focus-key="add-track"${disabled ? ' disabled' : ''}>` +
-                    `${plusIcon}<span>Add track</span></button>` +
-                `<button type="button" class="tc-audio-mixer-btn" aria-label="Play"${disabled ? ' disabled' : ''}>` +
-                    `${playIcon}</button>` +
-                `<span class="tc-audio-mixer-time">` +
-                    `<span class="tc-audio-mixer-time-cur">${formatTime(currentMs)}</span>` +
-                    ` / ${formatTime(totalMs)}</span>` +
+            `<button type="button" class="tc-audio-mixer-btn tc-audio-mixer-btn--primary" ` +
+            `data-action="add-track" data-focus-key="add-track"${disabled ? ' disabled' : ''}>` +
+            `${plusIcon}<span>Add track</span></button>` +
+            `<button type="button" class="tc-audio-mixer-btn" aria-label="Play"${disabled ? ' disabled' : ''}>` +
+            `${playIcon}</button>` +
+            `<span class="tc-audio-mixer-time">` +
+            `<span class="tc-audio-mixer-time-cur">${formatTime(currentMs)}</span>` +
+            ` / ${formatTime(totalMs)}</span>` +
             `</div>`
 
         const headers =
             `<div class="tc-audio-mixer-tracks">` +
-                `<div class="tc-audio-mixer-tracks-spacer" style="height:${RULER_H}px"></div>` +
-                doc.tracks.map(track => this._renderHeader(track, sel, disabled)).join('') +
+            `<div class="tc-audio-mixer-tracks-spacer" style="height:${RULER_H}px"></div>` +
+            doc.tracks.map((track) => this._renderHeader(track, sel, disabled)).join('') +
             `</div>`
 
         const ruler = this._renderRuler(totalMs, laneWidth, currentMs, disabled)
 
         const lanes =
             `<div class="tc-audio-mixer-lanes" style="width:${laneWidth}px">` +
-                doc.tracks.map(track => this._renderLane(track, sel, disabled)).join('') +
-                `<div class="tc-audio-mixer-playhead" style="left:${currentMs * PX_PER_MS}px" aria-hidden="true"></div>` +
+            doc.tracks.map((track) => this._renderLane(track, sel, disabled)).join('') +
+            `<div class="tc-audio-mixer-playhead" style="left:${currentMs * PX_PER_MS}px" aria-hidden="true"></div>` +
             `</div>`
 
         const timeline =
             `<div class="tc-audio-mixer-timeline">` +
-                `<div class="tc-audio-mixer-timeline-inner" style="width:${laneWidth}px">` +
-                    ruler + lanes +
-                `</div>` +
+            `<div class="tc-audio-mixer-timeline-inner" style="width:${laneWidth}px">` +
+            ruler +
+            lanes +
+            `</div>` +
             `</div>`
 
         const inspector = this._renderInspector(sel, disabled)
 
         this.innerHTML =
             `<div class="tc-audio-mixer">` +
-                toolbar +
-                `<div class="tc-audio-mixer-main">` +
-                    `<div class="tc-audio-mixer-stage">${headers}${timeline}</div>` +
-                    inspector +
-                `</div>` +
+            toolbar +
+            `<div class="tc-audio-mixer-main">` +
+            `<div class="tc-audio-mixer-stage">${headers}${timeline}</div>` +
+            inspector +
+            `</div>` +
             `</div>`
 
         if (focusSel) this.querySelector<HTMLElement>(focusSel)?.focus()
@@ -594,15 +598,20 @@ export class AudioMixer extends HTMLElement {
             .join('')
         return (
             `<div class="tc-audio-mixer tc-audio-mixer--loading">` +
-                `<div class="tc-audio-mixer-skeleton" aria-hidden="true">` +
-                    `<div class="tc-audio-mixer-skeleton-bar"></div>${rows}` +
-                `</div>` +
-                `<span class="visually-hidden">Loading mixer…</span>` +
+            `<div class="tc-audio-mixer-skeleton" aria-hidden="true">` +
+            `<div class="tc-audio-mixer-skeleton-bar"></div>${rows}` +
+            `</div>` +
+            `<span class="visually-hidden">Loading mixer…</span>` +
             `</div>`
         )
     }
 
-    private _renderRuler(totalMs: number, laneWidth: number, currentMs: number, disabled: boolean): string {
+    private _renderRuler(
+        totalMs: number,
+        laneWidth: number,
+        currentMs: number,
+        disabled: boolean,
+    ): string {
         const stepMs = 5000
         const ticks: string[] = []
         for (let ms = 0; ms <= totalMs; ms += stepMs) {
@@ -612,42 +621,50 @@ export class AudioMixer extends HTMLElement {
         }
         return (
             `<div class="tc-audio-mixer-ruler" role="slider" tabindex="${disabled ? -1 : 0}" ` +
-                `aria-label="Playhead position" aria-valuemin="0" aria-valuemax="${Math.round(totalMs)}" ` +
-                `aria-valuenow="${Math.round(currentMs)}" style="height:${RULER_H}px;width:${laneWidth}px">` +
-                ticks.join('') +
+            `aria-label="Playhead position" aria-valuemin="0" aria-valuemax="${Math.round(totalMs)}" ` +
+            `aria-valuenow="${Math.round(currentMs)}" style="height:${RULER_H}px;width:${laneWidth}px">` +
+            ticks.join('') +
             `</div>`
         )
     }
 
-    private _renderHeader(track: AudioMixerTrack, sel: AudioMixerSelectionState, disabled: boolean): string {
+    private _renderHeader(
+        track: AudioMixerTrack,
+        sel: AudioMixerSelectionState,
+        disabled: boolean,
+    ): string {
         const active = sel.trackId === track.id && !sel.clipId
         const volume = typeof track.volume === 'number' ? track.volume : 1
         const dis = disabled ? ' disabled' : ''
         return (
             `<div class="tc-audio-mixer-track-header${active ? ' tc-audio-mixer-track-header--active' : ''}" ` +
-                `data-track-id="${esc(track.id)}" style="height:${TRACK_H}px">` +
-                `<div class="tc-audio-mixer-track-name" title="${esc(track.name)}">${esc(track.name)}</div>` +
-                `<div class="tc-audio-mixer-track-controls">` +
-                    `<button type="button" class="tc-audio-mixer-chip${track.muted ? ' tc-audio-mixer-chip--mute' : ''}" ` +
-                        `data-action="mute" data-track-id="${esc(track.id)}" data-focus-key="mute:${esc(track.id)}" ` +
-                        `aria-pressed="${track.muted ? 'true' : 'false'}" aria-label="Mute ${esc(track.name)}"${dis}>` +
-                        `${muteIcon}</button>` +
-                    `<button type="button" class="tc-audio-mixer-chip${track.solo ? ' tc-audio-mixer-chip--solo' : ''}" ` +
-                        `data-action="solo" data-track-id="${esc(track.id)}" data-focus-key="solo:${esc(track.id)}" ` +
-                        `aria-pressed="${track.solo ? 'true' : 'false'}" aria-label="Solo ${esc(track.name)}"${dis}>` +
-                        `${soloIcon}</button>` +
-                    `<input type="range" class="tc-audio-mixer-fader" min="0" max="1" step="0.01" ` +
-                        `value="${volume}" data-action="volume" data-track-id="${esc(track.id)}" ` +
-                        `data-focus-key="vol:${esc(track.id)}" aria-label="${esc(track.name)} volume" ` +
-                        `aria-valuemin="0" aria-valuemax="1" aria-valuenow="${volume}"${dis}>` +
-                `</div>` +
+            `data-track-id="${esc(track.id)}" style="height:${TRACK_H}px">` +
+            `<div class="tc-audio-mixer-track-name" title="${esc(track.name)}">${esc(track.name)}</div>` +
+            `<div class="tc-audio-mixer-track-controls">` +
+            `<button type="button" class="tc-audio-mixer-chip${track.muted ? ' tc-audio-mixer-chip--mute' : ''}" ` +
+            `data-action="mute" data-track-id="${esc(track.id)}" data-focus-key="mute:${esc(track.id)}" ` +
+            `aria-pressed="${track.muted ? 'true' : 'false'}" aria-label="Mute ${esc(track.name)}"${dis}>` +
+            `${muteIcon}</button>` +
+            `<button type="button" class="tc-audio-mixer-chip${track.solo ? ' tc-audio-mixer-chip--solo' : ''}" ` +
+            `data-action="solo" data-track-id="${esc(track.id)}" data-focus-key="solo:${esc(track.id)}" ` +
+            `aria-pressed="${track.solo ? 'true' : 'false'}" aria-label="Solo ${esc(track.name)}"${dis}>` +
+            `${soloIcon}</button>` +
+            `<input type="range" class="tc-audio-mixer-fader" min="0" max="1" step="0.01" ` +
+            `value="${volume}" data-action="volume" data-track-id="${esc(track.id)}" ` +
+            `data-focus-key="vol:${esc(track.id)}" aria-label="${esc(track.name)} volume" ` +
+            `aria-valuemin="0" aria-valuemax="1" aria-valuenow="${volume}"${dis}>` +
+            `</div>` +
             `</div>`
         )
     }
 
-    private _renderLane(track: AudioMixerTrack, sel: AudioMixerSelectionState, disabled: boolean): string {
+    private _renderLane(
+        track: AudioMixerTrack,
+        sel: AudioMixerSelectionState,
+        disabled: boolean,
+    ): string {
         const clips = track.clips
-            .map(clip => {
+            .map((clip) => {
                 const start = clip.startMs || 0
                 const length = clip.lengthMs || 0
                 const w = Math.max(8, length * PX_PER_MS)
@@ -655,20 +672,18 @@ export class AudioMixer extends HTMLElement {
                 const label = clip.label ?? ''
                 return (
                     `<div class="tc-audio-mixer-clip${isSel ? ' tc-audio-mixer-clip--selected' : ''}" ` +
-                        `data-track-id="${esc(track.id)}" data-clip-id="${esc(clip.id)}" ` +
-                        `tabindex="${disabled ? -1 : 0}" role="button" ` +
-                        `aria-label="${esc(label || 'Clip')} — ${formatTime(start)}, ${formatTime(length)} long" ` +
-                        `style="left:${start * PX_PER_MS}px;width:${w}px">` +
-                        `<span class="tc-audio-mixer-clip-handle tc-audio-mixer-clip-handle--l" data-edge="l" aria-hidden="true"></span>` +
-                        `<span class="tc-audio-mixer-clip-label">${esc(label)}</span>` +
-                        `<span class="tc-audio-mixer-clip-handle tc-audio-mixer-clip-handle--r" data-edge="r" aria-hidden="true"></span>` +
+                    `data-track-id="${esc(track.id)}" data-clip-id="${esc(clip.id)}" ` +
+                    `tabindex="${disabled ? -1 : 0}" role="button" ` +
+                    `aria-label="${esc(label || 'Clip')} — ${formatTime(start)}, ${formatTime(length)} long" ` +
+                    `style="left:${start * PX_PER_MS}px;width:${w}px">` +
+                    `<span class="tc-audio-mixer-clip-handle tc-audio-mixer-clip-handle--l" data-edge="l" aria-hidden="true"></span>` +
+                    `<span class="tc-audio-mixer-clip-label">${esc(label)}</span>` +
+                    `<span class="tc-audio-mixer-clip-handle tc-audio-mixer-clip-handle--r" data-edge="r" aria-hidden="true"></span>` +
                     `</div>`
                 )
             })
             .join('')
-        return (
-            `<div class="tc-audio-mixer-lane" data-track-id="${esc(track.id)}" style="height:${TRACK_H}px">${clips}</div>`
-        )
+        return `<div class="tc-audio-mixer-lane" data-track-id="${esc(track.id)}" style="height:${TRACK_H}px">${clips}</div>`
     }
 
     private _renderInspector(sel: AudioMixerSelectionState, disabled: boolean): string {
@@ -677,57 +692,57 @@ export class AudioMixer extends HTMLElement {
         if (clip) {
             const effects = Array.isArray(clip.effects) ? clip.effects : []
             const rows = effects
-                .map(fx => (
-                    `<div class="tc-audio-mixer-effect">` +
+                .map(
+                    (fx) =>
+                        `<div class="tc-audio-mixer-effect">` +
                         `<span class="tc-audio-mixer-effect-type">${esc(fx.type)}</span>` +
                         `<button type="button" class="tc-audio-mixer-chip tc-audio-mixer-chip--danger" ` +
-                            `data-action="remove-effect" data-track-id="${esc(sel.trackId ?? '')}" ` +
-                            `data-clip-id="${esc(sel.clipId ?? '')}" data-effect-id="${esc(fx.id)}" ` +
-                            `aria-label="Remove ${esc(fx.type)}"${disabled ? ' disabled' : ''}>${trashIcon}</button>` +
-                    `</div>`
-                ))
+                        `data-action="remove-effect" data-track-id="${esc(sel.trackId ?? '')}" ` +
+                        `data-clip-id="${esc(sel.clipId ?? '')}" data-effect-id="${esc(fx.id)}" ` +
+                        `aria-label="Remove ${esc(fx.type)}"${disabled ? ' disabled' : ''}>${trashIcon}</button>` +
+                        `</div>`,
+                )
                 .join('')
-            const empty = effects.length === 0
-                ? `<div class="tc-audio-mixer-inspector-empty">No effects yet.</div>`
-                : ''
-            const options = EFFECT_TYPES
-                .map(t => `<option value="${t}">${t}</option>`)
-                .join('')
+            const empty =
+                effects.length === 0
+                    ? `<div class="tc-audio-mixer-inspector-empty">No effects yet.</div>`
+                    : ''
+            const options = EFFECT_TYPES.map((t) => `<option value="${t}">${t}</option>`).join('')
             return (
                 `<div class="tc-audio-mixer-inspector">` +
-                    `<div class="tc-audio-mixer-inspector-title">${scissorsIcon}` +
-                        `<span>${esc(clip.label || 'Clip')}</span></div>` +
-                    `<dl class="tc-audio-mixer-meta">` +
-                        `<div><dt>Start</dt><dd>${formatTime(clip.startMs || 0)}</dd></div>` +
-                        `<div><dt>Length</dt><dd>${formatTime(clip.lengthMs || 0)}</dd></div>` +
-                    `</dl>` +
-                    `<div class="tc-audio-mixer-field-label">Effect chain</div>` +
-                    `<div class="tc-audio-mixer-effects">${rows}${empty}</div>` +
-                    `<div class="tc-audio-mixer-fx-add-row">` +
-                        `<span class="tc-audio-mixer-icon-lead">${plusIcon}</span>` +
-                        `<select class="tc-audio-mixer-fx-add" data-action="add-effect" ` +
-                            `data-track-id="${esc(sel.trackId ?? '')}" data-clip-id="${esc(sel.clipId ?? '')}" ` +
-                            `aria-label="Add effect"${disabled ? ' disabled' : ''}>` +
-                            `<option value="">Add effect…</option>${options}` +
-                        `</select>` +
-                    `</div>` +
+                `<div class="tc-audio-mixer-inspector-title">${scissorsIcon}` +
+                `<span>${esc(clip.label || 'Clip')}</span></div>` +
+                `<dl class="tc-audio-mixer-meta">` +
+                `<div><dt>Start</dt><dd>${formatTime(clip.startMs || 0)}</dd></div>` +
+                `<div><dt>Length</dt><dd>${formatTime(clip.lengthMs || 0)}</dd></div>` +
+                `</dl>` +
+                `<div class="tc-audio-mixer-field-label">Effect chain</div>` +
+                `<div class="tc-audio-mixer-effects">${rows}${empty}</div>` +
+                `<div class="tc-audio-mixer-fx-add-row">` +
+                `<span class="tc-audio-mixer-icon-lead">${plusIcon}</span>` +
+                `<select class="tc-audio-mixer-fx-add" data-action="add-effect" ` +
+                `data-track-id="${esc(sel.trackId ?? '')}" data-clip-id="${esc(sel.clipId ?? '')}" ` +
+                `aria-label="Add effect"${disabled ? ' disabled' : ''}>` +
+                `<option value="">Add effect…</option>${options}` +
+                `</select>` +
+                `</div>` +
                 `</div>`
             )
         }
 
         if (sel.trackId) {
-            const track = this._doc.tracks.find(t => t.id === sel.trackId)
+            const track = this._doc.tracks.find((t) => t.id === sel.trackId)
             return (
                 `<div class="tc-audio-mixer-inspector">` +
-                    `<div class="tc-audio-mixer-inspector-title"><span>${esc(track?.name || 'Track')}</span></div>` +
-                    `<div class="tc-audio-mixer-inspector-empty">Select a clip to edit its effect chain.</div>` +
+                `<div class="tc-audio-mixer-inspector-title"><span>${esc(track?.name || 'Track')}</span></div>` +
+                `<div class="tc-audio-mixer-inspector-empty">Select a clip to edit its effect chain.</div>` +
                 `</div>`
             )
         }
 
         return (
             `<div class="tc-audio-mixer-inspector">` +
-                `<div class="tc-audio-mixer-inspector-empty">Select a track or clip to inspect.</div>` +
+            `<div class="tc-audio-mixer-inspector-empty">Select a track or clip to inspect.</div>` +
             `</div>`
         )
     }

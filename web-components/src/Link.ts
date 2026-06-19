@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -13,7 +14,6 @@ const _externalSvg = (LucideIcons as Record<string, string>)['ExternalLink'] ?? 
 const externalLinkIcon = _externalSvg ? icon(_externalSvg, 'tc-link__external-icon') : ''
 
 export class Link extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -29,7 +29,7 @@ export class Link extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-link-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -40,7 +40,7 @@ export class Link extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-link-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get variant(): LinkVariant {
@@ -87,15 +87,7 @@ export class Link extends HTMLElement {
             ? `${externalLinkIcon}<span class="visually-hidden">(opens in new tab)</span>`
             : ''
 
-        this.innerHTML = `<a href="${this._escape(href)}" class="${classes}"${externalAttrs}><span class="tc-link-content"></span>${externalHtml}</a>`
-    }
-
-    private _escape(s: string): string {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
+        this.innerHTML = `<a href="${esc(href)}" class="${classes}"${externalAttrs}><span class="tc-link-content"></span>${externalHtml}</a>`
     }
 }
 

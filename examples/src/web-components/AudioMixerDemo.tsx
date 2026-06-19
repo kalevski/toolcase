@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 interface Effect {
     id: string
@@ -38,7 +37,13 @@ const INITIAL_DOC: MixerDoc = {
             name: 'Drums',
             volume: 0.9,
             clips: [
-                { id: 'd1', startMs: 0, lengthMs: 8000, label: 'Loop A', effects: [{ id: 'fx0', type: 'eq' }] },
+                {
+                    id: 'd1',
+                    startMs: 0,
+                    lengthMs: 8000,
+                    label: 'Loop A',
+                    effects: [{ id: 'fx0', type: 'eq' }],
+                },
                 { id: 'd2', startMs: 12000, lengthMs: 10000, label: 'Loop B' },
             ],
         },
@@ -64,16 +69,19 @@ const INITIAL_DOC: MixerDoc = {
 
 const mapTrack = (doc: MixerDoc, trackId: string, fn: (t: Track) => Track): MixerDoc => ({
     ...doc,
-    tracks: doc.tracks.map(t => (t.id === trackId ? fn(t) : t)),
+    tracks: doc.tracks.map((t) => (t.id === trackId ? fn(t) : t)),
 })
 
 const mapClip = (doc: MixerDoc, clipId: string, fn: (c: Clip) => Clip): MixerDoc => ({
     ...doc,
-    tracks: doc.tracks.map(t => ({ ...t, clips: t.clips.map(c => (c.id === clipId ? fn(c) : c)) })),
+    tracks: doc.tracks.map((t) => ({
+        ...t,
+        clips: t.clips.map((c) => (c.id === clipId ? fn(c) : c)),
+    })),
 })
 
 const findTrackOfClip = (doc: MixerDoc, clipId: string): Track | undefined =>
-    doc.tracks.find(t => t.clips.some(c => c.id === clipId))
+    doc.tracks.find((t) => t.clips.some((c) => c.id === clipId))
 
 const AudioMixerDemo: React.FC = () => {
     const ref = useRef<any>(null)
@@ -101,31 +109,38 @@ const AudioMixerDemo: React.FC = () => {
         }
         const onClipMove = (e: Event) => {
             const { clipId, startMs } = (e as CustomEvent).detail
-            setDoc(d => mapClip(d, clipId, c => ({ ...c, startMs })))
+            setDoc((d) => mapClip(d, clipId, (c) => ({ ...c, startMs })))
         }
         const onClipResize = (e: Event) => {
             const { clipId, lengthMs } = (e as CustomEvent).detail
-            setDoc(d => mapClip(d, clipId, c => ({ ...c, lengthMs })))
+            setDoc((d) => mapClip(d, clipId, (c) => ({ ...c, lengthMs })))
         }
         const onMute = (e: Event) => {
             const { trackId, muted } = (e as CustomEvent).detail
-            setDoc(d => mapTrack(d, trackId, t => ({ ...t, muted })))
+            setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, muted })))
         }
         const onSolo = (e: Event) => {
             const { trackId, solo } = (e as CustomEvent).detail
-            setDoc(d => mapTrack(d, trackId, t => ({ ...t, solo })))
+            setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, solo })))
         }
         const onVolume = (e: Event) => {
             const { trackId, volume } = (e as CustomEvent).detail
-            setDoc(d => mapTrack(d, trackId, t => ({ ...t, volume })))
+            setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, volume })))
         }
         const onEffectAdd = (e: Event) => {
             const { clipId, effect } = (e as CustomEvent).detail
-            setDoc(d => mapClip(d, clipId, c => ({ ...c, effects: [...(c.effects ?? []), effect] })))
+            setDoc((d) =>
+                mapClip(d, clipId, (c) => ({ ...c, effects: [...(c.effects ?? []), effect] })),
+            )
         }
         const onEffectRemove = (e: Event) => {
             const { clipId, effect } = (e as CustomEvent).detail
-            setDoc(d => mapClip(d, clipId, c => ({ ...c, effects: (c.effects ?? []).filter(fx => fx.id !== effect.id) })))
+            setDoc((d) =>
+                mapClip(d, clipId, (c) => ({
+                    ...c,
+                    effects: (c.effects ?? []).filter((fx) => fx.id !== effect.id),
+                })),
+            )
         }
 
         el.addEventListener('tc-seek', onSeek)
@@ -150,23 +165,28 @@ const AudioMixerDemo: React.FC = () => {
         }
     }, [])
 
-    const selectedTrack = doc.tracks.find(t => t.id === selection.trackId)
+    const selectedTrack = doc.tracks.find((t) => t.id === selection.trackId)
     const selectedClip =
-        selection.clipId != null ? findTrackOfClip(doc, selection.clipId)?.clips.find(c => c.id === selection.clipId) : undefined
+        selection.clipId != null
+            ? findTrackOfClip(doc, selection.clipId)?.clips.find((c) => c.id === selection.clipId)
+            : undefined
 
     return (
         <div className="py-4">
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Audio Mixer"
+                        <tc-rich-page-header
+                            title-text="Audio Mixer"
                             description="A framework-free timeline editor: track headers with mute/solo/volume, draggable and edge-resizable clips, a keyboard-seekable ruler & playhead, and an effect-chain inspector. Fully controlled via the doc/selection/actions properties and tc-* events."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Interactive timeline">
+                            <tc-section-card title="Interactive timeline">
                                 {/* @ts-ignore */}
                                 <tc-audio-mixer ref={ref} current-ms={currentMs} />
                                 <div className="form-text mt-2">
@@ -176,20 +196,20 @@ const AudioMixerDemo: React.FC = () => {
                                         : selectedTrack
                                           ? `track "${selectedTrack.name}"`
                                           : 'none'}
-                                    . Drag a clip to move it, drag its edges to resize, click the ruler to seek, and add
-                                    effects in the inspector.
+                                    . Drag a clip to move it, drag its edges to resize, click the
+                                    ruler to seek, and add effects in the inspector.
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading">
+                            <tc-section-card title="Loading">
                                 {/* @ts-ignore */}
                                 <tc-audio-mixer loading />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <DisabledMixer />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

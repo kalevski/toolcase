@@ -1,16 +1,28 @@
+import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-card'
 
-export type CardVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
+export type CardVariant =
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'info'
+    | 'light'
+    | 'dark'
 export type CardImgPosition = 'top' | 'bottom'
 
-const VARIANTS: CardVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+const VARIANTS: CardVariant[] = [...VARIANTS_FULL]
 
 function escAttr(v: string): string {
-    return v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return v
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
 }
 
 export class Card extends HTMLElement {
-
     private _initialised = false
     private _headerNodes: Node[] = []
     private _footerNodes: Node[] = []
@@ -27,9 +39,13 @@ export class Card extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             const children = Array.from(this.childNodes)
-            this._headerNodes = children.filter(n => (n as Element).getAttribute?.('slot') === 'header')
-            this._footerNodes = children.filter(n => (n as Element).getAttribute?.('slot') === 'footer')
-            this._bodyNodes = children.filter(n => {
+            this._headerNodes = children.filter(
+                (n) => (n as Element).getAttribute?.('slot') === 'header',
+            )
+            this._footerNodes = children.filter(
+                (n) => (n as Element).getAttribute?.('slot') === 'footer',
+            )
+            this._bodyNodes = children.filter((n) => {
                 const slot = (n as Element).getAttribute?.('slot')
                 return slot !== 'header' && slot !== 'footer'
             })
@@ -78,12 +94,10 @@ export class Card extends HTMLElement {
 
         this.className = `card${variant ? ` text-bg-${variant}` : ''}`
 
-        const headerHtml = this._headerNodes.length > 0
-            ? `<div class="card-header tc-card-header"></div>`
-            : ''
-        const footerHtml = this._footerNodes.length > 0
-            ? `<div class="card-footer tc-card-footer"></div>`
-            : ''
+        const headerHtml =
+            this._headerNodes.length > 0 ? `<div class="card-header tc-card-header"></div>` : ''
+        const footerHtml =
+            this._footerNodes.length > 0 ? `<div class="card-footer tc-card-footer"></div>` : ''
         const imgHtml = img
             ? `<img src="${escAttr(img)}" class="card-img-${imgPosition}" alt="">`
             : ''
@@ -105,9 +119,9 @@ export class Card extends HTMLElement {
         const headerEl = this.querySelector('.tc-card-header')
         const bodyEl = this.querySelector('.tc-card-body')
         const footerEl = this.querySelector('.tc-card-footer')
-        this._headerNodes.forEach(n => headerEl?.appendChild(n))
-        this._bodyNodes.forEach(n => bodyEl?.appendChild(n))
-        this._footerNodes.forEach(n => footerEl?.appendChild(n))
+        this._headerNodes.forEach((n) => headerEl?.appendChild(n))
+        this._bodyNodes.forEach((n) => bodyEl?.appendChild(n))
+        this._footerNodes.forEach((n) => footerEl?.appendChild(n))
     }
 }
 

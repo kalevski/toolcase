@@ -1,3 +1,5 @@
+import { isImageSrc } from './internal/image'
+import { esc } from './internal/esc'
 // Re-uses the canonical InventoryItem owned by tc-item-slot so the same data
 // drives both ports. The grid fallback only renders id/name/icon/qty (rarity/
 // cooldown/lock are fantasy chrome owned by tc-item-slot when that primitive is
@@ -7,32 +9,20 @@ import type { InventoryItem } from './ItemSlot'
 const TAG_NAME = 'tc-inventory-grid'
 
 export interface InventoryGridEventMap {
-    'tc-select': CustomEvent<{ item: InventoryItem | null, index: number }>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
+    'tc-select': CustomEvent<{ item: InventoryItem | null; index: number }>
 }
 
 // An icon that looks like an image source renders as an <img>; otherwise the
 // string is a short glyph/initials label (the design system forbids emoji-as-
 // icon, so free-form data glyphs stay content). Matches tc-hotbar's fallback so
 // both game ports read the same item data identically.
-function isImageSrc(value: string): boolean {
-    return /^(https?:|\/|\.\/|\.\.\/|data:image\/)/.test(value) || /\.(png|jpe?g|gif|svg|webp|avif)$/i.test(value)
-}
 
 export class InventoryGrid extends HTMLElement {
     private _initialised = false
     private _items: (InventoryItem | null)[] = []
 
     /** Optional callback fired alongside the tc-select CustomEvent. */
-    onSelect: ((detail: { item: InventoryItem | null, index: number }) => void) | null = null
+    onSelect: ((detail: { item: InventoryItem | null; index: number }) => void) | null = null
 
     static get observedAttributes(): string[] {
         return ['columns', 'slot-size', 'selected-id']
@@ -42,10 +32,14 @@ export class InventoryGrid extends HTMLElement {
         if (!this._initialised) {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'grid')
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -99,11 +93,13 @@ export class InventoryGrid extends HTMLElement {
     }
 
     private emit(item: InventoryItem | null, index: number): void {
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            detail: { item, index },
-            bubbles: true,
-            composed: true,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                detail: { item, index },
+                bubbles: true,
+                composed: true,
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect({ item, index })
     }
 
@@ -162,15 +158,17 @@ export class InventoryGrid extends HTMLElement {
         this.style.setProperty('--bs-inventory-grid-cell', `${size}px`)
 
         const selected = this.selectedId
-        const cellsHTML = this._items.map((slotItem, index) => {
-            const item = slotItem ?? null
-            const id = item?.id ?? ''
-            const isSelected = !!id && id === selected
-            const label = item?.name || item?.id || `Slot ${index + 1}`
-            const classes = 'tc-inventory-grid__slot'
-                + (item ? '' : ' tc-inventory-grid__slot--empty')
-                + (isSelected ? ' tc-inventory-grid__slot--selected' : '')
-            return `<tc-item-slot
+        const cellsHTML = this._items
+            .map((slotItem, index) => {
+                const item = slotItem ?? null
+                const id = item?.id ?? ''
+                const isSelected = !!id && id === selected
+                const label = item?.name || item?.id || `Slot ${index + 1}`
+                const classes =
+                    'tc-inventory-grid__slot' +
+                    (item ? '' : ' tc-inventory-grid__slot--empty') +
+                    (isSelected ? ' tc-inventory-grid__slot--selected' : '')
+                return `<tc-item-slot
                 class="${classes}"
                 data-index="${index}"
                 role="gridcell"
@@ -180,7 +178,8 @@ export class InventoryGrid extends HTMLElement {
                 size="${size}"
                 ${isSelected ? 'selected' : ''}
             >${this._slotFallback(item)}</tc-item-slot>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-inventory-grid__cells">${cellsHTML}</div>`
 

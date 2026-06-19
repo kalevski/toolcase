@@ -93,13 +93,20 @@ tc-theme[name='dungeon'],
         radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
     // Inset bevel stack + drop shadow (outer dark ring → gold rings → top highlight).
     --fg-panel-shadow:
-        inset 0 0 0 1px rgba(0, 0, 0, 0.6),
-        inset 0 0 0 2px var(--fg-gold-deep),
-        inset 0 0 0 3px var(--fg-gold-shadow),
-        inset 0 2px 0 rgba(255, 220, 150, 0.08),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 0 0 2px var(--fg-gold-deep),
+        inset 0 0 0 3px var(--fg-gold-shadow), inset 0 2px 0 rgba(255, 220, 150, 0.08),
         0 8px 24px rgba(0, 0, 0, 0.6);
     // "Light catches the top edge" highlight band — apply to every framed surface.
     --fg-bevel-top: inset 0 1px 0 rgba(232, 200, 120, 0.2);
+    // Frosted dungeon glass for floating menus / popovers / overlay panels.
+    // The opaque --fg-panel-bg gradient can't ride `background-color` (the slot
+    // every menu surface uses), so those menus render fully transparent. This
+    // recipe is a *translucent* fill applied via `background-image` (which the
+    // base background-color leaves intact) + a blur, so the menu reads as gilded
+    // smoked glass and backdrop-filter actually shows through. Keep it dark
+    // enough that --fg-parch text stays legible over busy page content.
+    --fg-overlay-bg: linear-gradient(180deg, rgba(38, 29, 18, 0.88), rgba(20, 14, 8, 0.92));
+    --fg-overlay-blur: blur(14px) saturate(125%);
     // Slot / button base fills.
     --fg-slot-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
     --fg-button-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
@@ -124,7 +131,11 @@ tc-theme[name='dungeon'],
     );
     --fg-notch-clip: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
     // Scanline overlay for resource bar fills.
-    --fg-scanlines: repeating-linear-gradient(90deg, transparent 0 9px, rgba(0, 0, 0, 0.18) 9px 10px);
+    --fg-scanlines: repeating-linear-gradient(
+        90deg,
+        transparent 0 9px,
+        rgba(0, 0, 0, 0.18) 9px 10px
+    );
 
     // ── Remap toolcase tokens (--tc-*) onto the fantasy palette ──────────────
     // This block alone flips every component's colours / borders / type, because

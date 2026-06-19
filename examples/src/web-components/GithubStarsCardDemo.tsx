@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const GithubStarsCardDemo: React.FC = () => {
     const staticRef = useRef<any>(null)
@@ -44,15 +43,17 @@ const GithubStarsCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="GithubStarsCard"
+                        <tc-rich-page-header
+                            title-text="GithubStarsCard"
                             description="GitHub repository card showing stars, forks, contributors, version, and a CTA. Supports pre-fetched stats via the stats JS property or live fetch from the GitHub API via fetch-live."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Static stats (via JS property)">
+                            <tc-section-card title="Static stats (via JS property)">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-github-stars-card
@@ -62,9 +63,9 @@ const GithubStarsCardDemo: React.FC = () => {
                                         cta-label="Star on GitHub"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Partial stats (stars + version only)">
+                            <tc-section-card title="Partial stats (stars + version only)">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-github-stars-card
@@ -73,9 +74,9 @@ const GithubStarsCardDemo: React.FC = () => {
                                         cta-label="View repository"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Full static stats + custom CTA label + event listeners">
+                            <tc-section-card title="Full static stats + custom CTA label + event listeners">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-github-stars-card
@@ -87,13 +88,14 @@ const GithubStarsCardDemo: React.FC = () => {
                                     />
                                 </div>
                                 <p className="mt-2 text-muted" style={{ fontSize: '0.8125rem' }}>
-                                    fetch-live is set — card shows a skeleton then populates from the GitHub API.
-                                    Pre-set stats appear immediately; live values override once the fetch resolves.
-                                    Check the browser console for tc-stats and tc-cta-click events.
+                                    fetch-live is set — card shows a skeleton then populates from
+                                    the GitHub API. Pre-set stats appear immediately; live values
+                                    override once the fetch resolves. Check the browser console for
+                                    tc-stats and tc-cta-click events.
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Live fetch (fetch-live attribute — real GitHub API)">
+                            <tc-section-card title="Live fetch (fetch-live attribute — real GitHub API)">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-github-stars-card
@@ -105,11 +107,10 @@ const GithubStarsCardDemo: React.FC = () => {
                                     />
                                 </div>
                                 <p className="mt-2 text-muted" style={{ fontSize: '0.8125rem' }}>
-                                    Live fetch from the GitHub REST API for microsoft/vscode. Check the browser
-                                    console for the onStats callback result.
+                                    Live fetch from the GitHub REST API for microsoft/vscode. Check
+                                    the browser console for the onStats callback result.
                                 </p>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

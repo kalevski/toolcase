@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
 
 const traffic = [
     {
         name: 'Visitors',
-        points: months.map((m, i) => ({ x: m, y: [1200, 1900, 1700, 2400, 2200, 3100, 3600, 4200][i] })),
+        points: months.map((m, i) => ({
+            x: m,
+            y: [1200, 1900, 1700, 2400, 2200, 3100, 3600, 4200][i],
+        })),
     },
     {
         name: 'Signups',
@@ -74,15 +76,17 @@ const AreaChartDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="AreaChart"
+                        <tc-rich-page-header
+                            title-text="AreaChart"
                             description="SVG area chart with filled regions, gridlines, an interactive tooltip, and an optional legend. Series, xFormatter and yFormatter are set via JS properties; title/subtitle/height/stacked/show-grid/show-legend/loading are attributes."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Unstacked — multiple overlaid series">
+                            <tc-section-card title="Unstacked — multiple overlaid series">
                                 {/* @ts-ignore */}
                                 <tc-area-chart
                                     ref={basicRef}
@@ -93,9 +97,9 @@ const AreaChartDemo: React.FC = () => {
                                 <p className="text-muted small mt-2 mb-0">
                                     Hover a point — last: <strong>{hover ?? 'none'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Stacked — cumulative areas">
+                            <tc-section-card title="Stacked — cumulative areas">
                                 {/* @ts-ignore */}
                                 <tc-area-chart
                                     ref={stackedRef}
@@ -104,9 +108,9 @@ const AreaChartDemo: React.FC = () => {
                                     subtitle="Stacked, monthly recurring revenue"
                                     height="280"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Grid off, legend off">
+                            <tc-section-card title="Grid off, legend off">
                                 {/* @ts-ignore */}
                                 <tc-area-chart
                                     ref={noGridRef}
@@ -115,13 +119,12 @@ const AreaChartDemo: React.FC = () => {
                                     title="Minimal"
                                     height="220"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-area-chart loading title="Loading…" height="260" />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

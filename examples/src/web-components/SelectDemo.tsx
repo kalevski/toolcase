@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SelectDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Select"
+                    <tc-rich-page-header
+                        title-text="Select"
                         description="Bootstrap form-select wrapper with label, sizes, validation states, and tc-option children."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Label &amp; Options">
+                        <tc-section-card title="Label &amp; Options">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-select label="Country">
@@ -36,9 +38,9 @@ const SelectDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-select>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Sizes">
+                        <tc-section-card title="Sizes">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-select label="Large" size="lg">
@@ -65,14 +67,16 @@ const SelectDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-select>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Validation States">
+                        <tc-section-card title="Validation States">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-select label="Valid" state="valid">
                                     {/* @ts-ignore */}
-                                    <tc-option value="gb" selected>United Kingdom</tc-option>
+                                    <tc-option value="gb" selected>
+                                        United Kingdom
+                                    </tc-option>
                                     {/* @ts-ignore */}
                                     <tc-option value="us">United States</tc-option>
                                     {/* @ts-ignore */}
@@ -86,24 +90,26 @@ const SelectDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-select>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled">
+                        <tc-section-card title="Disabled">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-select label="Disabled select" disabled>
                                     {/* @ts-ignore */}
                                     <tc-option value="a">Option A</tc-option>
                                     {/* @ts-ignore */}
-                                    <tc-option value="b" disabled>Option B (disabled)</tc-option>
+                                    <tc-option value="b" disabled>
+                                        Option B (disabled)
+                                    </tc-option>
                                     {/* @ts-ignore */}
                                     <tc-option value="c">Option C</tc-option>
                                     {/* @ts-ignore */}
                                 </tc-select>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Multiple">
+                        <tc-section-card title="Multiple">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}
                                 <tc-select label="Pick several" multiple>
@@ -112,15 +118,19 @@ const SelectDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                     <tc-option value="css">CSS</tc-option>
                                     {/* @ts-ignore */}
-                                    <tc-option value="js" selected>JavaScript</tc-option>
+                                    <tc-option value="js" selected>
+                                        JavaScript
+                                    </tc-option>
                                     {/* @ts-ignore */}
-                                    <tc-option value="ts" selected>TypeScript</tc-option>
+                                    <tc-option value="ts" selected>
+                                        TypeScript
+                                    </tc-option>
                                     {/* @ts-ignore */}
                                     <tc-option value="rust">Rust</tc-option>
                                     {/* @ts-ignore */}
                                 </tc-select>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

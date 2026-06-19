@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon, closeIcon } from './icons'
 
 const TAG_NAME = 'tc-chip'
@@ -6,24 +7,6 @@ const TAG_NAME = 'tc-chip'
 export type ChipVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
 
 const VARIANTS: ChipVariant[] = ['primary', 'secondary', 'info', 'success', 'warning', 'danger']
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 export class Chip extends HTMLElement {
     private _initialised = false
@@ -49,7 +32,7 @@ export class Chip extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-chip-content')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -60,7 +43,7 @@ export class Chip extends HTMLElement {
         const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
         const newInner = this.querySelector('.tc-chip-content')
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get selected(): boolean {
@@ -121,23 +104,27 @@ export class Chip extends HTMLElement {
             const slotContent = inner ? Array.from(inner.childNodes) : []
             this.render()
             const newInner = this.querySelector('.tc-chip-content')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 
     private _handleClick = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-click', {
-            bubbles: true,
-            composed: true,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-click', {
+                bubbles: true,
+                composed: true,
+            }),
+        )
     }
 
     private _handleRemove = (e: Event): void => {
         e.stopPropagation()
-        this.dispatchEvent(new CustomEvent('tc-remove', {
-            bubbles: true,
-            composed: true,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-remove', {
+                bubbles: true,
+                composed: true,
+            }),
+        )
         if (typeof this._onRemove === 'function') this._onRemove()
     }
 
@@ -161,9 +148,7 @@ export class Chip extends HTMLElement {
             ? `<span class="tc-chip-icon" aria-hidden="true">${lucideByName(iconName)}</span>`
             : ''
 
-        const countHtml = count != null
-            ? `<span class="tc-chip-count">${esc(count)}</span>`
-            : ''
+        const countHtml = count != null ? `<span class="tc-chip-count">${esc(count)}</span>` : ''
 
         const removeHtml = isRemovable
             ? `<button type="button" class="tc-chip-remove" aria-label="Remove"${disabledAttr}>${closeIcon}</button>`

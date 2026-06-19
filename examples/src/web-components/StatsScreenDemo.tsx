@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 import type { StatsSection } from '@toolcase/web-components'
 
 const matchSections: StatsSection[] = [
@@ -55,39 +54,42 @@ const StatsScreenDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Stats Screen"
+                        <tc-rich-page-header
+                            title-text="Stats Screen"
                             description="End-of-match statistics panel. Driven by the screen-title and summary attributes plus the sections JS property. Purely presentational — no events, no slots."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full match stats">
+                            <tc-section-card title="Full match stats">
                                 {/* @ts-ignore */}
                                 <tc-stats-screen
                                     ref={fullRef}
                                     screen-title="Match Complete"
                                     summary="Victory — Capture the Flag · EU-West"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal — single section, no summary">
+                            <tc-section-card title="Minimal — single section, no summary">
                                 {/* @ts-ignore */}
                                 <tc-stats-screen ref={minRef} screen-title="Round Over" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Attribute-only — no sections">
+                            <tc-section-card title="Attribute-only — no sections">
                                 {/* @ts-ignore */}
                                 <tc-stats-screen
                                     screen-title="Game Over"
                                     summary="No data available for this session."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Default title (screen-title omitted)">
+                            <tc-section-card title="Default title (screen-title omitted)">
                                 {/* @ts-ignore */}
                                 <tc-stats-screen />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+import { esc as escShared } from "./esc"
 // Shared scaffold for tc-input and tc-textarea. Both render the same
 // label + form-control + validation-feedback + help-text frame and share an
 // identical accessor set (value/placeholder/label/size/disabled/readonly/
@@ -27,7 +28,7 @@ export const TEXT_FIELD_ATTRIBUTES = [
 ]
 
 export function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return escShared(str)
 }
 
 export interface ControlRenderContext {

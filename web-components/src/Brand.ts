@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-brand'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class Brand extends HTMLElement {
     private _initialised = false
@@ -30,11 +23,11 @@ export class Brand extends HTMLElement {
 
             // Move named-slot children into their inner regions
             const primaryEl = this.querySelector('.tc-brand__primary')
-            if (primaryEl) primarySlot.forEach(n => primaryEl.appendChild(n))
+            if (primaryEl) primarySlot.forEach((n) => primaryEl.appendChild(n))
             const secondaryEl = this.querySelector('.tc-brand__secondary')
-            if (secondaryEl) secondarySlot.forEach(n => secondaryEl.appendChild(n))
+            if (secondaryEl) secondarySlot.forEach((n) => secondaryEl.appendChild(n))
             const labelEl = this.querySelector('.tc-brand__label-content')
-            if (labelEl) labelSlot.forEach(n => labelEl.appendChild(n))
+            if (labelEl) labelSlot.forEach((n) => labelEl.appendChild(n))
 
             this._initialised = true
         }
@@ -45,17 +38,21 @@ export class Brand extends HTMLElement {
 
         // Re-capture slot children (by slot attribute) from their containers
         const primarySlot = Array.from(this.querySelectorAll('.tc-brand__primary [slot="primary"]'))
-        const secondarySlot = Array.from(this.querySelectorAll('.tc-brand__secondary [slot="secondary"]'))
-        const labelSlot = Array.from(this.querySelectorAll('.tc-brand__label-content [slot="label"]'))
+        const secondarySlot = Array.from(
+            this.querySelectorAll('.tc-brand__secondary [slot="secondary"]'),
+        )
+        const labelSlot = Array.from(
+            this.querySelectorAll('.tc-brand__label-content [slot="label"]'),
+        )
 
         this.render()
 
         const primaryEl = this.querySelector('.tc-brand__primary')
-        if (primaryEl) primarySlot.forEach(n => primaryEl.appendChild(n))
+        if (primaryEl) primarySlot.forEach((n) => primaryEl.appendChild(n))
         const secondaryEl = this.querySelector('.tc-brand__secondary')
-        if (secondaryEl) secondarySlot.forEach(n => secondaryEl.appendChild(n))
+        if (secondaryEl) secondarySlot.forEach((n) => secondaryEl.appendChild(n))
         const labelEl = this.querySelector('.tc-brand__label-content')
-        if (labelEl) labelSlot.forEach(n => labelEl.appendChild(n))
+        if (labelEl) labelSlot.forEach((n) => labelEl.appendChild(n))
     }
 
     get primaryText(): string | null {

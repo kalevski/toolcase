@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CurrencyChipDemo: React.FC = () => {
     const chipRef = useRef<any>(null)
@@ -18,14 +17,17 @@ const CurrencyChipDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CurrencyChip"
+                        <tc-rich-page-header
+                            title-text="CurrencyChip"
                             description="Compact currency pill pairing a leading glyph with a formatted amount. The amount is rendered in JetBrains Mono with tabular figures; the glyph picks up the ink accent and can be re-tinted via the color attribute."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic">
+                            <tc-section-card title="Basic">
                                 <div className="d-flex flex-wrap gap-3 align-items-center">
                                     {/* @ts-ignore */}
                                     <tc-currency-chip glyph="$" amount="2499"></tc-currency-chip>
@@ -34,9 +36,9 @@ const CurrencyChipDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-currency-chip glyph="¢" amount="75"></tc-currency-chip>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Symbol glyphs &amp; large amounts">
+                            <tc-section-card title="Symbol glyphs &amp; large amounts">
                                 <div className="d-flex flex-wrap gap-3 align-items-center">
                                     {/* @ts-ignore */}
                                     <tc-currency-chip glyph="◆" amount="1250000"></tc-currency-chip>
@@ -45,36 +47,52 @@ const CurrencyChipDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-currency-chip glyph="XP" amount="340"></tc-currency-chip>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom glyph color">
+                            <tc-section-card title="Custom glyph color">
                                 <div className="d-flex flex-wrap gap-3 align-items-center">
                                     {/* @ts-ignore */}
-                                    <tc-currency-chip glyph="◆" amount="500" color="var(--tc-accent)"></tc-currency-chip>
+                                    <tc-currency-chip
+                                        glyph="◆"
+                                        amount="500"
+                                        color="var(--tc-accent)"
+                                    ></tc-currency-chip>
                                     {/* @ts-ignore */}
-                                    <tc-currency-chip glyph="●" amount="42" color="var(--tc-success)"></tc-currency-chip>
+                                    <tc-currency-chip
+                                        glyph="●"
+                                        amount="42"
+                                        color="var(--tc-success)"
+                                    ></tc-currency-chip>
                                     {/* @ts-ignore */}
-                                    <tc-currency-chip glyph="◆" amount="7" color="var(--tc-danger)"></tc-currency-chip>
+                                    <tc-currency-chip
+                                        glyph="◆"
+                                        amount="7"
+                                        color="var(--tc-danger)"
+                                    ></tc-currency-chip>
                                     {/* @ts-ignore */}
-                                    <tc-currency-chip glyph="◆" amount="128" color="#a855f7"></tc-currency-chip>
+                                    <tc-currency-chip
+                                        glyph="◆"
+                                        amount="128"
+                                        color="#a855f7"
+                                    ></tc-currency-chip>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Glyph-less (amount only)">
+                            <tc-section-card title="Glyph-less (amount only)">
                                 <div className="d-flex flex-wrap gap-3 align-items-center">
                                     {/* @ts-ignore */}
                                     <tc-currency-chip amount="64"></tc-currency-chip>
                                     {/* @ts-ignore */}
                                     <tc-currency-chip amount="1024"></tc-currency-chip>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Set via JS properties (ref)">
+                            <tc-section-card title="Set via JS properties (ref)">
                                 <div className="d-flex flex-wrap gap-3 align-items-center">
                                     {/* @ts-ignore */}
                                     <tc-currency-chip ref={chipRef}></tc-currency-chip>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

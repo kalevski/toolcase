@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // Builds a small sample sprite (a few embossed glyphs/shapes on transparent bg)
 // as a PNG data URL so the generator has something to turn into a normal map.
@@ -63,14 +62,17 @@ const NormalMapGeneratorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="NormalMapGenerator"
+                        <tc-rich-page-header
+                            title-text="NormalMapGenerator"
                             description="Interactive height→normal map generator — emboss/bevel controls, a Sobel gradient computed in JS, brush/erase/mask painting, view panning, and a lit preview. Fires tc-generate with the computed normal map whenever inputs change."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Editable — paint, switch tools & preview modes">
+                            <tc-section-card title="Editable — paint, switch tools & preview modes">
                                 {/* @ts-ignore */}
                                 <tc-normal-map-generator
                                     ref={editorRef}
@@ -88,16 +90,19 @@ const NormalMapGeneratorDemo: React.FC = () => {
                                             alt="Computed normal map"
                                             width={64}
                                             height={64}
-                                            style={{ imageRendering: 'pixelated', border: '1px solid var(--tc-border, #e2e8f0)' }}
+                                            style={{
+                                                imageRendering: 'pixelated',
+                                                border: '1px solid var(--tc-border, #e2e8f0)',
+                                            }}
                                         />
                                         <span className="text-body-secondary">
                                             Last <code>tc-generate</code>: {meta}
                                         </span>
                                     </div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Lit preview (view-only)">
+                            <tc-section-card title="Lit preview (view-only)">
                                 {/* @ts-ignore */}
                                 <tc-normal-map-generator
                                     ref={litRef}
@@ -105,12 +110,12 @@ const NormalMapGeneratorDemo: React.FC = () => {
                                     strength="2"
                                     emboss-height="3"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <tc-normal-map-generator preview-mode="normal" disabled />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

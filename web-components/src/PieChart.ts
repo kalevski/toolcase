@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-pie-chart'
 
 // One slice = a label, a numeric value and an optional explicit colour. Mirrors
@@ -24,22 +25,17 @@ const PALETTE_SIZE = 8
 // how far (in user units) an active slice is pulled out along its bisector
 const PULL = 7
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function polarToCart(cx: number, cy: number, r: number, angle: number): { x: number; y: number } {
     return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) }
 }
 
 function arcPath(
-    cx: number, cy: number,
-    r: number, ir: number,
-    startAngle: number, endAngle: number,
+    cx: number,
+    cy: number,
+    r: number,
+    ir: number,
+    startAngle: number,
+    endAngle: number,
     donut: boolean,
 ): string {
     const s = polarToCart(cx, cy, r, startAngle)
@@ -174,9 +170,11 @@ export class PieChart extends HTMLElement {
     }
 
     private _prefersReducedMotion(): boolean {
-        return typeof window !== 'undefined'
-            && typeof window.matchMedia === 'function'
-            && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        return (
+            typeof window !== 'undefined' &&
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        )
     }
 
     // ---- render ----
@@ -191,12 +189,13 @@ export class PieChart extends HTMLElement {
 
         const titleAttr = this.getAttribute('title')
         const subtitle = this.getAttribute('subtitle')
-        const headerHtml = (titleAttr || subtitle)
-            ? `<div class="tc-pie-chart-header">`
-                + (titleAttr ? `<div class="tc-pie-chart-title">${esc(titleAttr)}</div>` : '')
-                + (subtitle ? `<div class="tc-pie-chart-subtitle">${esc(subtitle)}</div>` : '')
-                + `</div>`
-            : ''
+        const headerHtml =
+            titleAttr || subtitle
+                ? `<div class="tc-pie-chart-header">` +
+                  (titleAttr ? `<div class="tc-pie-chart-title">${esc(titleAttr)}</div>` : '') +
+                  (subtitle ? `<div class="tc-pie-chart-subtitle">${esc(subtitle)}</div>` : '') +
+                  `</div>`
+                : ''
 
         const data = this._data
         if (!data.length) {
@@ -231,12 +230,20 @@ export class PieChart extends HTMLElement {
             currentAngle = endAngle
             const color = this._sliceColor(i, d.color)
             const pct = Math.round(fraction * 100)
-            this._geo.push({ index: i, label: d.label, value: d.value, color, pct, midAngle: (startAngle + endAngle) / 2 })
+            this._geo.push({
+                index: i,
+                label: d.label,
+                value: d.value,
+                color,
+                pct,
+                midAngle: (startAngle + endAngle) / 2,
+            })
 
             const path = arcPath(cx, cy, r, ir, startAngle, endAngle, donut)
-            slicesHtml += `<path class="tc-pie-chart-slice" data-i="${i}" d="${path}"`
-                + ` style="--tc-pie-color:${esc(color)}"`
-                + ` aria-label="${esc(d.label)}: ${pct}%"></path>`
+            slicesHtml +=
+                `<path class="tc-pie-chart-slice" data-i="${i}" d="${path}"` +
+                ` style="--tc-pie-color:${esc(color)}"` +
+                ` aria-label="${esc(d.label)}: ${pct}%"></path>`
         })
 
         // donut hole + centred label
@@ -244,18 +251,18 @@ export class PieChart extends HTMLElement {
         if (donut) {
             const centerLabel = this.getAttribute('center-label') ?? ''
             centerHtml =
-                `<circle class="tc-pie-chart-hole" cx="${cx}" cy="${cy}" r="${(ir - 1).toFixed(2)}" />`
-                + `<text class="tc-pie-chart-center-label" x="${cx}" y="${cy - 6}" text-anchor="middle">${esc(centerLabel)}</text>`
-                + `<text class="tc-pie-chart-center-value" x="${cx}" y="${cy + 16}" text-anchor="middle">${esc(visibleTotal.toLocaleString())}</text>`
+                `<circle class="tc-pie-chart-hole" cx="${cx}" cy="${cy}" r="${(ir - 1).toFixed(2)}" />` +
+                `<text class="tc-pie-chart-center-label" x="${cx}" y="${cy - 6}" text-anchor="middle">${esc(centerLabel)}</text>` +
+                `<text class="tc-pie-chart-center-value" x="${cx}" y="${cy + 16}" text-anchor="middle">${esc(visibleTotal.toLocaleString())}</text>`
         }
 
         const summary = this._summary(data, fullTotal)
         const svgHtml =
-            `<svg class="tc-pie-chart-svg" role="img" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-label="${esc(summary)}">`
-            + `<title>${esc(summary)}</title>`
-            + `<g class="tc-pie-chart-slices">${slicesHtml}</g>`
-            + centerHtml
-            + `</svg>`
+            `<svg class="tc-pie-chart-svg" role="img" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-label="${esc(summary)}">` +
+            `<title>${esc(summary)}</title>` +
+            `<g class="tc-pie-chart-slices">${slicesHtml}</g>` +
+            centerHtml +
+            `</svg>`
 
         const tooltipHtml = `<div class="tc-pie-chart-tooltip" role="status" aria-live="polite" hidden></div>`
 
@@ -268,28 +275,33 @@ export class PieChart extends HTMLElement {
                 const active = !this._hidden.has(i)
                 // visible slices: share of the visible total; hidden: original share of the full dataset
                 const pct = active
-                    ? (visibleTotal > 0 ? Math.round((d.value / visibleTotal) * 100) : 0)
-                    : (fullTotal > 0 ? Math.round((d.value / fullTotal) * 100) : 0)
-                legendHtml += `<li class="tc-pie-chart-legend-row">`
-                    + `<button type="button" class="tc-pie-chart-legend-item${active ? '' : ' tc-pie-chart-legend-item--off'}"`
-                    + ` data-i="${i}" aria-pressed="${active}">`
-                    + `<span class="tc-pie-chart-legend-swatch" style="--tc-pie-color:${esc(color)}" aria-hidden="true"></span>`
-                    + `<span class="tc-pie-chart-legend-label">${esc(d.label)}</span>`
-                    + `<span class="tc-pie-chart-legend-pct">${pct}%</span>`
-                    + `</button>`
-                    + `</li>`
+                    ? visibleTotal > 0
+                        ? Math.round((d.value / visibleTotal) * 100)
+                        : 0
+                    : fullTotal > 0
+                      ? Math.round((d.value / fullTotal) * 100)
+                      : 0
+                legendHtml +=
+                    `<li class="tc-pie-chart-legend-row">` +
+                    `<button type="button" class="tc-pie-chart-legend-item${active ? '' : ' tc-pie-chart-legend-item--off'}"` +
+                    ` data-i="${i}" aria-pressed="${active}">` +
+                    `<span class="tc-pie-chart-legend-swatch" style="--tc-pie-color:${esc(color)}" aria-hidden="true"></span>` +
+                    `<span class="tc-pie-chart-legend-label">${esc(d.label)}</span>` +
+                    `<span class="tc-pie-chart-legend-pct">${pct}%</span>` +
+                    `</button>` +
+                    `</li>`
             })
             legendHtml += `</ul>`
         }
 
         this.innerHTML =
-            `<div class="tc-pie-chart-inner">`
-            + headerHtml
-            + `<div class="tc-pie-chart-body">`
-            + `<div class="tc-pie-chart-plot">${svgHtml}${tooltipHtml}</div>`
-            + legendHtml
-            + `</div>`
-            + `</div>`
+            `<div class="tc-pie-chart-inner">` +
+            headerHtml +
+            `<div class="tc-pie-chart-body">` +
+            `<div class="tc-pie-chart-plot">${svgHtml}${tooltipHtml}</div>` +
+            legendHtml +
+            `</div>` +
+            `</div>`
 
         // post-render listeners (the fresh nodes get fresh handlers; old ones GC together)
         const slicesGroup = this.querySelector<SVGGElement>('.tc-pie-chart-slices')
@@ -306,7 +318,7 @@ export class PieChart extends HTMLElement {
         }
 
         // restore highlight if the active slice is still visible after a re-render
-        if (this._active !== null && this._geo.some(g => g.index === this._active)) {
+        if (this._active !== null && this._geo.some((g) => g.index === this._active)) {
             this._applyActive(this._active)
         } else {
             this._active = null
@@ -322,23 +334,26 @@ export class PieChart extends HTMLElement {
             : ''
         const size = Math.max(80, this.height)
         this.innerHTML =
-            `<div class="tc-pie-chart-inner">`
-            + headHtml
-            + `<div class="tc-pie-chart-body" aria-hidden="true">`
-            + `<div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--disc" style="width:${size}px;height:${size}px"></div>`
-            + `<ul class="tc-pie-chart-legend">`
-            + `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>`
-            + `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>`
-            + `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>`
-            + `</ul>`
-            + `</div>`
-            + `<span class="visually-hidden">Loading…</span>`
-            + `</div>`
+            `<div class="tc-pie-chart-inner">` +
+            headHtml +
+            `<div class="tc-pie-chart-body" aria-hidden="true">` +
+            `<div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--disc" style="width:${size}px;height:${size}px"></div>` +
+            `<ul class="tc-pie-chart-legend">` +
+            `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
+            `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
+            `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
+            `</ul>` +
+            `</div>` +
+            `<span class="visually-hidden">Loading…</span>` +
+            `</div>`
     }
 
     private _summary(data: PieChartSlice[], total: number): string {
         const kind = this.donut ? 'Donut' : 'Pie'
-        const names = data.map(d => d.label).slice(0, 8).join(', ')
+        const names = data
+            .map((d) => d.label)
+            .slice(0, 8)
+            .join(', ')
         const more = data.length > 8 ? ', …' : ''
         return `${kind} chart with ${data.length} slice${data.length !== 1 ? 's' : ''} (${names}${more}), total ${total.toLocaleString()}.`
     }
@@ -349,17 +364,17 @@ export class PieChart extends HTMLElement {
     // for a donut — swap the centre label to the slice's label + percentage.
     private _applyActive(index: number): void {
         this._active = index
-        const geo = this._geo.find(g => g.index === index)
+        const geo = this._geo.find((g) => g.index === index)
 
         const group = this.querySelector('.tc-pie-chart-slices')
         if (group) group.classList.add('tc-pie-chart-slices--has-active')
 
         const reduce = this._prefersReducedMotion()
-        this.querySelectorAll<SVGPathElement>('.tc-pie-chart-slice').forEach(path => {
+        this.querySelectorAll<SVGPathElement>('.tc-pie-chart-slice').forEach((path) => {
             const pi = parseInt(path.dataset.i ?? '', 10)
             const isActive = pi === index
             path.classList.toggle('tc-pie-chart-slice--active', isActive)
-            const g = this._geo.find(x => x.index === pi)
+            const g = this._geo.find((x) => x.index === pi)
             if (isActive && g && !reduce) {
                 const dx = (Math.cos(g.midAngle) * PULL).toFixed(2)
                 const dy = (Math.sin(g.midAngle) * PULL).toFixed(2)
@@ -369,7 +384,7 @@ export class PieChart extends HTMLElement {
             }
         })
 
-        this.querySelectorAll<HTMLElement>('.tc-pie-chart-legend-item').forEach(item => {
+        this.querySelectorAll<HTMLElement>('.tc-pie-chart-legend-item').forEach((item) => {
             const pi = parseInt(item.dataset.i ?? '', 10)
             item.classList.toggle('tc-pie-chart-legend-item--active', pi === index)
         })
@@ -389,12 +404,13 @@ export class PieChart extends HTMLElement {
         this._active = null
         const group = this.querySelector('.tc-pie-chart-slices')
         if (group) group.classList.remove('tc-pie-chart-slices--has-active')
-        this.querySelectorAll<SVGPathElement>('.tc-pie-chart-slice--active').forEach(p => {
+        this.querySelectorAll<SVGPathElement>('.tc-pie-chart-slice--active').forEach((p) => {
             p.classList.remove('tc-pie-chart-slice--active')
             p.removeAttribute('transform')
         })
-        this.querySelectorAll('.tc-pie-chart-legend-item--active')
-            .forEach(el => el.classList.remove('tc-pie-chart-legend-item--active'))
+        this.querySelectorAll('.tc-pie-chart-legend-item--active').forEach((el) =>
+            el.classList.remove('tc-pie-chart-legend-item--active'),
+        )
 
         // restore the donut centre to its resting label + total
         const centerLabel = this.querySelector<SVGTextElement>('.tc-pie-chart-center-label')
@@ -420,11 +436,11 @@ export class PieChart extends HTMLElement {
         tip.style.setProperty('--tc-pie-color', geo.color)
         tip.setAttribute('aria-label', `${geo.label}: ${geo.value.toLocaleString()} (${geo.pct}%)`)
         tip.innerHTML =
-            `<span class="tc-pie-chart-tooltip-label">${esc(geo.label)}</span>`
-            + `<span class="tc-pie-chart-tooltip-row">`
-            + `<span class="tc-pie-chart-tooltip-value">${esc(geo.value.toLocaleString())}</span>`
-            + `<span class="tc-pie-chart-tooltip-pct">${geo.pct}%</span>`
-            + `</span>`
+            `<span class="tc-pie-chart-tooltip-label">${esc(geo.label)}</span>` +
+            `<span class="tc-pie-chart-tooltip-row">` +
+            `<span class="tc-pie-chart-tooltip-value">${esc(geo.value.toLocaleString())}</span>` +
+            `<span class="tc-pie-chart-tooltip-pct">${geo.pct}%</span>` +
+            `</span>`
 
         // position at the slice centroid, mapping user units → rendered pixels
         const rect = svg.getBoundingClientRect()
@@ -432,7 +448,7 @@ export class PieChart extends HTMLElement {
         const cx = this._size / 2
         const cy = this._size / 2
         const tr = this._size / 2 - PULL - 4
-        const cr = this.donut ? ((tr + tr * 0.58) / 2) : (tr * 0.6)
+        const cr = this.donut ? (tr + tr * 0.58) / 2 : tr * 0.6
         const px = (cx + Math.cos(geo.midAngle) * cr) * scale
         const py = (cy + Math.sin(geo.midAngle) * cr) * scale
         tip.style.left = `${px}px`
@@ -456,7 +472,10 @@ export class PieChart extends HTMLElement {
 
     private _onSlicePointer = (e: Event): void => {
         const i = this._sliceIndexFromEvent(e)
-        if (i === null) { this._clearActive(); return }
+        if (i === null) {
+            this._clearActive()
+            return
+        }
         if (i !== this._active) this._applyActive(i)
     }
 
@@ -484,11 +503,13 @@ export class PieChart extends HTMLElement {
     private _emitSelect(i: number): void {
         const slice = this._data[i]
         if (!slice) return
-        this.dispatchEvent(new CustomEvent('tc-slice-select', {
-            bubbles: true,
-            composed: true,
-            detail: { slice, index: i } as PieSliceSelectDetail,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-slice-select', {
+                bubbles: true,
+                composed: true,
+                detail: { slice, index: i } as PieSliceSelectDetail,
+            }),
+        )
     }
 
     private _onLegendClick = (e: Event): void => {

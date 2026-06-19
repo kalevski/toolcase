@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon, chevronRightIcon } from './icons'
 
 const TAG_NAME = 'tc-tree-view'
@@ -13,24 +14,7 @@ export interface TreeNode {
     loadChildren?: () => Promise<TreeNode[]>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 // kebab-case lucide name → PascalCase lookup in lucide-static, wrapped in icon().
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr, 'tc-tree-view-icon')
-}
 
 function uniq(arr: string[]): string[] {
     return Array.from(new Set(arr))
@@ -169,18 +153,24 @@ export class TreeView extends HTMLElement {
     // so the checkbox reflects/half-reflects child membership; leaves track self.
     private _checkboxState(node: TreeNode): { checked: boolean; indeterminate: boolean } {
         if (this._hasChildren(node)) {
-            const descend = this._getChildren(node).flatMap(c => this._collectSelectable(c))
+            const descend = this._getChildren(node).flatMap((c) => this._collectSelectable(c))
             if (descend.length === 0) {
-                return { checked: !node.disabled && this._selected.includes(node.key), indeterminate: false }
+                return {
+                    checked: !node.disabled && this._selected.includes(node.key),
+                    indeterminate: false,
+                }
             }
-            const sel = descend.filter(k => this._selected.includes(k)).length
-            return { checked: sel === descend.length, indeterminate: sel > 0 && sel < descend.length }
+            const sel = descend.filter((k) => this._selected.includes(k)).length
+            return {
+                checked: sel === descend.length,
+                indeterminate: sel > 0 && sel < descend.length,
+            }
         }
         return { checked: this._selected.includes(node.key), indeterminate: false }
     }
 
     private _enabledKeys(): string[] {
-        return this._rows.filter(r => !r.disabled).map(r => r.key)
+        return this._rows.filter((r) => !r.disabled).map((r) => r.key)
     }
 
     // ── Mutations ────────────────────────────────────────────────────────────────
@@ -190,7 +180,7 @@ export class TreeView extends HTMLElement {
         if (!node || !this._hasChildren(node)) return
 
         if (this._expanded.includes(key)) {
-            this._commitExpanded(this._expanded.filter(k => k !== key))
+            this._commitExpanded(this._expanded.filter((k) => k !== key))
             return
         }
         // First expand of an async branch: fetch children, then expand.
@@ -206,7 +196,7 @@ export class TreeView extends HTMLElement {
         // Render now so the spinner appears on the node while loading.
         this.render()
         Promise.resolve(node.loadChildren!())
-            .then(kids => {
+            .then((kids) => {
                 this._loaded.set(key, Array.isArray(kids) ? kids : [])
                 this._loading.delete(key)
                 this._commitExpanded([...this._expanded, key])
@@ -234,7 +224,7 @@ export class TreeView extends HTMLElement {
         if (!own.length) return
         const { checked } = this._checkboxState(node)
         const next = checked
-            ? this._selected.filter(k => !own.includes(k))
+            ? this._selected.filter((k) => !own.includes(k))
             : uniq([...this._selected, ...own])
         this._commitSelected(next)
     }
@@ -242,22 +232,26 @@ export class TreeView extends HTMLElement {
     private _commitExpanded(next: string[]): void {
         this._expanded = next
         this.render()
-        this.dispatchEvent(new CustomEvent('tc-expand-change', {
-            bubbles: true,
-            composed: true,
-            detail: { keys: next },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-expand-change', {
+                bubbles: true,
+                composed: true,
+                detail: { keys: next },
+            }),
+        )
         if (typeof this.onExpandChange === 'function') this.onExpandChange(next)
     }
 
     private _commitSelected(next: string[]): void {
         this._selected = next
         this.render()
-        this.dispatchEvent(new CustomEvent('tc-select', {
-            bubbles: true,
-            composed: true,
-            detail: { keys: next },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', {
+                bubbles: true,
+                composed: true,
+                detail: { keys: next },
+            }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(next)
     }
 
@@ -269,7 +263,11 @@ export class TreeView extends HTMLElement {
 
         // Disclosure toggle → expand/collapse only.
         const toggle = target.closest('.tc-tree-view-toggle')
-        if (toggle && this.contains(toggle) && !toggle.classList.contains('tc-tree-view-toggle--leaf')) {
+        if (
+            toggle &&
+            this.contains(toggle) &&
+            !toggle.classList.contains('tc-tree-view-toggle--leaf')
+        ) {
             const row = toggle.closest<HTMLElement>('.tc-tree-view-row')
             const key = row?.dataset.key
             if (key != null) {
@@ -316,7 +314,7 @@ export class TreeView extends HTMLElement {
         const row = target?.closest<HTMLElement>('.tc-tree-view-row')
         if (!row || !this.contains(row) || row.dataset.key == null) return
         const key = row.dataset.key
-        const meta = this._rows.find(r => r.key === key)
+        const meta = this._rows.find((r) => r.key === key)
         if (!meta) return
 
         switch (e.key) {
@@ -382,7 +380,7 @@ export class TreeView extends HTMLElement {
     private _focusKey(key: string): void {
         const rows = this.querySelectorAll<HTMLElement>('.tc-tree-view-row')
         let target: HTMLElement | null = null
-        rows.forEach(r => {
+        rows.forEach((r) => {
             if (r.dataset.key === key) {
                 r.setAttribute('tabindex', '0')
                 target = r
@@ -415,7 +413,7 @@ export class TreeView extends HTMLElement {
     }
 
     private _focusFirstChild(parentKey: string): void {
-        const child = this._rows.find(r => r.parentKey === parentKey && !r.disabled)
+        const child = this._rows.find((r) => r.parentKey === parentKey && !r.disabled)
         if (child) this._focusKey(child.key)
     }
 
@@ -432,68 +430,85 @@ export class TreeView extends HTMLElement {
     }
 
     private _applyIndeterminate(): void {
-        this.querySelectorAll<HTMLInputElement>('.tc-tree-view-checkbox[data-indeterminate="true"]')
-            .forEach(cb => { cb.indeterminate = true })
+        this.querySelectorAll<HTMLInputElement>(
+            '.tc-tree-view-checkbox[data-indeterminate="true"]',
+        ).forEach((cb) => {
+            cb.indeterminate = true
+        })
     }
 
     // ── Render ──────────────────────────────────────────────────────────────────────
 
     private _renderNodes(nodes: TreeNode[], level: number, parentKey: string | null): string {
-        return nodes.map(node => {
-            const key = node.key
-            const hasChildren = this._hasChildren(node)
-            const isExpanded = this._expanded.includes(key)
-            const isSelected = this._selected.includes(key)
-            const isLoading = this._loading.has(key)
-            const disabled = !!node.disabled
+        return nodes
+            .map((node) => {
+                const key = node.key
+                const hasChildren = this._hasChildren(node)
+                const isExpanded = this._expanded.includes(key)
+                const isSelected = this._selected.includes(key)
+                const isLoading = this._loading.has(key)
+                const disabled = !!node.disabled
 
-            this._rows.push({ key, parentKey, level, hasChildren, expanded: isExpanded, disabled })
+                this._rows.push({
+                    key,
+                    parentKey,
+                    level,
+                    hasChildren,
+                    expanded: isExpanded,
+                    disabled,
+                })
 
-            // Disclosure toggle (chevron rotates on expand) or an invisible leaf spacer.
-            let toggleHtml: string
-            if (hasChildren) {
-                const glyph = isLoading
-                    ? '<span class="spinner-border spinner-border-sm tc-tree-view-spinner" role="status" aria-hidden="true"></span>'
-                    : chevronRightIcon
-                const expandedCls = isExpanded ? ' tc-tree-view-toggle--expanded' : ''
-                toggleHtml = `<span class="tc-tree-view-toggle${expandedCls}" aria-hidden="true">${glyph}</span>`
-            } else {
-                toggleHtml = '<span class="tc-tree-view-toggle tc-tree-view-toggle--leaf" aria-hidden="true"></span>'
-            }
+                // Disclosure toggle (chevron rotates on expand) or an invisible leaf spacer.
+                let toggleHtml: string
+                if (hasChildren) {
+                    const glyph = isLoading
+                        ? '<span class="spinner-border spinner-border-sm tc-tree-view-spinner" role="status" aria-hidden="true"></span>'
+                        : chevronRightIcon
+                    const expandedCls = isExpanded ? ' tc-tree-view-toggle--expanded' : ''
+                    toggleHtml = `<span class="tc-tree-view-toggle${expandedCls}" aria-hidden="true">${glyph}</span>`
+                } else {
+                    toggleHtml =
+                        '<span class="tc-tree-view-toggle tc-tree-view-toggle--leaf" aria-hidden="true"></span>'
+                }
 
-            let checkboxHtml = ''
-            if (this.checkboxMode) {
-                const { checked, indeterminate } = this._checkboxState(node)
-                checkboxHtml =
-                    `<input type="checkbox" class="form-check-input tc-tree-view-checkbox"` +
-                    ` ${checked ? 'checked' : ''}${disabled ? ' disabled' : ''}` +
-                    `${indeterminate ? ' data-indeterminate="true"' : ''}` +
-                    ` tabindex="-1" aria-label="${esc(node.label ?? '')}" />`
-            }
+                let checkboxHtml = ''
+                if (this.checkboxMode) {
+                    const { checked, indeterminate } = this._checkboxState(node)
+                    checkboxHtml =
+                        `<input type="checkbox" class="form-check-input tc-tree-view-checkbox"` +
+                        ` ${checked ? 'checked' : ''}${disabled ? ' disabled' : ''}` +
+                        `${indeterminate ? ' data-indeterminate="true"' : ''}` +
+                        ` tabindex="-1" aria-label="${esc(node.label ?? '')}" />`
+                }
 
-            const iconHtml = node.icon ? lucideByName(node.icon) : ''
-            const labelHtml = `<span class="tc-tree-view-label">${esc(node.label ?? '')}</span>`
+                // Pass the class so the .tc-tree-view-icon sizing rule applies —
+                // icon() strips the SVG's width/height, so without it the glyph
+                // renders at its default size (huge).
+                const iconHtml = node.icon ? lucideByName(node.icon, 'tc-tree-view-icon') : ''
+                const labelHtml = `<span class="tc-tree-view-label">${esc(node.label ?? '')}</span>`
 
-            const rowClasses = ['tc-tree-view-row']
-            if (isSelected) rowClasses.push('tc-tree-view-row--selected')
+                const rowClasses = ['tc-tree-view-row']
+                if (isSelected) rowClasses.push('tc-tree-view-row--selected')
 
-            const ariaExpanded = hasChildren ? ` aria-expanded="${isExpanded}"` : ''
-            const ariaDisabled = disabled ? ' aria-disabled="true"' : ''
+                const ariaExpanded = hasChildren ? ` aria-expanded="${isExpanded}"` : ''
+                const ariaDisabled = disabled ? ' aria-disabled="true"' : ''
 
-            const row =
-                `<div class="${rowClasses.join(' ')}" role="treeitem" data-key="${esc(key)}"` +
-                ` aria-level="${level + 1}" aria-selected="${isSelected}"${ariaExpanded}${ariaDisabled}` +
-                ` tabindex="-1" style="--tc-tree-level: ${level}">` +
-                `${toggleHtml}${checkboxHtml}${iconHtml}${labelHtml}` +
-                `</div>`
+                const row =
+                    `<div class="${rowClasses.join(' ')}" role="treeitem" data-key="${esc(key)}"` +
+                    ` aria-level="${level + 1}" aria-selected="${isSelected}"${ariaExpanded}${ariaDisabled}` +
+                    ` tabindex="-1" style="--tc-tree-level: ${level}">` +
+                    `${toggleHtml}${checkboxHtml}${iconHtml}${labelHtml}` +
+                    `</div>`
 
-            // The guide hairline on a child group aligns with THIS row's chevron column.
-            const childrenHtml = hasChildren && isExpanded
-                ? `<ul class="tc-tree-view-group" role="group" style="--tc-tree-guide: ${level}">${this._renderNodes(this._getChildren(node), level + 1, key)}</ul>`
-                : ''
+                // The guide hairline on a child group aligns with THIS row's chevron column.
+                const childrenHtml =
+                    hasChildren && isExpanded
+                        ? `<ul class="tc-tree-view-group" role="group" style="--tc-tree-guide: ${level}">${this._renderNodes(this._getChildren(node), level + 1, key)}</ul>`
+                        : ''
 
-            return `<li class="tc-tree-view-node" role="none">${row}${childrenHtml}</li>`
-        }).join('')
+                return `<li class="tc-tree-view-node" role="none">${row}${childrenHtml}</li>`
+            })
+            .join('')
     }
 
     private render(): void {

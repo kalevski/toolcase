@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-side-nav'
@@ -21,24 +22,7 @@ export interface SideNavSection {
     items: SideNavItem[]
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 // kebab-case lucide name → PascalCase lookup in lucide-static, wrapped in icon().
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr, 'tc-side-nav-icon')
-}
 
 export class SideNav extends HTMLElement {
     private _initialised = false
@@ -109,21 +93,25 @@ export class SideNav extends HTMLElement {
         }
 
         const key = item.key ?? `${sIndex}-${iIndex}`
-        this.dispatchEvent(new CustomEvent('tc-item-click', {
-            bubbles: true,
-            composed: true,
-            detail: { item, key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-item-click', {
+                bubbles: true,
+                composed: true,
+                detail: { item, key },
+            }),
+        )
         if (typeof this.onItemClick === 'function') this.onItemClick(event, item)
     }
 
     private render(): void {
         if (this.loading) {
             this.setAttribute('aria-busy', 'true')
-            const rows = Array.from({ length: this.loadingCount }, () =>
-                '<li class="tc-side-nav-item tc-side-nav-item--skeleton" aria-hidden="true">' +
-                '<span class="tc-side-nav-skeleton"></span>' +
-                '</li>'
+            const rows = Array.from(
+                { length: this.loadingCount },
+                () =>
+                    '<li class="tc-side-nav-item tc-side-nav-item--skeleton" aria-hidden="true">' +
+                    '<span class="tc-side-nav-skeleton"></span>' +
+                    '</li>',
             ).join('')
             this.innerHTML = [
                 '<nav class="tc-side-nav" aria-label="Loading navigation">',
@@ -138,48 +126,58 @@ export class SideNav extends HTMLElement {
 
         this.removeAttribute('aria-busy')
 
-        const sectionsHtml = this._sections.map((section, sIndex) => {
-            const titleHtml = section.title
-                ? `<div class="tc-side-nav-section-title">${esc(section.title)}</div>`
-                : ''
-
-            const itemsHtml = (Array.isArray(section.items) ? section.items : []).map((item, iIndex) => {
-                const classes = ['tc-side-nav-item']
-                if (item.active) classes.push('active')
-                if (item.disabled) classes.push('disabled')
-                const cls = classes.join(' ')
-
-                const iconHtml = item.icon ? lucideByName(item.icon) : ''
-                const labelHtml = `<span class="tc-side-nav-label">${esc(item.label ?? '')}</span>`
-                const badgeHtml = item.badge != null && item.badge !== ''
-                    ? `<span class="tc-side-nav-badge">${esc(String(item.badge))}</span>`
+        const sectionsHtml = this._sections
+            .map((section, sIndex) => {
+                const titleHtml = section.title
+                    ? `<div class="tc-side-nav-section-title">${esc(section.title)}</div>`
                     : ''
 
-                const dataAttrs = `data-section-index="${sIndex}" data-item-index="${iIndex}"`
-                const ariaCurrent = item.active ? ' aria-current="page"' : ''
-                const inner = `${iconHtml}${labelHtml}${badgeHtml}`
+                const itemsHtml = (Array.isArray(section.items) ? section.items : [])
+                    .map((item, iIndex) => {
+                        const classes = ['tc-side-nav-item']
+                        if (item.active) classes.push('active')
+                        if (item.disabled) classes.push('disabled')
+                        const cls = classes.join(' ')
 
-                let control: string
-                if (item.href && !item.disabled) {
-                    const target = item.target ? ` target="${esc(item.target)}"` : ''
-                    const rel = item.rel ? ` rel="${esc(item.rel)}"` : ''
-                    control = `<a class="${cls}" href="${esc(item.href)}"${target}${rel}${ariaCurrent} ${dataAttrs}>${inner}</a>`
-                } else if (item.disabled) {
-                    control = `<button type="button" class="${cls}" disabled aria-disabled="true"${ariaCurrent} ${dataAttrs}>${inner}</button>`
-                } else {
-                    control = `<button type="button" class="${cls}"${ariaCurrent} ${dataAttrs}>${inner}</button>`
-                }
+                        // Pass the class so the .tc-side-nav-icon sizing rule applies —
+                        // icon() strips the SVG's width/height, so without it the glyph
+                        // renders at its default size (huge).
+                        const iconHtml = item.icon
+                            ? lucideByName(item.icon, 'tc-side-nav-icon')
+                            : ''
+                        const labelHtml = `<span class="tc-side-nav-label">${esc(item.label ?? '')}</span>`
+                        const badgeHtml =
+                            item.badge != null && item.badge !== ''
+                                ? `<span class="tc-side-nav-badge">${esc(String(item.badge))}</span>`
+                                : ''
 
-                return `<li>${control}</li>`
-            }).join('')
+                        const dataAttrs = `data-section-index="${sIndex}" data-item-index="${iIndex}"`
+                        const ariaCurrent = item.active ? ' aria-current="page"' : ''
+                        const inner = `${iconHtml}${labelHtml}${badgeHtml}`
 
-            return [
-                '<div class="tc-side-nav-section">',
-                titleHtml,
-                `<ul class="tc-side-nav-list">${itemsHtml}</ul>`,
-                '</div>',
-            ].join('')
-        }).join('')
+                        let control: string
+                        if (item.href && !item.disabled) {
+                            const target = item.target ? ` target="${esc(item.target)}"` : ''
+                            const rel = item.rel ? ` rel="${esc(item.rel)}"` : ''
+                            control = `<a class="${cls}" href="${esc(item.href)}"${target}${rel}${ariaCurrent} ${dataAttrs}>${inner}</a>`
+                        } else if (item.disabled) {
+                            control = `<button type="button" class="${cls}" disabled aria-disabled="true"${ariaCurrent} ${dataAttrs}>${inner}</button>`
+                        } else {
+                            control = `<button type="button" class="${cls}"${ariaCurrent} ${dataAttrs}>${inner}</button>`
+                        }
+
+                        return `<li>${control}</li>`
+                    })
+                    .join('')
+
+                return [
+                    '<div class="tc-side-nav-section">',
+                    titleHtml,
+                    `<ul class="tc-side-nav-list">${itemsHtml}</ul>`,
+                    '</div>',
+                ].join('')
+            })
+            .join('')
 
         this.innerHTML = `<nav class="tc-side-nav">${sectionsHtml}</nav>`
     }

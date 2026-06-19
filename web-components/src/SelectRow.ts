@@ -14,7 +14,6 @@ export interface SelectOption {
 // fantasy chrome dropped for the toolcase slate/ink look.
 
 export class SelectRow extends SettingRowBase {
-
     private _options: SelectOption[] = []
 
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
@@ -68,7 +67,7 @@ export class SelectRow extends SettingRowBase {
         const value = this.value
         const disabledAttr = this.disabled ? ' disabled' : ''
         const optsMarkup = this._options
-            .map(opt => {
+            .map((opt) => {
                 const selected = opt.value === value ? ' selected' : ''
                 return `<option value="${this.escape(opt.value)}"${selected}>${this.escape(opt.label)}</option>`
             })

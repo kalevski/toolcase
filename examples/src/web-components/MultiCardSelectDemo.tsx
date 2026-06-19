@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FRAMEWORK_OPTIONS = [
     { value: 'react', label: 'React', icon: 'Atom', description: 'UI library' },
@@ -80,56 +79,90 @@ const MultiCardSelectDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="MultiCardSelect"
+                        <tc-rich-page-header
+                            title-text="MultiCardSelect"
                             description="Multi-select card grid with icons, descriptions, and a check indicator on selected cards. Behaves as an accessible checkgroup with full keyboard navigation."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title={`Default — 2 columns${selected.length ? ` (selected: ${selected.join(', ')})` : ''}`}>
+                            <tc-section-card
+                                title={`Default — 2 columns${selected.length ? ` (selected: ${selected.join(', ')})` : ''}`}
+                            >
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-multi-card-select ref={basicRef} columns="2" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`Controlled — 3 columns (selected: ${controlledValue.length ? controlledValue.join(', ') : 'none'})`}>
+                            <tc-section-card
+                                title={`Controlled — 3 columns (selected: ${controlledValue.length ? controlledValue.join(', ') : 'none'})`}
+                            >
                                 <div style={{ maxWidth: 720 }}>
                                     {/* @ts-ignore */}
                                     <tc-multi-card-select ref={controlledRef} />
                                 </div>
                                 <div className="d-flex gap-2 mt-3 flex-wrap">
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue(['auth', 'db'])}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setControlledValue(['auth', 'db'])}
+                                    >
                                         Set Auth + DB
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue([])}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => setControlledValue([])}
+                                    >
                                         Clear all
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => setControlledValue(['auth', 'db', 'storage', 'email', 'analytics'])}>
+                                    <button
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() =>
+                                            setControlledValue([
+                                                'auth',
+                                                'db',
+                                                'storage',
+                                                'email',
+                                                'analytics',
+                                            ])
+                                        }
+                                    >
                                         Select all
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inside a form (name attribute — inspect form data on submit)">
-                                <form onSubmit={e => { e.preventDefault(); const fd = new FormData(e.currentTarget); console.log('Form data:', [...fd.entries()]) }}>
+                            <tc-section-card title="Inside a form (name attribute — inspect form data on submit)">
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault()
+                                        const fd = new FormData(e.currentTarget)
+                                        console.log('Form data:', [...fd.entries()])
+                                    }}
+                                >
                                     {/* @ts-ignore */}
-                                    <tc-multi-card-select ref={formRef} name="frameworks" style={{ maxWidth: 480 }} />
+                                    <tc-multi-card-select
+                                        ref={formRef}
+                                        name="frameworks"
+                                        style={{ maxWidth: 480 }}
+                                    />
                                     <div className="mt-3">
                                         <button type="submit" className="btn btn-primary btn-sm">
                                             Submit (check console)
                                         </button>
                                     </div>
                                 </form>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-multi-card-select ref={loadingRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

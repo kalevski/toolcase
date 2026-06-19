@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-select'
 
 let _idCounter = 0
@@ -16,7 +17,6 @@ interface OptionData {
 }
 
 export class Select extends HTMLElement {
-
     private _selectId: string
     private _optionData: OptionData[] = []
     private _renderPending = false
@@ -63,7 +63,11 @@ export class Select extends HTMLElement {
     }
 
     get value(): string {
-        return this.querySelector<HTMLSelectElement>('select')?.value ?? this.getAttribute('value') ?? ''
+        return (
+            this.querySelector<HTMLSelectElement>('select')?.value ??
+            this.getAttribute('value') ??
+            ''
+        )
     }
     set value(v: string) {
         const sel = this.querySelector<HTMLSelectElement>('select')
@@ -129,11 +133,14 @@ export class Select extends HTMLElement {
         const state = this.state
         const multiple = this.multiple
         const disabled = this.disabled
-        const currentValue = this.querySelector<HTMLSelectElement>('select')?.value ?? this.getAttribute('value') ?? ''
+        const currentValue =
+            this.querySelector<HTMLSelectElement>('select')?.value ??
+            this.getAttribute('value') ??
+            ''
 
         // Snapshot tc-option / native option direct-children whenever they are present.
         // After this render they will be destroyed by innerHTML; _optionData persists.
-        const hasOptionChildren = Array.from(this.children).some(c => {
+        const hasOptionChildren = Array.from(this.children).some((c) => {
             const t = c.tagName.toLowerCase()
             return t === 'tc-option' || t === 'option'
         })
@@ -161,7 +168,8 @@ export class Select extends HTMLElement {
         }
 
         const sizeClass = size ? ` form-select-${size}` : ''
-        const stateClass = state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
+        const stateClass =
+            state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
         const disabledAttr = disabled ? ' disabled' : ''
         const multipleAttr = multiple ? ' multiple' : ''
 
@@ -169,17 +177,20 @@ export class Select extends HTMLElement {
             ? `<label class="form-label" for="${this._selectId}">${esc(label)}</label>`
             : ''
 
-        const optionsHtml = this._optionData.map(opt => {
-            const sel = opt.selected ? ' selected' : ''
-            const dis = opt.disabled ? ' disabled' : ''
-            return `<option value="${esc(opt.value)}"${sel}${dis}>${esc(opt.label)}</option>`
-        }).join('')
+        const optionsHtml = this._optionData
+            .map((opt) => {
+                const sel = opt.selected ? ' selected' : ''
+                const dis = opt.disabled ? ' disabled' : ''
+                return `<option value="${esc(opt.value)}"${sel}${dis}>${esc(opt.label)}</option>`
+            })
+            .join('')
 
-        const feedbackHtml = state === 'valid'
-            ? `<div class="valid-feedback">Looks good!</div>`
-            : state === 'invalid'
-                ? `<div class="invalid-feedback">Please provide a valid selection.</div>`
-                : ''
+        const feedbackHtml =
+            state === 'valid'
+                ? `<div class="valid-feedback">Looks good!</div>`
+                : state === 'invalid'
+                  ? `<div class="invalid-feedback">Please provide a valid selection.</div>`
+                  : ''
 
         this.innerHTML = [
             labelHtml,
@@ -193,10 +204,6 @@ export class Select extends HTMLElement {
         const sel = this.querySelector<HTMLSelectElement>('select')
         if (sel && currentValue) sel.value = currentValue
     }
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 declare global {

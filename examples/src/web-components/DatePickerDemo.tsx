@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useDateValue(initial: string): [string, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -25,22 +24,29 @@ const DatePickerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Date Picker"
+                        <tc-rich-page-header
+                            title-text="Date Picker"
                             description="Native HTML5 date input wrapper with optional label, min/max constraints, and disabled support."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Labelled with initial value">
+                            <tc-section-card title="Labelled with initial value">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-date-picker ref={ref1} label="Event date" value="2026-06-14" />
+                                    <tc-date-picker
+                                        ref={ref1}
+                                        label="Event date"
+                                        value="2026-06-14"
+                                    />
                                     <div className="form-text mt-1">Selected: {v1 || '—'}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Min / Max constraints">
+                            <tc-section-card title="Min / Max constraints">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-date-picker
@@ -51,21 +57,25 @@ const DatePickerDemo: React.FC = () => {
                                     />
                                     <div className="form-text mt-1">Selected: {v2 || '—'}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No label">
+                            <tc-section-card title="No label">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-date-picker value="2026-01-01" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-date-picker label="Locked date" value="2026-06-14" disabled />
+                                    <tc-date-picker
+                                        label="Locked date"
+                                        value="2026-06-14"
+                                        disabled
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

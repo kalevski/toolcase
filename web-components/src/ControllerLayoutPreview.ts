@@ -23,7 +23,6 @@ type FacePosition = 'top' | 'right' | 'bottom' | 'left'
  * events, no slots. The body and button circles are the only sanctioned curves.
  */
 export class ControllerLayoutPreview extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -56,33 +55,49 @@ export class ControllerLayoutPreview extends HTMLElement {
     private glyph(layout: ControllerLayout, position: FacePosition): string {
         if (layout === 'playstation') {
             switch (position) {
-                case 'top': return '△'    // △
-                case 'right': return '◯'  // ◯
-                case 'bottom': return '✕' // ✕
-                case 'left': return '□'   // ☐
+                case 'top':
+                    return '△' // △
+                case 'right':
+                    return '◯' // ◯
+                case 'bottom':
+                    return '✕' // ✕
+                case 'left':
+                    return '□' // ☐
             }
         }
         if (layout === 'nintendo') {
             switch (position) {
-                case 'top': return 'X'
-                case 'right': return 'A'
-                case 'bottom': return 'B'
-                case 'left': return 'Y'
+                case 'top':
+                    return 'X'
+                case 'right':
+                    return 'A'
+                case 'bottom':
+                    return 'B'
+                case 'left':
+                    return 'Y'
             }
         }
         if (layout === 'xbox') {
             switch (position) {
-                case 'top': return 'Y'
-                case 'right': return 'B'
-                case 'bottom': return 'A'
-                case 'left': return 'X'
+                case 'top':
+                    return 'Y'
+                case 'right':
+                    return 'B'
+                case 'bottom':
+                    return 'A'
+                case 'left':
+                    return 'X'
             }
         }
         switch (position) {
-            case 'top': return '△'    // △
-            case 'right': return '▷'  // ▷
-            case 'bottom': return '▽' // ▽
-            case 'left': return '◁'   // ◁
+            case 'top':
+                return '△' // △
+            case 'right':
+                return '▷' // ▷
+            case 'bottom':
+                return '▽' // ▽
+            case 'left':
+                return '◁' // ◁
         }
     }
 

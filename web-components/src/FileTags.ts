@@ -1,17 +1,10 @@
+import { esc } from './internal/esc'
 import { Plus, X } from 'lucide-static'
 import { icon } from './icons'
 // Re-uses the canonical FileTag shape owned by tc-file so both file ports agree.
 import type { FileTag } from './File'
 
 const TAG_NAME = 'tc-file-tags'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Pre-compute at module load — these icons are always in the rendered HTML
 const plusIconHtml = icon(Plus)
@@ -89,7 +82,7 @@ export class FileTags extends HTMLElement {
     private _getUnselectedTags(filter: string): FileTag[] {
         const sel = new Set(this._selectedIds)
         const lf = filter.toLowerCase()
-        return this._tags.filter(t => {
+        return this._tags.filter((t) => {
             if (sel.has(t.id)) return false
             if (!filter) return true
             return t.label.toLowerCase().includes(lf)
@@ -157,13 +150,16 @@ export class FileTags extends HTMLElement {
         if (!unselected.length) {
             return `<div class="tc-file-tags-no-results">No tags found</div>`
         }
-        return unselected.map((t, idx) => {
-            const activeCls = idx === this._activeOptionIdx ? ' tc-file-tags-option--active' : ''
-            return (
-                `<div class="tc-file-tags-option${activeCls}" role="option" aria-selected="false"` +
-                ` tabindex="-1" data-id="${esc(t.id)}">${esc(t.label)}</div>`
-            )
-        }).join('')
+        return unselected
+            .map((t, idx) => {
+                const activeCls =
+                    idx === this._activeOptionIdx ? ' tc-file-tags-option--active' : ''
+                return (
+                    `<div class="tc-file-tags-option${activeCls}" role="option" aria-selected="false"` +
+                    ` tabindex="-1" data-id="${esc(t.id)}">${esc(t.label)}</div>`
+                )
+            })
+            .join('')
     }
 
     private _renderMenuOptions(filter: string): void {
@@ -172,9 +168,7 @@ export class FileTags extends HTMLElement {
     }
 
     private _highlightOption(): void {
-        const options = Array.from(
-            this.querySelectorAll<HTMLElement>('.tc-file-tags-option')
-        )
+        const options = Array.from(this.querySelectorAll<HTMLElement>('.tc-file-tags-option'))
         options.forEach((opt, idx) => {
             opt.classList.toggle('tc-file-tags-option--active', idx === this._activeOptionIdx)
         })
@@ -189,9 +183,7 @@ export class FileTags extends HTMLElement {
     private _onMenuKeydown = (e: KeyboardEvent): void => {
         if (!this._isMenuOpen) return
 
-        const options = Array.from(
-            this.querySelectorAll<HTMLElement>('.tc-file-tags-option')
-        )
+        const options = Array.from(this.querySelectorAll<HTMLElement>('.tc-file-tags-option'))
         const len = options.length
 
         if (e.key === 'Escape') {
@@ -241,7 +233,7 @@ export class FileTags extends HTMLElement {
     }
 
     private _deselectTag(id: string): void {
-        this._selectedIds = this._selectedIds.filter(s => s !== id)
+        this._selectedIds = this._selectedIds.filter((s) => s !== id)
         this._emit()
         const chipsEl = this.querySelector<HTMLElement>('.tc-file-tags-chips')
         if (chipsEl) chipsEl.innerHTML = this._buildChipsHtml()
@@ -252,29 +244,34 @@ export class FileTags extends HTMLElement {
     }
 
     private _emit(): void {
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { selectedIds: [...this._selectedIds] },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { selectedIds: [...this._selectedIds] },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange([...this._selectedIds])
     }
 
     private _buildChipsHtml(): string {
-        const tagMap = new Map(this._tags.map(t => [t.id, t]))
+        const tagMap = new Map(this._tags.map((t) => [t.id, t]))
         const readonly = this.readonly
 
-        return this._selectedIds.map(id => {
-            const tag = tagMap.get(id)
-            if (!tag) return ''
-            const colorStyle = tag.color
-                ? ` style="--bs-file-tags-chip-color:${esc(tag.color)}"`
-                : ''
-            const removeBtn = !readonly
-                ? `<button type="button" class="tc-file-tags-chip-remove" aria-label="Remove ${esc(tag.label)}">${xIconHtml}</button>`
-                : ''
-            return `<span class="tc-file-tags-chip" data-id="${esc(id)}"${colorStyle}>${esc(tag.label)}${removeBtn}</span>`
-        }).filter(Boolean).join('')
+        return this._selectedIds
+            .map((id) => {
+                const tag = tagMap.get(id)
+                if (!tag) return ''
+                const colorStyle = tag.color
+                    ? ` style="--bs-file-tags-chip-color:${esc(tag.color)}"`
+                    : ''
+                const removeBtn = !readonly
+                    ? `<button type="button" class="tc-file-tags-chip-remove" aria-label="Remove ${esc(tag.label)}">${xIconHtml}</button>`
+                    : ''
+                return `<span class="tc-file-tags-chip" data-id="${esc(id)}"${colorStyle}>${esc(tag.label)}${removeBtn}</span>`
+            })
+            .filter(Boolean)
+            .join('')
     }
 
     private render(): void {
@@ -302,7 +299,9 @@ export class FileTags extends HTMLElement {
         const chipsEl = this.querySelector<HTMLElement>('.tc-file-tags-chips')
         if (chipsEl) {
             chipsEl.addEventListener('click', (e: MouseEvent) => {
-                const btn = (e.target as Element).closest<HTMLButtonElement>('.tc-file-tags-chip-remove')
+                const btn = (e.target as Element).closest<HTMLButtonElement>(
+                    '.tc-file-tags-chip-remove',
+                )
                 if (!btn) return
                 const chip = btn.closest<HTMLElement>('.tc-file-tags-chip')
                 const id = chip?.dataset.id
@@ -339,7 +338,9 @@ export class FileTags extends HTMLElement {
             const optionsEl = this.querySelector<HTMLElement>('.tc-file-tags-options')
             if (optionsEl) {
                 optionsEl.addEventListener('click', (e: MouseEvent) => {
-                    const option = (e.target as Element).closest<HTMLElement>('.tc-file-tags-option')
+                    const option = (e.target as Element).closest<HTMLElement>(
+                        '.tc-file-tags-option',
+                    )
                     if (option?.dataset.id) this._selectTag(option.dataset.id)
                 })
             }

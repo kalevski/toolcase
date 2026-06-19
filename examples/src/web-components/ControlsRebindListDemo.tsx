@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ControlsRebindListDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -43,26 +42,31 @@ const ControlsRebindListDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ControlsRebindList"
+                        <tc-rich-page-header
+                            title-text="ControlsRebindList"
                             description="List of input actions, each rebindable to a key/button. Set rows via the bindings JS property; each row is clickable and keyboard-activatable (Enter/Space) and fires tc-rebind with the action id."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic (last row is Unbound)">
+                            <tc-section-card title="Basic (last row is Unbound)">
                                 {/* @ts-ignore */}
                                 <tc-controls-rebind-list ref={basicRef}></tc-controls-rebind-list>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Interactive (click or press Enter/Space on a row)">
+                            <tc-section-card title="Interactive (click or press Enter/Space on a row)">
                                 {/* @ts-ignore */}
-                                <tc-controls-rebind-list ref={interactiveRef}></tc-controls-rebind-list>
+                                <tc-controls-rebind-list
+                                    ref={interactiveRef}
+                                ></tc-controls-rebind-list>
                                 <p className="mt-3 mb-0 text-secondary">
                                     Last rebind requested:{' '}
                                     <strong>{lastRebound ?? '— none yet —'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

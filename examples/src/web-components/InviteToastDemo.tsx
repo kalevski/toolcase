@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const InviteToastDemo: React.FC = () => {
     const [open, setOpen] = useState(false)
@@ -30,21 +29,24 @@ const InviteToastDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Invite Toast"
+                        <tc-rich-page-header
+                            title-text="Invite Toast"
                             description="Transient invite popup pinned to the top-right corner with accept / decline actions and an auto-decline countdown bar. Controlled component — fires tc-accept or tc-decline; set open to false in the handler to dismiss."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="last action">
+                            <tc-section-card title="last action">
                                 <code>{lastResult}</code>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="interactive — short timeout">
+                            <tc-section-card title="interactive — short timeout">
                                 <p className="text-muted mb-3">
-                                    Opens the toast top-right. Accept or decline, or let the 8-second
-                                    countdown lapse to auto-decline.
+                                    Opens the toast top-right. Accept or decline, or let the
+                                    8-second countdown lapse to auto-decline.
                                 </p>
                                 <button
                                     className="btn btn-primary"
@@ -56,7 +58,7 @@ const InviteToastDemo: React.FC = () => {
                                 >
                                     Send invite…
                                 </button>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
 
                         {/* @ts-ignore */}

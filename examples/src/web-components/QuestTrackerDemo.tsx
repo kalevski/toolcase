@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 interface QuestObjective {
     id: string
@@ -29,9 +28,7 @@ const BASIC_QUESTS: QuestEntry[] = [
     {
         id: 'q2',
         name: 'Wolves at the Gate',
-        objectives: [
-            { id: 'o1', label: 'Slay wolves', progress: 4, target: 6 },
-        ],
+        objectives: [{ id: 'o1', label: 'Slay wolves', progress: 4, target: 6 }],
     },
 ]
 
@@ -70,33 +67,45 @@ const QuestTrackerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="QuestTracker"
+                        <tc-rich-page-header
+                            title-text="QuestTracker"
                             description="On-screen quest-objectives tracker with per-objective progress bars, completed/optional states, and a configurable header title."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Active quests — mixed states">
+                            <tc-section-card title="Active quests — mixed states">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
-                                    <tc-quest-tracker ref={basicRef} tracker-title="Active Quests" />
+                                    <tc-quest-tracker
+                                        ref={basicRef}
+                                        tracker-title="Active Quests"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="All objectives completed">
+                            <tc-section-card title="All objectives completed">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
-                                    <tc-quest-tracker ref={completedRef} tracker-title="Completed" />
+                                    <tc-quest-tracker
+                                        ref={completedRef}
+                                        tracker-title="Completed"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No active quests (empty state)">
+                            <tc-section-card title="No active quests (empty state)">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
-                                    <tc-quest-tracker ref={emptyRef} tracker-title="Active Quests" />
+                                    <tc-quest-tracker
+                                        ref={emptyRef}
+                                        tracker-title="Active Quests"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

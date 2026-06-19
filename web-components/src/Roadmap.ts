@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -19,14 +20,6 @@ export interface RoadmapColumn {
     status: RoadmapStatus
     title?: string
     items: RoadmapItem[]
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 const STATUS_LABELS: Record<RoadmapStatus, string> = {
@@ -134,7 +127,9 @@ export class Roadmap extends HTMLElement {
         const tagsHtml =
             item.tags && item.tags.length > 0
                 ? `<span class="tc-roadmap-item-tags">` +
-                  item.tags.map(t => `<span class="tc-roadmap-item-tag">${esc(t)}</span>`).join('') +
+                  item.tags
+                      .map((t) => `<span class="tc-roadmap-item-tag">${esc(t)}</span>`)
+                      .join('') +
                   `</span>`
                 : ''
 
@@ -150,9 +145,7 @@ export class Roadmap extends HTMLElement {
     }
 
     private _renderColumn(column: RoadmapColumn, colIdx: number): string {
-        const status: RoadmapStatus = STATUSES.includes(column.status)
-            ? column.status
-            : 'planned'
+        const status: RoadmapStatus = STATUSES.includes(column.status) ? column.status : 'planned'
         const statusLabel = STATUS_LABELS[status]
         const items = Array.isArray(column.items) ? column.items : []
         const heading = column.title ? esc(column.title) : statusLabel
@@ -192,15 +185,12 @@ export class Roadmap extends HTMLElement {
         const layout = this.layout
         const title = this.getAttribute('title-text')
 
-        const titleHtml = title
-            ? `<h2 class="tc-roadmap-title">${esc(title)}</h2>`
-            : ''
+        const titleHtml = title ? `<h2 class="tc-roadmap-title">${esc(title)}</h2>` : ''
 
         const columnsHtml = this._columns.map((col, idx) => this._renderColumn(col, idx)).join('')
 
         this.innerHTML =
-            titleHtml +
-            `<div class="tc-roadmap tc-roadmap--${layout}">${columnsHtml}</div>`
+            titleHtml + `<div class="tc-roadmap tc-roadmap--${layout}">${columnsHtml}</div>`
 
         const board = this.querySelector<HTMLElement>('.tc-roadmap')
         if (board) {

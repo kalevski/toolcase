@@ -1,5 +1,5 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-state-machine'
 
@@ -11,24 +11,6 @@ export interface StateMachineItem {
     label: string
     description?: string
     status?: StateMachineStatus
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 const checkIconHtml = lucideByName('check')
@@ -93,21 +75,26 @@ export class StateMachine extends HTMLElement {
         else this.classList.remove('tc-state-machine--compact')
         this.setAttribute('role', 'list')
 
-        this.innerHTML = states.map((state, i) => {
-            const status: StateMachineStatus = STATUSES.includes(state.status as StateMachineStatus)
-                ? (state.status as StateMachineStatus)
-                : 'pending'
-            const isLast = i === states.length - 1
-            const marker = this._markerHtml(status)
-            const connectorHtml = !isLast
-                ? `<div class="tc-state-machine-connector" aria-hidden="true"></div>`
-                : ''
-            const labelHtml = `<span class="tc-state-machine-label">${esc(state.label)}</span>`
-            const descHtml = state.description && !compact
-                ? `<span class="tc-state-machine-description">${esc(state.description)}</span>`
-                : ''
-            return `<div class="tc-state-machine-state tc-state-machine-state-${status}" role="listitem"><div class="tc-state-machine-track">${marker}${connectorHtml}</div><div class="tc-state-machine-body">${labelHtml}${descHtml}</div></div>`
-        }).join('')
+        this.innerHTML = states
+            .map((state, i) => {
+                const status: StateMachineStatus = STATUSES.includes(
+                    state.status as StateMachineStatus,
+                )
+                    ? (state.status as StateMachineStatus)
+                    : 'pending'
+                const isLast = i === states.length - 1
+                const marker = this._markerHtml(status)
+                const connectorHtml = !isLast
+                    ? `<div class="tc-state-machine-connector" aria-hidden="true"></div>`
+                    : ''
+                const labelHtml = `<span class="tc-state-machine-label">${esc(state.label)}</span>`
+                const descHtml =
+                    state.description && !compact
+                        ? `<span class="tc-state-machine-description">${esc(state.description)}</span>`
+                        : ''
+                return `<div class="tc-state-machine-state tc-state-machine-state-${status}" role="listitem"><div class="tc-state-machine-track">${marker}${connectorHtml}</div><div class="tc-state-machine-body">${labelHtml}${descHtml}</div></div>`
+            })
+            .join('')
     }
 }
 

@@ -13,7 +13,15 @@ export class ConfirmDialog extends DialogBase {
     onCancel: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['open', 'dialog-title', 'eyebrow', 'message', 'confirm-label', 'cancel-label', 'danger']
+        return [
+            'open',
+            'dialog-title',
+            'eyebrow',
+            'message',
+            'confirm-label',
+            'cancel-label',
+            'danger',
+        ]
     }
 
     get dialogTitle(): string {
@@ -94,12 +102,16 @@ export class ConfirmDialog extends DialogBase {
     }
 
     private _emitConfirm(): void {
-        this.dispatchEvent(new CustomEvent('tc-confirm', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-confirm', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onConfirm === 'function') this.onConfirm()
     }
 
     private _emitCancel(): void {
-        this.dispatchEvent(new CustomEvent('tc-cancel', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-cancel', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onCancel === 'function') this.onCancel()
     }
 

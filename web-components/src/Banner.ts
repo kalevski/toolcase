@@ -1,25 +1,8 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon, closeIcon } from './icons'
 
 const TAG_NAME = 'tc-banner'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 const DEFAULT_ICONS: Record<string, string> = {
     info: 'info',
@@ -107,7 +90,7 @@ export class Banner extends HTMLElement {
             // Capture named slot nodes (icon / action), keep the rest as content.
             this._iconSlotNodes = Array.from(this.querySelectorAll('[slot="icon"]'))
             this._actionNodes = Array.from(this.querySelectorAll('[slot="action"]'))
-            this._contentNodes = Array.from(this.childNodes).filter(n => {
+            this._contentNodes = Array.from(this.childNodes).filter((n) => {
                 if (!(n instanceof Element)) return true
                 const slot = n.getAttribute('slot')
                 return slot !== 'icon' && slot !== 'action'
@@ -199,7 +182,9 @@ export class Banner extends HTMLElement {
     private _handleDismiss = (): void => {
         const key = this._resolvedStorageKey()
         if (key) {
-            try { localStorage.setItem(key, 'dismissed') } catch {}
+            try {
+                localStorage.setItem(key, 'dismissed')
+            } catch {}
         }
         this.hidden = true
         this.dispatchEvent(new CustomEvent('tc-dismiss', { bubbles: true, composed: true }))
@@ -218,15 +203,15 @@ export class Banner extends HTMLElement {
         if (iconEl && this._iconSlotNodes.length > 0) {
             // Slotted icon nodes take priority over the lucide fallback.
             iconEl.innerHTML = ''
-            this._iconSlotNodes.forEach(n => iconEl.appendChild(n))
+            this._iconSlotNodes.forEach((n) => iconEl.appendChild(n))
         }
         const contentEl = this.querySelector('.tc-banner-content')
         if (contentEl) {
-            this._contentNodes.forEach(n => contentEl.appendChild(n))
+            this._contentNodes.forEach((n) => contentEl.appendChild(n))
         }
         const actionEl = this.querySelector('.tc-banner-action')
         if (actionEl) {
-            this._actionNodes.forEach(n => actionEl.appendChild(n))
+            this._actionNodes.forEach((n) => actionEl.appendChild(n))
         }
     }
 
@@ -242,7 +227,7 @@ export class Banner extends HTMLElement {
 
         // Apply host classes — preserve any user-added classes.
         this.classList.add('tc-banner')
-        VARIANTS.forEach(v => this.classList.remove(`tc-banner-${v}`))
+        VARIANTS.forEach((v) => this.classList.remove(`tc-banner-${v}`))
         this.classList.add(`tc-banner-${variant}`)
 
         // ARIA: announcement bars are regions; status banners announce via
@@ -261,13 +246,12 @@ export class Banner extends HTMLElement {
             ? `<span class="tc-banner-icon" aria-hidden="true">${iconSvg}</span>`
             : ''
 
-        const actionHtml = hasAction
-            ? `<span class="tc-banner-action"></span>`
-            : ''
+        const actionHtml = hasAction ? `<span class="tc-banner-action"></span>` : ''
 
-        const ctaHtml = ctaLabel && ctaHref
-            ? `<a class="tc-banner-cta" href="${esc(ctaHref)}">${esc(ctaLabel)}</a>`
-            : ''
+        const ctaHtml =
+            ctaLabel && ctaHref
+                ? `<a class="tc-banner-cta" href="${esc(ctaHref)}">${esc(ctaLabel)}</a>`
+                : ''
 
         const closeHtml = dismissible
             ? `<button type="button" class="tc-banner-close" aria-label="Dismiss">${closeIcon}</button>`

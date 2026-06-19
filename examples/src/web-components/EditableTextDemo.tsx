@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const EditableTextDemo: React.FC = () => {
     const [committed, setCommitted] = useState('Project Alpha')
@@ -21,27 +20,31 @@ const EditableTextDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="EditableText"
+                        <tc-rich-page-header
+                            title-text="EditableText"
                             description="Inline editable label — looks like plain text at rest, reveals a form-control on hover/focus. Commits on Enter or blur, reverts on Escape."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default value — tc-change logger">
+                            <tc-section-card title="Default value — tc-change logger">
                                 <div className="d-flex align-items-center gap-2">
                                     <span className="form-text mb-0">Name:</span>
-                                    {/* @ts-ignore */}
                                     <tc-editable-text
                                         ref={listenerRef}
                                         default-value="Project Alpha"
                                         aria-label="Project name"
                                     />
                                 </div>
-                                <div className="form-text mt-2">Last committed: <strong>{committed}</strong></div>
-                            </SectionCard>
+                                <div className="form-text mt-2">
+                                    Last committed: <strong>{committed}</strong>
+                                </div>
+                            </tc-section-card>
 
-                            <SectionCard title="Placeholder only">
+                            <tc-section-card title="Placeholder only">
                                 <div className="d-flex align-items-center gap-2">
                                     <span className="form-text mb-0">Label:</span>
                                     {/* @ts-ignore */}
@@ -50,9 +53,9 @@ const EditableTextDemo: React.FC = () => {
                                         aria-label="Add label"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div className="d-flex align-items-center gap-2">
                                     <span className="form-text mb-0">Status:</span>
                                     {/* @ts-ignore */}
@@ -62,7 +65,7 @@ const EditableTextDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

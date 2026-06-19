@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-terminal-window'
 
 export type TerminalLineType = 'command' | 'output' | 'comment'
@@ -7,14 +8,6 @@ const TYPES: TerminalLineType[] = ['command', 'output', 'comment']
 export interface TerminalLine {
     type?: TerminalLineType
     text: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 let _uid = 0
@@ -103,23 +96,30 @@ export class TerminalWindow extends HTMLElement {
         const title = this.getAttribute('title') ?? ''
         const prompt = this.prompt
 
-        const dots = `<span class="tc-terminal-window-dots" aria-hidden="true">`
-            + `<span class="tc-terminal-window-dot tc-terminal-window-dot--red"></span>`
-            + `<span class="tc-terminal-window-dot tc-terminal-window-dot--amber"></span>`
-            + `<span class="tc-terminal-window-dot tc-terminal-window-dot--green"></span>`
-            + `</span>`
+        const dots =
+            `<span class="tc-terminal-window-dots" aria-hidden="true">` +
+            `<span class="tc-terminal-window-dot tc-terminal-window-dot--red"></span>` +
+            `<span class="tc-terminal-window-dot tc-terminal-window-dot--amber"></span>` +
+            `<span class="tc-terminal-window-dot tc-terminal-window-dot--green"></span>` +
+            `</span>`
         const titleHtml = `<span class="tc-terminal-window-title" id="${this._titleId}">${esc(title)}</span>`
         const bar = `<div class="tc-terminal-window-bar">${dots}${titleHtml}</div>`
 
-        const linesHtml = this._lines.map(line => {
-            const type: TerminalLineType = line.type && TYPES.includes(line.type) ? line.type : 'output'
-            const promptHtml = type === 'command'
-                ? `<span class="tc-terminal-window-prompt" aria-hidden="true">${esc(prompt)}</span>`
-                : ''
-            return `<div class="tc-terminal-window-line tc-terminal-window-line-${type}">`
-                + `${promptHtml}<span class="tc-terminal-window-text">${esc(line.text ?? '')}</span>`
-                + `</div>`
-        }).join('')
+        const linesHtml = this._lines
+            .map((line) => {
+                const type: TerminalLineType =
+                    line.type && TYPES.includes(line.type) ? line.type : 'output'
+                const promptHtml =
+                    type === 'command'
+                        ? `<span class="tc-terminal-window-prompt" aria-hidden="true">${esc(prompt)}</span>`
+                        : ''
+                return (
+                    `<div class="tc-terminal-window-line tc-terminal-window-line-${type}">` +
+                    `${promptHtml}<span class="tc-terminal-window-text">${esc(line.text ?? '')}</span>` +
+                    `</div>`
+                )
+            })
+            .join('')
         const body = `<div class="tc-terminal-window-body" role="log" aria-live="polite">${linesHtml}</div>`
 
         // Expose the window title as the region's accessible label.
@@ -130,9 +130,11 @@ export class TerminalWindow extends HTMLElement {
     // ── Typing animation ─────────────────────────────────────────────────────────
 
     private _prefersReducedMotion(): boolean {
-        return typeof window !== 'undefined'
-            && typeof window.matchMedia === 'function'
-            && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        return (
+            typeof window !== 'undefined' &&
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        )
     }
 
     /** Decide between instant render and per-character typing after every render. */
@@ -155,7 +157,9 @@ export class TerminalWindow extends HTMLElement {
 
     private _lineEls(): HTMLElement[] {
         const body = this.querySelector('.tc-terminal-window-body')
-        return body ? Array.from(body.querySelectorAll<HTMLElement>('.tc-terminal-window-line')) : []
+        return body
+            ? Array.from(body.querySelectorAll<HTMLElement>('.tc-terminal-window-line'))
+            : []
     }
 
     private _startTyping(): void {

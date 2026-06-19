@@ -7,7 +7,13 @@ const menuIcon = icon(Menu)
 
 let _uid = 0
 
-const NAMED_SLOTS: string[] = ['navbar-left', 'navbar-right', 'brand', 'sidebar-menu', 'sidebar-panel']
+const NAMED_SLOTS: string[] = [
+    'navbar-left',
+    'navbar-right',
+    'brand',
+    'sidebar-menu',
+    'sidebar-panel',
+]
 
 function isNamedSlotNode(n: Node): boolean {
     return n instanceof Element && NAMED_SLOTS.includes(n.getAttribute('slot') ?? '')
@@ -42,13 +48,10 @@ export class DashboardLayout extends HTMLElement {
             this._brandNodes = Array.from(this.querySelectorAll('[slot="brand"]'))
             this._sidebarMenuNodes = Array.from(this.querySelectorAll('[slot="sidebar-menu"]'))
             this._sidebarPanelNodes = Array.from(this.querySelectorAll('[slot="sidebar-panel"]'))
-            this._contentNodes = Array.from(this.childNodes).filter(n => !isNamedSlotNode(n))
+            this._contentNodes = Array.from(this.childNodes).filter((n) => !isNamedSlotNode(n))
 
-            // Default to open on first connect if attribute not already set
-            if (!this.hasAttribute('sidebar-open')) {
-                this.setAttribute('sidebar-open', '')
-            }
-
+            // Closed by default: on mobile this keeps the drawer hidden; on desktop
+            // (≥992px) CSS pins the sidebar open regardless of this attribute.
             this.render()
             this._distributeSlots()
             this._applyOpenClass()
@@ -77,45 +80,53 @@ export class DashboardLayout extends HTMLElement {
     private _handleToggle(): void {
         const newOpen = !this.sidebarOpen
         this.sidebarOpen = newOpen
-        this.dispatchEvent(new CustomEvent('tc-toggle-sidebar', {
-            bubbles: true,
-            composed: true,
-            detail: { open: newOpen },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-toggle-sidebar', {
+                bubbles: true,
+                composed: true,
+                detail: { open: newOpen },
+            }),
+        )
         if (typeof this.onToggleSidebar === 'function') this.onToggleSidebar(newOpen)
     }
 
     private _applyOpenClass(): void {
         const open = this.sidebarOpen
-        const sidebar = this.querySelector('.tc-dashboard-layout__sidebar')
+        const wrapper = this.querySelector('.tc-dashboard-layout__wrapper')
         const toggle = this.querySelector<HTMLButtonElement>('.tc-dashboard-layout__toggle')
-        if (sidebar) {
-            sidebar.classList.toggle('tc-dashboard-layout__sidebar--collapsed', !open)
+        const overlay = this.querySelector('.tc-dashboard-layout__overlay')
+        if (wrapper) {
+            wrapper.classList.toggle('tc-dashboard-layout__wrapper--open', open)
         }
         if (toggle) {
             toggle.setAttribute('aria-expanded', open ? 'true' : 'false')
+        }
+        if (overlay) {
+            overlay.setAttribute('aria-hidden', open ? 'false' : 'true')
         }
     }
 
     private _distributeSlots(): void {
         const navLeftEl = this.querySelector('.tc-dashboard-layout__navbar-left')
-        if (navLeftEl) this._navbarLeftNodes.forEach(n => navLeftEl.appendChild(n))
+        if (navLeftEl) this._navbarLeftNodes.forEach((n) => navLeftEl.appendChild(n))
         const navRightEl = this.querySelector('.tc-dashboard-layout__navbar-right')
-        if (navRightEl) this._navbarRightNodes.forEach(n => navRightEl.appendChild(n))
+        if (navRightEl) this._navbarRightNodes.forEach((n) => navRightEl.appendChild(n))
         const brandEl = this.querySelector('.tc-dashboard-layout__brand')
-        if (brandEl) this._brandNodes.forEach(n => brandEl.appendChild(n))
+        if (brandEl) this._brandNodes.forEach((n) => brandEl.appendChild(n))
         const sidebarMenuEl = this.querySelector('.tc-dashboard-layout__sidebar-menu')
-        if (sidebarMenuEl) this._sidebarMenuNodes.forEach(n => sidebarMenuEl.appendChild(n))
+        if (sidebarMenuEl) this._sidebarMenuNodes.forEach((n) => sidebarMenuEl.appendChild(n))
         const sidebarPanelEl = this.querySelector('.tc-dashboard-layout__sidebar-panel')
-        if (sidebarPanelEl) this._sidebarPanelNodes.forEach(n => sidebarPanelEl.appendChild(n))
+        if (sidebarPanelEl) this._sidebarPanelNodes.forEach((n) => sidebarPanelEl.appendChild(n))
         const contentEl = this.querySelector('.tc-dashboard-layout__content')
-        if (contentEl) this._contentNodes.forEach(n => contentEl.appendChild(n))
+        if (contentEl) this._contentNodes.forEach((n) => contentEl.appendChild(n))
     }
 
     private _attachHandlers(): void {
         this._keydownHandler = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
                 e.preventDefault()
+                this._handleToggle()
+            } else if (e.key === 'Escape' && this.sidebarOpen) {
                 this._handleToggle()
             }
         }
@@ -135,6 +146,11 @@ export class DashboardLayout extends HTMLElement {
         const target = e.target as Element
         if (target.closest('.tc-dashboard-layout__toggle')) {
             this._handleToggle()
+            return
+        }
+        // Tapping the dimmed backdrop closes the mobile drawer.
+        if (target.closest('.tc-dashboard-layout__overlay') && this.sidebarOpen) {
+            this._handleToggle()
         }
     }
 
@@ -143,14 +159,15 @@ export class DashboardLayout extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-dashboard-layout">` +
+            `<div class="tc-dashboard-layout__wrapper">` +
             `<nav class="tc-dashboard-layout__navbar" role="navigation" aria-label="Application navigation">` +
-            `<button class="tc-dashboard-layout__toggle" type="button" aria-label="Toggle sidebar" aria-expanded="true" aria-controls="${sidebarId}">` +
+            `<button class="tc-dashboard-layout__toggle" type="button" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="${sidebarId}">` +
             menuIcon +
             `</button>` +
             `<div class="tc-dashboard-layout__navbar-left"></div>` +
             `<div class="tc-dashboard-layout__navbar-right"></div>` +
             `</nav>` +
-            `<div class="tc-dashboard-layout__body">` +
+            `<div class="tc-dashboard-layout__overlay" aria-hidden="true"></div>` +
             `<aside class="tc-dashboard-layout__sidebar" id="${sidebarId}" role="navigation" aria-label="Sidebar navigation">` +
             `<div class="tc-dashboard-layout__brand"></div>` +
             `<div class="tc-dashboard-layout__sidebar-menu"></div>` +

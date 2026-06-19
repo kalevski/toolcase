@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-area-chart'
 
 // A single data point. `x` is categorical/ordinal (string or number); `y` is
@@ -36,14 +37,6 @@ const PALETTE_SIZE = 6
 const DASHES = ['', '', '6 3', '2 3', '8 3 2 3', '1 4']
 
 const DEFAULT_HEIGHT = 260
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Round a raw axis maximum up to a visually "nice" number (mirrors the React
 // AreaChart niceMax).
@@ -228,7 +221,9 @@ export class AreaChart extends HTMLElement {
     }
 
     private _seriesColorVar(index: number, explicit?: string): string {
-        return explicit ? esc(explicit) : `var(--bs-area-chart-series-${(index % PALETTE_SIZE) + 1})`
+        return explicit
+            ? esc(explicit)
+            : `var(--bs-area-chart-series-${(index % PALETTE_SIZE) + 1})`
     }
 
     // ---- render ----
@@ -244,12 +239,13 @@ export class AreaChart extends HTMLElement {
         const series = this._normSeries()
         const titleAttr = this.getAttribute('title')
         const subtitle = this.getAttribute('subtitle')
-        const headerHtml = (titleAttr || subtitle)
-            ? `<div class="tc-area-chart__header">`
-                + (titleAttr ? `<div class="tc-area-chart__title">${esc(titleAttr)}</div>` : '')
-                + (subtitle ? `<div class="tc-area-chart__subtitle">${esc(subtitle)}</div>` : '')
-                + `</div>`
-            : ''
+        const headerHtml =
+            titleAttr || subtitle
+                ? `<div class="tc-area-chart__header">` +
+                  (titleAttr ? `<div class="tc-area-chart__title">${esc(titleAttr)}</div>` : '') +
+                  (subtitle ? `<div class="tc-area-chart__subtitle">${esc(subtitle)}</div>` : '') +
+                  `</div>`
+                : ''
 
         if (!series.length || series.every((s) => !s.points.length)) {
             this.innerHTML = `<div class="tc-area-chart__inner">${headerHtml}<div class="tc-area-chart__empty">No data</div></div>`
@@ -259,7 +255,10 @@ export class AreaChart extends HTMLElement {
 
         const VH = this.height
         const VW = this._measurePlot()
-        const PL = 52, PR = 20, PT = 18, PB = 40
+        const PL = 52,
+            PR = 20,
+            PT = 18,
+            PB = 40
         const cW = Math.max(VW - PL - PR, 10)
         const cH = Math.max(VH - PT - PB, 10)
         this._vw = VW
@@ -271,7 +270,10 @@ export class AreaChart extends HTMLElement {
         for (const s of series) {
             for (const p of s.points) {
                 const xs = String(p.x)
-                if (!seen.has(xs)) { seen.add(xs); allX.push(xs) }
+                if (!seen.has(xs)) {
+                    seen.add(xs)
+                    allX.push(xs)
+                }
             }
         }
 
@@ -295,10 +297,11 @@ export class AreaChart extends HTMLElement {
             }
         } else {
             yMaxRaw = 0
-            for (const s of series) for (const p of s.points) {
-                const y = Number(p.y) || 0
-                if (y > yMaxRaw) yMaxRaw = y
-            }
+            for (const s of series)
+                for (const p of s.points) {
+                    const y = Number(p.y) || 0
+                    if (y > yMaxRaw) yMaxRaw = y
+                }
         }
         const yMax = niceMax(yMaxRaw * 1.1)
 
@@ -333,8 +336,8 @@ export class AreaChart extends HTMLElement {
 
         // --- axis lines ---
         const axesHtml =
-            `<line class="tc-area-chart__axis" x1="${PL}" y1="${baseline.toFixed(1)}" x2="${(PL + cW).toFixed(1)}" y2="${baseline.toFixed(1)}" />`
-            + `<line class="tc-area-chart__axis tc-area-chart__axis--faint" x1="${PL}" y1="${PT}" x2="${PL}" y2="${baseline.toFixed(1)}" />`
+            `<line class="tc-area-chart__axis" x1="${PL}" y1="${baseline.toFixed(1)}" x2="${(PL + cW).toFixed(1)}" y2="${baseline.toFixed(1)}" />` +
+            `<line class="tc-area-chart__axis tc-area-chart__axis--faint" x1="${PL}" y1="${PT}" x2="${PL}" y2="${baseline.toFixed(1)}" />`
 
         // --- areas + lines + point geometry ---
         this._pointGeom = []
@@ -372,13 +375,19 @@ export class AreaChart extends HTMLElement {
             })
 
             // area path: along the tops, back along the bottoms (reversed)
-            const topCmds = tops.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
-            const botCmds = [...bottoms].reverse().map((p) => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+            const topCmds = tops.map(
+                (p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`,
+            )
+            const botCmds = [...bottoms]
+                .reverse()
+                .map((p) => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
             const areaD = [...topCmds, ...botCmds, 'Z'].join(' ')
             areasHtml += `<path class="tc-area-chart__area" style="--tc-series-color: ${colorVar}" d="${areaD}" />`
 
             // top stroke line
-            const lineD = tops.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ')
+            const lineD = tops
+                .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+                .join(' ')
             linesHtml += `<path class="tc-area-chart__line" style="--tc-series-color: ${colorVar}" d="${lineD}"${dashAttr} fill="none" />`
 
             // record point geometry for hover nearest-point lookup, mapping back
@@ -386,7 +395,12 @@ export class AreaChart extends HTMLElement {
             tops.forEach((p) => {
                 const original = s.points.findIndex((pt) => String(pt.x) === p.xs)
                 if (original >= 0) {
-                    this._pointGeom.push({ sx: p.x, sy: p.y, seriesIndex: si, pointIndex: original })
+                    this._pointGeom.push({
+                        sx: p.x,
+                        sy: p.y,
+                        seriesIndex: si,
+                        pointIndex: original,
+                    })
                 }
             })
         })
@@ -400,18 +414,25 @@ export class AreaChart extends HTMLElement {
 
         const summary = this._summary(series, allX, stacked)
         const svgHtml =
-            `<svg class="tc-area-chart__svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">`
-            + `<title>${esc(summary)}</title><desc>${esc(summary)}</desc>`
-            + gridHtml + axesHtml + areasHtml + linesHtml + dotsHtml + xLabelsHtml
-            + `</svg>`
+            `<svg class="tc-area-chart__svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">` +
+            `<title>${esc(summary)}</title><desc>${esc(summary)}</desc>` +
+            gridHtml +
+            axesHtml +
+            areasHtml +
+            linesHtml +
+            dotsHtml +
+            xLabelsHtml +
+            `</svg>`
 
         // legend
         let legendHtml = ''
         if (this.showLegend && series.length) {
-            const chips = series.map((s, si) => {
-                const colorVar = this._seriesColorVar(si, s.color)
-                return `<span class="tc-area-chart__legend-chip"><span class="tc-area-chart__legend-dot" style="--tc-series-color: ${colorVar}"></span>${esc(s.name)}</span>`
-            }).join('')
+            const chips = series
+                .map((s, si) => {
+                    const colorVar = this._seriesColorVar(si, s.color)
+                    return `<span class="tc-area-chart__legend-chip"><span class="tc-area-chart__legend-dot" style="--tc-series-color: ${colorVar}"></span>${esc(s.name)}</span>`
+                })
+                .join('')
             legendHtml = `<div class="tc-area-chart__legend">${chips}</div>`
         }
 
@@ -444,23 +465,33 @@ export class AreaChart extends HTMLElement {
             ? `<div class="tc-area-chart__header"><div class="tc-area-chart__skeleton tc-area-chart__skeleton--title" aria-hidden="true"></div></div>`
             : ''
         this.innerHTML =
-            `<div class="tc-area-chart__inner">`
-            + headHtml
-            + `<div class="tc-area-chart__skeleton tc-area-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>`
-            + `<span class="visually-hidden">Loading…</span>`
-            + `</div>`
+            `<div class="tc-area-chart__inner">` +
+            headHtml +
+            `<div class="tc-area-chart__skeleton tc-area-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+            `<span class="visually-hidden">Loading…</span>` +
+            `</div>`
     }
 
-    private _summary(series: { name: string; points: AreaChartPoint[] }[], allX: string[], stacked: boolean): string {
-        const names = series.map((s) => s.name).filter(Boolean).join(', ')
+    private _summary(
+        series: { name: string; points: AreaChartPoint[] }[],
+        allX: string[],
+        stacked: boolean,
+    ): string {
+        const names = series
+            .map((s) => s.name)
+            .filter(Boolean)
+            .join(', ')
         const kind = stacked ? 'Stacked area chart' : 'Area chart'
-        const trend = series.map((s) => {
-            if (s.points.length < 2) return ''
-            const first = Number(s.points[0].y) || 0
-            const last = Number(s.points[s.points.length - 1].y) || 0
-            const dir = last > first ? 'rising' : last < first ? 'falling' : 'flat'
-            return `${s.name} ${dir}`
-        }).filter(Boolean).join('; ')
+        const trend = series
+            .map((s) => {
+                if (s.points.length < 2) return ''
+                const first = Number(s.points[0].y) || 0
+                const last = Number(s.points[s.points.length - 1].y) || 0
+                const dir = last > first ? 'rising' : last < first ? 'falling' : 'flat'
+                return `${s.name} ${dir}`
+            })
+            .filter(Boolean)
+            .join('; ')
         return `${kind} of ${series.length} series (${names}) across ${allX.length} points.${trend ? ` Trend: ${trend}.` : ''}`
     }
 
@@ -481,7 +512,10 @@ export class AreaChart extends HTMLElement {
             const dx = g.sx - ux
             const dy = g.sy - uy
             const d = dx * dx + dy * dy
-            if (d < bestDist) { bestDist = d; best = g }
+            if (d < bestDist) {
+                bestDist = d
+                best = g
+            }
         }
         if (!best) return
 
@@ -493,7 +527,9 @@ export class AreaChart extends HTMLElement {
         this._showTooltip(best, series, point)
 
         const detail: PointHoverDetail = { series, point, index: best.pointIndex }
-        this.dispatchEvent(new CustomEvent('tc-point-hover', { bubbles: true, composed: true, detail }))
+        this.dispatchEvent(
+            new CustomEvent('tc-point-hover', { bubbles: true, composed: true, detail }),
+        )
         if (typeof this._onPointHover === 'function') this._onPointHover(detail)
     }
 
@@ -502,7 +538,11 @@ export class AreaChart extends HTMLElement {
         if (tip) tip.hidden = true
     }
 
-    private _showTooltip(g: PointGeom, series: { name: string; color?: string }, point: AreaChartPoint): void {
+    private _showTooltip(
+        g: PointGeom,
+        series: { name: string; color?: string },
+        point: AreaChartPoint,
+    ): void {
         const tip = this.querySelector<HTMLElement>('.tc-area-chart__tooltip')
         if (!tip) return
         const colorVar = this._seriesColorVar(g.seriesIndex, series.color)
@@ -510,8 +550,8 @@ export class AreaChart extends HTMLElement {
         const yText = esc(this._yFormatter(Number(point.y) || 0))
         tip.style.setProperty('--tc-series-color', colorVar)
         tip.innerHTML =
-            `<span class="tc-area-chart__tooltip-name">${esc(series.name)}</span>`
-            + `<span class="tc-area-chart__tooltip-value">${xText} · ${yText}</span>`
+            `<span class="tc-area-chart__tooltip-name">${esc(series.name)}</span>` +
+            `<span class="tc-area-chart__tooltip-value">${xText} · ${yText}</span>`
         // position in plot pixels: the SVG fills the plot box, viewBox maps 1:1
         // to the rendered box, so scale user coords by the rendered/viewBox ratio
         const svg = this.querySelector<SVGSVGElement>('.tc-area-chart__svg')

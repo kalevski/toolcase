@@ -1,13 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cycle-wheel'
 
 // Minimal HTML-escape for user-supplied strings injected into innerHTML.
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 const DEFAULT_SPIN = 20
 
@@ -17,12 +11,19 @@ const DEFAULT_SPIN = 20
  * Port of `@toolcase/react-components` `CycleWheel`.
  */
 export class CycleWheel extends HTMLElement {
-
     private _initialised = false
     private _phases: string[] = []
 
     static get observedAttributes(): string[] {
-        return ['current-index', 'center-label', 'center-value', 'center-pill', 'center-sub', 'spin-seconds', 'paused']
+        return [
+            'current-index',
+            'center-label',
+            'center-value',
+            'center-pill',
+            'center-sub',
+            'spin-seconds',
+            'paused',
+        ]
     }
 
     connectedCallback(): void {
@@ -105,7 +106,9 @@ export class CycleWheel extends HTMLElement {
         const phases = this._phases
         const count = Math.max(phases.length, 1)
         const slotAngle = 360 / count
-        const active = phases.length ? ((this.currentIndex % phases.length) + phases.length) % phases.length : -1
+        const active = phases.length
+            ? ((this.currentIndex % phases.length) + phases.length) % phases.length
+            : -1
         const arrowRot = active >= 0 ? active * slotAngle : 0
         const spin = this.spinSeconds
 
@@ -129,23 +132,31 @@ export class CycleWheel extends HTMLElement {
 
         // Ring labels — each phase placed at its slot via a per-label rotation.
         // The whole ring spins; the active label is the only accented element.
-        const labelsHtml = phases.map((p, i) => {
-            const rot = (i * slotAngle).toFixed(3)
-            const cls = i === active
-                ? 'tc-cycle-wheel__label tc-cycle-wheel__label--active'
-                : 'tc-cycle-wheel__label'
-            return `<g transform="rotate(${rot} 200 200)"><text x="200" y="22" text-anchor="middle" dominant-baseline="middle" class="${cls}">${esc(p.toUpperCase())}</text></g>`
-        }).join('')
+        const labelsHtml = phases
+            .map((p, i) => {
+                const rot = (i * slotAngle).toFixed(3)
+                const cls =
+                    i === active
+                        ? 'tc-cycle-wheel__label tc-cycle-wheel__label--active'
+                        : 'tc-cycle-wheel__label'
+                return `<g transform="rotate(${rot} 200 200)"><text x="200" y="22" text-anchor="middle" dominant-baseline="middle" class="${cls}">${esc(p.toUpperCase())}</text></g>`
+            })
+            .join('')
 
         // Static pointer (does not spin): per-slot ticks + an arrow oriented to
         // the active phase, so the wheel reads as "oriented" even at rest.
-        const ticksHtml = phases.map((_, i) =>
-            `<line x1="0" y1="-196" x2="0" y2="-184" transform="rotate(${(i * slotAngle).toFixed(3)})" />`
-        ).join('')
+        const ticksHtml = phases
+            .map(
+                (_, i) =>
+                    `<line x1="0" y1="-196" x2="0" y2="-184" transform="rotate(${(i * slotAngle).toFixed(3)})" />`,
+            )
+            .join('')
 
         const labelEl = label ? `<div class="tc-cycle-wheel__core-label">${esc(label)}</div>` : ''
         const valueEl = `<div class="tc-cycle-wheel__core-value">${esc(value)}</div>`
-        const pillEl = this.centerPill ? `<div class="tc-cycle-wheel__core-pill">${esc(this.centerPill)}</div>` : ''
+        const pillEl = this.centerPill
+            ? `<div class="tc-cycle-wheel__core-pill">${esc(this.centerPill)}</div>`
+            : ''
         const subEl = sub ? `<div class="tc-cycle-wheel__core-sub">${esc(sub)}</div>` : ''
 
         this.innerHTML = `<div class="tc-cycle-wheel__inner">

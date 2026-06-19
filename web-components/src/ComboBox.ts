@@ -1,14 +1,7 @@
+import { esc } from './internal/esc'
 import { chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-combo-box'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export interface ComboOption {
     value: string
@@ -138,10 +131,10 @@ export class ComboBox extends HTMLElement {
     private _filteredOptions(): ComboOption[] {
         const q = this._query.trim().toLowerCase()
         if (!q) return this._options
-        return this._options.filter(opt => {
+        return this._options.filter((opt) => {
             if (opt.label.toLowerCase().includes(q)) return true
             if (opt.value.toLowerCase().includes(q)) return true
-            if (opt.keywords?.some(k => k.toLowerCase().includes(q))) return true
+            if (opt.keywords?.some((k) => k.toLowerCase().includes(q))) return true
             return false
         })
     }
@@ -151,15 +144,17 @@ export class ComboBox extends HTMLElement {
         if (!filtered.length) {
             return `<div class="tc-combo-box__empty">No matches</div>`
         }
-        return filtered.map(opt => {
-            const isSelected = opt.value === this.value
-            const selectedCls = isSelected ? ' tc-combo-box__option--selected' : ''
-            return (
-                `<div class="tc-combo-box__option${selectedCls}" role="option"` +
-                ` tabindex="0" aria-selected="${isSelected}" data-value="${esc(opt.value)}">` +
-                `${esc(opt.label)}</div>`
-            )
-        }).join('')
+        return filtered
+            .map((opt) => {
+                const isSelected = opt.value === this.value
+                const selectedCls = isSelected ? ' tc-combo-box__option--selected' : ''
+                return (
+                    `<div class="tc-combo-box__option${selectedCls}" role="option"` +
+                    ` tabindex="0" aria-selected="${isSelected}" data-value="${esc(opt.value)}">` +
+                    `${esc(opt.label)}</div>`
+                )
+            })
+            .join('')
     }
 
     // ── Selection ──────────────────────────────────────────────────────────
@@ -171,18 +166,20 @@ export class ComboBox extends HTMLElement {
         }
         this.value = value
         this._toggleOpen(false)
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
     // ── Render ─────────────────────────────────────────────────────────────
 
     private render(): void {
-        const selected = this._options.find(o => o.value === this.value)
+        const selected = this._options.find((o) => o.value === this.value)
         const triggerLabel = selected ? selected.label : this.placeholder
         const placeholderCls = selected ? '' : ' tc-combo-box__trigger--placeholder'
 
@@ -236,7 +233,7 @@ export class ComboBox extends HTMLElement {
     }
 
     private _wireOptions(): void {
-        this.querySelectorAll<HTMLElement>('.tc-combo-box__option').forEach(el => {
+        this.querySelectorAll<HTMLElement>('.tc-combo-box__option').forEach((el) => {
             const handle = () => this._select(el.dataset.value ?? '')
             el.addEventListener('click', handle)
             el.addEventListener('keydown', (e: KeyboardEvent) => {

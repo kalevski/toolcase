@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-user-panel'
@@ -7,26 +8,6 @@ export interface UserPanelMenuItem {
     key: string
     label: string
     icon?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    // 'gear' is the react/bootstrap name for the settings glyph; lucide calls it Settings.
-    const normalised = name === 'gear' ? 'settings' : name
-    const pascal = normalised
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 function deriveInitials(name: string): string {
@@ -174,7 +155,9 @@ export class UserPanel extends HTMLElement {
         if (trigger) trigger.setAttribute('aria-expanded', 'true')
         if (menuEl) menuEl.classList.add('show')
 
-        const enabled = Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item'))
+        const enabled = Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item'),
+        )
         if (enabled.length > 0) enabled[0].focus()
 
         this._menuOutsideHandler = (e: MouseEvent) => {
@@ -202,11 +185,13 @@ export class UserPanel extends HTMLElement {
     }
 
     private _selectMenuItem(key: string): void {
-        this.dispatchEvent(new CustomEvent('tc-menu-click', {
-            bubbles: true,
-            composed: true,
-            detail: { key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-menu-click', {
+                bubbles: true,
+                composed: true,
+                detail: { key },
+            }),
+        )
         if (typeof this.onMenuClick === 'function') this.onMenuClick(key)
         this._closeMenu()
     }
@@ -225,7 +210,9 @@ export class UserPanel extends HTMLElement {
     }
 
     private _onMenuKeydown = (e: KeyboardEvent): void => {
-        const enabled = Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item'))
+        const enabled = Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item'),
+        )
         if (!enabled.length) return
         const focused = document.activeElement as HTMLButtonElement
         const curIdx = enabled.indexOf(focused)
@@ -300,31 +287,28 @@ export class UserPanel extends HTMLElement {
             `</div>`
 
         const iconSvg = lucideByName(iconName)
-        const iconBtnClass = 'tc-user-panel-icon' + (highlighted ? ' tc-user-panel-icon--highlighted' : '')
-        const iconHtml =
-            `<button type="button" class="${iconBtnClass}" aria-label="Settings">${iconSvg}</button>`
+        const iconBtnClass =
+            'tc-user-panel-icon' + (highlighted ? ' tc-user-panel-icon--highlighted' : '')
+        const iconHtml = `<button type="button" class="${iconBtnClass}" aria-label="Settings">${iconSvg}</button>`
 
         const menuHtml = hasMenu
             ? `<div class="tc-user-panel-menu" role="menu">${this._buildMenuItemsHtml()}</div>`
             : ''
 
         this.innerHTML =
-            `<div class="tc-user-panel">` +
-            avatarHtml +
-            infoHtml +
-            iconHtml +
-            `</div>` +
-            menuHtml
+            `<div class="tc-user-panel">` + avatarHtml + infoHtml + iconHtml + `</div>` + menuHtml
 
         // Wire listeners after the innerHTML write.
         const iconBtn = this.querySelector<HTMLButtonElement>('.tc-user-panel-icon')
         if (iconBtn) {
             iconBtn.addEventListener('click', () => {
-                this.dispatchEvent(new CustomEvent('tc-icon-click', {
-                    bubbles: true,
-                    composed: true,
-                    detail: {},
-                }))
+                this.dispatchEvent(
+                    new CustomEvent('tc-icon-click', {
+                        bubbles: true,
+                        composed: true,
+                        detail: {},
+                    }),
+                )
                 if (typeof this.onIconClick === 'function') this.onIconClick()
             })
         }
@@ -337,7 +321,9 @@ export class UserPanel extends HTMLElement {
             }
             const menuEl = this.querySelector<HTMLElement>('.tc-user-panel-menu')
             if (menuEl) {
-                Array.from(menuEl.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item')).forEach(btn => {
+                Array.from(
+                    menuEl.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item'),
+                ).forEach((btn) => {
                     btn.addEventListener('click', () => {
                         const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                         if (idx >= 0 && idx < this._menuItems.length) {

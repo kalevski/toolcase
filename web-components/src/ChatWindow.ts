@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-chat-window'
 
 export interface ChatMessage {
@@ -18,14 +19,6 @@ export interface ChatChannel {
 export interface ChatWindowEventMap {
     'tc-send': CustomEvent<{ channel: string; text: string }>
     'tc-channel-change': CustomEvent<{ id: string }>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class ChatWindow extends HTMLElement {
@@ -156,25 +149,31 @@ export class ChatWindow extends HTMLElement {
         const active = this.activeChannel || (this._channels[0]?.id ?? '')
 
         const tabsMarkup = this._channels.length
-            ? this._channels.map((c) => {
-                const isActive = c.id === active
-                const cls = `tc-chat-window-tab${isActive ? ' is-active' : ''}`
-                const colorStyle = c.color ? `--bs-chat-window-tab-color:${esc(c.color)};` : ''
-                return `<button type="button" role="tab" aria-selected="${isActive}" class="${cls}" data-id="${esc(c.id)}" style="${colorStyle}">${esc(c.label)}</button>`
-            }).join('')
+            ? this._channels
+                  .map((c) => {
+                      const isActive = c.id === active
+                      const cls = `tc-chat-window-tab${isActive ? ' is-active' : ''}`
+                      const colorStyle = c.color
+                          ? `--bs-chat-window-tab-color:${esc(c.color)};`
+                          : ''
+                      return `<button type="button" role="tab" aria-selected="${isActive}" class="${cls}" data-id="${esc(c.id)}" style="${colorStyle}">${esc(c.label)}</button>`
+                  })
+                  .join('')
             : ''
         const tabsBlock = tabsMarkup
             ? `<div role="tablist" class="tc-chat-window-tabs">${tabsMarkup}</div>`
             : ''
 
-        const messagesMarkup = this._messages.map((m) => {
-            const cls = `tc-chat-window-message${m.system ? ' is-system' : ''}`
-            const colorStyle = m.color ? `--bs-chat-window-message-color:${esc(m.color)};` : ''
-            if (m.system) {
-                return `<div class="${cls}" data-id="${esc(m.id)}" style="${colorStyle}"><span class="tc-chat-window-message-body">${esc(m.body)}</span></div>`
-            }
-            return `<div class="${cls}" data-id="${esc(m.id)}" style="${colorStyle}"><span class="tc-chat-window-message-sender">${esc(m.sender)}</span><span class="tc-chat-window-message-body">${esc(m.body)}</span></div>`
-        }).join('')
+        const messagesMarkup = this._messages
+            .map((m) => {
+                const cls = `tc-chat-window-message${m.system ? ' is-system' : ''}`
+                const colorStyle = m.color ? `--bs-chat-window-message-color:${esc(m.color)};` : ''
+                if (m.system) {
+                    return `<div class="${cls}" data-id="${esc(m.id)}" style="${colorStyle}"><span class="tc-chat-window-message-body">${esc(m.body)}</span></div>`
+                }
+                return `<div class="${cls}" data-id="${esc(m.id)}" style="${colorStyle}"><span class="tc-chat-window-message-sender">${esc(m.sender)}</span><span class="tc-chat-window-message-body">${esc(m.body)}</span></div>`
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-chat-window">${tabsBlock}<div class="tc-chat-window-messages" role="log" aria-live="polite">${messagesMarkup}</div><div class="tc-chat-window-compose"><input type="text" class="tc-chat-window-input" placeholder="${esc(this.placeholder)}" aria-label="Message" /><button type="button" class="tc-chat-window-send">Send</button></div></div>`
 

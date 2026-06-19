@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-result-screen'
 
 // Port of game-components `gc-result-screen`. The fantasy chrome (gilded frame,
@@ -11,15 +12,6 @@ const TAG_NAME = 'tc-result-screen'
 // title-text / title-color / eyebrow defaults; tc-game-over-screen (defeat) and
 // tc-victory-screen (victory) are aliases that derive the variant from the tag
 // name. Every seeded default is overridable via the matching attribute.
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
 
 export type ResultScreenTitleColor = 'gold' | 'danger' | 'parch'
 const TITLE_COLORS: ResultScreenTitleColor[] = ['gold', 'danger', 'parch']
@@ -80,7 +72,6 @@ const ACTION_CLASS: Record<ResultScreenActionVariant, string> = {
 }
 
 export class ResultScreen extends HTMLElement {
-
     private _initialised = false
     private _stats: ResultStat[] = []
     private _rewards: ResultReward[] = []
@@ -97,9 +88,13 @@ export class ResultScreen extends HTMLElement {
         if (!this._initialised) {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'region')
             this.render()
-            this.addEventListener('click', this._onClick)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
     }
 
     disconnectedCallback(): void {
@@ -188,7 +183,9 @@ export class ResultScreen extends HTMLElement {
         if (!btn || !this.contains(btn)) return
         const id = btn.dataset.id
         if (!id) return
-        this.dispatchEvent(new CustomEvent('tc-action', { detail: { id }, bubbles: true, composed: true }))
+        this.dispatchEvent(
+            new CustomEvent('tc-action', { detail: { id }, bubbles: true, composed: true }),
+        )
         if (typeof this.onAction === 'function') this.onAction(id)
     }
 
@@ -199,34 +196,46 @@ export class ResultScreen extends HTMLElement {
     private render(): void {
         this.classList.add('tc-result-screen')
 
-        const statMarkup = this._stats.map(stat =>
-            `<div class="tc-result-screen-stat">`
-            + `<span class="tc-result-screen-stat-label">${esc(stat.label)}</span>`
-            + `<span class="tc-result-screen-stat-value">${esc(this._formatValue(stat.value))}</span>`
-            + `</div>`
-        ).join('')
+        const statMarkup = this._stats
+            .map(
+                (stat) =>
+                    `<div class="tc-result-screen-stat">` +
+                    `<span class="tc-result-screen-stat-label">${esc(stat.label)}</span>` +
+                    `<span class="tc-result-screen-stat-value">${esc(this._formatValue(stat.value))}</span>` +
+                    `</div>`,
+            )
+            .join('')
 
-        const rewardMarkup = this._rewards.map(reward => {
-            const colorStyle = reward.color ? ` style="color: ${esc(reward.color)}"` : ''
-            const glyphMarkup = reward.glyph
-                ? `<span class="tc-result-screen-reward-glyph"${colorStyle} aria-hidden="true">${esc(reward.glyph)}</span>`
-                : ''
-            const amountMarkup = reward.amount != null
-                ? `<span class="tc-result-screen-reward-amount">${esc(this._formatValue(reward.amount))}</span>`
-                : ''
-            return `<div class="tc-result-screen-reward">`
-                + glyphMarkup
-                + `<span class="tc-result-screen-reward-label">${esc(reward.label)}</span>`
-                + amountMarkup
-                + `</div>`
-        }).join('')
+        const rewardMarkup = this._rewards
+            .map((reward) => {
+                const colorStyle = reward.color ? ` style="color: ${esc(reward.color)}"` : ''
+                const glyphMarkup = reward.glyph
+                    ? `<span class="tc-result-screen-reward-glyph"${colorStyle} aria-hidden="true">${esc(reward.glyph)}</span>`
+                    : ''
+                const amountMarkup =
+                    reward.amount != null
+                        ? `<span class="tc-result-screen-reward-amount">${esc(this._formatValue(reward.amount))}</span>`
+                        : ''
+                return (
+                    `<div class="tc-result-screen-reward">` +
+                    glyphMarkup +
+                    `<span class="tc-result-screen-reward-label">${esc(reward.label)}</span>` +
+                    amountMarkup +
+                    `</div>`
+                )
+            })
+            .join('')
 
-        const actionMarkup = this._actions.map(action => {
-            const variant = ACTION_VARIANTS.includes(action.variant as ResultScreenActionVariant)
-                ? (action.variant as ResultScreenActionVariant)
-                : 'default'
-            return `<button type="button" class="tc-result-screen-action ${ACTION_CLASS[variant]}" data-id="${esc(action.id)}">${esc(action.label)}</button>`
-        }).join('')
+        const actionMarkup = this._actions
+            .map((action) => {
+                const variant = ACTION_VARIANTS.includes(
+                    action.variant as ResultScreenActionVariant,
+                )
+                    ? (action.variant as ResultScreenActionVariant)
+                    : 'default'
+                return `<button type="button" class="tc-result-screen-action ${ACTION_CLASS[variant]}" data-id="${esc(action.id)}">${esc(action.label)}</button>`
+            })
+            .join('')
 
         const subtitleMarkup = this.subtitle
             ? `<p class="tc-result-screen-subtitle">${esc(this.subtitle)}</p>`
@@ -235,10 +244,10 @@ export class ResultScreen extends HTMLElement {
             ? `<div class="tc-result-screen-stats">${statMarkup}</div>`
             : ''
         const rewardsBlock = rewardMarkup
-            ? `<div class="tc-result-screen-rewards">`
-                + `<span class="tc-result-screen-rewards-eyebrow">Rewards</span>`
-                + `<div class="tc-result-screen-rewards-list">${rewardMarkup}</div>`
-                + `</div>`
+            ? `<div class="tc-result-screen-rewards">` +
+              `<span class="tc-result-screen-rewards-eyebrow">Rewards</span>` +
+              `<div class="tc-result-screen-rewards-list">${rewardMarkup}</div>` +
+              `</div>`
             : ''
         const actionsBlock = actionMarkup
             ? `<div class="tc-result-screen-actions">${actionMarkup}</div>`

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const DialogueBoxDemo: React.FC = () => {
     const choiceRef = useRef<any>(null)
@@ -24,7 +23,7 @@ const DialogueBoxDemo: React.FC = () => {
     useEffect(() => {
         const el = advanceRef.current
         if (!el) return
-        const onAdvance = () => setAdvanceCount(c => c + 1)
+        const onAdvance = () => setAdvanceCount((c) => c + 1)
         el.addEventListener('tc-advance', onAdvance)
         return () => el.removeEventListener('tc-advance', onAdvance)
     }, [])
@@ -34,14 +33,17 @@ const DialogueBoxDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="DialogueBox"
+                        <tc-rich-page-header
+                            title-text="DialogueBox"
                             description="NPC dialogue box with an optional speaker name and a typewriter body line. Click (or tap) the box to fast-forward the typing; once revealed, an empty-choice box advances on click and emits tc-advance, while a box with choices presents clickable options that emit tc-choice. Restyled to the design system — flat slate surface, sharp corners, 1px hairline border."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="With speaker and advance indicator">
+                            <tc-section-card title="With speaker and advance indicator">
                                 {/* @ts-ignore */}
                                 <tc-dialogue-box
                                     ref={advanceRef}
@@ -49,28 +51,30 @@ const DialogueBoxDemo: React.FC = () => {
                                     text="The storm took out the eastern bridge. We'll have to find another way across before nightfall."
                                 />
                                 <p className="text-muted small mt-2 mb-0">
-                                    Advanced {advanceCount} time{advanceCount === 1 ? '' : 's'} (click the box after it finishes
-                                    typing).
+                                    Advanced {advanceCount} time{advanceCount === 1 ? '' : 's'}{' '}
+                                    (click the box after it finishes typing).
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With choices (choices JS property + tc-choice event)">
+                            <tc-section-card title="With choices (choices JS property + tc-choice event)">
                                 {/* @ts-ignore */}
                                 <tc-dialogue-box
                                     ref={choiceRef}
                                     speaker="Guild Clerk"
                                     text="There's a bounty posted for the marsh wyrm. Interested?"
                                 />
-                                <p className="text-muted small mt-2 mb-0">Last choice: {lastChoice}</p>
-                            </SectionCard>
+                                <p className="text-muted small mt-2 mb-0">
+                                    Last choice: {lastChoice}
+                                </p>
+                            </tc-section-card>
 
-                            <SectionCard title="No speaker, faster typing (typing-speed)">
+                            <tc-section-card title="No speaker, faster typing (typing-speed)">
                                 {/* @ts-ignore */}
                                 <tc-dialogue-box
                                     typing-speed="60"
                                     text="A narrator's voice, unattributed, hurries the scene along at sixty characters a second."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

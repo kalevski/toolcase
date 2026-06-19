@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useTimeValue(initial: string): [string, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -27,58 +26,94 @@ const TimePickerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Time Picker"
+                        <tc-rich-page-header
+                            title-text="Time Picker"
                             description="Time picker with a scrollable column interface supporting 12/24-hour formats, optional seconds, a clear button, and validation state."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="24-hour format">
+                            <tc-section-card title="24-hour format">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-time-picker ref={ref24} label="Start time" value="09:30" minute-step="15" />
-                                    <div className="form-text mt-1">Current value: {v24 || '(none)'}</div>
+                                    <tc-time-picker
+                                        ref={ref24}
+                                        label="Start time"
+                                        value="09:30"
+                                        minute-step="15"
+                                    />
+                                    <div className="form-text mt-1">
+                                        Current value: {v24 || '(none)'}
+                                    </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="12-hour format (AM/PM column)">
+                            <tc-section-card title="12-hour format (AM/PM column)">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-time-picker ref={ref12} label="Meeting time" format="12h" value="14:15" minute-step="5" />
-                                    <div className="form-text mt-1">Current value (24h): {v12 || '(none)'}</div>
+                                    <tc-time-picker
+                                        ref={ref12}
+                                        label="Meeting time"
+                                        format="12h"
+                                        value="14:15"
+                                        minute-step="5"
+                                    />
+                                    <div className="form-text mt-1">
+                                        Current value (24h): {v12 || '(none)'}
+                                    </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With seconds">
+                            <tc-section-card title="With seconds">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-time-picker ref={refSec} label="Timestamp" show-seconds value="08:05:30" />
-                                    <div className="form-text mt-1">Current value: {vSec || '(none)'}</div>
+                                    <tc-time-picker
+                                        ref={refSec}
+                                        label="Timestamp"
+                                        show-seconds
+                                        value="08:05:30"
+                                    />
+                                    <div className="form-text mt-1">
+                                        Current value: {vSec || '(none)'}
+                                    </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Clearable">
+                            <tc-section-card title="Clearable">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-time-picker ref={refClear} label="Reminder" clearable value="22:45" />
-                                    <div className="form-text mt-1">Current value: {vClear || '(none)'}</div>
+                                    <tc-time-picker
+                                        ref={refClear}
+                                        label="Reminder"
+                                        clearable
+                                        value="22:45"
+                                    />
+                                    <div className="form-text mt-1">
+                                        Current value: {vClear || '(none)'}
+                                    </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Error state">
+                            <tc-section-card title="Error state">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-time-picker label="Closing time" error="Please choose a valid time" placeholder="Pick a time" />
+                                    <tc-time-picker
+                                        label="Closing time"
+                                        error="Please choose a valid time"
+                                        placeholder="Pick a time"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-time-picker label="Locked" value="12:00" disabled />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

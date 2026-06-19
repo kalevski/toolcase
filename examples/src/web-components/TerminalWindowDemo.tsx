@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const STATIC_LINES = [
     { type: 'comment', text: '# Install the package' },
@@ -32,19 +31,22 @@ const TerminalWindowDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="TerminalWindow"
+                        <tc-rich-page-header
+                            title-text="TerminalWindow"
                             description="Styled terminal/console window with macOS-style chrome, command prompts, and an optional character-by-character typing animation. Set lines via the JS lines property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Static — command · output · comment">
+                            <tc-section-card title="Static — command · output · comment">
                                 {/* @ts-ignore */}
                                 <tc-terminal-window ref={staticRef} title="~/projects/my-app" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Animated typing — custom title, prompt & speed">
+                            <tc-section-card title="Animated typing — custom title, prompt & speed">
                                 {/* @ts-ignore */}
                                 <tc-terminal-window
                                     ref={typedRef}
@@ -53,7 +55,7 @@ const TerminalWindowDemo: React.FC = () => {
                                     animate-typing=""
                                     speed="55"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

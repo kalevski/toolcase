@@ -111,10 +111,12 @@ export class NetworkStatusIcon extends HTMLElement {
 
         this.dataset.tier = tier
 
-        const barsHtml = [1, 2, 3, 4].map(i => {
-            const active = i <= bars ? ' is-active' : ''
-            return `<span class="tc-network-status-icon-bar${active}" data-step="${i}" aria-hidden="true"></span>`
-        }).join('')
+        const barsHtml = [1, 2, 3, 4]
+            .map((i) => {
+                const active = i <= bars ? ' is-active' : ''
+                return `<span class="tc-network-status-icon-bar${active}" data-step="${i}" aria-hidden="true"></span>`
+            })
+            .join('')
 
         const ariaLabel = TIER_LABELS[tier]
         const labelHtml = this.showLabel

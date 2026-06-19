@@ -6,7 +6,6 @@ export type PaginationAlign = 'start' | 'center' | 'end'
 const ALIGNS: PaginationAlign[] = ['start', 'center', 'end']
 
 export class Pagination extends HTMLElement {
-
     private _onClick: (e: Event) => void
 
     static get observedAttributes(): string[] {
@@ -24,11 +23,13 @@ export class Pagination extends HTMLElement {
             if (isNaN(page) || page === this.current) return
 
             this.setAttribute('current', String(page))
-            this.dispatchEvent(new CustomEvent('tc-page-change', {
-                bubbles: true,
-                composed: true,
-                detail: { page },
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-page-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { page },
+                }),
+            )
         }
     }
 
@@ -99,14 +100,8 @@ export class Pagination extends HTMLElement {
         const sideCount = Math.max(1, Math.floor((maxVisible - 3) / 2))
         const pages: Array<number | '...'> = []
 
-        const rangeStart = Math.min(
-            Math.max(2, current - sideCount),
-            total - sideCount * 2 - 1
-        )
-        const rangeEnd = Math.max(
-            Math.min(total - 1, current + sideCount),
-            sideCount * 2 + 2
-        )
+        const rangeStart = Math.min(Math.max(2, current - sideCount), total - sideCount * 2 - 1)
+        const rangeEnd = Math.max(Math.min(total - 1, current + sideCount), sideCount * 2 + 2)
 
         pages.push(1)
         if (rangeStart > 2) pages.push('...')
@@ -128,16 +123,19 @@ export class Pagination extends HTMLElement {
         const prevDisabled = current === 1
         const nextDisabled = current === total
 
-        const pageItems = pages.map(p => {
-            if (p === '...') {
-                return `<li class="page-item disabled"><span class="page-link">&hellip;</span></li>`
-            }
-            const active = p === current ? ' active' : ''
-            const ariaCurrent = p === current ? ' aria-current="page"' : ''
-            return `<li class="page-item${active}"${ariaCurrent}><a class="page-link" href="#" data-page="${p}">${p}</a></li>`
-        }).join('')
+        const pageItems = pages
+            .map((p) => {
+                if (p === '...') {
+                    return `<li class="page-item disabled"><span class="page-link">&hellip;</span></li>`
+                }
+                const active = p === current ? ' active' : ''
+                const ariaCurrent = p === current ? ' aria-current="page"' : ''
+                return `<li class="page-item${active}"${ariaCurrent}><a class="page-link" href="#" data-page="${p}">${p}</a></li>`
+            })
+            .join('')
 
-        const ul = `<ul class="pagination${sizeClass}">` +
+        const ul =
+            `<ul class="pagination${sizeClass}">` +
             `<li class="page-item${prevDisabled ? ' disabled' : ''}">` +
             `<a class="page-link" href="#" data-page="${current - 1}" aria-label="Previous">&laquo;</a></li>` +
             pageItems +

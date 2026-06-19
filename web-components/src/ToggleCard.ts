@@ -1,33 +1,15 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-toggle-card'
 
 let _idCounter = 0
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 // kebab-case (or a "bi-"-prefixed name, for React-prop parity) → PascalCase
 // lookup in lucide-static, wrapped in icon() so CSS owns sizing.
-function lucideByName(name: string): string {
-    const pascal = name
-        .replace(/^bi-/, '')
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 export class ToggleCard extends HTMLElement {
-
     private _initialised = false
     private _hintId: string
 
@@ -45,11 +27,15 @@ export class ToggleCard extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this.render()
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -149,11 +135,13 @@ export class ToggleCard extends HTMLElement {
         if (this.disabled || this.loading) return
         const next = !this.checked
         this.checked = next
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { checked: next },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { checked: next },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(next)
     }
 
@@ -203,9 +191,10 @@ export class ToggleCard extends HTMLElement {
         const hintHtml = hasHint
             ? `<span class="tc-toggle-card-hint" id="${this._hintId}">${esc(hint as string)}</span>`
             : ''
-        const badgeHtml = badge != null && badge !== ''
-            ? `<span class="tc-toggle-card-badge">${esc(badge)}</span>`
-            : ''
+        const badgeHtml =
+            badge != null && badge !== ''
+                ? `<span class="tc-toggle-card-badge">${esc(badge)}</span>`
+                : ''
         const bodyHtml = [
             `<span class="tc-toggle-card-body">`,
             labelHtml,
@@ -220,9 +209,10 @@ export class ToggleCard extends HTMLElement {
             : `<span class="tc-toggle-card-switch" aria-hidden="true"><span class="tc-toggle-card-knob"></span></span>`
 
         // Native checkbox semantics: present in form data only while checked.
-        const hiddenInput = name && checked && !loading
-            ? `<input type="hidden" name="${esc(name)}" value="${esc(value)}">`
-            : ''
+        const hiddenInput =
+            name && checked && !loading
+                ? `<input type="hidden" name="${esc(name)}" value="${esc(value)}">`
+                : ''
 
         this.innerHTML = [hiddenInput, iconHtml, bodyHtml, controlHtml].join('')
     }

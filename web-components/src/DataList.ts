@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-data-list'
 
 export interface DataListActionDetail {
@@ -16,14 +17,6 @@ export interface DataListEventMap {
 
 /** Row renderer hook — returns the full markup for one row (typically an `<li>`). */
 export type DataListRenderRow = (item: any, index: number) => string
-
-function esc(s: unknown): string {
-    return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 /**
  * tc-data-list — a generic, data-driven row list. It owns the shared skeleton
@@ -171,8 +164,7 @@ export class DataList extends HTMLElement {
 
         const bodyRole = this.selectable ? 'listbox' : 'list'
         this.innerHTML =
-            headerHtml +
-            `<ul class="tc-data-list__body" role="${bodyRole}">${bodyInner}</ul>`
+            headerHtml + `<ul class="tc-data-list__body" role="${bodyRole}">${bodyInner}</ul>`
 
         this._wire()
         this._syncSelection()
@@ -183,7 +175,7 @@ export class DataList extends HTMLElement {
         if (!this.selectable) return
         const selected = this.selectedId
         const rows = this.querySelectorAll<HTMLElement>('.tc-data-list__row[data-id]')
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const isSel = row.dataset.id === selected && selected !== ''
             row.classList.toggle('tc-data-list__row--selected', isSel)
             row.setAttribute('aria-selected', isSel ? 'true' : 'false')

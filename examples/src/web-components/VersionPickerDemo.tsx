@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const VERSIONS = [
     { label: 'v3.2', value: '3.2', latest: true },
@@ -33,12 +32,12 @@ const VersionPickerDemo: React.FC = () => {
             const detail = (e as CustomEvent<{ value: string }>).detail
             setSelection(detail.value)
             // Keep both controls in sync so the demo reads as one selection
-            els.forEach(el => {
+            els.forEach((el) => {
                 if (el.value !== detail.value) el.value = detail.value
             })
         }
-        els.forEach(el => el.addEventListener('tc-change', handler))
-        return () => els.forEach(el => el.removeEventListener('tc-change', handler))
+        els.forEach((el) => el.addEventListener('tc-change', handler))
+        return () => els.forEach((el) => el.removeEventListener('tc-change', handler))
     }, [])
 
     return (
@@ -46,25 +45,36 @@ const VersionPickerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="VersionPicker"
+                        <tc-rich-page-header
+                            title-text="VersionPicker"
                             description="Version selector rendered as a segmented button group or a native-style dropdown. Versions carry latest / LTS / deprecated annotations and emit tc-change on selection."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Segmented (latest / LTS / deprecated, arrow-key navigation)">
+                            <tc-section-card title="Segmented (latest / LTS / deprecated, arrow-key navigation)">
                                 {/* @ts-ignore */}
-                                <tc-version-picker ref={segmentedRef} variant="segmented" name="version" />
+                                <tc-version-picker
+                                    ref={segmentedRef}
+                                    variant="segmented"
+                                    name="version"
+                                />
                                 <div className="form-text mt-2">
                                     Selected: <code>{selection}</code>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Dropdown (native select with annotations)">
+                            <tc-section-card title="Dropdown (native select with annotations)">
                                 {/* @ts-ignore */}
-                                <tc-version-picker ref={dropdownRef} variant="dropdown" name="version-dd" />
-                            </SectionCard>
+                                <tc-version-picker
+                                    ref={dropdownRef}
+                                    variant="dropdown"
+                                    name="version-dd"
+                                />
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

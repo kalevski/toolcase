@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-bar-chart'
 
 // One bar = a category label, a numeric value, and an optional explicit color.
@@ -21,14 +22,6 @@ export interface BarClickDetail {
 const PALETTE_SIZE = 6
 
 const DEFAULT_HEIGHT = 260
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // Round a raw axis maximum up to a visually "nice" number (mirrors the React
 // BarChart niceMax).
@@ -205,12 +198,13 @@ export class BarChart extends HTMLElement {
         const data = this._data
         const titleAttr = this.getAttribute('title')
         const subtitle = this.getAttribute('subtitle')
-        const headerHtml = (titleAttr || subtitle)
-            ? `<div class="tc-bar-chart__header">`
-                + (titleAttr ? `<div class="tc-bar-chart__title">${esc(titleAttr)}</div>` : '')
-                + (subtitle ? `<div class="tc-bar-chart__subtitle">${esc(subtitle)}</div>` : '')
-                + `</div>`
-            : ''
+        const headerHtml =
+            titleAttr || subtitle
+                ? `<div class="tc-bar-chart__header">` +
+                  (titleAttr ? `<div class="tc-bar-chart__title">${esc(titleAttr)}</div>` : '') +
+                  (subtitle ? `<div class="tc-bar-chart__subtitle">${esc(subtitle)}</div>` : '') +
+                  `</div>`
+                : ''
 
         if (!data.length) {
             this.innerHTML = `<div class="tc-bar-chart__inner">${headerHtml}<div class="tc-bar-chart__empty">No data</div></div>`
@@ -220,7 +214,10 @@ export class BarChart extends HTMLElement {
 
         const VH = this.height
         const VW = this._measurePlot()
-        const PL = 52, PR = 14, PT = 18, PB = 38
+        const PL = 52,
+            PR = 14,
+            PT = 18,
+            PB = 38
         const cW = Math.max(VW - PL - PR, 10)
         const cH = Math.max(VH - PT - PB, 10)
         this._vw = VW
@@ -263,13 +260,16 @@ export class BarChart extends HTMLElement {
 
                 this._anchors[i] = { ax: cx, ay: y, color }
 
-                barsHtml += `<g class="tc-bar-chart__bar" data-idx="${i}" role="button" tabindex="0" aria-label="${esc(`${d.label}: ${valueText}`)}" style="--tc-bar-color: ${color}">`
+                barsHtml +=
+                    `<g class="tc-bar-chart__bar" data-idx="${i}" role="button" tabindex="0" aria-label="${esc(`${d.label}: ${valueText}`)}" style="--tc-bar-color: ${color}">` +
                     // generous transparent hit/focus target spanning the whole column cell
-                    + `<rect class="tc-bar-chart__hit" x="${(PL + i * bGroup).toFixed(1)}" y="${PT}" width="${bGroup.toFixed(1)}" height="${cH.toFixed(1)}" />`
-                    + `<rect class="tc-bar-chart__rect" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bW.toFixed(1)}" height="${bH.toFixed(1)}" />`
-                    + (showValues ? `<text class="tc-bar-chart__value" x="${cx.toFixed(1)}" y="${(y - 5).toFixed(1)}" text-anchor="middle">${valueText}</text>` : '')
-                    + `<text class="tc-bar-chart__cat-label" x="${cx.toFixed(1)}" y="${(baseline + 16).toFixed(1)}" text-anchor="middle">${esc(d.label)}</text>`
-                    + `</g>`
+                    `<rect class="tc-bar-chart__hit" x="${(PL + i * bGroup).toFixed(1)}" y="${PT}" width="${bGroup.toFixed(1)}" height="${cH.toFixed(1)}" />` +
+                    `<rect class="tc-bar-chart__rect" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bW.toFixed(1)}" height="${bH.toFixed(1)}" />` +
+                    (showValues
+                        ? `<text class="tc-bar-chart__value" x="${cx.toFixed(1)}" y="${(y - 5).toFixed(1)}" text-anchor="middle">${valueText}</text>`
+                        : '') +
+                    `<text class="tc-bar-chart__cat-label" x="${cx.toFixed(1)}" y="${(baseline + 16).toFixed(1)}" text-anchor="middle">${esc(d.label)}</text>` +
+                    `</g>`
             })
         } else {
             const bGroup = cH / data.length
@@ -296,22 +296,26 @@ export class BarChart extends HTMLElement {
 
                 this._anchors[i] = { ax: PL + bW, ay: cy, color }
 
-                barsHtml += `<g class="tc-bar-chart__bar" data-idx="${i}" role="button" tabindex="0" aria-label="${esc(`${d.label}: ${valueText}`)}" style="--tc-bar-color: ${color}">`
+                barsHtml +=
+                    `<g class="tc-bar-chart__bar" data-idx="${i}" role="button" tabindex="0" aria-label="${esc(`${d.label}: ${valueText}`)}" style="--tc-bar-color: ${color}">` +
                     // generous transparent hit/focus target spanning the whole row cell
-                    + `<rect class="tc-bar-chart__hit" x="${PL}" y="${(PT + i * bGroup).toFixed(1)}" width="${cW.toFixed(1)}" height="${bGroup.toFixed(1)}" />`
-                    + `<rect class="tc-bar-chart__rect" x="${PL}" y="${y.toFixed(1)}" width="${bW.toFixed(1)}" height="${bH.toFixed(1)}" />`
-                    + (showValues ? `<text class="tc-bar-chart__value tc-bar-chart__value--h" x="${(PL + bW + 6).toFixed(1)}" y="${(cy + 4).toFixed(1)}">${valueText}</text>` : '')
-                    + `<text class="tc-bar-chart__cat-label" x="${(PL - 8).toFixed(1)}" y="${(cy + 4).toFixed(1)}" text-anchor="end">${esc(d.label)}</text>`
-                    + `</g>`
+                    `<rect class="tc-bar-chart__hit" x="${PL}" y="${(PT + i * bGroup).toFixed(1)}" width="${cW.toFixed(1)}" height="${bGroup.toFixed(1)}" />` +
+                    `<rect class="tc-bar-chart__rect" x="${PL}" y="${y.toFixed(1)}" width="${bW.toFixed(1)}" height="${bH.toFixed(1)}" />` +
+                    (showValues
+                        ? `<text class="tc-bar-chart__value tc-bar-chart__value--h" x="${(PL + bW + 6).toFixed(1)}" y="${(cy + 4).toFixed(1)}">${valueText}</text>`
+                        : '') +
+                    `<text class="tc-bar-chart__cat-label" x="${(PL - 8).toFixed(1)}" y="${(cy + 4).toFixed(1)}" text-anchor="end">${esc(d.label)}</text>` +
+                    `</g>`
             })
         }
 
         const summary = this._summary(data, orientation)
         const svgHtml =
-            `<svg class="tc-bar-chart__svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">`
-            + `<title>${esc(summary)}</title><desc>${esc(summary)}</desc>`
-            + gridHtml + barsHtml
-            + `</svg>`
+            `<svg class="tc-bar-chart__svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">` +
+            `<title>${esc(summary)}</title><desc>${esc(summary)}</desc>` +
+            gridHtml +
+            barsHtml +
+            `</svg>`
 
         const tooltipHtml = `<div class="tc-bar-chart__tooltip" role="status" aria-live="polite" hidden></div>`
 
@@ -344,16 +348,19 @@ export class BarChart extends HTMLElement {
             ? `<div class="tc-bar-chart__header"><div class="tc-bar-chart__skeleton tc-bar-chart__skeleton--title" aria-hidden="true"></div></div>`
             : ''
         this.innerHTML =
-            `<div class="tc-bar-chart__inner">`
-            + headHtml
-            + `<div class="tc-bar-chart__skeleton tc-bar-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>`
-            + `<span class="visually-hidden">Loading…</span>`
-            + `</div>`
+            `<div class="tc-bar-chart__inner">` +
+            headHtml +
+            `<div class="tc-bar-chart__skeleton tc-bar-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+            `<span class="visually-hidden">Loading…</span>` +
+            `</div>`
     }
 
     private _summary(data: BarChartDataItem[], orientation: BarChartOrientation): string {
         const fmt = this._yFormatter
-        const parts = data.slice(0, 12).map((d) => `${d.label} ${fmt(Number(d.value) || 0)}`).join(', ')
+        const parts = data
+            .slice(0, 12)
+            .map((d) => `${d.label} ${fmt(Number(d.value) || 0)}`)
+            .join(', ')
         const more = data.length > 12 ? `, …` : ''
         return `${orientation === 'horizontal' ? 'Horizontal bar' : 'Bar'} chart of ${data.length} items: ${parts}${more}.`
     }
@@ -393,8 +400,8 @@ export class BarChart extends HTMLElement {
         const valueText = esc(this._yFormatter(Number(item.value) || 0))
         tip.style.setProperty('--tc-bar-color', anchor.color)
         tip.innerHTML =
-            `<span class="tc-bar-chart__tooltip-name">${esc(item.label)}</span>`
-            + `<span class="tc-bar-chart__tooltip-value">${valueText}</span>`
+            `<span class="tc-bar-chart__tooltip-name">${esc(item.label)}</span>` +
+            `<span class="tc-bar-chart__tooltip-value">${valueText}</span>`
         // position in plot pixels: the SVG fills the plot box, viewBox maps 1:1
         // to the rendered box, so scale user coords by the rendered/viewBox ratio
         const svg = this.querySelector<SVGSVGElement>('.tc-bar-chart__svg')
@@ -412,11 +419,13 @@ export class BarChart extends HTMLElement {
         const idx = this._barIndexFromEvent(e)
         if (idx < 0) return
         const item = this._data[idx]
-        this.dispatchEvent(new CustomEvent('tc-bar-click', {
-            bubbles: true,
-            composed: true,
-            detail: { item, index: idx } as BarClickDetail,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-bar-click', {
+                bubbles: true,
+                composed: true,
+                detail: { item, index: idx } as BarClickDetail,
+            }),
+        )
         if (typeof this._onClick === 'function') this._onClick(item, idx)
     }
 

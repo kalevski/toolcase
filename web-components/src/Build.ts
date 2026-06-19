@@ -1,3 +1,5 @@
+import { VARIANTS_CORE } from './internal/variants'
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { ActionItem } from './ActionItems'
@@ -8,21 +10,13 @@ export type BuildStatus = 'pass' | 'fail' | 'running' | 'queued'
 export type BuildBadgeVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info'
 
 const STATUSES: BuildStatus[] = ['pass', 'fail', 'running', 'queued']
-const BADGE_VARIANTS: BuildBadgeVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info']
+const BADGE_VARIANTS: BuildBadgeVariant[] = [...VARIANTS_CORE]
 
 const STATUS_META: Record<BuildStatus, { lucideKey: string; ariaLabel: string }> = {
     pass: { lucideKey: 'Check', ariaLabel: 'Pass' },
     fail: { lucideKey: 'X', ariaLabel: 'Fail' },
     running: { lucideKey: 'Loader2', ariaLabel: 'Running' },
     queued: { lucideKey: 'Clock', ariaLabel: 'Queued' },
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 function lucideHtml(name: string, className?: string): string {
@@ -205,7 +199,7 @@ export class Build extends HTMLElement {
 
     private _getEnabledItems(): HTMLButtonElement[] {
         return Array.from(
-            this.querySelectorAll<HTMLButtonElement>('.tc-build-menu-item:not([disabled])')
+            this.querySelectorAll<HTMLButtonElement>('.tc-build-menu-item:not([disabled])'),
         )
     }
 
@@ -245,7 +239,10 @@ export class Build extends HTMLElement {
 
         const status = this.status
         const { lucideKey, ariaLabel } = STATUS_META[status]
-        const statusIconHtml = lucideHtml(lucideKey, `tc-build-status-icon tc-build-status-icon--${status}`)
+        const statusIconHtml = lucideHtml(
+            lucideKey,
+            `tc-build-status-icon tc-build-status-icon--${status}`,
+        )
         const nameVal = this.getAttribute('name')
         const dateVal = this.getAttribute('date')
         const sizeRaw = parseInt(this.getAttribute('size') ?? '', 10)
@@ -264,13 +261,13 @@ export class Build extends HTMLElement {
         // Meta row
         const metaItems: string[] = []
         if (dateVal) metaItems.push(`<span class="tc-build-meta-item">${esc(dateVal)}</span>`)
-        if (sizeVal != null) metaItems.push(`<span class="tc-build-meta-item">${esc(formatBytes(sizeVal))}</span>`)
-        if (durVal != null) metaItems.push(`<span class="tc-build-meta-item">${esc(formatDuration(durVal))}</span>`)
+        if (sizeVal != null)
+            metaItems.push(`<span class="tc-build-meta-item">${esc(formatBytes(sizeVal))}</span>`)
+        if (durVal != null)
+            metaItems.push(`<span class="tc-build-meta-item">${esc(formatDuration(durVal))}</span>`)
         const sep = '<span class="tc-build-meta-sep" aria-hidden="true">&middot;</span>'
         const metaHtml =
-            metaItems.length > 0
-                ? `<div class="tc-build-meta">${metaItems.join(sep)}</div>`
-                : ''
+            metaItems.length > 0 ? `<div class="tc-build-meta">${metaItems.join(sep)}</div>` : ''
 
         const badgeHtml =
             badgeVal != null
@@ -336,7 +333,9 @@ export class Build extends HTMLElement {
                 if (this._isMenuOpen) this._closeMenu()
                 else this._openMenu()
             })
-            trigger.addEventListener('keydown', (e: Event) => this._onTriggerKeydown(e as KeyboardEvent))
+            trigger.addEventListener('keydown', (e: Event) =>
+                this._onTriggerKeydown(e as KeyboardEvent),
+            )
         }
 
         // Menu keyboard navigation
@@ -346,7 +345,9 @@ export class Build extends HTMLElement {
         }
 
         // Menu item clicks
-        Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-build-menu-item:not([disabled])')).forEach(btn => {
+        Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-build-menu-item:not([disabled])'),
+        ).forEach((btn) => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._menuItems.length) {
@@ -383,7 +384,7 @@ export class Build extends HTMLElement {
         const menu = this._getMenu()
         if (trigger) trigger.setAttribute('aria-expanded', 'false')
         if (menu) menu.classList.remove('show')
-        this._getEnabledItems().forEach(btn => btn.setAttribute('tabindex', '-1'))
+        this._getEnabledItems().forEach((btn) => btn.setAttribute('tabindex', '-1'))
         this._removeOutsideListener()
         if (refocus) trigger?.focus()
     }
@@ -396,11 +397,13 @@ export class Build extends HTMLElement {
     }
 
     private _selectItem(key: string): void {
-        this.dispatchEvent(new CustomEvent('tc-menu-select', {
-            bubbles: true,
-            composed: true,
-            detail: { key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-menu-select', {
+                bubbles: true,
+                composed: true,
+                detail: { key },
+            }),
+        )
         if (typeof this._onMenuItemClick === 'function') this._onMenuItemClick(key)
         this._closeMenu()
     }

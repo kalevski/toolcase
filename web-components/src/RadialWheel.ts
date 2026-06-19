@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-radial-wheel'
 
 export interface RadialOption {
@@ -6,14 +7,6 @@ export interface RadialOption {
     label?: string
     color?: string
     disabled?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class RadialWheel extends HTMLElement {
@@ -117,7 +110,9 @@ export class RadialWheel extends HTMLElement {
 
     private _close(): void {
         this.open = false
-        this.dispatchEvent(new CustomEvent('tc-close', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-close', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onClose === 'function') this.onClose()
     }
 
@@ -173,38 +168,44 @@ export class RadialWheel extends HTMLElement {
         this._page = Math.min(Math.max(0, this._page), pageCount - 1)
         const pageStart = this._page * perPage
         const pageOptions = this._options.slice(pageStart, pageStart + perPage)
-        const hoverOption = pageOptions.find(o => o.id === this._hoverId) ?? null
+        const hoverOption = pageOptions.find((o) => o.id === this._hoverId) ?? null
 
         // Distribute the page's items evenly around the full circle. The angle
         // step is 2π / count, starting at the top (−π/2) and going clockwise, so
         // a single item lands dead-centre at the top and the gaps stay uniform.
         const n = pageOptions.length
-        const optionsHtml = pageOptions.map((opt, i) => {
-            const angle = (i / Math.max(1, n)) * Math.PI * 2 - Math.PI / 2
-            const x = Math.cos(angle) * radius
-            const y = Math.sin(angle) * radius
-            const isHover = opt.id === this._hoverId
-            const cls = [
-                'tc-radial-wheel-option',
-                opt.disabled ? 'tc-radial-wheel-option--disabled' : '',
-                isHover ? 'tc-radial-wheel-option--hover' : '',
-            ].filter(Boolean).join(' ')
-            // Per-option color fed through a custom property so the SCSS can
-            // expose it as --bs-radial-wheel-option-color on each button.
-            const colorStyle = opt.color ? `--bs-radial-wheel-option-color:${esc(opt.color)};` : ''
-            const icon = opt.icon ?? '●'
-            return (
-                `<button type="button"` +
-                ` role="menuitem"` +
-                ` class="${cls}"` +
-                ` data-id="${esc(opt.id)}"` +
-                (opt.disabled ? ` disabled aria-disabled="true"` : '') +
-                ` aria-label="${esc(opt.label ?? opt.id)}"` +
-                ` style="left:calc(50% + ${x.toFixed(2)}px);top:calc(50% + ${y.toFixed(2)}px);${colorStyle}"` +
-                `><span class="tc-radial-wheel-option-icon" aria-hidden="true">${esc(icon)}</span>` +
-                `</button>`
-            )
-        }).join('')
+        const optionsHtml = pageOptions
+            .map((opt, i) => {
+                const angle = (i / Math.max(1, n)) * Math.PI * 2 - Math.PI / 2
+                const x = Math.cos(angle) * radius
+                const y = Math.sin(angle) * radius
+                const isHover = opt.id === this._hoverId
+                const cls = [
+                    'tc-radial-wheel-option',
+                    opt.disabled ? 'tc-radial-wheel-option--disabled' : '',
+                    isHover ? 'tc-radial-wheel-option--hover' : '',
+                ]
+                    .filter(Boolean)
+                    .join(' ')
+                // Per-option color fed through a custom property so the SCSS can
+                // expose it as --bs-radial-wheel-option-color on each button.
+                const colorStyle = opt.color
+                    ? `--bs-radial-wheel-option-color:${esc(opt.color)};`
+                    : ''
+                const icon = opt.icon ?? '●'
+                return (
+                    `<button type="button"` +
+                    ` role="menuitem"` +
+                    ` class="${cls}"` +
+                    ` data-id="${esc(opt.id)}"` +
+                    (opt.disabled ? ` disabled aria-disabled="true"` : '') +
+                    ` aria-label="${esc(opt.label ?? opt.id)}"` +
+                    ` style="left:calc(50% + ${x.toFixed(2)}px);top:calc(50% + ${y.toFixed(2)}px);${colorStyle}"` +
+                    `><span class="tc-radial-wheel-option-icon" aria-hidden="true">${esc(icon)}</span>` +
+                    `</button>`
+                )
+            })
+            .join('')
 
         // Show the page position in the centre when paging and nothing is hovered,
         // so the hub doubles as the current-page readout (e.g. "1 / 3").
@@ -214,11 +215,12 @@ export class RadialWheel extends HTMLElement {
 
         // Pagination uses the canonical tc-page-indicator dot row, centred below
         // the disc inside the stack so it sits clear of the option ring.
-        const pagerHtml = pageCount > 1
-            ? `<tc-page-indicator class="tc-radial-wheel-pager" count="${pageCount}" index="${this._page}" aria-label="Wheel pages"></tc-page-indicator>`
-            : ''
+        const pagerHtml =
+            pageCount > 1
+                ? `<tc-page-indicator class="tc-radial-wheel-pager" count="${pageCount}" index="${this._page}" aria-label="Wheel pages"></tc-page-indicator>`
+                : ''
 
-        this.innerHTML = (
+        this.innerHTML =
             `<div class="tc-radial-wheel-backdrop" aria-hidden="true"></div>` +
             `<div class="tc-radial-wheel-stack">` +
             `<div class="tc-radial-wheel-disc">` +
@@ -227,7 +229,6 @@ export class RadialWheel extends HTMLElement {
             `</div>` +
             pagerHtml +
             `</div>`
-        )
 
         // Wire the page indicator's tc-select to page changes. The indicator is
         // recreated each render, so the listener is re-attached every time.
@@ -241,9 +242,9 @@ export class RadialWheel extends HTMLElement {
 
         // Attach hover listeners on each option button after innerHTML write.
         // Option click listeners also live here since buttons are replaced every render.
-        this.querySelectorAll<HTMLButtonElement>('.tc-radial-wheel-option').forEach(btn => {
+        this.querySelectorAll<HTMLButtonElement>('.tc-radial-wheel-option').forEach((btn) => {
             const id = btn.dataset.id ?? ''
-            const opt = this._options.find(o => o.id === id)
+            const opt = this._options.find((o) => o.id === id)
             if (!opt) return
 
             btn.addEventListener('mouseenter', () => {
@@ -258,13 +259,15 @@ export class RadialWheel extends HTMLElement {
             })
 
             if (!opt.disabled) {
-                btn.addEventListener('click', e => {
+                btn.addEventListener('click', (e) => {
                     e.stopPropagation()
-                    this.dispatchEvent(new CustomEvent('tc-select', {
-                        bubbles: true,
-                        composed: true,
-                        detail: { id },
-                    }))
+                    this.dispatchEvent(
+                        new CustomEvent('tc-select', {
+                            bubbles: true,
+                            composed: true,
+                            detail: { id },
+                        }),
+                    )
                     if (typeof this.onSelect === 'function') this.onSelect(id)
                 })
             }

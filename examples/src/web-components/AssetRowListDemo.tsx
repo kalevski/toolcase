@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const AssetRowListDemo: React.FC = () => {
     const taggedRef = useRef<any>(null)
@@ -20,14 +19,17 @@ const AssetRowListDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="AssetRowList"
+                        <tc-rich-page-header
+                            title-text="AssetRowList"
                             description="A bordered container wrapping one or more tc-asset-row elements. Provides a single 1px outer hairline frame; inner row separators are provided by tc-asset-row itself, with the last row's border collapsed to avoid double-borders."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic file list">
+                            <tc-section-card title="Basic file list">
                                 {/* @ts-ignore */}
                                 <tc-asset-row-list>
                                     {/* @ts-ignore */}
@@ -40,29 +42,43 @@ const AssetRowListDemo: React.FC = () => {
                                     <tc-asset-row icon="Music" name="track.mp3" size="3.8 MB" />
                                     {/* @ts-ignore */}
                                 </tc-asset-row-list>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Rows with tags (set via JS property)">
+                            <tc-section-card title="Rows with tags (set via JS property)">
                                 {/* @ts-ignore */}
                                 <tc-asset-row-list>
                                     {/* @ts-ignore */}
-                                    <tc-asset-row ref={taggedRef} icon="Package" name="@toolcase/base" size="12 KB" />
+                                    <tc-asset-row
+                                        ref={taggedRef}
+                                        icon="Package"
+                                        name="@toolcase/base"
+                                        size="12 KB"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-asset-row ref={pkgRef} icon="Box" name="bundle.min.js" size="48 KB" />
+                                    <tc-asset-row
+                                        ref={pkgRef}
+                                        icon="Box"
+                                        name="bundle.min.js"
+                                        size="48 KB"
+                                    />
                                     {/* @ts-ignore */}
-                                    <tc-asset-row icon="Archive" name="release-1.0.0.tar.gz" size="2.3 MB" />
+                                    <tc-asset-row
+                                        icon="Archive"
+                                        name="release-1.0.0.tar.gz"
+                                        size="2.3 MB"
+                                    />
                                     {/* @ts-ignore */}
                                 </tc-asset-row-list>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Single row">
+                            <tc-section-card title="Single row">
                                 {/* @ts-ignore */}
                                 <tc-asset-row-list>
                                     {/* @ts-ignore */}
                                     <tc-asset-row icon="File" name="config.json" size="512 B" />
                                     {/* @ts-ignore */}
                                 </tc-asset-row-list>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

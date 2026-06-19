@@ -3,7 +3,6 @@ const TAG_NAME = 'tc-accordion'
 let counter = 0
 
 export class Accordion extends HTMLElement {
-
     private _accordionId: string
 
     static get observedAttributes(): string[] {

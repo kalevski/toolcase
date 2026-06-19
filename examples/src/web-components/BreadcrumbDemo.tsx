@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BreadcrumbDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Breadcrumb"
+                    <tc-rich-page-header
+                        title-text="Breadcrumb"
                         description="Navigation trail backed by Bootstrap's breadcrumb. Wrap tc-breadcrumb-item elements inside tc-breadcrumb. Use href for linked items, active to mark the current page, and divider to customise the separator character."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Default breadcrumb — slash separator">
+                        <tc-section-card title="Default breadcrumb — slash separator">
                             {/* @ts-ignore */}
                             <tc-breadcrumb>
                                 {/* @ts-ignore */}
@@ -22,11 +24,11 @@ const BreadcrumbDemo: React.FC = () => (
                                 <tc-breadcrumb-item href="/library">Library</tc-breadcrumb-item>
                                 {/* @ts-ignore */}
                                 <tc-breadcrumb-item active>Data</tc-breadcrumb-item>
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-breadcrumb>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Custom divider — arrow (>)">
+                        <tc-section-card title="Custom divider — arrow (>)">
                             {/* @ts-ignore */}
                             <tc-breadcrumb divider=">">
                                 {/* @ts-ignore */}
@@ -35,18 +37,18 @@ const BreadcrumbDemo: React.FC = () => (
                                 <tc-breadcrumb-item href="/products">Products</tc-breadcrumb-item>
                                 {/* @ts-ignore */}
                                 <tc-breadcrumb-item active>Widget</tc-breadcrumb-item>
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-breadcrumb>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Active-only breadcrumb — single item">
+                        <tc-section-card title="Active-only breadcrumb — single item">
                             {/* @ts-ignore */}
                             <tc-breadcrumb>
                                 {/* @ts-ignore */}
                                 <tc-breadcrumb-item active>Home</tc-breadcrumb-item>
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-breadcrumb>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

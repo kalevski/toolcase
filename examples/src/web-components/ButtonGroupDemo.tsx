@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ButtonGroupDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Button Group"
+                    <tc-rich-page-header
+                        title-text="Button Group"
                         description="Bootstrap button group wrapper supporting horizontal and vertical layouts with optional size variants."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Basic Group">
+                        <tc-section-card title="Basic Group">
                             {/* @ts-ignore */}
                             <tc-button-group aria-label="Basic actions">
                                 {/* @ts-ignore */}
@@ -24,9 +26,9 @@ const ButtonGroupDemo: React.FC = () => (
                                 <tc-button variant="primary">Right</tc-button>
                                 {/* @ts-ignore */}
                             </tc-button-group>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Sizes">
+                        <tc-section-card title="Sizes">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
                                 <tc-button-group size="lg" aria-label="Large group">
@@ -59,9 +61,9 @@ const ButtonGroupDemo: React.FC = () => (
                                     {/* @ts-ignore */}
                                 </tc-button-group>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Vertical">
+                        <tc-section-card title="Vertical">
                             {/* @ts-ignore */}
                             <tc-button-group vertical aria-label="Vertical actions">
                                 {/* @ts-ignore */}
@@ -72,20 +74,26 @@ const ButtonGroupDemo: React.FC = () => (
                                 <tc-button variant="primary">Bottom</tc-button>
                                 {/* @ts-ignore */}
                             </tc-button-group>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Outline Buttons">
+                        <tc-section-card title="Outline Buttons">
                             {/* @ts-ignore */}
                             <tc-button-group aria-label="Outline group">
                                 {/* @ts-ignore */}
-                                <tc-button variant="danger" outline>Delete</tc-button>
+                                <tc-button variant="danger" outline>
+                                    Delete
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="warning" outline>Archive</tc-button>
+                                <tc-button variant="warning" outline>
+                                    Archive
+                                </tc-button>
                                 {/* @ts-ignore */}
-                                <tc-button variant="success" outline>Save</tc-button>
+                                <tc-button variant="success" outline>
+                                    Save
+                                </tc-button>
                                 {/* @ts-ignore */}
                             </tc-button-group>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

@@ -1,11 +1,8 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon, chevronRightIcon } from './icons'
 
 const TAG_NAME = 'tc-context-menu'
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 export interface ContextMenuItem {
     key: string
@@ -41,7 +38,7 @@ export class ContextMenu extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-context-menu-trigger')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
@@ -83,33 +80,37 @@ export class ContextMenu extends HTMLElement {
     }
 
     private _renderItems(items: ContextMenuItem[]): string {
-        return items.map(item => {
-            if (item.separator) {
-                return `<li class="tc-context-menu-separator" role="separator" aria-hidden="true"></li>`
-            }
-            const disabled = item.disabled === true
-            const danger = item.danger === true
-            const hasChildren = Array.isArray(item.children) && item.children.length > 0
+        return items
+            .map((item) => {
+                if (item.separator) {
+                    return `<li class="tc-context-menu-separator" role="separator" aria-hidden="true"></li>`
+                }
+                const disabled = item.disabled === true
+                const danger = item.danger === true
+                const hasChildren = Array.isArray(item.children) && item.children.length > 0
 
-            const disabledAttr = disabled ? ' aria-disabled="true"' : ''
-            const hasPopupAttr = hasChildren ? ' aria-haspopup="menu" aria-expanded="false"' : ''
-            const iconHtml = item.icon ? this._resolveIcon(item.icon) : ''
-            const chevronHtml = hasChildren
-                ? `<span class="tc-context-menu-chevron" aria-hidden="true">${chevronRightIcon}</span>`
-                : ''
+                const disabledAttr = disabled ? ' aria-disabled="true"' : ''
+                const hasPopupAttr = hasChildren
+                    ? ' aria-haspopup="menu" aria-expanded="false"'
+                    : ''
+                const iconHtml = item.icon ? this._resolveIcon(item.icon) : ''
+                const chevronHtml = hasChildren
+                    ? `<span class="tc-context-menu-chevron" aria-hidden="true">${chevronRightIcon}</span>`
+                    : ''
 
-            let cls = 'tc-context-menu-item'
-            if (danger) cls += ' tc-context-menu-item--danger'
-            if (disabled) cls += ' tc-context-menu-item--disabled'
-            if (hasChildren) cls += ' tc-context-menu-item--has-children'
+                let cls = 'tc-context-menu-item'
+                if (danger) cls += ' tc-context-menu-item--danger'
+                if (disabled) cls += ' tc-context-menu-item--disabled'
+                if (hasChildren) cls += ' tc-context-menu-item--has-children'
 
-            const submenuHtml = hasChildren
-                ? `<ul class="tc-context-menu-list tc-context-menu-list--sub" role="menu">${this._renderItems(item.children!)}</ul>`
-                : ''
+                const submenuHtml = hasChildren
+                    ? `<ul class="tc-context-menu-list tc-context-menu-list--sub" role="menu">${this._renderItems(item.children!)}</ul>`
+                    : ''
 
-            // tabindex="-1": not in the Tab order; focused only programmatically (ARIA menu pattern)
-            return `<li class="${cls}" role="menuitem"${disabledAttr}${hasPopupAttr} data-key="${esc(item.key)}" tabindex="-1">${iconHtml}<span class="tc-context-menu-label">${esc(item.label)}</span>${chevronHtml}${submenuHtml}</li>`
-        }).join('')
+                // tabindex="-1": not in the Tab order; focused only programmatically (ARIA menu pattern)
+                return `<li class="${cls}" role="menuitem"${disabledAttr}${hasPopupAttr} data-key="${esc(item.key)}" tabindex="-1">${iconHtml}<span class="tc-context-menu-label">${esc(item.label)}</span>${chevronHtml}${submenuHtml}</li>`
+            })
+            .join('')
     }
 
     private render(): void {
@@ -196,7 +197,7 @@ export class ContextMenu extends HTMLElement {
 
         // Focus first enabled item
         const firstItem = menu.querySelector<HTMLElement>(
-            '.tc-context-menu-item:not(.tc-context-menu-item--disabled)'
+            '.tc-context-menu-item:not(.tc-context-menu-item--disabled)',
         )
         firstItem?.focus()
 
@@ -218,7 +219,7 @@ export class ContextMenu extends HTMLElement {
         const menu = this._getMenu()
         if (menu) {
             // Close all open submenus
-            menu.querySelectorAll('.tc-context-menu-item--open').forEach(el => {
+            menu.querySelectorAll('.tc-context-menu-item--open').forEach((el) => {
                 el.classList.remove('tc-context-menu-item--open')
                 el.setAttribute('aria-expanded', 'false')
             })
@@ -237,7 +238,7 @@ export class ContextMenu extends HTMLElement {
         if (refocus) {
             const trigger = this._getTrigger()
             const focusable = trigger?.querySelector<HTMLElement>(
-                'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
             )
             focusable?.focus()
         }
@@ -257,7 +258,10 @@ export class ContextMenu extends HTMLElement {
         requestAnimationFrame(() => {
             const itemRect = item.getBoundingClientRect()
             const subRect = sub.getBoundingClientRect()
-            sub.classList.toggle('tc-context-menu-list--flip-x', itemRect.right + subRect.width > window.innerWidth)
+            sub.classList.toggle(
+                'tc-context-menu-list--flip-x',
+                itemRect.right + subRect.width > window.innerWidth,
+            )
         })
     }
 
@@ -265,7 +269,7 @@ export class ContextMenu extends HTMLElement {
         const sub = item.querySelector<HTMLElement>('.tc-context-menu-list--sub')
         if (!sub) return
         // Recursively close nested submenus
-        sub.querySelectorAll<HTMLElement>('.tc-context-menu-item--open').forEach(el => {
+        sub.querySelectorAll<HTMLElement>('.tc-context-menu-item--open').forEach((el) => {
             el.classList.remove('tc-context-menu-item--open')
             el.setAttribute('aria-expanded', 'false')
         })
@@ -307,10 +311,10 @@ export class ContextMenu extends HTMLElement {
         const parentMenu = target.parentElement
         if (parentMenu) {
             Array.from(
-                parentMenu.querySelectorAll<HTMLElement>(':scope > .tc-context-menu-item--open')
+                parentMenu.querySelectorAll<HTMLElement>(':scope > .tc-context-menu-item--open'),
             )
-                .filter(s => s !== target)
-                .forEach(s => this._closeSubmenu(s))
+                .filter((s) => s !== target)
+                .forEach((s) => this._closeSubmenu(s))
         }
 
         if (target.classList.contains('tc-context-menu-item--has-children')) {
@@ -331,7 +335,9 @@ export class ContextMenu extends HTMLElement {
         if (!currentMenu || !this.contains(currentMenu)) return
 
         const enabled = Array.from(
-            currentMenu.querySelectorAll<HTMLElement>(':scope > .tc-context-menu-item:not(.tc-context-menu-item--disabled)')
+            currentMenu.querySelectorAll<HTMLElement>(
+                ':scope > .tc-context-menu-item:not(.tc-context-menu-item--disabled)',
+            ),
         )
         const currentIdx = enabled.indexOf(focused)
 
@@ -352,7 +358,7 @@ export class ContextMenu extends HTMLElement {
                     this._openSubmenu(focused)
                     const sub = focused.querySelector<HTMLElement>('.tc-context-menu-list--sub')
                     const firstEnabled = sub?.querySelector<HTMLElement>(
-                        '.tc-context-menu-item:not(.tc-context-menu-item--disabled)'
+                        '.tc-context-menu-item:not(.tc-context-menu-item--disabled)',
                     )
                     firstEnabled?.focus()
                 }
@@ -375,7 +381,7 @@ export class ContextMenu extends HTMLElement {
                     this._openSubmenu(focused)
                     const sub = focused.querySelector<HTMLElement>('.tc-context-menu-list--sub')
                     const firstEnabled = sub?.querySelector<HTMLElement>(
-                        '.tc-context-menu-item:not(.tc-context-menu-item--disabled)'
+                        '.tc-context-menu-item:not(.tc-context-menu-item--disabled)',
                     )
                     firstEnabled?.focus()
                 } else {
@@ -412,7 +418,7 @@ export class ContextMenu extends HTMLElement {
                 bubbles: true,
                 composed: true,
                 detail: { key },
-            })
+            }),
         )
         if (typeof this.onSelect === 'function') this.onSelect(key)
         this._closeMenu()

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CardOptionsDemo: React.FC = () => {
     const iconRef = useRef<any>(null)
@@ -80,34 +79,41 @@ const CardOptionsDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CardOptions"
+                        <tc-rich-page-header
+                            title-text="CardOptions"
                             description="Grid of selectable card options with icons and a check indicator on the selected card. Behaves as an accessible radiogroup with full keyboard navigation."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — 3 columns with icons">
-                                <p className="text-muted small mb-3">Open the browser console to see tc-change events.</p>
+                            <tc-section-card title="Default — 3 columns with icons">
+                                <p className="text-muted small mb-3">
+                                    Open the browser console to see tc-change events.
+                                </p>
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-card-options ref={iconRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`2 columns with description — selected: ${selectedPlan}`}>
+                            <tc-section-card
+                                title={`2 columns with description — selected: ${selectedPlan}`}
+                            >
                                 <div style={{ maxWidth: 400 }}>
                                     {/* @ts-ignore */}
                                     <tc-card-options ref={descRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`4 columns — selected: ${selectedEnv}`}>
+                            <tc-section-card title={`4 columns — selected: ${selectedEnv}`}>
                                 <div style={{ maxWidth: 640 }}>
                                     {/* @ts-ignore */}
                                     <tc-card-options ref={fourColRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FRAMEWORK_OPTIONS = [
     { value: 'react', label: 'React', keywords: ['meta', 'jsx', 'hooks'] },
@@ -56,34 +55,42 @@ const ComboBoxDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ComboBox"
+                        <tc-rich-page-header
+                            title-text="ComboBox"
                             description="A trigger button with a filterable dropdown of options. Set options via the options JS property; type in the search field to filter by label, value, or keywords; listen for tc-change."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Filterable framework picker">
+                            <tc-section-card title="Filterable framework picker">
                                 <p className="text-muted small mb-3">
-                                    Options are set via the <code>options</code> JS property. Click the trigger
-                                    to open; type to filter (matches <code>label</code>, <code>value</code>, and{' '}
-                                    <code>keywords</code>); press Enter to pick the first match; Escape closes.
+                                    Options are set via the <code>options</code> JS property. Click
+                                    the trigger to open; type to filter (matches <code>label</code>,{' '}
+                                    <code>value</code>, and <code>keywords</code>); press Enter to
+                                    pick the first match; Escape closes.
                                 </p>
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-combo-box ref={basicRef} placeholder="Choose a framework…" />
+                                    <tc-combo-box
+                                        ref={basicRef}
+                                        placeholder="Choose a framework…"
+                                    />
                                 </div>
                                 {selected && (
                                     <p className="mt-3 text-muted small">
                                         Selected: <strong>{selected}</strong>
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Preselected value">
+                            <tc-section-card title="Preselected value">
                                 <p className="text-muted small mb-3">
-                                    Pass a <code>value</code> attribute to set an initial selection; the trigger
-                                    shows that option's label and the matching row is highlighted in the list.
+                                    Pass a <code>value</code> attribute to set an initial selection;
+                                    the trigger shows that option's label and the matching row is
+                                    highlighted in the list.
                                 </p>
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
@@ -96,12 +103,12 @@ const ComboBoxDemo: React.FC = () => {
                                 <p className="mt-3 text-muted small">
                                     Current value: <strong>{tz}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled state">
+                            <tc-section-card title="Disabled state">
                                 <p className="text-muted small mb-3">
-                                    The boolean <code>disabled</code> attribute dims the trigger and prevents the
-                                    dropdown from opening.
+                                    The boolean <code>disabled</code> attribute dims the trigger and
+                                    prevents the dropdown from opening.
                                 </p>
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
@@ -112,7 +119,7 @@ const ComboBoxDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

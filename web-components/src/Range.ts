@@ -1,9 +1,9 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-range'
 
 let _idCounter = 0
 
 export class Range extends HTMLElement {
-
     private _inputId: string
     private _initialised = false
 
@@ -54,7 +54,9 @@ export class Range extends HTMLElement {
     }
 
     get value(): string {
-        return this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
+        return (
+            this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
+        )
     }
     set value(v: string) {
         const input = this.querySelector<HTMLInputElement>('input')
@@ -84,15 +86,17 @@ export class Range extends HTMLElement {
         const max = this.max
         const step = this.step
         const disabled = this.disabled
-        const currentValue = this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
+        const currentValue =
+            this.querySelector<HTMLInputElement>('input')?.value ?? this.getAttribute('value') ?? ''
 
         const stepAttr = step != null ? ` step="${esc(step)}"` : ''
         const disabledAttr = disabled ? ' disabled' : ''
         const valueAttr = currentValue !== '' ? ` value="${esc(currentValue)}"` : ''
 
-        const labelHtml = label != null
-            ? `<label class="form-label" for="${this._inputId}">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label != null
+                ? `<label class="form-label" for="${this._inputId}">${esc(label)}</label>`
+                : ''
 
         this.innerHTML = [
             labelHtml,
@@ -100,10 +104,6 @@ export class Range extends HTMLElement {
             ` min="${esc(min)}" max="${esc(max)}"${stepAttr}${valueAttr}${disabledAttr}>`,
         ].join('')
     }
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 declare global {

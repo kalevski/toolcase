@@ -84,20 +84,23 @@ code, pre, .mono { font-family: var(--font-mono); }
     background: var(--accent);
     display: inline-block;
 }
-.nav {
+/* Scoped to the site header — `.nav` is also the Bootstrap-compatible class the
+   tc-nav web component uses, so unscoped rules here leak onto every nav demo
+   (light hover/active fills made tc-nav text unreadable, esp. in the dungeon theme). */
+.site-header .nav {
     display: flex;
     gap: 4px;
     align-items: center;
 }
-.nav a {
+.site-header .nav a {
     padding: 6px 12px;
     font-size: 14px;
     color: var(--fg-2);
     border-radius: var(--radius);
     font-weight: 500;
 }
-.nav a:hover { color: var(--fg); background: var(--bg-2); }
-.nav a.active { color: var(--fg); background: var(--bg-3); }
+.site-header .nav a:hover { color: var(--fg); background: var(--bg-2); }
+.site-header .nav a.active { color: var(--fg); background: var(--bg-3); }
 .header-spacer { flex: 1; }
 .header-meta {
     display: flex;

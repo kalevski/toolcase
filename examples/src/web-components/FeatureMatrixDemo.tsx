@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FeatureMatrixDemo: React.FC = () => {
     const fullRef = useRef<any>(null)
@@ -52,7 +51,10 @@ const FeatureMatrixDemo: React.FC = () => {
             { id: 'advanced', label: 'Advanced' },
         ]
         partialRef.current.rows = [
-            { label: 'Storage', values: { basic: '5 GB', standard: '50 GB', advanced: 'Unlimited' } },
+            {
+                label: 'Storage',
+                values: { basic: '5 GB', standard: '50 GB', advanced: 'Unlimited' },
+            },
             { label: 'Collaboration', values: { basic: false, standard: true, advanced: true } },
             { label: 'Audit log', values: { basic: false, standard: 'partial', advanced: true } },
         ]
@@ -76,34 +78,34 @@ const FeatureMatrixDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="FeatureMatrix"
+                        <tc-rich-page-header
+                            title-text="FeatureMatrix"
                             description="Comparison table of features vs columns supporting boolean, partial, and custom values with highlight column bands."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Full matrix — boolean / partial / custom values + title">
+                            <tc-section-card title="Full matrix — boolean / partial / custom values + title">
                                 {/* @ts-ignore */}
-                                <tc-feature-matrix
-                                    ref={fullRef}
-                                    title="Plan Comparison"
-                                />
-                            </SectionCard>
+                                <tc-feature-matrix ref={fullRef} title="Plan Comparison" />
+                            </tc-section-card>
 
-                            <SectionCard title="Compact matrix — highlighted standard column">
+                            <tc-section-card title="Compact matrix — highlighted standard column">
                                 {/* @ts-ignore */}
                                 <tc-feature-matrix ref={partialRef} title="Feature Overview" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted title">
+                            <tc-section-card title="Slotted title">
                                 {/* @ts-ignore */}
                                 <tc-feature-matrix ref={slottedRef}>
                                     <span slot="title">
                                         <strong>Open Source</strong> vs Cloud
                                     </span>
                                 </tc-feature-matrix>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

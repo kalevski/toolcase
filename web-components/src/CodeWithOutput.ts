@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-code-with-output'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type CodeWithOutputLanguage = 'javascript' | 'typescript' | 'bash'
 export type CodeWithOutputLayout = 'split' | 'stacked'
@@ -91,8 +84,12 @@ export class CodeWithOutput extends HTMLElement {
     private _rerenderWithSlots(): void {
         // Re-capture slot nodes from within their permanent containers
         this._titleSlotNodes = Array.from(this.querySelectorAll('.tc-cwo-title [slot="title"]'))
-        this._outputSlotNodes = Array.from(this.querySelectorAll('.tc-cwo-normal-content [slot="output"]'))
-        this._errorSlotNodes = Array.from(this.querySelectorAll('.tc-cwo-error-content [slot="error"]'))
+        this._outputSlotNodes = Array.from(
+            this.querySelectorAll('.tc-cwo-normal-content [slot="output"]'),
+        )
+        this._errorSlotNodes = Array.from(
+            this.querySelectorAll('.tc-cwo-error-content [slot="error"]'),
+        )
 
         this.render()
         this._distributeSlots()
@@ -102,16 +99,16 @@ export class CodeWithOutput extends HTMLElement {
         // Title slot
         if (this._titleSlotNodes.length > 0) {
             const titleEl = this.querySelector('.tc-cwo-title')
-            if (titleEl) this._titleSlotNodes.forEach(n => titleEl.appendChild(n))
+            if (titleEl) this._titleSlotNodes.forEach((n) => titleEl.appendChild(n))
         }
 
         // Output slot (always present in DOM — normal content container)
         const normalBody = this.querySelector('.tc-cwo-normal-content')
-        if (normalBody) this._outputSlotNodes.forEach(n => normalBody.appendChild(n))
+        if (normalBody) this._outputSlotNodes.forEach((n) => normalBody.appendChild(n))
 
         // Error slot (always present in DOM — error content container)
         const errorBody = this.querySelector('.tc-cwo-error-content')
-        if (errorBody) this._errorSlotNodes.forEach(n => errorBody.appendChild(n))
+        if (errorBody) this._errorSlotNodes.forEach((n) => errorBody.appendChild(n))
     }
 
     private render(): void {
@@ -137,19 +134,19 @@ export class CodeWithOutput extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-cwo ${layoutClass}">` +
-                titleHtml +
-                `<div class="tc-cwo-panes">` +
-                    `<div class="tc-cwo-code">` +
-                        `<div class="tc-cwo-code-header">` +
-                            `<span class="tc-cwo-lang">${esc(language.toUpperCase())}</span>` +
-                        `</div>` +
-                        `<pre><code class="tc-cwo-code-block">${esc(code)}</code></pre>` +
-                    `</div>` +
-                    `<div class="tc-cwo-output${errorClass}"${alertRole}>` +
-                        `<div class="tc-cwo-output-body tc-cwo-normal-content">${normalBodyHtml}</div>` +
-                        `<div class="tc-cwo-output-body tc-cwo-error-content">${errorBodyHtml}</div>` +
-                    `</div>` +
-                `</div>` +
+            titleHtml +
+            `<div class="tc-cwo-panes">` +
+            `<div class="tc-cwo-code">` +
+            `<div class="tc-cwo-code-header">` +
+            `<span class="tc-cwo-lang">${esc(language.toUpperCase())}</span>` +
+            `</div>` +
+            `<pre><code class="tc-cwo-code-block">${esc(code)}</code></pre>` +
+            `</div>` +
+            `<div class="tc-cwo-output${errorClass}"${alertRole}>` +
+            `<div class="tc-cwo-output-body tc-cwo-normal-content">${normalBodyHtml}</div>` +
+            `<div class="tc-cwo-output-body tc-cwo-error-content">${errorBodyHtml}</div>` +
+            `</div>` +
+            `</div>` +
             `</div>`
     }
 }

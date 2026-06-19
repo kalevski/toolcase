@@ -69,10 +69,10 @@ export class Modal extends BsOverlay {
 
     protected captureSlots(): void {
         this._bodyNodes = Array.from(this.childNodes).filter(
-            n => !(n instanceof Element && n.getAttribute('slot') === 'footer'),
+            (n) => !(n instanceof Element && n.getAttribute('slot') === 'footer'),
         )
         this._footerNodes = Array.from(this.childNodes).filter(
-            n => n instanceof Element && n.getAttribute('slot') === 'footer',
+            (n) => n instanceof Element && n.getAttribute('slot') === 'footer',
         )
     }
 
@@ -124,11 +124,11 @@ export class Modal extends BsOverlay {
             `</div>`
 
         const body = this.querySelector('.modal-body')
-        if (body) this._bodyNodes.forEach(n => body.appendChild(n))
+        if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
 
         if (hasFooter) {
             const footer = this.querySelector('.modal-footer')
-            if (footer) this._footerNodes.forEach(n => footer.appendChild(n))
+            if (footer) this._footerNodes.forEach((n) => footer.appendChild(n))
         }
     }
 }

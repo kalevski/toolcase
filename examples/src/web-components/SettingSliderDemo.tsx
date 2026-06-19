@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useSliderValue(initial: number): [number, boolean, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -15,7 +14,7 @@ function useSliderValue(initial: number): [number, boolean, React.RefObject<any>
             if (detail) setValue(detail.value)
         }
         const ontoggle = () => {
-            setMuted(m => {
+            setMuted((m) => {
                 const next = !m
                 if (el) el.muted = next
                 return next
@@ -43,21 +42,32 @@ const SettingSliderDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Setting Slider"
+                        <tc-rich-page-header
+                            title-text="Setting Slider"
                             description="A generic range-slider setting row: a native range input paired with a mono readout, plus an optional mute button. The readout format is driven by `format` (percent / int / float + unit). tc-volume-slider, tc-deadzone-slider and tc-fov-slider are presets."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Generic (0–100, integer)">
+                            <tc-section-card title="Generic (0–100, integer)">
                                 <div style={wellStyle}>
                                     {/* @ts-ignore */}
-                                    <tc-setting-slider row-label="Render scale" value="100" min="50" max="200" step="5" format="int" unit="%" />
+                                    <tc-setting-slider
+                                        row-label="Render scale"
+                                        value="100"
+                                        min="50"
+                                        max="200"
+                                        step="5"
+                                        format="int"
+                                        unit="%"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Volume preset (with mute, percent)">
+                            <tc-section-card title="Volume preset (with mute, percent)">
                                 <div style={wellStyle}>
                                     {/* @ts-ignore */}
                                     <tc-volume-slider ref={refVol} value="0.8" />
@@ -65,28 +75,42 @@ const SettingSliderDemo: React.FC = () => {
                                 <div className="form-text mt-1">
                                     Current: {Math.round(vol * 100)}% {muted ? '(muted)' : ''}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Deadzone preset (percent)">
+                            <tc-section-card title="Deadzone preset (percent)">
                                 <div style={wellStyle}>
                                     {/* @ts-ignore */}
-                                    <tc-deadzone-slider row-label="Left stick deadzone" description="Ignore input below this threshold." value="0.15" />
+                                    <tc-deadzone-slider
+                                        row-label="Left stick deadzone"
+                                        description="Ignore input below this threshold."
+                                        value="0.15"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="FOV preset (integer degrees)">
+                            <tc-section-card title="FOV preset (integer degrees)">
                                 <div style={wellStyle}>
                                     {/* @ts-ignore */}
-                                    <tc-fov-slider row-label="Field of View" min="70" max="140" value="103" />
+                                    <tc-fov-slider
+                                        row-label="Field of View"
+                                        min="70"
+                                        max="140"
+                                        value="103"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div style={wellStyle}>
                                     {/* @ts-ignore */}
-                                    <tc-volume-slider row-label="Sound effects" description="Locked — connect a device first." value="0.7" disabled />
+                                    <tc-volume-slider
+                                        row-label="Sound effects"
+                                        description="Locked — connect a device first."
+                                        value="0.7"
+                                        disabled
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

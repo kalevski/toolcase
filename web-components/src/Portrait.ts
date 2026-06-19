@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-portrait'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function looksLikeUrl(s: string): boolean {
     return /^https?:\/\//.test(s) || /^\//.test(s) || /\.(png|jpe?g|gif|webp|svg|avif)$/i.test(s)
@@ -108,14 +101,17 @@ export class Portrait extends HTMLElement {
             bodyContent = `<span class="tc-portrait__glyph" aria-hidden="true">${esc(glyph)}</span>`
         }
 
-        const levelHtml = level !== null
-            ? `<span class="tc-portrait__level">${esc(String(Math.floor(level)))}</span>`
-            : ''
+        const levelHtml =
+            level !== null
+                ? `<span class="tc-portrait__level">${esc(String(Math.floor(level)))}</span>`
+                : ''
 
         this.innerHTML = bodyContent + levelHtml
     }
 }
 
 declare global {
-    interface HTMLElementTagNameMap { [TAG_NAME]: Portrait }
+    interface HTMLElementTagNameMap {
+        [TAG_NAME]: Portrait
+    }
 }

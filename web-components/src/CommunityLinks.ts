@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -41,21 +42,14 @@ const PLATFORM_ICONS: Record<string, string> = {
 
 const FALLBACK_ICON = 'Link'
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function resolvePlatformIcon(name: string): string {
     if (!name) return ''
     const key = name.toLowerCase().trim()
     const lucideName = PLATFORM_ICONS[key] ?? name
-    const svgStr = (LucideIcons as Record<string, string>)[lucideName]
-        ?? (LucideIcons as Record<string, string>)[FALLBACK_ICON]
-        ?? ''
+    const svgStr =
+        (LucideIcons as Record<string, string>)[lucideName] ??
+        (LucideIcons as Record<string, string>)[FALLBACK_ICON] ??
+        ''
     return svgStr ? icon(svgStr, 'tc-community-links-item__icon-svg') : ''
 }
 
@@ -70,11 +64,13 @@ export class CommunityLinks extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             const hasTitleAttr = this.hasAttribute('title')
-            const slotNodes = hasTitleAttr ? [] : Array.from(this.querySelectorAll('[slot="title"]'))
+            const slotNodes = hasTitleAttr
+                ? []
+                : Array.from(this.querySelectorAll('[slot="title"]'))
             this.render()
             if (!hasTitleAttr) {
                 const slot = this.querySelector('.tc-community-links-title-slot')
-                if (slot) slotNodes.forEach(n => slot.appendChild(n))
+                if (slot) slotNodes.forEach((n) => slot.appendChild(n))
                 this._updateHeaderVisibility()
             }
             this._initialised = true
@@ -85,11 +81,12 @@ export class CommunityLinks extends HTMLElement {
         if (!this.isConnected || !this._initialised) return
         const hasTitleAttr = this.hasAttribute('title')
         const slot = this.querySelector('.tc-community-links-title-slot')
-        const slotNodes = (!hasTitleAttr && slot) ? Array.from(slot.querySelectorAll('[slot="title"]')) : []
+        const slotNodes =
+            !hasTitleAttr && slot ? Array.from(slot.querySelectorAll('[slot="title"]')) : []
         this.render()
         if (!hasTitleAttr) {
             const newSlot = this.querySelector('.tc-community-links-title-slot')
-            if (newSlot) slotNodes.forEach(n => newSlot.appendChild(n))
+            if (newSlot) slotNodes.forEach((n) => newSlot.appendChild(n))
             this._updateHeaderVisibility()
         }
     }
@@ -113,11 +110,12 @@ export class CommunityLinks extends HTMLElement {
     private _rerenderWithSlots(): void {
         const hasTitleAttr = this.hasAttribute('title')
         const slot = this.querySelector('.tc-community-links-title-slot')
-        const slotNodes = (!hasTitleAttr && slot) ? Array.from(slot.querySelectorAll('[slot="title"]')) : []
+        const slotNodes =
+            !hasTitleAttr && slot ? Array.from(slot.querySelectorAll('[slot="title"]')) : []
         this.render()
         if (!hasTitleAttr) {
             const newSlot = this.querySelector('.tc-community-links-title-slot')
-            if (newSlot) slotNodes.forEach(n => newSlot.appendChild(n))
+            if (newSlot) slotNodes.forEach((n) => newSlot.appendChild(n))
             this._updateHeaderVisibility()
         }
     }
@@ -151,26 +149,29 @@ export class CommunityLinks extends HTMLElement {
             headerHtml = `<div class="tc-community-links__header tc-community-links__header--slot" style="display:none"><span class="tc-community-links-title-slot"></span></div>`
         }
 
-        const gridHtml = this._links.map(link => {
-            const label = esc(link.label)
-            const href = esc(link.href)
-            const iconHtml = link.icon ? resolvePlatformIcon(link.icon) : ''
-            const descHtml = link.description
-                ? `<span class="tc-community-links-item__desc">${esc(link.description)}</span>`
-                : ''
-            const countHtml = link.count != null
-                ? `<span class="tc-community-links-item__count" aria-hidden="true">${esc(String(link.count))}</span>`
-                : ''
-            const ariaLabel = link.count != null
-                ? `${link.label} — ${link.count}`
-                : link.label
+        const gridHtml = this._links
+            .map((link) => {
+                const label = esc(link.label)
+                const href = esc(link.href)
+                const iconHtml = link.icon ? resolvePlatformIcon(link.icon) : ''
+                const descHtml = link.description
+                    ? `<span class="tc-community-links-item__desc">${esc(link.description)}</span>`
+                    : ''
+                const countHtml =
+                    link.count != null
+                        ? `<span class="tc-community-links-item__count" aria-hidden="true">${esc(String(link.count))}</span>`
+                        : ''
+                const ariaLabel = link.count != null ? `${link.label} — ${link.count}` : link.label
 
-            return `<a class="tc-community-links-item" href="${href}" target="_blank" rel="noopener noreferrer" aria-label="${esc(ariaLabel)}" role="listitem">` +
-                `<span class="tc-community-links-item__icon">${iconHtml}</span>` +
-                `<span class="tc-community-links-item__body">` +
-                `<span class="tc-community-links-item__label">${label}</span>${descHtml}` +
-                `</span>${countHtml}</a>`
-        }).join('')
+                return (
+                    `<a class="tc-community-links-item" href="${href}" target="_blank" rel="noopener noreferrer" aria-label="${esc(ariaLabel)}" role="listitem">` +
+                    `<span class="tc-community-links-item__icon">${iconHtml}</span>` +
+                    `<span class="tc-community-links-item__body">` +
+                    `<span class="tc-community-links-item__label">${label}</span>${descHtml}` +
+                    `</span>${countHtml}</a>`
+                )
+            })
+            .join('')
 
         this.innerHTML = `${headerHtml}<div class="tc-community-links-grid" role="list">${gridHtml}</div>`
     }

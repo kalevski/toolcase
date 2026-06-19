@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SAMPLE_ACTIVITIES = [
     {
@@ -33,7 +32,13 @@ const SAMPLE_ACTIVITIES = [
 
 const SAMPLE_SHORT = [
     { id: '1', icon: 'Upload', title: 'Deployed v2.4.1 to production', timestamp: 'just now' },
-    { id: '2', icon: 'AlertTriangle', title: 'Error rate spike detected', description: '3 errors in the last minute', timestamp: '30s ago' },
+    {
+        id: '2',
+        icon: 'AlertTriangle',
+        title: 'Error rate spike detected',
+        description: '3 errors in the last minute',
+        timestamp: '30s ago',
+    },
 ]
 
 const ActivityCardDemo: React.FC = () => {
@@ -58,56 +63,61 @@ const ActivityCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ActivityCard"
+                        <tc-rich-page-header
+                            title-text="ActivityCard"
                             description="Dashboard card showing a vertical timeline of activity items with icons, descriptions, and timestamps."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Loaded — with title (JS property)">
+                            <tc-section-card title="Loaded — with title (JS property)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-activity-card ref={loadedRef} title="Recent Activity" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loaded — no title (JS property)">
+                            <tc-section-card title="Loaded — no title (JS property)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-activity-card ref={noTitleRef} />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Short feed — 2 items">
+                            <tc-section-card title="Short feed — 2 items">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-activity-card ref={shortRef} title="Deployment Log" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — default count (3 rows)">
+                            <tc-section-card title="Loading state — default count (3 rows)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-activity-card title="Recent Activity" loading />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — 5 rows (loading-count attribute)">
+                            <tc-section-card title="Loading state — 5 rows (loading-count attribute)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
-                                    <tc-activity-card title="Activity Feed" loading loading-count="5" />
+                                    <tc-activity-card
+                                        title="Activity Feed"
+                                        loading
+                                        loading-count="5"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — no title">
+                            <tc-section-card title="Loading state — no title">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-activity-card loading />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type ChipVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
 
@@ -19,7 +18,7 @@ function SelectableChips() {
             if (!chip) return
             const key = chip.getAttribute('data-key')
             if (!key) return
-            setSelected(prev => (prev === key ? null : key))
+            setSelected((prev) => (prev === key ? null : key))
         }
         el.addEventListener('tc-click', handler)
         return () => el.removeEventListener('tc-click', handler)
@@ -28,7 +27,7 @@ function SelectableChips() {
     useEffect(() => {
         const el = containerRef.current
         if (!el) return
-        el.querySelectorAll('tc-chip').forEach(chip => {
+        el.querySelectorAll('tc-chip').forEach((chip) => {
             const key = chip.getAttribute('data-key')
             if (key === selected) chip.setAttribute('selected', '')
             else chip.removeAttribute('selected')
@@ -37,7 +36,7 @@ function SelectableChips() {
 
     return (
         <div ref={containerRef} className="d-flex flex-wrap gap-2">
-            {TAGS.map(tag => (
+            {TAGS.map((tag) => (
                 <React.Fragment key={tag}>
                     {/* @ts-ignore */}
                     <tc-chip data-key={tag}>{tag}</tc-chip>
@@ -70,7 +69,9 @@ function RemovableChipExample() {
     return (
         <>
             {/* @ts-ignore */}
-            <tc-chip ref={chipRef} variant="success" removable>Removable chip</tc-chip>
+            <tc-chip ref={chipRef} variant="success" removable>
+                Removable chip
+            </tc-chip>
         </>
     )
 }
@@ -80,70 +81,91 @@ const ChipDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Chip"
+                    <tc-rich-page-header
+                        title-text="Chip"
                         description="Compact interactive chip with optional icon, count badge, and remove button. Dispatches tc-click on body activation and tc-remove when the remove button is clicked."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Variants">
+                        <tc-section-card title="Variants">
                             <div className="d-flex flex-wrap gap-2">
-                                {ALL_VARIANTS.map(v => (
+                                {ALL_VARIANTS.map((v) => (
                                     <React.Fragment key={v}>
                                         {/* @ts-ignore */}
                                         <tc-chip variant={v}>{v}</tc-chip>
                                     </React.Fragment>
                                 ))}
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Selected state (click to toggle)">
+                        <tc-section-card title="Selected state (click to toggle)">
                             <SelectableChips />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="With leading icon">
+                        <tc-section-card title="With leading icon">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-chip icon="Tag">Tag</tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip icon="Star" variant="warning">Star</tc-chip>
+                                <tc-chip icon="Star" variant="warning">
+                                    Star
+                                </tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip icon="Shield" variant="success">Verified</tc-chip>
+                                <tc-chip icon="Shield" variant="success">
+                                    Verified
+                                </tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip icon="AlertTriangle" variant="danger">Alert</tc-chip>
+                                <tc-chip icon="AlertTriangle" variant="danger">
+                                    Alert
+                                </tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip icon="Bell" variant="info">Info</tc-chip>
+                                <tc-chip icon="Bell" variant="info">
+                                    Info
+                                </tc-chip>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="With count badge">
+                        <tc-section-card title="With count badge">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-chip count="12">Messages</tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip count="99+" variant="danger">Errors</tc-chip>
+                                <tc-chip count="99+" variant="danger">
+                                    Errors
+                                </tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip icon="Bell" count="3" variant="info">Notifications</tc-chip>
+                                <tc-chip icon="Bell" count="3" variant="info">
+                                    Notifications
+                                </tc-chip>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Removable — click × to hide (tc-remove listener)">
+                        <tc-section-card title="Removable — click × to hide (tc-remove listener)">
                             <RemovableChipExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled">
+                        <tc-section-card title="Disabled">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}
                                 <tc-chip disabled>Disabled</tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip disabled variant="primary">Disabled Primary</tc-chip>
+                                <tc-chip disabled variant="primary">
+                                    Disabled Primary
+                                </tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip disabled removable>Disabled Removable</tc-chip>
+                                <tc-chip disabled removable>
+                                    Disabled Removable
+                                </tc-chip>
                                 {/* @ts-ignore */}
-                                <tc-chip disabled selected>Disabled Selected</tc-chip>
+                                <tc-chip disabled selected>
+                                    Disabled Selected
+                                </tc-chip>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

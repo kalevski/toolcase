@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -11,7 +12,6 @@ export type IconSet = 'bi' | 'tc'
 const SETS: IconSet[] = ['bi', 'tc']
 
 export class Icon extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -117,27 +117,18 @@ export class Icon extends HTMLElement {
         const decorative = this.decorative
         const labelAttr = this.getAttribute('label')
 
-        const style = [
-            `--bs-icon-size: ${sizeVal}`,
-            color ? `--bs-icon-color: ${this._escape(color)}` : '',
-        ].filter(Boolean).join('; ')
+        const style = [`--bs-icon-size: ${sizeVal}`, color ? `--bs-icon-color: ${esc(color)}` : '']
+            .filter(Boolean)
+            .join('; ')
 
         let ariaAttrs = ''
         if (decorative) {
             ariaAttrs = ' aria-hidden="true"'
         } else if (labelAttr) {
-            ariaAttrs = ` role="img" aria-label="${this._escape(labelAttr)}"`
+            ariaAttrs = ` role="img" aria-label="${esc(labelAttr)}"`
         }
 
         this.innerHTML = `<${tag} class="tc-icon" style="${style}"${ariaAttrs}>${svgHtml}</${tag}>`
-    }
-
-    private _escape(s: string): string {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
     }
 }
 

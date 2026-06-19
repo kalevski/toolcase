@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { icon } from './icons'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
 
@@ -24,14 +25,6 @@ type SortDir = 'asc' | 'desc'
 interface SortState {
     key: string
     dir: SortDir
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 // Stable comparator: numbers numerically, everything else as locale-aware
@@ -233,15 +226,15 @@ export class Table extends HTMLElement {
 
         // ── Header ──
         const theadCells = cols
-            .map(col => {
+            .map((col) => {
                 const align = this._align(col)
                 const ariaSort = this._ariaSortFor(col)
                 const ariaSortAttr = ariaSort ? ` aria-sort="${ariaSort}"` : ''
                 const inner = col.sortable
                     ? `<button type="button" class="tc-table-sort" data-sort-key="${esc(col.key)}">` +
-                          `<span class="tc-table-th-label">${esc(col.header)}</span>` +
-                          this._sortIconFor(col) +
-                          `</button>`
+                      `<span class="tc-table-th-label">${esc(col.header)}</span>` +
+                      this._sortIconFor(col) +
+                      `</button>`
                     : `<span class="tc-table-th-label">${esc(col.header)}</span>`
                 return `<th scope="col" class="tc-table-th tc-table-th--${align}"${ariaSortAttr}${this._thStyle(col)}>${inner}</th>`
             })
@@ -266,7 +259,7 @@ export class Table extends HTMLElement {
                     const rowCls = `tc-table-row${interactive ? ' tc-table-row--clickable' : ''}`
                     const rowAttrs = interactive ? ` tabindex="0" data-idx="${index}"` : ''
                     const cells = cols
-                        .map(col => {
+                        .map((col) => {
                             const align = this._align(col)
                             const styleParts: string[] = []
                             if (col.width) styleParts.push(`width: ${esc(col.width)}`)

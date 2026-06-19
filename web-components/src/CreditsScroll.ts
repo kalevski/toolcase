@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Pause } from 'lucide-static'
 import { icon } from './icons'
 
@@ -10,15 +11,6 @@ const pauseIconHtml = icon(Pause)
 export interface CreditsScrollSection {
     role: string
     names: string[]
-}
-
-function esc(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 export class CreditsScroll extends HTMLElement {
@@ -105,8 +97,10 @@ export class CreditsScroll extends HTMLElement {
     }
 
     private _prefersReducedMotion(): boolean {
-        return typeof window.matchMedia === 'function'
-            && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        return (
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        )
     }
 
     private togglePlay(): void {
@@ -160,7 +154,9 @@ export class CreditsScroll extends HTMLElement {
     }
 
     private emitComplete(): void {
-        this.dispatchEvent(new CustomEvent('tc-complete', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-complete', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onComplete === 'function') this.onComplete()
     }
 
@@ -168,15 +164,17 @@ export class CreditsScroll extends HTMLElement {
         const titleMarkup = this.scrollTitle
             ? `<div class="tc-credits-scroll-title">${esc(this.scrollTitle)}</div>`
             : ''
-        const sectionsMarkup = this._sections.map((s) => {
-            const names = (s.names || [])
-                .map((n) => `<div class="tc-credits-scroll-name">${esc(n)}</div>`)
-                .join('')
-            return `<div class="tc-credits-scroll-section">
+        const sectionsMarkup = this._sections
+            .map((s) => {
+                const names = (s.names || [])
+                    .map((n) => `<div class="tc-credits-scroll-name">${esc(n)}</div>`)
+                    .join('')
+                return `<div class="tc-credits-scroll-section">
                 <div class="tc-credits-scroll-role">${esc(s.role)}</div>
                 <div class="tc-credits-scroll-names">${names}</div>
             </div>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML = `
             <div class="tc-credits-scroll-viewport">

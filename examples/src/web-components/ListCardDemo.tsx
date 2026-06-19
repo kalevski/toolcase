@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const RANKED_ITEMS = [
     { id: '1', label: 'React', value: '42,300' },
@@ -34,49 +33,55 @@ const ListCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ListCard"
+                        <tc-rich-page-header
+                            title-text="ListCard"
                             description="Dashboard card rendering a list of items with optional ranking numbers, leading icons, and trailing values."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Ordered — ranked list with values (JS property)">
+                            <tc-section-card title="Ordered — ranked list with values (JS property)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-list-card ref={rankedRef} title="Top Frameworks" ordered />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Icon list — leading lucide icons (JS property)">
+                            <tc-section-card title="Icon list — leading lucide icons (JS property)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-list-card ref={iconRef} title="Social Channels" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — default count (4 rows)">
+                            <tc-section-card title="Loading state — default count (4 rows)">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-list-card title="Top Frameworks" loading />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — ordered, 5 rows">
+                            <tc-section-card title="Loading state — ordered, 5 rows">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
-                                    <tc-list-card title="Leaderboard" loading ordered loading-count="5" />
+                                    <tc-list-card
+                                        title="Leaderboard"
+                                        loading
+                                        ordered
+                                        loading-count="5"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state — no title">
+                            <tc-section-card title="Loading state — no title">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-list-card loading />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

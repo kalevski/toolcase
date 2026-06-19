@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const STEPS = [
     { key: 'account', label: 'Account', description: 'Create your account' },
@@ -50,30 +49,37 @@ const StepperDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Stepper"
+                        <tc-rich-page-header
+                            title-text="Stepper"
                             description="Multi-step progress indicator with completion icons and optional clickable navigation. Set steps via the JS steps property; active step controlled via the active-step attribute."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Horizontal (mid-progress)">
+                            <tc-section-card title="Horizontal (mid-progress)">
                                 {/* @ts-ignore */}
                                 <tc-stepper ref={hRef} active-step="plan" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Vertical orientation">
+                            <tc-section-card title="Vertical orientation">
                                 {/* @ts-ignore */}
-                                <tc-stepper ref={vRef} active-step="profile" orientation="vertical" />
-                            </SectionCard>
+                                <tc-stepper
+                                    ref={vRef}
+                                    active-step="profile"
+                                    orientation="vertical"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Clickable — click a step to navigate">
+                            <tc-section-card title="Clickable — click a step to navigate">
                                 <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
                                     Active step: <strong>{clickActive}</strong>
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-stepper ref={clickRef} clickable />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

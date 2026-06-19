@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-pinned-feature-showcase'
@@ -9,24 +10,6 @@ export interface PinnedFeatureShowcaseItem {
     title: string
     description?: string
     icon?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
 }
 
 export class PinnedFeatureShowcase extends HTMLElement {
@@ -52,9 +35,9 @@ export class PinnedFeatureShowcase extends HTMLElement {
             const ctasSlot = Array.from(this.querySelectorAll('[slot="ctas"]'))
             this.render(mediaSlot.length > 0)
             const mediaEl = this.querySelector('.tc-pinned-feature-showcase-media')
-            if (mediaEl) mediaSlot.forEach(n => mediaEl.appendChild(n))
+            if (mediaEl) mediaSlot.forEach((n) => mediaEl.appendChild(n))
             const ctasEl = this.querySelector('.tc-pinned-feature-showcase-ctas')
-            if (ctasEl) ctasSlot.forEach(n => ctasEl.appendChild(n))
+            if (ctasEl) ctasSlot.forEach((n) => ctasEl.appendChild(n))
             this._initialised = true
         }
         this._detachCenteringListeners()
@@ -118,16 +101,16 @@ export class PinnedFeatureShowcase extends HTMLElement {
     private _rerenderWithSlots(): void {
         // Re-capture slots from within their inner containers (already moved there)
         const mediaSlot = Array.from(
-            this.querySelectorAll('.tc-pinned-feature-showcase-media [slot="media"]')
+            this.querySelectorAll('.tc-pinned-feature-showcase-media [slot="media"]'),
         )
         const ctasSlot = Array.from(
-            this.querySelectorAll('.tc-pinned-feature-showcase-ctas [slot="ctas"]')
+            this.querySelectorAll('.tc-pinned-feature-showcase-ctas [slot="ctas"]'),
         )
         this.render(mediaSlot.length > 0)
         const mediaEl = this.querySelector('.tc-pinned-feature-showcase-media')
-        if (mediaEl) mediaSlot.forEach(n => mediaEl.appendChild(n))
+        if (mediaEl) mediaSlot.forEach((n) => mediaEl.appendChild(n))
         const ctasEl = this.querySelector('.tc-pinned-feature-showcase-ctas')
-        if (ctasEl) ctasSlot.forEach(n => ctasEl.appendChild(n))
+        if (ctasEl) ctasSlot.forEach((n) => ctasEl.appendChild(n))
     }
 
     private _handleScroll = (): void => {
@@ -200,7 +183,7 @@ export class PinnedFeatureShowcase extends HTMLElement {
                 : ''
 
         const itemsHtml = this._items
-            .map(item => {
+            .map((item) => {
                 const iconHtml = item.icon
                     ? `<span class="tc-pinned-feature-showcase-item-icon" aria-hidden="true">${lucideByName(item.icon)}</span>`
                     : ''

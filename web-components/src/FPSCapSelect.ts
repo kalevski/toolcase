@@ -23,7 +23,6 @@ const DEFAULT_OPTIONS: FPSCapOption[] = [
 // `gc-fps-cap-select` with the fantasy chrome dropped for the toolcase
 // slate/ink look; the control reuses the design-system `.form-select` chrome.
 export class FPSCapSelect extends SettingRowBase {
-
     private _options: FPSCapOption[] = DEFAULT_OPTIONS.slice()
 
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
@@ -82,7 +81,7 @@ export class FPSCapSelect extends SettingRowBase {
         const value = this.value
         const disabledAttr = this.disabled ? ' disabled' : ''
         const optsMarkup = this._options
-            .map(opt => {
+            .map((opt) => {
                 const selected = opt.value === value ? ' selected' : ''
                 return `<option value="${this.escape(opt.value)}"${selected}>${this.escape(opt.label)}</option>`
             })

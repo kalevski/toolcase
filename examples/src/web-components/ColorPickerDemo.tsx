@@ -1,9 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PRESET_HEX = [
-    '#0f172a', '#1e293b', '#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1', '#f1f5f9',
-    '#dc2626', '#ea580c', '#d97706', '#ca8a04', '#16a34a', '#0284c7', '#7c3aed', '#db2777',
+    '#0f172a',
+    '#1e293b',
+    '#334155',
+    '#475569',
+    '#64748b',
+    '#94a3b8',
+    '#cbd5e1',
+    '#f1f5f9',
+    '#dc2626',
+    '#ea580c',
+    '#d97706',
+    '#ca8a04',
+    '#16a34a',
+    '#0284c7',
+    '#7c3aed',
+    '#db2777',
 ]
 
 const PRESET_OPTIONS = [
@@ -67,56 +80,67 @@ const ColorPickerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ColorPicker"
+                        <tc-rich-page-header
+                            title-text="ColorPicker"
                             description="Color picker dropdown with preset swatch grid, hex input, and selection management."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Hex string array">
+                            <tc-section-card title="Hex string array">
                                 <div>
                                     {/* @ts-ignore */}
                                     <tc-color-picker ref={hexRef} label="Background color" />
                                     <div className="form-text mt-2">Selected: {hexValue}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="ColorOption[] with labels">
+                            <tc-section-card title="ColorOption[] with labels">
                                 <div>
                                     {/* @ts-ignore */}
                                     <tc-color-picker ref={optionsRef} label="Accent color" />
                                     <div className="form-text mt-2">Selected: {optionsValue}</div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom columns (4)">
+                            <tc-section-card title="Custom columns (4)">
                                 <div>
                                     {/* @ts-ignore */}
-                                    <tc-color-picker ref={columnsRef} label="Theme color" columns="4" />
+                                    <tc-color-picker
+                                        ref={columnsRef}
+                                        label="Theme color"
+                                        columns="4"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state">
+                            <tc-section-card title="Loading state">
                                 <div>
                                     {/* @ts-ignore */}
                                     <tc-color-picker ref={loadingRef} label="Loading…" loading />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div>
                                     {/* @ts-ignore */}
-                                    <tc-color-picker label="Disabled picker" value="#64748b" disabled />
+                                    <tc-color-picker
+                                        label="Disabled picker"
+                                        value="#64748b"
+                                        disabled
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No label">
+                            <tc-section-card title="No label">
                                 <div>
                                     {/* @ts-ignore */}
                                     <tc-color-picker value="#0284c7" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

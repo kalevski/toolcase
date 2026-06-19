@@ -1,15 +1,8 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-section-card'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type SectionCardVariant = 'default' | 'danger'
 const VARIANTS: SectionCardVariant[] = ['default', 'danger']
@@ -26,18 +19,18 @@ export class SectionCard extends HTMLElement {
         if (!this._initialised) {
             this._actionSlotNodes = Array.from(this.querySelectorAll('[slot="action"]'))
             const bodyNodes = Array.from(this.childNodes).filter(
-                n => !(n instanceof Element && n.getAttribute('slot') === 'action')
+                (n) => !(n instanceof Element && n.getAttribute('slot') === 'action'),
             )
 
             this.render()
 
             if (this._actionSlotNodes.length > 0) {
                 const actionEl = this.querySelector('.tc-section-card-action')
-                if (actionEl) this._actionSlotNodes.forEach(n => actionEl.appendChild(n))
+                if (actionEl) this._actionSlotNodes.forEach((n) => actionEl.appendChild(n))
             }
 
             const bodyEl = this.querySelector('.tc-section-card-body')
-            if (bodyEl) bodyNodes.forEach(n => bodyEl.appendChild(n))
+            if (bodyEl) bodyNodes.forEach((n) => bodyEl.appendChild(n))
 
             this._initialised = true
         }
@@ -62,12 +55,12 @@ export class SectionCard extends HTMLElement {
         // Re-distribute action slot nodes
         if (this._actionSlotNodes.length > 0) {
             const newActionEl = this.querySelector('.tc-section-card-action')
-            if (newActionEl) this._actionSlotNodes.forEach(n => newActionEl.appendChild(n))
+            if (newActionEl) this._actionSlotNodes.forEach((n) => newActionEl.appendChild(n))
         }
 
         // Re-distribute body nodes
         const newBodyEl = this.querySelector('.tc-section-card-body')
-        if (newBodyEl) bodyNodes.forEach(n => newBodyEl.appendChild(n))
+        if (newBodyEl) bodyNodes.forEach((n) => newBodyEl.appendChild(n))
     }
 
     get title(): string {

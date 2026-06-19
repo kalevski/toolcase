@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const HeroDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -79,7 +78,15 @@ const HeroDemo: React.FC = () => {
         if (bgIconsRef.current) {
             bgIconsRef.current.primaryAction = { label: 'Explore', href: '#' }
             bgIconsRef.current.secondaryAction = { label: 'Learn More', href: '#' }
-            bgIconsRef.current.bgIcons = ['Zap', 'Shield', 'Code', 'Globe', 'Package', 'Star', 'Lock']
+            bgIconsRef.current.bgIcons = [
+                'Zap',
+                'Shield',
+                'Code',
+                'Globe',
+                'Package',
+                'Star',
+                'Lock',
+            ]
         }
     }, [])
 
@@ -88,15 +95,17 @@ const HeroDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Hero"
+                        <tc-rich-page-header
+                            title-text="Hero"
                             description="Large hero section with eyebrow, title, description, primary/secondary actions, optional background icons, stat cards, and metrics."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Basic — title, description, actions (href)">
+                            <tc-section-card title="Basic — title, description, actions (href)">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     ref={basicRef}
@@ -104,9 +113,9 @@ const HeroDemo: React.FC = () => {
                                     title="Build faster with toolcase"
                                     description="A curated collection of framework-free web components and utilities for modern product teams."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Full Featured — eyebrow, title, description, actions (onClick), stat cards + metrics + tc-action event">
+                            <tc-section-card title="Full Featured — eyebrow, title, description, actions (onClick), stat cards + metrics + tc-action event">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     ref={fullRef}
@@ -114,27 +123,27 @@ const HeroDemo: React.FC = () => {
                                     title="Ship your web games faster"
                                     description="A cloud platform built for indie game developers. Host, deploy and scale your browser games with zero infrastructure headaches."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal (No Stats) — title, description, single action">
+                            <tc-section-card title="Minimal (No Stats) — title, description, single action">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     ref={minimalRef}
                                     title="Build amazing games"
                                     description="Everything you need to create, test, and publish browser-based games."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With stat cards">
+                            <tc-section-card title="With stat cards">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     ref={statsRef}
                                     title="Trusted by developers worldwide"
                                     description="Thousands of teams rely on toolcase every day."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With metrics">
+                            <tc-section-card title="With metrics">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     ref={metricsRef}
@@ -142,9 +151,9 @@ const HeroDemo: React.FC = () => {
                                     title="Built for speed"
                                     description="Optimised build pipeline with full TypeScript coverage and zero runtime dependencies."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With background icons">
+                            <tc-section-card title="With background icons">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     ref={bgIconsRef}
@@ -152,14 +161,14 @@ const HeroDemo: React.FC = () => {
                                     title="Framework-free components"
                                     description="Custom elements that work everywhere — scattered icons appear faintly behind the content."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Minimal — title only">
+                            <tc-section-card title="Minimal — title only">
                                 {/* @ts-ignore */}
                                 <tc-hero title="Simple hero — no extras" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="title-as attribute (h2 heading)">
+                            <tc-section-card title="title-as attribute (h2 heading)">
                                 {/* @ts-ignore */}
                                 <tc-hero
                                     title-as="h2"
@@ -167,8 +176,7 @@ const HeroDemo: React.FC = () => {
                                     title="Rendered as an h2"
                                     description="Uses the title-as attribute to control the heading level for semantics and accessibility."
                                 />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

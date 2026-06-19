@@ -22,7 +22,6 @@ const PRESETS: GraphicsPreset[] = [
 // fill from the standard state ladder. All cosmetics flow through
 // `--bs-graphics-preset-picker-*`.
 export class GraphicsPresetPicker extends SettingRowBase {
-
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
     onChange: ((value: string) => void) | null = null
 
@@ -46,9 +45,11 @@ export class GraphicsPresetPicker extends SettingRowBase {
         }
         if (name === 'disabled') {
             const disabled = this.disabled
-            this.querySelectorAll<HTMLButtonElement>('.tc-graphics-preset-picker__preset').forEach(btn => {
-                btn.disabled = disabled
-            })
+            this.querySelectorAll<HTMLButtonElement>('.tc-graphics-preset-picker__preset').forEach(
+                (btn) => {
+                    btn.disabled = disabled
+                },
+            )
             return
         }
         super.attributeChangedCallback(name, old, next)
@@ -72,17 +73,19 @@ export class GraphicsPresetPicker extends SettingRowBase {
     // Reflect the current value onto each segment without rebuilding the markup.
     private _patchActive(): void {
         const value = this.value
-        this.querySelectorAll<HTMLButtonElement>('.tc-graphics-preset-picker__preset').forEach(btn => {
-            const active = btn.dataset.value === value
-            btn.dataset.active = String(active)
-            btn.setAttribute('aria-pressed', String(active))
-        })
+        this.querySelectorAll<HTMLButtonElement>('.tc-graphics-preset-picker__preset').forEach(
+            (btn) => {
+                const active = btn.dataset.value === value
+                btn.dataset.active = String(active)
+                btn.setAttribute('aria-pressed', String(active))
+            },
+        )
     }
 
     protected renderControl(): string {
         const value = this.value
         const disabled = this.disabled
-        const buttons = PRESETS.map(p => {
+        const buttons = PRESETS.map((p) => {
             const active = p.value === value
             return `
                 <button
@@ -104,8 +107,10 @@ export class GraphicsPresetPicker extends SettingRowBase {
     }
 
     protected bindControl(): void {
-        const buttons = this.querySelectorAll<HTMLButtonElement>('.tc-graphics-preset-picker__preset')
-        buttons.forEach(btn => {
+        const buttons = this.querySelectorAll<HTMLButtonElement>(
+            '.tc-graphics-preset-picker__preset',
+        )
+        buttons.forEach((btn) => {
             btn.addEventListener('click', () => {
                 if (this.disabled) return
                 const v = btn.dataset.value ?? 'medium'

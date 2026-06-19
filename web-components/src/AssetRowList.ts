@@ -12,7 +12,7 @@ export class AssetRowList extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const body = this.querySelector('.tc-asset-row-list-body')
-            if (body) slotContent.forEach(n => body.appendChild(n))
+            if (body) slotContent.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
     }
@@ -23,7 +23,7 @@ export class AssetRowList extends HTMLElement {
         const slotContent = body ? Array.from(body.childNodes) : []
         this.render()
         const newBody = this.querySelector('.tc-asset-row-list-body')
-        if (newBody) slotContent.forEach(n => newBody.appendChild(n))
+        if (newBody) slotContent.forEach((n) => newBody.appendChild(n))
     }
 
     private render(): void {

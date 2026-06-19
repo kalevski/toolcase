@@ -18,8 +18,15 @@ tc-theme[name='dungeon'],
     }
 
     // ── Trigger — seated gilded slot bevel ───────────────────────────────────
+    // --bs-extended-select-trigger-bg rides background-color, which drops the
+    // --fg-panel-bg gradient and leaves the trigger transparent. Repaint the
+    // panel gradient on background-image (opaque — the menu itself stays the
+    // floating surface; the trigger is a seated control slot, not glass).
     .tc-extended-select__trigger {
-        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+        background-image: var(--fg-panel-bg);
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.4);
     }
 
     // ── Menu — gilded floating panel shadow ──────────────────────────────────

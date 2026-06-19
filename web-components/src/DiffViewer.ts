@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-diff-viewer'
 
 export type DiffViewerMode = 'split' | 'unified'
@@ -12,14 +13,6 @@ interface DiffLine {
     text: string
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 const MAX_LINES = 2000
 
 function lineDiff(before: string[], after: string[]): DiffLine[] {
@@ -32,9 +25,10 @@ function lineDiff(before: string[], after: string[]): DiffLine[] {
     const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
     for (let i = 1; i <= m; i++) {
         for (let j = 1; j <= n; j++) {
-            dp[i][j] = bLines[i - 1] === aLines[j - 1]
-                ? dp[i - 1][j - 1] + 1
-                : Math.max(dp[i - 1][j], dp[i][j - 1])
+            dp[i][j] =
+                bLines[i - 1] === aLines[j - 1]
+                    ? dp[i - 1][j - 1] + 1
+                    : Math.max(dp[i - 1][j], dp[i][j - 1])
         }
     }
 
@@ -139,16 +133,20 @@ export class DiffViewer extends HTMLElement {
         const aLines = this._after.split('\n')
         const diffLines = lineDiff(bLines, aLines)
 
-        const headerHtml = (filename || language)
-            ? `<div class="tc-diff-viewer__header">` +
-              (filename ? `<span class="tc-diff-viewer__filename">${esc(filename)}</span>` : '') +
-              (language ? `<span class="tc-diff-viewer__language">${esc(language)}</span>` : '') +
-              `</div>`
-            : ''
+        const headerHtml =
+            filename || language
+                ? `<div class="tc-diff-viewer__header">` +
+                  (filename
+                      ? `<span class="tc-diff-viewer__filename">${esc(filename)}</span>`
+                      : '') +
+                  (language
+                      ? `<span class="tc-diff-viewer__language">${esc(language)}</span>`
+                      : '') +
+                  `</div>`
+                : ''
 
-        const bodyHtml = mode === 'unified'
-            ? this._renderUnified(diffLines)
-            : this._renderSplit(diffLines)
+        const bodyHtml =
+            mode === 'unified' ? this._renderUnified(diffLines) : this._renderSplit(diffLines)
 
         this.innerHTML = `<div class="tc-diff-viewer tc-diff-viewer--${mode}">${headerHtml}${bodyHtml}</div>`
 
@@ -162,37 +160,50 @@ export class DiffViewer extends HTMLElement {
     }
 
     private _renderSplit(lines: DiffLine[]): string {
-        const beforeRows = lines.map(line => {
-            if (line.kind === 'added') {
-                return `<tr class="tc-diff-viewer__row tc-diff-viewer__row--empty" aria-hidden="true">` +
-                    `<td class="tc-diff-viewer__gutter" aria-hidden="true"></td>` +
-                    `<td class="tc-diff-viewer__cell"></td>` +
+        const beforeRows = lines
+            .map((line) => {
+                if (line.kind === 'added') {
+                    return (
+                        `<tr class="tc-diff-viewer__row tc-diff-viewer__row--empty" aria-hidden="true">` +
+                        `<td class="tc-diff-viewer__gutter" aria-hidden="true"></td>` +
+                        `<td class="tc-diff-viewer__cell"></td>` +
+                        `</tr>`
+                    )
+                }
+                const cls = line.kind === 'removed' ? ' tc-diff-viewer__row--removed' : ''
+                const ariaLabel = this._rowAriaLabel(line.kind, line.text)
+                return (
+                    `<tr class="tc-diff-viewer__row${cls}"${ariaLabel}>` +
+                    `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.beforeNum ?? ''}</td>` +
+                    `<td class="tc-diff-viewer__cell"><pre class="tc-diff-viewer__code">${esc(line.text)}</pre></td>` +
                     `</tr>`
-            }
-            const cls = line.kind === 'removed' ? ' tc-diff-viewer__row--removed' : ''
-            const ariaLabel = this._rowAriaLabel(line.kind, line.text)
-            return `<tr class="tc-diff-viewer__row${cls}"${ariaLabel}>` +
-                `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.beforeNum ?? ''}</td>` +
-                `<td class="tc-diff-viewer__cell"><pre class="tc-diff-viewer__code">${esc(line.text)}</pre></td>` +
-                `</tr>`
-        }).join('')
+                )
+            })
+            .join('')
 
-        const afterRows = lines.map(line => {
-            if (line.kind === 'removed') {
-                return `<tr class="tc-diff-viewer__row tc-diff-viewer__row--empty" aria-hidden="true">` +
-                    `<td class="tc-diff-viewer__gutter" aria-hidden="true"></td>` +
-                    `<td class="tc-diff-viewer__cell"></td>` +
+        const afterRows = lines
+            .map((line) => {
+                if (line.kind === 'removed') {
+                    return (
+                        `<tr class="tc-diff-viewer__row tc-diff-viewer__row--empty" aria-hidden="true">` +
+                        `<td class="tc-diff-viewer__gutter" aria-hidden="true"></td>` +
+                        `<td class="tc-diff-viewer__cell"></td>` +
+                        `</tr>`
+                    )
+                }
+                const cls = line.kind === 'added' ? ' tc-diff-viewer__row--added' : ''
+                const ariaLabel = this._rowAriaLabel(line.kind, line.text)
+                return (
+                    `<tr class="tc-diff-viewer__row${cls}"${ariaLabel}>` +
+                    `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.afterNum ?? ''}</td>` +
+                    `<td class="tc-diff-viewer__cell"><pre class="tc-diff-viewer__code">${esc(line.text)}</pre></td>` +
                     `</tr>`
-            }
-            const cls = line.kind === 'added' ? ' tc-diff-viewer__row--added' : ''
-            const ariaLabel = this._rowAriaLabel(line.kind, line.text)
-            return `<tr class="tc-diff-viewer__row${cls}"${ariaLabel}>` +
-                `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.afterNum ?? ''}</td>` +
-                `<td class="tc-diff-viewer__cell"><pre class="tc-diff-viewer__code">${esc(line.text)}</pre></td>` +
-                `</tr>`
-        }).join('')
+                )
+            })
+            .join('')
 
-        return `<div class="tc-diff-viewer__split">` +
+        return (
+            `<div class="tc-diff-viewer__split">` +
             `<div class="tc-diff-viewer__pane tc-diff-viewer__pane--before">` +
             `<table class="tc-diff-viewer__table" role="table" aria-label="Before"><tbody>${beforeRows}</tbody></table>` +
             `</div>` +
@@ -200,24 +211,31 @@ export class DiffViewer extends HTMLElement {
             `<table class="tc-diff-viewer__table" role="table" aria-label="After"><tbody>${afterRows}</tbody></table>` +
             `</div>` +
             `</div>`
+        )
     }
 
     private _renderUnified(lines: DiffLine[]): string {
-        const rows = lines.map(line => {
-            const prefix = line.kind === 'added' ? '+' : line.kind === 'removed' ? '-' : ' '
-            const cls = line.kind !== 'unchanged' ? ` tc-diff-viewer__row--${line.kind}` : ''
-            const ariaLabel = this._rowAriaLabel(line.kind, line.text)
-            return `<tr class="tc-diff-viewer__row${cls}"${ariaLabel}>` +
-                `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.beforeNum ?? ''}</td>` +
-                `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.afterNum ?? ''}</td>` +
-                `<td class="tc-diff-viewer__prefix" aria-hidden="true">${prefix}</td>` +
-                `<td class="tc-diff-viewer__cell"><pre class="tc-diff-viewer__code">${esc(line.text)}</pre></td>` +
-                `</tr>`
-        }).join('')
+        const rows = lines
+            .map((line) => {
+                const prefix = line.kind === 'added' ? '+' : line.kind === 'removed' ? '-' : ' '
+                const cls = line.kind !== 'unchanged' ? ` tc-diff-viewer__row--${line.kind}` : ''
+                const ariaLabel = this._rowAriaLabel(line.kind, line.text)
+                return (
+                    `<tr class="tc-diff-viewer__row${cls}"${ariaLabel}>` +
+                    `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.beforeNum ?? ''}</td>` +
+                    `<td class="tc-diff-viewer__gutter" aria-hidden="true">${line.afterNum ?? ''}</td>` +
+                    `<td class="tc-diff-viewer__prefix" aria-hidden="true">${prefix}</td>` +
+                    `<td class="tc-diff-viewer__cell"><pre class="tc-diff-viewer__code">${esc(line.text)}</pre></td>` +
+                    `</tr>`
+                )
+            })
+            .join('')
 
-        return `<table class="tc-diff-viewer__table tc-diff-viewer__table--unified" role="table" aria-label="Unified diff">` +
+        return (
+            `<table class="tc-diff-viewer__table tc-diff-viewer__table--unified" role="table" aria-label="Unified diff">` +
             `<tbody>${rows}</tbody>` +
             `</table>`
+        )
     }
 }
 

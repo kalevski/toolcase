@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-perk-picker'
@@ -14,25 +15,6 @@ export interface Perk {
 
 export interface PerkPickerEventMap {
     'tc-select': CustomEvent<{ id: string }>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    if (!svg) return ''
-    return icon(svg)
 }
 
 // Locked cards always show a lucide lock glyph — never emoji per design rules.
@@ -52,10 +34,14 @@ export class PerkPicker extends HTMLElement {
         if (!this._initialised) {
             this.setAttribute('role', 'listbox')
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -97,7 +83,9 @@ export class PerkPicker extends HTMLElement {
     }
 
     private _select(id: string): void {
-        this.dispatchEvent(new CustomEvent('tc-select', { bubbles: true, composed: true, detail: { id } }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', { bubbles: true, composed: true, detail: { id } }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(id)
     }
 
@@ -134,19 +122,21 @@ export class PerkPicker extends HTMLElement {
         this.classList.add('tc-perk-picker')
         this.style.setProperty('--bs-perk-picker-columns', String(this.columns))
 
-        const cardsMarkup = this._perks.map(p => {
-            const classes = ['tc-perk-picker-card']
-            if (p.selected) classes.push('is-selected')
-            if (p.locked) classes.push('is-locked')
-            const descMarkup = p.description
-                ? `<span class="tc-perk-picker-card-description">${esc(p.description)}</span>`
-                : ''
-            return `<div role="option" class="${classes.join(' ')}" tabindex="${p.locked ? '-1' : '0'}" data-id="${esc(p.id)}" aria-selected="${p.selected ? 'true' : 'false'}" aria-disabled="${p.locked ? 'true' : 'false'}">
+        const cardsMarkup = this._perks
+            .map((p) => {
+                const classes = ['tc-perk-picker-card']
+                if (p.selected) classes.push('is-selected')
+                if (p.locked) classes.push('is-locked')
+                const descMarkup = p.description
+                    ? `<span class="tc-perk-picker-card-description">${esc(p.description)}</span>`
+                    : ''
+                return `<div role="option" class="${classes.join(' ')}" tabindex="${p.locked ? '-1' : '0'}" data-id="${esc(p.id)}" aria-selected="${p.selected ? 'true' : 'false'}" aria-disabled="${p.locked ? 'true' : 'false'}">
                 ${this._iconMarkup(p)}
                 <span class="tc-perk-picker-card-name">${esc(p.name)}</span>
                 ${descMarkup}
             </div>`
-        }).join('')
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-perk-picker-grid">${cardsMarkup}</div>`
     }

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-player-card'
 
 export type PresenceStatus = 'online' | 'away' | 'busy' | 'offline' | 'in-game'
@@ -18,28 +19,23 @@ export interface PlayerCardEventMap {
     'tc-action': CustomEvent<{ id: string }>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 function statusLabel(status: PresenceStatus): string {
     switch (status) {
-        case 'online':  return 'Online'
-        case 'away':    return 'Away'
-        case 'busy':    return 'Busy'
-        case 'in-game': return 'In Game'
+        case 'online':
+            return 'Online'
+        case 'away':
+            return 'Away'
+        case 'busy':
+            return 'Busy'
+        case 'in-game':
+            return 'In Game'
         case 'offline':
-        default:        return 'Offline'
+        default:
+            return 'Offline'
     }
 }
 
 export class PlayerCard extends HTMLElement {
-
     private _initialised = false
     private _stats: PlayerCardStat[] = []
     private _actions: PlayerCardAction[] = []
@@ -124,11 +120,13 @@ export class PlayerCard extends HTMLElement {
     }
 
     private _emit(id: string): void {
-        this.dispatchEvent(new CustomEvent('tc-action', {
-            bubbles: true,
-            composed: true,
-            detail: { id },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-action', {
+                bubbles: true,
+                composed: true,
+                detail: { id },
+            }),
+        )
         if (typeof this.onAction === 'function') this.onAction(id)
     }
 
@@ -152,24 +150,30 @@ export class PlayerCard extends HTMLElement {
 
         // ── Stats ────────────────────────────────────────────────────────────
         const statsHtml = this._stats.length
-            ? `<div class="tc-player-card-stats">${this._stats.map(s => {
-                const val = typeof s.value === 'number' ? s.value.toLocaleString() : s.value
-                return `<div class="tc-player-card-stat">
+            ? `<div class="tc-player-card-stats">${this._stats
+                  .map((s) => {
+                      const val = typeof s.value === 'number' ? s.value.toLocaleString() : s.value
+                      return `<div class="tc-player-card-stat">
                     <span class="tc-player-card-stat-label">${esc(s.label)}</span>
                     <span class="tc-player-card-stat-value">${esc(String(val))}</span>
                 </div>`
-            }).join('')}</div>`
+                  })
+                  .join('')}</div>`
             : ''
 
         // ── Actions ──────────────────────────────────────────────────────────
         const actionsHtml = this._actions.length
-            ? `<div class="tc-player-card-actions">${this._actions.map((a, i) => {
-                const cls = [
-                    'tc-player-card-action-btn',
-                    a.danger ? 'tc-player-card-action-btn--danger' : '',
-                ].filter(Boolean).join(' ')
-                return `<button type="button" class="${cls}" data-idx="${i}" data-id="${esc(a.id)}">${esc(a.label)}</button>`
-            }).join('')}</div>`
+            ? `<div class="tc-player-card-actions">${this._actions
+                  .map((a, i) => {
+                      const cls = [
+                          'tc-player-card-action-btn',
+                          a.danger ? 'tc-player-card-action-btn--danger' : '',
+                      ]
+                          .filter(Boolean)
+                          .join(' ')
+                      return `<button type="button" class="${cls}" data-idx="${i}" data-id="${esc(a.id)}">${esc(a.label)}</button>`
+                  })
+                  .join('')}</div>`
             : ''
 
         this.innerHTML = `

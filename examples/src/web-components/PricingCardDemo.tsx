@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FREE_FEATURES = [
     { label: '5 projects', included: true },
@@ -83,15 +82,21 @@ const PricingCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PricingCard"
+                        <tc-rich-page-header
+                            title-text="PricingCard"
                             description="Pricing tier card with a feature list and action button. Set features and action via JS properties. Fires tc-action on button activation."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Three tiers (Free, Pro highlighted, Enterprise)">
-                                <div className="d-flex flex-wrap gap-3" style={{ alignItems: 'stretch' }}>
+                            <tc-section-card title="Three tiers (Free, Pro highlighted, Enterprise)">
+                                <div
+                                    className="d-flex flex-wrap gap-3"
+                                    style={{ alignItems: 'stretch' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-pricing-card
                                         ref={freeRef}
@@ -121,11 +126,12 @@ const PricingCardDemo: React.FC = () => {
                                         style={{ flex: '1 1 220px', minWidth: '200px' }}
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Event log (tc-action)">
+                            <tc-section-card title="Event log (tc-action)">
                                 <p className="text-muted mb-2" style={{ fontSize: '0.875rem' }}>
-                                    Click the Pro card button to see the event. The event bubbles to document.
+                                    Click the Pro card button to see the event. The event bubbles to
+                                    document.
                                 </p>
                                 <div
                                     ref={eventLogRef}
@@ -142,7 +148,7 @@ const PricingCardDemo: React.FC = () => {
                                         No events yet.
                                     </p>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

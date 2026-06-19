@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-kill-feed'
 
 export interface KillFeedEntry {
@@ -8,14 +9,6 @@ export interface KillFeedEntry {
     victimColor?: string
     weapon?: string
     headshot?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class KillFeed extends HTMLElement {
@@ -60,19 +53,21 @@ export class KillFeed extends HTMLElement {
     private render(): void {
         const visible = this._entries.slice(-this.maxVisible)
 
-        const rowsHtml = visible.map(e => {
-            const killerStyle = e.killerColor
-                ? ` style="--bs-kill-feed-killer-color:${esc(e.killerColor)}"`
-                : ''
-            const victimStyle = e.victimColor
-                ? ` style="--bs-kill-feed-victim-color:${esc(e.victimColor)}"`
-                : ''
-            const weaponHtml = `<span class="tc-kill-feed-weapon">${e.weapon ? esc(e.weapon) : '⚔'}</span>`
-            const headshotHtml = e.headshot
-                ? `<span class="tc-kill-feed-headshot" aria-label="headshot">✦</span>`
-                : ''
-            return `<div class="tc-kill-feed-row" data-id="${esc(e.id)}"><span class="tc-kill-feed-killer"${killerStyle}>${esc(e.killerName)}</span>${weaponHtml}${headshotHtml}<span class="tc-kill-feed-victim"${victimStyle}>${esc(e.victimName)}</span></div>`
-        }).join('')
+        const rowsHtml = visible
+            .map((e) => {
+                const killerStyle = e.killerColor
+                    ? ` style="--bs-kill-feed-killer-color:${esc(e.killerColor)}"`
+                    : ''
+                const victimStyle = e.victimColor
+                    ? ` style="--bs-kill-feed-victim-color:${esc(e.victimColor)}"`
+                    : ''
+                const weaponHtml = `<span class="tc-kill-feed-weapon">${e.weapon ? esc(e.weapon) : '⚔'}</span>`
+                const headshotHtml = e.headshot
+                    ? `<span class="tc-kill-feed-headshot" aria-label="headshot">✦</span>`
+                    : ''
+                return `<div class="tc-kill-feed-row" data-id="${esc(e.id)}"><span class="tc-kill-feed-killer"${killerStyle}>${esc(e.killerName)}</span>${weaponHtml}${headshotHtml}<span class="tc-kill-feed-victim"${victimStyle}>${esc(e.victimName)}</span></div>`
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-kill-feed">${rowsHtml}</div>`
     }

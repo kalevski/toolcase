@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Check } from 'lucide-static'
 import { icon } from './icons'
 
@@ -8,14 +9,6 @@ let _cpIdCounter = 0
 export interface ColorOption {
     value: string
     label?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 function normalizeColor(c: string | ColorOption): ColorOption {
@@ -126,7 +119,9 @@ export class ColorPicker extends HTMLElement {
     }
 
     private _getSwatches(): HTMLButtonElement[] {
-        return Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-color-picker-swatch:not([disabled])'))
+        return Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-color-picker-swatch:not([disabled])'),
+        )
     }
 
     private _forceClose(): void {
@@ -144,7 +139,7 @@ export class ColorPicker extends HTMLElement {
 
         const swatches = this._getSwatches()
         const currentValue = this.value ?? ''
-        const selected = swatches.find(s => s.dataset.value === currentValue)
+        const selected = swatches.find((s) => s.dataset.value === currentValue)
         if (selected) selected.focus()
         else if (swatches.length > 0) swatches[0].focus()
 
@@ -184,11 +179,13 @@ export class ColorPicker extends HTMLElement {
         // render() with _isOpen already false, so the fresh DOM is consistent.
         this._closePanel(false)
         this.setAttribute('value', color)
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: color },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: color },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(color)
         // Restore focus to trigger after the re-render caused by setAttribute.
         this._getTrigger()?.focus()
@@ -236,9 +233,9 @@ export class ColorPicker extends HTMLElement {
     private _renderSkeleton(): string {
         const cols = this.columns
         const count = cols * 3
-        const items = Array.from({ length: count }).map(() =>
-            `<div class="tc-color-picker-swatch-skeleton"></div>`
-        ).join('')
+        const items = Array.from({ length: count })
+            .map(() => `<div class="tc-color-picker-swatch-skeleton"></div>`)
+            .join('')
         return `<div class="tc-color-picker-grid tc-color-picker-grid--loading" style="grid-template-columns:repeat(${cols},1fr);">${items}</div>`
     }
 
@@ -247,13 +244,15 @@ export class ColorPicker extends HTMLElement {
         const currentValue = this.value ?? ''
         const disabled = this.disabled
 
-        const swatches = this._colors.map(c => {
-            const isSelected = c.value === currentValue
-            const disabledAttr = disabled ? ' disabled aria-disabled="true"' : ''
-            const ariaSelected = isSelected ? ' aria-selected="true"' : ' aria-selected="false"'
-            const label = c.label ?? c.value
-            return `<button class="tc-color-picker-swatch${isSelected ? ' tc-color-picker-swatch--selected' : ''}" type="button" role="option"${ariaSelected}${disabledAttr} data-value="${esc(c.value)}" aria-label="${esc(label)}" style="background:${esc(c.value)};" tabindex="-1">${isSelected ? `<span class="tc-color-picker-check" aria-hidden="true">${checkIconHtml}</span>` : ''}</button>`
-        }).join('')
+        const swatches = this._colors
+            .map((c) => {
+                const isSelected = c.value === currentValue
+                const disabledAttr = disabled ? ' disabled aria-disabled="true"' : ''
+                const ariaSelected = isSelected ? ' aria-selected="true"' : ' aria-selected="false"'
+                const label = c.label ?? c.value
+                return `<button class="tc-color-picker-swatch${isSelected ? ' tc-color-picker-swatch--selected' : ''}" type="button" role="option"${ariaSelected}${disabledAttr} data-value="${esc(c.value)}" aria-label="${esc(label)}" style="background:${esc(c.value)};" tabindex="-1">${isSelected ? `<span class="tc-color-picker-check" aria-hidden="true">${checkIconHtml}</span>` : ''}</button>`
+            })
+            .join('')
 
         return `<div class="tc-color-picker-grid" role="listbox" aria-label="Color swatches" style="grid-template-columns:repeat(${cols},1fr);">${swatches}</div>`
     }
@@ -288,7 +287,9 @@ export class ColorPicker extends HTMLElement {
         const grid = this.querySelector('.tc-color-picker-grid')
         if (grid && !loading) {
             grid.addEventListener('click', (e: Event) => {
-                const swatch = (e.target as HTMLElement).closest<HTMLButtonElement>('.tc-color-picker-swatch')
+                const swatch = (e.target as HTMLElement).closest<HTMLButtonElement>(
+                    '.tc-color-picker-swatch',
+                )
                 if (swatch && !swatch.disabled) {
                     const color = swatch.dataset.value ?? ''
                     if (color) this._selectColor(color)

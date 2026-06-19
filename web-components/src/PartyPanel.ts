@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-party-panel'
 
 export interface PartyMember {
@@ -13,17 +14,7 @@ export interface PartyPanelEventMap {
     'tc-invite': CustomEvent<Record<string, never>>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 export class PartyPanel extends HTMLElement {
-
     private _initialised = false
     private _members: PartyMember[] = []
 
@@ -84,14 +75,12 @@ export class PartyPanel extends HTMLElement {
             'tc-party-panel-slot',
             'tc-party-panel-slot--filled',
             m.ready ? 'tc-party-panel-slot--ready' : '',
-        ].filter(Boolean).join(' ')
+        ]
+            .filter(Boolean)
+            .join(' ')
 
-        const hostHtml = m.host
-            ? `<span class="tc-party-panel-host-badge">Host</span>`
-            : ''
-        const roleHtml = m.role
-            ? `<span class="tc-party-panel-role">${esc(m.role)}</span>`
-            : ''
+        const hostHtml = m.host ? `<span class="tc-party-panel-host-badge">Host</span>` : ''
+        const roleHtml = m.role ? `<span class="tc-party-panel-role">${esc(m.role)}</span>` : ''
         const readyHtml = m.ready
             ? `<span class="tc-party-panel-ready-badge tc-party-panel-ready-badge--ready">Ready</span>`
             : `<span class="tc-party-panel-ready-badge tc-party-panel-ready-badge--waiting">Waiting</span>`
@@ -108,7 +97,9 @@ export class PartyPanel extends HTMLElement {
         const members = this._members.slice(0, capacity)
         const filled = members.length
 
-        const slots = Array.from({ length: capacity }, (_, i) => this._renderSlot(i, members)).join('')
+        const slots = Array.from({ length: capacity }, (_, i) => this._renderSlot(i, members)).join(
+            '',
+        )
 
         this.innerHTML = `
             <div class="tc-party-panel">
@@ -127,7 +118,9 @@ export class PartyPanel extends HTMLElement {
         const slots_el = this.querySelector<HTMLElement>('.tc-party-panel-slots')
 
         slots_el?.addEventListener('click', (e: MouseEvent) => {
-            const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-action="invite"]')
+            const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
+                '[data-action="invite"]',
+            )
             if (!btn || btn.disabled) return
             this._emit('tc-invite')
         })

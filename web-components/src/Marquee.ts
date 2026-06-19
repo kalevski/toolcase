@@ -6,7 +6,11 @@ const DIRECTIONS: MarqueeDirection[] = ['left', 'right']
 const DEFAULT_SPEED = 60
 
 function escAttr(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return s
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
 }
 
 function escHtml(s: string): string {
@@ -26,7 +30,7 @@ export class Marquee extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             if (this._items.length === 0) {
-                this._slotNodes = Array.from(this.childNodes).filter(n => n instanceof Element)
+                this._slotNodes = Array.from(this.childNodes).filter((n) => n instanceof Element)
             }
             this.render()
             if (this._items.length === 0 && this._slotNodes.length > 0) {
@@ -113,7 +117,7 @@ export class Marquee extends HTMLElement {
         if (!copy1) return
         const itemWrappers = Array.from(copy1.querySelectorAll(':scope > .tc-marquee-item'))
         this._slotNodes = itemWrappers
-            .map(w => w.firstChild)
+            .map((w) => w.firstChild)
             .filter((n): n is ChildNode => n !== null)
     }
 
@@ -150,7 +154,11 @@ export class Marquee extends HTMLElement {
         }
 
         appendItems(copy1, this._slotNodes, false)
-        appendItems(copy2, this._slotNodes.map(n => n.cloneNode(true)), true)
+        appendItems(
+            copy2,
+            this._slotNodes.map((n) => n.cloneNode(true)),
+            true,
+        )
     }
 
     private _updateDuration(): void {
@@ -160,7 +168,10 @@ export class Marquee extends HTMLElement {
         const w = copy1.offsetWidth
         const duration = w > 0 && this.speed > 0 ? w / this.speed : 10
         inner.style.setProperty('--bs-marquee-duration', `${duration}s`)
-        inner.style.setProperty('--bs-marquee-direction-value', this.direction === 'right' ? 'reverse' : 'normal')
+        inner.style.setProperty(
+            '--bs-marquee-direction-value',
+            this.direction === 'right' ? 'reverse' : 'normal',
+        )
     }
 
     private render(): void {

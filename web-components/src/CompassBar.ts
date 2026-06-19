@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-compass-bar'
 
 export interface CompassMarker {
@@ -6,15 +7,6 @@ export interface CompassMarker {
     color?: string
     label?: string
     icon?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 export class CompassBar extends HTMLElement {
@@ -129,35 +121,39 @@ export class CompassBar extends HTMLElement {
             { heading: 180, label: 'S' },
             { heading: 225, label: 'SW' },
             { heading: 270, label: 'W' },
-            { heading: 315, label: 'NW' }
+            { heading: 315, label: 'NW' },
         ]
         const cardinalsMarkup = showCardinals
-            ? cardinals.map((c) => {
-                const t = this.offsetWithinFOV(c.heading, heading, fov)
-                if (t == null) return ''
-                const pct = (t * 0.5 + 0.5) * 100
-                return `<span class="tc-compass-bar__cardinal" aria-hidden="true" style="left:${pct.toFixed(2)}%;">${c.label}</span>`
-            }).join('')
+            ? cardinals
+                  .map((c) => {
+                      const t = this.offsetWithinFOV(c.heading, heading, fov)
+                      if (t == null) return ''
+                      const pct = (t * 0.5 + 0.5) * 100
+                      return `<span class="tc-compass-bar__cardinal" aria-hidden="true" style="left:${pct.toFixed(2)}%;">${c.label}</span>`
+                  })
+                  .join('')
             : ''
 
-        const markerMarkup = this._markers.map((m) => {
-            const t = this.offsetWithinFOV(m.heading, heading, fov)
-            if (t == null) return ''
-            const pct = (t * 0.5 + 0.5) * 100
-            const color = m.color ? esc(m.color) : ''
-            const styleAttr = `left:${pct.toFixed(2)}%;${color ? `--bs-compass-bar-marker-color:${color};` : ''}`
-            const hasGlyph = !!m.icon
-            const glyphMarkup = hasGlyph
-                ? `<span class="tc-compass-bar__marker-glyph">${esc(m.icon as string)}</span>`
-                : ''
-            const labelMarkup = m.label
-                ? `<span class="tc-compass-bar__marker-label">${esc(m.label)}</span>`
-                : ''
-            const markerClass = hasGlyph
-                ? 'tc-compass-bar__marker tc-compass-bar__marker--glyph'
-                : 'tc-compass-bar__marker'
-            return `<span class="${markerClass}" data-id="${esc(m.id)}" style="${styleAttr}"><span class="tc-compass-bar__marker-tick" aria-hidden="true"></span>${glyphMarkup}${labelMarkup}</span>`
-        }).join('')
+        const markerMarkup = this._markers
+            .map((m) => {
+                const t = this.offsetWithinFOV(m.heading, heading, fov)
+                if (t == null) return ''
+                const pct = (t * 0.5 + 0.5) * 100
+                const color = m.color ? esc(m.color) : ''
+                const styleAttr = `left:${pct.toFixed(2)}%;${color ? `--bs-compass-bar-marker-color:${color};` : ''}`
+                const hasGlyph = !!m.icon
+                const glyphMarkup = hasGlyph
+                    ? `<span class="tc-compass-bar__marker-glyph">${esc(m.icon as string)}</span>`
+                    : ''
+                const labelMarkup = m.label
+                    ? `<span class="tc-compass-bar__marker-label">${esc(m.label)}</span>`
+                    : ''
+                const markerClass = hasGlyph
+                    ? 'tc-compass-bar__marker tc-compass-bar__marker--glyph'
+                    : 'tc-compass-bar__marker'
+                return `<span class="${markerClass}" data-id="${esc(m.id)}" style="${styleAttr}"><span class="tc-compass-bar__marker-tick" aria-hidden="true"></span>${glyphMarkup}${labelMarkup}</span>`
+            })
+            .join('')
 
         const normalized = Math.round(this.normalizeDeg(heading))
         const headingLabel = normalized.toString().padStart(3, '0')

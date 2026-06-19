@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BundleBarDemo: React.FC = () => {
     const chipsRef = useRef<any>(null)
@@ -30,49 +29,84 @@ const BundleBarDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BundleBar"
+                        <tc-rich-page-header
+                            title-text="BundleBar"
                             description="Segmented progress bar for build / bundle visualisation. Supports a name + meta header, a discrete segment track, and chip labels via the chips JS property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Fill ratios">
+                            <tc-section-card title="Fill ratios">
                                 <div className="d-flex flex-column gap-3">
                                     {/* @ts-ignore */}
-                                    <tc-bundle-bar segments="10" filled-segments="0" name="Empty bundle" meta="0 / 10"></tc-bundle-bar>
+                                    <tc-bundle-bar
+                                        segments="10"
+                                        filled-segments="0"
+                                        name="Empty bundle"
+                                        meta="0 / 10"
+                                    ></tc-bundle-bar>
                                     {/* @ts-ignore */}
-                                    <tc-bundle-bar segments="10" filled-segments="4" name="Partial build" meta="4 / 10"></tc-bundle-bar>
+                                    <tc-bundle-bar
+                                        segments="10"
+                                        filled-segments="4"
+                                        name="Partial build"
+                                        meta="4 / 10"
+                                    ></tc-bundle-bar>
                                     {/* @ts-ignore */}
-                                    <tc-bundle-bar segments="10" filled-segments="10" name="Complete bundle" meta="10 / 10"></tc-bundle-bar>
+                                    <tc-bundle-bar
+                                        segments="10"
+                                        filled-segments="10"
+                                        name="Complete bundle"
+                                        meta="10 / 10"
+                                    ></tc-bundle-bar>
                                     {/* @ts-ignore */}
-                                    <tc-bundle-bar segments="20" filled-segments="13" name="Build progress" meta="65%"></tc-bundle-bar>
+                                    <tc-bundle-bar
+                                        segments="20"
+                                        filled-segments="13"
+                                        name="Build progress"
+                                        meta="65%"
+                                    ></tc-bundle-bar>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="No header (track only)">
+                            <tc-section-card title="No header (track only)">
                                 {/* @ts-ignore */}
                                 <tc-bundle-bar segments="12" filled-segments="9"></tc-bundle-bar>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With chips (bundle sizes via JS property)">
+                            <tc-section-card title="With chips (bundle sizes via JS property)">
                                 {/* @ts-ignore */}
-                                <tc-bundle-bar ref={chipsRef} segments="10" filled-segments="7" name="dist/app" meta="3.8 MB"></tc-bundle-bar>
-                            </SectionCard>
+                                <tc-bundle-bar
+                                    ref={chipsRef}
+                                    segments="10"
+                                    filled-segments="7"
+                                    name="dist/app"
+                                    meta="3.8 MB"
+                                ></tc-bundle-bar>
+                            </tc-section-card>
 
-                            <SectionCard title="With chips (test results, coloured accents)">
+                            <tc-section-card title="With chips (test results, coloured accents)">
                                 {/* @ts-ignore */}
-                                <tc-bundle-bar ref={statusRef} segments="15" filled-segments="14" name="Test suite" meta="142 / 153"></tc-bundle-bar>
-                            </SectionCard>
+                                <tc-bundle-bar
+                                    ref={statusRef}
+                                    segments="15"
+                                    filled-segments="14"
+                                    name="Test suite"
+                                    meta="142 / 153"
+                                ></tc-bundle-bar>
+                            </tc-section-card>
 
-                            <SectionCard title="Named slots (name + meta)">
+                            <tc-section-card title="Named slots (name + meta)">
                                 {/* @ts-ignore */}
                                 <tc-bundle-bar segments="8" filled-segments="5">
                                     <strong slot="name">Custom name via slot</strong>
                                     <em slot="meta">slot meta</em>
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-bundle-bar>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

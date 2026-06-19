@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { Check, X } from 'lucide-static'
 import type { InventoryItem, ItemRarity } from './ItemSlot'
 import { icon } from './icons'
@@ -27,15 +28,6 @@ export interface TooltipItem extends InventoryItem {
     requirements?: { label: string; value: string | number; met?: boolean }[]
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 function formatValue(v: string | number): string {
     return typeof v === 'number' ? v.toLocaleString() : v
 }
@@ -57,7 +49,6 @@ const xIconHtml = icon(X, 'tc-item-tooltip__req-icon')
 // events, no slots. All cosmetics flow through --bs-item-tooltip-* custom
 // properties.
 export class ItemTooltip extends HTMLElement {
-
     private _item: TooltipItem | null = null
 
     static get observedAttributes(): string[] {
@@ -80,30 +71,39 @@ export class ItemTooltip extends HTMLElement {
     }
 
     private renderStats(item: TooltipItem): string {
-        const rows = (item.stats ?? []).map(s => `
+        const rows = (item.stats ?? [])
+            .map(
+                (s) => `
             <div class="tc-item-tooltip__stat">
                 <span class="tc-item-tooltip__stat-label">${esc(s.label)}</span>
                 <span class="tc-item-tooltip__stat-value">${esc(formatValue(s.value))}</span>
             </div>
-        `).join('')
+        `,
+            )
+            .join('')
         return rows ? `<div class="tc-item-tooltip__stats">${rows}</div>` : ''
     }
 
     private renderReqs(item: TooltipItem): string {
-        const rows = (item.requirements ?? []).map(r => {
-            // Explicit booleans drive the status colour + marker icon; an absent
-            // `met` leaves the row neutral (a plain requirement listing).
-            const mod = r.met === false ? ' tc-item-tooltip__req--unmet'
-                : r.met === true ? ' tc-item-tooltip__req--met' : ''
-            const marker = r.met === false ? xIconHtml
-                : r.met === true ? checkIconHtml : ''
-            return `
+        const rows = (item.requirements ?? [])
+            .map((r) => {
+                // Explicit booleans drive the status colour + marker icon; an absent
+                // `met` leaves the row neutral (a plain requirement listing).
+                const mod =
+                    r.met === false
+                        ? ' tc-item-tooltip__req--unmet'
+                        : r.met === true
+                          ? ' tc-item-tooltip__req--met'
+                          : ''
+                const marker = r.met === false ? xIconHtml : r.met === true ? checkIconHtml : ''
+                return `
                 <div class="tc-item-tooltip__req${mod}">
                     <span class="tc-item-tooltip__req-label">${esc(r.label)}</span>
                     <span class="tc-item-tooltip__req-value">${marker}${esc(formatValue(r.value))}</span>
                 </div>
             `
-        }).join('')
+            })
+            .join('')
         if (!rows) return ''
         return `<div class="tc-item-tooltip__reqs">
             <tc-eyebrow class="tc-item-tooltip__reqs-label">Requirements</tc-eyebrow>
@@ -124,7 +124,8 @@ export class ItemTooltip extends HTMLElement {
         }
         delete this.dataset.empty
 
-        const rarity: ItemRarity = item.rarity && RARITIES.includes(item.rarity) ? item.rarity : 'common'
+        const rarity: ItemRarity =
+            item.rarity && RARITIES.includes(item.rarity) ? item.rarity : 'common'
         // Reflect rarity onto the host so the SCSS (and themes / consumers) can
         // target a specific tier without a JS read — matches gc-item-tooltip.
         this.dataset.rarity = rarity

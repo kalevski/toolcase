@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CycleWheelDemo: React.FC = () => {
     const mainRef = useRef<any>(null)
@@ -28,14 +27,17 @@ const CycleWheelDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CycleWheel"
+                        <tc-rich-page-header
+                            title-text="CycleWheel"
                             description="Rotating SVG ring of phase labels around a fixed centre showing the current state, with an arrow pointer that orients to the active phase."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — five-phase loop (interactive)">
+                            <tc-section-card title="Default — five-phase loop (interactive)">
                                 <div style={{ maxWidth: 420, margin: '0 auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-cycle-wheel
@@ -62,9 +64,9 @@ const CycleWheelDemo: React.FC = () => {
                                         {paused ? 'Resume' : 'Pause'}
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Three-phase variant — faster spin (spin-seconds=12)">
+                            <tc-section-card title="Three-phase variant — faster spin (spin-seconds=12)">
                                 <div style={{ maxWidth: 320, margin: '0 auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-cycle-wheel
@@ -75,9 +77,9 @@ const CycleWheelDemo: React.FC = () => {
                                         center-pill="Live"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Paused — the spin is stopped via the paused attribute">
+                            <tc-section-card title="Paused — the spin is stopped via the paused attribute">
                                 <div style={{ maxWidth: 420, margin: '0 auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-cycle-wheel
@@ -90,7 +92,7 @@ const CycleWheelDemo: React.FC = () => {
                                         center-sub="Animation paused"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

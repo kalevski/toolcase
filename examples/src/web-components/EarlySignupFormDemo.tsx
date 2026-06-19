@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BENEFITS = [
     'Zero-config setup — drop in a script tag and go',
@@ -21,7 +20,8 @@ const EarlySignupFormDemo: React.FC = () => {
         const el = lightRef.current
         if (!el) return
         el.benefits = BENEFITS
-        const handler = (e: CustomEvent) => setLightLog(`tc-submit fired: ${JSON.stringify(e.detail)}`)
+        const handler = (e: CustomEvent) =>
+            setLightLog(`tc-submit fired: ${JSON.stringify(e.detail)}`)
         el.addEventListener('tc-submit', handler)
         return () => el.removeEventListener('tc-submit', handler)
     }, [])
@@ -30,8 +30,13 @@ const EarlySignupFormDemo: React.FC = () => {
     useEffect(() => {
         const el = darkRef.current
         if (!el) return
-        el.benefits = ['Priority access to beta features', 'Invite 3 teammates for free', 'Lifetime 20% discount']
-        const handler = (e: CustomEvent) => setDarkLog(`tc-submit fired: ${JSON.stringify(e.detail)}`)
+        el.benefits = [
+            'Priority access to beta features',
+            'Invite 3 teammates for free',
+            'Lifetime 20% discount',
+        ]
+        const handler = (e: CustomEvent) =>
+            setDarkLog(`tc-submit fired: ${JSON.stringify(e.detail)}`)
         el.addEventListener('tc-submit', handler)
         return () => el.removeEventListener('tc-submit', handler)
     }, [])
@@ -66,15 +71,17 @@ const EarlySignupFormDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="EarlySignupForm"
+                        <tc-rich-page-header
+                            title-text="EarlySignupForm"
                             description="Email signup panel with benefits list, inline validation, and a success confirmation state. Set benefits via JS property. Fires tc-submit on valid submission."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title='variant="light" (default)'>
+                            <tc-section-card title='variant="light" (default)'>
                                 {/* @ts-ignore */}
                                 <tc-early-signup-form
                                     ref={lightRef}
@@ -102,9 +109,9 @@ const EarlySignupFormDemo: React.FC = () => {
                                         {lightLog}
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title='variant="dark"'>
+                            <tc-section-card title='variant="dark"'>
                                 {/* @ts-ignore */}
                                 <tc-early-signup-form
                                     ref={darkRef}
@@ -132,9 +139,9 @@ const EarlySignupFormDemo: React.FC = () => {
                                         {darkLog}
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="loading state (external prop)">
+                            <tc-section-card title="loading state (external prop)">
                                 {/* @ts-ignore */}
                                 <tc-early-signup-form
                                     ref={loadingRef}
@@ -144,9 +151,9 @@ const EarlySignupFormDemo: React.FC = () => {
                                     loading
                                     helper-text="Hold tight while we register your email."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Success state (submitted on mount)">
+                            <tc-section-card title="Success state (submitted on mount)">
                                 {/* @ts-ignore */}
                                 <tc-early-signup-form
                                     ref={successRef}
@@ -161,9 +168,9 @@ const EarlySignupFormDemo: React.FC = () => {
                                     success-title="You're on the list."
                                     success-message="We'll email you the moment access opens up."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Validation — try submitting an invalid email">
+                            <tc-section-card title="Validation — try submitting an invalid email">
                                 {/* @ts-ignore */}
                                 <tc-early-signup-form
                                     variant="light"
@@ -174,8 +181,7 @@ const EarlySignupFormDemo: React.FC = () => {
                                     placeholder="hello@domain.com"
                                     helper-text="Enter your best email — we'll only use it once."
                                 />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

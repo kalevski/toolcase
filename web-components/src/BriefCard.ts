@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -13,14 +14,6 @@ const DIFF_VARIANT: Record<BriefCardDifficulty, string> = {
     hard: 'danger',
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function resolveIcon(name: string): string {
     const svgStr = (LucideIcons as Record<string, string>)[name]
     if (!svgStr) return ''
@@ -32,7 +25,16 @@ export class BriefCard extends HTMLElement {
     private _onClickProp: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['brief-id', 'difficulty', 'title', 'body', 'meta-left', 'meta-right', 'icon', 'clickable']
+        return [
+            'brief-id',
+            'difficulty',
+            'title',
+            'body',
+            'meta-left',
+            'meta-right',
+            'icon',
+            'clickable',
+        ]
     }
 
     constructor() {
@@ -62,11 +64,21 @@ export class BriefCard extends HTMLElement {
 
     private _rerenderWithSlots(): void {
         // Re-capture from their inner containers (already moved there)
-        const iconSlot = Array.from(this.querySelectorAll('.tc-brief-card__icon-slot [slot="icon"]'))
-        const titleSlot = Array.from(this.querySelectorAll('.tc-brief-card__title-slot [slot="title"]'))
-        const bodySlot = Array.from(this.querySelectorAll('.tc-brief-card__body-slot [slot="body"]'))
-        const metaLeftSlot = Array.from(this.querySelectorAll('.tc-brief-card__meta-left-slot [slot="meta-left"]'))
-        const metaRightSlot = Array.from(this.querySelectorAll('.tc-brief-card__meta-right-slot [slot="meta-right"]'))
+        const iconSlot = Array.from(
+            this.querySelectorAll('.tc-brief-card__icon-slot [slot="icon"]'),
+        )
+        const titleSlot = Array.from(
+            this.querySelectorAll('.tc-brief-card__title-slot [slot="title"]'),
+        )
+        const bodySlot = Array.from(
+            this.querySelectorAll('.tc-brief-card__body-slot [slot="body"]'),
+        )
+        const metaLeftSlot = Array.from(
+            this.querySelectorAll('.tc-brief-card__meta-left-slot [slot="meta-left"]'),
+        )
+        const metaRightSlot = Array.from(
+            this.querySelectorAll('.tc-brief-card__meta-right-slot [slot="meta-right"]'),
+        )
 
         this.render()
         this._distributeSlots(iconSlot, titleSlot, bodySlot, metaLeftSlot, metaRightSlot)
@@ -81,15 +93,15 @@ export class BriefCard extends HTMLElement {
         metaRightSlot: Element[],
     ): void {
         const iconEl = this.querySelector('.tc-brief-card__icon-slot')
-        if (iconEl) iconSlot.forEach(n => iconEl.appendChild(n))
+        if (iconEl) iconSlot.forEach((n) => iconEl.appendChild(n))
         const titleEl = this.querySelector('.tc-brief-card__title-slot')
-        if (titleEl) titleSlot.forEach(n => titleEl.appendChild(n))
+        if (titleEl) titleSlot.forEach((n) => titleEl.appendChild(n))
         const bodyEl = this.querySelector('.tc-brief-card__body-slot')
-        if (bodyEl) bodySlot.forEach(n => bodyEl.appendChild(n))
+        if (bodyEl) bodySlot.forEach((n) => bodyEl.appendChild(n))
         const metaLeftEl = this.querySelector('.tc-brief-card__meta-left-slot')
-        if (metaLeftEl) metaLeftSlot.forEach(n => metaLeftEl.appendChild(n))
+        if (metaLeftEl) metaLeftSlot.forEach((n) => metaLeftEl.appendChild(n))
         const metaRightEl = this.querySelector('.tc-brief-card__meta-right-slot')
-        if (metaRightEl) metaRightSlot.forEach(n => metaRightEl.appendChild(n))
+        if (metaRightEl) metaRightSlot.forEach((n) => metaRightEl.appendChild(n))
     }
 
     private _attachInnerListener(): void {
@@ -106,11 +118,13 @@ export class BriefCard extends HTMLElement {
     }
 
     private _handleClick(): void {
-        this.dispatchEvent(new CustomEvent('tc-click', {
-            bubbles: true,
-            composed: true,
-            detail: { id: this.briefId },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-click', {
+                bubbles: true,
+                composed: true,
+                detail: { id: this.briefId },
+            }),
+        )
         if (typeof this._onClickProp === 'function') this._onClickProp()
     }
 
@@ -217,7 +231,8 @@ export class BriefCard extends HTMLElement {
         const interactiveClass = interactive ? ' tc-brief-card--interactive' : ''
 
         // ID micro-label
-        const idHtml = briefId != null ? `<span class="tc-brief-card__id">${esc(briefId)}</span>` : ''
+        const idHtml =
+            briefId != null ? `<span class="tc-brief-card__id">${esc(briefId)}</span>` : ''
 
         // Header row
         const titleHtml = titleAttr != null ? esc(titleAttr) : ''

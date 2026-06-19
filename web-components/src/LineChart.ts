@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-line-chart'
 
 // One series = a name, an ordered list of {x, y} points, and an optional explicit
@@ -28,14 +29,6 @@ const DEFAULT_HEIGHT = 320
 // carry it, colour is data). An explicit per-series `color` is the sanctioned
 // override. Exposed as --bs-line-chart-series-N so themes can re-skin.
 const PALETTE_SIZE = 6
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 // round an axis max up to a "nice" round number so the top gridline reads cleanly
 function niceMax(v: number): number {
@@ -196,12 +189,13 @@ export class LineChart extends HTMLElement {
 
         const titleAttr = this.getAttribute('title')
         const subtitle = this.getAttribute('subtitle')
-        const headerHtml = (titleAttr || subtitle)
-            ? `<div class="tc-line-chart-header">`
-                + (titleAttr ? `<div class="tc-line-chart-title">${esc(titleAttr)}</div>` : '')
-                + (subtitle ? `<div class="tc-line-chart-subtitle">${esc(subtitle)}</div>` : '')
-                + `</div>`
-            : ''
+        const headerHtml =
+            titleAttr || subtitle
+                ? `<div class="tc-line-chart-header">` +
+                  (titleAttr ? `<div class="tc-line-chart-title">${esc(titleAttr)}</div>` : '') +
+                  (subtitle ? `<div class="tc-line-chart-subtitle">${esc(subtitle)}</div>` : '') +
+                  `</div>`
+                : ''
 
         const series = this._series
         if (!series.length) {
@@ -212,7 +206,10 @@ export class LineChart extends HTMLElement {
 
         const VH = this.height
         const VW = 560
-        const PL = 52, PR = 20, PT = 18, PB = 40
+        const PL = 52,
+            PR = 20,
+            PT = 18,
+            PB = 40
         const cW = VW - PL - PR
         const cH = VH - PT - PB
         this._vw = VW
@@ -221,16 +218,23 @@ export class LineChart extends HTMLElement {
         // shared x domain = the union of every series' x values, in first-seen order
         const allX: string[] = []
         const seen = new Set<string>()
-        series.forEach(s => seriesPoints(s).forEach(p => {
-            const key = String(p.x)
-            if (!seen.has(key)) { seen.add(key); allX.push(key) }
-        }))
+        series.forEach((s) =>
+            seriesPoints(s).forEach((p) => {
+                const key = String(p.x)
+                if (!seen.has(key)) {
+                    seen.add(key)
+                    allX.push(key)
+                }
+            }),
+        )
 
         // y domain across visible series only (toggled-off series don't scale it)
         const visibleY: number[] = []
         series.forEach((s, si) => {
             if (this._hidden.has(si)) return
-            seriesPoints(s).forEach(p => { if (typeof p.y === 'number' && !isNaN(p.y)) visibleY.push(p.y) })
+            seriesPoints(s).forEach((p) => {
+                if (typeof p.y === 'number' && !isNaN(p.y)) visibleY.push(p.y)
+            })
         })
         const rawMax = visibleY.length ? Math.max(...visibleY) : 0
         const yMax = niceMax(rawMax * 1.05)
@@ -249,12 +253,12 @@ export class LineChart extends HTMLElement {
         let gridHtml = ''
         if (this.showGrid) {
             gridHtml += `<g class="tc-line-chart-grid">`
-            yTicks.forEach(t => {
+            yTicks.forEach((t) => {
                 const y = yPos(t).toFixed(1)
                 gridHtml += `<line class="tc-line-chart-gridline" x1="${PL}" y1="${y}" x2="${PL + cW}" y2="${y}" />`
             })
             // vertical hairlines at each x position
-            allX.forEach(x => {
+            allX.forEach((x) => {
                 const xc = xPos(x).toFixed(1)
                 gridHtml += `<line class="tc-line-chart-gridline tc-line-chart-gridline--v" x1="${xc}" y1="${PT}" x2="${xc}" y2="${(PT + cH).toFixed(1)}" />`
             })
@@ -263,7 +267,7 @@ export class LineChart extends HTMLElement {
 
         // y axis tick labels (always shown — they read the scale)
         let yLabelsHtml = ''
-        yTicks.forEach(t => {
+        yTicks.forEach((t) => {
             const y = (yPos(t) + 4).toFixed(1)
             yLabelsHtml += `<text class="tc-line-chart-axis-label tc-line-chart-axis-label--y" x="${PL - 8}" y="${y}" text-anchor="end">${esc(this._fmtY(t))}</text>`
         })
@@ -279,8 +283,8 @@ export class LineChart extends HTMLElement {
 
         // axes
         const axesHtml =
-            `<line class="tc-line-chart-axis" x1="${PL}" y1="${(PT + cH).toFixed(1)}" x2="${PL + cW}" y2="${(PT + cH).toFixed(1)}" />`
-            + `<line class="tc-line-chart-axis tc-line-chart-axis--y" x1="${PL}" y1="${PT}" x2="${PL}" y2="${(PT + cH).toFixed(1)}" />`
+            `<line class="tc-line-chart-axis" x1="${PL}" y1="${(PT + cH).toFixed(1)}" x2="${PL + cW}" y2="${(PT + cH).toFixed(1)}" />` +
+            `<line class="tc-line-chart-axis tc-line-chart-axis--y" x1="${PL}" y1="${PT}" x2="${PL}" y2="${(PT + cH).toFixed(1)}" />`
 
         // --- series lines + point markers ---
         this._anchors = []
@@ -288,15 +292,20 @@ export class LineChart extends HTMLElement {
         series.forEach((s, si) => {
             if (this._hidden.has(si)) return
             const color = this._seriesColor(si, s.color)
-            const pts = seriesPoints(s).filter(p => allX.includes(String(p.x)) && typeof p.y === 'number' && !isNaN(p.y))
+            const pts = seriesPoints(s).filter(
+                (p) => allX.includes(String(p.x)) && typeof p.y === 'number' && !isNaN(p.y),
+            )
             if (!pts.length) return
 
-            const d = pts.map((p, pi) =>
-                `${pi === 0 ? 'M' : 'L'} ${xPos(p.x).toFixed(1)} ${yPos(p.y).toFixed(1)}`
-            ).join(' ')
+            const d = pts
+                .map(
+                    (p, pi) =>
+                        `${pi === 0 ? 'M' : 'L'} ${xPos(p.x).toFixed(1)} ${yPos(p.y).toFixed(1)}`,
+                )
+                .join(' ')
 
             let dotsHtml = ''
-            pts.forEach(p => {
+            pts.forEach((p) => {
                 const cx = xPos(p.x)
                 const cy = yPos(p.y)
                 const ai = this._anchors.length
@@ -304,22 +313,23 @@ export class LineChart extends HTMLElement {
                 dotsHtml += `<circle class="tc-line-chart-point" data-ai="${ai}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" style="--tc-line-color:${esc(color)}" />`
             })
 
-            seriesHtml += `<g class="tc-line-chart-series" style="--tc-line-color:${esc(color)}">`
-                + `<path class="tc-line-chart-line" d="${d}" />`
-                + dotsHtml
-                + `</g>`
+            seriesHtml +=
+                `<g class="tc-line-chart-series" style="--tc-line-color:${esc(color)}">` +
+                `<path class="tc-line-chart-line" d="${d}" />` +
+                dotsHtml +
+                `</g>`
         })
 
         const summary = this._summary(series, allX.length)
         const svgHtml =
-            `<svg class="tc-line-chart-svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">`
-            + `<title>${esc(summary)}</title>`
-            + gridHtml
-            + axesHtml
-            + yLabelsHtml
-            + xLabelsHtml
-            + seriesHtml
-            + `</svg>`
+            `<svg class="tc-line-chart-svg" role="img" viewBox="0 0 ${VW} ${VH}" width="100%" height="${VH}" aria-label="${esc(summary)}">` +
+            `<title>${esc(summary)}</title>` +
+            gridHtml +
+            axesHtml +
+            yLabelsHtml +
+            xLabelsHtml +
+            seriesHtml +
+            `</svg>`
 
         const tooltipHtml = `<div class="tc-line-chart-tooltip" role="status" aria-live="polite" hidden></div>`
 
@@ -330,20 +340,21 @@ export class LineChart extends HTMLElement {
             series.forEach((s, si) => {
                 const color = this._seriesColor(si, s.color)
                 const active = !this._hidden.has(si)
-                legendHtml += `<button type="button" class="tc-line-chart-legend-item${active ? '' : ' tc-line-chart-legend-item--off'}" data-si="${si}" aria-pressed="${active}">`
-                    + `<span class="tc-line-chart-legend-swatch" style="--tc-line-color:${esc(color)}" aria-hidden="true"></span>`
-                    + `<span class="tc-line-chart-legend-label">${esc(seriesName(s, si))}</span>`
-                    + `</button>`
+                legendHtml +=
+                    `<button type="button" class="tc-line-chart-legend-item${active ? '' : ' tc-line-chart-legend-item--off'}" data-si="${si}" aria-pressed="${active}">` +
+                    `<span class="tc-line-chart-legend-swatch" style="--tc-line-color:${esc(color)}" aria-hidden="true"></span>` +
+                    `<span class="tc-line-chart-legend-label">${esc(seriesName(s, si))}</span>` +
+                    `</button>`
             })
             legendHtml += `</div>`
         }
 
         this.innerHTML =
-            `<div class="tc-line-chart-inner">`
-            + headerHtml
-            + `<div class="tc-line-chart-plot">${svgHtml}${tooltipHtml}</div>`
-            + legendHtml
-            + `</div>`
+            `<div class="tc-line-chart-inner">` +
+            headerHtml +
+            `<div class="tc-line-chart-plot">${svgHtml}${tooltipHtml}</div>` +
+            legendHtml +
+            `</div>`
 
         const svg = this.querySelector<SVGSVGElement>('.tc-line-chart-svg')
         if (svg) {
@@ -362,11 +373,11 @@ export class LineChart extends HTMLElement {
             ? `<div class="tc-line-chart-header"><div class="tc-line-chart-skeleton tc-line-chart-skeleton--title" aria-hidden="true"></div></div>`
             : ''
         this.innerHTML =
-            `<div class="tc-line-chart-inner">`
-            + headHtml
-            + `<div class="tc-line-chart-skeleton tc-line-chart-skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>`
-            + `<span class="visually-hidden">Loading…</span>`
-            + `</div>`
+            `<div class="tc-line-chart-inner">` +
+            headHtml +
+            `<div class="tc-line-chart-skeleton tc-line-chart-skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+            `<span class="visually-hidden">Loading…</span>` +
+            `</div>`
     }
 
     private _summary(series: LineChartSeries[], xCount: number): string {
@@ -395,7 +406,10 @@ export class LineChart extends HTMLElement {
             const dx = a.cx - ux
             const dy = a.cy - uy
             const d = dx * dx + dy * dy
-            if (d < bestD) { bestD = d; best = a }
+            if (d < bestD) {
+                bestD = d
+                best = a
+            }
         }
         // only surface when reasonably close (within ~40 user units)
         return bestD <= 40 * 40 ? best : null
@@ -403,15 +417,19 @@ export class LineChart extends HTMLElement {
 
     private _onPointerMove = (e: PointerEvent): void => {
         const a = this._nearestAnchor(e)
-        if (!a) { this._onPointerLeave(); return }
+        if (!a) {
+            this._onPointerLeave()
+            return
+        }
         this._showTooltip(a)
     }
 
     private _onPointerLeave = (): void => {
         const tip = this.querySelector<HTMLElement>('.tc-line-chart-tooltip')
         if (tip) tip.hidden = true
-        this.querySelectorAll('.tc-line-chart-point--active')
-            .forEach(el => el.classList.remove('tc-line-chart-point--active'))
+        this.querySelectorAll('.tc-line-chart-point--active').forEach((el) =>
+            el.classList.remove('tc-line-chart-point--active'),
+        )
     }
 
     private _showTooltip(a: PointAnchor): void {
@@ -423,8 +441,9 @@ export class LineChart extends HTMLElement {
         if (!point) return
 
         // highlight the active marker
-        this.querySelectorAll('.tc-line-chart-point--active')
-            .forEach(el => el.classList.remove('tc-line-chart-point--active'))
+        this.querySelectorAll('.tc-line-chart-point--active').forEach((el) =>
+            el.classList.remove('tc-line-chart-point--active'),
+        )
         const idx = this._anchors.indexOf(a)
         const marker = this.querySelector(`.tc-line-chart-point[data-ai="${idx}"]`)
         if (marker) marker.classList.add('tc-line-chart-point--active')
@@ -434,11 +453,11 @@ export class LineChart extends HTMLElement {
         tip.setAttribute('aria-label', `${seriesName(s, a.si)}, ${xLabel}: ${yLabel}`)
         tip.style.setProperty('--tc-line-color', a.color)
         tip.innerHTML =
-            `<span class="tc-line-chart-tooltip-x">${esc(xLabel)}</span>`
-            + `<span class="tc-line-chart-tooltip-row">`
-            + `<span class="tc-line-chart-tooltip-name">${esc(seriesName(s, a.si))}</span>`
-            + `<span class="tc-line-chart-tooltip-value">${esc(yLabel)}</span>`
-            + `</span>`
+            `<span class="tc-line-chart-tooltip-x">${esc(xLabel)}</span>` +
+            `<span class="tc-line-chart-tooltip-row">` +
+            `<span class="tc-line-chart-tooltip-name">${esc(seriesName(s, a.si))}</span>` +
+            `<span class="tc-line-chart-tooltip-value">${esc(yLabel)}</span>` +
+            `</span>`
 
         const svg = this.querySelector<SVGSVGElement>('.tc-line-chart-svg')
         const rect = svg ? svg.getBoundingClientRect() : null
@@ -448,11 +467,13 @@ export class LineChart extends HTMLElement {
         tip.style.top = `${a.cy * scaleY}px`
         tip.hidden = false
 
-        this.dispatchEvent(new CustomEvent('tc-point-hover', {
-            bubbles: true,
-            composed: true,
-            detail: { series: s, point } as LinePointHoverDetail,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-point-hover', {
+                bubbles: true,
+                composed: true,
+                detail: { series: s, point } as LinePointHoverDetail,
+            }),
+        )
     }
 
     // ---- legend toggle ----

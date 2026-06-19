@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HOURS = ['00', '04', '08', '12', '16', '20']
@@ -45,40 +44,43 @@ const HeatmapDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Heatmap"
+                        <tc-rich-page-header
+                            title-text="Heatmap"
                             description="Heatmap grid with colour-interpolated cells, axis labels, a min→max legend, and hover tooltips. Cell colour is the sanctioned data encoding; the default scale is slate→ink neutrals."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default scale — slate→ink neutrals">
+                            <tc-section-card title="Default scale — slate→ink neutrals">
                                 {/* @ts-ignore */}
                                 <tc-heatmap
                                     ref={defaultRef}
                                     title="Weekly activity"
                                     subtitle="Events by day and hour"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom colorScale — warm → hot">
+                            <tc-section-card title="Custom colorScale — warm → hot">
                                 {/* @ts-ignore */}
                                 <tc-heatmap
                                     ref={colorRef}
                                     title="Traffic intensity"
                                     subtitle="Explicit colour scale carries the encoding"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Larger cells — cell-size=44">
+                            <tc-section-card title="Larger cells — cell-size=44">
                                 {/* @ts-ignore */}
                                 <tc-heatmap ref={sizeRef} cell-size="44" title="Roomier grid" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-heatmap ref={loadingRef} loading title="Loading" />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

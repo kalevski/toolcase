@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const coloredSlices = [
     { label: 'JavaScript', value: 4820, color: '#f59e0b' },
@@ -34,49 +33,61 @@ const SlicesCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="SlicesCard"
+                        <tc-rich-page-header
+                            title-text="SlicesCard"
                             description="Dashboard card with a donut/pie chart and an item legend. Driven by a JS property array of slices."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Colored slices — caller-supplied colors">
+                            <tc-section-card title="Colored slices — caller-supplied colors">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
-                                    <tc-slices-card ref={coloredRef} title="Downloads by Language" />
+                                    <tc-slices-card
+                                        ref={coloredRef}
+                                        title="Downloads by Language"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Uncolored slate set — quiet default ramp">
+                            <tc-section-card title="Uncolored slate set — quiet default ramp">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-slices-card ref={slateRef} title="Issues by Status" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom size and stroke-width">
+                            <tc-section-card title="Custom size and stroke-width">
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-slices-card
-                                        ref={(el: any) => { if (el) el.slices = coloredSlices }}
+                                        ref={(el: any) => {
+                                            if (el) el.slices = coloredSlices
+                                        }}
                                         title="Large donut"
                                         size="200"
                                         stroke-width="32"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                            <tc-section-card title="Loading skeleton">
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                        gap: '1rem',
+                                    }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-slices-card loading title="Downloads" />
                                     {/* @ts-ignore */}
                                     <tc-slices-card loading />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

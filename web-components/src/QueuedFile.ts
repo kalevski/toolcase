@@ -1,15 +1,8 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon, closeIcon } from './icons'
 
 const TAG_NAME = 'tc-queued-file'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 Bytes'
@@ -20,7 +13,10 @@ function formatBytes(bytes: number): string {
 }
 
 // Pre-compute — file icon is always rendered
-const fileIconHtml = icon((LucideIcons as Record<string, string>)['File'] || '', 'tc-queued-file-icon-svg')
+const fileIconHtml = icon(
+    (LucideIcons as Record<string, string>)['File'] || '',
+    'tc-queued-file-icon-svg',
+)
 
 export class QueuedFile extends HTMLElement {
     private _initialised = false
@@ -78,10 +74,12 @@ export class QueuedFile extends HTMLElement {
     }
 
     private _handleDismiss = (): void => {
-        this.dispatchEvent(new CustomEvent('tc-dismiss', {
-            bubbles: true,
-            composed: true,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-dismiss', {
+                bubbles: true,
+                composed: true,
+            }),
+        )
         if (typeof this.onDismiss === 'function') this.onDismiss()
     }
 
@@ -101,14 +99,14 @@ export class QueuedFile extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-queued-file">` +
-                `<span class="tc-queued-file-leading" aria-hidden="true">${fileIconHtml}</span>` +
-                `<div class="tc-queued-file-body">` +
-                    `<span class="tc-queued-file-name">${fullName}</span>` +
-                    `<div class="tc-queued-file-meta">${formatBadgeHtml}` +
-                        `<span class="tc-queued-file-size">${sizeText}</span>` +
-                    `</div>` +
-                `</div>` +
-                `<button type="button" class="tc-queued-file-dismiss" aria-label="Dismiss">${closeIcon}</button>` +
+            `<span class="tc-queued-file-leading" aria-hidden="true">${fileIconHtml}</span>` +
+            `<div class="tc-queued-file-body">` +
+            `<span class="tc-queued-file-name">${fullName}</span>` +
+            `<div class="tc-queued-file-meta">${formatBadgeHtml}` +
+            `<span class="tc-queued-file-size">${sizeText}</span>` +
+            `</div>` +
+            `</div>` +
+            `<button type="button" class="tc-queued-file-dismiss" aria-label="Dismiss">${closeIcon}</button>` +
             `</div>`
 
         const btn = this.querySelector('.tc-queued-file-dismiss')

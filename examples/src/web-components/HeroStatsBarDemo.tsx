@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const HeroStatsBarDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -58,32 +57,35 @@ const HeroStatsBarDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="HeroStatsBar"
+                        <tc-rich-page-header
+                            title-text="HeroStatsBar"
                             description="Horizontal bar of key-value statistics with optional units and zero-state styling. Set stats via the JS stats property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic stats">
+                            <tc-section-card title="Basic stats">
                                 {/* @ts-ignore */}
                                 <tc-hero-stats-bar ref={basicRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With units">
+                            <tc-section-card title="With units">
                                 {/* @ts-ignore */}
                                 <tc-hero-stats-bar ref={unitsRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Zero-state (0, '0', empty mute the value color)">
+                            <tc-section-card title="Zero-state (0, '0', empty mute the value color)">
                                 {/* @ts-ignore */}
                                 <tc-hero-stats-bar ref={zeroRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Many stats">
+                            <tc-section-card title="Many stats">
                                 {/* @ts-ignore */}
                                 <tc-hero-stats-bar ref={manyRef} />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

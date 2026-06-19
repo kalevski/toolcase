@@ -1,7 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-divider'
 
 export class Divider extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -18,7 +18,7 @@ export class Divider extends HTMLElement {
             this.render()
             if (!this.hasAttribute('label')) {
                 const inner = this.querySelector('.tc-divider__label')
-                if (inner) slotContent.forEach(n => inner.appendChild(n))
+                if (inner) slotContent.forEach((n) => inner.appendChild(n))
             }
             this._initialised = true
         }
@@ -31,7 +31,7 @@ export class Divider extends HTMLElement {
         this.render()
         if (!this.hasAttribute('label')) {
             const newInner = this.querySelector('.tc-divider__label')
-            if (newInner) slotContent.forEach(n => newInner.appendChild(n))
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         }
     }
 
@@ -59,7 +59,7 @@ export class Divider extends HTMLElement {
 
         if (label != null) {
             // aria-label makes the separator name accessible when using the attribute
-            this.innerHTML = `<div class="tc-divider ${dirClass}" role="separator" aria-orientation="${orientation}" aria-label="${this._escape(label)}"><span class="tc-divider__label">${this._escape(label)}</span></div>`
+            this.innerHTML = `<div class="tc-divider ${dirClass}" role="separator" aria-orientation="${orientation}" aria-label="${esc(label)}"><span class="tc-divider__label">${esc(label)}</span></div>`
         } else {
             // Empty label span is hidden via CSS :empty; slotted children are
             // appended to it by connectedCallback / attributeChangedCallback.
@@ -68,13 +68,6 @@ export class Divider extends HTMLElement {
     }
 
     // Minimal HTML escape so dynamic label values don't inject markup.
-    private _escape(s: string): string {
-        return s
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-    }
 }
 
 declare global {

@@ -1,19 +1,16 @@
+import { VARIANTS_CORE } from './internal/variants'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cool-button'
 
 export type CoolButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info'
 export type CoolButtonSize = 'small' | 'default' | 'large'
 export type CoolButtonAddonPosition = 'left' | 'right'
 
-const VARIANTS: CoolButtonVariant[] = ['primary', 'secondary', 'success', 'danger', 'warning', 'info']
+const VARIANTS: CoolButtonVariant[] = [...VARIANTS_CORE]
 const SIZES: CoolButtonSize[] = ['small', 'default', 'large']
 const ADDON_POSITIONS: CoolButtonAddonPosition[] = ['left', 'right']
 
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
 export class CoolButton extends HTMLElement {
-
     private _initialised = false
     private _mainNodes: Node[] = []
     private _addonNodes: Node[] = []
@@ -21,7 +18,16 @@ export class CoolButton extends HTMLElement {
     onClick: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['variant', 'size', 'outline', 'loading', 'label', 'addon', 'addon-position', 'disabled']
+        return [
+            'variant',
+            'size',
+            'outline',
+            'loading',
+            'label',
+            'addon',
+            'addon-position',
+            'disabled',
+        ]
     }
 
     constructor() {
@@ -37,7 +43,8 @@ export class CoolButton extends HTMLElement {
                 : Array.from(this.querySelectorAll('[slot="addon"]'))
             if (!this.hasAttribute('label')) {
                 this._mainNodes = Array.from(this.childNodes).filter(
-                    n => !(n instanceof Element && (n as Element).getAttribute('slot') === 'addon'),
+                    (n) =>
+                        !(n instanceof Element && (n as Element).getAttribute('slot') === 'addon'),
                 )
             }
             this.render()
@@ -55,11 +62,15 @@ export class CoolButton extends HTMLElement {
         // Re-capture slot nodes from their current DOM containers before re-render.
         if (!this.hasAttribute('label')) {
             const contentEl = this.querySelector('.tc-cool-button-content')
-            if (contentEl) this._mainNodes = Array.from(contentEl.childNodes).filter(n => !this._isSpinner(n))
+            if (contentEl)
+                this._mainNodes = Array.from(contentEl.childNodes).filter(
+                    (n) => !this._isSpinner(n),
+                )
         }
         if (!this.hasAttribute('addon')) {
             const addonEl = this.querySelector('.tc-cool-button-addon')
-            if (addonEl) this._addonNodes = Array.from(addonEl.childNodes).filter(n => !this._isSpinner(n))
+            if (addonEl)
+                this._addonNodes = Array.from(addonEl.childNodes).filter((n) => !this._isSpinner(n))
         }
         this.render()
         this._distributeSlots()
@@ -72,22 +83,24 @@ export class CoolButton extends HTMLElement {
     private _handleClick = () => {
         const btn = this.querySelector<HTMLButtonElement>('button')
         if (btn && btn.disabled) return
-        this.dispatchEvent(new CustomEvent('tc-click', {
-            bubbles: true,
-            composed: true,
-            detail: {},
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-click', {
+                bubbles: true,
+                composed: true,
+                detail: {},
+            }),
+        )
         if (typeof this.onClick === 'function') this.onClick()
     }
 
     private _distributeSlots(): void {
         if (!this.hasAttribute('label')) {
             const contentEl = this.querySelector('.tc-cool-button-content')
-            if (contentEl) this._mainNodes.forEach(n => contentEl.appendChild(n))
+            if (contentEl) this._mainNodes.forEach((n) => contentEl.appendChild(n))
         }
         if (!this.hasAttribute('addon')) {
             const addonEl = this.querySelector('.tc-cool-button-addon')
-            if (addonEl) this._addonNodes.forEach(n => addonEl.appendChild(n))
+            if (addonEl) this._addonNodes.forEach((n) => addonEl.appendChild(n))
         }
     }
 
@@ -95,39 +108,53 @@ export class CoolButton extends HTMLElement {
         const v = this.getAttribute('variant') as CoolButtonVariant
         return VARIANTS.includes(v) ? v : 'primary'
     }
-    set variant(v: CoolButtonVariant) { this.setAttribute('variant', v) }
+    set variant(v: CoolButtonVariant) {
+        this.setAttribute('variant', v)
+    }
 
     get size(): CoolButtonSize {
         const v = this.getAttribute('size') as CoolButtonSize
         return SIZES.includes(v) ? v : 'default'
     }
-    set size(v: CoolButtonSize) { this.setAttribute('size', v) }
+    set size(v: CoolButtonSize) {
+        this.setAttribute('size', v)
+    }
 
-    get outline(): boolean { return this.hasAttribute('outline') }
+    get outline(): boolean {
+        return this.hasAttribute('outline')
+    }
     set outline(v: boolean) {
         if (v) this.setAttribute('outline', '')
         else this.removeAttribute('outline')
     }
 
-    get loading(): boolean { return this.hasAttribute('loading') }
+    get loading(): boolean {
+        return this.hasAttribute('loading')
+    }
     set loading(v: boolean) {
         if (v) this.setAttribute('loading', '')
         else this.removeAttribute('loading')
     }
 
-    get disabled(): boolean { return this.hasAttribute('disabled') }
+    get disabled(): boolean {
+        return this.hasAttribute('disabled')
+    }
     set disabled(v: boolean) {
         if (v) this.setAttribute('disabled', '')
         else this.removeAttribute('disabled')
     }
 
-    get label(): string | null { return this.getAttribute('label') }
+    get label(): string | null {
+        return this.getAttribute('label')
+    }
     set label(v: string | null) {
         if (v !== null) this.setAttribute('label', v)
         else this.removeAttribute('label')
     }
 
-    get addon(): string | null { return this.getAttribute('addon') }
+    get addon(): string | null {
+        return this.getAttribute('addon')
+    }
     set addon(v: string | null) {
         if (v !== null) this.setAttribute('addon', v)
         else this.removeAttribute('addon')
@@ -137,7 +164,9 @@ export class CoolButton extends HTMLElement {
         const v = this.getAttribute('addon-position') as CoolButtonAddonPosition
         return ADDON_POSITIONS.includes(v) ? v : 'right'
     }
-    set addonPosition(v: CoolButtonAddonPosition) { this.setAttribute('addon-position', v) }
+    set addonPosition(v: CoolButtonAddonPosition) {
+        this.setAttribute('addon-position', v)
+    }
 
     private render(): void {
         const variant = this.variant
@@ -149,7 +178,11 @@ export class CoolButton extends HTMLElement {
         const isDisabled = disabled || loading
 
         const variantClass = outline ? `btn-outline-${variant}` : `btn-${variant}`
-        const sizeClassMap: Record<CoolButtonSize, string> = { small: 'btn-sm', default: '', large: 'btn-lg' }
+        const sizeClassMap: Record<CoolButtonSize, string> = {
+            small: 'btn-sm',
+            default: '',
+            large: 'btn-lg',
+        }
         const sizeClass = sizeClassMap[size] ? ` ${sizeClassMap[size]}` : ''
         const loadingClass = loading ? ' tc-cool-button--loading' : ''
 
@@ -160,7 +193,9 @@ export class CoolButton extends HTMLElement {
         // hidden in place (kept in flow) so the button keeps its resting width — no
         // collapse, no jump. The spinner ring may use border-radius (sanctioned circle).
         const spinnerHtml = `<span class="tc-cool-button-spinner spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
-        const liveRegion = loading ? `<span class="visually-hidden" role="status">Loading…</span>` : ''
+        const liveRegion = loading
+            ? `<span class="visually-hidden" role="status">Loading…</span>`
+            : ''
 
         // Label attribute text is written directly into the content span;
         // when absent the span is empty and slot children are appended after render.

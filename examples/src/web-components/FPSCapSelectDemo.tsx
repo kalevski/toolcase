@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useFPSCapValue(initial: string): [string, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -41,23 +40,30 @@ const FPSCapSelectDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="FPS Cap Select"
+                        <tc-rich-page-header
+                            title-text="FPS Cap Select"
                             description="A preset frame-rate-cap setting row: a label/description block paired with a native select of FPS presets. Built on the shared tc-setting-row scaffold."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — six presets, defaults to 'FPS Cap'">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Default — six presets, defaults to 'FPS Cap'">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fps-cap-select ref={ref1} value="60" />
                                 </div>
                                 <div className="form-text mt-1">Current value: {v1}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom label + description">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Custom label + description">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fps-cap-select
                                         ref={ref2}
@@ -67,10 +73,12 @@ const FPSCapSelectDemo: React.FC = () => {
                                     />
                                 </div>
                                 <div className="form-text mt-1">Current value: {v2}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom presets (options JS property)">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Custom presets (options JS property)">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fps-cap-select
                                         ref={ref3}
@@ -79,10 +87,12 @@ const FPSCapSelectDemo: React.FC = () => {
                                         value="165"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Disabled">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fps-cap-select
                                         row-label="Frame rate limit"
@@ -91,7 +101,7 @@ const FPSCapSelectDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

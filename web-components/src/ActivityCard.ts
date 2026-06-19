@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -9,14 +10,6 @@ export interface ActivityItem {
     title: string
     description?: string
     timestamp?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 const FALLBACK_ICON = 'Circle'
@@ -90,16 +83,18 @@ export class ActivityCard extends HTMLElement {
 
         let listHtml: string
         if (loading) {
-            const rows = Array.from({ length: loadingCount }, () =>
-                '<li class="tc-activity-item tc-activity-item--skeleton" role="listitem">' +
-                '<div class="tc-activity-icon" aria-hidden="true">' +
-                '<div class="tc-activity-icon-chip tc-activity-icon-chip--skeleton"></div>' +
-                '</div>' +
-                '<div class="tc-activity-body">' +
-                '<div class="tc-activity-skeleton tc-activity-skeleton--title"></div>' +
-                '<div class="tc-activity-skeleton tc-activity-skeleton--desc"></div>' +
-                '</div>' +
-                '</li>'
+            const rows = Array.from(
+                { length: loadingCount },
+                () =>
+                    '<li class="tc-activity-item tc-activity-item--skeleton" role="listitem">' +
+                    '<div class="tc-activity-icon" aria-hidden="true">' +
+                    '<div class="tc-activity-icon-chip tc-activity-icon-chip--skeleton"></div>' +
+                    '</div>' +
+                    '<div class="tc-activity-body">' +
+                    '<div class="tc-activity-skeleton tc-activity-skeleton--title"></div>' +
+                    '<div class="tc-activity-skeleton tc-activity-skeleton--desc"></div>' +
+                    '</div>' +
+                    '</li>',
             ).join('')
             listHtml = [
                 '<ul class="tc-activity-list" role="list" aria-busy="true">',
@@ -108,31 +103,33 @@ export class ActivityCard extends HTMLElement {
                 '</ul>',
             ].join('')
         } else {
-            const items = this._activities.map((item, i) => {
-                const iconHtml = this._resolveIcon(item.icon ?? FALLBACK_ICON)
-                const isLast = i === this._activities.length - 1
-                const railClass = isLast ? '' : ' tc-activity-icon--has-rail'
-                const timeHtml = item.timestamp
-                    ? `<time class="tc-activity-time">${esc(item.timestamp)}</time>`
-                    : ''
-                const descHtml = item.description
-                    ? `<span class="tc-activity-desc">${esc(item.description)}</span>`
-                    : ''
-                return [
-                    `<li class="tc-activity-item" role="listitem">`,
-                    `<div class="tc-activity-icon${railClass}" aria-hidden="true">`,
-                    `<div class="tc-activity-icon-chip">${iconHtml}</div>`,
-                    `</div>`,
-                    `<div class="tc-activity-body">`,
-                    `<div class="tc-activity-row">`,
-                    `<span class="tc-activity-title">${esc(item.title)}</span>`,
-                    timeHtml,
-                    `</div>`,
-                    descHtml,
-                    `</div>`,
-                    `</li>`,
-                ].join('')
-            }).join('')
+            const items = this._activities
+                .map((item, i) => {
+                    const iconHtml = this._resolveIcon(item.icon ?? FALLBACK_ICON)
+                    const isLast = i === this._activities.length - 1
+                    const railClass = isLast ? '' : ' tc-activity-icon--has-rail'
+                    const timeHtml = item.timestamp
+                        ? `<time class="tc-activity-time">${esc(item.timestamp)}</time>`
+                        : ''
+                    const descHtml = item.description
+                        ? `<span class="tc-activity-desc">${esc(item.description)}</span>`
+                        : ''
+                    return [
+                        `<li class="tc-activity-item" role="listitem">`,
+                        `<div class="tc-activity-icon${railClass}" aria-hidden="true">`,
+                        `<div class="tc-activity-icon-chip">${iconHtml}</div>`,
+                        `</div>`,
+                        `<div class="tc-activity-body">`,
+                        `<div class="tc-activity-row">`,
+                        `<span class="tc-activity-title">${esc(item.title)}</span>`,
+                        timeHtml,
+                        `</div>`,
+                        descHtml,
+                        `</div>`,
+                        `</li>`,
+                    ].join('')
+                })
+                .join('')
             listHtml = `<ul class="tc-activity-list" role="list">${items}</ul>`
         }
 

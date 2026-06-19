@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 // tc-node-editor — framework-free canvas node/graph editor. Positioned HTML
 // node boxes live inside a transformable viewport (CSS transform = pan + zoom);
 // an SVG overlay inside that same viewport draws bezier edges between ports, so
@@ -52,13 +53,6 @@ const NUDGE = 10
 
 // Four-character HTML escape — user strings (labels, ids) are injected into
 // innerHTML, so encode the dangerous characters before they reach the DOM.
-function esc(s: unknown): string {
-    return String(s ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 function clamp(v: number, lo: number, hi: number): number {
     return Math.min(hi, Math.max(lo, v))
@@ -84,7 +78,6 @@ interface DragState {
 }
 
 export class NodeEditor extends HTMLElement {
-
     private _initialised = false
 
     private _graph: GraphData = { nodes: [], edges: [] }
@@ -188,7 +181,7 @@ export class NodeEditor extends HTMLElement {
     // World-space anchor for a port on a given node side. When no matching port
     // id is found we fall back to the node's vertical centre on that edge.
     private _anchor(nodeId: string, side: 'in' | 'out', portId?: string): Pos | null {
-        const idx = this._graph.nodes.findIndex(n => n.id === nodeId)
+        const idx = this._graph.nodes.findIndex((n) => n.id === nodeId)
         if (idx === -1) return null
         const node = this._graph.nodes[idx]
         const pos = this._posOf(node, idx)
@@ -196,7 +189,7 @@ export class NodeEditor extends HTMLElement {
         const ports = side === 'in' ? node.inputs : node.outputs
         let row = -1
         if (ports && ports.length) {
-            row = portId != null ? ports.findIndex(p => p.id === portId) : 0
+            row = portId != null ? ports.findIndex((p) => p.id === portId) : 0
             if (row === -1) row = 0
         }
         const y =
@@ -211,7 +204,10 @@ export class NodeEditor extends HTMLElement {
         return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`
     }
 
-    private _screenToWorld(clientX: number, clientY: number): { x: number; y: number; sx: number; sy: number } {
+    private _screenToWorld(
+        clientX: number,
+        clientY: number,
+    ): { x: number; y: number; sx: number; sy: number } {
         const root = this.querySelector('.tc-node-editor') as HTMLElement | null
         const rect = root ? root.getBoundingClientRect() : { left: 0, top: 0 }
         const sx = clientX - rect.left
@@ -258,20 +254,20 @@ export class NodeEditor extends HTMLElement {
     private _renderBody(node: GraphNode): string {
         const inputs = (node.inputs ?? [])
             .map(
-                p =>
+                (p) =>
                     `<div class="tc-node-editor-port-row">` +
                     `<span class="tc-node-editor-port tc-node-editor-port--in" data-node-id="${esc(node.id)}" data-port-id="${esc(p.id)}" data-side="in"></span>` +
                     `<span class="tc-node-editor-port-label">${esc(p.label ?? p.id)}</span>` +
-                    `</div>`
+                    `</div>`,
             )
             .join('')
         const outputs = (node.outputs ?? [])
             .map(
-                p =>
+                (p) =>
                     `<div class="tc-node-editor-port-row tc-node-editor-port-row--out">` +
                     `<span class="tc-node-editor-port-label">${esc(p.label ?? p.id)}</span>` +
                     `<span class="tc-node-editor-port tc-node-editor-port--out" data-node-id="${esc(node.id)}" data-port-id="${esc(p.id)}" data-side="out"></span>` +
-                    `</div>`
+                    `</div>`,
             )
             .join('')
         return (
@@ -298,7 +294,8 @@ export class NodeEditor extends HTMLElement {
 
     private _applyTransform(): void {
         const vp = this.querySelector('.tc-node-editor-viewport') as HTMLElement | null
-        if (vp) vp.style.transform = `translate(${this._panX}px, ${this._panY}px) scale(${this._zoom})`
+        if (vp)
+            vp.style.transform = `translate(${this._panX}px, ${this._panY}px) scale(${this._zoom})`
         const root = this.querySelector('.tc-node-editor') as HTMLElement | null
         if (root) {
             const size = GRID * this._zoom
@@ -309,7 +306,7 @@ export class NodeEditor extends HTMLElement {
 
     private _patchSelection(): void {
         const selected = this.getAttribute('selected-id')
-        this.querySelectorAll<HTMLElement>('.tc-node-editor-node').forEach(el => {
+        this.querySelectorAll<HTMLElement>('.tc-node-editor-node').forEach((el) => {
             const isSel = selected != null && el.dataset.nodeId === selected
             el.classList.toggle('tc-node-editor-node--selected', isSel)
             el.setAttribute('aria-selected', isSel ? 'true' : 'false')
@@ -325,21 +322,21 @@ export class NodeEditor extends HTMLElement {
         else this.removeAttribute('selected-id')
         // attributeChangedCallback patches selection visuals; fire the event.
         this.dispatchEvent(
-            new CustomEvent('tc-select', { bubbles: true, composed: true, detail: { id } })
+            new CustomEvent('tc-select', { bubbles: true, composed: true, detail: { id } }),
         )
         if (typeof this.onSelect === 'function') this.onSelect(id)
     }
 
     private _emitMove(id: string, pos: Pos): void {
         this.dispatchEvent(
-            new CustomEvent('tc-move-node', { bubbles: true, composed: true, detail: { id, pos } })
+            new CustomEvent('tc-move-node', { bubbles: true, composed: true, detail: { id, pos } }),
         )
         if (typeof this.onMoveNode === 'function') this.onMoveNode(id, pos)
     }
 
     private _emitConnect(from: string, to: string): void {
         this.dispatchEvent(
-            new CustomEvent('tc-connect', { bubbles: true, composed: true, detail: { from, to } })
+            new CustomEvent('tc-connect', { bubbles: true, composed: true, detail: { from, to } }),
         )
         if (typeof this.onConnect === 'function') this.onConnect(from, to)
     }
@@ -370,7 +367,7 @@ export class NodeEditor extends HTMLElement {
             const header = target.closest('.tc-node-editor-node-header')
             if (header) {
                 const world = this._screenToWorld(e.clientX, e.clientY)
-                const idx = this._graph.nodes.findIndex(n => n.id === nodeId)
+                const idx = this._graph.nodes.findIndex((n) => n.id === nodeId)
                 const pos = idx === -1 ? { x: 0, y: 0 } : this._posOf(this._graph.nodes[idx], idx)
                 this._drag = {
                     mode: 'node',
@@ -443,8 +440,13 @@ export class NodeEditor extends HTMLElement {
                 Math.abs(world.y - d.startWorldY!) > DRAG_THRESHOLD / this._zoom
             )
                 d.moved = true
-            this._positions = { ...this._positions, [d.nodeId!]: { x: Math.round(nx), y: Math.round(ny) } }
-            const el = this.querySelector<HTMLElement>(`.tc-node-editor-node[data-node-id="${cssEscape(d.nodeId!)}"]`)
+            this._positions = {
+                ...this._positions,
+                [d.nodeId!]: { x: Math.round(nx), y: Math.round(ny) },
+            }
+            const el = this.querySelector<HTMLElement>(
+                `.tc-node-editor-node[data-node-id="${cssEscape(d.nodeId!)}"]`,
+            )
             if (el) {
                 el.style.left = `${Math.round(nx)}px`
                 el.style.top = `${Math.round(ny)}px`
@@ -522,7 +524,7 @@ export class NodeEditor extends HTMLElement {
         else return
 
         e.preventDefault()
-        const idx = this._graph.nodes.findIndex(n => n.id === nodeId)
+        const idx = this._graph.nodes.findIndex((n) => n.id === nodeId)
         if (idx === -1) return
         const cur = this._posOf(this._graph.nodes[idx], idx)
         const pos = { x: cur.x + dx, y: cur.y + dy }
@@ -537,7 +539,10 @@ export class NodeEditor extends HTMLElement {
 // CSS.escape with a tiny fallback so the attribute selector survives ids that
 // contain quotes or other special characters.
 function cssEscape(value: string): string {
-    if (typeof (window as any).CSS !== 'undefined' && typeof (window as any).CSS.escape === 'function') {
+    if (
+        typeof (window as any).CSS !== 'undefined' &&
+        typeof (window as any).CSS.escape === 'function'
+    ) {
         return (window as any).CSS.escape(value)
     }
     return value.replace(/["\\]/g, '\\$&')

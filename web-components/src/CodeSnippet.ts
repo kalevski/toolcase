@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -6,17 +7,10 @@ const TAG_NAME = 'tc-code-snippet'
 export type CodeSnippetLanguage = 'javascript' | 'typescript' | 'bash'
 const LANGUAGES: CodeSnippetLanguage[] = ['javascript', 'typescript', 'bash']
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-}
-
 function lucideIcon(name: string): string {
     const pascal = name
         .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
         .join('')
     const svg = (LucideIcons as Record<string, string>)[pascal]
     return svg ? icon(svg) : ''
@@ -29,20 +23,20 @@ const checkIconHtml = lucideIcon('check')
 // Defined as string fragments to avoid module-level regex statefulness
 // (each call to applyHighlight creates a fresh /g regex).
 const JS_TOKEN_SRC =
-    '(\\/\\/[^\\n]*)' +                     // (1) single-line comment
-    '|(\\/\\*[\\s\\S]*?\\*\\/)' +           // (2) block comment
-    '|(`(?:[^`\\\\]|\\\\.)*`)' +            // (3) template literal
-    '|("(?:[^"\\\\]|\\\\.)*")' +            // (4) double-quoted string
-    "|(\'(?:[^\'\\\\]|\\\\.)*\')" +         // (5) single-quoted string
+    '(\\/\\/[^\\n]*)' + // (1) single-line comment
+    '|(\\/\\*[\\s\\S]*?\\*\\/)' + // (2) block comment
+    '|(`(?:[^`\\\\]|\\\\.)*`)' + // (3) template literal
+    '|("(?:[^"\\\\]|\\\\.)*")' + // (4) double-quoted string
+    "|(\'(?:[^\'\\\\]|\\\\.)*\')" + // (5) single-quoted string
     '|(\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b)' + // (6) number
     '|(\\b(?:const|let|var|function|return|if|else|for|while|class|new|typeof|instanceof|this|import|export|default|from|as|async|await|try|catch|finally|throw|true|false|null|undefined|void|break|continue|switch|case|of|in|do|extends|super|static|get|set|yield|delete|interface|type|enum|namespace|abstract|implements|public|private|protected|readonly|declare)\\b)' // (7) keyword
 
 const BASH_TOKEN_SRC =
-    '(#[^\\n]*)' +                          // (1) comment
-    '|("(?:[^"\\\\]|\\\\.)*")' +            // (2) double-quoted string
-    "|(\'[^\']*\')" +                        // (3) single-quoted string (no escapes in bash)
+    '(#[^\\n]*)' + // (1) comment
+    '|("(?:[^"\\\\]|\\\\.)*")' + // (2) double-quoted string
+    "|(\'[^\']*\')" + // (3) single-quoted string (no escapes in bash)
     '|(\\$(?:\\{[^}]*\\}|\\([^)]*\\)|[a-zA-Z_][a-zA-Z0-9_]*|\\d+))' + // (4) variable
-    '|(\\b\\d+\\b)' +                        // (5) number
+    '|(\\b\\d+\\b)' + // (5) number
     '|(\\b(?:if|then|else|elif|fi|for|do|done|while|until|echo|cd|ls|export|source|function|return|case|esac|in|exit|true|false|break|continue|shift|unset|set|local|mkdir|cp|mv|rm|cat|grep|sed|awk|curl|wget|git|npm|yarn|chmod|chown|sudo|apt|brew|pip|python|python3|node|bash|sh)\\b)' // (6) keyword
 
 function applyHighlight(code: string, language: CodeSnippetLanguage): string {
@@ -52,12 +46,14 @@ function applyHighlight(code: string, language: CodeSnippetLanguage): string {
         return escaped.replace(
             new RegExp(JS_TOKEN_SRC, 'g'),
             (match, cline, cblock, tmpl, dbl, sgl, num, kw) => {
-                if (cline !== undefined || cblock !== undefined) return `<span class="tok-comment">${match}</span>`
-                if (tmpl !== undefined || dbl !== undefined || sgl !== undefined) return `<span class="tok-string">${match}</span>`
+                if (cline !== undefined || cblock !== undefined)
+                    return `<span class="tok-comment">${match}</span>`
+                if (tmpl !== undefined || dbl !== undefined || sgl !== undefined)
+                    return `<span class="tok-string">${match}</span>`
                 if (num !== undefined) return `<span class="tok-number">${match}</span>`
                 if (kw !== undefined) return `<span class="tok-keyword">${match}</span>`
                 return match
-            }
+            },
         )
     }
 
@@ -66,12 +62,13 @@ function applyHighlight(code: string, language: CodeSnippetLanguage): string {
             new RegExp(BASH_TOKEN_SRC, 'g'),
             (match, comment, dbl, sgl, vari, num, kw) => {
                 if (comment !== undefined) return `<span class="tok-comment">${match}</span>`
-                if (dbl !== undefined || sgl !== undefined) return `<span class="tok-string">${match}</span>`
+                if (dbl !== undefined || sgl !== undefined)
+                    return `<span class="tok-string">${match}</span>`
                 if (vari !== undefined) return `<span class="tok-variable">${match}</span>`
                 if (num !== undefined) return `<span class="tok-number">${match}</span>`
                 if (kw !== undefined) return `<span class="tok-keyword">${match}</span>`
                 return match
-            }
+            },
         )
     }
 
@@ -105,9 +102,13 @@ export class CodeSnippet extends HTMLElement {
                 if (text) this.setAttribute('code', text)
             }
             this.render()
-            this.addEventListener('click', this._onHostClick)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onHostClick)
     }
 
     disconnectedCallback(): void {
@@ -171,11 +172,13 @@ export class CodeSnippet extends HTMLElement {
             return
         }
 
-        this.dispatchEvent(new CustomEvent('tc-copy', {
-            bubbles: true,
-            composed: true,
-            detail: { code },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-copy', {
+                bubbles: true,
+                composed: true,
+                detail: { code },
+            }),
+        )
         if (typeof this.onCopy === 'function') this.onCopy(code)
 
         this._setCopied(true)
@@ -216,9 +219,11 @@ export class CodeSnippet extends HTMLElement {
         if (loading) {
             this.innerHTML =
                 `<div class="tc-code-snippet tc-code-snippet--loading" aria-busy="true">` +
-                    `<div class="tc-code-snippet-skel">` +
-                        SKEL_WIDTHS.map(w => `<div class="tc-code-snippet-skel-line" style="width:${w}"></div>`).join('') +
-                    `</div>` +
+                `<div class="tc-code-snippet-skel">` +
+                SKEL_WIDTHS.map(
+                    (w) => `<div class="tc-code-snippet-skel-line" style="width:${w}"></div>`,
+                ).join('') +
+                `</div>` +
                 `</div>`
             return
         }
@@ -245,9 +250,9 @@ export class CodeSnippet extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-code-snippet">` +
-                headerHtml +
-                `<pre class="tc-code-snippet-pre"><code class="tc-code-snippet-code language-${esc(language)}">${highlightedCode}</code></pre>` +
-                `<div class="tc-code-snippet-status" role="status" aria-live="polite"></div>` +
+            headerHtml +
+            `<pre class="tc-code-snippet-pre"><code class="tc-code-snippet-code language-${esc(language)}">${highlightedCode}</code></pre>` +
+            `<div class="tc-code-snippet-status" role="status" aria-live="polite"></div>` +
             `</div>`
     }
 }

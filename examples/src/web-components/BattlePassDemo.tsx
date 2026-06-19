@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const tiers = Array.from({ length: 8 }, (_, i) => {
     const level = i + 1
@@ -20,7 +19,11 @@ const freeOnly = Array.from({ length: 5 }, (_, i) => {
     return {
         level,
         xpRequired: 800,
-        free: { label: level % 2 === 0 ? 'Crate' : `${level * 50} XP`, icon: level % 2 === 0 ? 'package' : 'star', claimed: level < 2 },
+        free: {
+            label: level % 2 === 0 ? 'Crate' : `${level * 50} XP`,
+            icon: level % 2 === 0 ? 'package' : 'star',
+            claimed: level < 2,
+        },
         // a couple of tiers have no free reward to show the empty-slot placeholder
         premium: level % 2 === 0 ? { label: 'Emote', icon: 'smile' } : undefined,
     }
@@ -49,14 +52,17 @@ const BattlePassDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BattlePass"
+                        <tc-rich-page-header
+                            title-text="BattlePass"
                             description="Battle-pass tier track with a season header, an XP progress bar, and a premium/free reward track of claimable cells. Set tiers via the tiers JS property; claimable cells fire tc-claim with { level, track }."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title={`Premium pass — last: ${last}`}>
+                            <tc-section-card title={`Premium pass — last: ${last}`}>
                                 <div style={{ maxWidth: 760 }}>
                                     {/* @ts-ignore */}
                                     <tc-battle-pass
@@ -68,9 +74,9 @@ const BattlePassDemo: React.FC = () => {
                                         has-premium
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Free pass (premium locked)">
+                            <tc-section-card title="Free pass (premium locked)">
                                 <div style={{ maxWidth: 620 }}>
                                     {/* @ts-ignore */}
                                     <tc-battle-pass
@@ -81,7 +87,7 @@ const BattlePassDemo: React.FC = () => {
                                         current-xp="520"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-legal-screen'
@@ -6,14 +7,6 @@ export interface LegalSection {
     id: string
     title: string
     body: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class LegalScreen extends HTMLElement {
@@ -90,11 +83,11 @@ export class LegalScreen extends HTMLElement {
             return
         }
         const initial = this.initialSection
-        if (initial && this._sections.some(s => s.id === initial)) {
+        if (initial && this._sections.some((s) => s.id === initial)) {
             if (!this._activeId) this._activeId = initial
             return
         }
-        if (!this._activeId || !this._sections.some(s => s.id === this._activeId)) {
+        if (!this._activeId || !this._sections.some((s) => s.id === this._activeId)) {
             this._activeId = this._sections[0].id
         }
     }
@@ -110,14 +103,18 @@ export class LegalScreen extends HTMLElement {
 
     private _onCloseClick = (e: MouseEvent): void => {
         if ((e.target as Element)?.closest('.tc-legal-screen__close')) {
-            this.dispatchEvent(new CustomEvent('tc-close', { bubbles: true, composed: true, detail: {} }))
+            this.dispatchEvent(
+                new CustomEvent('tc-close', { bubbles: true, composed: true, detail: {} }),
+            )
             if (typeof this.onClose === 'function') this.onClose()
         }
     }
 
     private _onAcceptClick = (e: MouseEvent): void => {
         if ((e.target as Element)?.closest('.tc-legal-screen__accept')) {
-            this.dispatchEvent(new CustomEvent('tc-accept', { bubbles: true, composed: true, detail: {} }))
+            this.dispatchEvent(
+                new CustomEvent('tc-accept', { bubbles: true, composed: true, detail: {} }),
+            )
             if (typeof this.onAccept === 'function') this.onAccept()
         }
     }
@@ -135,13 +132,15 @@ export class LegalScreen extends HTMLElement {
     }
 
     private render(): void {
-        const navHtml = this._sections.map(s => {
-            const isActive = s.id === this._activeId
-            const cls = `tc-legal-screen__nav-item${isActive ? ' tc-legal-screen__nav-item--active' : ''}`
-            return `<button type="button" class="${cls}" data-legal-id="${esc(s.id)}" aria-current="${isActive ? 'page' : 'false'}">${esc(s.title)}</button>`
-        }).join('')
+        const navHtml = this._sections
+            .map((s) => {
+                const isActive = s.id === this._activeId
+                const cls = `tc-legal-screen__nav-item${isActive ? ' tc-legal-screen__nav-item--active' : ''}`
+                return `<button type="button" class="${cls}" data-legal-id="${esc(s.id)}" aria-current="${isActive ? 'page' : 'false'}">${esc(s.title)}</button>`
+            })
+            .join('')
 
-        const active = this._sections.find(s => s.id === this._activeId)
+        const active = this._sections.find((s) => s.id === this._activeId)
         const bodyHtml = active
             ? `<span class="tc-legal-screen__section-eyebrow">Section</span>
                <h2 class="tc-legal-screen__section-title">${esc(active.title)}</h2>
@@ -156,18 +155,18 @@ export class LegalScreen extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-legal-screen">` +
-                `<header class="tc-legal-screen__header">` +
-                    `<div class="tc-legal-screen__header-meta">` +
-                        `<span class="tc-legal-screen__eyebrow">Legal</span>` +
-                        `<span class="tc-legal-screen__title">${esc(this.screenTitle)}</span>` +
-                    `</div>` +
-                    `<button type="button" class="tc-legal-screen__close" aria-label="Close">${closeIcon}</button>` +
-                `</header>` +
-                `<div class="tc-legal-screen__grid">` +
-                    `<nav class="tc-legal-screen__nav" aria-label="Legal sections">${navHtml}</nav>` +
-                    `<div class="tc-legal-screen__body">${bodyHtml}</div>` +
-                `</div>` +
-                footerHtml +
+            `<header class="tc-legal-screen__header">` +
+            `<div class="tc-legal-screen__header-meta">` +
+            `<span class="tc-legal-screen__eyebrow">Legal</span>` +
+            `<span class="tc-legal-screen__title">${esc(this.screenTitle)}</span>` +
+            `</div>` +
+            `<button type="button" class="tc-legal-screen__close" aria-label="Close">${closeIcon}</button>` +
+            `</header>` +
+            `<div class="tc-legal-screen__grid">` +
+            `<nav class="tc-legal-screen__nav" aria-label="Legal sections">${navHtml}</nav>` +
+            `<div class="tc-legal-screen__body">${bodyHtml}</div>` +
+            `</div>` +
+            footerHtml +
             `</div>`
     }
 }

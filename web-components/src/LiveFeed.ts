@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-live-feed'
@@ -12,24 +13,6 @@ export interface FeedEvent {
 }
 
 const LEVELS: FeedEvent['level'][] = ['info', 'success', 'warning', 'danger']
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 // Pre-compute level icons at module load time
 const levelIcons: Record<string, string> = {
@@ -109,9 +92,8 @@ export class LiveFeed extends HTMLElement {
         const prevScrollHeight = body?.scrollHeight ?? 0
         const prevScrollTop = body?.scrollTop ?? 0
         const clientHeight = body?.clientHeight ?? 0
-        const nearBottom = prevScrollHeight > 0
-            ? (prevScrollHeight - prevScrollTop - clientHeight) < 60
-            : true
+        const nearBottom =
+            prevScrollHeight > 0 ? prevScrollHeight - prevScrollTop - clientHeight < 60 : true
 
         this.render()
 
@@ -150,10 +132,12 @@ export class LiveFeed extends HTMLElement {
         const events = this._visibleEvents()
         const ev = events[idx]
         if (!ev) return
-        this.dispatchEvent(new CustomEvent('tc-row-click', {
-            bubbles: true,
-            detail: { id: ev.id, event: ev },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-row-click', {
+                bubbles: true,
+                detail: { id: ev.id, event: ev },
+            }),
+        )
         if (typeof this.onrowclick === 'function') this.onrowclick({ id: ev.id, event: ev })
     }
 
@@ -162,32 +146,35 @@ export class LiveFeed extends HTMLElement {
         const recording = this.hasAttribute('recording')
         const events = this._visibleEvents()
 
-        const headerHtml = (header != null || recording)
-            ? `<div class="tc-live-feed-header">${
-                header != null
-                    ? `<span class="tc-live-feed-title">${esc(header)}</span>`
-                    : ''
-            }${
-                recording
-                    ? `<span class="tc-live-feed-rec" role="status"><span class="tc-live-feed-rec-dot" aria-hidden="true"></span><span class="tc-live-feed-rec-label">REC<span class="visually-hidden"> recording</span></span></span>`
-                    : ''
-            }</div>`
-            : ''
+        const headerHtml =
+            header != null || recording
+                ? `<div class="tc-live-feed-header">${
+                      header != null ? `<span class="tc-live-feed-title">${esc(header)}</span>` : ''
+                  }${
+                      recording
+                          ? `<span class="tc-live-feed-rec" role="status"><span class="tc-live-feed-rec-dot" aria-hidden="true"></span><span class="tc-live-feed-rec-label">REC<span class="visually-hidden"> recording</span></span></span>`
+                          : ''
+                  }</div>`
+                : ''
 
-        const rowsHtml = events.map((ev, idx) => {
-            const levelIconHtml = ev.level && LEVELS.includes(ev.level) ? (levelIcons[ev.level] ?? '') : ''
-            const customIconHtml = ev.icon ? lucideByName(ev.icon) : ''
-            const iconHtml = customIconHtml || levelIconHtml
-            const levelClass = ev.level && LEVELS.includes(ev.level) ? ` tc-live-feed-row--${ev.level}` : ''
-            const timeHtml = ev.time
-                ? `<span class="tc-live-feed-time">${esc(ev.time)}</span>`
-                : ''
-            const iconEl = iconHtml
-                ? `<span class="tc-live-feed-icon" aria-hidden="true">${iconHtml}</span>`
-                : ''
-            const idAttr = ev.id ? ` data-row-id="${esc(ev.id)}"` : ''
-            return `<div class="tc-live-feed-row${levelClass}" role="button" tabindex="0" data-row-idx="${idx}"${idAttr}>${timeHtml}${iconEl}<span class="tc-live-feed-label">${esc(ev.label)}</span></div>`
-        }).join('')
+        const rowsHtml = events
+            .map((ev, idx) => {
+                const levelIconHtml =
+                    ev.level && LEVELS.includes(ev.level) ? (levelIcons[ev.level] ?? '') : ''
+                const customIconHtml = ev.icon ? lucideByName(ev.icon) : ''
+                const iconHtml = customIconHtml || levelIconHtml
+                const levelClass =
+                    ev.level && LEVELS.includes(ev.level) ? ` tc-live-feed-row--${ev.level}` : ''
+                const timeHtml = ev.time
+                    ? `<span class="tc-live-feed-time">${esc(ev.time)}</span>`
+                    : ''
+                const iconEl = iconHtml
+                    ? `<span class="tc-live-feed-icon" aria-hidden="true">${iconHtml}</span>`
+                    : ''
+                const idAttr = ev.id ? ` data-row-id="${esc(ev.id)}"` : ''
+                return `<div class="tc-live-feed-row${levelClass}" role="button" tabindex="0" data-row-idx="${idx}"${idAttr}>${timeHtml}${iconEl}<span class="tc-live-feed-label">${esc(ev.label)}</span></div>`
+            })
+            .join('')
 
         const ariaLabel = header ? esc(header) : 'Live feed'
         this.innerHTML = `<div class="tc-live-feed">${headerHtml}<div class="tc-live-feed-body" role="log" aria-live="polite" aria-label="${ariaLabel}">${rowsHtml}</div></div>`

@@ -1,5 +1,4 @@
 import React, { useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 let _counter = 0
 
@@ -20,19 +19,20 @@ const ShakeContainerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Shake Container"
+                        <tc-rich-page-header
+                            title-text="Shake Container"
                             description="rAF-driven camera-shake wrapper. Re-shakes whenever the trigger attribute changes to a new value; amplitude decays linearly from intensity px down to 0 over duration ms. Ported from gc-shake-container and restyled to the toolcase design system — no Shadow DOM, no game chrome, purely structural."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Light shake (intensity=4, duration=250)">
+                            <tc-section-card title="Light shake (intensity=4, duration=250)">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
-                                    Default settings give a subtle, quick jolt — suitable for
-                                    minor hits or UI feedback. Click the button to re-trigger
-                                    the shake.
+                                    Default settings give a subtle, quick jolt — suitable for minor
+                                    hits or UI feedback. Click the button to re-trigger the shake.
                                 </p>
                                 <div className="d-flex align-items-center gap-3 flex-wrap">
                                     <button
@@ -42,17 +42,14 @@ const ShakeContainerDemo: React.FC = () => {
                                         Shake
                                     </button>
                                     {/* @ts-ignore */}
-                                    <tc-shake-container
-                                        ref={lightRef}
-                                        intensity="4"
-                                        duration="250"
-                                    >
+                                    <tc-shake-container ref={lightRef} intensity="4" duration="250">
                                         <div
                                             style={{
                                                 padding: '1rem 1.5rem',
                                                 background: 'var(--tc-surface)',
                                                 border: '1px solid var(--tc-border)',
-                                                fontFamily: 'var(--tc-font-mono, "JetBrains Mono", monospace)',
+                                                fontFamily:
+                                                    'var(--tc-font-mono, "JetBrains Mono", monospace)',
                                                 fontSize: '0.875rem',
                                                 color: 'var(--tc-app-accent)',
                                                 minWidth: 160,
@@ -60,12 +57,12 @@ const ShakeContainerDemo: React.FC = () => {
                                         >
                                             -42 HP
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-shake-container>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Heavy shake (intensity=14, duration=600)">
+                            <tc-section-card title="Heavy shake (intensity=14, duration=600)">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     High <code>intensity</code> and a longer <code>duration</code>
                                     give a dramatic camera-slam effect — suitable for boss hits or
@@ -89,7 +86,8 @@ const ShakeContainerDemo: React.FC = () => {
                                                 padding: '1rem 1.5rem',
                                                 background: 'var(--tc-surface)',
                                                 border: '1px solid var(--tc-border)',
-                                                fontFamily: 'var(--tc-font-mono, "JetBrains Mono", monospace)',
+                                                fontFamily:
+                                                    'var(--tc-font-mono, "JetBrains Mono", monospace)',
                                                 fontSize: '0.875rem',
                                                 color: 'var(--tc-danger, #dc2626)',
                                                 minWidth: 200,
@@ -97,12 +95,12 @@ const ShakeContainerDemo: React.FC = () => {
                                         >
                                             CRITICAL HIT
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-shake-container>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Imperative shake() API">
+                            <tc-section-card title="Imperative shake() API">
                                 <p className="mb-3" style={{ opacity: 0.85 }}>
                                     Call <code>el.shake()</code> directly from JS without changing
                                     the <code>trigger</code> attribute — useful when the shake is
@@ -126,7 +124,8 @@ const ShakeContainerDemo: React.FC = () => {
                                                 padding: '1rem 1.5rem',
                                                 background: 'var(--tc-surface)',
                                                 border: '1px solid var(--tc-border)',
-                                                fontFamily: 'var(--tc-font-mono, "JetBrains Mono", monospace)',
+                                                fontFamily:
+                                                    'var(--tc-font-mono, "JetBrains Mono", monospace)',
                                                 fontSize: '0.875rem',
                                                 color: 'var(--tc-text)',
                                                 minWidth: 180,
@@ -134,11 +133,10 @@ const ShakeContainerDemo: React.FC = () => {
                                         >
                                             Shake me imperatively
                                         </div>
-                                    {/* @ts-ignore */}
+                                        {/* @ts-ignore */}
                                     </tc-shake-container>
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

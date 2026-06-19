@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useMouseSensitivity(initial: number): [number, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -28,25 +27,30 @@ const MouseSensitivityDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Mouse Sensitivity"
+                        <tc-rich-page-header
+                            title-text="Mouse Sensitivity"
                             description="A mouse-sensitivity setting row: a label/description block paired with one or two range sliders (main + optional ADS) and mono decimal readouts. Built on the shared tc-setting-row scaffold."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — Main only, defaults to 1.00">
-                                <div style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Default — Main only, defaults to 1.00">
+                                <div
+                                    style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-mouse-sensitivity ref={ref1} value="1" />
                                 </div>
-                                <div className="form-text mt-1">
-                                    Current main: {v1.toFixed(2)}
-                                </div>
-                            </SectionCard>
+                                <div className="form-text mt-1">Current main: {v1.toFixed(2)}</div>
+                            </tc-section-card>
 
-                            <SectionCard title="With ADS slider">
-                                <div style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="With ADS slider">
+                                <div
+                                    style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-mouse-sensitivity
                                         ref={ref2}
@@ -56,13 +60,13 @@ const MouseSensitivityDemo: React.FC = () => {
                                         ads="0.8"
                                     />
                                 </div>
-                                <div className="form-text mt-1">
-                                    Current main: {v2.toFixed(2)}
-                                </div>
-                            </SectionCard>
+                                <div className="form-text mt-1">Current main: {v2.toFixed(2)}</div>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom label + description">
-                                <div style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Custom label + description">
+                                <div
+                                    style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-mouse-sensitivity
                                         row-label="Look sensitivity"
@@ -71,10 +75,12 @@ const MouseSensitivityDemo: React.FC = () => {
                                         ads="1.2"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
-                                <div style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Disabled">
+                                <div
+                                    style={{ maxWidth: 520, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-mouse-sensitivity
                                         row-label="Mouse sensitivity"
@@ -84,7 +90,7 @@ const MouseSensitivityDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

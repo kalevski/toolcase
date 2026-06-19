@@ -1,3 +1,5 @@
+import { isImageSrc } from './internal/image'
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -28,27 +30,18 @@ export interface ItemSlotEventMap {
     'tc-click': CustomEvent<{ item: InventoryItem | null }>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 // An icon that looks like an image source renders as an <img>; otherwise the
 // string is a short glyph/initials label (the design system forbids emoji-as-
 // icon and icon fonts for data glyphs, so free-form glyphs stay content).
 // Matches the tc-hotbar / tc-inventory-grid fallback so all three game ports
 // read the same item data identically.
-function isImageSrc(value: string): boolean {
-    return /^(https?:|\/|\.\/|\.\.\/|data:image\/)/.test(value) || /\.(png|jpe?g|gif|svg|webp|avif)$/i.test(value)
-}
 
 // Pre-resolved lock glyph (lucide inline SVG, not the gc-* 🔒 emoji which the
 // design system bans). Always rendered for locked items, so resolve once.
-const lockIconHtml = icon((LucideIcons as Record<string, string>)['Lock'] ?? '', 'tc-item-slot__lock-glyph')
+const lockIconHtml = icon(
+    (LucideIcons as Record<string, string>)['Lock'] ?? '',
+    'tc-item-slot__lock-glyph',
+)
 
 export class ItemSlot extends HTMLElement {
     private _item: InventoryItem | null = null
@@ -127,11 +120,13 @@ export class ItemSlot extends HTMLElement {
     // item (the web-components rename of the gc-item-slot `click` event) so a
     // standalone slot is usable on its own. Locked items are inert.
     private _emit(): void {
-        this.dispatchEvent(new CustomEvent('tc-click', {
-            detail: { item: this._item },
-            bubbles: true,
-            composed: true,
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-click', {
+                detail: { item: this._item },
+                bubbles: true,
+                composed: true,
+            }),
+        )
         if (typeof this.onClick === 'function') this.onClick({ item: this._item })
     }
 
@@ -164,7 +159,8 @@ export class ItemSlot extends HTMLElement {
         this.style.setProperty('--bs-item-slot-glyph-size', `${Math.round(size * 0.42)}px`)
 
         const item = this._item
-        const rarity: ItemRarity = item?.rarity && RARITIES.includes(item.rarity) ? item.rarity : 'common'
+        const rarity: ItemRarity =
+            item?.rarity && RARITIES.includes(item.rarity) ? item.rarity : 'common'
         // Reflect rarity onto the host so the SCSS (and themes / consumers) can
         // target a specific tier without a JS read — matches gc-item-slot.
         if (item) this.dataset.rarity = rarity
@@ -200,22 +196,25 @@ export class ItemSlot extends HTMLElement {
 
         const glyph = item ? this._renderGlyph(item.icon ?? '', item.name ?? item.id) : ''
 
-        const qtyMarkup = item?.qty != null && item.qty > 1
-            ? `<span class="tc-item-slot__qty">${esc(item.qty.toLocaleString())}</span>`
-            : ''
+        const qtyMarkup =
+            item?.qty != null && item.qty > 1
+                ? `<span class="tc-item-slot__qty">${esc(item.qty.toLocaleString())}</span>`
+                : ''
 
         const equippedMarkup = item?.equipped
             ? `<span class="tc-item-slot__equipped" aria-label="Equipped">E</span>`
             : ''
 
-        const cdPct = item?.cooldown != null && item?.cooldownMax && item.cooldownMax > 0
-            ? Math.max(0, Math.min(1, item.cooldown / item.cooldownMax))
-            : null
-        const cooldownMarkup = cdPct != null && cdPct > 0
-            ? `<div class="tc-item-slot__cooldown" style="--bs-item-slot-cd-angle: ${cdPct * 360}deg" aria-hidden="true">`
-              + `<span class="tc-item-slot__cooldown-label">${esc(String(Math.ceil(item!.cooldown!)))}</span>`
-              + `</div>`
-            : ''
+        const cdPct =
+            item?.cooldown != null && item?.cooldownMax && item.cooldownMax > 0
+                ? Math.max(0, Math.min(1, item.cooldown / item.cooldownMax))
+                : null
+        const cooldownMarkup =
+            cdPct != null && cdPct > 0
+                ? `<div class="tc-item-slot__cooldown" style="--bs-item-slot-cd-angle: ${cdPct * 360}deg" aria-hidden="true">` +
+                  `<span class="tc-item-slot__cooldown-label">${esc(String(Math.ceil(item!.cooldown!)))}</span>` +
+                  `</div>`
+                : ''
 
         const lockMarkup = isLocked
             ? `<span class="tc-item-slot__lock" aria-hidden="true">${lockIconHtml}</span>`
@@ -226,14 +225,15 @@ export class ItemSlot extends HTMLElement {
             ? `<span class="tc-item-slot__hotkey" aria-hidden="true">${esc(hotkey)}</span>`
             : ''
 
-        this.innerHTML = `<div class="tc-item-slot__inner">`
-            + glyph
-            + qtyMarkup
-            + equippedMarkup
-            + cooldownMarkup
-            + lockMarkup
-            + hotkeyMarkup
-            + `</div>`
+        this.innerHTML =
+            `<div class="tc-item-slot__inner">` +
+            glyph +
+            qtyMarkup +
+            equippedMarkup +
+            cooldownMarkup +
+            lockMarkup +
+            hotkeyMarkup +
+            `</div>`
     }
 }
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const throughputBars = [
     { label: '@your/server', value: 124000, unit: 'req/s' },
@@ -56,44 +55,64 @@ const BenchmarkChartDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BenchmarkChart"
+                        <tc-rich-page-header
+                            title-text="BenchmarkChart"
                             description="Horizontal SVG bar chart comparing benchmark values with leader highlighting and linear/log scale. Bars are set via the `bars` JS property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Throughput — higher is better (linear)">
+                            <tc-section-card title="Throughput — higher is better (linear)">
                                 {/* @ts-ignore */}
-                                <tc-benchmark-chart ref={throughputRef} title="Requests per second" />
-                            </SectionCard>
+                                <tc-benchmark-chart
+                                    ref={throughputRef}
+                                    title="Requests per second"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="P99 latency — lower is better">
+                            <tc-section-card title="P99 latency — lower is better">
                                 {/* @ts-ignore */}
-                                <tc-benchmark-chart ref={latencyRef} lower-is-better title="P99 latency" />
-                            </SectionCard>
+                                <tc-benchmark-chart
+                                    ref={latencyRef}
+                                    lower-is-better
+                                    title="P99 latency"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Read latency — log scale (values span orders of magnitude)">
+                            <tc-section-card title="Read latency — log scale (values span orders of magnitude)">
                                 {/* @ts-ignore */}
-                                <tc-benchmark-chart ref={logRef} scale="log" lower-is-better title="Storage read latency (µs, log scale)" />
-                            </SectionCard>
+                                <tc-benchmark-chart
+                                    ref={logRef}
+                                    scale="log"
+                                    lower-is-better
+                                    title="Storage read latency (µs, log scale)"
+                                />
+                            </tc-section-card>
 
-                            <SectionCard title="Per-bar colors">
+                            <tc-section-card title="Per-bar colors">
                                 {/* @ts-ignore */}
-                                <tc-benchmark-chart ref={interactiveRef} interactive title="Lines of code by language" />
+                                <tc-benchmark-chart
+                                    ref={interactiveRef}
+                                    interactive
+                                    title="Lines of code by language"
+                                />
                                 <p className="text-muted small mt-2 mb-0">
-                                    Interactive — last clicked bar: <strong>{clicked ?? 'none'}</strong>
+                                    Interactive — last clicked bar:{' '}
+                                    <strong>{clicked ?? 'none'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Rich title via slot">
+                            <tc-section-card title="Rich title via slot">
                                 {/* @ts-ignore */}
                                 <tc-benchmark-chart ref={slotRef}>
-                                    <span slot="title">Requests per second <code>v2.4</code></span>
+                                    <span slot="title">
+                                        Requests per second <code>v2.4</code>
+                                    </span>
                                 </tc-benchmark-chart>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

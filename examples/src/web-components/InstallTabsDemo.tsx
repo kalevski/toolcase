@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const InstallTabsDemo: React.FC = () => {
     const eventsRef = useRef<any>(null)
@@ -36,38 +35,42 @@ const InstallTabsDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="InstallTabs"
+                        <tc-rich-page-header
+                            title-text="InstallTabs"
                             description="Tabbed install commands for npm, yarn, pnpm, and bun with a copy button. Keyboard navigable with roving tabindex."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Basic install — tc-copy and tc-change events">
+                            <tc-section-card title="Basic install — tc-copy and tc-change events">
                                 {/* @ts-ignore */}
-                                <tc-install-tabs ref={eventsRef} package="@toolcase/web-components" />
+                                <tc-install-tabs
+                                    ref={eventsRef}
+                                    package="@toolcase/web-components"
+                                />
                                 {lastEvent && (
                                     <p className="mt-2 text-muted" style={{ fontSize: '0.8rem' }}>
                                         <code>{lastEvent}</code>
                                     </p>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Dev dependency (dev attribute)">
+                            <tc-section-card title="Dev dependency (dev attribute)">
                                 {/* @ts-ignore */}
                                 <tc-install-tabs package="vitest" dev />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Global install (global attribute)">
+                            <tc-section-card title="Global install (global attribute)">
                                 {/* @ts-ignore */}
                                 <tc-install-tabs package="typescript" global />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Limited managers (npm and pnpm only, JS property)">
+                            <tc-section-card title="Limited managers (npm and pnpm only, JS property)">
                                 <LimitedManagersExample />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

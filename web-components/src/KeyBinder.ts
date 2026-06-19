@@ -1,17 +1,9 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-key-binder'
 
 export interface KeyBinderEventMap {
     'tc-change': CustomEvent<{ value: string; code: string; key: string }>
     'tc-cancel': CustomEvent<void>
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
 }
 
 export class KeyBinder extends HTMLElement {
@@ -28,7 +20,8 @@ export class KeyBinder extends HTMLElement {
 
     connectedCallback(): void {
         if (!this.hasAttribute('role')) this.setAttribute('role', 'button')
-        if (!this.hasAttribute('tabindex')) this.setAttribute('tabindex', this.disabled ? '-1' : '0')
+        if (!this.hasAttribute('tabindex'))
+            this.setAttribute('tabindex', this.disabled ? '-1' : '0')
         this.addEventListener('click', this._handleClick)
         this.addEventListener('keydown', this._handleHostKey)
         this.addEventListener('blur', this._handleBlur)
@@ -97,7 +90,9 @@ export class KeyBinder extends HTMLElement {
         window.removeEventListener('keydown', this._keyHandler, true)
         this.render()
         if (emitCancel) {
-            this.dispatchEvent(new CustomEvent('tc-cancel', { bubbles: true, composed: true, detail: undefined }))
+            this.dispatchEvent(
+                new CustomEvent('tc-cancel', { bubbles: true, composed: true, detail: undefined }),
+            )
             if (typeof this.onCancel === 'function') this.onCancel()
         }
     }
@@ -153,11 +148,7 @@ export class KeyBinder extends HTMLElement {
             this.removeAttribute('aria-disabled')
         }
 
-        const displayText = capturing
-            ? 'Press any key…'
-            : hasValue
-              ? this.value
-              : this.placeholder
+        const displayText = capturing ? 'Press any key…' : hasValue ? this.value : this.placeholder
 
         this.innerHTML = `<span class="tc-key-binder__label">${esc(displayText)}</span>`
     }

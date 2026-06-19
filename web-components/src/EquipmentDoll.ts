@@ -1,3 +1,5 @@
+import { isImageSrc } from './internal/image'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-equipment-doll'
 
 // A single equipped item. Pared down from the game-components InventoryItem to
@@ -22,22 +24,10 @@ export interface EquipmentDollEventMap {
     'tc-select': CustomEvent<{ id: string }>
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
-
 // An item icon that looks like an image source is rendered as an <img>;
 // otherwise the string is treated as a short glyph/initials label inside the
 // sharp slot tile (mirrors the tc-crafting-panel icon-tile pattern — the design
 // system forbids emoji-as-icon, so free-form data glyphs stay content).
-function isImageSrc(value: string): boolean {
-    return /^(https?:|\/|\.\/|\.\.\/|data:image\/)/.test(value) || /\.(png|jpe?g|gif|svg|webp|avif)$/i.test(value)
-}
 
 // Neutral humanoid figure used when no custom `silhouette` is supplied. A faint
 // slate backdrop for the equipment slots arranged around it — no fantasy fill,
@@ -65,10 +55,14 @@ export class EquipmentDoll extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -139,7 +133,9 @@ export class EquipmentDoll extends HTMLElement {
     }
 
     private emit(id: string): void {
-        this.dispatchEvent(new CustomEvent('tc-select', { detail: { id }, bubbles: true, composed: true }))
+        this.dispatchEvent(
+            new CustomEvent('tc-select', { detail: { id }, bubbles: true, composed: true }),
+        )
         if (typeof this.onSelect === 'function') this.onSelect(id)
     }
 
@@ -184,9 +180,10 @@ export class EquipmentDoll extends HTMLElement {
             const glyph = icon || (name ? name.charAt(0).toUpperCase() : '?')
             glyphMarkup = `<span class="tc-equipment-doll__icon" aria-hidden="true">${esc(glyph)}</span>`
         }
-        const qtyMarkup = item.qty != null && item.qty > 1
-            ? `<span class="tc-equipment-doll__qty">${esc(item.qty.toLocaleString())}</span>`
-            : ''
+        const qtyMarkup =
+            item.qty != null && item.qty > 1
+                ? `<span class="tc-equipment-doll__qty">${esc(item.qty.toLocaleString())}</span>`
+                : ''
         return glyphMarkup + qtyMarkup
     }
 
@@ -204,24 +201,28 @@ export class EquipmentDoll extends HTMLElement {
             ? `<div class="tc-equipment-doll__silhouette" aria-hidden="true">${esc(silhouette)}</div>`
             : DEFAULT_FIGURE
 
-        const slotsHTML = this._slots.map((cfg) => {
-            const isSelected = cfg.id === selected
-            const item = cfg.item ?? null
-            const accLabel = cfg.label || item?.name || cfg.id
-            const filledClass = item ? ' is-filled' : ' is-empty'
-            const selectedClass = isSelected ? ' is-selected' : ''
-            const labelMarkup = cfg.label
-                ? `<span class="tc-equipment-doll__label">${esc(cfg.label)}</span>`
-                : ''
-            return `<button type="button" class="tc-equipment-doll__slot${filledClass}${selectedClass}"`
-                + ` data-id="${esc(cfg.id)}"`
-                + ` style="left:${cfg.x}%;top:${cfg.y}%"`
-                + ` aria-pressed="${isSelected ? 'true' : 'false'}"`
-                + ` aria-label="${esc(accLabel)}">`
-                + `<span class="tc-equipment-doll__tile">${this._slotBody(item)}</span>`
-                + labelMarkup
-                + `</button>`
-        }).join('')
+        const slotsHTML = this._slots
+            .map((cfg) => {
+                const isSelected = cfg.id === selected
+                const item = cfg.item ?? null
+                const accLabel = cfg.label || item?.name || cfg.id
+                const filledClass = item ? ' is-filled' : ' is-empty'
+                const selectedClass = isSelected ? ' is-selected' : ''
+                const labelMarkup = cfg.label
+                    ? `<span class="tc-equipment-doll__label">${esc(cfg.label)}</span>`
+                    : ''
+                return (
+                    `<button type="button" class="tc-equipment-doll__slot${filledClass}${selectedClass}"` +
+                    ` data-id="${esc(cfg.id)}"` +
+                    ` style="left:${cfg.x}%;top:${cfg.y}%"` +
+                    ` aria-pressed="${isSelected ? 'true' : 'false'}"` +
+                    ` aria-label="${esc(accLabel)}">` +
+                    `<span class="tc-equipment-doll__tile">${this._slotBody(item)}</span>` +
+                    labelMarkup +
+                    `</button>`
+                )
+            })
+            .join('')
 
         this.setAttribute('role', 'group')
         if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', 'Equipment')

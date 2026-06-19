@@ -1,5 +1,4 @@
 import React, { useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const OffcanvasDemo: React.FC = () => {
     const startRef = useRef<any>(null)
@@ -14,14 +13,17 @@ const OffcanvasDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Offcanvas"
+                        <tc-rich-page-header
+                            title-text="Offcanvas"
                             description="Bootstrap Offcanvas plugin wrapper. Use the placement attribute to control the slide-in direction, title for the header, and children for the body."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — start placement">
+                            <tc-section-card title="Default — start placement">
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => startRef.current?.show()}
@@ -30,12 +32,15 @@ const OffcanvasDemo: React.FC = () => {
                                 </button>
                                 {/* @ts-ignore */}
                                 <tc-offcanvas ref={startRef} title="Start Panel" placement="start">
-                                    <p>This panel slides in from the left (start). Add any content here as children of <code>tc-offcanvas</code>.</p>
-                                {/* @ts-ignore */}
+                                    <p>
+                                        This panel slides in from the left (start). Add any content
+                                        here as children of <code>tc-offcanvas</code>.
+                                    </p>
+                                    {/* @ts-ignore */}
                                 </tc-offcanvas>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="placement=&quot;end&quot; — slide in from the right">
+                            <tc-section-card title='placement="end" — slide in from the right'>
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => endRef.current?.show()}
@@ -45,11 +50,11 @@ const OffcanvasDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-offcanvas ref={endRef} title="End Panel" placement="end">
                                     <p>This panel slides in from the right.</p>
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-offcanvas>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="placement=&quot;top&quot; — slide in from the top">
+                            <tc-section-card title='placement="top" — slide in from the top'>
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => topRef.current?.show()}
@@ -59,11 +64,11 @@ const OffcanvasDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-offcanvas ref={topRef} title="Top Panel" placement="top">
                                     <p>This panel slides in from the top of the viewport.</p>
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-offcanvas>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="placement=&quot;bottom&quot; — slide in from the bottom">
+                            <tc-section-card title='placement="bottom" — slide in from the bottom'>
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => bottomRef.current?.show()}
@@ -71,13 +76,17 @@ const OffcanvasDemo: React.FC = () => {
                                     Open offcanvas (bottom)
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-offcanvas ref={bottomRef} title="Bottom Panel" placement="bottom">
+                                <tc-offcanvas
+                                    ref={bottomRef}
+                                    title="Bottom Panel"
+                                    placement="bottom"
+                                >
                                     <p>This panel slides in from the bottom of the viewport.</p>
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-offcanvas>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="backdrop=&quot;static&quot; — click outside does not close">
+                            <tc-section-card title='backdrop="static" — click outside does not close'>
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => staticRef.current?.show()}
@@ -85,13 +94,21 @@ const OffcanvasDemo: React.FC = () => {
                                     Open static offcanvas
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-offcanvas ref={staticRef} title="Static Backdrop" placement="start" backdrop="static">
-                                    <p>Clicking outside this panel will not close it. Use the Close button.</p>
-                                {/* @ts-ignore */}
+                                <tc-offcanvas
+                                    ref={staticRef}
+                                    title="Static Backdrop"
+                                    placement="start"
+                                    backdrop="static"
+                                >
+                                    <p>
+                                        Clicking outside this panel will not close it. Use the Close
+                                        button.
+                                    </p>
+                                    {/* @ts-ignore */}
                                 </tc-offcanvas>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="scroll — allow body scroll while open">
+                            <tc-section-card title="scroll — allow body scroll while open">
                                 <button
                                     className="btn btn-primary"
                                     onClick={() => scrollRef.current?.show()}
@@ -99,11 +116,18 @@ const OffcanvasDemo: React.FC = () => {
                                     Open scrollable offcanvas
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-offcanvas ref={scrollRef} title="Body Scroll" placement="end" scroll>
-                                    <p>The page body remains scrollable while this panel is open.</p>
-                                {/* @ts-ignore */}
+                                <tc-offcanvas
+                                    ref={scrollRef}
+                                    title="Body Scroll"
+                                    placement="end"
+                                    scroll
+                                >
+                                    <p>
+                                        The page body remains scrollable while this panel is open.
+                                    </p>
+                                    {/* @ts-ignore */}
                                 </tc-offcanvas>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

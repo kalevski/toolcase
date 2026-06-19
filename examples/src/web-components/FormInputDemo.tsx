@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // Listen for tc-change on a tc-form-input and surface the latest value + error.
 function useFormValue(): [{ value: unknown; hasError: boolean }, React.RefObject<any>] {
-    const [state, setState] = useState<{ value: unknown; hasError: boolean }>({ value: '', hasError: false })
+    const [state, setState] = useState<{ value: unknown; hasError: boolean }>({
+        value: '',
+        hasError: false,
+    })
     const ref = useRef<any>(null)
 
     useEffect(() => {
@@ -61,14 +63,17 @@ const FormInputDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Form Input"
+                        <tc-rich-page-header
+                            title-text="Form Input"
                             description="Universal form-input dispatcher — one element renders any of 18 control types with built-in validation, helper/error lines, and full ARIA wiring."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Text with validation (validate property)">
+                            <tc-section-card title="Text with validation (validate property)">
                                 <div style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
                                     <tc-form-input
@@ -80,12 +85,13 @@ const FormInputDemo: React.FC = () => {
                                         required
                                     />
                                     <div className="form-text mt-1">
-                                        value: {String(emailState.value)} — hasError: {String(emailState.hasError)}
+                                        value: {String(emailState.value)} — hasError:{' '}
+                                        {String(emailState.hasError)}
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Dropdown (options property)">
+                            <tc-section-card title="Dropdown (options property)">
                                 <div style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
                                     <tc-form-input
@@ -96,36 +102,51 @@ const FormInputDemo: React.FC = () => {
                                         help="Choose where you're based."
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Radio group (options property)">
+                            <tc-section-card title="Radio group (options property)">
                                 <div style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
                                     <tc-form-input ref={radioRef} type="radio" label="Priority" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Checkbox & switch">
+                            <tc-section-card title="Checkbox & switch">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
-                                    <tc-form-input type="checkbox" label="I accept the terms" required />
+                                    <tc-form-input
+                                        type="checkbox"
+                                        label="I accept the terms"
+                                        required
+                                    />
                                     {/* @ts-ignore */}
                                     <tc-form-input type="switch" label="Enable notifications" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Date, color & range">
+                            <tc-section-card title="Date, color & range">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
-                                    <tc-form-input type="date" label="Start date" help="Pick a launch date." />
+                                    <tc-form-input
+                                        type="date"
+                                        label="Start date"
+                                        help="Pick a launch date."
+                                    />
                                     {/* @ts-ignore */}
                                     <tc-form-input type="color" label="Brand color" />
                                     {/* @ts-ignore */}
-                                    <tc-form-input type="range" label="Volume" min="0" max="100" step="5" help="Drag to adjust." />
+                                    <tc-form-input
+                                        type="range"
+                                        label="Volume"
+                                        min="0"
+                                        max="100"
+                                        step="5"
+                                        help="Drag to adjust."
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Forced error & loading state">
+                            <tc-section-card title="Forced error & loading state">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
                                     <tc-form-input
@@ -136,14 +157,19 @@ const FormInputDemo: React.FC = () => {
                                     {/* @ts-ignore */}
                                     <tc-form-input type="text" label="Loading field" loading />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 <div style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}
-                                    <tc-form-input ref={disabledRef} type="text" label="Read-only field" disabled />
+                                    <tc-form-input
+                                        ref={disabledRef}
+                                        type="text"
+                                        label="Read-only field"
+                                        disabled
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

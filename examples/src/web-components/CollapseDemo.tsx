@@ -1,5 +1,4 @@
 import React, { useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CollapseDemo: React.FC = () => {
     const collapseRef = useRef<any>(null)
@@ -10,14 +9,17 @@ const CollapseDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Collapse"
+                        <tc-rich-page-header
+                            title-text="Collapse"
                             description="Toggleable content region backed by Bootstrap's Collapse plugin. Use the open attribute to start expanded and horizontal for a width-based transition."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — toggle button drives show/hide">
+                            <tc-section-card title="Default — toggle button drives show/hide">
                                 <div className="d-flex gap-2 mb-3">
                                     <button
                                         className="btn btn-primary"
@@ -41,23 +43,25 @@ const CollapseDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-collapse ref={collapseRef} open>
                                     <div className="card card-body">
-                                        This content is collapsible. Click <strong>Toggle</strong> to show or hide it using Bootstrap's Collapse plugin.
+                                        This content is collapsible. Click <strong>Toggle</strong>{' '}
+                                        to show or hide it using Bootstrap's Collapse plugin.
                                     </div>
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-collapse>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="open — starts expanded by default">
+                            <tc-section-card title="open — starts expanded by default">
                                 {/* @ts-ignore */}
                                 <tc-collapse open>
                                     <div className="card card-body">
-                                        This panel starts expanded because the <code>open</code> attribute is present.
+                                        This panel starts expanded because the <code>open</code>{' '}
+                                        attribute is present.
                                     </div>
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-collapse>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="horizontal — width-based transition">
+                            <tc-section-card title="horizontal — width-based transition">
                                 <div className="d-flex gap-2 mb-3">
                                     <button
                                         className="btn btn-primary"
@@ -69,11 +73,12 @@ const CollapseDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-collapse ref={hCollapseRef} horizontal open>
                                     <div className="card card-body" style={{ width: '300px' }}>
-                                        This collapses horizontally (width transition) instead of vertically.
+                                        This collapses horizontally (width transition) instead of
+                                        vertically.
                                     </div>
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-collapse>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cdn-map'
 
 export type CdnMapVariant = 'primary' | 'accent'
@@ -7,14 +8,6 @@ export interface CdnMapNode {
     left: string
     variant?: CdnMapVariant
     label?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 // Pure-number string → "Npx"; any other CSS string passes through unchanged.
@@ -62,21 +55,26 @@ export class CdnMap extends HTMLElement {
     private render(): void {
         const heightCss = resolveLength(this.getAttribute('height'), '360px')
 
-        const primaryCount = this._nodes.filter(n => n.variant !== 'accent').length
-        const accentCount = this._nodes.filter(n => n.variant === 'accent').length
-        const ariaLabel = this._nodes.length === 0
-            ? 'CDN map — no nodes'
-            : `CDN map — ${primaryCount} primary node${primaryCount !== 1 ? 's' : ''}, ${accentCount} accent node${accentCount !== 1 ? 's' : ''}`
+        const primaryCount = this._nodes.filter((n) => n.variant !== 'accent').length
+        const accentCount = this._nodes.filter((n) => n.variant === 'accent').length
+        const ariaLabel =
+            this._nodes.length === 0
+                ? 'CDN map — no nodes'
+                : `CDN map — ${primaryCount} primary node${primaryCount !== 1 ? 's' : ''}, ${accentCount} accent node${accentCount !== 1 ? 's' : ''}`
 
-        const nodeHtml = this._nodes.map(node => {
-            const isAccent = node.variant === 'accent'
-            const variantClass = isAccent ? ' is-accent' : ' is-primary'
-            const variantLabel = isAccent ? 'accent' : 'primary'
-            const rawLabel = node.label || ''
-            const labelHtml = rawLabel ? `<span class="tc-cdn-map__node-label">${esc(rawLabel)}</span>` : ''
-            const nodeAriaLabel = rawLabel ? `${rawLabel} (${variantLabel})` : variantLabel
-            return `<span class="tc-cdn-map__node${variantClass}" style="top:${esc(node.top)};left:${esc(node.left)}" role="img" aria-label="${esc(nodeAriaLabel)}"><span class="tc-cdn-map__node-dot" aria-hidden="true"></span>${labelHtml}</span>`
-        }).join('')
+        const nodeHtml = this._nodes
+            .map((node) => {
+                const isAccent = node.variant === 'accent'
+                const variantClass = isAccent ? ' is-accent' : ' is-primary'
+                const variantLabel = isAccent ? 'accent' : 'primary'
+                const rawLabel = node.label || ''
+                const labelHtml = rawLabel
+                    ? `<span class="tc-cdn-map__node-label">${esc(rawLabel)}</span>`
+                    : ''
+                const nodeAriaLabel = rawLabel ? `${rawLabel} (${variantLabel})` : variantLabel
+                return `<span class="tc-cdn-map__node${variantClass}" style="top:${esc(node.top)};left:${esc(node.left)}" role="img" aria-label="${esc(nodeAriaLabel)}"><span class="tc-cdn-map__node-dot" aria-hidden="true"></span>${labelHtml}</span>`
+            })
+            .join('')
 
         this.classList.add('tc-cdn-map')
         this.setAttribute('role', 'img')

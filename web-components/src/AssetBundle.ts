@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
 import { ActionItem } from './ActionItems'
@@ -19,19 +20,11 @@ export interface AssetBundleAdvancedOptions {
 
 let _idCounter = 0
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function lucideHtml(name: string, className?: string): string {
     if (!name) return ''
     // Accept PascalCase directly, or kebab-case (convert to PascalCase).
     const pascal = name.includes('-')
-        ? name.replace(/(^\w|-\w)/g, m => m.replace('-', '').toUpperCase())
+        ? name.replace(/(^\w|-\w)/g, (m) => m.replace('-', '').toUpperCase())
         : name
     const svgStr =
         (LucideIcons as Record<string, string>)[pascal] ??
@@ -47,7 +40,7 @@ function humanizeKey(key: string): string {
         .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
         .replace(/\s+/g, ' ')
         .trim()
-        .replace(/^./, c => c.toUpperCase())
+        .replace(/^./, (c) => c.toUpperCase())
 }
 
 // Resolved once at module load — these icons are always rendered.
@@ -79,7 +72,16 @@ export class AssetBundle extends HTMLElement {
     onBuildTagChange: ((tag: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['name', 'target', 'target-icon', 'category', 'latest-build-ref', 'default-build-tag', 'build-tag', 'loading']
+        return [
+            'name',
+            'target',
+            'target-icon',
+            'category',
+            'latest-build-ref',
+            'default-build-tag',
+            'build-tag',
+            'loading',
+        ]
     }
 
     connectedCallback(): void {
@@ -300,10 +302,16 @@ export class AssetBundle extends HTMLElement {
 
         // Tags section
         const includedHtml = this._includedTags
-            .map(t => `<span class="tc-asset-bundle-tag tc-asset-bundle-tag--included">${plusIconHtml}<span>${esc(t)}</span></span>`)
+            .map(
+                (t) =>
+                    `<span class="tc-asset-bundle-tag tc-asset-bundle-tag--included">${plusIconHtml}<span>${esc(t)}</span></span>`,
+            )
             .join('')
         const excludedHtml = this._excludedTags
-            .map(t => `<span class="tc-asset-bundle-tag tc-asset-bundle-tag--excluded">${minusIconHtml}<span>${esc(t)}</span></span>`)
+            .map(
+                (t) =>
+                    `<span class="tc-asset-bundle-tag tc-asset-bundle-tag--excluded">${minusIconHtml}<span>${esc(t)}</span></span>`,
+            )
             .join('')
 
         const tagsHtml =
@@ -336,7 +344,7 @@ export class AssetBundle extends HTMLElement {
                       countEntries
                           .map(
                               ([type, count]) =>
-                                  `<span class="tc-asset-bundle-count"><span class="tc-asset-bundle-count-label">${esc(type)}</span><span class="tc-asset-bundle-count-value">${esc(String(count))}</span></span>`
+                                  `<span class="tc-asset-bundle-count"><span class="tc-asset-bundle-count-label">${esc(type)}</span><span class="tc-asset-bundle-count-value">${esc(String(count))}</span></span>`,
                           )
                           .join(''),
                       '</div>',
@@ -352,7 +360,7 @@ export class AssetBundle extends HTMLElement {
         if (candidates.length > 0) {
             if (interactive) {
                 buildTagHtml = `<div class="tc-asset-bundle-build-tags" role="radiogroup" aria-label="Build tag">${candidates
-                    .map(t => {
+                    .map((t) => {
                         const isActive = t === active
                         return `<button class="tc-asset-bundle-build-tag${isActive ? ' tc-asset-bundle-build-tag--active' : ''}" type="button" role="radio" aria-checked="${isActive}" data-tag="${esc(t)}">${esc(t)}</button>`
                     })
@@ -389,7 +397,9 @@ export class AssetBundle extends HTMLElement {
                     const label = `<span class="tc-asset-bundle-opt-label">${esc(humanizeKey(key))}</span>`
                     let valueHtml: string
                     if (typeof val === 'boolean') {
-                        const cls = val ? 'tc-asset-bundle-opt-bool--on' : 'tc-asset-bundle-opt-bool--off'
+                        const cls = val
+                            ? 'tc-asset-bundle-opt-bool--on'
+                            : 'tc-asset-bundle-opt-bool--off'
                         valueHtml = `<span class="tc-asset-bundle-opt-bool ${cls}">${val ? checkIconHtml : xIconHtml}<span>${val ? 'On' : 'Off'}</span></span>`
                     } else {
                         valueHtml = `<span class="tc-asset-bundle-opt-value">${esc(String(val))}</span>`
@@ -421,7 +431,9 @@ export class AssetBundle extends HTMLElement {
             '</div>',
         ].join('')
 
-        const targetMod = target ? ` tc-asset-bundle--${esc(target.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}` : ''
+        const targetMod = target
+            ? ` tc-asset-bundle--${esc(target.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`
+            : ''
 
         this.innerHTML = `<div class="tc-asset-bundle card${targetMod}">${headerHtml}${bodyHtml}</div>`
     }
@@ -435,7 +447,9 @@ export class AssetBundle extends HTMLElement {
                 const disabled = item.disabled === true
                 const dangerCls = item.danger ? ' tc-asset-bundle-menu-item--danger' : ''
                 const disabledAttr = disabled ? ' disabled aria-disabled="true"' : ''
-                const iconHtml = item.icon ? lucideHtml(item.icon, 'tc-asset-bundle-menu-item-icon') : ''
+                const iconHtml = item.icon
+                    ? lucideHtml(item.icon, 'tc-asset-bundle-menu-item-icon')
+                    : ''
                 return (
                     `<button class="tc-asset-bundle-menu-item${dangerCls}" role="menuitem" ` +
                     `type="button" tabindex="-1" data-idx="${idx}"${disabledAttr}>` +
@@ -455,7 +469,9 @@ export class AssetBundle extends HTMLElement {
         }
 
         // Interactive build-tag chips
-        Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-build-tag[data-tag]')).forEach(btn => {
+        Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-build-tag[data-tag]'),
+        ).forEach((btn) => {
             btn.addEventListener('click', () => {
                 const tag = btn.dataset.tag ?? ''
                 if (tag && tag !== this._activeBuildTag()) this._setActiveBuildTag(tag)
@@ -470,7 +486,9 @@ export class AssetBundle extends HTMLElement {
                 if (this._isMenuOpen) this._closeMenu()
                 else this._openMenu()
             })
-            trigger.addEventListener('keydown', (e: Event) => this._onTriggerKeydown(e as KeyboardEvent))
+            trigger.addEventListener('keydown', (e: Event) =>
+                this._onTriggerKeydown(e as KeyboardEvent),
+            )
         }
 
         const menu = this._getMenu()
@@ -478,10 +496,13 @@ export class AssetBundle extends HTMLElement {
             menu.addEventListener('keydown', (e: Event) => this._onMenuKeydown(e as KeyboardEvent))
         }
 
-        Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-menu-item:not([disabled])')).forEach(btn => {
+        Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-menu-item:not([disabled])'),
+        ).forEach((btn) => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
-                if (idx >= 0 && idx < this._menuItems.length) this._selectItem(this._menuItems[idx].key)
+                if (idx >= 0 && idx < this._menuItems.length)
+                    this._selectItem(this._menuItems[idx].key)
             })
         })
     }
@@ -498,11 +519,13 @@ export class AssetBundle extends HTMLElement {
             if (this._advancedOpen) panel.removeAttribute('hidden')
             else panel.setAttribute('hidden', '')
         }
-        this.dispatchEvent(new CustomEvent('tc-advanced-toggle', {
-            bubbles: true,
-            composed: true,
-            detail: { open: this._advancedOpen },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-advanced-toggle', {
+                bubbles: true,
+                composed: true,
+                detail: { open: this._advancedOpen },
+            }),
+        )
         if (typeof this.onAdvancedToggle === 'function') this.onAdvancedToggle(this._advancedOpen)
     }
 
@@ -515,17 +538,21 @@ export class AssetBundle extends HTMLElement {
         this._suppressRender = false
 
         const active = this._activeBuildTag()
-        Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-build-tag[data-tag]')).forEach(btn => {
+        Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-build-tag[data-tag]'),
+        ).forEach((btn) => {
             const isActive = btn.dataset.tag === active
             btn.classList.toggle('tc-asset-bundle-build-tag--active', isActive)
             btn.setAttribute('aria-checked', String(isActive))
         })
 
-        this.dispatchEvent(new CustomEvent('tc-build-tag-change', {
-            bubbles: true,
-            composed: true,
-            detail: { tag },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-build-tag-change', {
+                bubbles: true,
+                composed: true,
+                detail: { tag },
+            }),
+        )
         if (typeof this.onBuildTagChange === 'function') this.onBuildTagChange(tag)
     }
 
@@ -540,7 +567,9 @@ export class AssetBundle extends HTMLElement {
     }
 
     private _getEnabledItems(): HTMLButtonElement[] {
-        return Array.from(this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-menu-item:not([disabled])'))
+        return Array.from(
+            this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-menu-item:not([disabled])'),
+        )
     }
 
     private _openMenu(focusLast = false): void {
@@ -570,7 +599,7 @@ export class AssetBundle extends HTMLElement {
         const menu = this._getMenu()
         if (trigger) trigger.setAttribute('aria-expanded', 'false')
         if (menu) menu.classList.remove('show')
-        this._getEnabledItems().forEach(btn => btn.setAttribute('tabindex', '-1'))
+        this._getEnabledItems().forEach((btn) => btn.setAttribute('tabindex', '-1'))
         this._removeOutsideListener()
         if (refocus) trigger?.focus()
     }
@@ -583,11 +612,13 @@ export class AssetBundle extends HTMLElement {
     }
 
     private _selectItem(key: string): void {
-        this.dispatchEvent(new CustomEvent('tc-menu-click', {
-            bubbles: true,
-            composed: true,
-            detail: { key },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-menu-click', {
+                bubbles: true,
+                composed: true,
+                detail: { key },
+            }),
+        )
         if (typeof this.onMenuItemClick === 'function') this.onMenuItemClick(key)
         this._closeMenu()
     }
@@ -638,10 +669,15 @@ export class AssetBundle extends HTMLElement {
         } else if (e.key === 'Tab') {
             this._closeMenu(false)
         } else if (e.key === 'Enter' || e.key === ' ') {
-            if (focused && focused.classList.contains('tc-asset-bundle-menu-item') && !focused.disabled) {
+            if (
+                focused &&
+                focused.classList.contains('tc-asset-bundle-menu-item') &&
+                !focused.disabled
+            ) {
                 e.preventDefault()
                 const idx = parseInt(focused.dataset.idx ?? '-1', 10)
-                if (idx >= 0 && idx < this._menuItems.length) this._selectItem(this._menuItems[idx].key)
+                if (idx >= 0 && idx < this._menuItems.length)
+                    this._selectItem(this._menuItems[idx].key)
             }
         }
     }

@@ -1,19 +1,21 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const RankCellDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="RankCell"
+                    <tc-rich-page-header
+                        title-text="RankCell"
                         description="Zero-padded rank number with tier accent for top-three positions. Gold for rank 1, silver for 2, bronze for 3, neutral for the rest. Designed for table and list cells — sharp corners, JetBrains Mono, tabular-nums alignment."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Top-three tiers (rank 1–3)">
+                        <tc-section-card title="Top-three tiers (rank 1–3)">
                             <div className="d-flex gap-3 align-items-center flex-wrap">
                                 {/* @ts-ignore */}
                                 <tc-rank-cell rank="1" pad="2"></tc-rank-cell>
@@ -22,9 +24,9 @@ const RankCellDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-rank-cell rank="3" pad="2"></tc-rank-cell>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Default tier (rank 4+)">
+                        <tc-section-card title="Default tier (rank 4+)">
                             <div className="d-flex gap-3 align-items-center flex-wrap">
                                 {/* @ts-ignore */}
                                 <tc-rank-cell rank="4" pad="2"></tc-rank-cell>
@@ -35,9 +37,9 @@ const RankCellDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-rank-cell rank="100" pad="3"></tc-rank-cell>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Custom pad width">
+                        <tc-section-card title="Custom pad width">
                             <div className="d-flex gap-3 align-items-center flex-wrap">
                                 {/* @ts-ignore */}
                                 <tc-rank-cell rank="1" pad="3"></tc-rank-cell>
@@ -48,9 +50,9 @@ const RankCellDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-rank-cell rank="100" pad="3"></tc-rank-cell>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Inline within a leaderboard table">
+                        <tc-section-card title="Inline within a leaderboard table">
                             <table className="table table-sm mb-0" style={{ fontSize: '0.875rem' }}>
                                 <thead>
                                     <tr>
@@ -102,7 +104,7 @@ const RankCellDemo: React.FC = () => (
                                     </tr>
                                 </tbody>
                             </table>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

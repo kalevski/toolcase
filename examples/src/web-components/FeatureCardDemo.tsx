@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FeatureCardDemo: React.FC = () => {
     return (
@@ -7,14 +6,17 @@ const FeatureCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="FeatureCard"
+                        <tc-rich-page-header
+                            title-text="FeatureCard"
                             description="A card highlighting a feature with optional icon, eyebrow, title, description, and visual area. Supports default/wide/full sizes, an inline horizontal layout, lucide icons via the icon attribute, and named slots for rich content."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default size — icon + eyebrow + title + description">
+                            <tc-section-card title="Default size — icon + eyebrow + title + description">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-feature-card
@@ -38,9 +40,9 @@ const FeatureCardDemo: React.FC = () => {
                                         description="Deploy to 100+ points of presence with automatic failover and sub-50 ms latency."
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Wide size">
+                            <tc-section-card title="Wide size">
                                 <div className="d-flex flex-column gap-3">
                                     {/* @ts-ignore */}
                                     <tc-feature-card
@@ -51,9 +53,9 @@ const FeatureCardDemo: React.FC = () => {
                                         description="Automatic sharding, replication, and backups. Scales from megabytes to petabytes without configuration changes."
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Full size">
+                            <tc-section-card title="Full size">
                                 {/* @ts-ignore */}
                                 <tc-feature-card
                                     size="full"
@@ -62,9 +64,9 @@ const FeatureCardDemo: React.FC = () => {
                                     title="End-to-end tracing"
                                     description="Distributed tracing, structured logs, and real-time metrics in one unified dashboard. Spot bottlenecks before they become incidents."
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inline layout (icon beside copy)">
+                            <tc-section-card title="Inline layout (icon beside copy)">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 540 }}>
                                     {/* @ts-ignore */}
                                     <tc-feature-card
@@ -83,9 +85,9 @@ const FeatureCardDemo: React.FC = () => {
                                         description="Full TypeScript coverage with generated types from your API schema."
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted icon and visual">
+                            <tc-section-card title="Slotted icon and visual">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-feature-card
@@ -93,12 +95,49 @@ const FeatureCardDemo: React.FC = () => {
                                         title="Your logo, your colours"
                                         description="Upload a logo and pick accent colours — every customer-facing surface reflects your brand instantly."
                                     >
-                                        <span slot="icon" style={{ display: 'inline-flex', color: 'var(--tc-text)' }}>
-                                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <circle cx="13.5" cy="6.5" r="0.5" fill="currentColor" />
-                                                <circle cx="17.5" cy="10.5" r="0.5" fill="currentColor" />
-                                                <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor" />
-                                                <circle cx="6.5" cy="12.5" r="0.5" fill="currentColor" />
+                                        <span
+                                            slot="icon"
+                                            style={{
+                                                display: 'inline-flex',
+                                                color: 'var(--tc-text)',
+                                            }}
+                                        >
+                                            <svg
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="18"
+                                                height="18"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <circle
+                                                    cx="13.5"
+                                                    cy="6.5"
+                                                    r="0.5"
+                                                    fill="currentColor"
+                                                />
+                                                <circle
+                                                    cx="17.5"
+                                                    cy="10.5"
+                                                    r="0.5"
+                                                    fill="currentColor"
+                                                />
+                                                <circle
+                                                    cx="8.5"
+                                                    cy="7.5"
+                                                    r="0.5"
+                                                    fill="currentColor"
+                                                />
+                                                <circle
+                                                    cx="6.5"
+                                                    cy="12.5"
+                                                    r="0.5"
+                                                    fill="currentColor"
+                                                />
                                                 <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
                                             </svg>
                                         </span>
@@ -121,9 +160,9 @@ const FeatureCardDemo: React.FC = () => {
                                         </div>
                                     </tc-feature-card>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Inline with slotted title">
+                            <tc-section-card title="Inline with slotted title">
                                 <div style={{ maxWidth: 480 }}>
                                     {/* @ts-ignore */}
                                     <tc-feature-card
@@ -135,7 +174,7 @@ const FeatureCardDemo: React.FC = () => {
                                         <strong slot="title">Micro-services made simple</strong>
                                     </tc-feature-card>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

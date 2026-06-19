@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useFullscreenValue(initial: boolean): [boolean, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -28,23 +27,30 @@ const FullscreenToggleDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Fullscreen Toggle"
+                        <tc-rich-page-header
+                            title-text="Fullscreen Toggle"
                             description="A fullscreen on/off setting row: a label/description block paired with a pill-track switch. Built on the shared tc-setting-row scaffold; defaults its label to 'Fullscreen'."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — off, defaults to 'Fullscreen'">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Default — off, defaults to 'Fullscreen'">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fullscreen-toggle ref={ref1} />
                                 </div>
                                 <div className="form-text mt-1">Current value: {String(v1)}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Checked + custom label & description">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Checked + custom label & description">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fullscreen-toggle
                                         ref={ref2}
@@ -54,10 +60,12 @@ const FullscreenToggleDemo: React.FC = () => {
                                     />
                                 </div>
                                 <div className="form-text mt-1">Current value: {String(v2)}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled (off)">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Disabled (off)">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fullscreen-toggle
                                         row-label="Fullscreen"
@@ -65,10 +73,12 @@ const FullscreenToggleDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled (on)">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Disabled (on)">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-fullscreen-toggle
                                         row-label="Fullscreen"
@@ -77,7 +87,7 @@ const FullscreenToggleDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

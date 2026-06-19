@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ParticleEmitterDemo: React.FC = () => {
     const defaultRef = useRef<any>(null)
@@ -11,7 +10,7 @@ const ParticleEmitterDemo: React.FC = () => {
     useEffect(() => {
         if (!defaultRef.current) return
         const el = defaultRef.current
-        const handler = () => setBurstCount(n => n + 1)
+        const handler = () => setBurstCount((n) => n + 1)
         el.addEventListener('tc-burst', handler)
         return () => el.removeEventListener('tc-burst', handler)
     }, [])
@@ -31,17 +30,24 @@ const ParticleEmitterDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ParticleEmitter"
+                        <tc-rich-page-header
+                            title-text="ParticleEmitter"
                             description="Canvas particle-burst emitter. Call burst() or toggle the burst attribute to spawn a wave of particles from the centre. Particle physics (count, speed, gravity, lifetime, size) are fully configurable via attributes; colours are set via the colors JS property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — slate/cyan palette">
+                            <tc-section-card title="Default — slate/cyan palette">
                                 <div className="d-flex align-items-start gap-3 flex-wrap">
                                     {/* @ts-ignore */}
-                                    <tc-particle-emitter ref={defaultRef} width="280" height="180" />
+                                    <tc-particle-emitter
+                                        ref={defaultRef}
+                                        width="280"
+                                        height="180"
+                                    />
                                     <div className="d-flex flex-column gap-2">
                                         <button
                                             className="btn btn-sm btn-primary"
@@ -56,9 +62,9 @@ const ParticleEmitterDemo: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Cyan palette (colors JS property)">
+                            <tc-section-card title="Cyan palette (colors JS property)">
                                 <div className="d-flex align-items-start gap-3 flex-wrap">
                                     {/* @ts-ignore */}
                                     <tc-particle-emitter ref={cyanRef} width="280" height="180" />
@@ -69,12 +75,19 @@ const ParticleEmitterDemo: React.FC = () => {
                                         Burst
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Fast + many particles (count=48, speed=350)">
+                            <tc-section-card title="Fast + many particles (count=48, speed=350)">
                                 <div className="d-flex align-items-start gap-3 flex-wrap">
                                     {/* @ts-ignore */}
-                                    <tc-particle-emitter ref={fastRef} width="280" height="200" count="48" speed="350" particle-size="3" />
+                                    <tc-particle-emitter
+                                        ref={fastRef}
+                                        width="280"
+                                        height="200"
+                                        count="48"
+                                        speed="350"
+                                        particle-size="3"
+                                    />
                                     <button
                                         className="btn btn-sm btn-primary"
                                         onClick={() => handleBurst(fastRef)}
@@ -82,12 +95,19 @@ const ParticleEmitterDemo: React.FC = () => {
                                         Burst
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Heavy gravity (gravity=1200, lifetime=500)">
+                            <tc-section-card title="Heavy gravity (gravity=1200, lifetime=500)">
                                 <div className="d-flex align-items-start gap-3 flex-wrap">
                                     {/* @ts-ignore */}
-                                    <tc-particle-emitter ref={heavyRef} width="280" height="200" gravity="1200" lifetime="500" particle-size="6" />
+                                    <tc-particle-emitter
+                                        ref={heavyRef}
+                                        width="280"
+                                        height="200"
+                                        gravity="1200"
+                                        lifetime="500"
+                                        particle-size="6"
+                                    />
                                     <button
                                         className="btn btn-sm btn-primary"
                                         onClick={() => handleBurst(heavyRef)}
@@ -95,7 +115,7 @@ const ParticleEmitterDemo: React.FC = () => {
                                         Burst
                                     </button>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

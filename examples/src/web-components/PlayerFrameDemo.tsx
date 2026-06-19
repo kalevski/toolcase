@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const PlayerFrameDemo: React.FC = () => {
     const liveRef = useRef<any>(null)
@@ -24,15 +23,17 @@ const PlayerFrameDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PlayerFrame"
+                        <tc-rich-page-header
+                            title-text="PlayerFrame"
                             description="Player nameplate / HUD frame combining a portrait tile, player name, optional class label, and resource bars (HP, MP, Stamina). Port of gc-player-frame, restyled to the toolcase design system."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Default — HP bar only">
+                            <tc-section-card title="Default — HP bar only">
                                 <div className="d-flex flex-wrap gap-3">
                                     {/* @ts-ignore */}
                                     <tc-player-frame
@@ -52,9 +53,9 @@ const PlayerFrameDemo: React.FC = () => {
                                         style={{ width: '280px' }}
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With class label and level">
+                            <tc-section-card title="With class label and level">
                                 {/* @ts-ignore */}
                                 <tc-player-frame
                                     name="Vesper"
@@ -65,9 +66,9 @@ const PlayerFrameDemo: React.FC = () => {
                                     hp-max="120"
                                     style={{ width: '300px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="HP + MP bars (show-mp)">
+                            <tc-section-card title="HP + MP bars (show-mp)">
                                 {/* @ts-ignore */}
                                 <tc-player-frame
                                     name="Solara"
@@ -81,9 +82,9 @@ const PlayerFrameDemo: React.FC = () => {
                                     show-mp=""
                                     style={{ width: '300px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="HP + MP + Stamina bars (show-mp + show-stamina)">
+                            <tc-section-card title="HP + MP + Stamina bars (show-mp + show-stamina)">
                                 {/* @ts-ignore */}
                                 <tc-player-frame
                                     name="Cindrix"
@@ -100,9 +101,9 @@ const PlayerFrameDemo: React.FC = () => {
                                     show-stamina=""
                                     style={{ width: '300px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Critical health (low HP)">
+                            <tc-section-card title="Critical health (low HP)">
                                 {/* @ts-ignore */}
                                 <tc-player-frame
                                     name="Onyx"
@@ -116,10 +117,13 @@ const PlayerFrameDemo: React.FC = () => {
                                     mp-max="80"
                                     style={{ width: '300px' }}
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Live update via attributes">
-                                <div className="mb-3 d-flex flex-column gap-2" style={{ maxWidth: '300px' }}>
+                            <tc-section-card title="Live update via attributes">
+                                <div
+                                    className="mb-3 d-flex flex-column gap-2"
+                                    style={{ maxWidth: '300px' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-player-frame
                                         ref={liveRef}
@@ -134,7 +138,10 @@ const PlayerFrameDemo: React.FC = () => {
                                         show-mp=""
                                     />
                                 </div>
-                                <div className="d-flex flex-column gap-2 mt-2" style={{ maxWidth: '300px' }}>
+                                <div
+                                    className="d-flex flex-column gap-2 mt-2"
+                                    style={{ maxWidth: '300px' }}
+                                >
                                     <label className="form-label mb-0">
                                         HP: <strong>{hp}</strong> / 100
                                     </label>
@@ -144,7 +151,7 @@ const PlayerFrameDemo: React.FC = () => {
                                         min={0}
                                         max={100}
                                         value={hp}
-                                        onChange={e => setHp(Number(e.target.value))}
+                                        onChange={(e) => setHp(Number(e.target.value))}
                                     />
                                     <label className="form-label mb-0">
                                         MP: <strong>{mp}</strong> / 100
@@ -155,11 +162,10 @@ const PlayerFrameDemo: React.FC = () => {
                                         min={0}
                                         max={100}
                                         value={mp}
-                                        onChange={e => setMp(Number(e.target.value))}
+                                        onChange={(e) => setMp(Number(e.target.value))}
                                     />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

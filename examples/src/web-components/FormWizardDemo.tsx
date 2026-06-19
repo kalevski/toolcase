@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const FormWizardDemo: React.FC = () => {
     // ── Basic demo (JS property content) ─────────────────────────────────────
@@ -14,12 +13,14 @@ const FormWizardDemo: React.FC = () => {
             {
                 label: 'Account',
                 icon: 'user',
-                content: '<p style="margin:0">Enter your name and email to create your account.</p>',
+                content:
+                    '<p style="margin:0">Enter your name and email to create your account.</p>',
             },
             {
                 label: 'Profile',
                 icon: 'settings',
-                content: '<p style="margin:0">Customise your profile: avatar, bio, and preferences.</p>',
+                content:
+                    '<p style="margin:0">Customise your profile: avatar, bio, and preferences.</p>',
             },
             {
                 label: 'Plan',
@@ -54,11 +55,7 @@ const FormWizardDemo: React.FC = () => {
     useEffect(() => {
         const el = slotRef.current
         if (!el) return
-        el.steps = [
-            { label: 'Details' },
-            { label: 'Address' },
-            { label: 'Review' },
-        ]
+        el.steps = [{ label: 'Details' }, { label: 'Address' }, { label: 'Review' }]
     }, [])
 
     // ── Loading state demo ────────────────────────────────────────────────────
@@ -70,8 +67,11 @@ const FormWizardDemo: React.FC = () => {
         if (!el) return
         el.steps = [
             { label: 'Setup', content: '<p style="margin:0">Configure initial settings.</p>' },
-            { label: 'Deploy', content: '<p style="margin:0">Deploy your application to production.</p>' },
-            { label: 'Done',   content: '<p style="margin:0">Your app is live!</p>' },
+            {
+                label: 'Deploy',
+                content: '<p style="margin:0">Deploy your application to production.</p>',
+            },
+            { label: 'Done', content: '<p style="margin:0">Your app is live!</p>' },
         ]
         el.setAttribute('complete-label', 'Launch')
         el.setAttribute('complete-icon', 'rocket')
@@ -96,45 +96,57 @@ const FormWizardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Form Wizard"
+                        <tc-rich-page-header
+                            title-text="Form Wizard"
                             description="Multi-step form wizard with tab navigation, Back/Next/Complete footer, step icons, slotted content, and loading state. Set steps via the JS steps property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Basic (4 steps, JS content, icons)">
+                            <tc-section-card title="Basic (4 steps, JS content, icons)">
                                 <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
                                     Last event: <strong>{lastEvent}</strong>
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-form-wizard ref={basicRef} />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted content (slot=&quot;step-N&quot;)">
+                            <tc-section-card title='Slotted content (slot="step-N")'>
                                 {/* @ts-ignore */}
                                 <tc-form-wizard ref={slotRef}>
                                     <div slot="step-0">
-                                        <p style={{ margin: 0 }}>Fill in your account details here. (slotted content for step 0)</p>
+                                        <p style={{ margin: 0 }}>
+                                            Fill in your account details here. (slotted content for
+                                            step 0)
+                                        </p>
                                     </div>
                                     <div slot="step-1">
-                                        <p style={{ margin: 0 }}>Enter your shipping address. (slotted content for step 1)</p>
+                                        <p style={{ margin: 0 }}>
+                                            Enter your shipping address. (slotted content for step
+                                            1)
+                                        </p>
                                     </div>
                                     <div slot="step-2">
-                                        <p style={{ margin: 0 }}>Review your order before confirming. (slotted content for step 2)</p>
+                                        <p style={{ margin: 0 }}>
+                                            Review your order before confirming. (slotted content
+                                            for step 2)
+                                        </p>
                                     </div>
                                 </tc-form-wizard>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state (click Complete to trigger)">
+                            <tc-section-card title="Loading state (click Complete to trigger)">
                                 <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-                                    {isLoading ? 'Simulating a network request… (2 s)' : 'Advance to the last step and click Launch.'}
+                                    {isLoading
+                                        ? 'Simulating a network request… (2 s)'
+                                        : 'Advance to the last step and click Launch.'}
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-form-wizard ref={loadingRef} />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

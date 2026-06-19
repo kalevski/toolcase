@@ -1,9 +1,9 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-radio'
 
 let _idCounter = 0
 
 export class Radio extends HTMLElement {
-
     private _inputId: string
     private _initialised = false
 
@@ -32,7 +32,9 @@ export class Radio extends HTMLElement {
     }
 
     get checked(): boolean {
-        return this.querySelector<HTMLInputElement>('input')?.checked ?? this.hasAttribute('checked')
+        return (
+            this.querySelector<HTMLInputElement>('input')?.checked ?? this.hasAttribute('checked')
+        )
     }
     set checked(v: boolean) {
         const input = this.querySelector<HTMLInputElement>('input')
@@ -110,9 +112,10 @@ export class Radio extends HTMLElement {
         const valueAttr = value ? ` value="${esc(value)}"` : ''
         const nameAttr = name ? ` name="${esc(name)}"` : ''
 
-        const labelHtml = label != null
-            ? `<label class="form-check-label" for="${this._inputId}">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label != null
+                ? `<label class="form-check-label" for="${this._inputId}">${esc(label)}</label>`
+                : ''
 
         this.innerHTML = [
             `<div class="form-check${inlineClass}${reverseClass}">`,
@@ -121,10 +124,6 @@ export class Radio extends HTMLElement {
             `</div>`,
         ].join('')
     }
-}
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 declare global {

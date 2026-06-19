@@ -4,7 +4,6 @@ export type CrosshairVariant = 'cross' | 'dot' | 'circle' | 'tShape' | 'classic'
 const VARIANTS: CrosshairVariant[] = ['cross', 'dot', 'circle', 'tShape', 'classic', 'rune']
 
 export class Crosshair extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {

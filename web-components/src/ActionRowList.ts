@@ -90,32 +90,38 @@ export class ActionRowList extends HTMLElement {
         const outline = this.outline
         const trailingIconHtml = this._trailingIconHtml()
 
-        const rows = this._actions.map((action, idx) => {
-            const variant = action.variant ?? 'secondary'
-            const btnClass = outline ? `btn-outline-${variant}` : `btn-${variant}`
-            const disabled = action.disabled === true
-            const disabledAttr = disabled ? ' disabled' : ''
-            const disabledRow = disabled ? ' data-disabled="true"' : ''
-            const iconHtml = action.icon ? this._resolveIcon(action.icon) : ''
-            const labelHtml = action.label != null
-                ? `<span class="tc-action-row-cta-label">${action.label}</span>`
-                : ''
-            const descHtml = action.description != null
-                ? `<span class="tc-action-row-desc">${action.description}</span>`
-                : ''
+        const rows = this._actions
+            .map((action, idx) => {
+                const variant = action.variant ?? 'secondary'
+                const btnClass = outline ? `btn-outline-${variant}` : `btn-${variant}`
+                const disabled = action.disabled === true
+                const disabledAttr = disabled ? ' disabled' : ''
+                const disabledRow = disabled ? ' data-disabled="true"' : ''
+                const iconHtml = action.icon ? this._resolveIcon(action.icon) : ''
+                const labelHtml =
+                    action.label != null
+                        ? `<span class="tc-action-row-cta-label">${action.label}</span>`
+                        : ''
+                const descHtml =
+                    action.description != null
+                        ? `<span class="tc-action-row-desc">${action.description}</span>`
+                        : ''
 
-            return (
-                `<div class="tc-action-row list-group-item d-flex align-items-center justify-content-between" data-idx="${idx}"${disabledRow}>` +
+                return (
+                    `<div class="tc-action-row list-group-item d-flex align-items-center justify-content-between" data-idx="${idx}"${disabledRow}>` +
                     `<div class="tc-action-row-info">` +
-                        `<span class="tc-action-row-title">${action.title}</span>` +
-                        descHtml +
+                    `<span class="tc-action-row-title">${action.title}</span>` +
+                    descHtml +
                     `</div>` +
                     `<button class="btn btn-sm ${btnClass} tc-action-row-cta" type="button" data-idx="${idx}"${disabledAttr} aria-label="${action.label ?? action.title}">` +
-                        iconHtml + labelHtml + trailingIconHtml +
+                    iconHtml +
+                    labelHtml +
+                    trailingIconHtml +
                     `</button>` +
-                `</div>`
-            )
-        }).join('')
+                    `</div>`
+                )
+            })
+            .join('')
 
         this.innerHTML = `<div class="tc-action-row-list list-group">${rows}</div>`
 
@@ -123,12 +129,16 @@ export class ActionRowList extends HTMLElement {
         const list = this.querySelector<HTMLElement>('.tc-action-row-list')
         if (list) {
             list.addEventListener('click', (e: Event) => {
-                const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.tc-action-row-cta')
+                const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
+                    '.tc-action-row-cta',
+                )
                 if (!btn || btn.disabled) return
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._actions.length) {
                     const key = this._actions[idx].key
-                    this.dispatchEvent(new CustomEvent('tc-action-click', { bubbles: true, detail: { key } }))
+                    this.dispatchEvent(
+                        new CustomEvent('tc-action-click', { bubbles: true, detail: { key } }),
+                    )
                     if (typeof this.onActionClick === 'function') this.onActionClick(key)
                 }
             })

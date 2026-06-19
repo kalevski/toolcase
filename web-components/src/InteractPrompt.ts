@@ -1,11 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-interact-prompt'
 
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
-
 export class InteractPrompt extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['show', 'key-label', 'text', 'hold-progress']
     }
@@ -66,16 +62,15 @@ export class InteractPrompt extends HTMLElement {
         const text = this.text
         const hold = this.holdProgress
 
-        const keyMarkup = key
-            ? `<span class="tc-interact-prompt-key">${esc(key)}</span>`
-            : ''
+        const keyMarkup = key ? `<span class="tc-interact-prompt-key">${esc(key)}</span>` : ''
 
-        const holdMarkup = hold != null
-            ? `
+        const holdMarkup =
+            hold != null
+                ? `
             <div class="tc-interact-prompt-hold" role="progressbar" aria-valuemin="0" aria-valuemax="1" aria-valuenow="${hold.toFixed(2)}">
                 <div class="tc-interact-prompt-hold-fill" style="width: ${(hold * 100).toFixed(2)}%"></div>
             </div>`
-            : ''
+                : ''
 
         this.innerHTML = `
             <div class="tc-interact-prompt-row">

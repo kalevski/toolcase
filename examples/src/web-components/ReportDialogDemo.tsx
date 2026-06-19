@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CUSTOM_REASONS = [
     'Exploiting bugs',
@@ -18,7 +17,7 @@ const ReportDialogDemo: React.FC = () => {
     const [eventsOpen, setEventsOpen] = useState(false)
     const [log, setLog] = useState<string[]>([])
 
-    const appendLog = (msg: string) => setLog(l => [msg, ...l].slice(0, 10))
+    const appendLog = (msg: string) => setLog((l) => [msg, ...l].slice(0, 10))
 
     // Basic dialog
     useEffect(() => {
@@ -68,9 +67,14 @@ const ReportDialogDemo: React.FC = () => {
     useEffect(() => {
         const el = eventsRef.current
         if (!el) return
-        const onCancel = () => { appendLog('tc-cancel fired'); setEventsOpen(false) }
+        const onCancel = () => {
+            appendLog('tc-cancel fired')
+            setEventsOpen(false)
+        }
         const onSubmit = (e: CustomEvent) => {
-            appendLog(`tc-submit — reason: "${e.detail.reason}", comment: "${e.detail.comment || '(none)'}"`)
+            appendLog(
+                `tc-submit — reason: "${e.detail.reason}", comment: "${e.detail.comment || '(none)'}"`,
+            )
             setEventsOpen(false)
         }
         el.addEventListener('tc-cancel', onCancel)
@@ -92,14 +96,17 @@ const ReportDialogDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ReportDialog"
+                        <tc-rich-page-header
+                            title-text="ReportDialog"
                             description="Player-report moderation modal with a reason radio group, optional comment textarea, and Cancel / Submit Report actions. Controlled — fires tc-cancel or tc-submit; the consumer sets open to false to dismiss."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Basic — default reasons, player name">
+                            <tc-section-card title="Basic — default reasons, player name">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setBasicOpen(true)}
@@ -107,13 +114,10 @@ const ReportDialogDemo: React.FC = () => {
                                     Report ShadowStriker99
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-report-dialog
-                                    ref={basicRef}
-                                    player-name="ShadowStriker99"
-                                />
-                            </SectionCard>
+                                <tc-report-dialog ref={basicRef} player-name="ShadowStriker99" />
+                            </tc-section-card>
 
-                            <SectionCard title="Custom reasons — injected via JS property">
+                            <tc-section-card title="Custom reasons — injected via JS property">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setCustomOpen(true)}
@@ -121,13 +125,10 @@ const ReportDialogDemo: React.FC = () => {
                                     Report NightRaider
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-report-dialog
-                                    ref={customRef}
-                                    player-name="NightRaider"
-                                />
-                            </SectionCard>
+                                <tc-report-dialog ref={customRef} player-name="NightRaider" />
+                            </tc-section-card>
 
-                            <SectionCard title="Events — tc-cancel / tc-submit">
+                            <tc-section-card title="Events — tc-cancel / tc-submit">
                                 <button
                                     className="btn btn-sm btn-outline-secondary"
                                     onClick={() => setEventsOpen(true)}
@@ -135,23 +136,24 @@ const ReportDialogDemo: React.FC = () => {
                                     Open event demo
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-report-dialog
-                                    ref={eventsRef}
-                                    player-name="EventTarget42"
-                                />
+                                <tc-report-dialog ref={eventsRef} player-name="EventTarget42" />
                                 <div className="mt-3">
                                     <strong className="d-block mb-1">Event log</strong>
                                     {log.length === 0 ? (
-                                        <span className="text-muted">Open the dialog, pick a reason, and interact…</span>
+                                        <span className="text-muted">
+                                            Open the dialog, pick a reason, and interact…
+                                        </span>
                                     ) : (
                                         <ul className="mb-0">
                                             {log.map((line, i) => (
-                                                <li key={i}><code>{line}</code></li>
+                                                <li key={i}>
+                                                    <code>{line}</code>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

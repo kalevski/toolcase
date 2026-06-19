@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const items = [
     { key: 'general', icon: 'settings', text: 'General' },
@@ -12,9 +11,11 @@ const items = [
 // Per-key HTML strings projected into the default slot (the content area).
 const panels: Record<string, string> = {
     general: '<p style="margin:0">General workspace settings — name, slug, and default region.</p>',
-    members: '<p style="margin:0">Invite teammates and manage their roles. <strong>12</strong> members in this workspace.</p>',
+    members:
+        '<p style="margin:0">Invite teammates and manage their roles. <strong>12</strong> members in this workspace.</p>',
     billing: '<p style="margin:0">Your plan, payment method, and invoice history live here.</p>',
-    notifications: '<p style="margin:0">Choose which events email you. A <strong>New</strong> digest option is available.</p>',
+    notifications:
+        '<p style="margin:0">Choose which events email you. A <strong>New</strong> digest option is available.</p>',
     security: '<p style="margin:0">Two-factor authentication, sessions, and audit log.</p>',
 }
 
@@ -42,7 +43,7 @@ const UncontrolledExample: React.FC = () => {
             {/* @ts-ignore */}
             <tc-vertical-item-list ref={ref} default-active-key="members">
                 <div dangerouslySetInnerHTML={{ __html: panels[active] }} />
-            {/* @ts-ignore */}
+                {/* @ts-ignore */}
             </tc-vertical-item-list>
             {lastEvent && (
                 <p className="mt-2 text-muted" style={{ fontSize: '0.8rem' }}>
@@ -66,7 +67,7 @@ const DisabledExample: React.FC = () => {
             {/* @ts-ignore */}
             <tc-vertical-item-list ref={ref} default-active-key="general" disabled>
                 <p style={{ margin: 0 }}>Interaction is disabled — the menu is dimmed and inert.</p>
-            {/* @ts-ignore */}
+                {/* @ts-ignore */}
             </tc-vertical-item-list>
         </>
     )
@@ -84,8 +85,10 @@ const LoadingExample: React.FC = () => {
         <>
             {/* @ts-ignore */}
             <tc-vertical-item-list ref={ref} loading loading-count="5">
-                <p style={{ margin: 0 }} className="text-muted">Content loads once the menu is ready.</p>
-            {/* @ts-ignore */}
+                <p style={{ margin: 0 }} className="text-muted">
+                    Content loads once the menu is ready.
+                </p>
+                {/* @ts-ignore */}
             </tc-vertical-item-list>
         </>
     )
@@ -96,26 +99,27 @@ const VerticalItemListDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="VerticalItemList"
+                    <tc-rich-page-header
+                        title-text="VerticalItemList"
                         description="Vertical navigation menu with icons and badges beside an associated content area. The active item carries a 2px ink left-edge marker; Up/Down roam, Enter/Space select."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-
-                        <SectionCard title="Uncontrolled (default-active-key, slotted content per key, tc-select)">
+                        <tc-section-card title="Uncontrolled (default-active-key, slotted content per key, tc-select)">
                             <UncontrolledExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Disabled (no interaction)">
+                        <tc-section-card title="Disabled (no interaction)">
                             <DisabledExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Loading skeleton (loading + loading-count)">
+                        <tc-section-card title="Loading skeleton (loading + loading-count)">
                             <LoadingExample />
-                        </SectionCard>
-
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

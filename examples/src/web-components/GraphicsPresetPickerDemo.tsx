@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function usePresetValue(initial: string): [string, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -28,23 +27,30 @@ const GraphicsPresetPickerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Graphics Preset Picker"
+                        <tc-rich-page-header
+                            title-text="Graphics Preset Picker"
                             description="A low / medium / high / ultra graphics-preset setting row: a label/description block paired with a segmented preset button group. Built on the shared tc-setting-row scaffold."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — four presets, defaults to 'Quality preset' / 'medium'">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Default — four presets, defaults to 'Quality preset' / 'medium'">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-graphics-preset-picker ref={ref1} />
                                 </div>
                                 <div className="form-text mt-1">Current value: {v1}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom label + description, preset 'ultra'">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Custom label + description, preset 'ultra'">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-graphics-preset-picker
                                         ref={ref2}
@@ -54,10 +60,12 @@ const GraphicsPresetPickerDemo: React.FC = () => {
                                     />
                                 </div>
                                 <div className="form-text mt-1">Current value: {v2}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Disabled">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-graphics-preset-picker
                                         row-label="Graphics quality"
@@ -66,7 +74,7 @@ const GraphicsPresetPickerDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

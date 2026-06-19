@@ -1,14 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-invite-toast'
 
 const DEFAULT_TIMEOUT = 15
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class InviteToast extends HTMLElement {
     private _initialised = false
@@ -131,13 +124,17 @@ export class InviteToast extends HTMLElement {
 
     private _emitAccept(): void {
         this._stopTimer()
-        this.dispatchEvent(new CustomEvent('tc-accept', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-accept', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onAccept === 'function') this.onAccept()
     }
 
     private _emitDecline(): void {
         this._stopTimer()
-        this.dispatchEvent(new CustomEvent('tc-decline', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-decline', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onDecline === 'function') this.onDecline()
     }
 

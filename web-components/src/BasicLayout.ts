@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-basic-layout'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class BasicLayout extends HTMLElement {
     private _initialised = false
@@ -21,7 +14,7 @@ export class BasicLayout extends HTMLElement {
             // Capture named brand-slot children before render() wipes innerHTML
             this._brandSlotNodes = Array.from(this.querySelectorAll('[slot="brand"]'))
             const mainNodes = Array.from(this.childNodes).filter(
-                n => !(n instanceof Element && n.getAttribute('slot') === 'brand')
+                (n) => !(n instanceof Element && n.getAttribute('slot') === 'brand'),
             )
 
             this.render()
@@ -29,12 +22,12 @@ export class BasicLayout extends HTMLElement {
             // Distribute brand slots into the header (only when brand attribute absent)
             if (!this.hasAttribute('brand')) {
                 const brandEl = this.querySelector('.tc-basic-layout-brand')
-                if (brandEl) this._brandSlotNodes.forEach(n => brandEl.appendChild(n))
+                if (brandEl) this._brandSlotNodes.forEach((n) => brandEl.appendChild(n))
             }
 
             // Distribute default children into main
             const mainEl = this.querySelector('.tc-basic-layout-main')
-            if (mainEl) mainNodes.forEach(n => mainEl.appendChild(n))
+            if (mainEl) mainNodes.forEach((n) => mainEl.appendChild(n))
 
             this._initialised = true
         }
@@ -61,12 +54,12 @@ export class BasicLayout extends HTMLElement {
         // Re-distribute brand slots (only when brand attribute is absent)
         if (!this.hasAttribute('brand')) {
             const newBrandEl = this.querySelector('.tc-basic-layout-brand')
-            if (newBrandEl) this._brandSlotNodes.forEach(n => newBrandEl.appendChild(n))
+            if (newBrandEl) this._brandSlotNodes.forEach((n) => newBrandEl.appendChild(n))
         }
 
         // Re-distribute main content
         const newMainEl = this.querySelector('.tc-basic-layout-main')
-        if (newMainEl) mainNodes.forEach(n => newMainEl.appendChild(n))
+        if (newMainEl) mainNodes.forEach((n) => newMainEl.appendChild(n))
     }
 
     get brand(): string | null {

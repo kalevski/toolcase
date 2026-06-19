@@ -1,14 +1,11 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-leaderboard'
-
-function esc(s: string): string {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
 
 function initials(name: string): string {
     return name
         .trim()
         .split(/\s+/)
-        .map(w => w[0]?.toUpperCase() ?? '')
+        .map((w) => w[0]?.toUpperCase() ?? '')
         .slice(0, 2)
         .join('')
 }
@@ -115,8 +112,11 @@ export class Leaderboard extends HTMLElement {
     }
 
     private render(): void {
-        const theadCells = COL_KEYS.filter(k => this._isVisible(k))
-            .map(k => `<th scope="col" class="tc-leaderboard-th tc-leaderboard-th-${k}">${this._label(k)}</th>`)
+        const theadCells = COL_KEYS.filter((k) => this._isVisible(k))
+            .map(
+                (k) =>
+                    `<th scope="col" class="tc-leaderboard-th tc-leaderboard-th-${k}">${this._label(k)}</th>`,
+            )
             .join('')
 
         const rows = this._entries

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const traffic = [
     { label: 'Jan', value: 1200 },
@@ -55,7 +54,9 @@ const BarChartDemo: React.FC = () => {
         const el = verticalRef.current
         if (el) {
             const handler = (e: any) =>
-                setClicked(`${e.detail.item.label} = ${e.detail.item.value} (index ${e.detail.index})`)
+                setClicked(
+                    `${e.detail.item.label} = ${e.detail.item.value} (index ${e.detail.index})`,
+                )
             el.addEventListener('tc-bar-click', handler)
             return () => el.removeEventListener('tc-bar-click', handler)
         }
@@ -66,15 +67,17 @@ const BarChartDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BarChart"
+                        <tc-rich-page-header
+                            title-text="BarChart"
                             description="SVG bar chart in vertical (columns) or horizontal (rows) orientation, with category/value axis labels, an interactive tooltip, and optional per-bar value labels. data and yFormatter are set via JS properties; title/subtitle/orientation/height/show-values/loading are attributes. Clicking a bar fires tc-bar-click."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Vertical — with value labels + click">
+                            <tc-section-card title="Vertical — with value labels + click">
                                 {/* @ts-ignore */}
                                 <tc-bar-chart
                                     ref={verticalRef}
@@ -86,9 +89,9 @@ const BarChartDemo: React.FC = () => {
                                 <p className="text-muted small mt-2 mb-0">
                                     Last clicked bar: <strong>{clicked ?? 'none'}</strong>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Horizontal — ranked rows">
+                            <tc-section-card title="Horizontal — ranked rows">
                                 {/* @ts-ignore */}
                                 <tc-bar-chart
                                     ref={horizontalRef}
@@ -97,9 +100,9 @@ const BarChartDemo: React.FC = () => {
                                     height="240"
                                     show-values
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Per-item colors">
+                            <tc-section-card title="Per-item colors">
                                 {/* @ts-ignore */}
                                 <tc-bar-chart
                                     ref={statusRef}
@@ -108,13 +111,12 @@ const BarChartDemo: React.FC = () => {
                                     height="220"
                                     show-values
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading skeleton">
+                            <tc-section-card title="Loading skeleton">
                                 {/* @ts-ignore */}
                                 <tc-bar-chart loading title="Loading…" height="240" />
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

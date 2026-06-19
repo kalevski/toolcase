@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const BasicCardDemo: React.FC = () => {
     return (
@@ -7,35 +6,44 @@ const BasicCardDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="BasicCard"
+                        <tc-rich-page-header
+                            title-text="BasicCard"
                             description="Small dashboard card with an optional icon chip and a two-line text block."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="With icon">
+                            <tc-section-card title="With icon">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-basic-card icon="BarChart2" text-a="$24,500" text-b="Total revenue this month" />
+                                    <tc-basic-card
+                                        icon="BarChart2"
+                                        text-a="$24,500"
+                                        text-b="Total revenue this month"
+                                    />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Without icon">
+                            <tc-section-card title="Without icon">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
                                     <tc-basic-card text-a="1,284" text-b="Active users" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Loading state">
+                            <tc-section-card title="Loading state">
                                 <div style={{ maxWidth: 320 }}>
                                     {/* @ts-ignore */}
-                                    <tc-basic-card loading text-a="placeholder" text-b="placeholder" />
+                                    <tc-basic-card
+                                        loading
+                                        text-a="placeholder"
+                                        text-b="placeholder"
+                                    />
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

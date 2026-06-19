@@ -4,7 +4,6 @@ export type SpacerAxis = 'horizontal' | 'vertical'
 const AXES: SpacerAxis[] = ['horizontal', 'vertical']
 
 export class Spacer extends HTMLElement {
-
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -47,9 +46,12 @@ export class Spacer extends HTMLElement {
         const isHorizontal = axis === 'horizontal'
 
         // Bare numbers (e.g. size="24") are treated as px lengths.
-        const resolvedSize = rawSize != null
-            ? /^\d+(\.\d+)?$/.test(rawSize.trim()) ? `${rawSize.trim()}px` : rawSize
-            : null
+        const resolvedSize =
+            rawSize != null
+                ? /^\d+(\.\d+)?$/.test(rawSize.trim())
+                    ? `${rawSize.trim()}px`
+                    : rawSize
+                : null
 
         if (resolvedSize != null) {
             if (isHorizontal) {

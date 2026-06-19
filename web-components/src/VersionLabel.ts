@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-version-label'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class VersionLabel extends HTMLElement {
     private _initialised = false
@@ -69,7 +62,9 @@ export class VersionLabel extends HTMLElement {
             parts.push(`<span class="tc-version-label-branch">${esc(branch)}</span>`)
         }
 
-        this.innerHTML = parts.join('<span class="tc-version-label-sep" aria-hidden="true">·</span>')
+        this.innerHTML = parts.join(
+            '<span class="tc-version-label-sep" aria-hidden="true">·</span>',
+        )
     }
 }
 

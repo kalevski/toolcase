@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CountdownTimerDemo: React.FC = () => {
     const now = useMemo(() => Date.now(), [])
@@ -31,37 +30,36 @@ const CountdownTimerDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Countdown Timer"
+                        <tc-rich-page-header
+                            title-text="Countdown Timer"
                             description="Counts down to a target date in configurable units. Visibility-aware updates keep the timer accurate when the tab is backgrounded."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — all four units">
+                            <tc-section-card title="Default — all four units">
                                 {/* @ts-ignore */}
                                 <tc-countdown-timer
                                     target={baseTarget}
                                     label="Launch in"
                                     sub-label="Get ready for launch!"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Compact mode">
+                            <tc-section-card title="Compact mode">
                                 {/* @ts-ignore */}
-                                <tc-countdown-timer
-                                    target={baseTarget}
-                                    compact
-                                    label="Time left"
-                                />
-                            </SectionCard>
+                                <tc-countdown-timer target={baseTarget} compact label="Time left" />
+                            </tc-section-card>
 
-                            <SectionCard title="Custom units — hours · minutes · seconds (JS property)">
+                            <tc-section-card title="Custom units — hours · minutes · seconds (JS property)">
                                 {/* @ts-ignore */}
                                 <tc-countdown-timer ref={customRef} label="Session ends in" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Expire event (fires after 3 s)">
+                            <tc-section-card title="Expire event (fires after 3 s)">
                                 {/* @ts-ignore */}
                                 <tc-countdown-timer ref={expireRef} label="Expiring soon" />
                                 {expireFired && (
@@ -69,7 +67,7 @@ const CountdownTimerDemo: React.FC = () => {
                                         ✓ <code>tc-expire</code> event fired — timer has expired.
                                     </div>
                                 )}
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,5 @@
+import { formatCompact } from './internal/format'
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -10,18 +12,6 @@ const REGISTRY_ICONS: Record<DownloadStatsRegistry, string> = {
     npm: 'Package',
     pypi: 'Package',
     crates: 'Package',
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function formatCompact(n: number): string {
-    return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n)
 }
 
 function parseNumAttr(raw: string | null): number | null {
@@ -121,13 +111,11 @@ export class DownloadStats extends HTMLElement {
         if (monthly != null) cells.push(this._cell(formatCompact(monthly), 'Monthly'))
         if (total != null) cells.push(this._cell(formatCompact(total), 'Total'))
 
-        const cellsHtml = cells.length > 0
-            ? `<div class="tc-download-stats__cells">${cells.join('')}</div>`
-            : ''
+        const cellsHtml =
+            cells.length > 0 ? `<div class="tc-download-stats__cells">${cells.join('')}</div>` : ''
 
-        const sparklineHtml = sparklineData.length > 0
-            ? this._buildSparklineHtml(sparklineData)
-            : ''
+        const sparklineHtml =
+            sparklineData.length > 0 ? this._buildSparklineHtml(sparklineData) : ''
 
         this.innerHTML = `<div class="tc-download-stats">${headerHtml}${cellsHtml}${sparklineHtml}</div>`
     }
@@ -177,7 +165,7 @@ export class DownloadStats extends HTMLElement {
         const max = Math.max(...data)
         const range = max - min
         const pad = 3
-        const norm = (v: number): number => range === 0 ? 0.5 : (v - min) / range
+        const norm = (v: number): number => (range === 0 ? 0.5 : (v - min) / range)
 
         const pts = data.map((v, i) => {
             const x = pad + (i / (n - 1)) * (width - pad * 2)

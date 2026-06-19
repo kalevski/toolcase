@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SECTIONS = [
     {
@@ -54,15 +53,17 @@ const LegalScreenDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Legal Screen"
+                        <tc-rich-page-header
+                            title-text="Legal Screen"
                             description="Multi-section legal / EULA screen with a sidebar nav, scrollable body, optional accept footer, and a close button. Sections are supplied via the sections JS property."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Read-only — sections nav + close button">
+                            <tc-section-card title="Read-only — sections nav + close button">
                                 <div style={{ height: '400px' }}>
                                     {/* @ts-ignore */}
                                     <tc-legal-screen
@@ -72,9 +73,11 @@ const LegalScreenDemo: React.FC = () => {
                                     />
                                     {/* @ts-ignore */}
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title={`With Accept footer — last event: ${lastEvent}`}>
+                            <tc-section-card
+                                title={`With Accept footer — last event: ${lastEvent}`}
+                            >
                                 <div style={{ height: '400px' }}>
                                     {/* @ts-ignore */}
                                     <tc-legal-screen
@@ -85,8 +88,7 @@ const LegalScreenDemo: React.FC = () => {
                                     />
                                     {/* @ts-ignore */}
                                 </div>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

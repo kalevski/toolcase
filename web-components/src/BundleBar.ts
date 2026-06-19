@@ -1,17 +1,10 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-bundle-bar'
 
 export interface BundleBarChip {
     label: string
     value?: string | number
     color?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class BundleBar extends HTMLElement {
@@ -50,9 +43,9 @@ export class BundleBar extends HTMLElement {
 
     private _distributeSlots(nameSlot: Element[], metaSlot: Element[]): void {
         const nameEl = this.querySelector('.tc-bundle-bar__name')
-        if (nameEl) nameSlot.forEach(n => nameEl.appendChild(n))
+        if (nameEl) nameSlot.forEach((n) => nameEl.appendChild(n))
         const metaEl = this.querySelector('.tc-bundle-bar__meta')
-        if (metaEl) metaSlot.forEach(n => metaEl.appendChild(n))
+        if (metaEl) metaSlot.forEach((n) => metaEl.appendChild(n))
     }
 
     get segments(): number {
@@ -64,7 +57,10 @@ export class BundleBar extends HTMLElement {
 
     get filledSegments(): number {
         const total = this.segments
-        return Math.max(0, Math.min(total, parseInt(this.getAttribute('filled-segments') ?? '0', 10) || 0))
+        return Math.max(
+            0,
+            Math.min(total, parseInt(this.getAttribute('filled-segments') ?? '0', 10) || 0),
+        )
     }
     set filledSegments(v: number) {
         this.setAttribute('filled-segments', String(v))
@@ -124,19 +120,22 @@ export class BundleBar extends HTMLElement {
         // Chips row — only rendered when the chips property is populated
         let chipsHtml = ''
         if (this._chips.length > 0) {
-            const chipItems = this._chips.map(chip => {
-                const colorStyle = chip.color
-                    ? ` style="--bs-bundle-bar-chip-accent: ${esc(chip.color)}"`
-                    : ''
-                const valueHtml = chip.value != null
-                    ? `<span class="tc-bundle-bar__chip-value">${esc(String(chip.value))}</span>`
-                    : ''
-                return (
-                    `<span class="tc-bundle-bar__chip"${colorStyle}>` +
-                    `<span class="tc-bundle-bar__chip-label">${esc(chip.label)}</span>` +
-                    `${valueHtml}</span>`
-                )
-            }).join('')
+            const chipItems = this._chips
+                .map((chip) => {
+                    const colorStyle = chip.color
+                        ? ` style="--bs-bundle-bar-chip-accent: ${esc(chip.color)}"`
+                        : ''
+                    const valueHtml =
+                        chip.value != null
+                            ? `<span class="tc-bundle-bar__chip-value">${esc(String(chip.value))}</span>`
+                            : ''
+                    return (
+                        `<span class="tc-bundle-bar__chip"${colorStyle}>` +
+                        `<span class="tc-bundle-bar__chip-label">${esc(chip.label)}</span>` +
+                        `${valueHtml}</span>`
+                    )
+                })
+                .join('')
             chipsHtml = `<div class="tc-bundle-bar__chips">${chipItems}</div>`
         }
 

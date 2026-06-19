@@ -1,35 +1,37 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SpinnerDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Spinner"
+                    <tc-rich-page-header
+                        title-text="Spinner"
                         description="Loading indicators in six shapes — border ring, grow pulse-dot, bouncing dots, equalizer bars, sonar pulse and dashed orbit. Supports all theme variants and a small size."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Border (default)">
+                        <tc-section-card title="Border (default)">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner></tc-spinner>
                                 {/* @ts-ignore */}
                                 <tc-spinner type="border"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Grow">
+                        <tc-section-card title="Grow">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner type="grow"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Variants — border">
+                        <tc-section-card title="Variants — border">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner variant="primary"></tc-spinner>
@@ -48,9 +50,9 @@ const SpinnerDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-spinner variant="dark"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Variants — grow">
+                        <tc-section-card title="Variants — grow">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner type="grow" variant="primary"></tc-spinner>
@@ -69,9 +71,9 @@ const SpinnerDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-spinner type="grow" variant="dark"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Dots">
+                        <tc-section-card title="Dots">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner type="dots"></tc-spinner>
@@ -82,9 +84,9 @@ const SpinnerDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-spinner type="dots" size="sm" variant="primary"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Bars">
+                        <tc-section-card title="Bars">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner type="bars"></tc-spinner>
@@ -95,9 +97,9 @@ const SpinnerDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-spinner type="bars" size="sm" variant="primary"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Pulse">
+                        <tc-section-card title="Pulse">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner type="pulse"></tc-spinner>
@@ -108,9 +110,9 @@ const SpinnerDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-spinner type="pulse" size="sm" variant="primary"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Orbit">
+                        <tc-section-card title="Orbit">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner type="orbit"></tc-spinner>
@@ -121,23 +123,23 @@ const SpinnerDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-spinner type="orbit" size="sm" variant="primary"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Small">
+                        <tc-section-card title="Small">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner size="sm" variant="primary"></tc-spinner>
                                 {/* @ts-ignore */}
                                 <tc-spinner type="grow" size="sm" variant="primary"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Custom label">
+                        <tc-section-card title="Custom label">
                             <div className="d-flex flex-wrap gap-3 align-items-center">
                                 {/* @ts-ignore */}
                                 <tc-spinner variant="primary" label="Please wait…"></tc-spinner>
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

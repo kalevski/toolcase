@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-toggle'
 
 export class Toggle extends HTMLElement {
-
     private _initialised = false
 
     /** Optional callback fired alongside the tc-change event. */
@@ -13,11 +12,15 @@ export class Toggle extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this.render()
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -69,11 +72,13 @@ export class Toggle extends HTMLElement {
         if (this.disabled) return
         const next = !this.on
         this.on = next
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { on: next },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { on: next },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(next)
     }
 

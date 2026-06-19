@@ -1,12 +1,5 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-score-display'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export type ScoreDisplayAlign = 'left' | 'right' | 'center'
 const ALIGNS: ScoreDisplayAlign[] = ['left', 'right', 'center']
@@ -87,9 +80,7 @@ export class ScoreDisplay extends HTMLElement {
         this.dataset.align = this.align
         this.style.setProperty('--bs-score-display-font-size', `${this.fontSize}px`)
 
-        const labelHtml = label
-            ? `<span class="tc-score-display-label">${esc(label)}</span>`
-            : ''
+        const labelHtml = label ? `<span class="tc-score-display-label">${esc(label)}</span>` : ''
 
         const multiplierHtml = showMultiplier
             ? `<span class="tc-score-display-multiplier">×${multiplier}</span>`

@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
-const JS_CODE = "function greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet('World'));"
-const TS_CODE = "function processName(name: string): string {\n  return name.toUpperCase();\n}\n\nprocessName(undefined as any);"
-const BASH_CODE = "git clone https://github.com/example/my-app.git\ncd my-app && npm install"
-const STACKED_CODE = "const a = 1;\nconst b = 2;\nconsole.log(a + b);"
+const JS_CODE =
+    "function greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet('World'));"
+const TS_CODE =
+    'function processName(name: string): string {\n  return name.toUpperCase();\n}\n\nprocessName(undefined as any);'
+const BASH_CODE = 'git clone https://github.com/example/my-app.git\ncd my-app && npm install'
+const STACKED_CODE = 'const a = 1;\nconst b = 2;\nconsole.log(a + b);'
 
 const CodeWithOutputDemo: React.FC = () => {
     const splitRef = useRef<any>(null)
@@ -22,8 +23,8 @@ const CodeWithOutputDemo: React.FC = () => {
         if (errorRef.current) {
             errorRef.current.error =
                 "TypeError: Cannot read properties of undefined (reading 'toUpperCase')\n" +
-                "    at processName (index.ts:2:16)\n" +
-                "    at <anonymous>:5:1"
+                '    at processName (index.ts:2:16)\n' +
+                '    at <anonymous>:5:1'
         }
         if (bashRef.current) {
             bashRef.current.output =
@@ -36,14 +37,17 @@ const CodeWithOutputDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CodeWithOutput"
+                        <tc-rich-page-header
+                            title-text="CodeWithOutput"
                             description="Code snippet and its output displayed side-by-side (split) or stacked. Supports a normal output pane and a danger-styled error pane."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Split layout (default)">
+                            <tc-section-card title="Split layout (default)">
                                 {/* @ts-ignore */}
                                 <tc-code-with-output
                                     ref={splitRef}
@@ -52,9 +56,9 @@ const CodeWithOutputDemo: React.FC = () => {
                                     layout="split"
                                     title="JavaScript: greeting function"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Stacked layout">
+                            <tc-section-card title="Stacked layout">
                                 {/* @ts-ignore */}
                                 <tc-code-with-output
                                     ref={stackedRef}
@@ -62,9 +66,9 @@ const CodeWithOutputDemo: React.FC = () => {
                                     language="javascript"
                                     layout="stacked"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Error state">
+                            <tc-section-card title="Error state">
                                 {/* @ts-ignore */}
                                 <tc-code-with-output
                                     ref={errorRef}
@@ -73,9 +77,9 @@ const CodeWithOutputDemo: React.FC = () => {
                                     layout="split"
                                     title="TypeError example"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Bash language">
+                            <tc-section-card title="Bash language">
                                 {/* @ts-ignore */}
                                 <tc-code-with-output
                                     ref={bashRef}
@@ -83,15 +87,18 @@ const CodeWithOutputDemo: React.FC = () => {
                                     language="bash"
                                     layout="split"
                                 />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Slotted title and output">
+                            <tc-section-card title="Slotted title and output">
                                 {/* @ts-ignore */}
-                                <tc-code-with-output code={"const pi = Math.PI;\nconsole.log(pi);"} language="javascript">
+                                <tc-code-with-output
+                                    code={'const pi = Math.PI;\nconsole.log(pi);'}
+                                    language="javascript"
+                                >
                                     <span slot="title">Slotted rich title</span>
                                     <span slot="output">3.141592653589793</span>
                                 </tc-code-with-output>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

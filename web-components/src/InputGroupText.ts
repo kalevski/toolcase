@@ -1,7 +1,6 @@
 const TAG_NAME = 'tc-input-group-text'
 
 export class InputGroupText extends HTMLElement {
-
     private _initialised = false
 
     constructor() {
@@ -13,7 +12,7 @@ export class InputGroupText extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             const span = document.createElement('span')
             span.className = 'input-group-text'
-            slotContent.forEach(n => span.appendChild(n))
+            slotContent.forEach((n) => span.appendChild(n))
             this.innerHTML = ''
             this.appendChild(span)
             this._initialised = true

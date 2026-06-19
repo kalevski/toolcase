@@ -19,7 +19,6 @@ const TAG_NAME = 'tc-shake-container'
  * Slot: default — the content to shake.
  */
 export class ShakeContainer extends HTMLElement {
-
     private _initialised = false
     private _rafHandle: number | null = null
     private _startedAt: number = 0
@@ -34,7 +33,7 @@ export class ShakeContainer extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const inner = this.querySelector('.tc-shake-container-inner')
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
+            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
         this._lastTrigger = this.getAttribute('trigger')

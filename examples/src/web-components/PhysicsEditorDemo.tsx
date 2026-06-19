@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 // Build a small sample sprite (a glyph on a transparent background) as a PNG data
 // URL so the editor has an image to trace shapes over.
@@ -65,16 +64,19 @@ const PhysicsEditorDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="PhysicsEditor"
+                        <tc-rich-page-header
+                            title-text="PhysicsEditor"
                             description="Framework-free physics shape editor — draw polygons, circles, and boxes over an image background, drag vertices and handles to edit, and step through undo/redo history. Fires tc-change with the full shapes array on every mutation."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Editor — pick a tool, draw & edit shapes">
+                            <tc-section-card title="Editor — pick a tool, draw & edit shapes">
                                 <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
-                                    {TOOLS.map(t => (
+                                    {TOOLS.map((t) => (
                                         <button
                                             key={t}
                                             type="button"
@@ -85,34 +87,53 @@ const PhysicsEditorDemo: React.FC = () => {
                                         </button>
                                     ))}
                                     <span className="vr mx-1" />
-                                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => editorRef.current?.undo()}>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => editorRef.current?.undo()}
+                                    >
                                         Undo
                                     </button>
-                                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => editorRef.current?.redo()}>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => editorRef.current?.redo()}
+                                    >
                                         Redo
                                     </button>
-                                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => editorRef.current?.autoFit()}>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => editorRef.current?.autoFit()}
+                                    >
                                         Auto-fit
                                     </button>
                                 </div>
 
                                 {/* @ts-ignore */}
-                                <tc-physics-editor ref={editorRef} tool={tool} alpha-threshold="8" />
+                                <tc-physics-editor
+                                    ref={editorRef}
+                                    tool={tool}
+                                    alpha-threshold="8"
+                                />
 
                                 <div className="mt-3">
                                     <span className="text-body-secondary d-block mb-1">
                                         Latest <code>tc-change</code> payload:
                                     </span>
-                                    <pre className="border p-2 mb-0" style={{ maxHeight: 220, overflow: 'auto', fontSize: 12 }}>
+                                    <pre
+                                        className="border p-2 mb-0"
+                                        style={{ maxHeight: 220, overflow: 'auto', fontSize: 12 }}
+                                    >
                                         {shapesJson}
                                     </pre>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
+                            <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <tc-physics-editor tool="select" disabled />
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

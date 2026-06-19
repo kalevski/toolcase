@@ -13,7 +13,6 @@ const CONTAINER_CLASSES = [
 ]
 
 export class Container extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return ['fluid', 'breakpoint']
     }

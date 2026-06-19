@@ -1,15 +1,8 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-asset-row'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
 
 export class AssetRow extends HTMLElement {
     private _initialised = false
@@ -30,11 +23,11 @@ export class AssetRow extends HTMLElement {
 
             // Distribute named-slot children into their inner regions
             const iconEl = this.querySelector('.tc-asset-row-icon')
-            if (iconEl) iconSlot.forEach(n => iconEl.appendChild(n))
+            if (iconEl) iconSlot.forEach((n) => iconEl.appendChild(n))
             const nameEl = this.querySelector('.tc-asset-row-name')
-            if (nameEl) nameSlot.forEach(n => nameEl.appendChild(n))
+            if (nameEl) nameSlot.forEach((n) => nameEl.appendChild(n))
             const sizeEl = this.querySelector('.tc-asset-row-size')
-            if (sizeEl) sizeSlot.forEach(n => sizeEl.appendChild(n))
+            if (sizeEl) sizeSlot.forEach((n) => sizeEl.appendChild(n))
 
             this._initialised = true
         }
@@ -86,11 +79,11 @@ export class AssetRow extends HTMLElement {
         this.render()
 
         const iconEl = this.querySelector('.tc-asset-row-icon')
-        if (iconEl) iconSlot.forEach(n => iconEl.appendChild(n))
+        if (iconEl) iconSlot.forEach((n) => iconEl.appendChild(n))
         const nameEl = this.querySelector('.tc-asset-row-name')
-        if (nameEl) nameSlot.forEach(n => nameEl.appendChild(n))
+        if (nameEl) nameSlot.forEach((n) => nameEl.appendChild(n))
         const sizeEl = this.querySelector('.tc-asset-row-size')
-        if (sizeEl) sizeSlot.forEach(n => sizeEl.appendChild(n))
+        if (sizeEl) sizeSlot.forEach((n) => sizeEl.appendChild(n))
     }
 
     private _resolveIcon(name: string): string {
@@ -114,9 +107,10 @@ export class AssetRow extends HTMLElement {
         const nameHtml = nameAttr != null ? esc(nameAttr) : ''
 
         // Tags: JS property → neutral slate chip badges
-        const tagsHtml = this._tags.length > 0
-            ? `<span class="tc-asset-row-tags">${this._tags.map(t => `<span class="tc-asset-row-tag">${esc(t)}</span>`).join('')}</span>`
-            : ''
+        const tagsHtml =
+            this._tags.length > 0
+                ? `<span class="tc-asset-row-tags">${this._tags.map((t) => `<span class="tc-asset-row-tag">${esc(t)}</span>`).join('')}</span>`
+                : ''
 
         // Size: attribute → escaped text; otherwise slot content appended after
         const sizeHtml = sizeAttr != null ? esc(sizeAttr) : ''

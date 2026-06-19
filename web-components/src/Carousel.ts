@@ -6,7 +6,6 @@ const TAG_NAME = 'tc-carousel'
 let counter = 0
 
 export class Carousel extends HTMLElement {
-
     private _bsCarousel: BsCarousel | null = null
     private _carouselId: string
     private _slides: Node[] = []
@@ -110,20 +109,24 @@ export class Carousel extends HTMLElement {
 
     private _onSlide = (e: Event): void => {
         const ce = e as any
-        this.dispatchEvent(new CustomEvent('tc-slide', {
-            bubbles: true,
-            composed: true,
-            detail: { from: ce.from, to: ce.to, direction: ce.direction },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-slide', {
+                bubbles: true,
+                composed: true,
+                detail: { from: ce.from, to: ce.to, direction: ce.direction },
+            }),
+        )
     }
 
     private _onSlid = (e: Event): void => {
         const ce = e as any
-        this.dispatchEvent(new CustomEvent('tc-slid', {
-            bubbles: true,
-            composed: true,
-            detail: { from: ce.from, to: ce.to, direction: ce.direction },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-slid', {
+                bubbles: true,
+                composed: true,
+                detail: { from: ce.from, to: ce.to, direction: ce.direction },
+            }),
+        )
     }
 
     private render(): void {
@@ -133,14 +136,18 @@ export class Carousel extends HTMLElement {
 
         const indicatorsHtml = this.indicators
             ? `<div class="carousel-indicators">${this._slides
-                .map((_, i) =>
-                    `<button type="button" data-bs-target="#${id}" data-bs-slide-to="${i}"${i === 0 ? ' class="active" aria-current="true"' : ''} aria-label="Slide ${i + 1}"></button>`,
-                )
-                .join('')}</div>`
+                  .map(
+                      (_, i) =>
+                          `<button type="button" data-bs-target="#${id}" data-bs-slide-to="${i}"${i === 0 ? ' class="active" aria-current="true"' : ''} aria-label="Slide ${i + 1}"></button>`,
+                  )
+                  .join('')}</div>`
             : ''
 
         const slidesHtml = this._slides
-            .map((_, i) => `<div class="carousel-item${i === 0 ? ' active' : ''}" data-tc-slide="${i}"></div>`)
+            .map(
+                (_, i) =>
+                    `<div class="carousel-item${i === 0 ? ' active' : ''}" data-tc-slide="${i}"></div>`,
+            )
             .join('')
 
         const controlsHtml = this.controls

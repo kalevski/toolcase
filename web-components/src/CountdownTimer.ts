@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-countdown-timer'
 
 export type CountdownUnit = 'days' | 'hours' | 'minutes' | 'seconds'
@@ -19,14 +20,6 @@ const UNIT_SECONDS: Record<CountdownUnit, number> = {
     seconds: 1,
 }
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function parseTargetRaw(raw: string): number {
     const n = Number(raw)
     if (!isNaN(n) && n > 0) return n
@@ -37,8 +30,8 @@ function parseTargetRaw(raw: string): number {
 function parseUnitsRaw(raw: string): CountdownUnit[] {
     const parts = raw
         .split(',')
-        .map(u => u.trim() as CountdownUnit)
-        .filter(u => ALL_UNITS.includes(u))
+        .map((u) => u.trim() as CountdownUnit)
+        .filter((u) => ALL_UNITS.includes(u))
     return parts.length > 0 ? parts : [...DEFAULT_UNITS]
 }
 
@@ -106,7 +99,7 @@ export class CountdownTimer extends HTMLElement {
         return this._units
     }
     set units(v: CountdownUnit[]) {
-        const filtered = Array.isArray(v) ? v.filter(u => ALL_UNITS.includes(u)) : []
+        const filtered = Array.isArray(v) ? v.filter((u) => ALL_UNITS.includes(u)) : []
         this._units = filtered.length > 0 ? filtered : [...DEFAULT_UNITS]
         if (this._initialised) this.render()
     }
@@ -201,11 +194,13 @@ export class CountdownTimer extends HTMLElement {
         if (remaining === 0 && !this._expired) {
             this._expired = true
             this._clearInterval()
-            this.dispatchEvent(new CustomEvent('tc-expire', {
-                bubbles: true,
-                composed: true,
-                detail: {},
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-expire', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {},
+                }),
+            )
             if (typeof this.onexpire === 'function') this.onexpire()
         }
     }
@@ -235,7 +230,7 @@ export class CountdownTimer extends HTMLElement {
             })
             unitsHtml = `<div class="tc-countdown-units">${items.join('')}</div>`
         } else {
-            const cells = units.map(unit => {
+            const cells = units.map((unit) => {
                 const num = parts[unit]
                 const val = String(num).padStart(2, '0')
                 return (

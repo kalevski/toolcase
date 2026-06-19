@@ -1,17 +1,9 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-damage-number'
 
 export type DamageNumberVariant = 'normal' | 'crit' | 'heal' | 'miss'
 
 const DEFAULT_DURATION = 700
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
-}
 
 export class DamageNumber extends HTMLElement {
     private _initialised = false
@@ -94,11 +86,13 @@ export class DamageNumber extends HTMLElement {
         this._clearTimer()
         this._timer = setTimeout(() => {
             this._timer = null
-            this.dispatchEvent(new CustomEvent('tc-done', {
-                bubbles: true,
-                composed: true,
-                detail: {},
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-done', {
+                    bubbles: true,
+                    composed: true,
+                    detail: {},
+                }),
+            )
             if (typeof this.ondone === 'function') this.ondone()
         }, this.duration)
     }
@@ -107,10 +101,10 @@ export class DamageNumber extends HTMLElement {
         const variant: DamageNumberVariant = this.miss
             ? 'miss'
             : this.heal
-            ? 'heal'
-            : this.crit
-            ? 'crit'
-            : 'normal'
+              ? 'heal'
+              : this.crit
+                ? 'crit'
+                : 'normal'
         const text = this.miss ? 'MISS' : this.value
         const prefix = this.heal ? '+' : ''
 

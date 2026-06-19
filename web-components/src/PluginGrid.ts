@@ -1,27 +1,11 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-plugin-grid'
 
 const COLUMNS = [2, 3, 4] as const
 export type PluginGridColumns = 2 | 3 | 4
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    return svgStr ? icon(svgStr) : ''
-}
 
 function formatDownloads(n: number): string {
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`
@@ -53,8 +37,12 @@ export class PluginGrid extends HTMLElement {
         if (!this._initialised) {
             this.render()
             this._initialised = true
-            this.addEventListener('click', this._handleClick)
         }
+        // Re-attach host listeners on every connect — disconnectedCallback removes
+        // them, and a remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._handleClick)
     }
 
     disconnectedCallback(): void {
@@ -94,11 +82,13 @@ export class PluginGrid extends HTMLElement {
         const btn = (e.target as Element).closest('[data-install]')
         if (!btn) return
         const install = (btn as HTMLElement).dataset.install ?? ''
-        this.dispatchEvent(new CustomEvent('tc-copy', {
-            bubbles: true,
-            composed: true,
-            detail: { install },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-copy', {
+                bubbles: true,
+                composed: true,
+                detail: { install },
+            }),
+        )
     }
 
     private _renderCard(item: PluginItem): string {
@@ -126,9 +116,10 @@ export class PluginGrid extends HTMLElement {
               `</div>`
             : ''
 
-        const downloadsHtml = item.downloads !== undefined
-            ? `<span class="tc-plugin-card-downloads"><span aria-hidden="true">${downloadIconHtml}</span><span>${esc(formatDownloads(item.downloads))}</span></span>`
-            : ''
+        const downloadsHtml =
+            item.downloads !== undefined
+                ? `<span class="tc-plugin-card-downloads"><span aria-hidden="true">${downloadIconHtml}</span><span>${esc(formatDownloads(item.downloads))}</span></span>`
+                : ''
 
         const footerContent = installHtml || downloadsHtml
         const footerHtml = footerContent
@@ -153,7 +144,7 @@ export class PluginGrid extends HTMLElement {
             ? `<div class="tc-plugin-grid-header"><h2 class="tc-plugin-grid-title">${esc(title)}</h2></div>`
             : ''
 
-        const cardsHtml = this._items.map(item => this._renderCard(item)).join('')
+        const cardsHtml = this._items.map((item) => this._renderCard(item)).join('')
 
         this.innerHTML = `${headerHtml}<div class="tc-plugin-grid" data-columns="${cols}">${cardsHtml}</div>`
     }

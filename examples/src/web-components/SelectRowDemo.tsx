@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 function useSelectRowValue(initial: string): [string, React.RefObject<any>] {
     const [value, setValue] = useState(initial)
@@ -74,15 +73,20 @@ const SelectRowDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Select Row"
+                        <tc-rich-page-header
+                            title-text="Select Row"
                             description="A generic labeled dropdown setting row: a label/description block paired with a native select. Built on the shared tc-setting-row scaffold."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Quality preset">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Quality preset">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-select-row
                                         ref={ref1}
@@ -92,10 +96,12 @@ const SelectRowDemo: React.FC = () => {
                                     />
                                 </div>
                                 <div className="form-text mt-1">Current: {v1}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Language picker">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Language picker">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-select-row
                                         ref={ref2}
@@ -105,10 +111,12 @@ const SelectRowDemo: React.FC = () => {
                                     />
                                 </div>
                                 <div className="form-text mt-1">Current: {v2}</div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Numeric options">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Numeric options">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-select-row
                                         ref={ref3}
@@ -117,10 +125,12 @@ const SelectRowDemo: React.FC = () => {
                                         value="8"
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Disabled">
-                                <div style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}>
+                            <tc-section-card title="Disabled">
+                                <div
+                                    style={{ maxWidth: 480, border: '1px solid var(--tc-border)' }}
+                                >
                                     {/* @ts-ignore */}
                                     <tc-select-row
                                         ref={ref4}
@@ -130,7 +140,7 @@ const SelectRowDemo: React.FC = () => {
                                         disabled
                                     />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

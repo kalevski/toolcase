@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-single-card-select'
@@ -7,24 +8,6 @@ export interface SingleCardSelectOption {
     key: string
     title: string
     description?: string
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    if (!svg) return ''
-    return icon(svg)
 }
 
 // Pre-compute the check icon — always rendered in every card (hidden via opacity until selected).
@@ -47,10 +30,14 @@ export class SingleCardSelect extends HTMLElement {
                 this.setAttribute('aria-label', 'Select an option')
             }
             this.render()
-            this.addEventListener('click', this._onClick)
-            this.addEventListener('keydown', this._onKeydown)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._onClick)
+        this.addEventListener('keydown', this._onKeydown)
     }
 
     disconnectedCallback(): void {
@@ -121,11 +108,13 @@ export class SingleCardSelect extends HTMLElement {
         const prev = this.value
         this.setAttribute('value', key)
         if (key !== prev) {
-            this.dispatchEvent(new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: key },
-            }))
+            this.dispatchEvent(
+                new CustomEvent('tc-change', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { value: key },
+                }),
+            )
             if (typeof this.onChange === 'function') this.onChange(key)
         }
     }
@@ -135,7 +124,7 @@ export class SingleCardSelect extends HTMLElement {
         const value = this.value
         let hasTabStop = false
         const cards = Array.from(this.querySelectorAll<HTMLElement>('[role="radio"]'))
-        cards.forEach(card => {
+        cards.forEach((card) => {
             const isSelected = card.dataset.key === value
             card.classList.toggle('is-selected', isSelected)
             card.setAttribute('aria-checked', String(isSelected))
@@ -189,7 +178,7 @@ export class SingleCardSelect extends HTMLElement {
     }
 
     private _moveFocus(cards: ArrayLike<HTMLElement>, target: HTMLElement): void {
-        Array.from(cards).forEach(c => c.setAttribute('tabindex', c === target ? '0' : '-1'))
+        Array.from(cards).forEach((c) => c.setAttribute('tabindex', c === target ? '0' : '-1'))
         target.focus()
     }
 
@@ -207,8 +196,10 @@ export class SingleCardSelect extends HTMLElement {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
             const count = this.loadingCount
-            const skeletons = Array.from({ length: count }, () =>
-                `<div class="tc-single-card-select-option tc-single-card-select-option--skeleton" aria-hidden="true"></div>`
+            const skeletons = Array.from(
+                { length: count },
+                () =>
+                    `<div class="tc-single-card-select-option tc-single-card-select-option--skeleton" aria-hidden="true"></div>`,
             ).join('')
             this.innerHTML = `<span class="visually-hidden">Loading…</span>${skeletons}`
             return
@@ -218,27 +209,29 @@ export class SingleCardSelect extends HTMLElement {
         this.removeAttribute('aria-busy')
 
         const value = this.value
-        const selectedIdx = this._options.findIndex(o => o.key === value)
+        const selectedIdx = this._options.findIndex((o) => o.key === value)
 
-        const cardsHtml = this._options.map((opt, idx) => {
-            const isSelected = opt.key === value
-            const tabindex = isSelected || (selectedIdx < 0 && idx === 0) ? '0' : '-1'
-            const selectedClass = isSelected ? ' is-selected' : ''
+        const cardsHtml = this._options
+            .map((opt, idx) => {
+                const isSelected = opt.key === value
+                const tabindex = isSelected || (selectedIdx < 0 && idx === 0) ? '0' : '-1'
+                const selectedClass = isSelected ? ' is-selected' : ''
 
-            const descHtml = opt.description
-                ? `<span class="tc-single-card-select-desc">${esc(opt.description)}</span>`
-                : ''
+                const descHtml = opt.description
+                    ? `<span class="tc-single-card-select-desc">${esc(opt.description)}</span>`
+                    : ''
 
-            return [
-                `<button type="button" class="tc-single-card-select-option${selectedClass}"`,
-                ` role="radio" aria-checked="${isSelected}"`,
-                ` tabindex="${tabindex}" data-key="${esc(opt.key)}">`,
-                `<span class="tc-single-card-select-title">${esc(opt.title)}</span>`,
-                descHtml,
-                `<span class="tc-single-card-select-check" aria-hidden="true">${checkIconHtml}</span>`,
-                `</button>`,
-            ].join('')
-        }).join('')
+                return [
+                    `<button type="button" class="tc-single-card-select-option${selectedClass}"`,
+                    ` role="radio" aria-checked="${isSelected}"`,
+                    ` tabindex="${tabindex}" data-key="${esc(opt.key)}">`,
+                    `<span class="tc-single-card-select-title">${esc(opt.title)}</span>`,
+                    descHtml,
+                    `<span class="tc-single-card-select-check" aria-hidden="true">${checkIconHtml}</span>`,
+                    `</button>`,
+                ].join('')
+            })
+            .join('')
 
         const name = this.name
         const hiddenInputHtml = name

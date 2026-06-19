@@ -17,7 +17,6 @@ export type VirtualListRenderItem = (item: any, index: number) => string | Node
  * read at most once per animation frame to avoid layout thrash.
  */
 export class VirtualList extends HTMLElement {
-
     private _initialised = false
 
     private _items: any[] = []
@@ -274,15 +273,18 @@ export class VirtualList extends HTMLElement {
 
     private _checkEndReached(viewport: HTMLElement): void {
         const threshold = this.endReachedThreshold
-        const atEnd = viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - threshold
+        const atEnd =
+            viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - threshold
         if (atEnd && this._items.length > 0) {
             if (!this._endFired) {
                 this._endFired = true
-                this.dispatchEvent(new CustomEvent('tc-end-reached', {
-                    bubbles: true,
-                    composed: true,
-                    detail: {},
-                }))
+                this.dispatchEvent(
+                    new CustomEvent('tc-end-reached', {
+                        bubbles: true,
+                        composed: true,
+                        detail: {},
+                    }),
+                )
                 if (typeof this.onEndReached === 'function') this.onEndReached()
             }
         } else {
@@ -295,9 +297,9 @@ export class VirtualList extends HTMLElement {
 
         this.innerHTML =
             `<div class="tc-virtual-list" role="list" tabindex="0" style="height:${this.height}px">` +
-                `<div class="tc-virtual-list-sizer">` +
-                    `<div class="tc-virtual-list-window"></div>` +
-                `</div>` +
+            `<div class="tc-virtual-list-sizer">` +
+            `<div class="tc-virtual-list-window"></div>` +
+            `</div>` +
             `</div>`
 
         const viewport = this.querySelector<HTMLElement>('.tc-virtual-list')

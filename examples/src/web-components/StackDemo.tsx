@@ -1,5 +1,4 @@
 import React from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const box = (label: string) => (
     <div
@@ -20,34 +19,37 @@ const StackDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="Stack"
+                    <tc-rich-page-header
+                        title-text="Stack"
                         description="Flexbox row/column layout primitive. Composes children along a single axis with configurable gap, alignment, and wrapping."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Vertical stack (default)">
+                        <tc-section-card title="Vertical stack (default)">
                             {/* @ts-ignore */}
                             <tc-stack gap="8px">
                                 {box('Item A')}
                                 {box('Item B')}
                                 {box('Item C')}
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-stack>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Horizontal stack with gap">
+                        <tc-section-card title="Horizontal stack with gap">
                             {/* @ts-ignore */}
                             <tc-stack direction="horizontal" gap="12px" align="center">
                                 {box('Left')}
                                 {box('Middle')}
                                 {box('Right')}
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-stack>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Wrapping horizontal stack">
+                        <tc-section-card title="Wrapping horizontal stack">
                             {/* @ts-ignore */}
                             <tc-stack direction="horizontal" gap="8px" wrap>
                                 {box('Alpha')}
@@ -58,32 +60,32 @@ const StackDemo: React.FC = () => (
                                 {box('Zeta')}
                                 {box('Eta')}
                                 {box('Theta')}
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-stack>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Space-between justify">
+                        <tc-section-card title="Space-between justify">
                             {/* @ts-ignore */}
                             <tc-stack direction="horizontal" justify="space-between" align="center">
                                 {box('Start')}
                                 {box('Center')}
                                 {box('End')}
-                            {/* @ts-ignore */}
+                                {/* @ts-ignore */}
                             </tc-stack>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Inline stack (inline-flex)">
+                        <tc-section-card title="Inline stack (inline-flex)">
                             <p style={{ marginBottom: '8px', fontSize: '0.8125rem' }}>
                                 Inline text before
                                 {/* @ts-ignore */}
                                 <tc-stack inline direction="horizontal" gap="4px" align="center">
                                     {box('A')}
                                     {box('B')}
-                                {/* @ts-ignore */}
+                                    {/* @ts-ignore */}
                                 </tc-stack>
                                 and after.
                             </p>
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

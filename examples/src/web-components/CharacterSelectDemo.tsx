@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const CHARACTERS = [
     {
         id: 'aria',
         name: 'Aria Voss',
         role: 'Vanguard',
-        description: 'Front-line specialist who soaks damage and shields allies behind a kinetic barrier.',
+        description:
+            'Front-line specialist who soaks damage and shields allies behind a kinetic barrier.',
         stats: [
             { label: 'Health', value: 1280 },
             { label: 'Armour', value: 'Heavy' },
@@ -53,7 +53,9 @@ const CharacterSelectDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
 
     const [selected, setSelected] = useState<string>('aria')
-    const [confirmed, setConfirmed] = useState<string>('(none — double-click or use Enter then a confirm flow)')
+    const [confirmed, setConfirmed] = useState<string>(
+        '(none — double-click or use Enter then a confirm flow)',
+    )
 
     useEffect(() => {
         const el = basicRef.current
@@ -75,14 +77,17 @@ const CharacterSelectDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="CharacterSelect"
+                        <tc-rich-page-header
+                            title-text="CharacterSelect"
                             description="Roster / character-selection screen: a grid of selectable tiles paired with a detail panel showing the active character's role, description, and stats. Characters are supplied via the `characters` JS property; the selection is reflected on the `selected-id` attribute. Emits tc-select (click / Enter) and tc-confirm (double-click). Locked tiles are inert."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Roster (data-driven tiles + detail panel)">
+                            <tc-section-card title="Roster (data-driven tiles + detail panel)">
                                 {/* @ts-ignore */}
                                 <tc-character-select ref={basicRef} selected-id="aria" />
                                 <div className="form-text mt-3">
@@ -91,7 +96,7 @@ const CharacterSelectDemo: React.FC = () => {
                                 <div className="form-text">
                                     Last confirmed: <code>{confirmed}</code>
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

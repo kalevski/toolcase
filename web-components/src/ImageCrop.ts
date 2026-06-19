@@ -36,7 +36,6 @@ interface ImageBox {
 }
 
 export class ImageCrop extends HTMLElement {
-
     private _initialised = false
 
     // Crop transform — preserved across attribute-driven re-renders; reset only
@@ -344,7 +343,9 @@ export class ImageCrop extends HTMLElement {
         }
         this._dragMove = null
         this._dragUp = null
-        this.querySelector('.tc-image-crop-stage')?.classList.remove('tc-image-crop-stage--grabbing')
+        this.querySelector('.tc-image-crop-stage')?.classList.remove(
+            'tc-image-crop-stage--grabbing',
+        )
     }
 
     private _onWheel = (e: WheelEvent): void => {
@@ -455,12 +456,16 @@ export class ImageCrop extends HTMLElement {
     }
 
     private _emitCrop(blob: Blob): void {
-        this.dispatchEvent(new CustomEvent('tc-crop', { bubbles: true, composed: true, detail: { blob } }))
+        this.dispatchEvent(
+            new CustomEvent('tc-crop', { bubbles: true, composed: true, detail: { blob } }),
+        )
         if (typeof this.onCrop === 'function') this.onCrop(blob)
     }
 
     private _emitError(error: Error): void {
-        this.dispatchEvent(new CustomEvent('tc-error', { bubbles: true, composed: true, detail: { error } }))
+        this.dispatchEvent(
+            new CustomEvent('tc-error', { bubbles: true, composed: true, detail: { error } }),
+        )
         if (typeof this.onError === 'function') this.onError(error)
     }
 
@@ -526,7 +531,10 @@ export class ImageCrop extends HTMLElement {
             canvas.addEventListener('wheel', this._onWheel, { passive: false })
             canvas.addEventListener('keydown', this._onCanvasKeyDown)
         }
-        this.querySelector<HTMLInputElement>('.tc-image-crop-zoom')?.addEventListener('input', this._onZoomInput)
+        this.querySelector<HTMLInputElement>('.tc-image-crop-zoom')?.addEventListener(
+            'input',
+            this._onZoomInput,
+        )
         this.querySelector('.tc-image-crop-reset')?.addEventListener('click', this._onReset)
         this.querySelector('.tc-image-crop-apply')?.addEventListener('click', this._onApply)
     }

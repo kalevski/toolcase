@@ -1,19 +1,6 @@
+import { deriveInitials } from './internal/initials'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-contributor-wall'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function deriveInitials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean)
-    if (parts.length === 0) return '?'
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
-}
 
 export interface Contributor {
     name: string
@@ -33,11 +20,13 @@ export class ContributorWall extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             const hasTitleAttr = this.hasAttribute('title')
-            const slotNodes = hasTitleAttr ? [] : Array.from(this.querySelectorAll('[slot="title"]'))
+            const slotNodes = hasTitleAttr
+                ? []
+                : Array.from(this.querySelectorAll('[slot="title"]'))
             this.render()
             if (!hasTitleAttr) {
                 const slot = this.querySelector('.tc-contributor-wall-title-slot')
-                if (slot) slotNodes.forEach(n => slot.appendChild(n))
+                if (slot) slotNodes.forEach((n) => slot.appendChild(n))
                 this._updateHeaderVisibility()
             }
             this._initialised = true
@@ -79,19 +68,20 @@ export class ContributorWall extends HTMLElement {
     private _rerenderWithSlots(): void {
         const hasTitleAttr = this.hasAttribute('title')
         const slot = this.querySelector('.tc-contributor-wall-title-slot')
-        const slotNodes = (!hasTitleAttr && slot)
-            ? Array.from(slot.querySelectorAll('[slot="title"]'))
-            : []
+        const slotNodes =
+            !hasTitleAttr && slot ? Array.from(slot.querySelectorAll('[slot="title"]')) : []
         this.render()
         if (!hasTitleAttr) {
             const newSlot = this.querySelector('.tc-contributor-wall-title-slot')
-            if (newSlot) slotNodes.forEach(n => newSlot.appendChild(n))
+            if (newSlot) slotNodes.forEach((n) => newSlot.appendChild(n))
             this._updateHeaderVisibility()
         }
     }
 
     private _updateHeaderVisibility(): void {
-        const header = this.querySelector('.tc-contributor-wall__header--slot') as HTMLElement | null
+        const header = this.querySelector(
+            '.tc-contributor-wall__header--slot',
+        ) as HTMLElement | null
         if (!header) return
         const slot = header.querySelector('.tc-contributor-wall-title-slot')
         if (slot && slot.hasChildNodes()) {
@@ -102,15 +92,16 @@ export class ContributorWall extends HTMLElement {
     }
 
     private _itemHtml(c: Contributor): string {
-        const accessibleLabel = c.contributions != null
-            ? `${esc(c.name)} — ${c.contributions} contributions`
-            : esc(c.name)
+        const accessibleLabel =
+            c.contributions != null
+                ? `${esc(c.name)} — ${c.contributions} contributions`
+                : esc(c.name)
 
         let inner: string
         if (c.avatarUrl) {
             inner = `<img class="tc-contributor-wall-item__img" src="${esc(c.avatarUrl)}" alt="" loading="lazy">`
         } else {
-            inner = `<span class="tc-contributor-wall-item__initials" aria-hidden="true">${esc(deriveInitials(c.name))}</span>`
+            inner = `<span class="tc-contributor-wall-item__initials" aria-hidden="true">${esc(deriveInitials(c.name, '?'))}</span>`
         }
 
         if (c.profileUrl) {
@@ -137,11 +128,13 @@ export class ContributorWall extends HTMLElement {
         let headerHtml = ''
         if (hasTitleAttr) {
             if (titleAttr) {
-                headerHtml = `<div class="tc-contributor-wall__header">` +
+                headerHtml =
+                    `<div class="tc-contributor-wall__header">` +
                     `<h3 class="tc-contributor-wall__title">${esc(titleAttr)}</h3></div>`
             }
         } else {
-            headerHtml = `<div class="tc-contributor-wall__header tc-contributor-wall__header--slot" style="display:none">` +
+            headerHtml =
+                `<div class="tc-contributor-wall__header tc-contributor-wall__header--slot" style="display:none">` +
                 `<span class="tc-contributor-wall-title-slot"></span></div>`
         }
 
@@ -149,13 +142,14 @@ export class ContributorWall extends HTMLElement {
         const visible = hasOverflow ? contributors.slice(0, maxVisible!) : contributors
         const overflowCount = hasOverflow ? contributors.length - maxVisible! : 0
 
-        const itemsHtml = visible.map(c => this._itemHtml(c)).join('')
+        const itemsHtml = visible.map((c) => this._itemHtml(c)).join('')
 
-        const moreHtml = overflowCount > 0
-            ? `<span class="tc-contributor-wall-more" ` +
-              `aria-label="${overflowCount} more contributors" ` +
-              `title="${overflowCount} more contributors">+${overflowCount}</span>`
-            : ''
+        const moreHtml =
+            overflowCount > 0
+                ? `<span class="tc-contributor-wall-more" ` +
+                  `aria-label="${overflowCount} more contributors" ` +
+                  `title="${overflowCount} more contributors">+${overflowCount}</span>`
+                : ''
 
         this.innerHTML =
             `${headerHtml}` +

@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-quest-tracker'
 
 export interface QuestObjective {
@@ -13,14 +14,6 @@ export interface QuestEntry {
     id: string
     name: string
     objectives: QuestObjective[]
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 export class QuestTracker extends HTMLElement {
@@ -61,40 +54,48 @@ export class QuestTracker extends HTMLElement {
     }
 
     private render(): void {
-        const questsHtml = this._quests.map(q => {
-            const objectivesHtml = q.objectives.map(o => {
-                const hasProgress =
-                    typeof o.progress === 'number' &&
-                    typeof o.target === 'number' &&
-                    o.target > 0
-                const pct = hasProgress
-                    ? Math.max(0, Math.min(100, ((o.progress as number) / (o.target as number)) * 100))
-                    : 0
+        const questsHtml = this._quests
+            .map((q) => {
+                const objectivesHtml = q.objectives
+                    .map((o) => {
+                        const hasProgress =
+                            typeof o.progress === 'number' &&
+                            typeof o.target === 'number' &&
+                            o.target > 0
+                        const pct = hasProgress
+                            ? Math.max(
+                                  0,
+                                  Math.min(
+                                      100,
+                                      ((o.progress as number) / (o.target as number)) * 100,
+                                  ),
+                              )
+                            : 0
 
-                const stateCls = [
-                    o.completed ? ' tc-quest-tracker-objective--completed' : '',
-                    o.optional ? ' tc-quest-tracker-objective--optional' : '',
-                ].join('')
+                        const stateCls = [
+                            o.completed ? ' tc-quest-tracker-objective--completed' : '',
+                            o.optional ? ' tc-quest-tracker-objective--optional' : '',
+                        ].join('')
 
-                const checkHtml = o.completed
-                    ? `<span class="tc-quest-tracker-objective-check tc-quest-tracker-objective-check--done" aria-hidden="true"></span>`
-                    : `<span class="tc-quest-tracker-objective-check" aria-hidden="true"></span>`
+                        const checkHtml = o.completed
+                            ? `<span class="tc-quest-tracker-objective-check tc-quest-tracker-objective-check--done" aria-hidden="true"></span>`
+                            : `<span class="tc-quest-tracker-objective-check" aria-hidden="true"></span>`
 
-                const progressCountHtml = hasProgress
-                    ? `<span class="tc-quest-tracker-objective-count">${o.progress}/${o.target}</span>`
-                    : ''
+                        const progressCountHtml = hasProgress
+                            ? `<span class="tc-quest-tracker-objective-count">${o.progress}/${o.target}</span>`
+                            : ''
 
-                const progressBarHtml = hasProgress
-                    ? `<div class="tc-quest-tracker-objective-bar" role="progressbar" aria-valuenow="${pct.toFixed(0)}" aria-valuemin="0" aria-valuemax="100">
+                        const progressBarHtml = hasProgress
+                            ? `<div class="tc-quest-tracker-objective-bar" role="progressbar" aria-valuenow="${pct.toFixed(0)}" aria-valuemin="0" aria-valuemax="100">
                             <div class="tc-quest-tracker-objective-bar-fill" style="width:${pct.toFixed(2)}%"></div>
                         </div>`
-                    : ''
+                            : ''
 
-                const optionalHtml = o.optional
-                    ? `<span class="tc-quest-tracker-objective-optional">(optional)</span>`
-                    : ''
+                        const optionalHtml = o.optional
+                            ? `<span class="tc-quest-tracker-objective-optional">(optional)</span>`
+                            : ''
 
-                return `<div class="tc-quest-tracker-objective${stateCls}" data-id="${esc(o.id)}">
+                        return `<div class="tc-quest-tracker-objective${stateCls}" data-id="${esc(o.id)}">
                     <div class="tc-quest-tracker-objective-row">
                         ${checkHtml}
                         <span class="tc-quest-tracker-objective-label">${esc(o.label)}</span>
@@ -103,17 +104,20 @@ export class QuestTracker extends HTMLElement {
                     </div>
                     ${progressBarHtml}
                 </div>`
-            }).join('')
+                    })
+                    .join('')
 
-            return `<div class="tc-quest-tracker-quest" data-id="${esc(q.id)}">
+                return `<div class="tc-quest-tracker-quest" data-id="${esc(q.id)}">
                 <div class="tc-quest-tracker-quest-name">${esc(q.name)}</div>
                 <div class="tc-quest-tracker-objectives">${objectivesHtml}</div>
             </div>`
-        }).join('')
+            })
+            .join('')
 
-        const emptyHtml = this._quests.length === 0
-            ? `<p class="tc-quest-tracker-empty">No active quests</p>`
-            : ''
+        const emptyHtml =
+            this._quests.length === 0
+                ? `<p class="tc-quest-tracker-empty">No active quests</p>`
+                : ''
 
         this.innerHTML = `<div class="tc-quest-tracker">
             <div class="tc-quest-tracker-header">

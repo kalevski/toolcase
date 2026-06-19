@@ -1,5 +1,4 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
 
 const TAG_NAME = 'tc-physics-editor'
 
@@ -49,15 +48,6 @@ const MAX_ALPHA_DIM = 512
 const SIMPLIFY_TOLERANCE = 1.5
 
 let _idCounter = 0
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-        .join('')
-    const svg = (LucideIcons as Record<string, string>)[pascal]
-    return svg ? icon(svg) : ''
-}
 
 const TOOL_META: Array<{ tool: PhysicsTool; label: string; iconHtml: string }> = [
     { tool: 'select', label: 'Select / move shapes', iconHtml: lucideByName('mouse-pointer-2') },
@@ -354,7 +344,12 @@ export class PhysicsEditor extends HTMLElement {
     // ── Auto-fit silhouette trace (ported from react-components autoTrace) ───────
 
     /** Binary opaque mask from RGBA alpha, `1` where `alpha >= threshold`. */
-    private _alphaMask(rgba: Uint8ClampedArray, w: number, h: number, threshold: number): Uint8Array {
+    private _alphaMask(
+        rgba: Uint8ClampedArray,
+        w: number,
+        h: number,
+        threshold: number,
+    ): Uint8Array {
         const out = new Uint8Array(w * h)
         const t = Math.max(0, Math.min(255, threshold))
         for (let i = 0; i < w * h; i++) out[i] = rgba[i * 4 + 3] >= t ? 1 : 0
@@ -367,7 +362,8 @@ export class PhysicsEditor extends HTMLElement {
      * closing vertex), or `[]` for an empty mask.
      */
     private _traceContour(mask: Uint8Array, w: number, h: number): Array<[number, number]> {
-        const at = (x: number, y: number) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : mask[y * w + x])
+        const at = (x: number, y: number) =>
+            x < 0 || y < 0 || x >= w || y >= h ? 0 : mask[y * w + x]
 
         let start = -1
         for (let i = 0; i < w * h; i++) {
@@ -627,7 +623,12 @@ export class PhysicsEditor extends HTMLElement {
             return Math.hypot(p.x - shape.x, p.y - shape.y) <= shape.r
         }
         if (shape.type === 'box') {
-            return p.x >= shape.x && p.x <= shape.x + shape.w && p.y >= shape.y && p.y <= shape.y + shape.h
+            return (
+                p.x >= shape.x &&
+                p.x <= shape.x + shape.w &&
+                p.y >= shape.y &&
+                p.y <= shape.y + shape.h
+            )
         }
         // Polygon — ray casting.
         const pts = shape.points
@@ -637,7 +638,8 @@ export class PhysicsEditor extends HTMLElement {
             const yi = pts[i].y
             const xj = pts[j].x
             const yj = pts[j].y
-            const intersect = yi > p.y !== yj > p.y && p.x < ((xj - xi) * (p.y - yi)) / (yj - yi || 1e-9) + xi
+            const intersect =
+                yi > p.y !== yj > p.y && p.x < ((xj - xi) * (p.y - yi)) / (yj - yi || 1e-9) + xi
             if (intersect) inside = !inside
         }
         return inside
@@ -793,7 +795,12 @@ export class PhysicsEditor extends HTMLElement {
         if (kind === 'circle-new' && shape && shape.type === 'circle' && shape.r < MIN_SIZE) {
             this._shapes.splice(this._dragIndex, 1)
             discarded = true
-        } else if (kind === 'box-new' && shape && shape.type === 'box' && (shape.w < MIN_SIZE || shape.h < MIN_SIZE)) {
+        } else if (
+            kind === 'box-new' &&
+            shape &&
+            shape.type === 'box' &&
+            (shape.w < MIN_SIZE || shape.h < MIN_SIZE)
+        ) {
             this._shapes.splice(this._dragIndex, 1)
             discarded = true
         }
@@ -829,7 +836,7 @@ export class PhysicsEditor extends HTMLElement {
 
     private _translateShape(live: PhysicsShape, orig: PhysicsShape, dx: number, dy: number): void {
         if (live.type === 'polygon' && orig.type === 'polygon') {
-            live.points = orig.points.map(pt => ({ x: pt.x + dx, y: pt.y + dy }))
+            live.points = orig.points.map((pt) => ({ x: pt.x + dx, y: pt.y + dy }))
         } else if (live.type === 'circle' && orig.type === 'circle') {
             live.x = orig.x + dx
             live.y = orig.y + dy
@@ -839,7 +846,12 @@ export class PhysicsEditor extends HTMLElement {
         }
     }
 
-    private _resizeBoxCorner(live: BoxShape, orig: BoxShape, corner: number, p: PhysicsPoint): void {
+    private _resizeBoxCorner(
+        live: BoxShape,
+        orig: BoxShape,
+        corner: number,
+        p: PhysicsPoint,
+    ): void {
         // Keep the opposite corner pinned; the dragged corner follows the pointer.
         const opp = boxCorners(orig)[(corner + 2) % 4]
         live.x = Math.min(opp.x, p.x)
@@ -1090,7 +1102,13 @@ export class PhysicsEditor extends HTMLElement {
         // Background image (fit + centred).
         if (this._img && this._natW > 0) {
             ctx.imageSmoothingQuality = 'high'
-            ctx.drawImage(this._img, view.offsetX, view.offsetY, this._natW * view.scale, this._natH * view.scale)
+            ctx.drawImage(
+                this._img,
+                view.offsetX,
+                view.offsetY,
+                this._natW * view.scale,
+                this._natH * view.scale,
+            )
         }
 
         const pal = this._palette()
@@ -1151,12 +1169,12 @@ export class PhysicsEditor extends HTMLElement {
 
     private _drawHandles(ctx: CanvasRenderingContext2D, shape: PhysicsShape, pal: Palette): void {
         if (shape.type === 'polygon') {
-            shape.points.forEach(pt => this._handleSquare(ctx, this._toCss(pt), pal))
+            shape.points.forEach((pt) => this._handleSquare(ctx, this._toCss(pt), pal))
         } else if (shape.type === 'circle') {
             this._handleSquare(ctx, this._toCss({ x: shape.x, y: shape.y }), pal)
             this._handleCircle(ctx, this._toCss({ x: shape.x + shape.r, y: shape.y }), pal)
         } else {
-            boxCorners(shape).forEach(c => this._handleSquare(ctx, this._toCss(c), pal))
+            boxCorners(shape).forEach((c) => this._handleSquare(ctx, this._toCss(c), pal))
         }
     }
 
@@ -1220,7 +1238,7 @@ export class PhysicsEditor extends HTMLElement {
 
     private _updateToolbar(): void {
         const tool = this.tool
-        this.querySelectorAll<HTMLButtonElement>('[data-tool]').forEach(btn => {
+        this.querySelectorAll<HTMLButtonElement>('[data-tool]').forEach((btn) => {
             const active = btn.getAttribute('data-tool') === tool
             btn.classList.toggle('tc-physics-editor-tool--active', active)
             btn.setAttribute('aria-pressed', active ? 'true' : 'false')

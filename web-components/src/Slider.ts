@@ -1,10 +1,7 @@
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-slider'
 
 let _idCounter = 0
-
-function esc(str: string): string {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}
 
 function snapToStep(v: number, min: number, max: number, step: number): number {
     if (step <= 0 || max <= min) return Math.min(Math.max(v, min), max)
@@ -19,7 +16,6 @@ function snapToStep(v: number, min: number, max: number, step: number): number {
 }
 
 export class Slider extends HTMLElement {
-
     private _initialised = false
     private _idPrefix = `tc-slider-${++_idCounter}`
     private _dragging = false
@@ -30,7 +26,17 @@ export class Slider extends HTMLElement {
     onChange: ((value: number) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['value', 'min', 'max', 'step', 'ticks', 'show-tooltip', 'label', 'error', 'disabled']
+        return [
+            'value',
+            'min',
+            'max',
+            'step',
+            'ticks',
+            'show-tooltip',
+            'label',
+            'error',
+            'disabled',
+        ]
     }
 
     connectedCallback(): void {
@@ -129,7 +135,10 @@ export class Slider extends HTMLElement {
     set value(v: number) {
         const min = this.min
         const max = this.max
-        this.setAttribute('value', String(snapToStep(Math.min(Math.max(v, min), max), min, max, this.step)))
+        this.setAttribute(
+            'value',
+            String(snapToStep(Math.min(Math.max(v, min), max), min, max, this.step)),
+        )
     }
 
     // `formatValue` is a function → exposed as a JS property (not an attribute).
@@ -188,11 +197,13 @@ export class Slider extends HTMLElement {
     }
 
     private _fireChange(value: number): void {
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -323,9 +334,10 @@ export class Slider extends HTMLElement {
         const labelId = label != null ? `${this._idPrefix}-label` : null
         const errorId = error ? `${this._idPrefix}-error` : null
 
-        const labelHtml = label != null
-            ? `<label class="tc-slider-label" id="${labelId}">${esc(label)}</label>`
-            : ''
+        const labelHtml =
+            label != null
+                ? `<label class="tc-slider-label" id="${labelId}">${esc(label)}</label>`
+                : ''
 
         const tooltipHtml = showTooltip
             ? `<div class="tc-slider-tooltip" aria-hidden="true">${esc(valueText)}</div>`
@@ -354,7 +366,9 @@ export class Slider extends HTMLElement {
             error ? `aria-invalid="true"` : '',
             errorId ? `aria-describedby="${errorId}"` : '',
             `style="left:${pct}%"`,
-        ].filter(Boolean).join(' ')
+        ]
+            .filter(Boolean)
+            .join(' ')
 
         const errorHtml = error
             ? `<div class="tc-slider-error" id="${errorId}">${esc(error)}</div>`

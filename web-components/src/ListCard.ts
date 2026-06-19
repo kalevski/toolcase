@@ -1,3 +1,4 @@
+import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -8,14 +9,6 @@ export interface ListCardItem {
     icon?: string
     label: string
     value?: string | number
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
 }
 
 function resolveIcon(name: string): string {
@@ -94,14 +87,16 @@ export class ListCard extends HTMLElement {
 
         let listHtml: string
         if (loading) {
-            const skeletonRows = Array.from({ length: loadingCount }, () =>
-                '<li class="tc-list-card-item tc-list-card-item--skeleton">' +
-                '<div class="tc-list-card-lead" aria-hidden="true">' +
-                '<div class="tc-list-card-skeleton tc-list-card-skeleton--lead"></div>' +
-                '</div>' +
-                '<div class="tc-list-card-skeleton tc-list-card-skeleton--label"></div>' +
-                '<div class="tc-list-card-skeleton tc-list-card-skeleton--value"></div>' +
-                '</li>'
+            const skeletonRows = Array.from(
+                { length: loadingCount },
+                () =>
+                    '<li class="tc-list-card-item tc-list-card-item--skeleton">' +
+                    '<div class="tc-list-card-lead" aria-hidden="true">' +
+                    '<div class="tc-list-card-skeleton tc-list-card-skeleton--lead"></div>' +
+                    '</div>' +
+                    '<div class="tc-list-card-skeleton tc-list-card-skeleton--label"></div>' +
+                    '<div class="tc-list-card-skeleton tc-list-card-skeleton--value"></div>' +
+                    '</li>',
             ).join('')
             const tag = ordered ? 'ol' : 'ul'
             listHtml = [
@@ -112,29 +107,32 @@ export class ListCard extends HTMLElement {
             ].join('')
         } else {
             const tag = ordered ? 'ol' : 'ul'
-            const rows = this._items.map((item, i) => {
-                let leadHtml: string
-                if (ordered) {
-                    leadHtml = `<span class="tc-list-card-lead" aria-hidden="true"><span class="tc-list-card-rank">${i + 1}</span></span>`
-                } else if (item.icon) {
-                    const iconSvg = resolveIcon(item.icon)
-                    leadHtml = iconSvg
-                        ? `<span class="tc-list-card-lead" aria-hidden="true">${iconSvg}</span>`
-                        : `<span class="tc-list-card-lead" aria-hidden="true"></span>`
-                } else {
-                    leadHtml = ''
-                }
-                const valueHtml = item.value != null
-                    ? `<span class="tc-list-card-value">${esc(String(item.value))}</span>`
-                    : ''
-                return [
-                    '<li class="tc-list-card-item">',
-                    leadHtml,
-                    `<span class="tc-list-card-label">${esc(item.label)}</span>`,
-                    valueHtml,
-                    '</li>',
-                ].join('')
-            }).join('')
+            const rows = this._items
+                .map((item, i) => {
+                    let leadHtml: string
+                    if (ordered) {
+                        leadHtml = `<span class="tc-list-card-lead" aria-hidden="true"><span class="tc-list-card-rank">${i + 1}</span></span>`
+                    } else if (item.icon) {
+                        const iconSvg = resolveIcon(item.icon)
+                        leadHtml = iconSvg
+                            ? `<span class="tc-list-card-lead" aria-hidden="true">${iconSvg}</span>`
+                            : `<span class="tc-list-card-lead" aria-hidden="true"></span>`
+                    } else {
+                        leadHtml = ''
+                    }
+                    const valueHtml =
+                        item.value != null
+                            ? `<span class="tc-list-card-value">${esc(String(item.value))}</span>`
+                            : ''
+                    return [
+                        '<li class="tc-list-card-item">',
+                        leadHtml,
+                        `<span class="tc-list-card-label">${esc(item.label)}</span>`,
+                        valueHtml,
+                        '</li>',
+                    ].join('')
+                })
+                .join('')
             listHtml = `<${tag} class="tc-list-card-list">${rows}</${tag}>`
         }
 

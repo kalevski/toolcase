@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const ActionItemsDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
@@ -44,32 +43,37 @@ const ActionItemsDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="ActionItems"
+                        <tc-rich-page-header
+                            title-text="ActionItems"
                             description="Dropdown menu button with keyboard-accessible items. Fires tc-action-click when an item is chosen. Set items via the items JS property; icons are Lucide names in PascalCase."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Default — items with divider, disabled, and danger variants">
-                                <p className="text-muted small mb-3">Open the browser console to see tc-action-click events.</p>
+                            <tc-section-card title="Default — items with divider, disabled, and danger variants">
+                                <p className="text-muted small mb-3">
+                                    Open the browser console to see tc-action-click events.
+                                </p>
                                 {/* @ts-ignore */}
                                 <tc-action-items ref={basicRef} label="Actions" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="With Lucide icons + onActionClick callback">
+                            <tc-section-card title="With Lucide icons + onActionClick callback">
                                 {/* @ts-ignore */}
                                 <tc-action-items ref={dangerRef} label="More" />
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Custom label">
+                            <tc-section-card title="Custom label">
                                 <div className="d-flex gap-2">
                                     {/* @ts-ignore */}
                                     <tc-action-items label="Options" />
                                     {/* @ts-ignore */}
                                     <tc-action-items label="Manage" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

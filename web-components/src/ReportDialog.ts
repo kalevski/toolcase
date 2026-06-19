@@ -41,7 +41,8 @@ export class ReportDialog extends DialogBase {
         return this._reasons.slice()
     }
     set reasons(value: string[]) {
-        this._reasons = Array.isArray(value) && value.length > 0 ? value.slice() : DEFAULT_REASONS.slice()
+        this._reasons =
+            Array.isArray(value) && value.length > 0 ? value.slice() : DEFAULT_REASONS.slice()
         this._selectedReason = ''
         if (this._initialised) {
             this.render()
@@ -77,7 +78,9 @@ export class ReportDialog extends DialogBase {
     }
 
     private _emitCancel(): void {
-        this.dispatchEvent(new CustomEvent('tc-cancel', { bubbles: true, composed: true, detail: {} }))
+        this.dispatchEvent(
+            new CustomEvent('tc-cancel', { bubbles: true, composed: true, detail: {} }),
+        )
         if (typeof this.onCancel === 'function') this.onCancel()
     }
 
@@ -103,7 +106,7 @@ export class ReportDialog extends DialogBase {
     // transition does not replay every time the user picks a reason.
     private _patchReasonSelection(chosenValue: string): void {
         this._selectedReason = chosenValue
-        this.querySelectorAll<HTMLLabelElement>('.tc-report-dialog__reason').forEach(label => {
+        this.querySelectorAll<HTMLLabelElement>('.tc-report-dialog__reason').forEach((label) => {
             const radio = label.querySelector<HTMLInputElement>('input[type="radio"]')
             if (!radio) return
             const isChosen = radio.value === chosenValue

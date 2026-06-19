@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const SIMPLE_NODES = [
     { id: '1', x: 100, y: 180, label: 'Level 1', completed: true, bestStars: 3, stars: 3 },
@@ -20,10 +19,28 @@ const SIMPLE_EDGES = [
 ]
 
 const ICON_NODES = [
-    { id: 'a', x: 80, y: 150, label: 'Start',  icon: 'play',      completed: true, bestStars: 2, stars: 3 },
-    { id: 'b', x: 220, y: 80, label: 'Forest', icon: 'trees',     completed: true, bestStars: 3, stars: 3 },
-    { id: 'c', x: 220, y: 220, label: 'Cave',  icon: 'mountain',  completed: false },
-    { id: 'd', x: 360, y: 150, label: 'Castle', icon: 'castle',   locked: true },
+    {
+        id: 'a',
+        x: 80,
+        y: 150,
+        label: 'Start',
+        icon: 'play',
+        completed: true,
+        bestStars: 2,
+        stars: 3,
+    },
+    {
+        id: 'b',
+        x: 220,
+        y: 80,
+        label: 'Forest',
+        icon: 'trees',
+        completed: true,
+        bestStars: 3,
+        stars: 3,
+    },
+    { id: 'c', x: 220, y: 220, label: 'Cave', icon: 'mountain', completed: false },
+    { id: 'd', x: 360, y: 150, label: 'Castle', icon: 'castle', locked: true },
 ]
 
 const ICON_EDGES = [
@@ -35,8 +52,8 @@ const ICON_EDGES = [
 
 // Wide map for the scrollable container demo.
 const WIDE_NODES = [
-    { id: 'w1', x: 80,  y: 100, label: 'Stage 1', completed: true,  bestStars: 3, stars: 3 },
-    { id: 'w2', x: 200, y: 100, label: 'Stage 2', completed: true,  bestStars: 1, stars: 3 },
+    { id: 'w1', x: 80, y: 100, label: 'Stage 1', completed: true, bestStars: 3, stars: 3 },
+    { id: 'w2', x: 200, y: 100, label: 'Stage 2', completed: true, bestStars: 1, stars: 3 },
     { id: 'w3', x: 320, y: 100, label: 'Stage 3', completed: false },
     { id: 'w4', x: 440, y: 100, label: 'Stage 4', locked: true },
     { id: 'w5', x: 560, y: 100, label: 'Stage 5', locked: true },
@@ -51,39 +68,39 @@ const WIDE_EDGES = [
 
 const LevelSelectDemo: React.FC = () => {
     const basicRef = useRef<any>(null)
-    const iconRef  = useRef<any>(null)
-    const wideRef  = useRef<any>(null)
-    const [lastSelect, setLastSelect]   = useState<string>('—')
+    const iconRef = useRef<any>(null)
+    const wideRef = useRef<any>(null)
+    const [lastSelect, setLastSelect] = useState<string>('—')
     const [lastConfirm, setLastConfirm] = useState<string>('—')
 
     useEffect(() => {
         const el = basicRef.current
         if (!el) return
-        el.nodes      = SIMPLE_NODES
-        el.edges      = SIMPLE_EDGES
+        el.nodes = SIMPLE_NODES
+        el.edges = SIMPLE_EDGES
         el.selectedId = '3'
 
-        const onSelect  = (e: Event) => setLastSelect((e as CustomEvent).detail.id)
+        const onSelect = (e: Event) => setLastSelect((e as CustomEvent).detail.id)
         const onConfirm = (e: Event) => setLastConfirm((e as CustomEvent).detail.id)
-        el.addEventListener('tc-select',  onSelect)
+        el.addEventListener('tc-select', onSelect)
         el.addEventListener('tc-confirm', onConfirm)
         return () => {
-            el.removeEventListener('tc-select',  onSelect)
+            el.removeEventListener('tc-select', onSelect)
             el.removeEventListener('tc-confirm', onConfirm)
         }
     }, [])
 
     useEffect(() => {
         if (!iconRef.current) return
-        iconRef.current.nodes      = ICON_NODES
-        iconRef.current.edges      = ICON_EDGES
+        iconRef.current.nodes = ICON_NODES
+        iconRef.current.edges = ICON_EDGES
         iconRef.current.selectedId = 'b'
     }, [])
 
     useEffect(() => {
         if (!wideRef.current) return
-        wideRef.current.nodes      = WIDE_NODES
-        wideRef.current.edges      = WIDE_EDGES
+        wideRef.current.nodes = WIDE_NODES
+        wideRef.current.edges = WIDE_EDGES
         wideRef.current.selectedId = 'w3'
     }, [])
 
@@ -92,46 +109,53 @@ const LevelSelectDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="LevelSelect"
+                        <tc-rich-page-header
+                            title-text="LevelSelect"
                             description="Level / stage selection grid with SVG edge connections between nodes. Each node can be locked, completed, or selected; optional star ratings show best performance. Emits tc-select on click and tc-confirm on double-click."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-
-                            <SectionCard title="Basic — locked, completed, selected states with star ratings">
+                            <tc-section-card title="Basic — locked, completed, selected states with star ratings">
                                 {/* @ts-ignore */}
                                 <tc-level-select ref={basicRef} width="600" height="360" />
                                 <div className="mt-3 d-flex gap-4 small text-body-secondary">
-                                    <span>Last tc-select: <strong>{lastSelect}</strong></span>
-                                    <span>Last tc-confirm: <strong>{lastConfirm}</strong></span>
+                                    <span>
+                                        Last tc-select: <strong>{lastSelect}</strong>
+                                    </span>
+                                    <span>
+                                        Last tc-confirm: <strong>{lastConfirm}</strong>
+                                    </span>
                                 </div>
                                 <p className="mt-2 mb-0 small text-body-secondary">
-                                    Click an unlocked level to select it; double-click to fire tc-confirm.
-                                    Locked nodes are not interactive.
+                                    Click an unlocked level to select it; double-click to fire
+                                    tc-confirm. Locked nodes are not interactive.
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Lucide icon glyphs">
+                            <tc-section-card title="Lucide icon glyphs">
                                 {/* @ts-ignore */}
                                 <tc-level-select ref={iconRef} width="440" height="300" />
                                 <p className="mt-3 mb-0 small text-body-secondary">
-                                    Pass a Lucide icon name (kebab-case) in the <code>icon</code> field to replace the
-                                    default glyph. The star row is hidden when <code>bestStars</code> is omitted.
+                                    Pass a Lucide icon name (kebab-case) in the <code>icon</code>{' '}
+                                    field to replace the default glyph. The star row is hidden when{' '}
+                                    <code>bestStars</code> is omitted.
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Wide map — scrollable container">
+                            <tc-section-card title="Wide map — scrollable container">
                                 <div style={{ maxWidth: 320, overflowX: 'auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-level-select ref={wideRef} width="640" height="200" />
                                 </div>
                                 <p className="mt-3 mb-0 small text-body-secondary">
-                                    Wrap in an <code>overflow-x: auto</code> container for wide maps on narrow viewports.
+                                    Wrap in an <code>overflow-x: auto</code> container for wide maps
+                                    on narrow viewports.
                                 </p>
-                            </SectionCard>
-
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

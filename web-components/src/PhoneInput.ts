@@ -1,20 +1,13 @@
+import { esc } from './internal/esc'
 import { chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-phone-input'
 
 let _idCounter = 0
 
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
 function flagEmoji(code: string): string {
     return Array.from(code.toUpperCase())
-        .map(c => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
+        .map((c) => String.fromCodePoint(0x1f1e6 + c.charCodeAt(0) - 65))
         .join('')
 }
 
@@ -103,7 +96,7 @@ export class PhoneInput extends HTMLElement {
         this._idPrefix = `tc-phone-${uid}`
         this._inputId = `${this._idPrefix}-input`
         this._errorId = `${this._idPrefix}-error`
-        this._selectedCountry = PHONE_COUNTRIES.find(c => c.code === 'US') ?? PHONE_COUNTRIES[0]
+        this._selectedCountry = PHONE_COUNTRIES.find((c) => c.code === 'US') ?? PHONE_COUNTRIES[0]
     }
 
     // ── Getters/setters ───────────────────────────────────────────────────────
@@ -162,7 +155,7 @@ export class PhoneInput extends HTMLElement {
         if (!this._initialised) {
             const dc = this.getAttribute('default-country')
             if (dc) {
-                const found = PHONE_COUNTRIES.find(c => c.code === dc.toUpperCase())
+                const found = PHONE_COUNTRIES.find((c) => c.code === dc.toUpperCase())
                 if (found) this._selectedCountry = found
             }
             const v = this.getAttribute('value')
@@ -186,7 +179,7 @@ export class PhoneInput extends HTMLElement {
         }
         if (name === 'default-country' && !this._numberValue) {
             if (next) {
-                const found = PHONE_COUNTRIES.find(c => c.code === next.toUpperCase())
+                const found = PHONE_COUNTRIES.find((c) => c.code === next.toUpperCase())
                 if (found) this._selectedCountry = found
             }
         }
@@ -223,11 +216,13 @@ export class PhoneInput extends HTMLElement {
         const val = this._computeValue()
         const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
         if (hidden) hidden.value = val
-        this.dispatchEvent(new CustomEvent('tc-change', {
-            bubbles: true,
-            composed: true,
-            detail: { value: val },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-change', {
+                bubbles: true,
+                composed: true,
+                detail: { value: val },
+            }),
+        )
         if (typeof this.onChange === 'function') this.onChange(val)
     }
 
@@ -284,7 +279,7 @@ export class PhoneInput extends HTMLElement {
     }
 
     private _selectCountry(code: string): void {
-        const country = PHONE_COUNTRIES.find(c => c.code === code)
+        const country = PHONE_COUNTRIES.find((c) => c.code === code)
         if (!country) return
         this._selectedCountry = country
         this._closeDropdown(false)
@@ -359,30 +354,34 @@ export class PhoneInput extends HTMLElement {
     private _buildOptionsHtml(filter: string): string {
         const lf = filter.toLowerCase()
         const countries = filter
-            ? PHONE_COUNTRIES.filter(c =>
-                c.name.toLowerCase().includes(lf) ||
-                c.dialCode.includes(lf) ||
-                c.code.toLowerCase().includes(lf)
-            )
+            ? PHONE_COUNTRIES.filter(
+                  (c) =>
+                      c.name.toLowerCase().includes(lf) ||
+                      c.dialCode.includes(lf) ||
+                      c.code.toLowerCase().includes(lf),
+              )
             : PHONE_COUNTRIES
 
         if (!countries.length) {
             return `<div class="tc-phone-input-no-results">No countries found</div>`
         }
-        return countries.map((c, idx) => {
-            const activeCls = idx === this._activeIdx ? ' tc-phone-input-option--active' : ''
-            const selectedAttr = c.code === this._selectedCountry.code
-                ? ' aria-selected="true"'
-                : ' aria-selected="false"'
-            return (
-                `<div class="tc-phone-input-option${activeCls}" role="option"${selectedAttr}` +
-                ` tabindex="-1" data-code="${esc(c.code)}">` +
-                `<span class="tc-phone-input-option-flag" aria-hidden="true">${flagEmoji(c.code)}</span>` +
-                `<span class="tc-phone-input-option-name">${esc(c.name)}</span>` +
-                `<span class="tc-phone-input-option-dial">${esc(c.dialCode)}</span>` +
-                `</div>`
-            )
-        }).join('')
+        return countries
+            .map((c, idx) => {
+                const activeCls = idx === this._activeIdx ? ' tc-phone-input-option--active' : ''
+                const selectedAttr =
+                    c.code === this._selectedCountry.code
+                        ? ' aria-selected="true"'
+                        : ' aria-selected="false"'
+                return (
+                    `<div class="tc-phone-input-option${activeCls}" role="option"${selectedAttr}` +
+                    ` tabindex="-1" data-code="${esc(c.code)}">` +
+                    `<span class="tc-phone-input-option-flag" aria-hidden="true">${flagEmoji(c.code)}</span>` +
+                    `<span class="tc-phone-input-option-name">${esc(c.name)}</span>` +
+                    `<span class="tc-phone-input-option-dial">${esc(c.dialCode)}</span>` +
+                    `</div>`
+                )
+            })
+            .join('')
     }
 
     private _renderDropdownOptions(filter: string): void {

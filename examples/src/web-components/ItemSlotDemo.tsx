@@ -1,14 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'
 
 const RARITY_ITEMS: { rarity: Rarity; item: Record<string, unknown> }[] = [
     { rarity: 'common', item: { id: 'stick', name: 'Wooden Stick', icon: 'W', rarity: 'common' } },
-    { rarity: 'uncommon', item: { id: 'dagger', name: 'Iron Dagger', icon: 'D', rarity: 'uncommon' } },
+    {
+        rarity: 'uncommon',
+        item: { id: 'dagger', name: 'Iron Dagger', icon: 'D', rarity: 'uncommon' },
+    },
     { rarity: 'rare', item: { id: 'bow', name: 'Elven Bow', icon: 'B', rarity: 'rare' } },
     { rarity: 'epic', item: { id: 'staff', name: 'Arcane Staff', icon: 'A', rarity: 'epic' } },
-    { rarity: 'legendary', item: { id: 'blade', name: 'Sunblade', icon: 'S', rarity: 'legendary' } },
+    {
+        rarity: 'legendary',
+        item: { id: 'blade', name: 'Sunblade', icon: 'S', rarity: 'legendary' },
+    },
     { rarity: 'mythic', item: { id: 'relic', name: 'World Relic', icon: 'R', rarity: 'mythic' } },
 ]
 
@@ -59,53 +64,65 @@ const ItemSlotDemo: React.FC = () => {
             <div className="container">
                 <div className="row">
                     <div className="col-12">
-                        <RichPageHeader
-                            chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                            title="Item Slot"
+                        <tc-rich-page-header
+                            title-text="Item Slot"
                             description="A single inventory / hotbar slot: an item glyph, a quantity badge, a rarity border accent, an optional hotkey, an equipped marker, a radial cooldown sweep, and a locked state. Set the item via the JS item property; selected/size/hotkey are attributes. Activating an unlocked slot fires tc-click. Re-skinned from the game-components gc-item-slot — no gilded frame, no glow: a sharp hairline tile, rarity as a single muted border accent."
-                        />
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
-                            <SectionCard title="Rarity tiers">
+                            <tc-section-card title="Rarity tiers">
                                 <div className="d-flex flex-wrap gap-2 align-items-center">
                                     {RARITY_ITEMS.map((entry, i) => (
                                         // @ts-ignore — custom element
                                         <tc-item-slot
                                             key={entry.rarity}
-                                            ref={(el: HTMLElement | null) => (rarityRefs.current[i] = el)}
+                                            ref={(el: HTMLElement | null) =>
+                                                (rarityRefs.current[i] = el)
+                                            }
                                         />
                                     ))}
                                 </div>
                                 <p className="mt-3 mb-0 text-secondary">
-                                    common · uncommon · rare · epic · legendary · mythic — rarity shifts only the
-                                    hairline border colour.
+                                    common · uncommon · rare · epic · legendary · mythic — rarity
+                                    shifts only the hairline border colour.
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="States — quantity, equipped, cooldown, locked">
+                            <tc-section-card title="States — quantity, equipped, cooldown, locked">
                                 <div className="d-flex flex-wrap gap-2 align-items-center">
                                     {STATE_ITEMS.map((item, i) => (
                                         // @ts-ignore — custom element
                                         <tc-item-slot
                                             key={String(item.id)}
                                             hotkey={i < 4 ? String(i + 1) : undefined}
-                                            ref={(el: HTMLElement | null) => (stateRefs.current[i] = el)}
+                                            ref={(el: HTMLElement | null) =>
+                                                (stateRefs.current[i] = el)
+                                            }
                                         />
                                     ))}
                                     {/* @ts-ignore — empty socket */}
                                     <tc-item-slot aria-label="Empty slot" />
                                 </div>
-                            </SectionCard>
+                            </tc-section-card>
 
-                            <SectionCard title="Selectable (click or press Enter / Space)">
+                            <tc-section-card title="Selectable (click or press Enter / Space)">
                                 <div className="d-flex flex-wrap gap-2 align-items-center">
                                     {/* @ts-ignore — custom element */}
-                                    <tc-item-slot ref={selectableRef} selected size="72" hotkey="Q" />
+                                    <tc-item-slot
+                                        ref={selectableRef}
+                                        selected
+                                        size="72"
+                                        hotkey="Q"
+                                    />
                                 </div>
                                 <p className="mt-3 mb-0 text-secondary">
                                     Last activated: <code>{lastClicked}</code>
                                 </p>
-                            </SectionCard>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

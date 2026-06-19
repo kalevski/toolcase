@@ -1,26 +1,9 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { Check, ChevronLeft, ChevronRight } from 'lucide-static'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-form-wizard'
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const pascal = name
-        .split('-')
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('')
-    const svgStr = (LucideIcons as Record<string, string>)[pascal]
-    if (!svgStr) return ''
-    return icon(svgStr)
-}
 
 export interface FormWizardStep {
     id?: string
@@ -52,9 +35,13 @@ export class FormWizard extends HTMLElement {
             this._captureSlotNodes()
             this.render()
             this._distributeActiveStepContent()
-            this.addEventListener('click', this._handleClick)
             this._initialised = true
         }
+        // Listeners are (re)attached on every connect — disconnectedCallback removes
+        // them, and a move/remount (React reconciliation) disconnects then reconnects
+        // without re-running the one-time init above. Re-adding the same handler
+        // reference is a no-op, so this is safe to repeat.
+        this.addEventListener('click', this._handleClick)
     }
 
     disconnectedCallback(): void {
@@ -112,7 +99,7 @@ export class FormWizard extends HTMLElement {
 
     private _captureSlotNodes(): void {
         this._stepSlotNodes = []
-        Array.from(this.childNodes).forEach(node => {
+        Array.from(this.childNodes).forEach((node) => {
             if (!(node instanceof Element)) return
             const slotAttr = node.getAttribute('slot')
             const dataStep = node.getAttribute('data-step')
@@ -136,7 +123,7 @@ export class FormWizard extends HTMLElement {
     // _stepSlotNodes so they can be re-appended after the next render.
     private _rescueActiveSlotNodes(): void {
         const step = this._steps[this._activeIndex]
-        if (step?.content != null) return       // JS property — nothing to rescue
+        if (step?.content != null) return // JS property — nothing to rescue
         const body = this.querySelector('.tc-form-wizard-body')
         if (!body) return
         const nodes = Array.from(body.childNodes)
@@ -162,7 +149,7 @@ export class FormWizard extends HTMLElement {
         } else {
             const slotNodes = this._stepSlotNodes[this._activeIndex]
             if (slotNodes) {
-                slotNodes.forEach(n => body.appendChild(n))
+                slotNodes.forEach((n) => body.appendChild(n))
             }
         }
     }
@@ -177,11 +164,13 @@ export class FormWizard extends HTMLElement {
         this._visitedIndices.add(newIdx)
         this.render()
         this._distributeActiveStepContent()
-        this.dispatchEvent(new CustomEvent('tc-step-change', {
-            bubbles: true,
-            composed: true,
-            detail: { index: newIdx },
-        }))
+        this.dispatchEvent(
+            new CustomEvent('tc-step-change', {
+                bubbles: true,
+                composed: true,
+                detail: { index: newIdx },
+            }),
+        )
         if (typeof this.onStepChange === 'function') this.onStepChange({ index: newIdx })
     }
 
@@ -206,11 +195,13 @@ export class FormWizard extends HTMLElement {
 
         if (target.closest('.tc-form-wizard-complete')) {
             if (!this.loading) {
-                this.dispatchEvent(new CustomEvent('tc-complete', {
-                    bubbles: true,
-                    composed: true,
-                    detail: {},
-                }))
+                this.dispatchEvent(
+                    new CustomEvent('tc-complete', {
+                        bubbles: true,
+                        composed: true,
+                        detail: {},
+                    }),
+                )
                 if (typeof this.onComplete === 'function') this.onComplete()
             }
             return
@@ -239,40 +230,47 @@ export class FormWizard extends HTMLElement {
         const completeIconHtml = completeIconName ? lucideByName(completeIconName) : ''
 
         // ── Stepper header ───────────────────────────────────────────────────
-        const tabsHtml = steps.map((step, i) => {
-            const isDone = i < activeIdx
-            const isCurrent = i === activeIdx
-            const state: 'done' | 'current' | 'upcoming' = isDone ? 'done' : isCurrent ? 'current' : 'upcoming'
+        const tabsHtml = steps
+            .map((step, i) => {
+                const isDone = i < activeIdx
+                const isCurrent = i === activeIdx
+                const state: 'done' | 'current' | 'upcoming' = isDone
+                    ? 'done'
+                    : isCurrent
+                      ? 'current'
+                      : 'upcoming'
 
-            let markerContent: string
-            if (isDone) {
-                markerContent = checkIconHtml
-            } else if (step.icon) {
-                markerContent = lucideByName(step.icon)
-            } else {
-                markerContent = `<span class="tc-form-wizard-tab-num" aria-hidden="true">${i + 1}</span>`
-            }
+                let markerContent: string
+                if (isDone) {
+                    markerContent = checkIconHtml
+                } else if (step.icon) {
+                    markerContent = lucideByName(step.icon)
+                } else {
+                    markerContent = `<span class="tc-form-wizard-tab-num" aria-hidden="true">${i + 1}</span>`
+                }
 
-            const ariaSelected = isCurrent ? 'true' : 'false'
-            const ariaCurrent = isCurrent ? ' aria-current="step"' : ''
-            const ariaDisabled = state === 'upcoming' ? ' aria-disabled="true"' : ''
-            const tabIndex = isCurrent ? '0' : '-1'
+                const ariaSelected = isCurrent ? 'true' : 'false'
+                const ariaCurrent = isCurrent ? ' aria-current="step"' : ''
+                const ariaDisabled = state === 'upcoming' ? ' aria-disabled="true"' : ''
+                const tabIndex = isCurrent ? '0' : '-1'
 
-            const connectorHtml = i < total - 1
-                ? `<span class="tc-form-wizard-connector tc-form-wizard-connector--${state}" aria-hidden="true"></span>`
-                : ''
+                const connectorHtml =
+                    i < total - 1
+                        ? `<span class="tc-form-wizard-connector tc-form-wizard-connector--${state}" aria-hidden="true"></span>`
+                        : ''
 
-            return (
-                `<button type="button" class="tc-form-wizard-tab tc-form-wizard-tab--${state}"` +
-                ` role="tab" aria-selected="${ariaSelected}"${ariaCurrent}${ariaDisabled}` +
-                ` tabindex="${tabIndex}" data-step-index="${i}"` +
-                `>` +
-                `<span class="tc-form-wizard-tab-marker" aria-hidden="true">${markerContent}</span>` +
-                `<span class="tc-form-wizard-tab-label">${esc(step.label)}</span>` +
-                `</button>` +
-                connectorHtml
-            )
-        }).join('')
+                return (
+                    `<button type="button" class="tc-form-wizard-tab tc-form-wizard-tab--${state}"` +
+                    ` role="tab" aria-selected="${ariaSelected}"${ariaCurrent}${ariaDisabled}` +
+                    ` tabindex="${tabIndex}" data-step-index="${i}"` +
+                    `>` +
+                    `<span class="tc-form-wizard-tab-marker" aria-hidden="true">${markerContent}</span>` +
+                    `<span class="tc-form-wizard-tab-label">${esc(step.label)}</span>` +
+                    `</button>` +
+                    connectorHtml
+                )
+            })
+            .join('')
 
         // ── Footer buttons ───────────────────────────────────────────────────
         const spinnerHtml = loading
@@ -288,20 +286,20 @@ export class FormWizard extends HTMLElement {
             `</button>`
 
         const actionHtml = isLast
-            ? (`<button type="button" class="tc-form-wizard-complete btn btn-primary"` +
-               (loading ? ' disabled' : '') +
-               `>` +
-               spinnerHtml +
-               completeIconHtml +
-               `<span>${esc(completeLabel)}</span>` +
-               `</button>`)
-            : (`<button type="button" class="tc-form-wizard-next btn btn-primary"` +
-               (loading ? ' disabled' : '') +
-               `>` +
-               spinnerHtml +
-               `<span>Next</span>` +
-               nextIconHtml +
-               `</button>`)
+            ? `<button type="button" class="tc-form-wizard-complete btn btn-primary"` +
+              (loading ? ' disabled' : '') +
+              `>` +
+              spinnerHtml +
+              completeIconHtml +
+              `<span>${esc(completeLabel)}</span>` +
+              `</button>`
+            : `<button type="button" class="tc-form-wizard-next btn btn-primary"` +
+              (loading ? ' disabled' : '') +
+              `>` +
+              spinnerHtml +
+              `<span>Next</span>` +
+              nextIconHtml +
+              `</button>`
 
         const activeLabel = steps[activeIdx]?.label ?? 'Step content'
 

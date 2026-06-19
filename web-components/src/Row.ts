@@ -7,21 +7,26 @@ type JustifyContent = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenl
 const BREAKPOINTS: Breakpoint[] = ['sm', 'md', 'lg', 'xl', 'xxl']
 
 const ALL_ROW_CLASSES = [
-    ...(['', ...BREAKPOINTS].flatMap(bp => {
+    ...['', ...BREAKPOINTS].flatMap((bp) => {
         const suffix = bp ? `-${bp}` : ''
-        return [0, 1, 2, 3, 4, 5, 6].map(n => `row-cols${suffix}-${n}`)
-    })),
-    ...[0, 1, 2, 3, 4, 5].flatMap(n => [`g-${n}`, `gx-${n}`, `gy-${n}`]),
-    ...(['start', 'center', 'end'].map(v => `align-items-${v}`)),
-    ...(['start', 'center', 'end', 'between', 'around', 'evenly'].map(v => `justify-content-${v}`)),
+        return [0, 1, 2, 3, 4, 5, 6].map((n) => `row-cols${suffix}-${n}`)
+    }),
+    ...[0, 1, 2, 3, 4, 5].flatMap((n) => [`g-${n}`, `gx-${n}`, `gy-${n}`]),
+    ...['start', 'center', 'end'].map((v) => `align-items-${v}`),
+    ...['start', 'center', 'end', 'between', 'around', 'evenly'].map((v) => `justify-content-${v}`),
 ]
 
 export class Row extends HTMLElement {
-
     static get observedAttributes(): string[] {
         return [
-            'cols', 'cols-sm', 'cols-md', 'cols-lg', 'cols-xl', 'cols-xxl',
-            'gutter', 'g',
+            'cols',
+            'cols-sm',
+            'cols-md',
+            'cols-lg',
+            'cols-xl',
+            'cols-xxl',
+            'gutter',
+            'g',
             'align',
             'justify',
         ]
@@ -40,20 +45,35 @@ export class Row extends HTMLElement {
         if (this.isConnected) this.render()
     }
 
-    get cols(): string | null { return this.getAttribute('cols') }
-    set cols(v: string | null) { v != null ? this.setAttribute('cols', v) : this.removeAttribute('cols') }
+    get cols(): string | null {
+        return this.getAttribute('cols')
+    }
+    set cols(v: string | null) {
+        v != null ? this.setAttribute('cols', v) : this.removeAttribute('cols')
+    }
 
     get align(): AlignItems | null {
         const v = this.getAttribute('align')
-        return (v === 'start' || v === 'center' || v === 'end') ? v : null
+        return v === 'start' || v === 'center' || v === 'end' ? v : null
     }
-    set align(v: AlignItems | null) { v ? this.setAttribute('align', v) : this.removeAttribute('align') }
+    set align(v: AlignItems | null) {
+        v ? this.setAttribute('align', v) : this.removeAttribute('align')
+    }
 
     get justify(): JustifyContent | null {
         const v = this.getAttribute('justify')
-        return (v === 'start' || v === 'center' || v === 'end' || v === 'between' || v === 'around' || v === 'evenly') ? v : null
+        return v === 'start' ||
+            v === 'center' ||
+            v === 'end' ||
+            v === 'between' ||
+            v === 'around' ||
+            v === 'evenly'
+            ? v
+            : null
     }
-    set justify(v: JustifyContent | null) { v ? this.setAttribute('justify', v) : this.removeAttribute('justify') }
+    set justify(v: JustifyContent | null) {
+        v ? this.setAttribute('justify', v) : this.removeAttribute('justify')
+    }
 
     private resolveGutterClasses(): string[] {
         const raw = this.getAttribute('gutter') ?? this.getAttribute('g')
@@ -87,10 +107,7 @@ export class Row extends HTMLElement {
     private render(): void {
         this.classList.remove(...ALL_ROW_CLASSES)
 
-        const toAdd = [
-            ...this.resolveColsClasses(),
-            ...this.resolveGutterClasses(),
-        ]
+        const toAdd = [...this.resolveColsClasses(), ...this.resolveGutterClasses()]
 
         const align = this.align
         if (align) toAdd.push(`align-items-${align}`)

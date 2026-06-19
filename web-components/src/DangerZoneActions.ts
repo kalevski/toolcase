@@ -1,4 +1,5 @@
-import * as LucideIcons from 'lucide-static'
+import { lucideByName } from './internal/lucide'
+import { esc } from './internal/esc'
 import { icon } from './icons'
 
 const TAG_NAME = 'tc-danger-zone-actions'
@@ -10,20 +11,6 @@ export interface DangerZoneAction {
     buttonLabel: string
     icon?: string
     disabled?: boolean
-}
-
-function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-}
-
-function lucideByName(name: string): string {
-    const svgStr = (LucideIcons as Record<string, string>)[name]
-    if (!svgStr) return ''
-    return icon(svgStr, 'tc-danger-zone-icon')
 }
 
 export class DangerZoneActions extends HTMLElement {
@@ -60,49 +47,56 @@ export class DangerZoneActions extends HTMLElement {
         const extraClass = this.getAttribute('class-name')
         const wrapperClass = `tc-danger-zone${extraClass ? ` ${esc(extraClass)}` : ''}`
 
-        const items = this._actions.map((action, idx) => {
-            const disabled = action.disabled === true
-            const disabledAttr = disabled ? ' disabled' : ''
-            const iconHtml = action.icon ? lucideByName(action.icon) : ''
-            const descHtml = action.description != null
-                ? `<span class="tc-danger-zone-desc">${esc(action.description)}</span>`
-                : ''
+        const items = this._actions
+            .map((action, idx) => {
+                const disabled = action.disabled === true
+                const disabledAttr = disabled ? ' disabled' : ''
+                const iconHtml = action.icon ? lucideByName(action.icon) : ''
+                const descHtml =
+                    action.description != null
+                        ? `<span class="tc-danger-zone-desc">${esc(action.description)}</span>`
+                        : ''
 
-            return (
-                `<div class="tc-danger-zone-item">` +
+                return (
+                    `<div class="tc-danger-zone-item">` +
                     `<div class="tc-danger-zone-text">` +
-                        `<span class="tc-danger-zone-title">${esc(action.title)}</span>` +
-                        descHtml +
+                    `<span class="tc-danger-zone-title">${esc(action.title)}</span>` +
+                    descHtml +
                     `</div>` +
                     `<button` +
-                        ` class="btn btn-outline-danger tc-danger-zone-btn"` +
-                        ` type="button"` +
-                        ` data-idx="${idx}"` +
-                        `${disabledAttr}` +
-                        ` aria-label="${esc(action.buttonLabel)}"` +
+                    ` class="btn btn-outline-danger tc-danger-zone-btn"` +
+                    ` type="button"` +
+                    ` data-idx="${idx}"` +
+                    `${disabledAttr}` +
+                    ` aria-label="${esc(action.buttonLabel)}"` +
                     `>` +
-                        iconHtml +
-                        `<span>${esc(action.buttonLabel)}</span>` +
+                    iconHtml +
+                    `<span>${esc(action.buttonLabel)}</span>` +
                     `</button>` +
-                `</div>`
-            )
-        }).join('')
+                    `</div>`
+                )
+            })
+            .join('')
 
         this.innerHTML = `<div class="${wrapperClass}">${items}</div>`
 
         const wrapper = this.querySelector<HTMLElement>('.tc-danger-zone')
         if (wrapper) {
             wrapper.addEventListener('click', (e: Event) => {
-                const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.tc-danger-zone-btn')
+                const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
+                    '.tc-danger-zone-btn',
+                )
                 if (!btn || btn.disabled) return
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._actions.length) {
                     const key = this._actions[idx].key
-                    this.dispatchEvent(new CustomEvent('tc-action-click', {
-                        bubbles: true,
-                        composed: true,
-                        detail: { key },
-                    }))
+                    this.dispatchEvent(
+                        new CustomEvent('tc-action-click', {
+                            bubbles: true,
+                            composed: true,
+                            detail: { key },
+                        }),
+                    )
                     if (typeof this.onactionclick === 'function') this.onactionclick(key)
                 }
             })

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { RichPageHeader, RichPageHeaderChip, SectionCard } from '@toolcase/react-components'
 
 const TAGS = [
     { id: 'design', label: 'Design', color: 'var(--tc-info, #0ea5e9)' },
@@ -28,10 +27,10 @@ function EditableExample() {
         el.menuItems = MENU_ITEMS
 
         const onName = (e: CustomEvent) => {
-            setLog(prev => [`name changed → "${e.detail.name}"`, ...prev].slice(0, 5))
+            setLog((prev) => [`name changed → "${e.detail.name}"`, ...prev].slice(0, 5))
         }
         const onMenu = (e: CustomEvent) => {
-            setLog(prev => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
+            setLog((prev) => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
         }
 
         el.addEventListener('tc-name-change', onName)
@@ -56,7 +55,9 @@ function EditableExample() {
             {log.length > 0 && (
                 <ul className="list-unstyled mb-0 small text-muted">
                     {log.map((entry, i) => (
-                        <li key={i}><code>{entry}</code></li>
+                        <li key={i}>
+                            <code>{entry}</code>
+                        </li>
                     ))}
                 </ul>
             )}
@@ -102,18 +103,13 @@ function LoadingExample() {
             <button
                 className="btn btn-sm btn-secondary mt-2"
                 style={{ width: 'fit-content' }}
-                onClick={() => setLoaded(v => !v)}
+                onClick={() => setLoaded((v) => !v)}
             >
                 {loaded ? 'Show loading' : 'Show content'}
             </button>
             {loaded && (
                 /* @ts-ignore */
-                <tc-file
-                    name="dataset"
-                    extension=".csv"
-                    format="CSV"
-                    size="65536"
-                />
+                <tc-file name="dataset" extension=".csv" format="CSV" size="65536" />
             )}
         </div>
     )
@@ -152,41 +148,61 @@ const FileDemo: React.FC = () => (
         <div className="container">
             <div className="row">
                 <div className="col-12">
-                    <RichPageHeader
-                        chips={<RichPageHeaderChip>Web Components</RichPageHeaderChip>}
-                        title="File"
+                    <tc-rich-page-header
+                        title-text="File"
                         description="File entry with editable name, format badge, byte size, nested item count, tag chips, and an action menu. Emits tc-name-change on rename and tc-menu-item-click on menu selection."
-                    />
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
 
                     <div className="d-flex flex-column gap-4 mt-4">
-                        <SectionCard title="Editable file (with tags and menu)">
+                        <tc-section-card title="Editable file (with tags and menu)">
                             <EditableExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Readonly variant">
+                        <tc-section-card title="Readonly variant">
                             <ReadonlyExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Static examples">
+                        <tc-section-card title="Static examples">
                             <div className="d-flex flex-column gap-2">
                                 {/* @ts-ignore */}
-                                <tc-file name="architecture" extension=".png" format="PNG" size="2097152" items="3" />
+                                <tc-file
+                                    name="architecture"
+                                    extension=".png"
+                                    format="PNG"
+                                    size="2097152"
+                                    items="3"
+                                />
                                 {/* @ts-ignore */}
-                                <tc-file name="dataset" extension=".json" format="JSON" size="512000" />
+                                <tc-file
+                                    name="dataset"
+                                    extension=".json"
+                                    format="JSON"
+                                    size="512000"
+                                />
                                 {/* @ts-ignore */}
                                 <tc-file name="readme" extension=".md" size="4096" />
                                 {/* @ts-ignore */}
-                                <tc-file name="video-clip" extension=".mp4" format="MP4" size="52428800" items="1" />
+                                <tc-file
+                                    name="video-clip"
+                                    extension=".mp4"
+                                    format="MP4"
+                                    size="52428800"
+                                    items="1"
+                                />
                             </div>
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Loading skeleton">
+                        <tc-section-card title="Loading skeleton">
                             <LoadingExample />
-                        </SectionCard>
+                        </tc-section-card>
 
-                        <SectionCard title="Callback property (onMenuItemClick / onNameChange)">
+                        <tc-section-card title="Callback property (onMenuItemClick / onNameChange)">
                             <CallbackPropertyExample />
-                        </SectionCard>
+                        </tc-section-card>
                     </div>
                 </div>
             </div>

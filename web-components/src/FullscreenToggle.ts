@@ -9,7 +9,6 @@ const TAG_NAME = 'tc-fullscreen-toggle'
 // carries the signature ink gradient. All cosmetics flow through
 // `--bs-fullscreen-toggle-*`.
 export class FullscreenToggle extends SettingRowBase {
-
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
     onChange: ((value: boolean) => void) | null = null
 
