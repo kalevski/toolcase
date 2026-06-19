@@ -1,0 +1,25 @@
+// Dungeon › tc-social-links — gilded keycap polish on the filled variant.
+// Ghost variant resolves correctly via the foundation token remap alone.
+// Square corners and gold focus rings are already handled by the base + foundation.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Filled variant: swap the flat leather surface for a metal keycap fill
+    // so resting buttons read as small gilded metal keys.
+    .tc-social-links-filled {
+        --bs-social-links-bg: var(--fg-keycap-bg);
+        --bs-social-links-hover-bg: var(--fg-leather-2);
+        --bs-social-links-hover-shadow: var(--fg-bevel-top), var(--tc-shadow-md);
+    }
+
+    // Structural bevel: add a top-highlight band at rest; layer in the gilded
+    // lift on hover/focus. Replaces the slate-era rgba shadow the base hardcodes.
+    .tc-social-links-filled .tc-social-link {
+        box-shadow: var(--fg-bevel-top);
+
+        &:hover,
+        &:focus {
+            box-shadow: var(--fg-bevel-top), var(--tc-shadow-md);
+        }
+    }
+}

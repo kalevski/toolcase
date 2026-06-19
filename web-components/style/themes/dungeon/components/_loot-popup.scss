@@ -1,14 +1,141 @@
-// Dungeon › tc-loot-popup — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-loot-popup-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_loot-popup.scss
-// Target classes: web-components/style/components/_loot-popup.scss
+// Dungeon › tc-loot-popup — gilded reward window. Token swap carries the dark
+// panel + gold border; structural rules add the deep drop-shadow bevel, top
+// corner notches, display-caps title, mono eyebrow, and the bronze/blood
+// gradient action buttons (Take All = primary gold, others = bronze).
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-loot-popup
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-loot-popup {
+        // Panel — near-black vertical gradient under a gold edge.
+        --bs-loot-popup-bg: linear-gradient(180deg, rgba(20, 12, 8, 0.96), rgba(10, 6, 4, 0.96));
+        --bs-loot-popup-border-color: var(--fg-gold-deep);
+
+        --bs-loot-popup-eyebrow-color: var(--fg-parch-dim);
+        --bs-loot-popup-title-color: var(--fg-gold-bright);
+
+        // Heavier scrim than the slate default.
+        --bs-loot-popup-backdrop-bg: #000;
+        --bs-loot-popup-backdrop-opacity: 0.65;
+
+        // Secondary buttons — bronze keycap gradient.
+        --bs-loot-popup-btn-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-loot-popup-btn-color: var(--fg-gold-bright);
+        --bs-loot-popup-btn-border: 1px solid var(--fg-gold-deep);
+        --bs-loot-popup-btn-hover-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-loot-popup-btn-hover-color: var(--fg-gold-bright);
+
+        // Take All primary — brighter bronze with gold edge.
+        --bs-loot-popup-btn-primary-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-loot-popup-btn-primary-color: var(--fg-gold-bright);
+        --bs-loot-popup-btn-primary-hover-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-loot-popup-btn-primary-hover-color: var(--fg-gold-bright);
+
+        --bs-loot-popup-close-color: var(--fg-parch-3);
+        --bs-loot-popup-close-hover-color: var(--fg-gold-bright);
+        --bs-loot-popup-close-hover-bg: rgba(201, 169, 97, 0.12);
+    }
+
+    // Panel: deep gilded bevel + inset gold edge.
+    .tc-loot-popup__panel {
+        position: relative;
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+
+    // Top corner notches — signature gilded ornament.
+    .tc-loot-popup__panel::before,
+    .tc-loot-popup__panel::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+    .tc-loot-popup__panel::before { left: -1px; }
+    .tc-loot-popup__panel::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // Centre the header — reward-window composition, close button is absolute.
+    .tc-loot-popup__header {
+        text-align: center;
+    }
+
+    // Eyebrow promoted to display register to pair with the gilded title.
+    .tc-loot-popup__eyebrow {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+    }
+
+    // Title reads as gilded display caps with a glow; no right padding needed
+    // since the header is centred and the close button is absolutely positioned.
+    .tc-loot-popup__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding-right: 0;
+        text-shadow: 0 1px 0 #000, 0 0 18px rgba(232, 200, 120, 0.35);
+    }
+
+    // Gilded divider between title and loot list — rule + centred diamond motif.
+    .tc-loot-popup__list::before {
+        content: '';
+        display: block;
+        position: relative;
+        height: 1px;
+        margin: 0.75rem 0 1rem;
+        background: var(--fg-rule);
+    }
+
+    .tc-loot-popup__list::after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: calc(-0.25rem - 4px); // vertically centre the 8px diamond on the rule
+        left: 50%;
+        transform: translateX(-50%) rotate(45deg);
+        width: 8px;
+        height: 8px;
+        background: var(--fg-gold-edge);
+        box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+        pointer-events: none;
+    }
+
+    // Position the list relatively so the diamond pseudo can anchor to it.
+    .tc-loot-popup__list {
+        position: relative;
+    }
+
+    // Buttons — display caps + gilded keycap bevel.
+    .tc-loot-popup__btn {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        // Real luminance feedback on hover/active — hover-bg tokens equal rest state.
+        &:hover:not(:disabled) {
+            filter: brightness(1.15);
+        }
+
+        &:active:not(:disabled) {
+            filter: brightness(0.9);
+        }
+    }
+
+    // Primary headline action — gold edge with ambient glow.
+    .tc-loot-popup__take-all {
+        border-color: var(--fg-gold);
+        box-shadow: 0 0 12px rgba(232, 200, 120, 0.25);
+    }
 }

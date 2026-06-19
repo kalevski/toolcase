@@ -1,0 +1,45 @@
+// Dungeon › tc-button-group — joined gilded segments.
+// Token swap repoints the two hardcoded bypasses (--tc-slate-700 text and
+// #fff fill) to parchment + leather. Active segment keeps gold fill but
+// switches text to ink. No radius (base already 0).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .btn-group,
+    .btn-group-vertical {
+        .btn {
+            // Text: slate-700 bypass → parchment
+            --bs-btn-color: var(--fg-parch-2);
+            --bs-btn-hover-color: var(--fg-parch-2);
+            --bs-btn-disabled-color: var(--fg-parch-dim);
+
+            // Fill: #fff bypass → dark leather
+            --bs-btn-bg: var(--fg-leather);
+            --bs-btn-hover-bg: var(--fg-leather-2);
+            --bs-btn-disabled-bg: var(--fg-leather);
+
+            // Border: keep gold-deep hairlines
+            --bs-btn-border-color: var(--fg-gold-deep);
+            --bs-btn-hover-border-color: var(--fg-gold-deep);
+            --bs-btn-disabled-border-color: var(--fg-gold-deep);
+
+            // Active segment: gold fill (already set via --tc-app-accent),
+            // ink text instead of white
+            --bs-btn-active-color: var(--fg-ink);
+            --bs-btn-active-border-color: var(--fg-gold-deep);
+        }
+
+        // Active segment bevel highlight — mimics the gold surface catching light.
+        .btn.active {
+            box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.3);
+        }
+    }
+
+    // Tight letter-spacing for segment labels (segments are narrow; 0.16em is
+    // too wide for joined controls — the button guide may set display caps
+    // globally, so we only nudge spacing here).
+    .btn-group .btn,
+    .btn-group-vertical .btn {
+        letter-spacing: 0.08em;
+    }
+}

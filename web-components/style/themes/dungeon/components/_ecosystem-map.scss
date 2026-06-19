@@ -1,0 +1,69 @@
+// Dungeon › tc-ecosystem-map — constellation/skill-tree recolor.
+// Token swap repoints the ring/connector/node/list vars to fg-* palette.
+// Key fix: --bs-ecosystem-map-core-text was a #fff literal — repointed to
+// --fg-ink (ink on gold reads correctly). The SVG fills/strokes resolve
+// through the component vars so the diagram recolors for free.
+// Title gets display-caps treatment (base hardcodes a bold sans).
+// Node hover brightens to gold-bright (overrides the dormant slate fallback hex).
+// List chips stay border-radius: 0 (already enforced by base; confirmed here).
+// Sanctioned circles: ring/disc/dot SVG geometry — NOT squared.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-ecosystem-map {
+        // Ring and connector lines — gold-deep dashed hairlines
+        --bs-ecosystem-map-ring-stroke: var(--fg-gold-deep);
+        --bs-ecosystem-map-connector-stroke: var(--fg-gold-deep);
+
+        // Core disc — luminous gold focal point, ink text (fixes #fff literal)
+        --bs-ecosystem-map-core-fill: var(--fg-gold);
+        --bs-ecosystem-map-core-text: var(--fg-ink);
+
+        // Node dots — wood fill, gold-deep border
+        --bs-ecosystem-map-node-fill: var(--fg-leather);
+        --bs-ecosystem-map-node-stroke: var(--fg-gold-deep);
+
+        // Node and list labels — gold
+        --bs-ecosystem-map-node-label-color: var(--fg-gold);
+        --bs-ecosystem-map-list-label-color: var(--fg-gold);
+
+        // List fallback chips — wood bg, gold-deep border
+        --bs-ecosystem-map-list-bg: var(--fg-leather);
+        --bs-ecosystem-map-list-border: var(--fg-gold-deep);
+    }
+
+    // Title — display caps (base hardcodes bold sans; must override the class)
+    .tc-ecosystem-map__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // Node group/link hover — gilded bright, overrides dormant slate hex fallback
+    .tc-ecosystem-map__node-group,
+    .tc-ecosystem-map__node-link {
+        &:hover .tc-ecosystem-map__node-dot,
+        &:focus .tc-ecosystem-map__node-dot {
+            stroke: var(--fg-gold-bright);
+            fill: var(--fg-leather-2);
+        }
+    }
+
+    // List node chips — gold-bright hover border; ensure square corners
+    .tc-ecosystem-map__node {
+        border-radius: 0;
+        color: var(--fg-parch);
+
+        &:hover,
+        &:focus {
+            border-color: var(--fg-gold-bright);
+        }
+
+        // Core node chip in the list — gold bg, ink text
+        &--core {
+            color: var(--fg-ink);
+        }
+    }
+}

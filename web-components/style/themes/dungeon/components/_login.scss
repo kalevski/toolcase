@@ -1,0 +1,69 @@
+// Dungeon › tc-login — "enter the realm" gate.
+// Foundation remap already covers: ink aside, parchment form surface, gold
+// column divider, and border-radius:0.  This override adds the display-caps
+// title, fixes the hardcoded white skeleton shimmer, and frames the form inner
+// as a gilded plate, plus a sepia tint on the aside image.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-login {
+        // ── Title colour → ink on parchment ────────────────────────────────────
+        --bs-login-title-color: var(--fg-ink);
+
+        // ── Description → parchment-dim muted text ─────────────────────────────
+        --bs-login-desc-color: var(--fg-parch-dim);
+
+        // ── Skeleton shimmer → parchment tint (replaces hardcoded white literal) ─
+        --bs-login-skel-shimmer: rgba(232, 220, 196, 0.5);
+    }
+
+    // ── Display-caps title ─────────────────────────────────────────────────────
+    // Base hardcodes sans-serif font-family and negative letter-spacing on
+    // .tc-login-title; override the class directly.
+
+    .tc-login-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+
+    // ── Gilded form plate ──────────────────────────────────────────────────────
+    // Frames the bare form inner as a gilded panel on parchment with corner
+    // notches, mirroring the tc-panel signature ornament.
+
+    .tc-login-form-inner {
+        position: relative;
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-panel-shadow);
+        padding: 1.5rem;
+    }
+
+    .tc-login-form-inner::before,
+    .tc-login-form-inner::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-login-form-inner::before {
+        left: -1px;
+    }
+
+    .tc-login-form-inner::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Sepia aside image ──────────────────────────────────────────────────────
+    // CSS can only filter the blended pattern image, not replace it.
+
+    .tc-login-aside-img {
+        filter: sepia(0.5);
+    }
+}

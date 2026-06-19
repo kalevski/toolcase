@@ -1,0 +1,21 @@
+// Dungeon › tc-empty-state — gilded empty-slot bubble.
+// The foundation token remap already handles text/surface colours; this
+// override replaces the flat leather fill with a radial wood slot and adds
+// a gold-deep hairline + inset bevel so the icon bubble reads as an in-world
+// empty item slot.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-empty-state {
+        // Radial wood slot fill instead of flat leather surface.
+        --bs-empty-state-icon-bg: var(--fg-slot-bg);
+        // Gilt glyph — reads as the "no item" marker of an empty slot.
+        --bs-empty-state-icon-color: var(--fg-gold-deep);
+    }
+
+    // Beveled empty-slot border on the icon bubble.
+    .tc-empty-state__icon {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+}

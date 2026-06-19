@@ -1,14 +1,112 @@
-// Dungeon › tc-ability-card — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-ability-card-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_ability-card.scss
-// Target classes: web-components/style/components/_ability-card.scss
+// Dungeon › tc-ability-card — gilded ability tile. Token swap gives the wood
+// gradient + gold border; structural rules add the inset bevel + per-rarity
+// glow, the gilded icon chip, display-caps name (tinted by rarity), italic
+// parchment description, and mono meta numerals.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-ability-card
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-ability-card {
+        --bs-ability-card-bg: linear-gradient(180deg, rgba(20, 12, 8, 0.96), rgba(10, 6, 4, 0.96));
+        --bs-ability-card-border-color: var(--fg-gold-deep);
+        --bs-ability-card-icon-bg: linear-gradient(180deg, #2a1f14, #0a0604);
+        --bs-ability-card-icon-color: var(--fg-gold);
+        --bs-ability-card-rarity-color: var(--fg-common);
+        --bs-ability-card-name-color: var(--fg-common);
+        --bs-ability-card-desc-color: var(--fg-parch-3);
+        --bs-ability-card-keybind-bg: var(--fg-keycap-bg);
+        --bs-ability-card-keybind-border: var(--fg-gold-deep);
+        --bs-ability-card-keybind-color: var(--fg-gold-bright);
+        --bs-ability-card-meta-border: rgba(201, 169, 97, 0.15);
+        --bs-ability-card-meta-row-border: transparent;
+        --bs-ability-card-meta-label-color: var(--fg-parch-dim);
+        --bs-ability-card-meta-value-color: var(--fg-parch);
+
+        // Inset bevel + drop shadow + rarity inner glow.
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 0 18px rgba(156, 148, 137, 0.18),
+            0 6px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    // Per-rarity: name + glow track the rarity colour (the game tints the name).
+    tc-ability-card[data-rarity='uncommon'] {
+        --bs-ability-card-rarity-color: var(--fg-uncommon);
+        --bs-ability-card-name-color: var(--fg-uncommon);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 0 18px rgba(95, 168, 74, 0.22),
+            0 6px 16px rgba(0, 0, 0, 0.6);
+    }
+    tc-ability-card[data-rarity='rare'] {
+        --bs-ability-card-rarity-color: var(--fg-rare);
+        --bs-ability-card-name-color: var(--fg-rare);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 0 18px rgba(74, 127, 207, 0.25),
+            0 6px 16px rgba(0, 0, 0, 0.6);
+    }
+    tc-ability-card[data-rarity='epic'] {
+        --bs-ability-card-rarity-color: var(--fg-epic);
+        --bs-ability-card-name-color: var(--fg-epic);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 0 18px rgba(164, 77, 208, 0.28),
+            0 6px 16px rgba(0, 0, 0, 0.6);
+    }
+    tc-ability-card[data-rarity='legendary'] {
+        --bs-ability-card-rarity-color: var(--fg-legendary);
+        --bs-ability-card-name-color: var(--fg-legendary);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 0 18px rgba(232, 162, 58, 0.34),
+            0 6px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    // Gilded icon chip: bevel its inset frame + gold edge to anchor it visually.
+    .tc-ability-card-icon {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18);
+    }
+
+    // Header gold-rule divider that anchors the name block (icon + name row).
+    .tc-ability-card-head {
+        border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+        padding-bottom: 8px;
+    }
+
+    // Ability name reads as gilded display caps.
+    .tc-ability-card-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 700;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Description — italic parchment serif.
+    .tc-ability-card-description {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
+
+    // Mono micro-labels / numerals.
+    .tc-ability-card-rarity,
+    .tc-ability-card-meta-label,
+    .tc-ability-card-meta-value,
+    .tc-ability-card-keybind {
+        font-family: var(--fg-mono);
+    }
+    .tc-ability-card-meta-label {
+        letter-spacing: 0.18em;
+    }
+    .tc-ability-card-meta-value {
+        letter-spacing: 0.04em;
+    }
 }

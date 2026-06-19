@@ -1,0 +1,36 @@
+// Dungeon › tc-graphics-preset-picker — gilded engraved selector plate.
+// The base component is already square (border-radius:0), mono font, uppercase,
+// and all cosmetics flow through --bs-graphics-preset-picker-*. The foundation
+// remap covers most tokens via --tc-* → --fg-* but three fall through:
+//   1. --bs-graphics-preset-picker-active-color is hardcoded #fff (white on gold
+//      looks washed; ink on gold is the gilded read).
+//   2. --bs-graphics-preset-picker-focus-ring carries a literal slate rgba().
+//   3. Labels are mono; the fantasy treatment uses Cinzel display caps.
+// Step 4 adds an inset struck-metal highlight on the active segment.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap — host element carries the var defaults.
+    tc-graphics-preset-picker {
+        --bs-graphics-preset-picker-active-color: var(--fg-ink);
+        --bs-graphics-preset-picker-active-bg: var(--fg-gold);
+        --bs-graphics-preset-picker-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.3);
+    }
+
+    // 2. Gilded bevel on the outer frame — reads as an engraved selector plate.
+    .tc-graphics-preset-picker__group {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // 3. Display caps labels — carved-rune aesthetic over mono machine labels.
+    .tc-graphics-preset-picker__preset {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // 4. Struck-metal inset highlight on the active (selected) segment.
+    .tc-graphics-preset-picker__preset[data-active='true'] {
+        box-shadow: inset 0 1px 0 rgba(255, 220, 150, 0.25);
+    }
+}

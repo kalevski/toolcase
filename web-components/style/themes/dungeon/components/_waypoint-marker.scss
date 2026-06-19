@@ -1,14 +1,43 @@
-// Dungeon › tc-waypoint-marker — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-waypoint-marker-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_waypoint-marker.scss
-// Target classes: web-components/style/components/_waypoint-marker.scss
+// Dungeon › tc-waypoint-marker — gilded HUD marker: glowing gold glyph, an
+// ink-translucent chip rimmed in gold-deep, display-caps label, mono distance.
+// The label hardcodes mono in the base, so it's repointed to display caps here.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-waypoint-marker
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-waypoint-marker {
+        --bs-waypoint-marker-color: var(--fg-gold-bright);
+        --bs-waypoint-marker-bg: rgba(10, 6, 4, 0.65);
+        --bs-waypoint-marker-border-color: var(--fg-gold-deep);
+        --bs-waypoint-marker-text-color: var(--fg-parch);
+        --bs-waypoint-marker-distance-color: var(--fg-parch-3);
+        --bs-waypoint-marker-label-size: 10px;
+        --bs-waypoint-marker-distance-size: 9px;
+    }
+
+    .tc-waypoint-marker {
+        // Glyph — glow driven by the marker colour so coloured markers
+        // (danger, warning, safe) halo their own hue rather than amber.
+        &__glyph svg {
+            filter: drop-shadow(0 1px 2px #000)
+                drop-shadow(0 0 8px var(--bs-waypoint-marker-color));
+        }
+
+        // Chip — tighter padding to match the fantasy micro-scale.
+        &__text {
+            padding: 2px 6px;
+        }
+
+        // Label reads as gilded display caps (base hardcodes mono).
+        &__label {
+            font-family: var(--fg-display);
+            letter-spacing: 0.18em;
+            text-shadow: 0 1px 2px #000;
+        }
+
+        // Distance stays mono; add the same ink shadow for legibility on map.
+        &__distance {
+            font-family: var(--fg-mono);
+            text-shadow: 0 1px 2px #000;
+        }
+    }
 }

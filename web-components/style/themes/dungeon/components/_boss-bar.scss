@@ -1,7 +1,8 @@
 // Dungeon › tc-boss-bar — wide boss HP bar. Gilded panel frame, display-caps
 // name, blood-red gradient fill with scanlines, gold phase ticks.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-boss-bar {
         --bs-boss-bar-bg: var(--fg-panel-bg);
         --bs-boss-bar-border-color: var(--fg-gold-deep);
@@ -10,7 +11,7 @@ tc-theme[name='dungeon'] {
         --bs-boss-bar-epithet-color: var(--fg-parch-3);
         --bs-boss-bar-phase-color: var(--fg-gold);
         --bs-boss-bar-track-bg: linear-gradient(180deg, #0e0905, #1a120a);
-        --bs-boss-bar-fill-bg: linear-gradient(180deg, #d44a3a, #a8302a 60%, #5a1410);
+        --bs-boss-bar-fill-bg: linear-gradient(180deg, #e0584a, #a8302a 60%, #5a1410);
         --bs-boss-bar-ghost-bg: rgba(255, 220, 200, 0.25);
         --bs-boss-bar-tick-color: var(--fg-gold-bright);
         --bs-boss-bar-numeric-color: var(--fg-parch);
@@ -20,6 +21,12 @@ tc-theme[name='dungeon'] {
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.12em;
+        text-shadow: 0 1px 2px #000, 0 0 18px rgba(232, 200, 120, 0.35);
+    }
+
+    .tc-boss-bar__epithet {
+        font-family: var(--fg-body);
+        font-style: italic;
     }
 
     .tc-boss-bar__phase {
@@ -40,6 +47,10 @@ tc-theme[name='dungeon'] {
         inset: 0;
         background: var(--fg-scanlines);
         pointer-events: none;
+    }
+
+    .tc-boss-bar__tick {
+        box-shadow: 0 0 4px rgba(232, 200, 120, 0.6);
     }
 
     .tc-boss-bar__numeric,

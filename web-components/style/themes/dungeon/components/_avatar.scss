@@ -1,0 +1,51 @@
+// Dungeon › tc-avatar — gilded portrait medallion.
+// The foundation token remaps handle default bg (leather), initials color (parch-3),
+// and status dot hues (stamina/blood/amber). This file adds:
+//   1. A gold-deep border + bevel-top glow so the circle reads as a portrait medallion.
+//   2. Per-variant overrides to replace Sass-baked slate/product soft-bg + emphasis
+//      literals with fantasy element/rarity tints.
+// border-radius: 50% is kept everywhere (sanctioned circular exception).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // 1. Default avatar — gilded portrait medallion ring.
+    .tc-avatar {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+        // border-radius: 50% — keep; sanctioned circle exception.
+    }
+
+    // 2. Variant tint overrides — replace product-palette Sass literals with
+    //    fantasy element/rarity tones so colored avatars read on the dark theme.
+
+    .tc-avatar-primary {
+        --bs-avatar-bg: rgba(201, 169, 97, 0.18);   // gold tint
+        --bs-avatar-color: var(--fg-gold-bright);
+    }
+
+    .tc-avatar-success {
+        --bs-avatar-bg: rgba(72, 168, 60, 0.18);    // stamina tint
+        --bs-avatar-color: var(--fg-stamina-bright);
+    }
+
+    .tc-avatar-danger {
+        --bs-avatar-bg: rgba(168, 48, 42, 0.18);    // blood tint
+        --bs-avatar-color: var(--fg-blood-bright);
+    }
+
+    .tc-avatar-warning {
+        --bs-avatar-bg: rgba(232, 162, 58, 0.18);   // legendary amber tint
+        --bs-avatar-color: var(--fg-legendary);
+    }
+
+    .tc-avatar-info {
+        --bs-avatar-bg: rgba(74, 100, 207, 0.18);   // mana tint
+        --bs-avatar-color: var(--fg-mana-bright);
+    }
+
+    // 3. Status dot — no override needed; hues already map via foundation tokens
+    //    (stamina / blood / legendary-amber / parch-dim) and the ring uses --tc-surface → wood.
+
+    // 4. Image ring — keep border-radius: 50% (sanctioned); no further overrides needed.
+}

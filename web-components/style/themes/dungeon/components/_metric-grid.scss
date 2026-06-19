@@ -1,0 +1,19 @@
+// Dungeon › tc-metric-grid — gilded rune lattice over an ink-dark cell fill.
+// The hairline gap (grid background) becomes a gold lattice; cell fill goes
+// leather/ink. The outer edge gets the panel bevel for visual weight.
+// Layout, column variants, and the icon-gutter :has() rule are untouched.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-metric-grid {
+        // Hairline lattice → gold; cell fill → ink dark.
+        --bs-metric-grid-border-color: var(--fg-gold-deep);
+        --bs-metric-grid-bg: var(--fg-ink-2);
+    }
+
+    // Outer bevel so the grid reads as a gilded frame, not raw edges.
+    .tc-metric-grid {
+        box-shadow: var(--fg-panel-shadow);
+        position: relative;
+    }
+}

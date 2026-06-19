@@ -1,14 +1,40 @@
-// Dungeon › tc-settings-category-list — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-settings-category-list-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_settings-category-list.scss
-// Target classes: web-components/style/components/_settings-category-list.scss
+// Dungeon › tc-settings-category-list — gilded settings nav (composes nav rows).
+// Token swap recolours the nav divider + states; structural additions a flat swap
+// can't carry: display-caps item labels (base hardcodes mono), the gold left-marker
+// + gradient highlight on the active row, and the gold-bright hover/active text.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-settings-category-list
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-settings-category-list {
+        --bs-settings-category-list-nav-border-color: rgba(201, 169, 97, 0.25);
+
+        --bs-settings-category-list-item-color: var(--fg-parch);
+        --bs-settings-category-list-item-hover-color: var(--fg-gold-bright);
+        --bs-settings-category-list-item-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-settings-category-list-item-letter-spacing: 0.16em;
+
+        --bs-settings-category-list-item-active-color: var(--fg-gold-bright);
+        --bs-settings-category-list-item-active-bg: transparent;
+        --bs-settings-category-list-item-active-border-color: var(--fg-gold-bright);
+
+        --bs-settings-category-list-icon-color: var(--fg-gold);
+        --bs-settings-category-list-icon-active-color: var(--fg-gold-bright);
+    }
+
+    // Items read as display caps (base hardcodes mono).
+    .tc-settings-category-list-item {
+        font-family: var(--fg-display);
+    }
+
+    // Active row gets the gilded gradient sweep (the var bg above is transparent
+    // so this gradient is the visible highlight).
+    .tc-settings-category-list-item--active {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.22), transparent 70%);
+    }
+
+    // Focus ring: base uses var(--tc-app-accent) which remaps to --fg-gold, but
+    // gc uses --fg-gold-bright for focus-visible — match gc explicitly.
+    .tc-settings-category-list-item:focus-visible {
+        outline: 2px solid var(--fg-gold-bright);
+    }
 }

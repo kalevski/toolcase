@@ -1,14 +1,82 @@
-// Dungeon › tc-dialogue-box — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-dialogue-box-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
+// Dungeon › tc-dialogue-box — gilded NPC frame: radial wood fill, triple inset
+// gold bevel, gold-bright display-caps speaker name, body in the serif body face,
+// gold mono advance caret, and display-caps choices with a gold left-rail on
+// hover. Token swap recolours; the .tc-* rules add the bevel + gradient + caps.
 //
 // Design source:  game-components/style/components/_dialogue-box.scss
 // Target classes: web-components/style/components/_dialogue-box.scss
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-dialogue-box
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-dialogue-box {
+        --bs-dialogue-box-bg: transparent;
+        --bs-dialogue-box-border: 1px solid var(--fg-gold-deep);
+        --bs-dialogue-box-speaker-color: var(--fg-gold-bright);
+        --bs-dialogue-box-speaker-border: 1px solid transparent;
+        --bs-dialogue-box-text-color: var(--fg-parch-2);
+        --bs-dialogue-box-indicator-color: var(--fg-gold-bright);
+
+        --bs-dialogue-box-choice-bg: transparent;
+        --bs-dialogue-box-choice-color: var(--fg-parch);
+        --bs-dialogue-box-choice-border: 1px solid transparent;
+        --bs-dialogue-box-choice-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-dialogue-box-choice-marker-color: var(--fg-parch-dim);
+        --bs-dialogue-box-choice-marker-hover-color: var(--fg-gold-bright);
+
+        // Gilded frame — radial wood fill + triple inset gold bevel.
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    // Speaker separator — gold-rule gradient replaces flat hairline.
+    .tc-dialogue-box-speaker {
+        background-image: var(--fg-rule);
+        background-repeat: no-repeat;
+        background-position: bottom;
+        background-size: 100% 1px;
+    }
+
+    // Speaker name = gold-bright display caps.
+    .tc-dialogue-box-speaker-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+    }
+
+    // Body copy = serif body face.
+    .tc-dialogue-box-text {
+        font-family: var(--fg-body);
+    }
+
+    // Caret = mono gold.
+    .tc-dialogue-box-indicator {
+        font-family: var(--fg-mono);
+    }
+
+    // Choices block — gold hairline top border to read as a distinct sub-panel.
+    .tc-dialogue-box-choices {
+        border-top: 1px solid rgba(201, 169, 97, 0.25);
+        padding-top: 0.25rem;
+    }
+
+    // Choices = display caps with a gold left-rail on hover.
+    .tc-dialogue-box-choice {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        border-left-width: 2px;
+    }
+    .tc-dialogue-box-choice:hover {
+        color: var(--fg-gold-bright);
+        border-left-color: var(--fg-gold-bright);
+        box-shadow: inset 2px 0 0 var(--fg-gold-bright);
+    }
 }

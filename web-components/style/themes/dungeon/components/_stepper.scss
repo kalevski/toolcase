@@ -1,0 +1,53 @@
+// Dungeon › tc-stepper — quest-step / ritual-progression track.
+// Token swap fixes the two #fff literals the foundation remap misses
+// (active-color, complete-color → fg-ink on gold/stamina fills).
+// Structural rules add: active marker glow, mono numerals, gilded
+// connector gradient, and display-caps active label.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap: fix the two hardcoded #fff literals ───────────────────────
+    // Vars live on the host element (tc-stepper carries all --bs-stepper-* defaults).
+    tc-stepper {
+        --bs-stepper-active-color: var(--fg-ink);
+        --bs-stepper-active-bg: var(--fg-gold-bright);
+        --bs-stepper-active-border: var(--fg-gold-bright);
+
+        // Complete marker: ink glyph on stamina fill reads better than white-on-green
+        --bs-stepper-complete-color: var(--fg-ink);
+    }
+
+    // ── Active marker glow — lit waypoint ─────────────────────────────────────
+    .tc-stepper-step-active {
+        .tc-stepper-marker {
+            box-shadow: 0 0 6px var(--fg-gold-bright);
+        }
+
+        // Display caps on the active step label — quest chapter heading feel
+        .tc-stepper-label {
+            font-family: var(--fg-display);
+            letter-spacing: 0.06em;
+        }
+    }
+
+    // ── Mono numerals — struck-rune ordinals ──────────────────────────────────
+    .tc-stepper-num {
+        font-family: var(--fg-mono);
+    }
+
+    // ── Gilded connector — the base uses a flat colour; override with gold rule.
+    // Complete and active overrides come AFTER to win the cascade.
+    .tc-stepper-connector {
+        background: var(--fg-rule);
+    }
+
+    .tc-stepper-connector-complete {
+        background: var(--fg-rule);
+        opacity: 1;
+    }
+
+    .tc-stepper-connector-active {
+        background: var(--fg-rule);
+        opacity: 0.7;
+    }
+}

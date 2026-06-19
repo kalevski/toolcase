@@ -1,14 +1,205 @@
-// Dungeon › tc-lobby — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-lobby-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_lobby.scss
-// Target classes: web-components/style/components/_lobby.scss
+// Dungeon › tc-lobby — gilded muster panel. Root gets the layered gold inset frame
+// + parchment-on-leather radial; meta strip + slots become framed ink cells with a
+// gold hairline; ready slots wash stamina-green, empty slots go dashed; names + meta
+// values read display caps; rank chips go mono; ready/host badges glow; all action
+// buttons become beveled gilded metal (ready toggles green, start gold). Token swap
+// can't carry the inset frame, the cell bevels, the gradient washes, or the recasts.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-lobby
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-lobby {
+        --bs-lobby-bg: transparent;
+        --bs-lobby-border: var(--fg-gold-deep);
+        --bs-lobby-header-bg: transparent;
+        --bs-lobby-header-border: rgba(201, 169, 97, 0.25);
+        --bs-lobby-eyebrow-color: var(--fg-parch-dim);
+        --bs-lobby-title-color: var(--fg-gold-bright);
+
+        --bs-lobby-meta-bg: rgba(0, 0, 0, 0.3);
+        --bs-lobby-meta-border: rgba(201, 169, 97, 0.25);
+        --bs-lobby-meta-key-color: var(--fg-parch-dim);
+        --bs-lobby-meta-val-color: var(--fg-gold-bright);
+
+        --bs-lobby-slot-bg: var(--fg-slot-bg);
+        --bs-lobby-slot-border: var(--fg-gold-deep);
+        --bs-lobby-slot-empty-color: var(--fg-parch-dim);
+        --bs-lobby-slot-filled-bg: var(--fg-slot-bg);
+        --bs-lobby-slot-ready-bg: linear-gradient(90deg, rgba(111, 159, 58, 0.18), rgba(0, 0, 0, 0.3));
+
+        --bs-lobby-player-name-color: var(--fg-parch);
+        --bs-lobby-rank-bg: rgba(0, 0, 0, 0.4);
+        --bs-lobby-rank-color: var(--fg-gold-bright);
+        --bs-lobby-host-badge-color: var(--fg-gold-bright);
+        --bs-lobby-ready-color: var(--fg-stamina-bright);
+        --bs-lobby-waiting-color: var(--fg-parch-dim);
+
+        --bs-lobby-actions-bg: transparent;
+    }
+
+    // Root — layered gilded inset frame + parchment-on-leather radial (base flat).
+    // position:relative is required by the corner-notch ::after pseudo-element.
+    .tc-lobby {
+        position: relative;
+        color: var(--fg-parch);
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 18px;
+            height: 18px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            pointer-events: none;
+        }
+    }
+
+    // Meta values read gilded display caps.
+    .tc-lobby-meta-val {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    // Meta cell dividers become gold-rule hairlines instead of flat rgba borders.
+    .tc-lobby-meta-cell {
+        border-right: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+
+        &:last-child {
+            border-right: none;
+            border-image: none;
+        }
+    }
+
+    // Slots — single-column discrete framed ink cells with carved wood slot bg.
+    // Override the base 2-column shared-edge grid to match gc-lobby's look.
+    .tc-lobby-slots {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 0 0.875rem;
+    }
+
+    .tc-lobby-slot {
+        border: 1px solid var(--bs-lobby-slot-border);
+        box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.12);
+
+        &.tc-lobby-slot--ready {
+            border-color: var(--fg-stamina);
+        }
+
+        &.tc-lobby-slot--empty {
+            border-style: dashed;
+        }
+    }
+
+    // Player name reads display caps.
+    .tc-lobby-player-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    // Rank chip framed mono cap.
+    .tc-lobby-rank {
+        border: 1px solid var(--fg-gold-deep);
+        letter-spacing: 0.16em;
+    }
+
+    // Host badge reads display caps with a glow.
+    .tc-lobby-host-badge {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+        text-shadow: 0 0 6px rgba(232, 200, 120, 0.6);
+    }
+
+    // Ready / waiting badges read display caps; ready glows green.
+    .tc-lobby-ready-badge {
+        font-family: var(--fg-display);
+        letter-spacing: 0.2em;
+
+        &.tc-lobby-ready-badge--ready {
+            text-shadow: 0 0 6px rgba(168, 214, 90, 0.4);
+        }
+    }
+
+    .tc-lobby-empty-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.2em;
+        font-style: italic;
+    }
+
+    // Actions bar — gold-rule top divider to frame the button row (safe now that
+    // slots are single-column with their own discrete borders).
+    .tc-lobby-actions {
+        border-top: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+
+    // All action buttons become beveled gilded metal; READY UP gets leather fill.
+    .tc-lobby-btn {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+        background: var(--fg-button-bg);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18);
+        transition:
+            transform 0.12s ease,
+            filter 0.12s ease;
+
+        &:hover:not(:disabled) {
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+            background: var(--fg-button-bg);
+            color: var(--fg-gold-bright);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(1px);
+            filter: brightness(0.9);
+        }
+
+        // Ready toggle: leather metal, green when active.
+        &.tc-lobby-btn--active {
+            background: linear-gradient(180deg, #2a4818, #15240a);
+            border-color: var(--fg-stamina);
+            color: var(--fg-stamina-bright);
+
+            &:hover:not(:disabled) {
+                opacity: 1;
+                filter: brightness(1.15);
+            }
+        }
+
+        // Start: brighter gold metal, the decisive action.
+        &.tc-lobby-btn--start {
+            background: linear-gradient(180deg, #5a3a18, #2a1a0a);
+            border-color: var(--fg-gold);
+            color: var(--fg-gold-bright);
+            box-shadow:
+                inset 0 1px 0 rgba(232, 200, 120, 0.25),
+                inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+                0 2px 0 rgba(0, 0, 0, 0.6);
+
+            &:hover:not(:disabled) {
+                opacity: 1;
+                filter: brightness(1.15);
+            }
+        }
+    }
 }

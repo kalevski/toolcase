@@ -1,14 +1,13 @@
-// Dungeon › tc-grid — TODO: dungeon override not yet implemented.
+// Dungeon › tc-grid — no override needed.
 //
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-grid-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
+// tc-grid is a pure CSS-grid layout primitive: it has no colours, borders, fills,
+// or text of its own — only track/gap geometry driven from --bs-grid-* inline
+// styles. There is nothing for the fantasy reskin to carry, so this block is
+// intentionally empty (the foundation token remap covers any inherited cosmetics).
 //
 // Design source:  game-components/style/components/_grid.scss
 // Target classes: web-components/style/components/_grid.scss
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-grid
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
 }

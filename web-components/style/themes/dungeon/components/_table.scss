@@ -1,0 +1,43 @@
+// Dungeon › tc-table — gilded ledger / loot manifest.
+// Key fix: --bs-table-row-hairline hard-codes var(--tc-slate-100, #f1f5f9), a raw
+// slate token the foundation does not remap, producing near-white hairlines on dark
+// wood. Override it here with a faint gold hairline. Also: gilded header caps and
+// a bevel-top highlight on the wrap frame.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap: the one off-palette literal + header colour ─────────────────
+    tc-table {
+        --bs-table-row-hairline: 1px solid rgba(201, 169, 97, 0.15);
+        --bs-table-th-color:     var(--fg-gold);
+    }
+
+    // ── Header: gilded display caps (engraved ledger read) ───────────────────────
+    .tc-table-th {
+        font-family:     var(--fg-display);
+        letter-spacing:  0.1em;
+        text-transform:  uppercase;
+        font-weight:     600;
+    }
+
+    // Sort button hover lifts to gold-bright instead of plain text.
+    .tc-table-sort:hover {
+        color: var(--fg-gold-bright);
+    }
+
+    // Active sort-direction icon takes gold instead of --tc-text.
+    .tc-table-th[aria-sort='ascending'] .tc-table-sort-icon,
+    .tc-table-th[aria-sort='descending'] .tc-table-sort-icon {
+        color: var(--fg-gold);
+    }
+
+    // ── Wrap frame: gilded top-edge bevel ───────────────────────────────────────
+    .tc-table-wrap {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Sticky header: bolder gold lift line ────────────────────────────────────
+    .tc-table-wrap--sticky .tc-table-head .tc-table-th {
+        box-shadow: 0 1px 0 var(--fg-gold);
+    }
+}

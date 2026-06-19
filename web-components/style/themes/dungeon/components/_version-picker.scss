@@ -1,0 +1,32 @@
+// Dungeon › tc-version-picker — edition / scroll-revision selector.
+// Foundation already remaps all --bs-version-picker-* vars (gold frame, wood
+// surface, ink active fill, element-ramp status tags, mono strings). The two
+// structural fixes here are: (1) add the gilded bevel to the segmented frame,
+// (2) repaint the one hardcoded white rgba wash on the active-segment tag so
+// it reads on the gold fill instead of bleeding white.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Segmented frame bevel ─────────────────────────────────────────────
+    // The full panel shadow stack is intentionally heavy; the lighter
+    // --fg-bevel-top (top highlight band only) is sufficient for this compact
+    // grouped control.
+    .tc-version-picker--segmented {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Active-segment annotation tag ─────────────────────────────────────
+    // Base hardcodes rgba(255,255,255,0.18) — white wash on the gold active
+    // fill.  Replace with an ink wash so the tag reads clearly on gold.
+    .tc-version-picker__option--active .tc-version-picker__tag {
+        background: rgba(26, 20, 13, 0.25);
+        color: var(--fg-ink);
+    }
+
+    // ── Dropdown label text ───────────────────────────────────────────────
+    // Route the micro uppercase label to the display face; already uppercase +
+    // tracked in the base, just swap the font family for dungeon flavor.
+    .tc-version-picker__label-text {
+        font-family: var(--fg-display);
+    }
+}

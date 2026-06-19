@@ -1,0 +1,34 @@
+// Dungeon › tc-image-crop — gilded avatar/portrait stage.
+// Three slate-literal traps survive the foundation remap:
+//   - scrim rgba(15,23,42,…)       → ink rgba
+//   - apply-button gradient stop #2b3a51 → var(--fg-gold-edge)
+//   - apply-button text #fff and lift rgba(30,41,59,…) → ink text + deep shadow
+// Structural add: gilded bevel on the crop stage via --fg-bevel-top.
+// Sanctioned circles kept: round slider thumb, circular crop-window border-radius: 50%.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on the host ──────────────────────────────────────────────────
+    tc-image-crop {
+        --bs-image-crop-scrim:              rgba(10, 7, 4, 0.6);
+        --bs-image-crop-btn-primary-bg:     var(--fg-gold-edge);
+        --bs-image-crop-btn-primary-color:  var(--fg-ink);
+        --bs-image-crop-btn-primary-lift:   0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    // ── Gilded crop stage — inset bevel top highlight ───────────────────────────
+    // The base ships no shadow on the stage; this adds the gilded frame read.
+    .tc-image-crop-stage {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Zoom label — engraved display caps ──────────────────────────────────────
+    // Base already sets mono + uppercase + 0.08em tracking; upgrade to Cinzel
+    // display caps so the "ZOOM" label reads as an engraved instrument callout.
+    .tc-image-crop-zoom-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+}

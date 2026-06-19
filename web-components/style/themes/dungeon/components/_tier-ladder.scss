@@ -1,0 +1,85 @@
+// Dungeon › tc-tier-ladder — "Ranks of the Order" board.
+// Token swap catches most cosmetics via --tc-* remap; this file patches the
+// one hardcoded literal (slate current-bg), adds the gilded panel frame to the
+// list container, display caps to the title, and repoints dots to the rarity ramp.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ------------------------------------------------------------------ //
+    // Token overrides on the host element
+    // ------------------------------------------------------------------ //
+    tc-tier-ladder {
+        // Current row: replace the hardcoded slate rgba that the foundation
+        // remap cannot reach — this is the only literal in the base.
+        --bs-tier-ladder-current-bg: linear-gradient(
+            90deg,
+            rgba(201, 169, 97, 0.18),
+            transparent
+        );
+
+        // Gold hairline row separators (stronger fantasy read than leather).
+        --bs-tier-ladder-row-separator: rgba(201, 169, 97, 0.15);
+
+        // Current-tier accent: gold-bright on all three current vars.
+        --bs-tier-ladder-current-border: var(--fg-gold-bright);
+        --bs-tier-ladder-current-name-color: var(--fg-gold-bright);
+        --bs-tier-ladder-current-indicator-color: var(--fg-gold-bright);
+
+        // Rarity ramp for identity dots.
+        --bs-tier-ladder-dot-cyan:   var(--fg-rare);
+        --bs-tier-ladder-dot-yellow: var(--fg-legendary);
+        --bs-tier-ladder-dot-pink:   var(--fg-mythic);
+        --bs-tier-ladder-dot-red:    var(--fg-blood);
+    }
+
+    // ------------------------------------------------------------------ //
+    // List container — gilded bevel frame
+    // ------------------------------------------------------------------ //
+    .tc-tier-ladder-list {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Corner notches on the list container (the same signature ornament as
+    // .tc-panel--bordered).
+    .tc-tier-ladder-list::before,
+    .tc-tier-ladder-list::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .tc-tier-ladder-list::before {
+        left: -1px;
+    }
+
+    .tc-tier-ladder-list::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ------------------------------------------------------------------ //
+    // Title — display caps (base inherits sans; must override the element)
+    // ------------------------------------------------------------------ //
+    .tc-tier-ladder-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ------------------------------------------------------------------ //
+    // Current-tier row — widen left marker to a bolder gold rule
+    // ------------------------------------------------------------------ //
+    .tc-tier-ladder-tier--current {
+        --bs-tier-ladder-current-marker-width: 4px;
+    }
+}

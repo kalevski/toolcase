@@ -1,14 +1,52 @@
-// Dungeon › tc-icon-badge — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-icon-badge-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_icon-badge.scss
-// Target classes: web-components/style/components/_icon-badge.scss
+// Dungeon › tc-icon-badge — gilded glyph chip. Token swap gives the gold glyph +
+// gold border; structural rules add the shared radial socket fill (matching
+// hotbar/item-slot sockets) and an inlaid two-ring gilded bevel stack.
+// Sharp corners preserved.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-icon-badge
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-icon-badge {
+        // 1. Unify fill recipe — shared socket fill matches hotbar/item-slot.
+        --bs-icon-badge-bg: var(--fg-slot-bg);
+        --bs-icon-badge-border-color: var(--fg-gold-deep);
+        --bs-icon-badge-color: var(--fg-gold-bright);
+
+        // 2. Inlaid gold edge — thin inner gold ring frames the glyph.
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-shadow),
+            var(--fg-bevel-top),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.55);
+    }
+
+    // 3. Filled-badge guard — caller-supplied `bg` is likely bright; replace the
+    //    dark bottom inset with the top highlight only so bright fills stay clean.
+    tc-icon-badge[bg] {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+            inset 0 0 0 2px var(--fg-gold-shadow),
+            var(--fg-bevel-top);
+    }
+
+    // Text fallback glyph reads as a mono cap.
+    .tc-icon-badge__glyph {
+        font-family: var(--fg-mono);
+
+        // 4. Glyph legibility — drop-shadow separates the gold glyph from dark fill.
+        svg {
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+        }
+    }
+
+    // 5. Hover affordance — warms the border to bright gold and adds a faint inner glow.
+    tc-icon-badge:hover {
+        --bs-icon-badge-border-color: var(--fg-gold);
+
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-shadow),
+            var(--fg-bevel-top),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.55),
+            inset 0 0 6px rgba(240, 210, 122, 0.25);
+    }
 }

@@ -1,0 +1,27 @@
+// Dungeon › tc-state-machine — quest-stage / ritual-progress ladder.
+// Foundation remaps all four marker states (done→stamina, active→gold, pending→gold-deep,
+// error→blood) and the connector/text colours for free via --tc-* → --fg-* in _foundation.scss.
+// This override adds structural details a token swap cannot carry:
+//   1. Active marker rune-glow (box-shadow on the filled circle).
+//   2. Gilded connector (--fg-rule gold gradient replacing the flat 1px line).
+//   3. Display caps on stage labels (--fg-display small-caps feel).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Active stage glows like a lit rune — base only fills + pulses the circle.
+    .tc-state-machine-marker-active {
+        box-shadow: 0 0 6px var(--fg-gold-bright);
+    }
+
+    // Connector becomes a gilded gradient rule instead of a flat gold-deep line.
+    // --fg-rule is a gradient, so it must be applied as background, not border-color.
+    .tc-state-machine-connector {
+        background: var(--fg-rule);
+    }
+
+    // Stage label reads as fantasy display caps for a quest-step heading feel.
+    .tc-state-machine-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.08em;
+    }
+}

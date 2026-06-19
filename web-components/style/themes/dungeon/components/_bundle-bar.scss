@@ -1,0 +1,29 @@
+// Dungeon › tc-bundle-bar — loot gauge / resource bar reskin.
+// Token swap deepens the track to ink and replaces the flat accent fill with
+// a gilded gradient. Structural rules add the recessed track bevel, scanline
+// overlay on filled segments, and display caps on the name label.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-bundle-bar {
+        --bs-bundle-bar-segment-bg: var(--fg-ink-2);
+        --bs-bundle-bar-segment-filled-bg: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    }
+
+    // Recessed gilt channel: thin inner stroke seats the gauge track in the surface.
+    .tc-bundle-bar__track {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+
+    // Scanline overlay on filled segments — echoes the resource-bar signature texture.
+    .tc-bundle-bar__segment.is-filled {
+        background-image: var(--fg-scanlines);
+    }
+
+    // Display caps on the name label — reads as a dungeon-register heading.
+    .tc-bundle-bar__name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+}

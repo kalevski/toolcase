@@ -1,0 +1,27 @@
+// Dungeon › tc-link — gilded inline anchor.
+// The default/primary link is already gold via the --tc-app-accent remap in the
+// foundation; no structural override is needed (no frame, bevel, or notch).
+// Only the status variants are repointed here to sharper fantasy element tones.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-link-success {
+        --bs-link-color: var(--fg-uncommon);
+        --bs-link-hover-color: var(--fg-uncommon);
+    }
+
+    .tc-link-danger {
+        --bs-link-color: var(--fg-blood-bright);
+        --bs-link-hover-color: var(--fg-blood-bright);
+    }
+
+    .tc-link-info {
+        --bs-link-color: var(--fg-mana-bright);
+        --bs-link-hover-color: var(--fg-mana-bright);
+    }
+
+    .tc-link-warning {
+        --bs-link-color: var(--fg-legendary);
+        --bs-link-hover-color: var(--fg-legendary);
+    }
+}

@@ -1,0 +1,57 @@
+// Dungeon › tc-tab-sections — gilded display-caps tab nav over wood-panel content.
+// Token swap fixes the off-palette skeleton-bg (--tc-slate-200 is not remapped by
+// the foundation). Structural rules repoint tab typography to --fg-display caps and
+// replace the nav hairline with a gold-gradient rule.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap ────────────────────────────────────────────────────────────
+    // Sits on the host element, matching where the base defines these vars.
+
+    tc-tab-sections {
+        // Active tab gets bright gold (foundation maps active to --tc-text → parch,
+        // this strengthens it to the gilded accent).
+        --bs-tab-sections-tab-color-active: var(--fg-gold-bright);
+
+        // Skeleton bars: --tc-slate-200 is a raw slate token the foundation does
+        // not remap; replace with a dark leather/gold-shadow tone so bars sit
+        // on-palette against the wood background.
+        --bs-tab-sections-skeleton-bg: var(--fg-gold-shadow);
+    }
+
+    // ── Display-caps tab typography ───────────────────────────────────────────
+    // The base hardcodes font-family: var(--tc-font-sans) on the class element,
+    // so a var remap alone is insufficient — override the class directly.
+
+    .tc-tab-sections-tab {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // Active tab: stronger gold colour + gold border-bottom (foundation already
+    // sets the underline to --tc-app-accent → gold; this overrides the colour
+    // directly for a brighter gilded read, matching tc-tab-bar behaviour).
+    .tc-tab-sections-tab--active {
+        color: var(--fg-gold-bright);
+        border-bottom-color: var(--fg-gold);
+    }
+
+    // ── Gilded gradient nav hairline ──────────────────────────────────────────
+    // Replace the flat 1px solid border-bottom with the --fg-rule gold gradient
+    // so the nav separator reads as an ornamental gold rule rather than plain ink.
+    // margin-bottom: -1px on tabs is preserved — the tab still sits flush because
+    // the gradient is rendered as background-image at the bottom edge, not as a
+    // border (so border-bottom on the nav becomes none and the flush trick still
+    // works via the tab's own 2px underline overlapping the 1px background line).
+
+    .tc-tab-sections-nav {
+        border-bottom: none;
+        background-image: var(--fg-rule);
+        background-repeat: no-repeat;
+        background-position: bottom;
+        background-size: 100% 1px;
+    }
+}

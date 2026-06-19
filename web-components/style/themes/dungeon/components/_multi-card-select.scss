@@ -1,0 +1,51 @@
+// Dungeon › tc-multi-card-select — gilded chooser grid.
+// Token swap via foundation covers most cosmetics (leather/parchment surfaces,
+// gold border, gold selected-fill, square corners). This override handles:
+//   1. Critical contrast fix: selected-text was hardcoded #fff — ink reads on gold.
+//   2. Recessed slot feel on resting cards via --fg-slot-bg + bevel highlight.
+//   3. Gold-gradient lit fill on selected cards instead of flat gold.
+//   4. Display caps on option labels.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // 1. Critical contrast fix — hardcoded #fff → ink so text is legible on gold fill.
+    tc-multi-card-select {
+        --bs-multi-card-select-selected-text: var(--fg-ink);
+    }
+
+    // 2. Resting card: recessed socket appearance with top-edge bevel highlight.
+    .tc-multi-card-select-card {
+        background-image: var(--fg-slot-bg);
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // 3. Selected card: gold-gradient lit fill pops forward; deeper shadow for depth.
+    .tc-multi-card-select-card.is-selected {
+        background-image: var(--fg-gold-edge);
+        border-color: var(--fg-gold);
+        box-shadow: var(--fg-bevel-top), 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    // 4. Ink description text on gold (base hardcodes rgba(255,255,255,0.75)).
+    .tc-multi-card-select-card.is-selected .tc-multi-card-select-desc {
+        color: rgba(26, 20, 13, 0.75);
+    }
+
+    // 5. Display caps on option title labels.
+    .tc-multi-card-select-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+
+    // Extension point (no base class today): consumer-added rarity classes
+    // can drive per-card border-color via the --fg-{common…mythic} ramp, e.g.:
+    //   .tc-multi-card-select-card--common   { border-color: var(--fg-common); }
+    //   .tc-multi-card-select-card--uncommon { border-color: var(--fg-uncommon); }
+    //   .tc-multi-card-select-card--rare     { border-color: var(--fg-rare); }
+    //   .tc-multi-card-select-card--epic     { border-color: var(--fg-epic); }
+    //   .tc-multi-card-select-card--legendary{ border-color: var(--fg-legendary); }
+    //   .tc-multi-card-select-card--mythic   { border-color: var(--fg-mythic); }
+}

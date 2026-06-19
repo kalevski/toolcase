@@ -1,14 +1,43 @@
-// Dungeon › tc-objective-marker — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-objective-marker-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_objective-marker.scss
-// Target classes: web-components/style/components/_objective-marker.scss
+// Dungeon › tc-objective-marker — gilded world-space pin. Token swap repoints
+// the marker colour to gold-bright; rules add the glyph glow, the dark gold-edged
+// info chip with an inset bevel, display-caps label, and mono distance readout.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-objective-marker
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-objective-marker {
+        --bs-objective-marker-color: var(--fg-gold-bright);
+        // Subtle vertical gradient gives the chip the same depth as other dungeon slots.
+        --bs-objective-marker-bg: linear-gradient(180deg, rgba(20, 12, 6, 0.78), rgba(10, 6, 4, 0.8));
+        --bs-objective-marker-border-color: var(--fg-gold-deep);
+        --bs-objective-marker-text-color: var(--fg-gold-bright);
+        --bs-objective-marker-distance-color: var(--fg-parch);
+        // Airier stacking: 4px outer gap between glyph and chip.
+        gap: 4px;
+    }
+
+    // Glyph glows in its own accent colour — fixes gold halo on custom-colored markers.
+    .tc-objective-marker__glyph {
+        filter:
+            drop-shadow(0 1px 2px #000)
+            drop-shadow(0 0 12px var(--bs-objective-marker-color));
+    }
+
+    // Info chip — dark outer ring + sanctioned gilded top highlight for depth.
+    .tc-objective-marker__text {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5), var(--fg-bevel-top);
+        // Airier stacking: 2px inner text gap.
+        gap: 2px;
+    }
+
+    // Label reads as display caps; distance is mono.
+    .tc-objective-marker__label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+        text-shadow: 0 1px 2px #000;
+    }
+    .tc-objective-marker__distance {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.16em;
+        text-shadow: 0 1px 2px #000;
+    }
 }

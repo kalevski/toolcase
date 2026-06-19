@@ -1,0 +1,34 @@
+// Dungeon › tc-section-flag — gilded zone label.
+// The foundation swap handles all colour (marker → gold, title → parch, subtitle → parch-3,
+// font-family → body serif). The two things a token swap cannot carry are:
+//   1. Title upgraded from body serif to display caps with wide tracking.
+//   2. Marker upgraded from a flat gold fill to a gold gradient sliver.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Title — display caps (the signature dungeon heading move).
+    // Overrides font-family (base hardcodes --tc-font-sans) and resets the
+    // base's tight tracking (-0.01em) to wide tracking (+0.16em).
+    .tc-section-flag-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // Marker — gold gradient sliver (top-bright → deep) for a bevelled look.
+    .tc-section-flag-marker {
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    }
+
+    // Center variant — the marker becomes a horizontal bar; switch to a
+    // horizontal gradient so the bright edge is still on the leading side.
+    .tc-section-flag--center .tc-section-flag-marker {
+        background: linear-gradient(90deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    }
+
+    // Subtitle — quiet italic lore-caption (already serif via foundation).
+    .tc-section-flag-subtitle {
+        font-style: italic;
+    }
+}

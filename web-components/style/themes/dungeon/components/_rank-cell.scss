@@ -1,0 +1,22 @@
+// Dungeon › tc-rank-cell — stamped plate with fantasy metal tier ramp.
+// Token swap replaces the three hardcoded tier hex literals (#d97706, #94a3b8,
+// #b45309) with the sanctioned metal tokens (legendary/gold, silver, copper).
+// The base frame bg/border/default text already remap via the foundation.
+// Structural bevel gives the cell a stamped-plate read without over-decorating
+// what is intentionally a small, dense leaderboard element.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Repoint hardcoded tier literals → fantasy metal ramp.
+    tc-rank-cell {
+        --bs-rank-cell-gold:   var(--fg-legendary);
+        --bs-rank-cell-silver: var(--fg-silver);
+        --bs-rank-cell-bronze: var(--fg-copper);
+    }
+
+    // Stamped-plate surface — kept light since it's a dense cell, not a panel.
+    .tc-rank-cell {
+        background: var(--fg-slot-bg);
+        box-shadow: var(--fg-bevel-top);
+    }
+}

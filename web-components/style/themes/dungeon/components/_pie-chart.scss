@@ -1,0 +1,44 @@
+// Dungeon › tc-pie-chart — fantasy ramp replaces the slate-leaning slice defaults.
+// Core fix: slices 2/4/6/8 use --tc-slate-500/700/400/600 which are undefined in
+// the dungeon foundation, leaving half the pie cold grey. The full --fg-* ramp
+// (gold → rarity → element) restores all eight slices. Tooltip literal #fff → parch.
+// Structural: display caps on the title, mono caps on the centre label, gilded
+// bevel on the inner frame.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // --- token swap: slice fill ramp (gold / rarity / element) ---
+    tc-pie-chart {
+        --bs-pie-chart-slice-1: var(--fg-gold);          // was --tc-app-accent (→ gold already, explicit)
+        --bs-pie-chart-slice-2: var(--fg-rare);           // was --tc-slate-500  (undefined → dead grey)
+        --bs-pie-chart-slice-3: var(--fg-mana);           // was --tc-info       (→ mana already, explicit)
+        --bs-pie-chart-slice-4: var(--fg-epic);           // was --tc-slate-700  (undefined → dead grey)
+        --bs-pie-chart-slice-5: var(--fg-stamina);        // was --tc-success    (→ stamina already, explicit)
+        --bs-pie-chart-slice-6: var(--fg-legendary);      // was --tc-slate-400  (undefined → dead grey)
+        --bs-pie-chart-slice-7: var(--fg-fire);           // was --tc-warning    (→ distinct warm hue)
+        --bs-pie-chart-slice-8: var(--fg-arcane);         // was --tc-slate-600  (undefined → dead grey)
+
+        // --- token swap: tooltip text (kills literal #fff) ---
+        --bs-pie-chart-tooltip-color: var(--fg-parch);
+    }
+
+    // --- structure: gilded bevel on the inner frame ---
+    .tc-pie-chart-inner {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // --- structure: display caps title ---
+    .tc-pie-chart-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    // --- structure: mono caps centre label (overrides hardcoded 'Inter', sans-serif) ---
+    .tc-pie-chart-center-label {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+}

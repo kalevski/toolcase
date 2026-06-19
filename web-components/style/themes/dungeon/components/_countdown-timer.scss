@@ -1,0 +1,39 @@
+// Dungeon › tc-countdown-timer — quest/event timer as gilded slot tiles.
+// Token swap gives slot-bg fill + gold-deep borders; structural rules add the
+// inset bevel on each unit tile, display-caps section label, and numeral glow.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-countdown-timer {
+        // Slot tile: radial wood fill instead of flat slate surface.
+        --bs-countdown-timer-unit-bg: var(--fg-slot-bg);
+        // Gold border on every unit tile.
+        --bs-countdown-timer-unit-border: var(--fg-gold-deep);
+        // Glowing engraved mono numeral.
+        --bs-countdown-timer-value-color: var(--fg-gold-bright);
+        // Section label and unit micro-label in gold.
+        --bs-countdown-timer-label-color: var(--fg-gold);
+        --bs-countdown-timer-unit-label-color: var(--fg-gold);
+        // Compact-mode colon separators in gold.
+        --bs-countdown-timer-sep-color: var(--fg-gold);
+    }
+
+    // Each unit tile reads as a recessed gilded slot.
+    .tc-countdown-unit {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Base hardcodes JetBrains Mono on the section label — override to display caps.
+    .tc-countdown-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    // Subtle glow on the large mono numeral.
+    .tc-countdown-value {
+        text-shadow: 0 0 6px rgba(240, 210, 122, 0.3);
+    }
+}

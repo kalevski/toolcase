@@ -1,0 +1,16 @@
+// Dungeon › tc-pulse-indicator — arcane-gold beacon dot.
+// Foundation already covers label colour (parch-muted) and body-font serif.
+// The only dungeon flavour worth adding: repoint the default dot/ring colour
+// from stamina-green to gold so the "live" indicator reads as an arcane beacon.
+// Dot + ring stay circular (sanctioned border-radius: 50%); no frame here so
+// no bevel / notch / display-caps apply.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Arcane-gold default beacon.
+    // Inline `color` attribute on the host writes its own --bs-pulse-indicator-color,
+    // so per-instance overrides remain untouched without needing !important.
+    tc-pulse-indicator {
+        --bs-pulse-indicator-color: var(--fg-gold);
+    }
+}

@@ -1,0 +1,27 @@
+// Dungeon › tc-spinner — single off-palette fix: the ring track.
+// The spinner variants (grow, dots, bars, orbit, pulse) all use currentcolor
+// so they pick up the gilded hue from the inherited text color for free.
+// The only literal the foundation does NOT remap is the spinner-border track:
+// `border: … solid var(--tc-slate-200)` — slate against dark wood is
+// off-palette. We replace it with --fg-gold-shadow (dark tarnished gold) so
+// the bright arc reads as light catching a spinning bronze ring.
+// All border-radius: 50% here are sanctioned circles — left untouched.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Force a gold arc colour on the two variants that may not inherit
+    // a text colour from context.
+    .spinner-border,
+    .spinner-pulse {
+        color: var(--fg-gold-bright);
+    }
+
+    // Replace the slate-200 track with dark tarnished gold so the bright
+    // arc pops against a dark wood surface. border-top-color carries the
+    // arc via currentcolor (set above).
+    .spinner-border {
+        border-color: var(--fg-gold-shadow);
+        border-top-color: currentcolor;
+    }
+}

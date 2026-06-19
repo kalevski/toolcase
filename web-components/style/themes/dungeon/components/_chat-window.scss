@@ -1,14 +1,91 @@
-// Dungeon › tc-chat-window — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-chat-window-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_chat-window.scss
-// Target classes: web-components/style/components/_chat-window.scss
+// Dungeon › tc-chat-window — gilded chat panel. Token swap recolours the shell,
+// tabs, input and send button; structural rules add the dual gradient/radial
+// fill + triple-gold inset bevel on the shell, display-caps tabs/senders/send
+// label, the metal send-button bevel, and the dark-inset gilded compose input.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-chat-window
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-chat-window {
+        --bs-chat-window-bg:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        --bs-chat-window-border: 1px solid var(--fg-gold-deep);
+
+        --bs-chat-window-tabs-bg: transparent;
+        --bs-chat-window-tabs-border: 1px solid rgba(201, 169, 97, 0.25);
+        --bs-chat-window-tab-rest-color: var(--fg-parch-3);
+        --bs-chat-window-tab-active-color: var(--fg-gold-bright);
+
+        --bs-chat-window-message-color: var(--fg-gold-bright);
+        --bs-chat-window-system-color: var(--fg-parch-3);
+        --bs-chat-window-message-hover-bg: rgba(201, 169, 97, 0.06);
+
+        --bs-chat-window-compose-border: 1px solid rgba(201, 169, 97, 0.25);
+        --bs-chat-window-input-bg: linear-gradient(180deg, #0e0905, #1a120a);
+        --bs-chat-window-input-border: 1px solid var(--fg-gold-deep);
+        --bs-chat-window-input-color: var(--fg-parch);
+        --bs-chat-window-input-focus-border: var(--fg-gold-bright);
+        --bs-chat-window-input-focus-ring: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+        --bs-chat-window-send-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-chat-window-send-color: var(--fg-gold-bright);
+    }
+
+    // Triple-gold inset bevel on the shell.
+    .tc-chat-window {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    // Tabs + senders + send label read as display caps.
+    .tc-chat-window-tab,
+    .tc-chat-window-message-sender,
+    .tc-chat-window-send {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+    }
+
+    // Active tab gets a faint gilded well.
+    .tc-chat-window-tab.is-active {
+        background: rgba(201, 169, 97, 0.12);
+    }
+
+    // Dark-inset gilded compose input.
+    .tc-chat-window-input {
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+    }
+
+    // Italic dim placeholder on the compose input.
+    .tc-chat-window-input::placeholder {
+        color: var(--fg-parch-dim);
+        font-style: italic;
+    }
+
+    // Metal send-button bevel + brightness feedback (drops the slate lift glow).
+    .tc-chat-window-send {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        &:hover {
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+            box-shadow:
+                inset 0 1px 0 rgba(232, 200, 120, 0.25),
+                inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+                0 2px 0 rgba(0, 0, 0, 0.6);
+        }
+
+        &:active {
+            filter: brightness(0.9);
+            transform: translateY(1px);
+        }
+    }
 }

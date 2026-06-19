@@ -1,0 +1,39 @@
+// Dungeon › tc-nav — tabs, pills, underline, side-rail.
+// Foundation already repoints every --bs-nav-* colour token to the parch/gold
+// palette and forces border-radius to 0, so the only structural upgrade is
+// display-caps typography on nav links plus optional active-marker polish and
+// a metal pill for the active pill state.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Display caps — the single fantasy signature ────────────────────────────
+    // Scoped to .nav (not tc-navbar) so it doesn't double-apply inside the bar.
+    .nav .nav-link {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    // ── Tabs — brighten the active underline to gilded gold ───────────────────
+    .nav-tabs {
+        --bs-nav-tabs-link-active-border-color: var(--fg-gold-bright);
+    }
+
+    // ── Underline — active marker tracks the brighter gold ────────────────────
+    .nav-underline {
+        .nav-link.active {
+            border-bottom-color: var(--fg-gold-bright);
+        }
+
+        &.flex-column .nav-link.active {
+            border-left-color: var(--fg-gold-bright);
+        }
+    }
+
+    // ── Pills — active pill reads as a pressed metal tab ──────────────────────
+    .nav-pills .nav-link.active {
+        background: var(--fg-button-bg);
+        box-shadow: var(--fg-bevel-top);
+        color: var(--fg-gold-bright);
+    }
+}

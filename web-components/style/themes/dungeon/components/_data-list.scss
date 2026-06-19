@@ -1,0 +1,66 @@
+// Dungeon › tc-data-list — inventory/quest-list gilded panel.
+// Token swap: wood gradient bg, gold-deep borders, leather header, ink-on-gold
+// action hover. Structure: bevel + corner notches (framed inventory panel),
+// display-caps header title, metal resting-state action buttons.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap ────────────────────────────────────────────────────────────
+
+    tc-data-list {
+        --bs-data-list-bg:                var(--fg-panel-bg);
+        --bs-data-list-border:            1px solid var(--fg-gold-deep);
+        --bs-data-list-separator:         1px solid var(--fg-gold-deep);
+        --bs-data-list-header-bg:         var(--fg-leather-2);
+        --bs-data-list-action-hover-color: var(--fg-ink);
+        --bs-data-list-action-border:     1px solid var(--fg-gold);
+        --bs-data-list-row-selected-bg:   var(--fg-leather-2);
+    }
+
+    // ── Panel shell — bevel + corner notches ──────────────────────────────────
+
+    .tc-data-list {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+        border-radius: 0;
+    }
+
+    // Top corner notches — signature gilded ornament.
+    .tc-data-list::before,
+    .tc-data-list::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .tc-data-list::before {
+        left: -1px;
+    }
+
+    .tc-data-list::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Header title — display caps ───────────────────────────────────────────
+
+    .tc-data-list__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // ── Action button — metal resting fill ────────────────────────────────────
+
+    .tc-data-list__action {
+        background: var(--fg-button-bg);
+        border-radius: 0;
+    }
+}

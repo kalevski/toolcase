@@ -1,0 +1,76 @@
+// Dungeon › .offcanvas — gilded edge drawer.
+// Token-swap promotes the flat bordered slab to a wood-fill, bevel-edged panel.
+// Structural rules cover: gradient surface, inset bevel, display-caps title,
+// gold-rule header divider, serif body copy, and ink backdrop fix.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // -------------------------------------------------------------------------
+    // 1. Token swap — surface + border colour
+    // -------------------------------------------------------------------------
+    .offcanvas {
+        --bs-offcanvas-bg: var(--fg-panel-bg);
+        --bs-offcanvas-border-color: var(--fg-gold-deep);
+        --bs-offcanvas-color: var(--fg-parch);
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. Gilded bevel — inset stack layered on top of the deep drop shadow
+    //    that the foundation already wires via --bs-offcanvas-box-shadow.
+    // -------------------------------------------------------------------------
+    .offcanvas {
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            var(--bs-offcanvas-box-shadow);
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Backdrop fix — base hardcodes #0f172a (slate-navy literal, not a var)
+    // -------------------------------------------------------------------------
+    .offcanvas-backdrop {
+        background-color: #000;
+        backdrop-filter: blur(2px);
+
+        &.show {
+            opacity: 0.65;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Display caps title
+    // -------------------------------------------------------------------------
+    .offcanvas-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. Header gold-rule divider — replace flat border-bottom with gradient
+    // -------------------------------------------------------------------------
+    .offcanvas-header {
+        position: relative;
+        border-bottom: none;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--fg-rule);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. Body serif copy
+    // -------------------------------------------------------------------------
+    .offcanvas-body {
+        font-family: var(--fg-body);
+        color: var(--fg-parch);
+    }
+}

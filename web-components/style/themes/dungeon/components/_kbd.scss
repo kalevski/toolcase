@@ -1,0 +1,22 @@
+// Dungeon › tc-kbd — engraved keycap with gradient bevel fill.
+// Token swap repoints --bs-kbd-* to parch text on a wood-gradient cap with a
+// gold-deep border. Structural rule overrides the base box-shadow:none to
+// restore the inset top-highlight bevel that makes the cap read as 3-D.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-kbd {
+        --bs-kbd-bg: var(--fg-keycap-bg);
+        --bs-kbd-color: var(--fg-parch);
+        --bs-kbd-border-color: var(--fg-gold-deep);
+        --bs-kbd-sep-color: var(--fg-parch-dim);
+        --bs-kbd-font-family: var(--fg-mono);
+    }
+
+    // Bevel highlight — overrides the base box-shadow:none so the cap gets
+    // the inset gold top-edge that makes it read as a physical keycap.
+    .tc-kbd-key {
+        box-shadow: var(--fg-bevel-top);
+        letter-spacing: 0.04em;
+    }
+}

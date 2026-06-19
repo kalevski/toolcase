@@ -1,14 +1,10 @@
-// Dungeon › tc-vignette-overlay — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-vignette-overlay-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_vignette-overlay.scss
-// Target classes: web-components/style/components/_vignette-overlay.scss
+// Dungeon › tc-vignette-overlay — keep the edge vignette ink-black, matching
+// the game's cinematic low-health darkening. Pure colour FX: the radial
+// gradient structure and intensity contract are already correct in the base.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-vignette-overlay
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-vignette-overlay {
+        --bs-vignette-overlay-color: #0a0604;
+    }
 }

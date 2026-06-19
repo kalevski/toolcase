@@ -1,0 +1,34 @@
+// Dungeon › tc-scoring-rules — scoring codex list.
+// Token swap covers most cosmetics (row divider, desc colour, accents via --tc-*).
+// Explicit overrides: stray #ec4899 pink → --fg-mythic; points → gold-bright;
+// title → display caps; accent bar widened to 4px rune-marker width.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-scoring-rules {
+        // Fix the one stray hardcoded hex the foundation cannot reach.
+        --bs-scoring-rules-accent-pink: var(--fg-mythic);
+
+        // Gild the points and title token values.
+        --bs-scoring-rules-points-color: var(--fg-gold-bright);
+        --bs-scoring-rules-title-color: var(--fg-gold-bright);
+
+        // Widen the accent bar so it reads as a gilded rune marker.
+        --bs-scoring-rules-accent-bar-width: 4px;
+    }
+
+    // Display caps on rule titles — the base hardcodes no font-family here,
+    // so we must override the class directly (a var swap alone won't do it).
+    .tc-scoring-rule-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // Explicit mono on points — foundation already routes --bs-font-monospace
+    // to --fg-mono, but belt-and-suspenders keeps this self-contained.
+    .tc-scoring-rule-points {
+        font-family: var(--fg-mono);
+    }
+}

@@ -1,0 +1,30 @@
+// Dungeon › tc-file-dropzone — ritual circle / empty slot frame.
+// Foundation token remap already flips bg → wood, border → gold-deep (dashed),
+// prompt/icon → parch-3, active-bg → leather, active-border → gold-bright.
+// Structural additions: prompt display caps ("DROP TO SUMMON") + active-rune glow.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Step 1: swap area background to the panel wood-grain gradient.
+    tc-file-dropzone {
+        --bs-file-dropzone-bg: var(--fg-panel-bg);
+    }
+
+    // Step 2: prompt text as display caps — Cinzel, wide tracking, "summon" tone.
+    .tc-file-dropzone__prompt {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // Step 3: drag-active state — gold-bright border (free via token) + rune glow.
+    .tc-file-dropzone--active .tc-file-dropzone__area {
+        box-shadow: 0 0 0 1px var(--fg-gold-bright), 0 0 18px rgba(240, 210, 122, 0.25);
+    }
+
+    // Step 4: icon tinted gilt at rest so it reads as a rune glyph.
+    .tc-file-dropzone__icon {
+        color: var(--fg-gold-deep);
+    }
+}

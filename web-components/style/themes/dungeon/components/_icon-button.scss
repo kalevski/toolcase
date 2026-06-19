@@ -1,0 +1,26 @@
+// Dungeon › tc-icon-button — gilded top-highlight bevel on solid icon controls.
+// Most appearance flows through .btn / .btn-{variant} and is already themed by
+// the button partial + foundation token remap. This partial only adds the one
+// structural rule that a token swap can't carry: the inset top-highlight that
+// makes a square icon control read as a struck metal chip.
+// Ghost secondary is explicitly excluded — a hover-well ghost bevel is too heavy.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Solid icon-buttons (primary, danger, etc.) — gilded top highlight.
+    // Scoped away from .btn-secondary so the transparent ghost stays flat.
+    .tc-icon-button:not(.btn-secondary) {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Ghost secondary — flat, no bevel; override any box-shadow the button
+    // partial may have set on .btn so the transparent ghost stays weightless.
+    .btn-secondary.tc-icon-button {
+        box-shadow: none;
+
+        &:hover,
+        &:active {
+            box-shadow: none;
+        }
+    }
+}

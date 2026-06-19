@@ -1,14 +1,124 @@
-// Dungeon › tc-character-create — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-character-create-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_character-create.scss
-// Target classes: web-components/style/components/_character-create.scss
+// Dungeon › tc-character-create — gilded creation panel. The base sets the
+// surface/border/shadow directly on the host, so the token swap + bevel go on
+// tc-character-create itself. Structural rules give the eyebrow + field labels
+// display caps and the range readout gold mono.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-character-create
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-character-create {
+        --bs-character-create-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+        --bs-character-create-border-color: var(--fg-gold-deep);
+        --bs-character-create-eyebrow-color: var(--fg-parch-dim);
+        --bs-character-create-eyebrow-spacing: 0.18em;
+        --bs-character-create-label-color: var(--fg-parch-dim);
+        --bs-character-create-range-value-color: var(--fg-gold-bright);
+        --bs-character-create-footer-border-color: rgba(201, 169, 97, 0.2);
+
+        // Inset bevel the base ships flat.
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    }
+
+    // Eyebrow + field labels read as display caps.
+    .tc-character-create-eyebrow,
+    .tc-character-create-field-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+
+    // Live range readout as gold mono.
+    .tc-character-create-range-value {
+        font-family: var(--fg-mono);
+    }
+
+    // --- Improvement 1: gild the name field ---
+    // Scope under tc-character-create to avoid leaking into other forms.
+    tc-character-create .tc-character-create-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--fg-gold-bright);
+        background: linear-gradient(180deg, #0e0905, #1a120a);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        border-radius: 0;
+    }
+
+    tc-character-create .tc-character-create-name::placeholder {
+        color: var(--fg-parch-dim);
+        font-style: italic;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    // --- Improvement 4: focus border gold ---
+    tc-character-create .tc-character-create-name:focus {
+        border-color: var(--fg-gold-bright);
+        outline: none;
+    }
+
+    // --- Improvement 2: gild the controls/selects ---
+    tc-character-create .tc-character-create-control {
+        font-family: var(--fg-mono);
+        color: var(--fg-parch);
+        background: linear-gradient(180deg, #0e0905, #1a120a);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        border-radius: 0;
+    }
+
+    tc-character-create select.tc-character-create-control {
+        appearance: none;
+        -webkit-appearance: none;
+        color: var(--fg-gold-bright);
+        background-image: linear-gradient(180deg, #2a1f14, #0a0604);
+        cursor: pointer;
+    }
+
+    // Improvement 4 (cont.): gold focus border on controls.
+    tc-character-create .tc-character-create-control:focus {
+        border-color: var(--fg-gold-bright);
+        outline: none;
+    }
+
+    // --- Improvement 3: diamond range thumb + gilded track ---
+    tc-character-create .tc-character-create-range {
+        appearance: none;
+        -webkit-appearance: none;
+        height: 8px;
+        background: linear-gradient(180deg, #0e0905, #1a120a);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        border-radius: 0;
+        outline: none;
+    }
+
+    tc-character-create .tc-character-create-range::-webkit-slider-thumb {
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        box-shadow: 0 0 0 1px #000, 0 0 6px rgba(232, 200, 120, 0.5);
+        transform: rotate(45deg);
+        border-radius: 0;
+        cursor: pointer;
+    }
+
+    tc-character-create .tc-character-create-range::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        box-shadow: 0 0 0 1px #000, 0 0 6px rgba(232, 200, 120, 0.5);
+        border: none;
+        border-radius: 0;
+        cursor: pointer;
+    }
+
+    // Improvement 4 (cont.): gold focus border on range.
+    tc-character-create .tc-character-create-range:focus {
+        border-color: var(--fg-gold-bright);
+        outline: none;
+    }
 }

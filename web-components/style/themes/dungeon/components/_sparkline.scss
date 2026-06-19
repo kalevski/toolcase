@@ -1,0 +1,18 @@
+// Dungeon › tc-sparkline — brighter gold series color against dark wood surfaces.
+// The foundation already remaps --tc-app-accent → --fg-gold, so the line/bar/dot
+// strokes turn gold for free. This override bumps the default to --fg-gold-bright
+// for stronger contrast on --fg-ink backgrounds, and adds a faint struck-metal
+// glow to endpoint dots.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Token swap: brighter gold line/bar/dot default on dark dungeon surfaces.
+    tc-sparkline {
+        --bs-sparkline-color: var(--fg-gold-bright);
+    }
+
+    // Endpoint dots: faint struck-metal glow for visibility against dark wood.
+    .tc-sparkline-dot {
+        filter: drop-shadow(0 0 2px var(--fg-gold-deep));
+    }
+}

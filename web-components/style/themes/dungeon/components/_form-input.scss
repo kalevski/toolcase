@@ -1,0 +1,27 @@
+// Dungeon › tc-form-input — field-chrome wrapper.
+// Foundation already remaps all color tokens (label parchment, helper parch-3,
+// error/required blood red, loading-bar leather + gold-deep border, border-radius 0).
+// This partial only carries the two structural overrides a token swap cannot reach:
+//   1. Field-label register → Cinzel display caps (engraved dungeon field tag).
+//   2. Loading bar → seated leather slot with top bevel highlight.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Engraved field-tag label: Cinzel small-caps register, tight tracking.
+    // Using 0.08em (restrained) rather than the full 0.16em display tracking
+    // so dense forms remain scannable.
+    .tc-form-input-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+
+    // Loading placeholder bar — reads as a seated wood slot with bevel highlight
+    // rather than a flat muted surface.
+    .tc-form-input-loading-bar {
+        background: var(--fg-slot-bg);
+        box-shadow: var(--fg-bevel-top);
+    }
+}

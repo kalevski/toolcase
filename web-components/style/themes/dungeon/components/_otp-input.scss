@@ -1,0 +1,40 @@
+// Dungeon › tc-otp-input — row of gilded glyph sockets (keycap/rune cells).
+// Token swaps correct the focus/fill border from dark-ink to gold; structural
+// rules paint each cell as a recessed slot with a top-edge bevel highlight,
+// and the filled state lights the digit gold like a charged rune.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swaps on the host element ────────────────────────────────────
+    tc-otp-input {
+        --bs-otp-input-border-color: var(--fg-gold-deep);
+        --bs-otp-input-focus-border-color: var(--fg-gold-bright);
+        --bs-otp-input-filled-border-color: var(--fg-gold);
+        --bs-otp-input-error-focus-ring: 0 0 0 0.2rem rgba(168, 48, 42, 0.2);
+    }
+
+    // ── Label — display caps ────────────────────────────────────────────────
+    .tc-otp-input__label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ── Individual cell — recessed glyph socket ────────────────────────────
+    .tc-otp-input__cell {
+        background-image: var(--fg-slot-bg);
+        box-shadow: var(--fg-bevel-top);
+
+        &:focus {
+            box-shadow: var(--fg-bevel-top), var(--bs-otp-input-focus-ring);
+        }
+
+        // Filled (digit entered) — lit-rune state: gold digit + inset gold ring.
+        &.tc-otp-input__cell--filled {
+            color: var(--fg-gold-bright);
+            box-shadow: var(--fg-bevel-top), 0 0 0 1px var(--fg-gold) inset;
+        }
+    }
+}

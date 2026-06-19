@@ -1,0 +1,43 @@
+// Dungeon › tc-basic-card — gilded stat tile with Cinzel caps headline.
+// Fixes: hardcoded Inter primary font + white skeleton shimmer; adds bevel + slot chip.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on the host elements ──────────────────────────────────────
+
+    tc-basic-card,
+    tc-colored-card {
+        --bs-basic-card-bg: var(--fg-panel-bg);
+        --bs-basic-card-icon-bg: var(--fg-slot-bg);
+        --bs-basic-card-skeleton-shimmer: rgba(240, 210, 122, 0.18);
+    }
+
+    // ── Gilded bevel on the card surface ─────────────────────────────────────
+
+    .tc-basic-card {
+        --bs-card-box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Primary headline — Cinzel display caps ────────────────────────────────
+    // Base hardcodes font-family: 'Inter', ... so the var remap alone won't fix
+    // it; override the class directly.
+
+    .tc-basic-card-primary {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+
+    // ── Secondary label — body serif ──────────────────────────────────────────
+
+    .tc-basic-card-secondary {
+        font-family: var(--fg-body);
+    }
+
+    // ── Icon chip — gilded slot bevel ─────────────────────────────────────────
+
+    .tc-basic-card-icon {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

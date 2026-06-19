@@ -1,0 +1,38 @@
+// Dungeon › tc-input — form-control / form-label / form-text shared primitives.
+// Foundation token remap already covers: wood bg, gold border, parchment text,
+// placeholder dim, disabled surfaces, serif body font, border-radius 0, and
+// validation stamina/blood colors.
+//
+// These two rules fix hardcoded slate values that survive the remap:
+//   1. .form-label { color: #334155 } → near-invisible on dark wood — override to parchment.
+//   2. .form-control:focus { border-color/box-shadow: rgba(30,41,59,…) } → slate focus → gold.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Field label — engraved display caps in parchment ──────────────────────
+    .form-label {
+        color: var(--fg-parch);
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    // ── Input field — recessed inscribed-slot shadow ───────────────────────────
+    .form-control {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    // ── Focus state — gold ring replaces hardcoded slate rgba literals ─────────
+    .form-control:focus {
+        border-color: var(--fg-gold);
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    // Validation focus states preserve element-colored borders; only the halo
+    // glow needs to restore the inset slot shadow on top of the focus ring.
+    // The .is-valid / .is-invalid border-colors are already stamina/blood via
+    // the token remap — no overrides needed here.
+}

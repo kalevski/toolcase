@@ -1,0 +1,55 @@
+// Dungeon › tc-audio-mixer — gilded console / sound-forge theme.
+// Fixes four palette leaks the foundation token remap can't reach:
+//   1. Clip bg/border hardcoded to slate ramp → leather-3 / gold-deep.
+//   2. Loading scrim hardcoded to white rgba → dark ink veil.
+//   3. Clip :hover border hardcoded to --tc-slate-400 literal → gold.
+//   4. Even-lane color-mix toward #fff → warm ink-2 band.
+// Adds: console bevel on .tc-audio-mixer; display caps on track / inspector
+// titles (kept modest — dense editor UI).
+// base sets overflow:hidden on .tc-audio-mixer → corner notches are skipped.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on host ──────────────────────────────────────────────────
+
+    tc-audio-mixer {
+        --bs-audio-mixer-surface: var(--fg-panel-bg);
+        --bs-audio-mixer-clip-bg: var(--fg-leather-3);
+        --bs-audio-mixer-clip-border: var(--fg-gold-deep);
+        --bs-audio-mixer-scrim-bg: rgba(13, 10, 6, 0.6);
+    }
+
+    // ── Gilded console frame ────────────────────────────────────────────────
+    // overflow:hidden on the element means ::before/::after notches would be
+    // clipped; bevel shadow only.
+
+    .tc-audio-mixer {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Clip hover — replace slate-400 literal ──────────────────────────────
+
+    .tc-audio-mixer-clip:hover {
+        border-color: var(--fg-gold);
+    }
+
+    // ── Even-lane alternation — replace white color-mix with warm band ──────
+
+    .tc-audio-mixer-lane:nth-child(even) {
+        background: var(--fg-ink-2);
+    }
+
+    // ── Track & inspector display caps (modest — dense information UI) ───────
+
+    .tc-audio-mixer-track-name {
+        font-family: var(--fg-display);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .tc-audio-mixer-inspector-title {
+        font-family: var(--fg-display);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+}

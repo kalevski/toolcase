@@ -1,0 +1,41 @@
+// Dungeon › tc-file — save-slot / inventory-record row.
+// Foundation token remap handles most cosmetics (wood surface, gold border,
+// leather hover, parchment text, gold focus ring). This override fixes the
+// two literal #fff active-text values, tones the skeleton shimmer, and adds
+// the gilded bevel structure that vars alone cannot carry.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token fixes on host ─────────────────────────────────────────────────
+    // #fff active text → ink for engraved-on-gold contrast.
+    // White skeleton shimmer → muted gold-bright wash suited for dark wood.
+    // Format badge tinted gold for the engraved mono-plate read.
+    tc-file {
+        --bs-file-menu-active-color: var(--fg-ink);
+        --bs-file-dropdown-item-active-color: var(--fg-ink);
+        --bs-file-skeleton-shimmer: rgba(240, 210, 122, 0.25);
+        --bs-file-format-color: var(--fg-gold);
+    }
+
+    // ── Row — gilded top-edge bevel ─────────────────────────────────────────
+    // The wood-gradient bg arrives free via --tc-surface remap; add the top
+    // highlight band so each row reads as a seated plank, not a flat box.
+    .tc-file {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Format badge — engraved mono plate ──────────────────────────────────
+    // Leather fill + gold-deep hairline arrive free; the bevel makes it read
+    // as a recessed plate inset into the row.
+    .tc-file-format {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Dropdown panel — gilded floating panel ──────────────────────────────
+    // Wood bg + gold-deep border arrive free; replace the flat shadow with the
+    // full inset-bevel-stack + drop-shadow recipe so the menu reads as a
+    // proper dungeon panel.
+    .tc-file-menu-dropdown {
+        box-shadow: var(--fg-panel-shadow);
+    }
+}

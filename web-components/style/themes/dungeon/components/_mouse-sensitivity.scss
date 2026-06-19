@@ -1,0 +1,61 @@
+// Dungeon › tc-mouse-sensitivity — gilded range sliders for the settings screen.
+// Token swap covers most vars via --tc-* → --fg-* remapping in the foundation;
+// this override fixes the hardcoded stale-slate focus ring, brightens the Firefox
+// fill, crisps the value readout, and adds inset-shadow depth to the track plus a
+// metallic gradient to the thumb (the one sanctioned circle).
+// Cross-browser note: WebKit does not paint a filled-track portion natively — only
+// Firefox ::-moz-range-progress renders the left-of-thumb fill. The uniform gilded
+// rail on Chrome is intentional; faking a WebKit fill requires JS and is out of scope.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-mouse-sensitivity {
+        // Fix stale-slate focus ring → gold glow.
+        --bs-mouse-sensitivity-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.4);
+        // Brighten the Firefox progress fill (left-of-thumb) to gold-bright.
+        --bs-mouse-sensitivity-fill-color: var(--fg-gold-bright);
+        // Crisper parchment readout rather than muted.
+        --bs-mouse-sensitivity-value-color: var(--fg-parch);
+        // Pressed thumb darkens within the gold family.
+        --bs-mouse-sensitivity-thumb-active-bg: var(--fg-gold-deep);
+        // Restate track rail colour explicitly for clarity (already via --tc-border).
+        --bs-mouse-sensitivity-track-color: var(--fg-gold-deep);
+    }
+
+    // Recessed gilded channel — inset shadow gives the flat hairline track depth.
+    .tc-mouse-sensitivity__input::-webkit-slider-runnable-track {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    .tc-mouse-sensitivity__input::-moz-range-track {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    // Metallic gold stud thumb (sanctioned circle — border-radius:50% kept).
+    // background-color fallback kept so disabled state still flattens correctly.
+    .tc-mouse-sensitivity__input::-webkit-slider-thumb {
+        background-image: var(--fg-gold-edge);
+        box-shadow: var(--bs-mouse-sensitivity-thumb-shadow), inset 0 1px 0 rgba(255, 220, 150, 0.4);
+    }
+
+    .tc-mouse-sensitivity__input::-moz-range-thumb {
+        background-image: var(--fg-gold-edge);
+        box-shadow: var(--bs-mouse-sensitivity-thumb-shadow), inset 0 1px 0 rgba(255, 220, 150, 0.4);
+    }
+
+    // Disabled thumb: clear the gradient so the flat disabled-color shows through.
+    .tc-mouse-sensitivity__input:disabled::-webkit-slider-thumb {
+        background-image: none;
+        box-shadow: none;
+    }
+
+    .tc-mouse-sensitivity__input:disabled::-moz-range-thumb {
+        background-image: none;
+        box-shadow: none;
+    }
+
+    // Gild the Main / ADS micro-label; mono uppercase voice is already set by base.
+    .tc-mouse-sensitivity__key {
+        color: var(--fg-gold);
+    }
+}

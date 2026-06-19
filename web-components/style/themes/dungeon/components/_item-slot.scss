@@ -1,20 +1,21 @@
 // Dungeon › tc-item-slot — gilded inventory tile. Radial wood fill, inset bevel,
 // per-rarity gold/element border + inner glow, gold-bright selected halo.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-item-slot {
         --bs-item-slot-bg: var(--fg-slot-bg);
         --bs-item-slot-border-color: var(--fg-gold-deep);
         --bs-item-slot-empty-border: var(--fg-gold-shadow);
         --bs-item-slot-hover-bg: var(--fg-slot-bg);
-        --bs-item-slot-glyph-color: var(--fg-parch-3);
+        --bs-item-slot-glyph-color: var(--fg-parch-2);
         --bs-item-slot-empty-color: rgba(184, 164, 126, 0.18);
 
         --bs-item-slot-selected-border: var(--fg-gold-bright);
         --bs-item-slot-selected-ring: rgba(232, 200, 120, 0.5);
 
         --bs-item-slot-qty-bg: rgba(0, 0, 0, 0.7);
-        --bs-item-slot-qty-color: var(--fg-parch);
+        --bs-item-slot-qty-color: var(--fg-gold-bright);
         --bs-item-slot-hotkey-bg: rgba(0, 0, 0, 0.7);
         --bs-item-slot-hotkey-color: var(--fg-gold-bright);
         --bs-item-slot-equipped-bg: var(--fg-gold-deep);
@@ -25,7 +26,8 @@ tc-theme[name='dungeon'] {
         box-shadow:
             inset 0 0 0 1px rgba(0, 0, 0, 0.7),
             var(--fg-bevel-top),
-            inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6),
+            inset 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     // Per-rarity border + inner glow (glow scales with rarity).
@@ -63,5 +65,23 @@ tc-theme[name='dungeon'] {
     .tc-item-slot__equipped {
         font-family: var(--fg-mono);
         text-shadow: 0 1px 2px #000;
+        box-shadow: inset 0 0 0 1px var(--fg-gold-deep);
+    }
+
+    // Cooldown sweep: layer a thin gold-deep band at the leading edge so the
+    // radial wipe reads as an arcane timer rather than a plain dark shadow.
+    .tc-item-slot__cooldown {
+        background: conic-gradient(
+            var(--bs-item-slot-cooldown-veil) calc(var(--bs-item-slot-cd-angle) - 3deg),
+            var(--fg-gold-deep) calc(var(--bs-item-slot-cd-angle) - 3deg),
+            var(--fg-gold-deep) var(--bs-item-slot-cd-angle),
+            transparent var(--bs-item-slot-cd-angle)
+        );
+    }
+
+    // Cooldown countdown numeral: gilded mono to match the numeral language.
+    .tc-item-slot__cooldown-label {
+        color: var(--fg-gold-bright);
+        font-family: var(--fg-mono);
     }
 }

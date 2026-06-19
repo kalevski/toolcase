@@ -1,8 +1,10 @@
 // Dungeon theme — foundation token layer.
 //
 // An OPT-IN fantasy skin for @toolcase/web-components. It applies only inside a
-// theme root: `<tc-theme name="dungeon"> … </tc-theme>`. Everything outside the
-// wrapper keeps the default toolcase (slate / product) voice.
+// theme root — either the custom element `<tc-theme name="dungeon"> … </tc-theme>`
+// or any element carrying `[data-tc-theme="dungeon"]` (e.g. a plain wrapper div,
+// which the examples site uses). Everything outside the root keeps the default
+// toolcase (slate / product) voice.
 //
 // HOW IT WORKS — read this before authoring a component override:
 //   Every tc-* component drives its cosmetics through --bs-<component>-* custom
@@ -24,7 +26,8 @@
 
 @use '../../foundation/tokens' as *;
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     color-scheme: dark;
 
     // `tc-theme` is display:contents (no box), so `background` would not paint —

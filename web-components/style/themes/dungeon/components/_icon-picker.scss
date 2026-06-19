@@ -1,0 +1,46 @@
+// Dungeon › tc-icon-picker — gilded sigil/emblem picker.
+// Token-swap via the foundation already handles most cosmetics (wood surface,
+// gold borders, leather hover wells, gold focus halo). The structural overrides
+// here fix the one hardcoded literal (#fff glyph on the selected cell) and add
+// the bevel/shadow depth that flat token swaps cannot carry.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Trigger button ────────────────────────────────────────────────────────
+    // Gold border + wood bg are already remapped by the foundation.
+    // Add the top-highlight bevel so the trigger reads as a gilded plate.
+    .tc-icon-picker-trigger {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Popup overlay ─────────────────────────────────────────────────────────
+    // Replaces the flat --tc-shadow-lg with the full panel bevel + drop shadow,
+    // making the dropdown read as a framed gilded plate lifted off the surface.
+    .tc-icon-picker-popup {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Label — engraved display caps ─────────────────────────────────────────
+    // The base hardcodes font-family: inherit, so we must override the class
+    // directly (a var swap on the host won't reach it).
+    .tc-icon-picker-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Selected option cell — struck-gold sigil ──────────────────────────────
+    // The gold fill is already delivered by --tc-app-accent (remapped to gold
+    // by the foundation). The base hardcodes color: #fff on this class;
+    // override it to ink so the glyph reads as a dark stamp on gold leaf.
+    .tc-icon-picker-option--selected {
+        color: var(--fg-ink);
+    }
+
+    // Selected + highlighted combo repeats the same color trap.
+    .tc-icon-picker-option--selected.tc-icon-picker-option--highlighted {
+        color: var(--fg-ink);
+    }
+}

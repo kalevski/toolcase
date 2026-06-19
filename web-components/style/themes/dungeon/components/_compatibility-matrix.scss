@@ -1,0 +1,31 @@
+// Dungeon › tc-compatibility-matrix — gilded affinity chart.
+// Token swap fixes the slate hairline (--tc-slate-100 is not remapped) and
+// promotes the title to gold. Structure adds the bevel shadow on the outer
+// frame and lifts the title to display caps. Status icons (yes/no/partial/
+// unknown) are already dungeon-themed via the foundation --tc-* remap.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── 1. Token swap: slate hairline → bronze, plain text title → gilded ────
+
+    tc-compatibility-matrix {
+        --bs-compatibility-matrix-inner-border: 1px solid var(--fg-gold-shadow);
+        --bs-compatibility-matrix-title-color: var(--fg-gold-bright);
+    }
+
+    // ── 2. Structure: gilded bevel on the outer frame ────────────────────────
+
+    .tc-compatibility-matrix {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── 3. Structure: display-caps title ─────────────────────────────────────
+
+    .tc-compatibility-matrix__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+}

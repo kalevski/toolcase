@@ -1,0 +1,34 @@
+// Dungeon › tc-date-picker — gilded dark input field.
+// Foundation covers border/bg/label tokens via --tc-* remap; this partial
+// fixes two hardcoded defects the token swap cannot reach: color-scheme:light
+// (forces native calendar indicator to render light on a dark field) and the
+// slate focus-ring literals (border-color/box-shadow rgba slate values).
+// Also applies display-caps to the form label and deepens the bg to --fg-ink-2.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap — deepen the input bg to the darker ink surface.
+    tc-date-picker {
+        --bs-date-picker-border-color: var(--fg-gold);
+        --bs-date-picker-bg: var(--fg-ink-2);
+    }
+
+    // 2. Defect fix — calendar indicator must render for a dark field.
+    .tc-date-picker input[type='date'].form-control {
+        color-scheme: dark;
+    }
+
+    // 3. Defect fix — replace hardcoded slate focus literals with gold.
+    .tc-date-picker input[type='date'].form-control:focus {
+        border-color: var(--fg-gold-bright);
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    // 4. Display caps label — gilded Cinzel heading over the input.
+    .tc-date-picker .form-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: var(--bs-date-picker-label-size);
+    }
+}

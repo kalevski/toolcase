@@ -1,0 +1,45 @@
+// Dungeon › tc-toggle-card — gilded "option rune card" for settings/codex UI.
+// Token swap covers bg/border/accent/font through the foundation's --tc-* remap;
+// structural rules add the card bevel, square the pill track + knob, gild the
+// knob, and repoint the checked gradient's hardcoded slate-blue literal.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-toggle-card {
+        // Off-track well: deep dungeon black instead of --tc-border-strong.
+        --bs-toggle-card-switch-track-off: #0e0905;
+        // Knob: gold instead of hardcoded #ffffff.
+        --bs-toggle-card-switch-knob: var(--fg-gold-bright);
+    }
+
+    // Card frame — light bevel (cards repeat in lists, keep subtle).
+    .tc-toggle-card {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Square pill track + dungeon inset shadow (overrides 999px base + slate inset).
+    .tc-toggle-card-switch {
+        border: 1px solid var(--fg-gold-deep);
+        border-radius: 0;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    // Square knob + gold gradient (overrides 50% base + #ffffff literal).
+    .tc-toggle-card-knob {
+        border-radius: 0;
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    }
+
+    // Checked track: dark amber fill overrides the hardcoded slate-blue gradient end.
+    .tc-toggle-card--on .tc-toggle-card-switch {
+        background-image: linear-gradient(180deg, #2a1a08, #4a2a0e);
+        border-color: var(--fg-gold);
+    }
+
+    // Display caps on the label (base hardcodes font-family on the class, not a var).
+    .tc-toggle-card-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+}

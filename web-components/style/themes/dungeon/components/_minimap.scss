@@ -1,14 +1,141 @@
-// Dungeon › tc-minimap — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-minimap-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_minimap.scss
-// Target classes: web-components/style/components/_minimap.scss
+// Dungeon › tc-minimap — gilded scrying frame. Token swap recolours the surface;
+// structural rules add the multi-ring inset gold bevel on the host, recolour the
+// grid + markers to gold with glows, and add all four corner ornaments via the
+// surface element's pseudo-elements for bottom brackets.
+// Entity + player markers stay circular (sanctioned).
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-minimap
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-minimap {
+        --bs-minimap-surface: radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        --bs-minimap-border-color: var(--fg-gold-deep);
+        --bs-minimap-bg-color: #14100a;
+        // Minor grid lines — dim gold hairlines.
+        --bs-minimap-grid-color: rgba(201, 169, 97, 0.18);
+        --bs-minimap-marker-color: var(--fg-gold-bright);
+        --bs-minimap-player-color: var(--fg-gold-bright);
+
+        // Multi-ring inset gold frame + drop shadow (base ships none).
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    // Background surface — major/minor grid layering + edge vignette.
+    // The base uses a single grid; add a second brighter grid every 4 cells for
+    // the parchment-survey feel and a radial vignette to focus the centre.
+    .tc-minimap__bg {
+        background-image:
+            var(--bs-minimap-bg-image),
+            // Major grid — 4× interval, brighter.
+            linear-gradient(rgba(201, 169, 97, 0.32) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(201, 169, 97, 0.32) 1px, transparent 1px),
+            // Minor grid — base density, dim.
+            linear-gradient(var(--bs-minimap-grid-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--bs-minimap-grid-color) 1px, transparent 1px);
+        background-size:
+            100% 100%,
+            calc(var(--bs-minimap-grid-size, 20px) * 4) calc(var(--bs-minimap-grid-size, 20px) * 4),
+            calc(var(--bs-minimap-grid-size, 20px) * 4) calc(var(--bs-minimap-grid-size, 20px) * 4),
+            var(--bs-minimap-grid-size, 20px) var(--bs-minimap-grid-size, 20px),
+            var(--bs-minimap-grid-size, 20px) var(--bs-minimap-grid-size, 20px);
+        // Edge vignette to darken under the gold frame and focus the centre.
+        box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    // Rotating surface — central compass rune on the otherwise-empty state.
+    .tc-minimap__surface {
+        position: relative;
+    }
+    .tc-minimap__surface::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 24px;
+        height: 24px;
+        // Faint radial gold rune/compass mark — low opacity so markers read over it.
+        background: radial-gradient(circle, rgba(201, 169, 97, 0.2) 0%, transparent 70%);
+        border: 1px solid rgba(201, 169, 97, 0.15);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    // Bottom corner ornaments — use the surface's ::before/::after for bl/br brackets
+    // since the host pseudo-elements are already used for top corners.
+    .tc-minimap__surface::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+        clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+        // Flip vertically for bottom-left.
+        transform: scaleY(-1);
+    }
+
+    // Entity markers — gold dot with a hard outline + glow.
+    // Per-marker color overrides should use --fg-* rarity tokens
+    // (--fg-rare for allies, --fg-blood for hostiles, --fg-legendary for objectives).
+    .tc-minimap__marker {
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 6px rgba(232, 200, 120, 0.6);
+    }
+
+    // Player dot — crisp dark separator ring + gold glow; replaces the muddy
+    // outline: 2px solid var(--bs-minimap-surface) influence from the base.
+    .tc-minimap__player {
+        outline-color: var(--fg-ink);
+        box-shadow:
+            0 0 0 1px var(--fg-gold-deep),
+            0 0 8px rgba(232, 200, 120, 0.7);
+    }
+
+    // Top corner ornaments — gilded L-brackets (top-left and top-right).
+    tc-minimap::before,
+    tc-minimap::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+        clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+    }
+    tc-minimap::before { left: 0; }
+    tc-minimap::after {
+        right: 0;
+        transform: scaleX(-1);
+    }
+
+    // Bottom-right corner bracket — piggybacks on the surface ::before approach
+    // by using a sibling trick: since CSS only allows two pseudo-elements, we
+    // render bottom-right as a background layer on the host using a conic approach.
+    // Implemented as a positioned overlay inside .tc-minimap__bg ::after.
+    .tc-minimap__bg::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+        z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+        clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+        // Flip both axes for bottom-right.
+        transform: scale(-1, -1);
+    }
 }

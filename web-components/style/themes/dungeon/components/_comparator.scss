@@ -1,0 +1,48 @@
+// Dungeon › tc-comparator — gilded comparison ledger.
+// Token swap fixes the slate-hairline inner border and the stray skeleton radius;
+// structural rules add the bevel shadow, gilded display-caps title, and champion
+// tech names. Winner column gets a gold-tint wash. No corner notches (wide table).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap (host element carries all --bs-comparator-* defaults) ───────
+    tc-comparator {
+        // Row hairlines: slate-100 isn't remapped by foundation → gold-shadow bronze.
+        --bs-comparator-inner-border: 1px solid var(--fg-gold-shadow);
+
+        // Winner column: gold-tint wash instead of plain leather.
+        --bs-comparator-winner-bg: var(--tc-accent-soft);
+
+        // Flatten stray 2px skeleton bar rounding.
+        --bs-comparator-skel-radius: 0;
+
+        // Gilded table title.
+        --bs-comparator-title-color: var(--fg-gold-bright);
+    }
+
+    // ── Structure: gilded frame bevel ──────────────────────────────────────────
+    .tc-comparator {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Structure: display-caps title ─────────────────────────────────────────
+    // Overrides class-level font-family since base hardcodes it via the cascade.
+    .tc-comparator__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+    }
+
+    // ── Structure: champion-name display caps ─────────────────────────────────
+    // Base hardcodes font-family: var(--bs-body-font-family) on this element,
+    // so a var alone won't override it — must target the class directly.
+    .tc-comparator__tech-name {
+        font-family: var(--fg-display);
+        letter-spacing: 0.06em;
+    }
+
+    // ── Winner column: gold-tint indicator accent ──────────────────────────────
+    // Winner yes-indicator inherits --bs-comparator-winner-indicator-yes-color
+    // (already stamina via tc-success remap), leave that; the bg tint is enough
+    // to read as "gilded winner".
+}

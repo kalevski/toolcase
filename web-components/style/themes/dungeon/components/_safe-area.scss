@@ -1,14 +1,12 @@
-// Dungeon › tc-safe-area — TODO: dungeon override not yet implemented.
+// Dungeon › tc-safe-area — NO override needed.
 //
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-safe-area-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_safe-area.scss
-// Target classes: web-components/style/components/_safe-area.scss
+// tc-safe-area is a purely structural layout primitive: it insets its content by
+// env(safe-area-inset-*) plus an optional uniform `extra` padding. It carries no
+// background, border, text, or any cosmetic surface — nothing for a fantasy reskin
+// to repaint. The foundation token remap is irrelevant here because the component
+// references none of those tokens. Intentionally left empty.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-safe-area
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // No visual override — layout/inset primitive only.
 }

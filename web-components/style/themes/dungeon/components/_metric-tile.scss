@@ -1,0 +1,61 @@
+// Dungeon › tc-metric-tile — gilded stat plaque with display-caps label.
+// Token swap repoints surface/border/shadow to the wood+gold recipe; structural
+// rules override the hardcoded 'JetBrains Mono' font-family on label and value,
+// and add corner notches for the framed-plaque treatment on standalone tiles.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-metric-tile {
+        // Surface & frame
+        --bs-metric-tile-bg: var(--fg-panel-bg);
+        --bs-metric-tile-border-color: var(--fg-gold-deep);
+        --bs-metric-tile-shadow: var(--fg-panel-shadow);
+
+        // Text colours
+        --bs-metric-tile-icon-color: var(--fg-gold);
+        --bs-metric-tile-label-color: var(--fg-gold);
+        --bs-metric-tile-value-color: var(--fg-parch);
+        --bs-metric-tile-unit-color: var(--fg-parch-dim);
+        --bs-metric-tile-hint-color: var(--fg-parch-dim);
+    }
+
+    // Corner notches — signature gilded ornament on the standalone tile frame.
+    .tc-metric-tile {
+        position: relative;
+        color: var(--fg-parch);
+    }
+
+    .tc-metric-tile::before,
+    .tc-metric-tile::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-metric-tile::before {
+        left: -1px;
+    }
+
+    .tc-metric-tile::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // Display-caps label — override the hardcoded 'JetBrains Mono' to Cinzel.
+    .tc-metric-tile-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // Mono value — explicitly repoint to the palette token for stability.
+    .tc-metric-tile-value {
+        font-family: var(--fg-mono);
+    }
+}

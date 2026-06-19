@@ -1,14 +1,11 @@
-// Dungeon › tc-letterbox-bars — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-letterbox-bars-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_letterbox-bars.scss
-// Target classes: web-components/style/components/_letterbox-bars.scss
+// Dungeon › tc-letterbox-bars — pure cinematic ink bars. By mandate these stay
+// flat black/ink bars; the only fantasy touch is forcing the bar colour to pure
+// ink-black so the cutscene framing reads as deep theatre black on the parchment
+// world behind it. No bevel, no notches — sharp slabs.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-letterbox-bars
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-letterbox-bars {
+        --bs-letterbox-bars-color: #000000;
+    }
 }

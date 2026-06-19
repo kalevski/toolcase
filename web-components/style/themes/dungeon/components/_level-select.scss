@@ -1,14 +1,130 @@
-// Dungeon › tc-level-select — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-level-select-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_level-select.scss
-// Target classes: web-components/style/components/_level-select.scss
+// Dungeon › tc-level-select — gilded world map. Canvas gets the leather radial +
+// gold frame; edges become dashed gold-shadow rune lines (solid gold when
+// completed); each node square is a domed gilded medallion (bevel via box-shadow
+// on the node itself, since the web glyph isn't separately framed); selected gets
+// a gold outline + glow, completed glows stamina-green, labels + stars go display
+// caps. Token swap can't carry the bevel stacks, dashed edges, or display recast.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-level-select
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-level-select {
+        --bs-level-select-bg: transparent;
+        --bs-level-select-border-color: var(--fg-gold-deep);
+
+        --bs-level-select-edge-color: var(--fg-gold-shadow);
+        --bs-level-select-edge-completed-color: var(--fg-gold-bright);
+        --bs-level-select-edge-width: 2;
+
+        --bs-level-select-node-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-level-select-node-border-color: var(--fg-gold-deep);
+        --bs-level-select-node-color: var(--fg-gold-bright);
+
+        --bs-level-select-node-hover-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-level-select-node-hover-border: var(--fg-gold-deep);
+
+        --bs-level-select-node-selected-bg: radial-gradient(80% 80% at 50% 30%, #4a3420, #1a1008);
+        --bs-level-select-node-selected-color: var(--fg-gold-bright);
+        --bs-level-select-node-selected-border: var(--fg-gold-bright);
+
+        --bs-level-select-node-completed-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-level-select-node-completed-color: var(--fg-gold-bright);
+        --bs-level-select-node-completed-border: var(--fg-gold-bright);
+
+        --bs-level-select-node-locked-color: var(--fg-gold-deep);
+        --bs-level-select-node-locked-border: var(--fg-gold-deep);
+
+        --bs-level-select-label-color: var(--fg-parch);
+        --bs-level-select-star-color: var(--fg-gold-deep);
+        --bs-level-select-star-filled-color: var(--fg-gold-bright);
+    }
+
+    // Canvas — leather radial behind the map (base ships a flat surface).
+    .tc-level-select__canvas {
+        background:
+            radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+            linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    }
+
+    // Edges read as dashed rune lines until completed.
+    .tc-level-select__edge {
+        stroke-dasharray: 4 4;
+    }
+
+    // Finer dotted pattern for edges leading to locked nodes — not-yet-walked path.
+    .tc-level-select__edge--locked {
+        stroke-dasharray: 2 4;
+    }
+
+    .tc-level-select__edge--completed {
+        stroke-dasharray: none;
+    }
+
+    // Each node is a domed gilded medallion (bevel on the node frame itself).
+    .tc-level-select__node {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 1px 2px #000;
+
+        // Hover glow on unlocked, non-selected nodes.
+        &:hover:not(.tc-level-select__node--locked):not(.tc-level-select__node--selected) {
+            box-shadow:
+                inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(232, 200, 120, 0.18),
+                inset 0 -2px 6px rgba(0, 0, 0, 0.6),
+                0 0 8px rgba(232, 200, 120, 0.3);
+        }
+    }
+
+    .tc-level-select__node--completed:not(.tc-level-select__node--selected) {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            0 0 12px rgba(232, 200, 120, 0.4);
+    }
+
+    // Selected: warmer fill (via token), gold outline + glow halo.
+    .tc-level-select__node--selected {
+        outline: 2px solid var(--fg-gold-bright);
+        outline-offset: 2px;
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            0 0 12px rgba(232, 200, 120, 0.5);
+    }
+
+    // Locked: sunken/sealed read — deeply inset shadow signals carved-shut.
+    .tc-level-select__node--locked {
+        box-shadow:
+            inset 0 2px 8px rgba(0, 0, 0, 0.8),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7);
+    }
+
+    .tc-level-select__glyph-text {
+        font-family: var(--fg-display);
+    }
+
+    // Labels + stars read display caps; filled stars glow gold.
+    .tc-level-select__label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-level-select__star {
+        font-family: var(--fg-display);
+    }
+
+    .tc-level-select__star--filled {
+        text-shadow: 0 0 6px rgba(232, 200, 120, 0.6);
+
+        .tc-level-select__node--selected & {
+            color: var(--fg-gold-bright);
+        }
+    }
 }

@@ -1,0 +1,56 @@
+// Dungeon › tc-plugin-grid — loot/mod grid of gilded plugin cards.
+// Token swap gives wood fill + gold border on each card; structural rules add
+// the inset bevel stack and top corner notches that vars alone can't carry.
+// Display caps on card names and section title complete the fantasy treatment.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-plugin-grid {
+        --bs-plugin-grid-card-bg: var(--fg-panel-bg);
+        --bs-plugin-grid-card-border: 1px solid var(--fg-gold-deep);
+        --bs-plugin-grid-card-shadow: var(--fg-panel-shadow);
+        --bs-plugin-grid-card-shadow-hover: var(--fg-panel-shadow);
+        --bs-plugin-grid-install-bg: var(--fg-slot-bg);
+        --bs-plugin-grid-install-color: var(--fg-parch);
+        --bs-plugin-grid-header-color: var(--fg-gold-bright);
+        --bs-plugin-grid-name-color: var(--fg-parch);
+        --bs-plugin-grid-desc-color: var(--fg-parch-dim);
+        --bs-plugin-grid-downloads-color: var(--fg-parch-dim);
+        --bs-plugin-grid-copy-color: var(--fg-parch-dim);
+    }
+
+    // Each card is a framed loot entry — gilded bevel + positional anchor for notches.
+    .tc-plugin-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Top corner notches — the signature gilded ornament.
+    .tc-plugin-card::before,
+    .tc-plugin-card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+    .tc-plugin-card::before {
+        left: -1px;
+    }
+    .tc-plugin-card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // Section title and card name read as gilded display caps.
+    .tc-plugin-grid-title,
+    .tc-plugin-card-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+}

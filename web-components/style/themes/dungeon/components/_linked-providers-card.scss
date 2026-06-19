@@ -1,0 +1,62 @@
+// Dungeon › tc-linked-providers-card — "Linked Realms" panel.
+// Token swap covers: row separators (slate→faint gold), tile bg/border,
+// label/account/btn colours, connected dot (→ forest-green ramp).
+// Structural override: display-caps title (base hardcodes 'Inter');
+// bevel on the card frame and slot bevel on provider icon tiles.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on the host element ────────────────────────────────────────
+    tc-linked-providers-card {
+        // Row separators: override slate-grey fallback literal with faint gold.
+        --bs-linked-providers-card-row-separator: rgba(201, 169, 97, 0.15);
+
+        // Row hover: faint gold wash instead of slate-50.
+        --bs-linked-providers-card-row-hover-bg: rgba(201, 169, 97, 0.1);
+
+        // Text colours.
+        --bs-linked-providers-card-label-color: var(--fg-parch);
+        --bs-linked-providers-card-account-color: var(--fg-parch-dim);
+
+        // Title.
+        --bs-linked-providers-card-title-color: var(--fg-gold-bright);
+
+        // Icon tile: wood-slot background + gold-deep border.
+        --bs-linked-providers-card-tile-bg: var(--fg-slot-bg);
+        --bs-linked-providers-card-tile-border-color: var(--fg-gold-deep);
+        --bs-linked-providers-card-icon-default-color: var(--fg-gold);
+
+        // Action button.
+        --bs-linked-providers-card-btn-color: var(--fg-parch-dim);
+        --bs-linked-providers-card-btn-hover-bg: rgba(201, 169, 97, 0.18);
+        --bs-linked-providers-card-btn-hover-color: var(--fg-gold-bright);
+
+        // Connected status dot → fantasy-green ramp (sanctioned circle; kept round).
+        --bs-linked-providers-card-connected-dot-color: var(--fg-uncommon);
+
+        // Empty state.
+        --bs-linked-providers-card-empty-color: var(--fg-parch-dim);
+    }
+
+    // ── Gilded panel bevel on the card frame ──────────────────────────────────
+    // The base adds no box-shadow; this layer gives the full dungeon bevel stack.
+    .tc-linked-providers-card {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Display-caps title ────────────────────────────────────────────────────
+    // Base hardcodes font-family: 'Inter' — must override the class directly;
+    // a token swap alone cannot reach it.
+    .tc-linked-providers-card__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // ── Slot bevel on provider icon tiles ─────────────────────────────────────
+    // Adds the inset highlight band that makes icon tiles look recessed/gilded.
+    .tc-linked-providers-card__tile {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

@@ -1,0 +1,40 @@
+// Dungeon › tc-dashboard-layout — dark leather glass navbar + gilded sidebar rail.
+// Main purpose: replace the hardcoded rgba(255,255,255,0.85) white-glass navbar literal
+// with a dark ink-glass fill. Sidebar and content surfaces also grounded in leather/ink.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-dashboard-layout {
+        // ── Token swap ─────────────────────────────────────────────────────────
+        // Kills the white-glass literal; replaces with dark ink glass.
+        --bs-dashboard-layout-navbar-bg: rgba(26, 20, 13, 0.85);
+        // Strong gold-deep rule under the navbar.
+        --bs-dashboard-layout-navbar-border: var(--fg-gold-deep);
+        // Leather sidebar surface.
+        --bs-dashboard-layout-sidebar-bg: var(--fg-leather);
+        --bs-dashboard-layout-sidebar-border: var(--fg-gold-deep);
+        // Darker ink reading rail for content area.
+        --bs-dashboard-layout-content-bg: var(--fg-ink);
+        // Subtle leather-2 hover on the toggle.
+        --bs-dashboard-layout-toggle-hover-bg: var(--fg-leather-2);
+    }
+
+    // ── Navbar — gilded bottom edge gleam ──────────────────────────────────────
+    // Upgrades the single-pixel border to a 2px rule and adds the bevel highlight.
+    .tc-dashboard-layout__navbar {
+        border-bottom: 2px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+        border-radius: 0;
+    }
+
+    // ── Sidebar — brighter gilded right rail edge ──────────────────────────────
+    .tc-dashboard-layout__sidebar {
+        border-right: 2px solid var(--fg-gold);
+        border-radius: 0;
+    }
+
+    // ── Content — ensure no stray radius ──────────────────────────────────────
+    .tc-dashboard-layout__content {
+        border-radius: 0;
+    }
+}

@@ -1,0 +1,15 @@
+// Dungeon › tc-floating-label — gilt floated label.
+// The foundation already handles: wood/gold control chrome, square corners
+// (--bs-border-radius: 0), mono+uppercase+tracked docked label register
+// (the base hardcodes font-family/text-transform/letter-spacing on the
+// floated state so --tc-font-mono resolves for free), and parch text via
+// --tc-text-muted. The single override here tints the docked label gold so
+// it reads as an engraved gilt field tag.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .form-floating {
+        // Docked (floated) label inherits this via --bs-form-floating-label-color.
+        --bs-form-floating-label-color: var(--fg-gold);
+    }
+}

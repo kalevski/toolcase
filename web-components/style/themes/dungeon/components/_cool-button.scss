@@ -1,0 +1,49 @@
+// Dungeon › tc-cool-button — metal-button with gold-seam divider and inlaid addon slot.
+// Foundation already recolors .btn to gold/bronze gradient and squares the corners.
+// This partial owns only the divider seam fix and the addon inlay treatment.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Solid-variant divider: replace the white rgba seam with a gold one ────
+    // The base hardcodes rgba(255,255,255,0.28) on solid variants; override with
+    // a deep-gold value so the seam reads as an inlaid metal groove, not a white
+    // slash across a dark-gold face.
+    .btn-primary.tc-cool-button,
+    .btn-secondary.tc-cool-button,
+    .btn-success.tc-cool-button,
+    .btn-danger.tc-cool-button,
+    .btn-warning.tc-cool-button,
+    .btn-info.tc-cool-button {
+        --bs-cool-button-divider-color: var(--fg-gold-deep);
+    }
+
+    // ── Outline-variant divider: gold groove instead of a generic strong border ─
+    .btn-outline-primary.tc-cool-button,
+    .btn-outline-secondary.tc-cool-button,
+    .btn-outline-success.tc-cool-button,
+    .btn-outline-danger.tc-cool-button,
+    .btn-outline-warning.tc-cool-button,
+    .btn-outline-info.tc-cool-button {
+        --bs-cool-button-divider-color: var(--fg-gold-deep);
+    }
+
+    // ── Addon slot: recessed leather inlay with engraved-gold glyph ───────────
+    .tc-cool-button-addon {
+        --bs-cool-button-addon-bg: var(--fg-leather);
+        --bs-cool-button-addon-color: var(--fg-gold);
+
+        // Inset left edge so the addon reads as a recessed panel against the gold face.
+        box-shadow: inset 1px 0 0 var(--fg-gold-shadow);
+    }
+
+    // ── Label caps: display font for the primary label region ─────────────────
+    // Applied here rather than deferring to _metal-button.scss because
+    // tc-cool-button is a distinct component with its own .tc-cool-button-content
+    // wrapper; the metal-button partial targets a different selector.
+    .tc-cool-button-content {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+}

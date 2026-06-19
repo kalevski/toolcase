@@ -1,0 +1,27 @@
+// Dungeon › tc-placeholder — dim leather skeleton bars with a gold-deep shimmer.
+// The base hardcodes --tc-slate-200 / --tc-slate-100 (raw scale tokens), which
+// bypass the semantic remap in _foundation.scss and render as bright slate bars
+// on the dark wood backdrop. This partial repoints those two literals only.
+// No radius / caps / numerals concerns — bars are pure structural chrome.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Base fill: slate-200 → dim leather block.
+    .placeholder {
+        background-color: var(--fg-leather-2);
+    }
+
+    // Wave shimmer: slate-200/slate-100 sweep → leather/gold-deep/leather sweep.
+    // background-size: 400px 100% and the keyframe animation are kept from base.
+    .placeholder-wave .placeholder {
+        background: linear-gradient(
+            90deg,
+            var(--fg-leather) 25%,
+            var(--fg-leather-3) 37%,
+            var(--fg-leather) 63%
+        );
+        background-size: 400px 100%;
+    }
+
+    // .placeholder-glow left alone — opacity pulse works on the new leather fill.
+}

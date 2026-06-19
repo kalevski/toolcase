@@ -1,0 +1,51 @@
+// Dungeon › tc-accordion — stacked gilded plates (codex/quest-log/settings).
+// Foundation token-swap handles bg, border, hover, focus, active-color, and
+// radius (already 0).  This override patches the two things vars can't reach:
+//   1. The hardcoded slate-fill chevron SVG  → gold-fill data-URI.
+//   2. The hardcoded font-weight / no display family → Cinzel caps headers.
+// Also adds bevel top-highlight on each item for the gilded-plate read.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on .accordion ──────────────────────────────────────────────
+    // Replace flat wood surface token with the richer panel-bg gradient and
+    // swap both chevron data-URIs to gold fill (%23c9a961).
+    .accordion {
+        --bs-accordion-bg: var(--fg-panel-bg);
+        --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c9a961'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23c9a961'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+
+    // ── Item — gilded top-edge highlight ─────────────────────────────────────
+    // The bevel-top token adds the thin inset gold band at the top of each
+    // plate; the gold-deep border + panel-bg gradient give the stacked-frame look.
+    .accordion-item {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Header button — display caps (Cinzel section seals) ──────────────────
+    // Base hardcodes font-weight:500 and no display family; override directly
+    // so closed headers read as gilded section seals.
+    .accordion-button {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-parch);
+    }
+
+    // Active/open header — reinforce gold-bright ink (foundation does this via
+    // --bs-accordion-active-color → --bs-emphasis-color → fg-gold-bright,
+    // but spell it out to be explicit and survive any future token chain changes).
+    .accordion-button:not(.collapsed) {
+        color: var(--fg-gold-bright);
+    }
+
+    // ── Body — serif body text ────────────────────────────────────────────────
+    // Foundation sets muted parchment colour via --tc-text-muted; ensure the
+    // typeface is the EB Garamond body family, not the default system sans.
+    .accordion-body {
+        font-family: var(--fg-body);
+        color: var(--fg-parch-3);
+    }
+}

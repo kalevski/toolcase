@@ -1,14 +1,139 @@
-// Dungeon › tc-player-card — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-player-card-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_player-card.scss
-// Target classes: web-components/style/components/_player-card.scss
+// Dungeon › tc-player-card — gilded player dossier. Token swap recolours the
+// whole card; structural rules add the wood-gradient shell + gilded inset bevel,
+// display-caps name/rank/stat-labels, italic-body title, mono level + stat values,
+// glowing presence pips per status, and a bordered presence chip.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-player-card
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-player-card {
+        --bs-player-card-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+        --bs-player-card-border: var(--fg-gold-deep);
+
+        --bs-player-card-header-bg: transparent;
+        --bs-player-card-header-border: rgba(201, 169, 97, 0.3);
+
+        --bs-player-card-name-color: var(--fg-gold-bright);
+        --bs-player-card-title-color: var(--fg-parch-3);
+
+        --bs-player-card-pip-online: var(--fg-stamina-bright);
+        --bs-player-card-pip-away: var(--fg-fire);
+        --bs-player-card-pip-busy: var(--fg-blood);
+        --bs-player-card-pip-in-game: var(--fg-gold-bright);
+        --bs-player-card-pip-offline: var(--fg-parch-dim);
+        --bs-player-card-status-color: var(--fg-parch-3);
+
+        --bs-player-card-meta-bg: transparent;
+        --bs-player-card-meta-border: rgba(201, 169, 97, 0.3);
+        --bs-player-card-rank-bg: rgba(0, 0, 0, 0.4);
+        --bs-player-card-rank-color: var(--fg-gold);
+        --bs-player-card-level-color: var(--fg-gold-bright);
+
+        --bs-player-card-stats-bg: transparent;
+        --bs-player-card-stats-border: rgba(201, 169, 97, 0.3);
+        --bs-player-card-stat-label-color: var(--fg-parch-dim);
+        --bs-player-card-stat-value-color: var(--fg-parch);
+
+        --bs-player-card-actions-bg: transparent;
+        --bs-player-card-actions-border: rgba(201, 169, 97, 0.3);
+        --bs-player-card-btn-color: var(--fg-parch);
+        --bs-player-card-btn-bg: var(--fg-button-bg);
+        --bs-player-card-btn-border: var(--fg-gold-deep);
+        --bs-player-card-btn-hover-bg: var(--fg-leather-3);
+        --bs-player-card-btn-hover-color: var(--fg-gold-bright);
+        --bs-player-card-btn-danger-color: var(--fg-blood-bright);
+        --bs-player-card-btn-danger-hover-bg: var(--fg-blood);
+    }
+
+    // Shell: gilded inset bevel over the wood gradient (base ships flat).
+    .tc-player-card {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+        color: var(--fg-parch);
+    }
+
+    // Name: display caps gilded.
+    .tc-player-card-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    // Title: italic body serif.
+    .tc-player-card-card-title {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
+
+    // Presence chip: bordered ink well, display caps.
+    .tc-player-card-presence {
+        padding: 4px 8px;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--fg-gold-deep);
+    }
+
+    .tc-player-card-pip {
+        box-shadow: 0 0 6px currentColor;
+    }
+
+    .tc-player-card-status-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+
+    // Status label tinted per status to match pip colour.
+    .tc-player-card-presence[data-status='online'] .tc-player-card-status-label {
+        color: var(--fg-stamina-bright);
+    }
+
+    .tc-player-card-presence[data-status='away'] .tc-player-card-status-label {
+        color: var(--fg-fire);
+    }
+
+    .tc-player-card-presence[data-status='busy'] .tc-player-card-status-label {
+        color: var(--fg-blood-bright);
+    }
+
+    .tc-player-card-presence[data-status='in-game'] .tc-player-card-status-label {
+        color: var(--fg-gold-bright);
+    }
+
+    .tc-player-card-presence[data-status='offline'] .tc-player-card-status-label {
+        color: var(--fg-parch-dim);
+    }
+
+    // Rank: display caps; level + stat values mono.
+    .tc-player-card-rank {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+    }
+
+    .tc-player-card-level {
+        font-family: var(--fg-mono);
+    }
+
+    .tc-player-card-stat-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+    }
+
+    .tc-player-card-stat-value {
+        font-family: var(--fg-mono);
+        text-shadow: 0 0 4px rgba(232, 200, 120, 0.15);
+    }
+
+    // Meta + stats sections: inset top-edge sheen to reinforce gilded seam.
+    .tc-player-card-meta {
+        box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.1);
+    }
+
+    .tc-player-card-stats {
+        box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.1);
+    }
+
+    // Action buttons: gilded leather edge.
+    .tc-player-card-action-btn {
+        border: 1px solid var(--fg-gold-deep);
+    }
 }

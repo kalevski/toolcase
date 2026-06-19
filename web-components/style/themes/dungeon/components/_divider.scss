@@ -1,7 +1,8 @@
 // Dungeon › tc-divider — gold gradient rule with a centered diamond ornament.
 // The flanking lines are pseudo-elements; the label span carries the diamond.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     .tc-divider {
         --bs-divider-border-color: var(--fg-gold-deep);
         --bs-divider-label-color: var(--fg-gold);
@@ -18,7 +19,9 @@ tc-theme[name='dungeon'] {
     .tc-divider.tc-divider--vertical::before,
     .tc-divider.tc-divider--vertical::after {
         width: 1px;
-        background: var(--fg-rule);
+        // --fg-rule is a horizontal sweep gradient; rotate to 180deg so short
+        // vertical rails still catch the bright gold core at their midpoint.
+        background: linear-gradient(180deg, transparent, var(--fg-gold) 50%, transparent);
     }
 
     .tc-divider__label {

@@ -1,0 +1,30 @@
+// Dungeon › tc-benchmark-chart — gold leader gradient + display title caps.
+// Foundation covers most token swaps (track-bg, bar-fill, sep-color, label/value
+// colors, mono numerals). This override fixes the one hardcoded slate literal
+// (--bs-benchmark-chart-leader-to: #2b3a51) and brightens the leader's hot stop,
+// then applies display-font caps to the chart title.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // --- token swap: leader gradient stops + bar fill + track ---
+    tc-benchmark-chart {
+        --bs-benchmark-chart-leader-to: var(--fg-gold-shadow);
+        --bs-benchmark-chart-leader-from: var(--fg-gold-bright);
+        --bs-benchmark-chart-bar-fill: var(--fg-gold-deep);
+        --bs-benchmark-chart-track-bg: var(--fg-ink-2);
+    }
+
+    // --- display caps for the chart title ---
+    .tc-benchmark-chart__title,
+    .tc-benchmark-chart__title-slot {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+    }
+
+    // --- bronze caption ---
+    .tc-benchmark-chart__caption {
+        color: var(--fg-gold-deep);
+    }
+}

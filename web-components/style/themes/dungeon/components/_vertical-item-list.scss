@@ -1,0 +1,48 @@
+// Dungeon › tc-vertical-item-list — codex / spellbook side-tabs.
+// Token swap promotes the active marker and badge to gold-bright + ink text;
+// structural rules apply display caps to item labels (mirrors tab-bar treatment)
+// and swap the menu/content hairline for a gold-gradient pseudo-rule.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swaps on the host element ───────────────────────────────────────
+    tc-vertical-item-list {
+        // Active left-bar marker — brighter gold than the foundation default.
+        --bs-vertical-item-list-marker-color: var(--fg-gold-bright);
+
+        // Active label — promoted to gold-bright (not just the default text color).
+        --bs-vertical-item-list-item-active-color: var(--fg-gold-bright);
+
+        // Badge — ink text on gold fill (fixes the hardcoded #fff default).
+        --bs-vertical-item-list-badge-color: var(--fg-ink);
+    }
+
+    // ── Display caps on item labels ────────────────────────────────────────────
+    // The base hardcodes font-family: var(--tc-font-sans) on the element,
+    // so a var swap alone can't reach it — override the class directly.
+    .tc-vertical-item-list-item {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 11px;
+    }
+
+    // ── Gold-gradient menu/content divider ─────────────────────────────────────
+    // The base uses border-left on .tc-vertical-item-list-content.
+    // Replace it with a gold-gradient pseudo-rule for the dungeon treatment.
+    .tc-vertical-item-list-content {
+        position: relative;
+        border-left: none;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--fg-rule);
+            pointer-events: none;
+        }
+    }
+}

@@ -1,0 +1,73 @@
+// Dungeon › tc-entity-profile-card — character dossier / NPC profile plate.
+// Token swap replaces the plain white card surface with the wood-gradient panel;
+// structural rules add the gilded bevel stack, top corner notches, and display
+// caps title that a flat token swap cannot carry.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on the host element ───────────────────────────────────────
+    // The base sets all --bs-entity-profile-card-* vars on tc-entity-profile-card.
+    tc-entity-profile-card {
+        --bs-entity-profile-card-bg: var(--fg-panel-bg);
+        --bs-entity-profile-card-border-color: var(--fg-gold-deep);
+        // Tone the skeleton shimmer from a bright white sweep to a gold-parch wash.
+        --bs-entity-profile-card-skeleton-shimmer: rgba(240, 210, 122, 0.25);
+    }
+
+    // ── Gilded panel frame ────────────────────────────────────────────────────
+    // Apply the inset bevel stack + drop shadow and establish stacking context
+    // for the corner notch pseudo-elements.
+    .tc-entity-profile-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Top corner notches — signature gilded ornament ────────────────────────
+    .tc-entity-profile-card::before,
+    .tc-entity-profile-card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .tc-entity-profile-card::before {
+        left: -1px;
+    }
+
+    .tc-entity-profile-card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Hero cap — wood radial fill + gold-rule bottom divider ────────────────
+    // Replace the near-invisible ink gradient with the panel fill; the
+    // hero/meta separator becomes a gold-rule hairline via border-image.
+    .tc-entity-profile-card__hero {
+        background: var(--fg-panel-bg);
+        border-bottom: 1px solid var(--fg-gold-deep);
+        border-image: var(--fg-rule) 1;
+    }
+
+    // ── Display caps title — Cinzel, wide tracking ────────────────────────────
+    // The base hardcodes no font-family on __title, so override the class
+    // directly (a var swap would have no effect).
+    .tc-entity-profile-card__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Meta value — body serif numerals ─────────────────────────────────────
+    // The base uses the inherited stack; set explicitly to the body serif so
+    // values render as elegant parchment text rather than system UI.
+    .tc-entity-profile-card__meta-value {
+        font-family: var(--fg-body);
+    }
+}

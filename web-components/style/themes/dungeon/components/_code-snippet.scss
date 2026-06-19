@@ -1,0 +1,42 @@
+// Dungeon › tc-code-snippet — dark ink code surface with gilded header strip.
+// The foundation already maps the ink bg, border, and mono font.
+// This override fixes the legibility trap (--tc-text-inverse → dark ink on dark
+// ink bg) and repoints syntax tokens to the warm dungeon element palette.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap — host element ─────────────────────────────────────────────
+
+    tc-code-snippet {
+        // Legibility fix: --tc-text-inverse remaps to --fg-ink (dark) which
+        // would make code invisible on the ink background — force parchment.
+        --bs-code-snippet-code-color: var(--fg-parch);
+
+        // Gilded header
+        --bs-code-snippet-title-color: var(--fg-gold);
+        --bs-code-snippet-header-border: 1px solid var(--fg-gold-deep);
+
+        // Warm syntax token palette (hardcoded hex in base, must override here)
+        --bs-code-snippet-tok-keyword:  var(--fg-mana-bright);
+        --bs-code-snippet-tok-string:   var(--fg-stamina-bright);
+        --bs-code-snippet-tok-comment:  var(--fg-parch-dim);
+        --bs-code-snippet-tok-number:   var(--fg-legendary);
+        --bs-code-snippet-tok-variable: var(--fg-arcane-bright);
+    }
+
+    // ── Structure — gilded top highlight on the frame ─────────────────────────
+
+    .tc-code-snippet {
+        // Light top-edge bevel: a single highlight band, no full panel shadow
+        // (code blocks are not ornamental panels — keep it lean).
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Copy button — copied confirmation state ───────────────────────────────
+
+    // Base hardcodes #99cc88 for --copied; retint to match --fg-stamina-bright.
+    .tc-code-snippet-copy--copied {
+        color: var(--fg-stamina-bright);
+    }
+}

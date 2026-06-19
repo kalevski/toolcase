@@ -1,0 +1,95 @@
+// Dungeon › tc-leaderboard — gilded hall-of-champions rankings board.
+// Token swap repoints bg → wood panel, border → gold-deep, medal stripes →
+// fantasy metals, row hairlines → gold tint. Structural rules add the inset
+// bevel stack (box-shadow) and override the header font to Cinzel display caps.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Host-element token swap ──────────────────────────────────────────────
+
+    tc-leaderboard {
+        --bs-leaderboard-bg:             var(--fg-panel-bg);
+        --bs-leaderboard-border:         1px solid var(--fg-gold-deep);
+        --bs-leaderboard-row-hairline:   1px solid rgba(201, 169, 97, 0.15);
+        --bs-leaderboard-th-color:       var(--fg-gold);
+        --bs-leaderboard-td-color:       var(--fg-parch);
+        --bs-leaderboard-row-hover-bg:   rgba(201, 169, 97, 0.10);
+        --bs-leaderboard-row-active-bg:  rgba(201, 169, 97, 0.16);
+        --bs-leaderboard-gold:           var(--fg-gold);
+        --bs-leaderboard-silver:         var(--fg-silver);
+        --bs-leaderboard-bronze:         var(--fg-bronze);
+    }
+
+    // ── Table shell: bevel + drop shadow ────────────────────────────────────
+
+    .tc-leaderboard {
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // ── Header: Cinzel display caps (hall-of-champions voice) ────────────────
+
+    .tc-leaderboard-th {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // ── Rank numerals: mono for alignment ────────────────────────────────────
+
+    .tc-leaderboard-rank {
+        font-family: var(--fg-mono);
+    }
+
+    // ── Points numerals: mono for alignment ──────────────────────────────────
+
+    .tc-leaderboard-points {
+        font-family: var(--fg-mono);
+        color: var(--fg-parch);
+    }
+
+    // ── Rank medal text colors (repoint off the --bs-* vars) ─────────────────
+
+    .tc-leaderboard-rank--gold   { color: var(--fg-gold); }
+    .tc-leaderboard-rank--silver { color: var(--fg-silver); }
+    .tc-leaderboard-rank--bronze { color: var(--fg-bronze); }
+    .tc-leaderboard-rank--default { color: var(--fg-parch-dim); }
+
+    // ── Player name ──────────────────────────────────────────────────────────
+
+    .tc-leaderboard-name {
+        color: var(--fg-parch);
+    }
+
+    // ── Tier + sprints labels (muted parchment) ──────────────────────────────
+
+    .tc-leaderboard-tier,
+    .tc-leaderboard-td-sprints {
+        color: var(--fg-parch-dim);
+    }
+
+    // ── Avatar initials badge ────────────────────────────────────────────────
+
+    .tc-leaderboard-avatar--initials {
+        font-family: var(--fg-mono);
+        color: var(--fg-parch-dim);
+        background: var(--fg-leather-2);
+        border-color: var(--fg-gold-deep);
+    }
+
+    // ── Top-3 row: subtle rarity-tinted background ───────────────────────────
+
+    .tc-leaderboard-row--gold {
+        background: rgba(201, 169, 97, 0.08);
+    }
+
+    .tc-leaderboard-row--silver {
+        background: rgba(197, 207, 214, 0.06);
+    }
+
+    .tc-leaderboard-row--bronze {
+        background: rgba(160, 106, 58, 0.07);
+    }
+}

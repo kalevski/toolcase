@@ -1,14 +1,44 @@
-// Dungeon › tc-page-indicator — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-page-indicator-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_page-indicator.scss
-// Target classes: web-components/style/components/_page-indicator.scss
+// Dungeon › tc-page-indicator — gilded diamond pips. Token swap repoints the
+// dot colours to gold; rules turn the base circles into 45°-rotated gilded
+// diamonds (the fantasy motif) with an inked edge + inset highlight, and give
+// the active pip a gold glow.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-page-indicator
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-page-indicator {
+        --bs-page-indicator-color: var(--fg-gold-deep);
+        --bs-page-indicator-active-color: var(--fg-gold-bright);
+        --bs-page-indicator-gap: 8px;
+        line-height: 0;
+    }
+
+    // Filled gilded diamonds instead of hollow circles.
+    .tc-page-indicator-dot {
+        border-radius: 0;
+        border: 1px solid #000;
+        background: var(--bs-page-indicator-color);
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18);
+        transform: rotate(45deg);
+
+        &:hover {
+            background: var(--bs-page-indicator-active-color);
+            transform: rotate(45deg) scale(1.12);
+        }
+    }
+
+    // Active pip — bright gold with a glow.
+    .tc-page-indicator-dot--active {
+        background: var(--bs-page-indicator-active-color);
+        border-color: #000;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 0 6px rgba(232, 200, 120, 0.5);
+
+        &:hover {
+            background: var(--bs-page-indicator-active-color);
+            border-color: #000;
+        }
+    }
 }

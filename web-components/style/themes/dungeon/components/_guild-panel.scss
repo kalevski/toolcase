@@ -1,14 +1,113 @@
-// Dungeon › tc-guild-panel — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-guild-panel-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_guild-panel.scss
-// Target classes: web-components/style/components/_guild-panel.scss
+// Dungeon › tc-guild-panel — gilded clan panel. Token swap carries the gold
+// border + parch text; structural rules add the radial wood fill, the inset
+// gilded bevel stack, display-caps member names/ranks, mono stat values, and a
+// glowing online pip.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-guild-panel
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-guild-panel {
+        --bs-guild-panel-bg: transparent;
+        --bs-guild-panel-border: var(--fg-gold-deep);
+        --bs-guild-panel-separator: rgba(201, 169, 97, 0.15);
+
+        --bs-guild-panel-eyebrow-color: var(--fg-gold-deep);
+        --bs-guild-panel-name-color: var(--fg-gold-bright);
+        --bs-guild-panel-tag-color: var(--fg-gold-bright);
+        --bs-guild-panel-motto-color: var(--fg-parch-3);
+
+        --bs-guild-panel-stats-bg: rgba(0, 0, 0, 0.3);
+        --bs-guild-panel-stat-label-color: var(--fg-gold-deep);
+        --bs-guild-panel-stat-value-color: var(--fg-gold-bright);
+
+        --bs-guild-panel-row-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-guild-panel-member-name-color: var(--fg-parch);
+        --bs-guild-panel-member-rank-bg: var(--fg-slot-bg);
+        --bs-guild-panel-member-rank-color: var(--fg-gold-bright);
+        --bs-guild-panel-member-contribution-color: var(--fg-gold-bright);
+
+        --bs-guild-panel-pip-online: var(--fg-stamina-bright);
+        --bs-guild-panel-pip-offline: var(--fg-parch-dim);
+    }
+
+    // Radial wood fill + gilded bevel stack + drop shadow — use foundation recipes
+    // so the panel stays in lockstep with the shared surface.
+    .tc-guild-panel {
+        position: relative;
+        background: var(--fg-panel-bg);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Top corner notches — signature gilded ornament.
+    .tc-guild-panel::before,
+    .tc-guild-panel::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+    .tc-guild-panel::before {
+        left: -1px;
+    }
+    .tc-guild-panel::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // Display-caps guild name; mono tag.
+    .tc-guild-panel-name-text {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+    .tc-guild-panel-tag {
+        font-family: var(--fg-mono);
+    }
+
+    // Gilded divider under the header — replace flat hairline with the gold rule.
+    .tc-guild-panel-header {
+        border-bottom: none;
+        background-image: var(--fg-rule);
+        background-repeat: no-repeat;
+        background-position: bottom;
+        background-size: 100% 1px;
+    }
+
+    // Stats strip — gold-edge gradient frame + top bevel + scanlines.
+    .tc-guild-panel-stats {
+        border: 1px solid transparent;
+        border-image: var(--fg-gold-edge) 1;
+        box-shadow: var(--fg-bevel-top);
+        background-image: var(--fg-scanlines);
+    }
+    .tc-guild-panel-stat-value {
+        font-family: var(--fg-mono);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Member names read as display caps; ranks as gold-bordered caps chips.
+    .tc-guild-panel-member-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+    .tc-guild-panel-member-rank {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        border: 1px solid var(--fg-gold-deep);
+    }
+    .tc-guild-panel-member-contribution {
+        font-family: var(--fg-mono);
+    }
+
+    // Online pip gets the stamina glow.
+    .tc-guild-panel-member--online .tc-guild-panel-member-pip {
+        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-stamina-bright);
+    }
 }

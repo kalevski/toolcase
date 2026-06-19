@@ -1,0 +1,106 @@
+// Dungeon › tc-list-card — gilded ranked list panel (top-N board / quest list).
+// Four remap-bypass traps addressed:
+//   1. slate header gradient  → leather/ink band with gold bottom hairline
+//   2. slate row-separator fallback → faint gold
+//   3. white skeleton shimmer → parchment shimmer
+//   4. hardcoded 'Inter' on .tc-list-card-title → Cinzel display caps
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-list-card {
+        // ── Surface ───────────────────────────────────────────────────────────
+        --bs-list-card-bg:                  var(--fg-panel-bg);
+        --bs-list-card-border-color:        var(--fg-gold-deep);
+        --bs-list-card-shadow:              var(--fg-panel-shadow);
+
+        // ── Header ────────────────────────────────────────────────────────────
+        // Overrides the near-invisible slate wash (rgba(30,41,59,…)).
+        --bs-list-card-header-bg:           var(--fg-ink-2);
+        --bs-list-card-header-border-color: var(--fg-gold-deep);
+
+        // ── Title ─────────────────────────────────────────────────────────────
+        --bs-list-card-title-color:         var(--fg-gold-bright);
+
+        // ── Row separators ────────────────────────────────────────────────────
+        // Overrides the slate fallback (rgba(148,163,184,.35)).
+        --bs-list-card-row-separator-color: rgba(201, 169, 97, 0.15);
+
+        // ── Rank chip ─────────────────────────────────────────────────────────
+        --bs-list-card-rank-bg:             var(--fg-slot-bg);
+        --bs-list-card-rank-color:          var(--fg-gold);
+
+        // ── Label / value / icon ──────────────────────────────────────────────
+        --bs-list-card-label-color:         var(--fg-parch);
+        --bs-list-card-value-color:         var(--fg-parch-2);
+        --bs-list-card-icon-color:          var(--fg-gold);
+
+        // ── Skeleton shimmer ──────────────────────────────────────────────────
+        // Overrides the white shimmer (rgba(255,255,255,.6)).
+        --bs-list-card-skeleton-shimmer:    rgba(232, 220, 196, 0.5);
+    }
+
+    // ── Card shell — gilded bevel + corner notches ────────────────────────────
+
+    .tc-list-card-inner {
+        position: relative;
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // Top corner notches — signature gilded ornament (mirrors tc-panel).
+    .tc-list-card-inner::before,
+    .tc-list-card-inner::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-list-card-inner::before {
+        left: -1px;
+    }
+
+    .tc-list-card-inner::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Header — leather/ink band with gold bottom hairline ───────────────────
+
+    .tc-list-card-header {
+        background: var(--fg-ink-2);
+        border-bottom: 1px solid var(--fg-gold-deep);
+    }
+
+    // ── Title — display-caps (overrides hardcoded 'Inter') ────────────────────
+
+    .tc-list-card-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ── Rank chip — ink slot with gold mono numerals + subtle bevel ───────────
+
+    .tc-list-card-rank {
+        font-family: var(--fg-mono);
+        color: var(--fg-gold);
+        background: var(--fg-slot-bg);
+        box-shadow: var(--fg-bevel-top);
+        border-radius: 0;
+    }
+
+    // ── Value — explicit mono for stability ───────────────────────────────────
+
+    .tc-list-card-value {
+        font-family: var(--fg-mono);
+        color: var(--fg-parch-2);
+    }
+}

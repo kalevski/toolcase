@@ -1,14 +1,53 @@
-// Dungeon › tc-compass-bar — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-compass-bar-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_compass-bar.scss
-// Target classes: web-components/style/components/_compass-bar.scss
+// Dungeon › tc-compass-bar — gilded heading strip. Token swap recolours the
+// track / cardinals / pointer / heading to gold tones; structural rules add the
+// dark gradient track with the stacked inset gold bevel, display-caps cardinal
+// labels, and ink text shadows matching the game strip. Heading stays mono.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-compass-bar
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-compass-bar {
+        --bs-compass-bar-height: 28px;
+
+        --bs-compass-bar-cardinal-color: var(--fg-gold-bright);
+        --bs-compass-bar-cardinal-spacing: 0.18em;
+
+        --bs-compass-bar-center-color: var(--fg-gold);
+        --bs-compass-bar-pointer-color: var(--fg-gold-bright);
+
+        --bs-compass-bar-marker-color: var(--fg-parch);
+        --bs-compass-bar-marker-label-color: var(--fg-parch-3);
+        --bs-compass-bar-marker-label-spacing: 0.16em;
+
+        --bs-compass-bar-heading-color: var(--fg-gold-bright);
+    }
+
+    // Dark wood track with the signature stacked inset gold bevel.
+    .tc-compass-bar__track {
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.4)),
+            linear-gradient(180deg, #1a1308, #0a0604);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    // Cardinals read as gilded display caps with an ink shadow.
+    .tc-compass-bar__cardinal {
+        font-family: var(--fg-display);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Marker glyph + mono label carry the ink shadow.
+    .tc-compass-bar__marker-glyph,
+    .tc-compass-bar__marker-label {
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Mono heading with an ink shadow.
+    .tc-compass-bar__heading {
+        font-family: var(--fg-mono);
+        text-shadow: 0 1px 2px #000;
+    }
 }

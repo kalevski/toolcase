@@ -1,0 +1,42 @@
+// Dungeon › tc-tag-input — keyword/affix entry surface.
+// Foundation covers most token swaps (control bg, chip borders, menu, focus
+// accent). This override fixes the three off-palette hardcoded literals the
+// remap misses (slate-blue focus glow, white-on-gold active option, white
+// skeleton shimmer) and layers the display-caps label + mono chip text for an
+// affix/keyword read.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token fixes: off-palette literals → dungeon palette ─────────────────
+
+    tc-tag-input {
+        // Focus border + ring: slate-blue rgba literals → gold
+        --bs-tag-input-focus-border: var(--fg-gold);
+        --bs-tag-input-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.4);
+
+        // Active-option text: #fff white-on-gold → ink (far better contrast)
+        --bs-tag-input-option-active-color: var(--fg-ink);
+
+        // Chips: recessed slot fill for the affix/keyword token read
+        --bs-tag-input-chip-bg: var(--fg-slot-bg);
+
+        // Skeleton shimmer: white literal → gold-tinted
+        --bs-tag-input-skeleton-shimmer: rgba(240, 210, 122, 0.25);
+    }
+
+    // ── Structure: display caps label ────────────────────────────────────────
+
+    .tc-tag-input-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+
+    // ── Structure: mono chip text (affix/token read) ─────────────────────────
+
+    .tc-tag-input-tag {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.04em;
+    }
+}

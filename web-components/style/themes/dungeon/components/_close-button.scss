@@ -1,0 +1,19 @@
+// Dungeon › tc-close-button — gilded × glyph.
+// Foundation already maps resting color to parchment-dim and hover background
+// to the leather well via --tc-* remaps. This override tints the resting glyph
+// to bronze (gold-deep) and lifts the hover glyph to gold-bright.
+// No bevel or notches — the 30px hit area is too small for ornament.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Token-swap: resting glyph bronze instead of parchment-dim.
+    .btn-close {
+        --bs-btn-close-color: var(--fg-gold-deep);
+    }
+
+    // Structure: the base hardcodes `color: var(--tc-text)` in :hover, so we
+    // must override the property directly — a var swap alone won't reach it.
+    .btn-close:hover {
+        color: var(--fg-gold-bright);
+    }
+}

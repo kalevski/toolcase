@@ -1,0 +1,79 @@
+// Dungeon › tc-migration-guide — patch-notes scroll / spellbook errata plate.
+// Foundation token remap already covers surfaces, borders, and mono numerals.
+// This override adds: wood-gradient fill, gilded bevel + corner notches,
+// display-caps titles, gold-rule step separators, and fixes the ink-on-ink
+// code-color contrast trap.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on host ────────────────────────────────────────────────────
+
+    tc-migration-guide {
+        // Wood gradient fill (overrides flat --tc-surface).
+        --bs-migration-guide-bg: var(--fg-panel-bg);
+
+        // Gild the version pills (v1.x → v2.x numerals read as ledger entries).
+        --bs-migration-guide-version-color: var(--fg-gold);
+
+        // Fix ink-on-ink contrast trap: code-color resolves to --tc-text-inverse
+        // which maps to --fg-ink on a --tc-ink code surface → near-invisible.
+        // Repoint to parchment so code stays legible.
+        --bs-migration-guide-code-color: var(--fg-parch);
+    }
+
+    // ── Gilded frame: bevel + drop shadow ────────────────────────────────────
+
+    .tc-migration-guide {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Top corner notches ────────────────────────────────────────────────────
+
+    .tc-migration-guide::before,
+    .tc-migration-guide::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .tc-migration-guide::before {
+        left: -1px;
+    }
+
+    .tc-migration-guide::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Display caps: header title + per-step titles ──────────────────────────
+
+    .tc-migration-guide__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    .tc-migration-step__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Gold-rule step separators ─────────────────────────────────────────────
+    // --fg-rule is a gradient; border-image carries it — border-color cannot.
+
+    .tc-migration-step + .tc-migration-step {
+        border-top-color: transparent;
+        border-image: var(--fg-rule) 1;
+    }
+}

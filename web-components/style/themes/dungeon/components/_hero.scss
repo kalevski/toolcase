@@ -1,0 +1,81 @@
+// Dungeon › tc-hero — title-screen hero surface.
+// Token swaps handle most cosmetics via the foundation; this file lifts the
+// title to Cinzel display caps, guilds the eyebrow, adds a bevel to each stat
+// plate, and optionally drapes the section in the wood-gradient panel fill.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-hero {
+        // Lift eyebrow from parch-3 muted to a gilded chapter label.
+        --bs-hero-eyebrow-color: var(--fg-gold);
+
+        // Scattered bg icons read as faint gold runes at the inherited 0.06 opacity.
+        --bs-hero-bg-icon-color: var(--fg-gold);
+    }
+
+    // ── Hero shell ────────────────────────────────────────────────────────────
+    // Wood-gradient fill so the hero reads as a full-bleed dungeon title screen.
+    .tc-hero {
+        background: var(--fg-panel-bg);
+        box-shadow: var(--fg-panel-shadow);
+        position: relative;
+    }
+
+    // Corner notches on the outer hero frame.
+    .tc-hero::before,
+    .tc-hero::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        z-index: 2;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-hero::before {
+        left: -1px;
+    }
+
+    .tc-hero::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Title ─────────────────────────────────────────────────────────────────
+    // Base hardcodes no font-family (inherits body) and a tight -0.02em tracking.
+    // Override to Cinzel display caps — the marquee of the dungeon title screen.
+    .tc-hero-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        font-weight: 600;
+    }
+
+    // ── Eyebrow ───────────────────────────────────────────────────────────────
+    // Base hardcodes 'JetBrains Mono'. Override to Cinzel display caps so the
+    // eyebrow reads as a carved chapter label rather than a system micro-label.
+    .tc-hero-eyebrow {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // ── Stat cards — gilded plates ────────────────────────────────────────────
+    // Border + leather background are free via token remap; add the bevel so
+    // each plate reads as a small inset gilded plaque.
+    .tc-hero-stat-card {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Separator — gold-rule hairline ────────────────────────────────────────
+    // Base uses background: var(--bs-hero-border-color) (a plain solid colour).
+    // Replace with the gradient gold rule for the dungeon hairline motif.
+    .tc-hero-separator {
+        background: var(--fg-rule);
+        height: 1px;
+    }
+}

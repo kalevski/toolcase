@@ -1,14 +1,64 @@
-// Dungeon › tc-gamepad-button-prompt — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-gamepad-button-prompt-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
+// Dungeon › tc-gamepad-button-prompt — gilded round button glyph: a circular
+// metal cap (leather gradient, gold edge, bevel highlight) with a display-caps
+// glyph, per-button face colours (A green / B blood / X mana / Y legendary), and
+// a display-caps caption. Token swap recolours; the glyph rule turns the cap
+// circular (sanctioned round) with the bevel + gradient the base draws flat.
 //
 // Design source:  game-components/style/components/_gamepad-button-prompt.scss
 // Target classes: web-components/style/components/_gamepad-button-prompt.scss
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-gamepad-button-prompt
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-gamepad-button-prompt {
+        --bs-gamepad-button-prompt-cap-bg: var(--fg-keycap-bg); // recipe token; single source for the leather gradient
+        --bs-gamepad-button-prompt-cap-color: var(--fg-gold-bright);
+        --bs-gamepad-button-prompt-cap-border-color: var(--fg-gold-deep);
+        --bs-gamepad-button-prompt-label-color: var(--fg-parch);
+    }
+
+    // Round metal cap — leather gradient (via --fg-keycap-bg), gold edge, bevel highlight, display glyph.
+    .tc-gamepad-button-prompt__glyph {
+        font-family: var(--fg-display);
+        font-weight: 700;
+        // cap fill flows through the token; no inline gradient needed
+        border-bottom-width: var(--bs-gamepad-button-prompt-cap-border-width);
+        border-radius: 50%; // sanctioned circle — round gamepad button
+        box-shadow:
+            var(--fg-bevel-top), // recipe token: inset top highlight band
+            0 1px 0 rgba(0, 0, 0, 0.6);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Subtle pressed/hover affordance — gold edge brightens to signal interactivity.
+    .tc-gamepad-button-prompt__glyph:hover,
+    .tc-gamepad-button-prompt__glyph:active {
+        --bs-gamepad-button-prompt-cap-border-color: var(--fg-gold);
+    }
+
+    // Caption = display caps.
+    .tc-gamepad-button-prompt__label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+
+    // Per-button face colours (mirrors the game design).
+    tc-gamepad-button-prompt[data-button='A'] {
+        --bs-gamepad-button-prompt-cap-color: var(--fg-stamina-bright);
+    }
+    tc-gamepad-button-prompt[data-button='B'] {
+        --bs-gamepad-button-prompt-cap-color: var(--fg-blood-bright);
+    }
+    tc-gamepad-button-prompt[data-button='X'] {
+        --bs-gamepad-button-prompt-cap-color: var(--fg-mana-bright);
+    }
+    tc-gamepad-button-prompt[data-button='Y'] {
+        --bs-gamepad-button-prompt-cap-color: var(--fg-legendary);
+    }
+    tc-gamepad-button-prompt[data-button='LB'],
+    tc-gamepad-button-prompt[data-button='RB'],
+    tc-gamepad-button-prompt[data-button='LT'],
+    tc-gamepad-button-prompt[data-button='RT'] {
+        --bs-gamepad-button-prompt-cap-color: var(--fg-parch);
+    }
 }

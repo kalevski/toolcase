@@ -1,14 +1,66 @@
-// Dungeon › tc-kill-feed — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-kill-feed-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_kill-feed.scss
-// Target classes: web-components/style/components/_kill-feed.scss
+// Dungeon › tc-kill-feed — gilded ink rows. Each row becomes a beveled dark slab
+// with a gold hairline border; killer reads gold display caps, victim blood-bright,
+// weapon mono, headshot fire with a glow. Token swap can't carry the bevel or the
+// display-caps recast, so those are structural.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-kill-feed
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-kill-feed {
+        --bs-kill-feed-bg: transparent;
+        --bs-kill-feed-border: none;
+        --bs-kill-feed-row-border: none;
+        --bs-kill-feed-killer-color: var(--fg-gold-bright);
+        --bs-kill-feed-victim-color: var(--fg-blood-bright);
+        --bs-kill-feed-weapon-color: var(--fg-gold);
+        --bs-kill-feed-headshot-color: var(--fg-fire);
+    }
+
+    .tc-kill-feed {
+        gap: 4px;
+    }
+
+    // Each row is a beveled leather banner slab (base ships flat hairline rows).
+    // Warm gradient fill (improvement 1) + left gold accent stripe (improvement 3).
+    .tc-kill-feed-row {
+        background: linear-gradient(180deg, rgba(58, 42, 28, 0.4), rgba(10, 6, 4, 0.75));
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 3px 0 0 var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 2px 6px rgba(0, 0, 0, 0.6);
+
+        &:last-child {
+            border-bottom: 1px solid var(--fg-gold-deep);
+        }
+
+        // Improvement 4: headshot rows get a fire-tinted left stripe to stand out at a glance.
+        &.tc-kill-feed-row--headshot {
+            box-shadow:
+                inset 3px 0 0 var(--fg-fire),
+                inset 0 1px 0 rgba(232, 200, 120, 0.18),
+                0 2px 6px rgba(0, 0, 0, 0.6);
+        }
+    }
+
+    // Killer/victim shed the base mono for gold display caps / blood caps.
+    .tc-kill-feed-killer,
+    .tc-kill-feed-victim {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Improvement 2: tint weapon glyph gold so the kill verb reads as a struck weapon mark.
+    .tc-kill-feed-weapon {
+        font-family: var(--fg-mono);
+        color: var(--fg-gold);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-kill-feed-headshot {
+        text-shadow:
+            0 1px 2px #000,
+            0 0 6px var(--fg-fire);
+    }
 }

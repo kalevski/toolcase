@@ -1,0 +1,57 @@
+// Dungeon › tc-lightbox — modal image gallery / tome illustration viewer.
+// Token-swaps the hardcoded slate/white literals that the foundation remap
+// cannot reach (--tc-accent focus rings, #0f172a backdrop, #ffffff controls).
+// Adds a gilded stage frame + mono counter repoint.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-lightbox {
+        // Backdrop: slate-navy → warm fantasy ink.
+        --bs-lightbox-backdrop-bg: var(--fg-ink);
+
+        // Controls: cold white → parchment.
+        --bs-lightbox-control-color: var(--fg-parch);
+
+        // Hover wash: white glow → gold tint.
+        --bs-lightbox-control-wash: rgba(201, 169, 97, 0.18);
+
+        // Caption: white-70 → parchment-dim.
+        --bs-lightbox-caption-color: var(--fg-parch-dim);
+
+        // Thumbnails: white-15 border → gold tint; active → gold-bright.
+        --bs-lightbox-thumb-border:        rgba(201, 169, 97, 0.3);
+        --bs-lightbox-thumb-active-border: var(--fg-gold-bright);
+
+        // Stage surface: already remapped to ink; make it explicit.
+        --bs-lightbox-stage-bg: var(--fg-ink);
+    }
+
+    // ── Focus rings ───────────────────────────────────────────────────────────
+    // The base hardcodes `outline: 2px solid var(--tc-accent)` (cyan), not
+    // --tc-app-accent, so the foundation gold-remap does not reach these.
+    // Override outline-color on each interactive element individually.
+
+    .tc-lightbox__close:focus-visible,
+    .tc-lightbox__arrow:focus-visible,
+    .tc-lightbox__thumbnail:focus-visible {
+        outline-color: var(--fg-gold-bright);
+    }
+
+    // ── Gilded stage frame ────────────────────────────────────────────────────
+    // Wraps the displayed image in a gold-deep border + panel-shadow bevel so
+    // the framed art reads as a gilded illustration plate.
+
+    .tc-lightbox__image {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Counter ───────────────────────────────────────────────────────────────
+    // Base already uses --tc-font-mono; repoint color from control-color
+    // (which the base inherits via the var) to parch and lock mono typeface.
+
+    .tc-lightbox__counter {
+        color: var(--fg-parch);
+        font-family: var(--fg-mono);
+    }
+}

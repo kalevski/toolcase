@@ -1,14 +1,101 @@
-// Dungeon › tc-loading-screen — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-loading-screen-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_loading-screen.scss
-// Target classes: web-components/style/components/_loading-screen.scss
+// Dungeon › tc-loading-screen — full-viewport gilded loading page. Host surface
+// becomes a leather radial; title reads gilded display caps with a glow; label row
+// goes mono caps with a gold percent; the progress bar turns into an inset ink
+// groove with a gilded gradient fill + scanlines; the tip block becomes a framed
+// gilded ink panel with a serif-italic body. Token swap can't carry the gradient
+// fill, scanlines, tip frame, or the display/serif recasts.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-loading-screen
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-loading-screen {
+        --bs-loading-screen-bg: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+
+        --bs-loading-screen-eyebrow-color: var(--fg-parch-dim);
+        --bs-loading-screen-title-color: var(--fg-gold-bright);
+
+        --bs-loading-screen-label-color: var(--fg-parch-3);
+        --bs-loading-screen-pct-color: var(--fg-gold-bright);
+
+        --bs-loading-screen-bar-bg: linear-gradient(180deg, var(--fg-ink), var(--fg-ink-2));
+        --bs-loading-screen-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+        --bs-loading-screen-bar-height: 12px;
+
+        --bs-loading-screen-tip-label-color: var(--fg-parch-dim);
+        --bs-loading-screen-tip-body-color: var(--fg-parch-3);
+    }
+
+    // Header: gold-rule hairline below eyebrow+title reads as a titled plate.
+    .tc-loading-screen-header {
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+
+    // Title reads gilded display caps with a glow.
+    .tc-loading-screen-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-shadow:
+            0 1px 0 #000,
+            0 0 18px rgba(232, 200, 120, 0.35);
+    }
+
+    // Label row reads mono caps.
+    .tc-loading-screen-label {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 400;
+    }
+
+    // Bar — inset ink groove with a gilded fill (base ships a flat hairline track).
+    .tc-loading-screen-bar {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18);
+    }
+
+    // Scanlines wash over the fill (web has no scanline element — overlay the bar).
+    .tc-loading-screen-bar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: var(--fg-scanlines);
+    }
+
+    // Tip becomes a framed gilded ink panel; body switches to serif italic.
+    // Corner notch (top-right) brings the framed-panel language.
+    .tc-loading-screen-tip {
+        position: relative;
+        padding: 14px 18px;
+        background: var(--fg-panel-bg);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    }
+
+    .tc-loading-screen-tip::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 18px;
+        height: 18px;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-loading-screen-tip-label {
+        font-family: var(--fg-mono);
+    }
+
+    .tc-loading-screen-tip-body {
+        font-family: var(--fg-body);
+        font-style: italic;
+        letter-spacing: normal;
+    }
 }

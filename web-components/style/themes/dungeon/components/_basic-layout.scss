@@ -1,0 +1,30 @@
+// Dungeon › tc-basic-layout — two-section page shell.
+// Foundation already remaps surface/text/border tokens to dark wood + parch + gold-deep.
+// This override adds the optional gilded seam: swaps the brand bar to the warmer leather
+// surface and replaces the flat 1px hairline with the gold-gradient rule via ::after.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-basic-layout {
+        // Slightly warmer header surface than the default --tc-surface wood.
+        --bs-basic-layout-brand-bg: var(--fg-leather);
+    }
+
+    .tc-basic-layout-brand {
+        // Remove flat hairline — the gilded ::after rule replaces it.
+        border-bottom: 0;
+        position: relative;
+    }
+
+    // Gilded seam: gold-gradient hairline at the header/content boundary.
+    .tc-basic-layout-brand::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--fg-rule);
+        pointer-events: none;
+    }
+}

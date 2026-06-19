@@ -1,14 +1,107 @@
-// Dungeon › tc-skill-tree — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-skill-tree-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_skill-tree.scss
-// Target classes: web-components/style/components/_skill-tree.scss
+// Dungeon › tc-skill-tree — gilded talent constellation (panel + node-graph).
+// Token swap recolours the canvas/nodes; structural additions a flat swap can't
+// carry: the radial wood canvas gradient + gilded inset bevel, the dashed
+// gold-shadow edges that go solid gold-bright when unlocked, the gilded glyph
+// node bevel, the display-caps label (base hardcodes mono), the gold-bright mono
+// rank, and the gilded points strip. Sharp corners; the glyph dot stays square.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-skill-tree
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-skill-tree {
+        --bs-skill-tree-bg: transparent;
+        --bs-skill-tree-border-color: var(--fg-gold-deep);
+
+        --bs-skill-tree-edge-color: var(--fg-gold-shadow);
+        --bs-skill-tree-edge-unlocked-color: var(--fg-gold-bright);
+        --bs-skill-tree-edge-width: 2;
+
+        // Node — base / available.
+        --bs-skill-tree-node-bg: transparent;
+        --bs-skill-tree-node-border-color: var(--fg-gold-deep);
+        --bs-skill-tree-node-color: var(--fg-parch-3);
+        --bs-skill-tree-node-hover-bg: transparent;
+        --bs-skill-tree-node-hover-border: var(--fg-gold);
+
+        // Node — selected (gold-bright accent, not a filled block).
+        --bs-skill-tree-node-selected-bg: transparent;
+        --bs-skill-tree-node-selected-color: var(--fg-gold-bright);
+        --bs-skill-tree-node-selected-border: var(--fg-gold-bright);
+
+        // Node — unlocked.
+        --bs-skill-tree-node-unlocked-bg: transparent;
+        --bs-skill-tree-node-unlocked-color: var(--fg-gold-bright);
+        --bs-skill-tree-node-unlocked-border: var(--fg-gold-bright);
+
+        // Node — locked.
+        --bs-skill-tree-node-locked-border: var(--fg-gold-shadow);
+        --bs-skill-tree-node-locked-color: var(--fg-parch-dim);
+        --bs-skill-tree-node-locked-opacity: 0.55;
+
+        --bs-skill-tree-label-color: var(--fg-parch);
+        --bs-skill-tree-rank-color: var(--fg-gold-bright);
+
+        --bs-skill-tree-points-bg: rgba(0, 0, 0, 0.4);
+        --bs-skill-tree-points-border-color: var(--fg-gold-deep);
+        --bs-skill-tree-points-label-color: var(--fg-parch-3);
+        --bs-skill-tree-points-value-color: var(--fg-gold-bright);
+    }
+
+    // Canvas — radial wood fill with the gilded inset bevel.
+    .tc-skill-tree__canvas {
+        background:
+            radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+            linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    }
+
+    // Edges: dashed runic line while locked, solid gilded line once unlocked.
+    .tc-skill-tree__edge {
+        stroke-dasharray: 4 4;
+    }
+    .tc-skill-tree__edge--unlocked {
+        stroke-dasharray: none;
+    }
+
+    // Node tile — gilded slot bevel + engraved glyph text.
+    .tc-skill-tree__node {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 1px 2px #000;
+    }
+    // Keyboard focus — gold ring instead of the undefined --tc-accent fallback.
+    .tc-skill-tree__node:focus-visible {
+        outline-color: var(--fg-gold-bright);
+    }
+    .tc-skill-tree__node--unlocked .tc-skill-tree__glyph,
+    .tc-skill-tree__node--selected .tc-skill-tree__glyph {
+        filter: drop-shadow(0 0 8px rgba(232, 200, 120, 0.4));
+    }
+
+    // Label reads as fine display caps (base hardcodes mono).
+    .tc-skill-tree__label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    // Rank — gold-bright mono with an engraved shadow.
+    .tc-skill-tree__rank {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.16em;
+        text-shadow: 0 1px 2px #000;
+    }
+    // Neutralise base's white selected-rank override; keep rank in the gilded mono family.
+    .tc-skill-tree__node--selected .tc-skill-tree__rank {
+        color: var(--fg-gold-bright);
+    }
+
+    // Points value — gilded mono.
+    .tc-skill-tree__points-value {
+        font-family: var(--fg-mono);
+        text-shadow: 0 1px 2px #000;
+    }
 }

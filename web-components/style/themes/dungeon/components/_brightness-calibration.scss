@@ -1,14 +1,85 @@
-// Dungeon › tc-brightness-calibration — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-brightness-calibration-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_brightness-calibration.scss
-// Target classes: web-components/style/components/_brightness-calibration.scss
+// Dungeon › tc-brightness-calibration — gilded calibration view. The three
+// reference bands stay a FUNCTIONAL dark→mid→bright ramp (it is the calibration
+// target, not decoration) but are voiced in the fantasy ramp (ink → leather →
+// gold). Structural rules add the gilded inset frame on the preview, display-caps
+// row label, and gold mono readout.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-brightness-calibration
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-brightness-calibration {
+        --bs-brightness-calibration-bg: var(--fg-panel-bg);
+        --bs-brightness-calibration-border-color: var(--fg-gold-deep);
+
+        // Fantasy ramp: ink floor → leather mid → gilded ceiling.
+        --bs-brightness-calibration-band-dark: linear-gradient(180deg, #050302, #1a1208);
+        --bs-brightness-calibration-band-mid: linear-gradient(180deg, #2a1f14, #4a3422);
+        --bs-brightness-calibration-band-bright: linear-gradient(180deg, #c5a060, #f0d27a);
+        --bs-brightness-calibration-band-border-color: var(--fg-gold-deep);
+        --bs-brightness-calibration-band-label-dark: rgba(255, 255, 255, 0.6);
+        --bs-brightness-calibration-band-label-mid: rgba(255, 255, 255, 0.6);
+        --bs-brightness-calibration-band-label-bright: rgba(0, 0, 0, 0.65);
+
+        --bs-brightness-calibration-row-label-color: var(--fg-parch);
+        --bs-brightness-calibration-row-value-color: var(--fg-gold-bright);
+    }
+
+    // Gilded inset bevel on the preview frame.
+    .tc-brightness-calibration__preview {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+    }
+
+    // Band labels read as mono micro-caps.
+    .tc-brightness-calibration__band-label {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    // Row label as display caps; value as gold mono.
+    .tc-brightness-calibration__row-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+    .tc-brightness-calibration__row-value {
+        font-family: var(--fg-mono);
+    }
+
+    // Band labels bottom-aligned to match gc layout.
+    .tc-brightness-calibration__band {
+        align-items: flex-end;
+    }
+
+    // Gilded inset slider track.
+    .tc-brightness-calibration__input {
+        appearance: none;
+        -webkit-appearance: none;
+        height: 8px;
+        background: linear-gradient(180deg, #0e0905, #1a120a);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        cursor: pointer;
+    }
+
+    // Gilded diamond thumb — webkit.
+    .tc-brightness-calibration__input::-webkit-slider-thumb {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        transform: rotate(45deg);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: 0 0 0 1px #000;
+    }
+
+    // Gilded diamond thumb — moz.
+    .tc-brightness-calibration__input::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        transform: rotate(45deg);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: 0 0 0 1px #000;
+    }
 }

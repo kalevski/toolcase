@@ -1,0 +1,39 @@
+// Dungeon › tc-phase-grid — quest/objective grid with element-tinted status stripes.
+// Foundation covers: card bg/border (leather + gold-deep hairlines), title/desc (parch),
+// tag/command surfaces (ink), status colors (stamina/mana/blood via --tc-* → --fg-*),
+// mono fonts on tags + status labels. Overrides here add brighter element tokens,
+// display-caps card titles, wider status letter-spacing, and the signature gilded bevel.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-phase-grid {
+        // Brighter element status tokens — punchier than the default --tc-info/success/danger.
+        --bs-phase-grid-active-color:   var(--fg-mana-bright);
+        --bs-phase-grid-complete-color: var(--fg-stamina-bright);
+        --bs-phase-grid-blocked-color:  var(--fg-blood-bright);
+
+        // Warmer card surface — explicit leather over the generic --tc-surface.
+        --bs-phase-grid-card-bg: var(--fg-leather);
+
+        // Deeper ink command block — slightly warmer than pure ink.
+        --bs-phase-grid-command-bg: var(--fg-ink-2);
+    }
+
+    // Gilded bevel wraps the whole card grid in the signature shadow stack.
+    .tc-phase-grid {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Card title — display caps (base hardcodes --bs-font-sans-serif, so must override the class).
+    .tc-phase-grid-item-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+    }
+
+    // Status label — push the mono-caps tracking wider for the fantasy idiom.
+    .tc-phase-grid-item-status {
+        letter-spacing: 0.1em;
+    }
+}

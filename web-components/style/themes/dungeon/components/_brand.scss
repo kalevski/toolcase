@@ -1,0 +1,25 @@
+// Dungeon › tc-brand — engraved gilded wordmark.
+// Token swap turns the mono code lockup into a Cinzel display-caps title.
+// The underline becomes the gold gradient rule; the primary text reads gold.
+// The micro-label chip stays mono (stamp feel). No structural additions needed.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-brand {
+        // Swap mono wordmark font to Cinzel engraved display caps.
+        --bs-brand-primary-font: var(--fg-display);
+        // Cinzel reads better at wider tracking than JetBrains Mono.
+        --bs-brand-primary-letter-spacing: 0.12em;
+    }
+
+    // Primary wordmark reads as gilded gold rather than plain parchment.
+    .tc-brand__primary {
+        color: var(--fg-gold-bright);
+    }
+
+    // Underline becomes the gold gradient rule — a gilded sweep.
+    // --fg-rule is a gradient so it must be set as background, not border-color.
+    .tc-brand__underline {
+        background: var(--fg-rule);
+    }
+}

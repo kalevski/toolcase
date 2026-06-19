@@ -1,0 +1,22 @@
+// Dungeon › tc-asset-row — inventory manifest row.
+// Foundation reskin handles the bulk: parchment name, leather hover well,
+// gold-deep separator, mono tags and size, border-radius already 0.
+// This file adds the two optional polish touches from the conversion guide:
+//   1. Tag chips get the radial slot fill (fg-slot-bg) for a rune-chip feel.
+//   2. Name text gets body-serif small-caps for an item-manifest read.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // (1) Tag chips — swap flat leather surface for the radial slot fill.
+    tc-asset-row {
+        --bs-asset-row-tag-bg: var(--fg-slot-bg);
+    }
+
+    // (2) Name — body-serif small-caps for an inventory-entry read.
+    //     Override on the class because the base hardcodes font-family there.
+    .tc-asset-row-name {
+        font-family: var(--fg-body);
+        font-variant: small-caps;
+        letter-spacing: 0.04em;
+    }
+}

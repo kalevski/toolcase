@@ -1,7 +1,8 @@
 // Dungeon › tc-menu-item — gilded menu row. Display caps, left gold marker on
 // selected, gradient highlight wash, mono hotkey cap.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-menu-item {
         --bs-menu-item-bg: transparent;
         --bs-menu-item-color: var(--fg-parch);
@@ -14,10 +15,10 @@ tc-theme[name='dungeon'] {
         --bs-menu-item-selected-icon-color: var(--fg-gold-bright);
         --bs-menu-item-hotkey-font-family: var(--fg-mono);
         --bs-menu-item-hotkey-color: var(--fg-parch-3);
-        --bs-menu-item-hotkey-bg: rgba(0, 0, 0, 0.4);
+        --bs-menu-item-hotkey-bg: var(--fg-keycap-bg);
         --bs-menu-item-hotkey-border: 1px solid var(--fg-gold-deep);
         --bs-menu-item-hotkey-selected-color: var(--fg-gold-bright);
-        --bs-menu-item-hotkey-selected-bg: rgba(0, 0, 0, 0.4);
+        --bs-menu-item-hotkey-selected-bg: var(--fg-keycap-bg);
         --bs-menu-item-hotkey-selected-border: 1px solid var(--fg-gold);
 
         font-family: var(--fg-display);
@@ -29,11 +30,35 @@ tc-theme[name='dungeon'] {
     .tc-menu-item-label {
         font-weight: 600;
         font-size: 13px;
+        // Improvement 5: lift parchment/gold caps off the dark ground.
+        text-shadow: 0 1px 0 #000;
+    }
+
+    // Improvement 1: seated keycap bevel.
+    .tc-menu-item-hotkey {
+        box-shadow: inset 0 1px 0 var(--fg-bevel-top);
+    }
+
+    // Improvement 3: hover marker hint — rest → hover → selected progression.
+    tc-menu-item:hover:not(.tc-menu-item--selected) {
+        border-left-color: var(--fg-gold-deep);
     }
 
     // Selected: gold left marker + gradient highlight wash (no solid fill).
+    // Improvement 2: gild the left marker with a faint gold glow.
     tc-menu-item.tc-menu-item--selected {
         background: linear-gradient(90deg, rgba(201, 169, 97, 0.22), transparent 70%);
         border-left-color: var(--fg-gold-bright);
+        box-shadow: inset 2px 0 8px -2px rgba(232, 200, 120, 0.4);
+    }
+
+    // Improvement 4: upgrade row divider to gilded hairline.
+    tc-menu-item {
+        border-image: var(--fg-rule) 1;
+    }
+
+    // Improvement 6: faint glow on selected label/icon for active-rune feel.
+    tc-menu-item.tc-menu-item--selected .tc-menu-item-label {
+        text-shadow: 0 0 10px rgba(232, 200, 120, 0.3);
     }
 }

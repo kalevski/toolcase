@@ -1,0 +1,36 @@
+// Dungeon › tc-context-menu — gilded floating action menu.
+// Critical fix: --bs-context-menu-item-color is hardcoded to --tc-slate-700
+// in the base (slate ramp is not remapped by the foundation), so item text
+// stays product-gray without this explicit repoint to parchment.
+// Structural additions: inset bevel stack, gold-gradient separator rule.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap ───────────────────────────────────────────────────────────
+    // Applied on .tc-context-menu-list (where the base declares the defaults).
+
+    .tc-context-menu-list {
+        // Critical: repoint away from the unmapped --tc-slate-700 ramp.
+        --bs-context-menu-item-color: var(--fg-parch);
+        // Gilded hover text instead of plain --tc-text.
+        --bs-context-menu-item-hover-color: var(--fg-gold-bright);
+        // Richer wood-gradient surface over the flat --tc-surface token.
+        --bs-context-menu-bg: var(--fg-panel-bg);
+
+        // ── Gilded bevel (structural) ────────────────────────────────────────
+        // Layers the inset gold-ring stack + drop shadow over the base shadow.
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Gold-rule separator ──────────────────────────────────────────────────
+    // Replace the flat border-top hairline with a gold-gradient divider.
+    // height:1px + background replaces the border-top approach; border is
+    // zeroed out to avoid doubling.
+
+    .tc-context-menu-separator {
+        border-top: 0;
+        height: 1px;
+        background: var(--fg-rule);
+    }
+}

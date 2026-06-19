@@ -1,0 +1,57 @@
+// Dungeon › tc-roadmap — kanban/stacked board reskin.
+// Foundation already swaps neutrals (surfaces, borders, text, shadows) and
+// semantic accents (success/info/warning) to dungeon tokens. This override
+// adds display caps on headings, wood-gradient item cards, a light gilded
+// bevel on the board frame and item cards, and a gilded chip on the count badge.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on the host element ────────────────────────────────────────
+    tc-roadmap {
+        --bs-roadmap-title-color:      var(--fg-gold-bright);
+        --bs-roadmap-heading-color:    var(--fg-gold-bright);
+        --bs-roadmap-item-bg:          var(--fg-panel-bg);
+        --bs-roadmap-item-hover-bg:    var(--fg-leather-2);
+    }
+
+    // ── Board wrapper — gilded 1px border + top bevel highlight ──────────────
+    // The wrapper already draws a 1px border using --bs-roadmap-border; we
+    // repoint border-color to the gold-deep tone and add the bevel top band.
+    .tc-roadmap {
+        border-color: var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Board title — display caps ────────────────────────────────────────────
+    // Base hardcodes font-family: var(--bs-font-sans-serif) on this class;
+    // override the class directly to pick up the dungeon serif display face.
+    .tc-roadmap-title {
+        font-family:     var(--fg-display);
+        text-transform:  uppercase;
+        letter-spacing:  0.16em;
+        font-weight:     600;
+    }
+
+    // ── Column header — display caps ──────────────────────────────────────────
+    // Same hardcoded font-family situation as the board title above.
+    .tc-roadmap-column-header {
+        font-family:     var(--fg-display);
+        text-transform:  uppercase;
+        letter-spacing:  0.16em;
+        font-weight:     600;
+    }
+
+    // ── Item card — top gold bevel highlight ──────────────────────────────────
+    // Layered on top of the token-swapped --bs-roadmap-item-shadow so the
+    // card sits on a wood surface with a gilded top edge catch.
+    .tc-roadmap-item {
+        box-shadow: var(--fg-bevel-top), var(--tc-shadow-sm);
+    }
+
+    // ── Count badge — gilded chip border ─────────────────────────────────────
+    // Already mono (foundation remaps --bs-font-monospace → --fg-mono) and
+    // already border-radius:0. Add a 1px gold-deep border for the gilded chip.
+    .tc-roadmap-count {
+        border: 1px solid var(--fg-gold-deep);
+    }
+}

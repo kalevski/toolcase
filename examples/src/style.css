@@ -1,5 +1,5 @@
 /* @toolcase examples — site shell, ported from @toolcase website */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
     --bg: oklch(0.985 0.003 95);
@@ -713,6 +713,12 @@ code, pre, .mono { font-family: var(--font-mono); }
     min-height: calc(100vh - 130px);
     background: var(--tc-surface);
     color: var(--tc-text);
+}
+/* dungeon theme: paint the canvas with the fantasy torchlit backdrop instead of
+   the flat surface fill, so demos sit on proper dungeon ground */
+.example__canvas > .wc-theme-scope[data-tc-theme='dungeon'] {
+    background: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+    padding: 24px;
 }
 
 /* Phaser canvas wrapper */

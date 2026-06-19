@@ -1,14 +1,40 @@
-// Dungeon › tc-press-any-key — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-press-any-key-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_press-any-key.scss
-// Target classes: web-components/style/components/_press-any-key.scss
+// Dungeon › tc-press-any-key — glowing display-caps prompt. Token swap recolours;
+// structural rules switch the prompt text to gilded display caps with a wide track
+// and an ink + gold glow text shadow (base hardcodes mono). Pulse animation kept.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-press-any-key
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-press-any-key {
+        --bs-press-any-key-color: var(--fg-gold-bright);
+        --bs-press-any-key-color-hover: var(--fg-gold-bright);
+        --bs-press-any-key-letter-spacing: 0.32em;
+        // Gentler pulse: 1.6 s matches fantasy; floor raised to 0.5 via scoped keyframe.
+        --bs-press-any-key-pulse-duration: 1.6s;
+    }
+
+    // Prompt: gilded display caps with an ink + gold glow.
+    .tc-press-any-key__text {
+        font-family: var(--fg-display);
+        font-weight: 600;
+        text-shadow: 0 1px 2px #000, 0 0 12px rgba(232, 200, 120, 0.4);
+        // Override the pulse animation to use the dungeon-scoped keyframe so the
+        // opacity floor is 0.5 (fantasy) rather than 0.3 (base).
+        animation: dungeon-press-any-key-pulse var(--bs-press-any-key-pulse-duration) ease-in-out infinite;
+    }
+
+    // Hover: raise glow alpha (0.4 → 0.6) so the ignite effect is visible given
+    // that the text color is already pinned to --fg-gold-bright.
+    tc-press-any-key:hover:not([disabled]) .tc-press-any-key__text {
+        text-shadow: 0 1px 2px #000, 0 0 16px rgba(232, 200, 120, 0.6);
+    }
+
+    // Freeze pulse on disabled — mirrors the base rule for this theme scope.
+    tc-press-any-key[disabled] .tc-press-any-key__text {
+        animation: none;
+    }
+}
+
+@keyframes dungeon-press-any-key-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
 }

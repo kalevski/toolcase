@@ -1,0 +1,19 @@
+// Dungeon › tc-code-label-cell — machine-code chip beside a display name.
+// Foundation already recolours everything via --tc-* remap (parchment text,
+// leather bg, gold-deep border). This override upgrades the code chip to an
+// inset rune-slot: radial wood fill + top bevel highlight. The name picks up
+// a faint gold tint. No notches (chip is too small for corner ornaments).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Token swap — host element carries the var defaults (matches base file).
+    tc-code-label-cell {
+        --bs-code-label-cell-code-bg: var(--fg-slot-bg);
+        --bs-code-label-cell-code-color: var(--fg-gold);
+    }
+
+    // Structural: top bevel highlight makes the chip read as an inset slot.
+    .tc-code-label-cell-code {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

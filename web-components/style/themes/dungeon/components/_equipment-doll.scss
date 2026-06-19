@@ -1,14 +1,109 @@
-// Dungeon › tc-equipment-doll — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-equipment-doll-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
+// Dungeon › tc-equipment-doll — gilded paper-doll: radial-lit ink canvas with a
+// gold border + inset bevel, a glowing gilded silhouette, item-slot-style tiles
+// (gold bevel, gold selected halo), and wide-tracked display-caps slot labels.
+// Token swap recolours; the .tc-* rules add the canvas gradient + bevel, tile
+// bevels and the silhouette glow the base draws flat.
 //
 // Design source:  game-components/style/components/_equipment-doll.scss
 // Target classes: web-components/style/components/_equipment-doll.scss
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-equipment-doll
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-equipment-doll {
+        --bs-equipment-doll-surface: transparent;
+        --bs-equipment-doll-border-color: var(--fg-gold-deep);
+        --bs-equipment-doll-grid-color: transparent;
+        --bs-equipment-doll-figure-color: rgba(201, 169, 97, 0.16);
+
+        --bs-equipment-doll-slot-bg: var(--fg-slot-bg);
+        --bs-equipment-doll-slot-border: var(--fg-gold-deep);
+        --bs-equipment-doll-slot-empty-border: var(--fg-gold-shadow);
+        --bs-equipment-doll-slot-hover-bg: var(--fg-slot-bg);
+        --bs-equipment-doll-icon-color: var(--fg-parch);
+        --bs-equipment-doll-empty-color: var(--fg-parch-dim);
+
+        --bs-equipment-doll-selected-bg: var(--fg-slot-bg);
+        --bs-equipment-doll-selected-color: var(--fg-gold-bright);
+
+        --bs-equipment-doll-label-color: var(--fg-parch-dim);
+
+        --bs-equipment-doll-qty-bg: rgba(0, 0, 0, 0.7);
+        --bs-equipment-doll-qty-color: var(--fg-parch);
+    }
+
+    // Canvas = radial-lit ink + gold border + inset bevel stack + faint scanline texture.
+    .tc-equipment-doll__canvas {
+        position: relative;
+        background:
+            var(--fg-scanlines),
+            radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+            linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 6px 16px rgba(0, 0, 0, 0.7);
+
+        // Corner notch ornament — framed-panel signature.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            pointer-events: none;
+            z-index: 1;
+        }
+    }
+
+    // Silhouette (text glyph) = display font + gilded glow.
+    .tc-equipment-doll__silhouette {
+        font-family: var(--fg-display);
+        text-shadow: 0 0 24px rgba(232, 200, 120, 0.25);
+    }
+
+    // SVG figure = gilded tint + matching drop-shadow glow.
+    .tc-equipment-doll__figure {
+        color: rgba(201, 169, 97, 0.16);
+        filter: drop-shadow(0 0 24px rgba(232, 200, 120, 0.25));
+    }
+
+    // Tiles = item-slot bevel (inset dark + gilded top highlight).
+    .tc-equipment-doll__tile {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            var(--fg-bevel-top),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    // Empty slot = recessed gold socket, not a dashed product placeholder.
+    .tc-equipment-doll__slot.is-empty .tc-equipment-doll__tile {
+        border-style: solid;
+        border-color: var(--fg-gold-shadow);
+        background: var(--fg-slot-bg);
+        color: var(--fg-parch-dim);
+    }
+
+    // Selected tile = gold-bright outline + gold token glow halo.
+    .tc-equipment-doll__slot.is-selected .tc-equipment-doll__tile {
+        border-color: var(--fg-gold-bright);
+        outline: 2px solid var(--fg-gold-bright);
+        outline-offset: 0;
+        box-shadow: 0 0 0 1px #000, 0 0 12px var(--fg-gold-bright);
+    }
+
+    // Qty badge in mono with an ink shadow.
+    .tc-equipment-doll__qty {
+        font-family: var(--fg-mono);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Labels = wide-tracked display caps with an ink shadow.
+    .tc-equipment-doll__label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.24em;
+        text-shadow: 0 1px 2px #000;
+    }
 }

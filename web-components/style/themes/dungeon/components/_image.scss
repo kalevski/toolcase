@@ -1,0 +1,18 @@
+// Dungeon › tc-image — gilded asset frame.
+// Foundation already remaps all --bs-image-* tokens to wood/gold values via --tc-*.
+// Override adds: a brighter golden shimmer sweep + a gilded border + bevel highlight
+// so that tc-image reads as a framed portrait/asset card in the dungeon aesthetic.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-image {
+        // Brighter golden sweep in the loading shimmer (foundation default is too subtle).
+        --bs-image-shimmer-shine: rgba(232, 200, 120, 0.25);
+    }
+
+    // Gilded asset frame — border + top-bevel highlight turns the image into a portrait frame.
+    .tc-image {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+    }
+}

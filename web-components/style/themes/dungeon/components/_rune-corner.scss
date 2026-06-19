@@ -1,7 +1,8 @@
 // Dungeon › tc-rune-corner — gold gradient notch (the clip-path already matches
 // the fantasy notch glyph; only the flat ink fill needs swapping to gold).
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-rune-corner {
         --bs-rune-corner-bg: var(--fg-notch-fill);
     }

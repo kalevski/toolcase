@@ -1,14 +1,24 @@
-// Dungeon › tc-particle-emitter — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-particle-emitter-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_particle-emitter.scss
-// Target classes: web-components/style/components/_particle-emitter.scss
+// Dungeon › tc-particle-emitter — gilded forge frame. Token swap gives the
+// canvas a dark vertical gradient + gold border; the structural rule adds the
+// inset gilded bevel. Particle colour slots are repointed to the fantasy ramp
+// (ember/ash/gold) as theme-overridable anchors.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-particle-emitter
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-particle-emitter {
+        --bs-particle-emitter-bg: linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+        --bs-particle-emitter-border-color: var(--fg-gold-deep);
+        // Default particle palette anchors — ember → ash → gold.
+        --bs-particle-emitter-color-1: #2a1a0a;
+        --bs-particle-emitter-color-2: #8b6f3a;
+        --bs-particle-emitter-color-3: #f0d27a;
+        --bs-particle-emitter-color-4: #e07330;
+    }
+
+    // Inset gilded bevel on the bordered canvas (base ships none).
+    .tc-particle-emitter__canvas {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            var(--fg-bevel-top);
+    }
 }

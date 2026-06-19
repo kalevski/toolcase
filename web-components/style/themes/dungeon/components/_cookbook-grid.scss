@@ -1,0 +1,35 @@
+// Dungeon › tc-cookbook-grid — gilded developer-docs recipe grid.
+// Token swap repoints card surface to wood gradient + gold-deep border;
+// lang-color stray slate token replaced with parch-dim; tags become
+// leather-surface / gold-text rune chips. Structural bevel added to cards.
+// Section title elevated to display caps. No notches — docs chrome, not panel.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-cookbook-grid {
+        --bs-cookbook-grid-card-bg: var(--fg-panel-bg);
+        --bs-cookbook-grid-card-border: var(--fg-gold-deep);
+        --bs-cookbook-grid-lang-color: var(--fg-parch-dim);
+        --bs-cookbook-grid-tag-bg: var(--fg-leather);
+        --bs-cookbook-grid-tag-color: var(--fg-gold);
+    }
+
+    // Gilded bevel stack — base ships only tc-shadow-sm, insufficient for dungeon frame.
+    .tc-cookbook-grid-item {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Section heading elevated to display caps (base hardcodes no font-family).
+    .tc-cookbook-grid__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // Tag chips read as gilded rune labels.
+    .tc-cookbook-grid-item__tag {
+        border: 1px solid var(--fg-gold-deep);
+        letter-spacing: 0.08em;
+    }
+}

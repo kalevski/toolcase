@@ -1,20 +1,34 @@
-// Dungeon › tc-subtitle — body-serif text with a mono display-caps speaker label.
+// Dungeon › tc-subtitle — body-serif text with a display-caps speaker label.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-subtitle {
         --bs-subtitle-color: var(--fg-parch-3);
-        --bs-subtitle-speaker-color: var(--fg-gold);
+        --bs-subtitle-speaker-color: var(--fg-gold-bright);
         --bs-subtitle-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
         --bs-subtitle-border-color: var(--fg-gold-deep);
+        --bs-subtitle-padding-y: 14px;
+        --bs-subtitle-padding-x: 20px;
     }
 
     .tc-subtitle__text {
         font-family: var(--fg-body);
         font-style: italic;
+        text-shadow: 0 1px 0 #000, 0 0 8px #000, 0 0 16px #000;
     }
 
     .tc-subtitle__speaker {
-        font-family: var(--fg-mono);
-        letter-spacing: 0.16em;
+        font-family: var(--fg-display);
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .tc-subtitle--boxed {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    }
+
+    .tc-subtitle--boxed .tc-subtitle__text {
+        text-shadow: none;
     }
 }

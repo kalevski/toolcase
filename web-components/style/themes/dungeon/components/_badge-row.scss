@@ -1,0 +1,78 @@
+// Dungeon › tc-badge-row — gilded stat plates.
+// Default item flips for free via token remap (leather label, parchment text,
+// mono numerals). This override lifts the Sass-baked product-palette status
+// tints onto fantasy element tones (stamina/blood/legendary/mana/gold).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Brighter gold value plate for the unstyled default item.
+    .tc-badge-row-item {
+        --bs-badge-row-color: var(--fg-gold);
+    }
+
+    // ── Success → stamina (green life-force) ───────────────────────────────
+    .tc-badge-row-item--success {
+        .tc-badge-row-label {
+            background: rgba(111, 159, 58, 0.18);
+            color: var(--fg-stamina-bright);
+        }
+
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--fg-stamina);
+            color: var(--fg-ink);
+        }
+    }
+
+    // ── Danger → blood (crimson HP threat) ────────────────────────────────
+    .tc-badge-row-item--danger {
+        .tc-badge-row-label {
+            background: rgba(180, 40, 40, 0.18);
+            color: var(--fg-blood-bright);
+        }
+
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--fg-blood);
+            color: var(--fg-ink);
+        }
+    }
+
+    // ── Warning → legendary amber ──────────────────────────────────────────
+    .tc-badge-row-item--warning {
+        .tc-badge-row-label {
+            background: rgba(232, 162, 58, 0.18);
+            color: var(--fg-legendary);
+        }
+
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--fg-legendary);
+            color: var(--fg-ink);
+        }
+    }
+
+    // ── Info → mana (arcane blue) ──────────────────────────────────────────
+    .tc-badge-row-item--info {
+        .tc-badge-row-label {
+            background: rgba(60, 100, 180, 0.18);
+            color: var(--fg-mana-bright);
+        }
+
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--fg-mana);
+            color: var(--fg-ink);
+        }
+    }
+
+    // ── Primary → gold (the dungeon accent) ───────────────────────────────
+    .tc-badge-row-item--primary {
+        .tc-badge-row-label {
+            background: rgba(201, 169, 97, 0.18);
+            color: var(--fg-gold-bright);
+        }
+
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--fg-gold);
+            color: var(--fg-ink);
+        }
+    }
+}

@@ -1,0 +1,75 @@
+// Dungeon › tc-newsletter-signup — gilded enlistment plate.
+// Step 1: swap --bs-newsletter-signup-submit-bg to --fg-button-bg (kills the
+//         hardcoded #2b3a51 slate stop) and repoint the panel fill + label color.
+// Steps 2-3: add the inset bevel stack and top corner notches to .tc-newsletter-signup.
+// Step 4: .tc-newsletter-signup-title → Cinzel display caps.
+// Steps 5-6: submit button gold bevel + hover glow; spinner tinted gold.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Step 1: token swap on the host element ────────────────────────────────
+
+    tc-newsletter-signup {
+        --bs-newsletter-signup-bg: var(--fg-panel-bg);
+        --bs-newsletter-signup-submit-bg: var(--fg-button-bg);
+        --bs-newsletter-signup-submit-color: var(--fg-ink);
+    }
+
+    // ── Step 2: gilded bevel on the outer panel ───────────────────────────────
+
+    .tc-newsletter-signup {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Step 3: top corner notches ────────────────────────────────────────────
+
+    .tc-newsletter-signup::before,
+    .tc-newsletter-signup::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-newsletter-signup::before {
+        left: -1px;
+    }
+
+    .tc-newsletter-signup::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Step 4: title → Cinzel display caps ──────────────────────────────────
+
+    .tc-newsletter-signup-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Step 5: submit button gold bevel + hover glow ─────────────────────────
+
+    .tc-newsletter-signup-submit {
+        border-color: var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+
+        &:hover:not(:disabled) {
+            box-shadow: 0 0 10px rgba(232, 200, 120, 0.35);
+        }
+    }
+
+    // ── Step 6: spinner tinted gold (replaces hardcoded white) ───────────────
+
+    .tc-newsletter-signup-spinner {
+        border-color: rgba(232, 200, 120, 0.35);
+        border-top-color: var(--fg-gold-bright);
+    }
+}

@@ -2,7 +2,8 @@
 // tc-key sets defaults on the host AND the .tc-key class hardcodes box-shadow:none,
 // so the bevel is restored on the class.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-key {
         --bs-key-font-family: var(--fg-mono);
         --bs-key-color: var(--fg-parch);
@@ -15,8 +16,15 @@ tc-theme[name='dungeon'] {
 
     .tc-key {
         background-image: var(--fg-keycap-bg);
+        border-top-color: var(--fg-gold);
         box-shadow:
             inset 0 1px 0 rgba(232, 200, 120, 0.2),
-            0 1px 0 rgba(0, 0, 0, 0.6);
+            inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+    }
+
+    .tc-key--active {
+        box-shadow: inset 0 0 6px rgba(240, 210, 122, 0.3);
+        text-shadow: 0 0 4px rgba(240, 210, 122, 0.4);
     }
 }

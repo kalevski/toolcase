@@ -1,0 +1,43 @@
+// Dungeon › tc-maintainer-card — patron/character card.
+// Foundation reskin handles card surface (parchment bg, gold border, shadow).
+// This override fixes the two remap-bypass literals (sponsor #fff text / #b91c1c hover),
+// adds display-caps for the name, a portrait ring bump, and a gilded frame bevel.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on the host element ──────────────────────────────────────
+    tc-maintainer-card {
+        --bs-maintainer-card-name-color:        var(--fg-gold-bright);
+        --bs-maintainer-card-role-color:        var(--fg-parch-dim);
+        --bs-maintainer-card-location-color:    var(--fg-leather-3);
+        --bs-maintainer-card-bio-color:         var(--fg-parch-dim);
+        --bs-maintainer-card-link-color:        var(--fg-parch-dim);
+        --bs-maintainer-card-link-hover-bg:     rgba(201, 169, 97, 0.18);
+        --bs-maintainer-card-link-hover-color:  var(--fg-gold-bright);
+
+        // Sponsor CTA → blood/patron block (fixes the #fff + #b91c1c literals)
+        --bs-maintainer-card-sponsor-bg:        var(--fg-blood);
+        --bs-maintainer-card-sponsor-color:     var(--fg-parch);
+        --bs-maintainer-card-sponsor-hover-bg:  var(--fg-blood-bright);
+    }
+
+    // ── Gilded frame bevel (structure a token swap can't carry) ─────────────
+    .tc-maintainer-card {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Display-caps name (base hardcodes font-family on the class) ──────────
+    .tc-maintainer-card__name {
+        font-family:     var(--fg-display);
+        text-transform:  uppercase;
+        letter-spacing:  0.1em;
+        font-weight:     600;
+    }
+
+    // ── Portrait ring — bumped to a solid gold border ────────────────────────
+    // border-radius: 50% is sanctioned for this element; not changed.
+    .tc-maintainer-card__avatar {
+        border: 2px solid var(--fg-gold);
+    }
+}

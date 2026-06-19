@@ -1,14 +1,31 @@
-// Dungeon › tc-circular-progress — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-circular-progress-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_circular-progress.scss
-// Target classes: web-components/style/components/_circular-progress.scss
+// Dungeon › tc-circular-progress — gilded SVG ring. The disc is a sanctioned
+// circle, so the stroke keeps its roundness. Token swap recolours track/fill to
+// gold/dark; structural rules add the gold-bright glow on the fill arc, square
+// stroke caps, and mono parch numerals matching the game disc.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-circular-progress
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-circular-progress {
+        --bs-circular-progress-track: var(--fg-gold-shadow);
+        --bs-circular-progress-fill: var(--fg-gold-bright);
+        --bs-circular-progress-text-color: var(--fg-parch);
+    }
+
+    // Track reads as a dim, recessed gold ring.
+    .tc-circular-progress__track {
+        opacity: 0.6;
+    }
+
+    // Fill arc carries the gold glow; square caps match the fantasy disc.
+    .tc-circular-progress__fill {
+        stroke-linecap: square;
+        filter: drop-shadow(0 0 4px rgba(232, 200, 120, 0.4));
+    }
+
+    // Mono parch numeral with an ink shadow for legibility on the ring.
+    .tc-circular-progress__text {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.06em;
+        text-shadow: 0 1px 2px #000;
+    }
 }

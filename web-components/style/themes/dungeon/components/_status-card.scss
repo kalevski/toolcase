@@ -1,0 +1,91 @@
+// Dungeon › tc-status-card — party-status / system-health roster plaque.
+// Four things the foundation remap silently misses:
+//   (1) header-bg: hardcoded slate gradient literal → leather/ink band
+//   (2) item-separator-color: baked $slate-100 literal → faint gold hairline
+//   (3) title font-family: hardcoded 'Inter' → --fg-display caps
+//   (4) skeleton-shimmer: white literal → gold-tinted
+// Indicator colours (ok/warning/error/inactive) recolour for free via --tc-* tokens.
+// The indicator border-radius:50% circle is sanctioned — kept as-is.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swaps on the host element (vars live on tc-status-card) ─────────
+
+    tc-status-card {
+        --bs-status-card-bg: var(--fg-panel-bg);
+        --bs-status-card-border-color: var(--fg-gold-deep);
+        --bs-status-card-shadow: none; // replaced by panel-shadow on .tc-status-card-inner
+        --bs-status-card-header-bg: linear-gradient(180deg, var(--fg-leather-2), var(--fg-leather));
+        --bs-status-card-header-border-color: var(--fg-gold-deep);
+        --bs-status-card-title-color: var(--fg-gold-bright);
+        --bs-status-card-item-separator-color: rgba(201, 169, 97, 0.18);
+        --bs-status-card-label-color: var(--fg-parch);
+        --bs-status-card-detail-color: var(--fg-parch-2);
+        --bs-status-card-skeleton-bg: var(--fg-leather-2);
+        --bs-status-card-skeleton-shimmer: rgba(240, 210, 122, 0.25);
+    }
+
+    // ── Gilded frame: inset bevel + drop shadow ───────────────────────────────
+
+    .tc-status-card-inner {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // Corner notches — signature gilded ornament.
+    .tc-status-card-inner::before,
+    .tc-status-card-inner::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .tc-status-card-inner::before {
+        left: -1px;
+    }
+
+    .tc-status-card-inner::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Display caps title (overrides hardcoded 'Inter') ──────────────────────
+
+    .tc-status-card-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ── Mono numerals in detail (already uses --tc-font-mono, affirm) ─────────
+
+    .tc-status-card-detail {
+        font-family: var(--fg-mono);
+        color: var(--fg-parch-dim);
+    }
+
+    // ── Status indicator glows per state ──────────────────────────────────────
+    // Circles are sanctioned; add a faint elemental glow to reinforce state.
+
+    .tc-status-card-indicator--ok {
+        box-shadow: 0 0 5px rgba(111, 159, 58, 0.5);
+    }
+
+    .tc-status-card-indicator--warning {
+        box-shadow: 0 0 5px rgba(232, 162, 58, 0.5);
+    }
+
+    .tc-status-card-indicator--error {
+        box-shadow: 0 0 5px rgba(180, 40, 40, 0.55);
+    }
+}

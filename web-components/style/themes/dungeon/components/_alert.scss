@@ -1,0 +1,66 @@
+// Dungeon › tc-alert — scroll notice / warning seal.
+// Foundation already remaps --bs-alert-bg → leather, --bs-alert-border-color → gold,
+// and the element rgb vars so variant tints shift to fantasy hues.
+// This override:
+//   1. Sets parchment body text + EB Garamond typeface on .alert.
+//   2. Applies Cinzel display caps to .alert-heading.
+//   3. Fixes per-variant text colors (Sass-baked $theme-colors-emphasis bypasses the remap).
+//   4. Replaces hardcoded slate gradients/literals in .alert-primary / .alert-light / .alert-dark.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Base alert — parchment body text, fantasy serif body font, subtle top bevel.
+    .alert {
+        font-family: var(--fg-body);
+        color: var(--fg-parch);
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Heading — gilded Cinzel display caps ("notice seal" title).
+    .alert-heading {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // Per-variant text color fix — $theme-colors-emphasis is baked at Sass compile
+    // from the default palette so the rgb remap does not reach --bs-alert-color.
+    .alert-success {
+        --bs-alert-color: var(--fg-stamina-bright);
+    }
+
+    .alert-danger {
+        --bs-alert-color: var(--fg-blood-bright);
+    }
+
+    .alert-warning {
+        --bs-alert-color: var(--fg-legendary);
+    }
+
+    .alert-info {
+        --bs-alert-color: var(--fg-mana-bright);
+    }
+
+    // Primary — replace hardcoded slate-ink gradient with a warm gold wash.
+    .alert-primary {
+        --bs-alert-bg: linear-gradient(135deg, rgba(201, 169, 97, 0.12), rgba(201, 169, 97, 0.04));
+        --bs-alert-color: var(--fg-gold-bright);
+        --bs-alert-border-color: var(--fg-gold);
+    }
+
+    // Light — replace pale $slate-50 / $slate-300 literals with warm leather.
+    .alert-light {
+        --bs-alert-bg: var(--fg-leather-2);
+        --bs-alert-border-color: var(--fg-gold-deep);
+        --bs-alert-color: var(--fg-parch);
+    }
+
+    // Dark — replace slate gradient with deep ink surface.
+    .alert-dark {
+        --bs-alert-bg: var(--fg-ink-2);
+        --bs-alert-color: var(--fg-parch);
+    }
+}

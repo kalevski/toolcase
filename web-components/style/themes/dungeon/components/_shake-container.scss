@@ -1,14 +1,12 @@
-// Dungeon › tc-shake-container — TODO: dungeon override not yet implemented.
+// Dungeon › tc-shake-container — NO override needed.
 //
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-shake-container-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_shake-container.scss
-// Target classes: web-components/style/components/_shake-container.scss
+// tc-shake-container is a behaviour primitive: a transparent block wrapper whose
+// inner div JS translates per-frame to produce a camera shake. Its defaults are
+// deliberately transparent/zero-border so the shake reads against surrounding
+// content; it has no surface, label, or numeric part for a fantasy reskin to
+// repaint. Intentionally left empty.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-shake-container
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // No visual override — animation wrapper only.
 }

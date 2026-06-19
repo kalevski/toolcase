@@ -1,14 +1,53 @@
-// Dungeon › tc-list — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-list-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_list.scss
-// Target classes: web-components/style/components/_list.scss
+// Dungeon › tc-list — gilded selectable list. Container loses its solid surface
+// for a transparent frame on the dungeon panel; rows separate with gold hairlines,
+// hover washes gold, selected gets a gradient wash + inset gold left marker;
+// labels become display caps, meta + icons go gold/parch mono. Token swap can't
+// carry the gradient selected wash, the inset marker, or the display recast.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-list
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-list {
+        --bs-list-bg: transparent;
+        --bs-list-border-color: var(--fg-gold-deep);
+        // Improvement 2: raise row separator contrast so ledger rows read as ruled lines.
+        --bs-list-row-border-color: rgba(201, 169, 97, 0.28);
+
+        --bs-list-icon-color: var(--fg-gold);
+        --bs-list-label-color: var(--fg-parch);
+        --bs-list-meta-color: var(--fg-parch-3);
+        --bs-list-meta-font-family: var(--fg-mono);
+
+        // Improvement 4: deepen selected wash so it reads as a struck highlight, not a muddy fade.
+        --bs-list-selected-bg: linear-gradient(90deg, rgba(201, 169, 97, 0.24), rgba(201, 169, 97, 0.04) 80%);
+        --bs-list-selected-label-color: var(--fg-gold-bright);
+        --bs-list-selected-icon-color: var(--fg-gold-bright);
+        // Improvement 1: rely solely on the base border-left for the selected edge marker;
+        // set to gold and suppress the redundant inset box-shadow below.
+        --bs-list-selected-border-color: var(--fg-gold);
+    }
+
+    // Improvement 3: bevel-top highlight on the container so the frame reads as a gilded panel edge.
+    .tc-list {
+        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+    }
+
+    .tc-list-item:hover:not(.tc-list-item--disabled):not(.tc-list-item--selected) {
+        background: rgba(201, 169, 97, 0.08);
+        // Improvement 5: faint hover gold left hairline previews the selection marker.
+        box-shadow: inset 2px 0 0 var(--fg-gold-shadow);
+    }
+
+    // Improvement 1: drop the redundant inset marker — the base border-left (gold) is the single rule.
+    // No box-shadow override on .tc-list-item--selected needed; base border-left carries the marker.
+
+    // Label reads display caps; meta gains letter-spacing.
+    .tc-list-item-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    .tc-list-item-meta {
+        letter-spacing: 0.08em;
+    }
 }

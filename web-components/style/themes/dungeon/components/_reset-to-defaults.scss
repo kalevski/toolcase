@@ -1,0 +1,27 @@
+// Dungeon › tc-reset-to-defaults — two-step reset action (Reset → Confirm / Cancel).
+// Foundation already recolours the outline/hover/danger/ghost via --tc-* remaps.
+// This override:
+//   1. Sharpens the idle reset-button label to gold (token-swap on host).
+//   2. Applies dungeon display-caps voice to all button labels.
+//   3. Replaces the hardcoded rgba(239,68,68,...) red glow with a blood-tinted glow.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token-swap on host: make idle outline button read gold-on-transparent.
+    tc-reset-to-defaults {
+        --bs-reset-to-defaults-reset-color: var(--fg-gold);
+    }
+
+    // 2. Dungeon button-label voice — display caps + tracking on all button labels.
+    .tc-reset-to-defaults__btn {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    // 3. Replace the hardcoded bright-red glow with a blood-ramp glow on confirm hover.
+    //    The base hardcodes rgba(239,68,68,0.25) which clashes with the fantasy blood tone.
+    .tc-reset-to-defaults__btn--confirm:hover:not(:disabled) {
+        box-shadow: 0 4px 12px rgba(168, 48, 42, 0.3);
+    }
+}

@@ -1,0 +1,47 @@
+// Dungeon › tc-side-nav — navigation chrome reskin.
+// Token swap handles most of the palette (parchment text, gold accents, leather skeleton).
+// Two literal overrides are required: badge text (#fff → ink) and skeleton shimmer
+// (white rgba → parchment-dim). Display caps on item labels and a gilded active sweep
+// complete the fantasy treatment. No notches/bevels — this is nav chrome, not HUD.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on host ───────────────────────────────────────────────────────
+    tc-side-nav {
+        --bs-side-nav-section-title-color:   var(--fg-gold-deep);
+        --bs-side-nav-item-color:            var(--fg-parch-3);
+        --bs-side-nav-item-hover-bg:         rgba(201, 169, 97, 0.08);
+        --bs-side-nav-item-hover-color:      var(--fg-gold-bright);
+        --bs-side-nav-item-active-color:     var(--fg-gold-bright);
+        --bs-side-nav-marker-color:          var(--fg-gold-bright);
+        --bs-side-nav-focus-color:           var(--fg-gold);
+        --bs-side-nav-icon-color:            var(--fg-gold);
+        --bs-side-nav-badge-bg:              var(--fg-gold);
+        // Override the hardcoded #fff — badge text must be readable on gold.
+        --bs-side-nav-badge-color:           var(--fg-ink);
+        --bs-side-nav-skeleton-bg:           var(--fg-leather-2);
+        // Override the hardcoded white rgba shimmer sweep.
+        --bs-side-nav-skeleton-shimmer:      var(--fg-parch-dim);
+    }
+
+    // ── Item labels — promote to display caps ────────────────────────────────────
+    // Base inherits body sans-serif; override to Cinzel display with wider tracking.
+    .tc-side-nav-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.12em;
+    }
+
+    // ── Section titles — gold-deep mono with wider tracking ──────────────────────
+    // font-family is already hardcoded to var(--tc-font-mono) in the base; re-point
+    // it here so it resolves to the dungeon mono stack and bumps letter-spacing.
+    .tc-side-nav-section-title {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.16em;
+    }
+
+    // ── Active row — gilded gradient sweep behind the 2px gold marker ───────────
+    .tc-side-nav-item.active {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.22), transparent 70%);
+    }
+}

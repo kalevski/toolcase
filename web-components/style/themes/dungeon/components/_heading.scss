@@ -1,0 +1,30 @@
+// Dungeon › tc-heading — Cinzel display-caps banner treatment.
+// Token swap repoints gradient stops to an all-gold sheen; structural override
+// replaces the hardcoded sans family + negative tracking with wide-tracked
+// display caps that can't be carried by the foundation token remap alone.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-heading {
+        // Richer all-gold gradient sheen instead of the default gold→ink fade.
+        --bs-heading-gradient-start: var(--fg-gold-bright);
+        --bs-heading-gradient-end: var(--fg-gold-deep);
+        // Wide-tracked display caps — positive tracking overrides the tight -0.01em.
+        --bs-heading-letter-spacing: 0.05em;
+    }
+
+    // Override the hardcoded font-family + tracking on the inner hN element.
+    // The foundation remaps --tc-font-sans → --fg-body (EB Garamond), which is
+    // serif body copy — not the Cinzel engraved banner a dungeon title wants.
+    .tc-heading {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: var(--bs-heading-letter-spacing);
+    }
+
+    // Scale tracking back slightly for the largest level so big titles aren't
+    // over-spaced when rendered at 2.25rem.
+    h1.tc-heading {
+        letter-spacing: 0.03em;
+    }
+}

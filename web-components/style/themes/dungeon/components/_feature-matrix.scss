@@ -1,0 +1,49 @@
+// Dungeon › tc-feature-matrix — comparison table with gold hairlines and display-caps headers.
+// The foundation remap handles most token swaps; this override fixes the one genuine trap
+// (--tc-slate-100 inner hairlines are not remapped) and applies display caps to hardcoded
+// sans-serif font-family declarations that a token swap cannot reach.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-feature-matrix {
+        // Fix the un-remapped --tc-slate-100 inner hairlines → gold-shadow dividers.
+        --bs-feature-matrix-inner-border: 1px solid var(--fg-gold-shadow);
+
+        // Wood-grain surface instead of the default flat tc-surface.
+        --bs-feature-matrix-bg: var(--fg-panel-bg);
+    }
+
+    // Gilded bevel frame — vars alone cannot add box-shadow.
+    .tc-feature-matrix {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Panel title → display caps (base hardcodes no font-family here, but set it anyway
+    // so it reads as a proper section heading on the wood surface).
+    .tc-feature-matrix__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // Column-head label and feature-head → Cinzel display caps.
+    // The base hardcodes font-family: var(--tc-font-sans) on both; a var swap cannot fix this.
+    .tc-feature-matrix__feature-head {
+        font-family: var(--fg-display);
+    }
+
+    .tc-feature-matrix__col-label {
+        font-family: var(--fg-display);
+    }
+
+    // Row label and hint use sans-serif; promote row label to body serif for legibility
+    // on the parchment/leather palette; hint stays quieter but also gets the serif face.
+    .tc-feature-matrix__row-label {
+        font-family: var(--fg-body);
+    }
+
+    .tc-feature-matrix__row-hint {
+        font-family: var(--fg-body);
+    }
+}

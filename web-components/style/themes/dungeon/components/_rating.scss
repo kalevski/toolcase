@@ -1,0 +1,20 @@
+// Dungeon › tc-rating — gold-ramp quality stars.
+// Token swap repoints empty stars to dim-engraved gold and filled stars to
+// warm legendary gold; an optional faint drop-shadow adds an enchant glow
+// to filled/half glyphs. No frame or bevel — the star glyphs are box-less
+// by mandate. Focus ring already gold via foundation accent redirect.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-rating {
+        --bs-rating-empty-color: var(--fg-gold-deep);
+        --bs-rating-active-color: var(--fg-legendary);
+        --bs-rating-hover-color: var(--fg-gold-bright);
+    }
+
+    // Enchant glow — faint luminance halo on filled and half-filled glyphs.
+    .tc-rating-star--full .tc-rating-star-fill,
+    .tc-rating-star--half .tc-rating-star-fill {
+        filter: drop-shadow(0 0 2px rgba(240, 210, 122, 0.5));
+    }
+}

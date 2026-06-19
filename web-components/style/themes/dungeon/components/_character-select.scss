@@ -1,14 +1,75 @@
-// Dungeon › tc-character-select — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-character-select-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_character-select.scss
-// Target classes: web-components/style/components/_character-select.scss
+// Dungeon › tc-character-select — gilded roster. Token swap recolours tiles +
+// detail panel; structural rules add the wood-gradient + inset bevel on tiles
+// and detail card, the gold-bright selected glow, display-caps names/roles/stat
+// labels, and mono stat values.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-character-select
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-character-select {
+        --bs-character-select-tile-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+        --bs-character-select-tile-border-color: var(--fg-gold-deep);
+        --bs-character-select-tile-hover-bg: linear-gradient(180deg, #2a1f14 0%, #1a1308 100%);
+        --bs-character-select-tile-hover-border-color: var(--fg-gold);
+        --bs-character-select-selected-accent: var(--fg-gold-bright);
+
+        --bs-character-select-portrait-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-character-select-portrait-color: var(--fg-gold);
+
+        --bs-character-select-name-color: var(--fg-gold-bright);
+        --bs-character-select-role-color: var(--fg-parch-dim);
+        --bs-character-select-role-spacing: 0.18em;
+        --bs-character-select-lock-color: var(--fg-parch-dim);
+
+        --bs-character-select-detail-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+        --bs-character-select-detail-border-color: var(--fg-gold-deep);
+        --bs-character-select-detail-name-color: var(--fg-gold-bright);
+        --bs-character-select-detail-description-color: var(--fg-parch-3);
+        --bs-character-select-detail-stat-border-color: rgba(201, 169, 97, 0.15);
+        --bs-character-select-detail-stat-label-color: var(--fg-parch-dim);
+        --bs-character-select-detail-stat-value-color: var(--fg-parch);
+    }
+
+    // Gilded inset bevel on tiles + detail card.
+    .tc-character-select-tile,
+    .tc-character-select-detail {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    }
+
+    // Selected tile — gold-bright frame + inner glow halo.
+    .tc-character-select-tile.is-selected {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 12px rgba(232, 200, 120, 0.25),
+            0 0 0 1px var(--fg-gold-bright);
+    }
+
+    // Names + roles + stat labels read as display caps.
+    .tc-character-select-tile-name,
+    .tc-character-select-tile-role,
+    .tc-character-select-detail-name,
+    .tc-character-select-detail-role,
+    .tc-character-select-detail-stat-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+
+    // Tile name tracking matches gc reference (0.16em vs broader 0.18em on roles).
+    .tc-character-select-tile-name {
+        letter-spacing: 0.16em;
+    }
+
+    // Detail description — italic parchment serif.
+    .tc-character-select-detail-empty,
+    .tc-character-select-detail-description {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
+
+    // Stat values as mono numerals.
+    .tc-character-select-detail-stat-value {
+        font-family: var(--fg-mono);
+    }
 }

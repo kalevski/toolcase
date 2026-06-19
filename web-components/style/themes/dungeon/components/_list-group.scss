@@ -1,0 +1,55 @@
+// Dungeon › tc-list-group — gilded menu frame with gold hairline dividers.
+// Token swap covers text/bg/active colors; structural rules add the bevel
+// shadow and override the hardcoded $slate-100/$slate-700 sass literals that
+// the foundation remap cannot reach.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── 1. Token swap ────────────────────────────────────────────────────────
+    // Vars live on .list-group (matches the base file).
+    .list-group {
+        --bs-list-group-bg:                  var(--fg-panel-bg);
+        --bs-list-group-border-color:        var(--fg-gold-deep);
+        // Override the hardcoded $slate-700 literals:
+        --bs-list-group-color:               var(--fg-parch);
+        --bs-list-group-action-color:        var(--fg-parch);
+        --bs-list-group-action-hover-color:  var(--fg-parch);
+        --bs-list-group-action-hover-bg:     rgba(201, 169, 97, 0.1);
+        // Active row — foundation already points accent to gold; adjust contrast:
+        --bs-list-group-active-color:        var(--fg-ink);
+        --bs-list-group-active-border-color: var(--fg-gold);
+        // Disabled text:
+        --bs-list-group-disabled-color:      var(--fg-parch-dim);
+        --bs-list-group-disabled-bg:         transparent;
+    }
+
+    // ── 2. Structure — gilded outer bevel ────────────────────────────────────
+    .list-group {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── 3. Structure — gold hairline dividers ────────────────────────────────
+    // The base hardcodes `#{$slate-100}` on border-bottom; override the property.
+    .list-group-item {
+        border-bottom-color: rgba(201, 169, 97, 0.15);
+    }
+
+    // Horizontal variants use border-right instead (also hardcoded $slate-100).
+    .list-group-horizontal > .list-group-item,
+    [class*='list-group-horizontal-'] > .list-group-item {
+        border-right-color: rgba(201, 169, 97, 0.15);
+    }
+
+    // ── 4. Active item — gold text + left inset marker ───────────────────────
+    .list-group-item.active {
+        color: var(--fg-ink);
+        box-shadow: inset 3px 0 0 var(--fg-gold);
+    }
+
+    // ── 5. Numbered counters — mono gold glyphs ───────────────────────────────
+    .list-group-numbered > .list-group-item::before {
+        color: var(--fg-gold);
+        font-family: var(--fg-mono);
+    }
+}

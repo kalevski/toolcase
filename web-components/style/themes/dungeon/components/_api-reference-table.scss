@@ -1,0 +1,33 @@
+// Dungeon › tc-api-reference-table — documentation reference table.
+// Patches three hardcoded slate-ramp leaks that bypass the foundation remap,
+// adds the gilded bevel frame, and applies display caps to the title.
+// Notches are skipped — the base sets overflow: hidden on .tc-api-reference-table,
+// which would clip any ::before/::after corner ornaments.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-api-reference-table {
+        // Outer surface → wood panel gradient (foundation gives gold-deep border for free)
+        --bs-api-reference-table-bg: var(--fg-panel-bg);
+
+        // Slate-ramp leak #1 & #2: group heading + thead cap → leather fill
+        --bs-api-reference-table-group-heading-bg: var(--fg-leather);
+        --bs-api-reference-table-thead-bg: var(--fg-leather);
+
+        // Slate-ramp leak #3: inner row separators → faint gold-shadow rule
+        --bs-api-reference-table-row-border: 1px solid var(--fg-gold-shadow);
+    }
+
+    // Gilded bevel frame — notches skipped (overflow: hidden clips them).
+    .tc-api-reference-table {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Title cap → Cinzel display caps (carved tome label).
+    .tc-api-reference-table-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+}

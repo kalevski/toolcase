@@ -1,0 +1,72 @@
+// Dungeon › tc-faq-list — gilded codex panel with display-caps questions and gold-rule dividers.
+// Token swap upgrades bg to wood gradient; structural rules add the bevel, corner notches,
+// display-caps type treatment, and gold-rule hairline dividers that vars can't carry.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap on host element — wood gradient background.
+    tc-faq-list {
+        --bs-faq-list-bg: var(--fg-panel-bg);
+    }
+
+    // 2. Gilded bevel on the container — positions children for the notch pseudo-elements.
+    .tc-faq-list {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // 3. Top corner notches — signature gilded ornament (same recipe as tc-panel).
+    .tc-faq-list::before,
+    .tc-faq-list::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-faq-list::before {
+        left: -1px;
+    }
+
+    .tc-faq-list::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // 4. Display caps — title and question text as Cinzel "section seals."
+    .tc-faq-list-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    .tc-faq-list-question {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // 5. Gold-rule hairline dividers — upgrade the flat 1px borders to gradient gold rules.
+    .tc-faq-list-title-row {
+        border-bottom-color: transparent;
+        border-bottom-style: solid;
+        border-image: var(--fg-rule) 1;
+    }
+
+    .tc-faq-list-item:not(:last-child) {
+        border-bottom-color: transparent;
+        border-bottom-style: solid;
+        border-image: var(--fg-rule) 1;
+    }
+
+    // Answer body stays in readable body serif — not display caps.
+    .tc-faq-list-answer {
+        font-family: var(--fg-body);
+    }
+}

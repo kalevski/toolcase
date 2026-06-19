@@ -1,0 +1,32 @@
+// Dungeon › tc-sponsor-wall — guild patrons board.
+// Foundation already remaps cell bg → wood (#211a12), border/gap → --fg-gold-deep,
+// label colour → --fg-parch-dim, and focus ring → gold. Border-radius is already 0
+// everywhere. Structural adds: recessed wood slots per cell (--fg-slot-bg), display-caps
+// gilded headings (font-family override on the two hardcoded-mono classes), lowered rest
+// opacity for the darker surface, and a gilded bevel highlight on the logo grid frame.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap — recessed wood slot per logo cell, lower rest opacity for dark surface.
+    tc-sponsor-wall {
+        --bs-sponsor-wall-cell-bg: var(--fg-slot-bg);
+        --bs-sponsor-wall-logo-opacity: 0.6;
+    }
+
+    // 2. Display caps — engraved gilded section headings.
+    //    Base hardcodes font-family: var(--bs-font-monospace) on these classes;
+    //    a token-only swap cannot reach them, so we override the class directly.
+    .tc-sponsor-wall-title,
+    .tc-sponsor-tier-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold);
+    }
+
+    // 3. Gilded frame — light catches the top edge of the logo grid.
+    .tc-sponsor-tier-logos {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

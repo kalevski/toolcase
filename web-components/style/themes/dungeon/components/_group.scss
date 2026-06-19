@@ -1,0 +1,27 @@
+// Dungeon › tc-group — collapsible section container.
+// Foundation token remap covers all --bs-group-* vars (wood bg, gold-deep border,
+// leather hovers, parchment text). Structural adds: gilded top-edge highlight on
+// the frame, display-caps header label as a carved section seal, gold badge tally.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Gilded top-edge highlight — elevates the flat border into a framed plate.
+    .tc-group {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Section heading reads as a carved Cinzel seal, not plain sans weight-500.
+    .tc-group-toggle {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-parch);
+    }
+
+    // Badge reads as a bronze tally count rather than a muted parchment chip.
+    .tc-group-badge {
+        color: var(--fg-gold);
+    }
+}

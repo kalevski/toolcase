@@ -1,0 +1,72 @@
+// Dungeon › tc-page-footer — site footer chrome with gold-rule dividers,
+// display-caps CTA heading, gold metal CTA button, and a gold diamond brand dot.
+// Foundation remap handles surfaces/borders/links/mono — only hardcoded literals
+// and structural gild are authored here.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Top-edge gold rule (replaces flat hairline) ───────────────────────────
+    // The base sets border-top: 1px solid on .tc-page-footer. We keep the 1px
+    // geometry but replace the flat colour with the gold-gradient border-image.
+
+    .tc-page-footer {
+        border-top: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+
+    // ── CTA block — gold-rule bottom hairline ──────────────────────────────────
+
+    .tc-page-footer-cta {
+        border-bottom: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+
+    // ── CTA heading — display caps (Cinzel) ───────────────────────────────────
+
+    .tc-page-footer-cta-heading {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── CTA button — gold metal button; kills hardcoded slate gradient ─────────
+
+    .tc-page-footer-cta-btn {
+        background: var(--fg-button-bg);
+        color: var(--fg-ink);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+
+        &:hover {
+            color: var(--fg-ink);
+            box-shadow: 0 0 10px rgba(232, 200, 120, 0.35), var(--fg-bevel-top);
+            text-decoration: none;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--fg-gold-bright);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Brand dot — gold diamond (fixes stray border-radius: 2px) ────────────
+
+    .tc-page-footer-brand-dot {
+        border-radius: 0;
+        transform: rotate(45deg);
+        background: var(--fg-gold-edge);
+    }
+
+    // ── Legal bar — gold-rule top hairline ────────────────────────────────────
+
+    .tc-page-footer-legal {
+        border-top: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+}

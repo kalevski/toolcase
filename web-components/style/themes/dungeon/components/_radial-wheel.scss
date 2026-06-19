@@ -1,14 +1,69 @@
-// Dungeon › tc-radial-wheel — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-radial-wheel-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_radial-wheel.scss
-// Target classes: web-components/style/components/_radial-wheel.scss
+// Dungeon › tc-radial-wheel — gilded ability wheel. Token swap recolours the
+// disc, options and centre; structural rules turn each circular option into a
+// bronze medallion with the full inset bevel + gold-glow hover, and the centre
+// label into gilded display caps. Sanctioned circles (disc + options) kept round.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-radial-wheel
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-radial-wheel {
+        --bs-radial-wheel-backdrop-bg: #000;
+        --bs-radial-wheel-backdrop-opacity: 0.6;
+
+        --bs-radial-wheel-disc-bg: radial-gradient(60% 60% at 50% 50%, rgba(201, 169, 97, 0.05), transparent);
+        --bs-radial-wheel-disc-border: transparent;
+        --bs-radial-wheel-disc-shadow: none;
+
+        --bs-radial-wheel-option-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-radial-wheel-option-border: var(--fg-gold-deep);
+        --bs-radial-wheel-option-color: var(--fg-gold-bright);
+        --bs-radial-wheel-option-hover-color: var(--fg-gold-bright);
+
+        --bs-radial-wheel-center-size: 0.875rem;
+        --bs-radial-wheel-center-color: var(--fg-gold-bright);
+
+        --bs-radial-wheel-pager-active-color: var(--fg-gold-bright);
+    }
+
+    // Option: bronze medallion with full inset bevel (base ships a flat disc).
+    .tc-radial-wheel-option {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6),
+            0 4px 12px rgba(0, 0, 0, 0.6);
+
+        &:hover:not([disabled]),
+        &.tc-radial-wheel-option--hover:not([disabled]) {
+            background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+            filter: brightness(1.2);
+            box-shadow:
+                inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(232, 200, 120, 0.3),
+                0 0 18px var(--bs-radial-wheel-option-hover-color, rgba(232, 200, 120, 0.5));
+            border-color: var(--fg-gold-bright);
+        }
+    }
+
+    // Icon glyph: gilded display caps.
+    .tc-radial-wheel-option-icon {
+        font-family: var(--fg-display);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Centre label: gilded display caps.
+    .tc-radial-wheel-center {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Backdrop: add blur to match the fantasy gc-radial-wheel reference.
+    .tc-radial-wheel-backdrop {
+        backdrop-filter: blur(2px);
+    }
+
+    // Disabled option: greyed bronze medallion reads as locked.
+    .tc-radial-wheel-option--disabled {
+        filter: grayscale(0.4);
+    }
 }

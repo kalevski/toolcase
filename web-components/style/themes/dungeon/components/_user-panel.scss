@@ -1,0 +1,102 @@
+// Dungeon › tc-user-panel — adventurer nameplate / character bar.
+// Token swap fixes the three hardcoded #fff literals (avatar, icon-active,
+// menu-item-active) and reroutes the menu bg to the wood-fill recipe.
+// Structural adds: bevel highlight on the panel row, gilded shadow + corner
+// notches on the dropdown menu plaque, display caps on the plan tag.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on the host element ───────────────────────────────────────
+
+    tc-user-panel {
+        // Avatar: gold fill is already via --tc-app-accent → --fg-gold;
+        // override the hardcoded #fff text with ink for legibility.
+        --bs-user-panel-avatar-color: var(--fg-ink);
+
+        // Icon active: gold bg already wired via --tc-app-accent; fix the #fff.
+        --bs-user-panel-icon-active-color: var(--fg-ink);
+
+        // Menu item active: same — gold bg already correct, fix the #fff.
+        --bs-user-panel-menu-item-active-color: var(--fg-ink);
+
+        // Menu plaque background → wood gradient fill.
+        --bs-user-panel-menu-bg: var(--fg-panel-bg);
+
+        // Menu border → gold edge.
+        --bs-user-panel-menu-border-color: var(--fg-gold-deep);
+    }
+
+    // ── Panel row — light bevel highlight ────────────────────────────────────
+
+    .tc-user-panel {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Avatar — body font for the initial glyph ─────────────────────────────
+    // Base hardcodes var(--tc-font-sans); route to --fg-body for legibility.
+
+    .tc-user-panel-avatar {
+        font-family: var(--fg-body);
+    }
+
+    // ── Name — body font override ─────────────────────────────────────────────
+
+    .tc-user-panel-name {
+        font-family: var(--fg-body);
+        color: var(--fg-parch);
+    }
+
+    // ── Plan micro-label — display caps (reads as fantasy rank/class tag) ─────
+    // Base hardcodes var(--bs-font-monospace); plan spec says --fg-display.
+
+    .tc-user-panel-plan {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold);
+    }
+
+    // ── Dropdown menu — gilded plaque with corner notches ────────────────────
+
+    .tc-user-panel-menu {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Top corner notches — signature gilded ornament (mirrors tc-panel pattern).
+    .tc-user-panel-menu::before,
+    .tc-user-panel-menu::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 10px;
+        height: 10px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-user-panel-menu::before {
+        left: -1px;
+    }
+
+    .tc-user-panel-menu::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Menu items — body font, parchment text ────────────────────────────────
+
+    .tc-user-panel-menu-item {
+        font-family: var(--fg-body);
+        color: var(--fg-parch);
+    }
+
+    // ── Menu icon — parchment-dim tint ───────────────────────────────────────
+
+    .tc-user-panel-menu-icon {
+        color: var(--fg-parch-dim);
+    }
+}

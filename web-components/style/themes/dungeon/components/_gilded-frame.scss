@@ -1,33 +1,61 @@
-// Dungeon › tc-gilded-frame — bare gilded border (no notches).
-// Restores the leather/ink fills + inset bevel that the default theme dropped.
+// Dungeon › tc-gilded-frame — gilded border with full bevel, gradient gold edge,
+// corner notches, and a guarded transparent tone.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-gilded-frame {
         --bs-gilded-frame-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
         --bs-gilded-frame-color: var(--fg-parch);
-        --bs-gilded-frame-border-color: var(--fg-gold-deep);
+        // Use --fg-gold as fallback border-color; the gradient edge is set via
+        // border-image on .tc-gilded-frame so the border-color acts as a safe
+        // solid fallback only (border-image overrides it where supported).
+        --bs-gilded-frame-border-color: var(--fg-gold);
     }
 
+    // ── Improvement 1 & 2: full panel-shadow bevel + gradient gold edge ────────
     .tc-gilded-frame {
-        box-shadow:
-            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
-            var(--fg-bevel-top);
+        // Promote to the full dungeon panel bevel stack (outer dark → gold ring
+        // → top highlight) for consistent framed-surface depth.
+        box-shadow: var(--fg-panel-shadow);
+        // Gradient gold edge: honour the "gilded" name with a light-catching
+        // diagonal gradient border instead of a flat 1 px rule.
+        border-image: var(--fg-gold-edge) 1;
+        // Ensure the element is positioned so ::before corner notches can anchor.
+        position: relative;
     }
 
+    // ── Improvement 3: corner notches (signature dungeon motif) ───────────────
+    .tc-gilded-frame::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        // One notch per corner — rendered as a single clipped pseudo-element
+        // that the foundation composes via clip-path.
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        pointer-events: none;
+    }
+
+    // ── Tone overrides ─────────────────────────────────────────────────────────
     .tc-gilded-frame--tone-dark {
         --bs-gilded-frame-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
         --bs-gilded-frame-color: var(--fg-parch);
-        --bs-gilded-frame-border-color: var(--fg-gold-deep);
+        --bs-gilded-frame-border-color: var(--fg-gold);
     }
 
     .tc-gilded-frame--tone-leather {
         --bs-gilded-frame-bg: linear-gradient(180deg, #2a1f14 0%, #1a1308 100%);
         --bs-gilded-frame-color: var(--fg-parch);
-        --bs-gilded-frame-border-color: var(--fg-gold-deep);
+        --bs-gilded-frame-border-color: var(--fg-gold);
     }
 
+    // ── Improvement 4: guard transparent tone ─────────────────────────────────
+    // Reset the heavy inset-dark shadow so it doesn't read as a phantom second
+    // border over an unfilled, no-bg surface. Keep only the top highlight to
+    // preserve just the faintest edge cue.
     .tc-gilded-frame--tone-transparent {
         --bs-gilded-frame-bg: transparent;
-        --bs-gilded-frame-border-color: var(--fg-gold-deep);
+        --bs-gilded-frame-border-color: var(--fg-gold);
+        box-shadow: none;
     }
 }

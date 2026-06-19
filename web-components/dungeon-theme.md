@@ -39,13 +39,19 @@ Your per-component file only does step 2. Step 1 already happened.
 
 ## 2. The theme root selector & file layout
 
-Every rule you write is scoped under the theme root selector:
+Every rule you write is scoped under the theme root selector. Two activation forms
+are accepted (always author BOTH so either works):
 
 ```scss
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     /* token overrides + structural rules go here */
 }
 ```
+
+- `<tc-theme name="dungeon">` — the custom element (display:contents wrapper).
+- `[data-tc-theme="dungeon"]` — a data attribute on any element (e.g. a plain div).
+  The examples site applies the theme this way: `<div data-tc-theme="dungeon">`.
 
 Specificity math (why your overrides win):
 
@@ -215,20 +221,24 @@ TODO stub) compiles to nothing, so unconverted components simply inherit the fou
 
 ---
 
-## 7. Status — what's implemented vs stubbed
+## 7. Status — what's implemented
 
-**Fully implemented primitives** (use these as reference patterns):
-`panel` · `gilded-frame` · `metal-button` · `nav-button` · `menu-item` · `item-slot` ·
-`resource-bar` (+ health/mana/stamina) · `boss-bar` · `title` · `subtitle` · `eyebrow` ·
-`lore-text` · `key` · `divider` · `rarity-chip` · `currency-chip` · `portrait` · `toggle` ·
-`check` · `tab-bar` · `list-row` · `rune-corner` · `artboard-backdrop`
+**All 111 matched components are implemented.** No TODO stubs remain. Use any of these files as
+a reference pattern when extending the theme; the foundational primitives —
+`panel`, `gilded-frame`, `metal-button`, `nav-button`, `menu-item`, `item-slot`, `resource-bar`
+(+ health/mana/stamina), `boss-bar`, `title`, `subtitle`, `eyebrow`, `lore-text`, `key`,
+`divider`, `rarity-chip`, `currency-chip`, `portrait`, `toggle`, `check`, `tab-bar`, `list-row`,
+`rune-corner`, `artboard-backdrop` — carry the cleanest examples of the swap-vars-then-add-structure
+pattern.
 
-**TODO stubs** — the remaining ~89 matched components (`ability-card`, `ammo-counter`,
-`character-create`, `crafting-panel`, `dialogue-box`, `hotbar`, `inventory-grid`, `kill-feed`,
-`main-menu`, `minimap`, `quest-tracker`, `skill-tree`, `stat-row`, …). Each is a one-block stub
-pointing back here. Convert on demand with the §4 recipe. Most lean almost entirely on the
-foundation reskin + a panel/slot/button recipe they already compose.
+Six components are intentional **no-ops** (empty `tc-theme[name='dungeon'] {}` blocks): the pure
+layout / behaviour primitives `anchor`, `aspect-ratio-box`, `grid`, `safe-area`, `shake-container`,
+`stack` — they have no colours/borders/text, so the foundation reskin covers any inherited cosmetics.
 
 > The matched set is the 111 components present in **both** packages (intersection of the two
 > `style/components` dirs). web-components has ~227 extra components (dashboards, charts, forms)
 > with no game-components counterpart — those are intentionally **not** themed.
+>
+> To re-skin a component differently, edit its `style/themes/dungeon/components/_<name>.scss`
+> and run `npm run build:css`. Adding a new matched component? Create the partial, add a
+> `@use './<name>';` line to `components/_index.scss`, and follow §4.

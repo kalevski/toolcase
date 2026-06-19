@@ -1,0 +1,52 @@
+// Dungeon › tc-asset-bundle — gilded bundle manifest card.
+// Patches four literal leaks the foundation cannot catch: slate header cap,
+// product-green/red tag-chip borders, $slate-700 menu-item text, white shimmer.
+// Adds gilded bevel to the card shell and display caps to the bundle name.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on host ─────────────────────────────────────────────────────
+
+    tc-asset-bundle {
+        // Replace white/slate surface with warm wood gradient.
+        --bs-asset-bundle-bg: var(--fg-panel-bg);
+
+        // Replace the slate-toned header wash with a warm gold wash.
+        --bs-asset-bundle-header-cap: linear-gradient(180deg, rgba(201, 169, 97, 0.06), transparent);
+
+        // Replace literal product-green border with stamina-green tint.
+        --bs-asset-bundle-tag-included-border: rgba(111, 159, 58, 0.35);
+
+        // Replace literal product-red border with blood-red tint.
+        --bs-asset-bundle-tag-excluded-border: rgba(168, 48, 42, 0.4);
+
+        // Replace bright white shimmer with warm gold shimmer.
+        --bs-asset-bundle-skeleton-shimmer: rgba(240, 210, 122, 0.18);
+
+        // Active chip text reads better as ink on gold than white.
+        --bs-asset-bundle-control-active-color: var(--fg-ink);
+    }
+
+    // ── Card shell — gilded bevel ──────────────────────────────────────────────
+
+    .tc-asset-bundle {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Bundle name — display caps ─────────────────────────────────────────────
+
+    .tc-asset-bundle-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    // ── Action menu — patch $slate-700 literal; add gilded panel feel ──────────
+
+    .tc-asset-bundle-menu {
+        // Override the Sass $slate-700 literal that the foundation cannot reach.
+        --bs-asset-bundle-menu-item-color: var(--fg-parch);
+
+        box-shadow: var(--tc-shadow-lg), var(--fg-bevel-top);
+    }
+}

@@ -1,0 +1,60 @@
+// Dungeon › tc-command-reference — gilded codex of commands.
+// Token swap fixes the three hardcoded --tc-slate-100 hairlines (item separators,
+// alias chip borders, flags top-rule) that the foundation does not remap, and
+// upgrades the title to gold. Structural rules add the bevel frame and display-caps
+// title. The `:focus-within` border-color bug (shadow token used as color) is also
+// corrected to a gold edge.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap ────────────────────────────────────────────────────────────
+    // Vars live on the host element `tc-command-reference` in the base sheet.
+
+    tc-command-reference {
+        // Slate-hairline repoints — foundation does not remap --tc-slate-100.
+        --bs-command-reference-item-border:       1px solid var(--fg-gold-shadow);
+        --bs-command-reference-alias-border:      1px solid var(--fg-gold-deep);
+        --bs-command-reference-flags-border-top:  1px solid var(--fg-gold-shadow);
+
+        // Gilded title text.
+        --bs-command-reference-title-color:       var(--fg-gold-bright);
+
+        // Alias chip background — leather plate to match the dungeon palette.
+        --bs-command-reference-alias-bg:          var(--fg-leather);
+    }
+
+    // ── Gilded frame bevel ────────────────────────────────────────────────────
+
+    .tc-command-reference {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Display-caps title ────────────────────────────────────────────────────
+    // Override the element directly; the base hardcodes no font-family on
+    // `.tc-command-reference-title` but the dungeon requires Cinzel caps.
+
+    .tc-command-reference-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // ── Focus edge fix ────────────────────────────────────────────────────────
+    // Base uses `border-color: var(--tc-focus-ring)` which is a shadow value,
+    // not a color token — correct it to gold explicitly.
+
+    .tc-command-reference-search-wrap:focus-within {
+        border-color: var(--fg-gold-bright);
+    }
+
+    // ── List focus ring ───────────────────────────────────────────────────────
+    // `--tc-focus-ring` is a shadow token; used as `outline` color it may
+    // render incorrectly. Pin the outline color to gold to be safe.
+
+    .tc-command-reference-list:focus-visible {
+        outline-color: var(--fg-gold-bright);
+    }
+}

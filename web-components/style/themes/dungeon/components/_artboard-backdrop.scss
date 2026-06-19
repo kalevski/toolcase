@@ -3,7 +3,8 @@
 // display:contents and cannot carry a background). Mirrors the gc-* dark / scene
 // / parch radial gradients.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-artboard-backdrop {
         --bs-artboard-backdrop-bg: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
         --bs-artboard-backdrop-color: var(--fg-parch);

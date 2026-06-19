@@ -1,0 +1,26 @@
+// Dungeon › tc-chip-group — filter/loadout rail with optional gilded frame and display-caps title.
+// Token swap repoints the border to gold-deep; structural rules add the bevel when framed,
+// and promote the title to display caps. Chip internals stay in _chip.scss.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap: gold-deep border for the optional hairline frame.
+    tc-chip-group {
+        --bs-chip-group-border-color: var(--fg-gold-deep);
+    }
+
+    // 2. Gilded frame bevel — lighter than a full panel (bevel-top only, no drop shadow).
+    .tc-chip-group.has-border {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // 3. Display-caps title — base hardcodes color: var(--tc-text), so override directly.
+    .tc-chip-group-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--fg-gold-bright);
+    }
+
+    // 4. border-radius: 0 is already enforced by the base on .has-border; nothing to do.
+}

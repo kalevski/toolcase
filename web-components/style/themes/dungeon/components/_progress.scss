@@ -1,0 +1,30 @@
+// Dungeon › tc-progress — ink trough resource/XP gauge.
+// Token swap fixes the raw-slate track to a deep ink well; the bar gets a
+// gold fill + scanline overlay for the signature fantasy resource-bar look.
+// Inset box-shadow gives the recessed gauge trough; gold frame closes the
+// frame. Square corners already forced by the base (--bs-progress-border-radius: 0).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Token swap: replace raw-slate track with ink trough, sharpen bar fill to
+    // dungeon gold. text colour flips to ink for legibility on bright gold fill.
+    .progress,
+    .progress-stacked {
+        --bs-progress-bg: #0e0905;
+        --bs-progress-bar-bg: var(--fg-gold);
+        --bs-progress-bar-color: var(--fg-ink);
+    }
+
+    // Structure: recessed gauge well + gold perimeter frame.
+    .progress {
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        border: 1px solid var(--fg-gold-deep);
+    }
+
+    // Scanline resource-bar overlay on plain bars only.
+    // Striped variant already has its own background-image — don't clobber it.
+    .progress-bar:not(.progress-bar-striped) {
+        background-image: var(--fg-scanlines);
+    }
+}

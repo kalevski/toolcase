@@ -1,0 +1,34 @@
+// Dungeon › tc-node-editor — dev-tool graph editor.
+// Foundation covers ~90%: leather surfaces, gold borders, parch text, mono
+// labels, and edge colours all resolve through --tc-* → --fg-* remapping.
+// This override fixes the two cold values the foundation can't reach
+// (hardcoded #2b3a51 gradient stop + literal #fff selected-header text),
+// adds display-caps to node headers, and applies a top gold bevel to the
+// canvas frame.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Token swap on the host — kills hardcoded cold values and warms the ports.
+    tc-node-editor {
+        --bs-node-editor-selected-header-bg: linear-gradient(135deg, var(--fg-gold), var(--fg-gold-shadow));
+        --bs-node-editor-selected-header-text: var(--fg-ink);
+        --bs-node-editor-header-bg: linear-gradient(135deg, var(--fg-leather-2), var(--fg-leather));
+        --bs-node-editor-port-hover-bg: var(--fg-gold-bright);
+    }
+
+    // Canvas frame — top gold highlight band (restrained; no heavy drop shadow
+    // on a tool surface).
+    .tc-node-editor {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Node headers — display caps for the fantasy read, with tightened
+    // letter-spacing (0.08em per plan; full 0.16em is too wide at 13px).
+    .tc-node-editor-node-header {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+}

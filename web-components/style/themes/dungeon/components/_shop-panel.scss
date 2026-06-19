@@ -1,14 +1,152 @@
-// Dungeon › tc-shop-panel — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-shop-panel-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_shop-panel.scss
-// Target classes: web-components/style/components/_shop-panel.scss
+// Dungeon › tc-shop-panel — gilded merchant ledger (panel).
+// Token swap recolours the frame + rows; structural additions a flat swap can't
+// carry: the radial wood gradient fill, the multi-layer gilded inset bevel + drop
+// shadow, the display-caps row names + action button (base hardcodes mono), the
+// gold-bright mono currency/prices, the blood discount badge, and the engraved
+// gradient action button. Sharp corners throughout.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-shop-panel
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-shop-panel {
+        --bs-shop-panel-bg: transparent;
+        --bs-shop-panel-border: 1px solid var(--fg-gold-deep);
+
+        --bs-shop-panel-header-bg: transparent;
+        --bs-shop-panel-header-border: 1px solid rgba(201, 169, 97, 0.25);
+        --bs-shop-panel-mode-label-color: var(--fg-parch-3);
+
+        --bs-shop-panel-currency-bg: transparent;
+        --bs-shop-panel-currency-border: 0;
+        --bs-shop-panel-currency-color: var(--fg-gold-bright);
+
+        --bs-shop-panel-row-border: 1px solid rgba(201, 169, 97, 0.15);
+        --bs-shop-panel-row-hover-bg: rgba(201, 169, 97, 0.06);
+        --bs-shop-panel-sold-out-opacity: 0.55;
+
+        --bs-shop-panel-icon-color: var(--fg-gold-bright);
+        --bs-shop-panel-name-color: var(--fg-parch);
+        --bs-shop-panel-price-color: var(--fg-gold-bright);
+        --bs-shop-panel-price-old-color: var(--fg-parch-3);
+        --bs-shop-panel-discount-bg: rgba(168, 48, 42, 0.18);
+        --bs-shop-panel-discount-color: var(--fg-blood-bright);
+
+        --bs-shop-panel-empty-color: var(--fg-parch-3);
+    }
+
+    // Wood-gradient shell with the signature gilded inset bevel stack + drop shadow.
+    // position:relative anchors the corner-notch pseudo-elements.
+    .tc-shop-panel {
+        position: relative;
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+
+        // Corner-notch glyphs — top-left and bottom-right via ::before / ::after.
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        &::before {
+            top: 0;
+            left: 0;
+        }
+
+        &::after {
+            bottom: 0;
+            right: 0;
+            transform: rotate(180deg);
+        }
+    }
+
+    // Currency + prices — gold-bright mono with an engraved shadow.
+    .tc-shop-panel-currency,
+    .tc-shop-panel-price {
+        font-family: var(--fg-mono);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Currency icon — pull into the gilded family; base hardcodes --tc-text-faint.
+    .tc-shop-panel-currency-icon {
+        color: var(--fg-gold-deep);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Header — increase padding to approach the fantasy 10px 14px breathing room.
+    .tc-shop-panel-header {
+        padding: 0.625rem 0.875rem;
+    }
+
+    // Mode label reads as fine mono caps.
+    .tc-shop-panel-mode-label {
+        font-family: var(--fg-mono);
+    }
+
+    // Row icon — display font + engraved shadow so glyphs read carved, not flat.
+    .tc-shop-panel-row-icon {
+        font-family: var(--fg-display);
+        text-shadow: 0 1px 2px #000;
+        width: 28px;
+    }
+
+    // Row name reads as display caps.
+    .tc-shop-panel-row-name {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    // Discount badge — blood-outlined display caps.
+    .tc-shop-panel-discount {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        border: 1px solid var(--fg-blood);
+    }
+
+    // Old (struck-through) price — engraved shadow so the line-through reads against
+    // the gold active price beside it (base colour already set via the token above).
+    .tc-shop-panel-price-old {
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Unaffordable price burns blood-bright (matches the game cue).
+    .tc-shop-panel-row--unaffordable .tc-shop-panel-price-value {
+        color: var(--fg-blood-bright);
+    }
+
+    // Action button — engraved gilded gradient, display caps.
+    .tc-shop-panel-row-btn {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+        background: linear-gradient(180deg, #3a2a1a, #1f1610);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        &:hover:not(:disabled) {
+            color: var(--fg-gold-bright);
+            background: linear-gradient(180deg, #3a2a1a, #1f1610);
+            border: 1px solid var(--fg-gold-deep);
+            filter: brightness(1.15);
+        }
+    }
 }

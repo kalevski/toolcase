@@ -1,12 +1,15 @@
 // Dungeon › tc-rarity-chip — mono caps chip tinted + bordered by rarity, on a
 // translucent black fill (per the fantasy contract §11.1).
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     .tc-rarity-chip {
         --bs-rarity-chip-letter-spacing: 0.18em;
+        --bs-rarity-chip-font-size: 0.625rem;
         --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
         --bs-rarity-chip-color: var(--fg-common);
         --bs-rarity-chip-border-color: var(--fg-common);
+        text-shadow: 0 0 4px color-mix(in srgb, var(--bs-rarity-chip-color) 35%, transparent);
     }
 
     .tc-rarity-chip--uncommon {
@@ -33,5 +36,13 @@ tc-theme[name='dungeon'] {
         --bs-rarity-chip-color: var(--fg-mythic);
         --bs-rarity-chip-border-color: var(--fg-mythic);
         --bs-rarity-chip-bg: rgba(0, 0, 0, 0.4);
+    }
+
+    // The chip is a non-interactive presentational label; suppress the 44px
+    // touch-target inflation the base applies under coarse pointers.
+    @media (pointer: coarse) {
+        .tc-rarity-chip {
+            min-height: auto;
+        }
     }
 }

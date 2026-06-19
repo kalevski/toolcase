@@ -1,14 +1,72 @@
-// Dungeon › tc-title-screen — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-title-screen-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_title-screen.scss
-// Target classes: web-components/style/components/_title-screen.scss
+// Dungeon › tc-title-screen — the full-viewport hero. Ambient radial+linear
+// torchlight backdrop, parchment-dim spaced eyebrow, gold-bright display-caps
+// title with a glow, a gilded gradient divider rule (replaces the flat
+// hairline), and an italic parchment subtitle in the body serif.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-title-screen
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-title-screen {
+        --bs-title-screen-eyebrow-color: var(--fg-parch-dim);
+        --bs-title-screen-title-color: var(--fg-gold-bright);
+        --bs-title-screen-title-weight: 700;
+        --bs-title-screen-subtitle-color: var(--fg-parch-3);
+    }
+
+    // Torchlit ambient backdrop (verbatim from the game screen).
+    tc-title-screen {
+        background:
+            radial-gradient(60% 50% at 50% 30%, #4a3a22 0%, #1a1108 60%, #0a0604 100%),
+            linear-gradient(180deg, #1a1308 0%, #0a0604 100%);
+    }
+
+    // Eyebrow — mono micro-label with the game's wide 0.5em tracking.
+    .tc-title-screen__eyebrow {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.5em;
+    }
+
+    // Title — gilded display caps with an ink-then-amber glow.
+    .tc-title-screen__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-shadow: 0 2px 0 #000, 0 0 24px rgba(232, 200, 120, 0.35);
+    }
+
+    // Divider — gilded gradient rule with a centred diamond ornament.
+    // The base element is a single div, so the diamond is overlaid via ::before
+    // centred absolutely; the gradient rule is the element background itself.
+    .tc-title-screen__divider {
+        position: relative;
+        width: min(420px, 80%);
+        margin: 0 auto;
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            var(--fg-gold-deep) 30%,
+            var(--fg-gold) 50%,
+            var(--fg-gold-deep) 70%,
+            transparent
+        );
+
+        &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: var(--fg-gold-edge);
+            transform: translate(-50%, -50%) rotate(45deg);
+            box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+        }
+    }
+
+    // Subtitle — italic parchment in the body serif.
+    .tc-title-screen__subtitle {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
 }

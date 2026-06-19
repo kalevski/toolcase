@@ -1,0 +1,19 @@
+// Dungeon › tc-infinite-scroll — behavioral sentinel with loading + end rows.
+// Foundation token remap covers all --bs-infinite-scroll-* vars (parch-3 / parch-dim
+// for loading/end colors, gold ring via the spinner partial). No surface, bevel, or
+// notch needed here.
+//
+// The one thing the token swap cannot carry: the base hardcodes
+//   font-family: var(--tc-font-mono)
+// on .tc-infinite-scroll__end-label. We lift that to display-caps so the terminal
+// marker reads as an engraved dungeon inscription rather than a mono micro-label.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-infinite-scroll__end-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+}

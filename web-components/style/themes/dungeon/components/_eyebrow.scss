@@ -2,7 +2,8 @@
 // NOTE: tc-eyebrow sets its --bs-* defaults on the .tc-eyebrow CLASS, so the
 // override targets the class (not the element) to win the cascade.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     .tc-eyebrow {
         --bs-eyebrow-font-family: var(--fg-display);
         --bs-eyebrow-font-size: 0.72rem;

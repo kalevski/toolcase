@@ -1,14 +1,112 @@
-// Dungeon › tc-codex — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-codex-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_codex.scss
-// Target classes: web-components/style/components/_codex.scss
+// Dungeon › tc-codex — gilded bestiary frame. The host becomes a wood-radial
+// panel with the signature multi-layer gold bevel; token swap recolours list /
+// detail / row vars, and structural rules add the gradient+gold-marker selected
+// row, display-caps row names + stat labels, and mono stat values.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-codex
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-codex {
+        // Improvement 1: collapse the gap so list + detail butt into one unified frame.
+        --bs-codex-gap: 0;
+
+        --bs-codex-list-bg: transparent;
+        --bs-codex-list-border-color: var(--fg-gold-deep);
+
+        --bs-codex-row-color: var(--fg-parch);
+        --bs-codex-row-separator-color: rgba(201, 169, 97, 0.15);
+        --bs-codex-row-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-codex-row-selected-bg: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        --bs-codex-row-selected-color: var(--fg-gold-bright);
+
+        --bs-codex-glyph-color: var(--fg-gold-bright);
+        --bs-codex-glyph-undiscovered-color: var(--fg-parch-dim);
+
+        --bs-codex-detail-bg: transparent;
+        // Improvement 1: detail carries the internal divider; outer border handled by the list panel.
+        --bs-codex-detail-border-color: transparent;
+        --bs-codex-detail-eyebrow-color: var(--fg-parch-3);
+        --bs-codex-detail-name-color: var(--fg-gold-bright);
+        --bs-codex-detail-description-color: var(--fg-parch);
+        --bs-codex-detail-stat-border-color: rgba(201, 169, 97, 0.25);
+        --bs-codex-detail-stat-label-color: var(--fg-parch-3);
+        --bs-codex-detail-stat-value-color: var(--fg-gold-bright);
+    }
+
+    // Gilded wood frame: radial fill + full stacked gold bevel rings (Improvement 2).
+    .tc-codex-list,
+    .tc-codex-detail {
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+    }
+
+    // Improvement 2: full gc-style stacked bevel on the list (outer frame).
+    // Improvement 3: corner notches via ::before / ::after.
+    .tc-codex-list {
+        position: relative;
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-panel-shadow);
+
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            z-index: 1;
+        }
+
+        &::before {
+            top: 0;
+            left: 0;
+        }
+
+        &::after {
+            bottom: 0;
+            left: 0;
+        }
+    }
+
+    // Improvement 1: detail shares the background; left border acts as the internal divider.
+    .tc-codex-detail {
+        border: none;
+        border-left: 1px solid rgba(201, 169, 97, 0.25);
+        box-shadow: none;
+    }
+
+    // Selected row: gradient highlight + inset gold marker stripe.
+    .tc-codex-row.is-selected {
+        box-shadow: inset 3px 0 0 var(--fg-gold);
+    }
+
+    // Row name + stat label read as gilded display caps.
+    .tc-codex-row-name,
+    .tc-codex-detail-stat-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // Glyph drawn from the display face to match the game codex.
+    .tc-codex-row-glyph {
+        font-family: var(--fg-display);
+    }
+
+    // Mono stat values.
+    .tc-codex-detail-stat-value {
+        font-family: var(--fg-mono);
+    }
+
+    // Improvement 4: detail name as a true gilded display title.
+    .tc-codex-detail-name {
+        font-family: var(--fg-display);
+    }
+
+    // Improvement 5: eyebrow switches from mono to display caps.
+    .tc-codex-detail-eyebrow {
+        font-family: var(--fg-display);
+    }
 }

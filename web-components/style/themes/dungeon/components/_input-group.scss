@@ -1,0 +1,17 @@
+// Dungeon › tc-input-group — riveted leather addon plate + inscribed slot join.
+// Foundation already covers: leather fill (--tc-surface-muted), gold border
+// (--tc-border-strong), mono parch-3 text (--tc-text-muted → --tc-font-mono).
+// This partial adds the two embellishments the token swap can't carry:
+//   1. Recessed inset shadow on the addon — matches the input slot depth.
+//   2. Gold-stamped color for unit/prefix labels — "stamped metal" reading.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Recessed inset shadow: matches the depth of the adjacent input slot,
+    // making the addon read as a riveted plate pressed into the same channel.
+    .input-group-text {
+        color: var(--fg-gold);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+    }
+}

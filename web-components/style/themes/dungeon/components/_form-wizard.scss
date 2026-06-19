@@ -1,0 +1,65 @@
+// Dungeon › tc-form-wizard — gilded quest-board panel with gold-seal step markers.
+// Token swap covers most of the remap; structural rules add the inset bevel,
+// top corner notches, ink numerals on the gold seal, and display-caps stage labels.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on the host ────────────────────────────────────────────────
+    // Done/current marker text are literal #fff in the base — repoint to ink
+    // so numerals/check read as engraved on the gold seal.
+    // Body bg gets the wood-panel gradient for quest-board depth.
+    tc-form-wizard {
+        --bs-form-wizard-done-color: var(--fg-ink);
+        --bs-form-wizard-current-color: var(--fg-ink);
+        --bs-form-wizard-body-bg: var(--fg-panel-bg);
+        --bs-form-wizard-footer-bg: var(--fg-panel-bg);
+    }
+
+    // ── Host: gilded panel frame ──────────────────────────────────────────────
+    // The host carries `border` and `background` from vars (already remapped
+    // by the foundation to gold-deep + wood surface). Add the bevel stack and
+    // make it the stacking context for the corner notches.
+    tc-form-wizard {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // Top corner notches — signature gilded ornament on the quest board.
+    tc-form-wizard::before,
+    tc-form-wizard::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+    tc-form-wizard::before {
+        left: -1px;
+    }
+    tc-form-wizard::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Step marker: embossed gold seal ───────────────────────────────────────
+    // Foundation already routes bg/border through --tc-app-accent → gold.
+    // Add a subtle bevel so the circle reads as a struck-gold coin/seal.
+    .tc-form-wizard-tab-marker {
+        box-shadow: var(--fg-bevel-top), inset 0 -1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    // ── Step labels: display caps (Cinzel) ────────────────────────────────────
+    // Base hardcodes `font-family: inherit` on the tab, so labels render as
+    // plain body text. Override to quest-stage display caps.
+    .tc-form-wizard-tab-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+}

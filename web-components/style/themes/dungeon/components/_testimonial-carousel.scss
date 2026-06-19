@@ -1,0 +1,66 @@
+// Dungeon › tc-testimonial-carousel — NPC quote / endorsement plaque.
+// Foundation already recolours all tokens (wood surface, gold borders/dots,
+// legendary-gold stars, parch text). This override adds:
+//   1. Wood gradient fill + brighter stars via token-swap on the host element.
+//   2. Gilded plaque bevel on the slide card (box-shadow: var(--fg-panel-shadow)).
+//   3. Engraved display-caps author name (Cinzel serif, gold-bright).
+//   4. Filled-star sparkle glow (drop-shadow in legendary gold).
+// Avatar border-radius: 50% (sanctioned circle) and active-dot border-radius: 3px
+// (the one sanctioned pill) are intentionally left untouched.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── 1. Token-swap on host ─────────────────────────────────────────────────
+
+    tc-testimonial-carousel {
+        --bs-testimonial-carousel-surface: var(--fg-panel-bg);
+        --bs-testimonial-carousel-star-color: var(--fg-gold-bright);
+    }
+
+    // ── 2. Gilded plaque bevel on the slide card ──────────────────────────────
+    // Drop the flat base shadow and replace it with the full inset bevel stack.
+    // position: relative is required for ::before/::after corner notches below.
+
+    .tc-testimonial-carousel-slide {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Corner notches — signature gilded ornament (mirrors .tc-panel--bordered).
+    .tc-testimonial-carousel-slide::before,
+    .tc-testimonial-carousel-slide::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-testimonial-carousel-slide::before {
+        left: -1px;
+    }
+
+    .tc-testimonial-carousel-slide::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── 3. Engraved author name — display caps ────────────────────────────────
+
+    .tc-testimonial-carousel-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ── 4. Filled-star sparkle glow ───────────────────────────────────────────
+
+    .tc-testimonial-carousel-star--filled {
+        filter: drop-shadow(0 0 2px var(--fg-legendary));
+    }
+}

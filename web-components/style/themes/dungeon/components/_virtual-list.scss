@@ -1,0 +1,23 @@
+// Dungeon › tc-virtual-list — gilded ledger scroll panel.
+// Critical fix: --bs-virtual-list-row-separator points at --tc-slate-100 in the
+// base, which is only an SCSS variable and is never remapped by the dungeon
+// foundation, so row hairlines resolve to an invalid/transparent value and
+// disappear. This override repoints it to a faint gold rgba value.
+// Structural add: gilded bevel on the viewport frame via --fg-panel-shadow.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on the host element (matches where base defines the vars) ──
+
+    tc-virtual-list {
+        // Fix the broken row separators — --tc-slate-100 is not a CSS custom
+        // property and is never remapped, causing hairlines to disappear.
+        --bs-virtual-list-row-separator: rgba(201, 169, 97, 0.12);
+    }
+
+    // ── Viewport bevel — structural, cannot be carried by a var swap ──────────
+
+    .tc-virtual-list {
+        box-shadow: var(--fg-panel-shadow);
+    }
+}

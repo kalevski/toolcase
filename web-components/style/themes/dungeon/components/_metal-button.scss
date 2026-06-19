@@ -2,7 +2,8 @@
 // Token swap recolours the fills/borders; the inner-button rules add the metal
 // bevel shadow + display caps + brightness hover that vars don't expose.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-metal-button {
         --bs-metal-button-color: var(--fg-gold-bright);
         --bs-metal-button-bg: var(--fg-button-bg);
@@ -17,22 +18,24 @@ tc-theme[name='dungeon'] {
     }
 
     tc-metal-button[variant='primary'] {
-        --bs-metal-button-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        // Improvement 1: drive gradient from recipe token; gold overlay keeps primary brighter than default.
+        --bs-metal-button-bg: var(--fg-button-bg);
         --bs-metal-button-border-color: var(--fg-gold);
         --bs-metal-button-color: var(--fg-gold-bright);
-        --bs-metal-button-hover-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-metal-button-hover-bg: var(--fg-button-bg);
         --bs-metal-button-hover-border-color: var(--fg-gold);
-        --bs-metal-button-active-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-metal-button-active-bg: var(--fg-button-bg);
         --bs-metal-button-active-border-color: var(--fg-gold);
     }
 
     tc-metal-button[variant='danger'] {
-        --bs-metal-button-bg: linear-gradient(180deg, #5a1a16, #2a0a08);
+        // Improvement 1: drive gradient from recipe token; blood border preserved.
+        --bs-metal-button-bg: var(--fg-button-bg);
         --bs-metal-button-border-color: var(--fg-blood);
-        --bs-metal-button-color: #f4c4be;
-        --bs-metal-button-hover-bg: linear-gradient(180deg, #5a1a16, #2a0a08);
+        --bs-metal-button-color: var(--fg-parch);
+        --bs-metal-button-hover-bg: var(--fg-button-bg);
         --bs-metal-button-hover-border-color: var(--fg-blood);
-        --bs-metal-button-active-bg: linear-gradient(180deg, #5a1a16, #2a0a08);
+        --bs-metal-button-active-bg: var(--fg-button-bg);
         --bs-metal-button-active-border-color: var(--fg-blood);
     }
 
@@ -50,10 +53,13 @@ tc-theme[name='dungeon'] {
         text-transform: uppercase;
         letter-spacing: 0.18em;
         font-weight: 600;
+        // Improvement 2: bevel-top driven by recipe token instead of literal rgba.
+        // Improvement 4: gilded label lift — black shadow seats caps on the metal face.
         box-shadow:
-            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 1px 0 var(--fg-bevel-top),
             inset 0 -8px 12px rgba(0, 0, 0, 0.4),
             0 2px 0 rgba(0, 0, 0, 0.6);
+        text-shadow: 0 1px 0 #000;
 
         &:hover {
             filter: brightness(1.15);
@@ -63,12 +69,34 @@ tc-theme[name='dungeon'] {
             filter: brightness(0.9);
             transform: translateY(1px);
         }
+
+        // Improvement 5: strengthen focus — inset gold edge + existing glow ring.
+        &:focus-visible {
+            box-shadow:
+                inset 0 0 0 1px var(--fg-gold-bright),
+                inset 0 1px 0 var(--fg-bevel-top),
+                inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+                0 2px 0 rgba(0, 0, 0, 0.6),
+                0 0 0 0.25rem var(--bs-metal-button-focus-ring-color);
+        }
     }
 
-    // Drop the slate primary-hover glow from the default theme.
+    // Improvement 3: restore ghost inner bevel — empty pressed-plate look from the fantasy reference.
+    tc-metal-button[variant='ghost'] .tc-metal-button__btn {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18);
+    }
+
+    // Drop the slate primary-hover glow from the default theme; keep dungeon bevel intact.
+    // Improvement 4: faint gold aura on primary hover text, plus bevel-top token.
+    tc-metal-button[variant='primary'] .tc-metal-button__btn {
+        text-shadow: 0 1px 0 #000, 0 0 10px rgba(232, 200, 120, 0.3);
+    }
+
     tc-metal-button[variant='primary'] .tc-metal-button__btn:hover {
         box-shadow:
-            inset 0 1px 0 rgba(232, 200, 120, 0.3),
+            inset 0 1px 0 var(--fg-bevel-top),
             inset 0 -8px 12px rgba(0, 0, 0, 0.4),
             0 2px 0 rgba(0, 0, 0, 0.6);
     }

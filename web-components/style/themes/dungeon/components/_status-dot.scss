@@ -1,0 +1,25 @@
+// Dungeon › tc-status-dot — presence beacon polish.
+// Foundation already remaps all four state tokens (online → stamina, busy → blood,
+// away → legendary, offline → parch-dim) and the pulse ring tracks via
+// --bs-status-dot-color. This override adds:
+//   1. A coloured glow on the marker so it reads as a lit fantasy beacon.
+//   2. Engraved display-caps label for consistent dungeon typography.
+// border-radius: 50% on marker + pulse ring are sanctioned circles — never touched.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Beacon glow — colour is pulled from the live state token so all four states
+    // (stamina green, blood red, legendary amber, parch-dim grey) get appropriate glow.
+    .tc-status-dot-marker {
+        box-shadow: 0 0 4px var(--bs-status-dot-color);
+    }
+
+    // Engraved presence label — small display caps to match the fantasy UI voice.
+    .tc-status-dot-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 11px;
+    }
+}

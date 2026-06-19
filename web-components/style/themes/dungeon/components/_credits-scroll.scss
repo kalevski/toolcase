@@ -1,14 +1,45 @@
-// Dungeon › tc-credits-scroll — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-credits-scroll-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
+// Dungeon › tc-credits-scroll — fading vignette scroll: radial ink backdrop,
+// display-caps role labels with wide tracking, gold-bright names with a glow,
+// and a gold mono pause indicator. Token swap carries surface/border; the
+// .tc-* rules add the gradient backdrop and display/mono typography.
 //
 // Design source:  game-components/style/components/_credits-scroll.scss
 // Target classes: web-components/style/components/_credits-scroll.scss
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-credits-scroll
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-credits-scroll {
+        --bs-credits-scroll-bg: transparent;
+        --bs-credits-scroll-border: var(--fg-gold-deep);
+        --bs-credits-scroll-title-color: var(--fg-gold-bright);
+        --bs-credits-scroll-role-color: var(--fg-parch-dim);
+        --bs-credits-scroll-role-letter-spacing: 0.32em;
+        --bs-credits-scroll-name-color: var(--fg-gold-bright);
+        --bs-credits-scroll-indicator-bg: rgba(0, 0, 0, 0.55);
+        --bs-credits-scroll-indicator-border: var(--fg-gold-deep);
+        --bs-credits-scroll-indicator-color: var(--fg-gold-bright);
+
+        // Radial ink vignette — the cinematic credits backdrop.
+        background: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+    }
+
+    // Title + names in display caps with a soft glow.
+    .tc-credits-scroll-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        text-shadow: 0 2px 0 #000, 0 0 22px rgba(232, 200, 120, 0.35);
+    }
+
+    // Role = wide-tracked display caps micro-label.
+    .tc-credits-scroll-role {
+        font-family: var(--fg-display);
+    }
+
+    // Names = gilded display caps with ink shadow.
+    .tc-credits-scroll-name {
+        font-family: var(--fg-display);
+        letter-spacing: 0.12em;
+        text-shadow: 0 1px 2px #000;
+    }
 }

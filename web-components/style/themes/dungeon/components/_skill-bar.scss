@@ -1,14 +1,45 @@
-// Dungeon › tc-skill-bar — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-skill-bar-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_skill-bar.scss
-// Target classes: web-components/style/components/_skill-bar.scss
+// Dungeon › tc-skill-bar — gilded ability tray (composes tc-ability-card slots).
+// The individual cards are reskinned by the ability-card override; this file adds
+// the surrounding tray the game ships and a flat swap can't carry: the gilded
+// gradient frame + inset bevel on the bar host, the gold-bright selected halo on
+// a slot's card, and the gold cooldown progress strip. Cooldown label stays mono.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-skill-bar
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-skill-bar {
+        // Selected — gold-bright outline + glow halo on the inner card.
+        --bs-skill-bar-selected-border: var(--fg-gold-bright);
+        --bs-skill-bar-selected-shadow:
+            inset 0 0 0 1px #000,
+            inset 0 1px 0 rgba(232, 200, 120, 0.3),
+            0 0 12px rgba(232, 200, 120, 0.5);
+        --bs-skill-bar-disabled-opacity: 0.4;
+
+        // Cooldown veil + gold progress strip.
+        --bs-skill-bar-cd-bg: rgba(0, 0, 0, 0.75);
+        --bs-skill-bar-cd-bar-color: var(--fg-gold-bright);
+        // Raise the strip from the base 3 px hairline so it reads as a
+        // deliberate gilded sweep on the wide 180 px slots.
+        --bs-skill-bar-cd-bar-height: 4px;
+
+        // Gilded tray frame around the whole bar (base host is bare).
+        padding: 8px 10px;
+        background: linear-gradient(180deg, rgba(20, 12, 8, 0.7), rgba(10, 6, 4, 0.7));
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 4px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    // Cooldown overlay — faint inset gold edge to keep the veil within
+    // the gilded family without competing with the card chrome.
+    .tc-skill-bar__cd {
+        box-shadow: inset 0 0 0 1px rgba(232, 200, 120, 0.12);
+    }
+
+    // Cooldown label — engraved mono numerals.
+    .tc-skill-bar__cd-label {
+        text-shadow: 0 1px 2px #000, 0 0 4px #000;
+    }
 }

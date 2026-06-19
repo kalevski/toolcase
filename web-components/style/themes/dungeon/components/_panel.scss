@@ -2,7 +2,8 @@
 // Token swap gives the wood gradient + gold border; structural rules add the
 // inset bevel stack and the top corner notches that vars can't carry.
 
-tc-theme[name='dungeon'] {
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
     tc-panel {
         --bs-panel-bg: var(--fg-panel-bg);
         --bs-panel-border-color: var(--fg-gold-deep);
@@ -14,6 +15,8 @@ tc-theme[name='dungeon'] {
         --bs-panel-header-border-color: var(--fg-gold-deep);
         --bs-panel-header-color: var(--fg-gold-bright);
         --bs-panel-header-icon-color: var(--fg-gold);
+        --bs-panel-header-padding-x: 0.85rem;
+        --bs-panel-header-padding-y: 0.55rem;
     }
 
     .tc-panel {
@@ -47,11 +50,21 @@ tc-theme[name='dungeon'] {
         transform: scaleX(-1);
     }
 
-    // Header reads as gilded display caps.
+    // Header reads as gilded display caps with a top bevel highlight.
     .tc-panel-header {
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.16em;
         font-weight: 600;
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Replace the flat gold-deep hairline with the sanctioned gold rule gradient.
+    .tc-panel--bordered .tc-panel-header {
+        border-bottom: none;
+        background-image: var(--fg-rule);
+        background-repeat: no-repeat;
+        background-position: bottom;
+        background-size: 100% 1px;
     }
 }

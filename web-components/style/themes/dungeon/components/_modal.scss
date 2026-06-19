@@ -1,0 +1,77 @@
+// Dungeon › tc-modal — gilded overlay dialog.
+// Foundation covers most color tokens (surface → leather, border → gold-deep,
+// text → parch). This override handles: gradient panel fill, slate-navy backdrop
+// literal (#0f172a → #000 + blur), bevel stack on .modal-content, display caps
+// on .modal-title, serif body text, and top corner notches.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on .modal ─────────────────────────────────────────────────
+
+    .modal {
+        --bs-modal-bg: var(--fg-panel-bg);
+        --bs-modal-border-color: var(--fg-gold-deep);
+    }
+
+    // ── Backdrop: replace hardcoded slate-navy literal ───────────────────────
+
+    .modal-backdrop {
+        --bs-backdrop-bg: #000;
+        --bs-backdrop-opacity: 0.65;
+
+        backdrop-filter: blur(2px);
+    }
+
+    // ── Gilded bevel on .modal-content ───────────────────────────────────────
+
+    .modal-content {
+        position: relative;
+        color: var(--fg-parch);
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+
+    // Top corner notches — same gilded ornament as tc-panel.
+    // Gated off for fullscreen (.modal-content inside .modal-fullscreen has
+    // border: 0 and spans the full viewport; notches look wrong there).
+    .modal-dialog:not(.modal-fullscreen) .modal-content::before,
+    .modal-dialog:not(.modal-fullscreen) .modal-content::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .modal-dialog:not(.modal-fullscreen) .modal-content::before {
+        left: -1px;
+    }
+
+    .modal-dialog:not(.modal-fullscreen) .modal-content::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Display caps on .modal-title ─────────────────────────────────────────
+
+    .modal-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ── Serif body text ──────────────────────────────────────────────────────
+
+    .modal-body {
+        font-family: var(--fg-body);
+        color: var(--fg-parch);
+    }
+}

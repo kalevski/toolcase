@@ -1,14 +1,104 @@
-// Dungeon › tc-level-header — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-level-header-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_level-header.scss
-// Target classes: web-components/style/components/_level-header.scss
+// Dungeon › tc-level-header — gilded XP banner. Badge becomes a domed radial
+// medallion with a double gold inset; level value reads display caps gold; the XP
+// track turns into an inset ink groove with a gold gradient fill + glow; xp readout
+// stays mono, next-unlock label goes display caps. Token swap can't carry the
+// medallion bevel, the gradient fill, or the display recast.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-level-header
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-level-header {
+        --bs-level-header-bg: transparent;
+        --bs-level-header-border-color: var(--fg-gold-deep);
+
+        --bs-level-header-badge-bg: radial-gradient(70% 70% at 50% 30%, #6a4a2a, #2a1a0a 80%);
+        --bs-level-header-badge-color: var(--fg-gold-bright);
+
+        --bs-level-header-title-color: var(--fg-parch);
+
+        --bs-level-header-track-bg: linear-gradient(180deg, #0e0905, #1a120a);
+        --bs-level-header-fill-bg: linear-gradient(180deg, #f0d27a, #c9a961 60%, #5a4422);
+
+        --bs-level-header-xp-color: var(--fg-parch);
+        --bs-level-header-next-color: var(--fg-parch-3);
+    }
+
+    // Banner shell gains a bevel stack to match sibling framed panels.
+    .tc-level-header {
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+            0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    // Gold diamond ornament between medallion and title body.
+    .tc-level-header__body {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            width: 6px;
+            height: 6px;
+            background: var(--fg-gold-edge);
+            flex-shrink: 0;
+        }
+    }
+
+    // Badge medallion — domed radial + double gold inset (base ships a flat tile).
+    .tc-level-header__badge {
+        border: 2px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-bright),
+            inset 0 0 12px rgba(0, 0, 0, 0.6),
+            0 0 0 1px #000,
+            0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .tc-level-header__badge-label {
+        font-family: var(--fg-display);
+    }
+
+    // Level number reads gilded display caps.
+    .tc-level-header__badge-value {
+        font-family: var(--fg-display);
+        font-weight: 700;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-level-header__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    // Track becomes an inset ink groove with a deeper recess and a subtle top-edge gold catch.
+    .tc-level-header__track {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 1px 4px rgba(0, 0, 0, 0.8),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+    }
+
+    // Fill gains scanline texture for struck-metal read; domed highlight on top edge.
+    .tc-level-header__fill {
+        background: var(--fg-scanlines), linear-gradient(180deg, #f0d27a, #c9a961 60%, #5a4422);
+        box-shadow:
+            0 0 8px rgba(232, 200, 120, 0.4),
+            inset 0 1px 0 rgba(255, 240, 200, 0.4);
+    }
+
+    .tc-level-header__xp {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.16em;
+    }
+
+    // Next-unlock label as display caps.
+    .tc-level-header__next {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
 }

@@ -1,0 +1,32 @@
+// Dungeon › tc-switch — squared pill-track toggle mirroring tc-toggle exactly.
+// Kills the 999px / 50% pill curves, replaces the hardcoded slate-blue gradient
+// stop (#2b3a51) and four slate rgba shadow/focus literals with dungeon values.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-switch {
+        --bs-switch-track-bg: #0e0905;
+        --bs-switch-track-checked-bg: #4a2a0e;
+        --bs-switch-track-checked-gradient: linear-gradient(180deg, #2a1a08, #4a2a0e);
+        --bs-switch-track-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        --bs-switch-knob-bg: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-switch-knob-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.6);
+        --bs-switch-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.4);
+    }
+
+    // Square the pill track — 999px is a stray curve in the dungeon aesthetic.
+    .tc-switch__track {
+        border-radius: 0;
+        border-color: var(--fg-gold-deep);
+    }
+
+    // Checked state: warm dark gradient track with a gold border instead of transparent.
+    .tc-switch__track[data-checked='true'] {
+        border-color: var(--fg-gold);
+    }
+
+    // Square the knob — 50% circle is not sanctioned here (matches tc-toggle treatment).
+    .tc-switch__knob {
+        border-radius: 0;
+    }
+}

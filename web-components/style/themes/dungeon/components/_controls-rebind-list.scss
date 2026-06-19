@@ -1,14 +1,39 @@
-// Dungeon › tc-controls-rebind-list — TODO: dungeon override not yet implemented.
-//
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-controls-rebind-list-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_controls-rebind-list.scss
-// Target classes: web-components/style/components/_controls-rebind-list.scss
+// Dungeon › tc-controls-rebind-list — gilded rebind rows. Token swap recolours
+// frame / separators / keycap / rebind vars to gold tones; structural rules add
+// the display-caps action labels and the gold-bright rebind affordance on
+// hover, matching the game list.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-controls-rebind-list
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-controls-rebind-list {
+        --bs-controls-rebind-list-bg: transparent;
+        --bs-controls-rebind-list-border-color: var(--fg-gold-deep);
+        --bs-controls-rebind-list-separator-color: rgba(201, 169, 97, 0.15);
+        --bs-controls-rebind-list-row-hover-bg: rgba(201, 169, 97, 0.08);
+
+        --bs-controls-rebind-list-action-color: var(--fg-parch);
+
+        --bs-controls-rebind-list-empty-color: var(--fg-parch-dim);
+
+        --bs-controls-rebind-list-key-font-family: var(--fg-mono);
+        --bs-controls-rebind-list-key-color: var(--fg-gold-bright);
+        --bs-controls-rebind-list-key-bg: var(--fg-keycap-bg);
+        --bs-controls-rebind-list-key-border-color: var(--fg-gold-deep);
+
+        --bs-controls-rebind-list-rebind-color: var(--fg-parch-dim);
+        --bs-controls-rebind-list-rebind-hover-color: var(--fg-gold-bright);
+        --bs-controls-rebind-list-rebind-letter-spacing: 0.24em;
+    }
+
+    // Action label reads as gilded display caps.
+    .tc-controls-rebind-list-action {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    // REBIND affordance uses display caps (matches gc reference), not mono.
+    .tc-controls-rebind-list-rebind {
+        font-family: var(--fg-display);
+    }
 }

@@ -1,14 +1,10 @@
-// Dungeon › tc-stack — TODO: dungeon override not yet implemented.
+// Dungeon › tc-stack — no override needed.
 //
-// Most of the reskin is already inherited from the foundation token remap
-// (themes/dungeon/_foundation.scss). Add only the fantasy STRUCTURE this
-// component still needs (gilded bevel, corner notches, display caps, gradient
-// fills) by overriding its --bs-stack-* vars and .tc-* rules below.
-// Follow the per-component recipe in web-components/dungeon-theme.md.
-//
-// Design source:  game-components/style/components/_stack.scss
-// Target classes: web-components/style/components/_stack.scss
+// tc-stack is a purely structural flexbox layout primitive: no colours,
+// borders, surfaces, or text of its own. The foundation token remap carries
+// nothing here because there is nothing cosmetic to reskin. Deliberately left
+// empty — adding decoration would be inventing chrome the component doesn't have.
 
-tc-theme[name='dungeon'] {
-    // TODO: implement dungeon override for tc-stack
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
 }

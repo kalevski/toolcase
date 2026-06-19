@@ -1,0 +1,18 @@
+// Dungeon › tc-text — body-copy primitive.
+// Foundation already remaps: default color → parch, muted → parch-3,
+// code-chip bg → leather, code-chip color → parch, and the base font-family
+// var(--tc-font-sans) → --fg-body (EB Garamond serif) + var(--tc-font-mono) →
+// --fg-mono. No token swaps are needed here.
+//
+// The only structural override: the inline code chip gets a 1-px gold-deep
+// border so it reads as a gilded rune-chip rather than a plain flat highlight.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Inline code chip: add a gilded border and lift the text to gold-bright
+    // so the chip reads as an inset rune inscription.
+    .tc-text-code {
+        border: 1px solid var(--fg-gold-deep);
+        color: var(--fg-gold-bright);
+    }
+}

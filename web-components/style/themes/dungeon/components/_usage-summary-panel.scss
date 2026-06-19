@@ -1,0 +1,105 @@
+// Dungeon › tc-usage-summary-panel — resource-ledger / quota tome.
+// Fixes the broken --tc-slate-200 progress track (undefined CSS custom property),
+// replaces the slate-blue title gradient + white literals, and adds the gilded
+// bevel + display-caps title treatment.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on host element ────────────────────────────────────────────
+    // Fixes the critical --tc-slate-200 undefined-token track bug and repoints
+    // the slate-blue title gradient + white text to dungeon palette values.
+
+    tc-usage-summary-panel {
+        // Progress track background — --tc-slate-200 is SCSS-only, never a
+        // real CSS custom property; without this fix the track is transparent.
+        --bs-usage-summary-panel-bar-bg: #0e0905;
+
+        // Gold bar fill already resolved via --tc-app-accent → --fg-gold;
+        // keep it explicit so the component is self-contained.
+        --bs-usage-summary-panel-bar-fill: var(--fg-gold);
+
+        // Title header — replace slate-blue gradient end + white text literals.
+        --bs-usage-summary-panel-title-bg: var(--fg-button-bg);
+        --bs-usage-summary-panel-title-color: var(--fg-gold-bright);
+
+        // Parchment label / muted value already remapped by foundation; keep
+        // explicit for clarity.
+        --bs-usage-summary-panel-label-color: var(--fg-parch);
+        --bs-usage-summary-panel-value-color: var(--fg-parch-dim);
+
+        // Warn row uses legendary orange (--tc-warning → --fg-legendary via
+        // foundation); keep explicit.
+        --bs-usage-summary-panel-warn-fill: var(--fg-legendary);
+        --bs-usage-summary-panel-warn-value-color: var(--fg-legendary);
+
+        // Row separator — gold-deep hairline instead of slate border.
+        --bs-usage-summary-panel-row-border-color: var(--fg-gold-deep);
+
+        // Card shell — wood fill + gold border.
+        --bs-usage-summary-panel-bg: var(--fg-panel-bg);
+        --bs-usage-summary-panel-border-color: var(--fg-gold-deep);
+
+        // Skeleton shimmer — warm dark surface tone.
+        --bs-usage-summary-panel-skeleton-bg: var(--fg-leather-2);
+        --bs-usage-summary-panel-skeleton-shimmer: rgba(201, 169, 97, 0.15);
+    }
+
+    // ── Card shell — gilded bevel ─────────────────────────────────────────────
+
+    .tc-usage-summary-panel {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+        border-radius: 0;
+        color: var(--fg-parch);
+
+        // Top corner notches — signature gilded ornament.
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            width: 14px;
+            height: 14px;
+            pointer-events: none;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            z-index: 1;
+        }
+
+        &::before {
+            left: -1px;
+        }
+
+        &::after {
+            right: -1px;
+            transform: scaleX(-1);
+        }
+    }
+
+    // ── Title header — gold-plaque display caps ───────────────────────────────
+    // Overrides the hardcoded font-family ('JetBrains Mono') and the white
+    // border-bottom literal (rgba(255,255,255,0.08)) that token-swap cannot reach.
+
+    .tc-usage-summary-panel-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        // Override the hardcoded white border-bottom literal.
+        border-bottom-color: rgba(201, 169, 97, 0.25);
+        border-radius: 0;
+    }
+
+    // ── Value numerals — keep mono face (already correct; explicit for safety) ─
+
+    .tc-usage-summary-panel-value {
+        font-family: var(--fg-mono);
+    }
+
+    // ── Progress track — ensure square corners ────────────────────────────────
+
+    .tc-usage-summary-panel .progress {
+        border-radius: 0;
+    }
+}

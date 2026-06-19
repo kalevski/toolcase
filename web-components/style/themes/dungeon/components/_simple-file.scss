@@ -1,0 +1,22 @@
+// Dungeon › tc-simple-file — utility file-icon tile.
+// The foundation token remap already recolors the whole component; this override
+// adds the wood-slot fill + gilded glyph + gold-deep border on the icon box.
+// Filename stays in body sans (display caps would hurt path legibility).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-simple-file {
+        --bs-simple-file-icon-bg: var(--fg-slot-bg);
+        --bs-simple-file-icon-color: var(--fg-gold);
+    }
+
+    // Framed slot: gold-deep hairline around the icon box (base sets no border).
+    .tc-simple-file-icon {
+        border: 1px solid var(--fg-gold-deep);
+    }
+
+    // Ext label: stamped look — gold-deep instead of parchment-dim.
+    .tc-simple-file-ext {
+        color: var(--fg-gold-deep);
+    }
+}

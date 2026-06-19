@@ -1,0 +1,65 @@
+// Dungeon › tc-line-chart — gilded lattice chart with fantasy series ramp.
+// Token swap repoints the six series vars to --fg-* element hues (gold/mana/
+// blood/etc.), grids to faint gold-deep, axes to gold, labels to parch-dim,
+// tooltip text from the #fff literal to --fg-parch. Structural rules add the
+// panel bevel on the inner frame and display-caps on the title.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // --- series ramp: replace slate neutrals with fantasy element hues ---
+    tc-line-chart {
+        --bs-line-chart-series-1: var(--fg-gold);
+        --bs-line-chart-series-2: var(--fg-mana-bright);
+        --bs-line-chart-series-3: var(--fg-blood-bright);
+        --bs-line-chart-series-4: var(--fg-uncommon);
+        --bs-line-chart-series-5: var(--fg-arcane-bright);
+        --bs-line-chart-series-6: var(--fg-legendary);
+
+        // frame
+        --bs-line-chart-bg: var(--fg-panel-bg);
+        --bs-line-chart-border: 1px solid var(--fg-gold-deep);
+
+        // title + subtitle
+        --bs-line-chart-title-color: var(--fg-gold);
+        --bs-line-chart-subtitle-color: var(--fg-parch-dim);
+
+        // gilded lattice — grid faint, axes brighter
+        --bs-line-chart-grid-color: var(--fg-gold-deep);
+        --bs-line-chart-axis-color: var(--fg-gold);
+
+        // axis tick labels → parch tone
+        --bs-line-chart-axis-label-color: var(--fg-parch-dim);
+
+        // point fill → ink so markers read as gold-ringed dots on dark
+        --bs-line-chart-point-fill: var(--fg-ink);
+
+        // tooltip — ink surface (already remapped), override the #fff literal
+        --bs-line-chart-tooltip-bg: var(--fg-ink);
+        --bs-line-chart-tooltip-color: var(--fg-parch);
+
+        // legend label color
+        --bs-line-chart-legend-color: var(--fg-parch);
+    }
+
+    // --- structure: bevel on the inner frame ---
+    .tc-line-chart-inner {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // --- display-caps title ---
+    .tc-line-chart-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    // --- mono numerals on axis labels (guard against font drift) ---
+    .tc-line-chart-axis-label {
+        font-family: var(--fg-mono);
+    }
+
+    // --- mono numerals on tooltip value ---
+    .tc-line-chart-tooltip-value {
+        font-family: var(--fg-mono);
+    }
+}

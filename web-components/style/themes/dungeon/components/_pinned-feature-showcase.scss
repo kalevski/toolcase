@@ -1,0 +1,59 @@
+// Dungeon › tc-pinned-feature-showcase — gilded codex feature block.
+// Foundation token remap handles surfaces, parchment text, and gold-deep item borders.
+// This file patches:
+//   • gilt icon tint (token swap on host)
+//   • display-caps Cinzel on the main title and each item title (hardcoded sans on the class)
+//   • eyebrow restyled to the signature display-caps micro-label (NOT the shared tc-eyebrow
+//     element, so the tc-eyebrow dungeon override never reaches it — must be done here)
+//   • feature items receive a gilded bevel-top shadow + a left corner notch
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap — gilt icons instead of muted-parch default
+    tc-pinned-feature-showcase {
+        --bs-pinned-feature-showcase-item-icon-color: var(--fg-gold);
+    }
+
+    // 2. Main panel title — display caps (base hardcodes --bs-font-sans-serif on the class)
+    .tc-pinned-feature-showcase-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+
+    // 3. Eyebrow — local span (NOT tc-eyebrow), must be restyled explicitly here
+    //    Matches the signature tc-eyebrow dungeon treatment: display caps, wide tracking, gold-dim
+    .tc-pinned-feature-showcase-eyebrow {
+        font-family: var(--fg-display);
+        letter-spacing: 0.32em;
+        color: var(--fg-parch-dim);
+    }
+
+    // 4. Feature items — gilded codex entries: bevel-top highlight + corner notch
+    .tc-pinned-feature-showcase-item {
+        position: relative;
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Left corner notch on each codex entry (single notch — top-left only)
+    .tc-pinned-feature-showcase-item::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        width: 12px;
+        height: 12px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    // 5. Item title — display caps (base hardcodes --bs-font-sans-serif on the class)
+    .tc-pinned-feature-showcase-item-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+}

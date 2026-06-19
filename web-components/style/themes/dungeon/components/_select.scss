@@ -1,0 +1,27 @@
+// Dungeon › tc-select — gold chevron glyph, gold focus ring, inset wood-well.
+// The foundation already flips surface/text/border tokens, square corners hold.
+// This override patches the three hardcoded-slate literals the token remap misses
+// and adds a carved-inset shadow for the fantasy field signature.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .form-select {
+        // Recolor the inline chevron SVG: slate %2364748b → gold %23c9a961.
+        --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c9a961' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+
+        // Focus ring: was hardcoded slate rgba(30,41,59,…) — override to gold.
+        --bs-form-select-focus-border-color: var(--fg-gold);
+        --bs-form-select-focus-box-shadow: 0 0 0 0.2rem rgba(240, 210, 122, 0.35);
+
+        // Inset well — carved-into-wood signature (mirrors _check.scss treatment).
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6), var(--fg-bevel-top);
+
+        &:focus {
+            // Re-assert inset well so the gold ring stacks over it, not replaces it.
+            box-shadow:
+                inset 0 1px 3px rgba(0, 0, 0, 0.6),
+                var(--fg-bevel-top),
+                var(--bs-form-select-focus-box-shadow);
+        }
+    }
+}
