@@ -96,6 +96,66 @@ describe('LoggerFactory', () => {
     })
 })
 
+describe('LoggerFactory — addReporter / removeReporter', () => {
+    it('addReporter causes the reporter to receive subsequent logs', () => {
+        const received: string[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, _t: any, msgs: any[]): void { received.push(msgs[0]) }
+        }
+        const factory = new LoggerFactory([])
+        const logger = factory.getLogger('test')
+        const reporter = new R()
+        factory.addReporter(reporter)
+        logger.info('after-add')
+        expect(received).toEqual(['after-add'])
+    })
+
+    it('added reporter does not receive logs emitted before addReporter', () => {
+        const received: string[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, _t: any, msgs: any[]): void { received.push(msgs[0]) }
+        }
+        const factory = new LoggerFactory([])
+        const logger = factory.getLogger('test')
+        logger.info('before-add')
+        factory.addReporter(new R())
+        expect(received).toHaveLength(0)
+    })
+
+    it('removeReporter stops the reporter from receiving subsequent logs', () => {
+        const received: string[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, _t: any, msgs: any[]): void { received.push(msgs[0]) }
+        }
+        const reporter = new R()
+        const factory = new LoggerFactory([reporter])
+        const logger = factory.getLogger('test')
+        logger.info('before-remove')
+        factory.removeReporter(reporter)
+        logger.info('after-remove')
+        expect(received).toEqual(['before-remove'])
+    })
+
+    it('removeReporter is a no-op for an unregistered reporter', () => {
+        const factory = new LoggerFactory([])
+        class R extends LogReporter { log(): void {} }
+        expect(() => factory.removeReporter(new R())).not.toThrow()
+    })
+
+    it('multiple reporters can be added and each receives logs', () => {
+        const a: string[] = []
+        const b: string[] = []
+        class A extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]): void { a.push(msgs[0]) } }
+        class B extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]): void { b.push(msgs[0]) } }
+        const factory = new LoggerFactory([])
+        factory.addReporter(new A())
+        factory.addReporter(new B())
+        factory.getLogger('t').info('msg')
+        expect(a).toEqual(['msg'])
+        expect(b).toEqual(['msg'])
+    })
+})
+
 describe('Logger', () => {
     it('passes scope, time, and args through dispatch fn', () => {
         const captures: any[] = []

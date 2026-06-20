@@ -168,7 +168,8 @@ class SentryReporter extends LogReporter {
     }
 }
 
-const logging = new LoggerFactory([new SentryReporter()])
+const logging = new LoggerFactory()
+logging.addReporter(new SentryReporter())
 ```
 
 ## API
@@ -183,6 +184,8 @@ A pre-configured `LoggerFactory` with a `ConsoleLogReporter`. Suitable for quick
 |--------|------|-------------|
 | `getLogger(scope?)` | `(scope?: string) => Logger` | Get/create a scoped logger. |
 | `level` | `LoggerLevel` | Global threshold. |
+| `addReporter(reporter)` | `(reporter: LogReporter) => void` | Attach a reporter after construction. |
+| `removeReporter(reporter)` | `(reporter: LogReporter) => void` | Detach a previously added reporter. |
 
 ### `Logger`
 

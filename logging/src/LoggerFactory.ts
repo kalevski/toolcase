@@ -29,6 +29,15 @@ class LoggerFactory {
         return this.loggers.get(scope)!
     }
 
+    addReporter(reporter: LogReporter): void {
+        this.reporters.push(reporter)
+    }
+
+    removeReporter(reporter: LogReporter): void {
+        const i = this.reporters.indexOf(reporter)
+        if (i !== -1) this.reporters.splice(i, 1)
+    }
+
     private isEnabled = (order: number, overrideOrder: number | null): boolean => {
         const threshold = overrideOrder ?? this.levelOrder
         return threshold >= order
