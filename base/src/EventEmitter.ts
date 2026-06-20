@@ -44,14 +44,18 @@ class EventEmitter {
         const entries = this._listeners.get(event)
         if (!entries || entries.length === 0) return false
         const snapshot = entries.slice()
+        const survivors: ListenerEntry[] = []
+        for (const entry of entries) {
+            if (!entry.once) survivors.push(entry)
+        }
+        if (survivors.length === 0) {
+            this._listeners.delete(event)
+        } else if (survivors.length !== entries.length) {
+            this._listeners.set(event, survivors)
+        }
         for (const entry of snapshot) {
-            if (entry.once) {
-                const idx = entries.indexOf(entry)
-                if (idx !== -1) entries.splice(idx, 1)
-            }
             entry.fn.apply(entry.context, args)
         }
-        if (entries.length === 0) this._listeners.delete(event)
         return true
     }
 

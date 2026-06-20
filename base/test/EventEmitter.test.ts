@@ -90,6 +90,19 @@ describe('EventEmitter', () => {
         expect(ee.eventNames().sort()).toEqual(['a', 'b'])
     })
 
+    it('multiple once listeners all fire once and leave listenerCount 0', () => {
+        const ee = new EventEmitter()
+        const calls: number[] = []
+        ee.once('go', () => calls.push(1))
+        ee.once('go', () => calls.push(2))
+        ee.once('go', () => calls.push(3))
+        ee.emit('go')
+        expect(calls).toEqual([1, 2, 3])
+        expect(ee.listenerCount('go')).toBe(0)
+        ee.emit('go')
+        expect(calls).toEqual([1, 2, 3])
+    })
+
     it('emit snapshot prevents skipped listeners when off mid-emit', () => {
         const ee = new EventEmitter()
         const calls: string[] = []
