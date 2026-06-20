@@ -49,9 +49,9 @@ class TcImage extends HTMLElement {
             this._fallbackNodes = Array.from(this.childNodes)
             this.render()
             this._distributeFallback()
-            this._wireImg()
             this._initialised = true
         }
+        this._wireImg()
     }
 
     disconnectedCallback(): void {

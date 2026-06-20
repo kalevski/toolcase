@@ -43,9 +43,9 @@ export class TagInput extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
-            this._attachOutside()
             this._initialised = true
         }
+        this._attachOutside()
     }
 
     disconnectedCallback(): void {

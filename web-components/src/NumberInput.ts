@@ -131,9 +131,9 @@ export class NumberInput extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
-            this._attachListeners()
             this._initialised = true
         }
+        this._attachListeners()
     }
 
     disconnectedCallback(): void {
