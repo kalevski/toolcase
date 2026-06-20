@@ -293,11 +293,36 @@ class Serializer {
     fields(key: string): FieldType[] {
         const type = this.getType(key)
         return type.fieldsArray.map(f => {
-            const isMap = f instanceof MapField
+            if (f instanceof MapField) {
+                return {
+                    key: f.name,
+                    type: Serializer.FieldType.MAP(f.keyType, f.type),
+                    rule: 'optional' as FieldType['rule'],
+                    tag: f.id
+                }
+            }
+            const enumDef = this.namespace.get(f.type)
+            if (enumDef instanceof Enum) {
+                return {
+                    key: f.name,
+                    type: Serializer.FieldType.ENUM(enumDef.values as Record<string, number>),
+                    rule: (f.repeated ? 'repeated' : f.required ? 'required' : 'optional') as FieldType['rule'],
+                    default: f.options?.default,
+                    tag: f.id
+                }
+            }
+            if (f.repeated && f.options?.packed === true) {
+                return {
+                    key: f.name,
+                    type: Serializer.FieldType.PACKED_ARRAY(f.type),
+                    rule: 'repeated' as FieldType['rule'],
+                    tag: f.id
+                }
+            }
             return {
                 key: f.name,
                 type: f.type,
-                rule: (isMap ? 'optional' : f.repeated ? 'repeated' : f.required ? 'required' : 'optional') as FieldType['rule'],
+                rule: (f.repeated ? 'repeated' : f.required ? 'required' : 'optional') as FieldType['rule'],
                 default: f.options?.default,
                 tag: f.id
             }

@@ -537,6 +537,88 @@ describe('Serializer fragment / reassemble', () => {
     })
 })
 
+describe('Serializer.fields() faithful round-trip (map / enum / packed)', () => {
+    it('fields() returns a MAP marker for a map field', () => {
+        const s = new Serializer()
+        s.define('Stats', [
+            { key: 'counts', type: F.MAP(F.STRING, F.INT32), rule: 'optional' }
+        ])
+        const fields = s.fields('Stats')
+        const counts = fields.find(f => f.key === 'counts')!
+        expect((counts.type as any).__kind).toBe('map')
+        expect((counts.type as any).keyType).toBe('string')
+        expect((counts.type as any).valueType).toBe('int32')
+    })
+
+    it('fields() returns an ENUM marker for an inline enum field', () => {
+        const s = new Serializer()
+        s.define('Person', [
+            { key: 'role', type: F.ENUM(['admin', 'user', 'guest']), rule: 'optional' }
+        ])
+        const fields = s.fields('Person')
+        const role = fields.find(f => f.key === 'role')!
+        expect((role.type as any).__kind).toBe('enum')
+        expect((role.type as any).values).toMatchObject({ admin: 0, user: 1, guest: 2 })
+    })
+
+    it('fields() returns a PACKED_ARRAY marker for a packed repeated field', () => {
+        const s = new Serializer()
+        s.define('Frame', [
+            { key: 'ticks', type: F.PACKED_ARRAY(F.UINT32), rule: 'repeated' }
+        ])
+        const fields = s.fields('Frame')
+        const ticks = fields.find(f => f.key === 'ticks')!
+        expect((ticks.type as any).__kind).toBe('packed')
+        expect((ticks.type as any).type).toBe('uint32')
+    })
+
+    it('define(k2, s.fields(k1)) reproduces a map field faithfully', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'scores', type: F.MAP(F.STRING, F.INT32), rule: 'optional' }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const buf = s.encode('Copy', { scores: { alice: 10, bob: 20 } })
+        const out = s.decode('Copy', buf) as any
+        expect(out.scores).toEqual({ alice: 10, bob: 20 })
+    })
+
+    it('define(k2, s.fields(k1)) reproduces an enum field faithfully', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'role', type: F.ENUM(['admin', 'user', 'guest']), rule: 'optional', default: 1 }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const buf = s.encode('Copy', { role: 2 })
+        const out = s.decode('Copy', buf) as any
+        expect(out.role).toBe(2)
+    })
+
+    it('define(k2, s.fields(k1)) reproduces a packed array field faithfully', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'ticks', type: F.PACKED_ARRAY(F.UINT32), rule: 'repeated' }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const buf = s.encode('Copy', { ticks: [1, 2, 3, 4, 5] })
+        const out = s.decode('Copy', buf) as any
+        expect(Array.from(out.ticks)).toEqual([1, 2, 3, 4, 5])
+    })
+
+    it('define(k2, s.fields(k1)) preserves field tags in round-trip', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'counts', type: F.MAP(F.STRING, F.INT32), rule: 'optional', tag: 5 },
+            { key: 'ticks', type: F.PACKED_ARRAY(F.UINT32), rule: 'repeated', tag: 10 }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const copyFields = s.fields('Copy')
+        const byKey = Object.fromEntries(copyFields.map(f => [f.key, f]))
+        expect(byKey.counts.tag).toBe(5)
+        expect(byKey.ticks.tag).toBe(10)
+    })
+})
+
 describe('Serializer.define duplicate-type guard', () => {
     it('throws a friendly already-defined error on duplicate key', () => {
         const s = new Serializer()
