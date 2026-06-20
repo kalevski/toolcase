@@ -110,8 +110,42 @@ const eventsFor = (localName) => {
 const eventToProp = (name) =>
     'on' + name.split('-').map(s => s[0].toUpperCase() + s.slice(1)).join('')
 
+// Identify which observed attributes are boolean (presence-based) for a class.
+// Heuristic: a boolean-attribute getter returns `this.hasAttribute('name')` rather
+// than `this.getAttribute('name')`. Scanning for `return this.hasAttribute(...)` is
+// precise — it matches the getter pattern and avoids false positives like
+// `if (!this.hasAttribute('title'))` guards on value attributes.
+// Also follows ./internal/ imports so that attributes inherited from base helpers
+// (e.g. `open` from bs-overlay, `disabled`/`required` from text-field-base) are
+// detected correctly.
+const booleanAttrsFor = (localName) => {
+    const entry = importMap.get(localName)
+    if (!entry) return new Set()
+    let src
+    try {
+        src = readSrc(entry.file)
+    } catch {
+        return new Set()
+    }
+    const boolSet = new Set()
+    const collectBooleans = (text) => {
+        // Match simple getter pattern: `return this.hasAttribute('name')`
+        // and compound getter patterns: `return x?.y ?? this.hasAttribute('name')`
+        // The `[^\n;{}]*` allows arbitrary prefix expressions within the same return statement
+        // but stops at statement boundaries so `if (!this.hasAttribute(...))` guards don't match.
+        for (const m of text.matchAll(/return\s+[^\n;{}]*this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+            boolSet.add(m[1])
+        }
+    }
+    collectBooleans(src)
+    for (const m of src.matchAll(/from\s*['"]\.\/internal\/([A-Za-z0-9_-]+)['"]/g)) {
+        collectBooleans(readInternal(m[1]))
+    }
+    return boolSet
+}
+
 const components = tagToClass
-    .map(({ tag, cls }) => ({ tag, attrs: attrsFor(cls), events: eventsFor(cls) }))
+    .map(({ tag, cls }) => ({ tag, attrs: attrsFor(cls), events: eventsFor(cls), boolAttrs: booleanAttrsFor(cls) }))
     .sort((a, b) => a.tag.localeCompare(b.tag))
 
 const lines = []
@@ -138,8 +172,15 @@ lines.push(`    HTMLElement`)
 lines.push(`>`)
 lines.push(``)
 lines.push(`export interface ToolcaseIntrinsicElements {`)
-for (const { tag, attrs, events } of components) {
-    const attrParts = attrs.map(a => `'${a}'?: string | number | boolean`)
+for (const { tag, attrs, events, boolAttrs } of components) {
+    const attrParts = attrs.map(a => {
+        // Boolean (presence-based) attributes must not accept string | number, because
+        // React sets the attribute string for any truthy value, so `disabled={false}`
+        // would produce `disabled="false"` and keep hasAttribute('disabled') returning true.
+        // Type them as `boolean` only so that false → omit, true → setAttribute('', '').
+        const type = boolAttrs.has(a) ? 'boolean' : 'string | number'
+        return `'${a}'?: ${type}`
+    })
     const eventParts = events.map(e => `${eventToProp(e)}?: (e: CustomEvent) => void`)
     const allParts = [...attrParts, ...eventParts]
     if (allParts.length === 0) {
