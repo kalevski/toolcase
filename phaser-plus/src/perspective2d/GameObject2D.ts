@@ -21,7 +21,7 @@ export default class GameObject2D extends GameObject {
     }
 
     setTransform(x: number, y: number): this {
-        this.projection.translate(x, y, this as unknown as M.Vector2)
+        this.projection.transformPoint(x, y, this as unknown as M.Vector2)
         this.transform.set(x, y)
         return this
     }
@@ -46,7 +46,7 @@ export default class GameObject2D extends GameObject {
 
     override doUpdate(time: number, delta: number): void {
         super.doUpdate(time, delta)
-        this.projection.inverse.translate(this.x, this.y, this.transform)
+        this.projection.inverse.transformPoint(this.x, this.y, this.transform)
         this.pivot.set(this.transform.x, this.transform.y)
     }
 

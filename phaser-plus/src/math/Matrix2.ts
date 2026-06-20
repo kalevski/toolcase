@@ -24,11 +24,21 @@ export default class Matrix2 extends Float32Array {
     get v10(): number { return this[2] as number }
     get v11(): number { return this[3] as number }
 
-    translate(x: number, y: number, out: M.Vector2 = new M.Vector2()): M.Vector2 {
+    /**
+     * Apply the 2×2 linear transform to point (x, y) and write the result into `out`.
+     * This is a pure matrix–vector multiply (M·[x,y]ᵀ) — there is no translation
+     * component; a 2×2 matrix cannot encode one (that requires an affine / 3×3 form).
+     */
+    transformPoint(x: number, y: number, out: M.Vector2 = new M.Vector2()): M.Vector2 {
         const p = Matrix2.PRECISION
         out.x = Math.round((x * this.v00 + y * this.v01) * p) / p
         out.y = Math.round((x * this.v10 + y * this.v11) * p) / p
         return out
+    }
+
+    /** @deprecated Use `transformPoint` instead — this method does not translate. */
+    translate(x: number, y: number, out?: M.Vector2): M.Vector2 {
+        return this.transformPoint(x, y, out)
     }
 
     setValues(v00: number, v01: number, v10: number, v11: number, inverse: Matrix2 | null = null): void {
