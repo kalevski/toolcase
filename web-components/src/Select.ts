@@ -76,7 +76,14 @@ export class Select extends HTMLElement {
             this._renderPending = false
             if (this.isConnected) {
                 this.render()
-                this._internals.setFormValue(this.value || null)
+                if (this.multiple) {
+                    const fd = new FormData()
+                    const name = this.name ?? ''
+                    this.values.forEach((v) => fd.append(name, v))
+                    this._internals.setFormValue(fd)
+                } else {
+                    this._internals.setFormValue(this.value || null)
+                }
                 this._initialised = true
             }
         })
@@ -93,6 +100,20 @@ export class Select extends HTMLElement {
         const sel = this.querySelector<HTMLSelectElement>('select')
         if (sel) sel.value = v
         this.setAttribute('value', v)
+    }
+
+    get values(): string[] {
+        const sel = this.querySelector<HTMLSelectElement>('select')
+        if (!sel) return []
+        return Array.from(sel.selectedOptions).map((o) => o.value)
+    }
+    set values(v: string[]) {
+        const sel = this.querySelector<HTMLSelectElement>('select')
+        if (!sel) return
+        const set = new Set(v)
+        for (const opt of Array.from(sel.options)) {
+            opt.selected = set.has(opt.value)
+        }
     }
 
     get multiple(): boolean {
@@ -152,7 +173,15 @@ export class Select extends HTMLElement {
 
     private _onNativeChange = (): void => {
         const sel = this.querySelector<HTMLSelectElement>('select')
-        if (sel) {
+        if (!sel) return
+        if (this.multiple) {
+            const values = Array.from(sel.selectedOptions).map((o) => o.value)
+            this.dispatchEvent(new CustomEvent('tc-change', { bubbles: true, detail: { values } }))
+            const fd = new FormData()
+            const name = this.name ?? ''
+            values.forEach((v) => fd.append(name, v))
+            this._internals.setFormValue(fd)
+        } else {
             this.setAttribute('value', sel.value)
             this._internals.setFormValue(sel.value || null)
         }
@@ -164,10 +193,12 @@ export class Select extends HTMLElement {
         const state = this.state
         const multiple = this.multiple
         const disabled = this.disabled
-        const currentValue =
-            this.querySelector<HTMLSelectElement>('select')?.value ??
-            this.getAttribute('value') ??
-            ''
+        const existingSel = this.querySelector<HTMLSelectElement>('select')
+        const currentValues: string[] = existingSel
+            ? Array.from(existingSel.selectedOptions).map((o) => o.value)
+            : !multiple && this.getAttribute('value')
+              ? [this.getAttribute('value')!]
+              : []
 
         // Snapshot tc-option / native option direct-children whenever they are present.
         // After this render they will be destroyed by innerHTML; _optionData persists.
@@ -231,9 +262,18 @@ export class Select extends HTMLElement {
             feedbackHtml,
         ].join('')
 
-        // Restore the selected value from before the re-render.
+        // Restore the selected values from before the re-render.
         const sel = this.querySelector<HTMLSelectElement>('select')
-        if (sel && currentValue) sel.value = currentValue
+        if (sel && currentValues.length) {
+            if (multiple) {
+                const set = new Set(currentValues)
+                for (const opt of Array.from(sel.options)) {
+                    opt.selected = set.has(opt.value)
+                }
+            } else {
+                sel.value = currentValues[0]
+            }
+        }
     }
 }
 
