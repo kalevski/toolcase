@@ -45,6 +45,7 @@ class BufferedReporter extends LogReporter {
         }
         if (this.timer === null && this.flushInterval > 0) {
             this.timer = setTimeout(() => this.flush(), this.flushInterval)
+            if (typeof (this.timer as any)?.unref === 'function') (this.timer as any).unref()
         }
     }
 
