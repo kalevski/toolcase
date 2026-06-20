@@ -18,10 +18,8 @@ export default function throttle<T extends AnyFn>(fn: T, ms: number, options: Th
 
     return ((...args: Parameters<T>): void => {
         const now = Date.now()
+        if (last === 0 && !leading) last = now
         const elapsed = now - last
-        if (last === 0 && !leading) {
-            last = now
-        }
         if (elapsed >= ms) {
             if (timer !== null) {
                 clearTimeout(timer)
@@ -40,7 +38,7 @@ export default function throttle<T extends AnyFn>(fn: T, ms: number, options: Th
                     lastArgs = null
                     invoke(next)
                 }
-            }, ms - elapsed)
+            }, Math.max(0, ms - elapsed))
         }
     }) as T
 }
