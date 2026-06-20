@@ -59,6 +59,10 @@ export default class GameObjectPool {
         key: string,
         gameObjectClass: GameObjectClass<T>,
         instanceFn: InstanceFn<T> | null = null,
+        /**
+         * Called on every reuse (not on first creation). Use this to clear per-instance
+         * state that should not carry over between lives — tint, scale, alpha, velocity, etc.
+         */
         resetFn: ResetFn<T> | null = null
     ): this {
         if (this.map.has(key)) {
@@ -85,6 +89,7 @@ export default class GameObjectPool {
         }
         const object = pool.obtain() as T & Poolable
         this.onObjectCreate(object)
+        object.setActive(true).setVisible(true)
         return object as T
     }
 
