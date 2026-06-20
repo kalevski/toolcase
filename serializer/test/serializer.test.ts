@@ -369,6 +369,43 @@ describe('Serializer versioning', () => {
         s.define('Z', [{ key: 'a', type: F.STRING, rule: 'required' }])
         expect(() => s.decodeVersioned('Z', new Uint8Array([1]))).toThrow(/buffer too small/)
     })
+
+    it('defineVersion: decodes breaking field-reorder with version-appropriate schema (regression SER-3)', () => {
+        // v1 schema: id at tag 1, value at tag 2
+        const v1 = new Serializer()
+        v1.version(1, 0)
+        v1.define('Item', [
+            { key: 'id', type: F.UINT32, rule: 'required' },
+            { key: 'value', type: F.STRING, rule: 'required' }
+        ])
+        const frame = v1.encodeVersioned('Item', { id: 42, value: 'hello' })
+
+        // v2 schema: fields reordered — value now at tag 1, id at tag 2 (breaking change)
+        // Without defineVersion, decoding v1 bytes with v2 schema corrupts both fields.
+        const v2 = new Serializer()
+        v2.version(2, 0)
+        v2.define('Item', [
+            { key: 'value', type: F.STRING, rule: 'required' },
+            { key: 'id', type: F.UINT32, rule: 'required' }
+        ])
+        // Register the v1 field layout so old bytes are decoded correctly before migration
+        v2.defineVersion('Item', 1, [
+            { key: 'id', type: F.UINT32, rule: 'required' },
+            { key: 'value', type: F.STRING, rule: 'required' }
+        ])
+        v2.migrate('Item', 1, msg => ({ value: msg.value, id: msg.id }))
+
+        const out = v2.decodeVersioned('Item', frame)
+        expect(out.version).toEqual({ major: 1, minor: 0 })
+        expect((out.message as any).id).toBe(42)
+        expect((out.message as any).value).toBe('hello')
+    })
+
+    it('defineVersion: rejects forMajor out of range', () => {
+        const s = new Serializer()
+        expect(() => s.defineVersion('X', -1, [])).toThrow(/forMajor must be an integer/)
+        expect(() => s.defineVersion('X', 256, [])).toThrow(/forMajor must be an integer/)
+    })
 })
 
 describe('Serializer default constructor — Node 18 crypto compatibility', () => {

@@ -79,6 +79,8 @@ class Serializer {
 
     private migrations: Map<string, MigrationFn> = new Map()
 
+    private versionedTypes: Map<string, Type> = new Map()
+
     constructor(id: string | null = null) {
         if (id === null) {
             id = generateId(16)
@@ -87,7 +89,7 @@ class Serializer {
         this.namespace = this.root.define(id)
     }
 
-    define(key: string, fields: FieldType[] = []): void {
+    private buildTypeInNamespace(namespace: Namespace, key: string, fields: FieldType[]): Type {
         const type = new Type(key)
         for (const [index, field] of fields.entries()) {
             const tag = index + 1
@@ -96,8 +98,8 @@ class Serializer {
 
             if (isEnumMarker(fieldRef)) {
                 const enumName = `${key}_${field.key}_E`
-                if (this.namespace.get(enumName) === null) {
-                    this.namespace.add(new Enum(enumName, buildEnumValues(fieldRef.values)))
+                if (namespace.get(enumName) === null) {
+                    namespace.add(new Enum(enumName, buildEnumValues(fieldRef.values)))
                 }
                 type.add(new Field(field.key, tag, enumName, field.rule, undefined, {
                     default: defaultValue
@@ -122,7 +124,29 @@ class Serializer {
                 default: defaultValue
             }))
         }
+        return type
+    }
+
+    define(key: string, fields: FieldType[] = []): void {
+        const type = this.buildTypeInNamespace(this.namespace, key, fields)
         this.namespace.add(type)
+    }
+
+    /**
+     * Register the schema that was active for `key` at `forMajor`. When
+     * `decodeVersioned` encounters a frame with that major version it decodes
+     * the body with this schema before running migrations, allowing genuinely
+     * breaking changes (field reorder, retype, removal) to be handled safely.
+     */
+    defineVersion(key: string, forMajor: number, fields: FieldType[]): void {
+        if (!Number.isInteger(forMajor) || forMajor < 0 || forMajor > 255) {
+            throw new Error(`Serializer.defineVersion: forMajor must be an integer in [0,255], got ${forMajor}`)
+        }
+        const vRoot = new Root()
+        const vNamespace = vRoot.define(`__v${forMajor}_${key}`)
+        const type = this.buildTypeInNamespace(vNamespace, key, fields)
+        vNamespace.add(type)
+        this.versionedTypes.set(`${key}:${forMajor}`, type)
     }
 
     enum(name: string, values: string[] | Record<string, number>): void {
@@ -220,7 +244,15 @@ class Serializer {
             throw new Error(`Serializer.decodeVersioned[${key}] failed: frame v${major}.${minor} is newer than current v${this.currentVersion.major}.${this.currentVersion.minor}`)
         }
         const body = buffer.subarray(2)
-        let message: any = this.decode(key, body)
+        const decodeType = this.versionedTypes.get(`${key}:${major}`) ?? this.getType(key)
+        let message: any
+        try {
+            message = decodeType.decode(body)
+        } catch (error: any) {
+            const offset = typeof error?.offset === 'number' ? `, offset=${error.offset}` : ''
+            const size = body?.byteLength ?? '?'
+            throw new Error(`Serializer.decodeVersioned[${key}] failed: ${error.message} (bytes=${size}${offset})`)
+        }
         let v = major
         while (v < this.currentVersion.major) {
             const handler = this.migrations.get(`${key}:${v}`)
