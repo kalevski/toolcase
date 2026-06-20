@@ -142,6 +142,9 @@ class Serializer {
     }
 
     define(key: string, fields: FieldType[] = []): void {
+        if (this.namespace.get(key) !== null) {
+            throw new Error(`Serializer: type key=${key} already defined`)
+        }
         const type = this.buildTypeInNamespace(this.namespace, key, fields)
         this.namespace.add(type)
     }

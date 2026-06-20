@@ -536,3 +536,27 @@ describe('Serializer fragment / reassemble', () => {
         expect(() => s.fragment(new Uint8Array(10), 0)).toThrow(/positive integer/)
     })
 })
+
+describe('Serializer.define duplicate-type guard', () => {
+    it('throws a friendly already-defined error on duplicate key', () => {
+        const s = new Serializer()
+        s.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        expect(() => s.define('Item', [{ key: 'value', type: F.INT32, rule: 'optional' }]))
+            .toThrow(/type key=Item already defined/)
+    })
+
+    it('leaves no orphan inline enum in the namespace when define() fails for a duplicate key', () => {
+        const s = new Serializer()
+        s.define('Item', [
+            { key: 'role', type: F.ENUM(['a', 'b']), rule: 'optional' }
+        ])
+        // Without the guard, buildTypeInNamespace would register Item_status_E
+        // before namespace.add(type) threw — the guard must prevent that orphan.
+        expect(() => s.define('Item', [
+            { key: 'status', type: F.ENUM(['x', 'y']), rule: 'optional' }
+        ])).toThrow(/already defined/)
+
+        const ns: any = (s as any).namespace
+        expect(ns.get('Item_status_E')).toBeNull()
+    })
+})
