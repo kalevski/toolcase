@@ -1,4 +1,5 @@
 import { VARIANTS_FULL } from './internal/variants'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-badge'
 
 export type BadgeVariant =
@@ -77,7 +78,7 @@ export class Badge extends HTMLElement {
         const text = this.getAttribute('text')
         const pillClass = pill ? ' rounded-pill' : ''
         if (text != null) {
-            this.innerHTML = `<span class="badge text-bg-${variant}${pillClass}">${text}</span>`
+            this.innerHTML = `<span class="badge text-bg-${variant}${pillClass}">${esc(text)}</span>`
         } else {
             this.innerHTML = `<span class="badge text-bg-${variant}${pillClass}"><span class="tc-badge-content"></span></span>`
         }

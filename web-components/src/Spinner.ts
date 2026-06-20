@@ -1,4 +1,5 @@
 import { VARIANTS_FULL } from './internal/variants'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-spinner'
 
 export type SpinnerType = 'border' | 'grow' | 'dots' | 'bars' | 'pulse' | 'orbit'
@@ -75,7 +76,7 @@ export class Spinner extends HTMLElement {
         const segments =
             type === 'dots' || type === 'bars' ? '<span></span><span></span><span></span>' : ''
 
-        this.innerHTML = `<div class="spinner-${type}${variantClass}${sizeClass}" role="status">${segments}<span class="visually-hidden">${label}</span></div>`
+        this.innerHTML = `<div class="spinner-${type}${variantClass}${sizeClass}" role="status">${segments}<span class="visually-hidden">${esc(label)}</span></div>`
     }
 }
 

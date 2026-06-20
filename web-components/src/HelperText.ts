@@ -1,5 +1,6 @@
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-helper-text'
 
@@ -102,7 +103,7 @@ export class HelperText extends HTMLElement {
         const idAttr = id ? ` id="${id}"` : ''
         const content =
             text != null
-                ? `<span class="tc-helper-text-content">${text}</span>`
+                ? `<span class="tc-helper-text-content">${esc(text)}</span>`
                 : `<span class="tc-helper-text-content"></span>`
 
         this.innerHTML = `<div class="${classes}"${idAttr}>${iconHtml}${content}</div>`

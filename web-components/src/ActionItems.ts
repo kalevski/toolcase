@@ -1,5 +1,6 @@
 import * as LucideIcons from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-action-items'
 
@@ -90,7 +91,7 @@ export class ActionItems extends HTMLElement {
     }
 
     private render(): void {
-        this.innerHTML = `<button class="btn btn-sm btn-secondary tc-action-items-trigger" type="button" aria-haspopup="menu" aria-expanded="false"><span class="tc-action-items-label">${this.label}</span><span class="tc-action-items-caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-action-items-menu" role="menu"></div>`
+        this.innerHTML = `<button class="btn btn-sm btn-secondary tc-action-items-trigger" type="button" aria-haspopup="menu" aria-expanded="false"><span class="tc-action-items-label">${esc(this.label)}</span><span class="tc-action-items-caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-action-items-menu" role="menu"></div>`
         this._renderMenu()
 
         const trigger = this._getTrigger()

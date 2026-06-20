@@ -1,4 +1,5 @@
 import { closeIcon } from './icons'
+import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-close-button'
 
@@ -37,7 +38,7 @@ export class CloseButton extends HTMLElement {
     private render(): void {
         const label = this.ariaLabel
         const disabledAttr = this.disabled ? ' disabled' : ''
-        this.innerHTML = `<button type="button" class="btn-close" aria-label="${label}"${disabledAttr}>${closeIcon}</button>`
+        this.innerHTML = `<button type="button" class="btn-close" aria-label="${esc(label)}"${disabledAttr}>${closeIcon}</button>`
     }
 }
 
