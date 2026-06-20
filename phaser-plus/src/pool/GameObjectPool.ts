@@ -93,6 +93,8 @@ export default class GameObjectPool {
             this.logger.warning('cannot be released, the object was not created by the pool', object)
             return this
         }
+        ;(object.parentContainer ?? this.scene.children).remove(object as any)
+        object.setActive(false).setVisible(false)
         object.release()
         return this
     }
