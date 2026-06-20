@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Breadcrumb, Heading, Badge, StatusDot, IconButton, ProgressBar } from '@/components/ui'
+import { tcIcon } from '@/lib/icons'
 import type { EngineState } from '@/server/domain/types'
 import { useProject } from './ProjectContext'
 
@@ -41,47 +41,55 @@ export function ProjectHeader() {
     const subKey = m?.[1] ?? 'overview'
     const subLabel = SUB_LABEL[subKey]
 
+    const nav = (href: string) => (e: React.MouseEvent) => {
+        e.preventDefault()
+        router.push(href)
+    }
+
     return (
         <div className="tf-repo-header">
-            <Breadcrumb
-                items={[
-                    { label: 'Projects', onClick: () => router.push('/') },
-                    { label: project, onClick: () => router.push(`/projects/${project}`) },
-                    { label: subLabel },
-                ]}
-            />
+            <tc-breadcrumb>
+                <tc-breadcrumb-item href="/" onClick={nav('/')}>
+                    Projects
+                </tc-breadcrumb-item>
+                <tc-breadcrumb-item href={`/projects/${project}`} onClick={nav(`/projects/${project}`)}>
+                    {project}
+                </tc-breadcrumb-item>
+                <tc-breadcrumb-item active>{subLabel}</tc-breadcrumb-item>
+            </tc-breadcrumb>
 
             <div className="tf-repo-header__bar">
                 <div className="tf-repo-header__title">
-                    <Heading as="h1">{project}</Heading>
+                    <tc-heading as="h1">{project}</tc-heading>
                     <span className="tf-repo-header__status">
-                        <StatusDot status={STATE_DOT[snapshot.state]} pulse={snapshot.state === 'RUNNING'} />
-                        <Badge variant={STATE_BADGE[snapshot.state]}>{snapshot.state}</Badge>
+                        <tc-status-dot status={STATE_DOT[snapshot.state]} pulse={snapshot.state === 'RUNNING' || undefined} />
+                        <tc-badge variant={STATE_BADGE[snapshot.state]}>{snapshot.state}</tc-badge>
                     </span>
-                    {git?.branch && <Badge variant="secondary">⎇ {git.branch}</Badge>}
+                    {git?.branch && <tc-badge variant="secondary">⎇ {git.branch}</tc-badge>}
                 </div>
 
                 {running && (
                     <div className="tf-repo-header__actions">
-                        <IconButton
-                            icon="pause"
+                        <tc-icon-button
+                            icon={tcIcon('pause')}
                             label="Stop after current"
                             variant="warning"
                             outline
-                            disabled={snapshot.state === 'STOPPING'}
+                            disabled={snapshot.state === 'STOPPING' || undefined}
                             onClick={onStop}
                         />
-                        <IconButton icon="stop-fill" label="Force stop" variant="danger" onClick={onForce} />
+                        <tc-icon-button icon={tcIcon('stop-fill')} label="Force stop" variant="danger" onClick={onForce} />
                     </div>
                 )}
             </div>
 
             {running && (
-                <ProgressBar
-                    value={progressPct}
-                    variant={snapshot.error > 0 ? 'warning' : 'success'}
-                    label={`${snapshot.done} / ${snapshot.total} done${snapshot.error ? ` · ${snapshot.error} error` : ''}`}
-                />
+                <div className="tf-repo-header__progress">
+                    <tc-progress-bar value={progressPct} variant={snapshot.error > 0 ? 'warning' : 'success'} />
+                    <tc-text variant="muted" style={{ fontSize: '0.8rem', display: 'block', marginTop: '0.15rem' }}>
+                        {snapshot.done} / {snapshot.total} done{snapshot.error ? ` · ${snapshot.error} error` : ''}
+                    </tc-text>
+                </div>
             )}
         </div>
     )

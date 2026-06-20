@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/logging",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "Tiny isomorphic logger for Node.js and the browser — colored output, log levels, named reporters, zero dependencies.",
     "source": "src/main.js",
     "main": "lib/main.main.js",

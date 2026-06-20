@@ -2,21 +2,9 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import {
-    Table,
-    Badge,
-    StatusDot,
-    Tag,
-    Button,
-    Checkbox,
-    ChipGroup,
-    HelperText,
-    Select,
-    Tooltip,
-    toast,
-    type TableColumn,
-    type ChipGroupItem,
-} from '@/components/ui'
+import { toast } from '@/lib/toast'
+import { useTcProps, useTcEvents } from '@/lib/tc'
+import type { ChipGroupItem } from '@toolcase/web-components'
 import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { TaskDrawer } from '../TaskDrawer'
@@ -42,8 +30,15 @@ const STATUS_DOT: Record<TaskRuntimeStatus, 'online' | 'offline' | 'busy' | 'awa
 }
 
 type Filter = 'all' | TaskRuntimeStatus
+type Col = { key: string; header: React.ReactNode; width?: string; render: (t: TaskInfo) => React.ReactNode }
 
 const MODEL_ALIASES = ['fast', 'mid', 'deep']
+
+// Bare checkbox with its own change listener (React 18 won't fire onChange on tc-check).
+function Chk({ checked, indeterminate, onChange }: { checked: boolean; indeterminate?: boolean; onChange: (c: boolean) => void }) {
+    const ref = useTcEvents<HTMLElement>({ change: (e) => onChange((e.target as HTMLInputElement).checked) })
+    return <tc-check ref={ref} checked={checked || undefined} indeterminate={indeterminate ? '' : undefined} />
+}
 
 export function TasksClient() {
     const { project, tasks, running, busy, modelOptions, onReRunTask, onRunTasks, onResetErrors, setTasks, refresh } =
@@ -54,9 +49,7 @@ export function TasksClient() {
     const searchParams = useSearchParams()
 
     const [openTask, setOpenTask] = useState<string | null>(null)
-    // Default to the actionable view; fall back to All when nothing is pending
-    // (otherwise a fully-completed project opens on an empty table). Lazy
-    // initializer only — a manual chip selection must win for the session.
+    // Default to the actionable view; fall back to All when nothing is pending.
     const [statusFilter, setStatusFilter] = useState<Filter>(() =>
         tasks.some((t) => t.status === 'pending') ? 'pending' : 'all',
     )
@@ -73,6 +66,8 @@ export function TasksClient() {
     // A5 — archived list
     const [archived, setArchived] = useState<{ id: string; title: string }[]>([])
     const [showArchived, setShowArchived] = useState(false)
+
+    const pinRef = useTcEvents<HTMLElement>({ change: (e) => setPinModel((e.target as HTMLSelectElement).value) })
 
     // C3 — deep link from the search palette (?open=<id>)
     useEffect(() => {
@@ -100,15 +95,17 @@ export function TasksClient() {
     }, [tasks])
 
     const chips: ChipGroupItem[] = [
-        { id: 'all', label: 'All', active: statusFilter === 'all', count: tasks.length },
-        { id: 'pending', label: 'Pending', active: statusFilter === 'pending', count: counts.pending },
-        { id: 'running', label: 'Running', active: statusFilter === 'running', count: counts.running },
-        { id: 'done', label: 'Done', active: statusFilter === 'done', count: counts.done },
+        { id: 'all', label: 'All', selected: statusFilter === 'all', count: tasks.length },
+        { id: 'pending', label: 'Pending', selected: statusFilter === 'pending', count: counts.pending },
+        { id: 'running', label: 'Running', selected: statusFilter === 'running', count: counts.running },
+        { id: 'done', label: 'Done', selected: statusFilter === 'done', count: counts.done },
         ...(counts['needs-review'] > 0
-            ? [{ id: 'needs-review', label: 'Needs review', active: statusFilter === 'needs-review', count: counts['needs-review'] } as ChipGroupItem]
+            ? [{ id: 'needs-review', label: 'Needs review', selected: statusFilter === 'needs-review', count: counts['needs-review'] } as ChipGroupItem]
             : []),
-        { id: 'error', label: 'Error', active: statusFilter === 'error', count: counts.error },
+        { id: 'error', label: 'Error', selected: statusFilter === 'error', count: counts.error },
     ]
+
+    const chipRef = useTcProps<HTMLElement>({ items: chips, onToggle: (id: string) => setStatusFilter(id as Filter) })
 
     const shown = useMemo(() => {
         if (reordering) {
@@ -247,29 +244,25 @@ export function TasksClient() {
     }
 
     // ── columns ─────────────────────────────────────────────────────────────
-    const columns: TableColumn<TaskInfo>[] = [
+    const columns: Col[] = [
         ...(!reordering
             ? [
                   {
                       key: 'select',
                       header: (
-                          <Checkbox
+                          <Chk
                               checked={allShownSelected}
-                              onChange={(e) =>
-                                  setSelected(e.target.checked ? new Set(shown.map((t) => t.id)) : new Set())
-                              }
+                              indeterminate={!allShownSelected && shown.some((t) => selected.has(t.id))}
+                              onChange={(checked) => setSelected(checked ? new Set(shown.map((t) => t.id)) : new Set())}
                           />
                       ),
                       width: '2.5rem',
                       render: (t: TaskInfo) => (
                           <span onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                  checked={selected.has(t.id)}
-                                  onChange={(e) => toggleSelect(t.id, e.target.checked)}
-                              />
+                              <Chk checked={selected.has(t.id)} onChange={(checked) => toggleSelect(t.id, checked)} />
                           </span>
                       ),
-                  } as TableColumn<TaskInfo>,
+                  } as Col,
               ]
             : [
                   {
@@ -278,15 +271,15 @@ export function TasksClient() {
                       width: '6rem',
                       render: (t: TaskInfo) => (
                           <span style={{ display: 'inline-flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
-                              <Button size="small" variant="secondary" outline onClick={() => move(t.id, -1)}>
+                              <tc-button size="sm" variant="secondary" outline onClick={() => move(t.id, -1)}>
                                   ↑
-                              </Button>
-                              <Button size="small" variant="secondary" outline onClick={() => move(t.id, 1)}>
+                              </tc-button>
+                              <tc-button size="sm" variant="secondary" outline onClick={() => move(t.id, 1)}>
                                   ↓
-                              </Button>
+                              </tc-button>
                           </span>
                       ),
-                  } as TableColumn<TaskInfo>,
+                  } as Col,
               ]),
         { key: 'id', header: '#', width: '26%', render: (t) => <code>{t.id}</code> },
         { key: 'title', header: 'Title', render: (t) => t.title },
@@ -295,13 +288,13 @@ export function TasksClient() {
             header: 'Facets',
             render: (t) => (
                 <span style={{ display: 'inline-flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                    {t.severity && <Tag variant="warning">{t.severity}</Tag>}
-                    {t.project && <Tag variant="info">{t.project}</Tag>}
-                    {t.model && <Tag variant="secondary">⚡ {t.model}</Tag>}
+                    {t.severity && <tc-tag static variant="warning">{t.severity}</tc-tag>}
+                    {t.project && <tc-tag static variant="info">{t.project}</tc-tag>}
+                    {t.model && <tc-tag static variant="secondary">⚡ {t.model}</tc-tag>}
                     {t.depends && t.depends.length > 0 && (
-                        <Tooltip content={`Depends on: ${t.depends.join(', ')}`}>
-                            <Tag variant="secondary">⛓ {t.depends.join(',')}</Tag>
-                        </Tooltip>
+                        <tc-tooltip content={`Depends on: ${t.depends.join(', ')}`}>
+                            <tc-tag static variant="secondary">⛓ {t.depends.join(',')}</tc-tag>
+                        </tc-tooltip>
                     )}
                 </span>
             ),
@@ -312,9 +305,9 @@ export function TasksClient() {
             width: '7rem',
             render: (t) =>
                 t.costUsd != null ? (
-                    <Tooltip content={`${(t.tokensIn ?? 0).toLocaleString()} in / ${(t.tokensOut ?? 0).toLocaleString()} out`}>
+                    <tc-tooltip content={`${(t.tokensIn ?? 0).toLocaleString()} in / ${(t.tokensOut ?? 0).toLocaleString()} out`}>
                         <code>${t.costUsd.toFixed(2)}</code>
-                    </Tooltip>
+                    </tc-tooltip>
                 ) : (
                     <span style={{ opacity: 0.4 }}>—</span>
                 ),
@@ -324,8 +317,8 @@ export function TasksClient() {
             header: 'Status',
             render: (t) => (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <StatusDot status={STATUS_DOT[t.status]} pulse={t.status === 'running'} />
-                    <Badge variant={STATUS_BADGE[t.status]}>{t.status}</Badge>
+                    <tc-status-dot status={STATUS_DOT[t.status]} pulse={t.status === 'running' || undefined} />
+                    <tc-badge variant={STATUS_BADGE[t.status]}>{t.status}</tc-badge>
                 </span>
             ),
         },
@@ -335,36 +328,32 @@ export function TasksClient() {
 
     return (
         <div className="tf-stack">
-            <div
-                className="tf-actions"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}
-            >
-                <ChipGroup items={chips} onToggle={(id) => setStatusFilter(id as Filter)} />
+            <div className="tf-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <tc-chip-group ref={chipRef} />
                 <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <Button
-                        size="small"
+                    <tc-button
+                        size="sm"
                         variant="primary"
-                        disabled={busy || reordering}
-                        startIcon={<span>＋</span>}
+                        disabled={busy || reordering || undefined}
                         onClick={() => openNewTask({ project, onCreated: (t) => setTasks(t) })}
                     >
-                        New task
-                    </Button>
-                    <Button
-                        size="small"
+                        <span>＋</span> New task
+                    </tc-button>
+                    <tc-button
+                        size="sm"
                         variant="secondary"
                         outline
-                        disabled={busy || reordering}
+                        disabled={busy || reordering || undefined}
                         onClick={() => openImportIssues({ project, onImported: (t) => setTasks(t) })}
                     >
                         ⇩ Import from GitHub
-                    </Button>
+                    </tc-button>
                     {!reordering ? (
-                        <Button
-                            size="small"
+                        <tc-button
+                            size="sm"
                             variant="secondary"
                             outline
-                            disabled={busy || pendingIds.length < 2}
+                            disabled={busy || pendingIds.length < 2 || undefined}
                             title={helpTexts.tasks.reorder}
                             onClick={() => {
                                 setStatusFilter('pending')
@@ -373,113 +362,145 @@ export function TasksClient() {
                             }}
                         >
                             ⇅ Reorder
-                        </Button>
+                        </tc-button>
                     ) : (
                         <>
-                            <Button size="small" variant="success" onClick={() => void saveOrder()}>
+                            <tc-button size="sm" variant="success" onClick={() => void saveOrder()}>
                                 Save order
-                            </Button>
-                            <Button size="small" variant="secondary" outline onClick={() => setOrderIds(null)}>
+                            </tc-button>
+                            <tc-button size="sm" variant="secondary" outline onClick={() => setOrderIds(null)}>
                                 Cancel
-                            </Button>
+                            </tc-button>
                         </>
                     )}
-                    <Button
-                        size="small"
+                    <tc-button
+                        size="sm"
                         variant="secondary"
                         outline
-                        disabled={busy || reordering || counts.done + counts['needs-review'] === 0}
+                        disabled={busy || reordering || counts.done + counts['needs-review'] === 0 || undefined}
                         title={helpTexts.tasks.archive}
                         onClick={() => void archiveDone()}
                     >
                         🗄 Archive completed
-                    </Button>
-                    <Tooltip content={helpTexts.tasks.resetErrors}>
-                        <Button
-                            size="small"
+                    </tc-button>
+                    <tc-tooltip content={helpTexts.tasks.resetErrors}>
+                        <tc-button
+                            size="sm"
                             variant="warning"
                             outline
-                            disabled={busy || counts.error === 0 || reordering}
+                            disabled={busy || counts.error === 0 || reordering || undefined}
                             title={running ? 'Stop the active run first.' : ''}
                             onClick={onResetErrors}
                         >
                             Move errors to pending{counts.error > 0 ? ` (${counts.error})` : ''}
-                        </Button>
-                    </Tooltip>
+                        </tc-button>
+                    </tc-tooltip>
                 </span>
             </div>
 
             {selectedCount > 0 && !reordering && (
                 <div className="tf-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <Badge variant="info">{selectedCount} selected</Badge>
-                    <Button size="small" variant="primary" outline disabled={busy || bulkBusy} onClick={() => void onRunTasks([...selected]).then(() => setSelected(new Set()))}>
+                    <tc-badge variant="info">{selectedCount} selected</tc-badge>
+                    <tc-button size="sm" variant="primary" outline disabled={busy || bulkBusy || undefined} onClick={() => void onRunTasks([...selected]).then(() => setSelected(new Set()))}>
                         ▶ Re-run selected
-                    </Button>
-                    <Button size="small" variant="warning" outline disabled={busy || bulkBusy} onClick={() => void bulk('reset')}>
+                    </tc-button>
+                    <tc-button size="sm" variant="warning" outline disabled={busy || bulkBusy || undefined} onClick={() => void bulk('reset')}>
                         Reset to pending
-                    </Button>
+                    </tc-button>
                     <span style={{ display: 'inline-flex', gap: '0.25rem', alignItems: 'center' }}>
-                        <Select
-                            options={[
-                                { value: '', label: 'Run default' },
-                                ...MODEL_ALIASES.filter((a) => !modelOptions.some((o) => o.value === a)).map((a) => ({ value: a, label: a })),
-                                ...modelOptions,
-                            ]}
-                            value={pinModel}
-                            onChange={(e) => setPinModel(e.target.value)}
-                        />
-                        <Button size="small" variant="secondary" outline disabled={busy || bulkBusy} onClick={() => void bulk('pin', pinModel)}>
+                        <tc-select ref={pinRef} value={pinModel}>
+                            <tc-option value="">Run default</tc-option>
+                            {MODEL_ALIASES.filter((a) => !modelOptions.some((o) => o.value === a)).map((a) => (
+                                <tc-option key={a} value={a}>
+                                    {a}
+                                </tc-option>
+                            ))}
+                            {modelOptions.map((o) => (
+                                <tc-option key={o.value} value={o.value}>
+                                    {o.label}
+                                </tc-option>
+                            ))}
+                        </tc-select>
+                        <tc-button size="sm" variant="secondary" outline disabled={busy || bulkBusy || undefined} onClick={() => void bulk('pin', pinModel)}>
                             Pin model
-                        </Button>
+                        </tc-button>
                     </span>
-                    <Button size="small" variant="danger" outline disabled={busy || bulkBusy} onClick={() => void bulk('delete')}>
+                    <tc-button size="sm" variant="danger" outline disabled={busy || bulkBusy || undefined} onClick={() => void bulk('delete')}>
                         Delete
-                    </Button>
-                    <Button size="small" variant="secondary" outline onClick={() => setSelected(new Set())}>
+                    </tc-button>
+                    <tc-button size="sm" variant="secondary" outline onClick={() => setSelected(new Set())}>
                         Clear selection
-                    </Button>
+                    </tc-button>
                 </div>
             )}
 
-            <HelperText text={reordering ? helpTexts.tasks.reorderActive : helpTexts.tasks.statuses} />
+            <tc-helper-text text={reordering ? helpTexts.tasks.reorderActive : helpTexts.tasks.statuses} />
 
-            <Table
-                columns={columns}
-                data={shown}
-                rowKey={(t) => t.id}
-                hoverable
-                emptyMessage={
-                    statusFilter === 'all'
-                        ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
-                        : `No ${statusFilter} tasks.`
-                }
-                onRowClick={(t) => !reordering && setOpenTask(t.id)}
-            />
+            <table className="table table-hover">
+                <thead>
+                    <tr>
+                        {columns.map((c) => (
+                            <th key={c.key} style={c.width ? { width: c.width } : undefined}>
+                                {c.header}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {shown.length === 0 ? (
+                        <tr>
+                            <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
+                                {statusFilter === 'all'
+                                    ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
+                                    : `No ${statusFilter} tasks.`}
+                            </td>
+                        </tr>
+                    ) : (
+                        shown.map((t) => (
+                            <tr
+                                key={t.id}
+                                style={{ cursor: reordering ? 'default' : 'pointer' }}
+                                onClick={() => !reordering && setOpenTask(t.id)}
+                            >
+                                {columns.map((c) => (
+                                    <td key={c.key}>{c.render(t)}</td>
+                                ))}
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
 
             {archived.length > 0 && (
                 <div className="tf-stack-sm">
-                    <Button size="small" variant="secondary" outline onClick={() => setShowArchived((v) => !v)}>
+                    <tc-button size="sm" variant="secondary" outline onClick={() => setShowArchived((v) => !v)}>
                         {showArchived ? '▾' : '▸'} Archived ({archived.length})
-                    </Button>
+                    </tc-button>
                     {showArchived && (
-                        <Table
-                            columns={[
-                                { key: 'id', header: '#', width: '30%', render: (a: { id: string; title: string }) => <code>archive/{a.id}</code> },
-                                { key: 'title', header: 'Title', render: (a: { id: string; title: string }) => a.title },
-                                {
-                                    key: 'actions',
-                                    header: '',
-                                    width: '8rem',
-                                    render: (a: { id: string; title: string }) => (
-                                        <Button size="small" variant="secondary" outline disabled={busy} onClick={() => void restore(a.id)}>
-                                            Restore
-                                        </Button>
-                                    ),
-                                },
-                            ]}
-                            data={archived}
-                            rowKey={(a) => a.id}
-                        />
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th style={{ width: '30%' }}>#</th>
+                                    <th>Title</th>
+                                    <th style={{ width: '8rem' }} />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {archived.map((a) => (
+                                    <tr key={a.id}>
+                                        <td>
+                                            <code>archive/{a.id}</code>
+                                        </td>
+                                        <td>{a.title}</td>
+                                        <td>
+                                            <tc-button size="sm" variant="secondary" outline disabled={busy || undefined} onClick={() => void restore(a.id)}>
+                                                Restore
+                                            </tc-button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     )}
                 </div>
             )}

@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Modal, Button, Heading, Input, Text, toast } from '@/components/ui'
+import { Modal } from '@/lib/modal'
+import { toast } from '@/lib/toast'
+import { useTcEvents } from '@/lib/tc'
 
 const KEY = 'newProject'
 
@@ -20,6 +22,10 @@ export function NewProjectModal() {
     const [gitUrl, setGitUrl] = useState('')
     const [branch, setBranch] = useState('')
     const [submitting, setSubmitting] = useState(false)
+
+    const nameRef = useTcEvents<HTMLElement>({ input: (e) => setName((e.target as HTMLInputElement).value) })
+    const gitRef = useTcEvents<HTMLElement>({ input: (e) => setGitUrl((e.target as HTMLInputElement).value) })
+    const branchRef = useTcEvents<HTMLElement>({ input: (e) => setBranch((e.target as HTMLInputElement).value) })
 
     // Reset the form each time the dialog opens.
     useEffect(() => {
@@ -65,41 +71,44 @@ export function NewProjectModal() {
 
     return (
         <Modal.Window size="small" title="New project">
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <Heading as="h3">New project</Heading>
-                <Input
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <tc-input
+                    ref={nameRef}
                     label="Project name"
                     placeholder="my-service"
                     value={name}
-                    autoFocus
-                    disabled={submitting}
-                    onChange={(e) => setName(e.target.value)}
+                    disabled={submitting || undefined}
                 />
-                <Input
+                <tc-input
+                    ref={gitRef}
                     label="Git URL"
                     placeholder="https://github.com/org/repo.git"
                     value={gitUrl}
-                    disabled={submitting}
-                    onChange={(e) => setGitUrl(e.target.value)}
+                    disabled={submitting || undefined}
                 />
-                <Input
+                <tc-input
+                    ref={branchRef}
                     label="Branch (optional)"
                     placeholder="default branch"
                     value={branch}
-                    disabled={submitting}
-                    onChange={(e) => setBranch(e.target.value)}
+                    disabled={submitting || undefined}
                 />
-                <Text variant="muted">
+                <tc-text variant="muted">
                     Clones the repo into <code>repo/</code> and scaffolds <code>tasks/</code> + <code>knowledge/</code>.
                     This can take a minute. Generate a <code>CLAUDE.md</code> afterward from the project page.
-                </Text>
+                </tc-text>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                    <Button variant="secondary" outline disabled={submitting} onClick={() => close(null)}>
+                    <tc-button variant="secondary" outline disabled={submitting || undefined} onClick={() => close(null)}>
                         Cancel
-                    </Button>
-                    <Button variant="primary" loading={submitting} disabled={submitting || !valid} onClick={submit}>
+                    </tc-button>
+                    <tc-button
+                        variant="primary"
+                        loading={submitting || undefined}
+                        disabled={submitting || !valid || undefined}
+                        onClick={submit}
+                    >
                         Create
-                    </Button>
+                    </tc-button>
                 </div>
             </div>
         </Modal.Window>

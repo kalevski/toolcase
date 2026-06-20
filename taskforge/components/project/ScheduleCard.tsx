@@ -3,21 +3,11 @@
 // B3 — per-project schedule card on the Run page.
 
 import React, { useEffect, useState } from 'react'
-import {
-    Card,
-    Heading,
-    Text,
-    Input,
-    Select,
-    Switch,
-    Button,
-    Badge,
-    HelperText,
-    NumberInput,
-    toast,
-} from '@/components/ui'
+import { toast } from '@/lib/toast'
+import { useTcEvents, detailValue } from '@/lib/tc'
 import type { ScheduleRecord } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
+import { useConfirm } from '../ConfirmModal'
 import { helpTexts } from '../helpTexts'
 
 const PRESETS = [
@@ -30,7 +20,9 @@ const PRESETS = [
 
 export function ScheduleCard() {
     const { project, modelOptions, config } = useProject()
+    const confirm = useConfirm()
     const [loaded, setLoaded] = useState(false)
+    const [removing, setRemoving] = useState(false)
     const [exists, setExists] = useState(false)
     const [enabled, setEnabled] = useState(true)
     const [cron, setCron] = useState('0 2 * * *')
@@ -41,6 +33,20 @@ export function ScheduleCard() {
     const [pushAfter, setPushAfter] = useState(false)
     const [lastFired, setLastFired] = useState<string | null>(null)
     const [saving, setSaving] = useState(false)
+
+    const presetRef = useTcEvents<HTMLElement>({
+        change: (e) => {
+            const v = (e.target as HTMLSelectElement).value
+            if (v) setCron(v)
+        },
+    })
+    const cronRef = useTcEvents<HTMLElement>({ input: (e) => setCron((e.target as HTMLInputElement).value) })
+    const modelRef = useTcEvents<HTMLElement>({ change: (e) => setModel((e.target as HTMLSelectElement).value) })
+    const enabledRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setEnabled(detailValue<boolean>(e)) })
+    const onlyIfPendingRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setOnlyIfPending(detailValue<boolean>(e)) })
+    const commitAfterRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setCommitAfter(detailValue<boolean>(e)) })
+    const pushAfterRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setPushAfter(detailValue<boolean>(e)) })
+    const usageGateRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setUsageGate(detailValue<number | ''>(e)) })
 
     useEffect(() => {
         let cancelled = false
@@ -76,7 +82,7 @@ export function ScheduleCard() {
                     cron,
                     enabled,
                     onlyIfPending,
-                    skipAboveUsage: usageGate === '' ? null : usageGate,
+                    skipAboveUsage: usageGate === '' ? null : Math.min(100, Math.max(1, usageGate)),
                     options: {
                         model: model || undefined,
                         commitAfter,
@@ -96,78 +102,92 @@ export function ScheduleCard() {
     }
 
     const remove = async () => {
-        const res = await fetch(`/api/projects/${project}/schedule`, { method: 'DELETE' })
-        if (!res.ok) {
-            toast.error('Failed to remove schedule')
-            return
+        const ok = await confirm({
+            title: 'Remove schedule?',
+            body: 'Scheduled runs for this project will stop. You can recreate the schedule later.',
+            confirmLabel: 'Remove',
+            confirmVariant: 'danger',
+        })
+        if (!ok) return
+        setRemoving(true)
+        try {
+            const res = await fetch(`/api/projects/${project}/schedule`, { method: 'DELETE' })
+            if (!res.ok) {
+                toast.error('Failed to remove schedule')
+                return
+            }
+            setExists(false)
+            setEnabled(true)
+            toast.success('Schedule removed')
+        } finally {
+            setRemoving(false)
         }
-        setExists(false)
-        setEnabled(true)
-        toast.success('Schedule removed')
     }
 
     if (!loaded) return null
 
     return (
-        <Card
-            header={
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
-                    <Heading as="h3">Scheduled runs</Heading>
-                    {exists && <Badge variant={enabled ? 'success' : 'secondary'}>{enabled ? 'enabled' : 'disabled'}</Badge>}
-                </div>
-            }
-        >
+        <tc-card>
+            <div slot="header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%' }}>
+                <tc-heading as="h3">Scheduled runs</tc-heading>
+                {exists && (
+                    <tc-badge variant={enabled ? 'success' : 'secondary'}>{enabled ? 'enabled' : 'disabled'}</tc-badge>
+                )}
+            </div>
             <div className="tf-card-body tf-stack-sm">
-                <HelperText text={helpTexts.run.schedule} />
+                <tc-helper-text text={helpTexts.run.schedule} />
                 <div className="tf-form-row">
-                    <Select
-                        label="Preset"
-                        options={PRESETS}
-                        value={PRESETS.some((p) => p.value === cron) ? cron : ''}
-                        onChange={(e) => e.target.value && setCron(e.target.value)}
-                    />
-                    <Input
+                    <tc-select ref={presetRef} label="Preset" value={PRESETS.some((p) => p.value === cron) ? cron : ''}>
+                        {PRESETS.map((p) => (
+                            <tc-option key={p.value} value={p.value}>
+                                {p.label}
+                            </tc-option>
+                        ))}
+                    </tc-select>
+                    <tc-input
+                        ref={cronRef}
                         label="Cron (min hour dom mon dow)"
                         value={cron}
-                        onChange={(e) => setCron(e.target.value)}
                         placeholder="0 2 * * *"
                     />
-                    <Select
-                        label="Model"
-                        options={[{ value: '', label: `Project default (${config.defaultModel})` }, ...modelOptions]}
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                    />
+                    <tc-select ref={modelRef} label="Model" value={model}>
+                        <tc-option value="">Project default ({config.defaultModel})</tc-option>
+                        {modelOptions.map((m) => (
+                            <tc-option key={m.value} value={m.value}>
+                                {m.label}
+                            </tc-option>
+                        ))}
+                    </tc-select>
                 </div>
                 <div className="tf-form-row">
-                    <Switch label="Enabled" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
-                    <Switch label="Only if pending > 0" checked={onlyIfPending} onChange={(e) => setOnlyIfPending(e.target.checked)} />
-                    <Switch label="Commit after each task" checked={commitAfter} onChange={(e) => setCommitAfter(e.target.checked)} />
+                    <tc-switch ref={enabledRef} label="Enabled" checked={enabled || undefined} />
+                    <tc-switch ref={onlyIfPendingRef} label="Only if pending > 0" checked={onlyIfPending || undefined} />
+                    <tc-switch ref={commitAfterRef} label="Commit after each task" checked={commitAfter || undefined} />
                     {config.canPush && (
-                        <Switch label="Push after run" checked={pushAfter} onChange={(e) => setPushAfter(e.target.checked)} />
+                        <tc-switch ref={pushAfterRef} label="Push after run" checked={pushAfter || undefined} />
                     )}
                     <div style={{ maxWidth: 200 }}>
-                        <NumberInput
+                        <tc-number-input
+                            ref={usageGateRef}
                             label="Skip if usage ≥ % (blank = off)"
                             min={1}
                             max={100}
                             value={usageGate}
-                            onChange={(v) => setUsageGate(v)}
                         />
                     </div>
                 </div>
-                {lastFired && <Text variant="muted">Last fired: {new Date(lastFired).toLocaleString()}</Text>}
+                {lastFired && <tc-text variant="muted">Last fired: {new Date(lastFired).toLocaleString()}</tc-text>}
                 <div className="tf-actions">
-                    <Button variant="primary" loading={saving} disabled={saving} onClick={() => void save()}>
+                    <tc-button variant="primary" loading={saving || undefined} disabled={saving || undefined} onClick={() => void save()}>
                         {exists ? 'Update schedule' : 'Create schedule'}
-                    </Button>
+                    </tc-button>
                     {exists && (
-                        <Button variant="danger" outline onClick={() => void remove()}>
+                        <tc-button variant="danger" outline loading={removing || undefined} disabled={removing || undefined} onClick={() => void remove()}>
                             Remove
-                        </Button>
+                        </tc-button>
                     )}
                 </div>
             </div>
-        </Card>
+        </tc-card>
     )
 }

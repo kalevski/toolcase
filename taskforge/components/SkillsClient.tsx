@@ -2,10 +2,13 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Heading, Button, Table, IconButton, EmptyState, HelperText, toast, type TableColumn } from '@/components/ui'
+import { toast } from '@/lib/toast'
+import { tcIcon } from '@/lib/icons'
 import type { SkillSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
 import { helpTexts } from './helpTexts'
+
+type Col = { key: string; header: string; align?: 'right'; render: (s: SkillSummary) => React.ReactNode }
 
 export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
     const router = useRouter()
@@ -29,7 +32,7 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
         }
     }
 
-    const columns: TableColumn<SkillSummary>[] = [
+    const columns: Col[] = [
         { key: 'name', header: 'Name', render: (s) => <code>{s.name}</code> },
         { key: 'description', header: 'Description', render: (s) => s.description || <em>—</em> },
         {
@@ -38,8 +41,8 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
             align: 'right',
             render: (s) => (
                 <span style={{ display: 'inline-flex', gap: '0.4rem' }}>
-                    <IconButton icon="pencil" label="Edit" variant="secondary" outline onClick={() => router.push(`/skills/${s.name}`)} />
-                    <IconButton icon="trash" label="Delete" variant="danger" outline onClick={() => onDelete(s.name)} />
+                    <tc-icon-button icon={tcIcon('pencil')} label="Edit" variant="secondary" outline onClick={() => router.push(`/skills/${s.name}`)} />
+                    <tc-icon-button icon={tcIcon('trash')} label="Delete" variant="danger" outline onClick={() => onDelete(s.name)} />
                 </span>
             ),
         },
@@ -48,22 +51,43 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Heading as="h1">Skills</Heading>
+                <tc-heading as="h1">Skills</tc-heading>
                 <div style={{ flex: 1 }} />
-                <Button variant="primary" onClick={() => router.push('/skills/new')} startIcon={<span>＋</span>}>
-                    New skill
-                </Button>
+                <tc-button variant="primary" onClick={() => router.push('/skills/new')}>
+                    <span>＋</span> New skill
+                </tc-button>
             </div>
 
-            <HelperText text={helpTexts.skills.shared} />
+            <tc-helper-text text={helpTexts.skills.shared} />
 
             {rows.length === 0 ? (
-                <EmptyState icon="lightbulb">
+                <tc-empty-state icon={tcIcon('lightbulb')}>
                     <h3>No skills yet</h3>
                     <p>Create a user-level skill that Claude will auto-discover while solving tasks.</p>
-                </EmptyState>
+                </tc-empty-state>
             ) : (
-                <Table columns={columns} data={rows} rowKey={(s) => s.name} hoverable />
+                <table className="table table-hover">
+                    <thead>
+                        <tr>
+                            {columns.map((c) => (
+                                <th key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
+                                    {c.header}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows.map((s) => (
+                            <tr key={s.name}>
+                                {columns.map((c) => (
+                                    <td key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
+                                        {c.render(s)}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             )}
         </div>
     )

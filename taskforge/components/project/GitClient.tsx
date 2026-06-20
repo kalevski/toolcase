@@ -1,17 +1,8 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import {
-    Card,
-    Heading,
-    Badge,
-    StatusDot,
-    Banner,
-    Text,
-    HelperText,
-    TerminalWindow,
-    type TerminalLine,
-} from '@/components/ui'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTcProps } from '@/lib/tc'
+import { toTcLines, type TerminalLine } from '@/lib/terminal'
 import type { GitBranchList } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'
@@ -49,11 +40,16 @@ export function GitClient() {
     const wrapRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
+    // Memoize: the command input re-renders this component on every keystroke;
+    // a fresh toTcLines() array each time would rebuild the whole terminal.
+    const tcLines = useMemo(() => toTcLines(lines), [lines])
+    const termRef = useTcProps<HTMLElement>({ lines: tcLines })
+
     // keep the output pinned to the bottom as new lines arrive
     useEffect(() => {
-        const body = wrapRef.current?.querySelector('.component-terminal-window__body')
+        const body = wrapRef.current?.querySelector('.tc-terminal-window-body')
         if (body) body.scrollTop = body.scrollHeight
-    }, [lines])
+    }, [tcLines])
 
     const runCommand = useCallback(async () => {
         const command = input.trim()
@@ -123,58 +119,69 @@ export function GitClient() {
 
     return (
         <div className="tf-stack">
-            <Card header={<Heading as="h3">Repository status</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Repository status
+                </tc-heading>
                 <div className="tf-card-body tf-stack-sm">
                     <div className="tf-kv">
                         <span>Branch</span>
-                        <Badge variant="secondary">⎇ {git?.branch ?? '—'}</Badge>
+                        <tc-badge variant="secondary">⎇ {git?.branch ?? '—'}</tc-badge>
                     </div>
                     {branches && branches.local.length > 1 && (
                         <div className="tf-kv">
                             <span>Other local branches</span>
-                            <Text variant="muted">
+                            <tc-text variant="muted">
                                 {branches.local.filter((b) => b !== branches.current).join(', ')}
-                            </Text>
+                            </tc-text>
                         </div>
                     )}
                     {branches && branches.remote.length > 0 && (
                         <div className="tf-kv">
                             <span>Remote branches</span>
-                            <Text variant="muted">{branches.remote.join(', ')}</Text>
+                            <tc-text variant="muted">{branches.remote.join(', ')}</tc-text>
                         </div>
                     )}
                     <div className="tf-kv">
                         <span>Working tree</span>
                         <span className="tf-inline">
-                            <StatusDot status={dirty ? 'busy' : 'online'} />
+                            <tc-status-dot status={dirty ? 'busy' : 'online'} />
                             {dirty ? `dirty · ${git?.dirtyFiles.length ?? 0} file(s)` : 'clean'}
                         </span>
                     </div>
                     {git && (git.ahead > 0 || git.behind > 0) && (
                         <div className="tf-kv">
                             <span>Sync</span>
-                            <Badge variant="info">
+                            <tc-badge variant="info">
                                 ↑{git.ahead} ↓{git.behind}
-                            </Badge>
+                            </tc-badge>
                         </div>
                     )}
                     {git?.remotes?.length ? (
                         <div className="tf-kv">
                             <span>Remotes</span>
-                            <Text variant="muted">{git.remotes.join(', ')}</Text>
+                            <tc-text variant="muted">{git.remotes.join(', ')}</tc-text>
                         </div>
                     ) : null}
                 </div>
-            </Card>
+            </tc-card>
 
-            <Card header={<Heading as="h3">Terminal</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Terminal
+                </tc-heading>
                 <div className="tf-card-body tf-stack-sm">
                     <div
                         ref={wrapRef}
                         className="tf-git-terminal"
-                        onClick={() => inputRef.current?.focus()}
+                        onClick={(e) => {
+                            // Don't steal focus when the user is selecting terminal output.
+                            if (window.getSelection()?.toString()) return
+                            if ((e.target as Element).closest('.tf-git-terminal__input')) return
+                            inputRef.current?.focus()
+                        }}
                     >
-                        <TerminalWindow title={`git — ${project}`} lines={lines} />
+                        <tc-terminal-window ref={termRef} title={`git — ${project}`} />
                         <div className="tf-git-terminal__input-row">
                             <span className="tf-git-terminal__prompt">$</span>
                             <input
@@ -201,14 +208,14 @@ export function GitClient() {
                             />
                         </div>
                     </div>
-                    <HelperText text={helpTexts.git.terminal} />
+                    <tc-helper-text text={helpTexts.git.terminal} />
                 </div>
-            </Card>
+            </tc-card>
 
             {dirty && git && running && (
-                <Banner variant="warning" icon="exclamation-triangle">
+                <tc-banner variant="warning">
                     <strong>Working tree is dirty.</strong> Start is blocked until it is clean.
-                </Banner>
+                </tc-banner>
             )}
         </div>
     )

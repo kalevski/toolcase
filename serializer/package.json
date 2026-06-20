@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/serializer",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "Compact protobuf-based binary serializer — fast schema-driven encode/decode for Node.js and the browser.",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",

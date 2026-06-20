@@ -3,7 +3,9 @@
 // E2 — import open GitHub issues of the project's origin repo as task files.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Modal, Button, Heading, Text, Checkbox, Spinner, Tag, HelperText, toast } from '@/components/ui'
+import { Modal } from '@/lib/modal'
+import { toast } from '@/lib/toast'
+import { useTcEvents } from '@/lib/tc'
 import type { GithubIssue, TaskInfo } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 
@@ -13,6 +15,13 @@ export interface ImportIssuesInput {
 }
 
 const KEY = 'importIssues'
+
+// Per-row checkbox component so it can own its change listener (hooks can't run
+// in a .map; React 18 doesn't fire onChange on tc-check).
+function IssueCheckbox({ checked, onToggle }: { checked: boolean; onToggle: (checked: boolean) => void }) {
+    const ref = useTcEvents<HTMLElement>({ change: (e) => onToggle((e.target as HTMLInputElement).checked) })
+    return <tc-check ref={ref} checked={checked || undefined} />
+}
 
 export function ImportIssuesModal() {
     const input = Modal.useModalInput<ImportIssuesInput>()
@@ -73,28 +82,27 @@ export function ImportIssuesModal() {
     }
 
     return (
-        <Modal.Window size="large" title="Import GitHub issues">
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
-                <Heading as="h3">Import from GitHub — {input.project}</Heading>
-                <HelperText text={helpTexts.tasks.importIssues} />
+        <Modal.Window size="large" title={`Import from GitHub — ${input.project}`}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                <tc-helper-text text={helpTexts.tasks.importIssues} />
                 {issues === null && !loadError && (
                     <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                        <Spinner />
+                        <tc-spinner />
                     </div>
                 )}
-                {loadError && <Text style={{ color: 'var(--rc-danger, #c0392b)' }}>{loadError}</Text>}
-                {issues !== null && issues.length === 0 && <Text variant="muted">No open issues.</Text>}
+                {loadError && <tc-text style={{ color: 'var(--bs-danger, #c0392b)' }}>{loadError}</tc-text>}
+                {issues !== null && issues.length === 0 && <tc-text variant="muted">No open issues.</tc-text>}
                 {issues !== null && issues.length > 0 && (
                     <div style={{ maxHeight: 360, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                         {issues.map((i) => (
                             <label key={i.number} style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', cursor: 'pointer' }}>
-                                <Checkbox checked={picked.has(i.number)} onChange={(e) => toggle(i.number, e.target.checked)} />
+                                <IssueCheckbox checked={picked.has(i.number)} onToggle={(checked) => toggle(i.number, checked)} />
                                 <span>
                                     <strong>#{i.number}</strong> {i.title}{' '}
                                     {i.labels.map((l) => (
-                                        <Tag key={l} variant="secondary">
+                                        <tc-tag key={l} static variant="secondary">
                                             {l}
-                                        </Tag>
+                                        </tc-tag>
                                     ))}
                                 </span>
                             </label>
@@ -102,17 +110,17 @@ export function ImportIssuesModal() {
                     </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                    <Button variant="secondary" outline onClick={() => close(false)}>
+                    <tc-button variant="secondary" outline onClick={() => close(false)}>
                         Cancel
-                    </Button>
-                    <Button
+                    </tc-button>
+                    <tc-button
                         variant="primary"
-                        loading={submitting}
-                        disabled={submitting || picked.size === 0}
+                        loading={submitting || undefined}
+                        disabled={submitting || picked.size === 0 || undefined}
                         onClick={() => void submit()}
                     >
                         Import {picked.size > 0 ? `${picked.size} issue(s)` : ''}
-                    </Button>
+                    </tc-button>
                 </div>
             </div>
         </Modal.Window>

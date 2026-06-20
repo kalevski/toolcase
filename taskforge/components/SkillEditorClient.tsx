@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Heading, Breadcrumb, Input, MarkdownEditor, Button, Banner, toast } from '@/components/ui'
+import { toast } from '@/lib/toast'
+import { useTcEvents, detailValue } from '@/lib/tc'
 
 function lintFrontmatter(content: string): string | null {
     const fm = content.match(/^---\n([\s\S]*?)\n---/)
@@ -26,7 +27,15 @@ export function SkillEditorClient({
     const [content, setContent] = useState(initialContent)
     const [saving, setSaving] = useState(false)
 
+    const nameRef = useTcEvents<HTMLElement>({ input: (e) => setName((e.target as HTMLInputElement).value) })
+    const editorRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setContent(detailValue<string>(e)) })
+
     const lintError = lintFrontmatter(content)
+
+    const goSkills = (e?: React.MouseEvent) => {
+        e?.preventDefault()
+        router.push('/skills')
+    }
 
     const onSave = async () => {
         if (isNew && !/^[a-z0-9-]+$/.test(name)) {
@@ -63,31 +72,27 @@ export function SkillEditorClient({
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <Breadcrumb
-                items={[{ label: 'Skills', onClick: () => router.push('/skills') }, { label: isNew ? 'New' : initialName }]}
-            />
-            <Heading as="h1">{isNew ? 'New skill' : initialName}</Heading>
+            <tc-breadcrumb>
+                <tc-breadcrumb-item href="/skills" onClick={goSkills}>
+                    Skills
+                </tc-breadcrumb-item>
+                <tc-breadcrumb-item active>{isNew ? 'New' : initialName}</tc-breadcrumb-item>
+            </tc-breadcrumb>
+            <tc-heading as="h1">{isNew ? 'New skill' : initialName}</tc-heading>
 
-            {isNew && (
-                <Input
-                    label="Skill name"
-                    placeholder="my-skill"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-            )}
+            {isNew && <tc-input ref={nameRef} label="Skill name" placeholder="my-skill" value={name} />}
 
-            {lintError && <Banner variant="warning" icon="exclamation-triangle">{lintError}</Banner>}
+            {lintError && <tc-banner variant="warning">{lintError}</tc-banner>}
 
-            <MarkdownEditor value={content} onChange={setContent} height={460} label="SKILL.md" />
+            <tc-markdown-editor ref={editorRef} value={content} height="460" label="SKILL.md" />
 
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Button variant="primary" loading={saving} onClick={onSave}>
+                <tc-button variant="primary" loading={saving || undefined} onClick={onSave}>
                     Save
-                </Button>
-                <Button variant="secondary" outline onClick={() => router.push('/skills')}>
+                </tc-button>
+                <tc-button variant="secondary" outline onClick={goSkills}>
                     Cancel
-                </Button>
+                </tc-button>
             </div>
         </div>
     )

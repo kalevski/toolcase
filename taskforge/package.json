@@ -11,8 +11,8 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@toolcase/base": "^3",
-        "bootstrap-icons": "^1.13.1",
+        "@toolcase/base": "file:../base",
+        "@toolcase/web-components": "file:../web-components",
         "next": "^14.2.5",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",

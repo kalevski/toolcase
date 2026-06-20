@@ -4,7 +4,12 @@
 
 @use '../foundation/tokens' as *;
 
-tc-metric-tile {
+// Declared on the class too: tc-metric-grid renders its tiles as plain
+// `<div class="tc-metric-tile">` (not <tc-metric-tile> elements), so a token
+// block scoped to the element alone never reaches grid tiles — collapsing the
+// icon (width: var(--…icon-size) → 0) and unstyling the value/padding.
+tc-metric-tile,
+.tc-metric-tile {
     --bs-metric-tile-bg: var(--tc-surface);
     --bs-metric-tile-border-color: var(--tc-border);
     --bs-metric-tile-shadow: var(--tc-shadow-sm);

@@ -4,18 +4,8 @@
 // persist only the overridden keys; clearing one falls back to the env config.
 
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-    Card,
-    Heading,
-    Text,
-    Select,
-    Input,
-    Button,
-    Checkbox,
-    HelperText,
-    NumberInput,
-    toast,
-} from '@/components/ui'
+import { toast } from '@/lib/toast'
+import { useTcEvents, detailValue } from '@/lib/tc'
 import type { ProjectSettings } from '@/server/domain/types'
 import { NOTIFY_EVENTS } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
@@ -23,18 +13,59 @@ import { helpTexts } from '../helpTexts'
 
 type Tri = '' | 'on' | 'off'
 
-const triOptions = [
-    { value: '', label: 'Use default' },
-    { value: 'on', label: 'On' },
-    { value: 'off', label: 'Off' },
-]
-
 function toTri(v: boolean | undefined): Tri {
     return v === undefined ? '' : v ? 'on' : 'off'
 }
 
 function fromTri(v: Tri): boolean | undefined {
     return v === '' ? undefined : v === 'on'
+}
+
+// ── file-local tc-* binders (event wiring + loop reuse; not a shared kit) ──────
+
+function TriSel({ label, value, onChange }: { label: string; value: Tri; onChange: (v: Tri) => void }) {
+    const ref = useTcEvents<HTMLElement>({ change: (e) => onChange((e.target as HTMLSelectElement).value as Tri) })
+    return (
+        <tc-select ref={ref} label={label} value={value}>
+            <tc-option value="">Use default</tc-option>
+            <tc-option value="on">On</tc-option>
+            <tc-option value="off">Off</tc-option>
+        </tc-select>
+    )
+}
+
+function Sel({
+    label,
+    value,
+    onChange,
+    children,
+}: {
+    label: string
+    value: string
+    onChange: (v: string) => void
+    children: React.ReactNode
+}) {
+    const ref = useTcEvents<HTMLElement>({ change: (e) => onChange((e.target as HTMLSelectElement).value) })
+    return (
+        <tc-select ref={ref} label={label} value={value}>
+            {children}
+        </tc-select>
+    )
+}
+
+function Chk({
+    label,
+    checked,
+    onChange,
+    inline,
+}: {
+    label: string
+    checked: boolean
+    onChange: (c: boolean) => void
+    inline?: boolean
+}) {
+    const ref = useTcEvents<HTMLElement>({ change: (e) => onChange((e.target as HTMLInputElement).checked) })
+    return <tc-check ref={ref} label={label} checked={checked || undefined} inline={inline || undefined} />
 }
 
 export function SettingsClient() {
@@ -57,11 +88,19 @@ export function SettingsClient() {
     const [notifyOverridden, setNotifyOverridden] = useState(false)
     const [webhookUrl, setWebhookUrl] = useState('')
     const [saving, setSaving] = useState(false)
+    const [loadError, setLoadError] = useState(false)
+
+    const usageRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setUsageGate(detailValue<number | ''>(e)) })
+    const webhookRef = useTcEvents<HTMLElement>({ input: (e) => setWebhookUrl((e.target as HTMLInputElement).value) })
 
     const load = useCallback(async () => {
+        setLoadError(false)
         try {
             const d = await fetch(`/api/projects/${project}/settings`).then((r) => (r.ok ? r.json() : null))
-            if (!d) return
+            if (!d) {
+                setLoadError(true)
+                return
+            }
             const o: ProjectSettings = d.overrides
             setEffective(d.effective)
             setDefaultModel(o.defaultModel ?? '')
@@ -76,11 +115,16 @@ export function SettingsClient() {
             setReview(toTri(o.review))
             setOpenPr(toTri(o.openPr))
             setNotifyOverridden(o.notifyEvents !== undefined)
-            setNotifyEvents(new Set(o.notifyEvents ?? (d.effective.notifyEvents as string[]) ?? []))
+            const events = Array.isArray(o.notifyEvents)
+                ? o.notifyEvents
+                : Array.isArray(d.effective?.notifyEvents)
+                  ? (d.effective.notifyEvents as string[])
+                  : []
+            setNotifyEvents(new Set(events))
             setWebhookUrl(o.notifyWebhookUrl ?? '')
             setLoaded(true)
         } catch {
-            /* transient */
+            setLoadError(true)
         }
     }, [project])
 
@@ -123,95 +167,115 @@ export function SettingsClient() {
         }
     }
 
-    if (!loaded) return null
+    if (!loaded) {
+        return (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>
+                {loadError ? (
+                    <div className="tf-stack-sm">
+                        <tc-text variant="muted">Couldn’t load project settings.</tc-text>
+                        <div>
+                            <tc-button size="sm" variant="secondary" outline onClick={() => void load()}>
+                                Retry
+                            </tc-button>
+                        </div>
+                    </div>
+                ) : (
+                    <tc-spinner />
+                )}
+            </div>
+        )
+    }
 
     const eff = (k: string) => String(effective[k] ?? '—')
 
     return (
         <div className="tf-stack">
-            <HelperText text={helpTexts.settings.intro} />
+            <tc-helper-text text={helpTexts.settings.intro} />
 
-            <Card header={<Heading as="h3">Run defaults</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Run defaults
+                </tc-heading>
                 <div className="tf-card-body tf-stack-sm">
                     <div className="tf-form-row">
                         <div style={{ minWidth: 220 }}>
-                            <Select
-                                label={`Default model (env: ${eff('defaultModel')})`}
-                                options={[{ value: '', label: 'Use default' }, ...modelOptions]}
-                                value={defaultModel}
-                                onChange={(e) => setDefaultModel(e.target.value)}
-                            />
+                            <Sel label={`Default model (env: ${eff('defaultModel')})`} value={defaultModel} onChange={setDefaultModel}>
+                                <tc-option value="">Use default</tc-option>
+                                {modelOptions.map((m) => (
+                                    <tc-option key={m.value} value={m.value}>
+                                        {m.label}
+                                    </tc-option>
+                                ))}
+                            </Sel>
                         </div>
-                        <Select label="Warm session" options={triOptions} value={warmSession} onChange={(e) => setWarmSession(e.target.value as Tri)} />
-                        <Select label="Commit after task" options={triOptions} value={commitAfter} onChange={(e) => setCommitAfter(e.target.value as Tri)} />
-                        <Select
-                            label="Commit message"
-                            options={[
-                                { value: '', label: 'Use default' },
-                                { value: 'taskname', label: 'Task name' },
-                                { value: 'ai', label: 'AI-generated' },
-                            ]}
-                            value={commitMode}
-                            onChange={(e) => setCommitMode(e.target.value)}
-                        />
+                        <TriSel label="Warm session" value={warmSession} onChange={setWarmSession} />
+                        <TriSel label="Commit after task" value={commitAfter} onChange={setCommitAfter} />
+                        <Sel label="Commit message" value={commitMode} onChange={setCommitMode}>
+                            <tc-option value="">Use default</tc-option>
+                            <tc-option value="taskname">Task name</tc-option>
+                            <tc-option value="ai">AI-generated</tc-option>
+                        </Sel>
                         <div style={{ minWidth: 200 }}>
-                            <Select
-                                label="Commit model"
-                                options={[{ value: '', label: 'Use default' }, ...modelOptions]}
-                                value={commitModel}
-                                onChange={(e) => setCommitModel(e.target.value)}
-                            />
+                            <Sel label="Commit model" value={commitModel} onChange={setCommitModel}>
+                                <tc-option value="">Use default</tc-option>
+                                {modelOptions.map((m) => (
+                                    <tc-option key={m.value} value={m.value}>
+                                        {m.label}
+                                    </tc-option>
+                                ))}
+                            </Sel>
                         </div>
                     </div>
                     <div className="tf-form-row">
-                        <Select label="Branch per run" options={triOptions} value={branchPerRun} onChange={(e) => setBranchPerRun(e.target.value as Tri)} />
-                        <Select label="Push after run" options={triOptions} value={pushAfter} onChange={(e) => setPushAfter(e.target.value as Tri)} />
-                        <Select label="Open PR after push" options={triOptions} value={openPr} onChange={(e) => setOpenPr(e.target.value as Tri)} />
-                        <Select label="Reviewer pass" options={triOptions} value={review} onChange={(e) => setReview(e.target.value as Tri)} />
+                        <TriSel label="Branch per run" value={branchPerRun} onChange={setBranchPerRun} />
+                        <TriSel label="Push after run" value={pushAfter} onChange={setPushAfter} />
+                        <TriSel label="Open PR after push" value={openPr} onChange={setOpenPr} />
+                        <TriSel label="Reviewer pass" value={review} onChange={setReview} />
                     </div>
                 </div>
-            </Card>
+            </tc-card>
 
-            <Card header={<Heading as="h3">Knowledge & usage</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Knowledge &amp; usage
+                </tc-heading>
                 <div className="tf-card-body tf-form-row">
-                    <Select
-                        label="Knowledge auto-update"
-                        options={triOptions}
-                        value={knowledgeAuto}
-                        onChange={(e) => setKnowledgeAuto(e.target.value as Tri)}
-                    />
+                    <TriSel label="Knowledge auto-update" value={knowledgeAuto} onChange={setKnowledgeAuto} />
                     <div style={{ maxWidth: 240 }}>
-                        <NumberInput
+                        <tc-number-input
+                            ref={usageRef}
                             label={`Usage-gate threshold % (env: ${eff('usageGateThreshold')})`}
                             min={1}
                             max={100}
                             value={usageGate}
-                            onChange={(v) => setUsageGate(v)}
                         />
                     </div>
                 </div>
-            </Card>
+            </tc-card>
 
-            <Card header={<Heading as="h3">Notifications</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Notifications
+                </tc-heading>
                 <div className="tf-card-body tf-stack-sm">
-                    <HelperText text={helpTexts.settings.notify} />
-                    <Checkbox
+                    <tc-helper-text text={helpTexts.settings.notify} />
+                    <Chk
                         label="Override the global event selection for this project"
                         checked={notifyOverridden}
-                        onChange={(e) => setNotifyOverridden(e.target.checked)}
+                        onChange={setNotifyOverridden}
                     />
                     {notifyOverridden && (
                         <div className="tf-form-row">
                             {NOTIFY_EVENTS.map((ev) => (
-                                <Checkbox
+                                <Chk
                                     key={ev}
                                     label={ev}
                                     inline
                                     checked={notifyEvents.has(ev)}
-                                    onChange={(e) =>
+                                    onChange={(checked) =>
                                         setNotifyEvents((prev) => {
                                             const next = new Set(prev)
-                                            if (e.target.checked) next.add(ev)
+                                            if (checked) next.add(ev)
                                             else next.delete(ev)
                                             return next
                                         })
@@ -220,20 +284,20 @@ export function SettingsClient() {
                             ))}
                         </div>
                     )}
-                    <Input
+                    <tc-input
+                        ref={webhookRef}
                         label="Outbound JSON webhook URL (blank = env default)"
                         placeholder="https://ntfy.sh/my-topic"
                         value={webhookUrl}
-                        onChange={(e) => setWebhookUrl(e.target.value)}
                     />
                 </div>
-            </Card>
+            </tc-card>
 
             <div className="tf-actions">
-                <Button variant="primary" loading={saving} disabled={saving} onClick={() => void save()}>
+                <tc-button variant="primary" loading={saving || undefined} disabled={saving || undefined} onClick={() => void save()}>
                     Save settings
-                </Button>
-                <Text variant="muted">Empty / “Use default” values fall back to the environment configuration.</Text>
+                </tc-button>
+                <tc-text variant="muted">Empty / “Use default” values fall back to the environment configuration.</tc-text>
             </div>
         </div>
     )

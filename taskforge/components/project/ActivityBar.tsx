@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { AnnouncementBar, IconButton } from '@/components/ui'
+import { tcIcon } from '@/lib/icons'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject, AGENT_LABELS } from '../ProjectContext'
 
@@ -27,13 +27,9 @@ export function ActivityBar() {
         const href = `/projects/${project}/run`
         return (
             <div className="tf-activity-bar" onClick={go(href)}>
-                <AnnouncementBar
-                    variant="warning"
-                    iconName="moon"
-                    message={`Usage limit — sleeping until ~${new Date(wakeAt).toLocaleTimeString()}, will resume the current task.`}
-                    ctaLabel="View run"
-                    ctaHref={href}
-                />
+                <tc-announcement-bar variant="warning" icon-name={tcIcon('moon')} cta-label="View run" cta-href={href}>
+                    {`Usage limit — sleeping until ~${new Date(wakeAt).toLocaleTimeString()}, will resume the current task.`}
+                </tc-announcement-bar>
             </div>
         )
     }
@@ -43,37 +39,30 @@ export function ActivityBar() {
         const href = `/projects/${project}/run`
         return (
             <div className="tf-activity-bar" onClick={go(href)}>
-                <AnnouncementBar
-                    variant="info"
-                    iconName="play-circle"
-                    message={
-                        <span className="tf-activity-bar__message">
-                            <span>
-                                Task executor running — {snapshot.current ?? '…'} ({snapshot.done}/{snapshot.total}{' '}
-                                done)
-                            </span>
-                            <span className="tf-activity-bar__controls" onClick={(e) => e.stopPropagation()}>
-                                <IconButton
-                                    icon="skip-forward"
-                                    label="Skip current task"
-                                    variant="warning"
-                                    outline
-                                    disabled={snapshot.state !== 'RUNNING'}
-                                    onClick={() => void onSkipCurrent()}
-                                />
-                                <IconButton
-                                    icon="stop-fill"
-                                    label="Force stop run"
-                                    variant="danger"
-                                    outline
-                                    onClick={() => void onForce()}
-                                />
-                            </span>
+                <tc-announcement-bar variant="info" icon-name={tcIcon('play-circle')} cta-label="View run" cta-href={href}>
+                    <span className="tf-activity-bar__message">
+                        <span>
+                            Task executor running — {snapshot.current ?? '…'} ({snapshot.done}/{snapshot.total} done)
                         </span>
-                    }
-                    ctaLabel="View run"
-                    ctaHref={href}
-                />
+                        <span className="tf-activity-bar__controls" onClick={(e) => e.stopPropagation()}>
+                            <tc-icon-button
+                                icon={tcIcon('skip-forward')}
+                                label="Skip current task"
+                                variant="warning"
+                                outline
+                                disabled={snapshot.state !== 'RUNNING' || undefined}
+                                onClick={() => void onSkipCurrent()}
+                            />
+                            <tc-icon-button
+                                icon={tcIcon('stop-fill')}
+                                label="Force stop run"
+                                variant="danger"
+                                outline
+                                onClick={() => void onForce()}
+                            />
+                        </span>
+                    </span>
+                </tc-announcement-bar>
             </div>
         )
     }
@@ -86,26 +75,20 @@ export function ActivityBar() {
         const href = `/projects/${project}/agents?tab=${kind}`
         return (
             <div className="tf-activity-bar" onClick={go(href)}>
-                <AnnouncementBar
-                    variant="info"
-                    iconName="robot"
-                    message={
-                        <span className="tf-activity-bar__message">
-                            <span>{label} agent running…</span>
-                            <span className="tf-activity-bar__controls" onClick={(e) => e.stopPropagation()}>
-                                <IconButton
-                                    icon="stop-fill"
-                                    label={`Kill ${label.toLowerCase()}`}
-                                    variant="danger"
-                                    outline
-                                    onClick={() => void onStopAgent(kind)}
-                                />
-                            </span>
+                <tc-announcement-bar variant="info" icon-name={tcIcon('robot')} cta-label="View output" cta-href={href}>
+                    <span className="tf-activity-bar__message">
+                        <span>{label} agent running…</span>
+                        <span className="tf-activity-bar__controls" onClick={(e) => e.stopPropagation()}>
+                            <tc-icon-button
+                                icon={tcIcon('stop-fill')}
+                                label={`Kill ${label.toLowerCase()}`}
+                                variant="danger"
+                                outline
+                                onClick={() => void onStopAgent(kind)}
+                            />
                         </span>
-                    }
-                    ctaLabel="View output"
-                    ctaHref={href}
-                />
+                    </span>
+                </tc-announcement-bar>
             </div>
         )
     }

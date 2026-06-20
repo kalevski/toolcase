@@ -2,16 +2,9 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import {
-    DashboardLayout,
-    Brand,
-    SideNav,
-    Badge,
-    UserPanel,
-    type BadgeProps,
-    type SideNavItem,
-    type SideNavSection,
-} from '@/components/ui'
+import type { SideNavItem, SideNavSection } from '@toolcase/web-components'
+import { useTcProps } from '@/lib/tc'
+import { tcIcon } from '@/lib/icons'
 import type { EngineState, MeResponse, ProjectNavItem } from '@/server/domain/types'
 
 const STATE_ICON: Record<EngineState, string> = {
@@ -21,13 +14,15 @@ const STATE_ICON: Record<EngineState, string> = {
     IDLE: 'folder2',
 }
 
-/** Badge shown next to a project in the sidebar when its engine isn't idle. */
-const STATE_BADGE: Record<EngineState, BadgeProps['variant'] | null> = {
-    RUNNING: 'success',
-    SLEEPING: 'info',
-    STOPPING: 'warning',
-    IDLE: null,
+/** Whether a project gets a state badge in the sidebar (IDLE shows none). */
+const STATE_HAS_BADGE: Record<EngineState, boolean> = {
+    RUNNING: true,
+    SLEEPING: true,
+    STOPPING: true,
+    IDLE: false,
 }
+
+const USER_MENU = [{ key: 'logout', label: 'Logout', icon: tcIcon('box-arrow-right') }]
 
 type ProjectSub = 'overview' | 'tasks' | 'agents' | 'knowledge' | 'notes' | 'run' | 'runs' | 'git' | 'settings'
 
@@ -61,35 +56,28 @@ export function AppShell({
     const pathname = usePathname()
     const { activeProject, sub, section } = deriveActive(pathname)
 
-    // Projects are a first-class nav list (replaces the old dropdown): each row
-    // links straight to its overview, highlights when active, and shows a state
-    // badge when its engine isn't idle.
+    // Projects are a first-class nav list: each row links to its overview,
+    // highlights when active, and shows a state badge when its engine isn't idle.
     const projectsSection: SideNavSection = {
         key: 'projects',
         title: `Projects${projects.length ? ` · ${projects.length}` : ''}`,
         items: projects.length
             ? projects.map((p) => {
-                  const variant = STATE_BADGE[p.state]
-                  // Engine state wins; an agent session badges the row when the engine is idle.
-                  const badge = variant ? (
-                      <Badge variant={variant} size="sm" pill>
-                          {p.state.toLowerCase()}
-                      </Badge>
-                  ) : p.agentBusy ? (
-                      <Badge variant="info" size="sm" pill>
-                          agent
-                      </Badge>
-                  ) : undefined
+                  const badge = STATE_HAS_BADGE[p.state]
+                      ? p.state.toLowerCase()
+                      : p.agentBusy
+                        ? 'agent'
+                        : undefined
                   return {
                       key: `project-${p.name}`,
                       label: p.name,
-                      icon: STATE_ICON[p.state],
+                      icon: tcIcon(STATE_ICON[p.state]),
                       href: `/projects/${p.name}`,
                       active: p.name === activeProject,
                       badge,
                   } as SideNavItem
               })
-            : [{ key: 'no-projects', label: 'No projects yet', icon: 'plus-circle', href: '/' }],
+            : [{ key: 'no-projects', label: 'No projects yet', icon: tcIcon('plus-circle'), href: '/' }],
     }
 
     const projectSection: SideNavSection | null = activeProject
@@ -97,69 +85,15 @@ export function AppShell({
               key: 'project',
               title: activeProject,
               items: [
-                  {
-                      key: 'overview',
-                      label: 'Overview',
-                      icon: 'speedometer2',
-                      href: `/projects/${activeProject}`,
-                      active: sub === 'overview',
-                  },
-                  {
-                      key: 'tasks',
-                      label: 'Tasks',
-                      icon: 'list-task',
-                      href: `/projects/${activeProject}/tasks`,
-                      active: sub === 'tasks',
-                  },
-                  {
-                      key: 'knowledge',
-                      label: 'Knowledge',
-                      icon: 'journal-text',
-                      href: `/projects/${activeProject}/knowledge`,
-                      active: sub === 'knowledge',
-                  },
-                  {
-                      key: 'agents',
-                      label: 'Agents',
-                      icon: 'robot',
-                      href: `/projects/${activeProject}/agents`,
-                      active: sub === 'agents',
-                  },
-                  {
-                      key: 'notes',
-                      label: 'Notes',
-                      icon: 'stickies',
-                      href: `/projects/${activeProject}/notes`,
-                      active: sub === 'notes',
-                  },
-                  {
-                      key: 'run',
-                      label: 'Run',
-                      icon: 'play-circle',
-                      href: `/projects/${activeProject}/run`,
-                      active: sub === 'run',
-                  },
-                  {
-                      key: 'runs',
-                      label: 'Run history',
-                      icon: 'clock-history',
-                      href: `/projects/${activeProject}/runs`,
-                      active: sub === 'runs',
-                  },
-                  {
-                      key: 'git',
-                      label: 'Git',
-                      icon: 'diagram-2',
-                      href: `/projects/${activeProject}/git`,
-                      active: sub === 'git',
-                  },
-                  {
-                      key: 'settings',
-                      label: 'Settings',
-                      icon: 'sliders',
-                      href: `/projects/${activeProject}/settings`,
-                      active: sub === 'settings',
-                  },
+                  { key: 'overview', label: 'Overview', icon: tcIcon('speedometer2'), href: `/projects/${activeProject}`, active: sub === 'overview' },
+                  { key: 'tasks', label: 'Tasks', icon: tcIcon('list-task'), href: `/projects/${activeProject}/tasks`, active: sub === 'tasks' },
+                  { key: 'knowledge', label: 'Knowledge', icon: tcIcon('journal-text'), href: `/projects/${activeProject}/knowledge`, active: sub === 'knowledge' },
+                  { key: 'agents', label: 'Agents', icon: tcIcon('robot'), href: `/projects/${activeProject}/agents`, active: sub === 'agents' },
+                  { key: 'notes', label: 'Notes', icon: tcIcon('stickies'), href: `/projects/${activeProject}/notes`, active: sub === 'notes' },
+                  { key: 'run', label: 'Run', icon: tcIcon('play-circle'), href: `/projects/${activeProject}/run`, active: sub === 'run' },
+                  { key: 'runs', label: 'Run history', icon: tcIcon('clock-history'), href: `/projects/${activeProject}/runs`, active: sub === 'runs' },
+                  { key: 'git', label: 'Git', icon: tcIcon('diagram-2'), href: `/projects/${activeProject}/git`, active: sub === 'git' },
+                  { key: 'settings', label: 'Settings', icon: tcIcon('sliders'), href: `/projects/${activeProject}/settings`, active: sub === 'settings' },
               ],
           }
         : null
@@ -168,75 +102,51 @@ export function AppShell({
         key: 'general',
         title: 'General',
         items: [
-            { key: 'dashboard', label: 'Dashboard', icon: 'grid-1x2', href: '/', active: section === 'dashboard' },
-            { key: 'skills', label: 'Skills', icon: 'lightbulb', href: '/skills', active: section === 'skills' },
+            { key: 'dashboard', label: 'Dashboard', icon: tcIcon('grid-1x2'), href: '/', active: section === 'dashboard' },
+            { key: 'skills', label: 'Skills', icon: tcIcon('lightbulb'), href: '/skills', active: section === 'skills' },
             ...(me.role === 'admin'
                 ? [
-                      {
-                          key: 'users',
-                          label: 'Users',
-                          icon: 'people',
-                          href: '/users',
-                          active: section === 'users',
-                      } as SideNavItem,
-                      {
-                          key: 'audit',
-                          label: 'Audit log',
-                          icon: 'journal-check',
-                          href: '/audit',
-                          active: section === 'audit',
-                      } as SideNavItem,
-                      {
-                          key: 'health',
-                          label: 'Health',
-                          icon: 'heart-pulse',
-                          href: '/health',
-                          active: section === 'health',
-                      } as SideNavItem,
+                      { key: 'users', label: 'Users', icon: tcIcon('people'), href: '/users', active: section === 'users' } as SideNavItem,
+                      { key: 'audit', label: 'Audit log', icon: tcIcon('journal-check'), href: '/audit', active: section === 'audit' } as SideNavItem,
+                      { key: 'health', label: 'Health', icon: tcIcon('heart-pulse'), href: '/health', active: section === 'health' } as SideNavItem,
                   ]
                 : []),
         ],
     }
 
-    const sections: SideNavSection[] = [
-        generalSection,
-        projectsSection,
-        ...(projectSection ? [projectSection] : []),
-    ]
+    const sections: SideNavSection[] = [generalSection, projectsSection, ...(projectSection ? [projectSection] : [])]
 
-    const onItemClick = (e: React.MouseEvent<HTMLAnchorElement>, item: SideNavItem) => {
+    const onItemClick = (event: Event, item: SideNavItem) => {
         if (item.href) {
-            e.preventDefault()
+            event.preventDefault()
             router.push(item.href)
         }
     }
 
-    const onMenuClick = async (_e: React.MouseEvent<HTMLButtonElement>, key: string) => {
+    const onMenuClick = async (key: string) => {
         if (key === 'logout') {
             await fetch('/api/auth/logout', { method: 'POST' })
             router.push('/login')
         }
     }
 
+    const sideNavRef = useTcProps<HTMLElement>({ sections, onItemClick })
+    const userRef = useTcProps<HTMLElement>({ menuItems: USER_MENU, onMenuClick })
+
     return (
-        <DashboardLayout
-            brandComponent={<Brand primaryText="Task Forge" color="#6c5ce7" />}
-            sidebarMenuComponent={
-                <div className="tf-sidebar-menu">
-                    <SideNav sections={sections} onItemClick={onItemClick} />
-                </div>
-            }
-            navbarRightComponent={
-                <UserPanel
-                    username={me.login}
-                    avatarSrc={me.avatarUrl}
-                    plan={me.role}
-                    menuItems={[{ key: 'logout', label: 'Logout', icon: 'box-arrow-right' }]}
-                    onMenuClick={onMenuClick}
-                />
-            }
-        >
+        <tc-dashboard-layout>
+            <tc-brand slot="brand" primary-text="Task Forge" color="#6c5ce7" />
+            <div slot="sidebar-menu" className="tf-sidebar-menu">
+                <tc-side-nav ref={sideNavRef} />
+            </div>
+            <tc-user-panel
+                slot="navbar-right"
+                ref={userRef}
+                username={me.login}
+                avatar-src={me.avatarUrl}
+                plan={me.role}
+            />
             <div className="tf-content">{children}</div>
-        </DashboardLayout>
+        </tc-dashboard-layout>
     )
 }

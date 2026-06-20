@@ -3,7 +3,9 @@
 // A1 — manual task creation: title + markdown body + facets form.
 
 import React, { useCallback, useRef, useState } from 'react'
-import { Modal, Button, Heading, Input, Select, MarkdownEditor, HelperText, toast } from '@/components/ui'
+import { Modal } from '@/lib/modal'
+import { toast } from '@/lib/toast'
+import { useTcEvents, detailValue } from '@/lib/tc'
 import type { TaskInfo } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 
@@ -26,6 +28,14 @@ export function NewTaskModal() {
     const [model, setModel] = useState('')
     const [depends, setDepends] = useState('')
     const [submitting, setSubmitting] = useState(false)
+
+    const titleRef = useTcEvents<HTMLElement>({ input: (e) => setTitle((e.target as HTMLInputElement).value) })
+    const sevRef = useTcEvents<HTMLElement>({ change: (e) => setSeverity((e.target as HTMLSelectElement).value) })
+    const facetRef = useTcEvents<HTMLElement>({ input: (e) => setFacetProject((e.target as HTMLInputElement).value) })
+    const modelRef = useTcEvents<HTMLElement>({ change: (e) => setModel((e.target as HTMLSelectElement).value) })
+    const dependsRef = useTcEvents<HTMLElement>({ input: (e) => setDepends((e.target as HTMLInputElement).value) })
+    const bodyRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setBody(detailValue<string>(e)) })
+
     // Stamp form state to the open payload so a re-open starts fresh.
     const seenInput = useRef<NewTaskInput | null>(null)
     if (input && seenInput.current !== input) {
@@ -81,41 +91,41 @@ export function NewTaskModal() {
     }
 
     return (
-        <Modal.Window size="large" title="New task">
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
-                <Heading as="h3">New task — {input.project}</Heading>
-                <HelperText text={helpTexts.tasks.newTask} />
-                <Input label="Title" placeholder="Add /healthz endpoint" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Modal.Window size="large" title={`New task — ${input.project}`}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                <tc-helper-text text={helpTexts.tasks.newTask} />
+                <tc-input ref={titleRef} label="Title" placeholder="Add /healthz endpoint" value={title} />
                 <div className="tf-form-row">
-                    <Select
-                        label="Severity"
-                        options={[
-                            { value: '', label: '—' },
-                            { value: 'low', label: 'low' },
-                            { value: 'medium', label: 'medium' },
-                            { value: 'high', label: 'high' },
-                            { value: 'critical', label: 'critical' },
-                        ]}
-                        value={severity}
-                        onChange={(e) => setSeverity(e.target.value)}
-                    />
-                    <Input label="Project facet" placeholder="api" value={facetProject} onChange={(e) => setFacetProject(e.target.value)} />
-                    <Select
-                        label="Model pin"
-                        options={MODEL_OPTIONS.map((m) => ({ value: m, label: m || 'Run default' }))}
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                    />
-                    <Input label="Depends (CSV)" placeholder="003, 007" value={depends} onChange={(e) => setDepends(e.target.value)} />
+                    <tc-select ref={sevRef} label="Severity" value={severity}>
+                        <tc-option value="">—</tc-option>
+                        <tc-option value="low">low</tc-option>
+                        <tc-option value="medium">medium</tc-option>
+                        <tc-option value="high">high</tc-option>
+                        <tc-option value="critical">critical</tc-option>
+                    </tc-select>
+                    <tc-input ref={facetRef} label="Project facet" placeholder="api" value={facetProject} />
+                    <tc-select ref={modelRef} label="Model pin" value={model}>
+                        {MODEL_OPTIONS.map((m) => (
+                            <tc-option key={m} value={m}>
+                                {m || 'Run default'}
+                            </tc-option>
+                        ))}
+                    </tc-select>
+                    <tc-input ref={dependsRef} label="Depends (CSV)" placeholder="003, 007" value={depends} />
                 </div>
-                <MarkdownEditor value={body} onChange={setBody} height={280} />
+                <tc-markdown-editor ref={bodyRef} value={body} height="280" />
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                    <Button variant="secondary" outline onClick={() => close(false)}>
+                    <tc-button variant="secondary" outline onClick={() => close(false)}>
                         Cancel
-                    </Button>
-                    <Button variant="primary" loading={submitting} disabled={submitting || !title.trim()} onClick={() => void submit()}>
+                    </tc-button>
+                    <tc-button
+                        variant="primary"
+                        loading={submitting || undefined}
+                        disabled={submitting || !title.trim() || undefined}
+                        onClick={() => void submit()}
+                    >
                         Create task
-                    </Button>
+                    </tc-button>
                 </div>
             </div>
         </Modal.Window>

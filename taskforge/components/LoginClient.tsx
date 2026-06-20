@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { Login, Icon, toast } from '@/components/ui'
+import { toast } from '@/lib/toast'
+import { useTc } from '@/lib/tc'
 
 const ERRORS: Record<string, string> = {
     state: 'Sign-in expired or was tampered with. Please try again.',
@@ -9,27 +10,30 @@ const ERRORS: Record<string, string> = {
     oauth: 'GitHub sign-in failed. Please try again.',
 }
 
+// tc-login takes its connect options as a JS property (icons resolve via lucide
+// kebab names — Lucide has no GitHub brand glyph, so we use git-branch).
+const CONNECT = [{ key: 'github', label: 'Sign in with GitHub', icon: 'git-branch', variant: 'primary' as const }]
+
 export function LoginClient({ error }: { error?: string }) {
     useEffect(() => {
         if (error) toast.error(ERRORS[error] ?? 'Sign-in failed.')
     }, [error])
 
+    const ref = useTc<HTMLElement>(
+        { connect: CONNECT },
+        {
+            'tc-connect': () => {
+                window.location.href = '/api/auth/github'
+            },
+        },
+    )
+
     return (
         <div style={{ minHeight: '100vh', display: 'flex' }}>
-            <Login
+            <tc-login
+                ref={ref}
                 title="TaskForge"
                 description="Drive the Claude Code CLI over your local repositories."
-                connect={[
-                    {
-                        id: 'github',
-                        label: 'Sign in with GitHub',
-                        color: '#24292f',
-                        icon: <Icon name="github" />,
-                    },
-                ]}
-                onConnect={() => {
-                    window.location.href = '/api/auth/github'
-                }}
             />
         </div>
     )

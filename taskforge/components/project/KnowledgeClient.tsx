@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Card, Heading, Text, Table, Tag, Badge, Button, toast, type TableColumn } from '@/components/ui'
+import { toast } from '@/lib/toast'
 import type { KnowledgeDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { usePrompt } from '../ConfirmModal'
@@ -10,6 +10,8 @@ import { KnowledgeDrawer } from './KnowledgeDrawer'
 import { helpTexts } from '../helpTexts'
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
+
+type Col = { key: string; header: string; width?: string; render: (d: KnowledgeDoc) => React.ReactNode }
 
 export function KnowledgeClient() {
     const { project, knowledge, busy, onRemoveKnowledge, setKnowledge } = useProject()
@@ -50,18 +52,14 @@ export function KnowledgeClient() {
         toast.success(`Created knowledge/${data.id}`)
     }
 
-    const columns: TableColumn<KnowledgeDoc>[] = [
+    const columns: Col[] = [
         { key: 'id', header: 'File', width: '26%', render: (d) => <code>knowledge/{d.id}</code> },
         { key: 'title', header: 'Title', render: (d) => d.title },
         {
             key: 'description',
             header: 'About',
             render: (d) =>
-                d.isIndex ? (
-                    <Tag variant="info">index</Tag>
-                ) : (
-                    <Text variant="muted">{d.description || '—'}</Text>
-                ),
+                d.isIndex ? <tc-tag static variant="info">index</tc-tag> : <tc-text variant="muted">{d.description || '—'}</tc-text>,
         },
         {
             key: 'actions',
@@ -69,59 +67,75 @@ export function KnowledgeClient() {
             width: '7rem',
             render: (d) =>
                 d.isIndex ? null : (
-                    <Button
-                        size="small"
+                    <tc-button
+                        size="sm"
                         variant="danger"
                         outline
                         aria-label={`Remove ${d.id}`}
-                        disabled={busy}
+                        disabled={busy || undefined}
                         onClick={(e) => {
                             e.stopPropagation()
                             void onRemoveKnowledge(d.id)
                         }}
                     >
                         Remove
-                    </Button>
+                    </tc-button>
                 ),
         },
     ]
 
     return (
         <div className="tf-stack">
-            <Card
-                header={
-                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Heading as="h3">Knowledge base</Heading>
-                        <Button
-                            size="small"
-                            variant="primary"
-                            style={{ marginLeft: 'auto' }}
-                            disabled={busy}
-                            title={helpTexts.knowledge.newDoc}
-                            onClick={() => void onNewDoc()}
-                            startIcon={<span>＋</span>}
-                        >
-                            New doc
-                        </Button>
-                    </div>
-                }
-            >
-                <Table
-                    columns={columns}
-                    data={knowledge}
-                    rowKey={(d) => d.id}
-                    hoverable
-                    emptyMessage="No knowledge yet — use the knowledge analyzer on the Agents page, or create a doc by hand."
-                    onRowClick={(d) => setOpenDoc(d.id)}
-                />
-            </Card>
+            <tc-card>
+                <div slot="header" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    <tc-heading as="h3">Knowledge base</tc-heading>
+                    <tc-button
+                        size="sm"
+                        variant="primary"
+                        style={{ marginLeft: 'auto' }}
+                        disabled={busy || undefined}
+                        title={helpTexts.knowledge.newDoc}
+                        onClick={() => void onNewDoc()}
+                    >
+                        <span>＋</span> New doc
+                    </tc-button>
+                </div>
+                <table className="table table-hover">
+                    <thead>
+                        <tr>
+                            {columns.map((c) => (
+                                <th key={c.key} style={c.width ? { width: c.width } : undefined}>
+                                    {c.header}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {knowledge.length === 0 ? (
+                            <tr>
+                                <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
+                                    No knowledge yet — use the knowledge analyzer on the Agents page, or create a doc by hand.
+                                </td>
+                            </tr>
+                        ) : (
+                            knowledge.map((d) => (
+                                <tr key={d.id} style={{ cursor: 'pointer' }} onClick={() => setOpenDoc(d.id)}>
+                                    {columns.map((c) => (
+                                        <td key={c.key}>{c.render(d)}</td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </tc-card>
 
             {knowledge.length > 0 && (
-                <Text variant="muted">
+                <tc-text variant="muted">
                     Stored at the project root under <code>knowledge/</code> (alongside <code>repo/</code>). Click a row
                     to read a doc; <code>index.md</code> is rebuilt automatically.{' '}
-                    <Badge variant="secondary">{knowledge.length} file(s)</Badge>
-                </Text>
+                    <tc-badge variant="secondary">{knowledge.length} file(s)</tc-badge>
+                </tc-text>
             )}
 
             <KnowledgeDrawer project={project} docId={openDoc} onClose={() => setOpenDoc(null)} />

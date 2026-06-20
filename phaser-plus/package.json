@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/phaser-plus",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "Opinionated runtime for Phaser 4 — scene lifecycle, feature modules, isometric camera, and a Tweakpane debugger in one package.",
     "type": "module",
     "source": "src/index.ts",
@@ -48,8 +48,8 @@
     },
     "peerDependencies": {
         "phaser": "4.x",
-        "@toolcase/base": "4.x",
-        "@toolcase/logging": "4.x",
+        "@toolcase/base": "5.x",
+        "@toolcase/logging": "5.x",
         "react": ">=18",
         "react-dom": ">=18"
     },

@@ -3,17 +3,7 @@
 // D4 — admin health/diagnostics page + E3 backup actions.
 
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-    Card,
-    Heading,
-    Text,
-    Badge,
-    Button,
-    Select,
-    StatusDot,
-    Spinner,
-    HelperText,
-} from '@/components/ui'
+import { useTcEvents } from '@/lib/tc'
 import type { HealthDetails } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 
@@ -27,6 +17,10 @@ function bytes(n: number): string {
 export function HealthClient({ projects }: { projects: string[] }) {
     const [details, setDetails] = useState<HealthDetails | null>(null)
     const [exportProject, setExportProject] = useState(projects[0] ?? '')
+
+    const exportRef = useTcEvents<HTMLElement>({
+        change: (e) => setExportProject((e.target as HTMLSelectElement).value),
+    })
 
     const load = useCallback(async () => {
         try {
@@ -44,24 +38,27 @@ export function HealthClient({ projects }: { projects: string[] }) {
     if (!details) {
         return (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <Spinner />
+                <tc-spinner />
             </div>
         )
     }
 
     const check = (ok: boolean, okText: string, failText: string) => (
         <span className="tf-inline">
-            <StatusDot status={ok ? 'online' : 'offline'} />
+            <tc-status-dot status={ok ? 'online' : 'offline'} />
             {ok ? okText : failText}
         </span>
     )
 
     return (
         <div className="tf-stack">
-            <HelperText text={helpTexts.health.intro} />
+            <tc-helper-text text={helpTexts.health.intro} />
 
             <div className="tf-grid-2">
-                <Card header={<Heading as="h3">Environment</Heading>}>
+                <tc-card>
+                    <tc-heading slot="header" as="h3">
+                        Environment
+                    </tc-heading>
                     <div className="tf-card-body tf-stack-sm">
                         <div className="tf-kv">
                             <span>Agent CLI ({details.agentBin})</span>
@@ -74,11 +71,11 @@ export function HealthClient({ projects }: { projects: string[] }) {
                         <div className="tf-kv">
                             <span>Workspace disk</span>
                             {details.diskFree ? (
-                                <Text>
+                                <tc-text>
                                     {bytes(details.diskFree.freeBytes)} free of {bytes(details.diskFree.totalBytes)}
-                                </Text>
+                                </tc-text>
                             ) : (
-                                <Text variant="muted">unavailable</Text>
+                                <tc-text variant="muted">unavailable</tc-text>
                             )}
                         </div>
                         <div className="tf-kv">
@@ -86,9 +83,12 @@ export function HealthClient({ projects }: { projects: string[] }) {
                             {check(details.searchAvailable, 'available', 'unavailable on this runtime')}
                         </div>
                     </div>
-                </Card>
+                </tc-card>
 
-                <Card header={<Heading as="h3">Database</Heading>}>
+                <tc-card>
+                    <tc-heading slot="header" as="h3">
+                        Database
+                    </tc-heading>
                     <div className="tf-card-body tf-stack-sm">
                         <div className="tf-kv">
                             <span>Path</span>
@@ -96,29 +96,35 @@ export function HealthClient({ projects }: { projects: string[] }) {
                         </div>
                         <div className="tf-kv">
                             <span>Size</span>
-                            <Text>{bytes(details.db.sizeBytes)}</Text>
+                            <tc-text>{bytes(details.db.sizeBytes)}</tc-text>
                         </div>
                         <div className="tf-kv">
                             <span>Migration version</span>
-                            <Badge variant="secondary">v{details.db.migrationVersion}</Badge>
+                            <tc-badge variant="secondary">v{details.db.migrationVersion}</tc-badge>
                         </div>
                     </div>
-                </Card>
+                </tc-card>
             </div>
 
-            <Card header={<Heading as="h3">Engines</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Engines
+                </tc-heading>
                 <div className="tf-card-body tf-stack-sm">
-                    {details.engines.length === 0 && <Text variant="muted">No engine state tracked this process.</Text>}
+                    {details.engines.length === 0 && <tc-text variant="muted">No engine state tracked this process.</tc-text>}
                     {details.engines.map((e) => (
                         <div className="tf-kv" key={e.project}>
                             <span>{e.project}</span>
-                            <Badge variant={e.state === 'IDLE' ? 'secondary' : 'info'}>{e.state}</Badge>
+                            <tc-badge variant={e.state === 'IDLE' ? 'secondary' : 'info'}>{e.state}</tc-badge>
                         </div>
                     ))}
                 </div>
-            </Card>
+            </tc-card>
 
-            <Card header={<Heading as="h3">Config (env-derived)</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Config (env-derived)
+                </tc-heading>
                 <div className="tf-card-body tf-stack-sm">
                     {Object.entries(details.config).map(([k, v]) => (
                         <div className="tf-kv" key={k}>
@@ -127,38 +133,42 @@ export function HealthClient({ projects }: { projects: string[] }) {
                         </div>
                     ))}
                 </div>
-            </Card>
+            </tc-card>
 
-            <Card header={<Heading as="h3">Backups</Heading>}>
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Backups
+                </tc-heading>
                 <div className="tf-card-body tf-stack-sm">
-                    <HelperText text={helpTexts.health.backup} />
+                    <tc-helper-text text={helpTexts.health.backup} />
                     <div className="tf-actions" style={{ flexWrap: 'wrap' }}>
-                        <Button variant="primary" outline onClick={() => window.open('/api/admin/backup/db', '_blank')}>
+                        <tc-button variant="primary" outline onClick={() => window.open('/api/admin/backup/db', '_blank')}>
                             ⬇ Download DB backup
-                        </Button>
+                        </tc-button>
                         {projects.length > 0 && (
                             <span style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'flex-end' }}>
                                 <div style={{ minWidth: 200 }}>
-                                    <Select
-                                        label="Project export"
-                                        options={projects.map((p) => ({ value: p, label: p }))}
-                                        value={exportProject}
-                                        onChange={(e) => setExportProject(e.target.value)}
-                                    />
+                                    <tc-select ref={exportRef} label="Project export" value={exportProject}>
+                                        {projects.map((p) => (
+                                            <tc-option key={p} value={p}>
+                                                {p}
+                                            </tc-option>
+                                        ))}
+                                    </tc-select>
                                 </div>
-                                <Button
+                                <tc-button
                                     variant="secondary"
                                     outline
-                                    disabled={!exportProject}
+                                    disabled={!exportProject || undefined}
                                     onClick={() => window.open(`/api/admin/backup/project/${exportProject}`, '_blank')}
                                 >
                                     ⬇ Export tasks/knowledge/notes
-                                </Button>
+                                </tc-button>
                             </span>
                         )}
                     </div>
                 </div>
-            </Card>
+            </tc-card>
         </div>
     )
 }

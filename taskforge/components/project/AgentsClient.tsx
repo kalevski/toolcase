@@ -2,18 +2,8 @@
 
 import React, { useCallback, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import {
-    Button,
-    Card,
-    Heading,
-    HelperText,
-    Input,
-    Select,
-    TabSections,
-    Textarea,
-    Text,
-    toast,
-} from '@/components/ui'
+import { toast } from '@/lib/toast'
+import { useTcEvents } from '@/lib/tc'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm } from '../ConfirmModal'
@@ -50,10 +40,6 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
     const [rawTargetNote, setTargetNote] = useState('')
     const targetNote = notes.some((n) => n.id === rawTargetNote) ? rawTargetNote : ''
     const noteAgentRunning = agentSessions['note-writer']?.status === 'running'
-    const targetOptions = [
-        { value: '', label: '➕ Create new note' },
-        ...notes.map((n) => ({ value: n.id, label: n.title })),
-    ]
 
     // Tab selection lives in the URL (?tab=…) so the activity bar can deep-link
     // to a specific agent and refresh/share keeps the tab.
@@ -76,6 +62,13 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
     const [defPost, setDefPost] = useState('none')
     const [defPreamble, setDefPreamble] = useState('')
     const [savingDef, setSavingDef] = useState(false)
+
+    const kindRef = useTcEvents<HTMLElement>({ input: (e) => setDefKind((e.target as HTMLInputElement).value) })
+    const labelRef = useTcEvents<HTMLElement>({ input: (e) => setDefLabel((e.target as HTMLInputElement).value) })
+    const targetRef = useTcEvents<HTMLElement>({ change: (e) => setDefTarget((e.target as HTMLSelectElement).value) })
+    const postRef = useTcEvents<HTMLElement>({ change: (e) => setDefPost((e.target as HTMLSelectElement).value) })
+    const preambleRef = useTcEvents<HTMLElement>({ input: (e) => setDefPreamble((e.target as HTMLTextAreaElement).value) })
+    const noteTargetRef = useTcEvents<HTMLElement>({ change: (e) => setTargetNote((e.target as HTMLSelectElement).value) })
 
     const saveDef = async () => {
         setSavingDef(true)
@@ -119,108 +112,123 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
         router.refresh()
     }
 
+    // tc-tab-sections only renders string content, so the tab strip is plain
+    // Bootstrap nav-tabs (web-components-styled) and the active panel — which
+    // hosts live React (AgentPanel) — is rendered below it.
+    const active = tabKinds.find((k) => k.kind === activeTab)
+
+    const renderPanel = (k: (typeof tabKinds)[number]) => (
+        <div className="tf-stack-sm" style={{ paddingTop: '1rem' }}>
+            <tc-helper-text text={BUNDLED_HELP[k.kind] ?? helpTexts.agents.custom} />
+            {k.custom && isAdmin && (
+                <div className="tf-actions">
+                    <tc-button size="sm" variant="danger" outline onClick={() => void deleteDef(k.kind)}>
+                        Delete this agent kind
+                    </tc-button>
+                </div>
+            )}
+            {k.kind === 'note-writer' ? (
+                <AgentPanel
+                    kind="note-writer"
+                    placeholder={BUNDLED_PLACEHOLDER['note-writer']}
+                    submitLabel={targetNote ? 'Edit note' : 'Create note'}
+                    submitOptions={() => ({ targetNote: targetNote || undefined })}
+                    beforeComposer={
+                        <div className="tf-stack-sm">
+                            <div style={{ maxWidth: 320 }}>
+                                <tc-select
+                                    ref={noteTargetRef}
+                                    label="Target note"
+                                    value={targetNote}
+                                    disabled={noteAgentRunning || undefined}
+                                >
+                                    <tc-option value="">➕ Create new note</tc-option>
+                                    {notes.map((n) => (
+                                        <tc-option key={n.id} value={n.id}>
+                                            {n.title}
+                                        </tc-option>
+                                    ))}
+                                </tc-select>
+                            </div>
+                            <tc-helper-text text={helpTexts.notes.agentTarget} />
+                        </div>
+                    }
+                />
+            ) : (
+                <AgentPanel
+                    kind={k.kind}
+                    placeholder={BUNDLED_PLACEHOLDER[k.kind] ?? `Instructions for the ${k.label} agent…`}
+                    submitLabel={BUNDLED_SUBMIT[k.kind] ?? 'Run agent'}
+                />
+            )}
+        </div>
+    )
+
     return (
         <div className="tf-stack">
-            <TabSections
-                activeKey={activeTab}
-                onChange={onTabChange}
-                items={tabKinds.map((k) => ({
-                    key: k.kind,
-                    label: k.label,
-                    content: (
-                        <div className="tf-stack-sm" style={{ paddingTop: '1rem' }}>
-                            <HelperText text={BUNDLED_HELP[k.kind] ?? helpTexts.agents.custom} />
-                            {k.custom && isAdmin && (
-                                <div className="tf-actions">
-                                    <Button size="small" variant="danger" outline onClick={() => void deleteDef(k.kind)}>
-                                        Delete this agent kind
-                                    </Button>
-                                </div>
-                            )}
-                            {k.kind === 'note-writer' ? (
-                                <AgentPanel
-                                    kind="note-writer"
-                                    placeholder={BUNDLED_PLACEHOLDER['note-writer']}
-                                    submitLabel={targetNote ? 'Edit note' : 'Create note'}
-                                    submitOptions={() => ({ targetNote: targetNote || undefined })}
-                                    beforeComposer={
-                                        <div className="tf-stack-sm">
-                                            <div style={{ maxWidth: 320 }}>
-                                                <Select
-                                                    label="Target note"
-                                                    options={targetOptions}
-                                                    value={targetNote}
-                                                    disabled={noteAgentRunning}
-                                                    onChange={(e) => setTargetNote(e.target.value)}
-                                                />
-                                            </div>
-                                            <HelperText text={helpTexts.notes.agentTarget} />
-                                        </div>
-                                    }
-                                />
-                            ) : (
-                                <AgentPanel
-                                    kind={k.kind}
-                                    placeholder={BUNDLED_PLACEHOLDER[k.kind] ?? `Instructions for the ${k.label} agent…`}
-                                    submitLabel={BUNDLED_SUBMIT[k.kind] ?? 'Run agent'}
-                                />
-                            )}
-                        </div>
-                    ),
-                }))}
-            />
+            <div>
+                <ul className="nav nav-tabs" role="tablist">
+                    {tabKinds.map((k) => (
+                        <li className="nav-item" key={k.kind} role="presentation">
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={activeTab === k.kind}
+                                className={`nav-link${activeTab === k.kind ? ' active' : ''}`}
+                                onClick={() => onTabChange(k.kind)}
+                            >
+                                {k.label}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+                {active && renderPanel(active)}
+            </div>
 
             {isAdmin && (
-                <Card header={<Heading as="h3">Custom agents (admin)</Heading>}>
+                <tc-card>
+                    <tc-heading slot="header" as="h3">
+                        Custom agents (admin)
+                    </tc-heading>
                     <div className="tf-card-body tf-stack-sm">
-                        <HelperText text={helpTexts.agents.custom} />
+                        <tc-helper-text text={helpTexts.agents.custom} />
                         <div className="tf-form-row">
-                            <Input label="Kind (kebab-case)" placeholder="test-writer" value={defKind} onChange={(e) => setDefKind(e.target.value)} />
-                            <Input label="Label" placeholder="Test writer" value={defLabel} onChange={(e) => setDefLabel(e.target.value)} />
-                            <Select
-                                label="Target directory"
-                                options={[
-                                    { value: 'project', label: 'whole project' },
-                                    { value: 'repo', label: 'repo/' },
-                                    { value: 'tasks', label: 'tasks/' },
-                                    { value: 'knowledge', label: 'knowledge/' },
-                                    { value: 'notes', label: 'notes/' },
-                                ]}
-                                value={defTarget}
-                                onChange={(e) => setDefTarget(e.target.value)}
-                            />
-                            <Select
-                                label="Post-processing"
-                                options={[
-                                    { value: 'none', label: 'none' },
-                                    { value: 'tasks', label: 'refresh tasks' },
-                                    { value: 'knowledge', label: 'refresh knowledge' },
-                                    { value: 'notes', label: 'refresh notes' },
-                                ]}
-                                value={defPost}
-                                onChange={(e) => setDefPost(e.target.value)}
-                            />
+                            <tc-input ref={kindRef} label="Kind (kebab-case)" placeholder="test-writer" value={defKind} />
+                            <tc-input ref={labelRef} label="Label" placeholder="Test writer" value={defLabel} />
+                            <tc-select ref={targetRef} label="Target directory" value={defTarget}>
+                                <tc-option value="project">whole project</tc-option>
+                                <tc-option value="repo">repo/</tc-option>
+                                <tc-option value="tasks">tasks/</tc-option>
+                                <tc-option value="knowledge">knowledge/</tc-option>
+                                <tc-option value="notes">notes/</tc-option>
+                            </tc-select>
+                            <tc-select ref={postRef} label="Post-processing" value={defPost}>
+                                <tc-option value="none">none</tc-option>
+                                <tc-option value="tasks">refresh tasks</tc-option>
+                                <tc-option value="knowledge">refresh knowledge</tc-option>
+                                <tc-option value="notes">refresh notes</tc-option>
+                            </tc-select>
                         </div>
-                        <Textarea
+                        <tc-textarea
+                            ref={preambleRef}
                             label="Prompt preamble (prepended to every prompt)"
                             rows={4}
                             placeholder="You write focused unit tests for the change described below…"
                             value={defPreamble}
-                            onChange={(e) => setDefPreamble(e.target.value)}
                         />
                         <div className="tf-actions">
-                            <Button
+                            <tc-button
                                 variant="primary"
-                                loading={savingDef}
-                                disabled={savingDef || !defKind.trim() || !defLabel.trim()}
+                                loading={savingDef || undefined}
+                                disabled={savingDef || !defKind.trim() || !defLabel.trim() || undefined}
                                 onClick={() => void saveDef()}
                             >
                                 Save custom agent
-                            </Button>
-                            <Text variant="muted">Custom agents are global — every project gets the tab.</Text>
+                            </tc-button>
+                            <tc-text variant="muted">Custom agents are global — every project gets the tab.</tc-text>
                         </div>
                     </div>
-                </Card>
+                </tc-card>
             )}
         </div>
     )

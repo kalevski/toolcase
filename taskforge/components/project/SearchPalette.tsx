@@ -6,7 +6,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Badge, Kbd, Text } from '@/components/ui'
 import type { SearchDocType, SearchHit } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 
@@ -64,8 +63,16 @@ export function SearchPalette() {
             setHits([])
             setActive(0)
             setTimeout(() => inputRef.current?.focus(), 0)
+        } else if (debounce.current) {
+            // Cancel any in-flight debounced search when the palette closes.
+            clearTimeout(debounce.current)
+            debounce.current = null
         }
     }, [open])
+
+    // Clear a pending debounce timer on unmount so it can't fire setState after
+    // the palette is gone (or against a stale project after navigation).
+    useEffect(() => () => void (debounce.current && clearTimeout(debounce.current)), [])
 
     const runSearch = useCallback(
         (q: string) => {
@@ -145,16 +152,16 @@ export function SearchPalette() {
                         }}
                         onKeyDown={onInputKey}
                     />
-                    <Kbd>esc</Kbd>
+                    <tc-kbd>esc</tc-kbd>
                 </div>
                 {!available && (
                     <div className="tf-palette__empty">
-                        <Text variant="muted">Search unavailable — this runtime&apos;s SQLite lacks FTS5.</Text>
+                        <tc-text variant="muted">Search unavailable — this runtime&apos;s SQLite lacks FTS5.</tc-text>
                     </div>
                 )}
                 {available && query.trim() && grouped.flat.length === 0 && (
                     <div className="tf-palette__empty">
-                        <Text variant="muted">No matches.</Text>
+                        <tc-text variant="muted">No matches.</tc-text>
                     </div>
                 )}
                 <div className="tf-palette__results">
@@ -170,7 +177,7 @@ export function SearchPalette() {
                                     onClick={() => go(hit)}
                                 >
                                     <span className="tf-palette__row-title">
-                                        {hit.title} <Badge variant="secondary" size="sm">{hit.id}</Badge>
+                                        {hit.title} <tc-badge variant="secondary">{hit.id}</tc-badge>
                                     </span>
                                     <Snippet text={hit.snippet} />
                                 </button>

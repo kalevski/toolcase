@@ -1,7 +1,8 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { toast, type TerminalLine } from '@/components/ui'
+import { toast } from '@/lib/toast'
+import type { TerminalLine } from '@/lib/terminal'
 import type {
     AgentKind,
     AgentPromptRecord,
