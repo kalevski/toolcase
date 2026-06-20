@@ -29,4 +29,20 @@ describe('formatByteSize', () => {
     it('treats negative decimals as 0', () => {
         expect(formatByteSize(1536, -1)).toBe('2 KB')
     })
+
+    it('returns 0 Bytes for negative input', () => {
+        expect(formatByteSize(-5)).toBe('0 Bytes')
+    })
+
+    it('returns 0 Bytes for NaN', () => {
+        expect(formatByteSize(NaN)).toBe('0 Bytes')
+    })
+
+    it('returns 0 Bytes for sub-1 input', () => {
+        expect(formatByteSize(0.5)).toBe('0 Bytes')
+    })
+
+    it('clamps huge values to YB', () => {
+        expect(formatByteSize(1e30)).toMatch(/ YB$/)
+    })
 })
