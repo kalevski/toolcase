@@ -408,6 +408,50 @@ describe('Serializer versioning', () => {
     })
 })
 
+describe('Serializer.decodeVersioned return shape (regression)', () => {
+    it('no-migration path returns a plain object, not a Message instance', () => {
+        const s = new Serializer()
+        s.version(2, 0)
+        s.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        const frame = s.encodeVersioned('Item', { name: 'test' })
+        const out = s.decodeVersioned('Item', frame)
+        expect(Object.getPrototypeOf(out.message)).toBe(Object.prototype)
+        expect((out.message as any).name).toBe('test')
+    })
+
+    it('migration path returns a plain object with the same shape', () => {
+        const v1 = new Serializer()
+        v1.version(1, 0)
+        v1.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        const frame = v1.encodeVersioned('Item', { name: 'test' })
+
+        const v2 = new Serializer()
+        v2.version(2, 0)
+        v2.define('Item', [
+            { key: 'name', type: F.STRING, rule: 'required' },
+            { key: 'score', type: F.INT32, rule: 'optional', default: 0 }
+        ])
+        v2.migrate('Item', 1, msg => ({ name: msg.name, score: 42 }))
+        const out = v2.decodeVersioned('Item', frame)
+        expect(Object.getPrototypeOf(out.message)).toBe(Object.prototype)
+        expect((out.message as any).name).toBe('test')
+        expect((out.message as any).score).toBe(42)
+    })
+
+    it('throws when a migration produces a message that fails schema verify', () => {
+        const v1 = new Serializer()
+        v1.version(1, 0)
+        v1.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        const frame = v1.encodeVersioned('Item', { name: 'test' })
+
+        const v2 = new Serializer()
+        v2.version(2, 0)
+        v2.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        v2.migrate('Item', 1, _msg => ({ name: 123 } as any))
+        expect(() => v2.decodeVersioned('Item', frame)).toThrow(/migrated message invalid/)
+    })
+})
+
 describe('Serializer explicit field tags', () => {
     it('roundtrips a message encoded with explicit non-sequential tags', () => {
         const s = new Serializer()

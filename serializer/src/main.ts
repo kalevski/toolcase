@@ -264,7 +264,7 @@ class Serializer {
         const decodeType = this.versionedTypes.get(`${key}:${major}`) ?? this.getType(key)
         let message: any
         try {
-            message = decodeType.decode(body)
+            message = decodeType.toObject(decodeType.decode(body))
         } catch (error: any) {
             const offset = typeof error?.offset === 'number' ? `, offset=${error.offset}` : ''
             const size = body?.byteLength ?? '?'
@@ -278,6 +278,10 @@ class Serializer {
             }
             message = handler(message)
             v++
+        }
+        const invalid = this.getType(key).verify(message)
+        if (invalid) {
+            throw new Error(`Serializer.decodeVersioned[${key}] failed: migrated message invalid: ${invalid}`)
         }
         return { version: { major, minor }, message }
     }
