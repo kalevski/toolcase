@@ -27,6 +27,8 @@ export abstract class DialogBase extends HTMLElement {
     protected _initialised = false
     protected _previousFocus: Element | null = null
     protected _idPrefix: string
+    private _inertedElements: Element[] = []
+    private _didInertBackground = false
 
     constructor() {
         super()
@@ -53,6 +55,10 @@ export abstract class DialogBase extends HTMLElement {
     protected shouldLockScroll(): boolean {
         return true
     }
+    /** Whether opening should mark background content inert. Defaults to same as shouldLockScroll(). */
+    protected shouldInertBackground(): boolean {
+        return this.shouldLockScroll()
+    }
     /** Called synchronously once the dialog has opened (e.g. start an auto-dismiss timer). */
     protected onOpened(): void {}
     /** Called synchronously when the dialog begins closing (e.g. clear that timer). */
@@ -76,6 +82,10 @@ export abstract class DialogBase extends HTMLElement {
     disconnectedCallback(): void {
         this._detachHandlers()
         this._restoreScroll()
+        if (this._didInertBackground) {
+            this._setBackgroundInert(false)
+            this._didInertBackground = false
+        }
         overlayStack.pop(this)
     }
 
@@ -114,6 +124,10 @@ export abstract class DialogBase extends HTMLElement {
             this._previousFocus = document.activeElement
             panel?.removeAttribute('hidden')
             backdrop?.removeAttribute('hidden')
+            if (this.shouldInertBackground()) {
+                this._setBackgroundInert(true)
+                this._didInertBackground = true
+            }
             // Settle one frame before adding the open class to trigger the transition.
             requestAnimationFrame(() => {
                 this.classList.add(`${p}--open`)
@@ -128,6 +142,10 @@ export abstract class DialogBase extends HTMLElement {
             this.classList.remove(`${p}--open`)
             panel?.setAttribute('aria-hidden', 'true')
             if (this.shouldLockScroll()) this._restoreScroll()
+            if (this._didInertBackground) {
+                this._setBackgroundInert(false)
+                this._didInertBackground = false
+            }
             this._restoreFocus()
             const delay = this._getTransitionDuration(panel)
             setTimeout(() => {
@@ -165,6 +183,32 @@ export abstract class DialogBase extends HTMLElement {
         this._previousFocus = null
     }
 
+    private _setBackgroundInert(inert: boolean): void {
+        if (inert) {
+            // Collect ancestors so we can exclude the dialog's own branch.
+            const ancestors = new Set<Element>()
+            let el: Element | null = this
+            while (el && el !== document.body) {
+                ancestors.add(el)
+                el = el.parentElement
+            }
+            this._inertedElements = []
+            for (const child of Array.from(document.body.children)) {
+                if (!ancestors.has(child)) {
+                    child.setAttribute('inert', '')
+                    child.setAttribute('aria-hidden', 'true')
+                    this._inertedElements.push(child)
+                }
+            }
+        } else {
+            for (const el of this._inertedElements) {
+                el.removeAttribute('inert')
+                el.removeAttribute('aria-hidden')
+            }
+            this._inertedElements = []
+        }
+    }
+
     private _trapFocus(panel: HTMLElement | null): void {
         if (!panel) return
         const sel = this.initialFocusSelector()
@@ -191,6 +235,15 @@ export abstract class DialogBase extends HTMLElement {
             const panel = this.querySelector<HTMLElement>(`.${this.classPrefix}__panel`)
             if (!panel) return
             const focusable = getFocusable(panel)
+            // If focus has escaped the panel (e.g. moved to body or a background
+            // element), pull it back immediately rather than letting Tab roam further.
+            if (!panel.contains(document.activeElement)) {
+                e.preventDefault()
+                if (focusable.length === 0) panel.focus()
+                else if (e.shiftKey) focusable[focusable.length - 1].focus()
+                else focusable[0].focus()
+                return
+            }
             if (focusable.length === 0) return
             const first = focusable[0]
             const last = focusable[focusable.length - 1]

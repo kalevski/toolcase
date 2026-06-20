@@ -116,7 +116,10 @@ export class ConfirmDialog extends DialogBase {
     }
 
     protected render(): void {
-        if (!this.hasAttribute('role')) this.setAttribute('role', 'dialog')
+        // role="dialog" + aria-modal + labeling all live on the host so that
+        // the accessible name and modality are on the same node as the role.
+        this.setAttribute('role', 'dialog')
+        this.setAttribute('aria-modal', 'true')
 
         const isOpen = this.open
         const hiddenAttr = isOpen ? '' : ' hidden'
@@ -126,19 +129,26 @@ export class ConfirmDialog extends DialogBase {
         const titleId = `${this._idPrefix}-title`
         const messageId = `${this._idPrefix}-message`
 
+        this.setAttribute('aria-labelledby', titleId)
+        if (this.message) {
+            this.setAttribute('aria-describedby', messageId)
+        } else {
+            this.removeAttribute('aria-describedby')
+        }
+
         const eyebrowMarkup = this.eyebrow
             ? `<span class="tc-confirm-dialog__eyebrow">${esc(this.eyebrow)}</span>`
             : ''
         const messageMarkup = this.message
             ? `<p class="tc-confirm-dialog__message" id="${messageId}">${esc(this.message)}</p>`
             : ''
-        const describedBy = this.message ? ` aria-describedby="${messageId}"` : ''
 
+        // Panel is role="document" — a presentation wrapper. Naming/modal attrs
+        // are on the host (role="dialog") above, not here.
         this.innerHTML =
             `<div class="tc-confirm-dialog__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
             `<div class="tc-confirm-dialog__panel" role="document"` +
-            ` aria-labelledby="${titleId}"${describedBy} tabindex="-1"` +
-            ` aria-hidden="${panelAriaHidden}"${hiddenAttr}>` +
+            ` tabindex="-1" aria-hidden="${panelAriaHidden}"${hiddenAttr}>` +
             eyebrowMarkup +
             `<h2 class="tc-confirm-dialog__title" id="${titleId}">${esc(this.dialogTitle)}</h2>` +
             messageMarkup +
