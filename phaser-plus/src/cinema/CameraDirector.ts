@@ -1,6 +1,7 @@
 import type { Cameras, GameObjects } from 'phaser'
 import Feature from '../features/Feature'
 import type Scene from '../engine/Scene'
+import type ScreenShake from './ScreenShake'
 
 export type Easing = (t: number) => number
 
@@ -65,6 +66,8 @@ export default class CameraDirector extends Feature {
 
     private camera: Cameras.Scene2D.Camera | null = null
 
+    private shake: ScreenShake | null = null
+
     private queue: Shot[] = []
 
     private active: Shot | null = null
@@ -79,6 +82,15 @@ export default class CameraDirector extends Feature {
 
     private bound: boolean = false
 
+    /** Base camera position before the first timed cinematic shot started (excludes any shake offset). */
+    private preScrollX: number = 0
+
+    private preScrollY: number = 0
+
+    private preZoom: number = 1
+
+    private hasPre: boolean = false
+
     constructor(scene: Scene, key: string) {
         super(scene, key)
     }
@@ -86,6 +98,23 @@ export default class CameraDirector extends Feature {
     setCamera(camera: Cameras.Scene2D.Camera): this {
         this.camera = camera
         this.bound = true
+        return this
+    }
+
+    /**
+     * Link a ScreenShake instance that shares the same camera so the director
+     * can cooperate with it instead of clobbering its additive offset.
+     *
+     * When linked, every absolute scroll write performed by the director
+     * includes the current shake offset on top of the tweened base position.
+     * startShot() also strips the shake offset from its startX/Y snapshot so
+     * the tween travels between true base positions rather than shake-polluted
+     * ones.  Both orderings of the two features' onUpdate calls produce the
+     * same result: the camera always lands on tweenedBase + currentShakeOffset
+     * at the end of each frame.
+     */
+    setShake(shake: ScreenShake): this {
+        this.shake = shake
         return this
     }
 
@@ -103,6 +132,9 @@ export default class CameraDirector extends Feature {
     clear(): this {
         this.queue = []
         this.active = null
+        if (this.hasPre && this.camera !== null) {
+            this.restorePreState(this.camera)
+        }
         return this
     }
 
@@ -140,14 +172,36 @@ export default class CameraDirector extends Feature {
     }
 
     override onDestroy(): void {
+        if (this.hasPre && this.camera !== null) {
+            this.restorePreState(this.camera)
+        }
         this.queue = []
         this.active = null
     }
 
     private startShot(shot: Shot, camera: Cameras.Scene2D.Camera): void {
+        const sx = this.shake
+        const shakeX = sx !== null ? sx.offsetX : 0
+        const shakeY = sx !== null ? sx.offsetY : 0
+
+        if (shot.type === 'follow') {
+            // Follow is the "normal" camera mode — clear the cinematic snapshot so
+            // we do not restore to the pre-pan position when follow eventually ends.
+            this.hasPre = false
+        } else if (!this.hasPre) {
+            // First timed cinematic shot: remember where the camera was so we can
+            // restore it after the whole sequence is done.
+            this.preScrollX = camera.scrollX - shakeX
+            this.preScrollY = camera.scrollY - shakeY
+            this.preZoom = camera.zoom
+            this.hasPre = true
+        }
+
         this.active = shot
-        this.startX = camera.scrollX
-        this.startY = camera.scrollY
+        // Store the BASE scroll position (without shake) so tween math operates on
+        // true world positions.  tick* methods add the shake offset back on top.
+        this.startX = camera.scrollX - shakeX
+        this.startY = camera.scrollY - shakeY
         this.startZoom = camera.zoom
         this.elapsed = 0
     }
@@ -156,6 +210,20 @@ export default class CameraDirector extends Feature {
         const finished = this.active
         this.active = null
         if (finished !== null) this.emit(SHOT_DONE, finished)
+        // Restore camera to its pre-cinematic base position when the director
+        // runs out of shots, undoing any permanent scroll/zoom left by pan/zoom.
+        if (this.queue.length === 0 && this.hasPre && this.camera !== null) {
+            this.restorePreState(this.camera)
+        }
+    }
+
+    private restorePreState(camera: Cameras.Scene2D.Camera): void {
+        if (!this.hasPre) return
+        const sx = this.shake
+        camera.scrollX = this.preScrollX + (sx !== null ? sx.offsetX : 0)
+        camera.scrollY = this.preScrollY + (sx !== null ? sx.offsetY : 0)
+        camera.zoom = this.preZoom
+        this.hasPre = false
     }
 
     private tickFollow(shot: FollowShot, camera: Cameras.Scene2D.Camera, _dt: number): void {
@@ -174,8 +242,11 @@ export default class CameraDirector extends Feature {
         const e = ease(t)
         const targetX = shot.x - camera.width * 0.5
         const targetY = shot.y - camera.height * 0.5
-        camera.scrollX = this.startX + (targetX - this.startX) * e
-        camera.scrollY = this.startY + (targetY - this.startY) * e
+        const sx = this.shake
+        const shakeX = sx !== null ? sx.offsetX : 0
+        const shakeY = sx !== null ? sx.offsetY : 0
+        camera.scrollX = this.startX + (targetX - this.startX) * e + shakeX
+        camera.scrollY = this.startY + (targetY - this.startY) * e + shakeY
         if (t >= 1) this.completeActive()
     }
 
@@ -201,9 +272,12 @@ export default class CameraDirector extends Feature {
         const cy = shot.y + shot.height * 0.5
         const targetScrollX = cx - (camera.width * 0.5) / targetZoom
         const targetScrollY = cy - (camera.height * 0.5) / targetZoom
+        const sx = this.shake
+        const shakeX = sx !== null ? sx.offsetX : 0
+        const shakeY = sx !== null ? sx.offsetY : 0
         camera.zoom = this.startZoom + (targetZoom - this.startZoom) * e
-        camera.scrollX = this.startX + (targetScrollX - this.startX) * e
-        camera.scrollY = this.startY + (targetScrollY - this.startY) * e
+        camera.scrollX = this.startX + (targetScrollX - this.startX) * e + shakeX
+        camera.scrollY = this.startY + (targetScrollY - this.startY) * e + shakeY
         if (t >= 1) this.completeActive()
     }
 
@@ -218,8 +292,11 @@ export default class CameraDirector extends Feature {
         const ease = shot.ease ?? EASE_LINEAR
         const e = ease(t)
         const point = catmullRom(shot.points, e)
-        camera.scrollX = point.x - camera.width * 0.5
-        camera.scrollY = point.y - camera.height * 0.5
+        const sx = this.shake
+        const shakeX = sx !== null ? sx.offsetX : 0
+        const shakeY = sx !== null ? sx.offsetY : 0
+        camera.scrollX = point.x - camera.width * 0.5 + shakeX
+        camera.scrollY = point.y - camera.height * 0.5 + shakeY
         if (!shot.loop && t >= 1) this.completeActive()
     }
 
