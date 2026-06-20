@@ -1,4 +1,4 @@
-import { LoggerLevel, getLevel, getLevelOrder } from './Level'
+import { LoggerLevel, getLevel, getLevelOrder, isKnownLevel, KNOWN_LEVELS } from './Level'
 import Logger from './Logger'
 import LogReporter from './LogReporter'
 
@@ -14,6 +14,9 @@ class LoggerFactory {
     }
 
     set level(level: LoggerLevel) {
+        if (!isKnownLevel(level)) {
+            throw new RangeError(`Unknown log level: "${level}". Valid levels: ${KNOWN_LEVELS.join(', ')}`)
+        }
         this.levelOrder = getLevelOrder(level)
     }
 

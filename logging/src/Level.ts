@@ -27,5 +27,10 @@ const getLevelOrder = (level: LoggerLevel): number =>
 
 const getLevel = (order: number): LoggerLevel => OrderToLevel[order] ?? 'silent'
 
+const KNOWN_LEVELS = Object.keys(LevelOrder) as LoggerLevel[]
+
+const isKnownLevel = (level: string): level is LoggerLevel =>
+    Object.prototype.hasOwnProperty.call(LevelOrder, level)
+
 export default Level
-export { getLevelOrder, getLevel }
+export { getLevelOrder, getLevel, isKnownLevel, KNOWN_LEVELS }

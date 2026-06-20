@@ -60,6 +60,14 @@ describe('LoggerFactory', () => {
         expect(factory.level).toBe('verbose')
     })
 
+    it('throws RangeError when an invalid level is assigned', () => {
+        const factory = new LoggerFactory([])
+        expect(() => { (factory as any).level = 'warn' }).toThrow(RangeError)
+        expect(() => { (factory as any).level = 'trace' }).toThrow(RangeError)
+        expect(() => { (factory as any).level = '' }).toThrow(RangeError)
+        expect(() => { (factory as any).level = 'VERBOSE' }).toThrow(RangeError)
+    })
+
     it('drops unknown level tokens even when factory level is silent', () => {
         const messages: string[] = []
         class DummyReporter extends LogReporter {
