@@ -23,10 +23,15 @@ class LoggerFactory {
 
     getLogger(scope: string = 'default'): Logger {
         if (!this.loggers.has(scope)) {
-            const logger = new Logger(scope, this.onLog)
+            const logger = new Logger(scope, this.onLog, null, this.isEnabled)
             this.loggers.set(scope, logger)
         }
         return this.loggers.get(scope)!
+    }
+
+    private isEnabled = (order: number, overrideOrder: number | null): boolean => {
+        const threshold = overrideOrder ?? this.levelOrder
+        return threshold >= order
     }
 
     private onLog = (level: LoggerLevel, scope: string, time: string, messages: any[], overrideOrder?: number | null): void => {

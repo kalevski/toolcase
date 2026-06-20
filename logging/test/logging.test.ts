@@ -247,6 +247,92 @@ describe('Logger.withContext (structured context binding)', () => {
     })
 })
 
+describe('Logger.isEnabled (public guard predicate)', () => {
+    it('returns true for all levels when no factory predicate is wired', () => {
+        const log = new Logger('s', () => {})
+        expect(log.isEnabled('error')).toBe(true)
+        expect(log.isEnabled('debug')).toBe(true)
+        expect(log.isEnabled('verbose')).toBe(true)
+    })
+
+    it('reflects factory level threshold', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'warning'
+        const log = factory.getLogger('x')
+        expect(log.isEnabled('error')).toBe(true)
+        expect(log.isEnabled('warning')).toBe(true)
+        expect(log.isEnabled('info')).toBe(false)
+        expect(log.isEnabled('debug')).toBe(false)
+        expect(log.isEnabled('verbose')).toBe(false)
+    })
+
+    it('respects per-logger level override', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'warning'
+        const log = factory.getLogger('y')
+        log.setLevel('verbose')
+        expect(log.isEnabled('debug')).toBe(true)
+        expect(log.isEnabled('verbose')).toBe(true)
+    })
+
+    it('withContext child inherits predicate', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'info'
+        const log = factory.getLogger('z')
+        const child = log.withContext({ requestId: 'r1' })
+        expect(child.isEnabled('info')).toBe(true)
+        expect(child.isEnabled('debug')).toBe(false)
+    })
+})
+
+describe('Logger — early return for disabled levels', () => {
+    it('does not invoke toISOString or the dispatch fn for a disabled level', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'info'
+        const log = factory.getLogger('perf')
+        const child = log.withContext({ requestId: 'r1' })
+
+        const isoSpy = vi.spyOn(Date.prototype, 'toISOString')
+        child.debug('expensive payload')
+        expect(isoSpy).not.toHaveBeenCalled()
+        isoSpy.mockRestore()
+    })
+
+    it('does not invoke dispatch fn for a disabled level', () => {
+        const dispatched: string[] = []
+        const factory = new LoggerFactory([])
+        factory.level = 'info'
+        const log = factory.getLogger('perf2')
+        ;(log as any).logMessageFn = (level: string) => dispatched.push(level)
+        log.debug('should be dropped')
+        expect(dispatched).toHaveLength(0)
+    })
+
+    it('still dispatches enabled levels after the short-circuit is wired', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'debug'
+        const log = factory.getLogger('enabled')
+        const isoSpy = vi.spyOn(Date.prototype, 'toISOString')
+        log.debug('this should pass')
+        expect(isoSpy).toHaveBeenCalledTimes(1)
+        isoSpy.mockRestore()
+    })
+
+    it('short-circuits context array allocation when level is disabled', () => {
+        const received: any[][] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]) { received.push(msgs) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'info'
+        const log = factory.getLogger('ctx')
+        const child = log.withContext({ userId: 42 })
+        child.debug('nope')
+        expect(received).toHaveLength(0)
+        child.info('yes')
+        expect(received).toHaveLength(1)
+        expect(received[0][0]).toEqual({ userId: 42 })
+    })
+})
+
 describe('ConsoleLogReporter', () => {
     it('can be instantiated', () => {
         const reporter = new ConsoleLogReporter()
