@@ -622,6 +622,15 @@ describe('BufferedReporter', () => {
         buf.flush()
         expect(calls).toBe(0)
     })
+
+    it('flush() is called on process.beforeExit', () => {
+        const buf = new BufferedReporter(null, { onFlush: () => {}, maxSize: 100, flushInterval: 0 })
+        buf.log('info', 's', 't', ['pending'])
+        const flushSpy = vi.spyOn(buf, 'flush')
+        process.emit('beforeExit', 0)
+        expect(flushSpy).toHaveBeenCalledTimes(1)
+        flushSpy.mockRestore()
+    })
 })
 
 describe('LoggerFactory — reporter isolation', () => {

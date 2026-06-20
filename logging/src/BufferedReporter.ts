@@ -35,6 +35,9 @@ class BufferedReporter extends LogReporter {
         this.maxSize = options.maxSize ?? DEFAULT_MAX_SIZE
         this.flushInterval = options.flushInterval ?? DEFAULT_FLUSH_INTERVAL
         this.onFlushFn = options.onFlush ?? null
+        if (typeof process !== 'undefined' && typeof process.once === 'function') {
+            process.once('beforeExit', () => this.flush())
+        }
     }
 
     log(level: LoggerLevel, scope: string, time: string, messages: any[]): void {

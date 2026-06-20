@@ -172,6 +172,34 @@ new FileLogReporter('./logs/app.log', {
 })
 ```
 
+### Graceful shutdown
+
+`BufferedReporter` and `FileLogReporter` hold in-flight state (a pending batch and an open write stream respectively) that must be drained before the process exits.
+
+**`BufferedReporter`** — call `close()` on shutdown. It flushes the pending batch synchronously and cancels the interval timer.
+
+```ts
+const remote = new BufferedReporter(inner, { flushInterval: 2000 })
+
+process.on('SIGTERM', () => {
+    remote.close()
+    process.exit(0)
+})
+```
+
+As a safety net, `BufferedReporter` also registers a `process.once('beforeExit', …)` listener on Node.js that flushes any remaining entries automatically when the event loop drains. This does not replace an explicit `close()` call — it is a last-resort guard for clean exits where no shutdown hook is wired up. The listener is browser-safe (the registration is guarded by `typeof process !== 'undefined'`).
+
+**`FileLogReporter`** — call `await close()` on shutdown. It waits for any in-progress rotation to complete, then closes the underlying write stream.
+
+```ts
+const file = new FileLogReporter('./logs/app.log')
+
+process.on('SIGTERM', async () => {
+    await file.close()
+    process.exit(0)
+})
+```
+
 ### Custom reporter
 
 Extend `LogReporter` and implement `log(level, scope, time, messages)`:
