@@ -44,6 +44,14 @@ describe('State', () => {
         expect(emitted).toBe(true)
     })
 
+    it('state event fires with post-mutation data', () => {
+        const state = new State({ count: 0, label: 'a' })
+        let captured: any = null
+        state.on('state', (value: any) => { captured = value })
+        state.set({ count: 5 })
+        expect(captured).toEqual({ count: 5, label: 'a' })
+    })
+
     it('does not emit events when emit=false', () => {
         const state = new State({ count: 0 })
         let emitted = false

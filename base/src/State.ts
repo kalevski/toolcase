@@ -26,8 +26,8 @@ class State<T extends Record<string, any> = Record<string, any>> extends Broadca
         }
 
         const props = ['state']
-        this.emitEvent(props, this.data, emit)
         this.setProperties(this.data as Record<string, any>, data as Record<string, any>, props, emit)
+        this.emitEvent(props, this.data, emit)
         
         return this
     }
