@@ -26,7 +26,7 @@ class LSystem {
 
     iterate(): string {
         let sequence = ''
-        for (const rule of this._state.split('')) {
+        for (const rule of [...this._state]) {
             const resolved = this.config.rules[rule]
             if (typeof resolved !== 'string') {
                 sequence += rule
@@ -37,6 +37,11 @@ class LSystem {
         this._iteration++
         this._state = sequence
         return sequence
+    }
+
+    reset(): void {
+        this._state = this.config.axiom
+        this._iteration = 0
     }
 }
 
