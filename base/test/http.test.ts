@@ -64,7 +64,7 @@ describe('HTTP.RESTResponse', () => {
     it('toJSON omits count when not provided', () => {
         const r = new RESTResponse(200, [1, 2])
         const json = r.toJSON()
-        expect(json).toEqual({ status: 'OK', data: [1, 2] })
+        expect(json).toEqual({ status: 'OK', code: 200, data: [1, 2] })
         expect('count' in json).toBe(false)
     })
 
@@ -75,12 +75,29 @@ describe('HTTP.RESTResponse', () => {
 
     it('toJSON includes count when number provided', () => {
         const r = new RESTResponse(200, [1, 2], 2)
-        expect(r.toJSON()).toEqual({ status: 'OK', count: 2, data: [1, 2] })
+        expect(r.toJSON()).toEqual({ status: 'OK', code: 200, count: 2, data: [1, 2] })
     })
 
     it('JSON.stringify drops missing count', () => {
         const r = new RESTResponse(200, [1])
         const text = JSON.stringify(r)
         expect(text).not.toContain('count')
+    })
+
+    it('toJSON status is OK for 200', () => {
+        expect(new RESTResponse(200, null).toJSON().status).toBe('OK')
+    })
+
+    it('toJSON status is rejected for 500', () => {
+        expect(new RESTResponse(500, null).toJSON().status).toBe('rejected')
+    })
+
+    it('toJSON status is rejected for 400', () => {
+        expect(new RESTResponse(400, null).toJSON().status).toBe('rejected')
+    })
+
+    it('toJSON code reflects real status', () => {
+        expect(new RESTResponse(500, null).toJSON().code).toBe(500)
+        expect(new RESTResponse(201, null).toJSON().code).toBe(201)
     })
 })
