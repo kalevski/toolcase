@@ -39,8 +39,16 @@ export class Check extends HTMLElement {
         this.removeEventListener('change', this._onNativeChange)
     }
 
-    attributeChangedCallback(_name: string, _old: string | null, _next: string | null): void {
+    attributeChangedCallback(name: string, _old: string | null, _next: string | null): void {
         if (!this.isConnected || !this._initialised) return
+        if (name === 'checked' || name === 'indeterminate') {
+            const input = this.querySelector<HTMLInputElement>('input')
+            if (input) {
+                input.checked = this.hasAttribute('checked')
+                input.indeterminate = this.hasAttribute('indeterminate')
+            }
+            return
+        }
         this.render()
     }
 
@@ -115,8 +123,11 @@ export class Check extends HTMLElement {
     private _onNativeChange = (e: Event): void => {
         const input = e.target as HTMLInputElement
         if (input.tagName === 'INPUT') {
-            if (input.checked) this.setAttribute('checked', '')
-            else this.removeAttribute('checked')
+            const isChecked = input.checked
+            if (isChecked !== this.hasAttribute('checked')) {
+                if (isChecked) this.setAttribute('checked', '')
+                else this.removeAttribute('checked')
+            }
         }
     }
 
