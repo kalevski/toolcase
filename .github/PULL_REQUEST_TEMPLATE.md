@@ -15,8 +15,7 @@ For first-time contributors: read CONTRIBUTING.md for repo conventions.
 - [ ] `@toolcase/logging`
 - [ ] `@toolcase/serializer`
 - [ ] `@toolcase/node`
-- [ ] `@toolcase/react-components`
-- [ ] `@toolcase/game-components`
+- [ ] `@toolcase/web-components`
 - [ ] `@toolcase/phaser-plus`
 - [ ] `examples/` site
 - [ ] Repo / CI / tooling
@@ -45,8 +44,8 @@ For first-time contributors: read CONTRIBUTING.md for repo conventions.
 - [ ] PR is focused on a single logical change
 - [ ] Public API changes are reflected in the relevant `examples/public/<pkg>/SKILL.md`
 - [ ] New component / export is added to its package's `src/index.ts`
-- [ ] No `border-radius` introduced in `react-components` (except intentional circles)
-- [ ] New `game-components` entries register a `disconnectedCallback` if they install listeners or observers
+- [ ] No `border-radius` introduced in `web-components` (except sanctioned circles/pills)
+- [ ] New `web-components` entries register their tag in `src/register.ts` and clean up listeners/observers in `disconnectedCallback`
 
 ## Related issues
 

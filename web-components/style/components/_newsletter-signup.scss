@@ -18,8 +18,8 @@ tc-newsletter-signup {
     --bs-newsletter-signup-input-border: var(--tc-border-strong);
     --bs-newsletter-signup-input-focus-ring: var(--tc-focus-ring);
     --bs-newsletter-signup-input-placeholder-color: var(--tc-text-faint);
-    --bs-newsletter-signup-submit-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-newsletter-signup-submit-color: #fff;
+    --bs-newsletter-signup-submit-bg: var(--tc-app-accent-gradient);
+    --bs-newsletter-signup-submit-color: var(--tc-app-accent-contrast);
     --bs-newsletter-signup-submit-border: var(--tc-app-accent);
     --bs-newsletter-signup-error-color: var(--tc-danger);
     --bs-newsletter-signup-error-bg: var(--tc-danger-bg, rgba(220, 38, 38, 0.07));

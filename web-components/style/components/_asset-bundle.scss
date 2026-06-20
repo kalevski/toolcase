@@ -46,7 +46,7 @@ tc-asset-bundle {
     --bs-asset-bundle-control-hover-bg: var(--tc-surface-muted);
     --bs-asset-bundle-control-hover-color: var(--tc-text);
     --bs-asset-bundle-control-active-bg: var(--tc-app-accent);
-    --bs-asset-bundle-control-active-color: #{$white};
+    --bs-asset-bundle-control-active-color: var(--tc-app-accent-contrast);
 
     --bs-asset-bundle-skeleton-bg: var(--tc-surface-muted);
     --bs-asset-bundle-skeleton-shimmer: rgba(255, 255, 255, 0.6);

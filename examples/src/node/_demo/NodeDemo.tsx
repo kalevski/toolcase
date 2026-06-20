@@ -1,5 +1,4 @@
 import { ReactNode } from 'react'
-import { Button, Card, CodeSnippet, Heading, Text } from '@toolcase/react-components'
 
 export type LogEntry = { time: string; text: string; level?: string }
 
@@ -80,12 +79,18 @@ export type NodeDemoProps = {
 }
 
 export const NodeDemoCard = ({ title, description, code, onRun, logs, extra }: NodeDemoProps) => (
-    <Card>
-        <Heading as="h3">{title}</Heading>
-        <Text as="p" variant="muted">{description}</Text>
-        <CodeSnippet language="typescript" code={code} />
-        {extra}
-        {onRun ? <Button size="small" onClick={onRun}>Run</Button> : null}
-        <ConsoleOutput logs={logs ?? []} />
-    </Card>
+    <div className="card">
+        <div className="card-body">
+            <h3 className="card-title">{title}</h3>
+            <p className="text-body-secondary">{description}</p>
+            <tc-code-snippet language="typescript" code={code}></tc-code-snippet>
+            {extra}
+            {onRun ? (
+                <button type="button" className="btn btn-primary btn-sm" onClick={onRun}>
+                    Run
+                </button>
+            ) : null}
+            <ConsoleOutput logs={logs ?? []} />
+        </div>
+    </div>
 )

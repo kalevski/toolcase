@@ -104,7 +104,7 @@ tc-audio-mixer[disabled] {
     }
 
     &--primary {
-        color: #fff;
+        color: var(--tc-app-accent-contrast);
         background: var(--tc-app-accent);
         border-color: var(--tc-app-accent);
 
@@ -212,7 +212,7 @@ tc-audio-mixer[disabled] {
     }
 
     &--mute {
-        color: #fff;
+        color: var(--tc-app-accent-contrast);
         background: var(--bs-audio-mixer-mute-color);
         border-color: var(--bs-audio-mixer-mute-color);
     }
@@ -228,7 +228,7 @@ tc-audio-mixer[disabled] {
         border-color: var(--tc-border-strong);
 
         &:hover {
-            color: #fff;
+            color: var(--tc-app-accent-contrast);
             background: var(--tc-danger);
             border-color: var(--tc-danger);
         }

@@ -9,7 +9,7 @@ tc-multi-card-select {
     --bs-multi-card-select-bg: var(--tc-surface);
     --bs-multi-card-select-hover-bg: var(--tc-surface-muted);
     --bs-multi-card-select-selected-bg: var(--tc-app-accent);
-    --bs-multi-card-select-selected-text: #fff;
+    --bs-multi-card-select-selected-text: var(--tc-app-accent-contrast);
     --bs-multi-card-select-label-color: var(--tc-text);
     --bs-multi-card-select-label-size: 0.9375rem;
     --bs-multi-card-select-desc-color: var(--tc-text-muted);
@@ -75,7 +75,7 @@ tc-multi-card-select {
         }
 
         .tc-multi-card-select-desc {
-            color: rgba(255, 255, 255, 0.75);
+            color: color-mix(in srgb, var(--tc-app-accent-contrast) 75%, transparent);
         }
 
         .tc-multi-card-select-icon {

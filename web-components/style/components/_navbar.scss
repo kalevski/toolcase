@@ -55,6 +55,7 @@
 
     .nav-link {
         font-size: 0.8125rem;
+        padding: 0.4rem 0;
         color: var(--bs-navbar-color);
         transition: color var(--tc-transition-fast);
 
@@ -194,6 +195,14 @@
     .nav,
     .navbar-nav {
         flex-direction: row;
+    }
+
+    // Row layout needs explicit horizontal spacing — the nav-links carry no
+    // side padding (so the active 2px underline hugs the label), so without a
+    // gap the top-nav links collide ("PackagesAppsSkills").
+    .navbar-nav {
+        align-items: center;
+        gap: 1.5rem;
     }
 }
 

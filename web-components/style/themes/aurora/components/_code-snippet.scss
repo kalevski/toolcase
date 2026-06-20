@@ -1,0 +1,24 @@
+// Aurora › tc-code-snippet — near-black code surface, mint syntax accents.
+// Foundation maps the ink bg, border and mono font. Fix the legibility trap
+// (--tc-text-inverse → dark ink on dark bg) and repoint the hardcoded syntax
+// token hexes onto the aurora palette: mint comments, blue keywords, emerald
+// strings.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-code-snippet {
+        --bs-code-snippet-code-color: var(--ah-text);
+        --bs-code-snippet-title-color: var(--ah-accent-bright);
+        --bs-code-snippet-header-border: 1px solid var(--ah-border);
+
+        --bs-code-snippet-tok-keyword: var(--ah-info);
+        --bs-code-snippet-tok-string: var(--ah-accent);
+        --bs-code-snippet-tok-comment: var(--ah-muted);
+        --bs-code-snippet-tok-number: var(--ah-warn);
+        --bs-code-snippet-tok-variable: var(--ah-accent-bright);
+    }
+
+    .tc-code-snippet-copy--copied {
+        color: var(--ah-accent);
+    }
+}

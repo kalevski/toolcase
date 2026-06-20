@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/base",
-    "version": "3.0.3",
+    "version": "4.0.0",
     "description": "Zero-dep JavaScript helpers and data structures for Node.js and the browser — events, async, collections, math, and more.",
     "source": "src/main.js",
     "main": "lib/main.main.js",

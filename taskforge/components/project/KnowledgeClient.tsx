@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Card, Heading, Text, Table, Tag, Badge, Button, toast, type TableColumn } from '@toolcase/react-components'
+import { Card, Heading, Text, Table, Tag, Badge, Button, toast, type TableColumn } from '@/components/ui'
 import type { KnowledgeDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { usePrompt } from '../ConfirmModal'

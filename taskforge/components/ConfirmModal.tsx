@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useRef, useState } from 'react'
-import { Modal, Button, Heading, Text, Input } from '@toolcase/react-components'
+import { Modal, Button, Heading, Text, Input } from '@/components/ui'
 
 export interface ConfirmInput {
     title: string

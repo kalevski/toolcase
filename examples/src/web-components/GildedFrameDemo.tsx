@@ -7,7 +7,7 @@ const GildedFrameDemo: React.FC = () => (
                 <div className="col-12">
                     <tc-rich-page-header
                         title-text="Gilded Frame"
-                        description="Hairline-framed surface that wraps its slotted content. A web-components reinterpretation of the game-components gc-gilded-frame: the gilding is dropped for the toolcase voice — sharp corners, slate neutrals, 1px borders. Pick a tone and a padding step."
+                        description="Hairline-framed surface that wraps its slotted content. A toolcase design-system take on a framed surface: the gilding is dropped for the toolcase voice — sharp corners, slate neutrals, 1px borders. Pick a tone and a padding step."
                     >
                         <tc-badge slot="chips" variant="secondary">
                             Web Components

@@ -18,7 +18,7 @@ import {
     Tooltip,
     TerminalWindow,
     toast,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { CommitMessageMode } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { ScheduleCard } from './ScheduleCard'

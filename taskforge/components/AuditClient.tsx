@@ -3,7 +3,7 @@
 // D3 — admin audit-log table with filters.
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { Table, Badge, Button, Input, Select, Text, HelperText, type TableColumn } from '@toolcase/react-components'
+import { Table, Badge, Button, Input, Select, Text, HelperText, type TableColumn } from '@/components/ui'
 import type { AuditRecord } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 

@@ -1,0 +1,115 @@
+// Aurora › .btn — mint gradient primary with a glow lift.
+// The base .btn-primary bg is `linear-gradient(135deg, var(--tc-app-accent),
+// #2b3a51)` — that #2b3a51 slate stop survives the token remap, so primary
+// reads mint→slate. We repoint it to the full mint→emerald gradient, dark-ink
+// label, and add the signature glow drop-shadow + translateY hover lift.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .btn {
+        --bs-btn-focus-shadow-rgb: 47, 230, 173;
+        font-weight: 600;
+        transition:
+            transform 0.18s var(--ah-ease),
+            background 0.2s,
+            border-color 0.2s,
+            box-shadow 0.25s,
+            color 0.2s;
+    }
+
+    // Primary — mint→emerald gradient, dark-ink label, mint glow.
+    .btn-primary {
+        --bs-btn-bg: var(--ah-accent-grad);
+        --bs-btn-hover-bg: var(--ah-accent-grad);
+        --bs-btn-active-bg: linear-gradient(135deg, var(--ah-accent-2), var(--ah-accent-2));
+        --bs-btn-color: var(--ah-accent-ink);
+        --bs-btn-hover-color: var(--ah-accent-ink);
+        --bs-btn-active-color: var(--ah-accent-ink);
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-border-color: transparent;
+        --bs-btn-active-border-color: transparent;
+        // Loading / disabled primary renders as the base disabled state, whose
+        // colour falls back to the base white over a flat mint fill (~1.6:1).
+        // Keep the dark ink so `<tc-button loading>` stays legible.
+        --bs-btn-disabled-color: var(--ah-accent-ink);
+        --bs-btn-disabled-bg: var(--ah-accent-2);
+        box-shadow: var(--ah-glow), var(--ah-bevel-top);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--ah-glow-strong), var(--ah-bevel-top);
+    }
+
+    .btn-primary:active,
+    .btn-primary.active {
+        transform: translateY(0);
+        box-shadow: var(--ah-glow);
+    }
+
+    // Outline / ghost buttons pick up the mint accent on hover.
+    .btn-outline-primary {
+        --bs-btn-color: var(--ah-accent-bright);
+        --bs-btn-border-color: var(--ah-accent-line);
+        --bs-btn-hover-bg: var(--ah-accent-soft);
+        --bs-btn-hover-color: var(--ah-accent-bright);
+        --bs-btn-hover-border-color: var(--ah-accent);
+    }
+
+    // Outline-dark inherits --bs-dark (the near-black canvas) as its text +
+    // border → invisible on the dark ground (~1.1:1). Flip it to a light
+    // hairline/label so it reads as a neutral ghost button.
+    .btn-outline-dark {
+        --bs-btn-color: var(--ah-text);
+        --bs-btn-border-color: var(--ah-border-strong);
+        --bs-btn-hover-color: var(--ah-emphasis);
+        --bs-btn-hover-bg: var(--ah-surface-2);
+        --bs-btn-hover-border-color: var(--ah-border-strong);
+        --bs-btn-active-color: var(--ah-emphasis);
+        --bs-btn-active-bg: var(--ah-surface-2);
+        --bs-btn-active-border-color: var(--ah-border-strong);
+        --bs-btn-disabled-color: var(--ah-text-2);
+        --bs-btn-disabled-border-color: var(--ah-border);
+    }
+
+    // Solid semantic fills are bright on the dark canvas — the base keeps white
+    // text (only `light` flips), leaving success/warning/info/danger at
+    // ~1.9–2.8:1. Flip them all to near-black ink so they clear AA.
+    .btn-success,
+    .btn-warning,
+    .btn-info,
+    .btn-danger,
+    .btn-light {
+        --bs-btn-color: var(--ah-accent-ink);
+        --bs-btn-hover-color: var(--ah-accent-ink);
+        --bs-btn-active-color: var(--ah-accent-ink);
+        --bs-btn-disabled-color: var(--ah-accent-ink);
+    }
+
+    // Secondary maps to the light-grey secondary-TEXT tone; as a button FILL it
+    // reads as a pale wash with unreadable white text (~2.1:1). Re-skin it as a
+    // quiet dark surface with light text — the dark-theme secondary convention.
+    .btn-secondary {
+        --bs-btn-color: var(--ah-text);
+        --bs-btn-bg: var(--ah-surface-3);
+        --bs-btn-border-color: var(--ah-border-strong);
+        --bs-btn-hover-color: var(--ah-emphasis);
+        --bs-btn-hover-bg: var(--ah-surface-2);
+        --bs-btn-hover-border-color: var(--ah-border-strong);
+        --bs-btn-active-color: var(--ah-emphasis);
+        --bs-btn-active-bg: var(--ah-surface-2);
+        --bs-btn-active-border-color: var(--ah-border-strong);
+        --bs-btn-disabled-color: var(--ah-text-2);
+        --bs-btn-disabled-bg: var(--ah-surface-3);
+        --bs-btn-disabled-border-color: var(--ah-border);
+    }
+
+    // Plain-link buttons keep no lift / glow.
+    .btn-link {
+        box-shadow: none;
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

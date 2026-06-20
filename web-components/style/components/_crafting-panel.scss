@@ -55,8 +55,8 @@ tc-crafting-panel {
     --bs-crafting-panel-insufficient-color: var(--tc-danger);
 
     // ── Craft button (ink primary motif) ─────────────────────────────────────
-    --bs-crafting-panel-craft-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-crafting-panel-craft-color: #fff;
+    --bs-crafting-panel-craft-bg: var(--tc-app-accent-gradient);
+    --bs-crafting-panel-craft-color: var(--tc-app-accent-contrast);
     --bs-crafting-panel-craft-padding-y: 0.5rem;
     --bs-crafting-panel-craft-padding-x: 1rem;
     --bs-crafting-panel-craft-font-size: 0.925rem;

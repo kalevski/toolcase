@@ -1,0 +1,198 @@
+// Aurora › accent-fill contrast pass.
+//
+// Two systematic light-theme assumptions break on the dark aurora canvas:
+//
+//  1. ACCENT FILLS + WHITE TEXT. Dozens of components paint a part with the app
+//     accent (`--bs-*-bg: var(--tc-app-accent)`) and a hard-coded `#fff` label.
+//     The token remap turns the accent bright mint, so white text lands at
+//     ~1.6:1. These are STATE-specific vars (selected / active / current /
+//     claimed / done) so repointing the matching `--bs-*-color` to the dark
+//     accent-ink fixes only the accent state and leaves neutral states alone.
+//
+//  2. THE #2b3a51 SLATE-STOP GRADIENT. A whole family of CTA buttons fill with
+//     `linear-gradient(135deg, var(--tc-app-accent), #2b3a51)` + white text. The
+//     slate stop survives the remap, so the button renders mint→slate (a muddy
+//     mid-teal) under white (~3.9:1) — the same trap the primary button hit.
+//     Repoint the fill to the mint→emerald gradient and the label to ink.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    // ── 1. Accent-fill state labels → dark ink ──────────────────────────────
+    tc-asset-bundle {
+        --bs-asset-bundle-control-active-color: var(--ah-accent-ink);
+    }
+    tc-battle-pass {
+        --bs-battle-pass-premium-color: var(--ah-accent-ink);
+        --bs-battle-pass-level-marker-current-color: var(--ah-accent-ink);
+        --bs-battle-pass-cell-claimed-color: var(--ah-accent-ink);
+    }
+    tc-codex {
+        --bs-codex-row-selected-color: var(--ah-accent-ink);
+    }
+    tc-ecosystem-map {
+        --bs-ecosystem-map-core-text: var(--ah-accent-ink);
+    }
+    tc-equipment-doll {
+        --bs-equipment-doll-qty-color: var(--ah-accent-ink);
+        --bs-equipment-doll-selected-color: var(--ah-accent-ink);
+    }
+    tc-form-wizard {
+        --bs-form-wizard-current-color: var(--ah-accent-ink);
+        --bs-form-wizard-done-color: var(--ah-accent-ink);
+    }
+    tc-graphics-preset-picker {
+        --bs-graphics-preset-picker-active-color: var(--ah-accent-ink);
+    }
+    tc-item-slot {
+        // hotkey / qty / equipped sit on the bright accent → ink. NOT cooldown:
+        // its label rides a dark veil, where the base white is correct.
+        --bs-item-slot-hotkey-color: var(--ah-accent-ink);
+        --bs-item-slot-qty-color: var(--ah-accent-ink);
+        --bs-item-slot-equipped-color: var(--ah-accent-ink);
+    }
+    tc-menu-item {
+        --bs-menu-item-selected-color: var(--ah-accent-ink);
+        --bs-menu-item-selected-icon-color: rgba(4, 35, 27, 0.82);
+        --bs-menu-item-hotkey-selected-color: rgba(4, 35, 27, 0.85);
+    }
+    tc-level-header {
+        --bs-level-header-badge-color: var(--ah-accent-ink);
+    }
+    tc-level-select {
+        --bs-level-select-node-selected-color: var(--ah-accent-ink);
+    }
+    tc-lobby {
+        --bs-lobby-btn-start-color: var(--ah-accent-ink);
+        --bs-lobby-btn-active-color: var(--ah-accent-ink);
+    }
+    tc-main-menu {
+        --bs-main-menu-item-selected-color: var(--ah-accent-ink);
+        --bs-main-menu-badge-selected-color: var(--ah-accent-ink);
+    }
+    tc-maintainer-card {
+        // sponsor pill is the bright danger fill — ink clears AA where white did not
+        --bs-maintainer-card-sponsor-color: var(--ah-accent-ink);
+    }
+    tc-matchmaking-screen {
+        --bs-matchmaking-screen-btn-accept-color: var(--ah-accent-ink);
+    }
+    tc-normal-map-generator {
+        --bs-normal-map-generator-seg-active-color: var(--ah-accent-ink);
+        --bs-normal-map-generator-tool-active-color: var(--ah-accent-ink);
+    }
+    tc-perk-picker {
+        --bs-perk-picker-selected-color: var(--ah-accent-ink);
+        --bs-perk-picker-icon-selected-color: var(--ah-accent-ink);
+        --bs-perk-picker-selected-desc-color: rgba(4, 35, 27, 0.78);
+    }
+    tc-pricing-card {
+        --bs-pricing-card-badge-color: var(--ah-accent-ink);
+    }
+    tc-shop-panel {
+        --bs-shop-panel-btn-color: var(--ah-accent-ink);
+    }
+    tc-side-nav {
+        --bs-side-nav-badge-color: var(--ah-accent-ink);
+    }
+    tc-skill-tree {
+        --bs-skill-tree-node-selected-color: var(--ah-accent-ink);
+    }
+    tc-stepper {
+        --bs-stepper-active-color: var(--ah-accent-ink);
+        --bs-stepper-complete-color: var(--ah-accent-ink);
+    }
+    tc-user-panel {
+        --bs-user-panel-avatar-color: var(--ah-accent-ink);
+    }
+    tc-vertical-item-list {
+        --bs-vertical-item-list-badge-color: var(--ah-accent-ink);
+    }
+
+    // ── 2. #2b3a51 slate-stop CTA gradients → mint→emerald + ink ─────────────
+    tc-bitmap-font-generator {
+        --bs-bitmap-font-generator-btn-primary-bg: var(--ah-accent-grad);
+        --bs-bitmap-font-generator-btn-primary-color: var(--ah-accent-ink);
+        --bs-bitmap-font-generator-btn-active-color: var(--ah-accent-ink);
+    }
+    tc-chat-window {
+        --bs-chat-window-send-bg: var(--ah-accent-grad);
+        --bs-chat-window-send-color: var(--ah-accent-ink);
+    }
+    tc-crafting-panel {
+        --bs-crafting-panel-craft-bg: var(--ah-accent-grad);
+        --bs-crafting-panel-craft-color: var(--ah-accent-ink);
+    }
+    tc-early-signup-form {
+        --bs-early-signup-form-submit-bg: var(--ah-accent-grad);
+        --bs-early-signup-form-submit-color: var(--ah-accent-ink);
+    }
+    tc-github-stars-card {
+        --bs-github-stars-card-cta-bg: var(--ah-accent-grad);
+        --bs-github-stars-card-cta-color: var(--ah-accent-ink);
+    }
+    tc-image-crop {
+        --bs-image-crop-btn-primary-bg: var(--ah-accent-grad);
+        --bs-image-crop-btn-primary-color: var(--ah-accent-ink);
+    }
+    // metal-button: only the PRIMARY variant carries the slate gradient; default
+    // + ghost are neutral/transparent, so scope to the variant (a base override
+    // would paint every variant mint). danger keeps its red fill → ink label.
+    tc-metal-button[variant='primary'] {
+        --bs-metal-button-bg: var(--ah-accent-grad);
+        --bs-metal-button-hover-bg: var(--ah-accent-grad);
+        --bs-metal-button-active-bg: var(--ah-accent-grad);
+        --bs-metal-button-color: var(--ah-accent-ink);
+    }
+    tc-metal-button[variant='danger'] {
+        --bs-metal-button-color: var(--ah-accent-ink);
+    }
+    tc-newsletter-signup {
+        --bs-newsletter-signup-submit-bg: var(--ah-accent-grad);
+        --bs-newsletter-signup-submit-color: var(--ah-accent-ink);
+    }
+    tc-node-editor {
+        --bs-node-editor-selected-header-bg: var(--ah-accent-grad);
+        --bs-node-editor-selected-header-text: var(--ah-accent-ink);
+    }
+    tc-pricing-card {
+        --bs-pricing-card-highlight-cap-bg: var(--ah-accent-grad);
+    }
+    tc-usage-summary-panel {
+        --bs-usage-summary-panel-title-bg: var(--ah-accent-grad);
+        --bs-usage-summary-panel-title-color: var(--ah-accent-ink);
+    }
+
+    // legal-screen + page-footer paint the slate gradient directly on the
+    // element (no var), so re-skin the element and flip the label to ink.
+    .tc-legal-screen__accept,
+    .tc-page-footer-cta-btn {
+        background: var(--ah-accent-grad) !important;
+        color: var(--ah-accent-ink) !important;
+    }
+
+    // ── 3. State-scoped accent labels set directly on the element ────────────
+    // These hard-code `#fff` inside a `.is-selected` / `--complete` / `--live`
+    // block (no var to repoint), so scope the override to the SAME accent state.
+    .tc-crafting-panel-row.is-selected .tc-crafting-panel-row-name,
+    .tc-crafting-panel-row.is-selected .tc-crafting-panel-row-icon {
+        color: var(--ah-accent-ink);
+    }
+    .tc-pipeline-step--complete .tc-pipeline-marker,
+    .tc-pipeline-step--live .tc-pipeline-marker {
+        color: var(--ah-accent-ink);
+    }
+    .tc-skill-tree__node--selected .tc-skill-tree__rank,
+    .tc-skill-tree__node--selected .tc-skill-tree__label {
+        color: var(--ah-accent-ink);
+    }
+    .tc-legal-screen__nav-item--active {
+        color: var(--ah-accent-ink);
+    }
+    // game-showcase stamp shares one colour var across the ink default ("Featured",
+    // white-on-ink, correct) and the bright success/danger variants. Scope the ink
+    // flip to the coloured variants only.
+    .tc-game-showcase-card-stamp--success,
+    .tc-game-showcase-card-stamp--warning {
+        color: var(--ah-accent-ink);
+    }
+}

@@ -15,8 +15,8 @@ import {
     Text,
     toast,
     type TableColumn,
-} from '@toolcase/react-components'
-import { LineChart } from '@toolcase/react-components'
+} from '@/components/ui'
+import { LineChart } from '@/components/ui'
 import type { EngineState, ProjectSummary, UsageSnapshot } from '@/server/domain/types'
 import { useNewProject } from './NewProjectModal'
 import { useConfirm } from './ConfirmModal'

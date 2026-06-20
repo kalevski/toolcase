@@ -10,7 +10,7 @@ const IconBadgeDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="IconBadge"
-                            description="A single icon badge: a square slate chip with a centred lucide glyph. Ported from the game-components gc-icon-badge and restyled to the toolcase design system — flat surface, hairline border, sharp corners. The tile fill (bg) and glyph color (color) are caller-supplied; the chip and glyph size scale off the size attribute."
+                            description="A single icon badge: a square slate chip with a centred lucide glyph. Restyled to the toolcase design system — flat surface, hairline border, sharp corners. The tile fill (bg) and glyph color (color) are caller-supplied; the chip and glyph size scale off the size attribute."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

@@ -28,7 +28,7 @@ const ArtboardBackdropDemo: React.FC = () => (
                 <div className="col-12">
                     <tc-rich-page-header
                         title-text="Artboard Backdrop"
-                        description="Decorative full-bleed backdrop surface. Ported from game-components but re-skinned to the design system — slate ramp tones, sharp corners, hairline borders, no fantasy chrome."
+                        description="Decorative full-bleed backdrop surface. Built for the toolcase design system — slate ramp tones, sharp corners, hairline borders, no fantasy chrome."
                     >
                         <tc-badge slot="chips" variant="secondary">
                             Web Components

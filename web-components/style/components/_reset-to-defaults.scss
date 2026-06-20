@@ -19,7 +19,7 @@ tc-reset-to-defaults {
 
     // Confirm reset button — danger treatment.
     --bs-reset-to-defaults-confirm-bg: var(--tc-danger);
-    --bs-reset-to-defaults-confirm-color: #fff;
+    --bs-reset-to-defaults-confirm-color: var(--tc-app-accent-contrast);
     --bs-reset-to-defaults-confirm-border: 1px solid var(--tc-danger);
     --bs-reset-to-defaults-confirm-hover-bg: color-mix(in srgb, var(--tc-danger) 88%, #000 12%);
     --bs-reset-to-defaults-confirm-hover-border: 1px solid color-mix(in srgb, var(--tc-danger) 88%, #000 12%);

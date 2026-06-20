@@ -22,7 +22,7 @@ tc-physics-editor {
     --bs-physics-editor-tool-color: var(--tc-text-muted);
     --bs-physics-editor-tool-hover-bg: var(--tc-surface-muted);
     --bs-physics-editor-tool-active-bg: var(--tc-app-accent);
-    --bs-physics-editor-tool-active-color: #fff;
+    --bs-physics-editor-tool-active-color: var(--tc-app-accent-contrast);
 
     // Stage: slate well with a checkerboard so transparency reads.
     --bs-physics-editor-stage-bg: var(--tc-surface-muted);

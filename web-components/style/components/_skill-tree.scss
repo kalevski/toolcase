@@ -30,7 +30,7 @@ tc-skill-tree {
 
     // Node — selected
     --bs-skill-tree-node-selected-bg:        var(--tc-app-accent);
-    --bs-skill-tree-node-selected-color:     #fff;
+    --bs-skill-tree-node-selected-color: var(--tc-app-accent-contrast);
     --bs-skill-tree-node-selected-border:    var(--tc-app-accent);
 
     // Node — unlocked (not selected)

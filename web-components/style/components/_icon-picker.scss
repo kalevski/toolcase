@@ -197,11 +197,11 @@ tc-icon-picker {
         border-color: var(--tc-border-strong);
     }
 
-    // Selected cell — ink fill, white icon
+    // Selected cell — accent fill, contrast-ink icon
     &--selected {
         background: var(--tc-app-accent);
         border-color: var(--tc-app-accent);
-        color: #fff;
+        color: var(--tc-app-accent-contrast);
 
         &:hover {
             background: var(--tc-app-accent);

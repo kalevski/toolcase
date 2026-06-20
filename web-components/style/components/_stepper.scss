@@ -25,12 +25,12 @@ tc-stepper {
     // ── Active marker (ink fill + white number) ────────────────────────────────
     --bs-stepper-active-bg: var(--tc-app-accent);
     --bs-stepper-active-border: var(--tc-app-accent);
-    --bs-stepper-active-color: #fff;
+    --bs-stepper-active-color: var(--tc-app-accent-contrast);
 
     // ── Complete marker (success fill + check icon) ────────────────────────────
     --bs-stepper-complete-bg: var(--tc-success);
     --bs-stepper-complete-border: var(--tc-success);
-    --bs-stepper-complete-color: #fff;
+    --bs-stepper-complete-color: var(--tc-app-accent-contrast);
 
     // ── Check icon ─────────────────────────────────────────────────────────────
     --bs-stepper-check-icon-size: 1rem;

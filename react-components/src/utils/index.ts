@@ -1,1 +1,0 @@
-export { formatRelative } from './formatRelative'

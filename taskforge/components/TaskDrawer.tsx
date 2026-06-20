@@ -12,7 +12,7 @@ import {
     HelperText,
     MarkdownEditor,
     toast,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from './ProjectContext'
 import { useFeedbackModal } from './FeedbackModal'

@@ -26,14 +26,14 @@ tc-item-slot {
     --bs-item-slot-selected-ring: rgba(30, 41, 59, 0.12);
 
     --bs-item-slot-qty-bg: var(--tc-app-accent);
-    --bs-item-slot-qty-color: #fff;
+    --bs-item-slot-qty-color: var(--tc-app-accent-contrast);
 
     --bs-item-slot-hotkey-bg: var(--tc-app-accent);
-    --bs-item-slot-hotkey-color: #fff;
+    --bs-item-slot-hotkey-color: var(--tc-app-accent-contrast);
     --bs-item-slot-hotkey-font-size: 0.625rem;
 
     --bs-item-slot-equipped-bg: var(--tc-success);
-    --bs-item-slot-equipped-color: #fff;
+    --bs-item-slot-equipped-color: var(--tc-app-accent-contrast);
 
     --bs-item-slot-cooldown-veil: rgba(15, 23, 42, 0.55);
     --bs-item-slot-cooldown-color: #fff;

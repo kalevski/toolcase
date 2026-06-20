@@ -32,8 +32,8 @@ tc-early-signup-form {
     --bs-early-signup-form-input-focus-ring: var(--tc-focus-ring);
     --bs-early-signup-form-input-placeholder-color: var(--tc-text-faint);
     --bs-early-signup-form-field-label-color: var(--tc-text-faint);
-    --bs-early-signup-form-submit-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-early-signup-form-submit-color: #fff;
+    --bs-early-signup-form-submit-bg: var(--tc-app-accent-gradient);
+    --bs-early-signup-form-submit-color: var(--tc-app-accent-contrast);
     --bs-early-signup-form-submit-border: var(--tc-app-accent);
     --bs-early-signup-form-benefit-divider: var(--tc-border);
     --bs-early-signup-form-check-color: var(--tc-success);

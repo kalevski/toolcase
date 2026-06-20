@@ -27,13 +27,13 @@ tc-equipment-doll {
     --bs-equipment-doll-empty-color: var(--tc-text-faint);
 
     --bs-equipment-doll-selected-bg: var(--tc-app-accent);
-    --bs-equipment-doll-selected-color: #fff;
+    --bs-equipment-doll-selected-color: var(--tc-app-accent-contrast);
 
     --bs-equipment-doll-label-color: var(--tc-text-muted);
     --bs-equipment-doll-label-font-size: 0.6875rem;
 
     --bs-equipment-doll-qty-bg: var(--tc-app-accent);
-    --bs-equipment-doll-qty-color: #fff;
+    --bs-equipment-doll-qty-color: var(--tc-app-accent-contrast);
 }
 
 .tc-equipment-doll {

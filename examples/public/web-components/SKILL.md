@@ -435,7 +435,7 @@ None. `tc-basic-layout` is a purely presentational layout element.
 
 ### tc-dashboard-layout
 
-Full-height dashboard shell: a full-height sidebar on the left, a glass navbar spanning the content column, and a scrollable content area — same layout as the react-components `DashboardLayout`. **Responsive:** below 992px the sidebar becomes a slide-in drawer over a dimmed backdrop (scoped to the component, not the viewport); at ≥992px it is pinned open as a static left rail and the toggle is hidden. Named slots cover the brand, menu, panel, and both navbar ends; unslotted children land in the main content. On mobile the drawer opens/closes via the toggle button, Ctrl+B (Cmd+B), backdrop tap, Escape, or the `sidebar-open` attribute. Dispatches `tc-toggle-sidebar` on every flip.
+Full-height dashboard shell: a full-height sidebar on the left, a glass navbar spanning the content column, and a scrollable content area. **Responsive:** below 992px the sidebar becomes a slide-in drawer over a dimmed backdrop (scoped to the component, not the viewport); at ≥992px it is pinned open as a static left rail and the toggle is hidden. Named slots cover the brand, menu, panel, and both navbar ends; unslotted children land in the main content. On mobile the drawer opens/closes via the toggle button, Ctrl+B (Cmd+B), backdrop tap, Escape, or the `sidebar-open` attribute. Dispatches `tc-toggle-sidebar` on every flip.
 
 **Tag:** `tc-dashboard-layout`
 
@@ -1048,7 +1048,7 @@ None. `tc-aspect-ratio-box` is a purely presentational layout element.
 
 ### tc-gilded-frame
 
-Hairline-framed surface that wraps its slotted content. A web-components port of the game-components `gc-gilded-frame`: the decorative gilding, glows and leather/metal textures are dropped in favour of the toolcase voice — sharp corners, slate neutrals, 1px hairline borders, no decorative shadow. The three source tones map onto the neutral ramp: `dark` = ink fill with light text, `leather` = muted slate fill, `transparent` = no fill with a hairline border only.
+Hairline-framed surface that wraps its slotted content. Styled to the toolcase voice — sharp corners, slate neutrals, 1px hairline borders, no decorative shadow. The three tones map onto the neutral ramp: `dark` = ink fill with light text, `leather` = muted slate fill, `transparent` = no fill with a hairline border only.
 
 **Tag:** `tc-gilded-frame`
 
@@ -1205,7 +1205,7 @@ When the content overflows, the scroll container receives `tabindex="0"` so it i
 
 ### tc-artboard-backdrop
 
-Decorative full-bleed backdrop surface for staging artwork, previews, or hero content. Ported from the game-components `gc-artboard-backdrop`, but re-skinned to the web-components design system — the gilded frames, glows, and fantasy fills are dropped in favour of the slate neutral ramp, sharp corners (`border-radius: 0`), and a 1px hairline. Purely structural: slotted children are projected as light-DOM children of the host; no shadow root, no shadow (this is a base surface, not an overlay tier).
+Decorative full-bleed backdrop surface for staging artwork, previews, or hero content. Styled to the web-components design system — the slate neutral ramp, sharp corners (`border-radius: 0`), and a 1px hairline. Purely structural: slotted children are projected as light-DOM children of the host; no shadow root, no shadow (this is a base surface, not an overlay tier).
 
 **Tag:** `tc-artboard-backdrop`
 
@@ -2830,7 +2830,7 @@ ring.value = 60
 
 ### tc-cooldown-badge
 
-Small ring badge with a cooldown countdown readout — the web-components port of the `gc-cooldown-badge` game component, re-skinned from the fantasy original to the toolcase voice. The arc represents the remaining cooldown (`max - value`) and depletes clockwise as `value` climbs toward `max`; when the cooldown clears (`value >= max`) the ring completes in the cyan accent (`--tc-accent`) to signal ready. The disc is one of the sanctioned circular shapes; everything else stays flat — a slate hairline track, an ink (`--tc-app-accent`) cooling arc, and a JetBrains Mono readout in the centre. The remaining time is formatted `m:ss` above a minute, whole seconds from 10s up, and one decimal under 10s. The label shows the countdown (or a custom `label`) and is gated by `show-label` / the presence of `label`. The badge re-renders on every attribute or property change; it does not tick on its own — the consumer drives `value`. The inner wrapper carries `role="img"` with a descriptive `aria-label`; the SVG and visual label are `aria-hidden`. All cosmetics flow through `--bs-cooldown-badge-*`.
+Small ring badge with a cooldown countdown readout, styled to the toolcase voice. The arc represents the remaining cooldown (`max - value`) and depletes clockwise as `value` climbs toward `max`; when the cooldown clears (`value >= max`) the ring completes in the cyan accent (`--tc-accent`) to signal ready. The disc is one of the sanctioned circular shapes; everything else stays flat — a slate hairline track, an ink (`--tc-app-accent`) cooling arc, and a JetBrains Mono readout in the centre. The remaining time is formatted `m:ss` above a minute, whole seconds from 10s up, and one decimal under 10s. The label shows the countdown (or a custom `label`) and is gated by `show-label` / the presence of `label`. The badge re-renders on every attribute or property change; it does not tick on its own — the consumer drives `value`. The inner wrapper carries `role="img"` with a descriptive `aria-label`; the SVG and visual label are `aria-hidden`. All cosmetics flow through `--bs-cooldown-badge-*`.
 
 **Tag:** `tc-cooldown-badge`
 
@@ -2951,7 +2951,7 @@ None. `tc-pulse-indicator` is a purely presentational status element.
 
 ### tc-interact-prompt
 
-Contextual "press X to interact" prompt — a keycap paired with a mono uppercase machine-facing label, plus an optional hold-to-interact progress bar. Restyled from the game-components `gc-interact-prompt` to the web-components design system: a flat `--tc-surface` chip with a 1px hairline border and an overlay-tier shadow (it floats over content), a keycap mirroring the `tc-kbd` motif, and a hold-progress fill that uses the ink accent. Visibility is driven by the `show` attribute — the element renders nothing (`display: none`) until `show` is present. The host carries `role="status"` + `aria-live="polite"`, and the hold bar carries `role="progressbar"`.
+Contextual "press X to interact" prompt — a keycap paired with a mono uppercase machine-facing label, plus an optional hold-to-interact progress bar. Styled to the web-components design system: a flat `--tc-surface` chip with a 1px hairline border and an overlay-tier shadow (it floats over content), a keycap mirroring the `tc-kbd` motif, and a hold-progress fill that uses the ink accent. Visibility is driven by the `show` attribute — the element renders nothing (`display: none`) until `show` is present. The host carries `role="status"` + `aria-live="polite"`, and the hold bar carries `role="progressbar"`.
 
 **Tag:** `tc-interact-prompt`
 
@@ -3043,7 +3043,7 @@ prompt.holdProgress = 0.4 // clamped to 0–1
 
 ### tc-currency-chip
 
-Compact currency pill pairing a leading glyph (a currency symbol or short token string) with a formatted amount. Port of game-components `gc-currency-chip`, restyled to the design system — sharp corners, slate-100 fill, 1px hairline border, ink-accented glyph, and a JetBrains Mono amount with tabular figures. Purely presentational and attribute-driven; no slots, no events. The amount is run through `toLocaleString()` so thousands separators appear automatically.
+Compact currency pill pairing a leading glyph (a currency symbol or short token string) with a formatted amount. Restyled to the design system — sharp corners, slate-100 fill, 1px hairline border, ink-accented glyph, and a JetBrains Mono amount with tabular figures. Purely presentational and attribute-driven; no slots, no events. The amount is run through `toLocaleString()` so thousands separators appear automatically.
 
 **Tag:** `tc-currency-chip`
 
@@ -3108,7 +3108,7 @@ None. `tc-currency-chip` is a purely presentational element.
 
 ### tc-currency-display
 
-A larger currency readout pairing an optional label and currency icon with a prominent formatted amount. Port of game-components `gc-currency-display`, restyled to the design system — sharp corners, slate neutrals, an uppercase JetBrains Mono micro-label above an ink-accented icon and a JetBrains Mono amount with tabular figures. The gilded frame, glow, and metal fill are dropped. Purely presentational and attribute-driven; no slots, no events. The amount is run through `toLocaleString()` so thousands separators appear automatically.
+A larger currency readout pairing an optional label and currency icon with a prominent formatted amount. Restyled to the design system — sharp corners, slate neutrals, an uppercase JetBrains Mono micro-label above an ink-accented icon and a JetBrains Mono amount with tabular figures. Purely presentational and attribute-driven; no slots, no events. The amount is run through `toLocaleString()` so thousands separators appear automatically.
 
 **Tag:** `tc-currency-display`
 
@@ -3179,7 +3179,7 @@ None. `tc-currency-display` is a purely presentational element.
 
 ### tc-rarity-chip
 
-Mono uppercase rarity label chip for item tiers: Common, Uncommon, Rare, Epic, Legendary, and Mythic. Port of game-components `gc-rarity-chip`, restyled to the design system — sharp corners, 1px hairline border, JetBrains Mono uppercase label, and per-rarity tinted text/border using the sanctioned token ramp. Fantasy chrome (gilded frames, glows, metal textures) is not reproduced. Purely presentational — no events, no slots.
+Mono uppercase rarity label chip for item tiers: Common, Uncommon, Rare, Epic, Legendary, and Mythic. Restyled to the design system — sharp corners, 1px hairline border, JetBrains Mono uppercase label, and per-rarity tinted text/border using the sanctioned token ramp. Purely presentational — no events, no slots.
 
 **Tag:** `tc-rarity-chip`
 
@@ -3240,7 +3240,7 @@ None. `tc-rarity-chip` is a purely presentational element.
 
 ### tc-crosshair
 
-Configurable aiming reticle, ported from the `gc-crosshair` game component into the toolcase idiom. Six variants — `cross`, `dot`, `circle`, `tShape`, `classic`, `rune` — with knobs for overall `size`, arm `thickness`, center `gap`, `color`, and a `spread` offset added to the gap (for a recoil/bloom effect). The fantasy chrome is dropped: arms and the center pip are sharp ink shapes, the only curve is the sanctioned ring, and the `rune` variant is reworked into a sharp rotated-square marker. The host is decorative (`aria-hidden="true"`) and pointer-transparent so it can sit as an overlay marker. Purely presentational — no events.
+Configurable aiming reticle in the toolcase idiom. Six variants — `cross`, `dot`, `circle`, `tShape`, `classic`, `rune` — with knobs for overall `size`, arm `thickness`, center `gap`, `color`, and a `spread` offset added to the gap (for a recoil/bloom effect). The fantasy chrome is dropped: arms and the center pip are sharp ink shapes, the only curve is the sanctioned ring, and the `rune` variant is reworked into a sharp rotated-square marker. The host is decorative (`aria-hidden="true"`) and pointer-transparent so it can sit as an overlay marker. Purely presentational — no events.
 
 **Tag:** `tc-crosshair`
 
@@ -4589,7 +4589,7 @@ None. `tc-plugin-grid` is purely data-driven via the `items` JS property.
 
 ### tc-guild-panel
 
-Guild / clan panel with a header (eyebrow, guild name + tag, optional motto), a stats strip (optional level, members count or count/cap, online count), and a member roster (status pip, name, optional rank chip, optional contribution). The roster is set via the JS `members` property; the online count and headcount are derived from it automatically. Restyled from the game-components `gc-guild-panel` to the toolcase design system: slate neutrals, hairline borders, sharp corners (the status pip is the only sanctioned `border-radius`), online/offline status as the only color, and JetBrains Mono for the eyebrows, stat values, tag, rank chips, and contribution figures.
+Guild / clan panel with a header (eyebrow, guild name + tag, optional motto), a stats strip (optional level, members count or count/cap, online count), and a member roster (status pip, name, optional rank chip, optional contribution). The roster is set via the JS `members` property; the online count and headcount are derived from it automatically. Styled to the toolcase design system: slate neutrals, hairline borders, sharp corners (the status pip is the only sanctioned `border-radius`), online/offline status as the only color, and JetBrains Mono for the eyebrows, stat values, tag, rank chips, and contribution figures.
 
 **Tag:** `tc-guild-panel`
 
@@ -5264,7 +5264,7 @@ Navigation strip.
 
 ### tc-nav-button
 
-Back / close navigation button ported from `gc-nav-button` (game-components), restyled to the toolcase design system. Renders as a compact square icon button (chevron-left for `back`, × for `close`) with slate neutrals, sharp corners (`border-radius: 0`), and no game-specific chrome. The `size` attribute overrides the button dimensions in px. No shadow root; light DOM; `display: inline-block`.
+Back / close navigation button, styled to the toolcase design system. Renders as a compact square icon button (chevron-left for `back`, × for `close`) with slate neutrals, sharp corners (`border-radius: 0`). The `size` attribute overrides the button dimensions in px. No shadow root; light DOM; `display: inline-block`.
 
 **Tag:** `tc-nav-button`
 
@@ -6129,7 +6129,7 @@ Vertical navigation menu with icons and badges beside an associated content area
 
 ### tc-blur-overlay
 
-Full-surface backdrop-blur scrim for pause screens and dialog backdrops. Ported from the game-components `gc-blur-overlay`, but re-skinned to the web-components design system — the flat translucent-black wash is replaced by a slate-ink scrim on the fixed overlay tier (`--tc-z-modal-backdrop`), with sharp edges and no fantasy chrome. The host pins to the viewport, blurs whatever sits behind it, and centres its slotted content. Purely structural and passive (no shadow root): the consumer mounts/unmounts it to show/hide; it fires no events. The two cosmetic knobs accept free-form CSS values and are written through to `--bs-blur-overlay-*` custom properties.
+Full-surface backdrop-blur scrim for pause screens and dialog backdrops. Styled to the web-components design system — a slate-ink scrim on the fixed overlay tier (`--tc-z-modal-backdrop`), with sharp edges and no fantasy chrome. The host pins to the viewport, blurs whatever sits behind it, and centres its slotted content. Purely structural and passive (no shadow root): the consumer mounts/unmounts it to show/hide; it fires no events. The two cosmetic knobs accept free-form CSS values and are written through to `--bs-blur-overlay-*` custom properties.
 
 **Tag:** `tc-blur-overlay`
 
@@ -6431,7 +6431,7 @@ Static text content, readable as-is. Focus is never suppressed. The overlay cont
 
 **Tag:** `tc-dialogue-box`
 
-NPC dialogue box with an optional speaker name and a typewriter body line, plus an optional list of choice buttons. Ported from game-components `gc-dialogue-box` and rebuilt to the design system — the gilded frame, glow, and fantasy fills are dropped in favour of a flat slate surface, sharp corners, a 1px hairline border, and an overlay-tier shadow. The text types in character-by-character at `typing-speed` characters per second; clicking (or tapping) the box once while typing fast-forwards to the full line. Once the line is revealed, a box with no choices acts as an advance affordance (click → `tc-advance`, with a bobbing caret hint), while a box with choices presents the options (click → `tc-choice`). Under `prefers-reduced-motion` the line is revealed instantly and the caret stops bobbing.
+NPC dialogue box with an optional speaker name and a typewriter body line, plus an optional list of choice buttons. Built to the design system — a flat slate surface, sharp corners, a 1px hairline border, and an overlay-tier shadow. The text types in character-by-character at `typing-speed` characters per second; clicking (or tapping) the box once while typing fast-forwards to the full line. Once the line is revealed, a box with no choices acts as an advance affordance (click → `tc-advance`, with a bobbing caret hint), while a box with choices presents the options (click → `tc-choice`). Under `prefers-reduced-motion` the line is revealed instantly and the caret stops bobbing.
 
 **Attributes**
 
@@ -6591,7 +6591,7 @@ Offcanvas panel.
 
 ### tc-confirm-dialog
 
-Centred yes/no confirmation modal. Web-components port of game-components `gc-confirm-dialog`, restyled to the slate design system (sharp corners, 1px hairline, the single hard overlay shadow). Focus trap, scroll lock, and keyboard handling included. Controlled component — fires `tc-confirm` or `tc-cancel`; the consumer sets `open` to `false` to actually close. Renders the panel hidden when closed.
+Centred yes/no confirmation modal. Styled to the slate design system (sharp corners, 1px hairline, the single hard overlay shadow). Focus trap, scroll lock, and keyboard handling included. Controlled component — fires `tc-confirm` or `tc-cancel`; the consumer sets `open` to `false` to actually close. Renders the panel hidden when closed.
 
 **Tag:** `tc-confirm-dialog`
 
@@ -6699,7 +6699,7 @@ Slide-out panel with focus trap, keyboard handling, and optional pinned mode. Co
 
 ### tc-invite-toast
 
-Transient invite popup pinned to the top-right corner, overlay tier. Web-components port of game-components `gc-invite-toast`, restyled to the slate design system (white surface, sharp corners, 1px hairline, an ink accent stripe, the single hard overlay shadow) — the fantasy gilded chrome of the source is dropped. Shows an inviter, a body message, accept / decline actions, and a depleting countdown bar that auto-declines when it lapses. Hidden until `open`; corner placement, width, and z-index all flow through `--bs-invite-toast-*` custom properties. Controlled component — fires `tc-accept` or `tc-decline`; the consumer sets `open` to `false` to dismiss.
+Transient invite popup pinned to the top-right corner, overlay tier. Styled to the slate design system (white surface, sharp corners, 1px hairline, an ink accent stripe, the single hard overlay shadow). Shows an inviter, a body message, accept / decline actions, and a depleting countdown bar that auto-declines when it lapses. Hidden until `open`; corner placement, width, and z-index all flow through `--bs-invite-toast-*` custom properties. Controlled component — fires `tc-accept` or `tc-decline`; the consumer sets `open` to `false` to dismiss.
 
 **Tag:** `tc-invite-toast`
 
@@ -6754,7 +6754,7 @@ Transient invite popup pinned to the top-right corner, overlay tier. Web-compone
 
 ### tc-letterbox-bars
 
-Animated cinematic letterbox bars for cutscenes and reveal transitions. Ported from `gc-letterbox-bars` but re-skinned to the web-components design system — flat `var(--tc-ink)` bars replace any game chrome. The host fills its nearest positioned ancestor (`position: absolute; inset: 0`) and renders two bar spans that slide in/out when `[show]` is toggled. Purely structural and passive: no shadow root, no slots, no events. All cosmetics flow through `--bs-letterbox-bars-*` custom properties; the free-form CSS value attributes (`bar-height`, `bar-color`, `duration`) write through to those properties as inline overrides.
+Animated cinematic letterbox bars for cutscenes and reveal transitions. Styled to the web-components design system — flat `var(--tc-ink)` bars. The host fills its nearest positioned ancestor (`position: absolute; inset: 0`) and renders two bar spans that slide in/out when `[show]` is toggled. Purely structural and passive: no shadow root, no slots, no events. All cosmetics flow through `--bs-letterbox-bars-*` custom properties; the free-form CSS value attributes (`bar-height`, `bar-color`, `duration`) write through to those properties as inline overrides.
 
 **Tag:** `tc-letterbox-bars`
 
@@ -6860,7 +6860,7 @@ Modal image gallery with keyboard/swipe navigation, a thumbnail strip, captions,
 
 ### tc-loading-overlay
 
-Full-surface loading overlay with a spinner ring, optional label, determinate or indeterminate progress bar, and an optional mono tip line. Ported from `gc-loading-overlay` and restyled to the toolcase design system: flat slate ink scrim, sharp panel, no game chrome. Visibility is driven by the `[open]` boolean attribute — the consumer sets it; the component never self-closes. No slots; purely attribute-driven. Renders `role="status"` + `aria-live="polite"` on the host and a `role="progressbar"` on the inner bar.
+Full-surface loading overlay with a spinner ring, optional label, determinate or indeterminate progress bar, and an optional mono tip line. Styled to the toolcase design system: flat slate ink scrim, sharp panel. Visibility is driven by the `[open]` boolean attribute — the consumer sets it; the component never self-closes. No slots; purely attribute-driven. Renders `role="status"` + `aria-live="polite"` on the host and a `role="progressbar"` on the inner bar.
 
 **Tag:** `tc-loading-overlay`
 
@@ -6948,7 +6948,7 @@ None. `tc-loading-overlay` is a passive overlay — the consumer sets `open` to 
 
 ### tc-loading-screen
 
-Full-viewport loading screen with an eyebrow label, optional title, progress bar (determinate or indeterminate), and a cycling tip section. Ported from `gc-loading-screen` and voiced for the toolcase design system — slate surface, sharp corners, JetBrains Mono for all machine-facing text. The component covers the viewport when present in the DOM; add or remove it (or toggle `[hidden]`) to show or hide the loading state. No `[open]` attribute is needed.
+Full-viewport loading screen with an eyebrow label, optional title, progress bar (determinate or indeterminate), and a cycling tip section. Voiced for the toolcase design system — slate surface, sharp corners, JetBrains Mono for all machine-facing text. The component covers the viewport when present in the DOM; add or remove it (or toggle `[hidden]`) to show or hide the loading state. No `[open]` attribute is needed.
 
 **Tag:** `tc-loading-screen`
 
@@ -7056,7 +7056,7 @@ None.
 
 ### tc-title-screen
 
-Full-viewport game title / start screen. Covers the entire viewport when present in the DOM; add or remove it (or toggle `[hidden]`) to show or hide it. Port of `gc-title-screen` (game-components) restyled to the toolcase design system — slate surface, sharp corners, 1px hairline divider in place of the diamond decoration, JetBrains Mono eyebrow, no game chrome. The eyebrow defaults to `"Press Start"` and is configurable via attribute. Purely presentational — no events, no slots, no shadow root; `display: block`.
+Full-viewport game title / start screen. Covers the entire viewport when present in the DOM; add or remove it (or toggle `[hidden]`) to show or hide it. Styled to the toolcase design system — slate surface, sharp corners, 1px hairline divider, JetBrains Mono eyebrow. The eyebrow defaults to `"Press Start"` and is configurable via attribute. Purely presentational — no events, no slots, no shadow root; `display: block`.
 
 **Tag:** `tc-title-screen`
 
@@ -7266,7 +7266,7 @@ el.addEventListener('tc-change', e => console.log('selected:', e.detail.key))
 
 ### tc-character-create
 
-Character-creation panel: a character-name field plus a data-driven list of appearance/class fields (text, select, number, range) and a confirm action. Fields are supplied via the `fields` JS property; current values via the `values` property (controlled) or accumulated internally as the user edits (uncontrolled). Fires `tc-name` on every name keystroke, `tc-change` when any field changes, and `tc-confirm` when the confirm button is clicked. Ported from the game-components `gc-character-create` screen, restyled to the toolcase design system (flat slate card, hairline borders, sharp corners, shared form controls, ink primary action).
+Character-creation panel: a character-name field plus a data-driven list of appearance/class fields (text, select, number, range) and a confirm action. Fields are supplied via the `fields` JS property; current values via the `values` property (controlled) or accumulated internally as the user edits (uncontrolled). Fires `tc-name` on every name keystroke, `tc-change` when any field changes, and `tc-confirm` when the confirm button is clicked. Styled to the toolcase design system (flat slate card, hairline borders, sharp corners, shared form controls, ink primary action).
 
 **Tag:** `tc-character-create`
 
@@ -7333,7 +7333,7 @@ el.addEventListener('tc-confirm', e => console.log(e.detail.name, e.detail.value
 
 ### tc-character-select
 
-Roster / character-selection screen: a grid of selectable character tiles (square portrait + name + role) paired with a detail panel that shows the active character's role, description, and stats. Characters are supplied via the `characters` JS property; the current selection is reflected on the `selected-id` attribute. Fires `tc-select` when a tile is chosen (click / Enter / Space) and `tc-confirm` on double-click. Locked tiles are inert (greyed out, not focusable). Ported from the game-components `gc-character-select` screen, restyled to the toolcase design system (flat slate tiles, hairline borders, sharp corners, slate hover well, a 2px ink frame on the selected tile, and a lucide lock glyph in place of the 🔒 emoji).
+Roster / character-selection screen: a grid of selectable character tiles (square portrait + name + role) paired with a detail panel that shows the active character's role, description, and stats. Characters are supplied via the `characters` JS property; the current selection is reflected on the `selected-id` attribute. Fires `tc-select` when a tile is chosen (click / Enter / Space) and `tc-confirm` on double-click. Locked tiles are inert (greyed out, not focusable). Styled to the toolcase design system (flat slate tiles, hairline borders, sharp corners, slate hover well, a 2px ink frame on the selected tile, and a lucide lock glyph in place of the 🔒 emoji).
 
 **Tag:** `tc-character-select`
 
@@ -7685,7 +7685,7 @@ Grouped set of interactive chip buttons with an optional title, subtitle, and ha
 
 ### tc-color-picker
 
-Color picker dropdown with a preset swatch grid, a hex text input, and selection management. Port of `@toolcase/react-components` `ColorPicker`.
+Color picker dropdown with a preset swatch grid, a hex text input, and selection management.
 
 **Tag:** `tc-color-picker`
 
@@ -7784,7 +7784,7 @@ None. All content is generated from attributes and JS properties.
 
 ### tc-combo-box
 
-A trigger button with a filterable dropdown of options. Clicking the trigger opens an overlay popover with a search field and a listbox; typing filters the options by `label`, `value`, or `keywords`. Selecting an option closes the popover and fires `tc-change`. Implements the combobox/listbox ARIA pattern. Ported from the `@toolcase/game-components` `gc-combo-box` (functionality only — styled to the web-components design system).
+A trigger button with a filterable dropdown of options. Clicking the trigger opens an overlay popover with a search field and a listbox; typing filters the options by `label`, `value`, or `keywords`. Selecting an option closes the popover and fires `tc-change`. Implements the combobox/listbox ARIA pattern. Styled to the web-components design system.
 
 **Tag:** `tc-combo-box`
 
@@ -7850,7 +7850,7 @@ el.addEventListener('tc-change', e => console.log('selected:', e.detail.value))
 
 ### tc-icon-picker
 
-Searchable icon-grid dropdown for selecting a lucide icon by name. Port of `@toolcase/react-components` `IconPicker`.
+Searchable icon-grid dropdown for selecting a lucide icon by name.
 
 **Tag:** `tc-icon-picker`
 
@@ -7981,7 +7981,7 @@ Form wrapper with HTML5 constraint validation.
 
 ### tc-form-input
 
-Universal form-input dispatcher (port of react-components `FormInput`). The `type` attribute selects which native control to render, with built-in validation, a helper line, a danger-toned error line, and full ARIA wiring. Composes the shared form classes (`.form-control`, `.form-select`, `.form-check`, `.form-range`) so it stays self-contained. On every input/change it reads the control value, coerces it to the right JS type (boolean for checkbox/switch/single-radio, number for number/range, string otherwise), runs each `validate` function, computes the error message (preferring the `error` attribute, then a validator message, then `onErrorMessage`), toggles `is-invalid` + `aria-invalid` + `aria-describedby`, then fires `tc-change` and calls `onChange(value, hasError)`.
+Universal form-input dispatcher. The `type` attribute selects which native control to render, with built-in validation, a helper line, a danger-toned error line, and full ARIA wiring. Composes the shared form classes (`.form-control`, `.form-select`, `.form-check`, `.form-range`) so it stays self-contained. On every input/change it reads the control value, coerces it to the right JS type (boolean for checkbox/switch/single-radio, number for number/range, string otherwise), runs each `validate` function, computes the error message (preferring the `error` attribute, then a validator message, then `onErrorMessage`), toggles `is-invalid` + `aria-invalid` + `aria-describedby`, then fires `tc-change` and calls `onChange(value, hasError)`.
 
 **Tag:** `tc-form-input`
 
@@ -8039,7 +8039,7 @@ document.body.append(country)
 
 ### tc-helper-text
 
-Contextual helper text with a leading lucide icon. Pair with form inputs via `aria-describedby`. Port of `@toolcase/react-components` `HelperText`.
+Contextual helper text with a leading lucide icon. Pair with form inputs via `aria-describedby`.
 
 **Tag:** `tc-helper-text`
 
@@ -8457,7 +8457,7 @@ A generic range-slider setting row: a label/description text block paired with a
 
 ### tc-mouse-sensitivity
 
-A mouse-sensitivity setting row: a label/description text block paired with one or two native range sliders (main + optional ADS, each spanning 0.1–5 with 0.05 steps) and mono decimal readouts. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-mouse-sensitivity` with the fantasy chrome dropped for the toolcase slate/ink look.
+A mouse-sensitivity setting row: a label/description text block paired with one or two native range sliders (main + optional ADS, each spanning 0.1–5 with 0.05 steps) and mono decimal readouts. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse), styled to the toolcase slate/ink look.
 
 **Tag:** `tc-mouse-sensitivity`
 
@@ -8509,7 +8509,7 @@ A mouse-sensitivity setting row: a label/description text block paired with one 
 
 ### tc-reset-to-defaults
 
-A two-step reset action row: a label/description text block paired with a Reset button that enters a confirmation state (Confirm reset + Cancel). Confirming fires `tc-reset` and returns to idle; cancelling discards without firing. Built on the shared `tc-setting-row` scaffold. Port of game-components `gc-reset-to-defaults` with the fantasy chrome dropped for the toolcase slate/ink look.
+A two-step reset action row: a label/description text block paired with a Reset button that enters a confirmation state (Confirm reset + Cancel). Confirming fires `tc-reset` and returns to idle; cancelling discards without firing. Built on the shared `tc-setting-row` scaffold, styled to the toolcase slate/ink look.
 
 **Tag:** `tc-reset-to-defaults`
 
@@ -8554,7 +8554,7 @@ A two-step reset action row: a label/description text block paired with a Reset 
 
 ### tc-fps-cap-select
 
-A preset FPS-cap picker: a label/description text block paired with a native `<select>` of frame-rate presets. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse); the control reuses the design-system `.form-select` chrome with a mono readout font. Port of game-components `gc-fps-cap-select` with the fantasy chrome dropped for the toolcase slate/ink look.
+A preset FPS-cap picker: a label/description text block paired with a native `<select>` of frame-rate presets. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse); the control reuses the design-system `.form-select` chrome with a mono readout font, styled to the toolcase slate/ink look.
 
 **Tag:** `tc-fps-cap-select`
 
@@ -8600,7 +8600,7 @@ A preset FPS-cap picker: a label/description text block paired with a native `<s
 
 ### tc-select-row
 
-A generic labeled dropdown setting row: a label/description text block paired with a native `<select>` whose options are supplied via the `options` JS property. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse); the control reuses the design-system `.form-select` chrome. Port of game-components `gc-select-row` with the fantasy chrome dropped for the toolcase slate/ink look.
+A generic labeled dropdown setting row: a label/description text block paired with a native `<select>` whose options are supplied via the `options` JS property. Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse); the control reuses the design-system `.form-select` chrome, styled to the toolcase slate/ink look.
 
 **Tag:** `tc-select-row`
 
@@ -8651,7 +8651,7 @@ A generic labeled dropdown setting row: a label/description text block paired wi
 
 ### tc-fullscreen-toggle
 
-A fullscreen on/off setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-fullscreen-toggle` with the fantasy chrome dropped for the toolcase slate/ink look.
+A fullscreen on/off setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse), styled to the toolcase slate/ink look.
 
 **Tag:** `tc-fullscreen-toggle`
 
@@ -8695,7 +8695,7 @@ A fullscreen on/off setting row: a label/description text block paired with a pi
 
 ### tc-toggle-row
 
-A generic labeled boolean toggle setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-toggle-row` with the fantasy chrome dropped for the toolcase slate/ink look. For named setting presets (V-Sync, invert-axis, …) just set `row-label` — `<tc-toggle-row row-label="V-Sync" checked>`.
+A generic labeled boolean toggle setting row: a label/description text block paired with a pill-track switch (`role="switch"`, pure-circle knob — the checked track carries the signature slate-ink gradient). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse), styled to the toolcase slate/ink look. For named setting presets (V-Sync, invert-axis, …) just set `row-label` — `<tc-toggle-row row-label="V-Sync" checked>`.
 
 **Tag:** `tc-toggle-row`
 
@@ -8739,7 +8739,7 @@ A generic labeled boolean toggle setting row: a label/description text block pai
 
 ### tc-graphics-preset-picker
 
-A low / medium / high / ultra graphics-preset setting row: a label/description text block paired with a segmented preset button group (one hairline frame, 1px internal separators, sharp corners, mono uppercase labels — the active segment carries the signature slate-ink fill). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse). Port of game-components `gc-graphics-preset-picker` with the fantasy chrome dropped for the toolcase slate/ink look.
+A low / medium / high / ultra graphics-preset setting row: a label/description text block paired with a segmented preset button group (one hairline frame, 1px internal separators, sharp corners, mono uppercase labels — the active segment carries the signature slate-ink fill). Built on the shared `tc-setting-row` scaffold (a label/control row that the setting rows reuse), styled to the toolcase slate/ink look.
 
 **Tag:** `tc-graphics-preset-picker`
 
@@ -8930,7 +8930,7 @@ Toggle switch (styled checkbox).
 
 ### tc-toggle
 
-Atomic standalone on/off switch — a pill-track with a sliding circular knob. The host element IS the switch: it carries `role="switch"`, `aria-checked`, and handles click + Space/Enter. Port of `@toolcase/game-components` `gc-toggle`, restyled to the toolcase design system (slate neutrals, sharp outer corners, sanctioned pill/circle geometry, ink gradient on checked). Use `tc-toggle-card` when you need a card wrapper around the switch.
+Atomic standalone on/off switch — a pill-track with a sliding circular knob. The host element IS the switch: it carries `role="switch"`, `aria-checked`, and handles click + Space/Enter. Styled to the toolcase design system (slate neutrals, sharp outer corners, sanctioned pill/circle geometry, ink gradient on checked). Use `tc-toggle-card` when you need a card wrapper around the switch.
 
 **Tag:** `tc-toggle`
 
@@ -9039,7 +9039,7 @@ Multi-line text input.
 
 ### tc-markdown-editor
 
-Split-pane markdown editor with Write/Preview tabs and a formatting toolbar. The toolbar (bold, italic, heading, link, list, quote, code) wraps or prefixes the current textarea selection; switching to Preview renders a small, safe internal markdown-to-HTML conversion (headings, bold/italic, inline code, code fences, links, lists, blockquotes, paragraphs) with all text HTML-escaped and link hrefs protocol-sanitised. Port of `@toolcase/react-components` `MarkdownEditor`.
+Split-pane markdown editor with Write/Preview tabs and a formatting toolbar. The toolbar (bold, italic, heading, link, list, quote, code) wraps or prefixes the current textarea selection; switching to Preview renders a small, safe internal markdown-to-HTML conversion (headings, bold/italic, inline code, code fences, links, lists, blockquotes, paragraphs) with all text HTML-escaped and link hrefs protocol-sanitised.
 
 **Tag:** `tc-markdown-editor`
 
@@ -9084,7 +9084,7 @@ Split-pane markdown editor with Write/Preview tabs and a formatting toolbar. The
 
 ### tc-label
 
-Semantic form label with optional required indicator and info-icon tooltip. Port of `@toolcase/react-components` `Label`.
+Semantic form label with optional required indicator and info-icon tooltip.
 
 **Tag:** `tc-label`
 
@@ -9152,7 +9152,7 @@ None. `tc-label` is a presentational element.
 
 ### tc-json-editor
 
-Schema-driven form editor for JSON objects (port of react-components `JSONEditor`). A required `schema` JSON string drives the generated fields: each property renders a control matched to its type — text input (`string`), number input (`number`/`integer`), a switch (`boolean`), a select (any property carrying an `enum` array), a collapsible group (`object`, with a rotating chevron), or a repeatable list (`array`) with an add button and per-row remove buttons. Edits update an internal working copy and dispatch `tc-change` with the full updated value object on every change. Light DOM, sharp corners, slate neutrals; composes the shared `.form-control` / `.form-select` / `.form-check.form-switch` classes. Invalid schema JSON renders an inline `--tc-danger` error.
+Schema-driven form editor for JSON objects. A required `schema` JSON string drives the generated fields: each property renders a control matched to its type — text input (`string`), number input (`number`/`integer`), a switch (`boolean`), a select (any property carrying an `enum` array), a collapsible group (`object`, with a rotating chevron), or a repeatable list (`array`) with an add button and per-row remove buttons. Edits update an internal working copy and dispatch `tc-change` with the full updated value object on every change. Light DOM, sharp corners, slate neutrals; composes the shared `.form-control` / `.form-select` / `.form-check.form-switch` classes. Invalid schema JSON renders an inline `--tc-danger` error.
 
 **Tag:** `tc-json-editor`
 
@@ -9202,7 +9202,7 @@ el.addEventListener('tc-change', (e) => console.log(e.detail.value))
 
 ### tc-json-schema-def
 
-Visual editor for defining JSON schema properties (port of react-components `JSONSchemaDef`). Renders an optional editable schema-name field, a list of property rows, and an "add property" button. Each row holds a mono property-name input, a type `<select>` (`string`, `number`, `integer`, `boolean`, `object`, `array`, `ref`), a conditional `$ref` selector (shown for `ref` types and populated from `refList`; `array` types use `arrayRefList` for the item ref; `object` types use `objectRefList`), a required toggle, reorder up/down chevron buttons, and a remove button. Adding appends a blank row, removing splices it, reordering swaps it up/down, and any change rebuilds the serialized definition and dispatches `tc-change`. Duplicate (and blank) property names are detected and flagged inline with a `--tc-danger` error message plus `aria-invalid` — the editor never silently overwrites. Light DOM, sharp corners, slate neutrals; composes the shared `.form-control` / `.form-select` / `.form-check-input` classes.
+Visual editor for defining JSON schema properties. Renders an optional editable schema-name field, a list of property rows, and an "add property" button. Each row holds a mono property-name input, a type `<select>` (`string`, `number`, `integer`, `boolean`, `object`, `array`, `ref`), a conditional `$ref` selector (shown for `ref` types and populated from `refList`; `array` types use `arrayRefList` for the item ref; `object` types use `objectRefList`), a required toggle, reorder up/down chevron buttons, and a remove button. Adding appends a blank row, removing splices it, reordering swaps it up/down, and any change rebuilds the serialized definition and dispatches `tc-change`. Duplicate (and blank) property names are detected and flagged inline with a `--tc-danger` error message plus `aria-invalid` — the editor never silently overwrites. Light DOM, sharp corners, slate neutrals; composes the shared `.form-control` / `.form-select` / `.form-check-input` classes.
 
 **Tag:** `tc-json-schema-def`
 
@@ -9260,7 +9260,7 @@ el.addEventListener('tc-label-change', (e) => console.log(e.detail.label))
 
 ## tc-divider
 
-Horizontal or vertical 1px hairline separator, optionally with a centered mono micro-label. Port of the `@toolcase/react-components` `Divider` component.
+Horizontal or vertical 1px hairline separator, optionally with a centered mono micro-label.
 
 **Tag:** `tc-divider`
 
@@ -9330,7 +9330,7 @@ Inline lucide SVG icon glyph. Inherits color from surrounding text by default; a
 
 **Tag:** `tc-icon`
 
-> **Icon set note:** The `set` attribute is accepted for API parity with the `@toolcase/react-components` `Icon` component, which supports `bi` (Bootstrap Icons) and `tc` (ToolCase) sets. In `@toolcase/web-components` all names are resolved through the [lucide-static](https://www.npmjs.com/package/lucide-static) map regardless of `set` value.
+> **Icon set note:** The `set` attribute is accepted but has no effect on name resolution — in `@toolcase/web-components` all names are resolved through the [lucide-static](https://www.npmjs.com/package/lucide-static) map regardless of `set` value.
 
 **Attributes**
 
@@ -9391,7 +9391,7 @@ None. The icon SVG is rendered inline; there is no slot for child content.
 
 ## tc-icon-badge
 
-A single icon badge: a square slate chip with a centred lucide glyph. Ported from the game-components `gc-icon-badge` and restyled to the toolcase design system — flat surface, hairline border, sharp corners. The tile fill (`bg`) and glyph color (`color`) are caller-supplied free-form CSS values; the chip and glyph size scale off the `size` attribute. Purely presentational: no events, no slots.
+A single icon badge: a square slate chip with a centred lucide glyph. Styled to the toolcase design system — flat surface, hairline border, sharp corners. The tile fill (`bg`) and glyph color (`color`) are caller-supplied free-form CSS values; the chip and glyph size scale off the `size` attribute. Purely presentational: no events, no slots.
 
 **Tag:** `tc-icon-badge`
 
@@ -10397,7 +10397,7 @@ The segment track carries `role="progressbar"` with `aria-valuenow` (filled coun
 
 ### tc-boss-bar
 
-Wide top-of-screen boss health bar — a boss name, an optional epithet, a phase indicator, an ink health fill over a flat slate track, and a mono `hp / hp-max` readout. Purely presentational, no events, no slots. The health fill is clamped to `[0, hp-max]`. Phase boundaries can be marked with thin vertical ticks via the `phaseTicks` JS property. Drops the game-components fantasy chrome (gilded frame, glows, scanlines) in favour of a flat slate HUD panel; the track / fill / tick DOM is shared with the rest of the resource-bar family through an internal helper.
+Wide top-of-screen boss health bar — a boss name, an optional epithet, a phase indicator, an ink health fill over a flat slate track, and a mono `hp / hp-max` readout. Purely presentational, no events, no slots. The health fill is clamped to `[0, hp-max]`. Phase boundaries can be marked with thin vertical ticks via the `phaseTicks` JS property. Renders as a flat slate HUD panel; the track / fill / tick DOM is shared with the rest of the resource-bar family through an internal helper.
 
 **Tag:** `tc-boss-bar`
 
@@ -10477,7 +10477,7 @@ None. `tc-boss-bar` is attribute-driven.
 
 ### tc-buff-bar
 
-A horizontal row of active buff / debuff status icons, each composed from `tc-buff-icon`. Every entry can carry a duration (rendered as a mono caption and an optional radial cooldown sweep) and a stack count (a small mono ink badge). Ported from the game-components `gc-buff-bar` and restyled to the toolcase design system — flat slate tiles, hairline borders, sharp corners, mono machine-text, and a single status accent stripe distinguishing buffs from debuffs. The entry list is driven by the `buffs` JS property; only the icon size and inter-icon gap are attributes. Purely presentational: no events. Renders a `role="list"` of `role="listitem"` cells, each labelled by its entry `name`.
+A horizontal row of active buff / debuff status icons, each composed from `tc-buff-icon`. Every entry can carry a duration (rendered as a mono caption and an optional radial cooldown sweep) and a stack count (a small mono ink badge). Styled to the toolcase design system — flat slate tiles, hairline borders, sharp corners, mono machine-text, and a single status accent stripe distinguishing buffs from debuffs. The entry list is driven by the `buffs` JS property; only the icon size and inter-icon gap are attributes. Purely presentational: no events. Renders a `role="list"` of `role="listitem"` cells, each labelled by its entry `name`.
 
 **Tag:** `tc-buff-bar`
 
@@ -10538,7 +10538,7 @@ Each entry's tile is themed through the `tc-buff-icon` custom properties below.
 
 ### tc-buff-icon
 
-A single buff / debuff status icon: a square slate tile with a centred lucide glyph and an optional mono duration caption pinned to the bottom edge. Ported from the game-components `gc-buff-icon` and restyled to the toolcase design system — flat surface, hairline border, sharp corners, mono machine-text. Buff vs debuff is conveyed by a single 2px status accent stripe across the top (success for buffs, danger for debuffs). Composed by `tc-buff-bar`, but usable standalone. Purely presentational: no events, no slots.
+A single buff / debuff status icon: a square slate tile with a centred lucide glyph and an optional mono duration caption pinned to the bottom edge. Styled to the toolcase design system — flat surface, hairline border, sharp corners, mono machine-text. Buff vs debuff is conveyed by a single 2px status accent stripe across the top (success for buffs, danger for debuffs). Composed by `tc-buff-bar`, but usable standalone. Purely presentational: no events, no slots.
 
 **Tag:** `tc-buff-icon`
 
@@ -10597,7 +10597,7 @@ Per-kind accent overrides: `buff` → `var(--tc-success)`, `debuff` → `var(--t
 
 ### tc-resource-bar
 
-Value/max resource bar for a game HUD (HP, mana, stamina, …) — an ink fill over a flat slate track. Optionally renders a label row (a human-readable label plus a mono `value / max` readout), a ghost band behind the fill for recent loss, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. The fill is clamped to `[0, max]`. The `variant` attribute selects the fill color. The track / fill / ghost / tick DOM is shared across the resource-bar family through an internal helper. The game-components fantasy chrome (fantasy fills, scanlines, metal textures) is dropped in favour of a flat slate HUD bar.
+Value/max resource bar for a game HUD (HP, mana, stamina, …) — an ink fill over a flat slate track. Optionally renders a label row (a human-readable label plus a mono `value / max` readout), a ghost band behind the fill for recent loss, inline mono text inside the track, and evenly-spaced segment dividers. Purely presentational, no events, no slots. The fill is clamped to `[0, max]`. The `variant` attribute selects the fill color. The track / fill / ghost / tick DOM is shared across the resource-bar family through an internal helper. Renders as a flat slate HUD bar.
 
 **Tag:** `tc-resource-bar`
 
@@ -10673,7 +10673,7 @@ None. `tc-resource-bar` is attribute-driven.
 
 ### tc-brightness-calibration
 
-Gamma/brightness calibration view: three grayscale reference swatches (dark / mid / bright), each carrying a calibration instruction, plus a `0–1` brightness slider with a mono percentage readout. A `brightness()` filter derived from the slider value is applied to the whole swatch preview so the user can adjust until each band matches its instruction. Drops the game-components fantasy chrome in favour of a flat slate card with a hairline-separated swatch grid and the shared `.form-range` slider.
+Gamma/brightness calibration view: three grayscale reference swatches (dark / mid / bright), each carrying a calibration instruction, plus a `0–1` brightness slider with a mono percentage readout. A `brightness()` filter derived from the slider value is applied to the whole swatch preview so the user can adjust until each band matches its instruction. Renders as a flat slate card with a hairline-separated swatch grid and the shared `.form-range` slider.
 
 **Tag:** `tc-brightness-calibration`
 
@@ -10796,7 +10796,7 @@ None. The component owns its surface and all marker rendering.
 
 ### tc-compass-bar
 
-Horizontal compass strip showing a slice of the heading ring — the field of view (`fov`) — with cardinal ticks (N/NE/E/…) and positioned markers. A fixed ink pointer at the top centre marks the current bearing, and a mono readout shows the zero-padded heading in degrees. Cardinals and markers slide across the strip as the `heading` changes (position tracking transitions are frozen under `prefers-reduced-motion`). Ported from the game-components `gc-compass-bar` and re-skinned to the toolcase design system: flat slate track, 1px hairline frame, sharp corners (the rotated-square marker diamond is still `border-radius: 0`), mono machine-facing text, and the slate ink accent for pointer/markers. No slot children — set markers via the JS `markers` property.
+Horizontal compass strip showing a slice of the heading ring — the field of view (`fov`) — with cardinal ticks (N/NE/E/…) and positioned markers. A fixed ink pointer at the top centre marks the current bearing, and a mono readout shows the zero-padded heading in degrees. Cardinals and markers slide across the strip as the `heading` changes (position tracking transitions are frozen under `prefers-reduced-motion`). Styled to the toolcase design system: flat slate track, 1px hairline frame, sharp corners (the rotated-square marker diamond is still `border-radius: 0`), mono machine-facing text, and the slate ink accent for pointer/markers. No slot children — set markers via the JS `markers` property.
 
 **Tag:** `tc-compass-bar`
 
@@ -10869,7 +10869,7 @@ None. The component owns its track and all tick/marker rendering.
 
 ### tc-compass-rose
 
-Radial compass rose showing a facing direction. The slate-ink north needle rotates to the current `heading` while static N/E/S/W cardinals frame a flat slate face; short index ticks mark the four cardinals for an instrument read. Ported from the game-components `gc-compass-rose` and re-skinned to the toolcase design system: flat surface, 1px hairline ring, mono cardinal labels, and the slate ink accent for the north needle and hub (the south half uses a muted slate). The needle's rotation tween is decorative motion, frozen under `prefers-reduced-motion` (the final orientation — the information — is kept). The face circle and centre hub are the only sanctioned curves. No slot children, no events — purely presentational.
+Radial compass rose showing a facing direction. The slate-ink north needle rotates to the current `heading` while static N/E/S/W cardinals frame a flat slate face; short index ticks mark the four cardinals for an instrument read. Styled to the toolcase design system: flat surface, 1px hairline ring, mono cardinal labels, and the slate ink accent for the north needle and hub (the south half uses a muted slate). The needle's rotation tween is decorative motion, frozen under `prefers-reduced-motion` (the final orientation — the information — is kept). The face circle and centre hub are the only sanctioned curves. No slot children, no events — purely presentational.
 
 **Tag:** `tc-compass-rose`
 
@@ -10925,7 +10925,7 @@ None. The component owns its SVG face, needle, ticks, and cardinal labels.
 
 ### tc-controller-layout-preview
 
-A gamepad diagram with labeled face-button bindings. The four face buttons relabel per the `layout` attribute — Xbox (`A`/`B`/`X`/`Y`), PlayStation (`✕`/`◯`/`△`/`□`), Nintendo (the swapped `A`/`B`/`X`/`Y`), or the generic directional triangles (`△`/`▷`/`▽`/`◁`). Ported from the game-components `gc-controller-layout-preview` and re-skinned to the toolcase design system: a flat slate body, 1px hairline strokes, mono glyph labels outlined in the slate ink accent, and a mono uppercase platform micro-label beneath the diagram. The fantasy gilding, glows, and per-button colour fills are dropped — neutrals carry the diagram and the button bindings are the only information. The controller shell, thumbsticks, and face buttons are the sanctioned curves; the d-pad cross stays sharp. No slot children, no events — purely presentational.
+A gamepad diagram with labeled face-button bindings. The four face buttons relabel per the `layout` attribute — Xbox (`A`/`B`/`X`/`Y`), PlayStation (`✕`/`◯`/`△`/`□`), Nintendo (the swapped `A`/`B`/`X`/`Y`), or the generic directional triangles (`△`/`▷`/`▽`/`◁`). Styled to the toolcase design system: a flat slate body, 1px hairline strokes, mono glyph labels outlined in the slate ink accent, and a mono uppercase platform micro-label beneath the diagram. Neutrals carry the diagram and the button bindings are the only information. The controller shell, thumbsticks, and face buttons are the sanctioned curves; the d-pad cross stays sharp. No slot children, no events — purely presentational.
 
 **Tag:** `tc-controller-layout-preview`
 
@@ -10983,7 +10983,7 @@ None. The component owns its SVG body, d-pad, thumbsticks, face buttons, and pla
 
 ### tc-controls-rebind-list
 
-A list of input actions, each rebindable to a key/button. Each row shows an action label on the left and, on the right, the currently-bound key (a sharp mono key-cap) or an "Unbound" placeholder, followed by a "Rebind" affordance that ink-accents on hover/focus. Rows are clickable and keyboard-activatable (Enter/Space) and fire `tc-rebind` with the action id — the consumer is expected to capture the next key press and update the binding. Driven entirely by the `bindings` JS property. Ported from the game-components `gc-controls-rebind-list` and re-skinned to the toolcase design system: a hairline-framed list-group with slate-100 internal separators, a slate-well row hover, and JetBrains Mono key-caps — the fantasy chrome (gilded frame, glowing keys) is dropped, neutrals carry the list, and the ink accent marks only the active "Rebind" affordance.
+A list of input actions, each rebindable to a key/button. Each row shows an action label on the left and, on the right, the currently-bound key (a sharp mono key-cap) or an "Unbound" placeholder, followed by a "Rebind" affordance that ink-accents on hover/focus. Rows are clickable and keyboard-activatable (Enter/Space) and fire `tc-rebind` with the action id — the consumer is expected to capture the next key press and update the binding. Driven entirely by the `bindings` JS property. Styled to the toolcase design system: a hairline-framed list-group with slate-100 internal separators, a slate-well row hover, and JetBrains Mono key-caps — neutrals carry the list, and the ink accent marks only the active "Rebind" affordance.
 
 **Tag:** `tc-controls-rebind-list`
 
@@ -11063,7 +11063,7 @@ None. The component owns every row; content comes from the `bindings` property.
 
 ### tc-key-binder
 
-Click (or press Enter / Space) to enter capture mode; the next key press commits a new binding. Pressing Escape cancels. Emits `tc-change` with `{ value, code, key }` when a key is bound; emits `tc-cancel` when capture is cancelled. The bound key label renders in JetBrains Mono. Re-skinned from the game-components `gc-key-binder` — flat slate surface, sharp hairline border, no gilded frame, no glow.
+Click (or press Enter / Space) to enter capture mode; the next key press commits a new binding. Pressing Escape cancels. Emits `tc-change` with `{ value, code, key }` when a key is bound; emits `tc-cancel` when capture is cancelled. The bound key label renders in JetBrains Mono. Styled to the toolcase design system — flat slate surface, sharp hairline border.
 
 **Tag:** `tc-key-binder`
 
@@ -11140,7 +11140,7 @@ None. The element renders its own label from the `value` / `placeholder` attribu
 
 ### tc-crafting-panel
 
-A crafting UI: a recipe list on one side, and a detail panel on the other showing the selected recipe's output, its ingredient requirements, and a craft action. Selecting a row fires `tc-select`; the craft button fires `tc-craft`. The detail panel lists each input's `have/need` count, marking insufficient ingredients in the danger colour, and disables the craft button until the recipe is affordable (or while `crafting` is set). Driven by the `recipes` JS property plus the `selected-id` / `crafting` attributes. Ported from the game-components `gc-crafting-panel` and re-skinned to the toolcase design system: a hairline-framed recipe list with slate-100 separators and a solid-ink selected row, a flat slate detail card, sharp square icon tiles with mono glyphs, mono uppercase section eyebrows, and the standard ink primary button for the craft action — the fantasy chrome (gilded frames, glowing fills, metal textures) is dropped, neutrals carry the layout, and colour appears only as status (danger for insufficient stock).
+A crafting UI: a recipe list on one side, and a detail panel on the other showing the selected recipe's output, its ingredient requirements, and a craft action. Selecting a row fires `tc-select`; the craft button fires `tc-craft`. The detail panel lists each input's `have/need` count, marking insufficient ingredients in the danger colour, and disables the craft button until the recipe is affordable (or while `crafting` is set). Driven by the `recipes` JS property plus the `selected-id` / `crafting` attributes. Styled to the toolcase design system: a hairline-framed recipe list with slate-100 separators and a solid-ink selected row, a flat slate detail card, sharp square icon tiles with mono glyphs, mono uppercase section eyebrows, and the standard ink primary button for the craft action — neutrals carry the layout, and colour appears only as status (danger for insufficient stock).
 
 **Tag:** `tc-crafting-panel`
 
@@ -11557,7 +11557,7 @@ The inner root div carries `role="group"` and `aria-label` tied to the `title` a
 
 ### tc-chat-window
 
-Scrolling chat log with channel tabs and a compose row (text input + Send button). Messages and channels are set via JS properties; the newest message sits at the bottom and the log scrolls to it after every update. Channel tabs follow the underline-nav motif; clicking a tab switches the active channel and fires `tc-channel-change`. Sending (Enter or the Send button) fires `tc-send` with the active channel and trimmed text, then clears the input. Sender handles render in JetBrains Mono; per-message and per-channel colour is injected via inline custom properties. The message body has `role="log"` + `aria-live="polite"`. Sharp corners; slate neutrals; slate-ink Send button. Game-specific chrome from `gc-chat-window` (gilded frame, fantasy fills) is dropped.
+Scrolling chat log with channel tabs and a compose row (text input + Send button). Messages and channels are set via JS properties; the newest message sits at the bottom and the log scrolls to it after every update. Channel tabs follow the underline-nav motif; clicking a tab switches the active channel and fires `tc-channel-change`. Sending (Enter or the Send button) fires `tc-send` with the active channel and trimmed text, then clears the input. Sender handles render in JetBrains Mono; per-message and per-channel colour is injected via inline custom properties. The message body has `role="log"` + `aria-live="polite"`. Sharp corners; slate neutrals; slate-ink Send button.
 
 **Tag:** `tc-chat-window`
 
@@ -12582,7 +12582,7 @@ None. All content is driven by attributes.
 
 ### tc-equipment-doll
 
-A paper-doll of equipment slots arranged around a neutral character figure. Each slot is a sharp hairline tile positioned by `x`/`y` percentage on a grid-backed surface; selecting one fires `tc-select` and reflects the chosen slot via `selected-id`. Re-skinned from the game-components `gc-equipment-doll` to the toolcase design system — no gilded frame, no glow, no fantasy fills: a faint slate figure backs the tiles, selection uses the standard ink-active state, and item icons render as `<img>` (image source) or a short glyph/initials label. No slot children — set slots via the JS `slots` property.
+A paper-doll of equipment slots arranged around a neutral character figure. Each slot is a sharp hairline tile positioned by `x`/`y` percentage on a grid-backed surface; selecting one fires `tc-select` and reflects the chosen slot via `selected-id`. Styled to the toolcase design system: a faint slate figure backs the tiles, selection uses the standard ink-active state, and item icons render as `<img>` (image source) or a short glyph/initials label. No slot children — set slots via the JS `slots` property.
 
 **Tag:** `tc-equipment-doll`
 
@@ -12670,7 +12670,7 @@ None. The component owns its canvas and all figure/slot rendering.
 
 ### tc-hotbar
 
-A horizontal action bar of item/ability slots with hotkeys and a selected index. Each slot composes a `tc-item-slot` for the item visuals; the bar owns the sharp hairline frame, the row layout, the hotkey badge and the selection ring. Selecting a slot fires `tc-select` and reflects the chosen item's `id` via `selected-id`. Re-skinned from the game-components `gc-hotbar` to the toolcase design system — no gilded frame, no glow, no dark fills. No slot children — set slots via the JS `slots` property.
+A horizontal action bar of item/ability slots with hotkeys and a selected index. Each slot composes a `tc-item-slot` for the item visuals; the bar owns the sharp hairline frame, the row layout, the hotkey badge and the selection ring. Selecting a slot fires `tc-select` and reflects the chosen item's `id` via `selected-id`. Styled to the toolcase design system. No slot children — set slots via the JS `slots` property.
 
 Until `tc-item-slot` is registered, the bar renders standalone: each slot is painted as a design-system cell (sharp hairline frame, item glyph/quantity, hotkey badge, ink selection ring) via `:not(:defined)` fallback rules. Once `tc-item-slot` is registered it owns the slot interior.
 
@@ -12755,7 +12755,7 @@ None. The component owns its row and forwards each item to a composed `tc-item-s
 
 ### tc-inventory-grid
 
-A grid of inventory item slots with a configurable column count and a selected item id. Each cell composes a `tc-item-slot` for the item visuals; the grid owns the sharp hairline frame, the 1px-gap grid layout and the selection ring. Selecting a cell fires `tc-select` and reflects the chosen item's `id` via `selected-id`. Re-skinned from the game-components `gc-inventory-grid` to the toolcase design system — no gilded frame, no glow, no dark fills. No slot children — set cells via the JS `items` property (entries may be `null` for empty sockets).
+A grid of inventory item slots with a configurable column count and a selected item id. Each cell composes a `tc-item-slot` for the item visuals; the grid owns the sharp hairline frame, the 1px-gap grid layout and the selection ring. Selecting a cell fires `tc-select` and reflects the chosen item's `id` via `selected-id`. Styled to the toolcase design system. No slot children — set cells via the JS `items` property (entries may be `null` for empty sockets).
 
 Until `tc-item-slot` is registered, the grid renders standalone: each cell is painted as a design-system slot (sharp hairline frame, item glyph/quantity, ink selection ring) via `:not(:defined)` fallback rules. Once `tc-item-slot` is registered it owns the slot interior.
 
@@ -12836,7 +12836,7 @@ None. The component owns its grid and forwards each item to a composed `tc-item-
 
 ### tc-item-slot
 
-A single inventory / hotbar slot: an item glyph (image or initials), a quantity badge, a per-rarity border accent, an optional hotkey, an equipped marker, a radial cooldown sweep, and a locked state. The host element *is* the sharp hairline tile; set the item via the JS `item` property, and `selected` / `size` / `hotkey` via attributes. Activating an unlocked slot (click, Enter, or Space) fires `tc-click`. Re-skinned from the game-components `gc-item-slot` to the toolcase design system — no gilded frame, no inset glow, no metal fill: a flat slate tile where rarity is a single muted border accent and the locked glyph is a lucide lock icon (no emoji).
+A single inventory / hotbar slot: an item glyph (image or initials), a quantity badge, a per-rarity border accent, an optional hotkey, an equipped marker, a radial cooldown sweep, and a locked state. The host element *is* the sharp hairline tile; set the item via the JS `item` property, and `selected` / `size` / `hotkey` via attributes. Activating an unlocked slot (click, Enter, or Space) fires `tc-click`. Styled to the toolcase design system: a flat slate tile where rarity is a single muted border accent and the locked glyph is a lucide lock icon (no emoji).
 
 This is the primitive composed by `tc-hotbar`, `tc-inventory-grid`, and `tc-equipment-doll`: those parents own their own interactivity (role / tabindex / selection) and forward each item plus `size` / `selected` / `hotkey`, so the slot does not stop native-click propagation. Used standalone it is a self-sufficient button.
 
@@ -12884,7 +12884,7 @@ interface InventoryItem {
 
 | Event | `detail` | Description |
 |-------|----------|-------------|
-| `tc-click` | `{ item: InventoryItem \| null }` | Fired when an unlocked slot is activated (click, Enter, or Space). Bubbles and is composed. Locked slots fire nothing. (The web-components rename of the `gc-item-slot` `click` event; distinct from the `tc-select` that composing parents emit.) |
+| `tc-click` | `{ item: InventoryItem \| null }` | Fired when an unlocked slot is activated (click, Enter, or Space). Bubbles and is composed. Locked slots fire nothing. (Distinct from the `tc-select` that composing parents emit.) |
 
 **Slots**
 
@@ -12932,7 +12932,7 @@ Per-rarity border accent (applied via `tc-item-slot[data-rarity='…']`): `uncom
 
 ### tc-item-compare
 
-A side-by-side item stat comparison: a `current` (equipped) item next to a `candidate`, with the candidate column annotated by a per-stat **difference** block. Numeric stats shared between the two items are diffed (`candidate − current`); non-zero diffs render with a status-coloured arrow (green up / red down) and a signed value. Re-skinned from the game-components `gc-item-compare` to the toolcase design system — no gilded frames, no glows, no fantasy fills: two columns share a single hairline frame with a 1px internal separator, machine-facing figures are mono and tabular, and status colour appears only on the delta arrows. No slot children — set items via the JS `current` / `candidate` properties.
+A side-by-side item stat comparison: a `current` (equipped) item next to a `candidate`, with the candidate column annotated by a per-stat **difference** block. Numeric stats shared between the two items are diffed (`candidate − current`); non-zero diffs render with a status-coloured arrow (green up / red down) and a signed value. Styled to the toolcase design system: two columns share a single hairline frame with a 1px internal separator, machine-facing figures are mono and tabular, and status colour appears only on the delta arrows. No slot children — set items via the JS `current` / `candidate` properties.
 
 **Tag:** `tc-item-compare`
 
@@ -13009,7 +13009,7 @@ None. The component renders both columns from the `current` / `candidate` proper
 
 ### tc-item-tooltip
 
-A hover card describing an item: an optional mono **type** micro-label, the item **name**, a **rarity** chip, a **stat** list, an optional **requirements** block (each marked met / unmet), and optional **flavor** text. Set the item via the JS `item` property. Re-skinned from the game-components `gc-item-tooltip` to the toolcase design system — no gilded frame, no glow, no parchment fill: a sharp hairline surface at the overlay tier (`shadow-lg`, on the fixed `--tc-z-tooltip` layer), machine-facing figures are mono and tabular, and status colour is spent only on the rarity chip and the requirement met / unmet markers (each marker pairs a status colour with a lucide check / x icon so colour is never the sole signal). The consumer owns positioning. No slot children — set the item via the JS `item` property; with no item the host hides itself.
+A hover card describing an item: an optional mono **type** micro-label, the item **name**, a **rarity** chip, a **stat** list, an optional **requirements** block (each marked met / unmet), and optional **flavor** text. Set the item via the JS `item` property. Styled to the toolcase design system: a sharp hairline surface at the overlay tier (`shadow-lg`, on the fixed `--tc-z-tooltip` layer), machine-facing figures are mono and tabular, and status colour is spent only on the rarity chip and the requirement met / unmet markers (each marker pairs a status colour with a lucide check / x icon so colour is never the sole signal). The consumer owns positioning. No slot children — set the item via the JS `item` property; with no item the host hides itself.
 
 **Tag:** `tc-item-tooltip`
 
@@ -13216,7 +13216,7 @@ None. `tc-feature-card` is purely presentational.
 
 ### tc-ability-card
 
-Ability portrait tile: an icon chip, a rarity micro-label, the ability name, an optional hotkey (keybind), a description, and a meta grid of cooldown / cost / range. Ported from the game-components `gc-ability-card` and restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-text, and a single muted rarity accent (no gilded frames or glows). Purely attribute-driven and presentational.
+Ability portrait tile: an icon chip, a rarity micro-label, the ability name, an optional hotkey (keybind), a description, and a meta grid of cooldown / cost / range. Styled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-text, and a single muted rarity accent. Purely attribute-driven and presentational.
 
 **Tag:** `tc-ability-card`
 
@@ -13321,7 +13321,7 @@ Per-rarity accent overrides (applied via `tc-ability-card[data-rarity='…']`): 
 
 ### tc-skill-bar
 
-A horizontal toolbar of ability-card slots. Each slot is composed from `tc-ability-card` and driven entirely by the `slots` JS property. Clicking or pressing Enter/Space on a slot fires `tc-activate`. Ported from the game-components `gc-skill-bar` and restyled to the toolcase design system — flat slate surface, sharp corners, hairline borders, no fantasy chrome.
+A horizontal toolbar of ability-card slots. Each slot is composed from `tc-ability-card` and driven entirely by the `slots` JS property. Clicking or pressing Enter/Space on a slot fires `tc-activate`. Styled to the toolcase design system — flat slate surface, sharp corners, hairline borders.
 
 **Tag:** `tc-skill-bar`
 
@@ -13481,7 +13481,7 @@ None. `tc-ammo-counter` is attribute-driven.
 
 ### tc-combo-counter
 
-Combo / multiplier HUD readout — a JetBrains Mono label, a large ink multiplier figure (`x{combo}`), and an optional draining timer bar. Purely presentational, attribute-driven, no slots. The readout only appears once a multiplier is building (`combo > 1`); below that the host collapses (no card is rendered and `display: none` is applied). When the `combo` is `2` or more, the host reflects a `data-visible` attribute. Ported from the game-components `gc-combo-counter` and restyled to the toolcase design system — flat white surface, hairline border, sharp corners, ink accent on the value figure and timer fill (the fantasy glow/burst chrome is dropped).
+Combo / multiplier HUD readout — a JetBrains Mono label, a large ink multiplier figure (`x{combo}`), and an optional draining timer bar. Purely presentational, attribute-driven, no slots. The readout only appears once a multiplier is building (`combo > 1`); below that the host collapses (no card is rendered and `display: none` is applied). When the `combo` is `2` or more, the host reflects a `data-visible` attribute. Styled to the toolcase design system — flat white surface, hairline border, sharp corners, ink accent on the value figure and timer fill.
 
 **Tag:** `tc-combo-counter`
 
@@ -14209,7 +14209,7 @@ None. All content is supplied via attributes and the `steps` JS property.
       title: 'Update the import path',
       description: 'The package has moved to a scoped name.',
       before: "import { Button } from 'toolcase'",
-      after: "import { Button } from '@toolcase/react-components'",
+      after: "import { Button } from '@toolcase/web-components'",
     },
     {
       title: 'Replace className with variant',
@@ -15694,7 +15694,7 @@ el.addEventListener('tc-action', e => {
 ---
 ### tc-result-screen
 
-Match / round result screen: a centred region with a mono uppercase eyebrow, a status-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Ported from the game-components `gc-result-screen`, restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, `.btn` action primitives, and no gilded frame / diamond divider / metal buttons.
+Match / round result screen: a centred region with a mono uppercase eyebrow, a status-toned title, a short hairline divider, an optional subtitle, a column of hairline-separated stat rows, a soft reward strip, and a wrapped row of action buttons. Stats, rewards, and actions are supplied via JS properties; the title text/colour, subtitle, and eyebrow are attributes. Clicking an action fires `tc-action` with that action's `id`. Styled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-facing text, and `.btn` action primitives.
 
 **Tag:** `tc-result-screen`
 
@@ -15813,7 +15813,7 @@ el.addEventListener('tc-action', e => console.log('action', e.detail.id))
 
 ### tc-legal-screen
 
-Multi-section legal / EULA screen with a sidebar nav, scrollable body panel, an optional accept footer, and a close button. Ported from the game-components `gc-legal-screen`, restyled to the toolcase design system — flat `--tc-surface` card, 1px hairline borders, sharp corners (`border-radius: 0`), mono eyebrow labels, and an ink-gradient accept button. The game chrome (gilded frames, glows, fantasy fills) is dropped. Sections are supplied via the `sections` JS property; the active section is tracked internally and changes when a sidebar nav item is clicked. Fires `tc-close` when the close button is clicked and `tc-accept` when the accept button is clicked. The host carries `role="region"` unless one is already set.
+Multi-section legal / EULA screen with a sidebar nav, scrollable body panel, an optional accept footer, and a close button. Styled to the toolcase design system — flat `--tc-surface` card, 1px hairline borders, sharp corners (`border-radius: 0`), mono eyebrow labels, and an ink-gradient accept button. Sections are supplied via the `sections` JS property; the active section is tracked internally and changes when a sidebar nav item is clicked. Fires `tc-close` when the close button is clicked and `tc-accept` when the accept button is clicked. The host carries `role="region"` unless one is already set.
 
 **Tag:** `tc-legal-screen`
 
@@ -15870,7 +15870,7 @@ el.addEventListener('tc-close', () => console.log('closed'))
 
 ### tc-gamepad-button-prompt
 
-Gamepad button glyph prompt — a sharp slate key-cap holding a glyph (A / B / X / Y or generic such as `RT`, `LB`) with an optional caption label. Purely presentational, attribute-driven, no slots. Ported from the game-components `gc-gamepad-button-prompt` and restyled to the toolcase design system — a JetBrains Mono cap on a `--tc-surface-muted` fill with a hairline border, a faint heavier bottom edge (mirroring `tc-kbd`), sharp corners, and an Inter muted caption (the gilded frame / glow / face-button colour chrome is dropped). The host reflects a normalised `data-button` attribute (e.g. `data-button="A"`) as a theming hook. The `size` attribute (px) drives the cap dimension via inline custom properties.
+Gamepad button glyph prompt — a sharp slate key-cap holding a glyph (A / B / X / Y or generic such as `RT`, `LB`) with an optional caption label. Purely presentational, attribute-driven, no slots. Styled to the toolcase design system — a JetBrains Mono cap on a `--tc-surface-muted` fill with a hairline border, a faint heavier bottom edge (mirroring `tc-kbd`), sharp corners, and an Inter muted caption. The host reflects a normalised `data-button` attribute (e.g. `data-button="A"`) as a theming hook. The `size` attribute (px) drives the cap dimension via inline custom properties.
 
 **Tag:** `tc-gamepad-button-prompt`
 
@@ -15932,7 +15932,7 @@ None. `tc-gamepad-button-prompt` is a purely presentational element.
 
 ### tc-battle-pass
 
-Battle-pass tier track with a season header, an XP progress bar, and a two-row reward track (premium / free) of claimable reward cells. Ported from the game-components `gc-battle-pass`, restyled to the toolcase design system (no gilded frames, glows, fantasy fills, or emoji lock glyphs). Tiers are supplied via the `tiers` JS property; everything else is attribute-driven. Reward state per cell is derived: `claimed` cells fill with ink and a check glyph, `claimable` cells are interactive buttons (free → ink accent border, premium → cyan accent border), `locked` cells (level above the current level) and `gated` premium cells (no premium pass) recede via opacity and show a lock glyph. Only claimable cells are interactive; clicking one fires `tc-claim`.
+Battle-pass tier track with a season header, an XP progress bar, and a two-row reward track (premium / free) of claimable reward cells. Styled to the toolcase design system (sharp corners, slate neutrals, and lucide lock glyphs in place of emoji). Tiers are supplied via the `tiers` JS property; everything else is attribute-driven. Reward state per cell is derived: `claimed` cells fill with ink and a check glyph, `claimable` cells are interactive buttons (free → ink accent border, premium → cyan accent border), `locked` cells (level above the current level) and `gated` premium cells (no premium pass) recede via opacity and show a lock glyph. Only claimable cells are interactive; clicking one fires `tc-claim`.
 
 **Tag:** `tc-battle-pass`
 
@@ -17067,7 +17067,7 @@ el.addEventListener('tc-step-click', e => {
 
 ### tc-command-reference
 
-Searchable reference guide for CLI commands with usage, descriptions, flags, and aliases. Filters results in real time by command name, description, aliases, and flag text. Port of `@toolcase/react-components` `CommandReference`.
+Searchable reference guide for CLI commands with usage, descriptions, flags, and aliases. Filters results in real time by command name, description, aliases, and flag text.
 
 **Tag:** `tc-command-reference`
 
@@ -17178,7 +17178,7 @@ Searchable reference guide for CLI commands with usage, descriptions, flags, and
 
 ### tc-codex
 
-Codex / bestiary browser: a scrollable list of entries paired with a detail panel that shows the active entry's description and stat rows. Entries are supplied via the `entries` JS property; the current selection is reflected on the `selected-id` attribute. Fires `tc-select` when a row is chosen (click / Enter / Space). Undiscovered entries render masked (`???` name + a muted lucide glyph) but stay focusable and selectable — selecting one shows an "Undiscovered." detail. Ported from the game-components `gc-codex`, restyled to the toolcase design system (flat slate list, hairline borders, sharp corners, slate hover well, a solid-ink fill on the selected row, and lucide glyphs in place of the `◆`/`?` unicode markers).
+Codex / bestiary browser: a scrollable list of entries paired with a detail panel that shows the active entry's description and stat rows. Entries are supplied via the `entries` JS property; the current selection is reflected on the `selected-id` attribute. Fires `tc-select` when a row is chosen (click / Enter / Space). Undiscovered entries render masked (`???` name + a muted lucide glyph) but stay focusable and selectable — selecting one shows an "Undiscovered." detail. Styled to the toolcase design system (flat slate list, hairline borders, sharp corners, slate hover well, a solid-ink fill on the selected row, and lucide glyphs in place of the `◆`/`?` unicode markers).
 
 **Tag:** `tc-codex`
 
@@ -17537,7 +17537,7 @@ None. `tc-countdown-timer` is a purely attribute/property-driven component.
 
 ### tc-damage-number
 
-A floating combat number that rises and fades over a configurable duration, then fires a `tc-done` CustomEvent. Ported from the `game-components` `gc-damage-number` but re-skinned to the toolcase voice — JetBrains Mono digits in the slate/status palette, sharp corners, no fantasy chrome. Purely attribute/property-driven (no slots). The variant is resolved by precedence: `miss` > `heal` > `crit` > normal.
+A floating combat number that rises and fades over a configurable duration, then fires a `tc-done` CustomEvent. Styled to the toolcase voice — JetBrains Mono digits in the slate/status palette, sharp corners. Purely attribute/property-driven (no slots). The variant is resolved by precedence: `miss` > `heal` > `crit` > normal.
 
 **Tag:** `tc-damage-number`
 
@@ -17617,7 +17617,7 @@ Honours `prefers-reduced-motion`: the upward-travel transform is dropped while t
 
 ### tc-hit-marker
 
-A transient hit-confirmation reticle — four inward-pointing corner ticks that pop in and fade out over a configurable duration, then fire a `tc-done` CustomEvent and auto-clear their own `show` attribute. Ported from the `game-components` `gc-hit-marker` but re-skinned to the toolcase voice — sharp slate/status hairline strokes, no gilded frames or glows. The kill variant swaps the fantasy ☠ emoji for a lucide Skull glyph. Purely attribute/property-driven (no slots). The variant is resolved by precedence: `kill` > `crit` > normal.
+A transient hit-confirmation reticle — four inward-pointing corner ticks that pop in and fade out over a configurable duration, then fire a `tc-done` CustomEvent and auto-clear their own `show` attribute. Styled to the toolcase voice — sharp slate/status hairline strokes. The kill variant uses a lucide Skull glyph. Purely attribute/property-driven (no slots). The variant is resolved by precedence: `kill` > `crit` > normal.
 
 **Tag:** `tc-hit-marker`
 
@@ -20986,7 +20986,7 @@ None. Content is driven entirely by the `items` JS property.
 
 ### tc-time-picker
 
-Time picker with a scrollable column interface (hours, minutes, optional seconds, plus an AM/PM column in 12-hour mode). Selecting cells composes a canonical 24-hour time string. Port of `@toolcase/react-components` `TimePicker`.
+Time picker with a scrollable column interface (hours, minutes, optional seconds, plus an AM/PM column in 12-hour mode). Selecting cells composes a canonical 24-hour time string.
 
 **Tag:** `tc-time-picker`
 
@@ -21079,7 +21079,7 @@ None. All content is generated from attributes and JS properties.
 
 ### tc-toggle-card
 
-Clickable card with an integrated toggle switch for on/off states. The whole card is the click target — clicking anywhere (or pressing Space/Enter while focused) flips the switch and fires `tc-change`. Reuses the `tc-switch` motif (pill track + pure-circle knob, checked = ink gradient). Port of `@toolcase/react-components` `ToggleCard`.
+Clickable card with an integrated toggle switch for on/off states. The whole card is the click target — clicking anywhere (or pressing Space/Enter while focused) flips the switch and fires `tc-change`. Reuses the `tc-switch` motif (pill track + pure-circle knob, checked = ink gradient).
 
 **Tag:** `tc-toggle-card`
 
@@ -21170,7 +21170,7 @@ None. All content is driven by attributes and JS properties.
 
 ### tc-level-header
 
-Level / stage title header banner — a compact ink badge displaying the current level number, an optional title, a flat-slate XP progress bar with a `value / max XP` mono readout, and an optional next-unlock label. Purely presentational; no events, no slots. The XP fill is clamped to `[0, xp-max]`. Drops game-components fantasy chrome (gilded frame, glows, scanlines) in favour of flat slate HUD aesthetics.
+Level / stage title header banner — a compact ink badge displaying the current level number, an optional title, a flat-slate XP progress bar with a `value / max XP` mono readout, and an optional next-unlock label. Purely presentational; no events, no slots. The XP fill is clamped to `[0, xp-max]`. Flat slate HUD aesthetics.
 
 **Tag:** `tc-level-header`
 
@@ -21253,7 +21253,7 @@ None. `tc-level-header` is attribute-driven.
 
 ### tc-level-select
 
-Level / stage selection grid with SVG edge connections between nodes. Each node can be locked, completed, or selected; optional star ratings show best performance. Drops game-components fantasy chrome (gilded frames, glows, fantasy fills) in favour of flat slate aesthetics: sharp corners, 1px hairline borders, ink accent for the selected state, JetBrains Mono for node labels.
+Level / stage selection grid with SVG edge connections between nodes. Each node can be locked, completed, or selected; optional star ratings show best performance. Flat slate aesthetics: sharp corners, 1px hairline borders, ink accent for the selected state, JetBrains Mono for node labels.
 
 **Tag:** `tc-level-select`
 
@@ -21372,7 +21372,7 @@ None. `tc-level-select` is entirely data-driven via JS properties and attributes
 
 ### tc-list
 
-Generic vertical selectable list with icon, label, and optional meta cells. Ported from `gc-list` (game-components) and restyled to the toolcase design system. Items are supplied exclusively via the `items` JS property; the host carries `role="listbox"` and each row carries `role="option"`. Emits `tc-select` when a non-disabled row is activated via click, Enter, or Space. Sharp corners; slate neutrals; ink accent marks the selected row. Supports lucide icon names (rendered as SVG) and emoji/text icons.
+Generic vertical selectable list with icon, label, and optional meta cells. Styled to the toolcase design system. Items are supplied exclusively via the `items` JS property; the host carries `role="listbox"` and each row carries `role="option"`. Emits `tc-select` when a non-disabled row is activated via click, Enter, or Space. Sharp corners; slate neutrals; ink accent marks the selected row. Supports lucide icon names (rendered as SVG) and emoji/text icons.
 
 **Tag:** `tc-list`
 
@@ -21461,7 +21461,7 @@ None. `tc-list` is purely data-driven via the `items` JS property.
 
 ### tc-list-row
 
-Single selectable list row (leading media, label, trailing value/action). Ported from `gc-list-row` (game-components) and restyled to the toolcase design system. The host is the interactive element: `role="option"`, `tabindex="0"`, `aria-selected`, `aria-disabled`. Activate via click, Enter, or Space — fires `tc-select`. Accent colour is overridable per-row via the `accent` attribute. Light DOM; all content is author-supplied children using the helper classes below.
+Single selectable list row (leading media, label, trailing value/action). Styled to the toolcase design system. The host is the interactive element: `role="option"`, `tabindex="0"`, `aria-selected`, `aria-disabled`. Activate via click, Enter, or Space — fires `tc-select`. Accent colour is overridable per-row via the `accent` attribute. Light DOM; all content is author-supplied children using the helper classes below.
 
 **Tag:** `tc-list-row`
 
@@ -21556,7 +21556,7 @@ Single selectable list row (leading media, label, trailing value/action). Ported
 
 ### tc-lobby
 
-Multiplayer lobby panel showing player slots, ready state, and start controls. Port of `gc-lobby` (game-components), restyled to the toolcase design system: slate neutrals, hairline borders, sharp corners, JetBrains Mono for machine-facing text, ink accent for primary actions. Players are set via the `players` JS property. The Start Match button is shown only when a player with `host: true` is in the list and is enabled only when `can-start` is present. All cosmetics flow through `--bs-lobby-*` custom properties.
+Multiplayer lobby panel showing player slots, ready state, and start controls. Styled to the toolcase design system: slate neutrals, hairline borders, sharp corners, JetBrains Mono for machine-facing text, ink accent for primary actions. Players are set via the `players` JS property. The Start Match button is shown only when a player with `host: true` is in the list and is enabled only when `can-start` is present. All cosmetics flow through `--bs-lobby-*` custom properties.
 
 **Tag:** `tc-lobby`
 
@@ -21769,7 +21769,7 @@ A list of loot / drop entries with optional rarity tiers. Items are set via the 
 
 ### tc-loot-popup
 
-Modal loot window with Take All / Discard and optional auto-fade timer. Port of `gc-loot-popup` (game-components), restyled to the slate design system (sharp corners, 1px hairline, overlay-tier shadow). Controlled component — fires `tc-close`; the consumer sets `open` to `false` to actually dismiss. Focus trap, scroll lock, and keyboard (`Escape`) handling included. No shadow root; light DOM; `display: block`.
+Modal loot window with Take All / Discard and optional auto-fade timer. Styled to the slate design system (sharp corners, 1px hairline, overlay-tier shadow). Controlled component — fires `tc-close`; the consumer sets `open` to `false` to actually dismiss. Focus trap, scroll lock, and keyboard (`Escape`) handling included. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-loot-popup`
 
@@ -21869,7 +21869,7 @@ Modal loot window with Take All / Discard and optional auto-fade timer. Port of 
 
 ### tc-party-panel
 
-Party member panel with portraits, health, and status. Port of `gc-party-panel` (game-components), restyled to the toolcase design system: slate neutrals, hairline borders, sharp corners, JetBrains Mono for machine-facing text, ink accent for host badge. Members are set via the `members` JS property. Empty slots render as Invite buttons that fire `tc-invite`; the Leave Party button fires `tc-leave`. All cosmetics flow through `--bs-party-panel-*` custom properties.
+Party member panel with portraits, health, and status. Styled to the toolcase design system: slate neutrals, hairline borders, sharp corners, JetBrains Mono for machine-facing text, ink accent for host badge. Members are set via the `members` JS property. Empty slots render as Invite buttons that fire `tc-invite`; the Leave Party button fires `tc-leave`. All cosmetics flow through `--bs-party-panel-*` custom properties.
 
 **Tag:** `tc-party-panel`
 
@@ -21963,7 +21963,7 @@ Party member panel with portraits, health, and status. Port of `gc-party-panel` 
 
 ### tc-lore-text
 
-Flavor / lore body-copy block. Slot-based — used for tooltips, loading screens, codex entries, or any italic narrative aside. Drops game-components fantasy chrome (gilded frames, glows, fantasy fills) in favour of the web-components design system: sharp corners, 1px hairline left border, Inter italic prose.
+Flavor / lore body-copy block. Slot-based — used for tooltips, loading screens, codex entries, or any italic narrative aside. Styled to the web-components design system: sharp corners, 1px hairline left border, Inter italic prose.
 
 **Tag:** `tc-lore-text`
 
@@ -22026,7 +22026,7 @@ None. `tc-lore-text` is purely presentational.
 
 ### tc-subtitle
 
-Subtitle / secondary heading text line. Port of `gc-subtitle` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners, 1px hairline border (boxed variant), JetBrains Mono for the optional speaker micro-label. All content is driven by attributes — no slots or events. No shadow root; light DOM; `display: block`.
+Subtitle / secondary heading text line. Styled to the toolcase design system: slate neutrals, sharp corners, 1px hairline border (boxed variant), JetBrains Mono for the optional speaker micro-label. All content is driven by attributes — no slots or events. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-subtitle`
 
@@ -22104,7 +22104,7 @@ None. All content is supplied via attributes.
 
 ### tc-title
 
-Large display title text for hero sections, screen headings, and prominent labels. Port of `gc-title` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners, no glows or fantasy chrome. Slot content is the title text; `size` overrides the font size in pixels. No shadow root; light DOM; `display: block`.
+Large display title text for hero sections, screen headings, and prominent labels. Styled to the toolcase design system: slate neutrals, sharp corners. Slot content is the title text; `size` overrides the font size in pixels. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-title`
 
@@ -22163,7 +22163,7 @@ None. `tc-title` is purely presentational.
 
 ### tc-main-menu
 
-Main-menu container of menu items. Port of `gc-main-menu` (game-components), restyled to the toolcase design system: slate neutrals, hairline borders, sharp corners, JetBrains Mono for machine-facing labels, ink accent for the selected item. Items are set via the JS `items` property. Arrow keys navigate between enabled items; Enter/Space fires `tc-select` for the highlighted item; hovering an item also highlights it. No shadow root; light DOM; `display: block`.
+Main-menu container of menu items. Styled to the toolcase design system: slate neutrals, hairline borders, sharp corners, JetBrains Mono for machine-facing labels, ink accent for the selected item. Items are set via the JS `items` property. Arrow keys navigate between enabled items; Enter/Space fires `tc-select` for the highlighted item; hovering an item also highlights it. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-main-menu`
 
@@ -22258,7 +22258,7 @@ Main-menu container of menu items. Port of `gc-main-menu` (game-components), res
 
 ### tc-menu-item
 
-Single interactive menu row — icon, label, optional hotkey badge, selected/disabled states. Port of `gc-menu-item` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners, 1px hairline border, ink accent for the selected state, JetBrains Mono for the hotkey badge. Fires `tc-select` on click or Enter/Space. No shadow root; light DOM; `display: block` (overridden to `display: flex` in the component partial).
+Single interactive menu row — icon, label, optional hotkey badge, selected/disabled states. Styled to the toolcase design system: slate neutrals, sharp corners, 1px hairline border, ink accent for the selected state, JetBrains Mono for the hotkey badge. Fires `tc-select` on click or Enter/Space. No shadow root; light DOM; `display: block` (overridden to `display: flex` in the component partial).
 
 **Tag:** `tc-menu-item`
 
@@ -22348,7 +22348,7 @@ Single interactive menu row — icon, label, optional hotkey badge, selected/dis
 
 ### tc-matchmaking-screen
 
-Matchmaking / searching status panel with a state indicator ring, eyebrow + title header, optional meta strip (Mode, Region, Elapsed, ETA), and accept/cancel action buttons. Port of `gc-matchmaking-screen` (game-components), restyled to the toolcase design system: slate surface, sharp panel, 1px hairline borders, JetBrains Mono for machine-facing meta values, ink accent for the primary Accept action. Game chrome (gilded frames, glows, fantasy textures) is replaced with the slate neutral ramp. All cosmetics flow through `--bs-matchmaking-screen-*` custom properties.
+Matchmaking / searching status panel with a state indicator ring, eyebrow + title header, optional meta strip (Mode, Region, Elapsed, ETA), and accept/cancel action buttons. Styled to the toolcase design system: slate surface, sharp panel, 1px hairline borders, JetBrains Mono for machine-facing meta values, ink accent for the primary Accept action. The slate neutral ramp carries the panel. All cosmetics flow through `--bs-matchmaking-screen-*` custom properties.
 
 **Tag:** `tc-matchmaking-screen`
 
@@ -22465,7 +22465,7 @@ Matchmaking / searching status panel with a state indicator ring, eyebrow + titl
 
 ### tc-stats-screen
 
-End-of-match statistics panel. Port of `gc-stats-screen` (game-components), restyled to the toolcase design system: slate surface, sharp corners, 1px hairline borders, JetBrains Mono for machine-facing stat values, muted prose palette for labels. Game chrome (gilded frames, glows, fantasy fills, diamond dividers) is replaced with the slate neutral ramp. All cosmetics flow through `--bs-stats-screen-*` custom properties. Purely presentational — no events, no slots.
+End-of-match statistics panel. Styled to the toolcase design system: slate surface, sharp corners, 1px hairline borders, JetBrains Mono for machine-facing stat values, muted prose palette for labels. The slate neutral ramp carries the panel. All cosmetics flow through `--bs-stats-screen-*` custom properties. Purely presentational — no events, no slots.
 
 **Tag:** `tc-stats-screen`
 
@@ -22558,7 +22558,7 @@ End-of-match statistics panel. Port of `gc-stats-screen` (game-components), rest
 
 ### tc-metal-button
 
-Primary call-to-action button ported from `gc-metal-button` (game-components), restyled to the toolcase design system. Game-specific chrome (metal textures, gilded frames, glows) is dropped; the button renders with slate neutrals, sharp corners (`border-radius: 0`), a 1px hairline border, and the ink primary gradient for the `primary` variant. Slotted children become the button label. Disabled state is enforced natively on the inner `<button>`. No shadow root; light DOM; `display: inline-block`.
+Primary call-to-action button styled to the toolcase design system. The button renders with slate neutrals, sharp corners (`border-radius: 0`), a 1px hairline border, and the ink primary gradient for the `primary` variant. Slotted children become the button label. Disabled state is enforced natively on the inner `<button>`. No shadow root; light DOM; `display: inline-block`.
 
 > **Alias of `tc-button`.** `tc-metal-button` is a thin subclass of `tc-button` with `skin="metal"` baked in (equivalent to `<tc-button skin="metal">`). It keeps the metal `variant` (default / primary / danger / ghost) and `size` (sm / md / lg) sets and the `tc-metal-button__btn` class scheme.
 
@@ -22708,7 +22708,7 @@ None. `tc-minimap` is attribute- and property-driven.
 
 ### tc-player-card
 
-Player summary card showing a player name, optional title, presence status pip, rank badge, level, a stats grid, and action buttons. Port of `gc-player-card` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners (`border-radius: 0`), hairline borders, JetBrains Mono for all machine-facing text, and a sanctioned circle for the status pip. All game-specific chrome (gilded frames, glows, metal textures) is dropped. No shadow root; light DOM; `display: block`.
+Player summary card showing a player name, optional title, presence status pip, rank badge, level, a stats grid, and action buttons. Styled to the toolcase design system: slate neutrals, sharp corners (`border-radius: 0`), hairline borders, JetBrains Mono for all machine-facing text, and a sanctioned circle for the status pip. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-player-card`
 
@@ -22826,7 +22826,7 @@ None. `tc-player-card` is attribute- and property-driven; all content is generat
 
 ### tc-player-frame
 
-Player nameplate / HUD frame combining a portrait tile (glyph + optional level badge), a player name, an optional class label, and up to three stacked resource bars (HP always shown; MP and Stamina shown via boolean attributes). Port of `gc-player-frame` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners (`border-radius: 0`), 1px hairline borders, JetBrains Mono for machine-facing text. No shadow root; light DOM; `display: block`.
+Player nameplate / HUD frame combining a portrait tile (glyph + optional level badge), a player name, an optional class label, and up to three stacked resource bars (HP always shown; MP and Stamina shown via boolean attributes). Styled to the toolcase design system: slate neutrals, sharp corners (`border-radius: 0`), 1px hairline borders, JetBrains Mono for machine-facing text. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-player-frame`
 
@@ -23015,7 +23015,7 @@ None. All content is generated from attributes.
 
 ### tc-ping-display
 
-Compact network-latency readout: a status pip square plus a JetBrains Mono millisecond value, colour-coded by tier. Port of `gc-ping-display` from `@toolcase/game-components`, restyled to the toolcase design system (slate neutrals, sharp corners, `--bs-ping-display-*` custom properties). No shadow root; light DOM; `display: inline-flex`.
+Compact network-latency readout: a status pip square plus a JetBrains Mono millisecond value, colour-coded by tier. Styled to the toolcase design system (slate neutrals, sharp corners, `--bs-ping-display-*` custom properties). No shadow root; light DOM; `display: inline-flex`.
 
 **Tag:** `tc-ping-display`
 
@@ -23242,7 +23242,7 @@ None. `tc-objective-marker` is attribute-driven; all content is generated intern
 
 ### tc-waypoint-marker
 
-Absolutely-positioned world-space waypoint marker with a configurable Lucide icon glyph, optional label chip, and formatted distance readout (metres / kilometres). Port of `gc-waypoint-marker` restyled to the toolcase design system: slate neutrals, sharp corners, 1px hairlines. Drop it inside a `position: relative` container and set `x`/`y` to world coordinates. The element is `position: absolute` and transforms to pin the glyph tip at the target point. No shadow root; light DOM; `display: inline-flex`.
+Absolutely-positioned world-space waypoint marker with a configurable Lucide icon glyph, optional label chip, and formatted distance readout (metres / kilometres). Styled to the toolcase design system: slate neutrals, sharp corners, 1px hairlines. Drop it inside a `position: relative` container and set `x`/`y` to world coordinates. The element is `position: absolute` and transforms to pin the glyph tip at the target point. No shadow root; light DOM; `display: inline-flex`.
 
 **Tag:** `tc-waypoint-marker`
 
@@ -23617,7 +23617,7 @@ pe.addEventListener('tc-burst', e => {
 
 ### tc-pause-menu
 
-In-game pause overlay with a full-screen backdrop, an optional eyebrow + title header, a keyboard-navigable menu-item list, and a primary Resume button. Port of `gc-pause-menu` (game-components), restyled to the toolcase design system: slate neutrals, sharp corners, 1px hairline, overlay-tier shadow. Controlled component — fires `tc-close` / `tc-resume` / `tc-select`; the consumer sets `open` to `false` to actually dismiss. Focus trap, scroll lock, and keyboard (`Escape`, `ArrowDown`/`Up`, `Enter`/`Space`) handling included. Items are set via the JS `items` property. No shadow root; light DOM; `display: block`.
+In-game pause overlay with a full-screen backdrop, an optional eyebrow + title header, a keyboard-navigable menu-item list, and a primary Resume button. Styled to the toolcase design system: slate neutrals, sharp corners, 1px hairline, overlay-tier shadow. Controlled component — fires `tc-close` / `tc-resume` / `tc-select`; the consumer sets `open` to `false` to actually dismiss. Focus trap, scroll lock, and keyboard (`Escape`, `ArrowDown`/`Up`, `Enter`/`Space`) handling included. Items are set via the JS `items` property. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-pause-menu`
 
@@ -23720,7 +23720,7 @@ In-game pause overlay with a full-screen backdrop, an optional eyebrow + title h
 
 ### tc-perk-picker
 
-Grid of selectable perk cards with selected and locked states. Perks are supplied via the `perks` JS property; each card shows an optional icon tile, a name, and an optional description. Fires `tc-select` on click, Enter, or Space. The `columns` attribute controls the CSS grid column count. Locked perks are inert (reduced opacity, not focusable). Ported from the game-components `gc-perk-picker`, restyled to the toolcase design system (flat slate cards, hairline borders, sharp corners, ink fill for the selected card, lucide lock icon for locked entries).
+Grid of selectable perk cards with selected and locked states. Perks are supplied via the `perks` JS property; each card shows an optional icon tile, a name, and an optional description. Fires `tc-select` on click, Enter, or Space. The `columns` attribute controls the CSS grid column count. Locked perks are inert (reduced opacity, not focusable). Styled to the toolcase design system (flat slate cards, hairline borders, sharp corners, ink fill for the selected card, lucide lock icon for locked entries).
 
 **Tag:** `tc-perk-picker`
 
@@ -23797,7 +23797,7 @@ el.addEventListener('tc-select', e => {
 
 ### tc-portrait
 
-Standalone character portrait frame. Displays a glyph (emoji, initials, unicode symbol, or image URL) with an optional level badge strip at the bottom and an optional colored ring outline accent. Port of `gc-portrait` (game-components), restyled to the toolcase design system (flat slate surface, 1px hairline border, sharp corners, JetBrains Mono level badge). No shadow root; light DOM; `display: block`.
+Standalone character portrait frame. Displays a glyph (emoji, initials, unicode symbol, or image URL) with an optional level badge strip at the bottom and an optional colored ring outline accent. Styled to the toolcase design system (flat slate surface, 1px hairline border, sharp corners, JetBrains Mono level badge). No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-portrait`
 
@@ -23877,7 +23877,7 @@ Standalone character portrait frame. Displays a glyph (emoji, initials, unicode 
 
 ### tc-press-any-key
 
-"Press any key to continue" prompt. Renders a pulsing mono text label that fires `tc-continue` on any non-modifier keydown (document-level) or mousedown on the element. Port of `gc-press-any-key` (game-components), restyled to the toolcase design system (JetBrains Mono, slate muted text, sharp corners, opacity-pulse animation). No shadow root; light DOM; `display: block`.
+"Press any key to continue" prompt. Renders a pulsing mono text label that fires `tc-continue` on any non-modifier keydown (document-level) or mousedown on the element. Styled to the toolcase design system (JetBrains Mono, slate muted text, sharp corners, opacity-pulse animation). No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-press-any-key`
 
@@ -23950,7 +23950,7 @@ Standalone character portrait frame. Displays a glyph (emoji, initials, unicode 
 
 ### tc-journal
 
-Quest / lore journal pairing an entry list (left rail) with a detail view (right pane). Each entry carries a `state` (active / completed / failed / inactive), an optional description and body, a list of objectives with checkbox indicators, and a list of rewards. Selecting a row updates the detail pane and fires `tc-select`. Port of `gc-journal` (game-components), restyled to the slate/ink design system with sharp corners, JetBrains Mono machine-facing text, 1px hairline borders, a state-colored pip per row, a CSS-drawn objective checkbox, and `--bs-journal-*` custom properties as the theming contract.
+Quest / lore journal pairing an entry list (left rail) with a detail view (right pane). Each entry carries a `state` (active / completed / failed / inactive), an optional description and body, a list of objectives with checkbox indicators, and a list of rewards. Selecting a row updates the detail pane and fires `tc-select`. Styled to the slate/ink design system with sharp corners, JetBrains Mono machine-facing text, 1px hairline borders, a state-colored pip per row, a CSS-drawn objective checkbox, and `--bs-journal-*` custom properties as the theming contract.
 
 **Tag:** `tc-journal`
 
@@ -24191,7 +24191,7 @@ None.
 
 **Tag:** `tc-radial-wheel`
 
-**Description:** Modal radial (pie) item / ability selector. A fixed-position overlay displaying a circular disc with options arranged radially. Hovering an option shows its label in the center of the disc. Clicking the backdrop or pressing Escape closes the wheel. Port of `gc-radial-wheel` from `@toolcase/game-components`, restyled to the toolcase design system.
+**Description:** Modal radial (pie) item / ability selector. A fixed-position overlay displaying a circular disc with options arranged radially. Hovering an option shows its label in the center of the disc. Clicking the backdrop or pressing Escape closes the wheel. Styled to the toolcase design system.
 
 ---
 
@@ -24300,7 +24300,7 @@ None. All content is driven by the `options` JS property.
 
 ### tc-report-dialog
 
-Player-report moderation modal with a reason radio group, an optional comment textarea, and Cancel / Submit Report actions. Port of `gc-report-player-dialog` (game-components), restyled to the slate design system (sharp corners, 1px hairline, overlay-tier shadow, danger-red submit). Controlled component — fires `tc-cancel` or `tc-submit`; the consumer sets `open` to `false` to dismiss. Focus trap, scroll lock, and keyboard (`Escape`) handling included. No shadow root; light DOM; `display: block`.
+Player-report moderation modal with a reason radio group, an optional comment textarea, and Cancel / Submit Report actions. Styled to the slate design system (sharp corners, 1px hairline, overlay-tier shadow, danger-red submit). Controlled component — fires `tc-cancel` or `tc-submit`; the consumer sets `open` to `false` to dismiss. Focus trap, scroll lock, and keyboard (`Escape`) handling included. No shadow root; light DOM; `display: block`.
 
 **Tag:** `tc-report-dialog`
 
@@ -24406,7 +24406,7 @@ None. All content is driven by attributes and the `reasons` JS property.
 
 ### tc-screen-flash
 
-Full-screen flash effect for damage hits and scene transitions. Ported from `gc-screen-flash` and restyled to the toolcase design system: no shadow DOM, no game chrome — a flat fill `<div>` that JS animates from a peak opacity back to transparent. The host sits `position: fixed; inset: 0` with `pointer-events: none` so it covers the viewport without blocking interaction. A flash is triggered by changing the `trigger` attribute to a new non-null value, or by calling the imperative `flash()` method. A `tc-done` event fires when the fade-out completes.
+Full-screen flash effect for damage hits and scene transitions. Styled to the toolcase design system: no shadow DOM — a flat fill `<div>` that JS animates from a peak opacity back to transparent. The host sits `position: fixed; inset: 0` with `pointer-events: none` so it covers the viewport without blocking interaction. A flash is triggered by changing the `trigger` attribute to a new non-null value, or by calling the imperative `flash()` method. A `tc-done` event fires when the fade-out completes.
 
 **Tag:** `tc-screen-flash`
 
@@ -24498,7 +24498,7 @@ None. All content is generated by the component.
 
 ### tc-shake-container
 
-rAF-driven camera-shake wrapper that translates its slotted content with a decaying random offset. Ported from `gc-shake-container` (game-components) and restyled to the web-components design system — no Shadow DOM, no game chrome, no gilded frames; a flat block wrapper whose inner `.tc-shake-container-inner` div JS translates on demand. Re-shakes whenever the `trigger` attribute changes to a new value; intensity decays linearly from `intensity` px to 0 over `duration` ms. Respects `prefers-reduced-motion`. All cosmetics flow through `--bs-shake-container-*` custom properties.
+rAF-driven camera-shake wrapper that translates its slotted content with a decaying random offset. Styled to the web-components design system — no Shadow DOM; a flat block wrapper whose inner `.tc-shake-container-inner` div JS translates on demand. Re-shakes whenever the `trigger` attribute changes to a new value; intensity decays linearly from `intensity` px to 0 over `duration` ms. Respects `prefers-reduced-motion`. All cosmetics flow through `--bs-shake-container-*` custom properties.
 
 **Tag:** `tc-shake-container`
 
@@ -24571,7 +24571,7 @@ None. `tc-shake-container` is a passive wrapper — it shakes on demand but fire
 
 ### tc-rune-corner
 
-Decorative corner accent for absolutely-positioned framed surfaces. Port of `gc-rune-corner` (game-components), re-voiced for the web-components design system — flat ink L-shaped clip, no gilded frames or fantasy fills. Purely presentational — no events, no slots.
+Decorative corner accent for absolutely-positioned framed surfaces. Voiced for the web-components design system — flat ink L-shaped clip. Purely presentational — no events, no slots.
 
 **Tag:** `tc-rune-corner`
 
@@ -24628,7 +24628,7 @@ None. `tc-rune-corner` renders entirely from its attributes and CSS.
 
 ### tc-settings-category-list
 
-Settings sidebar panel with a left-side category nav and a right-side slotted content area. Categories are driven by the `categories` JS property; the active category is tracked via `selected-id`; clicking a tab fires `tc-select`. Port of `gc-settings-category-list` (game-components), restyled to the slate/ink design system with sharp corners, JetBrains Mono tabs, a 2px ink left-border active indicator, and `--bs-settings-category-list-*` custom properties as the theming contract.
+Settings sidebar panel with a left-side category nav and a right-side slotted content area. Categories are driven by the `categories` JS property; the active category is tracked via `selected-id`; clicking a tab fires `tc-select`. Styled to the slate/ink design system with sharp corners, JetBrains Mono tabs, a 2px ink left-border active indicator, and `--bs-settings-category-list-*` custom properties as the theming contract.
 
 **Tag:** `tc-settings-category-list`
 
@@ -24770,7 +24770,7 @@ None. All content is driven by attributes.
 
 ### tc-stat-row
 
-Label + value stat row with an optional trend indicator. Port of `gc-stat-row` from `@toolcase/game-components`, restyled to the toolcase design system with slate neutrals, JetBrains Mono values, and 1px hairline separators. Purely presentational; attribute-driven with no events and no slots. All cosmetics flow through `--bs-stat-row-*` custom properties.
+Label + value stat row with an optional trend indicator. Styled to the toolcase design system with slate neutrals, JetBrains Mono values, and 1px hairline separators. Purely presentational; attribute-driven with no events and no slots. All cosmetics flow through `--bs-stat-row-*` custom properties.
 
 **Tag:** `tc-stat-row`
 
@@ -24850,7 +24850,7 @@ None. All content is driven by attributes.
 
 ### tc-scroll-text
 
-Scrollable text panel with an optional mono uppercase title header. Drop any HTML content into the default slot; set `max-height` to enable a scrollable viewport. Port of `gc-scroll-text`; all game-specific chrome removed in favour of the slate design system.
+Scrollable text panel with an optional mono uppercase title header. Drop any HTML content into the default slot; set `max-height` to enable a scrollable viewport. Styled to the slate design system.
 
 **Tag:** `tc-scroll-text`
 
@@ -24923,7 +24923,7 @@ None. `tc-scroll-text` is a presentational element.
 
 ### tc-shop-panel
 
-Shop UI with an item grid, prices, optional discounts, and buy/sell actions. Port of `gc-shop-panel` (game-components), restyled to the toolcase design system — slate neutrals, sharp corners, 1px hairlines, JetBrains Mono for prices and currency. No Shadow DOM, no game chrome. All cosmetics flow through `--bs-shop-panel-*` custom properties.
+Shop UI with an item grid, prices, optional discounts, and buy/sell actions. Styled to the toolcase design system — slate neutrals, sharp corners, 1px hairlines, JetBrains Mono for prices and currency. No Shadow DOM. All cosmetics flow through `--bs-shop-panel-*` custom properties.
 
 **Tag:** `tc-shop-panel`
 
@@ -25032,7 +25032,7 @@ None. All content is driven by the `items` JS property.
 
 ### tc-skill-tree
 
-Node-graph skill tree with prerequisite edges, locked/unlocked/selected states, rank counters, and an optional remaining-points readout. Port of `gc-skill-tree` from `@toolcase/game-components`, restyled to the toolcase design system: flat slate surfaces, sharp corners, 1px hairline borders, ink accent for selected/unlocked states, JetBrains Mono for labels and rank counters. No game-specific chrome.
+Node-graph skill tree with prerequisite edges, locked/unlocked/selected states, rank counters, and an optional remaining-points readout. Styled to the toolcase design system: flat slate surfaces, sharp corners, 1px hairline borders, ink accent for selected/unlocked states, JetBrains Mono for labels and rank counters.
 
 **Tag:** `tc-skill-tree`
 
@@ -25161,7 +25161,7 @@ None. `tc-skill-tree` is entirely data-driven via JS properties and attributes.
 
 ### tc-transition-wipe
 
-Full-screen scene-wipe transition overlay. Ported from `gc-transition-wipe` and restyled to the toolcase design system: no shadow DOM, no fantasy chrome — a flat-fill `<div>` that CSS transitions in/out when the `[show]` attribute is toggled. Six direction variants control the animation style: `fade` (opacity), `left`/`right`/`up`/`down` (translate slides), and `iris` (circular clip-path reveal). The host sits `position: fixed; inset: 0`; `pointer-events` are blocked while `[show]` is set so the scene beneath is non-interactive during the transition. A `tc-complete` event fires after `duration` ms to signal that the scene can change.
+Full-screen scene-wipe transition overlay. Styled to the toolcase design system: no shadow DOM — a flat-fill `<div>` that CSS transitions in/out when the `[show]` attribute is toggled. Six direction variants control the animation style: `fade` (opacity), `left`/`right`/`up`/`down` (translate slides), and `iris` (circular clip-path reveal). The host sits `position: fixed; inset: 0`; `pointer-events` are blocked while `[show]` is set so the scene beneath is non-interactive during the transition. A `tc-complete` event fires after `duration` ms to signal that the scene can change.
 
 **Tag:** `tc-transition-wipe`
 
@@ -25240,7 +25240,7 @@ None. All content is generated by the component.
 
 ### tc-vignette-overlay
 
-Edge vignette overlay for damage feedback, cinematic framing, or low-health UI. Ported from `gc-vignette-overlay` (game-components) and restyled to the web-components design system — no Shadow DOM, no game chrome; a block wrapper whose `::after` pseudo-element paints a radial-gradient overlay on top of slotted content. The center is transparent and the edges fade to `vignette-color`; `intensity` (0–1) controls the pseudo-element's opacity. `pointer-events: none` on the overlay keeps content fully interactive. All cosmetics flow through `--bs-vignette-overlay-*` custom properties.
+Edge vignette overlay for damage feedback, cinematic framing, or low-health UI. Styled to the web-components design system — no Shadow DOM; a block wrapper whose `::after` pseudo-element paints a radial-gradient overlay on top of slotted content. The center is transparent and the edges fade to `vignette-color`; `intensity` (0–1) controls the pseudo-element's opacity. `pointer-events: none` on the overlay keeps content fully interactive. All cosmetics flow through `--bs-vignette-overlay-*` custom properties.
 
 **Tag:** `tc-vignette-overlay`
 

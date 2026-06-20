@@ -30,7 +30,7 @@ tc-inventory-grid {
     --bs-inventory-grid-selected-ring: rgba(30, 41, 59, 0.12);
 
     --bs-inventory-grid-qty-bg: var(--tc-app-accent);
-    --bs-inventory-grid-qty-color: #fff;
+    --bs-inventory-grid-qty-color: var(--tc-app-accent-contrast);
 
     box-sizing: border-box;
     padding: var(--bs-inventory-grid-padding);

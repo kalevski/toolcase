@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { AnnouncementBar, IconButton } from '@toolcase/react-components'
+import { AnnouncementBar, IconButton } from '@/components/ui'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject, AGENT_LABELS } from '../ProjectContext'
 

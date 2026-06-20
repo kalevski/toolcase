@@ -72,7 +72,7 @@ const BuffBarDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="BuffBar"
-                            description="A horizontal row of active buff / debuff status icons with cooldown sweeps, stack counts, and mono duration captions. Each entry composes tc-buff-icon. Ported from the game-components gc-buff-bar and restyled to the toolcase design system — flat slate tiles, hairline borders, sharp corners, mono machine-text, and a single status accent stripe for buff vs debuff."
+                            description="A horizontal row of active buff / debuff status icons with cooldown sweeps, stack counts, and mono duration captions. Each entry composes tc-buff-icon. Restyled to the toolcase design system — flat slate tiles, hairline borders, sharp corners, mono machine-text, and a single status accent stripe for buff vs debuff."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

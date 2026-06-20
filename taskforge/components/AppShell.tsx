@@ -11,7 +11,7 @@ import {
     type BadgeProps,
     type SideNavItem,
     type SideNavSection,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { EngineState, MeResponse, ProjectNavItem } from '@/server/domain/types'
 
 const STATE_ICON: Record<EngineState, string> = {

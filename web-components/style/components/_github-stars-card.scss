@@ -30,8 +30,8 @@ tc-github-stars-card {
     --bs-github-stars-card-stat-label-font-size: 0.6875rem;
 
     // CTA
-    --bs-github-stars-card-cta-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-github-stars-card-cta-color: #fff;
+    --bs-github-stars-card-cta-bg: var(--tc-app-accent-gradient);
+    --bs-github-stars-card-cta-color: var(--tc-app-accent-contrast);
     --bs-github-stars-card-cta-font-size: 0.875rem;
     --bs-github-stars-card-cta-padding: 0.625rem 1rem;
     --bs-github-stars-card-cta-hover-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);

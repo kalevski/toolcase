@@ -73,15 +73,16 @@ npm run typecheck
 npm run build        # produces .next/standalone
 ```
 
-The app depends only on the published `@toolcase/react-components` (+ its
-`@toolcase/base` peer) for UI. It expects `claude` and `git` on `PATH`
-(the Docker image installs both).
+The UI is built on a small, locally vendored component kit under
+`components/ui/` (plain React + CSS, SSR-safe), plus `@toolcase/base`. It expects
+`claude` and `git` on `PATH` (the Docker image installs both).
 
 ## Layout
 
 ```
 app/            Next.js App Router — pages + api/** route handlers
-components/     client compositions over @toolcase/react-components
+components/     client compositions over the local components/ui kit
+components/ui/  vendored React UI kit (Button, Modal, Table, charts, …) + styles.css
 skills/         bundled read-only app skills (task-creator, commit-message)
 middleware.ts   thin edge auth gate (full verify happens in the Node layer)
 server/         server-only code, n-layer architecture (deps point downward):

@@ -1,20 +1,18 @@
 {
     "name": "@toolcase/root",
     "private": true,
-    "description": "Toolcase monorepo — JavaScript utilities, logging, serializer, React + Web Component UI, and Phaser game runtime.",
+    "description": "Toolcase monorepo — JavaScript utilities, logging, serializer, framework-free Web Component UI, and Phaser game runtime.",
     "scripts": {
         "build": "npm run build --workspaces",
         "test": "vitest run",
         "lint": "eslint .",
-        "lint:exports": "publint base && publint logging && publint serializer && publint react-components && publint game-components && publint web-components && publint phaser-plus && publint node",
+        "lint:exports": "publint base && publint logging && publint serializer && publint web-components && publint phaser-plus && publint node",
         "format": "prettier --write ."
     },
     "workspaces": [
         "base",
         "logging",
         "serializer",
-        "react-components",
-        "game-components",
         "web-components",
         "phaser-plus",
         "node",

@@ -686,7 +686,7 @@ code, pre, .mono { font-family: var(--font-mono); }
 .example__canvas {
     min-height: calc(100vh - 130px);
 }
-/* react-components theme toggle */
+/* per-package theme toggle (web-components default / dungeon) */
 .example__theme {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -706,10 +706,6 @@ code, pre, .mono { font-family: var(--font-mono); }
     color: var(--fg-2);
     cursor: pointer;
 }
-/* dark theme wrapper fills the canvas so the demo sits on dark ground */
-.example__canvas > .theme--dark {
-    min-height: calc(100vh - 130px);
-}
 /* web-components theme wrapper: fill the canvas and paint the active theme's
    surface/text so dark + accent themes get a proper themed ground */
 .example__canvas > .wc-theme-scope {
@@ -721,6 +717,16 @@ code, pre, .mono { font-family: var(--font-mono); }
    the flat surface fill, so demos sit on proper dungeon ground */
 .example__canvas > .wc-theme-scope[data-tc-theme='dungeon'] {
     background: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+    padding: 24px;
+}
+/* aurora theme: deep-slate canvas lit by the ambient mint glow field so demos
+   sit on the proper production-AI ground */
+.example__canvas > .wc-theme-scope[data-tc-theme='aurora'] {
+    background:
+        radial-gradient(820px 520px at 78% -8%, rgba(47, 230, 173, 0.1), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(36, 90, 120, 0.14), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(47, 230, 173, 0.1), transparent 55%),
+        #07090d;
     padding: 24px;
 }
 
@@ -776,8 +782,8 @@ code, pre, .mono { font-family: var(--font-mono); }
     .example__bar-inner { padding: 10px 20px; }
 }
 
-/* Custom scrollbar — site-level chrome. Moved out of @toolcase/react-components
-   (a component library should not own global scrollbar styling; improvements/01 R6).
+/* Custom scrollbar — site-level chrome owned by the examples site itself
+   (a component library should not own global scrollbar styling).
    Thumb is square per the no-border-radius design rule. */
 ::-webkit-scrollbar {
     width: 12px;

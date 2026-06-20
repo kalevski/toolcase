@@ -42,7 +42,7 @@ tc-shop-panel {
     --bs-shop-panel-btn-font-size: 0.75rem;
     --bs-shop-panel-btn-min-height: 1.75rem;
     --bs-shop-panel-btn-bg: var(--tc-app-accent);
-    --bs-shop-panel-btn-color: #fff;
+    --bs-shop-panel-btn-color: var(--tc-app-accent-contrast);
     --bs-shop-panel-btn-border: 1px solid var(--tc-app-accent);
     --bs-shop-panel-btn-hover-bg: var(--tc-surface);
     --bs-shop-panel-btn-hover-color: var(--tc-app-accent);

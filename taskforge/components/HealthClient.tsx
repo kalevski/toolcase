@@ -13,7 +13,7 @@ import {
     StatusDot,
     Spinner,
     HelperText,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { HealthDetails } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 

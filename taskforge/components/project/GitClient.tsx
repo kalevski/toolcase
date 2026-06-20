@@ -11,7 +11,7 @@ import {
     HelperText,
     TerminalWindow,
     type TerminalLine,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { GitBranchList } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'

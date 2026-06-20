@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { EmptyState, Button } from '@toolcase/react-components'
+import { EmptyState, Button } from '@/components/ui'
 
 export function NoAccessClient({ login }: { login: string }) {
     const router = useRouter()

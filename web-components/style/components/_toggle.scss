@@ -10,7 +10,7 @@ tc-toggle {
     --bs-toggle-track-bg: var(--tc-border-strong);
     --bs-toggle-track-hover-bg: var(--tc-text-faint);
     --bs-toggle-track-checked-bg: var(--tc-app-accent);
-    --bs-toggle-track-checked-gradient: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-toggle-track-checked-gradient: var(--tc-app-accent-gradient);
     --bs-toggle-track-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
     --bs-toggle-knob-size: 18px;
     --bs-toggle-knob-inset: 2px;

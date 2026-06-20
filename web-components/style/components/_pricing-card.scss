@@ -19,14 +19,14 @@ tc-pricing-card {
     --bs-pricing-card-period-size: 0.875rem;
     --bs-pricing-card-desc-color: var(--tc-text-muted);
     --bs-pricing-card-badge-bg: var(--tc-app-accent);
-    --bs-pricing-card-badge-color: #fff;
+    --bs-pricing-card-badge-color: var(--tc-app-accent-contrast);
     --bs-pricing-card-feature-included-color: var(--tc-success);
     --bs-pricing-card-feature-excluded-color: var(--tc-text-faint);
     --bs-pricing-card-feature-label-color: var(--tc-text);
     --bs-pricing-card-feature-icon-size: 1rem;
     --bs-pricing-card-highlight-border-color: var(--tc-app-accent);
     --bs-pricing-card-highlight-shadow: 0 4px 20px rgba(30, 41, 59, 0.18);
-    --bs-pricing-card-highlight-cap-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-pricing-card-highlight-cap-bg: var(--tc-app-accent-gradient);
 }
 
 // Inner article — the visual card surface

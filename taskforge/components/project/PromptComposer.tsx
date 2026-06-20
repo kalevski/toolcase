@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useMemo, useState } from 'react'
-import { Button, Select, Tag, Text, Tooltip, toast } from '@toolcase/react-components'
+import { Button, Select, Tag, Text, Tooltip, toast } from '@/components/ui'
 import type { AgentKind, AgentPromptRecord } from '@/server/domain/types'
 import { usePrompt } from '../ConfirmModal'
 

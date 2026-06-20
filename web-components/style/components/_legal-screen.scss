@@ -30,7 +30,7 @@ tc-legal-screen {
     --bs-legal-screen-nav-item-size:      0.8125rem;
     --bs-legal-screen-nav-item-hover-bg:  var(--tc-surface-muted);
     --bs-legal-screen-nav-active-bg:      var(--tc-app-accent);
-    --bs-legal-screen-nav-active-color:   #fff;
+    --bs-legal-screen-nav-active-color: var(--tc-app-accent-contrast);
 
     // Body panel.
     --bs-legal-screen-body-bg:              var(--tc-surface);
@@ -266,8 +266,8 @@ tc-legal-screen {
     padding: 0.4375rem 1.25rem;
     border: none;
     border-radius: 0;
-    background: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    color: #fff;
+    background: var(--tc-app-accent-gradient);
+    color: var(--tc-app-accent-contrast);
     font-size: 0.875rem;
     font-weight: 500;
     letter-spacing: 0.025em;

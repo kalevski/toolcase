@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/web-components",
-    "version": "0.1.0",
+    "version": "4.0.0",
     "description": "Framework-free HTML5 Web Components (tc-*) with their own from-scratch toolcase styling and a Bootstrap-compatible class/grid API — drop into any stack without React, Vue, or Angular.",
     "main": "lib/index.main.js",
     "module": "lib/index.module.js",
@@ -30,7 +30,7 @@
         "gen:react-types": "node scripts/gen-react-types.mjs"
     },
     "peerDependencies": {
-        "@toolcase/base": "3.x.x",
+        "@toolcase/base": "4.x.x",
         "react": ">=18"
     },
     "peerDependenciesMeta": {

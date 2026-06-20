@@ -1,70 +1,76 @@
-import { useEffect, useState, ReactNode } from 'react'
+import { useEffect, useRef, useState, ReactNode } from 'react'
 import { Routes, Route, useNavigate, useLocation, Link as RouterLink } from 'react-router'
 import { packageRoutes, topPages, type DemoEntry, type PackageRoute } from './routes'
 import { NginxPilotPage } from './pages/NginxPilotPage'
 import { TaskForgePage } from './pages/TaskForgePage'
 
+// Header dogfoods <tc-navbar>: the glass app-chrome bar. Nav links are
+// React-controlled (RouterLink) so SPA navigation + active state keep working;
+// the link set is static, so the navbar moving them into its collapse region
+// never fights React's reconciliation.
 const Header = () => {
     const location = useLocation()
     const path = location.pathname
 
-    const isPackages =
-        path === '/' ||
-        packageRoutes.some((r) => path === r.basePath || path.startsWith(`${r.basePath}/`))
     const isApps = path.startsWith('/apps')
     const isSkills = path.startsWith('/skills')
+    const isPackages = !isApps && !isSkills
 
     return (
-        <header className="site-header">
-            <div className="site-header-inner">
-                <RouterLink to="/" className="brand">
-                    <span className="dot" />
-                    <span>@toolcase</span>
-                </RouterLink>
-                <nav className="nav">
-                    <RouterLink
-                        to="/"
-                        className={isPackages && !isApps && !isSkills ? 'active' : ''}
-                    >
+        // @ts-ignore custom element registered by @toolcase/web-components
+        <tc-navbar brand="@toolcase" expand="md" sticky="top">
+            <ul className="navbar-nav me-auto mb-2 mb-md-0">
+                <li className="nav-item">
+                    <RouterLink to="/" className={`nav-link ${isPackages ? 'active' : ''}`}>
                         Packages
                     </RouterLink>
-                    <RouterLink to="/apps" className={isApps ? 'active' : ''}>
+                </li>
+                <li className="nav-item">
+                    <RouterLink to="/apps" className={`nav-link ${isApps ? 'active' : ''}`}>
                         Apps
                     </RouterLink>
-                    <RouterLink to="/skills" className={isSkills ? 'active' : ''}>
+                </li>
+                <li className="nav-item">
+                    <RouterLink to="/skills" className={`nav-link ${isSkills ? 'active' : ''}`}>
                         Skills
                     </RouterLink>
-                </nav>
-                <div className="header-spacer" />
-                <div className="header-meta">
-                    <a href="https://github.com/kalevski/toolcase" target="_blank" rel="noopener">
-                        github ↗
-                    </a>
-                </div>
-            </div>
-        </header>
+                </li>
+            </ul>
+            <a
+                className="nav-link"
+                href="https://github.com/kalevski/toolcase"
+                target="_blank"
+                rel="noopener"
+            >
+                github ↗
+            </a>
+            {/* @ts-ignore */}
+        </tc-navbar>
     )
 }
 
-const Footer = () => (
-    <footer className="site-footer">
-        <div className="site-footer-inner">
-            <div>
-                <span style={{ color: 'var(--fg-2)', fontWeight: 500 }}>@toolcase</span>
-                &nbsp;·&nbsp; reusable code shaped over 10 years
-            </div>
-            <div style={{ display: 'flex', gap: 20 }}>
-                <a href="https://github.com/kalevski/toolcase" target="_blank" rel="noopener">
-                    github
-                </a>
-                <a href="https://www.npmjs.com/~kalevski" target="_blank" rel="noopener">
-                    npm
-                </a>
-                <a href="mailto:dakalevski@gmail.com">contact</a>
-            </div>
-        </div>
-    </footer>
-)
+// Footer dogfoods <tc-page-footer>. Its rows are JS properties (socialLinks),
+// assigned through a ref after mount; the rest is attribute-driven.
+const Footer = () => {
+    const ref = useRef<any>(null)
+    useEffect(() => {
+        if (!ref.current) return
+        ref.current.socialLinks = [
+            { icon: 'github', href: 'https://github.com/kalevski/toolcase', label: 'GitHub' },
+            { icon: 'package', href: 'https://www.npmjs.com/~kalevski', label: 'npm' },
+            { icon: 'mail', href: 'mailto:dakalevski@gmail.com', label: 'Contact' },
+        ]
+    }, [])
+    return (
+        // @ts-ignore custom element registered by @toolcase/web-components
+        <tc-page-footer
+            ref={ref}
+            brand="@toolcase"
+            tagline="Reusable code shaped over a decade of web apps and games."
+            legal-text="© Daniel Kalevski · MIT"
+        />
+    )
+}
 
 const isEditableTarget = (target: EventTarget | null) => {
     if (!(target instanceof HTMLElement)) return false
@@ -81,13 +87,10 @@ interface ExampleWrapperProps {
 }
 
 const routeThemes: Record<string, { value: string; label: string }[]> = {
-    'react-components': [
-        { value: 'default', label: 'Default' },
-        { value: 'dark', label: 'Dark' },
-    ],
     'web-components': [
         { value: 'default', label: 'Default' },
         { value: 'dungeon', label: 'Dungeon' },
+        { value: 'aurora', label: 'Aurora' },
     ],
 }
 
@@ -166,8 +169,6 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
             <div className={canvasClass}>
                 {route.key === 'web-components' ? (
                     <div className="wc-theme-scope" data-tc-theme={theme}>{children}</div>
-                ) : route.key === 'react-components' && theme === 'dark' ? (
-                    <div className="theme theme--dark">{children}</div>
                 ) : (
                     children
                 )}

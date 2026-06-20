@@ -1,0 +1,17 @@
+// Aurora › tc-spinner — mint arc on a faint slate track.
+// The grow / dots / bars / orbit / pulse variants ride currentcolor, so they
+// pick up the accent hue for free. Only the spinner-border track is an
+// off-palette literal (--tc-slate-200) that needs a faint-hairline replacement.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .spinner-border,
+    .spinner-pulse {
+        color: var(--ah-accent);
+    }
+
+    .spinner-border {
+        border-color: var(--ah-border-strong);
+        border-top-color: currentcolor;
+    }
+}

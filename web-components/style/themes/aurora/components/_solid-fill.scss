@@ -1,0 +1,24 @@
+// Aurora › solid-fill contrast utilities — the cross-component `.text-bg-*` and
+// `.bg-secondary` helpers (used by cards, inline status pills, component CTA
+// labels, etc.). The foundation utility pairs a fill with WHITE text for every
+// variant except `light`; on aurora's bright remapped fills that lands at
+// ~1.9–2.8:1, and `secondary` resolves to the pale secondary-TEXT grey which is
+// unreadable as a fill. Flip bright fills to ink and re-skin secondary to a dark
+// surface so any consumer of these helpers clears AA. Per-component partials
+// (badge, toast, card) with higher specificity still win where they re-skin.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .text-bg-success,
+    .text-bg-warning,
+    .text-bg-info,
+    .text-bg-danger {
+        color: var(--ah-accent-ink) !important;
+    }
+
+    .text-bg-secondary,
+    .bg-secondary {
+        background-color: var(--ah-surface-3) !important;
+        color: var(--ah-text) !important;
+    }
+}

@@ -24,7 +24,7 @@ tc-normal-map-generator {
     --bs-normal-map-generator-tool-color: var(--tc-text-muted);
     --bs-normal-map-generator-tool-hover-bg: var(--tc-surface-muted);
     --bs-normal-map-generator-tool-active-bg: var(--tc-app-accent);
-    --bs-normal-map-generator-tool-active-color: #fff;
+    --bs-normal-map-generator-tool-active-color: var(--tc-app-accent-contrast);
 
     // Segmented preview control (ink-active segment).
     --bs-normal-map-generator-seg-bg: var(--tc-surface);
@@ -32,7 +32,7 @@ tc-normal-map-generator {
     --bs-normal-map-generator-seg-color: var(--tc-text-muted);
     --bs-normal-map-generator-seg-hover-bg: var(--tc-surface-muted);
     --bs-normal-map-generator-seg-active-bg: var(--tc-app-accent);
-    --bs-normal-map-generator-seg-active-color: #fff;
+    --bs-normal-map-generator-seg-active-color: var(--tc-app-accent-contrast);
 
     // Stage: slate well with a checkerboard so transparency reads.
     --bs-normal-map-generator-stage-bg: var(--tc-surface-muted);

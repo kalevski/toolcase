@@ -66,7 +66,7 @@ const ItemSlotDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Item Slot"
-                            description="A single inventory / hotbar slot: an item glyph, a quantity badge, a rarity border accent, an optional hotkey, an equipped marker, a radial cooldown sweep, and a locked state. Set the item via the JS item property; selected/size/hotkey are attributes. Activating an unlocked slot fires tc-click. Re-skinned from the game-components gc-item-slot — no gilded frame, no glow: a sharp hairline tile, rarity as a single muted border accent."
+                            description="A single inventory / hotbar slot: an item glyph, a quantity badge, a rarity border accent, an optional hotkey, an equipped marker, a radial cooldown sweep, and a locked state. Set the item via the JS item property; selected/size/hotkey are attributes. Activating an unlocked slot fires tc-click. Built in the toolcase idiom — no gilded frame, no glow: a sharp hairline tile, rarity as a single muted border accent."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

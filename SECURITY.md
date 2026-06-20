@@ -10,8 +10,7 @@ Only the latest published version of each `@toolcase/*` package on npm receives 
 | `@toolcase/logging` | latest only |
 | `@toolcase/serializer` | latest only |
 | `@toolcase/node` | latest only |
-| `@toolcase/react-components` | latest only |
-| `@toolcase/game-components` | latest only |
+| `@toolcase/web-components` | latest only |
 | `@toolcase/phaser-plus` | latest only |
 
 ## Reporting a vulnerability

@@ -12,7 +12,7 @@ Stack baseline:
 - Vite + React (18+) + TypeScript (`strict`, `react-jsx`).
 - `react-router` v7 (`BrowserRouter`, `Routes`, `Route`, `Navigate`, `useNavigate`, `useParams`, `useLocation`, `useSearchParams`).
 - `zustand` v5 + `devtools` middleware. One store, many slices.
-- A UI primitives library (e.g. `@toolcase/react-components`) providing `Modal`, `DashboardLayout`/`BasicLayout`, `FormInput`, `Button`, `Card`, `SideNav`, `Dropdown`, `Alert`, `TabSections`, etc. The architecture is independent of the specific library — swap freely.
+- A UI primitives library (e.g. `@toolcase/web-components`) providing `tc-modal`, `tc-dashboard-layout`/`tc-basic-layout`, `tc-form-input`, `tc-button`, `tc-card`, `tc-side-nav`, `tc-dropdown`, `tc-alert`, `tc-tab-sections`, etc. The architecture is independent of the specific library — swap freely.
 - SCSS for styling (any CSS preprocessor works; rules below assume SCSS modules layered under `styles/`).
 - ESM (`"type": "module"`).
 
@@ -22,7 +22,7 @@ Stack baseline:
 
 These packages are designed for this SPA architecture. All are optional — use what fits.
 
-- **`@toolcase/react-components`** — 180+ UI primitives covering typography, inputs, buttons, layout (`DashboardLayout`, `BasicLayout`), navigation (`SideNav`, `TabSections`), overlays (`Modal`, `Alert`, `Dropdown`), data display, charts, and marketing/landing surfaces. See the `react-components` skill for component catalog and usage.
+- **`@toolcase/web-components`** — framework-free `tc-*` Web Components covering typography, inputs, buttons, layout (`tc-dashboard-layout`, `tc-basic-layout`), navigation (`tc-side-nav`, `tc-tab-sections`), overlays (`tc-modal`, `tc-alert`, `tc-dropdown`), data display, charts, and marketing/landing surfaces. Drop them into any React tree; `register()` once at startup. See the `web-components` skill for the component catalog and usage.
 
 - **`@toolcase/base`** — Zero-dep helpers and data structures: `Cache`, `PriorityQueue`, `VectorClock`, `ObjectPool`, `EventEmitter`, `Broadcast`, `generateId`, `retry`, `Color`, `JSONSchema`, `LSystem`, `WeightedRandom`, `Dijkstra`/`AStar`, `AdjacencyMatrix`, `State`, plus `HTTP` REST primitives (`Status`, `RESTError`, `RESTResponse`) and `Packing` (image atlas packer). Drop into `helpers/` or `services/`. See the `base` skill.
 

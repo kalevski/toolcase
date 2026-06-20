@@ -30,7 +30,7 @@ tc-vertical-item-list {
     --bs-vertical-item-list-icon-color: var(--tc-text-faint);
 
     --bs-vertical-item-list-badge-bg: var(--tc-app-accent);
-    --bs-vertical-item-list-badge-color: #fff;
+    --bs-vertical-item-list-badge-color: var(--tc-app-accent-contrast);
     --bs-vertical-item-list-badge-font-size: 0.6875rem;
 
     --bs-vertical-item-list-content-padding: 1rem;

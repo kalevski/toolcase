@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Breadcrumb, Heading, Badge, StatusDot, IconButton, ProgressBar } from '@toolcase/react-components'
+import { Breadcrumb, Heading, Badge, StatusDot, IconButton, ProgressBar } from '@/components/ui'
 import type { EngineState } from '@/server/domain/types'
 import { useProject } from './ProjectContext'
 

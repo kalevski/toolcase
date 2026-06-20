@@ -1,10 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link as RouterLink } from 'react-router'
 import { baseExamples } from '../base/index'
 import { loggingExamples } from '../logging/index'
 import { serializerExamples } from '../serializer/index'
-import { examples as reactComponentExamples } from '../react-components/index'
-import { gameComponentExamples } from '../game-components/index'
 import { webComponentExamples } from '../web-components/index'
 import { phaserExamples } from '../phaser-plus/index'
 import { nodeExamples } from '../node/index'
@@ -57,17 +55,6 @@ const libs: LibCard[] = [
         path: '/serializer',
     },
     {
-        key: 'react-components',
-        scope: '@toolcase/',
-        name: 'react-components',
-        tagline: 'React UI building blocks built on Bootstrap 5 — typography, inputs, layout, navigation, charts, data display.',
-        category: 'UI · React',
-        version: versions['react-components'],
-        examples: reactComponentExamples.length,
-        pkg: '@toolcase/react-components',
-        path: '/react-components',
-    },
-    {
         key: 'web-components',
         scope: '@toolcase/',
         name: 'web-components',
@@ -77,17 +64,6 @@ const libs: LibCard[] = [
         examples: webComponentExamples.length,
         pkg: '@toolcase/web-components',
         path: '/web-components',
-    },
-    {
-        key: 'game-components',
-        scope: '@toolcase/',
-        name: 'game-components',
-        tagline: 'Framework-free Web Components for game UI — panels, bars, dialogs, overlays, fantasy HUD primitives.',
-        category: 'Games · Web Components',
-        version: versions['game-components'],
-        examples: gameComponentExamples.length,
-        pkg: '@toolcase/game-components',
-        path: '/game-components',
     },
     {
         key: 'phaser-plus',
@@ -133,56 +109,34 @@ const InstallRow = ({ pkg }: { pkg: string }) => {
     )
 }
 
+// Landing hero dogfoods <tc-hero>: eyebrow + title + lead come in as
+// attributes; the four headline stats are a JS property assigned via ref.
+const HeroBanner = () => {
+    const ref = useRef<any>(null)
+    useEffect(() => {
+        if (!ref.current) return
+        ref.current.statCards = [
+            { label: 'Packages', value: String(libs.length) },
+            { label: 'Live examples', value: String(totalExamples) },
+            { label: 'Runtime', value: 'Node ≥ 18' },
+            { label: 'Maintained since', value: '2016' },
+        ]
+    }, [])
+    return (
+        // @ts-ignore custom element registered by @toolcase/web-components
+        <tc-hero
+            ref={ref}
+            eyebrow="Index / Libraries"
+            title="A small set of tools I keep reaching for, every project."
+            description="Six npm packages I've built, used, and rewritten across a decade of web apps and games — documented and demoed here so you can install one in a single line and see how it behaves."
+        />
+    )
+}
+
 export const Home = () => {
     return (
         <main className="site-container" data-screen-label="Libraries">
-            <section className="page-intro">
-                <div>
-                    <div className="eyebrow">Index / Libraries</div>
-                    <h1 className="page-title">A small set of tools I keep<br/>reaching for, every project.</h1>
-                    <p className="page-lead">
-                        Eight npm packages I've built, used, and rewritten across a decade of web apps and games.
-                        Documented and demoed here so you can install one in a single line and see how it behaves.
-                    </p>
-                </div>
-                <dl className="page-meta">
-                    <div>
-                        <dt>Maintainer</dt>
-                        <dd>Daniel Kalevski</dd>
-                    </div>
-                    <div>
-                        <dt>License</dt>
-                        <dd>MIT</dd>
-                    </div>
-                    <div>
-                        <dt>First commit</dt>
-                        <dd>2016</dd>
-                    </div>
-                    <div>
-                        <dt>Status</dt>
-                        <dd><span className="tag accent">Active</span></dd>
-                    </div>
-                </dl>
-            </section>
-
-            <div className="stats">
-                <div className="stat">
-                    <div className="stat-label">Packages</div>
-                    <div className="stat-value">{libs.length}</div>
-                </div>
-                <div className="stat">
-                    <div className="stat-label">Live examples</div>
-                    <div className="stat-value">{totalExamples}</div>
-                </div>
-                <div className="stat">
-                    <div className="stat-label">Runtime</div>
-                    <div className="stat-value">Node <span className="unit">≥ 18</span></div>
-                </div>
-                <div className="stat">
-                    <div className="stat-label">Maintained since</div>
-                    <div className="stat-value">2016</div>
-                </div>
-            </div>
+            <HeroBanner />
 
             <div className="section-head">
                 <h2>All libraries</h2>

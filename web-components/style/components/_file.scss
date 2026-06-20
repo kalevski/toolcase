@@ -63,7 +63,7 @@ tc-file {
     --bs-file-menu-hover-bg: var(--tc-surface-muted);
     --bs-file-menu-hover-color: var(--tc-text);
     --bs-file-menu-active-bg: var(--tc-app-accent);
-    --bs-file-menu-active-color: #fff;
+    --bs-file-menu-active-color: var(--tc-app-accent-contrast);
     --bs-file-menu-icon-size: 1rem;
 
     // Dropdown
@@ -78,7 +78,7 @@ tc-file {
     --bs-file-dropdown-item-hover-bg: var(--tc-surface-muted);
     --bs-file-dropdown-item-hover-color: var(--tc-text);
     --bs-file-dropdown-item-active-bg: var(--tc-app-accent);
-    --bs-file-dropdown-item-active-color: #fff;
+    --bs-file-dropdown-item-active-color: var(--tc-app-accent-contrast);
     --bs-file-dropdown-item-disabled-color: var(--tc-text-faint);
 
     // Skeleton

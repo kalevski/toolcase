@@ -10,8 +10,6 @@ export default defineConfig({
     base: '/',
     resolve: {
         alias: [
-            { find: '@toolcase/game-components/style.css', replacement: resolve(__dirname, '../game-components/lib/index.css') },
-            { find: '@toolcase/game-components', replacement: resolve(__dirname, '../game-components/src/index.ts') },
             { find: '@toolcase/web-components/style.css', replacement: resolve(__dirname, '../web-components/lib/index.css') },
             { find: '@toolcase/web-components/react', replacement: resolve(__dirname, '../web-components/src/react.ts') },
             { find: '@toolcase/web-components', replacement: resolve(__dirname, '../web-components/src/index.ts') },

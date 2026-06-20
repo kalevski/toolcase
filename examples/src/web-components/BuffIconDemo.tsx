@@ -10,7 +10,7 @@ const BuffIconDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="BuffIcon"
-                            description="A single buff / debuff status icon: a square slate tile with a centred lucide glyph and an optional mono duration caption pinned to the bottom edge. Ported from the game-components gc-buff-icon and restyled to the toolcase design system — flat surface, hairline border, sharp corners, mono machine-text, and a single 2px status accent stripe for buff vs debuff. The building block composed by tc-buff-bar, usable standalone."
+                            description="A single buff / debuff status icon: a square slate tile with a centred lucide glyph and an optional mono duration caption pinned to the bottom edge. Restyled to the toolcase design system — flat surface, hairline border, sharp corners, mono machine-text, and a single 2px status accent stripe for buff vs debuff. The building block composed by tc-buff-bar, usable standalone."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

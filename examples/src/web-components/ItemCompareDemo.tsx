@@ -60,7 +60,7 @@ const ItemCompareDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="ItemCompare"
-                            description="A side-by-side item stat comparison: an equipped item next to a candidate, with the candidate column annotated by a per-stat difference block (green up / red down). Set the current and candidate items via the JS properties. Re-skinned from the game-components gc-item-compare to the toolcase design system — no gilded frames, no glows; sharp hairline columns and mono machine-facing figures."
+                            description="A side-by-side item stat comparison: an equipped item next to a candidate, with the candidate column annotated by a per-stat difference block (green up / red down). Set the current and candidate items via the JS properties. Built in the toolcase design system — no gilded frames, no glows; sharp hairline columns and mono machine-facing figures."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

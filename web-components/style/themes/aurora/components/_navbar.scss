@@ -1,0 +1,18 @@
+// Aurora › tc-navbar — frosted dark glass bar.
+// The base --bs-navbar-bg is a hardcoded light `rgba(255,255,255,0.85)` that the
+// token remap does not reach; repoint it to a translucent deep-slate fill so the
+// blur reads as dark glass, and tint the brand dot with the mint glow ring.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-navbar,
+    .navbar {
+        --bs-navbar-bg: rgba(7, 9, 13, 0.72);
+        --bs-navbar-backdrop-filter: saturate(1.4) blur(14px);
+        --bs-navbar-border-color: var(--ah-border);
+        --bs-navbar-divider-color: var(--ah-border);
+        --bs-navbar-active-color: var(--ah-accent-bright);
+        --bs-navbar-brand-dot-bg: var(--ah-accent);
+        --bs-navbar-brand-dot-glow: var(--ah-accent-soft);
+    }
+}

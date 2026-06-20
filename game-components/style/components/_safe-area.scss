@@ -1,9 +1,0 @@
-gc-safe-area {
-    --gc-safe-area-extra: 0px;
-    display: block;
-    box-sizing: border-box;
-    padding-top: calc(env(safe-area-inset-top, 0px) + var(--gc-safe-area-extra));
-    padding-right: calc(env(safe-area-inset-right, 0px) + var(--gc-safe-area-extra));
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--gc-safe-area-extra));
-    padding-left: calc(env(safe-area-inset-left, 0px) + var(--gc-safe-area-extra));
-}

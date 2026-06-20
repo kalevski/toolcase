@@ -1,0 +1,10 @@
+// Aurora › tc-status-dot — marker gains a soft glow halo.
+// Status hues come from the token remap; the marker is a sanctioned circle. Add
+// a faint glow so the marker reads as lit against the dark surface.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .tc-status-dot-marker {
+        box-shadow: 0 0 6px currentcolor;
+    }
+}

@@ -17,12 +17,12 @@ tc-form-wizard {
     // ── State: done (ink circle + check) ─────────────────────────────────────
     --bs-form-wizard-done-bg: var(--tc-app-accent);
     --bs-form-wizard-done-border: var(--tc-app-accent);
-    --bs-form-wizard-done-color: #fff;
+    --bs-form-wizard-done-color: var(--tc-app-accent-contrast);
 
     // ── State: current (ink circle + underline) ───────────────────────────────
     --bs-form-wizard-current-bg: var(--tc-app-accent);
     --bs-form-wizard-current-border: var(--tc-app-accent);
-    --bs-form-wizard-current-color: #fff;
+    --bs-form-wizard-current-color: var(--tc-app-accent-contrast);
     --bs-form-wizard-current-underline: var(--tc-app-accent);
     --bs-form-wizard-current-underline-size: 2px;
 

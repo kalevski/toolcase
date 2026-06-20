@@ -15,7 +15,7 @@ import {
     HelperText,
     NumberInput,
     toast,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { ScheduleRecord } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'

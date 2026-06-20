@@ -107,8 +107,8 @@ tc-page-footer {
     line-height: 1.5;
     border: 0;
     border-radius: 0;
-    background: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    color: #fff;
+    background: var(--tc-app-accent-gradient);
+    color: var(--tc-app-accent-contrast);
     text-decoration: none;
     cursor: pointer;
     transition:

@@ -38,9 +38,9 @@ tc-bitmap-font-generator {
     --bs-bitmap-font-generator-btn-color: var(--tc-text);
     --bs-bitmap-font-generator-btn-hover-bg: var(--tc-surface-muted);
     --bs-bitmap-font-generator-btn-active-bg: var(--tc-app-accent);
-    --bs-bitmap-font-generator-btn-active-color: #fff;
-    --bs-bitmap-font-generator-btn-primary-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-bitmap-font-generator-btn-primary-color: #fff;
+    --bs-bitmap-font-generator-btn-active-color: var(--tc-app-accent-contrast);
+    --bs-bitmap-font-generator-btn-primary-bg: var(--tc-app-accent-gradient);
+    --bs-bitmap-font-generator-btn-primary-color: var(--tc-app-accent-contrast);
     --bs-bitmap-font-generator-btn-primary-lift: 0 4px 15px rgba(30, 41, 59, 0.3);
 
     --bs-bitmap-font-generator-disabled-opacity: 0.55;

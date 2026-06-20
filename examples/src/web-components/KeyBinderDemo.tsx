@@ -27,7 +27,7 @@ const KeyBinderDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Key Binder"
-                            description="Click (or press Enter / Space) to enter capture mode, then press any key to assign the binding. Escape cancels. Emits tc-change with { value, code, key } or tc-cancel. Re-skinned from the game-components gc-key-binder — flat slate surface, no gilded frame, no glow; the bound key label is JetBrains Mono."
+                            description="Click (or press Enter / Space) to enter capture mode, then press any key to assign the binding. Escape cancels. Emits tc-change with { value, code, key } or tc-cancel. Built in the toolcase idiom — flat slate surface, no gilded frame, no glow; the bound key label is JetBrains Mono."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

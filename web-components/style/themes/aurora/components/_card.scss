@@ -1,0 +1,40 @@
+// Aurora › .card — soft gradient surface with a glow hover-lift.
+// Token swap gives the dark fill; this adds the top-down surface gradient, the
+// thin top highlight, and the signature translateY lift + border-brighten on
+// hover that the AIHub service cards use.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .card {
+        --bs-card-bg: var(--ah-surface-grad);
+        --bs-card-border-color: var(--ah-border);
+        --bs-card-cap-bg: transparent;
+        --bs-card-color: var(--ah-text);
+        position: relative;
+        box-shadow: var(--ah-bevel-top);
+        transition:
+            transform 0.3s var(--ah-ease),
+            border-color 0.3s,
+            box-shadow 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        border-color: var(--ah-border-strong);
+        box-shadow: var(--tc-shadow-hover), var(--ah-bevel-top);
+    }
+
+    .card-header {
+        border-bottom-color: var(--ah-border);
+    }
+
+    .card-footer {
+        border-top-color: var(--ah-border);
+    }
+
+    // Solid-variant cards (text-bg-*) keep their fill — drop the hover lift so
+    // the bright surface doesn't float.
+    .card[class*='text-bg-']:hover {
+        transform: none;
+    }
+}

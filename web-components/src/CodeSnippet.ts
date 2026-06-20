@@ -39,8 +39,20 @@ const BASH_TOKEN_SRC =
     '|(\\b\\d+\\b)' + // (5) number
     '|(\\b(?:if|then|else|elif|fi|for|do|done|while|until|echo|cd|ls|export|source|function|return|case|esac|in|exit|true|false|break|continue|shift|unset|set|local|mkdir|cp|mv|rm|cat|grep|sed|awk|curl|wget|git|npm|yarn|chmod|chown|sudo|apt|brew|pip|python|python3|node|bash|sh)\\b)' // (6) keyword
 
+// Escape ONLY the three characters that are unsafe in element-text content.
+// Crucially we leave quotes literal: the shared esc() turns ' into the numeric
+// entity &#039;, whose digits the number tokenizer below then wraps in a span,
+// corrupting the entity (it renders as a literal "&#039;"). Keeping quotes raw
+// lets the string-token regexes match '…' / "…" correctly and emits no entity.
+function escCode(value: string): string {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+}
+
 function applyHighlight(code: string, language: CodeSnippetLanguage): string {
-    const escaped = esc(code)
+    const escaped = escCode(code)
 
     if (language === 'javascript' || language === 'typescript') {
         return escaped.replace(

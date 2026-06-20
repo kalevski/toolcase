@@ -81,7 +81,7 @@ export const TaskForgePage = () => {
                         can commit and push the result.
                     </p>
                     <div className="chip-row">
-                        {['Next.js 14', 'Claude Code CLI', 'GitHub OAuth', 'SSE', 'Docker', 'database-free', '@toolcase/react-components'].map((chip) => (
+                        {['Next.js 14', 'Claude Code CLI', 'GitHub OAuth', 'SSE', 'Docker', 'database-free'].map((chip) => (
                             <span key={chip} className="tag">{chip}</span>
                         ))}
                     </div>

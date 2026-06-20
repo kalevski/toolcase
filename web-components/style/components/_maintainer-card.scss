@@ -29,7 +29,7 @@ tc-maintainer-card {
     --bs-maintainer-card-link-hover-color: var(--tc-text);
     --bs-maintainer-card-link-icon-size: 1.125rem;
     --bs-maintainer-card-sponsor-bg: var(--tc-danger);
-    --bs-maintainer-card-sponsor-color: #fff;
+    --bs-maintainer-card-sponsor-color: var(--tc-app-accent-contrast);
     --bs-maintainer-card-sponsor-hover-bg: #b91c1c;
 }
 

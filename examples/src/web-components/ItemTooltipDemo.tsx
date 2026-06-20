@@ -66,7 +66,7 @@ const ItemTooltipDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="ItemTooltip"
-                            description="A hover card describing an item: an optional mono type micro-label, the item name, a rarity chip, a stat list, an optional requirements block (met / unmet), and optional flavor text. Set the item via the JS `item` property. Re-skinned from the game-components gc-item-tooltip to the toolcase design system — no gilded frame, no glow, no parchment fill: a sharp hairline surface at the overlay tier, mono machine-facing figures, and status colour spent only on rarity and requirement markers."
+                            description="A hover card describing an item: an optional mono type micro-label, the item name, a rarity chip, a stat list, an optional requirements block (met / unmet), and optional flavor text. Set the item via the JS `item` property. Built in the toolcase design system — no gilded frame, no glow, no parchment fill: a sharp hairline surface at the overlay tier, mono machine-facing figures, and status colour spent only on rarity and requirement markers."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

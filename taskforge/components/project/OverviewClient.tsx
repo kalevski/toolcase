@@ -18,7 +18,7 @@ import {
     Table,
     toast,
     type TableColumn,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { TelemetrySummary } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'

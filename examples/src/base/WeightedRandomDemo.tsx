@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { WeightedRandom } from '@toolcase/base'
-import { Button, Card, CodeSnippet, Heading, Select, Text } from '@toolcase/react-components'
 
 const code = `import { WeightedRandom } from '@toolcase/base'
 
@@ -63,37 +62,40 @@ export const WeightedRandomDemo = () => {
     }, [draws, seed, run])
 
     return (
-        <Card>
-            <Heading as="h3">WeightedRandom</Heading>
-            <Text as="p" variant="muted">
+        <div className="card">
+            <div className="card-body">
+            <h3 className="card-title">WeightedRandom</h3>
+            <p className="text-body-secondary">
                 Weighted random selection with O(log n) picks. Builds a cumulative-weight table once
                 and binary-searches a uniform sample on every <code>pick()</code>. Useful for loot
                 tables, weighted spawn pools, A/B traffic splitters, and NPC behavior selection.
-            </Text>
-            <CodeSnippet code={code.trim()} language="typescript" />
+            </p>
+            <tc-code-snippet code={code.trim()} language="typescript"></tc-code-snippet>
 
             <div className="row g-3 mt-2">
                 <div className="col-sm-6 col-lg-4">
-                    <Select
-                        label="Draws"
-                        size="small"
+                    <label className="form-label" htmlFor="wr-draws-select">
+                        Draws
+                    </label>
+                    <select
+                        id="wr-draws-select"
+                        className="form-select form-select-sm"
                         value={String(draws)}
                         onChange={(e) => setDraws(Number(e.target.value))}
-                        options={[
-                            { value: '100', label: '100' },
-                            { value: '1000', label: '1,000' },
-                            { value: '10000', label: '10,000' },
-                            { value: '100000', label: '100,000' },
-                        ]}
-                    />
+                    >
+                        <option value="100">100</option>
+                        <option value="1000">1,000</option>
+                        <option value="10000">10,000</option>
+                        <option value="100000">100,000</option>
+                    </select>
                 </div>
                 <div className="col-sm-6 col-lg-8 d-flex align-items-end gap-2">
-                    <Button size="small" onClick={() => setSeed(seed + 1)}>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={() => setSeed(seed + 1)}>
                         Reseed
-                    </Button>
-                    <Button size="small" variant="secondary" outline onClick={() => setRun(run + 1)}>
+                    </button>
+                    <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setRun(run + 1)}>
                         Redraw
-                    </Button>
+                    </button>
                 </div>
             </div>
 
@@ -142,7 +144,7 @@ export const WeightedRandomDemo = () => {
                 </div>
             </div>
 
-            <div style={{ marginTop: 12, padding: 12, background: '#020617', color: '#e2e8f0', fontFamily: 'Ubuntu Mono, monospace', fontSize: 12, border: '1px solid #1e2a44' }}>
+            <div style={{ marginTop: 12, padding: 12, background: '#020617', color: '#e2e8f0', fontFamily: 'Ubuntu Mono, monospace', fontSize: 12, border: '1px solid #1e2a44', boxSizing: 'border-box' }}>
                 <div style={{ color: '#64748b', fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
                     Last 20 picks
                 </div>
@@ -155,7 +157,8 @@ export const WeightedRandomDemo = () => {
                     })}
                 </div>
             </div>
-        </Card>
+            </div>
+        </div>
     )
 }
 

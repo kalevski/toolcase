@@ -66,6 +66,10 @@ tc-theme[name='default'] {
     --tc-app-accent: #{$slate-800};
     --tc-app-accent-hover: #{$slate-900};
     --tc-app-accent-contrast: #{$white};
+    // Signature primary-action gradient. Re-skinned per theme so the bright-on-
+    // dark themes (aurora/dungeon) don't inherit the slate stop, which goes
+    // dark-on-dark and drops on-fill text contrast under their dark canvas.
+    --tc-app-accent-gradient: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
 
     // Accent — the toolcase signature cyan-blue. Spent sparingly: links,
     // focus, highlights, the brand dot. Never washes a surface.

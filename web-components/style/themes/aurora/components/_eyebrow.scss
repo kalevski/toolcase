@@ -1,0 +1,27 @@
+// Aurora › tc-eyebrow — the signature mono micro-label with a leading mint dot.
+// Base eyebrow is a plain mono caption; AIHub prefixes it with a glowing dot and
+// tints it the accent hue. The dot is injected via ::before on the .tc-eyebrow
+// class (which carries the --bs-eyebrow-* defaults, so the override wins).
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .tc-eyebrow {
+        --bs-eyebrow-color: var(--ah-accent);
+        --bs-eyebrow-letter-spacing: 0.18em;
+        --bs-eyebrow-font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6em;
+        text-transform: uppercase;
+    }
+
+    .tc-eyebrow::before {
+        content: '';
+        flex: none;
+        width: 0.45em;
+        height: 0.45em;
+        border-radius: 50%;
+        background: var(--ah-accent);
+        box-shadow: 0 0 0 0.27em var(--ah-accent-soft);
+    }
+}

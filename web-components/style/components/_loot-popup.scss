@@ -40,7 +40,7 @@ tc-loot-popup {
     --bs-loot-popup-btn-hover-bg:            var(--tc-surface-muted);
     --bs-loot-popup-btn-hover-color:         var(--tc-text);
     --bs-loot-popup-btn-primary-bg:          var(--tc-app-accent);
-    --bs-loot-popup-btn-primary-color:       #fff;
+    --bs-loot-popup-btn-primary-color: var(--tc-app-accent-contrast);
     --bs-loot-popup-btn-primary-hover-bg:    var(--tc-ink, #0f172a);
     --bs-loot-popup-btn-primary-hover-color: #fff;
 

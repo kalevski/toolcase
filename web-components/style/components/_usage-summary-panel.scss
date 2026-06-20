@@ -10,7 +10,7 @@ tc-usage-summary-panel {
     --bs-usage-summary-panel-shadow: var(--tc-shadow-sm);
     --bs-usage-summary-panel-padding-y: 0.875rem;
     --bs-usage-summary-panel-padding-x: 1rem;
-    --bs-usage-summary-panel-title-bg: linear-gradient(135deg, var(--tc-app-accent) 0%, #2b3a51 100%);
+    --bs-usage-summary-panel-title-bg: var(--tc-app-accent-gradient);
     --bs-usage-summary-panel-title-color: rgba(255, 255, 255, 0.9);
     --bs-usage-summary-panel-title-font-size: 0.6875rem;
     --bs-usage-summary-panel-title-letter-spacing: 0.08em;

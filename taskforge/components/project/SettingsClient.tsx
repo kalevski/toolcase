@@ -15,7 +15,7 @@ import {
     HelperText,
     NumberInput,
     toast,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { ProjectSettings } from '@/server/domain/types'
 import { NOTIFY_EVENTS } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'

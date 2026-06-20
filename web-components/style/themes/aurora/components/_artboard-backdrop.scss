@@ -1,0 +1,28 @@
+// Aurora › tc-artboard-backdrop — the ambient glow canvas. This is the
+// recommended way to paint the aurora surface (the tc-theme wrapper is
+// display:contents and cannot carry a background): deep-slate base layered with
+// the mint radial glow field, mirroring the AIHub `body::before` ambient light.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-artboard-backdrop,
+    .tc-artboard-backdrop--dark {
+        --bs-artboard-backdrop-bg: var(--ah-glow-field), var(--ah-bg);
+        --bs-artboard-backdrop-color: var(--ah-text);
+        --bs-artboard-backdrop-border-color: transparent;
+    }
+
+    .tc-artboard-backdrop--scene {
+        --bs-artboard-backdrop-bg:
+            radial-gradient(60% 50% at 50% 30%, rgba(47, 230, 173, 0.1), transparent 60%),
+            linear-gradient(180deg, var(--ah-surface), var(--ah-bg));
+        --bs-artboard-backdrop-color: var(--ah-text);
+        --bs-artboard-backdrop-border-color: var(--ah-border);
+    }
+
+    .tc-artboard-backdrop--parch {
+        --bs-artboard-backdrop-bg: var(--ah-glow-field), var(--ah-bg-2);
+        --bs-artboard-backdrop-color: var(--ah-text);
+        --bs-artboard-backdrop-border-color: var(--ah-border);
+    }
+}

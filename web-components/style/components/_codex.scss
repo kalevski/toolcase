@@ -21,7 +21,7 @@ tc-codex {
     --bs-codex-row-separator-color: var(--tc-surface-muted);
     --bs-codex-row-hover-bg: var(--tc-surface-hover);
     --bs-codex-row-selected-bg: var(--tc-app-accent);
-    --bs-codex-row-selected-color: #fff;
+    --bs-codex-row-selected-color: var(--tc-app-accent-contrast);
     --bs-codex-row-name-size: 0.8125rem;
 
     --bs-codex-glyph-size: 1rem;

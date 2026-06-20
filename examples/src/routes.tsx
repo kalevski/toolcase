@@ -5,16 +5,12 @@ import { Skills } from './pages/Skills'
 import { BasePage } from './pages/BasePage'
 import { LoggingPage } from './pages/LoggingPage'
 import { SerializerPage } from './pages/SerializerPage'
-import { ReactComponentsPage } from './pages/ReactComponentsPage'
-import { GameComponentsPage } from './pages/GameComponentsPage'
 import { WebComponentsPage } from './pages/WebComponentsPage'
 import { PhaserPlusPage } from './pages/PhaserPlusPage'
 import { NodePage } from './pages/NodePage'
 import { baseExamples } from './base/index'
 import { loggingExamples } from './logging/index'
 import { serializerExamples } from './serializer/index'
-import { examples as reactComponentExamples } from './react-components/index'
-import { gameComponentExamples } from './game-components/index'
 import { webComponentExamples } from './web-components/index'
 import { phaserExamples } from './phaser-plus/index'
 import { nodeExamples } from './node/index'
@@ -69,28 +65,6 @@ export const packageRoutes: PackageRoute[] = [
         examples: serializerExamples.map((e) => ({
             key: e.key,
             title: e.label,
-            element: e.element,
-        })),
-    },
-    {
-        key: 'react-components',
-        basePath: '/react-components',
-        indexLabel: 'All Components',
-        page: <ReactComponentsPage />,
-        examples: reactComponentExamples.map((e) => ({
-            key: e.key,
-            title: formatLabel(e.key),
-            element: e.element,
-        })),
-    },
-    {
-        key: 'game-components',
-        basePath: '/game-components',
-        indexLabel: 'All Game Components',
-        page: <GameComponentsPage />,
-        examples: gameComponentExamples.map((e) => ({
-            key: e.key,
-            title: formatLabel(e.key),
             element: e.element,
         })),
     },

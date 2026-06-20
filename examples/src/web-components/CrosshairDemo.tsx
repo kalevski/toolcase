@@ -7,7 +7,7 @@ const CrosshairDemo: React.FC = () => (
                 <div className="col-12">
                     <tc-rich-page-header
                         title-text="Crosshair"
-                        description="Configurable aiming reticle. Six variants (cross, dot, circle, t-shape, classic, rune) with knobs for size, arm thickness, center gap, color, and a spread offset. Restyled from the game-components original into the toolcase idiom: sharp ink shapes, a single sanctioned ring, no fantasy chrome."
+                        description="Configurable aiming reticle. Six variants (cross, dot, circle, t-shape, classic, rune) with knobs for size, arm thickness, center gap, color, and a spread offset. Built in the toolcase idiom: sharp ink shapes, a single sanctioned ring, no fantasy chrome."
                     >
                         <tc-badge slot="chips" variant="secondary">
                             Web Components

@@ -30,7 +30,7 @@ tc-level-select {
 
     // Node — selected
     --bs-level-select-node-selected-bg:      var(--tc-app-accent);
-    --bs-level-select-node-selected-color:   #fff;
+    --bs-level-select-node-selected-color: var(--tc-app-accent-contrast);
     --bs-level-select-node-selected-border:  var(--tc-app-accent);
 
     // Node — completed (not selected)

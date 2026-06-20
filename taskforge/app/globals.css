@@ -46,15 +46,11 @@ body {
     margin-left: auto;
 }
 
-/* ── IconButton fix ────────────────────────────────────────────────────────
-   The published @toolcase/react-components@^3 ships an UNSCOPED CommandPalette
-   rule (`.component-icon-button { color: var(--cp-muted); border: none; … }`)
-   that leaks onto every IconButton. `--cp-muted` is undefined outside a command
-   palette, so the icon color collapses to an inherited/near-white value and the
-   icon box loses its border — making icons invisible on the light surface.
-   globals.css loads after style.css, so re-asserting the token-driven chrome at
-   matching specificity restores the intended look. (Source SCSS is already
-   correctly scoped; this guards the stale published build.) */
+/* ── IconButton chrome ──────────────────────────────────────────────────────
+   Re-assert the token-driven IconButton chrome here at matching specificity.
+   The local components/ui kit defines the base rules in components/ui/styles.css;
+   globals.css loads afterwards, so these declarations win and keep the token
+   fallbacks (--ib-*, --tc-*) consistent for the dashboard surface. */
 .component.component-icon-button {
     display: inline-flex;
     color: var(--ib-color, var(--tc-text-muted));

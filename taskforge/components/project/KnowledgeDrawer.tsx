@@ -4,7 +4,7 @@
 // MarkdownEditor, save rebuilds the index). The app-owned index stays read-only.
 
 import React, { useEffect, useState } from 'react'
-import { Drawer, Spinner, Badge, Button, MarkdownEditor, HelperText, toast } from '@toolcase/react-components'
+import { Drawer, Spinner, Badge, Button, MarkdownEditor, HelperText, toast } from '@/components/ui'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'
 

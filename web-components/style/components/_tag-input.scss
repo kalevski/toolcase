@@ -48,7 +48,7 @@ tc-tag-input {
     --bs-tag-input-option-padding-y: 0.375rem;
     --bs-tag-input-option-hover-bg: var(--tc-surface-muted);
     --bs-tag-input-option-active-bg: var(--tc-app-accent);
-    --bs-tag-input-option-active-color: #fff;
+    --bs-tag-input-option-active-color: var(--tc-app-accent-contrast);
     --bs-tag-input-check-icon-size: 0.875rem;
 
     // Meta (counter / hint)

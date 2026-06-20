@@ -19,3 +19,7 @@
 //       Scoped under `tc-theme[name="dungeon"]`, so it is inert until a wrapper
 //       opts in; everything outside the wrapper keeps the default voice.
 @use './themes/dungeon';
+
+//   (5) Aurora theme — opt-in dark "production-AI" skin (deep slate, mint glow).
+//       Scoped under `tc-theme[name="aurora"]`, inert until a wrapper opts in.
+@use './themes/aurora';

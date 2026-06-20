@@ -13,7 +13,7 @@ import {
     Textarea,
     Text,
     toast,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm } from '../ConfirmModal'

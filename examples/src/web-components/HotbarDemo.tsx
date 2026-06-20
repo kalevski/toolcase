@@ -47,7 +47,7 @@ const HotbarDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Hotbar"
-                            description="A horizontal action bar of item/ability slots with hotkeys and a selected index. Each slot composes a tc-item-slot for the item visuals; the bar owns the sharp hairline frame, the row layout, the hotkey badge and the selection ring. Selecting a slot fires tc-select and reflects the chosen item id via selected-id. Set slots via the JS slots property. Re-skinned from the game-components gc-hotbar — no gilded frame, no glow."
+                            description="A horizontal action bar of item/ability slots with hotkeys and a selected index. Each slot composes a tc-item-slot for the item visuals; the bar owns the sharp hairline frame, the row layout, the hotkey badge and the selection ring. Selecting a slot fires tc-select and reflects the chosen item id via selected-id. Set slots via the JS slots property. Built in the toolcase idiom — no gilded frame, no glow."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

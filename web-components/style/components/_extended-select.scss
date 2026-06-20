@@ -18,7 +18,7 @@ tc-extended-select {
     --bs-extended-select-option-color: var(--tc-text);
     --bs-extended-select-option-hover-bg: var(--tc-surface-muted);
     --bs-extended-select-option-selected-bg: var(--tc-app-accent);
-    --bs-extended-select-option-selected-color: #ffffff;
+    --bs-extended-select-option-selected-color: var(--tc-app-accent-contrast);
     --bs-extended-select-option-desc-color: var(--tc-text-muted);
     --bs-extended-select-option-font-size: 0.875rem;
     --bs-extended-select-option-desc-font-size: 0.75rem;
@@ -212,7 +212,7 @@ tc-extended-select {
         color: var(--bs-extended-select-option-selected-color);
 
         .tc-extended-select__option-desc {
-            color: rgba(255, 255, 255, 0.75);
+            color: color-mix(in srgb, var(--tc-app-accent-contrast) 75%, transparent);
         }
 
         .tc-extended-select__check {

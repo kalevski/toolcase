@@ -46,7 +46,7 @@ tc-action-items {
     --bs-action-items-item-color: var(--tc-slate-700);
     --bs-action-items-item-hover-color: var(--tc-text);
     --bs-action-items-item-hover-bg: var(--tc-surface-muted);
-    --bs-action-items-item-active-color: #{$white};
+    --bs-action-items-item-active-color: var(--tc-app-accent-contrast);
     --bs-action-items-item-active-bg: var(--tc-app-accent);
     --bs-action-items-item-disabled-color: var(--tc-text-faint);
     --bs-action-items-danger-color: var(--tc-danger);

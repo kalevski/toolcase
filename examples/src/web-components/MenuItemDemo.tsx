@@ -21,7 +21,7 @@ const MenuItemDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Menu Item"
-                            description="A single interactive menu row — icon, label, optional hotkey badge, selected, and disabled states. Port of gc-menu-item (game-components), restyled to the toolcase design system. Fires tc-select on click or Enter/Space. All cosmetics flow through --bs-menu-item-* custom properties."
+                            description="A single interactive menu row — icon, label, optional hotkey badge, selected, and disabled states. Restyled to the toolcase design system. Fires tc-select on click or Enter/Space. All cosmetics flow through --bs-menu-item-* custom properties."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

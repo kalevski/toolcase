@@ -19,7 +19,7 @@ tc-graphics-preset-picker {
     --bs-graphics-preset-picker-bg: var(--tc-surface);
     --bs-graphics-preset-picker-hover-color: var(--tc-text);
     --bs-graphics-preset-picker-hover-bg: var(--tc-surface-muted);
-    --bs-graphics-preset-picker-active-color: #fff;
+    --bs-graphics-preset-picker-active-color: var(--tc-app-accent-contrast);
     --bs-graphics-preset-picker-active-bg: var(--tc-app-accent);
     --bs-graphics-preset-picker-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
     --bs-graphics-preset-picker-disabled-opacity: 0.55;

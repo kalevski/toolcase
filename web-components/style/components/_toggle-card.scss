@@ -162,7 +162,7 @@ tc-toggle-card {
 .tc-toggle-card--on {
     .tc-toggle-card-switch {
         background-color: var(--bs-toggle-card-on-accent);
-        background-image: linear-gradient(135deg, var(--bs-toggle-card-on-accent), #2b3a51);
+        background-image: var(--tc-app-accent-gradient);
         box-shadow: none;
     }
 

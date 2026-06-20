@@ -89,13 +89,13 @@
 // Primary carries the signature slate-ink gradient + hover glow.
 .btn-primary {
     --bs-btn-color: #{$white};
-    --bs-btn-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-btn-bg: var(--tc-app-accent-gradient);
     --bs-btn-border-color: var(--tc-app-accent);
     --bs-btn-hover-color: #{$white};
-    --bs-btn-hover-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-btn-hover-bg: var(--tc-app-accent-gradient);
     --bs-btn-hover-border-color: var(--tc-app-accent);
     --bs-btn-active-color: #{$white};
-    --bs-btn-active-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-btn-active-bg: var(--tc-app-accent-gradient);
     --bs-btn-active-border-color: var(--tc-app-accent);
     --bs-btn-disabled-color: #{$white};
     --bs-btn-disabled-bg: var(--tc-app-accent);

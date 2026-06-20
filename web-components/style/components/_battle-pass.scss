@@ -29,7 +29,7 @@ tc-battle-pass {
     --bs-battle-pass-end-color: var(--tc-text-muted);
     --bs-battle-pass-end-font-size: 0.6875rem;
     --bs-battle-pass-premium-bg: var(--tc-accent);
-    --bs-battle-pass-premium-color: #fff;
+    --bs-battle-pass-premium-color: var(--tc-app-accent-contrast);
     --bs-battle-pass-premium-font-size: 0.625rem;
 
     // Progress
@@ -54,7 +54,7 @@ tc-battle-pass {
     --bs-battle-pass-level-marker-border-color: var(--tc-border);
     --bs-battle-pass-level-marker-color: var(--tc-text-muted);
     --bs-battle-pass-level-marker-current-bg: var(--tc-app-accent);
-    --bs-battle-pass-level-marker-current-color: #fff;
+    --bs-battle-pass-level-marker-current-color: var(--tc-app-accent-contrast);
 
     // Reward cells
     --bs-battle-pass-cell-min-width: 6.5rem;
@@ -67,7 +67,7 @@ tc-battle-pass {
     --bs-battle-pass-cell-claimable-border-color: var(--tc-app-accent);
     --bs-battle-pass-cell-premium-border-color: var(--tc-accent);
     --bs-battle-pass-cell-claimed-bg: var(--tc-app-accent);
-    --bs-battle-pass-cell-claimed-color: #fff;
+    --bs-battle-pass-cell-claimed-color: var(--tc-app-accent-contrast);
     --bs-battle-pass-cell-locked-opacity: 0.5;
     --bs-battle-pass-cell-empty-bg: var(--tc-surface-hover);
     --bs-battle-pass-cell-empty-border-color: var(--tc-border);

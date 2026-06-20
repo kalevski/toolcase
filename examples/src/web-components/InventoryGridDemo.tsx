@@ -50,7 +50,7 @@ const InventoryGridDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Inventory Grid"
-                            description="A grid of inventory item slots with a configurable column count and a selected item id. Each cell composes a tc-item-slot for the item visuals; the grid owns the sharp hairline frame, the 1px-gap grid layout and the selection ring. Selecting a cell fires tc-select and reflects the chosen item id via selected-id. Set cells via the JS items property (entries may be null for empty sockets). Re-skinned from the game-components gc-inventory-grid — no gilded frame, no glow, no dark fills."
+                            description="A grid of inventory item slots with a configurable column count and a selected item id. Each cell composes a tc-item-slot for the item visuals; the grid owns the sharp hairline frame, the 1px-gap grid layout and the selection ring. Selecting a cell fires tc-select and reflects the chosen item id via selected-id. Set cells via the JS items property (entries may be null for empty sockets). Built in the toolcase idiom — no gilded frame, no glow, no dark fills."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

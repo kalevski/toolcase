@@ -1,0 +1,33 @@
+// Aurora theme — component override partials.
+//
+// The foundation token remap (../_foundation.scss) already re-skins every tc-*
+// component's colours / borders / type / shadows for free. These partials add
+// only the AIHub STRUCTURE a flat token swap can't carry: the mint gradient +
+// glow on primary actions, hover-lift on cards/panels, the ambient glow field,
+// gradient display text, the mono dot eyebrow, and the dark frosted navbar.
+
+@use './button';
+@use './card';
+@use './panel';
+@use './eyebrow';
+@use './brand';
+@use './navbar';
+@use './nav';
+@use './artboard-backdrop';
+@use './progress';
+@use './spinner';
+@use './badge';
+@use './badge-row';
+@use './solid-fill';
+@use './accent-fills';
+@use './form-control';
+@use './dark-surface';
+@use './chip';
+@use './alert';
+@use './code-snippet';
+@use './input';
+@use './link';
+@use './pulse-indicator';
+@use './status-dot';
+@use './heading';
+@use './title';

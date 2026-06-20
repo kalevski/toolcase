@@ -47,7 +47,7 @@ tc-pause-screen {
     --bs-pause-menu-resume-font-size:       0.8125rem;
     --bs-pause-menu-resume-min-height:      2.25rem;
     --bs-pause-menu-resume-bg:              var(--tc-app-accent);
-    --bs-pause-menu-resume-color:           #fff;
+    --bs-pause-menu-resume-color: var(--tc-app-accent-contrast);
     --bs-pause-menu-resume-hover-bg:        var(--tc-ink, #0f172a);
     --bs-pause-menu-resume-hover-color:     #fff;
 }

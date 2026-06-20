@@ -4,7 +4,7 @@
 // pending, optionally run it immediately.
 
 import React, { useCallback, useRef, useState } from 'react'
-import { Modal, Button, Heading, Text, Switch, Textarea, HelperText, toast } from '@toolcase/react-components'
+import { Modal, Button, Heading, Text, Switch, Textarea, HelperText, toast } from '@/components/ui'
 import type { TaskInfo } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 

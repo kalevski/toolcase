@@ -171,11 +171,11 @@ tc-entity-cell {
     &:active {
         background-color: var(--tc-app-accent);
         border-color: var(--tc-app-accent);
-        color: #fff;
+        color: var(--tc-app-accent-contrast);
 
         .tc-entity-cell__name,
         .tc-entity-cell__sublabel {
-            color: #fff;
+            color: var(--tc-app-accent-contrast);
         }
     }
 

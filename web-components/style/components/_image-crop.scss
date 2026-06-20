@@ -28,8 +28,8 @@ tc-image-crop {
     --bs-image-crop-btn-border: var(--tc-border-strong);
     --bs-image-crop-btn-color: var(--tc-text);
     --bs-image-crop-btn-hover-bg: var(--tc-surface-muted);
-    --bs-image-crop-btn-primary-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-image-crop-btn-primary-color: #fff;
+    --bs-image-crop-btn-primary-bg: var(--tc-app-accent-gradient);
+    --bs-image-crop-btn-primary-color: var(--tc-app-accent-contrast);
     --bs-image-crop-btn-primary-lift: 0 4px 15px rgba(30, 41, 59, 0.3);
 
     --bs-image-crop-error-color: var(--tc-danger);

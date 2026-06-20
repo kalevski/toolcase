@@ -7,7 +7,7 @@ const LabelDemo: React.FC = () => (
                 <div className="col-12">
                     <tc-rich-page-header
                         title-text="Label"
-                        description="Semantic form label with optional required indicator and info-icon tooltip. Port of @toolcase/react-components Label."
+                        description="Semantic form label with optional required indicator and info-icon tooltip."
                     >
                         <tc-badge slot="chips" variant="secondary">
                             Web Components

@@ -23,7 +23,7 @@ tc-user-panel {
     // Avatar
     --bs-user-panel-avatar-size: 2rem;
     --bs-user-panel-avatar-bg: var(--tc-app-accent);
-    --bs-user-panel-avatar-color: #fff;
+    --bs-user-panel-avatar-color: var(--tc-app-accent-contrast);
     --bs-user-panel-avatar-font-size: 0.75rem;
 
     // Name + plan
@@ -41,7 +41,7 @@ tc-user-panel {
     --bs-user-panel-icon-hover-bg: var(--tc-surface-muted);
     --bs-user-panel-icon-hover-color: var(--tc-text);
     --bs-user-panel-icon-active-bg: var(--tc-app-accent);
-    --bs-user-panel-icon-active-color: #fff;
+    --bs-user-panel-icon-active-color: var(--tc-app-accent-contrast);
     --bs-user-panel-icon-glyph-size: 1rem;
     --bs-user-panel-icon-highlight-color: var(--tc-accent);
 
@@ -57,7 +57,7 @@ tc-user-panel {
     --bs-user-panel-menu-item-hover-bg: var(--tc-surface-muted);
     --bs-user-panel-menu-item-hover-color: var(--tc-text);
     --bs-user-panel-menu-item-active-bg: var(--tc-app-accent);
-    --bs-user-panel-menu-item-active-color: #fff;
+    --bs-user-panel-menu-item-active-color: var(--tc-app-accent-contrast);
 
     // Skeleton
     --bs-user-panel-skeleton-bg: var(--tc-surface-muted);

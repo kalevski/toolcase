@@ -3,7 +3,7 @@
 // E2 — import open GitHub issues of the project's origin repo as task files.
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Modal, Button, Heading, Text, Checkbox, Spinner, Tag, HelperText, toast } from '@toolcase/react-components'
+import { Modal, Button, Heading, Text, Checkbox, Spinner, Tag, HelperText, toast } from '@/components/ui'
 import type { GithubIssue, TaskInfo } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 

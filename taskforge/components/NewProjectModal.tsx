@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Modal, Button, Heading, Input, Text, toast } from '@toolcase/react-components'
+import { Modal, Button, Heading, Input, Text, toast } from '@/components/ui'
 
 const KEY = 'newProject'
 

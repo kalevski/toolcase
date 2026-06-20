@@ -19,15 +19,15 @@ tc-perk-picker {
 
     --bs-perk-picker-selected-bg: var(--tc-app-accent);
     --bs-perk-picker-selected-border: var(--tc-app-accent);
-    --bs-perk-picker-selected-color: #fff;
-    --bs-perk-picker-selected-desc-color: rgba(255, 255, 255, 0.72);
+    --bs-perk-picker-selected-color: var(--tc-app-accent-contrast);
+    --bs-perk-picker-selected-desc-color: color-mix(in srgb, var(--tc-app-accent-contrast) 72%, transparent);
 
     --bs-perk-picker-icon-size: 2.25rem;
     --bs-perk-picker-icon-bg: var(--tc-surface-muted);
     --bs-perk-picker-icon-color: var(--tc-text);
     --bs-perk-picker-icon-svg-size: 1.125rem;
     --bs-perk-picker-icon-selected-bg: rgba(255, 255, 255, 0.14);
-    --bs-perk-picker-icon-selected-color: #fff;
+    --bs-perk-picker-icon-selected-color: var(--tc-app-accent-contrast);
 
     --bs-perk-picker-name-size: 0.875rem;
     --bs-perk-picker-name-color: var(--tc-text);

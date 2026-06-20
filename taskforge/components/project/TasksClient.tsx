@@ -16,7 +16,7 @@ import {
     toast,
     type TableColumn,
     type ChipGroupItem,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { TaskDrawer } from '../TaskDrawer'

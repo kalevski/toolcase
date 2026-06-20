@@ -9,16 +9,16 @@ const MigrationGuideDemo: React.FC = () => {
         if (basicRef.current) {
             basicRef.current.steps = [
                 {
-                    title: 'Update the import path',
-                    description: 'The package has moved to a scoped name in v2.',
-                    before: `import { Button } from 'toolcase'`,
-                    after: `import { Button } from '@toolcase/react-components'`,
+                    title: 'Swap the package',
+                    description: 'The React library is replaced by framework-free custom elements.',
+                    before: `import { Button } from '@toolcase/react-components'`,
+                    after: `import { register } from '@toolcase/web-components'`,
                 },
                 {
-                    title: 'Replace className with variant',
-                    description: 'Variant is now a first-class prop instead of a CSS class string.',
-                    before: `<Button className="btn-primary">Save</Button>`,
-                    after: `<Button variant="primary">Save</Button>`,
+                    title: 'Register the elements once at startup',
+                    description: 'Call register() before the first render so the tc-* tags upgrade.',
+                    before: `import '@toolcase/react-components/style.css'`,
+                    after: [`import '@toolcase/web-components/style.css'`, ``, `register()`].join('\n'),
                 },
             ]
         }
@@ -29,40 +29,40 @@ const MigrationGuideDemo: React.FC = () => {
             fullRef.current.steps = [
                 {
                     title: 'Install the new package',
-                    description: 'Remove the old dependency and install the scoped package.',
-                    before: `npm install toolcase-ui`,
-                    after: `npm install @toolcase/react-components`,
+                    description: 'Remove the React library and install the framework-free web components.',
+                    before: `npm install @toolcase/react-components`,
+                    after: `npm install @toolcase/web-components`,
                     language: 'bash',
                 },
                 {
-                    title: 'Update all imports',
+                    title: 'Register elements + load the stylesheet',
                     before: [
-                        `import { Button } from 'toolcase-ui'`,
-                        `import { Modal } from 'toolcase-ui'`,
-                        `import { Alert } from 'toolcase-ui'`,
+                        `import { Button, Card } from '@toolcase/react-components'`,
+                        `import '@toolcase/react-components/style.css'`,
                     ].join('\n'),
                     after: [
-                        `import {`,
-                        `  Button,`,
-                        `  Modal,`,
-                        `  Alert,`,
-                        `} from '@toolcase/react-components'`,
+                        `import { register } from '@toolcase/web-components'`,
+                        `import '@toolcase/web-components/style.css'`,
+                        ``,
+                        `register()`,
                     ].join('\n'),
                     language: 'typescript',
                 },
                 {
-                    title: 'Migrate Button variant prop',
+                    title: 'Replace JSX components with custom elements',
                     description:
-                        'The `type` prop has been renamed to `variant` to align with Bootstrap naming.',
-                    before: `<Button type="primary">Submit</Button>`,
-                    after: `<Button variant="primary">Submit</Button>`,
+                        'Props become attributes; children stay as light-DOM content.',
+                    before: `<Button variant="primary">Submit</Button>`,
+                    after: `<tc-button variant="primary">Submit</tc-button>`,
                     language: 'tsx',
                 },
                 {
-                    title: 'Update CSS import',
-                    before: `import 'toolcase-ui/dist/styles.css'`,
-                    after: `import '@toolcase/react-components/style.css'`,
-                    language: 'typescript',
+                    title: 'Map handlers to DOM events',
+                    description:
+                        'onClick becomes a native listener; richer components emit tc-* CustomEvents.',
+                    before: `<Button onClick={save}>Save</Button>`,
+                    after: [`<tc-button id="save">Save</tc-button>`, ``, `el.addEventListener('click', save)`].join('\n'),
+                    language: 'tsx',
                 },
             ]
         }
@@ -106,8 +106,8 @@ const MigrationGuideDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-migration-guide
                                     ref={basicRef}
-                                    from="v1.0"
-                                    to="v2.0"
+                                    from="react-components"
+                                    to="web-components"
                                 ></tc-migration-guide>
                             </tc-section-card>
 
@@ -115,8 +115,8 @@ const MigrationGuideDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-migration-guide
                                     ref={fullRef}
-                                    from="v0.x"
-                                    to="v1.0"
+                                    from="react-components"
+                                    to="web-components"
                                 ></tc-migration-guide>
                             </tc-section-card>
 

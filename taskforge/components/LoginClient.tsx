@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { Login, Icon, toast } from '@toolcase/react-components'
+import { Login, Icon, toast } from '@/components/ui'
 
 const ERRORS: Record<string, string> = {
     state: 'Sign-in expired or was tampered with. Please try again.',

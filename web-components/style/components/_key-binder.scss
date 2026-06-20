@@ -24,7 +24,7 @@ tc-key-binder {
 
     --bs-key-binder-capturing-bg: var(--tc-app-accent);
     --bs-key-binder-capturing-border-color: var(--tc-app-accent);
-    --bs-key-binder-capturing-color: #fff;
+    --bs-key-binder-capturing-color: var(--tc-app-accent-contrast);
 
     --bs-key-binder-empty-color: var(--tc-text-faint);
     --bs-key-binder-empty-border-color: var(--tc-border);

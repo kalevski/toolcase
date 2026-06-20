@@ -1,0 +1,57 @@
+// Aurora › tc-chip — selected/active chips glow mint.
+// Resting chips stay neutral on the dark surface; the active/selected state and
+// the count badge pick up the soft mint accent so selection reads at a glance.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-chip,
+    .tc-chip {
+        --bs-chip-bg: var(--ah-surface-2);
+        --bs-chip-bg-hover: var(--ah-surface-3);
+        --bs-chip-border-color: var(--ah-border);
+        --bs-chip-count-bg: var(--ah-accent-soft);
+    }
+
+    // Colored variants — the base pairs a LIGHT pastel fill with DARK emphasis
+    // text, but the foundation token remap re-points --bs-chip-bg to the dark
+    // surface (winning by source order) while leaving the dark text → ~1.0–2.5:1
+    // (dark ink on a dark chip). Re-skin each variant the aurora way: a soft
+    // semantic tint with the matching BRIGHT tone for text + hairline.
+    .tc-chip--primary:not(.is-selected) {
+        --bs-chip-bg: var(--ah-accent-soft);
+        --bs-chip-color: var(--ah-accent-bright);
+        --bs-chip-border-color: var(--ah-accent-line);
+    }
+
+    .tc-chip--info:not(.is-selected) {
+        --bs-chip-bg: var(--tc-info-bg);
+        --bs-chip-color: var(--ah-info);
+        --bs-chip-border-color: var(--ah-info);
+    }
+
+    .tc-chip--success:not(.is-selected) {
+        --bs-chip-bg: var(--tc-success-bg);
+        --bs-chip-color: var(--ah-success);
+        --bs-chip-border-color: var(--ah-success);
+    }
+
+    .tc-chip--warning:not(.is-selected) {
+        --bs-chip-bg: var(--tc-warning-bg);
+        --bs-chip-color: var(--ah-warn);
+        --bs-chip-border-color: var(--ah-warn);
+    }
+
+    .tc-chip--danger:not(.is-selected) {
+        --bs-chip-bg: var(--tc-danger-bg);
+        --bs-chip-color: var(--ah-danger);
+        --bs-chip-border-color: var(--ah-danger);
+    }
+
+    .tc-chip.active,
+    .tc-chip[aria-pressed='true'],
+    .tc-chip[aria-selected='true'] {
+        --bs-chip-bg: var(--ah-accent-soft);
+        --bs-chip-color: var(--ah-accent-bright);
+        --bs-chip-border-color: var(--ah-accent-line);
+    }
+}

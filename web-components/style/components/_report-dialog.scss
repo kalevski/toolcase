@@ -64,9 +64,11 @@ tc-report-dialog {
     --bs-report-dialog-btn-hover-bg:             var(--tc-surface-muted);
     --bs-report-dialog-btn-hover-color:          var(--tc-text);
     --bs-report-dialog-btn-submit-bg:            var(--tc-danger, #dc2626);
-    --bs-report-dialog-btn-submit-color:         #fff;
-    --bs-report-dialog-btn-submit-hover-bg:      #b91c1c;
-    --bs-report-dialog-btn-submit-hover-color:   #fff;
+    --bs-report-dialog-btn-submit-color: var(--tc-app-accent-contrast);
+    // Themed darken (was the fixed #b91c1c, which stayed dark in dark themes and
+    // killed the on-fill ink) so the submit-color reads on hover in every theme.
+    --bs-report-dialog-btn-submit-hover-bg:      color-mix(in srgb, var(--tc-danger) 85%, #000);
+    --bs-report-dialog-btn-submit-hover-color: var(--tc-app-accent-contrast);
 
     // Close button
     --bs-report-dialog-close-color:       var(--tc-text-muted);
@@ -302,7 +304,7 @@ tc-report-dialog {
         width: 0.375rem;
         height: 0.375rem;
         border-radius: 50%;
-        background: #fff;
+        background: var(--tc-app-accent-contrast);
         opacity: 0;
         transition: opacity var(--tc-transition-fast);
     }

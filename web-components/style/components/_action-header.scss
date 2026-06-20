@@ -39,7 +39,7 @@
         --bs-btn-hover-color: var(--tc-text);
         --bs-btn-hover-bg: var(--tc-surface-muted);
         --bs-btn-hover-border-color: var(--tc-border-strong);
-        --bs-btn-active-color: #{$white};
+        --bs-btn-active-color: var(--tc-app-accent-contrast);
         --bs-btn-active-bg: var(--tc-app-accent);
         --bs-btn-active-border-color: var(--tc-app-accent);
         --bs-btn-disabled-color: var(--tc-text-muted);

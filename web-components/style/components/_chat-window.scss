@@ -35,8 +35,8 @@ tc-chat-window {
     --bs-chat-window-input-font-size: 0.8125rem;
     --bs-chat-window-input-focus-border: rgba(30, 41, 59, 0.5);
     --bs-chat-window-input-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
-    --bs-chat-window-send-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-chat-window-send-color: #fff;
+    --bs-chat-window-send-bg: var(--tc-app-accent-gradient);
+    --bs-chat-window-send-color: var(--tc-app-accent-contrast);
     --bs-chat-window-send-font-size: 0.8125rem;
 }
 

@@ -1,0 +1,18 @@
+// Aurora › tc-heading — display type with a mint gradient treatment.
+// The base inner .tc-heading sets `font-family: var(--tc-font-sans)` literally,
+// so the display swap is applied on the class. The optional --gradient treatment
+// runs mint→bright-mint (the base end stop is --tc-ink, near-black, which would
+// fade the text into the canvas).
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-heading {
+        --bs-heading-gradient-start: var(--ah-accent);
+        --bs-heading-gradient-end: var(--ah-accent-bright);
+    }
+
+    .tc-heading {
+        font-family: var(--ah-display);
+        letter-spacing: -0.02em;
+    }
+}

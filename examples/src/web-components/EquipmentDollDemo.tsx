@@ -111,7 +111,7 @@ const EquipmentDollDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="EquipmentDoll"
-                            description="A paper-doll of equipment slots arranged around a neutral character figure. Each slot is a sharp hairline tile positioned by x/y percentage; selecting one fires tc-select. Set slots via the JS slots property. Re-skinned from the game-components gc-equipment-doll to the toolcase design system — no gilded frame, no glow."
+                            description="A paper-doll of equipment slots arranged around a neutral character figure. Each slot is a sharp hairline tile positioned by x/y percentage; selecting one fires tc-select. Set slots via the JS slots property. Built in the toolcase design system — no gilded frame, no glow."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

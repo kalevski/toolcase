@@ -164,6 +164,9 @@ tc-theme[name='dungeon'],
     --tc-app-accent: var(--fg-gold);
     --tc-app-accent-hover: var(--fg-gold-bright);
     --tc-app-accent-contrast: var(--fg-ink);
+    // Primary-action gradient → the gold edge gradient, so ink-on-fill text reads
+    // across the sweep instead of inheriting the light-theme slate stop.
+    --tc-app-accent-gradient: var(--fg-gold-edge);
 
     --tc-accent: var(--fg-gold-bright);
     --tc-accent-fg: var(--fg-gold);

@@ -50,8 +50,6 @@ const EcosystemMapDemo: React.FC = () => {
                 {
                     label: 'UI',
                     items: [
-                        { name: '@toolcase/react-components' },
-                        { name: '@toolcase/game-components' },
                         { name: '@toolcase/web-components' },
                     ],
                 },

@@ -28,11 +28,11 @@ tc-hotbar {
     --bs-hotbar-selected-ring: rgba(30, 41, 59, 0.12);
 
     --bs-hotbar-hotkey-bg: var(--tc-app-accent);
-    --bs-hotbar-hotkey-color: #fff;
+    --bs-hotbar-hotkey-color: var(--tc-app-accent-contrast);
     --bs-hotbar-hotkey-font-size: 0.625rem;
 
     --bs-hotbar-qty-bg: var(--tc-app-accent);
-    --bs-hotbar-qty-color: #fff;
+    --bs-hotbar-qty-color: var(--tc-app-accent-contrast);
 
     box-sizing: border-box;
     padding: var(--bs-hotbar-padding);

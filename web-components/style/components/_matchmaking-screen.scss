@@ -50,7 +50,7 @@ tc-matchmaking-screen {
     --bs-matchmaking-screen-btn-border:      var(--tc-border);
     --bs-matchmaking-screen-btn-hover-bg:    var(--tc-surface-hover, var(--tc-surface-muted));
     --bs-matchmaking-screen-btn-accept-bg:   var(--tc-app-accent);
-    --bs-matchmaking-screen-btn-accept-color: #fff;
+    --bs-matchmaking-screen-btn-accept-color: var(--tc-app-accent-contrast);
     --bs-matchmaking-screen-btn-min-height:  2.25rem;
 }
 

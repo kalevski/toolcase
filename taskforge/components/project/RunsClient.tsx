@@ -14,7 +14,7 @@ import {
     TerminalWindow,
     type TableColumn,
     type TerminalLine,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { RunRecord, SseEvent } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'

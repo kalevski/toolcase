@@ -36,7 +36,7 @@ tc-node-editor {
 
     // Selected = ink emphasis.
     --bs-node-editor-selected-border: var(--tc-app-accent);
-    --bs-node-editor-selected-header-bg: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
+    --bs-node-editor-selected-header-bg: var(--tc-app-accent-gradient);
     --bs-node-editor-selected-header-text: #fff;
 
     // Ports — sanctioned circles.

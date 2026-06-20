@@ -1211,18 +1211,18 @@ class NetFeature extends Feature {
 }
 ```
 
-### `@toolcase/game-components` HUD overlay
+### `@toolcase/web-components` HUD overlay
 
 `HTMLFeature` hosts the HUD; bind values per-frame.
 
 ```ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import { register } from '@toolcase/game-components'
+import { register } from '@toolcase/web-components'
 register()
 
 class Hud extends HTMLFeature {
     onCreate() {
-        this.node.innerHTML = '<gc-health-bar id="hp" value="100" max="100"></gc-health-bar>'
+        this.node.innerHTML = '<tc-health-bar id="hp" value="100" max="100"></tc-health-bar>'
     }
     onUpdate() {
         ;(this.node.querySelector('#hp') as any).value = this.scene.player.hp
@@ -1253,7 +1253,7 @@ world.on('state.score', s => log.info('score', s))
 | Phaser GameObjects | Use Phaser's native API: `setTint(0xRRGGBB)`, `setAlpha`, `setBlendMode`, custom shaders via `Effect`. |
 | `Effect` shaders | The 73 built-in effects accept numeric `color` parameters in `0xRRGGBB` form — pass game-themed palette values (e.g. from `@toolcase/base` `Color`, where keys resolve as `Color.RED` / `Color.BLUE` etc., or `Color.toNumber('blue')` for the `0xRRGGBB` number) to keep visuals consistent across scenes. |
 | `Cinema` overlays | `CameraFlash.flash(color, ...)`, `LetterboxFeature.setBarColor`, `DialogCameraCue.setDimColor` — all accept `0xRRGGBB`. |
-| `HTMLFeature` content | Plain DOM inside `this.node`. Style with regular CSS / SCSS or by mounting `@toolcase/game-components` (`gc-*` web components) — they expose a full `--fg-*` / `--gc-*` variable layer documented in their SKILL.md. |
+| `HTMLFeature` content | Plain DOM inside `this.node`. Style with regular CSS / SCSS or by mounting `@toolcase/web-components` (`tc-*` web components) — they expose a full `--tc-*` / `--bs-*` variable layer documented in their SKILL.md. |
 | `Debugger` panels | Tweakpane folders; restyle with Tweakpane's own CSS variables on the panel container. |
 
 Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects / cinema overlays are easy to scatter. Consolidate them into a constants module (or the `Color` palette from `@toolcase/base` — `Color.toNumber('blue')` yields the `0xRRGGBB` number) and pass references — that way one change retones every scene.

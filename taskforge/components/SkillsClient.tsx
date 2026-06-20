@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Heading, Button, Table, IconButton, EmptyState, HelperText, toast, type TableColumn } from '@toolcase/react-components'
+import { Heading, Button, Table, IconButton, EmptyState, HelperText, toast, type TableColumn } from '@/components/ui'
 import type { SkillSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
 import { helpTexts } from './helpTexts'

@@ -1,8 +1,0 @@
-export { DemoPage } from './DemoPage'
-export type { DemoPageProps } from './DemoPage'
-export { DemoSection } from './DemoSection'
-export type { DemoSectionProps } from './DemoSection'
-export { DemoGrid } from './DemoGrid'
-export type { DemoGridProps } from './DemoGrid'
-export { DemoRow } from './DemoRow'
-export type { DemoRowProps } from './DemoRow'

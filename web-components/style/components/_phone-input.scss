@@ -22,7 +22,7 @@ tc-phone-input {
     --bs-phone-input-dropdown-z: var(--tc-z-dropdown);
     --bs-phone-input-option-hover-bg: var(--tc-surface-muted);
     --bs-phone-input-option-active-bg: var(--tc-app-accent);
-    --bs-phone-input-option-active-text: #fff;
+    --bs-phone-input-option-active-text: var(--tc-app-accent-contrast);
     --bs-phone-input-error-color: var(--tc-danger);
 }
 
@@ -237,7 +237,7 @@ tc-phone-input {
         color: var(--bs-phone-input-option-active-text);
 
         .tc-phone-input-option-dial {
-            color: rgba(255, 255, 255, 0.7);
+            color: color-mix(in srgb, var(--tc-app-accent-contrast) 70%, transparent);
         }
     }
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
-import { Select } from '@toolcase/react-components'
 import { captureLogs, LoggingDemoCard, type LogEntry } from './_demo/LoggingDemo'
 
 const levelOptions = [
@@ -56,12 +55,21 @@ export const LogLevelsDemo = () => {
             logs={logs}
             extra={
                 <div className="mb-2" style={{ maxWidth: 240 }}>
-                    <Select
-                        label="Level"
-                        options={levelOptions}
+                    <label className="form-label" htmlFor="log-level-select">
+                        Level
+                    </label>
+                    <select
+                        id="log-level-select"
+                        className="form-select form-select-sm"
                         value={level}
                         onChange={(e) => setLevel(e.target.value)}
-                    />
+                    >
+                        {levelOptions.map((o) => (
+                            <option key={o.value} value={o.value}>
+                                {o.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             }
         />

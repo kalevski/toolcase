@@ -25,7 +25,7 @@ tc-combo-box {
     --bs-combo-box-option-color: var(--tc-text);
     --bs-combo-box-option-hover-bg: var(--tc-surface-muted);
     --bs-combo-box-option-selected-bg: var(--tc-app-accent);
-    --bs-combo-box-option-selected-color: #ffffff;
+    --bs-combo-box-option-selected-color: var(--tc-app-accent-contrast);
     --bs-combo-box-option-font-size: 0.875rem;
     --bs-combo-box-empty-color: var(--tc-text-muted);
     --bs-combo-box-disabled-opacity: 0.55;

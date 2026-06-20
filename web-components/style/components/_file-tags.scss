@@ -55,7 +55,7 @@ tc-file-tags {
     --bs-file-tags-option-padding-y: 0.375rem;
     --bs-file-tags-option-hover-bg: var(--tc-surface-muted);
     --bs-file-tags-option-active-bg: var(--tc-app-accent);
-    --bs-file-tags-option-active-color: #fff;
+    --bs-file-tags-option-active-color: var(--tc-app-accent-contrast);
     --bs-file-tags-no-results-color: var(--tc-text-faint);
     --bs-file-tags-no-results-font-size: 0.8125rem;
 }

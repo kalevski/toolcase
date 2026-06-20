@@ -29,7 +29,7 @@ tc-data-list {
     --bs-data-list-action-color: var(--tc-text);
     --bs-data-list-action-border: 1px solid var(--tc-border-strong);
     --bs-data-list-action-hover-bg: var(--tc-app-accent);
-    --bs-data-list-action-hover-color: #fff;
+    --bs-data-list-action-hover-color: var(--tc-app-accent-contrast);
 
     --bs-data-list-empty-color: var(--tc-text-faint);
 }

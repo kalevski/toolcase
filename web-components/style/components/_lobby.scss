@@ -35,9 +35,9 @@ tc-lobby {
     --bs-lobby-btn-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
     --bs-lobby-btn-hover-color: var(--tc-text);
     --bs-lobby-btn-active-bg: var(--tc-app-accent);
-    --bs-lobby-btn-active-color: #fff;
+    --bs-lobby-btn-active-color: var(--tc-app-accent-contrast);
     --bs-lobby-btn-start-bg: var(--tc-app-accent);
-    --bs-lobby-btn-start-color: #fff;
+    --bs-lobby-btn-start-color: var(--tc-app-accent-contrast);
     --bs-lobby-btn-disabled-opacity: 0.45;
     --bs-lobby-btn-min-height: 2.25rem;
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Heading, Breadcrumb, Input, MarkdownEditor, Button, Banner, toast } from '@toolcase/react-components'
+import { Heading, Breadcrumb, Input, MarkdownEditor, Button, Banner, toast } from '@/components/ui'
 
 function lintFrontmatter(content: string): string | null {
     const fm = content.match(/^---\n([\s\S]*?)\n---/)

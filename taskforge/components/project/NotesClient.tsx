@@ -12,7 +12,7 @@ import {
     HelperText,
     toast,
     type TableColumn,
-} from '@toolcase/react-components'
+} from '@/components/ui'
 import type { NoteDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm, usePrompt } from '../ConfirmModal'

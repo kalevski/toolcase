@@ -1,0 +1,50 @@
+// Aurora › tc-alert — tinted notice with an accent heading.
+// Foundation remaps the element rgb vars, so variant tints shift to aurora hues.
+// This fixes the Sass-baked emphasis text colours (which bypass the rgb remap)
+// and repoints the slate-literal primary / light / dark variants onto the dark
+// palette.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .alert {
+        color: var(--ah-text);
+        box-shadow: var(--ah-bevel-top);
+    }
+
+    .alert-heading {
+        color: var(--ah-emphasis);
+    }
+
+    .alert-primary {
+        --bs-alert-bg: var(--ah-accent-soft);
+        --bs-alert-color: var(--ah-accent-bright);
+        --bs-alert-border-color: var(--ah-accent-line);
+    }
+
+    .alert-success {
+        --bs-alert-color: var(--ah-success);
+    }
+
+    .alert-danger {
+        --bs-alert-color: var(--ah-danger);
+    }
+
+    .alert-warning {
+        --bs-alert-color: var(--ah-warn);
+    }
+
+    .alert-info {
+        --bs-alert-color: var(--ah-info);
+    }
+
+    .alert-light {
+        --bs-alert-bg: var(--ah-surface-3);
+        --bs-alert-border-color: var(--ah-border-strong);
+        --bs-alert-color: var(--ah-text);
+    }
+
+    .alert-dark {
+        --bs-alert-bg: var(--ah-bg-2);
+        --bs-alert-color: var(--ah-text);
+    }
+}

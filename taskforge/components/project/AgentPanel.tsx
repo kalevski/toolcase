@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Badge, Button, StatusDot, TerminalWindow, Text, toast } from '@toolcase/react-components'
+import { Badge, Button, StatusDot, TerminalWindow, Text, toast } from '@/components/ui'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject, AGENT_LABELS } from '../ProjectContext'
 import { PromptComposer } from './PromptComposer'

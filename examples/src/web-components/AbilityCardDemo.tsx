@@ -8,7 +8,7 @@ const AbilityCardDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="AbilityCard"
-                            description="An ability portrait tile: an icon chip, rarity micro-label, ability name, optional hotkey, description, and a meta grid of cooldown / cost / range. Ported from the game-components gc-ability-card and restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-text."
+                            description="An ability portrait tile: an icon chip, rarity micro-label, ability name, optional hotkey, description, and a meta grid of cooldown / cost / range. Restyled to the toolcase design system — flat slate surface, hairline borders, sharp corners, mono machine-text."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

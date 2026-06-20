@@ -50,7 +50,7 @@ tc-player-card {
     --bs-player-card-btn-hover-color:var(--tc-text);
     --bs-player-card-btn-danger-color:   var(--tc-danger, #ef4444);
     --bs-player-card-btn-danger-hover-bg: var(--tc-danger, #ef4444);
-    --bs-player-card-btn-danger-hover-color: #fff;
+    --bs-player-card-btn-danger-hover-color: var(--tc-app-accent-contrast);
     --bs-player-card-btn-min-height: 2rem;
     --bs-player-card-btn-disabled-opacity: 0.45;
 }

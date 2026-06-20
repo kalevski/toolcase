@@ -225,7 +225,7 @@ tc-build {
     --bs-build-menu-item-color: #{$slate-700};
     --bs-build-menu-item-hover-color: var(--tc-text);
     --bs-build-menu-item-hover-bg: var(--tc-surface-muted);
-    --bs-build-menu-item-active-color: #{$white};
+    --bs-build-menu-item-active-color: var(--tc-app-accent-contrast);
     --bs-build-menu-item-active-bg: var(--tc-app-accent);
     --bs-build-menu-item-disabled-color: var(--tc-text-faint);
     --bs-build-menu-danger-color: var(--tc-danger);

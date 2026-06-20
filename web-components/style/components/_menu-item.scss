@@ -23,8 +23,8 @@ tc-menu-item {
     --bs-menu-item-hover-color: var(--tc-text);
 
     --bs-menu-item-selected-bg: var(--tc-app-accent);
-    --bs-menu-item-selected-color: #fff;
-    --bs-menu-item-selected-icon-color: rgba(255, 255, 255, 0.8);
+    --bs-menu-item-selected-color: var(--tc-app-accent-contrast);
+    --bs-menu-item-selected-icon-color: color-mix(in srgb, var(--tc-app-accent-contrast) 80%, transparent);
 
     --bs-menu-item-disabled-opacity: 0.45;
 

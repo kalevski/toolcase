@@ -59,7 +59,7 @@ const GuildPanelDemo: React.FC = () => (
                 <div className="col-12">
                     <tc-rich-page-header
                         title-text="GuildPanel"
-                        description="Guild / clan panel with a header (name, tag, motto), a stats strip (level, members, online), and a member roster. The roster is set via the members JS property. Restyled from the game-components gc-guild-panel to the toolcase design system: slate neutrals, hairline borders, sharp corners, and JetBrains Mono for stat values and rank chips."
+                        description="Guild / clan panel with a header (name, tag, motto), a stats strip (level, members, online), and a member roster. The roster is set via the members JS property. Built in the toolcase design system: slate neutrals, hairline borders, sharp corners, and JetBrains Mono for stat values and rank chips."
                     >
                         <tc-badge slot="chips" variant="secondary">
                             Web Components

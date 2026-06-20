@@ -6,7 +6,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Badge, Kbd, Text } from '@toolcase/react-components'
+import { Badge, Kbd, Text } from '@/components/ui'
 import type { SearchDocType, SearchHit } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 

@@ -18,13 +18,13 @@ tc-main-menu {
     --bs-main-menu-item-border: var(--tc-border);
     --bs-main-menu-item-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
     --bs-main-menu-item-selected-bg: var(--tc-app-accent);
-    --bs-main-menu-item-selected-color: #fff;
+    --bs-main-menu-item-selected-color: var(--tc-app-accent-contrast);
     --bs-main-menu-item-disabled-color: var(--tc-text-faint);
     --bs-main-menu-item-disabled-opacity: 0.5;
     --bs-main-menu-badge-bg: var(--tc-surface-muted);
     --bs-main-menu-badge-color: var(--tc-text-muted);
     --bs-main-menu-badge-selected-bg: rgba(255, 255, 255, 0.2);
-    --bs-main-menu-badge-selected-color: #fff;
+    --bs-main-menu-badge-selected-color: var(--tc-app-accent-contrast);
     --bs-main-menu-item-min-height: 2.75rem;
 }
 

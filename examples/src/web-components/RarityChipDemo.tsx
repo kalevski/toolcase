@@ -7,7 +7,7 @@ const RarityChipDemo: React.FC = () => (
                 <div className="col-12">
                     <tc-rich-page-header
                         title-text="RarityChip"
-                        description="Mono uppercase rarity label chip: Common through Mythic. Port of game-components gc-rarity-chip, restyled to the design system with sharp corners, a 1px hairline border, and rarity-tinted text/border. Purely presentational — no events, no slots."
+                        description="Mono uppercase rarity label chip: Common through Mythic. Restyled to the design system with sharp corners, a 1px hairline border, and rarity-tinted text/border. Purely presentational — no events, no slots."
                     >
                         <tc-badge slot="chips" variant="secondary">
                             Web Components

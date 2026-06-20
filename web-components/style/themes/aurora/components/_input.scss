@@ -1,0 +1,22 @@
+// Aurora › tc-input — dark field with a mint focus halo.
+// Foundation remaps the field bg / border / text / placeholder. These fix the
+// hardcoded slate values that survive: the form label colour and the slate focus
+// border + ring, replaced with the mint accent line and soft glow.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .form-label {
+        color: var(--ah-text-2);
+    }
+
+    .form-control,
+    .form-select {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--ah-accent);
+        box-shadow: var(--tc-focus-ring);
+    }
+}

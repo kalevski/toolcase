@@ -14,7 +14,7 @@ tc-level-header {
     --bs-level-header-gap:                  0.75rem;
 
     --bs-level-header-badge-bg:             var(--tc-app-accent);
-    --bs-level-header-badge-color:          #fff;
+    --bs-level-header-badge-color: var(--tc-app-accent-contrast);
     --bs-level-header-badge-size:           3rem;
     --bs-level-header-badge-label-size:     0.5625rem;
     --bs-level-header-badge-value-size:     1.125rem;

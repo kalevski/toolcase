@@ -51,7 +51,7 @@ const BlurOverlayDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Blur Overlay"
-                            description="Full-surface backdrop-blur scrim for pause screens and dialog backdrops. Ported from game-components but re-skinned to the design system — a slate-ink wash on the fixed overlay tier, sharp edges, no fantasy chrome. Blur amount and background are free-form CSS values."
+                            description="Full-surface backdrop-blur scrim for pause screens and dialog backdrops. Built for the toolcase design system — a slate-ink wash on the fixed overlay tier, sharp edges, no fantasy chrome. Blur amount and background are free-form CSS values."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

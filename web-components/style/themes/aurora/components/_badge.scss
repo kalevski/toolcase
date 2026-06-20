@@ -1,0 +1,29 @@
+// Aurora › tc-badge — soft accent chips.
+// Variant fills flip for free via the token remap. Two fixes: the primary badge
+// reads better as a soft mint pill (dark text on bright mint is heavy at chip
+// size), and .text-bg-secondary hardcodes a slate fill that must be beaten with
+// an equally-specific !important.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .badge.text-bg-primary {
+        background-color: var(--ah-accent-soft) !important;
+        color: var(--ah-accent-bright) !important;
+    }
+
+    .badge.text-bg-secondary {
+        background-color: var(--ah-surface-3) !important;
+        color: var(--ah-text-2) !important;
+    }
+
+    // Bright semantic fills keep base white text (warning is even hard-forced
+    // white) — ~1.9–2.8:1 on the saturated chips. Flip to near-black ink. The
+    // count-badge content span inherits this colour. !important + the higher
+    // theme-scope specificity beats both the utility and the base override.
+    .badge.text-bg-success,
+    .badge.text-bg-warning,
+    .badge.text-bg-info,
+    .badge.text-bg-danger {
+        color: var(--ah-accent-ink) !important;
+    }
+}

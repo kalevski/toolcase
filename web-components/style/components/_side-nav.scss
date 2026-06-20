@@ -32,7 +32,7 @@ tc-side-nav {
     --bs-side-nav-icon-color: var(--tc-text-faint);
 
     --bs-side-nav-badge-bg: var(--tc-app-accent);
-    --bs-side-nav-badge-color: #fff;
+    --bs-side-nav-badge-color: var(--tc-app-accent-contrast);
     --bs-side-nav-badge-font-size: 0.6875rem;
 
     --bs-side-nav-focus-color: var(--tc-app-accent);
