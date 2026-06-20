@@ -329,7 +329,13 @@ describe('JSONSchema', () => {
         expect(schema.validate('f47ac10b-58cc-4372-a567-0e02b2c3d479')).toBe(true)
         expect(schema.validate('not-a-uuid')).toBe(false)
         expect(schema.getLatestError()?.issues[0].message).toMatch(/must be a valid UUID/)
-        expect(schema.validate('550e8400-e29b-61d4-a716-446655440000')).toBe(false)
+        expect(schema.validate('550e8400-e29b-41d4-a716-4466554400zz')).toBe(false)
+    })
+
+    it('UUIDv7 now validates (widened regex)', () => {
+        const schema = new JSONSchema({ type: 'uuid' })
+        expect(schema.validate('018fb2d0-58ce-7c93-9de1-a9b7d98b4e7b')).toBe(true)
+        expect(schema.validate('00000000-0000-0000-0000-000000000000')).toBe(true)
     })
 
     it('validates date type (YYYY-MM-DD)', () => {
@@ -414,5 +420,83 @@ describe('JSONSchema', () => {
         expect(schema.validate('SGVsbG8')).toBe(false)
         expect(schema.validate('')).toBe(false)
         expect(schema.getLatestError()?.issues[0].message).toMatch(/must be a valid base64/)
+    })
+
+    it('password with ^&* specials now validates (widened regex)', () => {
+        const schema = new JSONSchema({ type: 'password' })
+        expect(schema.validate('Secret^1ab')).toBe(true)
+        expect(schema.validate('Pass&word1')).toBe(true)
+        expect(schema.validate('Abc*1defgh')).toBe(true)
+        expect(schema.validate('weakpassword')).toBe(false)
+    })
+
+    it('minLength constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', minLength: 5 })
+        expect(schema.validate('hello')).toBe(true)
+        expect(schema.validate('hi')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at least 5 characters/)
+    })
+
+    it('maxLength constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', maxLength: 5 })
+        expect(schema.validate('hello')).toBe(true)
+        expect(schema.validate('toolong')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at most 5 characters/)
+    })
+
+    it('pattern constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', pattern: '^[0-9]+$' })
+        expect(schema.validate('12345')).toBe(true)
+        expect(schema.validate('abc')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/must match pattern/)
+    })
+
+    it('enum constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', enum: ['a', 'b', 'c'] })
+        expect(schema.validate('b')).toBe(true)
+        expect(schema.validate('d')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/must be one of/)
+    })
+
+    it('min constraint on number', () => {
+        const schema = new JSONSchema({ type: 'number', min: 10 })
+        expect(schema.validate(10)).toBe(true)
+        expect(schema.validate(9.9)).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/>= 10/)
+    })
+
+    it('max constraint on number', () => {
+        const schema = new JSONSchema({ type: 'number', max: 100 })
+        expect(schema.validate(100)).toBe(true)
+        expect(schema.validate(100.1)).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/<= 100/)
+    })
+
+    it('min/max constraints on integer', () => {
+        const schema = new JSONSchema({ type: 'integer', min: 1, max: 10 })
+        expect(schema.validate(5)).toBe(true)
+        expect(schema.validate(0)).toBe(false)
+        expect(schema.validate(11)).toBe(false)
+    })
+
+    it('enum constraint on number', () => {
+        const schema = new JSONSchema({ type: 'number', enum: [1, 2, 3] })
+        expect(schema.validate(2)).toBe(true)
+        expect(schema.validate(4)).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/must be one of/)
+    })
+
+    it('minItems constraint on array', () => {
+        const schema = new JSONSchema({ type: 'array', minItems: 2 })
+        expect(schema.validate([1, 2])).toBe(true)
+        expect(schema.validate([1])).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at least 2 items/)
+    })
+
+    it('maxItems constraint on array', () => {
+        const schema = new JSONSchema({ type: 'array', maxItems: 3 })
+        expect(schema.validate([1, 2, 3])).toBe(true)
+        expect(schema.validate([1, 2, 3, 4])).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at most 3 items/)
     })
 })

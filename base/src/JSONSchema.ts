@@ -19,6 +19,14 @@ type PrimitiveTypeName =
 
 interface BaseSchema {
     required?: boolean
+    enum?: unknown[]
+    minLength?: number
+    maxLength?: number
+    pattern?: string
+    min?: number
+    max?: number
+    minItems?: number
+    maxItems?: number
 }
 
 interface PrimitiveSchema extends BaseSchema {
@@ -55,6 +63,14 @@ interface RawSchema {
     flexible?: boolean
     properties?: Record<string, RawSchema>
     items?: RawSchema
+    enum?: unknown[]
+    minLength?: number
+    maxLength?: number
+    pattern?: string
+    min?: number
+    max?: number
+    minItems?: number
+    maxItems?: number
 }
 
 export interface ValidationIssue {
@@ -74,10 +90,10 @@ export type ValidationFn = (
 ) => void
 
 const USERNAME_REGEX = /^[A-Za-z][A-Za-z0-9_-]{2,22}$/
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-={}\[\]|:;"'<>,.?\/~`]).{8,24}$/
 const EMAIL_REGEX = /^(?:(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))$/
 const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
 const DATETIME_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-]([01]\d|2[0-3]):[0-5]\d)$/
 const IPV4_REGEX = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
@@ -267,39 +283,80 @@ class JSONSchema<const S extends Schema = Schema> {
         }
     }
 
-    private validateString: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateString: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'string') {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} must be a string, value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} must be a string, value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.minLength !== undefined && data.length < schema.minLength) {
+            issues.push({ path: here, message: `property=${here} must be at least ${schema.minLength} characters long` })
+        }
+        if (schema.maxLength !== undefined && data.length > schema.maxLength) {
+            issues.push({ path: here, message: `property=${here} must be at most ${schema.maxLength} characters long` })
+        }
+        if (schema.pattern !== undefined && !new RegExp(schema.pattern).test(data)) {
+            issues.push({ path: here, message: `property=${here} must match pattern ${schema.pattern}` })
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
-    private validateBoolean: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateBoolean: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'boolean') {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} can be "true" or "false", value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} can be "true" or "false", value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
-    private validateNumber: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateNumber: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'number') {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} must be a number, value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} must be a number, value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.min !== undefined && data < schema.min) {
+            issues.push({ path: here, message: `property=${here} must be >= ${schema.min}` })
+        }
+        if (schema.max !== undefined && data > schema.max) {
+            issues.push({ path: here, message: `property=${here} must be <= ${schema.max}` })
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
-    private validateInteger: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateInteger: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'number' || !Number.isInteger(data)) {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} must be an integer, value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} must be an integer, value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.min !== undefined && data < schema.min) {
+            issues.push({ path: here, message: `property=${here} must be >= ${schema.min}` })
+        }
+        if (schema.max !== undefined && data > schema.max) {
+            issues.push({ path: here, message: `property=${here} must be <= ${schema.max}` })
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
@@ -374,6 +431,13 @@ class JSONSchema<const S extends Schema = Schema> {
                 message: `property=${here} must be an array, value=${data} type=${typeof data} provided`
             })
             return
+        }
+
+        if (schema.minItems !== undefined && data.length < schema.minItems) {
+            issues.push({ path: here, message: `property=${here} must have at least ${schema.minItems} items` })
+        }
+        if (schema.maxItems !== undefined && data.length > schema.maxItems) {
+            issues.push({ path: here, message: `property=${here} must have at most ${schema.maxItems} items` })
         }
 
         if (schema.items === null || typeof schema.items !== 'object') {
