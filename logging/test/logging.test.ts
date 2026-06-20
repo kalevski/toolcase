@@ -408,15 +408,34 @@ describe('JSONLineReporter', () => {
         expect(parsed.region).toBe('eu')
     })
 
-    it('falls back when message contains a circular ref', () => {
+    it('replaces a circular ref field with [Circular] and keeps siblings', () => {
         const lines: string[] = []
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
         const cyc: any = {}
         cyc.self = cyc
-        reporter.log('info', 's', 't', [cyc])
+        reporter.log('info', 's', 't', ['ok', cyc])
         expect(lines).toHaveLength(1)
         const parsed = JSON.parse(lines[0])
-        expect(parsed.messages).toEqual(['<unserializable>'])
+        expect(parsed.messages[0]).toBe('ok')
+        expect(parsed.messages[1]).toEqual({ self: '[Circular]' })
+    })
+
+    it('serializes a nested Error with name/message/stack', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        reporter.log('error', 's', 't', [{ err: new Error('x') }])
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.messages[0].err.name).toBe('Error')
+        expect(parsed.messages[0].err.message).toBe('x')
+        expect(typeof parsed.messages[0].err.stack).toBe('string')
+    })
+
+    it('serializes BigInt messages as strings', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        reporter.log('info', 's', 't', [42n])
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.messages[0]).toBe('42')
     })
 })
 

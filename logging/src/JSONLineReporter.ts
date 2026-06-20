@@ -27,7 +27,7 @@ class JSONLineReporter extends LogReporter {
             level,
             scope,
             time,
-            messages: messages.map(serialize)
+            messages: messages.map(safe)
         }
         try {
             this.writeFn(JSON.stringify(record))
@@ -38,11 +38,22 @@ class JSONLineReporter extends LogReporter {
 
 }
 
-const serialize = (value: any): any => {
-    if (value instanceof Error) {
-        return { name: value.name, message: value.message, stack: value.stack }
+const safe = (value: any): any => {
+    const seen = new WeakSet()
+    const walk = (v: any): any => {
+        if (v instanceof Error) return { name: v.name, message: v.message, stack: v.stack }
+        if (typeof v === 'bigint') return v.toString()
+        if (v && typeof v === 'object') {
+            if (seen.has(v)) return '[Circular]'
+            seen.add(v)
+            if (Array.isArray(v)) return v.map(walk)
+            const out: Record<string, any> = {}
+            for (const k of Object.keys(v)) out[k] = walk(v[k])
+            return out
+        }
+        return v
     }
-    return value
+    try { return walk(value) } catch { return '<unserializable>' }
 }
 
 export default JSONLineReporter
