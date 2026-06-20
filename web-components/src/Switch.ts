@@ -18,6 +18,8 @@ export class Switch extends HTMLElement {
     private _initialised = false
     private _internals: ElementInternals
     private _defaultChecked = false
+    private _btnEl: HTMLButtonElement | null = null
+    private _labelEl: HTMLLabelElement | null = null
 
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
     onChange: ((value: boolean) => void) | null = null
@@ -41,6 +43,17 @@ export class Switch extends HTMLElement {
         this.render()
         this._syncFormValue()
         this._initialised = true
+    }
+
+    disconnectedCallback(): void {
+        if (this._btnEl) {
+            this._btnEl.removeEventListener('click', this._onToggle)
+            this._btnEl = null
+        }
+        if (this._labelEl) {
+            this._labelEl.removeEventListener('click', this._onToggle)
+            this._labelEl = null
+        }
     }
 
     formResetCallback(): void {
@@ -135,6 +148,15 @@ export class Switch extends HTMLElement {
     }
 
     private render(): void {
+        if (this._btnEl) {
+            this._btnEl.removeEventListener('click', this._onToggle)
+            this._btnEl = null
+        }
+        if (this._labelEl) {
+            this._labelEl.removeEventListener('click', this._onToggle)
+            this._labelEl = null
+        }
+
         const label = this.label
         const checked = this.checked
         const disabled = this.disabled
@@ -159,10 +181,10 @@ export class Switch extends HTMLElement {
             `</div>`,
         ].join('')
 
-        const btn = this.querySelector<HTMLButtonElement>('.tc-switch__track')
-        if (btn) btn.addEventListener('click', this._onToggle)
-        const labelEl = this.querySelector<HTMLLabelElement>('.tc-switch__label')
-        if (labelEl) labelEl.addEventListener('click', this._onToggle)
+        this._btnEl = this.querySelector<HTMLButtonElement>('.tc-switch__track')
+        if (this._btnEl) this._btnEl.addEventListener('click', this._onToggle)
+        this._labelEl = this.querySelector<HTMLLabelElement>('.tc-switch__label')
+        if (this._labelEl) this._labelEl.addEventListener('click', this._onToggle)
     }
 
     private _onToggle = (): void => {
@@ -170,6 +192,7 @@ export class Switch extends HTMLElement {
         const next = !this.checked
         this.checked = next // triggers attributeChangedCallback → _syncFormValue
         this.emit('tc-change', { value: next })
+        this.dispatchEvent(new Event('input', { bubbles: true }))
         this.dispatchEvent(new Event('change', { bubbles: true }))
         if (typeof this.onChange === 'function') this.onChange(next)
     }
