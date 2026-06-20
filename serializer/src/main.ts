@@ -66,6 +66,12 @@ const generateId = (length: number = 16): string => {
     return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').slice(0, length)
 }
 
+// Wire-format constants — a breaking change from the pre-magic-byte layout.
+// Any buffer produced by an older build will be rejected by decodeVersioned /
+// reassemble rather than silently misinterpreted.
+const MAGIC_VERSIONED = 0xB5
+const MAGIC_FRAGMENT  = 0xF5
+
 const isEnumMarker = (value: any): value is EnumMarker =>
     value !== null && typeof value === 'object' && value.__kind === 'enum'
 
@@ -242,24 +248,28 @@ class Serializer {
 
     encodeVersioned(key: string, message: Record<string, any>): Uint8Array {
         const body = this.encode(key, message)
-        const out = new Uint8Array(body.byteLength + 2)
-        out[0] = this.currentVersion.major
-        out[1] = this.currentVersion.minor
-        out.set(body, 2)
+        const out = new Uint8Array(body.byteLength + 3)
+        out[0] = MAGIC_VERSIONED
+        out[1] = this.currentVersion.major
+        out[2] = this.currentVersion.minor
+        out.set(body, 3)
         return out
     }
 
     decodeVersioned(key: string, buffer: Uint8Array): VersionedFrame {
-        if (!buffer || buffer.byteLength < 2) {
+        if (!buffer || buffer.byteLength < 3) {
             const size = buffer?.byteLength ?? '?'
             throw new Error(`Serializer.decodeVersioned[${key}] failed: buffer too small for version header (bytes=${size})`)
         }
-        const major = buffer[0]
-        const minor = buffer[1]
+        if (buffer[0] !== MAGIC_VERSIONED) {
+            throw new Error(`Serializer.decodeVersioned[${key}] failed: missing versioned magic byte`)
+        }
+        const major = buffer[1]
+        const minor = buffer[2]
         if (major > this.currentVersion.major) {
             throw new Error(`Serializer.decodeVersioned[${key}] failed: frame v${major}.${minor} is newer than current v${this.currentVersion.major}.${this.currentVersion.minor}`)
         }
-        const body = buffer.subarray(2)
+        const body = buffer.subarray(3)
         const decodeType = this.versionedTypes.get(`${key}:${major}`) ?? this.getType(key)
         let message: any
         try {
@@ -347,16 +357,17 @@ class Serializer {
             const start = i * maxChunkSize
             const end = Math.min(start + maxChunkSize, length)
             const slice = buffer.subarray(start, end)
-            const chunk = new Uint8Array(8 + slice.byteLength)
-            chunk[0] = (frameId >>> 24) & 0xff
-            chunk[1] = (frameId >>> 16) & 0xff
-            chunk[2] = (frameId >>> 8) & 0xff
-            chunk[3] = frameId & 0xff
-            chunk[4] = (i >>> 8) & 0xff
-            chunk[5] = i & 0xff
-            chunk[6] = (total >>> 8) & 0xff
-            chunk[7] = total & 0xff
-            chunk.set(slice, 8)
+            const chunk = new Uint8Array(9 + slice.byteLength)
+            chunk[0] = MAGIC_FRAGMENT
+            chunk[1] = (frameId >>> 24) & 0xff
+            chunk[2] = (frameId >>> 16) & 0xff
+            chunk[3] = (frameId >>> 8) & 0xff
+            chunk[4] = frameId & 0xff
+            chunk[5] = (i >>> 8) & 0xff
+            chunk[6] = i & 0xff
+            chunk[7] = (total >>> 8) & 0xff
+            chunk[8] = total & 0xff
+            chunk.set(slice, 9)
             out.push(chunk)
         }
         return out
@@ -367,26 +378,32 @@ class Serializer {
             throw new Error('Serializer.reassemble: chunks must be a non-empty array')
         }
         const first = chunks[0]
-        if (!first || first.byteLength < 8) {
-            throw new Error('Serializer.reassemble: chunk header truncated (need 8 bytes)')
+        if (!first || first.byteLength < 9) {
+            throw new Error('Serializer.reassemble: chunk header truncated (need 9 bytes)')
         }
-        const frameId = (((first[0] << 24) | (first[1] << 16) | (first[2] << 8) | first[3]) >>> 0)
-        const total = (first[6] << 8) | first[7]
+        if (first[0] !== MAGIC_FRAGMENT) {
+            throw new Error('Serializer.reassemble: missing fragment magic byte')
+        }
+        const frameId = (((first[1] << 24) | (first[2] << 16) | (first[3] << 8) | first[4]) >>> 0)
+        const total = (first[7] << 8) | first[8]
         if (chunks.length !== total) {
             throw new Error(`Serializer.reassemble: chunk count mismatch — got ${chunks.length}, header says ${total}`)
         }
         const ordered: Uint8Array[] = new Array(total)
         let payloadBytes = 0
         for (const chunk of chunks) {
-            if (!chunk || chunk.byteLength < 8) {
-                throw new Error('Serializer.reassemble: chunk header truncated (need 8 bytes)')
+            if (!chunk || chunk.byteLength < 9) {
+                throw new Error('Serializer.reassemble: chunk header truncated (need 9 bytes)')
             }
-            const fid = (((chunk[0] << 24) | (chunk[1] << 16) | (chunk[2] << 8) | chunk[3]) >>> 0)
+            if (chunk[0] !== MAGIC_FRAGMENT) {
+                throw new Error('Serializer.reassemble: missing fragment magic byte')
+            }
+            const fid = (((chunk[1] << 24) | (chunk[2] << 16) | (chunk[3] << 8) | chunk[4]) >>> 0)
             if (fid !== frameId) {
                 throw new Error(`Serializer.reassemble: frameId mismatch — chunks belong to different frames`)
             }
-            const index = (chunk[4] << 8) | chunk[5]
-            const t = (chunk[6] << 8) | chunk[7]
+            const index = (chunk[5] << 8) | chunk[6]
+            const t = (chunk[7] << 8) | chunk[8]
             if (t !== total) {
                 throw new Error(`Serializer.reassemble: total mismatch — chunk says ${t}, expected ${total}`)
             }
@@ -396,7 +413,7 @@ class Serializer {
             if (ordered[index] !== undefined) {
                 throw new Error(`Serializer.reassemble: duplicate chunk at index ${index}`)
             }
-            const payload = chunk.subarray(8)
+            const payload = chunk.subarray(9)
             ordered[index] = payload
             payloadBytes += payload.byteLength
         }

@@ -584,7 +584,8 @@ describe('Serializer fragment / reassemble', () => {
         const s = new Serializer()
         for (let i = 0; i < 100; i++) {
             const chunks = s.fragment(new Uint8Array([1, 2, 3]))
-            const frameId = (((chunks[0][0] << 24) | (chunks[0][1] << 16) | (chunks[0][2] << 8) | chunks[0][3]) >>> 0)
+            // byte 0 is MAGIC_FRAGMENT; frame ID occupies bytes 1-4
+            const frameId = (((chunks[0][1] << 24) | (chunks[0][2] << 16) | (chunks[0][3] << 8) | chunks[0][4]) >>> 0)
             expect(frameId).not.toBe(0)
         }
     })
@@ -693,6 +694,47 @@ describe('Serializer.define duplicate-type guard', () => {
 
         const ns: any = (s as any).namespace
         expect(ns.get('Item_status_E')).toBeNull()
+    })
+})
+
+describe('Serializer magic-byte header (SER-454)', () => {
+    it('decodeVersioned rejects a buffer without the versioned magic byte', () => {
+        const s = new Serializer()
+        s.define('X', [{ key: 'k', type: F.STRING, rule: 'required' }])
+        // byte 0 = 0x01 (not MAGIC_VERSIONED = 0xB5); 3 bytes so it passes the size check
+        const bare = new Uint8Array([0x01, 0x00, 0x00])
+        expect(() => s.decodeVersioned('X', bare)).toThrow(/missing versioned magic byte/)
+    })
+
+    it('reassemble rejects chunks without the fragment magic byte', () => {
+        const s = new Serializer()
+        // 9-byte chunk with byte 0 = 0x00 (not MAGIC_FRAGMENT = 0xF5)
+        const fakeChunk = new Uint8Array(9)  // all zeros
+        expect(() => s.reassemble([fakeChunk])).toThrow(/missing fragment magic byte/)
+    })
+
+    it('encodeVersioned / decodeVersioned round-trips with the new 3-byte header', () => {
+        const s = new Serializer()
+        s.version(2, 3)
+        s.define('Msg', [{ key: 'text', type: F.STRING, rule: 'required' }])
+        const frame = s.encodeVersioned('Msg', { text: 'hello' })
+        expect(frame.byteLength).toBeGreaterThan(3)
+        const out = s.decodeVersioned('Msg', frame)
+        expect(out.version).toEqual({ major: 2, minor: 3 })
+        expect((out.message as any).text).toBe('hello')
+    })
+
+    it('fragment / reassemble round-trips with the new 9-byte chunk header', () => {
+        const s = new Serializer()
+        const payload = new Uint8Array([10, 20, 30, 40, 50])
+        const chunks = s.fragment(payload, 3)
+        expect(chunks.length).toBeGreaterThan(1)
+        // first byte of every chunk must be the magic marker
+        for (const chunk of chunks) {
+            expect(chunk[0]).toBe(0xF5)
+        }
+        const out = s.reassemble(chunks)
+        expect(Array.from(out)).toEqual([10, 20, 30, 40, 50])
     })
 })
 
