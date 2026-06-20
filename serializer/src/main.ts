@@ -1,5 +1,8 @@
 import { Root, Type, Field, MapField, Enum, Writer, Namespace, Message } from 'protobufjs/light'
 
+// eslint-disable-next-line no-var
+declare var require: ((id: string) => any) | undefined
+
 type EnumMarker = { __kind: 'enum', values: string[] | Record<string, number> }
 type MapMarker = { __kind: 'map', keyType: string, valueType: string }
 type PackedMarker = { __kind: 'packed', type: string }
@@ -30,9 +33,17 @@ interface VersionedFrame<T = Record<string, any>> {
 
 type MigrationFn = (message: any) => Record<string, any>
 
+const getRandomBytes = (n: number): Uint8Array => {
+    const g = globalThis as any
+    if (g.crypto?.getRandomValues) return g.crypto.getRandomValues(new Uint8Array(n))
+    try { return require?.('node:crypto').randomBytes(n) } catch { /* fall through */ }
+    const b = new Uint8Array(n)
+    for (let i = 0; i < n; i++) b[i] = Math.floor(Math.random() * 256)
+    return b
+}
+
 const generateId = (length: number = 16): string => {
-    const bytes = new Uint8Array(Math.ceil(length / 2))
-    globalThis.crypto.getRandomValues(bytes)
+    const bytes = getRandomBytes(Math.ceil(length / 2))
     return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').slice(0, length)
 }
 

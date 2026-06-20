@@ -371,6 +371,21 @@ describe('Serializer versioning', () => {
     })
 })
 
+describe('Serializer default constructor — Node 18 crypto compatibility', () => {
+    it('constructs and produces a non-empty id when globalThis.crypto is absent', () => {
+        const savedCrypto = (globalThis as any).crypto
+        try {
+            (globalThis as any).crypto = undefined
+            const s = new Serializer()
+            const id: string = (s as any).namespace.name
+            expect(id).toBeTruthy()
+            expect(id.length).toBeGreaterThan(0)
+        } finally {
+            (globalThis as any).crypto = savedCrypto
+        }
+    })
+})
+
 describe('Serializer fragment / reassemble', () => {
     it('roundtrips a small payload (single chunk)', () => {
         const s = new Serializer()
