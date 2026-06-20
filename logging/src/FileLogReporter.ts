@@ -7,6 +7,7 @@ export type FileLogFormatter = (level: LoggerLevel, scope: string, time: string,
 export interface FileLogReporterOptions {
     append?: boolean
     formatter?: FileLogFormatter
+    onError?: (err: Error) => void
 }
 
 const defaultFormatter: FileLogFormatter = (level, scope, time, messages) => {
@@ -29,6 +30,7 @@ class FileLogReporter extends LogReporter {
         super()
         const flags = options.append === false ? 'w' : 'a'
         this.stream = createWriteStream(filePath, { flags })
+        this.stream.on('error', err => options.onError?.(err))
         this.formatter = options.formatter ?? defaultFormatter
     }
 

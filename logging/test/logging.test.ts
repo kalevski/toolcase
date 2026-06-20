@@ -488,6 +488,17 @@ describe('FileLogReporter', () => {
         expect(content).toContain('boom')
     })
 
+    it('invokes onError and does not crash when the path is unwritable', async () => {
+        const errors: Error[] = []
+        const reporter = new FileLogReporter('/nonexistent-dir/does-not-exist/app.log', {
+            onError: err => errors.push(err)
+        })
+        reporter.log('info', 'svc', 't', ['msg'])
+        await new Promise(resolve => setTimeout(resolve, 200))
+        expect(errors).toHaveLength(1)
+        expect(errors[0]).toBeInstanceOf(Error)
+    })
+
     it('honors custom formatter', async () => {
         const { mkdtempSync, readFileSync } = await import('node:fs')
         const { tmpdir } = await import('node:os')
