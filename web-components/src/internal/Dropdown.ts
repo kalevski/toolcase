@@ -19,6 +19,7 @@ export class Dropdown {
     private _menu: HTMLElement | null
     private _popper: PopperInstance | null = null
     private _isShown = false
+    private _deferredClose: (() => void) | null = null
 
     constructor(toggle: HTMLElement) {
         this._toggle = toggle
@@ -74,6 +75,10 @@ export class Dropdown {
         this._toggle.removeEventListener('click', this._onToggleClick)
         document.removeEventListener('mousedown', this._onDocumentClick)
         document.removeEventListener('keydown', this._onKeydown)
+        if (this._deferredClose) {
+            document.removeEventListener('click', this._deferredClose)
+            this._deferredClose = null
+        }
         this._popper?.destroy()
         this._popper = null
     }
@@ -108,7 +113,11 @@ export class Dropdown {
 
         // Let menu-item clicks complete before closing.
         if (insideMenu) {
-            document.addEventListener('click', () => this.hide(), { once: true })
+            if (this._deferredClose) {
+                document.removeEventListener('click', this._deferredClose)
+            }
+            this._deferredClose = () => this.hide()
+            document.addEventListener('click', this._deferredClose, { once: true })
             return
         }
         this.hide()
