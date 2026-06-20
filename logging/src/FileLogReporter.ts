@@ -1,3 +1,4 @@
+import { createWriteStream, type WriteStream } from 'node:fs'
 import { LoggerLevel } from './Level'
 import LogReporter from './LogReporter'
 
@@ -7,13 +8,6 @@ export interface FileLogReporterOptions {
     append?: boolean
     formatter?: FileLogFormatter
 }
-
-interface NodeWriteStream {
-    write(chunk: string): boolean
-    end(callback?: () => void): void
-}
-
-declare const require: ((id: string) => any) | undefined
 
 const defaultFormatter: FileLogFormatter = (level, scope, time, messages) => {
     const body = messages.map(m => {
@@ -28,17 +22,13 @@ const defaultFormatter: FileLogFormatter = (level, scope, time, messages) => {
 
 class FileLogReporter extends LogReporter {
 
-    private stream: NodeWriteStream
+    private stream: WriteStream
     private formatter: FileLogFormatter
 
     constructor(filePath: string, options: FileLogReporterOptions = {}) {
         super()
-        if (typeof require !== 'function') {
-            throw new Error('FileLogReporter is only available in Node.js')
-        }
-        const fs = require('node:fs')
         const flags = options.append === false ? 'w' : 'a'
-        this.stream = fs.createWriteStream(filePath, { flags })
+        this.stream = createWriteStream(filePath, { flags })
         this.formatter = options.formatter ?? defaultFormatter
     }
 
