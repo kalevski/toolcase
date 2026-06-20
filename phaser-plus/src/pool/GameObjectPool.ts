@@ -74,7 +74,11 @@ export default class GameObjectPool {
         const pool = new (ObjectPool as any)(
             gameObjectClass,
             resetFn,
-            (cls: GameObjectClass<T>) => factory(key, cls, this.scene)
+            (cls: GameObjectClass<T>) => {
+                const obj = factory(key, cls, this.scene)
+                ;(obj as any).__poolKey = key
+                return obj
+            }
         )
         this.map.set(key, pool)
         this.dirty = true
@@ -89,6 +93,7 @@ export default class GameObjectPool {
         }
         const object = pool.obtain() as T & Poolable
         this.onObjectCreate(object)
+        ;(object as any).__freed = false
         object.setActive(true).setVisible(true)
         return object as T
     }
@@ -98,6 +103,16 @@ export default class GameObjectPool {
             this.logger.warning('cannot be released, the object was not created by the pool', object)
             return this
         }
+        const key = (object as any).__poolKey
+        if (!key || !this.map.has(key)) {
+            this.logger.warning('object does not belong to this pool', object)
+            return this
+        }
+        if ((object as any).__freed === true) {
+            this.logger.warning('object already released', object)
+            return this
+        }
+        ;(object as any).__freed = true
         ;(object.parentContainer ?? this.scene.children).remove(object as any)
         object.setActive(false).setVisible(false)
         object.release()
