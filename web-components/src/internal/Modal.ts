@@ -1,6 +1,7 @@
 import { Backdrop } from './backdrop'
 import { executeAfterTransition, reflow, triggerEvent } from './transition'
 import { lockBody, unlockBody } from './scroll-lock'
+import { overlayStack } from './overlay-stack'
 
 // Drop-in replacement for Bootstrap's Modal plugin: backdrop (true | 'static'),
 // Escape handling, body scroll lock, [data-bs-dismiss="modal"] wiring and the
@@ -33,6 +34,7 @@ export class Modal {
         if (showEvent.defaultPrevented) return
 
         this._isShown = true
+        overlayStack.push(this)
         this._transitioning = true
         lockBody()
         document.addEventListener('keydown', this._onKeydown)
@@ -61,6 +63,7 @@ export class Modal {
         if (hideEvent.defaultPrevented) return
 
         this._isShown = false
+        overlayStack.pop(this)
         this._transitioning = true
         document.removeEventListener('keydown', this._onKeydown)
 
@@ -85,11 +88,21 @@ export class Modal {
     }
 
     dispose(): void {
+        if (this._isShown) {
+            const el = this._element
+            el.classList.remove('show', 'showing')
+            el.style.display = 'none'
+            el.setAttribute('aria-hidden', 'true')
+            el.removeAttribute('aria-modal')
+            el.removeAttribute('role')
+            unlockBody()
+            overlayStack.pop(this)
+            this._isShown = false
+        }
         this._element.removeEventListener('click', this._onDismissClick)
         this._element.removeEventListener('mousedown', this._onElementMouseDown)
         document.removeEventListener('keydown', this._onKeydown)
         this._backdrop.dispose()
-        if (this._isShown) unlockBody()
     }
 
     private _onDismissClick = (event: Event): void => {
@@ -105,6 +118,7 @@ export class Modal {
     }
 
     private _onKeydown = (event: KeyboardEvent): void => {
+        if (overlayStack.top() !== this) return
         if (event.key !== 'Escape') return
         if (this._backdropOption === 'static' || !this._keyboard) this._shake()
         else this.hide()

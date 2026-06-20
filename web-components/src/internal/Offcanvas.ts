@@ -1,6 +1,7 @@
 import { Backdrop } from './backdrop'
 import { executeAfterTransition, triggerEvent } from './transition'
 import { lockBody, unlockBody } from './scroll-lock'
+import { overlayStack } from './overlay-stack'
 
 // Drop-in replacement for Bootstrap's Offcanvas plugin: backdrop
 // (true | false | 'static'), optional body scroll, Escape handling,
@@ -39,6 +40,7 @@ export class Offcanvas {
         if (showEvent.defaultPrevented) return
 
         this._isShown = true
+        overlayStack.push(this)
         this._transitioning = true
         document.addEventListener('keydown', this._onKeydown)
 
@@ -70,6 +72,7 @@ export class Offcanvas {
         if (hideEvent.defaultPrevented) return
 
         this._isShown = false
+        overlayStack.pop(this)
         this._transitioning = true
         document.removeEventListener('keydown', this._onKeydown)
 
@@ -94,10 +97,18 @@ export class Offcanvas {
     }
 
     dispose(): void {
+        if (this._isShown) {
+            const el = this._element
+            el.classList.remove('show', 'showing', 'hiding')
+            el.removeAttribute('aria-modal')
+            el.removeAttribute('role')
+            if (!this._scroll) unlockBody()
+            overlayStack.pop(this)
+            this._isShown = false
+        }
         this._element.removeEventListener('click', this._onDismissClick)
         document.removeEventListener('keydown', this._onKeydown)
         this._backdrop.dispose()
-        if (this._isShown && !this._scroll) unlockBody()
     }
 
     private _onDismissClick = (event: Event): void => {
@@ -106,6 +117,7 @@ export class Offcanvas {
     }
 
     private _onKeydown = (event: KeyboardEvent): void => {
+        if (overlayStack.top() !== this) return
         if (event.key !== 'Escape') return
         if (this._keyboard && this._backdropOption !== 'static') this.hide()
     }

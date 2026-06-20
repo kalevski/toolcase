@@ -2,6 +2,7 @@ import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { icon } from './icons'
 import { lockBody, unlockBody } from './internal/scroll-lock'
+import { overlayStack } from './internal/overlay-stack'
 
 const TAG_NAME = 'tc-command-palette'
 
@@ -62,6 +63,7 @@ export class CommandPalette extends HTMLElement {
         this._detachHostHandlers()
         this._detachKeydown()
         this._restoreScroll()
+        overlayStack.pop(this)
     }
 
     attributeChangedCallback(name: string): void {
@@ -148,6 +150,7 @@ export class CommandPalette extends HTMLElement {
     // ── Side effects (open/close lifecycle) ───────────────────────────────────────
 
     private _openSideEffects(): void {
+        overlayStack.push(this)
         this._previousFocus = document.activeElement
         this._lockScroll()
         this._attachKeydown()
@@ -157,6 +160,7 @@ export class CommandPalette extends HTMLElement {
     }
 
     private _closeSideEffects(): void {
+        overlayStack.pop(this)
         this._detachKeydown()
         this._restoreScroll()
         this._restoreFocus()
@@ -254,6 +258,7 @@ export class CommandPalette extends HTMLElement {
 
     private _onKeydown = (e: KeyboardEvent): void => {
         if (!this.open) return
+        if (overlayStack.top() !== this) return
         const { flat } = this._computeView()
 
         if (e.key === 'Escape') {

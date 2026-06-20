@@ -5,6 +5,7 @@ import { esc } from './internal/esc'
 
 import { closeIcon, chevronLeftIcon, chevronRightIcon } from './icons'
 import { lockBody, unlockBody } from './internal/scroll-lock'
+import { overlayStack } from './internal/overlay-stack'
 
 const TAG_NAME = 'tc-lightbox'
 
@@ -38,6 +39,8 @@ export class Lightbox extends HTMLElement {
     private _swipeStartX = 0
     private _dragging = false
 
+    private _closeTimerId: ReturnType<typeof setTimeout> | null = null
+
     onclose: (() => void) | null = null
 
     constructor() {
@@ -61,6 +64,12 @@ export class Lightbox extends HTMLElement {
     disconnectedCallback(): void {
         this._detachHandlers()
         this._restoreScroll()
+        this._restoreFocus()
+        if (this._closeTimerId !== null) {
+            clearTimeout(this._closeTimerId)
+            this._closeTimerId = null
+        }
+        overlayStack.pop(this)
     }
 
     attributeChangedCallback(name: string): void {
@@ -107,6 +116,7 @@ export class Lightbox extends HTMLElement {
 
     private _applyOpenState(opening: boolean): void {
         if (opening) {
+            overlayStack.push(this)
             this._previousFocus = document.activeElement
             this._index = this._clampIndex(this.initialIndex)
             this.render()
@@ -118,13 +128,15 @@ export class Lightbox extends HTMLElement {
                 this._focusDialog()
             })
         } else {
+            overlayStack.pop(this)
             this._setOpenClass(false)
             this._restoreScroll()
             this._restoreFocus()
             const delay = this._getTransitionDuration(
                 this.querySelector<HTMLElement>('.tc-lightbox__backdrop'),
             )
-            setTimeout(() => {
+            this._closeTimerId = setTimeout(() => {
+                this._closeTimerId = null
                 if (!this.open) this.innerHTML = ''
             }, delay)
         }
@@ -211,6 +223,7 @@ export class Lightbox extends HTMLElement {
 
     private _onKeydown = (e: KeyboardEvent): void => {
         if (!this.open) return
+        if (overlayStack.top() !== this) return
         switch (e.key) {
             case 'Escape':
                 e.preventDefault()

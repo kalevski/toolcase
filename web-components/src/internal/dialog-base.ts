@@ -1,5 +1,6 @@
 import { esc as escShared } from "./esc"
 import { lockBody, unlockBody } from './scroll-lock'
+import { overlayStack } from './overlay-stack'
 // Shared scaffold for centered modal dialogs (tc-confirm-dialog,
 // tc-report-dialog). Owns the open/close lifecycle, the one-frame transition
 // dance, scroll-lock, focus trap + restore, Escape/Tab handling, and backdrop
@@ -75,6 +76,7 @@ export abstract class DialogBase extends HTMLElement {
     disconnectedCallback(): void {
         this._detachHandlers()
         this._restoreScroll()
+        overlayStack.pop(this)
     }
 
     attributeChangedCallback(name: string): void {
@@ -108,6 +110,7 @@ export abstract class DialogBase extends HTMLElement {
         const backdrop = this.querySelector<HTMLElement>(`.${p}__backdrop`)
 
         if (opening) {
+            overlayStack.push(this)
             this._previousFocus = document.activeElement
             panel?.removeAttribute('hidden')
             backdrop?.removeAttribute('hidden')
@@ -120,6 +123,7 @@ export abstract class DialogBase extends HTMLElement {
             })
             this.onOpened()
         } else {
+            overlayStack.pop(this)
             this.onClosing()
             this.classList.remove(`${p}--open`)
             panel?.setAttribute('aria-hidden', 'true')
@@ -175,6 +179,7 @@ export abstract class DialogBase extends HTMLElement {
 
     private _onKeydown = (e: KeyboardEvent): void => {
         if (!this.open) return
+        if (overlayStack.top() !== this) return
         if (e.key === 'Escape') {
             e.preventDefault()
             this.onCloseRequest()
