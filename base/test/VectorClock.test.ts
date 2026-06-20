@@ -71,10 +71,20 @@ describe('VectorClock', () => {
         expect(VectorClock.compare(vc2, vc1)).toBe(-1)
     })
 
-    it('identical clocks are isAfter in both directions', () => {
+    it('equal clocks are not isAfter in either direction', () => {
         const vc1 = new VectorClock('node1', { node1: 1 })
         const vc2 = new VectorClock('node2', { node1: 1 })
-        expect(vc1.isAfter(vc2)).toBe(true)
-        expect(vc2.isAfter(vc1)).toBe(true)
+        expect(vc1.isAfter(vc2)).toBe(false)
+        expect(vc2.isAfter(vc1)).toBe(false)
+        expect(VectorClock.isEqual(vc1, vc2)).toBe(true)
+        expect(VectorClock.compare(vc1, vc2)).toBe(0)
+        expect(vc1.isConcurrent(vc2)).toBe(false)
+        expect(vc1.isBefore(vc2)).toBe(false)
+    })
+
+    it('compare returns 0 for concurrent clocks', () => {
+        const vc1 = new VectorClock('node1', { node1: 2, node2: 1 })
+        const vc2 = new VectorClock('node2', { node1: 1, node2: 2 })
+        expect(VectorClock.compare(vc1, vc2)).toBe(0)
     })
 })
