@@ -49,6 +49,9 @@ export class ScrollSpy {
     }
 
     dispose(): void {
+        this._activeLink?.classList.remove('active')
+        this._activeLink = null
+        this._linksById.clear()
         this._observer?.disconnect()
         this._observer = null
         this._targetNav?.removeEventListener('click', this._onNavClick)

@@ -125,8 +125,9 @@ export class Toast extends HTMLElement {
         if (variant) classes.push(`text-bg-${variant}`)
         this.className = classes.join(' ')
 
-        this.setAttribute('role', 'alert')
-        this.setAttribute('aria-live', 'assertive')
+        const urgent = ['error', 'danger', 'warning'].includes(variant ?? '')
+        this.setAttribute('role', urgent ? 'alert' : 'status')
+        this.setAttribute('aria-live', urgent ? 'assertive' : 'polite')
         this.setAttribute('aria-atomic', 'true')
 
         const headerHtml = hasTitle

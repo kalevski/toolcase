@@ -17,17 +17,14 @@ const instances = new WeakMap<Element, Collapse>()
 export class Collapse {
     private _element: HTMLElement
     private _parent: Element | null
-    private _togglers: HTMLElement[]
     private _transitioning = false
     private _disposed = false
 
     constructor(element: HTMLElement, options: CollapseOptions = {}) {
         this._element = element
         this._parent = this._resolveParent(options.parent)
-        this._togglers = this._findTogglers()
-        for (const toggler of this._togglers) {
-            toggler.addEventListener('click', this._onTogglerClick)
-        }
+        // Delegated listener on document so togglers added after construction are picked up automatically.
+        document.addEventListener('click', this._onDocumentClick)
         instances.set(element, this)
         this._syncTogglers(this._isShown())
         if (options.toggle) this.toggle()
@@ -111,13 +108,17 @@ export class Collapse {
     dispose(): void {
         if (this._disposed) return
         this._disposed = true
-        for (const toggler of this._togglers) {
-            toggler.removeEventListener('click', this._onTogglerClick)
-        }
+        document.removeEventListener('click', this._onDocumentClick)
         instances.delete(this._element)
     }
 
-    private _onTogglerClick = (event: Event): void => {
+    private _onDocumentClick = (event: Event): void => {
+        const target = event.target as Element
+        const toggler = target.closest<HTMLElement>('[data-bs-toggle="collapse"]')
+        if (!toggler) return
+        const id = this._element.id
+        if (!id) return
+        if (toggler.getAttribute('data-bs-target') !== `#${id}`) return
         event.preventDefault()
         this.toggle()
     }
@@ -145,7 +146,7 @@ export class Collapse {
     }
 
     private _syncTogglers(shown: boolean): void {
-        for (const toggler of this._togglers) {
+        for (const toggler of this._findTogglers()) {
             toggler.classList.toggle('collapsed', !shown)
             toggler.setAttribute('aria-expanded', String(shown))
         }
