@@ -5,7 +5,7 @@ class PriorityQueue<T> {
 
     private values: T[] = []
 
-    private hashMap: Map<string, string> = new Map()
+    private hashMap: Map<string, number> = new Map()
 
     private priorityFn: PriorityFn<T>
 
@@ -36,7 +36,8 @@ class PriorityQueue<T> {
         this.values.push(value)
         this.bubbleUp()
         if (this.uniqueFn !== null) {
-            this.hashMap.set(this.uniqueFn(value), '0')
+            const key = this.uniqueFn(value)
+            this.hashMap.set(key, (this.hashMap.get(key) ?? 0) + 1)
         }
         return true
     }
@@ -50,7 +51,10 @@ class PriorityQueue<T> {
         }
         
         if (this.uniqueFn !== null && node !== null) {
-            this.hashMap.delete(this.uniqueFn(node))
+            const key = this.uniqueFn(node)
+            const next = (this.hashMap.get(key) ?? 0) - 1
+            if (next <= 0) this.hashMap.delete(key)
+            else this.hashMap.set(key, next)
         }
         return node
     }
@@ -58,7 +62,10 @@ class PriorityQueue<T> {
     pop(): T | null {
         const node = this.values.pop() || null
         if (this.uniqueFn !== null && node !== null) {
-            this.hashMap.delete(this.uniqueFn(node))
+            const key = this.uniqueFn(node)
+            const next = (this.hashMap.get(key) ?? 0) - 1
+            if (next <= 0) this.hashMap.delete(key)
+            else this.hashMap.set(key, next)
         }
         return node
     }
