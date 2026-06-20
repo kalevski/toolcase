@@ -2,7 +2,7 @@
     "name": "@toolcase/base",
     "version": "5.0.0",
     "description": "Zero-dep JavaScript helpers and data structures for Node.js and the browser — events, async, collections, math, and more.",
-    "source": "src/main.js",
+    "source": "src/main.ts",
     "main": "lib/main.main.js",
     "module": "lib/main.module.js",
     "types": "lib/main.d.ts",
