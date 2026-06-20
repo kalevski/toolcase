@@ -506,6 +506,26 @@ describe('BufferedReporter', () => {
         expect(batches[0][1].level).toBe('warning')
     })
 
+    it('when both inner and onFlush are provided, both receive the flushed entries', () => {
+        const innerReceived: string[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, _t: any, msgs: any[]): void { innerReceived.push(msgs[0]) }
+        }
+        const batches: any[][] = []
+        const buf = new BufferedReporter(new R(), {
+            maxSize: 2,
+            flushInterval: 0,
+            onFlush: entries => batches.push(entries)
+        })
+        buf.log('info', 's', 't', ['x'])
+        buf.log('info', 's', 't', ['y'])
+        // onFlush received the batch
+        expect(batches).toHaveLength(1)
+        expect(batches[0]).toHaveLength(2)
+        // inner also received each entry individually
+        expect(innerReceived).toEqual(['x', 'y'])
+    })
+
     it('throws when neither inner reporter nor onFlush is provided', () => {
         expect(() => new BufferedReporter(null, {})).toThrow(/inner reporter or an onFlush/)
     })

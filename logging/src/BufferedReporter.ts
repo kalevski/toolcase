@@ -62,7 +62,8 @@ class BufferedReporter extends LogReporter {
         try {
             if (this.onFlushFn !== null) {
                 this.onFlushFn(entries)
-            } else if (this.inner !== null) {
+            }
+            if (this.inner !== null) {
                 for (const entry of entries) {
                     this.inner.log(entry.level, entry.scope, entry.time, entry.messages)
                 }

@@ -89,7 +89,7 @@ A reporter receives every log line and decides what to do with it (print, ship t
 |----------|---------------|--------------|
 | `ConsoleLogReporter` | Browser + Node | Pretty-prints to the developer console. Default. |
 | `JSONLineReporter` | Browser + Node | Emits one JSON object per line. Good for log aggregators. |
-| `BufferedReporter` | Browser + Node | Wraps any reporter (or an `onFlush` handler) and flushes in batches. |
+| `BufferedReporter` | Browser + Node | Wraps an inner reporter and/or an `onFlush` handler and flushes in batches. When both are supplied, `onFlush` is called first, then every entry is forwarded to `inner`. |
 | `FileLogReporter` | **Node only** | Writes to disk (append by default). Imported from `@toolcase/logging/node`. |
 
 ### Multiple reporters
@@ -127,6 +127,19 @@ const reporter = new BufferedReporter(null, {
         body: JSON.stringify(entries)
     })
 })
+```
+
+Both can be supplied at once — `onFlush` fires first (useful as a batch hook or for shipping the raw array), then every entry is forwarded individually to `inner`:
+
+```ts
+const reporter = new BufferedReporter(
+    new ConsoleLogReporter(),           // sink: receives each entry one-by-one
+    {
+        maxSize: 50,
+        flushInterval: 2000,
+        onFlush: entries => ship(entries) // hook: also ships the whole batch
+    }
+)
 ```
 
 ### File reporter (Node)
