@@ -38,7 +38,12 @@ export default class EffectManager {
         const list = this.filterList
         const camera = list.camera as Cameras.Scene2D.Camera
         const game = (this.target as any).scene?.game ?? camera.scene?.game
-        if (game) ensureEffectRegistered(game, EffectClass)
+        if (game) {
+            const registered = ensureEffectRegistered(game, EffectClass)
+            if (!registered) {
+                throw new Error(`reef.effects: effect ${EffectClass.KEY} could not be registered (WebGL renderer not booted?)`)
+            }
+        }
         const effect = new EffectClass(camera)
         if (params) {
             for (const key of Object.keys(params) as Array<keyof T>) {
