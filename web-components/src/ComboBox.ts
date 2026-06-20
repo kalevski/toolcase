@@ -173,6 +173,7 @@ export class ComboBox extends HTMLElement {
                 detail: { value },
             }),
         )
+        this.dispatchEvent(new Event('change', { bubbles: true }))
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
