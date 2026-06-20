@@ -90,7 +90,7 @@ A reporter receives every log line and decides what to do with it (print, ship t
 | `ConsoleLogReporter` | Browser + Node | Pretty-prints to the developer console with colored output. Default. |
 | `JSONLineReporter` | Browser + Node | Emits one JSON object per line. Good for log aggregators. |
 | `BufferedReporter` | Browser + Node | Wraps an inner reporter and/or an `onFlush` handler and flushes in batches. When both are supplied, `onFlush` is called first, then every entry is forwarded to `inner`. |
-| `FileLogReporter` | **Node only** | Writes to disk (append by default). Imported from `@toolcase/logging/node`. |
+| `FileLogReporter` | **Node only** | Writes to disk (append by default) with optional size-based rotation. Imported from `@toolcase/logging/node`. |
 
 ### ConsoleLogReporter options
 
@@ -161,6 +161,15 @@ import { FileLogReporter } from '@toolcase/logging/node'
 const logging = new LoggerFactory([
     new FileLogReporter('./logs/app.log')
 ])
+```
+
+Size-based rotation is supported via `maxBytes` and `maxFiles`. When the active file reaches `maxBytes`, it is renamed to `.1` (shifting older files up to `.maxFiles`, dropping the oldest) and a fresh file is opened:
+
+```ts
+new FileLogReporter('./logs/app.log', {
+    maxBytes: 10 * 1024 * 1024,  // rotate at 10 MB
+    maxFiles: 5,                  // keep app.log.1 … app.log.5
+})
 ```
 
 ### Custom reporter

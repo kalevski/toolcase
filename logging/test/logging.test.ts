@@ -726,4 +726,52 @@ describe('FileLogReporter', () => {
         const content = readFileSync(file, 'utf8').trim()
         expect(content).toBe('[warning] a|b')
     })
+
+    it('rotates when maxBytes is exceeded', async () => {
+        const { mkdtempSync, readFileSync, existsSync } = await import('node:fs')
+        const { tmpdir } = await import('node:os')
+        const { join } = await import('node:path')
+        const dir = mkdtempSync(join(tmpdir(), 'tc-log-rot-'))
+        const file = join(dir, 'app.log')
+        // Line 1 = 25 bytes, line 2 = 27 bytes; 25+27=52 > maxBytes=50 → rotation on 2nd write
+        const reporter = new FileLogReporter(file, {
+            maxBytes: 50,
+            maxFiles: 3,
+            formatter: (_level, _scope, _time, messages) => messages.join(' ')
+        })
+        reporter.log('info', 's', 't', ['line-one-fills-the-file'])
+        reporter.log('info', 's', 't', ['line-two-goes-to-new-file'])
+        await reporter.close()
+        expect(existsSync(file)).toBe(true)
+        expect(existsSync(`${file}.1`)).toBe(true)
+        const archived = readFileSync(`${file}.1`, 'utf8')
+        expect(archived).toContain('line-one-fills-the-file')
+        const current = readFileSync(file, 'utf8')
+        expect(current).toContain('line-two-goes-to-new-file')
+    })
+
+    it('keeps at most maxFiles archived logs, dropping the oldest', async () => {
+        const { mkdtempSync, existsSync, writeFileSync, readFileSync } = await import('node:fs')
+        const { tmpdir } = await import('node:os')
+        const { join } = await import('node:path')
+        const dir = mkdtempSync(join(tmpdir(), 'tc-log-maxf-'))
+        const file = join(dir, 'app.log')
+        // Pre-seed archives up to the cap (maxFiles = 2)
+        writeFileSync(`${file}.1`, 'archive-1\n')
+        writeFileSync(`${file}.2`, 'archive-2\n')
+        const reporter = new FileLogReporter(file, {
+            maxBytes: 20,
+            maxFiles: 2,
+            formatter: (_l, _s, _t, msgs) => msgs.join('')
+        })
+        // First write fits (6 bytes); second write (21 bytes) pushes over 20 → rotation
+        reporter.log('info', 's', 't', ['hello'])
+        reporter.log('info', 's', 't', ['msg-padded-xxxxxxxxx'])
+        await reporter.close()
+        // Shift: archive-2 dropped, archive-1 → .2, old app.log (hello) → .1
+        expect(existsSync(`${file}.2`)).toBe(true)
+        expect(existsSync(`${file}.3`)).toBe(false)
+        expect(readFileSync(`${file}.2`, 'utf8')).toBe('archive-1\n')
+        expect(readFileSync(`${file}.1`, 'utf8')).toBe('hello\n')
+    })
 })

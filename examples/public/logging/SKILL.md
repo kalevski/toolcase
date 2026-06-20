@@ -238,9 +238,7 @@ Errors are serialized to `{ name, message, stack }`. Circular references fall ba
 
 ### FileLogReporter (Node only)
 
-Append to a log file. Lazy-loads `node:fs`; available from `@toolcase/logging/node`.
-
-> **Caveat:** the constructor's environment check is `require`-based (`typeof require !== 'function'` → throws `"FileLogReporter is only available in Node.js"`). This is **not** universally Node-safe — under pure-ESM Node (no CommonJS `require` in scope) the guard can misfire and throw even though `fs` is available. It targets CJS/bundled-Node setups.
+Writes log lines to a file. Available from `@toolcase/logging/node`.
 
 ```ts
 import { LoggerFactory } from '@toolcase/logging'
@@ -258,6 +256,15 @@ log.info('boot complete')
 
 // On shutdown, await flush:
 await reporter.close()
+```
+
+Size-based rotation: pass `maxBytes` and `maxFiles` to rotate when the active file exceeds the byte threshold. The current file is renamed to `.1`, older archives shift up, and any archive beyond `maxFiles` is dropped.
+
+```ts
+new FileLogReporter('./logs/app.log', {
+    maxBytes: 10 * 1024 * 1024,  // rotate at 10 MB
+    maxFiles: 5,                  // keep app.log.1 … app.log.5
+})
 ```
 
 Combine with `JSONLineReporter` to write JSON lines to disk:
