@@ -32,6 +32,7 @@ export class Carousel {
             element.addEventListener('mouseenter', this._onMouseEnter)
             element.addEventListener('mouseleave', this._onMouseLeave)
         }
+        document.addEventListener('visibilitychange', this._onVisibilityChange)
         if (this._ride === 'carousel') this.cycle()
     }
 
@@ -70,6 +71,7 @@ export class Carousel {
         this._element.removeEventListener('click', this._onControlClick)
         this._element.removeEventListener('mouseenter', this._onMouseEnter)
         this._element.removeEventListener('mouseleave', this._onMouseLeave)
+        document.removeEventListener('visibilitychange', this._onVisibilityChange)
     }
 
     private _clearTimer(): void {
@@ -167,5 +169,9 @@ export class Carousel {
 
     private _onMouseLeave = (): void => {
         this._paused = false
+    }
+
+    private _onVisibilityChange = (): void => {
+        this._paused = document.hidden
     }
 }

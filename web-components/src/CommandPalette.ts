@@ -155,6 +155,7 @@ export class CommandPalette extends HTMLElement {
         this._lockScroll()
         this._attachKeydown()
         requestAnimationFrame(() => {
+            if (!this.open) return
             this.querySelector<HTMLInputElement>('.tc-command-palette-input')?.focus()
         })
     }

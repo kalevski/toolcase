@@ -102,6 +102,7 @@ export class InviteToast extends HTMLElement {
         this._remaining = this.timeoutSeconds
         this._updateCountdown()
         this._timer = setInterval(() => {
+            if (document.hidden) return
             this._remaining -= 1
             this._updateCountdown()
             if (this._remaining <= 0) {
