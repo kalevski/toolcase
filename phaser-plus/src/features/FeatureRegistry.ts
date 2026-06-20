@@ -30,6 +30,10 @@ export default class FeatureRegistry extends Broadcast {
         return this.features.size
     }
 
+    /**
+     * Features are constructed and `onCreate`-called eagerly in registration order.
+     * A feature may only `get()` dependencies that were registered before it.
+     */
     register<T extends Feature>(key: string, featureClass: FeatureClass<T>): T {
         if (this.features.has(key)) {
             throw new Error(`key ${key} is already in use by other feature`)
@@ -65,7 +69,7 @@ export default class FeatureRegistry extends Broadcast {
     }
 
     destroyAll(): void {
-        for (const key of [...this.keys]) {
+        for (const key of [...this.keys].reverse()) {
             this.destroy(key)
         }
     }
