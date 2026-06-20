@@ -18,7 +18,13 @@ type EventClass<E extends Event<P>, P> = new (scene: import('../engine/Scene').d
 
 export default class EventProcessor extends FlowProcessor {
 
-    private readonly timerDefPool = new ObjectPool(TimerDef)
+    private readonly timerDefPool = new ObjectPool(TimerDef, (def: TimerDef) => {
+        def.event = null
+        def.name = ''
+        def.time = 0
+        def.payload = null
+        def.context = null
+    })
 
     private queue: TimerDef[] = []
 
