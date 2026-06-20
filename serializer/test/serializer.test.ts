@@ -408,6 +408,57 @@ describe('Serializer versioning', () => {
     })
 })
 
+describe('Serializer explicit field tags', () => {
+    it('roundtrips a message encoded with explicit non-sequential tags', () => {
+        const s = new Serializer()
+        s.define('Config', [
+            { key: 'name', type: F.STRING, rule: 'required', tag: 10 },
+            { key: 'value', type: F.INT32, rule: 'optional', tag: 20 },
+            { key: 'active', type: F.BOOL, rule: 'optional', tag: 30 }
+        ])
+        const buf = s.encode('Config', { name: 'alpha', value: 42, active: true })
+        const out = s.decode('Config', buf) as any
+        expect(out.name).toBe('alpha')
+        expect(out.value).toBe(42)
+        expect(out.active).toBe(true)
+    })
+
+    it('decodes correctly when schema field ORDER differs but explicit tags match (wire compatibility)', () => {
+        // Encoder defines fields in one order with explicit tags
+        const encoder = new Serializer()
+        encoder.define('Packet', [
+            { key: 'id', type: F.UINT32, rule: 'required', tag: 1 },
+            { key: 'payload', type: F.STRING, rule: 'required', tag: 5 },
+            { key: 'flags', type: F.INT32, rule: 'optional', tag: 9 }
+        ])
+        const buf = encoder.encode('Packet', { id: 7, payload: 'hello', flags: 3 })
+
+        // Decoder defines the same fields in a DIFFERENT order but same explicit tags
+        const decoder = new Serializer()
+        decoder.define('Packet', [
+            { key: 'flags', type: F.INT32, rule: 'optional', tag: 9 },
+            { key: 'payload', type: F.STRING, rule: 'required', tag: 5 },
+            { key: 'id', type: F.UINT32, rule: 'required', tag: 1 }
+        ])
+        const out = decoder.decode('Packet', buf) as any
+        expect(out.id).toBe(7)
+        expect(out.payload).toBe('hello')
+        expect(out.flags).toBe(3)
+    })
+
+    it('fields() introspection includes the assigned tag number', () => {
+        const s = new Serializer()
+        s.define('Tagged', [
+            { key: 'x', type: F.INT32, rule: 'optional', tag: 100 },
+            { key: 'y', type: F.INT32, rule: 'optional' }
+        ])
+        const fields = s.fields('Tagged')
+        const byKey = Object.fromEntries(fields.map(f => [f.key, f]))
+        expect(byKey.x.tag).toBe(100)
+        expect(byKey.y.tag).toBe(2) // positional fallback: index 1 → tag 2
+    })
+})
+
 describe('Serializer default constructor — Node 18 crypto compatibility', () => {
     it('constructs and produces a non-empty id when globalThis.crypto is absent', () => {
         const savedCrypto = (globalThis as any).crypto

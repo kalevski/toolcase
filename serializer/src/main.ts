@@ -13,6 +13,20 @@ interface FieldType {
     type: FieldTypeRef
     rule: 'optional' | 'required' | 'repeated'
     default?: any
+    /**
+     * Explicit protobuf field tag (field number). When omitted the tag is
+     * derived from the field's array position (`index + 1`).
+     *
+     * WARNING — positional tags are fragile: inserting, removing, or
+     * reordering a field shifts every subsequent tag and silently
+     * corrupts existing buffers. When omitting explicit tags, fields
+     * must be **append-only** — never insert or remove in the middle.
+     *
+     * NOTE — protobuf reserves tags 19000–19999 for internal use;
+     * `protobufjs` will reject them. Schemas with ≥ 18999 positional
+     * fields will hit this range automatically.
+     */
+    tag?: number
 }
 
 interface SafeResult<T> {
@@ -92,7 +106,7 @@ class Serializer {
     private buildTypeInNamespace(namespace: Namespace, key: string, fields: FieldType[]): Type {
         const type = new Type(key)
         for (const [index, field] of fields.entries()) {
-            const tag = index + 1
+            const tag = typeof field.tag === 'number' ? field.tag : index + 1
             const defaultValue = typeof field.default === 'undefined' ? null : field.default
             const fieldRef = field.type
 
@@ -281,7 +295,8 @@ class Serializer {
                 key: f.name,
                 type: f.type,
                 rule: (isMap ? 'optional' : f.repeated ? 'repeated' : f.required ? 'required' : 'optional') as FieldType['rule'],
-                default: f.options?.default
+                default: f.options?.default,
+                tag: f.id
             }
         })
     }
