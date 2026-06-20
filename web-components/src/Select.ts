@@ -17,21 +17,29 @@ interface OptionData {
 }
 
 export class Select extends HTMLElement {
+    static formAssociated = true
+
     private _selectId: string
     private _optionData: OptionData[] = []
     private _renderPending = false
     private _initialised = false
+    private _internals: ElementInternals
+    private _defaultValue = ''
 
     static get observedAttributes(): string[] {
-        return ['value', 'multiple', 'size', 'disabled', 'state', 'label']
+        return ['value', 'multiple', 'size', 'disabled', 'state', 'label', 'name']
     }
 
     constructor() {
         super()
         this._selectId = `tc-select-${++_idCounter}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
+        if (!this._initialised) {
+            this._defaultValue = this.getAttribute('value') ?? ''
+        }
         this.addEventListener('change', this._onNativeChange)
         this._scheduleRender()
     }
@@ -44,9 +52,20 @@ export class Select extends HTMLElement {
         if (!this.isConnected || !this._initialised) return
         if (name === 'value') {
             this._syncValue(next)
+            this._internals.setFormValue(next || null)
             return
         }
         this.render()
+    }
+
+    formResetCallback(): void {
+        this._syncValue(this._defaultValue)
+        this._internals.setFormValue(this._defaultValue || null)
+    }
+
+    formDisabledCallback(disabled: boolean): void {
+        const sel = this.querySelector<HTMLSelectElement>('select')
+        if (sel) sel.disabled = disabled
     }
 
     // Called by tc-option children when they connect or change.
@@ -57,6 +76,7 @@ export class Select extends HTMLElement {
             this._renderPending = false
             if (this.isConnected) {
                 this.render()
+                this._internals.setFormValue(this.value || null)
                 this._initialised = true
             }
         })
@@ -117,6 +137,14 @@ export class Select extends HTMLElement {
         else this.removeAttribute('label')
     }
 
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
+    }
+
     private _syncValue(next: string | null): void {
         const sel = this.querySelector<HTMLSelectElement>('select')
         if (sel) sel.value = next ?? ''
@@ -124,7 +152,10 @@ export class Select extends HTMLElement {
 
     private _onNativeChange = (): void => {
         const sel = this.querySelector<HTMLSelectElement>('select')
-        if (sel) this.setAttribute('value', sel.value)
+        if (sel) {
+            this.setAttribute('value', sel.value)
+            this._internals.setFormValue(sel.value || null)
+        }
     }
 
     private render(): void {

@@ -11,15 +11,19 @@ let _idCounter = 0
 // state fades the whole row well past the off state so the two never look alike.
 // All cosmetics flow through `--bs-switch-*`.
 export class Switch extends HTMLElement {
+    static formAssociated = true
+
     private _inputId: string
     private _labelId: string
     private _initialised = false
+    private _internals: ElementInternals
+    private _defaultChecked = false
 
     // Optional callback mirror of the `tc-change` event (see styleguide §events).
     onChange: ((value: boolean) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['checked', 'value', 'label', 'disabled', 'reverse']
+        return ['checked', 'value', 'label', 'disabled', 'reverse', 'name']
     }
 
     constructor() {
@@ -27,11 +31,36 @@ export class Switch extends HTMLElement {
         const n = ++_idCounter
         this._inputId = `tc-switch-${n}`
         this._labelId = `tc-switch-label-${n}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
+        if (!this._initialised) {
+            this._defaultChecked = this.hasAttribute('checked')
+        }
         this.render()
+        this._syncFormValue()
         this._initialised = true
+    }
+
+    formResetCallback(): void {
+        this.checked = this._defaultChecked
+        this._syncFormValue()
+    }
+
+    formDisabledCallback(disabled: boolean): void {
+        const btn = this.querySelector<HTMLButtonElement>('.tc-switch__track')
+        if (btn) btn.disabled = disabled
+        const row = this.querySelector<HTMLElement>('.tc-switch__row')
+        if (row) row.classList.toggle('tc-switch__row--disabled', disabled)
+    }
+
+    private _syncFormValue(): void {
+        if (this.checked) {
+            this._internals.setFormValue(this.value || 'on')
+        } else {
+            this._internals.setFormValue(null)
+        }
     }
 
     attributeChangedCallback(name: string, _old: string | null, _next: string | null): void {
@@ -45,6 +74,7 @@ export class Switch extends HTMLElement {
                 btn.setAttribute('aria-checked', String(checked))
                 btn.dataset.checked = String(checked)
             }
+            this._syncFormValue()
             return
         }
         if (name === 'disabled') {
@@ -96,6 +126,14 @@ export class Switch extends HTMLElement {
         else this.removeAttribute('reverse')
     }
 
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
+    }
+
     private render(): void {
         const label = this.label
         const checked = this.checked
@@ -130,7 +168,7 @@ export class Switch extends HTMLElement {
     private _onToggle = (): void => {
         if (this.disabled) return
         const next = !this.checked
-        this.checked = next
+        this.checked = next // triggers attributeChangedCallback → _syncFormValue
         this.emit('tc-change', { value: next })
         this.dispatchEvent(new Event('change', { bubbles: true }))
         if (typeof this.onChange === 'function') this.onChange(next)

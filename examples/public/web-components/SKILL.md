@@ -7228,6 +7228,26 @@ Tooltip positioned by Popper.js.
 
 ## Forms
 
+> **Form association.** `tc-input`, `tc-textarea`, `tc-select`, `tc-switch`, `tc-radio-group`, and `tc-checkbox-group` are **form-associated custom elements** (Chrome 77+, Firefox 98+, Safari 16.4+). Add a `name` attribute to any of them and they participate in `<form>` submission, `form.reset()`, and `form.checkValidity()` just like native controls — no hidden inputs, no JS glue.
+>
+> ```html
+> <form id="f">
+>   <tc-input name="email" type="email" required></tc-input>
+>   <tc-switch name="newsletter" value="yes"></tc-switch>
+>   <button type="submit">Send</button>
+> </form>
+> <script>
+>   f.addEventListener('submit', e => {
+>     e.preventDefault()
+>     const d = new FormData(f)
+>     console.log(d.get('email'), d.get('newsletter')) // 'user@x.com', 'yes' or null
+>   })
+>   // f.reset() restores all tc-* controls to their HTML attribute values
+> </script>
+> ```
+>
+> **Notes:** The `name` attribute belongs on the outer `tc-*` element, not the inner native control. `tc-checkbox-group` with multiple values — use `new FormData(form).getAll('fieldname')`. Inner radio buttons in `tc-radio-group` use an internal name for browser grouping; the user `name` attribute feeds `ElementInternals` only.
+
 ### tc-card-options
 
 Grid of selectable card options (radiogroup). Options are set via the `options` JS property. Fires `tc-change` when the selection changes. Fully keyboard-accessible: Arrow keys move selection, Enter/Space confirms.
@@ -7434,7 +7454,7 @@ Checkbox input.
 
 ### tc-checkbox-group
 
-Coordinated group of checkboxes with an optional group label, inline layout, disabled per-option support, and required validation. Options are set via the `options` JS property. Fires `tc-change` when the selection changes. Works controlled (consumer sets `value`) or uncontrolled (internal state).
+Coordinated group of checkboxes with an optional group label, inline layout, disabled per-option support, and required validation. Options are set via the `options` JS property. Fires `tc-change` when the selection changes. Works controlled (consumer sets `value`) or uncontrolled (internal state). Form-associated — add `name` to participate in `<form>` submission and `form.reset()`. Multiple selections are submitted as multiple entries under the same key; use `new FormData(form).getAll('fieldname')` to read them.
 
 **Tag:** `tc-checkbox-group`
 
@@ -7444,7 +7464,7 @@ Coordinated group of checkboxes with an optional group label, inline layout, dis
 |-----------|------|---------|-------------|
 | `label` | string | — | Group legend text |
 | `inline` | boolean | false | Lay checkboxes out horizontally |
-| `name` | string | — | `name` applied to every inner checkbox input (for form grouping) |
+| `name` | string | — | Form field name — consumed by `ElementInternals` for submission; inner checkboxes use an internal name for grouping |
 | `id` | string | — | Standard HTML `id` on the host element |
 | `required` | boolean | false | Group is invalid until at least one option is checked; sets `aria-required` and `aria-invalid` on the fieldset |
 
@@ -8113,13 +8133,14 @@ None. `tc-helper-text` is purely presentational.
 
 ### tc-input
 
-Text input field.
+Text input field. Form-associated — add `name` to participate in `<form>` submission, `form.reset()`, and `form.checkValidity()`.
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `type` | string | `text` | Input type |
+| `name` | string | — | Form field name (makes this control a form participant) |
 | `value` | string | — | Current value |
 | `placeholder` | string | — | Placeholder text |
 | `label` | string | — | Visible label |
@@ -8131,7 +8152,7 @@ Text input field.
 | `help` | string | — | Help text below input |
 
 ```html
-<tc-input type="email" label="Email" placeholder="you@example.com" required></tc-input>
+<tc-input name="email" type="email" label="Email" placeholder="you@example.com" required></tc-input>
 ```
 
 ---
@@ -8180,7 +8201,7 @@ Radio button input.
 
 ### tc-radio-group
 
-Group of radio buttons with optional label, inline layout, disabled options, and roving-tabindex keyboard navigation.
+Group of radio buttons with optional label, inline layout, disabled options, and roving-tabindex keyboard navigation. Form-associated — add `name` to participate in `<form>` submission and `form.reset()`.
 
 **Tag:** `tc-radio-group`
 
@@ -8190,7 +8211,7 @@ Group of radio buttons with optional label, inline layout, disabled options, and
 |-----------|------|---------|-------------|
 | `label` | string | — | Group label (renders as `<legend>`) |
 | `value` | string | — | Currently selected option value |
-| `name` | string | — | Shared `name` for all radio inputs (defaults to an internal auto-generated id) |
+| `name` | string | — | Form field name — consumed by `ElementInternals` for submission; inner radios use an internal name for grouping |
 | `inline` | boolean | false | Render options in a horizontal row |
 
 **JS Properties**
@@ -8891,12 +8912,13 @@ Single-handle range slider with full keyboard navigation, optional tick marks, a
 
 ### tc-select
 
-Select dropdown input.
+Select dropdown input. Form-associated — add `name` to participate in `<form>` submission and `form.reset()`.
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `name` | string | — | Form field name (makes this control a form participant) |
 | `label` | string | — | Visible label |
 | `value` | string | — | Selected value |
 | `multiple` | boolean | false | Multi-select |
@@ -8909,7 +8931,7 @@ Select dropdown input.
 Populate with `tc-option` children:
 
 ```html
-<tc-select label="Country">
+<tc-select name="country" label="Country">
     <tc-option value="us">United States</tc-option>
     <tc-option value="gb">United Kingdom</tc-option>
 </tc-select>
@@ -8923,21 +8945,23 @@ Populate with `tc-option` children:
 
 ### tc-switch
 
-Toggle switch (styled checkbox).
+Toggle switch (styled checkbox). Form-associated — add `name` to participate in `<form>` submission. Submits its `value` attribute (default `"on"`) when checked, or nothing when unchecked.
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `name` | string | — | Form field name (makes this control a form participant) |
 | `label` | string | — | Visible label |
 | `checked` | boolean | false | On/off state |
+| `value` | string | `"on"` | Value submitted when checked |
 | `disabled` | boolean | false | Disabled |
 | `reverse` | boolean | false | Label before switch |
 
-**Events:** `tc-change` with `{ detail: { checked: boolean } }`
+**Events:** `tc-change` with `{ detail: { value: boolean } }`
 
 ```html
-<tc-switch label="Enable notifications" checked></tc-switch>
+<tc-switch name="newsletter" label="Subscribe to newsletter" value="yes" checked></tc-switch>
 ```
 
 ---
@@ -9028,12 +9052,13 @@ None. Content is driven entirely by attributes.
 
 ### tc-textarea
 
-Multi-line text input.
+Multi-line text input. Form-associated — add `name` to participate in `<form>` submission, `form.reset()`, and `form.checkValidity()`.
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `name` | string | — | Form field name (makes this control a form participant) |
 | `value` | string | — | Current value |
 | `placeholder` | string | — | Placeholder text |
 | `label` | string | — | Visible label |
@@ -9046,7 +9071,7 @@ Multi-line text input.
 | `help` | string | — | Help text |
 
 ```html
-<tc-textarea label="Bio" rows="5" placeholder="Tell us about yourself…"></tc-textarea>
+<tc-textarea name="bio" label="Bio" rows="5" placeholder="Tell us about yourself…"></tc-textarea>
 ```
 
 ---

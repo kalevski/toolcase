@@ -1,10 +1,16 @@
 import { esc as escShared } from "./esc"
 // Shared scaffold for tc-input and tc-textarea. Both render the same
 // label + form-control + validation-feedback + help-text frame and share an
-// identical accessor set (value/placeholder/label/size/disabled/readonly/
+// identical accessor set (value/placeholder/label/name/size/disabled/readonly/
 // required/state/help) plus the in-place `value` fast-path. They differ only in
 // the control element: Input emits `<input type>`, Textarea emits
 // `<textarea rows>`. The subclass supplies `controlSelector` + `renderControl`.
+//
+// Form association: both subclasses inherit `static formAssociated = true` and
+// use ElementInternals to participate in `<form>` submission, reset, and
+// validation. The `name` attribute on the outer custom element is what FormData
+// uses; the inner native control intentionally carries no `name` to avoid
+// double-submission.
 
 let _idCounter = 0
 
@@ -19,6 +25,7 @@ export const TEXT_FIELD_ATTRIBUTES = [
     'value',
     'placeholder',
     'label',
+    'name',
     'size',
     'disabled',
     'readonly',
@@ -44,9 +51,16 @@ export interface ControlRenderContext {
 }
 
 export abstract class TextFieldBase extends HTMLElement {
+    // Form participation: the outer custom element is the form participant.
+    // The inner native control carries no `name` to avoid double-submission.
+    static formAssociated = true
+
     protected _controlId: string
     protected _helpId: string
     protected _initialised = false
+    protected _internals: ElementInternals
+    // The value captured at first connectedCallback — used to restore on form reset.
+    private _defaultValue = ''
 
     /** CSS selector for the inner control element (`input` / `textarea`). */
     protected abstract get controlSelector(): string
@@ -59,11 +73,21 @@ export abstract class TextFieldBase extends HTMLElement {
         const prefix = this.localName || 'tc-field'
         this._controlId = `${prefix}-${uid}`
         this._helpId = `${prefix}-help-${uid}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
+        if (!this._initialised) {
+            this._defaultValue = this.getAttribute('value') ?? ''
+        }
         this.render()
+        this._syncFormValue()
         this._initialised = true
+        this.addEventListener('input', this._onInput)
+    }
+
+    disconnectedCallback(): void {
+        this.removeEventListener('input', this._onInput)
     }
 
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
@@ -71,9 +95,59 @@ export abstract class TextFieldBase extends HTMLElement {
         if (name === 'value') {
             const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(this.controlSelector)
             if (control && control.value !== (next ?? '')) control.value = next ?? ''
+            this._syncFormValue()
             return
         }
         this.render()
+        this._syncFormValue()
+    }
+
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(this.controlSelector)
+        if (control) control.value = this._defaultValue
+        this._syncFormValue()
+    }
+
+    /** Called by the browser when a containing fieldset or form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(this.controlSelector)
+        if (control) control.disabled = disabled
+    }
+
+    private _onInput = (): void => {
+        this._syncFormValue()
+    }
+
+    private _syncFormValue(): void {
+        const value = this.value
+        this._internals.setFormValue(value || null)
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(this.controlSelector)
+        if (control) {
+            const v = control.validity
+            if (v.valid) {
+                this._internals.setValidity({})
+            } else {
+                this._internals.setValidity(
+                    {
+                        badInput: v.badInput,
+                        customError: v.customError,
+                        patternMismatch: v.patternMismatch,
+                        rangeOverflow: v.rangeOverflow,
+                        rangeUnderflow: v.rangeUnderflow,
+                        stepMismatch: v.stepMismatch,
+                        tooLong: v.tooLong,
+                        tooShort: v.tooShort,
+                        typeMismatch: v.typeMismatch,
+                        valueMissing: v.valueMissing,
+                    },
+                    control.validationMessage,
+                    control,
+                )
+            }
+        } else {
+            this._internals.setValidity({})
+        }
     }
 
     get value(): string {
@@ -102,6 +176,14 @@ export abstract class TextFieldBase extends HTMLElement {
     set label(v: string | null) {
         if (v != null) this.setAttribute('label', v)
         else this.removeAttribute('label')
+    }
+
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
     }
 
     get size(): FieldSize | null {

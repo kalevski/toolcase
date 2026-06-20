@@ -10,10 +10,18 @@ export interface CheckboxGroupOption {
 }
 
 export class CheckboxGroup extends HTMLElement {
+    // Form association: the outer custom element is the form participant (via
+    // ElementInternals). Inner checkboxes use `_idPrefix` as their HTML `name`
+    // attribute for grouping; the user-facing `name` attribute is consumed by
+    // ElementInternals for form submission. For multiple selections, setFormValue
+    // receives a FormData object with one entry per checked value.
+    static formAssociated = true
+
     private _initialised = false
     private _idPrefix: string
     private _options: CheckboxGroupOption[] = []
     private _value: string[] = []
+    private _internals: ElementInternals
 
     onChange: ((checkedValues: string[]) => void) | null = null
 
@@ -24,6 +32,7 @@ export class CheckboxGroup extends HTMLElement {
     constructor() {
         super()
         this._idPrefix = `tc-cbg-${++_idCounter}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
@@ -31,6 +40,7 @@ export class CheckboxGroup extends HTMLElement {
             this.render()
             this._initialised = true
         }
+        this._syncFormValue()
         // Listeners are (re)attached on every connect — disconnectedCallback removes
         // them, and a move/remount (React reconciliation) disconnects then reconnects
         // without re-running the one-time init above. Re-adding the same handler
@@ -42,9 +52,39 @@ export class CheckboxGroup extends HTMLElement {
         this.removeEventListener('change', this._onNativeChange)
     }
 
-    attributeChangedCallback(_name: string, _old: string | null, _next: string | null): void {
+    attributeChangedCallback(attr: string, _old: string | null, _next: string | null): void {
         if (!this.isConnected || !this._initialised) return
         this.render()
+        // Re-sync form value when name changes — FormData keys are baked in at
+        // setFormValue call time, so a name change requires a fresh call.
+        if (attr === 'name') this._syncFormValue()
+    }
+
+    formResetCallback(): void {
+        this._value = []
+        this.render()
+        this._syncFormValue()
+    }
+
+    formDisabledCallback(disabled: boolean): void {
+        for (const input of Array.from(
+            this.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+        )) {
+            input.disabled = disabled
+        }
+    }
+
+    private _syncFormValue(): void {
+        const name = this.name ?? ''
+        if (this._value.length === 0) {
+            this._internals.setFormValue(null)
+        } else {
+            const fd = new FormData()
+            for (const v of this._value) {
+                fd.append(name, v)
+            }
+            this._internals.setFormValue(fd)
+        }
     }
 
     get label(): string | null {
@@ -92,7 +132,10 @@ export class CheckboxGroup extends HTMLElement {
     }
     set value(v: string[]) {
         this._value = Array.isArray(v) ? v : []
-        if (this._initialised) this.render()
+        if (this._initialised) {
+            this.render()
+            this._syncFormValue()
+        }
     }
 
     private _onNativeChange = (e: Event): void => {
@@ -117,6 +160,8 @@ export class CheckboxGroup extends HTMLElement {
             else fieldset.removeAttribute('aria-invalid')
         }
 
+        this._syncFormValue()
+
         this.dispatchEvent(
             new CustomEvent('tc-change', {
                 bubbles: true,
@@ -130,7 +175,6 @@ export class CheckboxGroup extends HTMLElement {
     private render(): void {
         const label = this.label
         const inline = this.inline
-        const name = this.name
         const required = this.required
 
         // Preserve focus across re-renders
@@ -152,11 +196,12 @@ export class CheckboxGroup extends HTMLElement {
                 const inputId = `${this._idPrefix}-${idx}`
                 const checkedAttr = this._value.includes(opt.value) ? ' checked' : ''
                 const disabledAttr = opt.disabled ? ' disabled' : ''
-                const nameAttr = name ? ` name="${esc(name)}"` : ''
-
+                // Inner checkboxes carry no `name` — ElementInternals owns form
+                // submission. Checkbox mutual exclusion is not applicable; the
+                // checked state is managed entirely in JS.
                 return [
                     `<div class="form-check">`,
-                    `<input type="checkbox" class="form-check-input" id="${inputId}"${nameAttr}`,
+                    `<input type="checkbox" class="form-check-input" id="${inputId}"`,
                     ` value="${esc(opt.value)}"${checkedAttr}${disabledAttr}>`,
                     `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
                     `</div>`,

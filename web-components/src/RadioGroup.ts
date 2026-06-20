@@ -10,10 +10,18 @@ export interface RadioGroupOption {
 }
 
 export class RadioGroup extends HTMLElement {
+    // Form association: the outer custom element is the form participant (via
+    // ElementInternals). Inner radio inputs carry NO `name` attribute to avoid
+    // double-submission. Mutual exclusion and keyboard grouping are handled
+    // entirely in JS (_patchCheckedAndTabindex / _onKeydown).
+    static formAssociated = true
+
     private _initialised = false
     private _idPrefix: string
     private _options: RadioGroupOption[] = []
     private _value = ''
+    private _internals: ElementInternals
+    private _defaultValue = ''
 
     onChange: ((value: string) => void) | null = null
 
@@ -24,14 +32,17 @@ export class RadioGroup extends HTMLElement {
     constructor() {
         super()
         this._idPrefix = `tc-rg-${++_idCounter}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
             this._value = this.getAttribute('value') ?? ''
+            this._defaultValue = this._value
             this.render()
             this._initialised = true
         }
+        this._internals.setFormValue(this._value || null)
         // Listeners are (re)attached on every connect — disconnectedCallback removes
         // them, and a move/remount (React reconciliation) disconnects then reconnects
         // without re-running the one-time init above. Re-adding the same handler
@@ -45,12 +56,29 @@ export class RadioGroup extends HTMLElement {
         this.removeEventListener('keydown', this._onKeydown)
     }
 
+    formResetCallback(): void {
+        this._value = this._defaultValue
+        if (this._defaultValue) this.setAttribute('value', this._defaultValue)
+        else this.removeAttribute('value')
+        this._patchCheckedAndTabindex()
+        this._internals.setFormValue(this._value || null)
+    }
+
+    formDisabledCallback(disabled: boolean): void {
+        for (const input of Array.from(
+            this.querySelectorAll<HTMLInputElement>('input[type="radio"]'),
+        )) {
+            input.disabled = disabled
+        }
+    }
+
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
         if (!this.isConnected || !this._initialised) return
         if (name === 'value') {
             // Surgical patch for value changes — avoids destroying focus on user interaction
             this._value = next ?? ''
             this._patchCheckedAndTabindex()
+            this._internals.setFormValue(this._value || null)
             return
         }
         const focusedValue = this.querySelector<HTMLInputElement>('input:focus')?.value ?? null
@@ -156,6 +184,7 @@ export class RadioGroup extends HTMLElement {
         this._value = optValue
         // Triggers attributeChangedCallback → _patchCheckedAndTabindex (surgical, no full re-render)
         this.setAttribute('value', optValue)
+        this._internals.setFormValue(optValue || null)
 
         this.dispatchEvent(
             new CustomEvent('tc-change', {
@@ -195,6 +224,7 @@ export class RadioGroup extends HTMLElement {
         this._value = nextOption.value
         // Triggers attributeChangedCallback → _patchCheckedAndTabindex
         this.setAttribute('value', nextOption.value)
+        this._internals.setFormValue(nextOption.value || null)
 
         // Focus the newly selected input after DOM patch
         const nextInput = Array.from(
@@ -215,8 +245,6 @@ export class RadioGroup extends HTMLElement {
     private render(): void {
         const label = this.label
         const inline = this.inline
-        // Fallback name ensures same-group browser behavior even without an explicit name attribute
-        const name = this.name ?? this._idPrefix
 
         const selectedEnabled = this._options.find((o) => o.value === this._value && !o.disabled)
         const firstEnabled = this._options.find((o) => !o.disabled)
@@ -240,10 +268,13 @@ export class RadioGroup extends HTMLElement {
                 const disabledAttr = opt.disabled ? ' disabled aria-disabled="true"' : ''
                 const tabindex = isTabbable ? '0' : '-1'
 
+                // Inner radios carry no `name` — ElementInternals owns form
+                // submission. Mutual exclusion (only one checked) is enforced
+                // by _patchCheckedAndTabindex rather than native browser grouping.
                 return [
                     `<div class="form-check">`,
                     `<input type="radio" class="form-check-input" id="${inputId}"`,
-                    ` name="${esc(name)}" value="${esc(opt.value)}"${checkedAttr}${disabledAttr} tabindex="${tabindex}">`,
+                    ` value="${esc(opt.value)}"${checkedAttr}${disabledAttr} tabindex="${tabindex}">`,
                     `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
                     `</div>`,
                 ].join('')

@@ -54,6 +54,40 @@ The stylesheet import is also unsafe at the top level in RSC — put it in a cli
 <tc-modal title="Confirm" id="confirm-modal">Are you sure?</tc-modal>
 ```
 
+## Form controls
+
+`tc-input`, `tc-textarea`, `tc-select`, `tc-switch`, `tc-radio-group`, and `tc-checkbox-group` are **form-associated custom elements** — they participate in `<form>` submission, reset, and validation via the [ElementInternals API](https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals).
+
+```html
+<form id="demo">
+  <tc-input name="username" required></tc-input>
+  <tc-select name="role">
+    <tc-option value="admin">Admin</tc-option>
+    <tc-option value="user">User</tc-option>
+  </tc-select>
+  <button type="submit">Submit</button>
+</form>
+<script>
+  const form = document.getElementById('demo')
+  form.addEventListener('submit', e => {
+    e.preventDefault()
+    const data = new FormData(form)
+    console.log(data.get('username'), data.get('role'))
+  })
+  // form.reset() clears all tc-* controls back to their initial values
+  // form.checkValidity() / form.reportValidity() honour tc-input[required] etc.
+</script>
+```
+
+### Behaviour notes
+
+- The `name` attribute on the outer `tc-*` element is what `FormData` uses. The inner native control intentionally carries **no** `name` to avoid double-submission.
+- `form.reset()` restores each control to the value it had when first connected to the DOM (the HTML attribute value, or empty).
+- Validity is mirrored from the inner control: `tc-input[required]` makes `form.checkValidity()` return `false` until a value is entered.
+- `tc-checkbox-group` with multiple selections uses a `FormData` object internally, so `new FormData(form).getAll('fieldname')` returns the array of checked values.
+- `tc-radio-group` inner radio buttons use an internal name for native grouping; the user-facing `name` attribute on `tc-radio-group` is forwarded to the form entry via `ElementInternals`.
+- **Browser support:** `ElementInternals` / `formAssociated` requires Chrome 77+, Firefox 98+, Safari 16.4+. In older browsers these controls degrade gracefully — they render correctly but their values are not included in `FormData` and form reset/validation do not apply to them.
+
 ## License
 
 [MIT](https://github.com/kalevski/toolcase/blob/main/LICENSE)
