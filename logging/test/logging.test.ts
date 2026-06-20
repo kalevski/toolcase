@@ -429,6 +429,22 @@ describe('ConsoleLogReporter', () => {
         expect(spy).toHaveBeenCalledTimes(3)
         spy.mockRestore()
     })
+
+    it('{ color: false } emits no ANSI escape sequences', () => {
+        const reporter = new ConsoleLogReporter({ color: false })
+        const spyError = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const spyWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const spyLog = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('error',   'svc', 't', ['msg'])
+        reporter.log('warning', 'svc', 't', ['msg'])
+        reporter.log('info',    'svc', 't', ['msg'])
+        for (const spy of [spyError, spyWarn, spyLog]) {
+            for (const call of spy.mock.calls) {
+                expect(call.join(' ')).not.toMatch(/\x1b\[/)
+            }
+            spy.mockRestore()
+        }
+    })
 })
 
 describe('JSONLineReporter', () => {

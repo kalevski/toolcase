@@ -2,7 +2,7 @@ import Logger from './Logger'
 import Level from './Level'
 import LoggerFactory from './LoggerFactory'
 import LogReporter from './LogReporter'
-import ConsoleLogReporter from './ConsoleLogReporter'
+import ConsoleLogReporter, { type ConsoleLogReporterOptions } from './ConsoleLogReporter'
 import JSONLineReporter from './JSONLineReporter'
 import BufferedReporter from './BufferedReporter'
 
@@ -13,3 +13,4 @@ const logging = new LoggerFactory([
 export default logging
 
 export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter }
+export type { ConsoleLogReporterOptions }

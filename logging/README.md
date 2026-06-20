@@ -87,10 +87,20 @@ A reporter receives every log line and decides what to do with it (print, ship t
 
 | Reporter | Where it works | What it does |
 |----------|---------------|--------------|
-| `ConsoleLogReporter` | Browser + Node | Pretty-prints to the developer console. Default. |
+| `ConsoleLogReporter` | Browser + Node | Pretty-prints to the developer console with colored output. Default. |
 | `JSONLineReporter` | Browser + Node | Emits one JSON object per line. Good for log aggregators. |
 | `BufferedReporter` | Browser + Node | Wraps an inner reporter and/or an `onFlush` handler and flushes in batches. When both are supplied, `onFlush` is called first, then every entry is forwarded to `inner`. |
 | `FileLogReporter` | **Node only** | Writes to disk (append by default). Imported from `@toolcase/logging/node`. |
+
+### ConsoleLogReporter options
+
+Color is auto-enabled on Node TTYs and in the browser, auto-disabled under `NO_COLOR` or non-TTY Node output. Override explicitly:
+
+```ts
+new ConsoleLogReporter()               // auto-detect
+new ConsoleLogReporter({ color: true })  // force on
+new ConsoleLogReporter({ color: false }) // force off
+```
 
 ### Multiple reporters
 
