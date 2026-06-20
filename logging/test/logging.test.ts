@@ -60,6 +60,18 @@ describe('LoggerFactory', () => {
         expect(factory.level).toBe('verbose')
     })
 
+    it('drops unknown level tokens even when factory level is silent', () => {
+        const messages: string[] = []
+        class DummyReporter extends LogReporter {
+            log(level: string): void { messages.push(level) }
+        }
+        const factory = new LoggerFactory([new DummyReporter()])
+        factory.level = 'silent'
+        const logger = factory.getLogger('test')
+        logger.log('trace' as any, 'should be dropped')
+        expect(messages).toHaveLength(0)
+    })
+
     it('filters messages below configured level', () => {
         const messages: { level: string; msgs: any[] }[] = []
 

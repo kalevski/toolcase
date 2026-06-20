@@ -18,13 +18,8 @@ const Level: Record<string, LoggerLevel> = {
     VERBOSE: 'verbose'
 }
 
-const getLevelOrder = (level: LoggerLevel): number => {
-    const order = LevelOrder[level] ?? null
-    if (typeof order !== 'number') {
-        return -1
-    }
-    return order
-}
+const getLevelOrder = (level: LoggerLevel): number =>
+    LevelOrder[level] ?? Number.POSITIVE_INFINITY
 
 const getLevel = (levelOrder: number): LoggerLevel => {
     const level = Object.keys(LevelOrder).find(key => LevelOrder[key as LoggerLevel] === levelOrder) || null
