@@ -22,6 +22,7 @@ class Sorter {
             case 'height-desc': return (a, b) => b.height - a.height
             case 'width-desc': return (a, b) => b.width - a.width
             case 'perimeter-desc': return (a, b) => (b.width + b.height) - (a.width + a.height)
+            default: throw new Error(`unknown sort strategy: ${this.strategy}`)
         }
     }
 

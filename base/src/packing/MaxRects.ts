@@ -101,6 +101,7 @@ class MaxRects extends Algorithm {
                 score1 = free.y + h
                 score2 = free.x
                 break
+            default: throw new Error(`unknown heuristic: ${this.heuristic}`)
         }
         return {
             score1,
