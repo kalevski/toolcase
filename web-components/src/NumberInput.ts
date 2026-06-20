@@ -149,14 +149,19 @@ export class NumberInput extends HTMLElement {
             this._updateStepperState()
             return
         }
-        const focusedValue = this.querySelector<HTMLInputElement>('input:focus')?.value ?? null
+        const focusedInput = this.querySelector<HTMLInputElement>('input:focus')
+        const selStart = focusedInput?.selectionStart ?? null
+        const selEnd = focusedInput?.selectionEnd ?? null
+        const wasFocused = focusedInput !== null
         this.render()
         this._attachListeners()
-        if (focusedValue !== null) {
+        if (wasFocused) {
             const input = this.querySelector<HTMLInputElement>('input')
             if (input) {
-                input.value = focusedValue
                 input.focus()
+                if (selStart !== null && selEnd !== null) {
+                    input.setSelectionRange(selStart, selEnd)
+                }
             }
         }
     }
@@ -189,7 +194,11 @@ export class NumberInput extends HTMLElement {
             this.setAttribute('value', this._formatValue(newValue))
         }
         const input = this.querySelector<HTMLInputElement>('input')
-        if (input) input.value = newValue === '' ? '' : this._formatValue(newValue)
+        if (input) {
+            input.value = newValue === '' ? '' : this._formatValue(newValue)
+            if (newValue === '') input.removeAttribute('aria-valuenow')
+            else input.setAttribute('aria-valuenow', String(newValue))
+        }
         this._updateStepperState()
         this.dispatchEvent(
             new CustomEvent('tc-change', {
