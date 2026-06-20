@@ -90,7 +90,7 @@ A reporter receives every log line and decides what to do with it (print, ship t
 | `ConsoleLogReporter` | Browser + Node | Pretty-prints to the developer console. Default. |
 | `JSONLineReporter` | Browser + Node | Emits one JSON object per line. Good for log aggregators. |
 | `BufferedReporter` | Browser + Node | Wraps any reporter (or an `onFlush` handler) and flushes in batches. |
-| `FileLogReporter` | **Node only** | Writes to disk with optional rotation. Imported from `@toolcase/logging/node`. |
+| `FileLogReporter` | **Node only** | Writes to disk (append by default). Imported from `@toolcase/logging/node`. |
 
 ### Multiple reporters
 
@@ -136,7 +136,7 @@ import { LoggerFactory } from '@toolcase/logging'
 import { FileLogReporter } from '@toolcase/logging/node'
 
 const logging = new LoggerFactory([
-    new FileLogReporter({ filepath: './logs/app.log' })
+    new FileLogReporter('./logs/app.log')
 ])
 ```
 
@@ -145,7 +145,7 @@ const logging = new LoggerFactory([
 Extend `LogReporter` and implement `log(level, scope, time, messages)`:
 
 ```ts
-import { LogReporter } from '@toolcase/logging'
+import { LoggerFactory, LogReporter } from '@toolcase/logging'
 
 class SentryReporter extends LogReporter {
     log(level, scope, time, messages) {
@@ -155,7 +155,7 @@ class SentryReporter extends LogReporter {
     }
 }
 
-logging.addReporter?.(new SentryReporter()) // or pass into the LoggerFactory ctor
+const logging = new LoggerFactory([new SentryReporter()])
 ```
 
 ## API
