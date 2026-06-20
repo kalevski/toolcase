@@ -12,6 +12,13 @@ describe('HTTP.Status', () => {
         expect(Status.INTERNAL_SERVER_ERROR).toBe(500)
         expect(Status.IM_A_TEAPOT).toBe(418)
     })
+
+    it('correctly-spelled aliases resolve to the same codes as the legacy typo keys', () => {
+        expect(Status.NON_AUTHORITATIVE_INFORMATION).toBe(203)
+        expect(Status.PARTIAL_CONTENT).toBe(206)
+        expect(Status.NONAUTHORITATIVE_INFORMATION).toBe(203)
+        expect(Status.PARCIAL_CONTENT).toBe(206)
+    })
 })
 
 describe('HTTP.RESTError', () => {
