@@ -411,6 +411,63 @@ describe('BufferedReporter', () => {
     })
 })
 
+describe('LoggerFactory — reporter isolation', () => {
+    it('does not throw when a reporter throws', () => {
+        class ThrowingReporter extends LogReporter {
+            log(): void { throw new Error('reporter failure') }
+        }
+        const factory = new LoggerFactory([new ThrowingReporter()])
+        const logger = factory.getLogger('iso')
+        expect(() => logger.info('msg')).not.toThrow()
+    })
+
+    it('runs sibling reporters after a throwing reporter', () => {
+        const received: string[] = []
+        class ThrowingReporter extends LogReporter {
+            log(): void { throw new Error('reporter failure') }
+        }
+        class GoodReporter extends LogReporter {
+            log(level: any, _s: any, _t: any, msgs: any[]): void { received.push(msgs[0]) }
+        }
+        const factory = new LoggerFactory([new ThrowingReporter(), new GoodReporter()])
+        const logger = factory.getLogger('iso')
+        logger.info('hello')
+        expect(received).toEqual(['hello'])
+    })
+})
+
+describe('BufferedReporter — flush isolation', () => {
+    it('does not throw when onFlush throws', () => {
+        const buf = new BufferedReporter(null, {
+            maxSize: 2,
+            flushInterval: 0,
+            onFlush: () => { throw new Error('flush failure') }
+        })
+        buf.log('info', 's', 't', ['a'])
+        expect(() => buf.log('info', 's', 't', ['b'])).not.toThrow()
+    })
+
+    it('does not throw when the inner reporter throws during flush', () => {
+        class ThrowingReporter extends LogReporter {
+            log(): void { throw new Error('inner failure') }
+        }
+        const buf = new BufferedReporter(new ThrowingReporter(), { maxSize: 2, flushInterval: 0 })
+        buf.log('info', 's', 't', ['a'])
+        expect(() => buf.log('info', 's', 't', ['b'])).not.toThrow()
+    })
+
+    it('buffer is cleared even when onFlush throws', () => {
+        const buf = new BufferedReporter(null, {
+            maxSize: 2,
+            flushInterval: 0,
+            onFlush: () => { throw new Error('flush failure') }
+        })
+        buf.log('info', 's', 't', ['a'])
+        buf.log('info', 's', 't', ['b'])
+        expect(buf.size()).toBe(0)
+    })
+})
+
 describe('FileLogReporter', () => {
     it('writes formatted lines to a file', async () => {
         const { mkdtempSync, readFileSync } = await import('node:fs')

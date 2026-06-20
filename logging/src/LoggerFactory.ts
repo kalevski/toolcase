@@ -36,7 +36,11 @@ class LoggerFactory {
             return
         }
         for (const reporter of this.reporters) {
-            reporter.log(level, scope, time, messages)
+            try {
+                reporter.log(level, scope, time, messages)
+            } catch {
+                // a reporter must never break logging or sibling reporters
+            }
         }
     }
 
