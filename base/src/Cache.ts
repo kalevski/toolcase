@@ -17,6 +17,16 @@ class Cache<T> {
 
     private maxEntries: number | undefined
 
+    /**
+     * @param fetchFn    - Function invoked to load data on a cache miss.
+     * @param ms         - Time-to-live in milliseconds. `0` (default) or any value `≤ 0`
+     *                     means entries never expire: once fetched, the cached value is
+     *                     returned on every subsequent call until explicitly invalidated.
+     *                     Positive values expire entries after the given number of
+     *                     milliseconds.
+     * @param maxEntries - Optional cap on stored entries; the least-recently-used entry
+     *                     is evicted when the limit is exceeded.
+     */
     constructor(fetchFn: FetchFn<T>, ms: number = 0, maxEntries?: number) {
         if (typeof fetchFn !== 'function') {
             throw new Error(`fetchFn must be a function, ${fetchFn} provided`)
@@ -30,7 +40,8 @@ class Cache<T> {
     async get(...args: any[]): Promise<T | null> {
         const hash = this.getHash(args)
         const entry = this.getEntry(hash)
-        if (this.getTime() <= entry.fetchedAt + this.ms) return entry.data
+        const needsFetch = entry.fetchedAt === 0 || (this.ms > 0 && this.getTime() > entry.fetchedAt + this.ms)
+        if (!needsFetch) return entry.data
         let p = this.inflight.get(hash)
         if (!p) {
             p = Promise.resolve(this.fetchFn(...args))
@@ -42,6 +53,10 @@ class Cache<T> {
         return entry.data
     }
 
+    /**
+     * Update the TTL. `ms ≤ 0` sets cache-forever mode; positive values set a
+     * finite expiry window in milliseconds.
+     */
     setMS(ms: number = 0): void {
         if (typeof ms !== 'number') {
             throw new Error(`ms must be a number, ${ms} provided`)

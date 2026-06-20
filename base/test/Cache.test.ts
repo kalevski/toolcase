@@ -88,7 +88,18 @@ describe('Cache', () => {
         expect(fn).toHaveBeenCalledTimes(5)
     })
 
-    it('concurrent stale get calls invoke fetchFn only once', async () => {
+    it('ms = 0 (default) caches forever — fetchFn is called only once across repeated calls', async () => {
+        const fn = vi.fn(() => 'value')
+        const cache = new Cache(fn) // ms defaults to 0 → cache-forever
+
+        await cache.get('key')
+        await cache.get('key')
+        await cache.get('key')
+
+        expect(fn).toHaveBeenCalledTimes(1)
+    })
+
+    it('concurrent get calls invoke fetchFn only once', async () => {
         let resolver!: (v: string) => void
         const fn = vi.fn(() => new Promise<string>(r => { resolver = r }))
 
