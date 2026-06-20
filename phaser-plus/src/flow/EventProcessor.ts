@@ -39,7 +39,7 @@ export default class EventProcessor extends FlowProcessor {
         for (let index = 0; index < this.queue.length; index++) {
             const def = this.queue[index]!
             def.time += delta / 1000
-            if (def.time > 0) {
+            if (def.time >= 0) {
                 if (def.name === TIMEOUT_FN_NAME) {
                     (def.event as TimerCallback).call(def.context)
                 } else {

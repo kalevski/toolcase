@@ -266,7 +266,7 @@ export default class BehaviorTreeProcessor extends FlowProcessor {
             if (entry.interval > 0) {
                 entry.elapsed += dt
                 if (entry.elapsed < entry.interval) continue
-                entry.elapsed = 0
+                entry.elapsed -= entry.interval
             }
             const ctx: TickContext = {
                 scene: this.scene,
