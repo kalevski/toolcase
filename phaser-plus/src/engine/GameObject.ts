@@ -67,6 +67,8 @@ export default class GameObject extends GameObjects.Container {
     onDestroy(): void {}
 
     protected preDestroy(): void {
+        this._effects?.clear()
+        this._effects = null
         super.preDestroy()
         this.onDestroy()
     }

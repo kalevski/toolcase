@@ -25,6 +25,8 @@ export default class ReactFeature extends HTMLFeature {
 
     private _loading: boolean = false
 
+    private _destroyed: boolean = false
+
     constructor(scene: Scene, key: string) {
         super(scene, key)
     }
@@ -44,7 +46,7 @@ export default class ReactFeature extends HTMLFeature {
         this._loading = true
         loadCreateRoot()
             .then((createRoot) => {
-                if (this._pending === null) {
+                if (this._destroyed || this._pending === null) {
                     this._loading = false
                     return
                 }
@@ -84,6 +86,7 @@ export default class ReactFeature extends HTMLFeature {
     }
 
     override preDestroy(): void {
+        this._destroyed = true
         this.unmount()
         super.preDestroy()
     }

@@ -3,14 +3,8 @@ import type Scene from '../engine/Scene'
 
 const STYLE_ID = '@phaser-plus/reef/dom'
 
-let stylesInjected = false
-
 function injectStylesOnce(): void {
-    if (stylesInjected) return
-    if (document.getElementById(STYLE_ID) !== null) {
-        stylesInjected = true
-        return
-    }
+    if (document.getElementById(STYLE_ID) !== null) return
     const style = document.createElement('style')
     style.id = STYLE_ID
     style.innerHTML = `
@@ -26,7 +20,6 @@ function injectStylesOnce(): void {
         user-select: none;
     }`
     document.head.append(style)
-    stylesInjected = true
 }
 
 export default class HTMLFeature extends Feature {

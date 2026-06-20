@@ -13,6 +13,12 @@ export default class Scene extends PhaserScene {
 
     engine!: Engine
 
+    /**
+     * Game-global service registry. Its lifetime matches the `Game` instance,
+     * not the Scene — services are shared across all scenes and persist through
+     * scene restarts. Call `services.disposeAll()` only when tearing down the
+     * entire game, not on scene shutdown.
+     */
     services!: ServiceRegistry
 
     features!: FeatureRegistry
