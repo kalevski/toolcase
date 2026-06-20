@@ -56,6 +56,11 @@ const getRandomBytes = (n: number): Uint8Array => {
     return b
 }
 
+const getRandomUint32 = (): number => {
+    const b = getRandomBytes(4)
+    return ((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]) >>> 0
+}
+
 const generateId = (length: number = 16): string => {
     const bytes = getRandomBytes(Math.ceil(length / 2))
     return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').slice(0, length)
@@ -83,8 +88,6 @@ const buildEnumValues = (values: string[] | Record<string, number>): Record<stri
 
 class Serializer {
 
-    private writer: Writer = new Writer()
-
     private root: Root
 
     private namespace: Namespace
@@ -107,7 +110,7 @@ class Serializer {
         const type = new Type(key)
         for (const [index, field] of fields.entries()) {
             const tag = typeof field.tag === 'number' ? field.tag : index + 1
-            const defaultValue = typeof field.default === 'undefined' ? null : field.default
+            const defaultOpts = typeof field.default !== 'undefined' ? { default: field.default } : {}
             const fieldRef = field.type
 
             if (isEnumMarker(fieldRef)) {
@@ -115,9 +118,7 @@ class Serializer {
                 if (namespace.get(enumName) === null) {
                     namespace.add(new Enum(enumName, buildEnumValues(fieldRef.values)))
                 }
-                type.add(new Field(field.key, tag, enumName, field.rule, undefined, {
-                    default: defaultValue
-                }))
+                type.add(new Field(field.key, tag, enumName, field.rule, undefined, { ...defaultOpts }))
                 continue
             }
 
@@ -128,15 +129,13 @@ class Serializer {
 
             if (isPackedMarker(fieldRef)) {
                 type.add(new Field(field.key, tag, fieldRef.type, 'repeated', undefined, {
-                    default: defaultValue,
+                    ...defaultOpts,
                     packed: true
                 }))
                 continue
             }
 
-            type.add(new Field(field.key, tag, fieldRef as string, field.rule, undefined, {
-                default: defaultValue
-            }))
+            type.add(new Field(field.key, tag, fieldRef as string, field.rule, undefined, { ...defaultOpts }))
         }
         return type
     }
@@ -179,13 +178,13 @@ class Serializer {
     }
 
     encode(key: string, message: Record<string, any>): Uint8Array {
-        this.writer.reset()
+        const writer = Writer.create()
         const type = this.getType(key)
         try {
-            return type.encode(message, this.writer).finish()
+            return type.encode(message, writer).finish()
         } catch (error: any) {
             const validationError = type.verify(message)
-            const reason = validationError ?? error.message
+            const reason = validationError ?? (error?.message ?? String(error))
             throw new Error(`Serializer.encode[${key}] failed: ${reason}`)
         }
     }
@@ -342,7 +341,7 @@ class Serializer {
         if (total > 0xffff) {
             throw new Error(`Serializer.fragment: ${total} chunks exceeds the 65535 limit; raise maxChunkSize`)
         }
-        const frameId = Math.floor(Math.random() * 0xffffffff) >>> 0
+        const frameId = (getRandomUint32() | 1) >>> 0
         const out: Uint8Array[] = []
         for (let i = 0; i < total; i++) {
             const start = i * maxChunkSize

@@ -579,6 +579,15 @@ describe('Serializer fragment / reassemble', () => {
         const s = new Serializer()
         expect(() => s.fragment(new Uint8Array(10), 0)).toThrow(/positive integer/)
     })
+
+    it('fragment never produces frameId === 0 (regression SER-453)', () => {
+        const s = new Serializer()
+        for (let i = 0; i < 100; i++) {
+            const chunks = s.fragment(new Uint8Array([1, 2, 3]))
+            const frameId = (((chunks[0][0] << 24) | (chunks[0][1] << 16) | (chunks[0][2] << 8) | chunks[0][3]) >>> 0)
+            expect(frameId).not.toBe(0)
+        }
+    })
 })
 
 describe('Serializer.fields() faithful round-trip (map / enum / packed)', () => {
@@ -684,5 +693,43 @@ describe('Serializer.define duplicate-type guard', () => {
 
         const ns: any = (s as any).namespace
         expect(ns.get('Item_status_E')).toBeNull()
+    })
+})
+
+describe('Serializer robustness fixes (SER-453)', () => {
+    it('encode surfaces a string reason when a non-Error is thrown', () => {
+        const s = new Serializer()
+        s.define('Msg', [{ key: 'x', type: F.STRING, rule: 'required' }])
+        // Trigger the encode catch path by passing a value that protobufjs throws a string on.
+        // We do this by monkey-patching the type's encode to throw a raw string.
+        const type = (s as any).namespace.lookupType('Msg')
+        const orig = type.encode.bind(type)
+        type.encode = () => { throw 'raw string error' }
+        try {
+            expect(() => s.encode('Msg', { x: 'hi' })).toThrow(/raw string error/)
+        } finally {
+            type.encode = orig
+        }
+    })
+
+    it('re-entrant encode does not corrupt the outer buffer (regression SER-453)', () => {
+        const s = new Serializer()
+        s.define('Inner', [{ key: 'n', type: F.INT32, rule: 'required' }])
+        s.define('Outer', [{ key: 'label', type: F.STRING, rule: 'required' }])
+
+        // Simulate re-entrancy: the first encode call triggers a second encode mid-flight
+        // by monkey-patching the type's encode to call s.encode('Inner', ...) before finishing.
+        const outerType = (s as any).namespace.lookupType('Outer')
+        const origEncode = outerType.encode.bind(outerType)
+        outerType.encode = (msg: any, writer: any) => {
+            // This re-entrant encode must NOT corrupt the outer writer.
+            const innerBuf = s.encode('Inner', { n: 42 })
+            expect(innerBuf.byteLength).toBeGreaterThan(0)
+            return origEncode(msg, writer)
+        }
+
+        const buf = s.encode('Outer', { label: 'test' })
+        const out = s.decode('Outer', buf) as any
+        expect(out.label).toBe('test')
     })
 })
