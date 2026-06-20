@@ -98,6 +98,7 @@ export default class DialogCameraCue extends Feature {
         if (this.state === 'closed') return this
         this.elapsed = (1 - this.alphaT) * this.fadeSec
         this.state = 'closing'
+        if (this.blurEnabled) this.toggleBlur(false)
         return this
     }
 
@@ -230,7 +231,6 @@ export default class DialogCameraCue extends Feature {
         if (this.state === 'closed') {
             for (const r of this.panels) r.setVisible(false)
             for (const r of this.vignettePanels) r.setVisible(false)
-            if (this.blurEnabled) this.toggleBlur(false)
         }
     }
 

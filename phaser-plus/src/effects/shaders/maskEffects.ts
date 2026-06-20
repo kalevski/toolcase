@@ -76,7 +76,7 @@ export class EnergyBarEffect extends Effect {
             float fill = step(0.0, dist);
             float edge = smoothstep(0.04, 0.0, abs(dist));
             float pulse = 0.6 + 0.4 * sin(uTime * 6.0);
-            float seg = step(0.5, abs(fract(outTexCoord.x * uSegments) - 0.5)) * 0.05;
+            float seg = step(abs(fract(outTexCoord.x * uSegments) - 0.5), 0.04) * 0.05;
             vec3 fillCol = uColor * (1.0 - seg);
             vec3 outRgb = mix(src.rgb * 0.25, fillCol, fill);
             outRgb += edge * uColor * uEdge * pulse;

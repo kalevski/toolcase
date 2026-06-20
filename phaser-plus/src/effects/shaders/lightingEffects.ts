@@ -6,7 +6,7 @@ import { HEAD, HASH, NOISE, SAMPLE_SRC, SAFE_SAMPLE, MIX_OUT } from './_prelude'
 // --------------------------------------------------------------------------
 export class OutlineEffect extends Effect {
     static readonly KEY = 'reef.Outline'
-    static readonly FRAGMENT = `${HEAD}
+    static readonly FRAGMENT = `${HEAD}${SAFE_SAMPLE}
         uniform float uSpread;
         uniform float uSoftness;
         uniform vec3 uColor;
@@ -20,7 +20,7 @@ export class OutlineEffect extends Effect {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     if (x == 0 && y == 0) continue;
-                    a = max(a, texture2D(uMainSampler, outTexCoord + vec2(float(x), float(y)) * uSpread).a);
+                    a = max(a, safeSample(outTexCoord + vec2(float(x), float(y)) * uSpread).a);
                 }
             }
             float edge = smoothstep(0.0, uSoftness, a) * (1.0 - src.a);
@@ -95,7 +95,7 @@ export class PatternAdditiveEffect extends PatternEffect {
 // --------------------------------------------------------------------------
 export class EdgeColorEffect extends Effect {
     static readonly KEY = 'reef.EdgeColor'
-    static readonly FRAGMENT = `${HEAD}
+    static readonly FRAGMENT = `${HEAD}${SAFE_SAMPLE}
         uniform vec3 uColor;
         uniform float uWidth;
         void main() {
@@ -104,7 +104,7 @@ export class EdgeColorEffect extends Effect {
             float minA = 1.0;
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
-                    minA = min(minA, texture2D(uMainSampler, outTexCoord + vec2(float(x), float(y)) * px).a);
+                    minA = min(minA, safeSample(outTexCoord + vec2(float(x), float(y)) * px).a);
                 }
             }
             float edge = src.a * (1.0 - minA);
@@ -145,7 +145,7 @@ export class BlurEffect extends Effect {
                 acc += texture2D(uMainSampler, outTexCoord - vec2(0.0, float(i)) * px) * weights[i];
             }
             vec4 src = texture2D(uMainSampler, outTexCoord);
-            vec3 outRgb = (acc / 1.74).rgb;
+            vec3 outRgb = (acc / 1.77297).rgb;
             ${MIX_OUT}
         }`
     alpha: number = 1
