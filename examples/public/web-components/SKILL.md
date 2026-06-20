@@ -14,6 +14,20 @@ import '@toolcase/web-components/style.css'
 register() // registers all tc-* elements via customElements.define
 ```
 
+**SSR / Next.js / server-side rendering — dynamic import required.** Every `tc-*` class body contains `extends HTMLElement`, which is evaluated at module load time. A static top-level `import '@toolcase/web-components'` in server-rendered code throws `ReferenceError: HTMLElement is not defined`. The package ships a `node` export condition that resolves to a no-op stub, so server-side imports are safe, but browser registration must use a dynamic import inside a client-only boundary:
+
+```ts
+// Next.js app directory — client component
+'use client'
+import { useEffect } from 'react'
+
+useEffect(() => {
+    void import('@toolcase/web-components').then(m => m.register())
+}, [])
+```
+
+Never call `register()` at module top-level in a file that Next.js (or any SSR framework) also renders on the server.
+
 After `register()` you can author markup directly:
 
 ```html
