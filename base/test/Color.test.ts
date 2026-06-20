@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import Color from '../src/Color'
 
+type ColorType = Parameters<typeof Color.getHex>[0]
+
 describe('Color', () => {
     it('exposes Material palette as uppercase keys', () => {
         expect(Color.RED).toBe('#f44336')
@@ -27,7 +29,8 @@ describe('Color', () => {
         const palette = [
             '#f44336','#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3',
             '#03a9f4','#00bcd4','#009688','#4caf50','#8bc34a','#cddc39',
-            '#ffeb3b','#ffc107','#ff9800','#ff5722'
+            '#ffeb3b','#ffc107','#ff9800','#ff5722',
+            '#795548','#9e9e9e','#607d8b','#ffffff','#000000',
         ]
         for (let i = 0; i < 50; i++) {
             expect(palette).toContain(Color.getRandomHex())
@@ -46,5 +49,18 @@ describe('Color', () => {
             stub.mockRestore()
         }
         expect(seen.size).toBeGreaterThan(1)
+    })
+
+    it('every ColorType member resolves via getHex and toNumber', () => {
+        const allColors: ColorType[] = [
+            'white', 'red', 'pink', 'purple', 'deep_purple', 'indigo', 'blue',
+            'light_blue', 'cyan', 'teal', 'green', 'light_green', 'lime', 'yellow',
+            'amber', 'orange', 'deep_orange', 'brown', 'grey', 'blue_grey', 'black',
+        ]
+        for (const c of allColors) {
+            const hex = Color.getHex(c)
+            expect(hex, `getHex(${c})`).not.toBeNull()
+            expect(Color.toNumber(c), `toNumber(${c})`).toBe(parseInt(hex!.slice(1), 16))
+        }
     })
 })

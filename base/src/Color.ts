@@ -17,6 +17,11 @@ const PALETTE: Record<string, string> = {
     AMBER: '#ffc107',
     ORANGE: '#ff9800',
     DEEP_ORANGE: '#ff5722',
+    BROWN: '#795548',
+    GREY: '#9e9e9e',
+    BLUE_GREY: '#607d8b',
+    WHITE: '#ffffff',
+    BLACK: '#000000',
 }
 
 const Color: Record<string, string | ((...args: any[]) => any)> & {
