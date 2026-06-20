@@ -792,3 +792,20 @@ describe('FileLogReporter', () => {
         expect(readFileSync(`${file}.1`, 'utf8')).toBe('hello\n')
     })
 })
+
+describe('FileLogReporter — ESM smoke (post-build)', () => {
+    it('constructs without a Dynamic require error when loaded from the built ESM bundle', async () => {
+        const { existsSync } = await import('node:fs')
+        // Resolve lib/node.module.js relative to this test file
+        const builtUrl = new URL('../lib/node.module.js', import.meta.url)
+        if (!existsSync(builtUrl)) {
+            // Package has not been built yet; skip silently rather than fail CI
+            return
+        }
+        // Dynamic import of the ESM bundle — must not throw "Dynamic require of ... is not supported"
+        const mod = await import(/* @vite-ignore */ builtUrl.href)
+        const FileLogReporterBuilt: typeof FileLogReporter = mod.default
+        const reporter = new FileLogReporterBuilt('/tmp/esm-smoke-test.log')
+        await reporter.close()
+    })
+})
