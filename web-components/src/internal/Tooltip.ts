@@ -71,10 +71,14 @@ export class Tooltip {
 
         this._isShown = false
         const tip = this._tip
+        const popper = this._popper
+        this._tip = null
+        this._popper = null
         if (!tip) return
         tip.classList.remove('show')
         executeAfterTransition(tip, () => {
-            this._destroyTip()
+            popper?.destroy()
+            tip.remove()
             triggerEvent(this._element, `hidden.bs.${this._eventNamespace}`)
         })
     }
