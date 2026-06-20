@@ -34,6 +34,11 @@ export default class World extends Layer {
         this.onLayerUpdate()
     }
 
+    override onUpdate(time: number, delta: number): void {
+        super.onUpdate(time, delta)
+        ;(this.container.list as unknown as GameObject2D[]).sort(this.sort.fn)
+    }
+
     protected override onLayerUpdate(): void {
         super.onLayerUpdate()
         this.grid.cameraFilter = this.container.cameraFilter
@@ -46,7 +51,6 @@ export default class World extends Layer {
             }
             this.gridUpdate = null
         }
-        ;(this.container.list as unknown as GameObject2D[]).sort(this.sort.fn)
 
         const matter = (this.scene as any).matter
         if (matter !== undefined && matter.world.debugGraphic !== undefined) {

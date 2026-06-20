@@ -40,7 +40,11 @@ export default class Grid extends GameObject {
         this.canvas.lineStyle(1, this.STYLE.LINES, 0.3)
     }
 
-    override onDestroy(): void {}
+    override onDestroy(): void {
+        if (this.TEXTURE_KEY !== '' && this.scene.textures.exists(this.TEXTURE_KEY)) {
+            this.scene.textures.remove(this.TEXTURE_KEY)
+        }
+    }
 
     setProjection(matrix: Matrix2): void {
         this.canvas = this.scene.add.graphics()

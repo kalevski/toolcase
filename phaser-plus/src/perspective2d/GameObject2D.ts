@@ -23,6 +23,7 @@ export default class GameObject2D extends GameObject {
     setTransform(x: number, y: number): this {
         this.projection.transformPoint(x, y, this as unknown as M.Vector2)
         this.transform.set(x, y)
+        this.pivot.set(x, y)
         return this
     }
 
