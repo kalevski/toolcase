@@ -5,8 +5,6 @@ const opts = (overrides = {}) => ({
     maxWidth: 100,
     maxHeight: 100,
     allowRotation: false,
-    padding: 0,
-    extrude: 0,
     pot: 'none' as const,
     ...overrides
 })

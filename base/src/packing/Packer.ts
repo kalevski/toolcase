@@ -51,8 +51,6 @@ class Packer {
             maxWidth: this.options.maxWidth,
             maxHeight: this.options.maxHeight,
             allowRotation: this.options.allowRotation,
-            padding: this.options.padding,
-            extrude: this.options.extrude,
             pot: this.options.pot
         }
         const kind: AlgorithmKind = this.options.algorithm
