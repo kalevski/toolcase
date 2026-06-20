@@ -9,10 +9,11 @@ export class FloatingLabel extends HTMLElement {
     }
 
     connectedCallback(): void {
-        // Snapshot the projected child control before rebuilding the DOM.
-        this._control = this.firstElementChild
+        if (!this._initialised) {
+            this._control = this.firstElementChild
+            this._initialised = true
+        }
         this.render()
-        this._initialised = true
     }
 
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
