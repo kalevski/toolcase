@@ -126,7 +126,9 @@ export class DistortionAdditiveEffect extends DistortionEffect {
 }
 
 // --------------------------------------------------------------------------
-// Wave — alias of Distortion preserved for parity with effects.md.
+// Wave — intentional alias of DistortionEffect registered under a separate KEY
+// for API parity with effects.md. Shares DistortionEffect.FRAGMENT exactly;
+// visual behaviour is identical. Prefer DistortionEffect for new code.
 // --------------------------------------------------------------------------
 export class WaveEffect extends DistortionEffect {
     static readonly KEY: string = 'reef.Wave'
@@ -178,8 +180,33 @@ export class MysticDistortionEffect extends Effect {
     }
 }
 
+// --------------------------------------------------------------------------
+// MysticDistortionAdditive — additive-blend variant of MysticDistortionEffect.
+// Brightens the distorted output (×1.6, clamped) so it composes correctly
+// under Phaser's additive blend mode, mirroring DistortionAdditiveEffect.
+// --------------------------------------------------------------------------
 export class MysticDistortionAdditiveEffect extends MysticDistortionEffect {
     static readonly KEY: string = 'reef.MysticDistortionAdditive'
+    static readonly FRAGMENT: string = `${HEAD}${SAFE_SAMPLE}
+        uniform vec2 uOffset;
+        uniform vec2 uDistance;
+        uniform vec2 uPhase;
+        uniform float uPitch;
+        uniform float uPitchSpeed;
+        uniform float uPitchOffset;
+        uniform vec3 uGlow;
+        void main() {
+            vec2 d = vec2(
+                sin(outTexCoord.y * uOffset.x + uPhase.x) * uDistance.x,
+                sin(outTexCoord.x * uOffset.y + uPhase.y) * uDistance.y
+            );
+            float band = sin(outTexCoord.y * 90.0 + uTime * uPitchSpeed * 1.4 + uPitchOffset);
+            d.x += band * uPitch * 0.05;
+            vec4 src = safeSample(outTexCoord + d);
+            float aura = smoothstep(0.0, 0.6, abs(band)) * 0.3;
+            vec3 outRgb = clamp((src.rgb + uGlow * aura) * 1.6, 0.0, 1.0);
+            ${MIX_OUT}
+        }`
 }
 
 // --------------------------------------------------------------------------
@@ -246,6 +273,11 @@ export class JellyEffect extends Effect {
     }
 }
 
+// --------------------------------------------------------------------------
+// JellyAutoMove — intentional alias of JellyEffect registered under a separate
+// KEY for API parity. Shares JellyEffect.FRAGMENT exactly; visual behaviour is
+// identical. Differentiate at call-site by supplying distinct uniform values.
+// --------------------------------------------------------------------------
 export class JellyAutoMoveEffect extends JellyEffect {
     static readonly KEY: string = 'reef.JellyAutoMove'
 }
@@ -319,6 +351,11 @@ export class LiquifyEffect extends Effect {
     }
 }
 
+// --------------------------------------------------------------------------
+// Slim — intentional alias of LiquifyEffect registered under a separate KEY
+// for API parity. Shares LiquifyEffect.FRAGMENT exactly; visual behaviour is
+// identical. Differentiate at call-site by supplying distinct uniform values.
+// --------------------------------------------------------------------------
 export class SlimEffect extends LiquifyEffect {
     static readonly KEY: string = 'reef.Slim'
 }
