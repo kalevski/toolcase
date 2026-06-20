@@ -26,9 +26,11 @@ describe('PriorityQueue', () => {
         expect(pq.length).toBe(1)
     })
 
-    it('dequeue returns null when empty', () => {
+    it('dequeue returns null when empty and leaves no stray -1 key', () => {
         const pq = new PriorityQueue(n => n)
         expect(pq.dequeue()).toBeNull()
+        expect((pq as any).values['-1']).toBeUndefined()
+        expect(Object.prototype.hasOwnProperty.call((pq as any).values, '-1')).toBe(false)
     })
 
     it('pop removes last element', () => {

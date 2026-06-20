@@ -42,6 +42,7 @@ class PriorityQueue<T> {
     }
 
     dequeue(): T | null {
+        if (this.values.length === 0) return null
         this.swap(0, this.values.length - 1)
         const node = this.values.pop() || null
         if (this.values.length > 1) {
