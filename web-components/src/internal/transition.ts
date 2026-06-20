@@ -13,8 +13,10 @@ export function reflow(element: HTMLElement): void {
 
 function transitionDurationMs(element: HTMLElement): number {
     const styles = window.getComputedStyle(element)
-    const duration = parseFloat(styles.transitionDuration.split(',')[0] || '0')
-    const delay = parseFloat(styles.transitionDelay.split(',')[0] || '0')
+    const maxOf = (v: string) =>
+        v.split(',').reduce((m, p) => Math.max(m, parseFloat(p) || 0), 0)
+    const duration = maxOf(styles.transitionDuration)
+    const delay = maxOf(styles.transitionDelay)
     if (!duration && !delay) return 0
     return (duration + delay) * 1000
 }
