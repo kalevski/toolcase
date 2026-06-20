@@ -113,21 +113,37 @@ export class Selector extends Composite {
 
 export class Parallel extends Composite {
 
+    // Latched result per child; null while still running.
+    // Resolved children are not re-ticked until reset() is called, making the
+    // composite deterministic with stateful children.
+    private latched: (Status | null)[]
+
     constructor(children: BTNode[], private successThreshold: number = children.length) {
         super(children)
+        this.latched = new Array(children.length).fill(null)
     }
 
     tick(ctx: TickContext): Status {
         let successes = 0
         let failures = 0
-        for (const child of this.children) {
-            const status = child.tick(ctx)
-            if (status === SUCCESS) successes++
-            else if (status === FAILURE) failures++
+        for (let i = 0; i < this.children.length; i++) {
+            const status = this.latched[i] ?? this.children[i]!.tick(ctx)
+            if (status === SUCCESS) {
+                this.latched[i] = SUCCESS
+                successes++
+            } else if (status === FAILURE) {
+                this.latched[i] = FAILURE
+                failures++
+            }
         }
         if (successes >= this.successThreshold) return SUCCESS
         if (failures > this.children.length - this.successThreshold) return FAILURE
         return RUNNING
+    }
+
+    override reset(ctx: TickContext): void {
+        super.reset(ctx)
+        this.latched.fill(null)
     }
 
 }
