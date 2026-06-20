@@ -32,6 +32,14 @@ export const TEXT_FIELD_ATTRIBUTES = [
     'required',
     'state',
     'help',
+    'min',
+    'max',
+    'step',
+    'pattern',
+    'minlength',
+    'maxlength',
+    'inputmode',
+    'autocomplete',
 ]
 
 export function esc(str: string): string {
@@ -84,10 +92,12 @@ export abstract class TextFieldBase extends HTMLElement {
         this._syncFormValue()
         this._initialised = true
         this.addEventListener('input', this._onInput)
+        this.addEventListener('focusout', this._onFocusout)
     }
 
     disconnectedCallback(): void {
         this.removeEventListener('input', this._onInput)
+        this.removeEventListener('focusout', this._onFocusout)
     }
 
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
@@ -96,6 +106,12 @@ export abstract class TextFieldBase extends HTMLElement {
             const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(this.controlSelector)
             if (control && control.value !== (next ?? '')) control.value = next ?? ''
             this._syncFormValue()
+            return
+        }
+        // Fast path: updating only the state class/feedback avoids destroying + recreating the
+        // inner control (which would steal focus while the user is typing).
+        if (name === 'state') {
+            this._patchState(next as FieldState | null)
             return
         }
         this.render()
@@ -117,6 +133,42 @@ export abstract class TextFieldBase extends HTMLElement {
 
     private _onInput = (): void => {
         this._syncFormValue()
+        this._reflectValidity()
+    }
+
+    private _onFocusout = (): void => {
+        this._reflectValidity()
+    }
+
+    private _reflectValidity(): void {
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(this.controlSelector)
+        if (!control) return
+        const newState: FieldState = control.validity.valid ? 'valid' : 'invalid'
+        if (this.getAttribute('state') !== newState) {
+            this.setAttribute('state', newState)
+        }
+    }
+
+    /** In-place update of validity chrome — does not replace innerHTML so the focused
+     *  control is never disrupted. */
+    private _patchState(state: FieldState | null): void {
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(this.controlSelector)
+        if (!control) return
+        control.classList.remove('is-valid', 'is-invalid')
+        if (state === 'valid') control.classList.add('is-valid')
+        else if (state === 'invalid') control.classList.add('is-invalid')
+        this.querySelectorAll('.valid-feedback, .invalid-feedback').forEach(el => el.remove())
+        if (state === 'valid') {
+            const div = document.createElement('div')
+            div.className = 'valid-feedback'
+            div.textContent = 'Looks good!'
+            control.insertAdjacentElement('afterend', div)
+        } else if (state === 'invalid') {
+            const div = document.createElement('div')
+            div.className = 'invalid-feedback'
+            div.textContent = 'Please provide a valid value.'
+            control.insertAdjacentElement('afterend', div)
+        }
     }
 
     private _syncFormValue(): void {
@@ -254,6 +306,15 @@ export abstract class TextFieldBase extends HTMLElement {
         const readonlyAttr = this.readonly ? ' readonly' : ''
         const requiredAttr = this.required ? ' required' : ''
 
+        const attrOrEmpty = (attrName: string) => {
+            const v = this.getAttribute(attrName)
+            return v != null ? ` ${attrName}="${esc(v)}"` : ''
+        }
+        const constraintAttrs =
+            attrOrEmpty('min') + attrOrEmpty('max') + attrOrEmpty('step') +
+            attrOrEmpty('pattern') + attrOrEmpty('minlength') + attrOrEmpty('maxlength') +
+            attrOrEmpty('inputmode') + attrOrEmpty('autocomplete')
+
         const labelHtml = label
             ? `<label class="form-label" for="${this._controlId}">${esc(label)}</label>`
             : ''
@@ -272,7 +333,7 @@ export abstract class TextFieldBase extends HTMLElement {
             classAttr: `form-control${sizeClass}${stateClass}`,
             value: currentValue,
             placeholder,
-            commonAttrs: `${ariaDescribedBy}${disabledAttr}${readonlyAttr}${requiredAttr}`,
+            commonAttrs: `${ariaDescribedBy}${disabledAttr}${readonlyAttr}${requiredAttr}${constraintAttrs}`,
         })
 
         this.innerHTML = [labelHtml, control, feedbackHtml, helpHtml].join('')
