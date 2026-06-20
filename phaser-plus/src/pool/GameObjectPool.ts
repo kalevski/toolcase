@@ -120,7 +120,17 @@ export default class GameObjectPool {
     }
 
     dispose(): void {
-        this.map.forEach(pool => { (pool as any).dispose() })
+        this.map.forEach(pool => {
+            // Destroy every free (not currently live) instance so their GL/texture refs are
+            // released immediately. Live objects that were obtained but not yet released are
+            // still held in the scene's display list and will be destroyed by Phaser's own
+            // scene teardown.
+            const free: any[] = (pool as any).pool ?? []
+            for (const obj of free) {
+                if (typeof obj?.destroy === 'function') obj.destroy()
+            }
+            ;(pool as any).dispose()
+        })
         this.map.clear()
         this.dirty = true
     }
