@@ -4,6 +4,7 @@ import { esc } from './internal/esc'
 // through --bs-lightbox-* vars backed by --tc-* tokens.
 
 import { closeIcon, chevronLeftIcon, chevronRightIcon } from './icons'
+import { lockBody, unlockBody } from './internal/scroll-lock'
 
 const TAG_NAME = 'tc-lightbox'
 
@@ -146,11 +147,11 @@ export class Lightbox extends HTMLElement {
     }
 
     private _lockScroll(): void {
-        document.body.style.overflow = 'hidden'
+        lockBody()
     }
 
     private _restoreScroll(): void {
-        document.body.style.overflow = ''
+        unlockBody()
     }
 
     private _restoreFocus(): void {

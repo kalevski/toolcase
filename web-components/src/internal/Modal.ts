@@ -1,5 +1,6 @@
 import { Backdrop } from './backdrop'
 import { executeAfterTransition, reflow, triggerEvent } from './transition'
+import { lockBody, unlockBody } from './scroll-lock'
 
 // Drop-in replacement for Bootstrap's Modal plugin: backdrop (true | 'static'),
 // Escape handling, body scroll lock, [data-bs-dismiss="modal"] wiring and the
@@ -33,7 +34,7 @@ export class Modal {
 
         this._isShown = true
         this._transitioning = true
-        document.body.classList.add('modal-open')
+        lockBody()
         document.addEventListener('keydown', this._onKeydown)
 
         if (this._backdropOption !== false) this._backdrop.show()
@@ -73,7 +74,7 @@ export class Modal {
             el.removeAttribute('aria-modal')
             el.removeAttribute('role')
             this._backdrop.hide()
-            document.body.classList.remove('modal-open')
+            unlockBody()
             triggerEvent(el, 'hidden.bs.modal')
         })
     }
@@ -88,7 +89,7 @@ export class Modal {
         this._element.removeEventListener('mousedown', this._onElementMouseDown)
         document.removeEventListener('keydown', this._onKeydown)
         this._backdrop.dispose()
-        if (this._isShown) document.body.classList.remove('modal-open')
+        if (this._isShown) unlockBody()
     }
 
     private _onDismissClick = (event: Event): void => {

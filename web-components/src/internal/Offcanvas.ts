@@ -1,5 +1,6 @@
 import { Backdrop } from './backdrop'
 import { executeAfterTransition, triggerEvent } from './transition'
+import { lockBody, unlockBody } from './scroll-lock'
 
 // Drop-in replacement for Bootstrap's Offcanvas plugin: backdrop
 // (true | false | 'static'), optional body scroll, Escape handling,
@@ -47,7 +48,7 @@ export class Offcanvas {
                 this.hide()
             })
         }
-        if (!this._scroll) document.body.classList.add('modal-open')
+        if (!this._scroll) lockBody()
 
         const el = this._element
         el.classList.add('showing')
@@ -82,7 +83,7 @@ export class Offcanvas {
             el.removeAttribute('aria-modal')
             el.removeAttribute('role')
             this._backdrop.hide()
-            if (!this._scroll) document.body.classList.remove('modal-open')
+            if (!this._scroll) unlockBody()
             triggerEvent(el, 'hidden.bs.offcanvas')
         })
     }
@@ -96,7 +97,7 @@ export class Offcanvas {
         this._element.removeEventListener('click', this._onDismissClick)
         document.removeEventListener('keydown', this._onKeydown)
         this._backdrop.dispose()
-        if (this._isShown && !this._scroll) document.body.classList.remove('modal-open')
+        if (this._isShown && !this._scroll) unlockBody()
     }
 
     private _onDismissClick = (event: Event): void => {

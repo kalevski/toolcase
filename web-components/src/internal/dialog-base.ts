@@ -1,4 +1,5 @@
 import { esc as escShared } from "./esc"
+import { lockBody, unlockBody } from './scroll-lock'
 // Shared scaffold for centered modal dialogs (tc-confirm-dialog,
 // tc-report-dialog). Owns the open/close lifecycle, the one-frame transition
 // dance, scroll-lock, focus trap + restore, Escape/Tab handling, and backdrop
@@ -146,11 +147,11 @@ export abstract class DialogBase extends HTMLElement {
     }
 
     private _lockScroll(): void {
-        document.body.style.overflow = 'hidden'
+        lockBody()
     }
 
     private _restoreScroll(): void {
-        document.body.style.overflow = ''
+        unlockBody()
     }
 
     private _restoreFocus(): void {

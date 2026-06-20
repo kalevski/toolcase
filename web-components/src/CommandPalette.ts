@@ -1,6 +1,7 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { icon } from './icons'
+import { lockBody, unlockBody } from './internal/scroll-lock'
 
 const TAG_NAME = 'tc-command-palette'
 
@@ -162,11 +163,11 @@ export class CommandPalette extends HTMLElement {
     }
 
     private _lockScroll(): void {
-        document.body.style.overflow = 'hidden'
+        lockBody()
     }
 
     private _restoreScroll(): void {
-        document.body.style.overflow = ''
+        unlockBody()
     }
 
     private _restoreFocus(): void {
