@@ -19,6 +19,12 @@ npm-debug.log*
 .env
 .env*.local
 
+# multi-account registry — per-alias Claude config dirs hold `.credentials.json`
+# OAuth tokens (real secrets); never commit them. Also the local SQLite store.
+.claude-accounts/
+taskforge.db
+taskforge.db-*
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -7,6 +7,7 @@ import 'server-only'
 import { prep, getRow, allRows, tx } from '@/server/data/db'
 import { config } from '@/server/config'
 import { selectLru, type PickOptions } from '@/server/domain/account-lru'
+import { looksLikeApiKey } from '@/server/domain/account-secrets'
 import type { Account } from '@/server/domain/types'
 
 const ALIAS_RE = /^[a-z0-9][a-z0-9-]{0,40}$/
@@ -55,6 +56,14 @@ export function validate(input: AccountInput): void {
     if (input.auth === 'apikey' && !input.apiKeyEnv?.trim()) {
         throw new InvalidAccountError('apiKeyEnv (env var name) is required for apikey accounts')
     }
+    // SECRET INVARIANT guard: `apiKeyEnv` is the *name* of the env var that holds
+    // the key, never the key itself. Reject an actual `sk-ant-…` value pasted
+    // here so a secret can never be persisted into the `account` table.
+    if (looksLikeApiKey(input.apiKeyEnv)) {
+        throw new InvalidAccountError(
+            'apiKeyEnv must be the NAME of an env var (e.g. TASKFORGE_CIBOT_KEY), not the API key value itself',
+        )
+    }
 }
 
 export function upsert(input: AccountInput): Account {
@@ -62,6 +71,10 @@ export function upsert(input: AccountInput): Account {
     const dir = input.dir?.trim() || defaultDir(input.alias)
     const label = input.label?.trim() || null
     const apiKeyEnv = input.auth === 'apikey' ? input.apiKeyEnv!.trim() : null
+    // SECRET INVARIANT: only registry metadata is written below — alias, dir,
+    // auth, label, and the env-var *name* (`api_key_env`). There is deliberately
+    // no column for an API key value; the key is resolved from the environment at
+    // spawn time (see `resolveAccount`) and never reaches this table.
     prep(
         `INSERT INTO account (alias, dir, auth, label, api_key_env)
          VALUES (?, ?, ?, ?, ?)

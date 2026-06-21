@@ -44,6 +44,7 @@ import * as projectRepo from '@/server/data/repositories/project-repo'
 import { RunLogger } from '@/server/infrastructure/logs'
 import { slog } from '@/server/infrastructure/server-log'
 import { isLimitError, isTransientError, computeLimitSleep } from '@/server/domain/limit'
+import { scrubSecrets } from '@/server/domain/account-secrets'
 import { notifyBatch } from '@/server/infrastructure/slack'
 import { refreshUsage } from '@/server/services/usage'
 import { ensureImported } from '@/server/services/migrate-fs'
@@ -1081,6 +1082,12 @@ class ExecutionManager extends EventEmitter {
         })
         r.child = child
 
+        // The child runs under the resolved account env; its stderr/stdout could
+        // echo the spawn env (CLAUDE_CONFIG_DIR / API key). Scrub those values out
+        // of everything that lands in a run log, telemetry, or audit detail.
+        const accountSecrets = accountEnv ? [accountEnv.ANTHROPIC_API_KEY, accountEnv.CLAUDE_CONFIG_DIR] : []
+        const scrub = (s: string): string => (accountEnv ? scrubSecrets(s, accountSecrets) : s)
+
         let stderrBuf = ''
         let resultText = ''
         let isError = false
@@ -1104,7 +1111,7 @@ class ExecutionManager extends EventEmitter {
         await new Promise<void>((resolve) => {
             child.stdout?.on('data', (chunk: Buffer) => parser.feed(chunk.toString()))
             child.stderr?.on('data', (chunk: Buffer) => {
-                const text = chunk.toString()
+                const text = scrub(chunk.toString())
                 stderrBuf += text
                 this.log(repo, 'error', text, rel)
             })
@@ -1114,7 +1121,7 @@ class ExecutionManager extends EventEmitter {
                 resolve()
             })
             child.on('error', (err) => {
-                stderrBuf += `\n${err.message}`
+                stderrBuf += `\n${scrub(err.message)}`
                 resolve()
             })
         })
@@ -1126,7 +1133,7 @@ class ExecutionManager extends EventEmitter {
             isError,
             limit: isLimitError(stderrBuf),
             stderr: stderrBuf,
-            resultText,
+            resultText: scrub(resultText),
             sessionId,
             usage,
         }

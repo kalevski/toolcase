@@ -5,3 +5,7 @@ node_modules
 .env*.local
 npm-debug.log*
 README.md
+# Multi-account secrets / local registry store — must never enter the image.
+.claude-accounts/
+taskforge.db
+taskforge.db-*
