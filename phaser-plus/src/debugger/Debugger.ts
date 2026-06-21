@@ -23,6 +23,8 @@ export default class Debugger extends HTMLFeature {
 
     private readonly panels: Record<string, Panel> = {}
 
+    private readonly folders: Record<string, any> = {}
+
     private updateLoop!: Time.TimerEvent
 
     override onCreate(): void {
@@ -103,6 +105,7 @@ export default class Debugger extends HTMLFeature {
             throw new Error(`panel key=${key} is already taken`)
         }
         const folder = (this.pane as any).addFolder({ title: title === null ? key : title })
+        this.folders[key] = folder
         const panel = new panelClass(this.scene, folder)
         panel.draw()
         this.panels[key] = panel
@@ -117,6 +120,8 @@ export default class Debugger extends HTMLFeature {
         if (!panel) return this
         panel.dispose()
         delete this.panels[key]
+        this.folders[key]?.dispose?.()
+        delete this.folders[key]
         return this
     }
 
