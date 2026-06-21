@@ -40,6 +40,11 @@ VOLUME /var/lib/nginxpilot
 # in config to expose it beyond the container's loopback).
 EXPOSE 80 9090
 
+# Requires admin.listen to be non-empty (default: 127.0.0.1:9090).
+# Disabling the admin endpoint (admin.listen: "") also disables this healthcheck.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:9090/healthz >/dev/null 2>&1 || exit 1
+
 # No arguments → supervise daemon + nginx. With arguments → run the CLI:
 #   docker run --rm ... <image> validate
 ENTRYPOINT ["/usr/local/bin/nginxpilot-entrypoint.sh"]
