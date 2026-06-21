@@ -62,7 +62,8 @@ if tokens >= cost then
 	allowed = 1
 end
 redis.call("HSET", key, "tokens", tostring(tokens), "last", tostring(now))
-local ttl = math.ceil(capacity / refill) + 1
+local ttl
+if refill > 0 then ttl = math.ceil(capacity / refill) + 1 else ttl = math.ceil(capacity) + 1 end
 redis.call("EXPIRE", key, ttl)
 return {allowed, tostring(tokens)}
 `.trim()

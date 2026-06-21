@@ -62,6 +62,7 @@ export class RateLimiter {
 		refillPerSecond: number,
 		cost = 1,
 	): Promise<{ allowed: boolean; tokens: number }> {
+		if (refillPerSecond < 0) throw new RangeError('refillPerSecond must be >= 0')
 		const now = Date.now()
 		const reply = (await this.scripts.get('tokenBucket').run(this.client, {
 			keys: [this.keys.build(BUCKET_NAMESPACE, key)],
