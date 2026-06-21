@@ -212,4 +212,37 @@ describe('AtlasBuilder', () => {
         const stat = await fs.stat(result.pages[0].file)
         expect(stat.size).toBeGreaterThan(0)
     })
+
+    it('rejects decode when image exceeds maxInputPixels', async () => {
+        const dir = path.join(workDir, 'pixel-limit')
+        await fs.mkdir(dir, { recursive: true })
+        // 32x32 = 1024 pixels; limit of 100 triggers rejection
+        const img = path.join(dir, 'big.png')
+        await writeSolidPng(img, 32, 32, { r: 200, g: 0, b: 0 })
+        const out = path.join(workDir, 'out-pixel-limit')
+        const builder = new AtlasBuilder({
+            output: { directory: out },
+            maxInputPixels: 100
+        })
+        await expect(builder.build([{ id: 'big', path: img }])).rejects.toMatchObject({
+            name: 'AtlasBuildError',
+            stage: 'decode'
+        })
+    })
+
+    it('accepts decode when image is within maxInputPixels', async () => {
+        const dir = path.join(workDir, 'pixel-limit-ok')
+        await fs.mkdir(dir, { recursive: true })
+        // 8x8 = 64 pixels; limit of 100 is fine
+        const img = path.join(dir, 'small.png')
+        await writeSolidPng(img, 8, 8, { r: 0, g: 200, b: 0 })
+        const out = path.join(workDir, 'out-pixel-limit-ok')
+        const result = await new AtlasBuilder({
+            output: { directory: out, format: 'png' },
+            maxInputPixels: 100,
+            packer: { padding: 0, allowRotation: false, pot: 'none' },
+            useAlphaTrimming: false
+        }).build([{ id: 'small', path: img }])
+        expect(result.pages[0].frames.length).toBe(1)
+    })
 })

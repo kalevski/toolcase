@@ -118,4 +118,19 @@ describe('ImageProcessor', () => {
         expect(ma.width).toBe(10)
         expect(mb.width).toBe(40)
     })
+
+    it('rejects image exceeding maxInputPixels', async () => {
+        // 10x10 = 100 pixels; limit of 50 means it should be rejected
+        const buf = await makeRedPng(10, 10)
+        const proc = ImageProcessor.fromBuffer(buf, { maxInputPixels: 50 })
+        await expect(proc.toBuffer()).rejects.toThrow(ImageProcessorError)
+    })
+
+    it('accepts image within maxInputPixels', async () => {
+        const buf = await makeRedPng(4, 4)
+        // 4x4 = 16 pixels; limit of 50 is fine
+        const out = await ImageProcessor.fromBuffer(buf, { maxInputPixels: 50 }).toBuffer()
+        const meta = await sharp(out).metadata()
+        expect(meta.width).toBe(4)
+    })
 })

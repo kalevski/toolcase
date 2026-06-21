@@ -38,6 +38,11 @@ export interface OptimizeOptions {
 	stripMetadata?: boolean
 }
 
+export interface ImageProcessorOptions {
+	/** Maximum allowed input pixels (width × height). Defaults to 50 000 000. */
+	maxInputPixels?: number
+}
+
 export interface ImageMetadata {
 	format: string
 	width: number
@@ -58,25 +63,27 @@ export class ImageProcessor {
 	private readonly source: ImageSource
 	private readonly ops: ReadonlyArray<PipelineOp>
 	private readonly sourcePath: string | null
+	private readonly maxInputPixels: number | undefined
 
-	private constructor(source: ImageSource, ops: ReadonlyArray<PipelineOp>, sourcePath: string | null) {
+	private constructor(source: ImageSource, ops: ReadonlyArray<PipelineOp>, sourcePath: string | null, maxInputPixels: number | undefined) {
 		this.source = source
 		this.ops = ops
 		this.sourcePath = sourcePath
+		this.maxInputPixels = maxInputPixels
 	}
 
-	static fromBuffer(buffer: Buffer): ImageProcessor {
+	static fromBuffer(buffer: Buffer, options?: ImageProcessorOptions): ImageProcessor {
 		if (!Buffer.isBuffer(buffer)) {
 			throw new ImageProcessorError('invalid-buffer', 'fromBuffer requires a Buffer')
 		}
-		return new ImageProcessor({ kind: 'buffer', data: buffer }, [], null)
+		return new ImageProcessor({ kind: 'buffer', data: buffer }, [], null, options?.maxInputPixels)
 	}
 
-	static fromPath(path: string): ImageProcessor {
+	static fromPath(path: string, options?: ImageProcessorOptions): ImageProcessor {
 		if (typeof path !== 'string' || path.length === 0) {
 			throw new ImageProcessorError('invalid-path', 'fromPath requires a non-empty string')
 		}
-		return new ImageProcessor({ kind: 'path', path }, [], path)
+		return new ImageProcessor({ kind: 'path', path }, [], path, options?.maxInputPixels)
 	}
 
 	resize(options: ResizeOptions): ImageProcessor {
@@ -194,13 +201,13 @@ export class ImageProcessor {
 
 	private append(op: PipelineOp): ImageProcessor {
 		const next = this.ops.length === 0 ? [op] : [...this.ops, op]
-		return new ImageProcessor(this.source, next, this.sourcePath)
+		return new ImageProcessor(this.source, next, this.sourcePath, this.maxInputPixels)
 	}
 
 	private async materialize(): Promise<Sharp> {
 		const sharp = await loadSharp()
 		const input = this.source.kind === 'buffer' ? this.source.data : this.source.path
-		let pipeline: Sharp = sharp(input)
+		let pipeline: Sharp = sharp(input, { limitInputPixels: this.maxInputPixels ?? 50_000_000, failOn: 'error' })
 		for (const op of this.ops) {
 			pipeline = op(pipeline)
 		}

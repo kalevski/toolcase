@@ -36,6 +36,8 @@ export interface AtlasBuilderOptions {
 	 * whole-atlas concerns, not per-input.
 	 */
 	continueOnError?: boolean
+	/** Maximum allowed input pixels (width × height) per source image. Defaults to 50 000 000. */
+	maxInputPixels?: number
 }
 
 export interface AtlasBuildFailure {
@@ -238,7 +240,7 @@ export class AtlasBuilder {
 						channels: 4,
 						background: this.options.background ?? { r: 0, g: 0, b: 0, alpha: 0 }
 					}
-				}).composite(composites)
+				}, { limitInputPixels: this.options.maxInputPixels ?? 50_000_000, failOn: 'error' }).composite(composites)
 
 				const composedBuffer = await canvas.png().toBuffer()
 				let writer = ImageProcessor.fromBuffer(composedBuffer).format({
@@ -297,8 +299,13 @@ export class AtlasBuilder {
 			throw new AtlasBuildError('decode', 'input.path is required')
 		}
 		const id = typeof input.id === 'string' && input.id.length > 0 ? input.id : path.basename(input.path, path.extname(input.path))
+		const limit = this.options.maxInputPixels ?? 50_000_000
 		try {
-			const { data, info } = await sharp(input.path).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+			const meta = await sharp(input.path, { limitInputPixels: limit, failOn: 'error' }).metadata()
+			if (meta.width && meta.height && meta.width * meta.height > limit) {
+				throw new AtlasBuildError('decode', `input image exceeds pixel limit (${meta.width * meta.height} > ${limit})`, input.path)
+			}
+			const { data, info } = await sharp(input.path, { limitInputPixels: limit, failOn: 'error' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
 			const useTrim = this.options.useAlphaTrimming !== false
 			const bounds = useTrim
 				? AtlasBuilder.computeAlphaBounds(data, info.width, info.height, this.options.packer?.alphaThreshold ?? 1)
