@@ -195,6 +195,54 @@ describe('RESTRouteHandler.list', () => {
         expect(state.paginate.mock.calls[0][0].where).toEqual({ age: { gte: '18' } })
     })
 
+    it('schema without filterable flag → field rejected even though readable', async () => {
+        const { list } = setup({ schema: { email: {}, status: {} } })
+        const { reply, code } = makeReply()
+        const body = await list.handler(makeReq({ query: { email: 'x' } }), reply) as { cause: string }
+        expect(code).toHaveBeenCalledWith(400)
+        expect(body.cause).toBe('VALIDATION_ERROR')
+    })
+
+    it('schema with filterable:true → field accepted for filtering', async () => {
+        const { state, list } = setup({ schema: { email: { filterable: true }, status: {} } })
+        state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
+        const { reply } = makeReply()
+        await list.handler(makeReq({ query: { email: 'x' } }), reply)
+        expect(state.paginate.mock.calls[0][0].where).toEqual({ email: 'x' })
+    })
+
+    it('schema without sortable flag → sort on that field is rejected', async () => {
+        const { list } = setup({ schema: { createdAt: {} } })
+        const { reply, code } = makeReply()
+        const body = await list.handler(makeReq({ query: { sort: 'createdAt' } }), reply) as { cause: string }
+        expect(code).toHaveBeenCalledWith(400)
+        expect(body.cause).toBe('VALIDATION_ERROR')
+    })
+
+    it('schema with sortable:true → sort on that field is accepted', async () => {
+        const { state, list } = setup({ schema: { createdAt: { sortable: true } } })
+        state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
+        const { reply } = makeReply()
+        await list.handler(makeReq({ query: { sort: 'createdAt' } }), reply)
+        expect(state.paginate.mock.calls[0][0].orderBy).toEqual([{ field: 'createdAt', direction: 'asc' }])
+    })
+
+    it('explicit filterableFields override schema flags', async () => {
+        const { state, list } = setup({ filterableFields: ['status'], schema: { status: {} } })
+        state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
+        const { reply } = makeReply()
+        await list.handler(makeReq({ query: { status: 'active' } }), reply)
+        expect(state.paginate.mock.calls[0][0].where).toEqual({ status: 'active' })
+    })
+
+    it('explicit sortableFields override schema flags', async () => {
+        const { state, list } = setup({ sortableFields: ['name'], schema: { name: {} } })
+        state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
+        const { reply } = makeReply()
+        await list.handler(makeReq({ query: { sort: 'name' } }), reply)
+        expect(state.paginate.mock.calls[0][0].orderBy).toEqual([{ field: 'name', direction: 'asc' }])
+    })
+
     it('hides restrictedOutputFields on every row', async () => {
         const { state, list } = setup({ restrictedOutputFields: ['passwordHash'] })
         state.paginate.mockResolvedValue({

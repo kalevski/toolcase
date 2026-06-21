@@ -10,6 +10,8 @@ export interface FieldRule {
 	format?: string
 	enum?: readonly (string | number | boolean | null)[]
 	items?: FieldRule
+	filterable?: boolean
+	sortable?: boolean
 }
 
 export type FieldSchema<T extends object = Record<string, unknown>> = {

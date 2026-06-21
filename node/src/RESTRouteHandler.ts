@@ -56,8 +56,8 @@ export class RESTRouteHandler<Row extends object = any> extends RouteHandler<Row
         super(options)
         this.service = service
         this.methods = new Set<RESTMethod>(options.methods ?? ALL_METHODS)
-        this.filterableFields = resolveFieldList(options.filterableFields, options.schema)
-        this.sortableFields = resolveFieldList(options.sortableFields, options.schema)
+        this.filterableFields = resolveFieldList(options.filterableFields, options.schema, 'filter')
+        this.sortableFields = resolveFieldList(options.sortableFields, options.schema, 'sort')
     }
 
     register(fastify: FastifyInstance): void {
@@ -191,6 +191,7 @@ function groupFor<T extends object>(
 function resolveFieldList<T extends object>(
     explicit: ReadonlyArray<keyof T & string> | undefined,
     schema: { [K in keyof T]?: FieldRule } | undefined,
+    kind: 'filter' | 'sort',
 ): ReadonlyArray<keyof T & string> | undefined {
     if (explicit !== undefined) return explicit
     if (!schema) return [] as ReadonlyArray<keyof T & string>
@@ -198,6 +199,8 @@ function resolveFieldList<T extends object>(
     for (const key of Object.keys(schema) as (keyof T & string)[]) {
         const rule = schema[key]
         if (rule?.private || rule?.writeOnly) continue
+        if (kind === 'filter' && !rule?.filterable) continue
+        if (kind === 'sort' && !rule?.sortable) continue
         out.push(key)
     }
     return out
