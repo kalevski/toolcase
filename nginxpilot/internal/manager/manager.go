@@ -81,6 +81,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 func (m *Manager) Run(ctx context.Context) {
 	m.mu.Lock()
 	m.ctx = ctx
+	m.reconcileState()
 	for i := range m.cfg.Sites {
 		m.startLoop(m.cfg.Sites[i])
 	}
@@ -91,6 +92,25 @@ func (m *Manager) Run(ctx context.Context) {
 	<-ctx.Done()
 	m.log.Info("shutting down, waiting for in-flight syncs")
 	m.wg.Wait()
+}
+
+// reconcileState clears DeployedRef and HTTP validators for any site whose
+// state records a deploy but whose current/ symlink resolves to nothing.
+// Called once at startup (with m.mu held) before loops begin, so a daemon
+// restarted after a manual rm of current/ self-heals on the first tick.
+func (m *Manager) reconcileState() {
+	for _, site := range m.cfg.Sites {
+		if !m.deployer.CurrentExists(site.Domain) {
+			st, err := m.store.Load(site.Domain)
+			if err != nil || st.DeployedRef == "" {
+				continue
+			}
+			m.log.Warn("state records a deploy but current is missing; clearing ref so next sync redeploys",
+				"domain", site.Domain)
+			st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+			_ = m.store.Save(st)
+		}
+	}
 }
 
 // startLoop must be called with m.mu held and m.ctx set.
