@@ -129,4 +129,25 @@ describe('parseFilters', () => {
         const out = parseFilters<Row>({ age: { in: '18,21,30' } }, { schema })
         expect(out).toEqual({ age: { in: [18, 21, 30] } })
     })
+
+    describe('prototype pollution guard', () => {
+        it('drops __proto__ key and does not pollute Object prototype', () => {
+            const poisoned = JSON.parse('{"__proto__":{"isAdmin":true}}') as Record<string, unknown>
+            const out = parseFilters(poisoned, { allowedFields: [] })
+            expect(Object.keys(out)).not.toContain('__proto__')
+            expect(({} as Record<string, unknown>).isAdmin).toBeUndefined()
+        })
+
+        it('drops constructor key', () => {
+            const poisoned = JSON.parse('{"constructor":{"prototype":{"isAdmin":true}}}') as Record<string, unknown>
+            const out = parseFilters(poisoned, { allowedFields: [] })
+            expect(Object.keys(out)).not.toContain('constructor')
+        })
+
+        it('drops prototype key', () => {
+            const poisoned = JSON.parse('{"prototype":{"isAdmin":true}}') as Record<string, unknown>
+            const out = parseFilters(poisoned, { allowedFields: [] })
+            expect(Object.keys(out)).not.toContain('prototype')
+        })
+    })
 })

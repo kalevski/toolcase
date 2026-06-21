@@ -1,5 +1,7 @@
 import { FieldSchema, Visitor, VisitorActions, VisitorContext } from './types'
 
+export const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
 export function pipe<T extends object>(...visitors: Visitor<T>[]): Visitor<T> {
 	return (ctx, actions) => {
 		for (const visitor of visitors) {
@@ -25,6 +27,7 @@ export function traverseEntity<T extends object = Record<string, unknown>>(
 	const result: Record<string, unknown> = {}
 
 	for (const key of Object.keys(source)) {
+		if (FORBIDDEN_KEYS.has(key)) continue
 		const rule = (schema as Record<string, unknown>)[key] as
 			| FieldSchema<T>[keyof T]
 			| undefined

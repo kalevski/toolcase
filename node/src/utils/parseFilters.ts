@@ -1,5 +1,5 @@
 import { ValidationError } from '../errors'
-import { FieldRule, FieldSchema } from './sanitize'
+import { FieldRule, FieldSchema, FORBIDDEN_KEYS } from './sanitize'
 import { FILTER_OP_SET, Filter, FilterOp } from './filter'
 
 export type CoerceType = 'integer' | 'number' | 'boolean' | 'date'
@@ -31,6 +31,7 @@ export function parseFilters<T extends object = Record<string, unknown>>(
 	const out: Record<string, unknown> = {}
 
 	for (const key of Object.keys(query)) {
+		if (FORBIDDEN_KEYS.has(key)) continue
 		if (reserved.has(key)) continue
 		if (!allowed.has(key)) {
 			throw new ValidationError(`Unknown filter field: ${key}`)
