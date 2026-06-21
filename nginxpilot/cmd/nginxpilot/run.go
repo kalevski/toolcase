@@ -58,9 +58,11 @@ func cmdRun(args []string) int {
 	defer stop()
 
 	// Admin endpoint (loopback by default; empty listen disables).
-	token := ""
-	if cfg.Admin.TokenEnv != "" {
-		token = os.Getenv(cfg.Admin.TokenEnv)
+	token, err := resolveAdminToken(cfg.Admin.TokenEnv)
+	if err != nil {
+		log.Error("admin token misconfiguration; refusing to start",
+			"error", err, "var", cfg.Admin.TokenEnv)
+		return 1
 	}
 	adminSrv := admin.New(mgr, token, log)
 	go func() {
@@ -97,6 +99,21 @@ func cmdRun(args []string) int {
 	sdNotify("STOPPING=1")
 	log.Info("shutdown complete")
 	return 0
+}
+
+// resolveAdminToken looks up the bearer token from the environment.
+// When tokenEnv is empty, no auth is configured and ("", nil) is returned.
+// When tokenEnv names a variable that resolves to "", an error is returned so
+// the caller can refuse to start rather than expose an unauthenticated endpoint.
+func resolveAdminToken(tokenEnv string) (string, error) {
+	if tokenEnv == "" {
+		return "", nil
+	}
+	token := os.Getenv(tokenEnv)
+	if token == "" {
+		return "", fmt.Errorf("env var %q is empty", tokenEnv)
+	}
+	return token, nil
 }
 
 // sdNotify implements the systemd Type=notify readiness protocol with no
