@@ -14,6 +14,7 @@ import ColorDemo from './ColorDemo'
 import UtilitiesDemo from './UtilitiesDemo'
 import PackingDemo from './PackingDemo'
 import WeightedRandomDemo from './WeightedRandomDemo'
+import RandomDemo from './RandomDemo'
 import DijkstraDemo from './DijkstraDemo'
 import AStarDemo from './AStarDemo'
 
@@ -48,6 +49,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'adjacency-matrix', label: 'AdjacencyMatrix', category: 'Data Structures', element: <AdjacencyMatrixDemo /> },
     { key: 'object-pool', label: 'ObjectPool', category: 'Data Structures', element: <ObjectPoolDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
+    { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },
     { key: 'dijkstra', label: 'Dijkstra', category: 'Data Structures', element: <DijkstraDemo /> },
     { key: 'astar', label: 'AStar', category: 'Data Structures', element: <AStarDemo /> },
 

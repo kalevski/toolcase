@@ -17,6 +17,7 @@ import AdjacencyMatrix from './AdjacencyMatrix'
 import State from './State'
 import retry from './retry'
 import WeightedRandom from './WeightedRandom'
+import Random from './Random'
 import Dijkstra from './Dijkstra'
 import AStar from './AStar'
 
@@ -87,6 +88,7 @@ export {
     State,
     retry,
     WeightedRandom,
+    Random,
     Dijkstra,
     AStar
 }
@@ -113,6 +115,7 @@ const BASE = {
     State,
     retry,
     WeightedRandom,
+    Random,
     Dijkstra,
     AStar
 }

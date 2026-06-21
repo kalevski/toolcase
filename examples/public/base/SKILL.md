@@ -1039,6 +1039,49 @@ const port    = env('PORT', 3000, 'number')
 const debug   = env('DEBUG', false, 'boolean')
 ```
 
+### Random
+
+Seedable pseudo-random number generator (mulberry32). Deterministic: identical seeds produce identical sequences. Zero dependencies, isomorphic.
+
+```ts
+new Random(seed: number)
+```
+
+- `next(): number` — uniform float in `[0, 1)`. Usable as `RandomFn` for `WeightedRandom`.
+- `int(min: number, max: number): number` — inclusive integer in `[min, max]`. Throws if `min`/`max` are not integers or `min > max`.
+- `float(min: number, max: number): number` — float in `[min, max)`. Throws if bounds are non-finite or `min > max`.
+- `bool(p: number = 0.5): boolean` — `true` with probability `p`. Throws if `p` is outside `[0, 1]`.
+- `pick<T>(arr: T[]): T` — uniformly random element. Throws on empty or non-array.
+- `shuffle<T>(arr: T[]): T[]` — Fisher-Yates shuffle; returns a new array without mutating the original.
+- `weighted<T>(entries: Array<{ item: T, weight: number }>): T` — weighted pick. Throws if entries is empty, any weight is negative/non-finite, or total weight is zero.
+
+```ts
+import { Random } from '@toolcase/base'
+
+const rng = new Random(42)
+
+rng.next()           // 0.7837119...
+rng.int(1, 6)        // 1–6 inclusive (dice roll)
+rng.float(0, 1)      // 0.something
+rng.bool(0.3)        // true ~30% of the time
+rng.pick(['a', 'b', 'c'])       // one of the three
+rng.shuffle([1, 2, 3, 4, 5])   // [3, 1, 5, 2, 4] (or similar)
+rng.weighted([
+    { item: 'common', weight: 7 },
+    { item: 'rare',   weight: 3 }
+])  // 'common' ~70% of the time
+```
+
+Inject into `WeightedRandom` for reproducible loot tables:
+
+```ts
+import { Random, WeightedRandom } from '@toolcase/base'
+
+const rng = new Random(seed)
+const loot = new WeightedRandom(entries, (e) => e.weight, () => rng.next())
+loot.pick() // deterministic given same seed
+```
+
 ---
 
 ## Notes
