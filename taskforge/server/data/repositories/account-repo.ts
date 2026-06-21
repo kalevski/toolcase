@@ -4,8 +4,9 @@
 // key value is never stored here.
 
 import 'server-only'
-import { prep, getRow, allRows } from '@/server/data/db'
+import { prep, getRow, allRows, tx } from '@/server/data/db'
 import { config } from '@/server/config'
+import { selectLru, type PickOptions } from '@/server/domain/account-lru'
 import type { Account } from '@/server/domain/types'
 
 const ALIAS_RE = /^[a-z0-9][a-z0-9-]{0,40}$/
@@ -93,4 +94,31 @@ export function remove(alias: string): void {
  */
 export function markUsed(alias: string, at: string = new Date().toISOString()): void {
     prep('UPDATE account SET last_used_at = ? WHERE alias = ?').run(at, alias)
+}
+
+/**
+ * Atomically pick the least-recently-used eligible account and stamp it used —
+ * the rotation primitive that spreads load across identities. Eligible = not
+ * currently cooling down (`cooling_until` unset or already past `at`), optionally
+ * restricted to `opts.pool` (subset of aliases) and/or a single `opts.auth`
+ * method. Ordering follows `selectLru` (never-used first, then oldest
+ * `last_used_at`, ties broken by alias). Returns the chosen account (with its
+ * freshly-advanced `lastUsedAt`), or `null` when nothing is eligible.
+ *
+ * The read-pick-stamp runs inside one transaction so two concurrent project
+ * engines never select the same account in a race.
+ */
+export function pickLeastRecentlyUsed(
+    opts: PickOptions = {},
+    at: string = new Date().toISOString(),
+): Account | null {
+    // An explicitly empty pool selects nothing — short-circuit before the tx.
+    if (opts.pool && opts.pool.length === 0) return null
+    return tx(() => {
+        const accounts = allRows<Raw>('SELECT * FROM account').map(map)
+        const chosen = selectLru(accounts, opts, at)
+        if (!chosen) return null
+        markUsed(chosen.alias, at)
+        return { ...chosen, lastUsedAt: at }
+    })
 }

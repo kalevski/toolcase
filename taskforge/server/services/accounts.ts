@@ -38,6 +38,24 @@ export function getAccount(alias: string): Account | null {
 }
 
 /**
+ * Spread subscription load across identities: when no specific alias is pinned,
+ * pick the least-recently-used eligible account so concurrent project engines
+ * rotate rather than hammering one. Eligible = not currently cooling down;
+ * optionally restrict rotation to an explicit `pool` of aliases and/or a single
+ * `auth` method. The chosen account is stamped `lastUsedAt = now` (via
+ * `account-repo`), so repeated calls advance through the pool. Returns `null`
+ * when no eligible account remains (including an empty `pool`).
+ *
+ * Selection + stamp are a single atomic transaction (see
+ * `account-repo.pickLeastRecentlyUsed`), so two engines never grab the same
+ * account in a race. This is the rotation primitive consumed by the failover
+ * path; it does not itself mark accounts cooling down.
+ */
+export function pickAccount(opts?: { pool?: string[]; auth?: 'oauth' | 'apikey' }): Account | null {
+    return accountRepo.pickLeastRecentlyUsed(opts)
+}
+
+/**
  * Resolve an alias to the spawn inputs for the `claude` CLI:
  * `dir` (its `CLAUDE_CONFIG_DIR`) and `env` (the env overlay to merge into the
  * child process). For `apikey` accounts the env includes `ANTHROPIC_API_KEY`,
