@@ -96,10 +96,11 @@ export class RESTRouteHandler<Row extends object = any> extends RouteHandler<Row
     private handleList = async (req: FastifyRequest): Promise<unknown> => {
         const opts = this.options as RESTRouteHandlerOptions<Row>
         const raw = (req.query ?? {}) as Record<string, unknown>
-        const { offset, limit } = normalizeOffsetLimit(raw, opts.pagination)
-        const sort = parseSort<Row>(raw, { allowedFields: this.sortableFields })
+        const query = this.sanitizeQuery(raw, req) as Record<string, unknown>
+        const { offset, limit } = normalizeOffsetLimit(query, opts.pagination)
+        const sort = parseSort<Row>(query, { allowedFields: this.sortableFields })
         const orderBy = sort ?? opts.defaultOrderBy
-        const where = parseFilters<Row>(raw, {
+        const where = parseFilters<Row>(query, {
             allowedFields: this.filterableFields,
             schema: opts.schema,
         })

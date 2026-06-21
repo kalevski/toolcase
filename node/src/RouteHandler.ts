@@ -150,7 +150,7 @@ export abstract class RouteHandler<T extends object = Record<string, unknown>> {
 			return this.idParser(raw) as ID
 		} catch (error) {
 			if (error instanceof ValidationError) throw error
-			throw new ValidationError(`Invalid ${this.idParam}: ${raw}`, String(error))
+			throw new ValidationError(`Invalid ${this.idParam}: ${raw}`)
 		}
 	}
 

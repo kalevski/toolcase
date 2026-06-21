@@ -254,6 +254,48 @@ describe('RESTRouteHandler.list', () => {
         expect(out.data[0].passwordHash).toBeUndefined()
         expect(out.data[1].passwordHash).toBeUndefined()
     })
+
+    it('strictQuery strips non-schema keys before parseSort/parseFilters', async () => {
+        const { state, list } = setup({
+            schema: { email: { filterable: true } },
+            filterableFields: ['email'],
+            strictQuery: true,
+            allowedQueryKeys: ['offset', 'limit'],
+        })
+        state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
+        const { reply } = makeReply()
+        // 'unknown_key' should be silently stripped by sanitizeQuery before reaching parseFilters
+        await list.handler(makeReq({ query: { email: 'x', unknown_key: 'y' } }), reply)
+        expect(state.paginate).toHaveBeenCalledTimes(1)
+        const arg = state.paginate.mock.calls[0][0]
+        expect(arg.where).toEqual({ email: 'x' })
+    })
+
+    it('allowedQueryKeys preserves extra keys beyond schema in strict mode', async () => {
+        const { state, list } = setup({
+            schema: { email: { filterable: true } },
+            filterableFields: ['email'],
+            sortableFields: ['email'],
+            strictQuery: true,
+            allowedQueryKeys: ['sort', 'offset', 'limit'],
+        })
+        state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
+        const { reply } = makeReply()
+        await list.handler(makeReq({ query: { sort: 'email', evil: 'x' } }), reply)
+        expect(state.paginate.mock.calls[0][0].orderBy).toEqual([{ field: 'email', direction: 'asc' }])
+    })
+
+    it('schema private field stripped from query by sanitizeQuery', async () => {
+        const { state, list } = setup({
+            schema: { email: { filterable: true }, passwordHash: { private: true } },
+            filterableFields: ['email', 'passwordHash'],
+        })
+        state.paginate.mockResolvedValue({ results: [], pagination: { offset: 0, limit: 25, count: 0 } })
+        const { reply } = makeReply()
+        await list.handler(makeReq({ query: { email: 'x', passwordHash: 'secret' } }), reply)
+        // passwordHash is private and must be stripped from query before parseFilters
+        expect(state.paginate.mock.calls[0][0].where).toEqual({ email: 'x' })
+    })
 })
 
 describe('RESTRouteHandler.getOne', () => {
