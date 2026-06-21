@@ -5,6 +5,7 @@ package config
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -272,7 +273,11 @@ func ParseByteSize(s string) (ByteSize, error) {
 	case "TIB":
 		mult = 1 << 40
 	}
-	return ByteSize(n * mult), nil
+	prod := n * mult
+	if prod < 0 || prod > float64(math.MaxInt64) {
+		return 0, fmt.Errorf("size %q is too large", s)
+	}
+	return ByteSize(prod), nil
 }
 
 // String implements fmt.Stringer.
