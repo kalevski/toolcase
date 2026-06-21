@@ -50,7 +50,7 @@ func buildSource(site config.Site, dataDir string, log *slog.Logger) (source.Sou
 // on failure it carries the recorded error and bumped failure streak
 // (spec §4.5: any failure before the symlink rename leaves `current`
 // untouched; the last good version keeps serving).
-func SyncSite(ctx context.Context, site config.Site, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error) {
+func SyncSite(ctx context.Context, site config.Site, defaults config.Defaults, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error) {
 	st, err := store.Load(site.Domain)
 	if err != nil {
 		return &state.SiteState{Domain: site.Domain}, err
@@ -65,7 +65,8 @@ func SyncSite(ctx context.Context, site config.Site, dataDir string, store *stat
 	}
 	st.SourceFingerprint = fp
 
-	err = doSync(ctx, site, dataDir, st, dep, log)
+	keep := site.KeepReleases(defaults)
+	err = doSync(ctx, site, dataDir, keep, st, dep, log)
 	if err != nil {
 		st.FailureStreak++
 		st.LastError = err.Error()
@@ -86,7 +87,7 @@ func SyncSite(ctx context.Context, site config.Site, dataDir string, store *stat
 }
 
 // doSync mutates st on success (deployed ref, validators, timestamps).
-func doSync(ctx context.Context, site config.Site, dataDir string, st *state.SiteState, dep *deploy.Deployer, log *slog.Logger) error {
+func doSync(ctx context.Context, site config.Site, dataDir string, keep int, st *state.SiteState, dep *deploy.Deployer, log *slog.Logger) error {
 	src, err := buildSource(site, dataDir, log)
 	if err != nil {
 		return err
@@ -157,7 +158,7 @@ func doSync(ctx context.Context, site config.Site, dataDir string, st *state.Sit
 		}
 	}
 
-	releasePath, err := dep.Promote(site.Domain, res.Ref, staging)
+	releasePath, err := dep.Promote(site.Domain, res.Ref, staging, keep)
 	if err != nil {
 		return fmt.Errorf("deploy: %w", err)
 	}

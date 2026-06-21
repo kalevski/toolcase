@@ -54,14 +54,14 @@ func cmdSync(args []string) int {
 		fmt.Fprintf(os.Stderr, "state store init failed: %v\n", err)
 		return 1
 	}
-	dep := deploy.New(cfg.DataDir, cfg.Defaults.KeepReleases, log)
+	dep := deploy.New(cfg.DataDir, log)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
 	defer stop()
 	ctx, cancel := context.WithTimeout(ctx, *timeout)
 	defer cancel()
 
-	if _, err := manager.SyncSite(ctx, *site, cfg.DataDir, store, dep, log); err != nil {
+	if _, err := manager.SyncSite(ctx, *site, cfg.Defaults, cfg.DataDir, store, dep, log); err != nil {
 		fmt.Fprintf(os.Stderr, "sync failed: %v\n", err)
 		return 1
 	}

@@ -57,9 +57,9 @@ func TestReloadDrainsOldLoop(t *testing.T) {
 		log:      logger,
 		store:    store,
 		cfg:      cfg,
-		deployer: deploy.New(dir, 3, logger),
+		deployer: deploy.New(dir, logger),
 		loops:    map[string]*siteLoop{},
-		syncFn: func(ctx context.Context, site config.Site, dataDir string, st *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error) {
+		syncFn: func(ctx context.Context, site config.Site, defaults config.Defaults, dataDir string, st *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error) {
 			n := int(atomic.AddInt32(&callCount, 1))
 			syncStarted <- n
 			if n == 1 {
@@ -160,7 +160,7 @@ func TestReconcileStateClearsStaleRef(t *testing.T) {
 		log:      logger,
 		store:    store,
 		cfg:      cfg,
-		deployer: deploy.New(dir, 3, logger),
+		deployer: deploy.New(dir, logger),
 		loops:    map[string]*siteLoop{},
 		syncFn:   SyncSite,
 	}
@@ -233,7 +233,7 @@ func TestPruneGitCaches(t *testing.T) {
 		log:      logger,
 		store:    store,
 		cfg:      cfg,
-		deployer: deploy.New(dir, 3, logger),
+		deployer: deploy.New(dir, logger),
 		loops:    map[string]*siteLoop{},
 		syncFn:   SyncSite,
 	}
@@ -271,7 +271,7 @@ func TestReconcileStateSkipsWhenCurrentExists(t *testing.T) {
 	}
 
 	// Build a valid current/ → releases/... structure.
-	dep := deploy.New(dir, 3, logger)
+	dep := deploy.New(dir, logger)
 	releaseDir := filepath.Join(dep.SiteDir(domain), "releases", "20260101T000000-live-sha")
 	if err := os.MkdirAll(releaseDir, 0o750); err != nil {
 		t.Fatal(err)

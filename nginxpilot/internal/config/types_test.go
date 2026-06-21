@@ -4,6 +4,59 @@ import (
 	"testing"
 )
 
+func intPtr(v int) *int { return &v }
+
+func TestSiteKeepReleases(t *testing.T) {
+	tests := []struct {
+		name         string
+		siteKeep     *int
+		defaultKeep  int
+		want         int
+	}{
+		{
+			name:        "per-site value wins over defaults and built-in",
+			siteKeep:    intPtr(7),
+			defaultKeep: 3,
+			want:        7,
+		},
+		{
+			name:        "falls back to defaults when site value is nil",
+			siteKeep:    nil,
+			defaultKeep: 3,
+			want:        3,
+		},
+		{
+			name:        "falls back to defaults when site value is zero",
+			siteKeep:    intPtr(0),
+			defaultKeep: 3,
+			want:        3,
+		},
+		{
+			name:        "falls back to built-in when both site and defaults are zero",
+			siteKeep:    nil,
+			defaultKeep: 0,
+			want:        defaultKeepReleases,
+		},
+		{
+			name:        "falls back to built-in when site value is zero and defaults is zero",
+			siteKeep:    intPtr(0),
+			defaultKeep: 0,
+			want:        defaultKeepReleases,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			site := Site{Source: Source{KeepReleases: tc.siteKeep}}
+			defaults := Defaults{KeepReleases: tc.defaultKeep}
+			got := site.KeepReleases(defaults)
+			if got != tc.want {
+				t.Errorf("KeepReleases() = %d, want %d", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestParseByteSize(t *testing.T) {
 	tests := []struct {
 		input   string

@@ -30,14 +30,13 @@ var DefaultExcludes = []string{".env*", ".htaccess", ".DS_Store"}
 
 // Deployer manages the sites/ tree under data_dir.
 type Deployer struct {
-	dataDir      string
-	keepReleases int
-	log          *slog.Logger
+	dataDir string
+	log     *slog.Logger
 }
 
 // New returns a Deployer rooted at dataDir.
-func New(dataDir string, keepReleases int, log *slog.Logger) *Deployer {
-	return &Deployer{dataDir: dataDir, keepReleases: keepReleases, log: log}
+func New(dataDir string, log *slog.Logger) *Deployer {
+	return &Deployer{dataDir: dataDir, log: log}
 }
 
 // SiteDir returns sites/<domain> under data_dir.
@@ -128,7 +127,8 @@ func CountRegularFiles(dir string) (int, error) {
 // Promote turns a fully staged directory into the live release:
 // normalize perms, fsync, rename into releases/, swap the symlink, prune.
 // ref should be a short content identifier (git SHA / hash prefix).
-func (d *Deployer) Promote(domain, ref, stagingDir string) (string, error) {
+// keep is the maximum number of releases to retain after the swap.
+func (d *Deployer) Promote(domain, ref, stagingDir string, keep int) (string, error) {
 	releasesDir := filepath.Join(d.SiteDir(domain), "releases")
 	if err := os.MkdirAll(releasesDir, 0o750); err != nil {
 		return "", err
@@ -168,15 +168,15 @@ func (d *Deployer) Promote(domain, ref, stagingDir string) (string, error) {
 	}
 
 	// 4. Prune old releases.
-	if err := d.Prune(domain); err != nil {
+	if err := d.Prune(domain, keep); err != nil {
 		d.log.Warn("prune failed", "domain", domain, "error", err)
 	}
 	return releasePath, nil
 }
 
-// Prune deletes releases beyond keepReleases, oldest first, never deleting
-// the target of `current`.
-func (d *Deployer) Prune(domain string) error {
+// Prune deletes releases beyond keep, oldest first, never deleting the target
+// of `current`. keep is the maximum number of releases to retain.
+func (d *Deployer) Prune(domain string, keep int) error {
 	releasesDir := filepath.Join(d.SiteDir(domain), "releases")
 	entries, err := os.ReadDir(releasesDir)
 	if err != nil {
@@ -193,7 +193,7 @@ func (d *Deployer) Prune(domain string) error {
 		}
 	}
 	sort.Strings(names) // timestamp prefix => lexical == chronological
-	excess := len(names) - d.keepReleases
+	excess := len(names) - keep
 	for _, name := range names {
 		if excess <= 0 {
 			break

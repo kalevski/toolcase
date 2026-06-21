@@ -60,6 +60,10 @@ func (a Admin) ListenAddr() string {
 	return *a.Listen
 }
 
+// defaultKeepReleases is the built-in fallback when neither the site nor
+// defaults specify keep_releases.
+const defaultKeepReleases = 5
+
 // Defaults holds global per-site fallbacks.
 type Defaults struct {
 	Interval     Duration `yaml:"interval"`
@@ -88,12 +92,25 @@ func (s Site) Interval(d Defaults) time.Duration {
 	return 5 * time.Minute
 }
 
+// KeepReleases returns the effective keep_releases for the site: per-site
+// value wins, then defaults, then the built-in constant.
+func (s Site) KeepReleases(d Defaults) int {
+	if s.Source.KeepReleases != nil && *s.Source.KeepReleases > 0 {
+		return *s.Source.KeepReleases
+	}
+	if d.KeepReleases > 0 {
+		return d.KeepReleases
+	}
+	return defaultKeepReleases
+}
+
 // Source describes where a site's content comes from.
 type Source struct {
-	Type     string   `yaml:"type"`
-	URL      string   `yaml:"url"`
-	Interval Duration `yaml:"interval"`
-	Auth     Auth     `yaml:"auth"`
+	Type         string   `yaml:"type"`
+	URL          string   `yaml:"url"`
+	Interval     Duration `yaml:"interval"`
+	KeepReleases *int     `yaml:"keep_releases"`
+	Auth         Auth     `yaml:"auth"`
 
 	// git only
 	Branch string `yaml:"branch"`

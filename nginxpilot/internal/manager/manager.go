@@ -33,7 +33,7 @@ type Manager struct {
 	loops    map[string]*siteLoop
 	wg       sync.WaitGroup
 	ctx      context.Context
-	syncFn   func(ctx context.Context, site config.Site, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error)
+	syncFn   func(ctx context.Context, site config.Site, defaults config.Defaults, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error)
 }
 
 type siteLoop struct {
@@ -69,7 +69,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 		log:      log,
 		store:    store,
 		cfg:      cfg,
-		deployer: deploy.New(cfg.DataDir, cfg.Defaults.KeepReleases, log),
+		deployer: deploy.New(cfg.DataDir, log),
 		loops:    map[string]*siteLoop{},
 		syncFn:   SyncSite,
 	}
@@ -173,12 +173,13 @@ func (m *Manager) syncOnce(ctx context.Context, sl *siteLoop) (streak int) {
 	m.mu.Lock()
 	dep := m.deployer
 	dataDir := m.cfg.DataDir
+	defaults := m.cfg.Defaults
 	m.mu.Unlock()
 
 	syncCtx, cancel := context.WithTimeout(ctx, syncTimeout)
 	defer cancel()
 
-	st, err := m.syncFn(syncCtx, sl.site, dataDir, m.store, dep, m.log)
+	st, err := m.syncFn(syncCtx, sl.site, defaults, dataDir, m.store, dep, m.log)
 	if err != nil {
 		m.log.Error("sync failed", "domain", sl.site.Domain, "error", err,
 			"failure_streak", st.FailureStreak)
@@ -294,7 +295,7 @@ func (m *Manager) Reload(newCfg *config.Config) {
 	}
 
 	m.cfg = newCfg
-	m.deployer = deploy.New(newCfg.DataDir, newCfg.Defaults.KeepReleases, m.log)
+	m.deployer = deploy.New(newCfg.DataDir, m.log)
 
 	// Removed sites: stop the loop; content stays on disk (orphan).
 	for domain, sl := range m.loops {
