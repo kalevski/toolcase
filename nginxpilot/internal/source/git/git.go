@@ -31,6 +31,7 @@ type Syncer struct {
 	branch  string
 	subdir  string
 	auth    config.Auth
+	limits  config.Limits
 	dataDir string
 	log     *slog.Logger
 }
@@ -43,6 +44,7 @@ func New(domain string, src config.Source, dataDir string, log *slog.Logger) *Sy
 		branch:  src.Branch,
 		subdir:  strings.Trim(path.Clean(src.Subdir), "/"),
 		auth:    src.Auth,
+		limits:  src.Limits.Effective(),
 		dataDir: dataDir,
 		log:     log,
 	}
@@ -167,12 +169,20 @@ func (s *Syncer) extract(ctx context.Context, cache, sha, stagingDir string) err
 // untar extracts a tar stream into dest, stripping the subdir prefix when
 // configured. Paths are validated against traversal; symlinks and other
 // special entries are skipped with a warning (an escaping symlink would be
-// a read-anything primitive through nginx).
+// a read-anything primitive through nginx). Entry count and total written
+// bytes are bounded by s.limits (mirrors httpzip extraction guards).
 func (s *Syncer) untar(r io.Reader, dest string) error {
+	maxEntries := s.limits.MaxEntries
+	maxUncompressed := int64(s.limits.MaxUncompressedSize)
+
 	prefix := ""
 	if s.subdir != "" && s.subdir != "." {
 		prefix = s.subdir + "/"
 	}
+
+	var entries int
+	var written int64
+
 	tr := tar.NewReader(r)
 	for {
 		hdr, err := tr.Next()
@@ -182,6 +192,12 @@ func (s *Syncer) untar(r io.Reader, dest string) error {
 		if err != nil {
 			return err
 		}
+
+		entries++
+		if entries > maxEntries {
+			return fmt.Errorf("limit exceeded: max_entries (%d)", maxEntries)
+		}
+
 		name := path.Clean(strings.TrimPrefix(hdr.Name, "./"))
 		if name == "." {
 			continue
@@ -213,13 +229,19 @@ func (s *Syncer) untar(r io.Reader, dest string) error {
 			if err != nil {
 				return err
 			}
-			_, copyErr := io.Copy(f, tr)
+			remaining := maxUncompressed - written
+			// +1 so that reading exactly budget+1 bytes signals overrun.
+			n, copyErr := io.Copy(f, io.LimitReader(tr, remaining+1))
+			written += n
 			closeErr := f.Close()
 			if copyErr != nil {
 				return copyErr
 			}
 			if closeErr != nil {
 				return closeErr
+			}
+			if written > maxUncompressed {
+				return fmt.Errorf("limit exceeded: max_uncompressed_size (%s)", s.limits.MaxUncompressedSize)
 			}
 		case tar.TypeSymlink, tar.TypeLink:
 			s.log.Warn("skipping link entry in git tree", "entry", hdr.Name)

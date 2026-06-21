@@ -1,7 +1,14 @@
 package git
 
 import (
+	"archive/tar"
+	"bytes"
+	"io"
+	"log/slog"
+	"strings"
 	"testing"
+
+	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 )
 
 func TestCacheDir(t *testing.T) {
@@ -62,5 +69,91 @@ func TestCacheDirDomainIsolation(t *testing.T) {
 
 	if dirA == dirB {
 		t.Fatalf("expected distinct cache dirs for different domains; both got %q", dirA)
+	}
+}
+
+// makeTar writes n regular files of the given payload into a tar stream.
+func makeTar(files map[string][]byte) []byte {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	for name, data := range files {
+		_ = tw.WriteHeader(&tar.Header{
+			Typeflag: tar.TypeReg,
+			Name:     name,
+			Size:     int64(len(data)),
+			Mode:     0o640,
+		})
+		_, _ = tw.Write(data)
+	}
+	_ = tw.Close()
+	return buf.Bytes()
+}
+
+// newTestSyncer builds a minimal Syncer with explicit limits and no auth/log noise.
+func newTestSyncer(limits config.Limits) *Syncer {
+	return &Syncer{
+		limits: limits,
+		log:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+	}
+}
+
+func TestUntarMaxEntries(t *testing.T) {
+	s := newTestSyncer(config.Limits{
+		MaxEntries:          2,
+		MaxUncompressedSize: config.ByteSize(config.DefaultMaxUncompressedSize),
+	}.Effective())
+
+	stream := makeTar(map[string][]byte{
+		"a.txt": []byte("hello"),
+		"b.txt": []byte("world"),
+		"c.txt": []byte("extra"),
+	})
+
+	dest := t.TempDir()
+	err := s.untar(bytes.NewReader(stream), dest)
+	if err == nil {
+		t.Fatal("expected error for max_entries exceeded, got nil")
+	}
+	if !strings.Contains(err.Error(), "max_entries") {
+		t.Fatalf("expected max_entries error, got: %v", err)
+	}
+}
+
+func TestUntarMaxUncompressedSize(t *testing.T) {
+	const limit = 50
+
+	s := newTestSyncer(config.Limits{
+		MaxEntries:          config.DefaultMaxEntries,
+		MaxUncompressedSize: limit,
+	}.Effective())
+
+	stream := makeTar(map[string][]byte{
+		"big.txt": bytes.Repeat([]byte("x"), limit+1),
+	})
+
+	dest := t.TempDir()
+	err := s.untar(bytes.NewReader(stream), dest)
+	if err == nil {
+		t.Fatal("expected error for max_uncompressed_size exceeded, got nil")
+	}
+	if !strings.Contains(err.Error(), "max_uncompressed_size") {
+		t.Fatalf("expected max_uncompressed_size error, got: %v", err)
+	}
+}
+
+func TestUntarWithinLimits(t *testing.T) {
+	s := newTestSyncer(config.Limits{
+		MaxEntries:          5,
+		MaxUncompressedSize: 1024,
+	}.Effective())
+
+	stream := makeTar(map[string][]byte{
+		"a.txt": []byte("hello"),
+		"b.txt": []byte("world"),
+	})
+
+	dest := t.TempDir()
+	if err := s.untar(bytes.NewReader(stream), dest); err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
