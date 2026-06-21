@@ -32,6 +32,8 @@ export default class AudioPanel extends Panel {
 
     private busListeners: Record<string, (state: BusState) => void> = {}
 
+    private busSeenSounds: Record<string, Set<any>> = {}
+
     override draw(): void {
         const sound = this.scene.sound as any
         this.state.masterVolume = typeof sound.volume === 'number' ? sound.volume : 1
@@ -51,12 +53,13 @@ export default class AudioPanel extends Panel {
         if (this.buses[name] !== undefined) return this.buses[name]
         const bus: BusState = { name, volume: 1, mute: false, pan: 0, channels: [] }
         const folder = this.base.addFolder({ title: `Bus: ${name}` })
-        const apply = () => { this.applyBus(bus); onChange?.(bus) }
+        const apply = () => { this.applyBus(bus, true); onChange?.(bus) }
         folder.addBinding(bus, 'volume', { label: 'Vol', min: 0, max: 1, step: 0.01 }).on('change', apply)
         folder.addBinding(bus, 'mute', { label: 'Mute' }).on('change', apply)
         folder.addBinding(bus, 'pan', { label: 'Pan', min: -1, max: 1, step: 0.01 }).on('change', apply)
         this.buses[name] = bus
         this.busFolders[name] = folder
+        this.busSeenSounds[name] = new Set()
         if (onChange) this.busListeners[name] = onChange
         return bus
     }
@@ -92,6 +95,7 @@ export default class AudioPanel extends Panel {
         }
         delete this.buses[name]
         delete this.busListeners[name]
+        delete this.busSeenSounds[name]
         return this
     }
 
@@ -99,16 +103,19 @@ export default class AudioPanel extends Panel {
         return this.buses[name] ?? null
     }
 
-    private applyBus(bus: BusState): void {
+    private applyBus(bus: BusState, force = false): void {
         const sound = this.scene.sound as any
         const list: any[] = sound.sounds ?? []
+        const seen = this.busSeenSounds[bus.name]
         for (const s of list) {
             if (s == null || !bus.channels.includes(s.key)) continue
+            if (!force && seen?.has(s)) continue
             if (typeof s.setVolume === 'function') s.setVolume(bus.volume)
             else if ('volume' in s) s.volume = bus.volume
             if (typeof s.setMute === 'function') s.setMute(bus.mute)
             else if ('mute' in s) s.mute = bus.mute
             this.setPan(s, bus.pan)
+            seen?.add(s)
         }
     }
 
@@ -133,8 +140,13 @@ export default class AudioPanel extends Panel {
             if (s?.isPlaying) playing.push(s.key ?? '?')
         }
         this.state.playing = playing.length === 0 ? '(none)' : playing.join(' ')
-        // Re-apply each bus so channels that start playing later inherit the mix.
-        for (const name in this.buses) this.applyBus(this.buses[name])
+        // Prune dead references then apply buses only to newly appearing sounds.
+        const liveSet = new Set(list)
+        for (const name in this.buses) {
+            const seen = this.busSeenSounds[name]
+            if (seen) for (const s of seen) if (!liveSet.has(s)) seen.delete(s)
+            this.applyBus(this.buses[name])
+        }
         for (const key in this.components) this.components[key].refresh?.()
     }
 
@@ -145,6 +157,7 @@ export default class AudioPanel extends Panel {
         this.buses = {}
         this.busFolders = {}
         this.busListeners = {}
+        this.busSeenSounds = {}
     }
 
 }

@@ -29,7 +29,7 @@ export default class TimelinePanel extends Panel {
 
     private history: TimelineEntry[] = []
 
-    private originalTrigger: ((event: string, payload: unknown, delay?: number) => void) | null = null
+    private originalTrigger: ((event: string, payload: unknown, delay?: number) => unknown) | null = null
 
     override draw(): void {
         this.components.paused = this.base.addBinding(this.state, 'paused', { label: 'Paused' })
@@ -43,12 +43,13 @@ export default class TimelinePanel extends Panel {
     }
 
     private hookFlow(): void {
-        const events = this.scene.flow?.events as unknown as { trigger: (e: string, p: unknown, d?: number) => void } | undefined
-        if (!events) return
+        const events: any = this.scene.flow?.events
+        if (!events || events.__hooked) return
+        events.__hooked = true
         this.originalTrigger = events.trigger.bind(events)
         events.trigger = (event: string, payload: unknown, delay?: number) => {
             this.push({ time: ((this.game as any).loop?.time ?? 0), type: 'event', name: event })
-            this.originalTrigger!(event, payload, delay)
+            return this.originalTrigger!(event, payload, delay)
         }
     }
 
@@ -89,9 +90,10 @@ export default class TimelinePanel extends Panel {
     }
 
     override dispose(): void {
-        const events = this.scene.flow?.events as unknown as { trigger: (e: string, p: unknown, d?: number) => void } | undefined
+        const events: any = this.scene.flow?.events
         if (events && this.originalTrigger !== null) {
-            events.trigger = this.originalTrigger
+            delete events.trigger
+            delete events.__hooked
             this.originalTrigger = null
         }
     }
