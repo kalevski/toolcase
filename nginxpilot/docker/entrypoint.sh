@@ -14,10 +14,10 @@ set -eu
 NGINXPILOT_CONFIG="${NGINXPILOT_CONFIG:-/etc/nginxpilot/config.yml}"
 
 if [ "$#" -gt 0 ]; then
-    exec su-exec 0:nginx nginxpilot "$@"
+    exec su-exec nginxpilot:nginx nginxpilot "$@"
 fi
 
-su-exec 0:nginx nginxpilot run --config "$NGINXPILOT_CONFIG" &
+su-exec nginxpilot:nginx nginxpilot run --config "$NGINXPILOT_CONFIG" &
 nginxpilot_pid=$!
 
 # Official nginx entrypoint (envsubst templates, ipv6 detection) then nginx.

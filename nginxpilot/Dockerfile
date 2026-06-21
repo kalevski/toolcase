@@ -17,10 +17,15 @@ RUN CGO_ENABLED=0 go build -trimpath \
 # nginx base image: one container runs nginx AND the sync daemon, sharing
 # /var/lib/nginxpilot directly. git + openssh-client are required
 # for git sources (the daemon shells out to the system git binary);
-# su-exec runs the daemon with group `nginx` so deployed files (0750/0640)
-# stay readable by the nginx workers.
+# su-exec runs the daemon as the unprivileged `nginxpilot` user (group `nginx`)
+# so deployed files (0750/0640) stay readable by the nginx workers.
 FROM nginx:1.27-alpine
 RUN apk add --no-cache git openssh-client ca-certificates tzdata su-exec
+
+RUN addgroup -S nginxpilot 2>/dev/null; \
+    adduser -S -D -H -G nginx nginxpilot && \
+    mkdir -p /var/lib/nginxpilot && \
+    chown -R nginxpilot:nginx /var/lib/nginxpilot
 
 COPY --from=build /out/nginxpilot /usr/local/bin/nginxpilot
 COPY docker/entrypoint.sh /usr/local/bin/nginxpilot-entrypoint.sh

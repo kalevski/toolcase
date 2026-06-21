@@ -155,7 +155,7 @@ docker run -d \
 ```
 
 - Mount your vhosts into `/etc/nginx/conf.d/`, each `root` pointing at `…/sites/<domain>/current` (generate a starting snippet with `print-vhost`, below).
-- The daemon runs with group `nginx` so its `0750`/`0640` content stays readable by the workers; nginx is PID-managed by the official entrypoint, content swaps need no reload.
+- The daemon runs as the unprivileged `nginxpilot` user (member of group `nginx`) so its `0750`/`0640` content stays readable by the workers; nginx is PID-managed by the official entrypoint, content swaps need no reload.
 - Port 9090 is the admin endpoint — set `admin.listen: 0.0.0.0:9090` in the config and publish the port if you want `/status` from outside.
 - Any argument bypasses the supervisor and runs the CLI directly:
 
