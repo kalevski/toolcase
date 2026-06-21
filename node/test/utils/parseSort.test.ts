@@ -75,4 +75,27 @@ describe('parseSort', () => {
     it('throws on non-string sort', () => {
         expect(() => parseSort({ sort: 123 }, { allowedFields: [] })).toThrow(ValidationError)
     })
+
+    describe('error message bounding', () => {
+        it('truncates very long field names in error messages', () => {
+            const longField = 'x'.repeat(200)
+            let msg = ''
+            try {
+                parseSort({ sort: longField }, { allowedFields: [] })
+            } catch (e) {
+                msg = (e as Error).message
+            }
+            expect(msg.length).toBeLessThanOrEqual(200)
+        })
+
+        it('strips control characters from error messages', () => {
+            let msg = ''
+            try {
+                parseSort({ sort: 'bad\x00field\x1f' }, { allowedFields: [] })
+            } catch (e) {
+                msg = (e as Error).message
+            }
+            expect(msg).not.toMatch(/[\x00-\x1f]/)
+        })
+    })
 })

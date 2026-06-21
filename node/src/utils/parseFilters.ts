@@ -2,6 +2,12 @@ import { ValidationError } from '../errors'
 import { FieldRule, FieldSchema, FORBIDDEN_KEYS } from './sanitize'
 import { FILTER_OP_SET, Filter, FilterOp } from './filter'
 
+const MAX_MSG_LEN = 100
+
+function safeStr(raw: unknown): string {
+	return String(raw).replace(/[\x00-\x1f\x7f]/g, '').slice(0, MAX_MSG_LEN)
+}
+
 export type CoerceType = 'integer' | 'number' | 'boolean' | 'date'
 
 export interface ParseFiltersOptions<T extends object> {
@@ -134,28 +140,28 @@ function coerceLeaf(
 		case 'integer': {
 			const n = Number(raw)
 			if (!Number.isInteger(n)) {
-				throw new ValidationError(`Filter ${key}[${op}] not an integer: ${raw}`)
+				throw new ValidationError(`Filter ${key}[${op}] not an integer: ${safeStr(raw)}`)
 			}
 			return n
 		}
 		case 'number': {
 			const n = Number(raw)
 			if (!Number.isFinite(n)) {
-				throw new ValidationError(`Filter ${key}[${op}] not a number: ${raw}`)
+				throw new ValidationError(`Filter ${key}[${op}] not a number: ${safeStr(raw)}`)
 			}
 			return n
 		}
 		case 'boolean': {
 			const b = parseBoolean(raw)
 			if (b === undefined) {
-				throw new ValidationError(`Filter ${key}[${op}] not a boolean: ${raw}`)
+				throw new ValidationError(`Filter ${key}[${op}] not a boolean: ${safeStr(raw)}`)
 			}
 			return b
 		}
 		case 'date': {
 			const d = new Date(raw)
 			if (Number.isNaN(d.getTime())) {
-				throw new ValidationError(`Filter ${key}[${op}] not a date: ${raw}`)
+				throw new ValidationError(`Filter ${key}[${op}] not a date: ${safeStr(raw)}`)
 			}
 			return d
 		}

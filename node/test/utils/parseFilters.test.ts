@@ -130,6 +130,31 @@ describe('parseFilters', () => {
         expect(out).toEqual({ age: { in: [18, 21, 30] } })
     })
 
+    describe('error message bounding', () => {
+        it('truncates very long raw values in error messages', () => {
+            const schema: FieldSchema<Row> = { age: { type: 'integer' } }
+            const longVal = 'a'.repeat(200)
+            let msg = ''
+            try {
+                parseFilters<Row>({ age: longVal }, { schema })
+            } catch (e) {
+                msg = (e as Error).message
+            }
+            expect(msg.length).toBeLessThanOrEqual(200)
+        })
+
+        it('strips control characters from error messages', () => {
+            const schema: FieldSchema<Row> = { age: { type: 'integer' } }
+            let msg = ''
+            try {
+                parseFilters<Row>({ age: 'bad\x00val\x1f' }, { schema })
+            } catch (e) {
+                msg = (e as Error).message
+            }
+            expect(msg).not.toMatch(/[\x00-\x1f]/)
+        })
+    })
+
     describe('prototype pollution guard', () => {
         it('drops __proto__ key and does not pollute Object prototype', () => {
             const poisoned = JSON.parse('{"__proto__":{"isAdmin":true}}') as Record<string, unknown>

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import env from '../src/env'
 
 describe('env', () => {
@@ -28,6 +28,41 @@ describe('env', () => {
         process.env.NUM_VAR = 'abc'
         expect(env('NUM_VAR', 99, 'number')).toBe(99)
         delete process.env.NUM_VAR
+    })
+
+    it('warns when env value is present but unparseable as number', () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        process.env.NUM_WARN = 'abc'
+        env('NUM_WARN', 0, 'number')
+        expect(warn).toHaveBeenCalledOnce()
+        expect(warn.mock.calls[0][0]).toContain('NUM_WARN')
+        delete process.env.NUM_WARN
+        warn.mockRestore()
+    })
+
+    it('warns for leading-zero octal-like values (007)', () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        process.env.NUM_007 = '007'
+        env('NUM_007', 0, 'number')
+        expect(warn).toHaveBeenCalledOnce()
+        delete process.env.NUM_007
+        warn.mockRestore()
+    })
+
+    it('warns for whitespace-padded values (" 42")', () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        process.env.NUM_SPACE = ' 42'
+        env('NUM_SPACE', 0, 'number')
+        expect(warn).toHaveBeenCalledOnce()
+        delete process.env.NUM_SPACE
+        warn.mockRestore()
+    })
+
+    it('does not warn when env number value is missing', () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        expect(env('TOTALLY_MISSING_NUM_VAR', 7, 'number')).toBe(7)
+        expect(warn).not.toHaveBeenCalled()
+        warn.mockRestore()
     })
 
     it('parses boolean type true', () => {

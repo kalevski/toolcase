@@ -30,10 +30,14 @@ export const allowOnly = (allowed: readonly string[]): Visitor => {
 	}
 }
 
+const DECIMAL_NUMBER_RE = /^-?(\d+\.?\d*|\.\d+)$/
+
 export const coerceNumber: Visitor = ({ value }, { set }) => {
 	if (typeof value === 'string' && value.length > 0) {
-		const n = Number(value)
-		if (Number.isFinite(n)) set(n)
+		if (DECIMAL_NUMBER_RE.test(value)) {
+			const n = Number(value)
+			if (Number.isFinite(n)) set(n)
+		}
 	}
 }
 
