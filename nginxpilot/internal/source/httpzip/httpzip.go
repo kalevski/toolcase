@@ -144,18 +144,18 @@ func (s *Syncer) Sync(ctx context.Context, st *state.SiteState, stagingDir strin
 	}, nil
 }
 
-// download streams the body to <data_dir>/tmp/<domain>.zip.partial,
+// download streams the body to a unique temp file under <data_dir>/tmp/,
 // enforcing max_archive_size and computing SHA-256 on the fly.
 func (s *Syncer) download(body io.Reader) (path string, hash string, size int64, err error) {
 	tmpDir := filepath.Join(s.dataDir, "tmp")
 	if err := os.MkdirAll(tmpDir, 0o750); err != nil {
 		return "", "", 0, err
 	}
-	path = filepath.Join(tmpDir, s.domain+".zip.partial")
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o640)
+	f, err := os.CreateTemp(tmpDir, s.domain+"-*.zip.partial")
 	if err != nil {
 		return "", "", 0, err
 	}
+	path = f.Name()
 
 	maxSize := int64(s.limits.MaxArchiveSize)
 	hasher := sha256.New()
