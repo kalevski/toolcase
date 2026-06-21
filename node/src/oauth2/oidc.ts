@@ -36,9 +36,7 @@ export interface OIDCDiscoveryDocument {
 
 const DISCOVERY_TTL_MS = 24 * 60 * 60 * 1000
 
-let discoveryFetchOpts: HttpOptions = {}
-
-let discoveryCache = new Cache<OIDCDiscoveryDocument>(async (issuer: string) => fetchDiscovery(issuer, discoveryFetchOpts), DISCOVERY_TTL_MS)
+let discoveryCache = new Cache<OIDCDiscoveryDocument>((issuer: string) => fetchDiscovery(issuer, {}), DISCOVERY_TTL_MS)
 
 async function fetchDiscovery(issuer: string, opts: HttpOptions): Promise<OIDCDiscoveryDocument> {
 	const base = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer
@@ -71,12 +69,15 @@ async function fetchDiscovery(issuer: string, opts: HttpOptions): Promise<OIDCDi
 }
 
 export async function fetchOIDCDiscovery(issuer: string, opts: HttpOptions & { cacheTtlMs?: number } = {}): Promise<OIDCDiscoveryDocument> {
-	if (opts.cacheTtlMs === 0) {
-		return fetchDiscovery(issuer, opts)
+	const { cacheTtlMs, ...fetchOpts } = opts
+	// Bypass the shared cache when caller supplies a custom fetchImpl or headers — these
+	// are caller-specific and cannot be keyed into a shared cache without a race or
+	// confused-deputy / SSRF hazard.
+	if (cacheTtlMs === 0 || fetchOpts.fetchImpl !== undefined || fetchOpts.headers !== undefined) {
+		return fetchDiscovery(issuer, fetchOpts)
 	}
-	discoveryFetchOpts = opts
-	if (typeof opts.cacheTtlMs === 'number' && opts.cacheTtlMs > 0) {
-		discoveryCache.setMS(opts.cacheTtlMs)
+	if (typeof cacheTtlMs === 'number' && cacheTtlMs > 0) {
+		discoveryCache.setMS(cacheTtlMs)
 	}
 	const result = await discoveryCache.get(issuer)
 	if (!result) throw new OAuth2ProtocolError('discovery returned empty')
@@ -87,7 +88,7 @@ export function clearDiscoveryCache(issuer?: string): void {
 	if (issuer) {
 		discoveryCache.invalidate(issuer)
 	} else {
-		discoveryCache = new Cache<OIDCDiscoveryDocument>(async (i: string) => fetchDiscovery(i, discoveryFetchOpts), DISCOVERY_TTL_MS)
+		discoveryCache = new Cache<OIDCDiscoveryDocument>((i: string) => fetchDiscovery(i, {}), DISCOVERY_TTL_MS)
 	}
 }
 

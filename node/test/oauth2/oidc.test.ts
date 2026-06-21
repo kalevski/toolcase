@@ -129,21 +129,23 @@ describe('verifyIdToken', () => {
 
 describe('fetchOIDCDiscovery', () => {
 
+	const makeDiscoveryDoc = (issuer: string = ISSUER) => ({
+		issuer,
+		authorization_endpoint: `${issuer}/auth`,
+		token_endpoint: `${issuer}/token`,
+		jwks_uri: `${issuer}/jwks`,
+		response_types_supported: ['code'],
+		subject_types_supported: ['public'],
+		id_token_signing_alg_values_supported: ['RS256']
+	})
+
 	const fetchDiscovery = (doc: any) => vi.fn(async () => new Response(JSON.stringify(doc), {
 		status: 200,
 		headers: { 'Content-Type': 'application/json' }
 	})) as any
 
 	it('fetches and parses discovery document', async () => {
-		const doc = {
-			issuer: ISSUER,
-			authorization_endpoint: `${ISSUER}/auth`,
-			token_endpoint: `${ISSUER}/token`,
-			jwks_uri: `${ISSUER}/jwks`,
-			response_types_supported: ['code'],
-			subject_types_supported: ['public'],
-			id_token_signing_alg_values_supported: ['RS256']
-		}
+		const doc = makeDiscoveryDoc()
 		const fetchImpl = fetchDiscovery(doc)
 		const result = await fetchOIDCDiscovery(ISSUER, { fetchImpl, cacheTtlMs: 0 })
 		expect(result.issuer).toBe(ISSUER)
@@ -151,32 +153,53 @@ describe('fetchOIDCDiscovery', () => {
 	})
 
 	it('rejects when discovery issuer does not match requested issuer', async () => {
-		const doc = {
-			issuer: 'https://evil.test',
-			authorization_endpoint: 'https://evil.test/auth',
-			token_endpoint: 'https://evil.test/token',
-			jwks_uri: 'https://evil.test/jwks',
-			response_types_supported: ['code'],
-			subject_types_supported: ['public'],
-			id_token_signing_alg_values_supported: ['RS256']
-		}
+		const doc = makeDiscoveryDoc('https://evil.test')
 		const fetchImpl = fetchDiscovery(doc)
 		await expect(fetchOIDCDiscovery(ISSUER, { fetchImpl, cacheTtlMs: 0 })).rejects.toBeInstanceOf(OAuth2ProtocolError)
 	})
 
 	it('accepts matching issuer without trailing slash', async () => {
-		const doc = {
-			issuer: ISSUER,
-			authorization_endpoint: `${ISSUER}/auth`,
-			token_endpoint: `${ISSUER}/token`,
-			jwks_uri: `${ISSUER}/jwks`,
-			response_types_supported: ['code'],
-			subject_types_supported: ['public'],
-			id_token_signing_alg_values_supported: ['RS256']
-		}
+		const doc = makeDiscoveryDoc()
 		const fetchImpl = fetchDiscovery(doc)
 		const result = await fetchOIDCDiscovery(`${ISSUER}/`, { fetchImpl, cacheTtlMs: 0 })
 		expect(result.issuer).toBe(ISSUER)
+	})
+
+	it('concurrent callers with different fetchImpl each use their own implementation', async () => {
+		const doc = makeDiscoveryDoc()
+		const fetchImpl1 = fetchDiscovery(doc)
+		const fetchImpl2 = fetchDiscovery(doc)
+		const [r1, r2] = await Promise.all([
+			fetchOIDCDiscovery(ISSUER, { fetchImpl: fetchImpl1 }),
+			fetchOIDCDiscovery(ISSUER, { fetchImpl: fetchImpl2 })
+		])
+		expect(fetchImpl1).toHaveBeenCalledOnce()
+		expect(fetchImpl2).toHaveBeenCalledOnce()
+		expect(r1.issuer).toBe(ISSUER)
+		expect(r2.issuer).toBe(ISSUER)
+	})
+
+	it('caller with custom fetchImpl is not served a cached result', async () => {
+		// Populate the shared cache (no fetchImpl = cached path, uses global fetch mock)
+		const doc = makeDiscoveryDoc()
+		vi.stubGlobal('fetch', fetchDiscovery(doc))
+		await fetchOIDCDiscovery(ISSUER)
+
+		// A subsequent call with a custom fetchImpl must bypass the cache and hit its own impl
+		const fetchImpl2 = fetchDiscovery(doc)
+		await fetchOIDCDiscovery(ISSUER, { fetchImpl: fetchImpl2 })
+		expect(fetchImpl2).toHaveBeenCalledOnce()
+	})
+
+	it('caller with custom headers is not served a cached result', async () => {
+		const doc = makeDiscoveryDoc()
+		vi.stubGlobal('fetch', fetchDiscovery(doc))
+		await fetchOIDCDiscovery(ISSUER)
+
+		const fetchImpl2 = fetchDiscovery(doc)
+		vi.stubGlobal('fetch', fetchImpl2)
+		await fetchOIDCDiscovery(ISSUER, { headers: { Authorization: 'Bearer tenant-token' } })
+		expect(fetchImpl2).toHaveBeenCalledOnce()
 	})
 })
 
