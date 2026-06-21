@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -12,7 +12,7 @@ import {
     HTTP,     // { Status, RESTError, RESTResponse }
     Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
     VectorClock, EventEmitter, Broadcast,
-    LSystem, ObjectPool, PriorityQueue, RingBuffer,
+    LSystem, ObjectPool, PriorityQueue, RingBuffer, Stack, Deque,
     generateId, ulid, toHex, formatByteSize,
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
@@ -29,6 +29,8 @@ import {
   - [Cache](#cache)
   - [PriorityQueue](#priorityqueue)
   - [RingBuffer](#ringbuffer)
+  - [Stack](#stack)
+  - [Deque](#deque)
   - [VectorClock](#vectorclock)
   - [State](#state)
   - [AdjacencyMatrix](#adjacencymatrix)
@@ -140,6 +142,75 @@ rb.peek()        // 2
 rb.clear()
 rb.size          // 0
 ```
+
+### Stack
+
+LIFO stack backed by a plain array.
+
+```ts
+new Stack<T>()
+```
+
+- `size: number` — current item count.
+- `push(item: T): this` — push to the top. Throws if `item === undefined`. Chainable.
+- `pop(): T | null` — remove and return the top item; `null` when empty.
+- `peek(): T | null` — top item without removing it; `null` when empty.
+- `isEmpty(): boolean` — true when `size === 0`.
+- `clear(): this` — reset to empty. Chainable.
+- `[Symbol.iterator]` — iterate all items in insertion order (bottom → top).
+
+```ts
+import { Stack } from '@toolcase/base'
+
+const history = new Stack<string>()
+history.push('login').push('dashboard').push('settings')
+
+history.peek()   // 'settings'  (top, not removed)
+history.pop()    // 'settings'
+history.size     // 2
+[...history]     // ['login', 'dashboard']  (insertion order)
+history.clear()
+history.isEmpty() // true
+```
+
+### Deque
+
+Double-ended queue backed by a doubly-linked list. O(1) push and pop at both ends.
+
+```ts
+new Deque<T>()
+```
+
+- `size: number` — current item count.
+- `pushFront(item: T): this` — insert at the front. Throws if `item === undefined`. Chainable.
+- `pushBack(item: T): this` — insert at the back. Throws if `item === undefined`. Chainable.
+- `popFront(): T | null` — remove and return the front item; `null` when empty.
+- `popBack(): T | null` — remove and return the back item; `null` when empty.
+- `peekFront(): T | null` — front item without removing it; `null` when empty.
+- `peekBack(): T | null` — back item without removing it; `null` when empty.
+- `isEmpty(): boolean` — true when `size === 0`.
+- `clear(): this` — reset to empty. Chainable.
+- `[Symbol.iterator]` — iterate all items front to back.
+
+```ts
+import { Deque } from '@toolcase/base'
+
+const d = new Deque<number>()
+d.pushBack(2).pushBack(3).pushFront(1)
+
+d.peekFront()  // 1
+d.peekBack()   // 3
+[...d]         // [1, 2, 3]
+
+d.popFront()   // 1
+d.popBack()    // 3
+d.size         // 1
+
+d.clear()
+d.isEmpty()    // true
+```
+
+Use as a FIFO queue: `pushBack` + `popFront`. Use as a LIFO stack: `pushBack` + `popBack` (or `pushFront` + `popFront`). Sliding-window algorithms use both ends simultaneously.
 
 ### VectorClock
 

@@ -4,6 +4,8 @@ import Broadcast from './Broadcast'
 import LSystem from './LSystem'
 import ObjectPool from './ObjectPool'
 import PriorityQueue from './PriorityQueue'
+import Stack from './Stack'
+import Deque from './Deque'
 import generateId from './generateId'
 import ulid from './ulid'
 import toHex from './toHex'
@@ -79,6 +81,8 @@ export {
     LSystem,
     ObjectPool,
     PriorityQueue,
+    Stack,
+    Deque,
     generateId,
     ulid,
     toHex,
@@ -109,6 +113,8 @@ const BASE = {
     LSystem,
     ObjectPool,
     PriorityQueue,
+    Stack,
+    Deque,
     generateId,
     ulid,
     toHex,

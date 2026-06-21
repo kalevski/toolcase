@@ -20,6 +20,8 @@ import AStarDemo from './AStarDemo'
 import AsyncDemo from './AsyncDemo'
 import RingBufferDemo from './RingBufferDemo'
 import UlidDemo from './UlidDemo'
+import StackDemo from './StackDemo'
+import DequeDemo from './DequeDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -54,6 +56,8 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'adjacency-matrix', label: 'AdjacencyMatrix', category: 'Data Structures', element: <AdjacencyMatrixDemo /> },
     { key: 'object-pool', label: 'ObjectPool', category: 'Data Structures', element: <ObjectPoolDemo /> },
     { key: 'ring-buffer', label: 'RingBuffer', category: 'Data Structures', element: <RingBufferDemo /> },
+    { key: 'stack', label: 'Stack', category: 'Data Structures', element: <StackDemo /> },
+    { key: 'deque', label: 'Deque', category: 'Data Structures', element: <DequeDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
     { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },
     { key: 'dijkstra', label: 'Dijkstra', category: 'Data Structures', element: <DijkstraDemo /> },
