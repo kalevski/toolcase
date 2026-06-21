@@ -120,7 +120,7 @@ export default class GamepadFeature extends Feature {
         if (!state) return { x: 0, y: 0, rx: 0, ry: 0 }
         const dz = state.deadZone
         const ax = state.pad.axes
-        const apply = (v: number) => Math.abs(v) < dz ? 0 : v
+        const apply = (v: number) => Math.abs(v) < dz ? 0 : Math.sign(v) * (Math.abs(v) - dz) / (1 - dz)
         return {
             x: apply(ax[0]?.getValue() ?? 0),
             y: apply(ax[1]?.getValue() ?? 0),

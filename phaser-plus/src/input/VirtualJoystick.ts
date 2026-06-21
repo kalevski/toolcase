@@ -78,6 +78,8 @@ function injectOnce(): void {
 interface ButtonHandle {
     config: Required<ButtonConfig>
     el: HTMLDivElement
+    press: (event: PointerEvent) => void
+    release: (event: PointerEvent) => void
 }
 
 export default class VirtualJoystick extends HTMLFeature {
@@ -145,22 +147,27 @@ export default class VirtualJoystick extends HTMLFeature {
             this.input?.setVirtual(merged.id, true)
             el.setPointerCapture(event.pointerId)
         }
-        const release = () => {
+        const release = (event: PointerEvent) => {
             el.classList.remove('is-pressed')
             this.input?.setVirtual(merged.id, false)
+            el.releasePointerCapture(event.pointerId)
         }
         el.addEventListener('pointerdown', press)
         el.addEventListener('pointerup', release)
         el.addEventListener('pointercancel', release)
         el.addEventListener('pointerleave', release)
         this.node.append(el)
-        this.buttons.set(merged.id, { config: merged, el })
+        this.buttons.set(merged.id, { config: merged, el, press, release })
         return this
     }
 
     removeButton(id: string): this {
         const handle = this.buttons.get(id)
         if (!handle) return this
+        handle.el.removeEventListener('pointerdown', handle.press)
+        handle.el.removeEventListener('pointerup', handle.release)
+        handle.el.removeEventListener('pointercancel', handle.release)
+        handle.el.removeEventListener('pointerleave', handle.release)
         handle.el.remove()
         this.buttons.delete(id)
         return this
@@ -268,9 +275,21 @@ export default class VirtualJoystick extends HTMLFeature {
     }
 
     override onDestroy(): void {
-        for (const handle of this.buttons.values()) handle.el.remove()
+        for (const handle of this.buttons.values()) {
+            handle.el.removeEventListener('pointerdown', handle.press)
+            handle.el.removeEventListener('pointerup', handle.release)
+            handle.el.removeEventListener('pointercancel', handle.release)
+            handle.el.removeEventListener('pointerleave', handle.release)
+            handle.el.remove()
+        }
         this.buttons.clear()
-        this.joystickEl?.remove()
+        if (this.joystickEl) {
+            this.joystickEl.removeEventListener('pointerdown', this.onPointerDown)
+            this.joystickEl.removeEventListener('pointermove', this.onPointerMove)
+            this.joystickEl.removeEventListener('pointerup', this.onPointerUp)
+            this.joystickEl.removeEventListener('pointercancel', this.onPointerUp)
+            this.joystickEl.remove()
+        }
         this.joystickEl = null
         this.thumbEl = null
     }
