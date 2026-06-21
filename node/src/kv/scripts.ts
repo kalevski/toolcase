@@ -92,7 +92,12 @@ return v
 `.trim()
 
 const LUA_VERSIONED_SET = `
-local cur = redis.call("HGET", KEYS[1], "version")
+local fields = redis.call("HMGET", KEYS[1], "version", "__vset")
+local cur = fields[1]
+local marker = fields[2]
+if not cur and not marker and redis.call("EXISTS", KEYS[1]) == 1 then
+	return {0, -1}
+end
 if cur and tonumber(cur) ~= tonumber(ARGV[1]) then
 	return {0, tonumber(cur)}
 end
@@ -100,7 +105,7 @@ if not cur and tonumber(ARGV[1]) ~= 0 then
 	return {0, 0}
 end
 local nextVersion = tonumber(ARGV[1]) + 1
-redis.call("HSET", KEYS[1], "version", tostring(nextVersion), "data", ARGV[2])
+redis.call("HSET", KEYS[1], "version", tostring(nextVersion), "data", ARGV[2], "__vset", "1")
 if ARGV[3] ~= "" then
 	redis.call("EXPIRE", KEYS[1], tonumber(ARGV[3]))
 end
