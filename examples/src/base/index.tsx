@@ -27,6 +27,7 @@ import TrieDemo from './TrieDemo'
 import SpatialDemo from './SpatialDemo'
 import BiMapDemo from './BiMapDemo'
 import MultiMapDemo from './MultiMapDemo'
+import Vec2Demo from './Vec2Demo'
 import MathDemo from './MathDemo'
 import EasingDemo from './EasingDemo'
 
@@ -69,6 +70,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'trie', label: 'Trie', category: 'Data Structures', element: <TrieDemo /> },
     { key: 'bimap', label: 'BiMap', category: 'Data Structures', element: <BiMapDemo /> },
     { key: 'multimap', label: 'MultiMap', category: 'Data Structures', element: <MultiMapDemo /> },
+    { key: 'vec2', label: 'Vec2', category: 'Data Structures', element: <Vec2Demo /> },
     { key: 'spatial', label: 'Spatial', category: 'Data Structures', element: <SpatialDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
     { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },

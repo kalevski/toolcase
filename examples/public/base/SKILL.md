@@ -28,7 +28,8 @@ import {
     Cache, AdjacencyMatrix, State, retry,
     WeightedRandom, Dijkstra, AStar,
     DisjointSet, Trie,
-    BiMap, MultiMap
+    BiMap, MultiMap,
+    Vec2
 } from '@toolcase/base'
 ```
 
@@ -84,6 +85,8 @@ import {
 - [Spatial](#spatial)
   - [SpatialHash](#spatialhash)
   - [Quadtree](#quadtree)
+- [Math](#math)
+  - [Vec2](#vec2)
 - [Async](#async)
   - [Deferred](#deferred)
   - [Semaphore](#semaphore)
@@ -1923,6 +1926,84 @@ qt.update('A', { x: 600, y: 600, width: 20, height: 20 })
 qt.size // → 3
 
 qt.clear().size // → 0
+```
+
+---
+
+## Math
+
+### Vec2
+
+Immutable 2D vector. Every operation returns a new `Vec2` — the original is never modified. Zero dependencies, isomorphic.
+
+```ts
+new Vec2(x: number = 0, y: number = 0)
+```
+
+**Static constants:**
+- `Vec2.ZERO` — `Vec2(0, 0)` singleton.
+- `Vec2.ONE` — `Vec2(1, 1)` singleton.
+
+**Properties:**
+- `x: number` / `y: number` — (readonly) components.
+- `length: number` — Euclidean length (`Math.sqrt(x² + y²)`).
+- `lengthSq: number` — squared length (avoids `sqrt`; useful for distance comparisons).
+
+**Methods:**
+- `add(other: Vec2): Vec2` — component-wise sum.
+- `subtract(other: Vec2): Vec2` — component-wise difference.
+- `scale(factor: number): Vec2` — multiply both components by `factor`.
+- `dot(other: Vec2): number` — dot product (`x·ox + y·oy`).
+- `normalize(): Vec2` — unit vector in the same direction; returns `Vec2.ZERO` when length is 0.
+- `lerp(other: Vec2, t: number): Vec2` — linear interpolation; `t=0` → this, `t=1` → other. Extrapolates outside `[0, 1]`.
+- `rotate(angle: number): Vec2` — rotate by `angle` radians counter-clockwise.
+- `negate(): Vec2` — flip both components (`scale(-1)`).
+- `distanceTo(other: Vec2): number` — Euclidean distance between two points.
+- `equals(other: Vec2): boolean` — exact component equality.
+- `toArray(): [number, number]` — `[x, y]` tuple.
+- `toString(): string` — `"Vec2(x, y)"`.
+
+**`Rect` type** (also exported from `@toolcase/base`):
+
+```ts
+import type { Rect } from '@toolcase/base'
+// { x: number; y: number; width: number; height: number }
+```
+
+```ts
+import { Vec2 } from '@toolcase/base'
+import type { Rect } from '@toolcase/base'
+
+// Basic operations
+const a = new Vec2(3, 0)
+const b = new Vec2(0, 4)
+
+a.add(b).toString()       // 'Vec2(3, 4)'
+a.subtract(b).toString()  // 'Vec2(3, -4)'
+a.scale(2).toString()     // 'Vec2(6, 0)'
+
+// Length + normalize
+const c = new Vec2(3, 4)
+c.length                  // 5
+c.normalize().toString()  // 'Vec2(0.6, 0.8)'
+
+// Dot product (0 = perpendicular, 1 = same direction for unit vectors)
+a.dot(b)                  // 0
+a.dot(a)                  // 9
+
+// Lerp between two points
+new Vec2(0, 0).lerp(new Vec2(100, 200), 0.5).toString()  // 'Vec2(50, 100)'
+
+// Rotate 90° counter-clockwise
+new Vec2(1, 0).rotate(Math.PI / 2).toString()  // 'Vec2(~0, 1)'
+
+// Distance
+new Vec2(0, 0).distanceTo(new Vec2(3, 4))  // 5
+
+// Rect: derive center from bounds
+const bounds: Rect = { x: 0, y: 0, width: 100, height: 50 }
+const center = new Vec2(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+center.toString()  // 'Vec2(50, 25)'
 ```
 
 ---

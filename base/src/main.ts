@@ -29,6 +29,7 @@ import DisjointSet from './DisjointSet'
 import Trie from './Trie'
 import BiMap from './BiMap'
 import MultiMap from './MultiMap'
+import Vec2 from './Vec2'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -60,6 +61,7 @@ const HTTP = {
 
 export type { SpatialPoint, SpatialRect } from './spatial'
 export type { EasingFn } from './easing'
+export type { Rect } from './Vec2'
 
 export type {
     Size as PackingSize,
@@ -145,7 +147,8 @@ export {
     DisjointSet,
     Trie,
     BiMap,
-    MultiMap
+    MultiMap,
+    Vec2
 }
 
 const BASE = {
@@ -200,7 +203,8 @@ const BASE = {
     DisjointSet,
     Trie,
     BiMap,
-    MultiMap
+    MultiMap,
+    Vec2
 }
 
 export default BASE
