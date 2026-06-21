@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/admin"
@@ -39,6 +40,12 @@ func cmdRun(args []string) int {
 		log.Error("cannot create data_dir", "dir", cfg.DataDir, "error", err)
 		return 1
 	}
+
+	tmpDir := filepath.Join(cfg.DataDir, "tmp")
+	if err := os.RemoveAll(tmpDir); err != nil {
+		log.Warn("could not clear tmp dir on startup", "dir", tmpDir, "error", err)
+	}
+	_ = os.MkdirAll(tmpDir, 0o750)
 
 	store, err := state.NewStore(cfg.DataDir)
 	if err != nil {
