@@ -54,6 +54,11 @@ function buildArgv(opts: AgentArgvOptions): string[] {
 
 export interface SpawnAgentOptions extends AgentArgvOptions {
     cwd: string
+    /**
+     * Per-account environment overlay (e.g. `{ CLAUDE_CONFIG_DIR,
+     * ANTHROPIC_API_KEY }`) selecting which Claude identity this child uses.
+     */
+    accountEnv?: Record<string, string>
 }
 
 /**
@@ -62,11 +67,14 @@ export interface SpawnAgentOptions extends AgentArgvOptions {
  */
 export function spawnAgent(opts: SpawnAgentOptions): ChildProcess {
     const argv = buildArgv(opts)
-    // No `env` override: inherit the parent environment so the `claude` CLI uses
+    // When an account env is supplied, overlay it on the inherited parent env so
+    // this child targets a chosen Claude account (CLAUDE_CONFIG_DIR / API key);
+    // otherwise pass no `env` and inherit the parent so the `claude` CLI uses
     // its own stored credentials / daemon auth.
     return spawn(config.agentBin, argv, {
         cwd: opts.cwd,
         detached: true,
+        env: opts.accountEnv ? { ...process.env, ...opts.accountEnv } : undefined,
         stdio: ['ignore', 'pipe', 'pipe'],
     })
 }
@@ -82,6 +90,11 @@ export interface RunOnceOptions {
     extraArgs?: string
     /** forwarded into the child env (e.g. a temp skills dir) */
     env?: Record<string, string>
+    /**
+     * Per-account environment overlay (e.g. `{ CLAUDE_CONFIG_DIR,
+     * ANTHROPIC_API_KEY }`) selecting which Claude identity this child uses.
+     */
+    accountEnv?: Record<string, string>
 }
 
 export interface RunOnceResult {
@@ -97,8 +110,12 @@ export function runAgentOnce(opts: RunOnceOptions): Promise<RunOnceResult> {
         const child = spawn(config.agentBin, argv, {
             cwd: opts.cwd,
             detached: true,
-            // Inherit parent env; merge any caller overrides (e.g. a temp skills dir).
-            env: opts.env ? { ...process.env, ...opts.env } : undefined,
+            // Inherit parent env; overlay any caller overrides (e.g. a temp skills
+            // dir) and the per-account env (CLAUDE_CONFIG_DIR / API key) when present.
+            env:
+                opts.env || opts.accountEnv
+                    ? { ...process.env, ...opts.env, ...opts.accountEnv }
+                    : undefined,
             stdio: ['ignore', 'pipe', 'pipe'],
         })
         let stdout = ''
