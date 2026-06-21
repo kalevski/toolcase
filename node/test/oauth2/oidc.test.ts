@@ -88,6 +88,22 @@ describe('verifyIdToken', () => {
 		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['ES256'] })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
+	it('rejects symmetric algorithm HS256 before any verification', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['HS256'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
+	})
+
+	it('rejects none algorithm before any verification', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['none'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
+	})
+
+	it('accepts RS256 in allowedAlgorithms', async () => {
+		const token = await signToken({})
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['RS256'] })
+		expect(verified.payload.iss).toBe(ISSUER)
+	})
+
 	it('matches nonce', async () => {
 		const token = await signToken({ nonce: 'n1' })
 		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { nonce: 'n1' })

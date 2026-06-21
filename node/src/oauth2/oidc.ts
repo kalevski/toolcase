@@ -174,6 +174,10 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 		}
 	}
 	const algorithms = options.allowedAlgorithms ? [...options.allowedAlgorithms] : [...DEFAULT_ALG_LIST]
+	const SYM = /^(HS\d{3}|none)$/i
+	if (algorithms.some(a => SYM.test(a))) {
+		throw new OIDCVerificationError('symmetric/none algorithms are not allowed for ID tokens')
+	}
 	let verifyResult: { payload: any; protectedHeader: any }
 	try {
 		verifyResult = await j.jwtVerify(idToken, jwks as any, {
