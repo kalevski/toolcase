@@ -2,6 +2,7 @@ import type Serializer from '@toolcase/serializer'
 import { RESP_TYPES } from 'redis'
 import { KVServiceError } from '../errors'
 import { KeyBuilder } from './keys'
+import type { Locker } from './Locker'
 import { LuaScriptCache } from './scripts'
 import type { SubscriberPool } from './SubscriberPool'
 import type { RedisClient, SubscribeHandler, Subscription } from './types'
@@ -28,6 +29,7 @@ export class ValueStore {
 		private readonly serializer: Serializer | undefined,
 		private readonly subscribers?: SubscriberPool,
 		bufferClient?: unknown,
+		private readonly locker?: Locker,
 	) {
 		if (serializer !== undefined) {
 			const s = serializer as unknown as { encode?: unknown; decode?: unknown }
@@ -135,9 +137,22 @@ export class ValueStore {
 	): Promise<T> {
 		const cached = await this.getValue<T>(type, key)
 		if (cached !== null) return cached
-		const value = await factory()
-		await this.setValue(type, key, value, { EX: ttlSeconds })
-		return value
+		if (!this.locker) {
+			const value = await factory()
+			await this.setValue(type, key, value, { EX: ttlSeconds })
+			return value
+		}
+		return this.locker.withLock(
+			this.keys.build('remember', type, key),
+			30_000,
+			async (_handle) => {
+				const again = await this.getValue<T>(type, key)
+				if (again !== null) return again
+				const value = await factory()
+				await this.setValue(type, key, value, { EX: ttlSeconds })
+				return value
+			},
+		)
 	}
 
 	enqueueValue(type: string, queueKey: string, message: object): Promise<number> {

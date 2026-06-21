@@ -77,6 +77,7 @@ export class KVService {
 			this.serializer,
 			this.subscribers,
 			bufferClient,
+			this.locker,
 		)
 		this.versioned = new Versioned(this.client, this.keys, this.scripts, this.serializer, bufferClient)
 	}
