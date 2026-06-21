@@ -27,6 +27,10 @@ func Validate(cfg *Config) error {
 		return fmt.Errorf("defaults.keep_releases must be >= 1")
 	}
 
+	if cfg.Admin.TokenEnv != "" && cfg.Admin.TokenFile != "" {
+		return fmt.Errorf("admin.token_env and admin.token_file are mutually exclusive")
+	}
+
 	seen := map[string]string{} // domain -> file
 	for i := range cfg.Sites {
 		site := &cfg.Sites[i]

@@ -65,10 +65,9 @@ func cmdRun(args []string) int {
 	defer stop()
 
 	// Admin endpoint (loopback by default; empty listen disables).
-	token, err := resolveAdminToken(cfg.Admin.TokenEnv)
+	token, err := resolveAdminToken(cfg.Admin.TokenEnv, cfg.Admin.TokenFile)
 	if err != nil {
-		log.Error("admin token misconfiguration; refusing to start",
-			"error", err, "var", cfg.Admin.TokenEnv)
+		log.Error("admin token misconfiguration; refusing to start", "error", err)
 		return 1
 	}
 	adminSrv := admin.New(mgr, token, log)
@@ -108,17 +107,20 @@ func cmdRun(args []string) int {
 	return 0
 }
 
-// resolveAdminToken looks up the bearer token from the environment.
-// When tokenEnv is empty, no auth is configured and ("", nil) is returned.
-// When tokenEnv names a variable that resolves to "", an error is returned so
-// the caller can refuse to start rather than expose an unauthenticated endpoint.
-func resolveAdminToken(tokenEnv string) (string, error) {
-	if tokenEnv == "" {
+// resolveAdminToken resolves the bearer token from an env var or a secret file.
+// When both refs are empty, no auth is configured and ("", nil) is returned.
+// If a ref is configured but resolves to an empty value, an error is returned
+// so the caller refuses to start rather than expose an unauthenticated endpoint.
+func resolveAdminToken(tokenEnv, tokenFile string) (string, error) {
+	if tokenEnv == "" && tokenFile == "" {
 		return "", nil
 	}
-	token := os.Getenv(tokenEnv)
+	token, err := config.ResolveSecret(tokenEnv, tokenFile)
+	if err != nil {
+		return "", err
+	}
 	if token == "" {
-		return "", fmt.Errorf("env var %q is empty", tokenEnv)
+		return "", fmt.Errorf("admin token is empty")
 	}
 	return token, nil
 }

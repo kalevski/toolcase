@@ -47,8 +47,9 @@ type Config struct {
 type Admin struct {
 	// Listen is the address for the admin endpoint. nil means the default
 	// (127.0.0.1:9090); an explicit empty string disables the endpoint.
-	Listen   *string `yaml:"listen"`
-	TokenEnv string  `yaml:"token_env"`
+	Listen    *string `yaml:"listen"`
+	TokenEnv  string  `yaml:"token_env"`
+	TokenFile string  `yaml:"token_file"`
 }
 
 // ListenAddr resolves the effective admin listen address ("" = disabled).
