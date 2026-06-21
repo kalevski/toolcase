@@ -64,6 +64,9 @@ async function fetchDiscovery(issuer: string, opts: HttpOptions): Promise<OIDCDi
 	if (typeof parsed.issuer !== 'string' || typeof parsed.token_endpoint !== 'string' || typeof parsed.authorization_endpoint !== 'string' || typeof parsed.jwks_uri !== 'string') {
 		throw new OAuth2ProtocolError('discovery document missing required fields')
 	}
+	if (parsed.issuer !== base && parsed.issuer !== issuer) {
+		throw new OAuth2ProtocolError(`discovery issuer mismatch: requested ${issuer}, got ${parsed.issuer}`)
+	}
 	return parsed as OIDCDiscoveryDocument
 }
 

@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import {
 	verifyIdToken, fetchOIDCDiscovery, clearJwksCache, clearDiscoveryCache, oidcProvider
 } from '../../src/oauth2/oidc'
-import { OIDCVerificationError } from '../../src/errors'
+import { OIDCVerificationError, OAuth2ProtocolError } from '../../src/errors'
 
 const ISSUER = 'https://idp.test'
 const AUDIENCE = 'cid'
@@ -148,6 +148,35 @@ describe('fetchOIDCDiscovery', () => {
 		const result = await fetchOIDCDiscovery(ISSUER, { fetchImpl, cacheTtlMs: 0 })
 		expect(result.issuer).toBe(ISSUER)
 		expect(fetchImpl.mock.calls[0][0]).toBe(`${ISSUER}/.well-known/openid-configuration`)
+	})
+
+	it('rejects when discovery issuer does not match requested issuer', async () => {
+		const doc = {
+			issuer: 'https://evil.test',
+			authorization_endpoint: 'https://evil.test/auth',
+			token_endpoint: 'https://evil.test/token',
+			jwks_uri: 'https://evil.test/jwks',
+			response_types_supported: ['code'],
+			subject_types_supported: ['public'],
+			id_token_signing_alg_values_supported: ['RS256']
+		}
+		const fetchImpl = fetchDiscovery(doc)
+		await expect(fetchOIDCDiscovery(ISSUER, { fetchImpl, cacheTtlMs: 0 })).rejects.toBeInstanceOf(OAuth2ProtocolError)
+	})
+
+	it('accepts matching issuer without trailing slash', async () => {
+		const doc = {
+			issuer: ISSUER,
+			authorization_endpoint: `${ISSUER}/auth`,
+			token_endpoint: `${ISSUER}/token`,
+			jwks_uri: `${ISSUER}/jwks`,
+			response_types_supported: ['code'],
+			subject_types_supported: ['public'],
+			id_token_signing_alg_values_supported: ['RS256']
+		}
+		const fetchImpl = fetchDiscovery(doc)
+		const result = await fetchOIDCDiscovery(`${ISSUER}/`, { fetchImpl, cacheTtlMs: 0 })
+		expect(result.issuer).toBe(ISSUER)
 	})
 })
 
