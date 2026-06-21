@@ -64,3 +64,109 @@ describe('Color', () => {
         }
     })
 })
+
+describe('Color — WCAG contrast utilities', () => {
+    describe('luminance', () => {
+        it('white (#ffffff) has luminance 1', () => {
+            expect(Color.luminance('#ffffff')).toBeCloseTo(1.0, 5)
+        })
+
+        it('black (#000000) has luminance 0', () => {
+            expect(Color.luminance('#000000')).toBeCloseTo(0.0, 5)
+        })
+
+        it('mid-grey #767676 has luminance ~0.2158', () => {
+            // WCAG reference: relative luminance of #767676 ≈ 0.2158
+            // linearC ≈ 0.2158 for equal R, G, B channels at 118/255
+            expect(Color.luminance('#767676')).toBeCloseTo(0.2158, 3)
+        })
+
+        it('accepts 3-digit shorthand hex', () => {
+            // #fff == #ffffff
+            expect(Color.luminance('#fff')).toBeCloseTo(1.0, 5)
+        })
+
+        it('luminance is symmetric with channel order (all-grey)', () => {
+            const l = Color.luminance('#595959')
+            expect(l).toBeGreaterThan(0)
+            expect(l).toBeLessThan(1)
+        })
+    })
+
+    describe('contrastRatio', () => {
+        it('white vs black = 21', () => {
+            expect(Color.contrastRatio('#ffffff', '#000000')).toBeCloseTo(21.0, 5)
+        })
+
+        it('is commutative', () => {
+            const ab = Color.contrastRatio('#2196f3', '#ffffff')
+            const ba = Color.contrastRatio('#ffffff', '#2196f3')
+            expect(ab).toBeCloseTo(ba, 10)
+        })
+
+        it('same color has contrast ratio 1', () => {
+            expect(Color.contrastRatio('#4caf50', '#4caf50')).toBeCloseTo(1.0, 5)
+        })
+
+        it('#767676 vs white is ~4.54 (just above AA threshold)', () => {
+            // Commonly cited WCAG boundary value
+            expect(Color.contrastRatio('#767676', '#ffffff')).toBeCloseTo(4.54, 1)
+        })
+
+        it('#595959 vs white is ~7.0 (AAA threshold)', () => {
+            // L(#595959) ≈ 0.10 → ratio = (1.05)/(0.15) ≈ 7.0
+            expect(Color.contrastRatio('#595959', '#ffffff')).toBeCloseTo(7.0, 0)
+        })
+    })
+
+    describe('readableOn', () => {
+        it('black on white passes all WCAG levels', () => {
+            const r = Color.readableOn('#000000', '#ffffff')
+            expect(r.AA).toBe(true)
+            expect(r.AAA).toBe(true)
+            expect(r.AALarge).toBe(true)
+            expect(r.AAALarge).toBe(true)
+        })
+
+        it('white on white fails all WCAG levels (ratio = 1)', () => {
+            const r = Color.readableOn('#ffffff', '#ffffff')
+            expect(r.AA).toBe(false)
+            expect(r.AAA).toBe(false)
+            expect(r.AALarge).toBe(false)
+            expect(r.AAALarge).toBe(false)
+        })
+
+        it('#767676 on white passes AA but not AAA', () => {
+            // contrast ~4.54 → AA pass (≥4.5), AAA fail (<7), large pass
+            const r = Color.readableOn('#767676', '#ffffff')
+            expect(r.AA).toBe(true)
+            expect(r.AAA).toBe(false)
+            expect(r.AALarge).toBe(true)
+            expect(r.AAALarge).toBe(true)
+        })
+
+        it('#949494 on white passes only AALarge (contrast ~3.0)', () => {
+            // L(#949494) ≈ 0.296 → ratio ≈ 3.04, passes AALarge (≥3.0) but not AA (≥4.5)
+            const r = Color.readableOn('#949494', '#ffffff')
+            expect(r.AA).toBe(false)
+            expect(r.AAA).toBe(false)
+            expect(r.AALarge).toBe(true)
+            expect(r.AAALarge).toBe(false)
+        })
+
+        it('#595959 on white passes AA, AAA and all large levels', () => {
+            // contrast ~7.0 → all levels pass
+            const r = Color.readableOn('#595959', '#ffffff')
+            expect(r.AA).toBe(true)
+            expect(r.AAA).toBe(true)
+            expect(r.AALarge).toBe(true)
+            expect(r.AAALarge).toBe(true)
+        })
+
+        it('is symmetric — swapping fg/bg gives the same result', () => {
+            const r1 = Color.readableOn('#2196f3', '#ffffff')
+            const r2 = Color.readableOn('#ffffff', '#2196f3')
+            expect(r1).toEqual(r2)
+        })
+    })
+})
