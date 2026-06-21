@@ -73,4 +73,7 @@ export const helpTexts = {
     audit: {
         intro: 'Who did what: run controls, task mutations, git actions, agent starts, settings — newest first.',
     },
+    accounts: {
+        intro: 'The Claude identities TaskForge can dispatch under. Verify checks token health with a cheap one-shot run; oauth accounts are finished with an interactive claude /login on the host. Secrets are never shown — apikey accounts reference an env-var name only.',
+    },
 } as const

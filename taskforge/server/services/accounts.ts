@@ -9,7 +9,10 @@ import { promises as fs } from 'node:fs'
 import { config } from '@/server/config'
 import * as accountRepo from '@/server/data/repositories/account-repo'
 import { runAgentOnce } from '@/server/infrastructure/agent'
-import type { Account, AccountHealth } from '@/server/domain/types'
+import type { Account, AccountHealth, AccountSummary } from '@/server/domain/types'
+
+// Re-exported so existing consumers can keep importing it from this service.
+export type { AccountSummary }
 
 /** Unknown alias passed to `resolveAccount`. */
 export class UnknownAccountError extends Error {
@@ -46,25 +49,13 @@ export function getAccount(alias: string): Account | null {
 }
 
 /**
- * Non-secret registry view for the management surface: every account's metadata
- * (alias, config dir, auth method, label, the API-key env-var *name*) plus its
- * cached runtime state (`lastUsedAt` as the last known-good "health" stamp,
- * `coolingUntil`, and a derived `cooling` flag — true while a quota cool-down is
- * still in effect). Holds no secrets: the API key value is never stored, only
- * the env-var name that references it. `now` is injectable for deterministic
- * tests.
+ * Build the non-secret registry view for the management surface — see
+ * {@link AccountSummary} (every account's metadata plus its cached runtime state:
+ * `lastUsedAt` as the last known-good "health" stamp, `coolingUntil`, and a
+ * derived `cooling` flag, true while a quota cool-down is still in effect). Holds
+ * no secrets: the API key value is never stored, only the env-var name that
+ * references it. `now` is injectable for deterministic tests.
  */
-export interface AccountSummary {
-    alias: string
-    dir: string
-    auth: 'oauth' | 'apikey'
-    label?: string
-    apiKeyEnv?: string
-    lastUsedAt?: string
-    coolingUntil?: string
-    cooling: boolean
-}
-
 export function listAccountSummaries(now: string = new Date().toISOString()): AccountSummary[] {
     return accountRepo.list().map((a) => ({
         alias: a.alias,

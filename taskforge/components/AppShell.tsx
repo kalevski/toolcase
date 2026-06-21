@@ -30,7 +30,7 @@ type ProjectSub = 'overview' | 'tasks' | 'agents' | 'knowledge' | 'notes' | 'run
 function deriveActive(pathname: string): {
     activeProject: string | null
     sub: ProjectSub | null
-    section: 'dashboard' | 'skills' | 'users' | 'audit' | 'health' | null
+    section: 'dashboard' | 'skills' | 'users' | 'accounts' | 'audit' | 'health' | null
 } {
     const m = pathname.match(/^\/projects\/([^/]+)(?:\/(tasks|knowledge|notes|runs|run|git|agents|settings))?\/?$/)
     if (m) {
@@ -38,6 +38,7 @@ function deriveActive(pathname: string): {
     }
     if (pathname.startsWith('/skills')) return { activeProject: null, sub: null, section: 'skills' }
     if (pathname.startsWith('/users')) return { activeProject: null, sub: null, section: 'users' }
+    if (pathname.startsWith('/accounts')) return { activeProject: null, sub: null, section: 'accounts' }
     if (pathname.startsWith('/audit')) return { activeProject: null, sub: null, section: 'audit' }
     if (pathname.startsWith('/health')) return { activeProject: null, sub: null, section: 'health' }
     return { activeProject: null, sub: null, section: 'dashboard' }
@@ -107,6 +108,7 @@ export function AppShell({
             ...(me.role === 'admin'
                 ? [
                       { key: 'users', label: 'Users', icon: tcIcon('people'), href: '/users', active: section === 'users' } as SideNavItem,
+                      { key: 'accounts', label: 'Accounts', icon: tcIcon('key'), href: '/accounts', active: section === 'accounts' } as SideNavItem,
                       { key: 'audit', label: 'Audit log', icon: tcIcon('journal-check'), href: '/audit', active: section === 'audit' } as SideNavItem,
                       { key: 'health', label: 'Health', icon: tcIcon('heart-pulse'), href: '/health', active: section === 'health' } as SideNavItem,
                   ]

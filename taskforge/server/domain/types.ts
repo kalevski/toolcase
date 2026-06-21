@@ -215,6 +215,25 @@ export interface AccountHealthSummary {
     lastUsedAt?: string
 }
 
+/**
+ * Non-secret registry view for the management surface (`GET /api/accounts`):
+ * every account's metadata (alias, config dir, auth method, label, the API-key
+ * env-var *name*) plus its cached runtime state — `lastUsedAt` as the last
+ * known-good health stamp, `coolingUntil`, and a derived `cooling` flag (true
+ * while a quota cool-down is still in effect). Holds no secrets: the API key
+ * value is never stored, only the env-var name that references it.
+ */
+export interface AccountSummary {
+    alias: string
+    dir: string
+    auth: 'oauth' | 'apikey'
+    label?: string
+    apiKeyEnv?: string
+    lastUsedAt?: string
+    coolingUntil?: string
+    cooling: boolean
+}
+
 // ── Git ──────────────────────────────────────────────────────────────────────
 
 export interface GitStatus {
