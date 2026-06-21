@@ -11,6 +11,7 @@ function makeClient(evalReply: unknown, rankReply: unknown = 0) {
         zRank: vi.fn().mockResolvedValue(rankReply),
         // zAdd returns added-count (0 when member already existed, 1 when new)
         zAdd: vi.fn().mockResolvedValue(0),
+        zIncrBy: vi.fn().mockResolvedValue(0),
     }
 }
 
@@ -38,6 +39,36 @@ describe('Leaderboard.addScore', () => {
         await board.addScore('scores', 'bob', 99)
         expect(client.zAdd).toHaveBeenCalledOnce()
         expect(client.zAdd).toHaveBeenCalledWith('test:scores', { score: 99, value: 'bob' })
+    })
+})
+
+describe('Leaderboard.incrScore', () => {
+
+    it('returns a number when zIncrBy resolves with a string float', async () => {
+        const client = makeClient(null)
+        client.zIncrBy.mockResolvedValue('5.5')
+        const board = makeLeaderboard(client)
+        const result = await board.incrScore('scores', 'alice', 0.5)
+        expect(typeof result).toBe('number')
+        expect(result).toBe(5.5)
+    })
+
+    it('returns a number when zIncrBy resolves with an integer', async () => {
+        const client = makeClient(null)
+        client.zIncrBy.mockResolvedValue(10)
+        const board = makeLeaderboard(client)
+        const result = await board.incrScore('scores', 'alice', 1)
+        expect(typeof result).toBe('number')
+        expect(result).toBe(10)
+    })
+
+    it('calls zIncrBy with the correct key, delta and member', async () => {
+        const client = makeClient(null)
+        client.zIncrBy.mockResolvedValue('42')
+        const board = makeLeaderboard(client)
+        await board.incrScore('scores', 'bob', 7)
+        expect(client.zIncrBy).toHaveBeenCalledOnce()
+        expect(client.zIncrBy).toHaveBeenCalledWith('test:scores', 7, 'bob')
     })
 })
 

@@ -20,6 +20,7 @@ import { Versioned } from './Versioned'
 
 const SCAN_BATCH_DEFAULT = 100
 const DEL_BATCH_LIMIT = 500
+const POP_N_MAX = 1000
 
 export interface DelByPatternOptions {
 	confirm?: boolean
@@ -131,10 +132,10 @@ export class KVService {
 	async warmScripts(): Promise<void> {
 		const names = Object.keys(KV_LUA_SCRIPTS) as (keyof typeof KV_LUA_SCRIPTS)[]
 		await Promise.all(names.map(async (name) => {
-			const sha = this.scripts.get(name).sha
+			this.scripts.get(name)
 			await (this.client as unknown as {
 				scriptLoad: (source: string) => Promise<string>
-			}).scriptLoad(KV_LUA_SCRIPTS[name]).catch(() => sha)
+			}).scriptLoad(KV_LUA_SCRIPTS[name])
 		}))
 	}
 
@@ -379,7 +380,7 @@ export class KVService {
 	async popN(key: string, count: number): Promise<string[]> {
 		const reply = (await this.scripts.get('popN').run(this.client, {
 			keys: [this.key(key)],
-			arguments: [String(count)],
+			arguments: [String(Math.min(count, POP_N_MAX))],
 		})) as unknown
 		if (!Array.isArray(reply)) return []
 		return reply.map((v) => String(v))

@@ -40,6 +40,7 @@ if count < limit then
 	redis.call("PEXPIRE", KEYS[1], window)
 	return {1, count + 1, limit - count - 1}
 end
+redis.call("PEXPIRE", KEYS[1], window)
 return {0, count, 0}
 `.trim()
 
@@ -70,6 +71,7 @@ return {allowed, tostring(tokens)}
 
 const LUA_INCR_CAPPED = `
 local current = tonumber(redis.call("GET", KEYS[1]))
+local is_new = current == nil
 if current == nil then current = 0 end
 local delta = tonumber(ARGV[1])
 local cap = tonumber(ARGV[2])
@@ -77,7 +79,7 @@ if current + delta > cap then
 	return {0, current}
 end
 local next = redis.call("INCRBY", KEYS[1], delta)
-if ARGV[3] ~= "" then
+if is_new and ARGV[3] ~= "" then
 	redis.call("EXPIRE", KEYS[1], tonumber(ARGV[3]))
 end
 return {1, next}
@@ -125,7 +127,7 @@ return {rank, score}
 
 const LUA_POP_N = `
 local results = {}
-local count = tonumber(ARGV[1])
+local count = math.min(tonumber(ARGV[1]), 1000)
 for i = 1, count do
 	local v = redis.call("LPOP", KEYS[1])
 	if not v then break end
@@ -151,7 +153,9 @@ if v == 1 then
 else
 	ttl = redis.call("TTL", KEYS[1])
 	if ttl < 0 then
+		redis.call("SET", KEYS[1], "1")
 		redis.call("EXPIRE", KEYS[1], tonumber(ARGV[1]))
+		v = 1
 		ttl = tonumber(ARGV[1])
 	end
 end

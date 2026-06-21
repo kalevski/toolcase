@@ -26,8 +26,9 @@ export class Leaderboard {
 		await this.client.zAdd(this.keys.build(boardKey), { score, value: member })
 	}
 
-	incrScore(boardKey: string, member: string, delta: number): Promise<number> {
-		return this.client.zIncrBy(this.keys.build(boardKey), delta, member) as unknown as Promise<number>
+	async incrScore(boardKey: string, member: string, delta: number): Promise<number> {
+		const reply = await this.client.zIncrBy(this.keys.build(boardKey), delta, member)
+		return Number(reply)
 	}
 
 	async addScoreAndRank(
