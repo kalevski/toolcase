@@ -86,7 +86,34 @@ fn('b')   // within window — deferred
 fn('c')   // replaces 'b' as trailing call
 await sleep(250) // trailing fires here`
 
-const { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle } = Async
+const asyncQueueCode = `// Unbounded — producer runs freely
+const q = new Async.AsyncQueue<number>()
+q.push(1); q.push(2); q.push(3)
+q.close()
+
+for await (const n of q) console.log('got', n)
+
+// Bounded with backpressure (capacity = 2)
+const bounded = new Async.AsyncQueue<string>(2)
+
+const producer = (async () => {
+  for (const msg of ['a', 'b', 'c', 'd']) {
+    await bounded.push(msg)  // blocks when full
+    console.log('pushed', msg)
+  }
+  bounded.close()
+})()
+
+const consumer = (async () => {
+  for await (const msg of bounded) {
+    console.log('pulled', msg)
+    await sleep(10)   // slow consumer — triggers backpressure
+  }
+})()
+
+await Promise.all([producer, consumer])`
+
+const { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue } = Async
 
 export const AsyncDemo = () => {
     const [deferredLogs, setDeferredLogs] = useState<any[]>([])
@@ -97,6 +124,7 @@ export const AsyncDemo = () => {
     const [sleepLogs, setSleepLogs] = useState<any[]>([])
     const [debounceLogs, setDebounceLogs] = useState<any[]>([])
     const [throttleLogs, setThrottleLogs] = useState<any[]>([])
+    const [asyncQueueLogs, setAsyncQueueLogs] = useState<any[]>([])
     const [running, setRunning] = useState('')
 
     const run = (key: string, setLogs: (l: any[]) => void, fn: () => Promise<void>) => async () => {
@@ -186,6 +214,33 @@ export const AsyncDemo = () => {
         await sleep(250)
     })
 
+    const runAsyncQueue = run('asyncQueue', setAsyncQueueLogs, async () => {
+        const q = new AsyncQueue<number>()
+        await q.push(1)
+        await q.push(2)
+        await q.push(3)
+        q.close()
+        for await (const n of q) {
+            console.log('got', n)
+        }
+
+        const bounded = new AsyncQueue<string>(2)
+        const producer = (async () => {
+            for (const msg of ['a', 'b', 'c', 'd']) {
+                await bounded.push(msg)
+                console.log('pushed', msg)
+            }
+            bounded.close()
+        })()
+        const consumer = (async () => {
+            for await (const msg of bounded) {
+                console.log('pulled', msg)
+                await sleep(5)
+            }
+        })()
+        await Promise.all([producer, consumer])
+    })
+
     return (
         <>
             <DemoSection
@@ -251,6 +306,14 @@ export const AsyncDemo = () => {
                 onRun={runThrottle}
                 logs={throttleLogs}
                 running={running === 'throttle'}
+            />
+            <DemoSection
+                title="AsyncQueue"
+                description="Backpressure-aware producer/consumer channel. Async push/pull, AsyncIterable consumption, optional bounded capacity, and close/drain semantics."
+                code={asyncQueueCode}
+                onRun={runAsyncQueue}
+                logs={asyncQueueLogs}
+                running={running === 'asyncQueue'}
             />
         </>
     )

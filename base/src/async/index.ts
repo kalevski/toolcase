@@ -6,8 +6,9 @@ import withTimeout from './withTimeout'
 import sleep from './sleep'
 import debounce from './debounce'
 import throttle from './throttle'
+import AsyncQueue from './AsyncQueue'
 
-export { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle }
+export { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue }
 
 const Async = {
     Deferred,
@@ -17,7 +18,8 @@ const Async = {
     withTimeout,
     sleep,
     debounce,
-    throttle
+    throttle,
+    AsyncQueue
 }
 
 export default Async

@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -12,6 +12,7 @@ import {
     HTTP,     // { Status, RESTError, RESTResponse }
     Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
     Spatial,  // { SpatialHash, Quadtree }
+    Async,    // { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue }
     VectorClock, EventEmitter, Broadcast,
     LSystem, ObjectPool, PriorityQueue, RingBuffer, Stack, Deque,
     generateId, ulid, toHex, formatByteSize,
@@ -72,6 +73,16 @@ import {
 - [Spatial](#spatial)
   - [SpatialHash](#spatialhash)
   - [Quadtree](#quadtree)
+- [Async](#async)
+  - [Deferred](#deferred)
+  - [Semaphore](#semaphore)
+  - [Mutex](#mutex)
+  - [pLimit](#plimit)
+  - [withTimeout](#withtimeout)
+  - [sleep](#sleep)
+  - [debounce](#debounce)
+  - [throttle](#throttle)
+  - [AsyncQueue](#asyncqueue)
 
 ---
 
@@ -1384,7 +1395,7 @@ Zero-dependency async toolkit. Exported as the `Async` namespace.
 
 ```ts
 import { Async } from '@toolcase/base'
-// Async = { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle }
+// Async = { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue }
 ```
 
 ### Deferred
@@ -1549,6 +1560,73 @@ window.addEventListener('scroll', onScroll)
 
 // Drop trailing call (e.g. on unmount)
 onScroll.cancel()
+```
+
+### AsyncQueue
+
+Backpressure-aware producer/consumer channel. Async `push`/`pull`, `AsyncIterable` consumption, optional bounded capacity with backpressure, and close/drain semantics.
+
+```ts
+new Async.AsyncQueue<T>(capacity?: number)
+```
+
+- `capacity` — maximum number of buffered items. Default `Infinity` (unbounded). Pass a positive integer to enable backpressure. Constructor throws if `capacity` is not a positive integer.
+
+**Properties:**
+- `size: number` — current number of buffered items (readonly getter).
+- `closed: boolean` — `true` after `close()` is called (readonly getter).
+
+**Methods:**
+- `push(item: T): Promise<void>` — add an item. When bounded and full, blocks until a slot is freed. Throws synchronously if `item === undefined` or if the queue is closed.
+- `pull(): Promise<T>` — remove and return the next item. Blocks when the buffer is empty. Rejects with `Error('queue is closed')` when closed and empty.
+- `close(): void` — close the queue. Idempotent. Wakes all pending `pull()` callers with a rejection and all blocked `push()` callers with a rejection. Items already buffered can still be consumed after close.
+- `drain(): Promise<void>` — resolves when the buffer is empty (all buffered items have been consumed). Resolves immediately if already empty.
+- `[Symbol.asyncIterator](): AsyncIterator<T>` — iterate items via `for await...of`; terminates when the queue is closed and empty.
+
+```ts
+import { Async } from '@toolcase/base'
+
+// --- Unbounded (no backpressure) ---
+const q = new Async.AsyncQueue<string>()
+
+// Producer
+await q.push('hello')
+await q.push('world')
+q.close()
+
+// Consumer via for-await-of (terminates on close + empty)
+for await (const msg of q) {
+    console.log(msg)  // 'hello', 'world'
+}
+
+// --- Bounded with backpressure ---
+const bounded = new Async.AsyncQueue<number>(2)
+
+// push blocks when full until a consumer pulls
+const producer = (async () => {
+    for (let i = 0; i < 5; i++) {
+        await bounded.push(i)   // blocks at i=2, i=3, i=4 until consumer pulls
+    }
+    bounded.close()
+})()
+
+const consumer = (async () => {
+    for await (const n of bounded) {
+        console.log(n)          // 0, 1, 2, 3, 4
+    }
+})()
+
+await Promise.all([producer, consumer])
+
+// --- Drain: wait for all items to be consumed ---
+const channel = new Async.AsyncQueue<string>()
+await channel.push('a')
+await channel.push('b')
+channel.close()
+
+const drainP = channel.drain()          // resolves when buffer empties
+for await (const _ of channel) { /* consume */ }
+await drainP                            // already empty by now
 ```
 
 ---
