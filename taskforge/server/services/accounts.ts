@@ -5,6 +5,7 @@
 // only here, at resolution time, and never persisted.
 
 import 'server-only'
+import { promises as fs } from 'node:fs'
 import { config } from '@/server/config'
 import * as accountRepo from '@/server/data/repositories/account-repo'
 import { runAgentOnce } from '@/server/infrastructure/agent'
@@ -14,6 +15,13 @@ import type { Account, AccountHealth } from '@/server/domain/types'
 export class UnknownAccountError extends Error {
     constructor(alias: string) {
         super(`unknown account alias: "${alias}"`)
+    }
+}
+
+/** Attempt to register an alias that is already in the registry. */
+export class AccountExistsError extends Error {
+    constructor(alias: string) {
+        super(`account alias "${alias}" already exists`)
     }
 }
 
@@ -35,6 +43,84 @@ export function listAccounts(): Account[] {
 /** One account by alias, or null when absent. */
 export function getAccount(alias: string): Account | null {
     return accountRepo.get(alias)
+}
+
+/**
+ * Non-secret registry view for the management surface: every account's metadata
+ * (alias, config dir, auth method, label, the API-key env-var *name*) plus its
+ * cached runtime state (`lastUsedAt` as the last known-good "health" stamp,
+ * `coolingUntil`, and a derived `cooling` flag — true while a quota cool-down is
+ * still in effect). Holds no secrets: the API key value is never stored, only
+ * the env-var name that references it. `now` is injectable for deterministic
+ * tests.
+ */
+export interface AccountSummary {
+    alias: string
+    dir: string
+    auth: 'oauth' | 'apikey'
+    label?: string
+    apiKeyEnv?: string
+    lastUsedAt?: string
+    coolingUntil?: string
+    cooling: boolean
+}
+
+export function listAccountSummaries(now: string = new Date().toISOString()): AccountSummary[] {
+    return accountRepo.list().map((a) => ({
+        alias: a.alias,
+        dir: a.dir,
+        auth: a.auth,
+        label: a.label,
+        apiKeyEnv: a.apiKeyEnv,
+        lastUsedAt: a.lastUsedAt,
+        coolingUntil: a.coolingUntil,
+        cooling: !!a.coolingUntil && a.coolingUntil > now,
+    }))
+}
+
+/** Outcome of `registerAccount` — the persisted row plus optional next-step
+ * `guidance` (the host-side `claude /login` to finish an `oauth` account). */
+export interface RegisterResult {
+    account: Account
+    guidance?: string
+}
+
+/**
+ * Register a new account: validate the alias is kebab-case and the auth shape is
+ * coherent (`apikey` requires an env-var name), reject a duplicate alias, create
+ * its isolated config dir under `accountsDir`, and persist the registry row. For
+ * `oauth` accounts the dir is created empty and `guidance` instructs the operator
+ * to run an interactive `claude /login` against that `CLAUDE_CONFIG_DIR` on the
+ * host to complete authorization (it cannot be done over HTTP). Throws
+ * `InvalidAccountError` (bad alias/auth) or `AccountExistsError` (duplicate).
+ */
+export async function registerAccount(input: accountRepo.AccountInput): Promise<RegisterResult> {
+    accountRepo.validate(input)
+    if (accountRepo.get(input.alias)) throw new AccountExistsError(input.alias)
+
+    const dir = accountRepo.defaultDir(input.alias)
+    await fs.mkdir(dir, { recursive: true })
+    const account = accountRepo.upsert({ ...input, dir })
+
+    const guidance =
+        account.auth === 'oauth'
+            ? `Created empty config dir ${dir}. To finish authorization, run an interactive ` +
+              `\`claude /login\` on the host with CLAUDE_CONFIG_DIR=${dir} set.`
+            : undefined
+    return { account, guidance }
+}
+
+/**
+ * Remove an account: delete its registry row and its isolated config dir.
+ * Returns false when the alias is unknown (so the caller can 404); dir removal
+ * is best-effort so a missing/locked dir never leaves a dangling row.
+ */
+export async function removeAccount(alias: string): Promise<boolean> {
+    const account = accountRepo.get(alias)
+    if (!account) return false
+    accountRepo.remove(alias)
+    await fs.rm(account.dir, { recursive: true, force: true }).catch(() => {})
+    return true
 }
 
 /**
