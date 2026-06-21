@@ -23,6 +23,7 @@ import UlidDemo from './UlidDemo'
 import StackDemo from './StackDemo'
 import DequeDemo from './DequeDemo'
 import DisjointSetDemo from './DisjointSetDemo'
+import TrieDemo from './TrieDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -60,6 +61,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'stack', label: 'Stack', category: 'Data Structures', element: <StackDemo /> },
     { key: 'deque', label: 'Deque', category: 'Data Structures', element: <DequeDemo /> },
     { key: 'disjoint-set', label: 'DisjointSet', category: 'Data Structures', element: <DisjointSetDemo /> },
+    { key: 'trie', label: 'Trie', category: 'Data Structures', element: <TrieDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
     { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },
     { key: 'dijkstra', label: 'Dijkstra', category: 'Data Structures', element: <DijkstraDemo /> },

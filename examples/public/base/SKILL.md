@@ -18,7 +18,7 @@ import {
     Color, JSONSchema, getNumberInRange,
     Cache, AdjacencyMatrix, State, retry,
     WeightedRandom, Dijkstra, AStar,
-    DisjointSet
+    DisjointSet, Trie
 } from '@toolcase/base'
 ```
 
@@ -38,6 +38,7 @@ import {
   - [ObjectPool](#objectpool)
   - [WeightedRandom](#weightedrandom)
   - [DisjointSet](#disjointset)
+  - [Trie](#trie)
 - [Events](#events)
   - [EventEmitter](#eventemitter)
   - [Broadcast](#broadcast)
@@ -385,6 +386,42 @@ ds.count           // 1
 ds.connected('b', 'd') // true
 ds.connected('a', 'z') // false (z unknown)
 ds.find('b')           // same root as find('d')
+```
+
+### Trie
+
+Prefix tree for O(m) insert, lookup, and delete (m = word length) and O(m + k) prefix enumeration (k = number of matches).
+
+```ts
+new Trie()
+```
+
+- `size: number` — number of distinct words currently stored.
+- `insert(word: string): this` — add `word` to the trie. No-op if already present. Chainable.
+- `has(word: string): boolean` — `true` only when `word` was inserted and not deleted (exact match, not prefix match).
+- `delete(word: string): boolean` — remove `word`; returns `true` if it existed, `false` otherwise. Prunes nodes that are no longer on any other path.
+- `startsWith(prefix: string): string[]` — all inserted words that begin with `prefix` (including `prefix` itself if it was inserted). Empty prefix returns every word. Returns `[]` when no match exists.
+- `clear(): this` — remove all words. Chainable.
+
+```ts
+import { Trie } from '@toolcase/base'
+
+const t = new Trie()
+t.insert('apple').insert('app').insert('application').insert('apt')
+
+t.has('apple')          // true
+t.has('app')            // true
+t.has('ap')             // false — not a terminal word
+
+t.startsWith('app')     // ['app', 'apple', 'application'] (order unspecified)
+t.startsWith('apt')     // ['apt']
+t.startsWith('xyz')     // []
+t.startsWith('')        // all four words
+
+t.delete('app')
+t.has('app')            // false
+t.has('apple')          // true  — sharing prefix is unaffected
+t.size                  // 3
 ```
 
 ---

@@ -25,6 +25,7 @@ import Dijkstra from './Dijkstra'
 import AStar from './AStar'
 import RingBuffer from './RingBuffer'
 import DisjointSet from './DisjointSet'
+import Trie from './Trie'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -102,7 +103,8 @@ export {
     Dijkstra,
     AStar,
     RingBuffer,
-    DisjointSet
+    DisjointSet,
+    Trie
 }
 
 const BASE = {
@@ -135,7 +137,8 @@ const BASE = {
     Dijkstra,
     AStar,
     RingBuffer,
-    DisjointSet
+    DisjointSet,
+    Trie
 }
 
 export default BASE
