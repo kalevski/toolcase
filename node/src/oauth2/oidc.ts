@@ -1,5 +1,5 @@
 import { Cache } from '@toolcase/base'
-import { createHash } from 'node:crypto'
+import { createHash, timingSafeEqual } from 'node:crypto'
 import { OIDCVerificationError, OAuth2ProtocolError } from '../errors'
 import { fetchWithOptions, type HttpOptions } from '../http/options'
 import type { OAuth2ProviderConfig, ClientAuthMethod } from './types'
@@ -191,7 +191,7 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 	}
 	const { payload, protectedHeader } = verifyResult
 	if (ctx.nonce !== undefined) {
-		if (payload.nonce !== ctx.nonce) {
+		if (typeof payload.nonce !== 'string' || !timingSafeStringEqual(payload.nonce, ctx.nonce)) {
 			throw new OIDCVerificationError('nonce mismatch')
 		}
 	}
@@ -219,11 +219,11 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 	}
 	if (ctx.accessToken !== undefined) {
 		if (typeof payload.at_hash !== 'string') throw new OIDCVerificationError('at_hash required but absent')
-		if (computeHalfHash(ctx.accessToken, protectedHeader.alg) !== payload.at_hash) throw new OIDCVerificationError('at_hash mismatch')
+		if (!timingSafeStringEqual(computeHalfHash(ctx.accessToken, protectedHeader.alg), payload.at_hash)) throw new OIDCVerificationError('at_hash mismatch')
 	}
 	if (ctx.authorizationCode !== undefined) {
 		if (typeof payload.c_hash !== 'string') throw new OIDCVerificationError('c_hash required but absent')
-		if (computeHalfHash(ctx.authorizationCode, protectedHeader.alg) !== payload.c_hash) throw new OIDCVerificationError('c_hash mismatch')
+		if (!timingSafeStringEqual(computeHalfHash(ctx.authorizationCode, protectedHeader.alg), payload.c_hash)) throw new OIDCVerificationError('c_hash mismatch')
 	}
 	return {
 		header: { alg: protectedHeader.alg, kid: protectedHeader.kid, typ: protectedHeader.typ },
@@ -232,17 +232,31 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 	}
 }
 
+// Maps JWT algorithm identifiers to the hash used for at_hash/c_hash per RFC 7519 §3.
+// EdDSA maps to sha512 (Ed25519 convention, RFC 8037 §2.4).
+// Ed448 uses SHAKE-256 internally, which has no standardised at_hash mapping —
+// tokens signed with Ed448 will be rejected by this function (fail-closed).
+const ALG_HASH_MAP: Readonly<Record<string, string>> = {
+	RS256: 'sha256', ES256: 'sha256', PS256: 'sha256',
+	RS384: 'sha384', ES384: 'sha384', PS384: 'sha384',
+	RS512: 'sha512', ES512: 'sha512', PS512: 'sha512',
+	EdDSA: 'sha512'
+}
+
 function computeHalfHash(value: string, alg: string): string {
-	const algoMap: Record<string, string> = {
-		RS256: 'sha256', ES256: 'sha256', PS256: 'sha256', HS256: 'sha256',
-		RS384: 'sha384', ES384: 'sha384', PS384: 'sha384', HS384: 'sha384',
-		RS512: 'sha512', ES512: 'sha512', PS512: 'sha512', HS512: 'sha512',
-		EdDSA: 'sha512'
-	}
-	const algo = algoMap[alg] ?? 'sha256'
+	const algo = ALG_HASH_MAP[alg]
+	if (!algo) throw new OIDCVerificationError(`computeHalfHash: unsupported algorithm for at_hash/c_hash: ${alg}`)
 	const digest = createHash(algo).update(value).digest()
 	const half = digest.subarray(0, digest.length / 2)
 	return half.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+	const bufA = Buffer.from(a, 'utf8')
+	const bufB = Buffer.from(b, 'utf8')
+	// Length mismatch means definite inequality; length is not secret for hash outputs or nonces.
+	if (bufA.length !== bufB.length) return false
+	return timingSafeEqual(bufA, bufB)
 }
 
 export interface OidcProviderInput {

@@ -67,6 +67,11 @@ export function defineOAuth2Provider(opts: OAuth2ProviderConfig): OAuth2Provider
 	const clientAuthMethod = opts.clientAuthMethod !== undefined
 		? opts.clientAuthMethod
 		: (opts.clientSecret ? 'client_secret_basic' : 'none')
+	// Public clients (no client secret) should always use PKCE; default to S256.
+	const pkceMethod = opts.pkceMethod ?? (clientAuthMethod === 'none' ? 'S256' : undefined)
+	if (pkceMethod === 'plain') {
+		console.warn('defineOAuth2Provider: pkceMethod "plain" provides no protection if the code_challenge is intercepted; use "S256" instead')
+	}
 	return {
 		...opts,
 		authorizationEndpoint: stripTrailingSlash(opts.authorizationEndpoint),
@@ -78,7 +83,7 @@ export function defineOAuth2Provider(opts: OAuth2ProviderConfig): OAuth2Provider
 		jwksUri: opts.jwksUri ? stripTrailingSlash(opts.jwksUri) : undefined,
 		endSessionEndpoint: opts.endSessionEndpoint ? stripTrailingSlash(opts.endSessionEndpoint) : undefined,
 		clientAuthMethod,
-		pkceMethod: opts.pkceMethod
+		pkceMethod
 	}
 }
 

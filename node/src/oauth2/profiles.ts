@@ -1,12 +1,17 @@
-import type { OAuth2Profile, OAuth2Tokens } from './types'
+import type { OAuth2Profile } from './types'
 
 export interface ParseStandardOIDCProfileInput {
-	tokens: OAuth2Tokens
+	/** Claims from a verified OIDC ID token (i.e. `VerifiedIDToken.payload`). These take precedence over userinfo. */
+	idTokenClaims?: Record<string, unknown>
+	/** Claims from the userinfo endpoint. */
 	userinfo?: Record<string, unknown>
 }
 
 export function parseStandardOIDCProfile(input: ParseStandardOIDCProfileInput): OAuth2Profile {
-	const claims: Record<string, unknown> = { ...(input.userinfo ?? {}), ...(input.tokens.raw ?? {}) }
+	// Merge userinfo first, then overlay with verified ID-token claims.
+	// ID-token claims are cryptographically verified; userinfo is not signed, so
+	// ID-token claims win for security-sensitive fields (sub, email, email_verified).
+	const claims: Record<string, unknown> = { ...(input.userinfo ?? {}), ...(input.idTokenClaims ?? {}) }
 	const subject = pickString(claims.sub)
 	if (!subject) {
 		throw new Error('parseStandardOIDCProfile: missing sub claim')
@@ -34,7 +39,10 @@ export function parseGitHubProfile(input: ParseGitHubProfileInput): OAuth2Profil
 		throw new Error('parseGitHubProfile: missing user.id')
 	}
 	const subject = String(id)
-	const primary = input.emails.find(e => e.primary && e.verified) ?? input.emails.find(e => e.verified) ?? input.emails[0]
+	// Only include a verified email — falling back to an unverified address is an
+	// account-linking takeover vector if callers key accounts on email without
+	// checking emailVerified.
+	const primary = input.emails.find(e => e.primary && e.verified) ?? input.emails.find(e => e.verified)
 	return {
 		subject,
 		email: primary?.email,

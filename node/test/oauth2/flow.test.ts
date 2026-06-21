@@ -3,6 +3,64 @@ import { buildAuthorizeURL, exchangeCode, refreshToken, revokeToken, fetchUserin
 import { defineOAuth2Provider } from '../../src/oauth2/types'
 import { OAuth2TokenError, OAuth2ProtocolError } from '../../src/errors'
 
+describe('defineOAuth2Provider — PKCE defaults and warnings', () => {
+
+	it('defaults pkceMethod to S256 for public clients (no clientSecret)', () => {
+		const provider = defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'pub-client'
+		})
+		expect(provider.pkceMethod).toBe('S256')
+	})
+
+	it('does not override pkceMethod when caller sets it explicitly for a public client', () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {})
+		const provider = defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'pub-client',
+			pkceMethod: 'plain'
+		})
+		expect(provider.pkceMethod).toBe('plain')
+		vi.restoreAllMocks()
+	})
+
+	it('does not set pkceMethod by default for confidential clients', () => {
+		const provider = defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'cid',
+			clientSecret: 'cs'
+		})
+		expect(provider.pkceMethod).toBeUndefined()
+	})
+
+	it('emits console.warn when plain pkceMethod is configured', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'cid',
+			pkceMethod: 'plain'
+		})
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('plain'))
+		vi.restoreAllMocks()
+	})
+
+	it('does not emit console.warn for S256', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'cid',
+			pkceMethod: 'S256'
+		})
+		expect(warn).not.toHaveBeenCalled()
+		vi.restoreAllMocks()
+	})
+})
+
 const baseProvider = defineOAuth2Provider({
 	authorizationEndpoint: 'https://idp.test/authorize',
 	tokenEndpoint: 'https://idp.test/token',

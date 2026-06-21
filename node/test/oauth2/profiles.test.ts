@@ -1,18 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { parseStandardOIDCProfile, parseGitHubProfile, parseDiscordProfile } from '../../src/oauth2/profiles'
-import type { OAuth2Tokens } from '../../src/oauth2/types'
-
-const baseTokens: OAuth2Tokens = {
-	accessToken: 'at',
-	tokenType: 'Bearer',
-	raw: {}
-}
 
 describe('parseStandardOIDCProfile', () => {
 
 	it('maps userinfo claims', () => {
 		const profile = parseStandardOIDCProfile({
-			tokens: baseTokens,
 			userinfo: { sub: 'u-1', email: 'a@x', email_verified: true, name: 'A', picture: 'https://img.test/a.png' }
 		})
 		expect(profile.subject).toBe('u-1')
@@ -21,16 +13,33 @@ describe('parseStandardOIDCProfile', () => {
 		expect(profile.avatarUrl).toBe('https://img.test/a.png')
 	})
 
-	it('id_token claims override userinfo', () => {
+	it('idTokenClaims override userinfo', () => {
 		const profile = parseStandardOIDCProfile({
-			tokens: { ...baseTokens, raw: { sub: 'tok-sub' } },
+			idTokenClaims: { sub: 'tok-sub' },
 			userinfo: { sub: 'ui-sub' }
 		})
 		expect(profile.subject).toBe('tok-sub')
 	})
 
+	it('does not trust unverified tokens.raw — only idTokenClaims and userinfo are accepted', () => {
+		// Passing only idTokenClaims with no email yields no email in the profile;
+		// callers must pass verified claims explicitly rather than raw token responses.
+		const profile = parseStandardOIDCProfile({ idTokenClaims: { sub: 'u1' } })
+		expect(profile.email).toBeUndefined()
+		expect(profile.emailVerified).toBeUndefined()
+	})
+
+	it('idTokenClaims email takes precedence over userinfo email', () => {
+		const profile = parseStandardOIDCProfile({
+			idTokenClaims: { sub: 'u1', email: 'verified@idp', email_verified: true },
+			userinfo: { sub: 'u1', email: 'attacker@evil', email_verified: false }
+		})
+		expect(profile.email).toBe('verified@idp')
+		expect(profile.emailVerified).toBe(true)
+	})
+
 	it('throws on missing sub', () => {
-		expect(() => parseStandardOIDCProfile({ tokens: baseTokens })).toThrow(/missing sub/)
+		expect(() => parseStandardOIDCProfile({})).toThrow(/missing sub/)
 	})
 })
 
@@ -47,6 +56,27 @@ describe('parseGitHubProfile', () => {
 		expect(profile.subject).toBe('42')
 		expect(profile.email).toBe('b@x')
 		expect(profile.name).toBe('Octo Cat')
+	})
+
+	it('falls back to any verified email when no primary verified email exists', () => {
+		const profile = parseGitHubProfile({
+			user: { id: 1, login: 'octo' },
+			emails: [
+				{ email: 'unverified@x', primary: true, verified: false },
+				{ email: 'verified@x', primary: false, verified: true }
+			]
+		})
+		expect(profile.email).toBe('verified@x')
+		expect(profile.emailVerified).toBe(true)
+	})
+
+	it('does not include email when no verified email exists — prevents account-linking takeover', () => {
+		const profile = parseGitHubProfile({
+			user: { id: 1, login: 'octo' },
+			emails: [{ email: 'unverified@x', primary: true, verified: false }]
+		})
+		expect(profile.email).toBeUndefined()
+		expect(profile.emailVerified).toBeUndefined()
 	})
 
 	it('falls back to login when name missing', () => {

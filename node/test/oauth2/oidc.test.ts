@@ -153,6 +153,28 @@ describe('verifyIdToken', () => {
 		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode: 'code-test' })).rejects.toThrow('c_hash required but absent')
 	})
 
+	it('rejects at_hash that has the correct length but wrong value (timing-safe comparison)', async () => {
+		// Build the correct at_hash for 'at-test', then flip one character to produce a
+		// same-length string that must be rejected — exercises the timingSafeEqual path.
+		const accessToken = 'at-test'
+		const digest = createHash('sha256').update(accessToken).digest()
+		const correctHash = digest.subarray(0, 16).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+		// Produce a same-length but different value by corrupting the first char
+		const wrongChar = correctHash[0] === 'A' ? 'B' : 'A'
+		const wrongHash = wrongChar + correctHash.slice(1)
+		expect(wrongHash.length).toBe(correctHash.length)
+		const token = await signToken({ at_hash: wrongHash })
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken })).rejects.toThrow('at_hash mismatch')
+	})
+
+	it('rejects nonce with same length but different value (timing-safe comparison)', async () => {
+		const nonce = 'aaaaaaaaaaaaaaaa'
+		const wrongNonce = 'aaaaaaaaaaaaaaab'
+		expect(nonce.length).toBe(wrongNonce.length)
+		const token = await signToken({ nonce })
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { nonce: wrongNonce })).rejects.toThrow('nonce mismatch')
+	})
+
 	it('enforces requiredAmr', async () => {
 		const token = await signToken({ amr: ['pwd', 'mfa'] })
 		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { requiredAmr: ['mfa'] })
