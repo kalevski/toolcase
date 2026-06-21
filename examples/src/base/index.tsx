@@ -25,6 +25,8 @@ import DequeDemo from './DequeDemo'
 import DisjointSetDemo from './DisjointSetDemo'
 import TrieDemo from './TrieDemo'
 import SpatialDemo from './SpatialDemo'
+import BiMapDemo from './BiMapDemo'
+import MultiMapDemo from './MultiMapDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -63,6 +65,8 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'deque', label: 'Deque', category: 'Data Structures', element: <DequeDemo /> },
     { key: 'disjoint-set', label: 'DisjointSet', category: 'Data Structures', element: <DisjointSetDemo /> },
     { key: 'trie', label: 'Trie', category: 'Data Structures', element: <TrieDemo /> },
+    { key: 'bimap', label: 'BiMap', category: 'Data Structures', element: <BiMapDemo /> },
+    { key: 'multimap', label: 'MultiMap', category: 'Data Structures', element: <MultiMapDemo /> },
     { key: 'spatial', label: 'Spatial', category: 'Data Structures', element: <SpatialDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
     { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },

@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -19,7 +19,8 @@ import {
     Color, JSONSchema, getNumberInRange,
     Cache, AdjacencyMatrix, State, retry,
     WeightedRandom, Dijkstra, AStar,
-    DisjointSet, Trie
+    DisjointSet, Trie,
+    BiMap, MultiMap
 } from '@toolcase/base'
 ```
 
@@ -40,6 +41,8 @@ import {
   - [WeightedRandom](#weightedrandom)
   - [DisjointSet](#disjointset)
   - [Trie](#trie)
+  - [BiMap](#bimap)
+  - [MultiMap](#multimap)
 - [Events](#events)
   - [EventEmitter](#eventemitter)
   - [Broadcast](#broadcast)
@@ -426,6 +429,91 @@ t.delete('app')
 t.has('app')            // false
 t.has('apple')          // true  — sharing prefix is unaffected
 t.size                  // 3
+```
+
+### BiMap
+
+Bidirectional map enforcing a strict 1-to-1 (bijective) relationship between keys and values. Both directions are stored as `Map`s, so all lookups are O(1). Assigning a key to a new value (or a value to a new key) automatically displaces the existing pair.
+
+```ts
+new BiMap<K, V>()
+```
+
+- `size: number` — number of key-value pairs.
+- `set(key: K, value: V): this` — insert or replace the pair. If `value` was already mapped to a different key, that old key is removed. If `key` was already mapped to a different value, that old value is removed. Chainable.
+- `get(key: K): V | null` — forward lookup; `null` when key not present.
+- `getKey(value: V): K | null` — reverse lookup; `null` when value not present.
+- `has(key: K): boolean` — `true` when key exists.
+- `hasValue(value: V): boolean` — `true` when value exists.
+- `delete(key: K): boolean` — remove the pair by key; `true` if found.
+- `deleteByValue(value: V): boolean` — remove the pair by value; `true` if found.
+- `clear(): this` — remove all pairs. Chainable.
+- `[Symbol.iterator]` — iterate `[K, V]` pairs in insertion order.
+
+```ts
+import { BiMap } from '@toolcase/base'
+
+const ports = new BiMap<string, number>()
+ports.set('http', 80).set('https', 443).set('ftp', 21)
+
+ports.get('https')       // 443
+ports.getKey(80)         // 'http'
+ports.hasValue(443)      // true
+
+// Reassigning a value auto-removes the old key
+ports.set('alt-http', 80)
+ports.has('http')        // false
+ports.getKey(80)         // 'alt-http'
+ports.size               // 3
+
+ports.delete('ftp')
+ports.size               // 2
+
+for (const [svc, port] of ports) {
+    console.log(svc, '->', port)
+}
+```
+
+### MultiMap
+
+Maps each key to a `Set` of values. `size` counts total values across all keys. Adding the same key-value pair twice is a no-op (set semantics per key). Supports per-value removal or bulk removal of all values under a key.
+
+```ts
+new MultiMap<K, V>()
+```
+
+- `size: number` — total number of values across all keys.
+- `set(key: K, value: V): this` — add `value` to the set under `key`. No-op if the pair already exists. Chainable.
+- `get(key: K): ReadonlySet<V> | undefined` — the set of values under `key`; `undefined` when key not present.
+- `has(key: K, value?: V): boolean` — with only `key`: `true` when any values exist under it. With `value`: `true` when that specific pair exists.
+- `delete(key: K, value?: V): boolean` — with only `key`: remove all values under it (returns `true` if key existed). With `value`: remove that specific value (returns `true` if found; removes the key when its set becomes empty).
+- `keys(): IterableIterator<K>` — iterate all keys that have at least one value.
+- `clear(): this` — remove all entries. Chainable.
+- `[Symbol.iterator]` — iterate `[K, ReadonlySet<V>]` pairs.
+
+```ts
+import { MultiMap } from '@toolcase/base'
+
+const tags = new MultiMap<string, string>()
+tags.set('post:1', 'typescript').set('post:1', 'react')
+tags.set('post:2', 'typescript').set('post:2', 'css')
+
+tags.size                          // 4
+tags.get('post:1')                 // Set { 'typescript', 'react' }
+tags.has('post:1', 'react')        // true
+tags.has('post:1', 'vue')          // false
+
+tags.delete('post:1', 'react')
+tags.get('post:1')                 // Set { 'typescript' }
+tags.size                          // 3
+
+tags.delete('post:2')
+tags.has('post:2')                 // false
+tags.size                          // 1
+
+for (const [postId, tagSet] of tags) {
+    console.log(postId, [...tagSet])
+}
 ```
 
 ---

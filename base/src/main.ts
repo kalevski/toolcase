@@ -26,6 +26,8 @@ import AStar from './AStar'
 import RingBuffer from './RingBuffer'
 import DisjointSet from './DisjointSet'
 import Trie from './Trie'
+import BiMap from './BiMap'
+import MultiMap from './MultiMap'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -108,7 +110,9 @@ export {
     AStar,
     RingBuffer,
     DisjointSet,
-    Trie
+    Trie,
+    BiMap,
+    MultiMap
 }
 
 const BASE = {
@@ -143,7 +147,9 @@ const BASE = {
     AStar,
     RingBuffer,
     DisjointSet,
-    Trie
+    Trie,
+    BiMap,
+    MultiMap
 }
 
 export default BASE
