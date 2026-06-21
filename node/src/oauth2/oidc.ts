@@ -217,17 +217,13 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 			}
 		}
 	}
-	if (ctx.accessToken !== undefined && typeof payload.at_hash === 'string') {
-		const expected = computeHalfHash(ctx.accessToken, protectedHeader.alg)
-		if (expected !== payload.at_hash) {
-			throw new OIDCVerificationError('at_hash mismatch')
-		}
+	if (ctx.accessToken !== undefined) {
+		if (typeof payload.at_hash !== 'string') throw new OIDCVerificationError('at_hash required but absent')
+		if (computeHalfHash(ctx.accessToken, protectedHeader.alg) !== payload.at_hash) throw new OIDCVerificationError('at_hash mismatch')
 	}
-	if (ctx.authorizationCode !== undefined && typeof payload.c_hash === 'string') {
-		const expected = computeHalfHash(ctx.authorizationCode, protectedHeader.alg)
-		if (expected !== payload.c_hash) {
-			throw new OIDCVerificationError('c_hash mismatch')
-		}
+	if (ctx.authorizationCode !== undefined) {
+		if (typeof payload.c_hash !== 'string') throw new OIDCVerificationError('c_hash required but absent')
+		if (computeHalfHash(ctx.authorizationCode, protectedHeader.alg) !== payload.c_hash) throw new OIDCVerificationError('c_hash mismatch')
 	}
 	return {
 		header: { alg: protectedHeader.alg, kid: protectedHeader.kid, typ: protectedHeader.typ },

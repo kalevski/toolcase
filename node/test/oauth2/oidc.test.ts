@@ -129,6 +129,30 @@ describe('verifyIdToken', () => {
 		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken: 'at-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
+	it('rejects when accessToken provided but at_hash absent', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken: 'at-test' })).rejects.toThrow('at_hash required but absent')
+	})
+
+	it('checks c_hash', async () => {
+		const authorizationCode = 'code-test'
+		const digest = createHash('sha256').update(authorizationCode).digest()
+		const c_hash = digest.subarray(0, 16).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+		const token = await signToken({ c_hash })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode })
+		expect(verified.payload.c_hash).toBe(c_hash)
+	})
+
+	it('rejects bad c_hash', async () => {
+		const token = await signToken({ c_hash: 'wrong' })
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode: 'code-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
+	})
+
+	it('rejects when authorizationCode provided but c_hash absent', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode: 'code-test' })).rejects.toThrow('c_hash required but absent')
+	})
+
 	it('enforces requiredAmr', async () => {
 		const token = await signToken({ amr: ['pwd', 'mfa'] })
 		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { requiredAmr: ['mfa'] })
