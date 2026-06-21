@@ -24,6 +24,7 @@ import Random from './Random'
 import Dijkstra from './Dijkstra'
 import AStar from './AStar'
 import RingBuffer from './RingBuffer'
+import DisjointSet from './DisjointSet'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -100,7 +101,8 @@ export {
     Random,
     Dijkstra,
     AStar,
-    RingBuffer
+    RingBuffer,
+    DisjointSet
 }
 
 const BASE = {
@@ -132,7 +134,8 @@ const BASE = {
     Random,
     Dijkstra,
     AStar,
-    RingBuffer
+    RingBuffer,
+    DisjointSet
 }
 
 export default BASE

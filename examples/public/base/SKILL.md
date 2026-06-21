@@ -17,7 +17,8 @@ import {
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
     Cache, AdjacencyMatrix, State, retry,
-    WeightedRandom, Dijkstra, AStar
+    WeightedRandom, Dijkstra, AStar,
+    DisjointSet
 } from '@toolcase/base'
 ```
 
@@ -36,6 +37,7 @@ import {
   - [AdjacencyMatrix](#adjacencymatrix)
   - [ObjectPool](#objectpool)
   - [WeightedRandom](#weightedrandom)
+  - [DisjointSet](#disjointset)
 - [Events](#events)
   - [EventEmitter](#eventemitter)
   - [Broadcast](#broadcast)
@@ -349,6 +351,40 @@ Pass a seeded `random` for deterministic tests:
 let s = 1
 const seeded = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
 const wr = new WeightedRandom(['a', 'b'], (k) => k === 'a' ? 1 : 9, seeded)
+```
+
+### DisjointSet
+
+Union-Find with path compression and union-by-rank. Tracks disjoint sets identified by string keys.
+
+```ts
+new DisjointSet()
+```
+
+- `count: number` — (readonly getter) number of disjoint sets currently tracked.
+- `makeSet(id: string): this` — register `id` as a new singleton set. No-op if `id` already exists. Chainable.
+- `find(id: string): string | null` — return the representative (root) of the set containing `id`; `null` if `id` was never registered. Applies path compression on every call.
+- `union(a: string, b: string): boolean` — merge the sets containing `a` and `b`. Returns `true` if they were in different sets (a merge happened), `false` if they were already in the same set or either id is unknown.
+- `connected(a: string, b: string): boolean` — `true` if `a` and `b` share a representative (same set); `false` otherwise or if either is unknown.
+
+```ts
+import { DisjointSet } from '@toolcase/base'
+
+const ds = new DisjointSet()
+
+ds.makeSet('a').makeSet('b').makeSet('c').makeSet('d')
+ds.count           // 4
+
+ds.union('a', 'b') // true  — merged
+ds.union('c', 'd') // true  — merged
+ds.count           // 2
+
+ds.union('a', 'c') // true  — one group now
+ds.count           // 1
+
+ds.connected('b', 'd') // true
+ds.connected('a', 'z') // false (z unknown)
+ds.find('b')           // same root as find('d')
 ```
 
 ---
