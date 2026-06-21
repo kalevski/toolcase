@@ -50,6 +50,12 @@ func (d *Deployer) CurrentPath(domain string) string {
 	return filepath.Join(d.SiteDir(domain), "current")
 }
 
+// CurrentExists reports whether <site>/current resolves to a real directory.
+func (d *Deployer) CurrentExists(domain string) bool {
+	fi, err := os.Stat(d.CurrentPath(domain)) // follows the symlink
+	return err == nil && fi.IsDir()
+}
+
 // TmpDir returns the shared staging/download area under data_dir.
 func (d *Deployer) TmpDir() string {
 	return filepath.Join(d.dataDir, "tmp")

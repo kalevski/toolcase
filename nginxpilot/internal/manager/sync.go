@@ -108,6 +108,16 @@ func doSync(ctx context.Context, site config.Site, dataDir string, st *state.Sit
 		return err
 	}
 
+	if !res.Changed && !dep.CurrentExists(site.Domain) {
+		log.Warn("deployed ref recorded but current release missing; forcing resync", "domain", site.Domain)
+		st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+		// re-run the source with cleared validators
+		res, err = src.Sync(ctx, st, staging)
+		if err != nil {
+			return err
+		}
+	}
+
 	if !res.Changed {
 		// Cheap no-op (the common case) — still refresh validators so the
 		// next conditional GET uses the freshest ones.
