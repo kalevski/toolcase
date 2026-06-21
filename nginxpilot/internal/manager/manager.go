@@ -7,12 +7,15 @@ import (
 	"context"
 	"log/slog"
 	"math/rand/v2"
+	"os"
+	"path/filepath"
 	"reflect"
 	"sync"
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/deploy"
+	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
 )
 
@@ -311,7 +314,8 @@ func sameSite(a, b config.Site) bool {
 }
 
 // warnOrphans logs site directories on disk that no configured domain owns
-// (spec §6: warning while orphans exist; --prune-orphans deletes).
+// (spec §6: warning while orphans exist; --prune-orphans deletes) and
+// immediately removes stale git bare-repo caches (task 592, IMP-5/613).
 func (m *Manager) warnOrphans() {
 	m.mu.Lock()
 	dep := m.deployer
@@ -329,6 +333,49 @@ func (m *Manager) warnOrphans() {
 	for _, domain := range orphans {
 		m.log.Warn("orphaned site content on disk (not in config); use --prune-orphans to delete",
 			"domain", domain)
+	}
+
+	m.pruneGitCaches()
+}
+
+// pruneGitCaches removes git bare-repo cache dirs under cache/git/ that no
+// configured site references, preventing unbounded growth when a site's URL
+// or branch changes. Git caches are fully disposable — deleted caches are
+// recloned on the next sync. Mirrors warnOrphans/PruneOrphans for sites
+// (task 592, cross-ref task 613).
+func (m *Manager) pruneGitCaches() {
+	m.mu.Lock()
+	dataDir := m.cfg.DataDir
+	sites := m.cfg.Sites
+	m.mu.Unlock()
+
+	live := map[string]bool{}
+	for _, site := range sites {
+		if site.Source.Type == config.SourceGit {
+			live[gitsource.CacheDir(site.Domain, dataDir, site.Source.URL, site.Source.Branch)] = true
+		}
+	}
+
+	cacheBase := filepath.Join(dataDir, "cache", "git")
+	entries, err := os.ReadDir(cacheBase)
+	if os.IsNotExist(err) {
+		return
+	}
+	if err != nil {
+		m.log.Warn("git cache GC scan failed", "error", err)
+		return
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		dir := filepath.Join(cacheBase, e.Name())
+		if !live[dir] {
+			m.log.Info("removing stale git cache", "dir", e.Name())
+			if err := os.RemoveAll(dir); err != nil {
+				m.log.Warn("git cache GC remove failed", "dir", e.Name(), "error", err)
+			}
+		}
 	}
 }
 

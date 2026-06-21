@@ -32,7 +32,7 @@ func (sl *siteLoop) setSyncing(v bool) {
 func buildSource(site config.Site, dataDir string, log *slog.Logger) (source.Source, error) {
 	switch site.Source.Type {
 	case config.SourceGit:
-		return gitsource.New(site.Source, dataDir, log), nil
+		return gitsource.New(site.Domain, site.Source, dataDir, log), nil
 	case config.SourceHTTPZip:
 		return httpzip.New(site.Domain, site.Source, dataDir, log), nil
 	default:

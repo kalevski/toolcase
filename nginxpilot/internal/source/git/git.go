@@ -26,6 +26,7 @@ import (
 
 // Syncer syncs one git-backed site.
 type Syncer struct {
+	domain  string
 	url     string
 	branch  string
 	subdir  string
@@ -35,8 +36,9 @@ type Syncer struct {
 }
 
 // New builds a Syncer from a validated site source.
-func New(src config.Source, dataDir string, log *slog.Logger) *Syncer {
+func New(domain string, src config.Source, dataDir string, log *slog.Logger) *Syncer {
 	return &Syncer{
+		domain:  domain,
 		url:     src.URL,
 		branch:  src.Branch,
 		subdir:  strings.Trim(path.Clean(src.Subdir), "/"),
@@ -49,10 +51,18 @@ func New(src config.Source, dataDir string, log *slog.Logger) *Syncer {
 // Type implements source.Source.
 func (s *Syncer) Type() string { return config.SourceGit }
 
-// cacheDir is the shared bare fetch target — never served, fully disposable.
+// CacheDir returns the bare-repo cache path for a site identified by domain,
+// url, and branch. Identical inputs always return the same path; any field
+// difference produces a distinct path. Exported so the manager can build the
+// live set for garbage collection without constructing a Syncer.
+func CacheDir(domain, dataDir, url, branch string) string {
+	sum := sha256.Sum256([]byte(domain + "\x00" + url + "\x00" + branch))
+	return filepath.Join(dataDir, "cache", "git", hex.EncodeToString(sum[:8]))
+}
+
+// cacheDir is the bare fetch target for this Syncer — never served, fully disposable.
 func (s *Syncer) cacheDir() string {
-	sum := sha256.Sum256([]byte(s.url + "\x00" + s.branch))
-	return filepath.Join(s.dataDir, "cache", "git", hex.EncodeToString(sum[:8]))
+	return CacheDir(s.domain, s.dataDir, s.url, s.branch)
 }
 
 // Sync implements source.Source.
