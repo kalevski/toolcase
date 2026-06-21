@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"text/tabwriter"
@@ -32,6 +33,7 @@ func cmdStatus(args []string) int {
 		fmt.Fprintln(os.Stderr, "admin endpoint is disabled (admin.listen is empty); status unavailable")
 		return 1
 	}
+	listen = normalizeListenAddr(listen)
 
 	req, err := http.NewRequest(http.MethodGet, "http://"+listen+"/status", nil)
 	if err != nil {
@@ -99,9 +101,18 @@ func orDash(s string) string {
 	return s
 }
 
+func normalizeListenAddr(listen string) string {
+	host, port, err := net.SplitHostPort(listen)
+	if err == nil && (host == "" || host == "0.0.0.0" || host == "::") {
+		listen = net.JoinHostPort("127.0.0.1", port)
+	}
+	return listen
+}
+
 func truncate(s string, n int) string {
-	if len(s) <= n {
+	r := []rune(s)
+	if len(r) <= n {
 		return s
 	}
-	return s[:n-1] + "…"
+	return string(r[:n-1]) + "…"
 }
