@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"io"
 	"log/slog"
+	"os"
 	"strings"
 	"testing"
 
@@ -155,5 +156,142 @@ func TestUntarWithinLimits(t *testing.T) {
 	dest := t.TempDir()
 	if err := s.untar(bytes.NewReader(stream), dest); err != nil {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+// TestUntarTraversalRejected verifies that an archive entry whose path
+// escapes the staging directory is rejected before any file is written.
+func TestUntarTraversalRejected(t *testing.T) {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	_ = tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeReg,
+		Name:     "../escape.txt",
+		Size:     5,
+		Mode:     0o640,
+	})
+	_, _ = tw.Write([]byte("oops!"))
+	_ = tw.Close()
+
+	s := newTestSyncer(config.Limits{}.Effective())
+	err := s.untar(bytes.NewReader(buf.Bytes()), t.TempDir())
+	if err == nil {
+		t.Fatal("expected error for path traversal, got nil")
+	}
+	if !strings.Contains(err.Error(), "escapes") {
+		t.Fatalf("expected 'escapes' in error, got: %v", err)
+	}
+}
+
+// TestUntarSymlinkSkipped verifies that TypeSymlink entries are skipped
+// (logged as warnings) and do not cause extraction to fail.
+func TestUntarSymlinkSkipped(t *testing.T) {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	_ = tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeSymlink,
+		Name:     "link",
+		Linkname: "/etc/passwd",
+		Mode:     0o777,
+	})
+	_ = tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeReg,
+		Name:     "real.txt",
+		Size:     5,
+		Mode:     0o640,
+	})
+	_, _ = tw.Write([]byte("hello"))
+	_ = tw.Close()
+
+	s := newTestSyncer(config.Limits{}.Effective())
+	dest := t.TempDir()
+	if err := s.untar(bytes.NewReader(buf.Bytes()), dest); err != nil {
+		t.Fatalf("symlink entry should be skipped, not error: %v", err)
+	}
+
+	// The symlink must not have been created.
+	if _, err := os.Lstat(dest + "/link"); !os.IsNotExist(err) {
+		t.Error("symlink entry was materialized; it should have been skipped")
+	}
+	// The regular file alongside it must be present.
+	if _, err := os.Stat(dest + "/real.txt"); err != nil {
+		t.Errorf("real.txt missing after symlink skip: %v", err)
+	}
+}
+
+// TestUntarHardlinkSkipped verifies that TypeLink (hard-link) entries are
+// skipped without error — hard links could escape the staging tree.
+func TestUntarHardlinkSkipped(t *testing.T) {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	_ = tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeReg,
+		Name:     "original.txt",
+		Size:     3,
+		Mode:     0o640,
+	})
+	_, _ = tw.Write([]byte("abc"))
+	_ = tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeLink,
+		Name:     "hardlink",
+		Linkname: "original.txt",
+	})
+	_ = tw.Close()
+
+	s := newTestSyncer(config.Limits{}.Effective())
+	dest := t.TempDir()
+	if err := s.untar(bytes.NewReader(buf.Bytes()), dest); err != nil {
+		t.Fatalf("hard-link entry should be skipped, not error: %v", err)
+	}
+
+	// Hard link must not exist.
+	if _, err := os.Lstat(dest + "/hardlink"); !os.IsNotExist(err) {
+		t.Error("hard-link entry was materialized; it should have been skipped")
+	}
+}
+
+// TestUntarSubdirPrefixStripping verifies that when a Syncer is configured
+// with a subdir, entries under that prefix are extracted with the prefix
+// removed and entries outside it are ignored.
+func TestUntarSubdirPrefixStripping(t *testing.T) {
+	var buf bytes.Buffer
+	tw := tar.NewWriter(&buf)
+	for name, data := range map[string][]byte{
+		"site/index.html":   []byte("<html/>"),
+		"site/css/main.css": []byte("body{}"),
+		"other/skip.txt":    []byte("ignored"),
+	} {
+		_ = tw.WriteHeader(&tar.Header{
+			Typeflag: tar.TypeReg,
+			Name:     name,
+			Size:     int64(len(data)),
+			Mode:     0o640,
+		})
+		_, _ = tw.Write(data)
+	}
+	_ = tw.Close()
+
+	s := &Syncer{
+		subdir: "site",
+		limits: config.Limits{}.Effective(),
+		log:    slog.New(slog.NewTextHandler(io.Discard, nil)),
+	}
+	dest := t.TempDir()
+	if err := s.untar(bytes.NewReader(buf.Bytes()), dest); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Files under site/ must exist without the prefix.
+	for _, name := range []string{"index.html", "css/main.css"} {
+		if _, err := os.Stat(dest + "/" + name); err != nil {
+			t.Errorf("expected %q to be extracted: %v", name, err)
+		}
+	}
+	// Files outside the subdir must not appear.
+	if _, err := os.Stat(dest + "/other"); !os.IsNotExist(err) {
+		t.Error("entry outside subdir was extracted; it should have been skipped")
+	}
+	if _, err := os.Stat(dest + "/skip.txt"); !os.IsNotExist(err) {
+		t.Error("entry outside subdir was extracted; it should have been skipped")
 	}
 }
