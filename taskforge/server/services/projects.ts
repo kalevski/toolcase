@@ -60,6 +60,7 @@ export async function getTasks(project: string): Promise<TaskInfo[]> {
             severity: row.severity,
             project: row.project,
             model: row.model,
+            account: row.account,
             depends: row.depends,
             lastElapsed: tele?.elapsed,
             lastModel: tele?.model,

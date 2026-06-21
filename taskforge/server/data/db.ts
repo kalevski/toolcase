@@ -257,6 +257,12 @@ const MIGRATIONS: string[] = [
         cooling_until TEXT
     );
     `,
+    // v6 — per-task Claude identity (mirrors the task file's **Account:** facet).
+    // Pins which account in the registry a task runs under; not wired into
+    // execution yet (parse/store only — see 611-task-account-facet.md).
+    `
+    ALTER TABLE task ADD COLUMN account TEXT;
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

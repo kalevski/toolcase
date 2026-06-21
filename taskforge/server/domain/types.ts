@@ -63,6 +63,8 @@ export interface TaskInfo {
     project?: string
     /** Pinned model for this task (`**Model:**` facet) — overrides the run model. */
     model?: string
+    /** `**Account:**` facet — pins the Claude identity for this task. */
+    account?: string
     /** Task ids/number prefixes this task depends on (`**Depends:**` facet, A4). */
     depends?: string[]
     /** Last recorded attempt outcome from telemetry, if any. */

@@ -177,6 +177,8 @@ export interface ParsedTask {
     project?: string
     /** Pinned per-task model (`**Model:**` facet) — overrides the run model (§9). */
     model?: string
+    /** Pinned per-task Claude identity (`**Account:**` facet) — alias into the account registry. */
+    account?: string
     /** A4 — task ids / number prefixes this task depends on (`**Depends:**` facet). */
     depends?: string[]
     /** E2 — provenance facet (`**Source:** github#123`) for imported issues. */
@@ -191,6 +193,7 @@ export function parseTask(content: string, id: string): ParsedTask {
     const severity = facet(content, id, 'severity', 'priority')
     const project = facet(content, id, 'project', 'tags')
     const model = facet(content, id, 'model', 'model')
+    const account = facet(content, id, 'account', 'account')
     const dependsRaw = extractField(content, 'depends')
     const depends = dependsRaw
         ? dependsRaw
@@ -206,6 +209,7 @@ export function parseTask(content: string, id: string): ParsedTask {
         severity,
         project,
         model,
+        account,
         depends: depends?.length ? depends : undefined,
         source: source || undefined,
         error: error || undefined,
@@ -448,6 +452,7 @@ export interface CreateTaskInput {
     severity?: string
     project?: string
     model?: string
+    account?: string
     depends?: string[]
     /** E2 — provenance facet, e.g. `github#123`. */
     source?: string
@@ -468,6 +473,7 @@ export async function createTask(project: string, input: CreateTaskInput): Promi
     if (input.severity) lines.push(`**Severity:** ${input.severity}`)
     if (input.project) lines.push(`**Project:** ${input.project}`)
     if (input.model) lines.push(`**Model:** ${input.model}`)
+    if (input.account) lines.push(`**Account:** ${input.account}`)
     if (input.depends?.length) lines.push(`**Depends:** ${input.depends.join(', ')}`)
     if (input.source) lines.push(`**Source:** ${input.source}`)
     lines.push('', input.body.trim(), '')
