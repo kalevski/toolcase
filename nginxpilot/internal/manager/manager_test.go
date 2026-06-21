@@ -12,6 +12,7 @@ import (
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/deploy"
+	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
 )
 
@@ -181,6 +182,69 @@ func TestReconcileStateClearsStaleRef(t *testing.T) {
 	}
 	if got.ContentHash != "" {
 		t.Errorf("ContentHash not cleared: got %q", got.ContentHash)
+	}
+}
+
+// TestPruneGitCaches verifies that pruneGitCaches removes cache dirs not
+// referenced by any configured git site and leaves live ones untouched.
+func TestPruneGitCaches(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	const domain = "example.com"
+	const url = "https://github.com/example/repo.git"
+	const branch = "main"
+
+	// Create the cache/git/ directory and populate it.
+	cacheBase := filepath.Join(dir, "cache", "git")
+	if err := os.MkdirAll(cacheBase, 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	// Live dir: what CacheDir produces for the configured site.
+	liveDir := gitsource.CacheDir(domain, dir, url, branch)
+	if err := os.MkdirAll(liveDir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	// Stale dir: a leftover from a previously removed or identity-changed site.
+	staleDir := filepath.Join(cacheBase, "deadbeefdeadbeef")
+	if err := os.MkdirAll(staleDir, 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	store, err := state.NewStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := &config.Config{
+		DataDir: dir,
+		Sites: []config.Site{
+			{
+				Domain: domain,
+				Source: config.Source{Type: config.SourceGit, URL: url, Branch: branch},
+			},
+		},
+	}
+	m := &Manager{
+		log:      logger,
+		store:    store,
+		cfg:      cfg,
+		deployer: deploy.New(dir, 3, logger),
+		loops:    map[string]*siteLoop{},
+		syncFn:   SyncSite,
+	}
+
+	m.pruneGitCaches()
+
+	if _, err := os.Stat(liveDir); os.IsNotExist(err) {
+		t.Error("live cache dir was incorrectly removed")
+	}
+	if _, err := os.Stat(staleDir); !os.IsNotExist(err) {
+		t.Error("stale cache dir was not removed")
 	}
 }
 
