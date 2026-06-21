@@ -10,6 +10,7 @@ import path from 'node:path'
 import type { ChildProcess } from 'node:child_process'
 import { config } from '@/server/config'
 import { spawnAgent, resolveModel } from '@/server/infrastructure/agent'
+import { resolveAccount } from '@/server/services/accounts'
 import { createAgentStreamParser } from '@/server/infrastructure/stream-json'
 import { aiCommitMessage } from '@/server/services/commit-message'
 import { agentSessionsBusy } from '@/server/services/locks'
@@ -502,16 +503,21 @@ class ExecutionManager extends EventEmitter {
                 // .status. Reads the file only to surface the per-task model override.
                 if (opts.dryRun) {
                     let dryModel = opts.model
+                    // §account precedence: task facet → project/global default
+                    // (eff.defaultAccount already folds in config.defaultAccount).
+                    let dryAccount = eff.defaultAccount || config.defaultAccount || undefined
                     try {
                         const dryParsed = parseTask(await readTaskFile(repo, rel), rel)
                         if (dryParsed.model && this.isKnownModel(dryParsed.model)) dryModel = dryParsed.model
+                        if (dryParsed.account) dryAccount = dryParsed.account
                     } catch {
                         /* unreadable file — show the run model */
                     }
                     this.log(
                         repo,
                         'comment',
-                        `[dry-run] ${rel} → ${config.agentBin} --model ${resolveModel(dryModel)} (cwd=${projectPath(repo)})`,
+                        `[dry-run] ${rel} → ${config.agentBin} --model ${resolveModel(dryModel)}` +
+                            `${dryAccount ? ` --account ${dryAccount}` : ''} (cwd=${projectPath(repo)})`,
                         rel,
                     )
                     i++
@@ -556,9 +562,42 @@ class ExecutionManager extends EventEmitter {
                 }
                 const modelOverride = resolveModel(effectiveModel) !== resolveModel(opts.model)
 
+                // §account — pick this task's Claude identity (highest first): the
+                // task's **Account:** facet → the project default → the global
+                // default (eff.defaultAccount already folds in config.defaultAccount)
+                // → none (inherit the ambient identity). An alias that cannot be
+                // resolved (unknown / missing key env) errors the task rather than
+                // silently falling back to the ambient identity.
+                const accountAlias = parsed.account || eff.defaultAccount || config.defaultAccount || undefined
+                let accountEnv: Record<string, string> | undefined
+                if (accountAlias) {
+                    try {
+                        accountEnv = resolveAccount(accountAlias).env
+                    } catch (err: any) {
+                        await this.markError(
+                            repo,
+                            rel,
+                            0,
+                            effectiveModel,
+                            `account "${accountAlias}" could not be resolved: ${err?.message ?? err}`,
+                        )
+                        i++
+                        limitRetries = 0
+                        transientRetries = 0
+                        continue
+                    }
+                }
+
                 this.setState(repo, 'RUNNING')
                 this.emitEvent(repo, { type: 'task:begin', taskId: rel })
                 await r.logger!.beginTask(rel)
+                this.log(
+                    repo,
+                    'comment',
+                    `▶ ${rel} → model ${resolveModel(effectiveModel)}` +
+                        `${accountAlias ? `, account ${accountAlias}` : ''}`,
+                    rel,
+                )
                 const startedAt = Date.now()
                 executed = true
 
@@ -571,6 +610,7 @@ class ExecutionManager extends EventEmitter {
                     effectiveModel,
                     preamble,
                     modelOverride ? undefined : warmSessionId,
+                    accountEnv,
                 )
                 const elapsed = (Date.now() - startedAt) / 1000
                 r.logger!.endTask(rel, outcome.exit, elapsed)
@@ -943,6 +983,7 @@ class ExecutionManager extends EventEmitter {
         model: string,
         preamble: string,
         warmSessionId: string | undefined,
+        accountEnv: Record<string, string> | undefined,
     ): Promise<{
         exit: number | null
         isError: boolean
@@ -959,6 +1000,7 @@ class ExecutionManager extends EventEmitter {
             model,
             prompt,
             resumeSessionId: warmSessionId,
+            accountEnv,
         })
         r.child = child
 
