@@ -18,6 +18,9 @@ export interface HttpServerOptions {
 	prefix?: string
 	cors?: FastifyCorsOptions | false
 	trustProxy?: boolean
+	requestTimeoutMs?: number
+	connectionTimeoutMs?: number
+	keepAliveTimeoutMs?: number
 	healthCheck?: HealthCheck
 	logger?: Logger
 }
@@ -58,7 +61,12 @@ export class HttpServer {
 	}
 
 	async init(): Promise<void> {
-		this.server = fastify({ trustProxy: this.options.trustProxy ?? true })
+		this.server = fastify({
+			trustProxy: this.options.trustProxy ?? false,
+			requestTimeout: this.options.requestTimeoutMs ?? 30_000,
+			connectionTimeout: this.options.connectionTimeoutMs ?? 0,
+			keepAliveTimeout: this.options.keepAliveTimeoutMs ?? 72_000,
+		})
 
 		if (this.options.cors !== false) {
 			const corsOptions: FastifyCorsOptions = this.options.cors ?? {
