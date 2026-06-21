@@ -17,12 +17,14 @@ import WeightedRandomDemo from './WeightedRandomDemo'
 import RandomDemo from './RandomDemo'
 import DijkstraDemo from './DijkstraDemo'
 import AStarDemo from './AStarDemo'
+import AsyncDemo from './AsyncDemo'
 
 export type BaseCategory =
     | 'Events & State'
     | 'Data Structures'
     | 'Generation & Validation'
     | 'Utilities & Colors'
+    | 'Async'
 
 export type BaseExampleDef = {
     key: string
@@ -36,6 +38,7 @@ export const baseCategories: BaseCategory[] = [
     'Data Structures',
     'Generation & Validation',
     'Utilities & Colors',
+    'Async',
 ]
 
 export const baseExamples: BaseExampleDef[] = [
@@ -60,4 +63,6 @@ export const baseExamples: BaseExampleDef[] = [
 
     { key: 'utilities', label: 'Utility Functions', category: 'Utilities & Colors', element: <UtilitiesDemo /> },
     { key: 'color', label: 'Color', category: 'Utilities & Colors', element: <ColorDemo /> },
+
+    { key: 'async', label: 'Async', category: 'Async', element: <AsyncDemo /> },
 ]

@@ -26,6 +26,7 @@ import RESTError from './http/RESTError'
 import RESTResponse from './http/RESTResponse'
 
 import Packing from './packing'
+import Async from './async'
 
 
 const HTTP = {
@@ -69,6 +70,7 @@ export type {
 export {
     HTTP,
     Packing,
+    Async,
     VectorClock,
     EventEmitter,
     Broadcast,
@@ -96,6 +98,7 @@ export {
 const BASE = {
     HTTP,
     Packing,
+    Async,
     VectorClock,
     EventEmitter,
     Broadcast,

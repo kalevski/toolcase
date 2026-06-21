@@ -1084,6 +1084,181 @@ loot.pick() // deterministic given same seed
 
 ---
 
+## Async
+
+Zero-dependency async toolkit. Exported as the `Async` namespace.
+
+```ts
+import { Async } from '@toolcase/base'
+// Async = { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle }
+```
+
+### Deferred
+
+Promise with externally controlled resolve/reject. Useful for bridging callback-based APIs, coordinating between unrelated code paths, or creating one-shot gates.
+
+```ts
+new Async.Deferred<T>()
+```
+
+- `promise: Promise<T>` — the underlying promise (readonly).
+- `resolve(value: T): void` — settle with a value. Subsequent calls are no-ops (native Promise behaviour).
+- `reject(reason?: unknown): void` — settle with a rejection. Subsequent calls are no-ops.
+
+```ts
+const gate = new Async.Deferred<boolean>()
+
+// consumer
+gate.promise.then(ok => console.log('gate opened:', ok))
+
+// producer (from anywhere)
+gate.resolve(true)
+```
+
+### Semaphore
+
+Limits concurrent access. At most `permits` callers may hold the semaphore at once; excess callers queue and are admitted in FIFO order when a slot is released.
+
+```ts
+new Async.Semaphore(permits: number)
+```
+
+Throws if `permits` is not a positive integer.
+
+- `available: number` — current free permit count.
+- `acquire(): Promise<void>` — waits for a permit.
+- `release(): void` — returns a permit (or wakes the next queued waiter).
+- `run<T>(fn: () => T | Promise<T>): Promise<T>` — acquire → run → release (releases even on error).
+
+```ts
+const sem = new Async.Semaphore(3)
+
+const fetchPage = (url: string) => sem.run(() => fetch(url).then(r => r.json()))
+
+// fires at most 3 fetches at a time
+const pages = await Promise.all(urls.map(fetchPage))
+```
+
+### Mutex
+
+Mutual exclusion — one caller at a time. Thin wrapper around `Semaphore(1)` with a caller-held release function.
+
+```ts
+new Async.Mutex()
+```
+
+- `locked: boolean` — true when a caller holds the lock.
+- `acquire(): Promise<() => void>` — wait for the lock; the resolved value is the release function. Calling release more than once is a no-op.
+- `run<T>(fn: () => T | Promise<T>): Promise<T>` — acquire → run → release (releases even on error).
+
+```ts
+const mutex = new Async.Mutex()
+
+async function updateCounter() {
+    const release = await mutex.acquire()
+    try {
+        counter++
+    } finally {
+        release()
+    }
+}
+```
+
+### pLimit
+
+Concurrency gate. Returns a runner function that queues tasks and ensures at most `concurrency` run in parallel.
+
+```ts
+Async.pLimit(concurrency: number): <T>(fn: () => T | Promise<T>) => Promise<T>
+```
+
+Throws if `concurrency` is not a positive integer.
+
+```ts
+const limit = Async.pLimit(5)
+
+const results = await Promise.all(
+    urls.map(url => limit(() => fetch(url).then(r => r.json())))
+)
+```
+
+### withTimeout
+
+Races a promise against a deadline. Rejects with `Error('timed out after Nms')` if `fn` has not settled within `ms` milliseconds.
+
+```ts
+Async.withTimeout<T>(fn: () => T | Promise<T>, ms: number): Promise<T>
+```
+
+Throws synchronously if `ms <= 0`.
+
+Composes with `retry` — pass `withTimeout` inside the retry callback for per-attempt deadlines:
+
+```ts
+import { retry, Async } from '@toolcase/base'
+
+const result = await retry(
+    () => Async.withTimeout(() => fetch('/api/data').then(r => r.json()), 3_000),
+    { retries: 4, minTimeout: 500, factor: 2 }
+)
+```
+
+### sleep
+
+Resolves after `ms` milliseconds. Throws synchronously if `ms < 0`.
+
+```ts
+Async.sleep(ms: number): Promise<void>
+```
+
+```ts
+await Async.sleep(1_000)  // pause 1 second
+```
+
+### debounce
+
+Returns a debounced version of `fn` that fires only after `ms` have elapsed since the last call. The returned function also has a `cancel()` method to drop any pending invocation.
+
+```ts
+Async.debounce<T extends (...args: any[]) => void>(fn: T, ms: number): ((...args: Parameters<T>) => void) & { cancel(): void }
+```
+
+Throws if `fn` is not a function or `ms < 0`.
+
+```ts
+const onSearch = Async.debounce((query: string) => {
+    fetchSuggestions(query)
+}, 300)
+
+input.addEventListener('input', e => onSearch(e.currentTarget.value))
+
+// Cancel the pending call (e.g. on component unmount)
+onSearch.cancel()
+```
+
+### throttle
+
+Returns a throttled version of `fn` that fires at most once per `ms` window. Fires on the leading edge and again at the trailing edge if called during the window. The returned function also has a `cancel()` method to drop the pending trailing call.
+
+```ts
+Async.throttle<T extends (...args: any[]) => void>(fn: T, ms: number): ((...args: Parameters<T>) => void) & { cancel(): void }
+```
+
+Throws if `fn` is not a function or `ms < 0`.
+
+```ts
+const onScroll = Async.throttle(() => {
+    updateNavHighlight()
+}, 100)
+
+window.addEventListener('scroll', onScroll)
+
+// Drop trailing call (e.g. on unmount)
+onScroll.cancel()
+```
+
+---
+
 ## Notes
 
 - Package is `sideEffects: false` — tree-shakable.
