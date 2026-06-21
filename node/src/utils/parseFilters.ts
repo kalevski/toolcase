@@ -21,13 +21,18 @@ export function parseFilters<T extends object = Record<string, unknown>>(
 	query: Record<string, unknown>,
 	options: ParseFiltersOptions<T> = {},
 ): Filter<T> {
+	if (!options.allowedFields && !options.schema) {
+		throw new Error('parseFilters: pass allowedFields or schema; [] to allow none')
+	}
 	const reserved = new Set<string>(options.reservedKeys ?? DEFAULT_RESERVED)
-	const allowed = options.allowedFields ? new Set<string>(options.allowedFields) : null
+	const allowed = options.allowedFields
+		? new Set<string>(options.allowedFields)
+		: new Set<string>(Object.keys(options.schema!))
 	const out: Record<string, unknown> = {}
 
 	for (const key of Object.keys(query)) {
 		if (reserved.has(key)) continue
-		if (allowed && !allowed.has(key)) {
+		if (!allowed.has(key)) {
 			throw new ValidationError(`Unknown filter field: ${key}`)
 		}
 		const raw = query[key]
