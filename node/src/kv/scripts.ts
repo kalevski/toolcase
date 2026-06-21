@@ -109,7 +109,9 @@ return {1, nextVersion}
 
 const LUA_ADD_SCORE_RANK = `
 redis.call("ZADD", KEYS[1], ARGV[1], ARGV[2])
-local rank = redis.call("ZREVRANK", KEYS[1], ARGV[2])
+local rank
+if ARGV[3] == "asc" then rank = redis.call("ZRANK", KEYS[1], ARGV[2])
+else rank = redis.call("ZREVRANK", KEYS[1], ARGV[2]) end
 local score = redis.call("ZSCORE", KEYS[1], ARGV[2])
 if rank == false then rank = -1 end
 if score == false then score = "0" end

@@ -37,7 +37,7 @@ export class Leaderboard {
 	): Promise<{ rank: number | null; score: number }> {
 		const reply = (await this.scripts.get('addScoreAndRank').run(this.client, {
 			keys: [this.keys.build(boardKey)],
-			arguments: [String(score), member],
+			arguments: [String(score), member, this.direction],
 		})) as [number | string, number | string]
 		const rank = Number(reply[0])
 		return {
