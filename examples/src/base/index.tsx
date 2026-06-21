@@ -19,6 +19,7 @@ import DijkstraDemo from './DijkstraDemo'
 import AStarDemo from './AStarDemo'
 import AsyncDemo from './AsyncDemo'
 import RingBufferDemo from './RingBufferDemo'
+import UlidDemo from './UlidDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -63,6 +64,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'retry', label: 'retry', category: 'Generation & Validation', element: <RetryDemo /> },
     { key: 'packing', label: 'Packing', category: 'Generation & Validation', element: <PackingDemo /> },
 
+    { key: 'ulid', label: 'ulid', category: 'Utilities & Colors', element: <UlidDemo /> },
     { key: 'utilities', label: 'Utility Functions', category: 'Utilities & Colors', element: <UtilitiesDemo /> },
     { key: 'color', label: 'Color', category: 'Utilities & Colors', element: <ColorDemo /> },
 

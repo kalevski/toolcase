@@ -13,7 +13,7 @@ import {
     Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
     VectorClock, EventEmitter, Broadcast,
     LSystem, ObjectPool, PriorityQueue, RingBuffer,
-    generateId, toHex, formatByteSize,
+    generateId, ulid, toHex, formatByteSize,
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
     Cache, AdjacencyMatrix, State, retry,
@@ -42,6 +42,7 @@ import {
   - [AStar](#astar)
 - [Utilities](#utilities)
   - [generateId](#generateid)
+  - [ulid](#ulid)
   - [getNumberInRange](#getnumberinrange)
   - [retry](#retry)
   - [toHex / bufferToHex / hexToBuffer](#hex-helpers)
@@ -478,6 +479,27 @@ generateId(length: number = 8): string
 ```
 
 Uses `globalThis.crypto.getRandomValues`. `length` is the **string** length (rounded up to whole bytes internally, sliced).
+
+### ulid
+
+Monotonic sortable ID. 26-character Crockford Base32 string: 10-char millisecond timestamp prefix + 16-char random suffix. Lexicographic sort equals time order. Within the same millisecond the random suffix is incremented, guaranteeing strict monotonicity even under rapid-fire generation.
+
+```ts
+ulid(): string
+```
+
+Uses `globalThis.crypto.getRandomValues` for the random component. Throws `Error('ulid overflow: too many ids within the same millisecond')` if 32^16 IDs are generated in a single millisecond (unreachable in practice).
+
+```ts
+import { ulid } from '@toolcase/base'
+
+ulid()  // '01HWPEMZRQ8T3K4J5N6M7P8Q9R'  (example)
+ulid()  // '01HWPEMZRQ8T3K4J5N6M7P8Q9S'  (monotonically greater)
+
+// IDs sort in insertion order — safe to use as event-log keys
+const ids = [ulid(), ulid(), ulid()]
+ids.slice().sort() // same order as ids
+```
 
 ### getNumberInRange
 

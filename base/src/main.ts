@@ -5,6 +5,7 @@ import LSystem from './LSystem'
 import ObjectPool from './ObjectPool'
 import PriorityQueue from './PriorityQueue'
 import generateId from './generateId'
+import ulid from './ulid'
 import toHex from './toHex'
 import formatByteSize from './formatByteSize'
 import bufferToHex from './bufferToHex'
@@ -79,6 +80,7 @@ export {
     ObjectPool,
     PriorityQueue,
     generateId,
+    ulid,
     toHex,
     formatByteSize,
     bufferToHex,
@@ -108,6 +110,7 @@ const BASE = {
     ObjectPool,
     PriorityQueue,
     generateId,
+    ulid,
     toHex,
     formatByteSize,
     bufferToHex,
