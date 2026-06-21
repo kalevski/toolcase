@@ -96,4 +96,16 @@ export default class InspectorPanel extends Panel {
         setTimeout(() => URL.revokeObjectURL(url), 1000)
     }
 
+    override dispose(): void {
+        if (this.recorder !== null) {
+            this.recorder.ondataavailable = null
+            this.recorder.onstop = null
+            try { if (this.recorder.state !== 'inactive') this.recorder.stop() } catch {}
+            this.recorder = null
+        }
+        this.videoChunks = []
+        this.state.recording = false
+        super.dispose()
+    }
+
 }
