@@ -98,6 +98,29 @@ describe('ImageProcessor', () => {
         expect(meta.height).toBe(16)
     })
 
+    it('optimize() with no format preserves png input format', async () => {
+        const buf = await makeRedPng(16, 16)
+        const out = await ImageProcessor.fromBuffer(buf).optimize().toBuffer()
+        const meta = await sharp(out).metadata()
+        expect(meta.format).toBe('png')
+    })
+
+    it('optimize() with no format preserves jpeg input format', async () => {
+        const jpegBuf = await sharp({
+            create: { width: 16, height: 16, channels: 3, background: { r: 200, g: 100, b: 50 } }
+        }).jpeg({ quality: 80 }).toBuffer()
+        const out = await ImageProcessor.fromBuffer(jpegBuf).optimize().toBuffer()
+        const meta = await sharp(out).metadata()
+        expect(meta.format).toBe('jpeg')
+    })
+
+    it('optimize() with explicit format applies that encoder', async () => {
+        const buf = await makeRedPng(16, 16)
+        const out = await ImageProcessor.fromBuffer(buf).optimize({ format: 'webp' }).toBuffer()
+        const meta = await sharp(out).metadata()
+        expect(meta.format).toBe('webp')
+    })
+
     it('toFile writes to disk and returns metadata', async () => {
         const buf = await makeRedPng(12, 12)
         const dest = path.join(tmpDir, 'out.png')
@@ -106,6 +129,45 @@ describe('ImageProcessor', () => {
         expect(meta.height).toBe(24)
         const stat = await fs.stat(dest)
         expect(stat.size).toBeGreaterThan(0)
+    })
+
+    it('toFile leaves no partial or temp file on write failure', async () => {
+        const buf = await makeRedPng(4, 4)
+        // Target a non-existent subdirectory so sharp.toFile(tmp) fails before writing
+        const dest = path.join(tmpDir, 'no-such-subdir', 'fail.png')
+        await expect(ImageProcessor.fromBuffer(buf).toFile(dest)).rejects.toThrow(ImageProcessorError)
+        // Final destination must not exist
+        await expect(fs.stat(dest)).rejects.toThrow()
+        // No .tmp sibling files should linger in tmpDir
+        const files = await fs.readdir(tmpDir)
+        expect(files.filter(f => f.endsWith('.tmp'))).toHaveLength(0)
+    })
+
+    it('toFile leaves no temp file when rename fails (destination is a directory)', async () => {
+        const buf = await makeRedPng(4, 4)
+        // Create a directory at the destination path so rename(tmp, dest) fails
+        const dest = path.join(tmpDir, 'dest-as-dir')
+        await fs.mkdir(dest, { recursive: true })
+        await expect(ImageProcessor.fromBuffer(buf).toFile(dest)).rejects.toThrow(ImageProcessorError)
+        // No .tmp files should remain in tmpDir after cleanup
+        const files = await fs.readdir(tmpDir)
+        expect(files.filter(f => f.endsWith('.tmp'))).toHaveLength(0)
+    })
+
+    it('toFile sets hasAlpha true for 4-channel (RGBA) PNG output', async () => {
+        const buf = await makeRedPng(4, 4)
+        const dest = path.join(tmpDir, 'rgba.png')
+        const meta = await ImageProcessor.fromBuffer(buf).toFile(dest)
+        expect(meta.hasAlpha).toBe(true)
+    })
+
+    it('toFile sets hasAlpha false for 3-channel (RGB) JPEG output', async () => {
+        const buf = await sharp({
+            create: { width: 4, height: 4, channels: 3, background: { r: 200, g: 100, b: 50 } }
+        }).jpeg().toBuffer()
+        const dest = path.join(tmpDir, 'rgb.jpg')
+        const meta = await ImageProcessor.fromBuffer(buf).toFile(dest)
+        expect(meta.hasAlpha).toBe(false)
     })
 
     describe('resize() dimension validation', () => {

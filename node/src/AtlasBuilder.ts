@@ -204,9 +204,10 @@ export class AtlasBuilder {
 				if (!decoded) continue
 				if (placed.rect.width <= 0 || placed.rect.height <= 0) continue
 
-				const overlayBuffer = await this.prepareOverlay(sharp, decoded, placed.rotated)
+				const overlay = await this.prepareOverlay(sharp, decoded, placed.rotated)
 				composites.push({
-					input: overlayBuffer,
+					input: overlay.input,
+					raw: overlay.raw,
 					left: placed.rect.x,
 					top: placed.rect.y
 				})
@@ -328,16 +329,20 @@ export class AtlasBuilder {
 		}
 	}
 
-	private async prepareOverlay(sharp: SharpFactory, decoded: DecodedImage, rotated: boolean): Promise<Buffer> {
-		const raw = sharp(decoded.trimmedBuffer, {
-			raw: {
-				width: decoded.trimmedWidth,
-				height: decoded.trimmedHeight,
-				channels: 4
+	private async prepareOverlay(sharp: SharpFactory, decoded: DecodedImage, rotated: boolean): Promise<{ input: Buffer; raw: { width: number; height: number; channels: 1 | 2 | 3 | 4 } }> {
+		if (!rotated) {
+			return {
+				input: decoded.trimmedBuffer,
+				raw: { width: decoded.trimmedWidth, height: decoded.trimmedHeight, channels: 4 }
 			}
-		})
-		const withRotation = rotated ? raw.rotate(-90) : raw
-		return await withRotation.png().toBuffer()
+		}
+		const { data, info } = await sharp(decoded.trimmedBuffer, {
+			raw: { width: decoded.trimmedWidth, height: decoded.trimmedHeight, channels: 4 }
+		}).rotate(-90).raw().toBuffer({ resolveWithObject: true })
+		return {
+			input: data,
+			raw: { width: info.width, height: info.height, channels: info.channels }
+		}
 	}
 
 	private static computeAlphaBounds(data: Buffer, width: number, height: number, threshold: number): { left: number; top: number; width: number; height: number } {

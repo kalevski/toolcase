@@ -1,4 +1,5 @@
 import type { Sharp } from 'sharp'
+import { promises as fs } from 'node:fs'
 import { ImageProcessorError } from './errors'
 import { loadSharp } from './internal/lazySharp'
 
@@ -148,10 +149,7 @@ export class ImageProcessor {
 					pipeline.avif({ quality, effort })
 					break
 				case undefined:
-					pipeline.jpeg({ mozjpeg: true, quality, progressive: true })
-					pipeline.png({ palette, compressionLevel: 9, quality })
-					pipeline.webp({ quality, effort })
-					pipeline.avif({ quality, effort })
+					// No encoder — sharp will use the input format unchanged.
 					break
 			}
 			if (!stripMetadata) {
@@ -191,18 +189,21 @@ export class ImageProcessor {
 		if (typeof path !== 'string' || path.length === 0) {
 			throw new ImageProcessorError('invalid-path', 'toFile requires a non-empty string')
 		}
+		const tmp = `${path}.${process.pid}.tmp`
 		try {
 			const pipeline = await this.materialize()
-			const info = await pipeline.toFile(path)
+			const info = await pipeline.toFile(tmp)
+			await fs.rename(tmp, path)
 			return {
 				format: info.format ?? 'unknown',
 				width: info.width,
 				height: info.height,
 				channels: info.channels,
-				hasAlpha: info.premultiplied ?? false,
+				hasAlpha: info.channels === 4 || info.channels === 2,
 				size: info.size
 			}
 		} catch (error) {
+			await fs.unlink(tmp).catch(() => undefined)
 			throw ImageProcessor.wrapError(error, 'write-failed', path)
 		}
 	}
