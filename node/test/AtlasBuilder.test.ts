@@ -23,6 +23,19 @@ async function writeSolidPng(filePath: string, width: number, height: number, co
     }).png().toFile(filePath)
 }
 
+// Writes a PNG whose stored pixel buffer is width×height but whose EXIF orientation tag
+// instructs viewers to rotate 90° CW — so the visually-correct size is height×width.
+async function writePngWithExifOrientation6(filePath: string, storedWidth: number, storedHeight: number): Promise<void> {
+    await sharp({
+        create: {
+            width: storedWidth,
+            height: storedHeight,
+            channels: 4,
+            background: { r: 200, g: 100, b: 50, alpha: 1 }
+        }
+    }).withMetadata({ orientation: 6 }).png().toFile(filePath)
+}
+
 async function readPixel(filePath: string, x: number, y: number): Promise<{ r: number; g: number; b: number; a: number }> {
     const { data, info } = await sharp(filePath).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
     const idx = (y * info.width + x) * 4
@@ -244,5 +257,28 @@ describe('AtlasBuilder', () => {
             useAlphaTrimming: false
         }).build([{ id: 'small', path: img }])
         expect(result.pages[0].frames.length).toBe(1)
+    })
+
+    it('auto-orients images with EXIF orientation tag (90° CW)', async () => {
+        const dir = path.join(workDir, 'exif-orient')
+        await fs.mkdir(dir, { recursive: true })
+        // Stored pixels: 40w × 10h, EXIF orientation=6 (90° CW) → visual size: 10w × 40h
+        const img = path.join(dir, 'rotated.png')
+        await writePngWithExifOrientation6(img, 40, 10)
+
+        const out = path.join(workDir, 'out-exif-orient')
+        const result = await new AtlasBuilder({
+            output: { directory: out, baseName: 'exif', format: 'png' },
+            packer: { padding: 0, allowRotation: false, pot: 'none' },
+            useAlphaTrimming: false
+        }).build([{ id: 'img', path: img }])
+
+        const frame = result.pages[0].frames[0]
+        // After auto-orient the frame rect and source dims must reflect the visual size (10×40),
+        // not the transposed raw stored dims (40×10).
+        expect(frame.source.width).toBe(10)
+        expect(frame.source.height).toBe(40)
+        expect(frame.rect.width).toBe(10)
+        expect(frame.rect.height).toBe(40)
     })
 })

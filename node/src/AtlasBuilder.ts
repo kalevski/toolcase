@@ -305,7 +305,7 @@ export class AtlasBuilder {
 			if (meta.width && meta.height && meta.width * meta.height > limit) {
 				throw new AtlasBuildError('decode', `input image exceeds pixel limit (${meta.width * meta.height} > ${limit})`, input.path)
 			}
-			const { data, info } = await sharp(input.path, { limitInputPixels: limit, failOn: 'error' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+			const { data, info } = await sharp(input.path, { limitInputPixels: limit, failOn: 'error' }).rotate().ensureAlpha().raw().toBuffer({ resolveWithObject: true })
 			const useTrim = this.options.useAlphaTrimming !== false
 			const bounds = useTrim
 				? AtlasBuilder.computeAlphaBounds(data, info.width, info.height, this.options.packer?.alphaThreshold ?? 1)
