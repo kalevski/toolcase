@@ -65,6 +65,12 @@ func cmdValidate(args []string) int {
 		}
 	}
 
+	if cfg.Admin.TokenEnv != "" {
+		if _, ok := os.LookupEnv(cfg.Admin.TokenEnv); !ok {
+			fail("admin.token_env %s is not set", cfg.Admin.TokenEnv)
+		}
+	}
+
 	if failed {
 		return 1
 	}
