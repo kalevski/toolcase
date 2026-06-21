@@ -33,6 +33,7 @@ type Manager struct {
 	loops    map[string]*siteLoop
 	wg       sync.WaitGroup
 	ctx      context.Context
+	syncFn   func(ctx context.Context, site config.Site, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error)
 }
 
 type siteLoop struct {
@@ -70,6 +71,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 		cfg:      cfg,
 		deployer: deploy.New(cfg.DataDir, cfg.Defaults.KeepReleases, log),
 		loops:    map[string]*siteLoop{},
+		syncFn:   SyncSite,
 	}
 }
 
@@ -156,7 +158,7 @@ func (m *Manager) syncOnce(ctx context.Context, sl *siteLoop) (streak int) {
 	syncCtx, cancel := context.WithTimeout(ctx, syncTimeout)
 	defer cancel()
 
-	st, err := SyncSite(syncCtx, sl.site, dataDir, m.store, dep, m.log)
+	st, err := m.syncFn(syncCtx, sl.site, dataDir, m.store, dep, m.log)
 	if err != nil {
 		m.log.Error("sync failed", "domain", sl.site.Domain, "error", err,
 			"failure_streak", st.FailureStreak)
@@ -296,11 +298,21 @@ func (m *Manager) Reload(newCfg *config.Config) {
 		case !sameSite(old, site) || sl.interval != site.Interval(newCfg.Defaults):
 			// Changed → restart loop. A source identity change is caught by
 			// the fingerprint check inside the sync and forces a full resync.
+			// We wait for the old loop's done channel before starting the new
+			// one so two syncs never overlap on the same domain (BUG-3/BUG-6).
 			m.log.Info("site changed, restarting loop", "domain", domain)
 			sl.cancel()
 			delete(m.loops, domain)
-			m.startLoop(site)
-			m.loops[domain].kick <- struct{}{}
+			go func(old *siteLoop, ns config.Site) {
+				<-old.done
+				m.mu.Lock()
+				defer m.mu.Unlock()
+				if _, exists := m.loops[ns.Domain]; exists {
+					return // re-added by a concurrent Reload
+				}
+				m.startLoop(ns)
+				m.loops[ns.Domain].kick <- struct{}{}
+			}(sl, site)
 		}
 	}
 
