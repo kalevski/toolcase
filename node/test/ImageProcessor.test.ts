@@ -3,7 +3,7 @@ import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import sharp from 'sharp'
-import { ImageProcessor } from '../src/ImageProcessor'
+import { ImageProcessor, MAX_DIMENSION } from '../src/ImageProcessor'
 import { ImageProcessorError } from '../src/errors'
 
 async function makeRedPng(width = 4, height = 4): Promise<Buffer> {
@@ -106,6 +106,51 @@ describe('ImageProcessor', () => {
         expect(meta.height).toBe(24)
         const stat = await fs.stat(dest)
         expect(stat.size).toBeGreaterThan(0)
+    })
+
+    describe('resize() dimension validation', () => {
+        const proc = () => ImageProcessor.fromBuffer(Buffer.alloc(8))
+
+        it.each([
+            ['negative width', { width: -1, height: 8 }],
+            ['zero width', { width: 0, height: 8 }],
+            ['negative height', { width: 8, height: -5 }],
+            ['zero height', { width: 8, height: 0 }],
+            ['NaN width', { width: NaN, height: 8 }],
+            ['NaN height', { width: 8, height: NaN }],
+            ['fractional width', { width: 1.5, height: 8 }],
+            ['fractional height', { width: 8, height: 4.9 }],
+            ['oversized width', { width: MAX_DIMENSION + 1, height: 8 }],
+            ['oversized height', { width: 8, height: MAX_DIMENSION + 1 }],
+        ])('throws synchronously on %s', (_, options) => {
+            expect(() => proc().resize(options)).toThrow(ImageProcessorError)
+        })
+
+        it('accepts valid width and height', () => {
+            expect(() => proc().resize({ width: 100, height: 200 })).not.toThrow()
+        })
+
+        it('accepts width-only (aspect-preserving)', () => {
+            expect(() => proc().resize({ width: 100 })).not.toThrow()
+        })
+
+        it('accepts height-only (aspect-preserving)', () => {
+            expect(() => proc().resize({ height: 200 })).not.toThrow()
+        })
+
+        it('accepts MAX_DIMENSION as a valid bound', () => {
+            expect(() => proc().resize({ width: MAX_DIMENSION, height: MAX_DIMENSION })).not.toThrow()
+        })
+
+        it('includes resize-invalid reason', () => {
+            let err: ImageProcessorError | undefined
+            try {
+                proc().resize({ width: -1 })
+            } catch (e) {
+                err = e as ImageProcessorError
+            }
+            expect(err?.reason).toBe('resize-invalid')
+        })
     })
 
     it('chained transforms fork independently', async () => {

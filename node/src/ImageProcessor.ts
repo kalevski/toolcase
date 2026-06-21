@@ -2,6 +2,9 @@ import type { Sharp } from 'sharp'
 import { ImageProcessorError } from './errors'
 import { loadSharp } from './internal/lazySharp'
 
+/** Maximum allowed value for resize width or height. */
+export const MAX_DIMENSION = 65535
+
 export type ImageFormat = 'png' | 'jpeg' | 'webp' | 'avif'
 
 export interface ResizeOptions {
@@ -87,6 +90,11 @@ export class ImageProcessor {
 	}
 
 	resize(options: ResizeOptions): ImageProcessor {
+		for (const dim of [options.width, options.height]) {
+			if (dim !== undefined && (!Number.isInteger(dim) || dim <= 0 || dim > MAX_DIMENSION)) {
+				throw new ImageProcessorError('resize-invalid', 'resize width/height must be positive integers within bounds', this.sourcePath ?? undefined)
+			}
+		}
 		return this.append(pipeline => pipeline.resize({
 			width: options.width,
 			height: options.height,
