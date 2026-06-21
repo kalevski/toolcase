@@ -10,6 +10,7 @@ export interface FieldRule {
 	format?: string
 	enum?: readonly (string | number | boolean | null)[]
 	items?: FieldRule
+	fields?: Record<string, FieldRule>
 	filterable?: boolean
 	sortable?: boolean
 }
