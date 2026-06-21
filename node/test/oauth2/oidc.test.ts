@@ -125,6 +125,56 @@ describe('verifyIdToken', () => {
 		const oldToken = await signToken({ auth_time: Math.floor(Date.now() / 1000) - 3600 })
 		await expect(verifyIdToken(oldToken, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { maxAgeSeconds: 60 })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
+
+	it('invokes custom fetchImpl from http options when jwksUri is used', async () => {
+		const jwks = { keys: [publicJwk] }
+		const customFetch = mockJwksFetch(jwks)
+		const token = await signToken({})
+		clearJwksCache()
+		const result = await verifyIdToken(token, {
+			issuer: ISSUER,
+			audience: AUDIENCE,
+			jwksUri: `${ISSUER}/jwks`,
+			http: { fetchImpl: customFetch }
+		})
+		expect(customFetch).toHaveBeenCalled()
+		expect(result.payload.iss).toBe(ISSUER)
+	})
+
+	it('uses its own fetchImpl and does not share the global cache with other callers', async () => {
+		const jwks = { keys: [publicJwk] }
+		const customFetch1 = mockJwksFetch(jwks)
+		const customFetch2 = mockJwksFetch(jwks)
+		const token = await signToken({})
+		clearJwksCache()
+		await Promise.all([
+			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, http: { fetchImpl: customFetch1 } }),
+			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, http: { fetchImpl: customFetch2 } })
+		])
+		expect(customFetch1).toHaveBeenCalled()
+		expect(customFetch2).toHaveBeenCalled()
+	})
+
+	it('enforces timeoutMs: aborts JWKS fetch that exceeds the timeout', async () => {
+		const slowFetch = vi.fn((_url: string, init: RequestInit) => {
+			return new Promise<Response>((_resolve, reject) => {
+				if (init.signal) {
+					init.signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))
+				}
+			})
+		}) as any
+		const token = await signToken({})
+		clearJwksCache()
+		await expect(
+			verifyIdToken(token, {
+				issuer: ISSUER,
+				audience: AUDIENCE,
+				jwksUri: `${ISSUER}/jwks`,
+				http: { fetchImpl: slowFetch, timeoutMs: 50 }
+			})
+		).rejects.toThrow()
+		expect(slowFetch).toHaveBeenCalled()
+	})
 })
 
 describe('fetchOIDCDiscovery', () => {

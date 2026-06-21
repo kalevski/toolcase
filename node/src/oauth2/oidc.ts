@@ -94,18 +94,21 @@ export function clearDiscoveryCache(issuer?: string): void {
 
 const DEFAULT_JWKS_TTL_MS = 600_000
 
-let jwksCache = new Cache<any>(async (jwksUri: string) => createJwksGetter(jwksUri), DEFAULT_JWKS_TTL_MS)
+let jwksCache = new Cache<any>(async (jwksUri: string) => createJwksGetter(jwksUri, {}), DEFAULT_JWKS_TTL_MS)
 
-async function createJwksGetter(jwksUri: string): Promise<any> {
+async function createJwksGetter(jwksUri: string, opts: HttpOptions): Promise<any> {
 	const j = await loadJose()
-	return j.createRemoteJWKSet(new URL(jwksUri))
+	return j.createRemoteJWKSet(new URL(jwksUri), {
+		[j.customFetch]: opts.fetchImpl,
+		timeoutDuration: opts.timeoutMs,
+	})
 }
 
 export function clearJwksCache(jwksUri?: string): void {
 	if (jwksUri) {
 		jwksCache.invalidate(jwksUri)
 	} else {
-		jwksCache = new Cache<any>(async (uri: string) => createJwksGetter(uri), DEFAULT_JWKS_TTL_MS)
+		jwksCache = new Cache<any>(async (uri: string) => createJwksGetter(uri, {}), DEFAULT_JWKS_TTL_MS)
 	}
 }
 
@@ -117,6 +120,7 @@ export interface VerifyIdTokenOptions {
 	clockToleranceSeconds?: number
 	jwksCacheMs?: number
 	allowedAlgorithms?: readonly string[]
+	http?: HttpOptions
 }
 
 export interface OIDCVerifyContext {
@@ -156,11 +160,18 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 		if (!options.jwksUri) {
 			throw new OIDCVerificationError('verifyIdToken: jwksUri or jwks is required')
 		}
-		if (typeof options.jwksCacheMs === 'number' && options.jwksCacheMs > 0) {
-			jwksCache.setMS(options.jwksCacheMs)
+		const httpOpts = options.http ?? {}
+		// Bypass the shared cache when caller supplies a custom fetchImpl — per-call
+		// fetch impls cannot be keyed into a shared cache without SSRF / confused-deputy hazard.
+		if (httpOpts.fetchImpl !== undefined) {
+			jwks = await createJwksGetter(options.jwksUri, httpOpts)
+		} else {
+			if (typeof options.jwksCacheMs === 'number' && options.jwksCacheMs > 0) {
+				jwksCache.setMS(options.jwksCacheMs)
+			}
+			jwks = await jwksCache.get(options.jwksUri)
+			if (!jwks) throw new OIDCVerificationError('jwks fetch failed')
 		}
-		jwks = await jwksCache.get(options.jwksUri)
-		if (!jwks) throw new OIDCVerificationError('jwks fetch failed')
 	}
 	const algorithms = options.allowedAlgorithms ? [...options.allowedAlgorithms] : [...DEFAULT_ALG_LIST]
 	let verifyResult: { payload: any; protectedHeader: any }
