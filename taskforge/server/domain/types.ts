@@ -193,6 +193,28 @@ export interface Account {
     coolingUntil?: string
 }
 
+/**
+ * Result of a live `verifyAccount` token-health check — a cheap one-shot run
+ * under the account's config dir confirming the identity is usable before a
+ * batch is dispatched. `detail` is a short human-readable reason on failure.
+ */
+export interface AccountHealth {
+    ok: boolean
+    detail: string
+}
+
+/**
+ * Cached, non-live account summary for the health surface: the alias, its auth
+ * method, and the last time the identity was successfully used/verified
+ * (`lastUsedAt`). Health polling reports this without re-running a verify.
+ */
+export interface AccountHealthSummary {
+    alias: string
+    auth: 'oauth' | 'apikey'
+    label?: string
+    lastUsedAt?: string
+}
+
 // ── Git ──────────────────────────────────────────────────────────────────────
 
 export interface GitStatus {
@@ -361,6 +383,8 @@ export interface HealthDetails {
     db: { path: string; sizeBytes: number; migrationVersion: number }
     engines: { project: string; state: EngineState }[]
     searchAvailable: boolean
+    /** Registered Claude accounts with their auth method + cached last-verified time. */
+    accounts: AccountHealthSummary[]
     config: Record<string, string | number | boolean>
 }
 

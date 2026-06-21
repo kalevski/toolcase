@@ -5,8 +5,10 @@
 // only here, at resolution time, and never persisted.
 
 import 'server-only'
+import { config } from '@/server/config'
 import * as accountRepo from '@/server/data/repositories/account-repo'
-import type { Account } from '@/server/domain/types'
+import { runAgentOnce } from '@/server/infrastructure/agent'
+import type { Account, AccountHealth } from '@/server/domain/types'
 
 /** Unknown alias passed to `resolveAccount`. */
 export class UnknownAccountError extends Error {
@@ -55,4 +57,48 @@ export function resolveAccount(alias: string): { dir: string; env: Record<string
         env.ANTHROPIC_API_KEY = key
     }
     return { dir: account.dir, env }
+}
+
+// Heuristic markers of an auth failure in agent stderr — an expired/revoked
+// token or unset credentials can surface as a clean-ish exit with a complaint
+// on stderr rather than a non-zero code, so we scan for these explicitly.
+const AUTH_ERROR_RE =
+    /\b(invalid api key|unauthor\w*|not logged in|authenticat\w*|expired|revoked|forbidden|401|403|please run.*login|credit balance)\b/i
+
+/**
+ * Confirm an identity is usable *before* dispatching a batch (not mid-run):
+ * resolve the alias, then run a trivial one-shot under its config dir with the
+ * cheapest model, a short timeout, and read-only output flags. A clean exit
+ * with output is healthy and stamps `lastUsedAt`; a non-zero exit, timeout, or
+ * auth-error stderr is unhealthy and returns a short reason. Never throws for a
+ * known alias — only `resolveAccount` may throw (unknown alias / missing key).
+ */
+export async function verifyAccount(alias: string): Promise<AccountHealth> {
+    const { env } = resolveAccount(alias)
+    const res = await runAgentOnce({
+        cwd: config.workspaceDir,
+        // Cheapest model (haiku) — this is a liveness probe, not real work.
+        model: 'fast',
+        prompt: 'ok',
+        timeoutMs: config.generateTimeoutMs,
+        // Read-only: print plain text, plan mode so the probe can't side-effect.
+        extraArgs: '--print --output-format=text --permission-mode plan',
+        accountEnv: env,
+    })
+
+    if (res.timedOut) return { ok: false, detail: 'verify timed out' }
+    if (res.code !== 0) {
+        const detail = (res.stderr || res.stdout).trim().slice(0, 200)
+        return { ok: false, detail: detail || `agent exited with code ${res.code}` }
+    }
+    if (AUTH_ERROR_RE.test(res.stderr)) {
+        return { ok: false, detail: res.stderr.trim().slice(0, 200) }
+    }
+    if (res.stdout.trim() === '') {
+        const detail = res.stderr.trim().slice(0, 200)
+        return { ok: false, detail: detail || 'no output from agent' }
+    }
+
+    accountRepo.markUsed(alias)
+    return { ok: true, detail: 'ok' }
 }

@@ -85,3 +85,12 @@ export function list(): Account[] {
 export function remove(alias: string): void {
     prep('DELETE FROM account WHERE alias = ?').run(alias)
 }
+
+/**
+ * Stamp `last_used_at` — called after a successful spawn or a passing
+ * `verifyAccount` so callers can show "last verified" without re-running.
+ * No-op for an unknown alias.
+ */
+export function markUsed(alias: string, at: string = new Date().toISOString()): void {
+    prep('UPDATE account SET last_used_at = ? WHERE alias = ?').run(at, alias)
+}
