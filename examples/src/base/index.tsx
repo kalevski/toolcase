@@ -27,6 +27,7 @@ import TrieDemo from './TrieDemo'
 import SpatialDemo from './SpatialDemo'
 import BiMapDemo from './BiMapDemo'
 import MultiMapDemo from './MultiMapDemo'
+import MathDemo from './MathDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -80,6 +81,7 @@ export const baseExamples: BaseExampleDef[] = [
 
     { key: 'ulid', label: 'ulid', category: 'Utilities & Colors', element: <UlidDemo /> },
     { key: 'utilities', label: 'Utility Functions', category: 'Utilities & Colors', element: <UtilitiesDemo /> },
+    { key: 'math', label: 'Math Utilities', category: 'Utilities & Colors', element: <MathDemo /> },
     { key: 'color', label: 'Color', category: 'Utilities & Colors', element: <ColorDemo /> },
 
     { key: 'async', label: 'Async', category: 'Async', element: <AsyncDemo /> },

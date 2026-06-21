@@ -15,6 +15,7 @@ import hexToBuffer from './hexToBuffer'
 import Color from './Color'
 import JSONSchema from './JSONSchema'
 import getNumberInRange from './getNumberInRange'
+import { clamp, lerp, inverseLerp, mapRange, smoothstep, approximately } from './math'
 import Cache from './Cache'
 import AdjacencyMatrix from './AdjacencyMatrix'
 import State from './State'
@@ -100,6 +101,12 @@ export {
     Color,
     JSONSchema,
     getNumberInRange,
+    clamp,
+    lerp,
+    inverseLerp,
+    mapRange,
+    smoothstep,
+    approximately,
     Cache,
     AdjacencyMatrix,
     State,
@@ -137,6 +144,12 @@ const BASE = {
     Color,
     JSONSchema,
     getNumberInRange,
+    clamp,
+    lerp,
+    inverseLerp,
+    mapRange,
+    smoothstep,
+    approximately,
     Cache,
     AdjacencyMatrix,
     State,

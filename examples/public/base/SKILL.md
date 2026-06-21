@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -18,6 +18,7 @@ import {
     generateId, ulid, toHex, formatByteSize,
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
+    clamp, lerp, inverseLerp, mapRange, smoothstep, approximately,
     Cache, AdjacencyMatrix, State, retry,
     WeightedRandom, Dijkstra, AStar,
     DisjointSet, Trie,
@@ -57,6 +58,7 @@ import {
   - [retry](#retry)
   - [toHex / bufferToHex / hexToBuffer](#hex-helpers)
   - [formatByteSize](#formatbytesize)
+  - [Math helpers (clamp / lerp / inverseLerp / mapRange / smoothstep / approximately)](#math-helpers)
 - [Validation](#validation)
   - [JSONSchema](#jsonschema)
 - [Other](#other)
@@ -799,6 +801,102 @@ Returns `'0 Bytes'` when `bytes === 0`. Powers of 1024: `Bytes / KB / MB / GB / 
 
 ```ts
 formatByteSize(1536) // "1.5 KB"
+```
+
+### Math helpers
+
+Zero-dependency scalar math. All functions are pure and accept / return plain `number` (or `boolean` for `approximately`).
+
+```ts
+import { clamp, lerp, inverseLerp, mapRange, smoothstep, approximately } from '@toolcase/base'
+```
+
+#### `clamp`
+
+```ts
+clamp(value: number, min: number, max: number): number
+```
+
+Constrain `value` to the closed interval `[min, max]`.
+
+```ts
+clamp(15, 0, 10)   // 10
+clamp(-5, 0, 10)   // 0
+clamp(5,  0, 10)   // 5
+```
+
+#### `lerp`
+
+```ts
+lerp(a: number, b: number, t: number): number
+```
+
+Linear interpolation between `a` (at `t=0`) and `b` (at `t=1`). Extrapolates outside `[0, 1]`.
+
+```ts
+lerp(0, 100, 0)    // 0
+lerp(0, 100, 0.5)  // 50
+lerp(0, 100, 1)    // 100
+lerp(0, 100, 1.5)  // 150  (extrapolation)
+```
+
+#### `inverseLerp`
+
+```ts
+inverseLerp(a: number, b: number, value: number): number
+```
+
+Inverse of `lerp` — returns the `t` such that `lerp(a, b, t) === value`. Returns `0` when `a === b` (degenerate case).
+
+```ts
+inverseLerp(0, 100, 25)  // 0.25
+inverseLerp(0, 100, 75)  // 0.75
+inverseLerp(5, 5, 99)    // 0  (degenerate)
+```
+
+#### `mapRange`
+
+```ts
+mapRange(value: number, inMin: number, inMax: number, outMin: number, outMax: number): number
+```
+
+Remap `value` from one range to another. Extrapolates when `value` is outside `[inMin, inMax]`.
+
+```ts
+mapRange(0.5, 0, 1, 0, 255)   // 127.5
+mapRange(128, 0, 255, 0, 1)   // 0.5020...
+mapRange(5,   0, 10, -100, 100) // 0
+```
+
+#### `smoothstep`
+
+```ts
+smoothstep(edge0: number, edge1: number, x: number): number
+```
+
+Smooth Hermite interpolation (Ken Perlin's cubic S-curve) returning `0` when `x <= edge0`, `1` when `x >= edge1`, and an ease-in/ease-out value in between. Output is clamped to `[0, 1]`.
+
+```ts
+smoothstep(0, 1, 0)    // 0
+smoothstep(0, 1, 0.25) // 0.15625  (easing in — below the linear)
+smoothstep(0, 1, 0.5)  // 0.5
+smoothstep(0, 1, 0.75) // 0.84375  (easing out — above the linear)
+smoothstep(0, 1, 1)    // 1
+```
+
+#### `approximately`
+
+```ts
+approximately(a: number, b: number, epsilon: number = 1e-7): boolean
+```
+
+Returns `true` when `|a - b| <= epsilon`. Useful for float equality checks after arithmetic.
+
+```ts
+0.1 + 0.2 === 0.3                    // false  (IEEE 754)
+approximately(0.1 + 0.2, 0.3)        // true
+approximately(1.0, 1.0 + 1e-6)       // false  (outside default epsilon)
+approximately(1.0, 1.0 + 1e-6, 1e-5) // true   (custom epsilon)
 ```
 
 ---
