@@ -56,6 +56,17 @@ export function pickAccount(opts?: { pool?: string[]; auth?: 'oauth' | 'apikey' 
 }
 
 /**
+ * Mark an account cooling down until `until` (ISO-8601) after an attempt under it
+ * hit a usage-limit/429, so `pickAccount` skips it until the limit resets (an
+ * `until` already in the past leaves it immediately eligible again). The
+ * dispatcher calls this on a limit outcome before attempting failover to another
+ * identity. No-op for an unknown alias.
+ */
+export function coolDownAccount(alias: string, until: string): void {
+    accountRepo.setCoolingUntil(alias, until)
+}
+
+/**
  * Resolve an alias to the spawn inputs for the `claude` CLI:
  * `dir` (its `CLAUDE_CONFIG_DIR`) and `env` (the env overlay to merge into the
  * child process). For `apikey` accounts the env includes `ANTHROPIC_API_KEY`,

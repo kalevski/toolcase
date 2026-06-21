@@ -97,6 +97,16 @@ export function markUsed(alias: string, at: string = new Date().toISOString()): 
 }
 
 /**
+ * Mark an account cooling down until `until` (ISO-8601) — called when an attempt
+ * under this account hits a usage-limit/429, so the LRU pool filter (`selectLru`)
+ * skips it until the limit resets. A `until` already in the past (or `null`)
+ * leaves the account immediately eligible again. No-op for an unknown alias.
+ */
+export function setCoolingUntil(alias: string, until: string | null): void {
+    prep('UPDATE account SET cooling_until = ? WHERE alias = ?').run(until, alias)
+}
+
+/**
  * Atomically pick the least-recently-used eligible account and stamp it used —
  * the rotation primitive that spreads load across identities. Eligible = not
  * currently cooling down (`cooling_until` unset or already past `at`), optionally

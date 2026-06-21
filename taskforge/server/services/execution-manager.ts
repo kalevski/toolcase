@@ -10,7 +10,7 @@ import path from 'node:path'
 import type { ChildProcess } from 'node:child_process'
 import { config } from '@/server/config'
 import { spawnAgent, resolveModel } from '@/server/infrastructure/agent'
-import { resolveAccount } from '@/server/services/accounts'
+import { resolveAccount, pickAccount, coolDownAccount } from '@/server/services/accounts'
 import { createAgentStreamParser } from '@/server/infrastructure/stream-json'
 import { aiCommitMessage } from '@/server/services/commit-message'
 import { agentSessionsBusy } from '@/server/services/locks'
@@ -466,6 +466,12 @@ class ExecutionManager extends EventEmitter {
             let limitRetries = 0
             let transientRetries = 0
             let executed = false
+            // §account failover — when a usage-limit on the resolved account fails
+            // over to another identity, `failoverAccount` pins the replacement for
+            // the *next* attempt at `failoverFor` (the same task). Cleared once the
+            // task advances or the engine sleeps, so canonical resolution resumes.
+            let failoverAccount: string | null = null
+            let failoverFor: string | null = null
 
             while (i < scoped.length) {
                 if (r.forceRequested) {
@@ -568,7 +574,16 @@ class ExecutionManager extends EventEmitter {
                 // → none (inherit the ambient identity). An alias that cannot be
                 // resolved (unknown / missing key env) errors the task rather than
                 // silently falling back to the ambient identity.
-                const accountAlias = parsed.account || eff.defaultAccount || config.defaultAccount || undefined
+                // A prior usage-limit on this same task may have failed over to a
+                // different identity — honour that pin; otherwise drop any stale
+                // failover and resolve canonically.
+                let accountAlias = parsed.account || eff.defaultAccount || config.defaultAccount || undefined
+                if (failoverAccount && failoverFor === rel) {
+                    accountAlias = failoverAccount
+                } else {
+                    failoverAccount = null
+                    failoverFor = null
+                }
                 let accountEnv: Record<string, string> | undefined
                 if (accountAlias) {
                     try {
@@ -641,13 +656,75 @@ class ExecutionManager extends EventEmitter {
 
                 // §6.6 classify, order matters
                 if (outcome.limit) {
+                    const plan = computeLimitSleep(outcome.stderr + '\n' + outcome.resultText, Date.now())
+
+                    // §account cool-down + failover — when this attempt ran under a
+                    // resolved account, mark that account cooling down until the
+                    // limit's wake/reset time (the plan already falls back to
+                    // config.limitSleepFallback when no reset is parseable), then try
+                    // to fail over to another eligible identity before sleeping the
+                    // whole engine. Each failover removes one account from the LRU
+                    // pool, so the chain is bounded by the account count.
+                    if (accountAlias) {
+                        const coolingUntil = new Date(plan.wakeAt).toISOString()
+                        coolDownAccount(accountAlias, coolingUntil)
+                        this.log(
+                            repo,
+                            'comment',
+                            `account ${accountAlias} hit usage limit — cooling down until ${coolingUntil}`,
+                            rel,
+                        )
+                        slog('info', 'engine', 'account cooling down', {
+                            project: repo,
+                            account: accountAlias,
+                            coolingUntil,
+                            task: rel,
+                        })
+                        dispatchProjectEvent(
+                            repo,
+                            'limit',
+                            `account ${accountAlias} hit usage limit at ${rel} — cooling down until ${coolingUntil}`,
+                            { task: rel, account: accountAlias, coolingUntil },
+                        )
+
+                        const next = pickAccount()
+                        if (next) {
+                            failoverAccount = next.alias
+                            failoverFor = rel
+                            this.log(
+                                repo,
+                                'comment',
+                                `failing over to account ${next.alias} — retrying ${rel}`,
+                                rel,
+                            )
+                            slog('info', 'engine', 'account failover', {
+                                project: repo,
+                                from: accountAlias,
+                                to: next.alias,
+                                task: rel,
+                            })
+                            // retry SAME task under the new identity, no engine sleep
+                            continue
+                        }
+                        this.log(
+                            repo,
+                            'comment',
+                            `no eligible account to fail over to — falling back to sleep`,
+                            rel,
+                        )
+                    }
+
+                    // No account, or no failover target: existing whole-engine sleep.
+                    // Drop any stale failover pin so the post-sleep retry resolves the
+                    // canonical account again.
+                    failoverAccount = null
+                    failoverFor = null
                     if (!config.limitAutoSleep || limitRetries >= config.limitMaxRetries) {
                         reason = 'usage-limit'
                         this.log(repo, 'error', 'usage limit reached — stopping run', rel)
                         return
                     }
                     limitRetries++
-                    const plan = computeLimitSleep(outcome.stderr + '\n' + outcome.resultText, Date.now())
                     r.wakeAt = plan.wakeAt
                     this.setState(repo, 'SLEEPING')
                     this.emitEvent(repo, { type: 'limit', wakeAt: plan.wakeAt, taskId: rel })
