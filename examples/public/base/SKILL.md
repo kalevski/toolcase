@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -13,12 +13,18 @@ import {
     Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
     Spatial,  // { SpatialHash, Quadtree }
     Async,    // { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue }
+    Easing,   // { easeInSine…easeInOutBounce (30 fns) + cubicBezier }
     VectorClock, EventEmitter, Broadcast,
     LSystem, ObjectPool, PriorityQueue, RingBuffer, Stack, Deque,
     generateId, ulid, toHex, formatByteSize,
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
     clamp, lerp, inverseLerp, mapRange, smoothstep, approximately,
+    // easing functions also available individually:
+    easeInSine, easeOutSine, easeInOutSine,
+    easeInQuad, easeOutQuad, easeInOutQuad,
+    // ... (all 30 + cubicBezier)
+    cubicBezier,
     Cache, AdjacencyMatrix, State, retry,
     WeightedRandom, Dijkstra, AStar,
     DisjointSet, Trie,
@@ -51,6 +57,9 @@ import {
 - [Pathfinding](#pathfinding)
   - [Dijkstra](#dijkstra)
   - [AStar](#astar)
+- [Easing](#easing)
+  - [Easing functions](#easing-functions)
+  - [cubicBezier](#cubicbezier)
 - [Utilities](#utilities)
   - [generateId](#generateid)
   - [ulid](#ulid)
@@ -897,6 +906,96 @@ Returns `true` when `|a - b| <= epsilon`. Useful for float equality checks after
 approximately(0.1 + 0.2, 0.3)        // true
 approximately(1.0, 1.0 + 1e-6)       // false  (outside default epsilon)
 approximately(1.0, 1.0 + 1e-6, 1e-5) // true   (custom epsilon)
+```
+
+---
+
+## Easing
+
+30 zero-dependency easing functions grouped in 10 families (Sine, Quad, Cubic, Quart, Quint, Expo, Circ, Back, Elastic, Bounce), each with In / Out / InOut variants, plus a CSS-compatible `cubicBezier` sampler. All functions are isomorphic and have no side effects. Every function guarantees `f(0) === 0` and `f(1) === 1`.
+
+```ts
+import { Easing } from '@toolcase/base'
+// or individual named exports:
+import { easeInQuad, easeOutCubic, easeInOutBounce, cubicBezier } from '@toolcase/base'
+import type { EasingFn } from '@toolcase/base'
+```
+
+### Easing functions
+
+All 30 functions share the same signature:
+
+```ts
+(t: number) => number
+```
+
+`t` is the normalised progress in `[0, 1]`. Families that overshoot (Back, Elastic) may return values slightly outside `[0, 1]` between the endpoints; the endpoints themselves are always exact.
+
+| Export | Family | Behaviour |
+|---|---|---|
+| `easeInSine` / `easeOutSine` / `easeInOutSine` | Sine | Smooth sinusoidal acceleration |
+| `easeInQuad` / `easeOutQuad` / `easeInOutQuad` | Quad | t² — gentle curve |
+| `easeInCubic` / `easeOutCubic` / `easeInOutCubic` | Cubic | t³ — moderate curve |
+| `easeInQuart` / `easeOutQuart` / `easeInOutQuart` | Quart | t⁴ — steep curve |
+| `easeInQuint` / `easeOutQuint` / `easeInOutQuint` | Quint | t⁵ — very steep curve |
+| `easeInExpo` / `easeOutExpo` / `easeInOutExpo` | Expo | 2^(10t) — exponential |
+| `easeInCirc` / `easeOutCirc` / `easeInOutCirc` | Circ | Quarter-circle arc |
+| `easeInBack` / `easeOutBack` / `easeInOutBack` | Back | Overshoots and returns |
+| `easeInElastic` / `easeOutElastic` / `easeInOutElastic` | Elastic | Spring oscillation |
+| `easeInBounce` / `easeOutBounce` / `easeInOutBounce` | Bounce | Bouncing-ball effect |
+
+```ts
+import { easeInCubic, easeOutBounce, Easing } from '@toolcase/base'
+
+easeInCubic(0)    // 0
+easeInCubic(0.5)  // 0.125
+easeInCubic(1)    // 1
+
+easeOutBounce(0)    // 0
+easeOutBounce(0.5)  // ~0.766
+easeOutBounce(1)    // 1
+
+// Namespace form
+Easing.easeInElastic(0.8)   // ~-0.108  (overshoots — Back/Elastic families only)
+Easing.easeInOutBack(0.5)   // 0.5
+```
+
+Apply to any interpolation:
+
+```ts
+import { lerp, easeInOutCubic } from '@toolcase/base'
+
+function animate(start: number, end: number, rawT: number): number {
+    return lerp(start, end, easeInOutCubic(rawT))
+}
+```
+
+### cubicBezier
+
+CSS-compatible cubic-bezier curve sampler. Takes two inner control points (x1, y1) and (x2, y2) in `[0, 1]` and returns an `EasingFn` that maps `t → y` using Newton-Raphson + bisection to solve the parametric curve.
+
+```ts
+cubicBezier(x1: number, y1: number, x2: number, y2: number): EasingFn
+```
+
+Control points must satisfy `0 <= x1, x2 <= 1` for the mapping to be monotone (equivalent to the CSS `cubic-bezier()` constraint). `y1` and `y2` may be outside `[0, 1]` to allow overshoot.
+
+```ts
+import { cubicBezier } from '@toolcase/base'
+
+// CSS keyword equivalents
+const ease        = cubicBezier(0.25, 0.1,  0.25, 1.0)
+const easeIn      = cubicBezier(0.42, 0,    1.0,  1.0)
+const easeOut     = cubicBezier(0,    0,    0.58, 1.0)
+const easeInOut   = cubicBezier(0.42, 0,    0.58, 1.0)
+
+ease(0)    // 0
+ease(0.5)  // ~0.847
+ease(1)    // 1
+
+// Custom spring-like curve
+const spring = cubicBezier(0.175, 0.885, 0.32, 1.275)
+spring(0.8)  // > 1 (controlled overshoot)
 ```
 
 ---

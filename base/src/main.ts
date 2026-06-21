@@ -37,6 +37,19 @@ import RESTResponse from './http/RESTResponse'
 import Packing from './packing'
 import Async from './async'
 import Spatial from './spatial'
+import Easing, {
+    easeInSine, easeOutSine, easeInOutSine,
+    easeInQuad, easeOutQuad, easeInOutQuad,
+    easeInCubic, easeOutCubic, easeInOutCubic,
+    easeInQuart, easeOutQuart, easeInOutQuart,
+    easeInQuint, easeOutQuint, easeInOutQuint,
+    easeInExpo, easeOutExpo, easeInOutExpo,
+    easeInCirc, easeOutCirc, easeInOutCirc,
+    easeInBack, easeOutBack, easeInOutBack,
+    easeInElastic, easeOutElastic, easeInOutElastic,
+    easeInBounce, easeOutBounce, easeInOutBounce,
+    cubicBezier
+} from './easing'
 
 
 const HTTP = {
@@ -46,6 +59,7 @@ const HTTP = {
 }
 
 export type { SpatialPoint, SpatialRect } from './spatial'
+export type { EasingFn } from './easing'
 
 export type {
     Size as PackingSize,
@@ -84,6 +98,18 @@ export {
     Packing,
     Async,
     Spatial,
+    Easing,
+    easeInSine, easeOutSine, easeInOutSine,
+    easeInQuad, easeOutQuad, easeInOutQuad,
+    easeInCubic, easeOutCubic, easeInOutCubic,
+    easeInQuart, easeOutQuart, easeInOutQuart,
+    easeInQuint, easeOutQuint, easeInOutQuint,
+    easeInExpo, easeOutExpo, easeInOutExpo,
+    easeInCirc, easeOutCirc, easeInOutCirc,
+    easeInBack, easeOutBack, easeInOutBack,
+    easeInElastic, easeOutElastic, easeInOutElastic,
+    easeInBounce, easeOutBounce, easeInOutBounce,
+    cubicBezier,
     VectorClock,
     EventEmitter,
     Broadcast,
@@ -127,6 +153,18 @@ const BASE = {
     Packing,
     Async,
     Spatial,
+    Easing,
+    easeInSine, easeOutSine, easeInOutSine,
+    easeInQuad, easeOutQuad, easeInOutQuad,
+    easeInCubic, easeOutCubic, easeInOutCubic,
+    easeInQuart, easeOutQuart, easeInOutQuart,
+    easeInQuint, easeOutQuint, easeInOutQuint,
+    easeInExpo, easeOutExpo, easeInOutExpo,
+    easeInCirc, easeOutCirc, easeInOutCirc,
+    easeInBack, easeOutBack, easeInOutBack,
+    easeInElastic, easeOutElastic, easeInOutElastic,
+    easeInBounce, easeOutBounce, easeInOutBounce,
+    cubicBezier,
     VectorClock,
     EventEmitter,
     Broadcast,
