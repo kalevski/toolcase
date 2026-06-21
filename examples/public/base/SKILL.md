@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -12,7 +12,7 @@ import {
     HTTP,     // { Status, RESTError, RESTResponse }
     Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
     VectorClock, EventEmitter, Broadcast,
-    LSystem, ObjectPool, PriorityQueue,
+    LSystem, ObjectPool, PriorityQueue, RingBuffer,
     generateId, toHex, formatByteSize,
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
@@ -28,6 +28,7 @@ import {
 - [Data Structures](#data-structures)
   - [Cache](#cache)
   - [PriorityQueue](#priorityqueue)
+  - [RingBuffer](#ringbuffer)
   - [VectorClock](#vectorclock)
   - [State](#state)
   - [AdjacencyMatrix](#adjacencymatrix)
@@ -102,6 +103,41 @@ const pq = new PriorityQueue<{ id: string, weight: number }>(n => n.weight, n =>
 pq.enqueue({ id: 'a', weight: 5 })
 pq.enqueue({ id: 'b', weight: 1 })
 pq.dequeue() // { id: 'b', weight: 1 }
+```
+
+### RingBuffer
+
+Fixed-capacity circular buffer. Oldest entry is overwritten when the buffer is full. Zero allocations after construction.
+
+```ts
+new RingBuffer<T>(capacity: number)
+```
+
+- `capacity: number` — (readonly) maximum number of items.
+- `size: number` — current item count.
+- `push(item: T): this` — append an item; overwrites the oldest when full. Throws if `item === undefined`. Chainable.
+- `peek(): T | null` — the oldest item without removing it; `null` when empty.
+- `tail(n: number): T[]` — the last `n` items in insertion order (newest last); clamped to `size`. Returns `[]` when `n <= 0` or buffer is empty.
+- `clear(): this` — reset to empty; capacity is preserved.
+- `[Symbol.iterator]` — iterate all items in insertion order (oldest → newest).
+
+Constructor throws if `capacity` is not a positive integer.
+
+```ts
+import { RingBuffer } from '@toolcase/base'
+
+const rb = new RingBuffer<number>(3)
+rb.push(1).push(2).push(3)
+rb.peek()        // 1 (oldest)
+rb.tail(2)       // [2, 3]
+[...rb]          // [1, 2, 3]
+
+rb.push(4)       // overwrites 1
+rb.peek()        // 2
+[...rb]          // [2, 3, 4]
+
+rb.clear()
+rb.size          // 0
 ```
 
 ### VectorClock

@@ -18,6 +18,7 @@ import RandomDemo from './RandomDemo'
 import DijkstraDemo from './DijkstraDemo'
 import AStarDemo from './AStarDemo'
 import AsyncDemo from './AsyncDemo'
+import RingBufferDemo from './RingBufferDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -51,6 +52,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'vector-clock', label: 'VectorClock', category: 'Data Structures', element: <VectorClockDemo /> },
     { key: 'adjacency-matrix', label: 'AdjacencyMatrix', category: 'Data Structures', element: <AdjacencyMatrixDemo /> },
     { key: 'object-pool', label: 'ObjectPool', category: 'Data Structures', element: <ObjectPoolDemo /> },
+    { key: 'ring-buffer', label: 'RingBuffer', category: 'Data Structures', element: <RingBufferDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
     { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },
     { key: 'dijkstra', label: 'Dijkstra', category: 'Data Structures', element: <DijkstraDemo /> },

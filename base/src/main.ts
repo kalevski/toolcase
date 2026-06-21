@@ -20,6 +20,7 @@ import WeightedRandom from './WeightedRandom'
 import Random from './Random'
 import Dijkstra from './Dijkstra'
 import AStar from './AStar'
+import RingBuffer from './RingBuffer'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -92,7 +93,8 @@ export {
     WeightedRandom,
     Random,
     Dijkstra,
-    AStar
+    AStar,
+    RingBuffer
 }
 
 const BASE = {
@@ -120,7 +122,8 @@ const BASE = {
     WeightedRandom,
     Random,
     Dijkstra,
-    AStar
+    AStar,
+    RingBuffer
 }
 
 export default BASE
