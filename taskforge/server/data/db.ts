@@ -242,6 +242,21 @@ const MIGRATIONS: string[] = [
         created_at      TEXT NOT NULL
     );
     `,
+    // v5 — Claude account registry (multi-account foundation). Maps a short
+    // alias to an isolated config dir + auth method. Registry metadata only —
+    // the API key for `apikey` accounts is referenced by env-var name
+    // (api_key_env) and resolved at spawn time; the key value is never stored.
+    `
+    CREATE TABLE account (
+        alias         TEXT PRIMARY KEY,
+        dir           TEXT NOT NULL,
+        auth          TEXT NOT NULL,
+        label         TEXT,
+        api_key_env   TEXT,
+        last_used_at  TEXT,
+        cooling_until TEXT
+    );
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

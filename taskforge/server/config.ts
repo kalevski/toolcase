@@ -78,6 +78,10 @@ export const config = {
     // (E4: the half-implemented `cursor` backend stub was removed — `claude`
     //  is the one supported backend; a second one needs a real AgentBackend seam.)
     agentBin: process.env.CLAUDE_BIN || process.env.AGENT_BIN || 'claude',
+    // Fallback account alias when a task/project specifies none (multi-account
+    // registry). Empty = no default; the parent process's inherited identity is
+    // used (current single-account behavior).
+    defaultAccount: optional('DEFAULT_ACCOUNT', ''),
     defaultModel: optional('DEFAULT_MODEL', 'claude-sonnet-4-6'),
     modelCatalog: (() => {
         const list = csv('MODEL_CATALOG')
@@ -100,6 +104,13 @@ export const config = {
     },
     get authDir() {
         return `${this.workspaceDir}/.auth`
+    },
+    /**
+     * Root of the per-alias Claude config dirs (multi-account registry). Each
+     * account gets an isolated `CLAUDE_CONFIG_DIR` at `${accountsDir}/<alias>`.
+     */
+    get accountsDir() {
+        return `${this.workspaceDir}/.claude-accounts`
     },
     /** SQLite database file — system of record for app state (see server/db.ts). */
     get dbPath() {

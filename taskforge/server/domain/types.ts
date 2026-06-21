@@ -168,6 +168,29 @@ export interface AgentPromptRecord {
     usedAt: string
 }
 
+// ── Claude account registry (multi-account) ──────────────────────────────────
+
+/**
+ * One Claude identity in the account registry — registry **metadata only**,
+ * never secrets. `dir` is the isolated `CLAUDE_CONFIG_DIR` (one config dir = one
+ * logged-in identity). For `apikey` accounts the key is referenced by env-var
+ * **name** (`apiKeyEnv`) and resolved at spawn time; the key value is never
+ * stored. `lastUsedAt`/`coolingUntil` are mutable runtime fields used later by
+ * the dispatcher for round-robin + cool-down on quota errors.
+ */
+export interface Account {
+    /** Short kebab-case handle; primary key + config-dir folder name. */
+    alias: string
+    /** Isolated config dir on disk (`${accountsDir}/<alias>`). */
+    dir: string
+    auth: 'oauth' | 'apikey'
+    label?: string
+    /** Name of the env var holding the API key (apikey auth only). */
+    apiKeyEnv?: string
+    lastUsedAt?: string
+    coolingUntil?: string
+}
+
 // ── Git ──────────────────────────────────────────────────────────────────────
 
 export interface GitStatus {
