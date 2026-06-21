@@ -9,6 +9,8 @@ function makeClient(evalReply: unknown, rankReply: unknown = 0) {
         eval: vi.fn().mockResolvedValue(evalReply),
         zRevRank: vi.fn().mockResolvedValue(rankReply),
         zRank: vi.fn().mockResolvedValue(rankReply),
+        // zAdd returns added-count (0 when member already existed, 1 when new)
+        zAdd: vi.fn().mockResolvedValue(0),
     }
 }
 
@@ -17,6 +19,27 @@ function makeLeaderboard(client: unknown, direction?: 'asc' | 'desc') {
     const scripts = new LuaScriptCache()
     return new Leaderboard(client as never, keys, scripts, direction ? { direction } : {})
 }
+
+describe('Leaderboard.addScore', () => {
+
+    it('returns void (not the ZADD added-count) when updating an existing member', async () => {
+        // zAdd returns 0 when the member already existed but its score was updated —
+        // the old implementation forwarded that 0 to callers who expected the stored score.
+        const client = makeClient(null)
+        client.zAdd.mockResolvedValue(0)
+        const board = makeLeaderboard(client)
+        const result = await board.addScore('scores', 'alice', 42)
+        expect(result).toBeUndefined()
+    })
+
+    it('calls zAdd with the correct key and score payload', async () => {
+        const client = makeClient(null)
+        const board = makeLeaderboard(client)
+        await board.addScore('scores', 'bob', 99)
+        expect(client.zAdd).toHaveBeenCalledOnce()
+        expect(client.zAdd).toHaveBeenCalledWith('test:scores', { score: 99, value: 'bob' })
+    })
+})
 
 describe('Leaderboard.addScoreAndRank direction', () => {
 

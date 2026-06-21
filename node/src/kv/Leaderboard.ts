@@ -22,8 +22,8 @@ export class Leaderboard {
 		this.direction = options.direction ?? 'desc'
 	}
 
-	addScore(boardKey: string, member: string, score: number): Promise<number> {
-		return this.client.zAdd(this.keys.build(boardKey), { score, value: member })
+	async addScore(boardKey: string, member: string, score: number): Promise<void> {
+		await this.client.zAdd(this.keys.build(boardKey), { score, value: member })
 	}
 
 	incrScore(boardKey: string, member: string, delta: number): Promise<number> {

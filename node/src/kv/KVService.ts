@@ -570,7 +570,7 @@ export class KVService {
 		return this.locker.extendLock(key, token, ttlMs)
 	}
 
-	addScore(boardKey: string, member: string, score: number): Promise<number> {
+	addScore(boardKey: string, member: string, score: number): Promise<void> {
 		return this.leaderboard.addScore(boardKey, member, score)
 	}
 
