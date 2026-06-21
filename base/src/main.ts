@@ -33,6 +33,7 @@ import RESTResponse from './http/RESTResponse'
 
 import Packing from './packing'
 import Async from './async'
+import Spatial from './spatial'
 
 
 const HTTP = {
@@ -40,6 +41,8 @@ const HTTP = {
     RESTError,
     RESTResponse
 }
+
+export type { SpatialPoint, SpatialRect } from './spatial'
 
 export type {
     Size as PackingSize,
@@ -77,6 +80,7 @@ export {
     HTTP,
     Packing,
     Async,
+    Spatial,
     VectorClock,
     EventEmitter,
     Broadcast,
@@ -111,6 +115,7 @@ const BASE = {
     HTTP,
     Packing,
     Async,
+    Spatial,
     VectorClock,
     EventEmitter,
     Broadcast,

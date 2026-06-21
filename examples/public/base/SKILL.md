@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -11,6 +11,7 @@ Zero-dependency TypeScript helpers and data structures. Isomorphic (Node + brows
 import {
     HTTP,     // { Status, RESTError, RESTResponse }
     Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
+    Spatial,  // { SpatialHash, Quadtree }
     VectorClock, EventEmitter, Broadcast,
     LSystem, ObjectPool, PriorityQueue, RingBuffer, Stack, Deque,
     generateId, ulid, toHex, formatByteSize,
@@ -65,6 +66,9 @@ import {
   - [Packer](#packer)
   - [Algorithms](#algorithms)
   - [Helpers (Trimmer / Sorter / Rotator / MultiPagePlanner / potCeil)](#packing-helpers)
+- [Spatial](#spatial)
+  - [SpatialHash](#spatialhash)
+  - [Quadtree](#quadtree)
 
 ---
 
@@ -1457,6 +1461,105 @@ window.addEventListener('scroll', onScroll)
 
 // Drop trailing call (e.g. on unmount)
 onScroll.cancel()
+```
+
+---
+
+## Spatial
+
+2D broad-phase spatial partitioning. Exported as a single namespace `Spatial` with two structures behind a shared `SpatialRect` / `SpatialPoint` contract.
+
+```ts
+import { Spatial, type SpatialPoint, type SpatialRect } from '@toolcase/base'
+// Spatial = { SpatialHash, Quadtree }
+```
+
+Both structures store arbitrary items (`T`) keyed by their axis-aligned bounding rectangle (`SpatialRect`). Nearest-neighbour distance is measured from the query point to the nearest edge of an item's bounding rect (distance = 0 if the point is inside the rect).
+
+### SpatialHash
+
+Uniform-grid spatial hash. O(1) amortised insert/remove; query cost scales with the number of occupied cells the query rect touches. Best when objects are roughly uniform in size and the cell size is tuned to ~2× the average object diameter.
+
+```ts
+new Spatial.SpatialHash<T>(cellSize: number)
+```
+
+Constructor throws if `cellSize` is not a positive finite number.
+
+- `size: number` — read-only item count.
+- `insert(item: T, bounds: SpatialRect): void` — no-op if item is already inserted. Throws if `item === undefined`.
+- `remove(item: T): boolean` — returns `true` if removed; `false` if not present.
+- `update(item: T, bounds: SpatialRect): void` — remove + reinsert (for moving objects).
+- `query(bounds: SpatialRect): T[]` — all items whose bounds overlap the query rect; no duplicates.
+- `nearest(point: SpatialPoint, maxDist?: number): T | null` — item with the smallest distance to `point`; respects `maxDist` (default `Infinity`).
+- `clear(): this` — remove all items. Chainable.
+
+```ts
+import { Spatial, type SpatialRect } from '@toolcase/base'
+
+type Entity = { id: string }
+
+const hash = new Spatial.SpatialHash<Entity>(64)
+
+const player: Entity = { id: 'player' }
+hash.insert(player, { x: 100, y: 100, width: 32, height: 32 })
+
+const enemy: Entity = { id: 'enemy' }
+hash.insert(enemy, { x: 300, y: 300, width: 32, height: 32 })
+
+// Broad-phase range query
+const nearby = hash.query({ x: 80, y: 80, width: 100, height: 100 })
+// → [player]
+
+// Move player
+hash.update(player, { x: 280, y: 280, width: 32, height: 32 })
+
+// Nearest neighbour
+hash.nearest({ x: 0, y: 0 }) // → enemy (player moved away)
+```
+
+### Quadtree
+
+Recursive quadrant tree. Insert cost is O(log n) amortised; query prunes by bounding box; nearest-neighbour uses branch-and-bound pruning. Best when object density is uneven (sparse large regions + dense clusters).
+
+```ts
+new Spatial.Quadtree<T>(bounds: SpatialRect, capacity?: number, maxDepth?: number)
+```
+
+- `bounds` — the world rectangle this tree covers. Items outside it are rejected by `insert`.
+- `capacity` — max items per node before subdivision (default `8`).
+- `maxDepth` — max tree depth; nodes at max depth store all items regardless of count (default `8`).
+
+Constructor throws if `bounds` is null/undefined, `capacity < 1`, or `maxDepth < 0`.
+
+- `size: number` — read-only item count.
+- `insert(item: T, bounds: SpatialRect): boolean` — returns `true` if inserted; `false` if item was already present or its bounds don't intersect the tree bounds. Throws if `item === undefined`.
+- `remove(item: T): boolean` — returns `true` if removed; `false` if not present.
+- `update(item: T, bounds: SpatialRect): void` — remove + reinsert.
+- `query(bounds: SpatialRect): T[]` — all items whose bounds overlap the query rect.
+- `nearest(point: SpatialPoint, maxDist?: number): T | null` — nearest item to `point` (branch-and-bound). Returns `null` when empty or nothing within `maxDist`.
+- `clear(): this` — remove all items, preserve root bounds. Chainable.
+
+```ts
+import { Spatial } from '@toolcase/base'
+
+const world = { x: 0, y: 0, width: 1024, height: 1024 }
+const qt = new Spatial.Quadtree<string>(world, 4, 6)
+
+qt.insert('A', { x: 10, y: 10, width: 20, height: 20 })
+qt.insert('B', { x: 500, y: 500, width: 20, height: 20 })
+qt.insert('C', { x: 15, y: 15, width: 10, height: 10 })
+
+qt.query({ x: 0, y: 0, width: 100, height: 100 })
+// → ['A', 'C']  (B is outside the query rect)
+
+qt.nearest({ x: 0, y: 0 })
+// → 'A'  (closest bounding rect to origin)
+
+qt.update('A', { x: 600, y: 600, width: 20, height: 20 })
+qt.size // → 3
+
+qt.clear().size // → 0
 ```
 
 ---
