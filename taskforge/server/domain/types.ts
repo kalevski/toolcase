@@ -310,6 +310,8 @@ export interface SearchHit {
 /** Persisted per-project overrides; absent keys fall back to env config. */
 export interface ProjectSettings {
     defaultModel?: string
+    /** Fallback Claude account alias for tasks that don't name one. */
+    defaultAccount?: string
     commitAfter?: boolean
     commitMessageMode?: CommitMessageMode
     commitModel?: string
