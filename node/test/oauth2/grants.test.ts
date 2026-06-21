@@ -43,6 +43,26 @@ describe('clientCredentialsToken', () => {
 		const fetchImpl = queue([{ status: 401, body: { error: 'invalid_client' } }])
 		await expect(clientCredentialsToken(provider, undefined, { fetchImpl })).rejects.toBeInstanceOf(OAuth2TokenError)
 	})
+
+	it('upstreamBody is redacted — extra fields stripped', async () => {
+		const fetchImpl = queue([{ status: 401, body: {
+			error: 'invalid_client',
+			error_description: 'bad creds',
+			client_secret: 'leaked',
+			access_token: 'leaked'
+		} }])
+		let err: OAuth2TokenError | undefined
+		try {
+			await clientCredentialsToken(provider, undefined, { fetchImpl })
+		} catch (e) {
+			err = e as OAuth2TokenError
+		}
+		expect(err).toBeInstanceOf(OAuth2TokenError)
+		const body = err!.upstreamBody as Record<string, unknown>
+		expect(body).toEqual({ error: 'invalid_client', error_description: 'bad creds' })
+		expect(body).not.toHaveProperty('client_secret')
+		expect(body).not.toHaveProperty('access_token')
+	})
 })
 
 describe('requestDeviceCode', () => {

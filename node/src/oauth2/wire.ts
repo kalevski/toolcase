@@ -39,7 +39,7 @@ export async function postForm(init: WireRequestInit, opts?: HttpOptions): Promi
 		try {
 			parsed = JSON.parse(text)
 		} catch {
-			parsed = text
+			parsed = undefined
 		}
 	}
 	return { status: response.status, body: parsed }
@@ -69,4 +69,9 @@ export function parseTokens(body: any): OAuth2Tokens {
 
 function encodeRFC6749(value: string): string {
 	return encodeURIComponent(value).replace(/%20/g, '+')
+}
+
+export function safeUpstream(body: any): unknown {
+	if (!body || typeof body !== 'object') return undefined
+	return { error: body.error, error_description: body.error_description }
 }

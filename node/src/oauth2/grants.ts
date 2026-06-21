@@ -2,7 +2,7 @@ import { EventEmitter } from '@toolcase/base'
 import { OAuth2TokenError, OAuth2ProtocolError } from '../errors'
 import type { HttpOptions } from '../http/options'
 import type { OAuth2ProviderConfig, OAuth2Tokens } from './types'
-import { postForm, parseTokens } from './wire'
+import { postForm, parseTokens, safeUpstream } from './wire'
 
 export interface ClientCredentialsInput {
 	scope?: readonly string[]
@@ -20,7 +20,7 @@ export async function clientCredentialsToken(provider: OAuth2ProviderConfig, inp
 	if (input.extraParams) for (const [k, v] of Object.entries(input.extraParams)) body.set(k, v)
 	const { status, body: parsed } = await postForm({ endpoint: provider.tokenEndpoint, body, provider }, opts)
 	if (status < 200 || status >= 300) {
-		throw new OAuth2TokenError(status, describeError(parsed) || `client_credentials failed (${status})`, parsed)
+		throw new OAuth2TokenError(status, describeError(parsed) || `client_credentials failed (${status})`, safeUpstream(parsed))
 	}
 	return parseTokens(parsed)
 }
@@ -44,7 +44,7 @@ export async function requestDeviceCode(provider: OAuth2ProviderConfig, input: {
 	if (input.extraParams) for (const [k, v] of Object.entries(input.extraParams)) body.set(k, v)
 	const { status, body: parsed } = await postForm({ endpoint: provider.deviceAuthorizationEndpoint, body, provider }, opts)
 	if (status < 200 || status >= 300) {
-		throw new OAuth2TokenError(status, describeError(parsed) || `device authorization failed (${status})`, parsed)
+		throw new OAuth2TokenError(status, describeError(parsed) || `device authorization failed (${status})`, safeUpstream(parsed))
 	}
 	if (!parsed || typeof parsed !== 'object') {
 		throw new OAuth2ProtocolError('device authorization response is not a JSON object')
@@ -106,7 +106,7 @@ export async function pollDeviceToken(provider: OAuth2ProviderConfig, input: Pol
 			events?.emit('interval_changed', { type: 'interval_changed', intervalSeconds: interval } as DevicePollEvent)
 			continue
 		}
-		throw new OAuth2TokenError(status, describeError(parsed) || `device token failed (${status})`, parsed)
+		throw new OAuth2TokenError(status, describeError(parsed) || `device token failed (${status})`, safeUpstream(parsed))
 	}
 }
 
