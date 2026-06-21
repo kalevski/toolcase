@@ -51,35 +51,36 @@ export abstract class EntityService<Entity = any, Driver = unknown> {
     protected afterDelete(_count: number, _ctx: HookContext<Driver> & { id?: any; where?: Filter<Entity> }): Promise<void> | void {}
 
     async insert(values: Record<string, any>, trx?: Driver): Promise<Entity> {
-        const ctx: HookContext<Driver> = { trx }
-        const prepared = await this.beforeInsert(values, ctx)
-        const row = await this.repository.insert(prepared, trx)
-        return this.afterInsert(row, ctx)
+        return this.withTrx(trx, async (t) => {
+            const ctx: HookContext<Driver> = { trx: t }
+            const prepared = await this.beforeInsert(values, ctx)
+            const row = await this.repository.insert(prepared, t)
+            return this.afterInsert(row, ctx)
+        })
     }
 
     async upsert(values: Record<string, any>, options: UpsertOptions, trx?: Driver): Promise<Entity> {
-        const ctx: HookContext<Driver> = { trx }
-        const prepared = await this.beforeInsert(values, ctx)
-        const row = await this.repository.upsert(prepared, options, trx)
-        return this.afterInsert(row, ctx)
+        return this.withTrx(trx, async (t) => {
+            const ctx: HookContext<Driver> = { trx: t }
+            const prepared = await this.beforeInsert(values, ctx)
+            const row = await this.repository.upsert(prepared, options, t)
+            return this.afterInsert(row, ctx)
+        })
     }
 
     /**
-     * Bulk insert. `beforeInsert` and `afterInsert` hooks run concurrently via
+     * Bulk insert. `beforeInsert` and `afterInsert` hooks run unconditionally via
      * `Promise.all`; result order is preserved by index. Override hooks must be
      * safe to invoke in parallel — do not rely on serial side effects.
      */
     async insertMany(values: Record<string, any>[], trx?: Driver): Promise<Entity[]> {
         if (values.length === 0) return []
-        const ctx: HookContext<Driver> = { trx }
-        const hasBefore = this.beforeInsert !== EntityService.prototype.beforeInsert
-        const hasAfter = this.afterInsert !== EntityService.prototype.afterInsert
-        const prepared = hasBefore
-            ? await Promise.all(values.map((v) => this.beforeInsert(v, ctx)))
-            : values
-        const rows = await this.repository.insertMany(prepared, trx)
-        if (!hasAfter) return rows
-        return Promise.all(rows.map((row) => this.afterInsert(row, ctx)))
+        return this.withTrx(trx, async (t) => {
+            const ctx: HookContext<Driver> = { trx: t }
+            const prepared = await Promise.all(values.map((v) => this.beforeInsert(v, ctx)))
+            const rows = await this.repository.insertMany(prepared, t)
+            return Promise.all(rows.map((row) => this.afterInsert(row, ctx)))
+        })
     }
 
     findById(id: any, trx?: Driver): Promise<Entity | undefined> {
@@ -123,46 +124,58 @@ export abstract class EntityService<Entity = any, Driver = unknown> {
     }
 
     async updateById(id: any, values: Record<string, any>, trx?: Driver): Promise<Entity | undefined> {
-        const ctx = { trx, id }
-        const prepared = await this.beforeUpdate(values, ctx)
-        const row = await this.repository.updateById(id, prepared, trx)
-        if (!row) return undefined
-        return this.afterUpdate(row, ctx)
+        return this.withTrx(trx, async (t) => {
+            const ctx = { trx: t, id }
+            const prepared = await this.beforeUpdate(values, ctx)
+            const row = await this.repository.updateById(id, prepared, t)
+            if (!row) return undefined
+            return this.afterUpdate(row, ctx)
+        })
     }
 
     async updateByIdOrThrow(id: any, values: Record<string, any>, trx?: Driver): Promise<Entity> {
-        const ctx = { trx, id }
-        const prepared = await this.beforeUpdate(values, ctx)
-        const row = await this.repository.updateByIdOrThrow(id, prepared, trx)
-        return this.afterUpdate(row, ctx)
+        return this.withTrx(trx, async (t) => {
+            const ctx = { trx: t, id }
+            const prepared = await this.beforeUpdate(values, ctx)
+            const row = await this.repository.updateByIdOrThrow(id, prepared, t)
+            return this.afterUpdate(row, ctx)
+        })
     }
 
     async update(where: Filter<Entity>, values: Record<string, any>, trx?: Driver): Promise<number> {
-        const prepared = await this.beforeUpdate(values, { trx })
-        return this.repository.update(where, prepared, trx)
+        return this.withTrx(trx, async (t) => {
+            const prepared = await this.beforeUpdate(values, { trx: t })
+            return this.repository.update(where, prepared, t)
+        })
     }
 
     async updateOne(where: Filter<Entity>, values: Record<string, any>, trx?: Driver): Promise<Entity | undefined> {
-        const ctx = { trx }
-        const prepared = await this.beforeUpdate(values, ctx)
-        const row = await this.repository.updateOne(where, prepared, trx)
-        if (!row) return undefined
-        return this.afterUpdate(row, ctx)
+        return this.withTrx(trx, async (t) => {
+            const ctx = { trx: t }
+            const prepared = await this.beforeUpdate(values, ctx)
+            const row = await this.repository.updateOne(where, prepared, t)
+            if (!row) return undefined
+            return this.afterUpdate(row, ctx)
+        })
     }
 
     async deleteById(id: any, trx?: Driver): Promise<number> {
-        const ctx = { trx, id }
-        await this.beforeDelete(ctx)
-        const count = await this.repository.deleteById(id, trx)
-        await this.afterDelete(count, ctx)
-        return count
+        return this.withTrx(trx, async (t) => {
+            const ctx = { trx: t, id }
+            await this.beforeDelete(ctx)
+            const count = await this.repository.deleteById(id, t)
+            await this.afterDelete(count, ctx)
+            return count
+        })
     }
 
     async deleteByIdOrThrow(id: any, trx?: Driver): Promise<void> {
-        const ctx = { trx, id }
-        await this.beforeDelete(ctx)
-        await this.repository.deleteByIdOrThrow(id, trx)
-        await this.afterDelete(1, ctx)
+        return this.withTrx(trx, async (t) => {
+            const ctx = { trx: t, id }
+            await this.beforeDelete(ctx)
+            await this.repository.deleteByIdOrThrow(id, t)
+            await this.afterDelete(1, ctx)
+        })
     }
 
     /**
@@ -171,20 +184,24 @@ export abstract class EntityService<Entity = any, Driver = unknown> {
      */
     async deleteMany(ids: readonly any[], trx?: Driver): Promise<number> {
         if (ids.length === 0) return 0
-        const where = { [this.repository.primaryKey]: ids } as unknown as Filter<Entity>
-        const ctx = { trx, where }
-        await this.beforeDelete(ctx)
-        const count = await this.repository.deleteMany(ids, trx)
-        await this.afterDelete(count, ctx)
-        return count
+        return this.withTrx(trx, async (t) => {
+            const where = { [this.repository.primaryKey]: ids } as unknown as Filter<Entity>
+            const ctx = { trx: t, where }
+            await this.beforeDelete(ctx)
+            const count = await this.repository.deleteMany(ids, t)
+            await this.afterDelete(count, ctx)
+            return count
+        })
     }
 
     async delete(where: Filter<Entity>, trx?: Driver): Promise<number> {
-        const ctx = { trx, where }
-        await this.beforeDelete(ctx)
-        const count = await this.repository.delete(where, trx)
-        await this.afterDelete(count, ctx)
-        return count
+        return this.withTrx(trx, async (t) => {
+            const ctx = { trx: t, where }
+            await this.beforeDelete(ctx)
+            const count = await this.repository.delete(where, t)
+            await this.afterDelete(count, ctx)
+            return count
+        })
     }
 
     count(where?: Filter<Entity>, trx?: Driver): Promise<number> {
