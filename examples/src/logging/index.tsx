@@ -8,6 +8,8 @@ import RingBufferReporterDemo from './RingBufferReporterDemo'
 import ComposableReportersDemo from './ComposableReportersDemo'
 import HTTPReporterDemo from './HTTPReporterDemo'
 import OTLPReporterDemo from './OTLPReporterDemo'
+import BeaconReporterDemo from './BeaconReporterDemo'
+import IndexedDBReporterDemo from './IndexedDBReporterDemo'
 
 export type LoggingExampleDef = {
     key: string
@@ -25,4 +27,6 @@ export const loggingExamples: LoggingExampleDef[] = [
     { key: 'composable-reporters', label: 'Composable Reporters', element: <ComposableReportersDemo /> },
     { key: 'http-reporter', label: 'HTTPReporter', element: <HTTPReporterDemo /> },
     { key: 'otlp-reporter', label: 'OTLPReporter', element: <OTLPReporterDemo /> },
+    { key: 'beacon-reporter', label: 'BeaconReporter', element: <BeaconReporterDemo /> },
+    { key: 'indexed-db-reporter', label: 'IndexedDBReporter', element: <IndexedDBReporterDemo /> },
 ]

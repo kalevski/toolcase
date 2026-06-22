@@ -16,6 +16,11 @@
             "types": "./lib/node.d.ts",
             "import": "./lib/node.module.js",
             "require": "./lib/node.main.js"
+        },
+        "./browser": {
+            "types": "./lib/browser.d.ts",
+            "import": "./lib/browser.module.js",
+            "require": "./lib/browser.main.js"
         }
     },
     "sideEffects": false,

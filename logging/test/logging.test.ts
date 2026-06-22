@@ -15,6 +15,8 @@ import SamplingReporter from '../src/SamplingReporter'
 import FanoutReporter, { MultiReporter } from '../src/FanoutReporter'
 import HTTPReporter, { type HTTPTransport } from '../src/HTTPReporter'
 import OTLPReporter, { type OTLPTransport } from '../src/OTLPReporter'
+import BeaconReporter from '../src/BeaconReporter'
+import IndexedDBReporter from '../src/IndexedDBReporter'
 
 // 2026-01-01T00:00:00.000Z in epoch ms
 const T0 = 1767225600000
@@ -2595,4 +2597,432 @@ describe('OTLPReporter — batching and transport', () => {
         const byKey = Object.fromEntries(attrs.map((a: any) => [a.key, a.value]))
         expect(byKey['requestId']).toEqual({ stringValue: 'r-99' })
     })
+})
+
+// ---------------------------------------------------------------------------
+// Minimal in-memory IDB shim
+// ---------------------------------------------------------------------------
+
+function makeFakeIDB() {
+    const stores: Record<string, { data: Map<number, any>; nextKey: number }> = {}
+
+    function makeRequest<T>(result: T) {
+        const req: any = { result, error: null, onsuccess: null, onerror: null }
+        Promise.resolve().then(() => req.onsuccess?.({ target: req }))
+        return req
+    }
+
+    function makeObjectStore(name: string) {
+        const s = stores[name]
+        return {
+            add(value: any) {
+                const key = s.nextKey++
+                s.data.set(key, value)
+                return makeRequest(key)
+            },
+            count() { return makeRequest(s.data.size) },
+            openCursor() {
+                const keys = [...s.data.keys()].sort((a, b) => a - b)
+                let idx = 0
+                const req: any = { result: null, error: null, onsuccess: null, onerror: null }
+                const advance = () => {
+                    if (idx < keys.length) {
+                        const k = keys[idx]
+                        req.result = {
+                            primaryKey: k,
+                            value: s.data.get(k),
+                            delete() { s.data.delete(k) },
+                            continue() {
+                                idx++
+                                Promise.resolve().then(() => { advance(); req.onsuccess?.({ target: req }) })
+                            }
+                        }
+                    } else {
+                        req.result = null
+                    }
+                }
+                Promise.resolve().then(() => { advance(); req.onsuccess?.({ target: req }) })
+                return req
+            },
+            getAll() { return makeRequest([...s.data.values()]) },
+            clear() { s.data.clear(); return makeRequest(undefined) },
+        }
+    }
+
+    function makeDB() {
+        return {
+            objectStoreNames: { contains: (name: string) => name in stores },
+            createObjectStore(name: string, _opts?: any) {
+                stores[name] = { data: new Map(), nextKey: 1 }
+                return makeObjectStore(name)
+            },
+            transaction(storeName: string, _mode?: string) {
+                const tx: any = { oncomplete: null, onerror: null, objectStore: () => makeObjectStore(storeName) }
+                setTimeout(() => tx.oncomplete?.(), 0)
+                return tx
+            },
+            close() {},
+        }
+    }
+
+    const db = makeDB()
+    return {
+        open(_name: string, _version: number) {
+            const req: any = { result: null, error: null, onupgradeneeded: null, onsuccess: null, onerror: null }
+            Promise.resolve().then(() => {
+                req.result = db
+                req.onupgradeneeded?.({ target: req })
+                Promise.resolve().then(() => req.onsuccess?.({ target: req }))
+            })
+            return req
+        },
+        deleteDatabase(_name: string) {
+            const req: any = { onsuccess: null }
+            Promise.resolve().then(() => req.onsuccess?.())
+            return req
+        },
+    }
+}
+
+// ---------------------------------------------------------------------------
+// BeaconReporter tests
+// ---------------------------------------------------------------------------
+
+describe('BeaconReporter', () => {
+
+    it('throws when navigator.sendBeacon is absent', () => {
+        const orig = (globalThis as any).navigator
+        ;(globalThis as any).navigator = undefined
+        try {
+            expect(() => new BeaconReporter({ url: '/logs' })).toThrow('navigator.sendBeacon')
+        } finally {
+            ;(globalThis as any).navigator = orig
+        }
+    })
+
+    it('buffers entries and sends them via sendBeacon on flush', () => {
+        const orig = (globalThis as any).navigator
+        const calls: { url: string; data: string }[] = []
+        ;(globalThis as any).navigator = { sendBeacon: (url: string, data: string) => { calls.push({ url, data }); return true } }
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 100, flushInterval: 0 })
+            reporter.log('info', 'svc', T0, {}, ['hello'])
+            reporter.log('warning', 'svc', T0, {}, ['world'])
+            reporter.flush()
+            expect(calls).toHaveLength(1)
+            expect(calls[0].url).toBe('/logs')
+            const entries = JSON.parse(calls[0].data)
+            expect(entries).toHaveLength(2)
+            expect(entries[0].level).toBe('info')
+            expect(entries[1].level).toBe('warning')
+        } finally {
+            ;(globalThis as any).navigator = orig
+        }
+    })
+
+    it('each entry carries level, scope, time, fields, and messages', () => {
+        const orig = (globalThis as any).navigator
+        const calls: any[] = []
+        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } }
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0 })
+            reporter.log('error', 'auth', T0, { reqId: 'r1' }, ['boom', { code: 42 }])
+            const entry = calls[0][0]
+            expect(entry.level).toBe('error')
+            expect(entry.scope).toBe('auth')
+            expect(entry.time).toBe(T0)
+            expect(entry.fields).toEqual({ reqId: 'r1' })
+            expect(entry.messages).toEqual(['boom', { code: 42 }])
+        } finally {
+            ;(globalThis as any).navigator = orig
+        }
+    })
+
+    it('flushes buffered entries via pagehide', () => {
+        const origNav = (globalThis as any).navigator
+        const origWin = (globalThis as any).window
+        const beaconCalls: string[] = []
+        const pageHideListeners: Array<() => void> = []
+        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(data); return true } }
+        ;(globalThis as any).window = {
+            onerror: null,
+            addEventListener: (event: string, fn: () => void, _opts?: any) => {
+                if (event === 'pagehide') pageHideListeners.push(fn)
+            }
+        }
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 100, flushInterval: 0 })
+            reporter.log('error', 'svc', T0, {}, ['critical'])
+            pageHideListeners.forEach(fn => fn())
+            expect(beaconCalls).toHaveLength(1)
+            const entries = JSON.parse(beaconCalls[0])
+            expect(entries[0].messages[0]).toBe('critical')
+        } finally {
+            ;(globalThis as any).navigator = origNav
+            ;(globalThis as any).window = origWin
+        }
+    })
+
+    it('does not throw when sendBeacon throws', () => {
+        const orig = (globalThis as any).navigator
+        ;(globalThis as any).navigator = { sendBeacon: () => { throw new Error('beacon failed') } }
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0 })
+            expect(() => reporter.log('error', 's', T0, {}, ['msg'])).not.toThrow()
+        } finally {
+            ;(globalThis as any).navigator = orig
+        }
+    })
+
+    it('respects factory level filtering', () => {
+        const orig = (globalThis as any).navigator
+        const calls: any[] = []
+        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } }
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 10, flushInterval: 0 })
+            const factory = new LoggerFactory([reporter])
+            factory.level = 'warning'
+            factory.getLogger('t').debug('dropped')
+            factory.getLogger('t').info('dropped')
+            factory.getLogger('t').warning('kept')
+            reporter.flush()
+            expect(calls).toHaveLength(1)
+            expect(calls[0]).toHaveLength(1)
+            expect(calls[0][0].level).toBe('warning')
+        } finally {
+            ;(globalThis as any).navigator = orig
+        }
+    })
+
+    it('captureErrors installs window.onerror that logs into the reporter', () => {
+        const origNav = (globalThis as any).navigator
+        const origWin = (globalThis as any).window
+        const beaconCalls: any[] = []
+        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } }
+        const mockWindow: any = { onerror: null, addEventListener: () => {} }
+        ;(globalThis as any).window = mockWindow
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true })
+            mockWindow.onerror('Something went wrong', 'app.js', 10, 5, new Error('test'))
+            expect(beaconCalls).toHaveLength(1)
+            expect(beaconCalls[0][0].level).toBe('error')
+            expect(beaconCalls[0][0].scope).toBe('window')
+        } finally {
+            ;(globalThis as any).navigator = origNav
+            ;(globalThis as any).window = origWin
+        }
+    })
+
+    it('captureErrors custom errorScope is used for captured errors', () => {
+        const origNav = (globalThis as any).navigator
+        const origWin = (globalThis as any).window
+        const beaconCalls: any[] = []
+        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } }
+        const mockWindow: any = { onerror: null, addEventListener: () => {} }
+        ;(globalThis as any).window = mockWindow
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true, errorScope: 'global' })
+            mockWindow.onerror('err', 'app.js', 1, 1, new Error('x'))
+            expect(beaconCalls[0][0].scope).toBe('global')
+        } finally {
+            ;(globalThis as any).navigator = origNav
+            ;(globalThis as any).window = origWin
+        }
+    })
+
+    it('captureErrors installs unhandledrejection listener', () => {
+        const origNav = (globalThis as any).navigator
+        const origWin = (globalThis as any).window
+        const beaconCalls: any[] = []
+        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } }
+        const listeners: Array<(evt: any) => void> = []
+        const mockWindow: any = { onerror: null, addEventListener: (_evt: string, fn: any) => listeners.push(fn) }
+        ;(globalThis as any).window = mockWindow
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true })
+            listeners.forEach(fn => fn({ reason: new Error('promise rejected') }))
+            expect(beaconCalls).toHaveLength(1)
+            expect(beaconCalls[0][0].level).toBe('error')
+            expect(beaconCalls[0][0].messages[0]).toBe('Unhandled promise rejection')
+        } finally {
+            ;(globalThis as any).navigator = origNav
+            ;(globalThis as any).window = origWin
+        }
+    })
+
+    it('close() flushes pending entries', () => {
+        const orig = (globalThis as any).navigator
+        const calls: any[] = []
+        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } }
+        try {
+            const reporter = new BeaconReporter({ url: '/logs', maxSize: 100, flushInterval: 0 })
+            reporter.log('info', 's', T0, {}, ['closing'])
+            reporter.close()
+            expect(calls).toHaveLength(1)
+        } finally {
+            ;(globalThis as any).navigator = orig
+        }
+    })
+
+})
+
+// ---------------------------------------------------------------------------
+// IndexedDBReporter tests
+// ---------------------------------------------------------------------------
+
+describe('IndexedDBReporter', () => {
+
+    it('throws when indexedDB is absent', () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = undefined
+        try {
+            expect(() => new IndexedDBReporter()).toThrow('IndexedDB')
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('stores log entries and drain() returns them', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = makeFakeIDB()
+        try {
+            const reporter = new IndexedDBReporter()
+            reporter.log('info', 'svc', T0, {}, ['hello'])
+            reporter.log('warning', 'svc', T1, { reqId: 'r1' }, ['world'])
+            await reporter.flush()
+            const entries = await reporter.drain()
+            expect(entries).toHaveLength(2)
+            expect(entries[0].level).toBe('info')
+            expect(entries[0].scope).toBe('svc')
+            expect(entries[0].time).toBe(T0)
+            expect(entries[0].messages).toEqual(['hello'])
+            expect(entries[1].level).toBe('warning')
+            expect(entries[1].fields).toEqual({ reqId: 'r1' })
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('drain() clears the store so a second drain returns empty', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = makeFakeIDB()
+        try {
+            const reporter = new IndexedDBReporter()
+            reporter.log('info', 's', T0, {}, ['a'])
+            await reporter.flush()
+            await reporter.drain()
+            const second = await reporter.drain()
+            expect(second).toHaveLength(0)
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('flush() waits for all pending writes before resolving', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = makeFakeIDB()
+        try {
+            const reporter = new IndexedDBReporter()
+            reporter.log('info', 's', T0, {}, ['a'])
+            reporter.log('info', 's', T0, {}, ['b'])
+            reporter.log('info', 's', T0, {}, ['c'])
+            await reporter.flush()
+            const entries = await reporter.drain()
+            expect(entries).toHaveLength(3)
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('evicts oldest entries when maxEntries is exceeded', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = makeFakeIDB()
+        try {
+            const reporter = new IndexedDBReporter({ maxEntries: 2 })
+            reporter.log('info', 's', T0, {}, ['first'])
+            reporter.log('info', 's', T0, {}, ['second'])
+            reporter.log('info', 's', T0, {}, ['third'])
+            await reporter.flush()
+            const entries = await reporter.drain()
+            expect(entries).toHaveLength(2)
+            const messages = entries.map(e => e.messages[0])
+            expect(messages).not.toContain('first')
+            expect(messages).toContain('third')
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('close() stops accepting new entries', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = makeFakeIDB()
+        try {
+            const reporter = new IndexedDBReporter()
+            reporter.log('info', 's', T0, {}, ['before-close'])
+            await reporter.close()
+            reporter.log('info', 's', T0, {}, ['after-close'])
+            const entries = await reporter.drain()
+            const messages = entries.map(e => e.messages[0])
+            expect(messages).toContain('before-close')
+            expect(messages).not.toContain('after-close')
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('respects factory level filtering', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = makeFakeIDB()
+        try {
+            const reporter = new IndexedDBReporter()
+            const factory = new LoggerFactory([reporter])
+            factory.level = 'warning'
+            factory.getLogger('t').debug('dropped')
+            factory.getLogger('t').info('dropped')
+            factory.getLogger('t').warning('kept')
+            await reporter.flush()
+            const entries = await reporter.drain()
+            expect(entries).toHaveLength(1)
+            expect(entries[0].level).toBe('warning')
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('does not throw when IDB open fails', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = {
+            open(_name: string, _version: number) {
+                const req: any = { result: null, error: new Error('open failed'), onupgradeneeded: null, onsuccess: null, onerror: null }
+                Promise.resolve().then(() => req.onerror?.({ target: req }))
+                return req
+            }
+        }
+        try {
+            const reporter = new IndexedDBReporter()
+            reporter.log('info', 's', T0, {}, ['msg'])
+            await expect(reporter.flush()).resolves.toBeUndefined()
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
+    it('drain() returns entries with correct fields shape', async () => {
+        const orig = (globalThis as any).indexedDB
+        ;(globalThis as any).indexedDB = makeFakeIDB()
+        try {
+            const reporter = new IndexedDBReporter()
+            reporter.log('error', 'auth', T1, { userId: 7 }, ['login failed', { code: 401 }])
+            await reporter.flush()
+            const [entry] = await reporter.drain()
+            expect(entry.level).toBe('error')
+            expect(entry.scope).toBe('auth')
+            expect(entry.time).toBe(T1)
+            expect(entry.fields).toEqual({ userId: 7 })
+            expect(entry.messages).toEqual(['login failed', { code: 401 }])
+        } finally {
+            ;(globalThis as any).indexedDB = orig
+        }
+    })
+
 })

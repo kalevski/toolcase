@@ -978,6 +978,89 @@ factory.level = 'verbose'
 
 Because each wrapper forwards `flush()` and `close()`, calling `factory.close()` drains the entire pipeline correctly.
 
+### `BeaconReporter` (browser only — `@toolcase/logging/browser`)
+
+Buffers entries in memory and flushes them via `navigator.sendBeacon` — a fire-and-forget network call that is guaranteed to complete even during page unload. The underlying `BufferedReporter` installs a `pagehide` listener automatically. Optionally captures global errors via `window.onerror` and `unhandledrejection`.
+
+```ts
+import { BeaconReporter } from '@toolcase/logging/browser'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new BeaconReporter({
+    url: 'https://telemetry.example.com/logs',
+    maxSize: 50,          // flush when buffer reaches 50 entries (default)
+    flushInterval: 0,     // no timer flush; rely on maxSize + pagehide (default)
+    captureErrors: true,  // auto-capture window.onerror + unhandledrejection
+    errorScope: 'window', // scope label for auto-captured errors (default)
+})
+
+const factory = new LoggerFactory([reporter])
+factory.level = 'warning'
+```
+
+Flushed payload: `JSON.stringify(LogEntry[])` sent as the `sendBeacon` body.
+
+```ts
+interface BeaconReporterOptions {
+    url: string
+    maxSize?: number            // default 50
+    flushInterval?: number      // default 0 (disabled)
+    captureErrors?: boolean     // default false
+    errorScope?: string         // default 'window'
+}
+
+class BeaconReporter extends LogReporter {
+    constructor(options: BeaconReporterOptions)  // throws if navigator.sendBeacon absent
+    log(level, scope, time, fields, messages): void
+    flush(): void
+    close(): void
+}
+```
+
+**Use when:** capturing production errors in a browser SPA with zero setup — especially during navigation-away where `fetch` would be cancelled.
+**Reuses:** `BufferedReporter` (batching, pagehide listener).
+
+### `IndexedDBReporter` (browser only — `@toolcase/logging/browser`)
+
+Persists log entries to an IndexedDB object store so they survive page reloads. Writes are serialized and non-blocking. Call `drain()` on next startup to retrieve and clear the stored entries for upload. Evicts the oldest entries when `maxEntries` is exceeded.
+
+```ts
+import { IndexedDBReporter } from '@toolcase/logging/browser'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new IndexedDBReporter({
+    dbName: '@toolcase/logging',   // default
+    storeName: 'log-entries',      // default
+    maxEntries: 1000,              // default; oldest evicted when exceeded
+})
+
+const factory = new LoggerFactory([reporter])
+factory.level = 'error'
+
+// On next startup — drain and ship:
+const buffered = await reporter.drain()    // returns LogEntry[], clears the store
+await fetch('/logs', { method: 'POST', body: JSON.stringify(buffered) })
+```
+
+```ts
+interface IndexedDBReporterOptions {
+    dbName?: string        // default '@toolcase/logging'
+    storeName?: string     // default 'log-entries'
+    maxEntries?: number    // default 1000
+}
+
+class IndexedDBReporter extends LogReporter {
+    constructor(options?: IndexedDBReporterOptions)  // throws if indexedDB absent
+    log(level, scope, time, fields, messages): void
+    flush(): Promise<void>             // wait for all pending writes
+    drain(): Promise<LogEntry[]>       // read + clear store; waits for pending writes first
+    close(): Promise<void>             // stop accepting new entries, flush pending
+}
+```
+
+**Use when:** you need crash-resilient log buffering across reloads — e.g., capturing errors before an upload attempt that might itself fail.
+**Reuses:** `LogReporter` (base class). Pairs naturally with `BeaconReporter` or a fetch-based uploader called from `drain()`.
+
 ---
 
 ## Notes
