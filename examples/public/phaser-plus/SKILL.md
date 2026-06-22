@@ -18,7 +18,7 @@ import {
     LogLevel,
     // Debugger
     Debugger, Panel,
-    PerformancePanel, MemoryPanel, TimelinePanel, InputPanel, AudioPanel, NetPanel,
+    PerformancePanel, MemoryPanel, TimelinePanel, InputPanel, AudioPanel, NetPanel, SaveStatePanel,
     ConsoleCommands, HotReload, RemoteDebugger,
     // Perspective2D
     Scene2D, World, GameObject2D, Grid,
@@ -667,7 +667,7 @@ dbg.removePanel('memory')
 dbg.getPanel<MemoryPanel>('memory')
 ```
 
-Built-in panels (always present, cannot be removed): `inspector`, `overview`, `flow`, `layer`, `gameObject`. Extra registered panels available for `addPanel`: `PerformancePanel`, `MemoryPanel`, `TimelinePanel`, `InputPanel`, `AudioPanel`, `NetPanel`.
+Built-in panels (always present, cannot be removed): `inspector`, `overview`, `flow`, `layer`, `gameObject`. Extra registered panels available for `addPanel`: `PerformancePanel`, `MemoryPanel`, `TimelinePanel`, `InputPanel`, `AudioPanel`, `NetPanel`, `SaveStatePanel`.
 
 Built-in tools (also `Panel` subclasses): `ConsoleCommands`, `HotReload`, `RemoteDebugger`.
 
@@ -1863,6 +1863,58 @@ const schema: SaveSchema = {
 
 A save made with version 1 passes through both migrators in order. Saves already at version 3 are returned unchanged.
 
+### SaveStatePanel — debugger panel for save slots
+
+`SaveStatePanel` is a `Panel` subclass that lists all slots from a bound `SaveService`, shows per-slot metadata, previews serialized data content, and lets you force-load or delete any slot from the in-game debugger.
+
+```ts
+import { Debugger, SaveStatePanel, SaveService, PersistenceFeature } from '@toolcase/phaser-plus'
+
+// onInit — bind SaveService and register the panel before PersistenceFeature resolves it
+this.services.bind(SaveService, () => new SaveService({ namespace: 'game', schema }))
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+const savePanel = dbg.addPanel('save', SaveStatePanel, 'Save State')
+
+// onCreate — connect the panel to the service
+const persistence = this.features.register('persistence', PersistenceFeature)
+savePanel.bind(persistence.service)
+```
+
+Panel controls:
+- **Slots** (readonly) — comma-separated IDs of all saved slots in the namespace
+- **Slot ID** (editable) — type a slot ID to target; auto-filled with the first slot on `bind`
+- **Version / Saved** (readonly) — schema version and ISO timestamp of the targeted slot
+- **Data** (readonly) — up to 120 chars of `JSON.stringify` of the slot's data content
+- **Refresh** — re-query `service.list()` and update slot list + metadata
+- **Inspect** — load the targeted slot's data and populate the Data preview
+- **Force Load** — load the targeted slot and emit `load` on the panel
+- **Delete Slot** — delete the targeted slot and auto-refresh the list
+
+Listening to panel events:
+
+```ts
+// Force Load was clicked — apply the loaded state
+savePanel.on('load', (slotId, data) => {
+    scene.applyState(data)
+})
+
+// Delete was clicked — slot ID is passed for reference
+savePanel.on('delete', (slotId) => {
+    console.log('deleted', slotId)
+})
+```
+
+Keep the panel in sync when saves happen outside it:
+
+```ts
+import { SAVE_DONE, SAVE_DELETED } from '@toolcase/phaser-plus'
+
+scene.features.on(SAVE_DONE,    () => savePanel.refresh())
+scene.features.on(SAVE_DELETED, () => savePanel.refresh())
+```
+
+Demo: `save-state-panel` example scene (`SaveStatePanelDemo.js`).
+
 ### Worked example — save/load with tc-save-slot-list
 
 ```ts
@@ -2286,6 +2338,7 @@ class GameScene extends Scene {
 | Duck a bus | `audio.duck('music', 0.15, holdMs, restoreMs)` |
 | Bind panel | `audio.bindDebugger(dbg)` (after `dbg.addPanel('audio', AudioPanel)`) |
 | Save slots | `services.bind(SaveService, () => new SaveService({...}))` → `features.register('p', PersistenceFeature)` |
+| Inspect save slots | `dbg.addPanel('save', SaveStatePanel)` → `panel.bind(persistence.service)` |
 | Save data | `persistence.save('slot-1', state)` |
 | Load with migration | `persistence.load('slot-1')` (auto-migrates via schema.migrations) |
 | Delete slot | `persistence.delete('slot-1')` |

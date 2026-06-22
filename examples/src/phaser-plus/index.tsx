@@ -49,6 +49,7 @@ import GestureRecognizerDemo from './scenes/GestureRecognizerDemo.js'
 import GamepadDemo from './scenes/GamepadDemo.js'
 import InputBufferDemo from './scenes/InputBufferDemo.js'
 import SaveServiceDemo from './scenes/SaveServiceDemo.js'
+import SaveStatePanelDemo from './scenes/SaveStatePanelDemo.js'
 import AssetFeatureDemo from './scenes/AssetFeatureDemo.js'
 import TilemapNavMeshDemo from './scenes/TilemapNavMeshDemo.js'
 import ParticleFeatureDemo from './scenes/ParticleFeatureDemo.js'
@@ -493,6 +494,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'SaveService + PersistenceFeature: 3 slots via tc-save-slot-list, LocalStorage backend, visible v1→v2 migration on load.',
         sceneFile: 'SaveServiceDemo.js',
         element: <PhaserCanvas sceneClass={SaveServiceDemo} />
+    },
+    {
+        key: 'save-state-panel',
+        title: 'Save State Panel',
+        category: 'Debugging',
+        description: 'SaveStatePanel: inspect slot list, view metadata, preview data content, force-load or delete any slot from the debugger.',
+        sceneFile: 'SaveStatePanelDemo.js',
+        element: <PhaserCanvas sceneClass={SaveStatePanelDemo} />
     },
     {
         key: 'asset-feature',

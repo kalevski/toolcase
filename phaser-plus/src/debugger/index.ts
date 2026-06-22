@@ -6,6 +6,7 @@ import TimelinePanel from './panels/TimelinePanel'
 import InputPanel from './panels/InputPanel'
 import AudioPanel from './panels/AudioPanel'
 import NetPanel from './panels/NetPanel'
+import SaveStatePanel from './panels/SaveStatePanel'
 import ConsoleCommands from './tools/ConsoleCommands'
 import HotReload from './tools/HotReload'
 import RemoteDebugger from './tools/RemoteDebugger'
@@ -19,6 +20,7 @@ export {
     InputPanel,
     AudioPanel,
     NetPanel,
+    SaveStatePanel,
     ConsoleCommands,
     HotReload,
     RemoteDebugger
