@@ -1152,6 +1152,8 @@ During playback read the active frame's inputs with `replay.readInput(key)`. `re
 
 See `replay-recorder-timeline` (`ReplayRecorderTimelineDemo.js`) for a full example wiring `bindReplay`.
 
+**Landing demo:** `flow-landing` (`FlowLandingDemo.js`) — one scene covering the complete Flow surface: `Flow.Event` (delayed trigger), `Flow.TimeEvent` (recurring interval), `Flow.Job` (cooperative countdown), `Flow.Timer` sugar, `Flow.Tween` (yoyo), `Flow.Timeline` (sequence + parallel), and a `StateMachine` FSM with three states and signal transitions. Use the right-side panel buttons to exercise each system interactively.
+
 ---
 
 ## Cinema — Camera, Shake, Parallax, Letterbox
@@ -1288,6 +1290,8 @@ letterbox.setBarDepth(1000)
 
 `setAspect(ratio)` is the toggle: passing a value matching the viewport hides the bars. `setBarColor(0xRRGGBB)` retints, `setBarDepth(depth)` re-layers.
 
+**Landing demo:** `cinema-landing` (`CinemaLandingDemo.js`) — one scene covering the full Cinema surface: `CameraDirector` (pan / zoom / fit-bounds / follow / spline shots), `ScreenShake` (impact / rumble / sine), `CameraFlash` (white hit, red damage), `ParallaxLayer` (three depth layers using generated graphics), `LetterboxFeature` (21:9 toggle), and `DialogCameraCue` (focus + vignette). All triggered from an HTML panel; no texture assets needed.
+
 ---
 
 ## Input — actions, buffer, gamepad, gestures, joystick
@@ -1394,6 +1398,8 @@ scene.events.on('update', () => {
 ```
 
 Buttons set virtual booleans (`input.setVirtual(id, …)`); pair with an `{ type: 'virtual', id }` binding on `InputFeature.bind('jump', [...])`.
+
+**Landing demo:** `input-landing` (`InputLandingDemo.js`) — one scene covering the full Input surface: `InputFeature` action map (WASD + Space, `ACTION_PRESS` / `ACTION_RELEASE` / hold timer), `InputBuffer` (ring buffer for leniency-window combo detection), `GestureRecognizer` (tap, double-tap, long-press, swipe, pinch), `GamepadFeature` (connect/disconnect, per-button events). Move the square with WASD/arrows; press Space three times within 600 ms for the triple-jump combo. Live readouts in the right-side HTML panel.
 
 ---
 
@@ -2636,3 +2642,21 @@ transport.send(payload)
 | Client-side prediction | `net.predict('player', state)` → render `net.getPredicted('player')` |
 | Live RTT / loss | `net.rtt`, `net.loss` (or read from `NetPanel` via `bindDebugger`) |
 | WebSocket transport | `new WebSocketTransport('wss://...')` → `net.setTransport(t)` |
+
+---
+
+## Demo site — category index
+
+The example site groups demos by subsystem. Categories added in task 689:
+
+| Category | Canonical demo(s) | Scene file(s) |
+|---|---|---|
+| `Flow` | `flow-landing` | `FlowLandingDemo.js` |
+| `Cinema` | `cinema-landing` | `CinemaLandingDemo.js` |
+| `Input` | `input-landing` | `InputLandingDemo.js` |
+| `Audio` | `audio-panel` | `AudioPanelDemo.js` |
+| `Net` | `net-panel` | `NetPanelDemo.js` |
+| `Persistence` | `save-service`, `save-state-panel` | `SaveServiceDemo.js`, `SaveStatePanelDemo.js` |
+| `Assets` | `asset-feature` | `AssetFeatureDemo.js` (cross-package: `tc-loading-screen` + `AssetFeature`) |
+
+The `asset-feature` demo is the canonical **cross-package** integration example: it binds `@toolcase/web-components`' `<tc-loading-screen>` to `AssetFeature`'s `ASSET_PROGRESS` events, demonstrating how to connect the two libraries at runtime.
