@@ -7,6 +7,11 @@ import ConsoleLogReporter, { type ConsoleLogReporterOptions } from './ConsoleLog
 import JSONLineReporter from './JSONLineReporter'
 import BufferedReporter from './BufferedReporter'
 import RingBufferReporter from './RingBufferReporter'
+import LevelFilterReporter from './LevelFilterReporter'
+import ScopeFilterReporter from './ScopeFilterReporter'
+import RedactionReporter from './RedactionReporter'
+import SamplingReporter from './SamplingReporter'
+import FanoutReporter, { MultiReporter } from './FanoutReporter'
 
 const logging = new LoggerFactory([
     new ConsoleLogReporter()
@@ -14,7 +19,8 @@ const logging = new LoggerFactory([
 
 export default logging
 
-export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter, RingBufferReporter, isKnownLevel, KNOWN_LEVELS }
+export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter, RingBufferReporter, isKnownLevel, KNOWN_LEVELS, LevelFilterReporter, ScopeFilterReporter, RedactionReporter, SamplingReporter, FanoutReporter, MultiReporter }
 export type { ConsoleLogReporterOptions, LoggerLevel } from './Level'
 export type { ClockFn } from './Logger'
 export type { LogEntry } from './BufferedReporter'
+export type { RedactionKeys } from './RedactionReporter'

@@ -702,6 +702,137 @@ svc.on('done', payload => log.info('done', payload))
 
 ---
 
+## Composable wrapper reporters
+
+Five decorator reporters that each wrap one inner `LogReporter` and forward the single-method SPI. Compose them freely with `FanoutReporter` to build per-sink pipelines.
+
+```ts
+import {
+    LevelFilterReporter, ScopeFilterReporter,
+    RedactionReporter, SamplingReporter,
+    FanoutReporter, MultiReporter,
+} from '@toolcase/logging'
+```
+
+### `LevelFilterReporter`
+
+Forwards only entries whose level is at or above `minLevel`. Lets you attach a stricter threshold to one specific sink without changing the factory's global level.
+
+```ts
+class LevelFilterReporter extends LogReporter {
+    constructor(inner: LogReporter, minLevel: LoggerLevel)
+}
+```
+
+```ts
+// Console receives only errors; the ring buffer still gets everything.
+const factory = new LoggerFactory([
+    new LevelFilterReporter(new ConsoleLogReporter(), 'error'),
+    new RingBufferReporter(200),
+])
+factory.level = 'verbose'
+```
+
+### `ScopeFilterReporter`
+
+Forwards only entries whose scope matches a glob `pattern`. `*` matches any sequence of characters, including `:` separators (same syntax as `factory.setLevel(pattern, level)`).
+
+```ts
+class ScopeFilterReporter extends LogReporter {
+    constructor(inner: LogReporter, pattern: string)
+}
+```
+
+```ts
+// Ship only db:* logs to the audit sink.
+const auditSink = new ScopeFilterReporter(new JSONLineReporter({ write }), 'db:*')
+const factory = new LoggerFactory([new ConsoleLogReporter(), auditSink])
+```
+
+Pattern examples:
+
+```ts
+'db:*'          // db:pool, db:pool:worker, …
+'http*'         // http, http:request, httpClient, …
+'*'             // every scope
+'auth'          // exact match only
+```
+
+### `RedactionReporter`
+
+Walks every entry's `fields` and each element of `messages` and replaces values whose key matches `keys` with the string `'[REDACTED]'`. Handles nested objects, arrays, and circular references. `Error` instances are passed through unchanged.
+
+```ts
+type RedactionKeys = string[] | RegExp
+
+class RedactionReporter extends LogReporter {
+    constructor(inner: LogReporter, keys: RedactionKeys)
+}
+```
+
+```ts
+// Scrub well-known sensitive keys before shipping to a remote sink.
+const safe = new RedactionReporter(new JSONLineReporter({ write }), [
+    'password', 'authorization', 'token', 'secret',
+])
+
+// Or use a regex for broader matching.
+const safe2 = new RedactionReporter(sink, /password|secret|token/i)
+
+const factory = new LoggerFactory([safe])
+factory.getLogger('auth').info('login', { user: 'alice', password: 'hunter2' })
+// → messages: [{ user: 'alice', password: '[REDACTED]' }]
+```
+
+The original messages array is never mutated.
+
+### `SamplingReporter`
+
+Forwards each entry to `inner` with probability `rate` (0–1). Useful for high-throughput trace-level logs where you want a statistical sample rather than every entry.
+
+```ts
+class SamplingReporter extends LogReporter {
+    constructor(inner: LogReporter, rate: number)   // throws RangeError if rate ∉ [0, 1]
+}
+```
+
+```ts
+// Forward ~10 % of verbose traces to the remote sink.
+const sampled = new SamplingReporter(remoteSink, 0.1)
+
+// rate=1 → all entries pass; rate=0 → all entries drop.
+new SamplingReporter(sink, 1)   // equivalent to no sampling
+new SamplingReporter(sink, 0)   // effectively mutes the sink
+```
+
+### `FanoutReporter` / `MultiReporter`
+
+Broadcasts every log entry to a list of inner reporters. Each reporter is called in a try/catch so a throw in one reporter does not skip the others. `flush()` and `close()` are forwarded to all inner reporters (errors isolated individually). `MultiReporter` is an alias.
+
+```ts
+class FanoutReporter extends LogReporter {
+    constructor(reporters: LogReporter[])
+}
+const MultiReporter = FanoutReporter
+```
+
+```ts
+// Per-sink policies via composition.
+const fanout = new FanoutReporter([
+    new LevelFilterReporter(new ConsoleLogReporter(), 'error'),   // errors only to console
+    new ScopeFilterReporter(auditSink, 'audit:*'),                // audit scope to remote
+    new RedactionReporter(jsonSink, ['password', 'token']),       // scrubbed JSON lines
+    new SamplingReporter(traceSink, 0.05),                        // 5 % trace sampling
+])
+
+const factory = new LoggerFactory([fanout])
+factory.level = 'verbose'
+```
+
+Because each wrapper forwards `flush()` and `close()`, calling `factory.close()` drains the entire pipeline correctly.
+
+---
+
 ## Notes
 
 - Package is `sideEffects: false` and zero-dependency.

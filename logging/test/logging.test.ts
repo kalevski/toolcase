@@ -8,6 +8,11 @@ import JSONLineReporter from '../src/JSONLineReporter'
 import FileLogReporter from '../src/FileLogReporter'
 import BufferedReporter from '../src/BufferedReporter'
 import RingBufferReporter from '../src/RingBufferReporter'
+import LevelFilterReporter from '../src/LevelFilterReporter'
+import ScopeFilterReporter from '../src/ScopeFilterReporter'
+import RedactionReporter from '../src/RedactionReporter'
+import SamplingReporter from '../src/SamplingReporter'
+import FanoutReporter, { MultiReporter } from '../src/FanoutReporter'
 
 // 2026-01-01T00:00:00.000Z in epoch ms
 const T0 = 1767225600000
@@ -1711,5 +1716,436 @@ describe('RingBufferReporter', () => {
         }
         const snap = reporter.snapshot()
         expect(snap.map(e => e.messages[0])).toEqual(['msg-7', 'msg-8', 'msg-9'])
+    })
+})
+
+describe('LevelFilterReporter', () => {
+    it('forwards entries at or above the min level', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(level: any) { captured.push(level) }
+        }
+        const reporter = new LevelFilterReporter(new Sink(), 'warning')
+        reporter.log('error', 's', T0, {}, ['e'])
+        reporter.log('warning', 's', T0, {}, ['w'])
+        reporter.log('info', 's', T0, {}, ['i'])
+        reporter.log('debug', 's', T0, {}, ['d'])
+        expect(captured).toEqual(['error', 'warning'])
+    })
+
+    it('forwards all entries when minLevel is verbose', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(level: any) { captured.push(level) }
+        }
+        const reporter = new LevelFilterReporter(new Sink(), 'verbose')
+        reporter.log('error', 's', T0, {}, ['e'])
+        reporter.log('verbose', 's', T0, {}, ['v'])
+        expect(captured).toEqual(['error', 'verbose'])
+    })
+
+    it('blocks entries below minLevel', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(level: any) { captured.push(level) }
+        }
+        const reporter = new LevelFilterReporter(new Sink(), 'error')
+        reporter.log('warning', 's', T0, {}, ['w'])
+        reporter.log('info', 's', T0, {}, ['i'])
+        reporter.log('debug', 's', T0, {}, ['d'])
+        expect(captured).toHaveLength(0)
+    })
+
+    it('passes all fields and messages unmodified to inner reporter', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, scope: string, time: number, fields: any, msgs: any[]) {
+                captured.push({ scope, time, fields, msgs })
+            }
+        }
+        const reporter = new LevelFilterReporter(new Sink(), 'info')
+        reporter.log('error', 'svc', T0, { reqId: 'r1' }, ['boom'])
+        expect(captured[0]).toEqual({ scope: 'svc', time: T0, fields: { reqId: 'r1' }, msgs: ['boom'] })
+    })
+
+    it('delegates flush() to inner reporter', () => {
+        let flushed = false
+        class Sink extends LogReporter {
+            log() {}
+            flush() { flushed = true }
+        }
+        new LevelFilterReporter(new Sink(), 'info').flush()
+        expect(flushed).toBe(true)
+    })
+
+    it('delegates close() to inner reporter', async () => {
+        let closed = false
+        class Sink extends LogReporter {
+            log() {}
+            close() { closed = true }
+        }
+        await new LevelFilterReporter(new Sink(), 'info').close()
+        expect(closed).toBe(true)
+    })
+
+    it('can be combined with a factory to add per-reporter threshold', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(level: any) { captured.push(level) }
+        }
+        const factory = new LoggerFactory([new LevelFilterReporter(new Sink(), 'error')])
+        factory.level = 'verbose'
+        factory.getLogger('t').error('e')
+        factory.getLogger('t').warning('w')
+        expect(captured).toEqual(['error'])
+    })
+})
+
+describe('ScopeFilterReporter', () => {
+    it('forwards entries whose scope matches the glob pattern', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(_l: any, scope: string) { captured.push(scope) }
+        }
+        const reporter = new ScopeFilterReporter(new Sink(), 'db:*')
+        reporter.log('info', 'db:pool', T0, {}, ['x'])
+        reporter.log('info', 'db:query', T0, {}, ['x'])
+        reporter.log('info', 'auth', T0, {}, ['x'])
+        expect(captured).toEqual(['db:pool', 'db:query'])
+    })
+
+    it('exact pattern matches only that scope', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(_l: any, scope: string) { captured.push(scope) }
+        }
+        const reporter = new ScopeFilterReporter(new Sink(), 'auth')
+        reporter.log('info', 'auth', T0, {}, ['x'])
+        reporter.log('info', 'auth:login', T0, {}, ['x'])
+        expect(captured).toEqual(['auth'])
+    })
+
+    it('wildcard-only pattern matches any scope', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(_l: any, scope: string) { captured.push(scope) }
+        }
+        const reporter = new ScopeFilterReporter(new Sink(), '*')
+        reporter.log('info', 'auth', T0, {}, ['x'])
+        reporter.log('info', 'db:pool', T0, {}, ['x'])
+        expect(captured).toEqual(['auth', 'db:pool'])
+    })
+
+    it('prefix wildcard matches scopes with a shared prefix', () => {
+        const captured: string[] = []
+        class Sink extends LogReporter {
+            log(_l: any, scope: string) { captured.push(scope) }
+        }
+        const reporter = new ScopeFilterReporter(new Sink(), 'http*')
+        reporter.log('info', 'http', T0, {}, ['x'])
+        reporter.log('info', 'http:request', T0, {}, ['x'])
+        reporter.log('info', 'authentication', T0, {}, ['x'])
+        expect(captured).toEqual(['http', 'http:request'])
+    })
+
+    it('delegates flush() to inner reporter', () => {
+        let flushed = false
+        class Sink extends LogReporter {
+            log() {}
+            flush() { flushed = true }
+        }
+        new ScopeFilterReporter(new Sink(), 'db:*').flush()
+        expect(flushed).toBe(true)
+    })
+
+    it('delegates close() to inner reporter', async () => {
+        let closed = false
+        class Sink extends LogReporter {
+            log() {}
+            close() { closed = true }
+        }
+        await new ScopeFilterReporter(new Sink(), 'db:*').close()
+        expect(closed).toBe(true)
+    })
+})
+
+describe('RedactionReporter', () => {
+    it('redacts keys matching a string list in messages', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const reporter = new RedactionReporter(new Sink(), ['password', 'authorization'])
+        reporter.log('info', 's', T0, {}, [{ user: 'alice', password: 'secret', token: 'x' }])
+        expect(captured[0].password).toBe('[REDACTED]')
+        expect(captured[0].user).toBe('alice')
+        expect(captured[0].token).toBe('x')
+    })
+
+    it('redacts keys matching a regex in messages', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const reporter = new RedactionReporter(new Sink(), /password|secret/i)
+        reporter.log('info', 's', T0, {}, [{ Password: 'x', secretKey: 'y', other: 'z' }])
+        expect(captured[0].Password).toBe('[REDACTED]')
+        expect(captured[0].secretKey).toBe('[REDACTED]')
+        expect(captured[0].other).toBe('z')
+    })
+
+    it('redacts matching keys in fields', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, fields: any) { captured.push(fields) }
+        }
+        const reporter = new RedactionReporter(new Sink(), ['authorization'])
+        reporter.log('info', 's', T0, { authorization: 'Bearer tok', reqId: 'r1' }, [])
+        expect(captured[0].authorization).toBe('[REDACTED]')
+        expect(captured[0].reqId).toBe('r1')
+    })
+
+    it('redacts nested keys inside objects', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const reporter = new RedactionReporter(new Sink(), ['password'])
+        reporter.log('info', 's', T0, {}, [{ user: { name: 'alice', password: 'secret' } }])
+        expect(captured[0].user.name).toBe('alice')
+        expect(captured[0].user.password).toBe('[REDACTED]')
+    })
+
+    it('redacts matching keys inside arrays in messages', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const reporter = new RedactionReporter(new Sink(), ['password'])
+        reporter.log('info', 's', T0, {}, [[{ password: 's' }, { password: 't' }]])
+        expect(captured[0][0].password).toBe('[REDACTED]')
+        expect(captured[0][1].password).toBe('[REDACTED]')
+    })
+
+    it('passes Error instances through without modification', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const err = new Error('boom')
+        const reporter = new RedactionReporter(new Sink(), ['password'])
+        reporter.log('error', 's', T0, {}, [err])
+        expect(captured[0]).toBe(err)
+    })
+
+    it('handles circular references without throwing', () => {
+        const captured: any[] = []
+        class Sink extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(...msgs) }
+        }
+        const obj: any = { name: 'node', password: 'secret' }
+        obj.self = obj
+        const reporter = new RedactionReporter(new Sink(), ['password'])
+        expect(() => reporter.log('info', 's', T0, {}, [obj])).not.toThrow()
+        expect(captured[0].password).toBe('[REDACTED]')
+        expect(captured[0].name).toBe('node')
+    })
+
+    it('does not mutate the original messages', () => {
+        const original = { user: 'alice', password: 'secret' }
+        class Sink extends LogReporter { log() {} }
+        const reporter = new RedactionReporter(new Sink(), ['password'])
+        reporter.log('info', 's', T0, {}, [original])
+        expect(original.password).toBe('secret')
+    })
+
+    it('delegates flush() to inner reporter', () => {
+        let flushed = false
+        class Sink extends LogReporter {
+            log() {}
+            flush() { flushed = true }
+        }
+        new RedactionReporter(new Sink(), ['password']).flush()
+        expect(flushed).toBe(true)
+    })
+
+    it('delegates close() to inner reporter', async () => {
+        let closed = false
+        class Sink extends LogReporter {
+            log() {}
+            close() { closed = true }
+        }
+        await new RedactionReporter(new Sink(), ['password']).close()
+        expect(closed).toBe(true)
+    })
+})
+
+describe('SamplingReporter', () => {
+    it('forwards all entries when rate is 1', () => {
+        const captured: number[] = []
+        class Sink extends LogReporter {
+            log() { captured.push(1) }
+        }
+        const reporter = new SamplingReporter(new Sink(), 1)
+        reporter.log('info', 's', T0, {}, ['a'])
+        reporter.log('info', 's', T0, {}, ['b'])
+        reporter.log('info', 's', T0, {}, ['c'])
+        expect(captured).toHaveLength(3)
+    })
+
+    it('drops all entries when rate is 0', () => {
+        const captured: number[] = []
+        class Sink extends LogReporter {
+            log() { captured.push(1) }
+        }
+        const reporter = new SamplingReporter(new Sink(), 0)
+        reporter.log('info', 's', T0, {}, ['a'])
+        reporter.log('info', 's', T0, {}, ['b'])
+        expect(captured).toHaveLength(0)
+    })
+
+    it('forwards an entry when Math.random() is below the rate', () => {
+        const spy = vi.spyOn(Math, 'random').mockReturnValue(0.3)
+        const captured: number[] = []
+        class Sink extends LogReporter {
+            log() { captured.push(1) }
+        }
+        new SamplingReporter(new Sink(), 0.5).log('info', 's', T0, {}, ['a'])
+        expect(captured).toHaveLength(1)
+        spy.mockRestore()
+    })
+
+    it('drops an entry when Math.random() is at or above the rate', () => {
+        const spy = vi.spyOn(Math, 'random').mockReturnValue(0.9)
+        const captured: number[] = []
+        class Sink extends LogReporter {
+            log() { captured.push(1) }
+        }
+        new SamplingReporter(new Sink(), 0.5).log('info', 's', T0, {}, ['a'])
+        expect(captured).toHaveLength(0)
+        spy.mockRestore()
+    })
+
+    it('throws RangeError for rate below 0', () => {
+        class Sink extends LogReporter { log() {} }
+        expect(() => new SamplingReporter(new Sink(), -0.1)).toThrow(RangeError)
+    })
+
+    it('throws RangeError for rate above 1', () => {
+        class Sink extends LogReporter { log() {} }
+        expect(() => new SamplingReporter(new Sink(), 1.1)).toThrow(RangeError)
+    })
+
+    it('delegates flush() to inner reporter', () => {
+        let flushed = false
+        class Sink extends LogReporter {
+            log() {}
+            flush() { flushed = true }
+        }
+        new SamplingReporter(new Sink(), 1).flush()
+        expect(flushed).toBe(true)
+    })
+
+    it('delegates close() to inner reporter', async () => {
+        let closed = false
+        class Sink extends LogReporter {
+            log() {}
+            close() { closed = true }
+        }
+        await new SamplingReporter(new Sink(), 1).close()
+        expect(closed).toBe(true)
+    })
+})
+
+describe('FanoutReporter', () => {
+    it('forwards log entries to all inner reporters', () => {
+        const a: string[] = []
+        const b: string[] = []
+        class A extends LogReporter { log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { a.push(msgs[0]) } }
+        class B extends LogReporter { log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { b.push(msgs[0]) } }
+        const reporter = new FanoutReporter([new A(), new B()])
+        reporter.log('info', 's', T0, {}, ['hello'])
+        expect(a).toEqual(['hello'])
+        expect(b).toEqual(['hello'])
+    })
+
+    it('continues calling remaining reporters after one throws', () => {
+        const captured: string[] = []
+        class Throws extends LogReporter { log() { throw new Error('boom') } }
+        class Good extends LogReporter { log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(msgs[0]) } }
+        const reporter = new FanoutReporter([new Throws(), new Good()])
+        expect(() => reporter.log('info', 's', T0, {}, ['msg'])).not.toThrow()
+        expect(captured).toEqual(['msg'])
+    })
+
+    it('flush() calls flush() on all inner reporters', () => {
+        const flushed: string[] = []
+        class F extends LogReporter {
+            constructor(private id: string) { super() }
+            log() {}
+            flush() { flushed.push(this.id) }
+        }
+        new FanoutReporter([new F('a'), new F('b')]).flush()
+        expect(flushed).toEqual(['a', 'b'])
+    })
+
+    it('flush() isolates reporter errors', () => {
+        class Throws extends LogReporter {
+            log() {}
+            flush() { throw new Error('flush boom') }
+        }
+        expect(() => new FanoutReporter([new Throws()]).flush()).not.toThrow()
+    })
+
+    it('close() calls close() on all inner reporters', async () => {
+        const closed: string[] = []
+        class C extends LogReporter {
+            constructor(private id: string) { super() }
+            log() {}
+            close() { closed.push(this.id) }
+        }
+        await new FanoutReporter([new C('a'), new C('b')]).close()
+        expect(closed).toEqual(['a', 'b'])
+    })
+
+    it('close() awaits async close() on reporters', async () => {
+        let resolved = false
+        class AsyncC extends LogReporter {
+            log() {}
+            close(): Promise<void> {
+                return new Promise((r) => setTimeout(() => { resolved = true; r() }, 10))
+            }
+        }
+        await new FanoutReporter([new AsyncC()]).close()
+        expect(resolved).toBe(true)
+    })
+
+    it('close() isolates reporter errors', async () => {
+        class Throws extends LogReporter {
+            log() {}
+            close() { throw new Error('close boom') }
+        }
+        await expect(new FanoutReporter([new Throws()]).close()).resolves.toBeUndefined()
+    })
+
+    it('MultiReporter is an alias for FanoutReporter', () => {
+        expect(MultiReporter).toBe(FanoutReporter)
+    })
+
+    it('can compose with LevelFilterReporter for per-sink thresholds', () => {
+        const errors: string[] = []
+        const all: string[] = []
+        class ErrorSink extends LogReporter { log(level: any) { errors.push(level) } }
+        class AllSink extends LogReporter { log(level: any) { all.push(level) } }
+        const fanout = new FanoutReporter([
+            new LevelFilterReporter(new ErrorSink(), 'error'),
+            new AllSink(),
+        ])
+        const factory = new LoggerFactory([fanout])
+        factory.level = 'verbose'
+        factory.getLogger('t').error('e')
+        factory.getLogger('t').info('i')
+        expect(errors).toEqual(['error'])
+        expect(all).toEqual(['error', 'info'])
     })
 })
