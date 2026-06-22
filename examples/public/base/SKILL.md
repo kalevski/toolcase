@@ -16,7 +16,7 @@ import {
     Easing,   // { easeInSine…easeInOutBounce (30 fns) + cubicBezier }
     VectorClock, EventEmitter, Broadcast,
     LSystem, ObjectPool, PriorityQueue, RingBuffer, Stack, Deque,
-    generateId, ulid, toHex, formatByteSize,
+    generateId, ulid, toHex, formatByteSize, formatDuration, formatNumber, relativeTime,
     bufferToHex, hexToBuffer,
     Color, JSONSchema, getNumberInRange,
     clamp, lerp, inverseLerp, mapRange, smoothstep, approximately,
@@ -813,6 +813,88 @@ Returns `'0 Bytes'` when `bytes === 0`. Powers of 1024: `Bytes / KB / MB / GB / 
 
 ```ts
 formatByteSize(1536) // "1.5 KB"
+```
+
+### formatDuration
+
+Convert a millisecond count to a compact, human-readable string. Shows the two most significant units; sub-second precision is dropped once the value reaches one second.
+
+```ts
+formatDuration(ms: number): string
+```
+
+Returns `'0ms'` when `ms` is `0`, negative, or non-finite.
+
+| Range | Format | Example |
+|---|---|---|
+| `< 1 s` | `Nms` | `'500ms'` |
+| `< 1 min` | `Ns` | `'45s'` |
+| `< 1 h` | `Nm Ns` | `'2m 30s'` |
+| `< 1 d` | `Nh Nm` | `'1h 30m'` |
+| `≥ 1 d` | `Nd Nh` | `'3d 2h'` |
+
+```ts
+formatDuration(500)         // '500ms'
+formatDuration(90_000)      // '1m 30s'
+formatDuration(5_400_000)   // '1h 30m'
+formatDuration(90_000_000)  // '1d 1h'
+formatDuration(0)           // '0ms'
+```
+
+### formatNumber
+
+Format a number with optional compact notation (`k` / `M` / `B` suffixes). In non-compact mode inserts thousands separators.
+
+```ts
+formatNumber(n: number, options?: FormatNumberOptions): string
+
+interface FormatNumberOptions {
+    compact?: boolean  // default false
+}
+```
+
+Returns `'0'` for `NaN` or `±Infinity`. Compact mode rounds to one decimal place and drops trailing `.0`.
+
+```ts
+// non-compact (default)
+formatNumber(999)          // '999'
+formatNumber(1_000)        // '1,000'
+formatNumber(1_234_567)    // '1,234,567'
+
+// compact
+formatNumber(1_200,  { compact: true }) // '1.2k'
+formatNumber(1_000,  { compact: true }) // '1k'
+formatNumber(3_400_000, { compact: true }) // '3.4M'
+formatNumber(2_500_000_000, { compact: true }) // '2.5B'
+formatNumber(-1_200, { compact: true }) // '-1.2k'
+```
+
+### relativeTime
+
+Turn a `Date` or Unix-millisecond timestamp into a human-readable relative-time string such as `'3 minutes ago'` or `'in 2 hours'`. Compares against `Date.now()` at call time.
+
+```ts
+relativeTime(date: Date | number): string
+```
+
+| Threshold | Format | Example |
+|---|---|---|
+| `< 1 s` | `'just now'` | `'just now'` |
+| `< 1 min` | `'N second(s) ago'` / `'in N second(s)'` | `'30 seconds ago'` |
+| `< 1 h` | `'N minute(s) ago'` / `'in N minute(s)'` | `'in 5 minutes'` |
+| `< 1 d` | `'N hour(s) ago'` / `'in N hour(s)'` | `'2 hours ago'` |
+| `≥ 1 d` | `'N day(s) ago'` / `'in N day(s)'` | `'in 3 days'` |
+
+```ts
+const now = Date.now()
+
+relativeTime(new Date(now - 500))              // 'just now'
+relativeTime(new Date(now - 30_000))           // '30 seconds ago'
+relativeTime(new Date(now - 3 * 60_000))       // '3 minutes ago'
+relativeTime(new Date(now - 2 * 3_600_000))    // '2 hours ago'
+relativeTime(new Date(now - 3 * 86_400_000))   // '3 days ago'
+relativeTime(new Date(now + 5 * 60_000))       // 'in 5 minutes'
+relativeTime(now + 2 * 3_600_000)              // 'in 2 hours' (timestamp accepted)
 ```
 
 ### Math helpers

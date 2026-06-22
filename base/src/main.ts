@@ -10,6 +10,9 @@ import generateId from './generateId'
 import ulid from './ulid'
 import toHex from './toHex'
 import formatByteSize from './formatByteSize'
+import formatDuration from './formatDuration'
+import formatNumber from './formatNumber'
+import relativeTime from './relativeTime'
 import bufferToHex from './bufferToHex'
 import hexToBuffer from './hexToBuffer'
 import Color from './Color'
@@ -58,6 +61,8 @@ const HTTP = {
     RESTError,
     RESTResponse
 }
+
+export type { FormatNumberOptions } from './formatNumber'
 
 export type { SpatialPoint, SpatialRect } from './spatial'
 export type { EasingFn } from './easing'
@@ -124,6 +129,9 @@ export {
     ulid,
     toHex,
     formatByteSize,
+    formatDuration,
+    formatNumber,
+    relativeTime,
     bufferToHex,
     hexToBuffer,
     Color,
@@ -180,6 +188,9 @@ const BASE = {
     ulid,
     toHex,
     formatByteSize,
+    formatDuration,
+    formatNumber,
+    relativeTime,
     bufferToHex,
     hexToBuffer,
     Color,
