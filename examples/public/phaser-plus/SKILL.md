@@ -13,7 +13,7 @@ import {
     Feature, FeatureRegistry, ServiceRegistry,
     Layer, ObjectLayer, HTMLFeature, SplitScreen,
     GameObjectPool,
-    Flow,    // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, StateMachine, BehaviorTreeProcessor, ReplayRecorder, Timer, Parallel, throttle, debounce, BT: {...} }
+    Flow,    // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, StateMachine, BehaviorTreeProcessor, ReplayRecorder, Timer, Tween, Timeline, TweenProcessor, EASE, resolveEase, Parallel, throttle, debounce, BT: {...} }
     Structs, // { Matrix2 }
     LogLevel,
     // Debugger
@@ -76,6 +76,7 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [TimeEvent](#timeevent)
   - [Job](#job)
   - [CollisionEvent](#collisionevent)
+  - [Tween & Timeline](#tween--timeline)
 - [Debugger](#debugger)
 - [Perspective2D](#perspective2d)
   - [Scene2D](#scene2d)
@@ -486,6 +487,106 @@ const onSearch = Flow.debounce(query, 300, { leading: false })
 ```
 
 Returned handles share `cancel()` / `pause()` / `resume()` (when applicable). `Parallel.run(N, tasks, onAll)` caps concurrency at `N` (use `Infinity`-style `0` to run all at once); each task takes a `done` callback.
+
+### Tween & Timeline
+
+Property interpolation driven by the same `flow.doUpdate` clock as events, timers, and jobs.
+
+**`Flow.Tween`** — static helper for one-shot tweens.
+
+```ts
+import { Flow } from '@toolcase/phaser-plus'
+
+const handle = Flow.Tween.to(scene, box, { x: 400, alpha: 0.5 }, {
+    ms: 600,
+    ease: 'easeOutCubic',  // string key or (t: number) => number
+    delay: 200,
+    loop: true,            // true = infinite, number = count
+    yoyo: true,
+    onComplete: () => console.log('done'),
+    onUpdate: (progress, target) => {}
+})
+
+handle.pause()
+handle.resume()
+handle.cancel()
+handle.progress    // 0..1
+handle.completed   // boolean
+handle.paused      // boolean
+```
+
+Or access the processor directly: `scene.flow.tween(target, to, opts)` returns the same `TweenHandle`.
+
+**`Flow.Timeline`** — fluent builder for sequenced + parallel tweens.
+
+```ts
+const tl = new Flow.Timeline(scene)          // or scene.flow.timeline()
+
+tl.to(box, { x: 400 }, { ms: 500, ease: 'easeOutCubic' })
+  .wait(200)
+  .parallel(sub => {
+      sub.to(box, { alpha: 0 }, { ms: 300, ease: 'easeIn' })
+         .to(icon, { scaleX: 0 }, { ms: 300, ease: 'easeIn' })
+  })
+  .stagger([a, b, c], { scaleY: 1 }, { ms: 400, ease: 'easeOutBack' }, 100)
+  .call(() => sfx.play('whoosh'))
+
+const handle = tl.play(() => console.log('sequence done'))
+```
+
+`TimelineHandle` API:
+
+```ts
+handle.seek(ms)     // scrub to any position (re-applies all tween values)
+handle.restart()    // reset elapsed to 0, clear fired flags — reset target values yourself first
+handle.pause()
+handle.resume()
+handle.cancel()
+handle.elapsed      // ms since play()
+handle.total        // total duration in ms
+handle.progress     // 0..1
+handle.completed    // boolean
+handle.paused       // boolean
+```
+
+**Easing** — all built-in easing functions available as `Flow.EASE` record and string keys:
+
+| Key | Shape |
+|---|---|
+| `linear` | constant |
+| `easeIn` / `easeOut` / `easeInOut` | quadratic |
+| `easeInCubic` / `easeOutCubic` / `easeInOutCubic` | cubic |
+| `easeInBack` / `easeOutBack` / `easeInOutBack` | overshoot |
+| `bounce` / `bounceIn` / `bounceOut` | bounce |
+| `elastic` | elastic snap |
+
+```ts
+import { Flow } from '@toolcase/phaser-plus'
+
+Flow.EASE.easeOutBack(0.8)         // call directly
+Flow.resolveEase('easeOutBack')    // string → EaseFn; undefined → linear
+```
+
+**`TweenProcessor`** — the `FlowProcessor` backing tweens and timelines. Accessible as `scene.flow.tweens`.
+
+```ts
+scene.flow.tweens.cancelAll()    // cancel every active tween + timeline
+scene.flow.tweens.pauseAll()
+scene.flow.tweens.resumeAll()
+scene.flow.tweens.onLog = (time, type, name) => {}  // hook for TimelinePanel
+```
+
+**`TimelinePanel.bindTimeline(handle)`** — attach a scrub UI to a `TimelineHandle` inside an existing `TimelinePanel`.
+
+```ts
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+const panel = dbg.addPanel('timeline', TimelinePanel, 'My Timeline')
+
+const handle = tl.play()
+panel.bindTimeline(handle)   // adds TL Scrub slider, TL Progress readout, Replay TL + Pause TL buttons
+```
+
+Demo: `tween-timeline` — `TweenTimelineDemo.js`.
 
 ---
 

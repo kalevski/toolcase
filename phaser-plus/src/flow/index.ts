@@ -38,6 +38,13 @@ import throttle from './throttle'
 import type { ThrottleOptions } from './throttle'
 import debounce from './debounce'
 import type { DebounceOptions } from './debounce'
+import TweenProcessor from './TweenProcessor'
+import type { TweenOptions, TweenHandle, TimelineHandle, TimelineStep } from './TweenProcessor'
+import Timeline from './Timeline'
+import type { ParallelBuilder } from './Timeline'
+import Tween from './Tween'
+import { EASE, resolveEase } from './easing'
+import type { EaseFn } from './easing'
 
 export {
     Event,
@@ -69,7 +76,12 @@ export {
     Timer,
     ParallelRunner,
     throttle,
-    debounce
+    debounce,
+    TweenProcessor,
+    Timeline,
+    Tween,
+    EASE,
+    resolveEase
 }
 
 export type {
@@ -87,5 +99,11 @@ export type {
     ParallelTask,
     ParallelHandle,
     ThrottleOptions,
-    DebounceOptions
+    DebounceOptions,
+    TweenOptions,
+    TweenHandle,
+    TimelineHandle,
+    TimelineStep,
+    ParallelBuilder,
+    EaseFn
 }

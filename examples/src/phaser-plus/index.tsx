@@ -51,6 +51,7 @@ import SaveServiceDemo from './scenes/SaveServiceDemo.js'
 import AssetFeatureDemo from './scenes/AssetFeatureDemo.js'
 import TilemapNavMeshDemo from './scenes/TilemapNavMeshDemo.js'
 import ParticleFeatureDemo from './scenes/ParticleFeatureDemo.js'
+import TweenTimelineDemo from './scenes/TweenTimelineDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -500,5 +501,13 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'ParticleFeature: define named presets, click-to-burst, cursor-following stream, and Explosion preset chained to a screen HeatEffect.',
         sceneFile: 'ParticleFeatureDemo.js',
         element: <PhaserCanvas sceneClass={ParticleFeatureDemo} />
+    },
+    {
+        key: 'tween-timeline',
+        title: 'Tween & Timeline',
+        category: 'Flow',
+        description: 'Flow.Tween + Flow.Timeline: sequence, parallel, stagger across five easing functions; scrub and replay via TimelinePanel.',
+        sceneFile: 'TweenTimelineDemo.js',
+        element: <PhaserCanvas sceneClass={TweenTimelineDemo} />
     }
 ]

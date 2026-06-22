@@ -1,4 +1,5 @@
 import Panel from '../Panel'
+import type { TimelineHandle } from '../../flow/TweenProcessor'
 
 interface TimelineEntry {
     time: number
@@ -11,6 +12,8 @@ interface TimelineState {
     log: string
     cursor: number
     historyLen: number
+    tlScrub: number
+    tlProgress: string
 }
 
 const MAX_HISTORY = 200
@@ -22,7 +25,9 @@ export default class TimelinePanel extends Panel {
         paused: false,
         log: '',
         cursor: 0,
-        historyLen: 0
+        historyLen: 0,
+        tlScrub: 0,
+        tlProgress: '--'
     }
 
     components: Record<string, any> = {}
@@ -30,6 +35,8 @@ export default class TimelinePanel extends Panel {
     private history: TimelineEntry[] = []
 
     private originalTrigger: ((event: string, payload: unknown, delay?: number) => unknown) | null = null
+
+    private _boundHandle: TimelineHandle | null = null
 
     override draw(): void {
         this.components.paused = this.base.addBinding(this.state, 'paused', { label: 'Paused' })
@@ -42,6 +49,34 @@ export default class TimelinePanel extends Panel {
         this.hookFlow()
     }
 
+    bindTimeline(handle: TimelineHandle): void {
+        this._boundHandle = handle
+        this.state.tlScrub = 0
+        this.components.tlScrub = this.base.addBinding(this.state, 'tlScrub', {
+            label: 'TL Scrub',
+            min: 0,
+            max: 1,
+            step: 0.001
+        })
+        this.components.tlScrub.on('change', (e: { value: number }) => {
+            this._boundHandle?.seek(this._boundHandle.total * e.value)
+        })
+        this.components.tlProgress = this.base.addBinding(this.state, 'tlProgress', {
+            readonly: true,
+            label: 'TL Progress'
+        })
+        this.components.tlReplay = this.base.addButton({ title: 'Replay TL' }).on('click', () => {
+            this._boundHandle?.restart()
+        })
+        this.components.tlPause = this.base.addButton({ title: 'Pause TL' }).on('click', () => {
+            if (this._boundHandle?.paused) {
+                this._boundHandle.resume()
+            } else {
+                this._boundHandle?.pause()
+            }
+        })
+    }
+
     private hookFlow(): void {
         const events: any = this.scene.flow?.events
         if (!events || events.__hooked) return
@@ -50,6 +85,13 @@ export default class TimelinePanel extends Panel {
         events.trigger = (event: string, payload: unknown, delay?: number) => {
             this.push({ time: ((this.game as any).loop?.time ?? 0), type: 'event', name: event })
             return this.originalTrigger!(event, payload, delay)
+        }
+
+        const tweens: any = this.scene.flow?.tweens
+        if (tweens && tweens.onLog === null) {
+            tweens.onLog = (time: number, type: string, name: string) => {
+                this.push({ time, type, name })
+            }
         }
     }
 
@@ -86,6 +128,14 @@ export default class TimelinePanel extends Panel {
     override doUpdate(): void {
         if (this.components.cursor) this.components.cursor.max = Math.max(0, this.history.length - 1)
         this.refreshLog()
+        if (this._boundHandle !== null) {
+            const h = this._boundHandle
+            this.state.tlProgress = `${(h.progress * 100).toFixed(1)}% (${h.elapsed.toFixed(0)}ms)`
+            if (!h.paused && !h.completed) {
+                this.state.tlScrub = h.progress
+            }
+            this.components.tlProgress?.refresh?.()
+        }
         for (const key in this.components) this.components[key].refresh?.()
     }
 
@@ -96,6 +146,9 @@ export default class TimelinePanel extends Panel {
             delete events.__hooked
             this.originalTrigger = null
         }
+        const tweens: any = this.scene.flow?.tweens
+        if (tweens) tweens.onLog = null
+        this._boundHandle = null
     }
 
 }

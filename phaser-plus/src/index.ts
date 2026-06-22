@@ -41,6 +41,10 @@ import Timer from './flow/Timer'
 import ParallelRunner from './flow/Parallel'
 import throttle from './flow/throttle'
 import debounce from './flow/debounce'
+import TweenProcessor from './flow/TweenProcessor'
+import Timeline from './flow/Timeline'
+import Tween from './flow/Tween'
+import { EASE, resolveEase } from './flow/easing'
 
 const Flow = {
     Event,
@@ -52,6 +56,11 @@ const Flow = {
     BehaviorTreeProcessor,
     ReplayRecorder,
     Timer,
+    Tween,
+    Timeline,
+    TweenProcessor,
+    EASE,
+    resolveEase,
     Parallel: ParallelRunner,
     throttle,
     debounce,
