@@ -18,6 +18,7 @@ import HTTPReporter, { type HTTPTransport } from '../src/HTTPReporter'
 import OTLPReporter, { type OTLPTransport } from '../src/OTLPReporter'
 import BeaconReporter from '../src/BeaconReporter'
 import IndexedDBReporter from '../src/IndexedDBReporter'
+import { textFormatter, jsonFormatter, logfmtFormatter } from '../src/Formatter'
 
 // 2026-01-01T00:00:00.000Z in epoch ms
 const T0 = 1767225600000
@@ -3124,4 +3125,216 @@ describe('IndexedDBReporter', () => {
         }
     })
 
+})
+
+describe('textFormatter', () => {
+    it('produces LEVEL [ISO] | scope: msg format', () => {
+        const line = textFormatter('info', 'auth', T0, {}, ['hello'])
+        expect(line).toBe('INFO [2026-01-01T00:00:00.000Z] | auth: hello')
+    })
+
+    it('uppercases the level token', () => {
+        expect(textFormatter('error', 's', T0, {}, ['e'])).toMatch(/^ERROR/)
+        expect(textFormatter('warning', 's', T0, {}, ['w'])).toMatch(/^WARNING/)
+        expect(textFormatter('verbose', 's', T0, {}, ['v'])).toMatch(/^VERBOSE/)
+    })
+
+    it('joins multiple messages with a space', () => {
+        const line = textFormatter('info', 's', T0, {}, ['hello', 'world'])
+        expect(line).toContain('hello world')
+    })
+
+    it('serializes plain objects to inline JSON', () => {
+        const line = textFormatter('info', 's', T0, {}, [{ key: 'val' }])
+        expect(line).toContain('{"key":"val"}')
+    })
+
+    it('serializes Error instances using the stack', () => {
+        const err = new Error('boom')
+        const line = textFormatter('error', 's', T0, {}, [err])
+        expect(line).toContain('boom')
+    })
+
+    it('ignores fields — they do not appear in the output', () => {
+        const line = textFormatter('info', 's', T0, { requestId: 'r1' }, ['msg'])
+        expect(line).not.toContain('requestId')
+        expect(line).not.toContain('r1')
+    })
+})
+
+describe('jsonFormatter', () => {
+    it('produces valid parseable JSON', () => {
+        const line = jsonFormatter('info', 'auth', T0, {}, ['ok'])
+        expect(() => JSON.parse(line)).not.toThrow()
+    })
+
+    it('contains level, scope, time (number), and messages', () => {
+        const parsed = JSON.parse(jsonFormatter('info', 'auth', T0, {}, ['ok', { id: 7 }]))
+        expect(parsed.level).toBe('info')
+        expect(parsed.scope).toBe('auth')
+        expect(parsed.time).toBe(T0)
+        expect(parsed.messages).toEqual(['ok', { id: 7 }])
+    })
+
+    it('spreads fields as top-level keys', () => {
+        const parsed = JSON.parse(jsonFormatter('info', 's', T0, { requestId: 'r1', userId: 42 }, ['msg']))
+        expect(parsed.requestId).toBe('r1')
+        expect(parsed.userId).toBe(42)
+        expect(parsed.messages).toEqual(['msg'])
+    })
+
+    it('serializes Error instances in messages with name/message/stack', () => {
+        const parsed = JSON.parse(jsonFormatter('error', 's', T0, {}, [new Error('boom')]))
+        expect(parsed.messages[0].name).toBe('Error')
+        expect(parsed.messages[0].message).toBe('boom')
+        expect(typeof parsed.messages[0].stack).toBe('string')
+    })
+
+    it('converts BigInt values in messages to strings', () => {
+        const parsed = JSON.parse(jsonFormatter('info', 's', T0, {}, [42n]))
+        expect(parsed.messages[0]).toBe('42')
+    })
+
+    it('replaces circular references in messages with [Circular]', () => {
+        const cyc: any = {}
+        cyc.self = cyc
+        const parsed = JSON.parse(jsonFormatter('info', 's', T0, {}, [cyc]))
+        expect(parsed.messages[0].self).toBe('[Circular]')
+    })
+
+    it('keeps sibling fields around a circular reference', () => {
+        const obj: any = { name: 'node', status: 'ok' }
+        obj.loop = obj
+        const parsed = JSON.parse(jsonFormatter('info', 's', T0, {}, [obj]))
+        expect(parsed.messages[0].name).toBe('node')
+        expect(parsed.messages[0].status).toBe('ok')
+        expect(parsed.messages[0].loop).toBe('[Circular]')
+    })
+})
+
+describe('logfmtFormatter', () => {
+    it('produces level, scope, ts, and msg fields', () => {
+        const line = logfmtFormatter('info', 'auth', T0, {}, ['hello'])
+        expect(line).toContain('level=info')
+        expect(line).toContain('scope=auth')
+        expect(line).toContain('ts=2026-01-01T00:00:00.000Z')
+        expect(line).toContain('msg=hello')
+    })
+
+    it('includes context fields as key=value pairs between ts and msg', () => {
+        const line = logfmtFormatter('info', 's', T0, { requestId: 'r1', userId: '42' }, ['event'])
+        expect(line).toContain('requestId=r1')
+        expect(line).toContain('userId=42')
+        const tsIdx = line.indexOf('ts=')
+        const msgIdx = line.indexOf('msg=')
+        const reqIdx = line.indexOf('requestId=')
+        expect(reqIdx).toBeGreaterThan(tsIdx)
+        expect(reqIdx).toBeLessThan(msgIdx)
+    })
+
+    it('joins multiple messages with a space in the msg field', () => {
+        const line = logfmtFormatter('info', 's', T0, {}, ['hello', 'world'])
+        expect(line).toContain('msg="hello world"')
+    })
+
+    it('quotes msg values that contain spaces', () => {
+        const line = logfmtFormatter('info', 's', T0, {}, ['hello world'])
+        expect(line).toContain('msg="hello world"')
+    })
+
+    it('quotes field values that contain spaces', () => {
+        const line = logfmtFormatter('info', 's', T0, { env: 'my env' }, ['x'])
+        expect(line).toContain('env="my env"')
+    })
+
+    it('quotes field values that contain = characters', () => {
+        const line = logfmtFormatter('info', 's', T0, { expr: 'a=b' }, ['x'])
+        expect(line).toContain('expr="a=b"')
+    })
+
+    it('produces "" for an empty msg', () => {
+        const line = logfmtFormatter('info', 's', T0, {}, [''])
+        expect(line).toContain('msg=""')
+    })
+
+    it('serializes object messages as JSON within the msg field', () => {
+        const line = logfmtFormatter('info', 's', T0, {}, [{ id: 7 }])
+        expect(line).toContain('{"id":7}')
+    })
+
+    it('uses error.message for Error instances in messages', () => {
+        const err = new Error('something went wrong')
+        const line = logfmtFormatter('error', 's', T0, {}, [err])
+        expect(line).toContain('something went wrong')
+    })
+})
+
+describe('JSONLineReporter — formatter option', () => {
+    it('uses jsonFormatter by default (parseable JSON with level/scope/time/messages)', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        reporter.log('info', 'auth', T0, {}, ['ok'])
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.level).toBe('info')
+        expect(parsed.scope).toBe('auth')
+        expect(parsed.time).toBe(T0)
+        expect(parsed.messages).toEqual(['ok'])
+    })
+
+    it('accepts a custom formatter — logfmt output over JSONLineReporter', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line), formatter: logfmtFormatter })
+        reporter.log('info', 'auth', T0, {}, ['hello'])
+        expect(lines[0]).toContain('level=info')
+        expect(lines[0]).toContain('scope=auth')
+        expect(lines[0]).toContain('msg=hello')
+    })
+
+    it('merges extra into fields before passing to the formatter', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({
+            write: line => lines.push(line),
+            extra: { service: 'api' },
+            formatter: logfmtFormatter
+        })
+        reporter.log('info', 's', T0, {}, ['x'])
+        expect(lines[0]).toContain('service=api')
+    })
+})
+
+describe('ConsoleLogReporter — formatter option', () => {
+    it('uses the formatter to produce the full output line instead of the default prefix + messages', () => {
+        const reporter = new ConsoleLogReporter({ color: false, formatter: logfmtFormatter })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 'auth', T0, {}, ['hello'])
+        const call = spy.mock.calls[0][0]
+        expect(call).toContain('level=info')
+        expect(call).toContain('scope=auth')
+        expect(call).toContain('msg=hello')
+        expect(call).not.toContain('INFO [')
+        spy.mockRestore()
+    })
+
+    it('routes error level to console.error when formatter is set', () => {
+        const reporter = new ConsoleLogReporter({ color: false, formatter: textFormatter })
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        reporter.log('error', 's', T0, {}, ['boom'])
+        expect(spy).toHaveBeenCalledTimes(1)
+        const line = spy.mock.calls[0][0]
+        expect(line).toContain('ERROR')
+        spy.mockRestore()
+    })
+
+    it('passes fields to the formatter when set', () => {
+        const reporter = new ConsoleLogReporter({
+            color: false,
+            formatter: (level, scope, _time, fields, messages) => {
+                return `${level} ${scope} req=${fields.requestId} ${messages.join(' ')}`
+            }
+        })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 'api', T0, { requestId: 'r1' }, ['start'])
+        expect(spy.mock.calls[0][0]).toBe('info api req=r1 start')
+        spy.mockRestore()
+    })
 })

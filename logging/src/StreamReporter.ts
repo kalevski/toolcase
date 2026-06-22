@@ -1,30 +1,22 @@
 import { type Writable } from 'node:stream'
 import { type LoggerLevel } from './Level'
 import LogReporter from './LogReporter'
+import { type LogFormatter, textFormatter } from './Formatter'
 
-export type StreamLogFormatter = (level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]) => string
+export type StreamLogFormatter = LogFormatter
 
 export interface StreamReporterOptions {
-    formatter?: StreamLogFormatter
+    formatter?: LogFormatter
     onError?: (err: Error) => void
     maxBytes?: number
 }
 
-export const defaultStreamFormatter: StreamLogFormatter = (level, scope, time, _fields, messages) => {
-    const body = messages.map(m => {
-        if (m instanceof Error) return m.stack || m.message
-        if (typeof m === 'object' && m !== null) {
-            try { return JSON.stringify(m) } catch { return String(m) }
-        }
-        return String(m)
-    }).join(' ')
-    return `${level.toUpperCase()} [${new Date(time).toISOString()}] | ${scope}: ${body}`
-}
+export { textFormatter as defaultStreamFormatter }
 
 class StreamReporter extends LogReporter {
 
     protected stream: Writable
-    protected readonly formatter: StreamLogFormatter
+    protected readonly formatter: LogFormatter
     protected readonly maxBytes: number
     protected readonly onError?: (err: Error) => void
     protected bytesWritten = 0
@@ -35,7 +27,7 @@ class StreamReporter extends LogReporter {
     constructor(stream: Writable, options: StreamReporterOptions = {}) {
         super()
         this.stream = stream
-        this.formatter = options.formatter ?? defaultStreamFormatter
+        this.formatter = options.formatter ?? textFormatter
         this.maxBytes = options.maxBytes ?? 0
         this.onError = options.onError
         this.stream.on('error', err => this.onError?.(err))
@@ -73,8 +65,6 @@ class StreamReporter extends LogReporter {
         })
     }
 
-    // Override in subclasses to replace the stream (e.g. file rotation).
-    // Must reset bytesWritten to 0 when done.
     protected openRotatedStream(): Promise<void> {
         this.bytesWritten = 0
         return Promise.resolve()

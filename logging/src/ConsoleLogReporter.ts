@@ -1,11 +1,13 @@
 import { LoggerLevel } from './Level'
 import LogReporter from './LogReporter'
+import { type LogFormatter } from './Formatter'
 
 export interface ConsoleLogReporterOptions {
     color?: boolean
     timestamp?: boolean
     prefix?: string | ((level: LoggerLevel, scope: string, time: number) => string)
     objects?: 'compact' | 'pretty'
+    formatter?: LogFormatter
 }
 
 const ANSI_RESET = '\x1b[0m'
@@ -61,6 +63,7 @@ class ConsoleLogReporter extends LogReporter {
     private readonly showTimestamp: boolean
     private readonly prefixOption: ConsoleLogReporterOptions['prefix']
     private readonly objectMode: 'compact' | 'pretty'
+    private readonly formatterOption?: LogFormatter
 
     constructor(options: ConsoleLogReporterOptions = {}) {
         super()
@@ -69,6 +72,7 @@ class ConsoleLogReporter extends LogReporter {
         this.showTimestamp = options.timestamp !== false
         this.prefixOption = options.prefix
         this.objectMode = options.objects ?? 'compact'
+        this.formatterOption = options.formatter
     }
 
     private buildPrefix(level: LoggerLevel, scope: string, time: number): string {
@@ -88,7 +92,32 @@ class ConsoleLogReporter extends LogReporter {
         return messages.map(serializeMessage)
     }
 
-    log(level: LoggerLevel, scope: string, time: number, _fields: Record<string, any>, messages: any[]): void {
+    private writeLine(level: LoggerLevel, line: string): void {
+        if (this.useColor && this.node) {
+            const ansi = ANSI_COLORS[level] ?? ''
+            const colored = `${ansi}${line}${ANSI_RESET}`
+            if (level === 'error') console.error(colored)
+            else if (level === 'warning') console.warn(colored)
+            else console.log(colored)
+        } else if (this.useColor) {
+            const style = BROWSER_STYLES[level] ?? ''
+            if (level === 'error') console.error(`%c${line}`, style)
+            else if (level === 'warning') console.warn(`%c${line}`, style)
+            else console.log(`%c${line}`, style)
+        } else {
+            if (level === 'error') console.error(line)
+            else if (level === 'warning') console.warn(line)
+            else console.log(line)
+        }
+    }
+
+    log(level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]): void {
+        if (this.formatterOption) {
+            const line = this.formatterOption(level, scope, time, fields, messages)
+            this.writeLine(level, line)
+            return
+        }
+
         const prefix = this.buildPrefix(level, scope, time)
         const msgs = this.prepareMessages(messages)
 
