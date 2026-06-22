@@ -37,6 +37,8 @@ import BloomFilter from './BloomFilter'
 import MultiMap from './MultiMap'
 import Vec2 from './Vec2'
 import TokenBucket from './TokenBucket'
+import Stopwatch from './Stopwatch'
+import Ticker from './Ticker'
 import slugify from './slugify'
 import truncate from './truncate'
 import escapeHtml from './escapeHtml'
@@ -172,6 +174,8 @@ export {
     MultiMap,
     Vec2,
     TokenBucket,
+    Stopwatch,
+    Ticker,
     slugify,
     truncate,
     escapeHtml
@@ -240,6 +244,8 @@ const BASE = {
     MultiMap,
     Vec2,
     TokenBucket,
+    Stopwatch,
+    Ticker,
     slugify,
     truncate,
     escapeHtml

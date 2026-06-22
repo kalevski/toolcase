@@ -35,6 +35,8 @@ import StringHelpersDemo from './StringHelpersDemo'
 import ResultOptionDemo from './ResultOptionDemo'
 import BloomFilterDemo from './BloomFilterDemo'
 import TokenBucketDemo from './TokenBucketDemo'
+import StopwatchDemo from './StopwatchDemo'
+import TickerDemo from './TickerDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -100,4 +102,6 @@ export const baseExamples: BaseExampleDef[] = [
 
     { key: 'result-option', label: 'Result / Option', category: 'Utilities & Colors', element: <ResultOptionDemo /> },
     { key: 'token-bucket', label: 'TokenBucket', category: 'Utilities & Colors', element: <TokenBucketDemo /> },
+    { key: 'stopwatch', label: 'Stopwatch', category: 'Utilities & Colors', element: <StopwatchDemo /> },
+    { key: 'ticker', label: 'Ticker', category: 'Utilities & Colors', element: <TickerDemo /> },
 ]

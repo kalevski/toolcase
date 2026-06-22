@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), timing (Stopwatch — start/stop/lap/elapsed with injectable clock; Ticker — fixed-step/variable-step update dispatcher driven by tick(delta)), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
 ---
 
 # base — API Reference
@@ -34,7 +34,9 @@ import {
     // tagged-union helpers:
     ok, err,    // Result<T, E> factories
     some, none, // Option<T> factories
-    TokenBucket
+    TokenBucket,
+    Stopwatch,
+    Ticker
 } from '@toolcase/base'
 import type { Result, Option } from '@toolcase/base'
 ```
@@ -2421,6 +2423,100 @@ for (let i = 100; i < 1100; i++) {
     if (filter.has(`user:${i}`)) fp++
 }
 console.log(`FPR: ${(fp / 10).toFixed(1)}%`)   // ≈ 1.7%
+```
+
+---
+
+---
+
+## Stopwatch
+
+Elapsed-time tracker with start/stop/lap. Paused intervals do not count towards `elapsed`. Clock-injectable for deterministic testing.
+
+```ts
+new Stopwatch(now?: () => number)
+```
+
+Constructor throws if `now` is provided but is not a function. Default clock: `() => Date.now()`.
+
+**Properties:**
+- `running: boolean` — `true` while the watch is ticking.
+- `elapsed: number` — total milliseconds measured (paused time excluded). Read-only. Computed lazily from the injected clock; side-effect free.
+- `laps: readonly number[]` — lap times in insertion order.
+
+**Methods:**
+- `start(): this` — begin timing. No-op when already running.
+- `stop(): this` — pause timing; accumulates elapsed so far. No-op when already stopped.
+- `lap(): number` — snapshot elapsed since the last `lap()` call (or since `start()`), push onto `laps`, and reset the lap counter. Works while stopped.
+- `reset(): this` — stop, clear elapsed, clear laps.
+
+```ts
+import { Stopwatch } from '@toolcase/base'
+
+let t = 0
+const sw = new Stopwatch(() => t)
+
+sw.start()
+t = 100
+const l1 = sw.lap()   // 100  — resets lap start
+t = 250
+const l2 = sw.lap()   // 150
+sw.stop()
+t = 999               // clock advances, elapsed stays frozen
+sw.elapsed            // 250
+sw.laps               // [100, 150]
+
+sw.reset()
+sw.elapsed            // 0
+sw.laps               // []
+```
+
+---
+
+## Ticker
+
+Fixed-step or variable-step update dispatcher. Drive it by calling `tick(delta)` from your animation or game loop; in fixed-step mode it accumulates remainders and fires once per complete interval.
+
+```ts
+new Ticker(step?: number)
+```
+
+- `step = 0` (default) — **variable-step**: each `tick(delta)` fires registered callbacks once with the actual `delta`.
+- `step > 0` — **fixed-step**: `tick(delta)` feeds the accumulator; callbacks fire once per complete `step` interval with the fixed step value, consuming remainders across calls.
+
+Constructor throws if `step < 0`.
+
+**Properties:**
+- `running: boolean` — `true` after `start()`, before `stop()` or `reset()`.
+- `elapsed: number` — total milliseconds fed via `tick()` calls so far (read-only).
+
+**Methods:**
+- `onTick(fn: (delta: number, elapsed: number) => void): this` — register a callback. Throws if `fn` is not a function.
+- `offTick(fn): this` — unregister a callback. No-op if not found.
+- `tick(delta: number): void` — feed a time delta (ms). No-op when not running. Throws if `delta < 0`.
+- `start(): this` — enable processing.
+- `stop(): this` — disable processing (accumulated state is preserved).
+- `reset(): this` — stop, clear `elapsed`, clear accumulator. Listeners are preserved.
+
+```ts
+import { Ticker } from '@toolcase/base'
+
+// variable-step
+const varTicker = new Ticker()
+varTicker.onTick((delta, elapsed) => console.log(delta, elapsed))
+varTicker.start()
+varTicker.tick(16)   // fires: 16, 16
+varTicker.tick(33)   // fires: 33, 49
+
+// fixed-step 60fps (≈16.67ms)
+const fixedTicker = new Ticker(1000 / 60)
+fixedTicker.onTick((step) => physicsUpdate(step))
+fixedTicker.start()
+
+// in phaser-plus onUpdate or rAF:
+function onUpdate(frameDelta: number) {
+    fixedTicker.tick(frameDelta)
+}
 ```
 
 ---
