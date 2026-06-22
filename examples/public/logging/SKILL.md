@@ -285,6 +285,63 @@ const file = createWriteStream('./app.jsonl', { flags: 'a' })
 const reporter = new JSONLineReporter({ write: line => file.write(line + '\n') })
 ```
 
+### RingBufferReporter
+
+Keeps the last `N` log entries in a fixed-capacity ring buffer backed by a circular array. Oldest entries are silently evicted when the buffer is full. Isomorphic — works in both Node.js and the browser with no I/O. Ideal for crash dumps, debug overlays, and "attach recent logs to this error report" patterns.
+
+```ts
+import { LoggerFactory, RingBufferReporter } from '@toolcase/logging'
+
+const ring = new RingBufferReporter(100)           // keep last 100 entries
+const factory = new LoggerFactory([ring])
+factory.level = 'debug'
+
+const log = factory.getLogger('app')
+log.info('boot complete')
+log.warning('slow query', { ms: 420 })
+log.error('connection lost', err)
+
+// At any time — retrieve all buffered entries (oldest → newest):
+const entries = ring.snapshot()    // LogEntry[]
+
+// On crash:
+reportError({ recentLogs: ring.snapshot() })
+```
+
+API:
+
+```ts
+class RingBufferReporter extends LogReporter {
+    constructor(capacity: number)   // throws if capacity is not a positive integer
+    readonly size: number           // current number of buffered entries (≤ capacity)
+    readonly capacity: number       // fixed maximum entries
+    snapshot(): LogEntry[]          // shallow copy, oldest → newest
+    clear(): void                   // reset buffer (capacity is preserved)
+}
+```
+
+`LogEntry` shape (also exported from `@toolcase/logging`):
+
+```ts
+type LogEntry = {
+    level: LoggerLevel
+    scope: string
+    time: number          // epoch milliseconds
+    fields: Record<string, any>
+    messages: any[]
+}
+```
+
+Compose with `ConsoleLogReporter` to log to console **and** retain the ring for diagnostics:
+
+```ts
+const ring = new RingBufferReporter(200)
+const factory = new LoggerFactory([new ConsoleLogReporter(), ring])
+
+// Later, attach to an error boundary or crash handler:
+window.onerror = () => sendDiagnostics(ring.snapshot())
+```
+
 ### BufferedReporter
 
 Batching/debounce wrapper. Buffers entries and flushes them either when `maxSize` is reached or after `flushInterval` ms — whichever comes first. Use it to wrap any slow sink (HTTP, database, filesystem) so per-call cost stays cheap.

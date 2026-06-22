@@ -7,6 +7,7 @@ import LogReporter from '../src/LogReporter'
 import JSONLineReporter from '../src/JSONLineReporter'
 import FileLogReporter from '../src/FileLogReporter'
 import BufferedReporter from '../src/BufferedReporter'
+import RingBufferReporter from '../src/RingBufferReporter'
 
 // 2026-01-01T00:00:00.000Z in epoch ms
 const T0 = 1767225600000
@@ -1566,5 +1567,149 @@ describe('FileLogReporter — ESM smoke (post-build)', () => {
         const FileLogReporterBuilt: typeof FileLogReporter = mod.default
         const reporter = new FileLogReporterBuilt('/tmp/esm-smoke-test.log')
         await reporter.close()
+    })
+})
+
+describe('RingBufferReporter', () => {
+    it('throws when capacity is not a positive integer', () => {
+        expect(() => new RingBufferReporter(0)).toThrow()
+        expect(() => new RingBufferReporter(-1)).toThrow()
+        expect(() => new RingBufferReporter(1.5)).toThrow()
+    })
+
+    it('buffers entries up to capacity', () => {
+        const reporter = new RingBufferReporter(3)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        factory.getLogger('a').info('one')
+        factory.getLogger('a').info('two')
+        factory.getLogger('a').info('three')
+        expect(reporter.size).toBe(3)
+        expect(reporter.snapshot()).toHaveLength(3)
+    })
+
+    it('overwrites the oldest entry when full', () => {
+        const reporter = new RingBufferReporter(3)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        const log = factory.getLogger('a')
+        log.info('one')
+        log.info('two')
+        log.info('three')
+        log.info('four')
+        const snap = reporter.snapshot()
+        expect(snap).toHaveLength(3)
+        expect(snap[0].messages[0]).toBe('two')
+        expect(snap[1].messages[0]).toBe('three')
+        expect(snap[2].messages[0]).toBe('four')
+    })
+
+    it('snapshot returns entries in insertion order (oldest to newest)', () => {
+        const reporter = new RingBufferReporter(5)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        const log = factory.getLogger('s')
+        log.info('a')
+        log.info('b')
+        log.info('c')
+        const snap = reporter.snapshot()
+        expect(snap.map(e => e.messages[0])).toEqual(['a', 'b', 'c'])
+    })
+
+    it('snapshot returns a shallow copy — mutating it does not affect the buffer', () => {
+        const reporter = new RingBufferReporter(3)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        factory.getLogger('s').info('msg')
+        const snap = reporter.snapshot()
+        snap.pop()
+        expect(reporter.size).toBe(1)
+    })
+
+    it('size reflects the number of buffered entries', () => {
+        const reporter = new RingBufferReporter(5)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        expect(reporter.size).toBe(0)
+        factory.getLogger('s').info('x')
+        expect(reporter.size).toBe(1)
+        factory.getLogger('s').info('y')
+        expect(reporter.size).toBe(2)
+    })
+
+    it('size is capped at capacity after overflow', () => {
+        const reporter = new RingBufferReporter(2)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        factory.getLogger('s').info('a')
+        factory.getLogger('s').info('b')
+        factory.getLogger('s').info('c')
+        expect(reporter.size).toBe(2)
+    })
+
+    it('capacity getter returns the configured limit', () => {
+        const reporter = new RingBufferReporter(7)
+        expect(reporter.capacity).toBe(7)
+    })
+
+    it('clear resets size to zero and snapshot returns empty array', () => {
+        const reporter = new RingBufferReporter(4)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        factory.getLogger('s').info('a')
+        factory.getLogger('s').info('b')
+        reporter.clear()
+        expect(reporter.size).toBe(0)
+        expect(reporter.snapshot()).toHaveLength(0)
+    })
+
+    it('clear preserves capacity — new entries can be pushed after clear', () => {
+        const reporter = new RingBufferReporter(3)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        factory.getLogger('s').info('a')
+        reporter.clear()
+        factory.getLogger('s').info('b')
+        const snap = reporter.snapshot()
+        expect(snap).toHaveLength(1)
+        expect(snap[0].messages[0]).toBe('b')
+    })
+
+    it('respects factory level filtering', () => {
+        const reporter = new RingBufferReporter(10)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'warning'
+        const log = factory.getLogger('s')
+        log.debug('dropped')
+        log.info('dropped')
+        log.warning('kept')
+        log.error('kept')
+        expect(reporter.size).toBe(2)
+    })
+
+    it('captures level, scope, time, fields, and messages on each entry', () => {
+        const reporter = new RingBufferReporter(5)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        const log = factory.getLogger('svc').withContext({ reqId: 'r1' })
+        log.warning('something happened', { detail: 42 })
+        const [entry] = reporter.snapshot()
+        expect(entry.level).toBe('warning')
+        expect(entry.scope).toBe('svc')
+        expect(entry.time).toBe(T0)
+        expect(entry.fields).toEqual({ reqId: 'r1' })
+        expect(entry.messages).toEqual(['something happened', { detail: 42 }])
+    })
+
+    it('ring wraps correctly across multiple overwrite cycles', () => {
+        const reporter = new RingBufferReporter(3)
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        const log = factory.getLogger('s')
+        for (let i = 1; i <= 9; i++) {
+            log.info(`msg-${i}`)
+        }
+        const snap = reporter.snapshot()
+        expect(snap.map(e => e.messages[0])).toEqual(['msg-7', 'msg-8', 'msg-9'])
     })
 })

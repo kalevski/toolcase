@@ -4,6 +4,7 @@ import LogLevelsDemo from './LogLevelsDemo'
 import MultipleScopesDemo from './MultipleScopesDemo'
 import CustomReporterDemo from './CustomReporterDemo'
 import ScopePatternDemo from './ScopePatternDemo'
+import RingBufferReporterDemo from './RingBufferReporterDemo'
 
 export type LoggingExampleDef = {
     key: string
@@ -17,4 +18,5 @@ export const loggingExamples: LoggingExampleDef[] = [
     { key: 'scopes', label: 'Multiple Scopes', element: <MultipleScopesDemo /> },
     { key: 'reporter', label: 'Custom Reporter', element: <CustomReporterDemo /> },
     { key: 'scope-pattern', label: 'Scope-pattern Levels', element: <ScopePatternDemo /> },
+    { key: 'ring-buffer', label: 'RingBufferReporter', element: <RingBufferReporterDemo /> },
 ]
