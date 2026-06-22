@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
 ---
 
 # base — API Reference
@@ -18,6 +18,7 @@ import {
     LSystem, ObjectPool, PriorityQueue, RingBuffer, Stack, Deque,
     generateId, ulid, toHex, formatByteSize, formatDuration, formatNumber, relativeTime,
     bufferToHex, hexToBuffer,
+    slugify, truncate, escapeHtml,
     Color, JSONSchema, getNumberInRange,
     clamp, lerp, inverseLerp, mapRange, smoothstep, approximately,
     // easing functions also available individually:
@@ -61,6 +62,10 @@ import {
 - [Easing](#easing)
   - [Easing functions](#easing-functions)
   - [cubicBezier](#cubicbezier)
+- [String helpers](#string-helpers)
+  - [slugify](#slugify)
+  - [truncate](#truncate)
+  - [escapeHtml](#escapehtml)
 - [Utilities](#utilities)
   - [generateId](#generateid)
   - [ulid](#ulid)
@@ -2086,6 +2091,92 @@ new Vec2(0, 0).distanceTo(new Vec2(3, 4))  // 5
 const bounds: Rect = { x: 0, y: 0, width: 100, height: 50 }
 const center = new Vec2(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
 center.toString()  // 'Vec2(50, 25)'
+```
+
+---
+
+## String helpers
+
+Three zero-dependency string utilities for HTML, URL slugs, and display truncation. All are pure functions (no side effects, no state).
+
+```ts
+import { slugify, truncate, escapeHtml } from '@toolcase/base'
+```
+
+### slugify
+
+Convert an arbitrary string into a URL-safe slug: lowercase, ASCII-only, hyphen-separated, no leading/trailing hyphens.
+
+```ts
+slugify(input: string): string
+```
+
+- Trims leading/trailing whitespace.
+- Lowercases.
+- Decomposes (NFD) and strips combining diacritical marks (U+0300–U+036F), converting accented letters to their ASCII base.
+- Removes any character that is not `a-z`, `0-9`, space, or `-`.
+- Collapses consecutive whitespace, underscores, and hyphens into a single `-`.
+- Strips any remaining leading or trailing `-`.
+
+```ts
+slugify('Hello, World!')        // 'hello-world'
+slugify('  héllo wörld  ')      // 'hello-world'
+slugify('café')                 // 'cafe'
+slugify('My Post Title 2024')   // 'my-post-title-2024'
+slugify('hello--world')         // 'hello-world'
+slugify('!!!---')               // ''
+```
+
+### truncate
+
+Shorten a string to `maxLength` characters, appending a suffix when truncated.
+
+```ts
+truncate(input: string, maxLength: number, suffix: string = '…'): string
+```
+
+- Returns `input` unchanged when `input.length <= maxLength`.
+- Otherwise cuts the input at `maxLength - suffix.length` characters and appends `suffix`.
+- When `maxLength < suffix.length`, the suffix itself is clipped to `maxLength`.
+
+```ts
+truncate('hello world', 8)         // 'hello w…'
+truncate('hello world', 8, '...')  // 'hello...'
+truncate('short', 10)              // 'short'
+truncate('hi', 1, '…')            // '…'
+```
+
+### escapeHtml
+
+Escape the five HTML special characters (`& < > " '`) so a string can be safely injected into HTML content or attributes without introducing markup or XSS vectors.
+
+```ts
+escapeHtml(input: string): string
+```
+
+| Character | Replacement |
+|---|---|
+| `&` | `&amp;` |
+| `<` | `&lt;` |
+| `>` | `&gt;` |
+| `"` | `&quot;` |
+| `'` | `&#39;` |
+
+```ts
+escapeHtml('& < > " \'')
+// '&amp; &lt; &gt; &quot; &#39;'
+
+escapeHtml('<script>alert("XSS")</script>')
+// '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
+
+escapeHtml('hello world')
+// 'hello world'   (safe chars pass through unchanged)
+```
+
+Use before inserting any user-supplied text into `innerHTML`:
+
+```ts
+element.innerHTML = `<p>${escapeHtml(userInput)}</p>`
 ```
 
 ---

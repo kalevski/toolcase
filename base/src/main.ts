@@ -33,6 +33,9 @@ import Trie from './Trie'
 import BiMap from './BiMap'
 import MultiMap from './MultiMap'
 import Vec2 from './Vec2'
+import slugify from './slugify'
+import truncate from './truncate'
+import escapeHtml from './escapeHtml'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -156,7 +159,10 @@ export {
     Trie,
     BiMap,
     MultiMap,
-    Vec2
+    Vec2,
+    slugify,
+    truncate,
+    escapeHtml
 }
 
 const BASE = {
@@ -215,7 +221,10 @@ const BASE = {
     Trie,
     BiMap,
     MultiMap,
-    Vec2
+    Vec2,
+    slugify,
+    truncate,
+    escapeHtml
 }
 
 export default BASE

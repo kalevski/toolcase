@@ -31,6 +31,7 @@ import Vec2Demo from './Vec2Demo'
 import MathDemo from './MathDemo'
 import EasingDemo from './EasingDemo'
 import FormattingDemo from './FormattingDemo'
+import StringHelpersDemo from './StringHelpersDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -86,6 +87,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'ulid', label: 'ulid', category: 'Utilities & Colors', element: <UlidDemo /> },
     { key: 'utilities', label: 'Utility Functions', category: 'Utilities & Colors', element: <UtilitiesDemo /> },
     { key: 'formatting', label: 'Formatting Helpers', category: 'Utilities & Colors', element: <FormattingDemo /> },
+    { key: 'string-helpers', label: 'String Helpers', category: 'Utilities & Colors', element: <StringHelpersDemo /> },
     { key: 'math', label: 'Math Utilities', category: 'Utilities & Colors', element: <MathDemo /> },
     { key: 'easing', label: 'Easing Functions', category: 'Utilities & Colors', element: <EasingDemo /> },
     { key: 'color', label: 'Color', category: 'Utilities & Colors', element: <ColorDemo /> },
