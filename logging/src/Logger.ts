@@ -2,7 +2,7 @@ import { LoggerLevel, getLevel, getLevelOrder, isKnownLevel } from './Level'
 
 export type ClockFn = () => number
 export type LogMessageFn = (level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[], overrideOrder?: number | null) => void
-export type IsEnabledFn = (order: number, overrideOrder: number | null) => boolean
+export type IsEnabledFn = (order: number, overrideOrder: number | null, scope: string) => boolean
 
 class Logger {
 
@@ -45,13 +45,13 @@ class Logger {
         if (!this.isEnabledFn) {
             return true
         }
-        return this.isEnabledFn(getLevelOrder(level), this.levelOverride)
+        return this.isEnabledFn(getLevelOrder(level), this.levelOverride, this.scope)
     }
 
     log(level: LoggerLevel, ...args: any[]): void {
         if (!isKnownLevel(level)) return
         const order = getLevelOrder(level)
-        if (this.isEnabledFn && !this.isEnabledFn(order, this.levelOverride)) {
+        if (this.isEnabledFn && !this.isEnabledFn(order, this.levelOverride, this.scope)) {
             return
         }
         const time = this.clock()
@@ -73,6 +73,13 @@ class Logger {
         const child = new Logger(this.scope, this.logMessageFn, merged, this.isEnabledFn, this.clock)
         child.levelOverride = this.levelOverride
         return child
+    }
+
+    child(childScope: string): Logger {
+        const scope = `${this.scope}:${childScope}`
+        const logger = new Logger(scope, this.logMessageFn, this.context, this.isEnabledFn, this.clock)
+        logger.levelOverride = this.levelOverride
+        return logger
     }
 
 }

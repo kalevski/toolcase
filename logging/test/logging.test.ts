@@ -1261,6 +1261,227 @@ describe('FileLogReporter', () => {
     })
 })
 
+describe('LoggerFactory.setLevel (scope-pattern overrides)', () => {
+    it('enables a below-global level for a matching scope', () => {
+        const captured: { level: string, scope: string }[] = []
+        class R extends LogReporter { log(level: any, scope: string) { captured.push({ level, scope }) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        factory.setLevel('db:*', 'debug')
+        const db = factory.getLogger('db:pool')
+        db.debug('pool debug')
+        db.verbose('pool verbose')
+        expect(captured.map(e => e.level)).toEqual(['debug'])
+    })
+
+    it('does not affect scopes that do not match the pattern', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        factory.setLevel('db:*', 'debug')
+        factory.getLogger('auth').debug('skipped')
+        expect(captured).toHaveLength(0)
+    })
+
+    it('most-specific pattern wins — db:pool:* over db:*', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'info'
+        factory.setLevel('db:*', 'debug')
+        factory.setLevel('db:pool:*', 'warning')
+        factory.getLogger('db:pool:worker').debug('dropped by db:pool:*')
+        factory.getLogger('db:pool:worker').warning('shown')
+        factory.getLogger('db:query').debug('shown via db:*')
+        expect(captured).toEqual(['warning', 'debug'])
+    })
+
+    it('exact pattern beats wildcard', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'info'
+        factory.setLevel('db:*', 'debug')
+        factory.setLevel('db:pool', 'error')
+        factory.getLogger('db:pool').debug('dropped by exact pattern')
+        factory.getLogger('db:pool').error('shown')
+        factory.getLogger('db:query').debug('shown via db:*')
+        expect(captured).toEqual(['error', 'debug'])
+    })
+
+    it('per-logger setLevel overrides pattern override', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'info'
+        factory.setLevel('db:*', 'debug')
+        const logger = factory.getLogger('db:pool')
+        logger.setLevel('warning')
+        logger.debug('dropped by per-logger override')
+        logger.warning('shown')
+        expect(captured).toEqual(['warning'])
+    })
+
+    it('re-registering the same pattern replaces its level', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'info'
+        factory.setLevel('db:*', 'debug')
+        factory.setLevel('db:*', 'error')
+        factory.getLogger('db:pool').debug('dropped')
+        factory.getLogger('db:pool').warning('dropped')
+        factory.getLogger('db:pool').error('shown')
+        expect(captured).toEqual(['error'])
+    })
+
+    it('throws RangeError for an unknown level', () => {
+        const factory = new LoggerFactory([])
+        expect(() => factory.setLevel('db:*', 'trace' as any)).toThrow(RangeError)
+    })
+
+    it('isEnabled reflects pattern threshold', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'warning'
+        factory.setLevel('db:*', 'debug')
+        const logger = factory.getLogger('db:pool')
+        expect(logger.isEnabled('debug')).toBe(true)
+        expect(logger.isEnabled('verbose')).toBe(false)
+        expect(factory.getLogger('auth').isEnabled('debug')).toBe(false)
+    })
+
+    it('wildcard-only pattern * matches any scope', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        factory.setLevel('*', 'debug')
+        factory.getLogger('anything').debug('shown')
+        factory.getLogger('other:scope').debug('shown')
+        expect(captured).toEqual(['debug', 'debug'])
+    })
+})
+
+describe('LoggerFactory.parseEnv', () => {
+    it('LOG_LEVEL sets the global factory level', () => {
+        const factory = new LoggerFactory([])
+        factory.parseEnv({ LOG_LEVEL: 'debug' })
+        expect(factory.level).toBe('debug')
+    })
+
+    it('DEBUG sets debug level for comma-separated patterns', () => {
+        const captured: { level: string, scope: string }[] = []
+        class R extends LogReporter { log(level: any, scope: string) { captured.push({ level, scope }) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        factory.parseEnv({ DEBUG: 'auth*,db:*' })
+        factory.getLogger('auth').debug('shown')
+        factory.getLogger('auth:login').debug('shown')
+        factory.getLogger('db:pool').debug('shown')
+        factory.getLogger('other').debug('dropped')
+        expect(captured.map(e => e.level)).toEqual(['debug', 'debug', 'debug'])
+        expect(captured.map(e => e.scope)).toEqual(['auth', 'auth:login', 'db:pool'])
+    })
+
+    it('DEBUG with space-separated patterns', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(_l: any, scope: string) { captured.push(scope) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        factory.parseEnv({ DEBUG: 'auth db' })
+        factory.getLogger('auth').debug('shown')
+        factory.getLogger('db').debug('shown')
+        factory.getLogger('other').debug('dropped')
+        expect(captured).toEqual(['auth', 'db'])
+    })
+
+    it('LOG_LEVEL and DEBUG can be combined', () => {
+        const factory = new LoggerFactory([])
+        factory.parseEnv({ LOG_LEVEL: 'error', DEBUG: 'verbose-svc' })
+        expect(factory.level).toBe('error')
+        expect(factory.getLogger('verbose-svc').isEnabled('debug')).toBe(true)
+        expect(factory.getLogger('other').isEnabled('info')).toBe(false)
+    })
+
+    it('unknown LOG_LEVEL is silently ignored', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'info'
+        factory.parseEnv({ LOG_LEVEL: 'trace' })
+        expect(factory.level).toBe('info')
+    })
+
+    it('missing keys are silently skipped', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'info'
+        factory.parseEnv({})
+        expect(factory.level).toBe('info')
+    })
+})
+
+describe('Logger.child (hierarchical scopes)', () => {
+    it('creates a logger with scope parent:child', () => {
+        const captured: { scope: string }[] = []
+        class R extends LogReporter { log(_l: any, scope: string) { captured.push({ scope }) } }
+        const factory = new LoggerFactory([new R()])
+        const db = factory.getLogger('db')
+        const pool = db.child('pool')
+        pool.info('msg')
+        expect(captured[0].scope).toBe('db:pool')
+    })
+
+    it('nested child scopes concatenate with colons', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(_l: any, scope: string) { captured.push(scope) } }
+        const factory = new LoggerFactory([new R()])
+        const pool = factory.getLogger('db').child('pool')
+        const worker = pool.child('worker')
+        worker.info('msg')
+        expect(captured[0]).toBe('db:pool:worker')
+    })
+
+    it('child inherits parent level override', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        const parent = factory.getLogger('svc')
+        parent.setLevel('verbose')
+        const child = parent.child('sub')
+        child.debug('shown via inherited override')
+        expect(captured).toEqual(['debug'])
+    })
+
+    it('child inherits parent withContext fields', () => {
+        const captured: { fields: any }[] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, fields: any) { captured.push({ fields }) } }
+        const factory = new LoggerFactory([new R()])
+        const parent = factory.getLogger('svc').withContext({ requestId: 'r1' })
+        const child = parent.child('sub')
+        child.info('msg')
+        expect(captured[0].fields).toEqual({ requestId: 'r1' })
+    })
+
+    it('child receives pattern level from factory', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(level: any) { captured.push(level) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'warning'
+        factory.setLevel('db:*', 'debug')
+        const pool = factory.getLogger('db').child('pool')
+        pool.debug('shown via pattern')
+        expect(captured).toEqual(['debug'])
+    })
+
+    it('child logs pass through the factory reporters', () => {
+        const captured: string[] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, _f: any, msgs: any[]) { captured.push(msgs[0]) } }
+        const factory = new LoggerFactory([new R()])
+        factory.getLogger('db').child('pool').info('hello')
+        expect(captured).toEqual(['hello'])
+    })
+})
+
 describe('FileLogReporter — ESM smoke (post-build)', () => {
     it('constructs without a Dynamic require error when loaded from the built ESM bundle', async () => {
         const { existsSync } = await import('node:fs')

@@ -499,6 +499,79 @@ class GroupedReporter extends LogReporter {
 
 ---
 
+## Scope-pattern level control
+
+`setLevel(pattern, level)` overrides the threshold for all scopes matching a glob pattern. The most-specific pattern (fewest wildcards) wins when multiple patterns match; last-registered wins on a tie.
+
+```ts
+const factory = new LoggerFactory([reporter])
+factory.level = 'warning'          // global default
+
+factory.setLevel('db:*', 'debug') // any db:* scope → debug
+factory.setLevel('db:pool', 'info') // exact match is more specific → info for db:pool
+
+factory.getLogger('db:pool').debug('dropped — db:pool exact pattern requires ≥ info')
+factory.getLogger('db:pool').info('shown')
+factory.getLogger('db:query').debug('shown — matched by db:*')
+factory.getLogger('auth').debug('dropped — no pattern, global is warning')
+```
+
+Pattern syntax: `*` matches any sequence of characters (including `:` separators).
+
+```ts
+factory.setLevel('auth*', 'debug')    // auth, auth:login, authentication, …
+factory.setLevel('db:pool:*', 'info') // db:pool:worker, db:pool:idle, …
+factory.setLevel('*', 'debug')        // every scope
+```
+
+Throws `RangeError` for an unknown level string (same as the `level` setter).
+
+### Hierarchical scopes via `child()`
+
+`logger.child(childScope)` returns a new logger whose scope is `parentScope:childScope`. Useful for building nested namespaces without repeating the parent prefix.
+
+```ts
+const db     = factory.getLogger('db')
+const pool   = db.child('pool')           // scope: db:pool
+const worker = pool.child('worker')       // scope: db:pool:worker
+
+// Matches factory.setLevel('db:*', 'debug'):
+pool.debug('shown')
+worker.debug('shown')
+```
+
+The child inherits the parent's `withContext` fields and `setLevel` override at creation time. It dispatches through the same factory reporters.
+
+```ts
+const req = factory.getLogger('http').withContext({ requestId: 'r1' })
+const handler = req.child('orders')   // scope: http:orders, carries requestId context
+handler.info('start')
+```
+
+### Env-driven configuration (`parseEnv`)
+
+`parseEnv(env)` reads `LOG_LEVEL` and `DEBUG` from a plain key-value object (pass `process.env` in Node, `import.meta.env` in Vite, or your own record).
+
+```ts
+factory.parseEnv(process.env)
+// LOG_LEVEL=debug    → factory.level = 'debug'
+// DEBUG=auth*,db:*   → factory.setLevel('auth*', 'debug'); factory.setLevel('db:*', 'debug')
+```
+
+`LOG_LEVEL` must be one of the six known level tokens; unknown values are silently ignored. `DEBUG` is comma-or-space-separated and each token becomes a scope pattern at level `debug`. Unknown `LOG_LEVEL` tokens are silently skipped (the factory level is unchanged).
+
+```ts
+// Node
+import logging from '@toolcase/logging'
+logging.parseEnv(process.env)
+
+// Vite / ESM
+import logging from '@toolcase/logging'
+logging.parseEnv(import.meta.env)
+```
+
+---
+
 ## Patterns
 
 **Switch verbosity from env (Node):**
