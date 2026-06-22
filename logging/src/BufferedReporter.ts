@@ -39,6 +39,9 @@ class BufferedReporter extends LogReporter {
         if (typeof process !== 'undefined' && typeof process.once === 'function') {
             process.once('beforeExit', () => this.flush())
         }
+        if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+            window.addEventListener('pagehide', () => this.flush(), { once: true })
+        }
     }
 
     log(level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]): void {

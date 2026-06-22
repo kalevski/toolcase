@@ -217,6 +217,51 @@ describe('LoggerFactory — flush / close lifecycle', () => {
     })
 })
 
+describe('LoggerFactory — close() drains BufferedReporter', () => {
+    it('factory.close() drains buffered entries to the inner reporter', async () => {
+        const received: string[] = []
+        class Inner extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]): void { received.push(msgs[0]) }
+        }
+        const buf = new BufferedReporter(new Inner(), { maxSize: 100, flushInterval: 99999 })
+        const factory = new LoggerFactory([buf])
+        factory.getLogger('test').info('alpha')
+        factory.getLogger('test').info('beta')
+        expect(received).toHaveLength(0)
+        await factory.close()
+        expect(received).toEqual(['alpha', 'beta'])
+    })
+
+    it('factory.flush() drains buffered entries to the inner reporter', () => {
+        const received: string[] = []
+        class Inner extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]): void { received.push(msgs[0]) }
+        }
+        const buf = new BufferedReporter(new Inner(), { maxSize: 100, flushInterval: 99999 })
+        const factory = new LoggerFactory([buf])
+        factory.getLogger('test').info('gamma')
+        expect(received).toHaveLength(0)
+        factory.flush()
+        expect(received).toEqual(['gamma'])
+    })
+
+    it('factory.close() drains multiple BufferedReporters', async () => {
+        const drainedA: string[] = []
+        const drainedB: string[] = []
+        class A extends LogReporter { log(_l: any, _s: any, _t: any, _f: any, msgs: any[]): void { drainedA.push(msgs[0]) } }
+        class B extends LogReporter { log(_l: any, _s: any, _t: any, _f: any, msgs: any[]): void { drainedB.push(msgs[0]) } }
+        const bufA = new BufferedReporter(new A(), { maxSize: 100, flushInterval: 99999 })
+        const bufB = new BufferedReporter(new B(), { maxSize: 100, flushInterval: 99999 })
+        const factory = new LoggerFactory([bufA, bufB])
+        factory.getLogger('t').info('msg')
+        expect(drainedA).toHaveLength(0)
+        expect(drainedB).toHaveLength(0)
+        await factory.close()
+        expect(drainedA).toEqual(['msg'])
+        expect(drainedB).toEqual(['msg'])
+    })
+})
+
 describe('LoggerFactory — addReporter / removeReporter', () => {
     it('addReporter causes the reporter to receive subsequent logs', () => {
         const received: string[] = []
@@ -1079,6 +1124,31 @@ describe('BufferedReporter', () => {
         process.emit('beforeExit', 0)
         expect(flushSpy).toHaveBeenCalledTimes(1)
         flushSpy.mockRestore()
+    })
+
+    it('flush() is called on window pagehide', () => {
+        const originalWindow = (globalThis as any).window
+        const listeners: Array<() => void> = []
+        ;(globalThis as any).window = {
+            addEventListener: (event: string, fn: () => void, _opts?: any) => {
+                if (event === 'pagehide') listeners.push(fn)
+            }
+        }
+        try {
+            const received: string[] = []
+            const buf = new BufferedReporter(null, {
+                onFlush: entries => entries.forEach(e => received.push(e.messages[0])),
+                maxSize: 100,
+                flushInterval: 0
+            })
+            buf.log('info', 's', T0, {}, ['queued'])
+            expect(received).toHaveLength(0)
+            listeners.forEach(fn => fn())
+            expect(received).toEqual(['queued'])
+        } finally {
+            if (originalWindow === undefined) delete (globalThis as any).window
+            else (globalThis as any).window = originalWindow
+        }
     })
 })
 
