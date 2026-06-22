@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), timing (Stopwatch — start/stop/lap/elapsed with injectable clock; Ticker — fixed-step/variable-step update dispatcher driven by tick(delta)), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers, diff — structural delta for plain objects/arrays, patch — apply delta so patch(a,diff(a,b)) deep-equals b), timing (Stopwatch — start/stop/lap/elapsed with injectable clock; Ticker — fixed-step/variable-step update dispatcher driven by tick(delta)), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
 ---
 
 # base — API Reference
@@ -36,9 +36,11 @@ import {
     some, none, // Option<T> factories
     TokenBucket,
     Stopwatch,
-    Ticker
+    Ticker,
+    diff,
+    patch
 } from '@toolcase/base'
-import type { Result, Option } from '@toolcase/base'
+import type { Result, Option, Delta } from '@toolcase/base'
 ```
 
 ---
@@ -111,6 +113,7 @@ import type { Result, Option } from '@toolcase/base'
   - [throttle](#throttle)
   - [AsyncQueue](#asyncqueue)
 - [TokenBucket](#tokenbucket)
+- [diff / patch](#diff--patch)
 
 ---
 
@@ -2517,6 +2520,84 @@ fixedTicker.start()
 function onUpdate(frameDelta: number) {
     fixedTicker.tick(frameDelta)
 }
+```
+
+---
+
+## diff / patch
+
+Structural diff and patch for plain objects and arrays. Zero-dependency, isomorphic.
+
+```ts
+import { diff, patch } from '@toolcase/base'
+import type { Delta } from '@toolcase/base'
+```
+
+### `diff(a, b): Delta | null`
+
+Computes the structural delta from `a` to `b`. Returns `null` when `a` and `b` are deeply equal.
+
+Both arguments must be plain objects (`{}`) or arrays (`[]`). Nested values may be primitives, plain objects, or arrays. Type mismatches at the root (object vs. array) return `null`.
+
+```ts
+function diff(a: unknown, b: unknown): Delta | null
+```
+
+**Delta format (JSON-serializable):**
+
+| Entry type | Shape | Meaning |
+|---|---|---|
+| Added key | `[newValue]` | key was absent in `a`, present in `b` |
+| Replaced value | `[oldValue, newValue]` | key existed in both; value changed |
+| Removed key | `[oldValue, 0, 0]` | key was present in `a`, absent in `b` |
+| Nested object | `ObjectDelta` | both sides are plain objects; recurse |
+| Array context | `{ _t: 'a', _l: number, [index]: entry }` | both sides are arrays; `_l` = new length |
+
+Only changed keys appear in the delta — unchanged keys are omitted.
+
+### `patch(target, delta): unknown`
+
+Applies a delta produced by `diff` to `target`. Returns the new value without mutating `target`. Pass `null` as the delta to return `target` unchanged.
+
+```ts
+function patch(target: unknown, delta: Delta | null): unknown
+```
+
+### Types
+
+```ts
+type Edit = [unknown] | [unknown, unknown] | [unknown, 0, 0]
+type ObjectDelta = { [key: string]: unknown }
+type ArrayDelta  = { _t: 'a'; _l: number; [key: string]: unknown }
+type Delta       = ObjectDelta | ArrayDelta
+```
+
+### Examples
+
+```ts
+import { diff, patch } from '@toolcase/base'
+
+// object diff
+const a = { user: 'Alice', score: 10, tags: ['a', 'b'] }
+const b = { user: 'Alice', score: 99, tags: ['a', 'b', 'c'], active: true }
+
+const delta = diff(a, b)
+// { score: [10, 99], tags: { _t: 'a', _l: 3, '2': ['c'] }, active: [true] }
+
+const result = patch(a, delta)
+// { user: 'Alice', score: 99, tags: ['a', 'b', 'c'], active: true }
+
+// round-trip guarantee
+patch(a, diff(a, b))  // deep-equals b
+
+// no change
+diff(a, a)            // null
+patch(a, null)        // returns a (same reference)
+
+// array diff
+const x = [1, 2, 3]
+const y = [1, 99, 3, 4]
+patch(x, diff(x, y))  // [1, 99, 3, 4]
 ```
 
 ---

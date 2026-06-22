@@ -42,6 +42,8 @@ import Ticker from './Ticker'
 import slugify from './slugify'
 import truncate from './truncate'
 import escapeHtml from './escapeHtml'
+import diff from './diff'
+import patch from './patch'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -73,6 +75,7 @@ const HTTP = {
 
 export type { Result } from './Result'
 export type { Option } from './Option'
+export type { Delta, ObjectDelta, ArrayDelta, Edit } from './diff'
 export type { FormatNumberOptions } from './formatNumber'
 
 export type { SpatialPoint, SpatialRect } from './spatial'
@@ -178,7 +181,9 @@ export {
     Ticker,
     slugify,
     truncate,
-    escapeHtml
+    escapeHtml,
+    diff,
+    patch
 }
 
 const BASE = {
@@ -248,7 +253,9 @@ const BASE = {
     Ticker,
     slugify,
     truncate,
-    escapeHtml
+    escapeHtml,
+    diff,
+    patch
 }
 
 export default BASE

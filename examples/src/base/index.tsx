@@ -37,6 +37,7 @@ import BloomFilterDemo from './BloomFilterDemo'
 import TokenBucketDemo from './TokenBucketDemo'
 import StopwatchDemo from './StopwatchDemo'
 import TickerDemo from './TickerDemo'
+import DiffPatchDemo from './DiffPatchDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -104,4 +105,5 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'token-bucket', label: 'TokenBucket', category: 'Utilities & Colors', element: <TokenBucketDemo /> },
     { key: 'stopwatch', label: 'Stopwatch', category: 'Utilities & Colors', element: <StopwatchDemo /> },
     { key: 'ticker', label: 'Ticker', category: 'Utilities & Colors', element: <TickerDemo /> },
+    { key: 'diff-patch', label: 'diff / patch', category: 'Utilities & Colors', element: <DiffPatchDemo /> },
 ]
