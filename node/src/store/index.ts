@@ -1,0 +1,5 @@
+export type { BlockRef } from './BlockRef'
+export { serializeBlockRef, deserializeBlockRef, BLOCK_REF_SIZE } from './BlockRef'
+export { BlockStore } from './BlockStore'
+export { NodeStore } from './NodeStore'
+export type { NodeStoreOptions } from './NodeStore'
