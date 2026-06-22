@@ -17,6 +17,7 @@ import SplitScreen from './features/SplitScreen'
 import GameObjectPool from './pool/GameObjectPool'
 
 import Matrix2 from './math/Matrix2'
+import { SpatialHash, Quadtree } from './structs'
 
 import Event from './flow/Event'
 import TimeEvent from './flow/TimeEvent'
@@ -79,10 +80,13 @@ const Flow = {
 }
 
 const Structs = {
-    Matrix2
+    Matrix2,
+    SpatialHash,
+    Quadtree
 }
 
 export type { Disposable }
+export type { SpatialPoint, SpatialRect } from './structs'
 export {
     Events,
     Flow,

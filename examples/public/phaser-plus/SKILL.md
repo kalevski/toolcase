@@ -14,7 +14,7 @@ import {
     Layer, ObjectLayer, HTMLFeature, SplitScreen,
     GameObjectPool,
     Flow,    // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, StateMachine, BehaviorTreeProcessor, ReplayRecorder, Timer, Tween, Timeline, TweenProcessor, EASE, resolveEase, Parallel, throttle, debounce, BT: {...} }
-    Structs, // { Matrix2 }
+    Structs, // { Matrix2, SpatialHash, Quadtree }
     LogLevel,
     // Debugger
     Debugger, Panel,
@@ -84,6 +84,8 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [GameObject2D](#gameobject2d)
   - [Grid](#grid)
   - [Matrix2](#matrix2)
+  - [SpatialHash](#spatialhash)
+  - [Quadtree](#quadtree)
 - [Effects](#effects)
 - [AI / Pathfinding](#ai--pathfinding)
 - [Events constants](#events-constants)
@@ -703,6 +705,56 @@ iso.inverse                              // cached inverse
 iso.determinant
 iso.setValues(v00, v01, v10, v11)
 ```
+
+### SpatialHash
+
+Uniform-grid broad-phase spatial hash. O(1) amortised insert/remove; query cost scales with cells touched. Best for objects of roughly uniform size (`cellSize ≈ 2× average object diameter`). Backed by `Spatial.SpatialHash` from `@toolcase/base`.
+
+```ts
+import type { SpatialPoint, SpatialRect } from '@toolcase/phaser-plus'
+
+const hash = new Structs.SpatialHash<Enemy>(64)   // cellSize = 64 px
+
+// insert / move / remove
+hash.insert(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })
+hash.update(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })
+hash.remove(enemy)
+
+// range query — returns all items whose bounds overlap the rect
+const nearby = hash.query({ x: px - 200, y: py - 200, width: 400, height: 400 })
+
+// nearest-neighbour — distance measured point-to-nearest-edge (0 if inside)
+const closest = hash.nearest({ x: px, y: py }, /* maxDist */ 300)
+
+hash.size   // current item count
+hash.clear()
+```
+
+### Quadtree
+
+Recursive quad-partition tree. O(log n) insert; query prunes by bounding box; nearest uses branch-and-bound. Best for non-uniform object density. Backed by `Spatial.Quadtree` from `@toolcase/base`.
+
+```ts
+const qt = new Structs.Quadtree<Enemy>(
+    { x: 0, y: 0, width: 4096, height: 4096 },  // world bounds
+    /* capacity */ 8,                              // max items per node before split (default 8)
+    /* maxDepth */ 8                               // maximum subdivision depth (default 8)
+)
+
+qt.insert(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })  // returns false if out-of-bounds or duplicate
+qt.update(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })
+qt.remove(enemy)
+
+const nearby  = qt.query({ x: px - 200, y: py - 200, width: 400, height: 400 })
+const closest = qt.nearest({ x: px, y: py }, /* maxDist */ 300)
+
+qt.size   // current item count
+qt.clear()
+```
+
+**Choosing between the two:**
+- `SpatialHash` — uniform object sizes, high throughput, frequent moves.
+- `Quadtree` — varying object sizes or sparse density; culling and AI perception over irregular distributions.
 
 ---
 
