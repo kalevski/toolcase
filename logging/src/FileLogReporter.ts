@@ -2,7 +2,7 @@ import { createWriteStream, unlinkSync, renameSync, type WriteStream } from 'nod
 import { LoggerLevel } from './Level'
 import LogReporter from './LogReporter'
 
-export type FileLogFormatter = (level: LoggerLevel, scope: string, time: string, messages: any[]) => string
+export type FileLogFormatter = (level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[]) => string
 
 export interface FileLogReporterOptions {
     append?: boolean
@@ -12,7 +12,7 @@ export interface FileLogReporterOptions {
     maxFiles?: number
 }
 
-const defaultFormatter: FileLogFormatter = (level, scope, time, messages) => {
+const defaultFormatter: FileLogFormatter = (level, scope, time, _fields, messages) => {
     const body = messages.map(m => {
         if (m instanceof Error) return m.stack || m.message
         if (typeof m === 'object' && m !== null) {
@@ -48,8 +48,8 @@ class FileLogReporter extends LogReporter {
         this.stream.on('error', err => this.onError?.(err))
     }
 
-    log(level: LoggerLevel, scope: string, time: string, messages: any[]): void {
-        const line = this.formatter(level, scope, time, messages) + '\n'
+    log(level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[]): void {
+        const line = this.formatter(level, scope, time, fields, messages) + '\n'
         if (this.rotating) {
             this.pending.push(line)
             return

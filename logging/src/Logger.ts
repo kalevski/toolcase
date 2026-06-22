@@ -1,6 +1,6 @@
 import { LoggerLevel, getLevel, getLevelOrder, isKnownLevel } from './Level'
 
-export type LogMessageFn = (level: LoggerLevel, scope: string, time: string, messages: any[], overrideOrder?: number | null) => void
+export type LogMessageFn = (level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[], overrideOrder?: number | null) => void
 export type IsEnabledFn = (order: number, overrideOrder: number | null) => boolean
 
 class Logger {
@@ -53,8 +53,8 @@ class Logger {
         }
         const time = new Date().toISOString()
         const evaluated = args.map(a => typeof a === 'function' ? a() : a)
-        const messages = this.context === null ? evaluated : [this.context, ...evaluated]
-        this.logMessageFn(level, this.scope, time, messages, this.levelOverride)
+        const fields = this.context ?? {}
+        this.logMessageFn(level, this.scope, time, fields, evaluated, this.levelOverride)
     }
 
     setLevel(level: LoggerLevel | null): void {

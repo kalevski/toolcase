@@ -66,7 +66,7 @@ class LoggerFactory {
         return threshold >= order
     }
 
-    private onLog = (level: LoggerLevel, scope: string, time: string, messages: any[], overrideOrder?: number | null): void => {
+    private onLog = (level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[], overrideOrder?: number | null): void => {
         const order = getLevelOrder(level)
         const threshold = (overrideOrder === null || overrideOrder === undefined) ? this.levelOrder : overrideOrder
         if (threshold < order) {
@@ -74,7 +74,7 @@ class LoggerFactory {
         }
         for (const reporter of this.reporters) {
             try {
-                reporter.log(level, scope, time, messages)
+                reporter.log(level, scope, time, fields, messages)
             } catch (err) {
                 console.error('[logging] reporter threw; isolating:', err)
             }

@@ -21,9 +21,10 @@ class JSONLineReporter extends LogReporter {
         this.extra = options.extra ?? {}
     }
 
-    log(level: LoggerLevel, scope: string, time: string, messages: any[]): void {
+    log(level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[]): void {
         const record = {
             ...this.extra,
+            ...fields,
             level,
             scope,
             time,
@@ -32,7 +33,7 @@ class JSONLineReporter extends LogReporter {
         try {
             this.writeFn(JSON.stringify(record))
         } catch {
-            this.writeFn(JSON.stringify({ ...this.extra, level, scope, time, messages: ['<unserializable>'] }))
+            this.writeFn(JSON.stringify({ ...this.extra, ...fields, level, scope, time, messages: ['<unserializable>'] }))
         }
     }
 

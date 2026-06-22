@@ -88,7 +88,7 @@ class ConsoleLogReporter extends LogReporter {
         return messages.map(serializeMessage)
     }
 
-    log(level: LoggerLevel, scope: string, time: string, messages: any[]): void {
+    log(level: LoggerLevel, scope: string, time: string, _fields: Record<string, any>, messages: any[]): void {
         const prefix = this.buildPrefix(level, scope, time)
         const msgs = this.prepareMessages(messages)
 

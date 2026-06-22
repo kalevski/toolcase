@@ -5,6 +5,7 @@ export interface LogEntry {
     level: LoggerLevel
     scope: string
     time: string
+    fields: Record<string, any>
     messages: any[]
 }
 
@@ -40,8 +41,8 @@ class BufferedReporter extends LogReporter {
         }
     }
 
-    log(level: LoggerLevel, scope: string, time: string, messages: any[]): void {
-        this.buffer.push({ level, scope, time, messages })
+    log(level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[]): void {
+        this.buffer.push({ level, scope, time, fields, messages })
         if (this.buffer.length >= this.maxSize) {
             this.flush()
             return
@@ -72,7 +73,7 @@ class BufferedReporter extends LogReporter {
         if (this.inner !== null) {
             for (const entry of entries) {
                 try {
-                    this.inner.log(entry.level, entry.scope, entry.time, entry.messages)
+                    this.inner.log(entry.level, entry.scope, entry.time, entry.fields, entry.messages)
                 } catch (err) {
                     console.error('[logging] BufferedReporter inner reporter threw:', err)
                 }
