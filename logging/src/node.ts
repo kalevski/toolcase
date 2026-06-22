@@ -1,4 +1,5 @@
+import StreamReporter, { type StreamLogFormatter, type StreamReporterOptions } from './StreamReporter'
 import FileLogReporter, { type FileLogFormatter, type FileLogReporterOptions } from './FileLogReporter'
 
-export { FileLogReporter }
-export type { FileLogFormatter, FileLogReporterOptions }
+export { StreamReporter, FileLogReporter }
+export type { StreamLogFormatter, StreamReporterOptions, FileLogFormatter, FileLogReporterOptions }

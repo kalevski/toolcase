@@ -6,6 +6,7 @@ import ConsoleLogReporter from '../src/ConsoleLogReporter'
 import LogReporter from '../src/LogReporter'
 import JSONLineReporter from '../src/JSONLineReporter'
 import FileLogReporter from '../src/FileLogReporter'
+import StreamReporter from '../src/StreamReporter'
 import BufferedReporter from '../src/BufferedReporter'
 import RingBufferReporter from '../src/RingBufferReporter'
 import LevelFilterReporter from '../src/LevelFilterReporter'
@@ -1338,6 +1339,104 @@ describe('FileLogReporter', () => {
         expect(existsSync(`${file}.3`)).toBe(false)
         expect(readFileSync(`${file}.2`, 'utf8')).toBe('archive-1\n')
         expect(readFileSync(`${file}.1`, 'utf8')).toBe('hello\n')
+    })
+})
+
+describe('StreamReporter', () => {
+    it('writes formatted lines to a Writable', async () => {
+        const { Writable } = await import('node:stream')
+        const chunks: Buffer[] = []
+        const stream = new Writable({
+            write(chunk, _enc, done) { chunks.push(chunk); done() }
+        })
+        const reporter = new StreamReporter(stream)
+        reporter.log('info', 'svc', T0, {}, ['hello', { k: 1 }])
+        await reporter.close()
+        const content = Buffer.concat(chunks).toString()
+        expect(content).toContain('INFO')
+        expect(content).toContain('svc')
+        expect(content).toContain('hello')
+        expect(content).toContain('{"k":1}')
+    })
+
+    it('uses a custom formatter', async () => {
+        const { Writable } = await import('node:stream')
+        const chunks: Buffer[] = []
+        const stream = new Writable({
+            write(chunk, _enc, done) { chunks.push(chunk); done() }
+        })
+        const reporter = new StreamReporter(stream, {
+            formatter: (level, _scope, _time, _fields, messages) => `[${level}] ${messages.join('|')}`
+        })
+        reporter.log('warning', 's', T0, {}, ['a', 'b'])
+        await reporter.close()
+        const content = Buffer.concat(chunks).toString().trim()
+        expect(content).toBe('[warning] a|b')
+    })
+
+    it('invokes onError when the stream emits an error', async () => {
+        const { PassThrough } = await import('node:stream')
+        const errors: Error[] = []
+        const stream = new PassThrough()
+        const reporter = new StreamReporter(stream, { onError: err => errors.push(err) })
+        const err = new Error('stream error')
+        stream.emit('error', err)
+        expect(errors).toHaveLength(1)
+        expect(errors[0]).toBe(err)
+    })
+
+    it('resets the byte counter when maxBytes is exceeded and continues writing to the same stream', async () => {
+        const { Writable } = await import('node:stream')
+        const chunks: Buffer[] = []
+        const stream = new Writable({
+            write(chunk, _enc, done) { chunks.push(chunk); done() }
+        })
+        const reporter = new StreamReporter(stream, {
+            maxBytes: 10,
+            formatter: (_l, _s, _t, _f, msgs) => msgs.join('')
+        })
+        reporter.log('info', 's', T0, {}, ['hello'])   // "hello\n" = 6 bytes → written directly
+        reporter.log('info', 's', T0, {}, ['world'])   // "world\n" = 6 bytes → 6+6 > 10 → rotation
+        await reporter.close()
+        const content = Buffer.concat(chunks).toString()
+        expect(content).toContain('hello')
+        expect(content).toContain('world')
+    })
+
+    it('queues multiple lines during rotation and flushes them all afterwards', async () => {
+        const { Writable } = await import('node:stream')
+        const chunks: Buffer[] = []
+        const stream = new Writable({
+            write(chunk, _enc, done) { chunks.push(chunk); done() }
+        })
+        const reporter = new StreamReporter(stream, {
+            maxBytes: 5,
+            formatter: (_l, _s, _t, _f, msgs) => msgs.join('')
+        })
+        reporter.log('info', 's', T0, {}, ['abc'])    // "abc\n" = 4 bytes → written
+        reporter.log('info', 's', T0, {}, ['xyz'])    // "xyz\n" = 4 bytes → 4+4 > 5 → rotation; queued
+        reporter.log('info', 's', T0, {}, ['pqr'])    // queued during rotation
+        await reporter.close()
+        const content = Buffer.concat(chunks).toString()
+        expect(content).toContain('abc')
+        expect(content).toContain('xyz')
+        expect(content).toContain('pqr')
+    })
+
+    it('close() ends the stream', async () => {
+        const { Writable } = await import('node:stream')
+        let finished = false
+        const stream = new Writable({
+            write(_chunk, _enc, done) { done() }
+        })
+        stream.on('finish', () => { finished = true })
+        const reporter = new StreamReporter(stream)
+        await reporter.close()
+        expect(finished).toBe(true)
+    })
+
+    it('FileLogReporter is a subclass of StreamReporter', () => {
+        expect(Object.getPrototypeOf(FileLogReporter.prototype)).toBe(StreamReporter.prototype)
     })
 })
 
