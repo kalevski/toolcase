@@ -47,6 +47,7 @@ import VirtualJoystickDemo from './scenes/VirtualJoystickDemo.js'
 import GestureRecognizerDemo from './scenes/GestureRecognizerDemo.js'
 import GamepadDemo from './scenes/GamepadDemo.js'
 import InputBufferDemo from './scenes/InputBufferDemo.js'
+import SaveServiceDemo from './scenes/SaveServiceDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -461,5 +462,13 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Ring buffer of recent inputs; consumeMatch detects fighting-game combos.',
         sceneFile: 'InputBufferDemo.js',
         element: <PhaserCanvas sceneClass={InputBufferDemo} />
+    },
+    {
+        key: 'save-service',
+        title: 'Save Service',
+        category: 'Features',
+        description: 'SaveService + PersistenceFeature: 3 slots via tc-save-slot-list, LocalStorage backend, visible v1→v2 migration on load.',
+        sceneFile: 'SaveServiceDemo.js',
+        element: <PhaserCanvas sceneClass={SaveServiceDemo} />
     }
 ]

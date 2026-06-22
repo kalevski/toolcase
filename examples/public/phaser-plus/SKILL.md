@@ -41,7 +41,10 @@ import {
     SUCCESS, FAILURE, RUNNING,
     REPLAY_FRAME, REPLAY_END,
     // Audio
-    AudioFeature, AUDIO_MUSIC_START, AUDIO_MUSIC_END, AUDIO_BUS_CHANGE
+    AudioFeature, AUDIO_MUSIC_START, AUDIO_MUSIC_END, AUDIO_BUS_CHANGE,
+    // Persistence
+    SaveService, PersistenceFeature, SAVE_DONE, LOAD_DONE, SAVE_DELETED,
+    LocalStorageBackend, IndexedDBBackend, MemoryBackend
 } from '@toolcase/phaser-plus'
 ```
 
@@ -1424,6 +1427,150 @@ audio.removeBus('voice')       // stops and destroys current track on the bus
 
 ---
 
+## Persistence — SaveService, PersistenceFeature, backends
+
+Durable save-slot system backed by a pluggable `SaveBackend`. Stores versioned JSON envelopes and applies a migration chain when loading older saves.
+
+### SaveService (ServiceRegistry singleton)
+
+```ts
+import { SaveService, LocalStorageBackend, MemoryBackend, IndexedDBBackend } from '@toolcase/phaser-plus'
+import type { SaveSchema, SaveConfig } from '@toolcase/phaser-plus'
+```
+
+Construct via `engine.services.bind`:
+
+```ts
+scene.services.bind(SaveService, () => new SaveService({
+    backend: new LocalStorageBackend('my-app'),   // default backend
+    namespace: 'game',                            // namespaces keys within the backend
+    schema: {
+        version: 2,
+        migrations: {
+            1: (data) => ({ ...data, playerName: 'Hero' })  // v1 → v2
+        }
+    }
+}))
+```
+
+`new SaveService()` (zero-arg) defaults to `LocalStorageBackend('phaser-plus')`, namespace `'save'`, schema version 1.
+
+| Method | Returns | Description |
+|---|---|---|
+| `save(slotId, data)` | `Promise<void>` | Serialize `data` as a versioned envelope |
+| `load<T>(slotId)` | `Promise<T \| null>` | Load + run migrations; `null` when slot missing |
+| `delete(slotId)` | `Promise<void>` | Remove a slot |
+| `list()` | `Promise<SaveEntry[]>` | All saved entries in this namespace |
+| `has(slotId)` | `Promise<boolean>` | Check if a slot exists |
+| `setSchema(schema)` | `this` | Replace schema at runtime |
+| `dispose()` | `void` | Calls `backend.dispose()`; invoked automatically by `ServiceRegistry` |
+
+`SaveEntry`: `{ id: string, version: number, savedAt: number }`.
+
+### SaveBackend interface
+
+```ts
+interface SaveBackend {
+    save(key: string, value: string): Promise<void>
+    load(key: string): Promise<string | null>
+    delete(key: string): Promise<void>
+    keys(): Promise<string[]>
+    dispose(): void
+}
+```
+
+Three built-in backends:
+
+| Class | Storage | Use for |
+|---|---|---|
+| `LocalStorageBackend(appPrefix?)` | `localStorage` | Default; up to ~5 MB |
+| `IndexedDBBackend(dbName?)` | IndexedDB | Large saves, binary blobs |
+| `MemoryBackend()` | `Map<string, string>` | Tests; volatile |
+
+### PersistenceFeature
+
+Scene-lifetime `Feature` that resolves `SaveService` from `engine.services` and forwards calls onto it with feature-bus events.
+
+```ts
+import { PersistenceFeature, SAVE_DONE, LOAD_DONE, SAVE_DELETED } from '@toolcase/phaser-plus'
+
+// onInit: bind SaveService first
+this.services.bind(SaveService, () => new SaveService({ namespace: 'game', schema }))
+
+// onCreate: register the feature
+const persistence = this.features.register('persistence', PersistenceFeature)
+
+await persistence.save('slot-1', gameState)
+const data = await persistence.load<GameState>('slot-1')
+await persistence.delete('slot-1')
+const entries = await persistence.list()
+
+// listen for async completions on the feature bus
+this.features.on(SAVE_DONE,    (slotId, data) => hud.refresh())
+this.features.on(LOAD_DONE,    (slotId, data) => applyState(data))
+this.features.on(SAVE_DELETED, (slotId)       => hud.refresh())
+```
+
+`persistence.service` exposes the raw `SaveService` for direct access.
+
+### Migration chain (v1 → v2 → v3)
+
+Each key in `migrations` is the source version to migrate FROM. The chain runs iteratively until `data._version === schema.version`:
+
+```ts
+const schema: SaveSchema = {
+    version: 3,
+    migrations: {
+        1: (d) => ({ ...d, playerName: 'Hero' }),  // v1 → v2
+        2: (d) => ({ ...d, highScore: 0 })          // v2 → v3
+    }
+}
+```
+
+A save made with version 1 passes through both migrators in order. Saves already at version 3 are returned unchanged.
+
+### Worked example — save/load with tc-save-slot-list
+
+```ts
+import {
+    Scene, HTMLFeature, SaveService, PersistenceFeature, LocalStorageBackend,
+    LOAD_DONE, SAVE_DONE, SAVE_DELETED
+} from '@toolcase/phaser-plus'
+
+const SCHEMA: SaveSchema = {
+    version: 2,
+    migrations: { 1: (d) => ({ ...d, playerName: 'Hero' }) }
+}
+
+class HUD extends HTMLFeature {
+    onCreate() {
+        this.node.innerHTML = '<tc-save-slot-list id="slots" mode="load"></tc-save-slot-list>'
+        const list = this.node.querySelector('#slots')
+        list.onLoad = id => this.scene.features.get('p')?.load(id)
+        list.onSave = id => this.scene.features.get('p')?.save(id, this.scene.state)
+        list.onDelete = id => this.scene.features.get('p')?.delete(id)
+    }
+}
+
+class GameScene extends Scene {
+    onInit() {
+        this.services.bind(SaveService, () => new SaveService({
+            backend: new LocalStorageBackend('my-game'),
+            namespace: 'game',
+            schema: SCHEMA
+        }))
+    }
+    onCreate() {
+        const p = this.features.register('p', PersistenceFeature)
+        this.features.register('hud', HUD)
+        this.features.on(LOAD_DONE, (id, data) => applyState(data))
+        this.features.on(SAVE_DONE, () => refreshSlots())
+    }
+}
+```
+
+---
+
 ## Cheat sheet
 
 | Need | Do |
@@ -1462,3 +1609,11 @@ audio.removeBus('voice')       // stops and destroys current track on the bus
 | Spatial SFX | `audio.setListener(x, y)` → `audio.playSpatial('sfx', 'shot', worldX, worldY, range)` |
 | Duck a bus | `audio.duck('music', 0.15, holdMs, restoreMs)` |
 | Bind panel | `audio.bindDebugger(dbg)` (after `dbg.addPanel('audio', AudioPanel)`) |
+| Save slots | `services.bind(SaveService, () => new SaveService({...}))` → `features.register('p', PersistenceFeature)` |
+| Save data | `persistence.save('slot-1', state)` |
+| Load with migration | `persistence.load('slot-1')` (auto-migrates via schema.migrations) |
+| Delete slot | `persistence.delete('slot-1')` |
+| List slots | `persistence.list()` → `SaveEntry[]` |
+| localStorage backend | `new LocalStorageBackend('app-prefix')` |
+| IndexedDB backend | `new IndexedDBBackend('db-name')` |
+| Test backend | `new MemoryBackend()` |
