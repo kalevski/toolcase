@@ -39,7 +39,9 @@ import {
     // Flow extras (also reachable via `Flow.*`)
     STATE_ENTER, STATE_EXIT, STATE_TRANSITION,
     SUCCESS, FAILURE, RUNNING,
-    REPLAY_FRAME, REPLAY_END
+    REPLAY_FRAME, REPLAY_END,
+    // Audio
+    AudioFeature, AUDIO_MUSIC_START, AUDIO_MUSIC_END, AUDIO_BUS_CHANGE
 } from '@toolcase/phaser-plus'
 ```
 
@@ -95,6 +97,7 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [GamepadFeature](#gamepadfeature)
   - [GestureRecognizer](#gesturerecognizer)
   - [VirtualJoystick](#virtualjoystick)
+- [Audio — bus mixer, music, SFX pool, spatial, ducking](#audio--bus-mixer-music-sfx-pool-spatial-ducking)
 - [Worked examples](#worked-examples)
 - [Cross-library integration](#cross-library-integration)
 - [Theming / styling surfaces](#theming--styling-surfaces)
@@ -1260,6 +1263,167 @@ Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects
 
 ---
 
+---
+
+## Audio — bus mixer, music, SFX pool, spatial, ducking
+
+`AudioFeature` is a scene-lifetime `Feature` that owns a master bus plus four default named buses (`music`, `sfx`, `ui`, `ambience`), each with independent volume / mute / pan. It handles music playback with crossfade, pooled fire-and-forget SFX with polyphony limits, spatial pan+attenuation by world position, and per-bus ducking. It wires directly into `AudioPanel` via `bindDebugger`.
+
+### AudioFeature
+
+```ts
+import { AudioFeature, AUDIO_MUSIC_START, AUDIO_MUSIC_END, AUDIO_BUS_CHANGE } from '@toolcase/phaser-plus'
+
+const audio = scene.features.register('audio', AudioFeature)
+```
+
+Default buses created automatically: `'music'`, `'sfx'`, `'ui'`, `'ambience'`. Add custom buses with `addBus(name)`.
+
+#### Master
+
+```ts
+audio.setMasterVolume(0.8)     // 0–1
+audio.setMasterMute(true)
+audio.getMasterVolume()        // → number
+audio.isMasterMute()           // → boolean
+```
+
+#### Per-bus controls
+
+```ts
+audio.setVolume('music', 0.6)   // 0–1; multiplied with master
+audio.setMute('sfx', true)
+audio.setPan('ui', -0.3)        // –1..1
+
+const bus = audio.getBus('music')  // → Readonly<{name,volume,mute,pan}> | null
+```
+
+#### Music (one track per bus, with crossfade)
+
+```ts
+audio.play('music', 'theme', /* loop */ true)             // immediate start
+audio.crossfadeTo('music', 'boss_theme', 1200)            // fade over 1200ms
+audio.stopMusic('music', /* fade ms */ 600)               // optional fade-out
+```
+
+#### SFX (pooled fire-and-forget, polyphony limit)
+
+Register SFX keys once (pre-allocates `maxVoices` sound instances for voice stealing):
+
+```ts
+audio.registerSfx('jump', 4)          // up to 4 concurrent voices
+audio.registerSfx('explosion', 6)
+
+audio.playSfx('sfx', 'jump')          // next voice in the pool; steals oldest if all busy
+```
+
+#### Spatial audio (world-space pan + attenuation)
+
+```ts
+audio.setListener(camera.scrollX + width / 2, camera.scrollY + height / 2)
+
+// Plays sfx_ping at (worldX, worldY); pan and volume attenuate with distance.
+// range: distance at which volume reaches 0 (default 400).
+audio.playSpatial('sfx', 'sfx_ping', worldX, worldY, /* range */ 300)
+```
+
+`playSpatial` uses the pool registered with `registerSfx`. Requires `registerSfx` before calling.
+
+#### Ducking
+
+Temporarily lower a bus (e.g. duck music while a VO plays):
+
+```ts
+// duck music to 15% volume, hold 1200ms, then restore over 600ms
+audio.duck('music', 0.15, 1200, 600)
+```
+
+Multiple `duck` calls on the same bus restart the hold/restore cycle.
+
+#### Debugger panel binding
+
+Binds every bus to `AudioPanel` sliders so the in-game debugger reflects live bus state:
+
+```ts
+const dbg = scene.features.register('debugger', Debugger)
+dbg.addPanel('audio', AudioPanel, 'Audio')
+
+const audio = scene.features.register('audio', AudioFeature)
+audio.bindDebugger(dbg)   // call after AudioPanel is added
+```
+
+#### Event constants
+
+| Constant | Payload | Meaning |
+|---|---|---|
+| `AUDIO_MUSIC_START` | `(busName, key)` | A track started on a bus |
+| `AUDIO_MUSIC_END` | `(busName)` | A track stopped on a bus |
+| `AUDIO_BUS_CHANGE` | `(busName, bus)` | Bus sliders changed via panel |
+
+```ts
+import { AUDIO_MUSIC_START } from '@toolcase/phaser-plus'
+scene.features.on(AUDIO_MUSIC_START, (bus, key) => hud.showNowPlaying(key))
+```
+
+#### Full wiring example
+
+```ts
+import { Scene, Debugger, AudioPanel, AudioFeature, AUDIO_MUSIC_START } from '@toolcase/phaser-plus'
+
+class GameScene extends Scene {
+    onInit() {
+        this.pool.register('bullet', Bullet)
+    }
+
+    onLoad() {
+        this.load.audio('music_main', 'assets/music_main.ogg')
+        this.load.audio('music_battle', 'assets/music_battle.ogg')
+        this.load.audio('sfx_shot', 'assets/sfx_shot.wav')
+    }
+
+    onCreate() {
+        const dbg = this.features.register('debugger', Debugger)
+        dbg.addPanel('audio', AudioPanel, 'Audio')
+
+        const audio = this.features.register('audio', AudioFeature)
+        audio.registerSfx('sfx_shot', 6)
+        audio.setListener(this.cameras.main.midPoint.x, this.cameras.main.midPoint.y)
+        audio.bindDebugger(dbg)
+        audio.play('music', 'music_main', true)
+
+        this.features.on(AUDIO_MUSIC_START, (bus, key) => console.log('now playing', key))
+
+        this.input.on('pointerdown', p => {
+            audio.playSpatial('sfx', 'sfx_shot', p.worldX, p.worldY, 600)
+        })
+    }
+
+    onUpdate() {
+        const audio = this.features.get('audio')
+        const mid = this.cameras.main.midPoint
+        audio.setListener(mid.x, mid.y)
+    }
+}
+```
+
+#### Custom buses
+
+Add extra buses beyond the four defaults:
+
+```ts
+audio.addBus('voice')          // volume/mute/pan default 1/false/0
+audio.play('voice', 'npc_bark', false)
+audio.duck('music', 0.2, 3000, 500)   // duck music while voice plays
+```
+
+Remove when done:
+
+```ts
+audio.removeBus('voice')       // stops and destroys current track on the bus
+```
+
+---
+
 ## Cheat sheet
 
 | Need | Do |
@@ -1292,3 +1456,9 @@ Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects
 | A* path | Extend `NavMesh` → register `PathFinder` → `findPath(...)` and listen `PATH_FOUND` |
 | In-game UI | Register `Debugger` feature; add panels via `dbg.addPanel(key, PanelCls)` |
 | Game-wide singleton | `engine.services.bind(Cls, factory)` then `engine.services.resolve(Cls)` |
+| Audio bus mixer | `features.register('audio', AudioFeature)` → `play/crossfadeTo/playSfx/playSpatial/duck` |
+| Music crossfade | `audio.crossfadeTo('music', 'boss_theme', 1200)` |
+| SFX polyphony pool | `audio.registerSfx('shot', 6)` → `audio.playSfx('sfx', 'shot')` |
+| Spatial SFX | `audio.setListener(x, y)` → `audio.playSpatial('sfx', 'shot', worldX, worldY, range)` |
+| Duck a bus | `audio.duck('music', 0.15, holdMs, restoreMs)` |
+| Bind panel | `audio.bindDebugger(dbg)` (after `dbg.addPanel('audio', AudioPanel)`) |

@@ -241,9 +241,9 @@ export const phaserExamples: PhaserExampleDef[] = [
     },
     {
         key: 'audio-panel',
-        title: 'Audio Panel',
+        title: 'Audio Mixer',
         category: 'Debugging',
-        description: 'Master vol/mute + per-bus sliders; lists playing tracks.',
+        description: 'AudioFeature: music/sfx/ui/ambience buses, 1.2s crossfade, spatial ping emitter, duck button.',
         sceneFile: 'AudioPanelDemo.js',
         element: <PhaserCanvas sceneClass={AudioPanelDemo} />
     },
