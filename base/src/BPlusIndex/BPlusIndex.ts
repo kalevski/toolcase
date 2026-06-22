@@ -930,6 +930,264 @@ export class BPlusIndex<K, V> {
     async * values(): AsyncGenerator<V> {
         for await (const [, v] of this.range()) yield v
     }
+
+    // ── rank / count / nth ───────────────────────────────────────────────────
+
+    /**
+     * O(log n) — descend the tree accumulating `childCounts` of skipped
+     * left-sibling subtrees; returns the 0-based rank (number of entries
+     * strictly less than `key`) and whether `key` itself exists.
+     */
+    private async _rankOf(key: K): Promise<{ rank: number; exists: boolean }> {
+        let accumulated = 0
+        let pageId = this.rootPageId
+
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) throw new Error(`BPlusIndex: missing page ${pageId}`)
+            if (raw[4] === PAGE_TYPE_LEAF) break
+            const node  = await this._readInternal(pageId)
+            const i     = this._upperBound(node.keyRaws, key)
+            for (let j = 0; j < i; j++) accumulated += node.childCounts[j]
+            pageId = node.children[i]
+        }
+
+        const leaf    = await this._readLeaf(pageId)
+        const keyRaws = leaf.entries.map(e => e.keyRaw)
+        const pos     = this._bsearch(keyRaws, key)
+
+        if (pos >= 0) return { rank: accumulated + pos, exists: true }
+        return { rank: accumulated + (~pos), exists: false }
+    }
+
+    /**
+     * O(log n) — 0-based position of `key` in sorted order (= number of
+     * entries strictly less than `key`).  Returns the insertion rank even
+     * when `key` is absent.
+     */
+    async rank(key: K): Promise<number> {
+        const { rank } = await this._rankOf(key)
+        return rank
+    }
+
+    /**
+     * O(log n) — entry at 0-based index `i` in sorted order; `undefined`
+     * when `i` is out of range.  Uses `childCounts` to pick the right child
+     * at every internal node without scanning.
+     */
+    async nth(i: number): Promise<[K, V] | undefined> {
+        if (i < 0 || i >= this._size) return undefined
+
+        let remaining = i
+        let pageId    = this.rootPageId
+
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) throw new Error(`BPlusIndex: missing page ${pageId}`)
+            if (raw[4] === PAGE_TYPE_LEAF) break
+            const node = await this._readInternal(pageId)
+            for (let j = 0; j < node.children.length; j++) {
+                if (remaining < node.childCounts[j]) {
+                    pageId = node.children[j]
+                    break
+                }
+                remaining -= node.childCounts[j]
+            }
+        }
+
+        const leaf  = await this._readLeaf(pageId)
+        const entry = leaf.entries[remaining]
+        if (!entry) return undefined
+        return [this.deserializeKey(entry.keyRaw), this.deserializeValue(entry.valueRaw)]
+    }
+
+    /**
+     * O(log n) — count of entries within the given range bounds.  When no
+     * bounds are provided, returns `this.size` without any page I/O.
+     */
+    async count(opts: RangeOptions<K> = {}): Promise<number> {
+        const { gte, gt, lte, lt } = opts
+
+        if (gte === undefined && gt === undefined && lte === undefined && lt === undefined) {
+            return this._size
+        }
+
+        // start = exclusive-lower insertion rank (first index in range)
+        let start = 0
+        if (gte !== undefined) {
+            const { rank } = await this._rankOf(gte)
+            start = rank
+        } else if (gt !== undefined) {
+            const { rank, exists } = await this._rankOf(gt)
+            start = exists ? rank + 1 : rank
+        }
+
+        // end = exclusive-upper insertion rank (first index past the range)
+        let end = this._size
+        if (lte !== undefined) {
+            const { rank, exists } = await this._rankOf(lte)
+            end = exists ? rank + 1 : rank
+        } else if (lt !== undefined) {
+            const { rank } = await this._rankOf(lt)
+            end = rank
+        }
+
+        return Math.max(0, end - start)
+    }
+
+    // ── endpoint helpers ─────────────────────────────────────────────────────
+
+    /** Descend to the rightmost non-empty leaf and return its last entry. */
+    private async _rightmostEntry(startPageId: number): Promise<[K, V] | undefined> {
+        let pageId = startPageId
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) return undefined
+            if (raw[4] === PAGE_TYPE_LEAF) {
+                const leaf = await this._readLeaf(pageId)
+                if (leaf.entries.length === 0) return undefined
+                const e = leaf.entries[leaf.entries.length - 1]
+                return [this.deserializeKey(e.keyRaw), this.deserializeValue(e.valueRaw)]
+            }
+            const node = await this._readInternal(pageId)
+            let next = -1
+            for (let j = node.children.length - 1; j >= 0; j--) {
+                if (node.childCounts[j] > 0) { next = node.children[j]; break }
+            }
+            if (next < 0) return undefined
+            pageId = next
+        }
+    }
+
+    /** Descend to the leftmost non-empty leaf and return its first entry. */
+    private async _leftmostEntry(startPageId: number): Promise<[K, V] | undefined> {
+        let pageId = startPageId
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) return undefined
+            if (raw[4] === PAGE_TYPE_LEAF) {
+                const leaf = await this._readLeaf(pageId)
+                if (leaf.entries.length === 0) return undefined
+                const e = leaf.entries[0]
+                return [this.deserializeKey(e.keyRaw), this.deserializeValue(e.valueRaw)]
+            }
+            const node = await this._readInternal(pageId)
+            let next = -1
+            for (let j = 0; j < node.children.length; j++) {
+                if (node.childCounts[j] > 0) { next = node.children[j]; break }
+            }
+            if (next < 0) return undefined
+            pageId = next
+        }
+    }
+
+    // ── endpoint queries ─────────────────────────────────────────────────────
+
+    /** O(log n) — smallest [key, value] in the index; `undefined` if empty. */
+    async first(): Promise<[K, V] | undefined> {
+        if (this._size === 0) return undefined
+        return this._leftmostEntry(this.rootPageId)
+    }
+
+    /** O(log n) — largest [key, value] in the index; `undefined` if empty. */
+    async last(): Promise<[K, V] | undefined> {
+        if (this._size === 0) return undefined
+        return this._rightmostEntry(this.rootPageId)
+    }
+
+    /**
+     * O(log n) — largest [key, value] whose key ≤ `target`; `undefined` if
+     * no such entry exists.  Uses the descent path to avoid stale prevPageId
+     * links left by copy-on-write splits.
+     */
+    async floor(target: K): Promise<[K, V] | undefined> {
+        const path: PathEntry[] = []
+        let pageId = this.rootPageId
+
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) throw new Error(`BPlusIndex: missing page ${pageId}`)
+            if (raw[4] === PAGE_TYPE_LEAF) break
+            const node = await this._readInternal(pageId)
+            const i    = this._upperBound(node.keyRaws, target)
+            path.push({ node, childIndex: i })
+            pageId = node.children[i]
+        }
+
+        const leaf    = await this._readLeaf(pageId)
+        const keyRaws = leaf.entries.map(e => e.keyRaw)
+        const pos     = this._bsearch(keyRaws, target)
+
+        if (pos >= 0) {
+            const e = leaf.entries[pos]
+            return [this.deserializeKey(e.keyRaw), this.deserializeValue(e.valueRaw)]
+        }
+
+        const insertPos = ~pos
+        if (insertPos > 0) {
+            const e = leaf.entries[insertPos - 1]
+            return [this.deserializeKey(e.keyRaw), this.deserializeValue(e.valueRaw)]
+        }
+
+        // All entries in this leaf are > target (or leaf is empty).
+        // Walk back up the path to find the nearest left-sibling subtree.
+        for (let i = path.length - 1; i >= 0; i--) {
+            const { node, childIndex } = path[i]
+            for (let j = childIndex - 1; j >= 0; j--) {
+                if (node.childCounts[j] === 0) continue
+                return this._rightmostEntry(node.children[j])
+            }
+        }
+
+        return undefined
+    }
+
+    /**
+     * O(log n) — smallest [key, value] whose key ≥ `target`; `undefined` if
+     * no such entry exists.  Uses the descent path to avoid stale nextPageId
+     * dependencies when the current leaf is fully to the left of the target.
+     */
+    async ceil(target: K): Promise<[K, V] | undefined> {
+        const path: PathEntry[] = []
+        let pageId = this.rootPageId
+
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) throw new Error(`BPlusIndex: missing page ${pageId}`)
+            if (raw[4] === PAGE_TYPE_LEAF) break
+            const node = await this._readInternal(pageId)
+            const i    = this._upperBound(node.keyRaws, target)
+            path.push({ node, childIndex: i })
+            pageId = node.children[i]
+        }
+
+        const leaf    = await this._readLeaf(pageId)
+        const keyRaws = leaf.entries.map(e => e.keyRaw)
+        const pos     = this._bsearch(keyRaws, target)
+
+        if (pos >= 0) {
+            const e = leaf.entries[pos]
+            return [this.deserializeKey(e.keyRaw), this.deserializeValue(e.valueRaw)]
+        }
+
+        const insertPos = ~pos
+        if (insertPos < leaf.entries.length) {
+            const e = leaf.entries[insertPos]
+            return [this.deserializeKey(e.keyRaw), this.deserializeValue(e.valueRaw)]
+        }
+
+        // All entries in this leaf are < target (or leaf is empty).
+        // Walk back up the path to find the nearest right-sibling subtree.
+        for (let i = path.length - 1; i >= 0; i--) {
+            const { node, childIndex } = path[i]
+            for (let j = childIndex + 1; j < node.children.length; j++) {
+                if (node.childCounts[j] === 0) continue
+                return this._leftmostEntry(node.children[j])
+            }
+        }
+
+        return undefined
+    }
 }
 
 interface PathEntry {

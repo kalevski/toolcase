@@ -592,3 +592,339 @@ describe('BPlusIndex — bulkLoad', () => {
         expect(await idx.get(49)).toBe(490)
     })
 })
+
+// ── rank ─────────────────────────────────────────────────────────────────────
+// rank() uses childCounts on internal nodes — it never scans leaves linearly.
+
+describe('BPlusIndex — rank', () => {
+    it('rank of every element matches its 0-based sorted position', async () => {
+        // Build a known dataset large enough to force multiple tree levels
+        const N = 200
+        const idx = await numIdx()
+        for (let i = 0; i < N; i++) await idx.set(i, i * 10)
+        for (let i = 0; i < N; i++) {
+            expect(await idx.rank(i)).toBe(i)
+        }
+    })
+
+    it('rank of a missing key is the insertion rank', async () => {
+        const idx = await numIdx()
+        for (const v of [10, 20, 30, 40, 50]) await idx.set(v, v)
+        // Missing keys between existing ones
+        expect(await idx.rank(0)).toBe(0)   // before all
+        expect(await idx.rank(15)).toBe(1)  // between 10 and 20
+        expect(await idx.rank(25)).toBe(2)  // between 20 and 30
+        expect(await idx.rank(100)).toBe(5) // after all
+    })
+
+    it('rank on empty index is always 0', async () => {
+        const idx = await numIdx()
+        expect(await idx.rank(42)).toBe(0)
+    })
+
+    it('rank after deletions reflects actual entry count below key', async () => {
+        const idx = await numIdx()
+        for (let i = 0; i < 10; i++) await idx.set(i, i)
+        await idx.delete(0)
+        await idx.delete(1)
+        // key 2 is now the 0-th element; rank(2) = 0
+        expect(await idx.rank(2)).toBe(0)
+        // rank(5) = 3 (keys 2, 3, 4 are less than 5)
+        expect(await idx.rank(5)).toBe(3)
+    })
+
+    it('rank with string keys respects lexicographic order', async () => {
+        const idx = await strIdx()
+        for (const k of ['banana', 'cherry', 'apple', 'date', 'elderberry']) {
+            await idx.set(k, k)
+        }
+        // Sorted: apple, banana, cherry, date, elderberry
+        expect(await idx.rank('apple')).toBe(0)
+        expect(await idx.rank('banana')).toBe(1)
+        expect(await idx.rank('cherry')).toBe(2)
+        expect(await idx.rank('date')).toBe(3)
+        expect(await idx.rank('elderberry')).toBe(4)
+    })
+})
+
+// ── nth ──────────────────────────────────────────────────────────────────────
+// nth() navigates via childCounts without scanning — O(log n).
+
+describe('BPlusIndex — nth', () => {
+    it('nth returns the correct entry at every position in a known dataset', async () => {
+        const N = 200
+        const idx = await numIdx()
+        for (let i = 0; i < N; i++) await idx.set(i, i * 10)
+        for (let i = 0; i < N; i++) {
+            const result = await idx.nth(i)
+            expect(result).toEqual([i, i * 10])
+        }
+    })
+
+    it('nth(0) returns the smallest key', async () => {
+        const idx = await numIdx()
+        for (const v of [30, 10, 20]) await idx.set(v, v)
+        expect(await idx.nth(0)).toEqual([10, 10])
+    })
+
+    it('nth(size - 1) returns the largest key', async () => {
+        const idx = await numIdx()
+        for (const v of [30, 10, 20]) await idx.set(v, v)
+        expect(await idx.nth(2)).toEqual([30, 30])
+    })
+
+    it('nth out of range returns undefined', async () => {
+        const idx = await numIdx()
+        await idx.set(1, 1)
+        expect(await idx.nth(-1)).toBeUndefined()
+        expect(await idx.nth(1)).toBeUndefined()
+    })
+
+    it('nth on empty index returns undefined', async () => {
+        const idx = await numIdx()
+        expect(await idx.nth(0)).toBeUndefined()
+    })
+
+    it('nth agrees with rank — nth(rank(k)) === k for all keys', async () => {
+        const idx = await numIdx()
+        const keys = [5, 2, 8, 1, 9, 3, 7, 4, 6, 0]
+        for (const k of keys) await idx.set(k, k * 100)
+        for (const k of keys) {
+            const r = await idx.rank(k)
+            const result = await idx.nth(r)
+            expect(result?.[0]).toBe(k)
+        }
+    })
+})
+
+// ── count ────────────────────────────────────────────────────────────────────
+// count() uses rank() under the hood — two tree descents, no leaf scanning.
+
+describe('BPlusIndex — count', () => {
+    async function populated200(): Promise<BPlusIndex<number, number>> {
+        const idx = await numIdx()
+        for (let i = 0; i < 200; i++) await idx.set(i, i)
+        return idx
+    }
+
+    it('count() with no bounds equals size', async () => {
+        const idx = await populated200()
+        expect(await idx.count()).toBe(200)
+    })
+
+    it('count with gte/lte', async () => {
+        const idx = await populated200()
+        expect(await idx.count({ gte: 50, lte: 99 })).toBe(50)
+        expect(await idx.count({ gte: 0,  lte: 199 })).toBe(200)
+        expect(await idx.count({ gte: 100, lte: 100 })).toBe(1)
+    })
+
+    it('count with gt/lt', async () => {
+        const idx = await populated200()
+        expect(await idx.count({ gt: 49, lt: 100 })).toBe(50) // 50..99
+        expect(await idx.count({ gt: 0,  lt: 199 })).toBe(198)
+    })
+
+    it('count with mixed gt/lte and gte/lt', async () => {
+        const idx = await populated200()
+        expect(await idx.count({ gte: 50, lt:  100 })).toBe(50)  // 50..99
+        expect(await idx.count({ gt:  49, lte: 99  })).toBe(50)  // 50..99
+    })
+
+    it('count with missing boundary keys', async () => {
+        const idx = await numIdx()
+        // Only even numbers 0, 2, 4, ..., 18; values equal keys
+        for (let i = 0; i < 10; i++) await idx.set(i * 2, i * 2)
+        // Odd boundary keys that do not exist in the tree
+        expect(await idx.count({ gte: 1, lte: 9  })).toBe(4)  // 2, 4, 6, 8
+        expect(await idx.count({ gt:  1, lt:  9  })).toBe(4)  // 2, 4, 6, 8 (8 < 9)
+        expect(await idx.count({ gte: 3, lt:  7  })).toBe(2)  // 4, 6
+        expect(await idx.count({ gt:  3, lte: 7  })).toBe(2)  // 4, 6
+    })
+
+    it('count returns 0 for an inverted range', async () => {
+        const idx = await populated200()
+        expect(await idx.count({ gte: 100, lte: 50 })).toBe(0)
+    })
+
+    it('count returns 0 for exclusive range on single key', async () => {
+        const idx = await numIdx()
+        await idx.set(5, 5)
+        expect(await idx.count({ gt: 5, lt: 5 })).toBe(0)
+        expect(await idx.count({ gt: 5, lte: 5 })).toBe(0)
+    })
+
+    it('count on empty index is always 0', async () => {
+        const idx = await numIdx()
+        expect(await idx.count()).toBe(0)
+        expect(await idx.count({ gte: 0 })).toBe(0)
+    })
+})
+
+// ── first / last ─────────────────────────────────────────────────────────────
+
+describe('BPlusIndex — first / last', () => {
+    it('first returns the minimum key-value pair', async () => {
+        const idx = await numIdx()
+        for (const v of [30, 10, 20, 40]) await idx.set(v, v * 10)
+        expect(await idx.first()).toEqual([10, 100])
+    })
+
+    it('last returns the maximum key-value pair', async () => {
+        const idx = await numIdx()
+        for (const v of [30, 10, 20, 40]) await idx.set(v, v * 10)
+        expect(await idx.last()).toEqual([40, 400])
+    })
+
+    it('first === nth(0) and last === nth(size - 1)', async () => {
+        const idx = await numIdx()
+        const N = 100
+        for (let i = 0; i < N; i++) await idx.set(i, i)
+        const f = await idx.first()
+        const l = await idx.last()
+        expect(f).toEqual(await idx.nth(0))
+        expect(l).toEqual(await idx.nth(N - 1))
+    })
+
+    it('first and last return undefined on empty index', async () => {
+        const idx = await numIdx()
+        expect(await idx.first()).toBeUndefined()
+        expect(await idx.last()).toBeUndefined()
+    })
+
+    it('first and last still correct after deletions', async () => {
+        const idx = await numIdx()
+        for (let i = 0; i < 10; i++) await idx.set(i, i)
+        await idx.delete(0)
+        await idx.delete(9)
+        expect((await idx.first())?.[0]).toBe(1)
+        expect((await idx.last())?.[0]).toBe(8)
+    })
+
+    it('first and last work correctly after bulkLoad', async () => {
+        const N = 300
+        const entries: [number, number][] = []
+        for (let i = 0; i < N; i++) entries.push([i, i])
+        const opts = {
+            adapter:          new MemoryAdapter(),
+            ...BPlusIndex.keyPreset.number,
+            serializeValue:   (v: number) => { const b = new Uint8Array(8); new DataView(b.buffer).setFloat64(0, v, true); return b },
+            deserializeValue: (b: Uint8Array) => new DataView(b.buffer, b.byteOffset).getFloat64(0, true),
+        }
+        const idx = await BPlusIndex.bulkLoad<number, number>(opts, entries)
+        expect((await idx.first())?.[0]).toBe(0)
+        expect((await idx.last())?.[0]).toBe(N - 1)
+    })
+})
+
+// ── floor / ceil ─────────────────────────────────────────────────────────────
+
+describe('BPlusIndex — floor / ceil', () => {
+    async function evenKeys(): Promise<BPlusIndex<number, number>> {
+        // Insert even numbers: 0, 2, 4, ..., 198
+        const idx = await numIdx()
+        for (let i = 0; i < 100; i++) await idx.set(i * 2, i * 2)
+        return idx
+    }
+
+    it('floor returns exact match when key exists', async () => {
+        const idx = await evenKeys()
+        expect(await idx.floor(10)).toEqual([10, 10])
+        expect(await idx.floor(100)).toEqual([100, 100])
+    })
+
+    it('floor returns the nearest key below when key is missing', async () => {
+        const idx = await evenKeys()
+        expect(await idx.floor(11)).toEqual([10, 10])
+        expect(await idx.floor(1)).toEqual([0, 0])
+        expect(await idx.floor(199)).toEqual([198, 198])
+    })
+
+    it('floor returns undefined when target is below all keys', async () => {
+        const idx = await evenKeys()
+        // All keys are >= 0; querying below 0 → undefined
+        const idx2 = await numIdx()
+        for (const v of [5, 10, 15]) await idx2.set(v, v)
+        expect(await idx2.floor(4)).toBeUndefined()
+        expect(await idx2.floor(3)).toBeUndefined()
+    })
+
+    it('floor on empty index returns undefined', async () => {
+        const idx = await numIdx()
+        expect(await idx.floor(5)).toBeUndefined()
+    })
+
+    it('ceil returns exact match when key exists', async () => {
+        const idx = await evenKeys()
+        expect(await idx.ceil(10)).toEqual([10, 10])
+        expect(await idx.ceil(0)).toEqual([0, 0])
+    })
+
+    it('ceil returns the nearest key above when key is missing', async () => {
+        const idx = await evenKeys()
+        expect(await idx.ceil(1)).toEqual([2, 2])
+        expect(await idx.ceil(99)).toEqual([100, 100])
+        expect(await idx.ceil(197)).toEqual([198, 198])
+    })
+
+    it('ceil returns undefined when target is above all keys', async () => {
+        const idx = await numIdx()
+        for (const v of [5, 10, 15]) await idx.set(v, v)
+        expect(await idx.ceil(16)).toBeUndefined()
+        expect(await idx.ceil(100)).toBeUndefined()
+    })
+
+    it('ceil on empty index returns undefined', async () => {
+        const idx = await numIdx()
+        expect(await idx.ceil(5)).toBeUndefined()
+    })
+
+    it('floor and ceil are consistent: ceil(x) >= x >= floor(x)', async () => {
+        const idx = await evenKeys()
+        for (const probe of [1, 3, 7, 11, 99, 101, 149, 197]) {
+            const f = await idx.floor(probe)
+            const c = await idx.ceil(probe)
+            expect(f).toBeDefined()
+            expect(c).toBeDefined()
+            expect(f![0]).toBeLessThanOrEqual(probe)
+            expect(c![0]).toBeGreaterThanOrEqual(probe)
+        }
+    })
+
+    it('floor and ceil work across leaf boundaries (large dataset)', async () => {
+        // 300 entries ensures multiple levels; query keys that cross leaf boundaries
+        const N = 300
+        const entries: [number, number][] = []
+        for (let i = 0; i < N; i++) entries.push([i * 3, i * 3]) // 0, 3, 6, ..., 897
+        const opts = {
+            adapter:          new MemoryAdapter(),
+            ...BPlusIndex.keyPreset.number,
+            serializeValue:   (v: number) => { const b = new Uint8Array(8); new DataView(b.buffer).setFloat64(0, v, true); return b },
+            deserializeValue: (b: Uint8Array) => new DataView(b.buffer, b.byteOffset).getFloat64(0, true),
+        }
+        const idx = await BPlusIndex.bulkLoad<number, number>(opts, entries)
+
+        // floor(1) → 0; ceil(1) → 3
+        expect(await idx.floor(1)).toEqual([0, 0])
+        expect(await idx.ceil(1)).toEqual([3, 3])
+        // floor(4) → 3; ceil(4) → 6
+        expect(await idx.floor(4)).toEqual([3, 3])
+        expect(await idx.ceil(4)).toEqual([6, 6])
+        // boundaries
+        expect(await idx.floor(0)).toEqual([0, 0])
+        expect(await idx.ceil(0)).toEqual([0, 0])
+        expect(await idx.floor(897)).toEqual([897, 897])
+        expect(await idx.ceil(897)).toEqual([897, 897])
+        expect(await idx.floor(900)).toEqual([897, 897])
+        expect(await idx.ceil(-1)).toEqual([0, 0])
+    })
+
+    it('floor and ceil work correctly after deletions', async () => {
+        const idx = await numIdx()
+        for (let i = 0; i < 20; i++) await idx.set(i, i)
+        // Delete keys 5..9 to create a gap
+        for (let i = 5; i <= 9; i++) await idx.delete(i)
+        expect(await idx.floor(7)).toEqual([4, 4])
+        expect(await idx.ceil(7)).toEqual([10, 10])
+    })
+})
