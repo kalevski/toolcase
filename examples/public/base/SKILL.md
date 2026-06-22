@@ -33,7 +33,8 @@ import {
     Vec2,
     // tagged-union helpers:
     ok, err,    // Result<T, E> factories
-    some, none  // Option<T> factories
+    some, none, // Option<T> factories
+    TokenBucket
 } from '@toolcase/base'
 import type { Result, Option } from '@toolcase/base'
 ```
@@ -106,6 +107,7 @@ import type { Result, Option } from '@toolcase/base'
   - [debounce](#debounce)
   - [throttle](#throttle)
   - [AsyncQueue](#asyncqueue)
+- [TokenBucket](#tokenbucket)
 
 ---
 
@@ -2326,6 +2328,54 @@ findUser(2)
 findUser(99)
     .map(name => name.toUpperCase())             // none
     .unwrapOr('unknown')                         // 'unknown'
+```
+
+---
+
+## TokenBucket
+
+Token-bucket rate limiter. The bucket starts full at `capacity`. Each `tryRemove`/`take` call drains tokens; between calls the bucket refills at `refillRate` tokens per unit of time (where the unit matches the clock injected via `now`). Zero dependencies, isomorphic.
+
+```ts
+new TokenBucket(capacity: number, refillRate: number, now?: () => number)
+```
+
+- `capacity: number` — (readonly) maximum number of tokens the bucket can hold. The bucket starts full.
+- `refillRate: number` — (readonly) tokens added per unit of time returned by `now`. With the default `Date.now()` clock, this is tokens per millisecond — so for 10 req/s use `10 / 1000`.
+- `now` — optional clock function. Defaults to `() => Date.now()`. Inject a deterministic clock in tests.
+
+**Properties:**
+- `tokens: number` — current token count computed as of `now()`, capped at `capacity`. Side-effect free (does not mutate state).
+
+**Methods:**
+- `tryRemove(n?: number): boolean` — refill, then try to consume `n` tokens (default `1`). Returns `true` and deducts from the bucket if sufficient tokens are available; `false` otherwise. Throws if `n <= 0`.
+- `take(n?: number): boolean` — alias for `tryRemove(n)`.
+
+```ts
+import { TokenBucket } from '@toolcase/base'
+
+// 10 tokens, refill 1 per ms (≈ 1 request/ms ceiling, or 1000 req/s)
+const bucket = new TokenBucket(10, 1)
+
+bucket.tryRemove(3)   // true  — 7 remaining
+bucket.tryRemove(8)   // false — only 7 left
+bucket.take()         // true  — 6 remaining (takes 1)
+
+console.log(bucket.tokens)   // ~6 + refill since last call
+```
+
+Inject a deterministic clock for testing:
+
+```ts
+let t = 0
+const bucket = new TokenBucket(5, 1, () => t)
+
+bucket.tryRemove(5)   // true  — empty
+bucket.tryRemove(1)   // false — no tokens
+
+t += 3                // advance 3 ticks
+bucket.tryRemove(3)   // true  — exactly 3 refilled
+bucket.tokens         // 0
 ```
 
 ---

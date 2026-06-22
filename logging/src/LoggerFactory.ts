@@ -55,8 +55,8 @@ class LoggerFactory {
         for (const reporter of this.reporters) {
             try {
                 reporter.log(level, scope, time, messages)
-            } catch {
-                // a reporter must never break logging or sibling reporters
+            } catch (err) {
+                console.error('[logging] reporter threw; isolating:', err)
             }
         }
     }

@@ -33,6 +33,7 @@ import EasingDemo from './EasingDemo'
 import FormattingDemo from './FormattingDemo'
 import StringHelpersDemo from './StringHelpersDemo'
 import ResultOptionDemo from './ResultOptionDemo'
+import TokenBucketDemo from './TokenBucketDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -96,4 +97,5 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'async', label: 'Async', category: 'Async', element: <AsyncDemo /> },
 
     { key: 'result-option', label: 'Result / Option', category: 'Utilities & Colors', element: <ResultOptionDemo /> },
+    { key: 'token-bucket', label: 'TokenBucket', category: 'Utilities & Colors', element: <TokenBucketDemo /> },
 ]

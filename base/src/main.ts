@@ -35,6 +35,7 @@ import Trie from './Trie'
 import BiMap from './BiMap'
 import MultiMap from './MultiMap'
 import Vec2 from './Vec2'
+import TokenBucket from './TokenBucket'
 import slugify from './slugify'
 import truncate from './truncate'
 import escapeHtml from './escapeHtml'
@@ -168,6 +169,7 @@ export {
     BiMap,
     MultiMap,
     Vec2,
+    TokenBucket,
     slugify,
     truncate,
     escapeHtml
@@ -234,6 +236,7 @@ const BASE = {
     BiMap,
     MultiMap,
     Vec2,
+    TokenBucket,
     slugify,
     truncate,
     escapeHtml

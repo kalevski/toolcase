@@ -696,6 +696,33 @@ describe('BufferedReporter — flush isolation', () => {
         buf.log('info', 's', 't', ['b'])
         expect(buf.size()).toBe(0)
     })
+
+    it('inner reporter still receives all entries when onFlush throws', () => {
+        const innerReceived: string[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, _t: any, msgs: any[]): void { innerReceived.push(msgs[0]) }
+        }
+        const buf = new BufferedReporter(new R(), {
+            maxSize: 2,
+            flushInterval: 0,
+            onFlush: () => { throw new Error('onFlush failure') }
+        })
+        buf.log('info', 's', 't', ['a'])
+        buf.log('info', 's', 't', ['b'])
+        expect(innerReceived).toEqual(['a', 'b'])
+    })
+
+    it('inner reporter is called for all entries even when it throws on each', () => {
+        let callCount = 0
+        class R extends LogReporter {
+            log(): void { callCount++; throw new Error('inner failure') }
+        }
+        const buf = new BufferedReporter(new R(), { maxSize: 3, flushInterval: 0 })
+        buf.log('info', 's', 't', ['a'])
+        buf.log('info', 's', 't', ['b'])
+        buf.log('info', 's', 't', ['c'])
+        expect(callCount).toBe(3)
+    })
 })
 
 describe('FileLogReporter', () => {

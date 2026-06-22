@@ -62,17 +62,21 @@ class BufferedReporter extends LogReporter {
         }
         const entries = this.buffer
         this.buffer = []
-        try {
-            if (this.onFlushFn !== null) {
+        if (this.onFlushFn !== null) {
+            try {
                 this.onFlushFn(entries)
+            } catch (err) {
+                console.error('[logging] BufferedReporter onFlush threw:', err)
             }
-            if (this.inner !== null) {
-                for (const entry of entries) {
+        }
+        if (this.inner !== null) {
+            for (const entry of entries) {
+                try {
                     this.inner.log(entry.level, entry.scope, entry.time, entry.messages)
+                } catch (err) {
+                    console.error('[logging] BufferedReporter inner reporter threw:', err)
                 }
             }
-        } catch {
-            // a flush failure must not crash the caller
         }
     }
 
