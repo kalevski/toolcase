@@ -41,6 +41,26 @@ class LoggerFactory {
         if (i !== -1) this.reporters.splice(i, 1)
     }
 
+    flush(): void {
+        for (const reporter of this.reporters) {
+            try {
+                reporter.flush()
+            } catch (err) {
+                console.error('[logging] reporter flush threw:', err)
+            }
+        }
+    }
+
+    async close(): Promise<void> {
+        for (const reporter of this.reporters) {
+            try {
+                await reporter.close()
+            } catch (err) {
+                console.error('[logging] reporter close threw:', err)
+            }
+        }
+    }
+
     private isEnabled = (order: number, overrideOrder: number | null): boolean => {
         const threshold = overrideOrder ?? this.levelOrder
         return threshold >= order

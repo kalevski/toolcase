@@ -233,6 +233,8 @@ A pre-configured `LoggerFactory` with a `ConsoleLogReporter`. Suitable for quick
 | `level` | `LoggerLevel` | Global threshold. |
 | `addReporter(reporter)` | `(reporter: LogReporter) => void` | Attach a reporter after construction. |
 | `removeReporter(reporter)` | `(reporter: LogReporter) => void` | Detach a previously added reporter. |
+| `flush()` | `() => void` | Call `flush()` on every attached reporter. Errors are isolated per reporter. |
+| `close()` | `() => Promise<void>` | Call `close()` on every attached reporter, awaiting any promises. Errors are isolated per reporter. |
 
 ### `Logger`
 

@@ -125,6 +125,93 @@ describe('LoggerFactory', () => {
     })
 })
 
+describe('LoggerFactory — flush / close lifecycle', () => {
+    it('flush() calls flush() on all reporters including dynamically added ones', () => {
+        const flushed: string[] = []
+        class F extends LogReporter {
+            constructor(private id: string) { super() }
+            log(): void {}
+            flush(): void { flushed.push(this.id) }
+        }
+        const factory = new LoggerFactory([new F('a')])
+        factory.addReporter(new F('b'))
+        factory.flush()
+        expect(flushed).toEqual(['a', 'b'])
+    })
+
+    it('flush() does not call flush() on removed reporters', () => {
+        const flushed: string[] = []
+        class F extends LogReporter {
+            constructor(private id: string) { super() }
+            log(): void {}
+            flush(): void { flushed.push(this.id) }
+        }
+        const r = new F('x')
+        const factory = new LoggerFactory([r])
+        factory.removeReporter(r)
+        factory.flush()
+        expect(flushed).toHaveLength(0)
+    })
+
+    it('flush() isolates reporter errors', () => {
+        class Throws extends LogReporter {
+            log(): void {}
+            flush(): void { throw new Error('flush failure') }
+        }
+        const factory = new LoggerFactory([new Throws()])
+        expect(() => factory.flush()).not.toThrow()
+    })
+
+    it('close() calls close() on all reporters including dynamically added ones', async () => {
+        const closed: string[] = []
+        class C extends LogReporter {
+            constructor(private id: string) { super() }
+            log(): void {}
+            close(): void { closed.push(this.id) }
+        }
+        const factory = new LoggerFactory([new C('a')])
+        factory.addReporter(new C('b'))
+        await factory.close()
+        expect(closed).toEqual(['a', 'b'])
+    })
+
+    it('close() awaits async close() on reporters', async () => {
+        let resolved = false
+        class AsyncC extends LogReporter {
+            log(): void {}
+            close(): Promise<void> {
+                return new Promise(r => setTimeout(() => { resolved = true; r() }, 10))
+            }
+        }
+        const factory = new LoggerFactory([new AsyncC()])
+        await factory.close()
+        expect(resolved).toBe(true)
+    })
+
+    it('close() does not call close() on removed reporters', async () => {
+        const closed: string[] = []
+        class C extends LogReporter {
+            constructor(private id: string) { super() }
+            log(): void {}
+            close(): void { closed.push(this.id) }
+        }
+        const r = new C('gone')
+        const factory = new LoggerFactory([r, new C('kept')])
+        factory.removeReporter(r)
+        await factory.close()
+        expect(closed).toEqual(['kept'])
+    })
+
+    it('close() isolates reporter errors', async () => {
+        class Throws extends LogReporter {
+            log(): void {}
+            close(): void { throw new Error('close failure') }
+        }
+        const factory = new LoggerFactory([new Throws()])
+        await expect(factory.close()).resolves.toBeUndefined()
+    })
+})
+
 describe('LoggerFactory — addReporter / removeReporter', () => {
     it('addReporter causes the reporter to receive subsequent logs', () => {
         const received: string[] = []
