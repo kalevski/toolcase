@@ -1,6 +1,6 @@
 ---
 name: phaser-plus
-description: Use when building Phaser 4 games with @toolcase/phaser-plus — scene lifecycle, feature registry, object pooling, flow events/timers/jobs, layer + camera management, perspective2d (isometric/grid), GLSL shader effects, A* pathfinding (NavMesh), and the Tweakpane in-game debugger.
+description: Use when building Phaser 4 games with @toolcase/phaser-plus — scene lifecycle, feature registry, object pooling, flow events/timers/jobs, layer + camera management, perspective2d (isometric/grid), GLSL shader effects, particle VFX (ParticleFeature), A* pathfinding (NavMesh), and the Tweakpane in-game debugger.
 ---
 
 # phaser-plus — API Reference
@@ -45,7 +45,9 @@ import {
     AudioFeature, AUDIO_MUSIC_START, AUDIO_MUSIC_END, AUDIO_BUS_CHANGE,
     // Persistence
     SaveService, PersistenceFeature, SAVE_DONE, LOAD_DONE, SAVE_DELETED,
-    LocalStorageBackend, IndexedDBBackend, MemoryBackend
+    LocalStorageBackend, IndexedDBBackend, MemoryBackend,
+    // Particles
+    ParticleFeature, PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP
 } from '@toolcase/phaser-plus'
 ```
 
@@ -102,6 +104,7 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [GestureRecognizer](#gesturerecognizer)
   - [VirtualJoystick](#virtualjoystick)
 - [Audio — bus mixer, music, SFX pool, spatial, ducking](#audio--bus-mixer-music-sfx-pool-spatial-ducking)
+- [Particles — ParticleFeature (VFX registry + pool)](#particles--particlefeature-vfx-registry--pool)
 - [Worked examples](#worked-examples)
 - [Cross-library integration](#cross-library-integration)
 - [Theming / styling surfaces](#theming--styling-surfaces)
@@ -1861,6 +1864,168 @@ class GameScene extends Scene {
 
 ---
 
+## Particles — ParticleFeature (VFX registry + pool)
+
+`ParticleFeature` is a scene-lifetime `Feature` that wraps Phaser's particle emitter factory as a named-preset registry with pooled emitters. Presets compose with `EffectManager` — a preset can carry an `effect` class that fires on the registered effect target for `effectDuration` ms.
+
+### ParticleFeature
+
+```ts
+import { ParticleFeature, PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP } from '@toolcase/phaser-plus'
+import type { ParticlePreset, StreamHandle } from '@toolcase/phaser-plus'
+
+const particles = scene.features.register('vfx', ParticleFeature)
+```
+
+#### Defining presets
+
+```ts
+import { HeatEffect } from '@toolcase/phaser-plus'
+
+particles.define('sparkle', {
+    texture: 'vfx-dot',
+    lifespan: 600,
+    quantity: 25,
+    speed: { min: 40, max: 130 },
+    scale: { start: 0.45, end: 0 },
+    alpha: { start: 1, end: 0 },
+    tint: [0xffd700, 0xffffff, 0x00e5ff],
+    angle: { min: 0, max: 360 }
+})
+
+particles.define('explosion', {
+    texture: 'vfx-dot',
+    lifespan: 900,
+    quantity: 60,
+    speed: { min: 100, max: 300 },
+    scale: { start: 0.8, end: 0 },
+    alpha: { start: 1, end: 0 },
+    tint: [0xffa500, 0xff4400, 0xffdd00],
+    angle: { min: 0, max: 360 },
+    effect: HeatEffect,         // applied to the effect target on each burst
+    effectDuration: 1400        // ms; defaults to lifespan × 1.5
+})
+```
+
+Full `ParticlePreset` shape:
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `texture` | `string` | — | **Required.** Phaser texture key |
+| `frame` | `string \| number` | — | Optional atlas frame |
+| `lifespan` | `number` | `800` | Particle lifetime ms |
+| `quantity` | `number` | `20` | Particles fired per burst |
+| `speed` | `{min,max} \| number` | — | Pixel/sec |
+| `scale` | `{start,end} \| number` | — | Size over lifetime |
+| `alpha` | `{start,end} \| number` | — | Opacity over lifetime |
+| `tint` | `number \| number[]` | — | Color(s) applied to particles |
+| `angle` | `{min,max}` | — | Emission direction in degrees |
+| `gravityX` / `gravityY` | `number` | — | Gravity force |
+| `blendMode` | `number` | — | Phaser blend mode constant |
+| `effect` | `EffectClass` | — | Effect applied to effect target on burst/stream |
+| `effectDuration` | `number` | `lifespan × 1.5` | How long the effect stays active (ms) |
+
+#### Effect target
+
+Set which game object receives the `effect` from presets:
+
+```ts
+const bgImage = scene.add.image(cx, cy, 'my-bg')
+particles.setEffectTarget(bgImage)
+```
+
+When a burst or stream fires for a preset with `effect`, `EffectManager.add(EffectClass)` is called on this target and auto-removed after `effectDuration` ms.
+
+#### Burst (pooled one-shot)
+
+```ts
+particles.burst('sparkle', x, y)        // fires preset at world position
+particles.burst('explosion', cx, cy)    // explosion burst + HeatEffect on target
+```
+
+Emitters are recycled back to the pool `lifespan + 200 ms` after each burst. Multiple concurrent bursts from the same preset each get their own pooled emitter.
+
+#### Stream (following)
+
+```ts
+const handle: StreamHandle = particles.stream('sparkle', playerSprite)
+// emitter continuously follows playerSprite.x / playerSprite.y
+handle.stop()   // detach and return emitter to pool
+handle.active   // boolean
+```
+
+#### Events
+
+| Constant | Payload | Fired when |
+|---|---|---|
+| `PARTICLE_BURST` | `(name, x, y)` | `burst()` fires |
+| `PARTICLE_STREAM_START` | `(name)` | `stream()` starts |
+| `PARTICLE_STREAM_STOP` | `(name)` | stream `handle.stop()` called |
+
+```ts
+import { PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP } from '@toolcase/phaser-plus'
+
+scene.features.on(PARTICLE_BURST, (name, x, y) => hud.showLabel(name, x, y))
+```
+
+#### Full wiring example
+
+```ts
+import { Scene, ParticleFeature, HeatEffect, PARTICLE_BURST } from '@toolcase/phaser-plus'
+
+class GameScene extends Scene {
+    onLoad() {
+        // generate or load a particle texture
+        this.load.image('spark', 'assets/spark.png')
+    }
+
+    onCreate() {
+        const { width, height } = this.game.config
+
+        const bgSprite = this.add.image(width / 2, height / 2, 'my-bg')
+
+        const particles = this.features.register('vfx', ParticleFeature)
+        particles.setEffectTarget(bgSprite)
+
+        particles.define('sparkle', {
+            texture: 'spark',
+            lifespan: 600,
+            quantity: 20,
+            speed: { min: 60, max: 180 },
+            scale: { start: 0.5, end: 0 },
+            alpha: { start: 1, end: 0 },
+            angle: { min: 0, max: 360 }
+        })
+
+        particles.define('shockwave', {
+            texture: 'spark',
+            lifespan: 800,
+            quantity: 50,
+            speed: { min: 150, max: 350 },
+            scale: { start: 0.7, end: 0 },
+            alpha: { start: 1, end: 0 },
+            tint: [0xffa500, 0xff4400],
+            angle: { min: 0, max: 360 },
+            effect: HeatEffect,
+            effectDuration: 1200
+        })
+
+        this.features.on(PARTICLE_BURST, (name) => console.log('burst', name))
+
+        this.input.on('pointerdown', (p) => {
+            particles.burst('sparkle', p.x, p.y)
+        })
+
+        // stream sparkles behind a moving ship
+        const stream = particles.stream('sparkle', ship)
+        // later:
+        stream.stop()
+    }
+}
+```
+
+---
+
 ## Cheat sheet
 
 | Need | Do |
@@ -1915,3 +2080,6 @@ class GameScene extends Scene {
 | Check asset loaded | `assets.has('key')` |
 | Retry failed assets | set `assets.retries = N` before `load()` |
 | Hot-reload texture | `await assets.reload('key')` |
+| VFX burst | `features.register('vfx', ParticleFeature)` → `define(name, preset)` → `burst(name, x, y)` |
+| VFX stream | `particles.stream(name, gameObject)` → `handle.stop()` |
+| Screen effect on burst | add `effect: HeatEffect` to preset, call `particles.setEffectTarget(sprite)` |

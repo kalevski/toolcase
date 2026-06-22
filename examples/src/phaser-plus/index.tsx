@@ -50,6 +50,7 @@ import InputBufferDemo from './scenes/InputBufferDemo.js'
 import SaveServiceDemo from './scenes/SaveServiceDemo.js'
 import AssetFeatureDemo from './scenes/AssetFeatureDemo.js'
 import TilemapNavMeshDemo from './scenes/TilemapNavMeshDemo.js'
+import ParticleFeatureDemo from './scenes/ParticleFeatureDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -62,6 +63,7 @@ export type PhaserCategory =
     | 'AI'
     | 'Cinema'
     | 'Input'
+    | 'Particles'
 
 export type PhaserExampleDef = {
     key: string
@@ -80,6 +82,7 @@ export const phaserCategories: PhaserCategory[] = [
     'Flow',
     'Perspective2D',
     'Effects',
+    'Particles',
     'AI',
     'Cinema',
     'Input'
@@ -488,5 +491,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'AssetFeature: declarative manifest, bundle-based lazy loading, aggregated progress, retry on failure, hot-reload swap.',
         sceneFile: 'AssetFeatureDemo.js',
         element: <PhaserCanvas sceneClass={AssetFeatureDemo} />
+    },
+
+    {
+        key: 'particle-feature',
+        title: 'VFX Gallery',
+        category: 'Particles',
+        description: 'ParticleFeature: define named presets, click-to-burst, cursor-following stream, and Explosion preset chained to a screen HeatEffect.',
+        sceneFile: 'ParticleFeatureDemo.js',
+        element: <PhaserCanvas sceneClass={ParticleFeatureDemo} />
     }
 ]
