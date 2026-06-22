@@ -75,6 +75,7 @@ const HTTP = {
 
 export type { Result } from './Result'
 export type { Option } from './Option'
+export type { Schema, RefSchema, ValidationIssue, ValidationError, ValidationFn, JSONSchemaOptions } from './JSONSchema'
 export type { Delta, ObjectDelta, ArrayDelta, Edit } from './diff'
 export type { FormatNumberOptions } from './formatNumber'
 
