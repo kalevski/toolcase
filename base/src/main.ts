@@ -33,6 +33,7 @@ import RingBuffer from './RingBuffer'
 import DisjointSet from './DisjointSet'
 import Trie from './Trie'
 import BiMap from './BiMap'
+import BloomFilter from './BloomFilter'
 import MultiMap from './MultiMap'
 import Vec2 from './Vec2'
 import TokenBucket from './TokenBucket'
@@ -167,6 +168,7 @@ export {
     DisjointSet,
     Trie,
     BiMap,
+    BloomFilter,
     MultiMap,
     Vec2,
     TokenBucket,
@@ -234,6 +236,7 @@ const BASE = {
     DisjointSet,
     Trie,
     BiMap,
+    BloomFilter,
     MultiMap,
     Vec2,
     TokenBucket,

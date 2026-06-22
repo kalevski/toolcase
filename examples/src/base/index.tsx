@@ -33,6 +33,7 @@ import EasingDemo from './EasingDemo'
 import FormattingDemo from './FormattingDemo'
 import StringHelpersDemo from './StringHelpersDemo'
 import ResultOptionDemo from './ResultOptionDemo'
+import BloomFilterDemo from './BloomFilterDemo'
 import TokenBucketDemo from './TokenBucketDemo'
 
 export type BaseCategory =
@@ -73,6 +74,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'disjoint-set', label: 'DisjointSet', category: 'Data Structures', element: <DisjointSetDemo /> },
     { key: 'trie', label: 'Trie', category: 'Data Structures', element: <TrieDemo /> },
     { key: 'bimap', label: 'BiMap', category: 'Data Structures', element: <BiMapDemo /> },
+    { key: 'bloom-filter', label: 'BloomFilter', category: 'Data Structures', element: <BloomFilterDemo /> },
     { key: 'multimap', label: 'MultiMap', category: 'Data Structures', element: <MultiMapDemo /> },
     { key: 'vec2', label: 'Vec2', category: 'Data Structures', element: <Vec2Demo /> },
     { key: 'spatial', label: 'Spatial', category: 'Data Structures', element: <SpatialDemo /> },

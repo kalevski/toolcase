@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
 ---
 
 # base — API Reference
@@ -29,7 +29,7 @@ import {
     Cache, AdjacencyMatrix, State, retry,
     WeightedRandom, Dijkstra, AStar,
     DisjointSet, Trie,
-    BiMap, MultiMap,
+    BiMap, BloomFilter, MultiMap,
     Vec2,
     // tagged-union helpers:
     ok, err,    // Result<T, E> factories
@@ -57,6 +57,7 @@ import type { Result, Option } from '@toolcase/base'
   - [DisjointSet](#disjointset)
   - [Trie](#trie)
   - [BiMap](#bimap)
+  - [BloomFilter](#bloomfilter)
   - [MultiMap](#multimap)
 - [Events](#events)
   - [EventEmitter](#eventemitter)
@@ -2376,6 +2377,50 @@ bucket.tryRemove(1)   // false — no tokens
 t += 3                // advance 3 ticks
 bucket.tryRemove(3)   // true  — exactly 3 refilled
 bucket.tokens         // 0
+```
+
+---
+
+## BloomFilter
+
+Probabilistic set-membership structure. Uses a compact `Uint8Array` bit array and double-hashing (djb2 + sdbm) to derive `k` independent positions per item. Zero allocations after construction, O(k) `add` and `has`, no false negatives.
+
+```ts
+new BloomFilter(bitSize: number, hashCount: number)
+```
+
+- `bitSize: number` — (readonly) length of the bit array in bits. Must be a positive integer.
+- `hashCount: number` — number of hash positions set / checked per item. Must be a positive integer.
+
+Constructor throws if either argument is not a positive integer.
+
+**Methods:**
+- `add(item: string): this` — sets the `hashCount` bit positions for `item`. Chainable.
+- `has(item: string): boolean` — returns `true` if all `hashCount` positions for `item` are set. Returns `false` if any bit is unset (definite non-member). `true` may be a false positive; `false` is never a false negative.
+
+**Choosing parameters** — for `n` expected items and desired false-positive rate `p`:
+- `bitSize = Math.ceil(-n * Math.log(p) / Math.LN2 ** 2)`
+- `hashCount = Math.round((bitSize / n) * Math.LN2)`
+
+```ts
+import { BloomFilter } from '@toolcase/base'
+
+const bf = new BloomFilter(10000, 7)  // ~1000 items at <1% FPR
+
+bf.add('alice').add('bob').add('carol')
+
+bf.has('alice')   // true  — no false negatives, ever
+bf.has('dave')    // false — not a member (very likely)
+
+// false-positive rate sanity check (m=1000, k=3, n=100 → ≈ 1.7% FPR)
+const filter = new BloomFilter(1000, 3)
+for (let i = 0; i < 100; i++) filter.add(`user:${i}`)
+
+let fp = 0
+for (let i = 100; i < 1100; i++) {
+    if (filter.has(`user:${i}`)) fp++
+}
+console.log(`FPR: ${(fp / 10).toFixed(1)}%`)   // ≈ 1.7%
 ```
 
 ---
