@@ -346,3 +346,249 @@ describe('BPlusIndex — flush / close', () => {
         await expect(idx.close()).resolves.toBeUndefined()
     })
 })
+
+// ── setMany ───────────────────────────────────────────────────────────────────
+
+describe('BPlusIndex — setMany', () => {
+    it('inserts multiple entries in one call', async () => {
+        const idx = await strIdx()
+        await idx.setMany([['b', '2'], ['a', '1'], ['c', '3']])
+        expect(idx.size).toBe(3)
+        expect(await idx.get('a')).toBe('1')
+        expect(await idx.get('b')).toBe('2')
+        expect(await idx.get('c')).toBe('3')
+    })
+
+    it('last-wins on duplicate keys in the same call', async () => {
+        const idx = await strIdx()
+        await idx.setMany([['a', 'first'], ['b', 'b'], ['a', 'last']])
+        expect(idx.size).toBe(2)
+        expect(await idx.get('a')).toBe('last')
+    })
+
+    it('updates existing keys from a prior set', async () => {
+        const idx = await strIdx()
+        await idx.set('x', 'old')
+        await idx.setMany([['x', 'new'], ['y', 'y']])
+        expect(idx.size).toBe(2)
+        expect(await idx.get('x')).toBe('new')
+    })
+
+    it('setMany on empty list is a no-op', async () => {
+        const idx = await strIdx()
+        await idx.set('a', '1')
+        await idx.setMany([])
+        expect(idx.size).toBe(1)
+    })
+
+    it('handles many entries that trigger splits', async () => {
+        const idx = await strIdx()
+        const N = 200
+        const pairs: [string, string][] = []
+        for (let i = 0; i < N; i++) pairs.push([`key-${String(i).padStart(4, '0')}`, `v${i}`])
+        await idx.setMany(pairs)
+        expect(idx.size).toBe(N)
+        const all = await collect(idx.entries())
+        expect(all).toHaveLength(N)
+        // Verify ascending order
+        for (let i = 0; i < all.length - 1; i++) expect(all[i][0] < all[i + 1][0]).toBe(true)
+    })
+
+    it('survives reopen after setMany', async () => {
+        const adapter = new MemoryAdapter()
+        const opts = {
+            adapter,
+            ...BPlusIndex.keyPreset.string,
+            serializeValue:   (v: string) => new TextEncoder().encode(v),
+            deserializeValue: (b: Uint8Array) => new TextDecoder().decode(b),
+        }
+        const idx1 = await BPlusIndex.open<string, string>(opts)
+        await idx1.setMany([['a', '1'], ['b', '2']])
+        await idx1.close()
+        const idx2 = await BPlusIndex.open<string, string>(opts)
+        expect(idx2.size).toBe(2)
+        expect(await idx2.get('a')).toBe('1')
+        expect(await idx2.get('b')).toBe('2')
+    })
+})
+
+// ── getMany ───────────────────────────────────────────────────────────────────
+
+describe('BPlusIndex — getMany', () => {
+    it('returns values aligned to input key order', async () => {
+        const idx = await strIdx()
+        await idx.setMany([['a', '1'], ['b', '2'], ['c', '3']])
+        const results = await idx.getMany(['c', 'a', 'b'])
+        expect(results).toEqual(['3', '1', '2'])
+    })
+
+    it('returns undefined for missing keys', async () => {
+        const idx = await strIdx()
+        await idx.set('a', '1')
+        const results = await idx.getMany(['a', 'z', 'b'])
+        expect(results).toEqual(['1', undefined, undefined])
+    })
+
+    it('returns empty array for empty key list', async () => {
+        const idx = await strIdx()
+        expect(await idx.getMany([])).toEqual([])
+    })
+
+    it('handles duplicate keys in the input list', async () => {
+        const idx = await strIdx()
+        await idx.set('a', '1')
+        const results = await idx.getMany(['a', 'a'])
+        expect(results).toEqual(['1', '1'])
+    })
+})
+
+// ── deleteMany ────────────────────────────────────────────────────────────────
+
+describe('BPlusIndex — deleteMany', () => {
+    it('removes multiple keys and returns count', async () => {
+        const idx = await strIdx()
+        await idx.setMany([['a', '1'], ['b', '2'], ['c', '3']])
+        const count = await idx.deleteMany(['a', 'c'])
+        expect(count).toBe(2)
+        expect(idx.size).toBe(1)
+        expect(await idx.get('a')).toBeUndefined()
+        expect(await idx.get('b')).toBe('2')
+        expect(await idx.get('c')).toBeUndefined()
+    })
+
+    it('skips missing keys and returns only removed count', async () => {
+        const idx = await strIdx()
+        await idx.set('a', '1')
+        const count = await idx.deleteMany(['a', 'nope', 'x'])
+        expect(count).toBe(1)
+        expect(idx.size).toBe(0)
+    })
+
+    it('returns 0 for empty key list', async () => {
+        const idx = await strIdx()
+        await idx.set('a', '1')
+        expect(await idx.deleteMany([])).toBe(0)
+        expect(idx.size).toBe(1)
+    })
+
+    it('returns 0 when no keys match', async () => {
+        const idx = await strIdx()
+        expect(await idx.deleteMany(['x', 'y'])).toBe(0)
+    })
+
+    it('survives reopen after deleteMany', async () => {
+        const adapter = new MemoryAdapter()
+        const opts = {
+            adapter,
+            ...BPlusIndex.keyPreset.string,
+            serializeValue:   (v: string) => new TextEncoder().encode(v),
+            deserializeValue: (b: Uint8Array) => new TextDecoder().decode(b),
+        }
+        const idx1 = await BPlusIndex.open<string, string>(opts)
+        await idx1.setMany([['a', '1'], ['b', '2'], ['c', '3']])
+        await idx1.deleteMany(['a', 'c'])
+        await idx1.close()
+        const idx2 = await BPlusIndex.open<string, string>(opts)
+        expect(idx2.size).toBe(1)
+        expect(await idx2.get('b')).toBe('2')
+    })
+})
+
+// ── bulkLoad ──────────────────────────────────────────────────────────────────
+
+describe('BPlusIndex — bulkLoad', () => {
+    function bulkStrOpts(adapter = new MemoryAdapter()) {
+        return {
+            adapter,
+            ...BPlusIndex.keyPreset.string,
+            serializeValue:   (v: string) => new TextEncoder().encode(v),
+            deserializeValue: (b: Uint8Array) => new TextDecoder().decode(b),
+        }
+    }
+
+    it('builds a readable index from a small sorted list', async () => {
+        const entries: [string, string][] = [['a', '1'], ['b', '2'], ['c', '3']]
+        const idx = await BPlusIndex.bulkLoad(bulkStrOpts(), entries)
+        expect(idx.size).toBe(3)
+        expect(await idx.get('a')).toBe('1')
+        expect(await idx.get('b')).toBe('2')
+        expect(await idx.get('c')).toBe('3')
+    })
+
+    it('full forward scan returns all entries in order', async () => {
+        const N = 300
+        const entries: [string, string][] = []
+        for (let i = 0; i < N; i++) entries.push([`key-${String(i).padStart(4, '0')}`, `v${i}`])
+        const idx = await BPlusIndex.bulkLoad(bulkStrOpts(), entries)
+        expect(idx.size).toBe(N)
+        const all = await collect(idx.entries())
+        expect(all).toHaveLength(N)
+        for (let i = 0; i < all.length; i++) expect(all[i][0]).toBe(entries[i][0])
+    })
+
+    it('supports get/has/range/delete after bulkLoad', async () => {
+        const entries: [string, string][] = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4']]
+        const idx = await BPlusIndex.bulkLoad(bulkStrOpts(), entries)
+        expect(await idx.has('c')).toBe(true)
+        expect(await idx.has('z')).toBe(false)
+        const rangeResult = await collect(idx.range({ gte: 'b', lte: 'c' }))
+        expect(rangeResult.map(([k]) => k)).toEqual(['b', 'c'])
+        expect(await idx.delete('b')).toBe(true)
+        expect(idx.size).toBe(3)
+    })
+
+    it('returns an empty index when entries array is empty', async () => {
+        const idx = await BPlusIndex.bulkLoad(bulkStrOpts(), [])
+        expect(idx.size).toBe(0)
+        expect(await collect(idx.entries())).toEqual([])
+    })
+
+    it('survives close and reopen with data intact', async () => {
+        const adapter = new MemoryAdapter()
+        const opts = bulkStrOpts(adapter)
+        const entries: [string, string][] = [['foo', 'bar'], ['zoo', 'zap']]
+        const idx1 = await BPlusIndex.bulkLoad(opts, entries)
+        await idx1.close()
+        const idx2 = await BPlusIndex.open<string, string>(opts)
+        expect(idx2.size).toBe(2)
+        expect(await idx2.get('foo')).toBe('bar')
+        expect(await idx2.get('zoo')).toBe('zap')
+    })
+
+    it('throws on out-of-order entries', async () => {
+        const entries: [string, string][] = [['b', '2'], ['a', '1']]
+        await expect(BPlusIndex.bulkLoad(bulkStrOpts(), entries))
+            .rejects.toThrow('out of order')
+    })
+
+    it('throws on duplicate keys', async () => {
+        const entries: [string, string][] = [['a', '1'], ['a', '2']]
+        await expect(BPlusIndex.bulkLoad(bulkStrOpts(), entries))
+            .rejects.toThrow('duplicate key')
+    })
+
+    it('throws when the index is not empty', async () => {
+        const opts = bulkStrOpts()
+        const existing = await BPlusIndex.open<string, string>(opts)
+        await existing.set('x', 'y')
+        await existing.close()
+        await expect(BPlusIndex.bulkLoad(opts, [['a', '1']]))
+            .rejects.toThrow('must be empty')
+    })
+
+    it('produces correct results with numeric keys', async () => {
+        const entries: [number, number][] = []
+        for (let i = 0; i < 50; i++) entries.push([i, i * 10])
+        const numOpts = {
+            adapter:          new MemoryAdapter(),
+            ...BPlusIndex.keyPreset.number,
+            serializeValue:   (v: number) => { const b = new Uint8Array(8); new DataView(b.buffer).setFloat64(0, v, true); return b },
+            deserializeValue: (b: Uint8Array) => new DataView(b.buffer, b.byteOffset).getFloat64(0, true),
+        }
+        const idx = await BPlusIndex.bulkLoad<number, number>(numOpts, entries)
+        expect(idx.size).toBe(50)
+        expect(await idx.get(25)).toBe(250)
+        expect(await idx.get(0)).toBe(0)
+        expect(await idx.get(49)).toBe(490)
+    })
+})

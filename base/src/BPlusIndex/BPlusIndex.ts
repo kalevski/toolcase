@@ -1,6 +1,6 @@
 import {
     StorageAdapter, BPlusIndexOptions, RangeOptions,
-    SuperblockData, InternalNode, LeafNode,
+    SuperblockData, InternalNode, LeafNode, LeafEntry,
     HEADER_SIZE, NULL_PAGE, SB_PAGE_A, SB_PAGE_B, FIRST_TREE_PAGE,
     PAGE_TYPE_INTERNAL, PAGE_TYPE_LEAF,
 } from './types'
@@ -94,6 +94,125 @@ export class BPlusIndex<K, V> {
     static async open<K, V>(opts: BPlusIndexOptions<K, V>): Promise<BPlusIndex<K, V>> {
         const idx = new BPlusIndex<K, V>(opts)
         await idx._init()
+        return idx
+    }
+
+    /**
+     * Build a balanced B+ tree bottom-up from pre-sorted, de-duplicated entries.
+     * Throws if entries are out-of-order or contain duplicate keys.
+     * Requires a fresh (empty) index — opens `opts` as a new file.
+     */
+    static async bulkLoad<K, V>(
+        opts: BPlusIndexOptions<K, V>,
+        entries: [K, V][],
+    ): Promise<BPlusIndex<K, V>> {
+        const idx = new BPlusIndex<K, V>(opts)
+        await idx._init()
+
+        if (idx._size !== 0 || idx.pageCount !== FIRST_TREE_PAGE + 1) {
+            throw new Error('BPlusIndex.bulkLoad: index must be empty (use a fresh adapter)')
+        }
+
+        if (entries.length === 0) return idx
+
+        // Validate sort order and uniqueness
+        for (let i = 1; i < entries.length; i++) {
+            const cmp = idx.compare(entries[i - 1][0], entries[i][0])
+            if (cmp > 0) throw new Error(`BPlusIndex.bulkLoad: entries out of order at index ${i}`)
+            if (cmp === 0) throw new Error(`BPlusIndex.bulkLoad: duplicate key at index ${i}`)
+        }
+
+        idx.writeSeq++
+        const ovThresh = Math.floor(idx.overflowThreshold * idx.pageSize)
+        // Fixed overhead per leaf page: header + keyCount(2) + prev(4) + next(4)
+        const LEAF_FIXED = HEADER_SIZE + 10
+
+        // ── Pass 1: group entries into leaf-sized batches ──────────────────
+        type RawEntry = { keyRaw: Uint8Array; valueRaw: Uint8Array }
+        const leafGroups: RawEntry[][] = []
+        let currentGroup: RawEntry[] = []
+        let currentSize = LEAF_FIXED
+
+        for (const [k, v] of entries) {
+            const keyRaw   = idx.serializeKey(k)
+            const valueRaw = idx.serializeValue(v)
+            const entrySize = 2 + keyRaw.length + (
+                valueRaw.length > ovThresh ? (2 + 4 + 4) : (2 + valueRaw.length)
+            )
+
+            if (currentGroup.length > 0 && currentSize + entrySize > idx.pageSize) {
+                leafGroups.push(currentGroup)
+                currentGroup = []
+                currentSize  = LEAF_FIXED
+            }
+
+            currentGroup.push({ keyRaw, valueRaw })
+            currentSize += entrySize
+        }
+        if (currentGroup.length > 0) leafGroups.push(currentGroup)
+
+        // ── Pass 2: allocate page IDs for all leaves ───────────────────────
+        // Reuse the initial empty leaf page for leaf[0]; allocate fresh pages for the rest
+        const leafPageIds: number[] = [FIRST_TREE_PAGE]
+        for (let i = 1; i < leafGroups.length; i++) leafPageIds.push(idx.pageCount++)
+
+        // ── Pass 3: write leaf pages ───────────────────────────────────────
+        type PageInfo = { pageId: number; firstKeyRaw: Uint8Array; count: number }
+        const leafInfos: PageInfo[] = []
+
+        for (let i = 0; i < leafGroups.length; i++) {
+            const group      = leafGroups[i]
+            const pageId     = leafPageIds[i]
+            const prevPageId = i === 0 ? NULL_PAGE : leafPageIds[i - 1]
+            const nextPageId = i + 1 < leafPageIds.length ? leafPageIds[i + 1] : NULL_PAGE
+            const leafEntries: LeafEntry[] = group.map(e => ({ ...e, overflowHead: 0 }))
+            const leaf: LeafNode = { pageId, pageSeq: idx.writeSeq, prevPageId, nextPageId, entries: leafEntries }
+            await idx._writeLeaf(leaf)  // handles overflow page allocation internally
+            leafInfos.push({ pageId, firstKeyRaw: group[0].keyRaw, count: group.length })
+        }
+
+        // ── Pass 4: build internal node levels bottom-up ───────────────────
+        let currentLevel: PageInfo[] = leafInfos
+
+        while (currentLevel.length > 1) {
+            const nextLevel: PageInfo[] = []
+            let i = 0
+
+            while (i < currentLevel.length) {
+                const nodeChildren: PageInfo[] = []
+                // Fixed internal node overhead: header + keyCount(2) + first child (10 bytes)
+                let nodeSize = HEADER_SIZE + 2 + 10
+
+                while (i < currentLevel.length) {
+                    const child     = currentLevel[i]
+                    const isFirst   = nodeChildren.length === 0
+                    // Each non-first child adds: a separator key + a child slot
+                    const addSize   = isFirst ? 0 : (2 + child.firstKeyRaw.length + 10)
+                    if (!isFirst && nodeSize + addSize > idx.pageSize) break
+                    nodeChildren.push(child)
+                    if (!isFirst) nodeSize += addSize
+                    i++
+                }
+
+                const keyRaws     = nodeChildren.slice(1).map(c => c.firstKeyRaw)
+                const children    = nodeChildren.map(c => c.pageId)
+                const childCounts = nodeChildren.map(c => c.count)
+                const totalCount  = childCounts.reduce((a, b) => a + b, 0)
+                const nodePageId  = idx.pageCount++
+                const node: InternalNode = {
+                    pageId: nodePageId, pageSeq: idx.writeSeq,
+                    keyRaws, children, childCounts,
+                }
+                await idx._writeInternal(node)
+                nextLevel.push({ pageId: nodePageId, firstKeyRaw: nodeChildren[0].firstKeyRaw, count: totalCount })
+            }
+
+            currentLevel = nextLevel
+        }
+
+        idx.rootPageId = currentLevel[0].pageId
+        idx._size      = entries.length
+        await idx._flushSuperblock()
         return idx
     }
 
@@ -422,6 +541,12 @@ export class BPlusIndex<K, V> {
     // ── set ─────────────────────────────────────────────────────────────────
 
     async set(key: K, value: V): Promise<this> {
+        await this._setOne(key, value)
+        await this._flushSuperblock()
+        return this
+    }
+
+    private async _setOne(key: K, value: V): Promise<void> {
         this.writeSeq++
         const keyRaw   = this.serializeKey(key)
         const valueRaw = this.serializeValue(value)
@@ -449,9 +574,33 @@ export class BPlusIndex<K, V> {
         } else {
             await this._cowLeaf(leaf, path, countDelta)
         }
+    }
 
+    // ── setMany ──────────────────────────────────────────────────────────────
+
+    async setMany(entries: [K, V][]): Promise<this> {
+        if (entries.length === 0) return this
+        // Stable sort by key; last-wins on duplicate keys
+        const sorted = [...entries].sort((a, b) => this.compare(a[0], b[0]))
+        const deduped: [K, V][] = []
+        for (const pair of sorted) {
+            if (deduped.length > 0 && this.compare(deduped[deduped.length - 1][0], pair[0]) === 0) {
+                deduped[deduped.length - 1] = pair
+            } else {
+                deduped.push(pair)
+            }
+        }
+        for (const [key, value] of deduped) await this._setOne(key, value)
         await this._flushSuperblock()
         return this
+    }
+
+    // ── getMany ──────────────────────────────────────────────────────────────
+
+    async getMany(keys: K[]): Promise<(V | undefined)[]> {
+        const results: (V | undefined)[] = new Array(keys.length)
+        for (let i = 0; i < keys.length; i++) results[i] = await this.get(keys[i])
+        return results
     }
 
     // ── copy-on-write leaf ──────────────────────────────────────────────────
@@ -624,6 +773,12 @@ export class BPlusIndex<K, V> {
     // ── delete ──────────────────────────────────────────────────────────────
 
     async delete(key: K): Promise<boolean> {
+        const removed = await this._deleteOne(key)
+        if (removed) await this._flushSuperblock()
+        return removed
+    }
+
+    private async _deleteOne(key: K): Promise<boolean> {
         const { leaf, path } = await this._findLeaf(key)
         const idx = this._bsearch(leaf.entries.map(e => e.keyRaw), key)
         if (idx < 0) return false
@@ -640,8 +795,17 @@ export class BPlusIndex<K, V> {
         // Empty leaves are not removed — they stay in the tree but hold no entries.
         // This avoids the complex multi-pointer fixup required when removing a leaf.
         await this._cowLeaf(leaf, path, -1)
-        await this._flushSuperblock()
         return true
+    }
+
+    // ── deleteMany ───────────────────────────────────────────────────────────
+
+    async deleteMany(keys: K[]): Promise<number> {
+        if (keys.length === 0) return 0
+        let count = 0
+        for (const key of keys) if (await this._deleteOne(key)) count++
+        if (count > 0) await this._flushSuperblock()
+        return count
     }
 
     // ── clear ────────────────────────────────────────────────────────────────
