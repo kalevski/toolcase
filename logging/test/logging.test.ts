@@ -688,6 +688,51 @@ describe('JSONLineReporter', () => {
         const parsed = JSON.parse(lines[0])
         expect(parsed.messages[0]).toBe('42')
     })
+
+    it('preserves good fields in an object that also contains a bigint field', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        reporter.log('info', 's', 't', [{ label: 'counter', value: 9007199254740993n, unit: 'ops' }])
+        expect(lines).toHaveLength(1)
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.messages[0]).toEqual({ label: 'counter', value: '9007199254740993', unit: 'ops' })
+    })
+
+    it('preserves good fields in an object that also contains a circular ref field', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        const obj: any = { name: 'node', status: 'ok', count: 3 }
+        obj.self = obj
+        reporter.log('info', 's', 't', [obj])
+        expect(lines).toHaveLength(1)
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.messages[0].name).toBe('node')
+        expect(parsed.messages[0].status).toBe('ok')
+        expect(parsed.messages[0].count).toBe(3)
+        expect(parsed.messages[0].self).toBe('[Circular]')
+    })
+
+    it('handles deeply nested mixed good/bad fields without losing the surrounding record', () => {
+        const lines: string[] = []
+        const reporter = new JSONLineReporter({ write: line => lines.push(line) })
+        const inner: any = { x: 1 }
+        inner.loop = inner
+        reporter.log('info', 's', 't', [
+            'prefix',
+            { fine: true, nested: { ok: 'yes', circ: inner, big: 42n }, after: 'end' },
+            'suffix'
+        ])
+        expect(lines).toHaveLength(1)
+        const parsed = JSON.parse(lines[0])
+        expect(parsed.messages[0]).toBe('prefix')
+        expect(parsed.messages[1].fine).toBe(true)
+        expect(parsed.messages[1].nested.ok).toBe('yes')
+        expect(parsed.messages[1].nested.circ.x).toBe(1)
+        expect(parsed.messages[1].nested.circ.loop).toBe('[Circular]')
+        expect(parsed.messages[1].nested.big).toBe('42')
+        expect(parsed.messages[1].after).toBe('end')
+        expect(parsed.messages[2]).toBe('suffix')
+    })
 })
 
 describe('BufferedReporter', () => {
