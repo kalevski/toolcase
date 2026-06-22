@@ -48,6 +48,7 @@ import GestureRecognizerDemo from './scenes/GestureRecognizerDemo.js'
 import GamepadDemo from './scenes/GamepadDemo.js'
 import InputBufferDemo from './scenes/InputBufferDemo.js'
 import SaveServiceDemo from './scenes/SaveServiceDemo.js'
+import AssetFeatureDemo from './scenes/AssetFeatureDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -470,5 +471,13 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'SaveService + PersistenceFeature: 3 slots via tc-save-slot-list, LocalStorage backend, visible v1→v2 migration on load.',
         sceneFile: 'SaveServiceDemo.js',
         element: <PhaserCanvas sceneClass={SaveServiceDemo} />
+    },
+    {
+        key: 'asset-feature',
+        title: 'Asset Feature',
+        category: 'Features',
+        description: 'AssetFeature: declarative manifest, bundle-based lazy loading, aggregated progress, retry on failure, hot-reload swap.',
+        sceneFile: 'AssetFeatureDemo.js',
+        element: <PhaserCanvas sceneClass={AssetFeatureDemo} />
     }
 ]

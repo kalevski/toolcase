@@ -1571,6 +1571,182 @@ class GameScene extends Scene {
 
 ---
 
+## Assets — AssetFeature (declarative manifest loader)
+
+`AssetFeature` is a scene-lifetime `Feature` that wraps Phaser's loader with a declarative `AssetManifest`, per-bundle lazy loading, aggregated progress events, exponential-backoff retry (via `@toolcase/base` `retry`), and a preload-then-swap path for hot asset reloads.
+
+### AssetFeature
+
+```ts
+import {
+    AssetFeature,
+    ASSET_PROGRESS,
+    ASSET_LOAD_COMPLETE,
+    ASSET_LOAD_ERROR
+} from '@toolcase/phaser-plus'
+import type { AssetManifest } from '@toolcase/phaser-plus'
+
+const assets = scene.features.register('assets', AssetFeature)
+```
+
+#### Manifest definition
+
+```ts
+const MANIFEST: AssetManifest = {
+    bundles: {
+        ui: {
+            images: [
+                { key: 'logo', url: 'assets/logo.png' }
+            ],
+            atlases: [
+                { key: 'icons', textureUrl: 'assets/icons.png', atlasUrl: 'assets/icons.json' }
+            ]
+        },
+        game: {
+            images: [
+                { key: 'tileset', url: 'assets/tileset.png' }
+            ],
+            audio: [
+                { key: 'bgm', url: ['assets/bgm.ogg', 'assets/bgm.mp3'] }
+            ],
+            fonts: [
+                { key: 'hud-font', textureUrl: 'assets/hud-font.png', fontDataUrl: 'assets/hud-font.xml' }
+            ]
+        }
+    }
+}
+
+assets.define(MANIFEST)
+```
+
+#### Loading bundles
+
+```ts
+// Load one or more bundles by name
+await assets.load('ui')
+await assets.load('ui', 'game')
+
+// Load all bundles in the manifest (no args)
+await assets.load()
+```
+
+`load()` skips keys that are already loaded — safe to call repeatedly. Throws if `define()` has not been called or if a previous `load()` is still in progress.
+
+#### Aggregated progress
+
+`ASSET_PROGRESS` fires with a number `0..1` representing how many files from the current `load()` call have completed (successful files only; denominator is the number of pending files at the start of the call).
+
+```ts
+scene.features.on(ASSET_PROGRESS, (progress: number) => {
+    loadingScreen.progress = progress
+})
+
+scene.features.on(ASSET_LOAD_COMPLETE, (bundleNames: string[]) => {
+    loadingScreen.remove()
+})
+
+scene.features.on(ASSET_LOAD_ERROR, (error: Error) => {
+    console.error('asset load failed', error.message)
+})
+```
+
+#### Retry
+
+`assets.retries` (default `3`) controls how many retry attempts are made when any file in a batch fails. Retry uses exponential backoff starting at 500 ms (`factor: 2`). On each retry only the files that have not yet successfully loaded are re-queued.
+
+```ts
+assets.retries = 2   // fail after 2 retries (3 total attempts)
+```
+
+#### `has(key)`
+
+Returns `true` if the asset was successfully loaded in any previous `load()` call.
+
+```ts
+if (assets.has('bgm')) {
+    audio.play('music', 'bgm', true)
+}
+```
+
+#### Hot-reload (preload-then-swap)
+
+`reload(key)` re-fetches a single asset from its original URL under a temporary key, then swaps it into the live texture / audio / bitmap-font cache without restarting the scene. Supported types: `image`, `atlas`, `font`, `audio`.
+
+```ts
+await assets.reload('icons')   // re-fetches icons.png+json, swaps atlas in-place
+```
+
+Any `Phaser.GameObjects.Image` already referencing the key picks up the new texture automatically on next render.
+
+#### API summary
+
+| Member | Description |
+|---|---|
+| `define(manifest)` | Set the active `AssetManifest`; returns `this` |
+| `load(...bundles)` | `Promise<void>` — lazy-load named bundles (all if no args) |
+| `has(key)` | `boolean` — whether the key was successfully loaded |
+| `reload(key)` | `Promise<void>` — preload-then-swap one asset in-place |
+| `retries` | `number` (default `3`) — retry attempts on batch failure |
+
+#### Event constants
+
+| Constant | Payload | Fired when |
+|---|---|---|
+| `ASSET_PROGRESS` | `(progress: number)` | File completed; `progress` is `0..1` over the current batch |
+| `ASSET_LOAD_COMPLETE` | `(bundleNames: string[])` | All bundles in the `load()` call finished |
+| `ASSET_LOAD_ERROR` | `(error: Error)` | Retries exhausted; `load()` also throws |
+
+#### Full wiring example
+
+```ts
+import {
+    Scene, HTMLFeature, AssetFeature,
+    ASSET_PROGRESS, ASSET_LOAD_COMPLETE, ASSET_LOAD_ERROR
+} from '@toolcase/phaser-plus'
+import type { AssetManifest } from '@toolcase/phaser-plus'
+
+const MANIFEST: AssetManifest = {
+    bundles: {
+        ui:   { atlases: [{ key: 'icons', textureUrl: 'icons.png', atlasUrl: 'icons.json' }] },
+        game: { images:  [{ key: 'tileset', url: 'tileset.png' }] }
+    }
+}
+
+class LoadingHUD extends HTMLFeature {
+    onCreate() {
+        this.node.innerHTML = `<tc-loading-screen id="ls" eyebrow="Loading" title-text="Preparing"></tc-loading-screen>`
+    }
+    setProgress(v: number) {
+        const el = this.node.querySelector('#ls') as any
+        if (el) el.progress = v
+    }
+    hide() { this.node.querySelector('#ls')?.remove() }
+}
+
+class GameScene extends Scene {
+    onCreate() {
+        const hud = this.features.register('hud', LoadingHUD)
+
+        const assets = this.features.register('assets', AssetFeature)
+        assets.retries = 3
+        assets.define(MANIFEST)
+
+        this.features.on(ASSET_PROGRESS,      (p) => hud.setProgress(p))
+        this.features.on(ASSET_LOAD_COMPLETE,  () => { hud.hide(); this.startGame() })
+        this.features.on(ASSET_LOAD_ERROR, (err) => console.error(err))
+
+        assets.load('ui', 'game')
+    }
+
+    startGame() {
+        const assets = this.features.get<AssetFeature>('assets')!
+        if (assets.has('icons')) this.add.image(100, 100, 'icons', 'play')
+    }
+}
+```
+
+---
+
 ## Cheat sheet
 
 | Need | Do |
@@ -1617,3 +1793,7 @@ class GameScene extends Scene {
 | localStorage backend | `new LocalStorageBackend('app-prefix')` |
 | IndexedDB backend | `new IndexedDBBackend('db-name')` |
 | Test backend | `new MemoryBackend()` |
+| Declarative asset loading | `features.register('assets', AssetFeature)` → `define(manifest)` → `load('bundle')` |
+| Check asset loaded | `assets.has('key')` |
+| Retry failed assets | set `assets.retries = N` before `load()` |
+| Hot-reload texture | `await assets.reload('key')` |
