@@ -15,6 +15,16 @@ interface BusState {
     channels: string[]
 }
 
+/**
+ * Debugger panel for the Phaser sound system.
+ *
+ * The bus API (`addBus` / `addChannel` / `removeChannel` / `removeBus` / `getBus`)
+ * is the intended bind surface for the future `AudioFeature`. Until that subsystem
+ * ships, callers wire buses manually by calling these methods themselves — typically
+ * once during scene `onCreate`. This is deliberate: the hooks are ready so that
+ * dropping in `AudioFeature` later requires only removing the manual wiring, not
+ * changing the panel contract.
+ */
 export default class AudioPanel extends Panel {
 
     state: AudioState = {
@@ -49,6 +59,19 @@ export default class AudioPanel extends Panel {
         this.components.playing = this.base.addBinding(this.state, 'playing', { readonly: true, label: 'Playing' })
     }
 
+    /**
+     * Register a named mixer bus in the panel.
+     *
+     * **Manual-instrumentation hook.** This is the bind point that `AudioFeature`
+     * will call automatically once it ships. Until then, call it yourself during
+     * scene `onCreate` to create bus controls, then use `addChannel` to assign
+     * sound keys to the bus. The `onChange` callback fires whenever the user
+     * adjusts the bus sliders, so you can mirror the values onto your own audio
+     * objects without waiting for `AudioFeature`.
+     *
+     * Returns the existing `BusState` unchanged if a bus with the same name was
+     * already registered.
+     */
     addBus(name: string, onChange?: (bus: BusState) => void): BusState {
         if (this.buses[name] !== undefined) return this.buses[name]
         const bus: BusState = { name, volume: 1, mute: false, pan: 0, channels: [] }
