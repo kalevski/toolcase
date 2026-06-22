@@ -8,6 +8,7 @@ import * as Events from './engine/Events'
 import Feature from './features/Feature'
 import FeatureRegistry from './features/FeatureRegistry'
 import ServiceRegistry from './features/ServiceRegistry'
+import type { Disposable } from './features/ServiceRegistry'
 import Layer from './features/Layer'
 import ObjectLayer from './features/ObjectLayer'
 import HTMLFeature from './features/HTMLFeature'
@@ -72,6 +73,7 @@ const Structs = {
     Matrix2
 }
 
+export type { Disposable }
 export {
     Events,
     Flow,
