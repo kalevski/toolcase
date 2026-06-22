@@ -14,6 +14,7 @@ import RedactionReporter from '../src/RedactionReporter'
 import SamplingReporter from '../src/SamplingReporter'
 import FanoutReporter, { MultiReporter } from '../src/FanoutReporter'
 import HTTPReporter, { type HTTPTransport } from '../src/HTTPReporter'
+import OTLPReporter, { type OTLPTransport } from '../src/OTLPReporter'
 
 // 2026-01-01T00:00:00.000Z in epoch ms
 const T0 = 1767225600000
@@ -2301,5 +2302,297 @@ describe('HTTPReporter', () => {
         await new Promise(resolve => setTimeout(resolve, 0))
         expect(posts).toHaveLength(1)
         expect(posts[0].entries).toHaveLength(2)
+    })
+})
+
+describe('OTLPReporter — level→severity mapping', () => {
+    const mkReporter = () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        return { reporter, posts }
+    }
+
+    it('verbose maps to severityNumber 1 and severityText TRACE', async () => {
+        const { reporter, posts } = mkReporter()
+        reporter.log('verbose', 'svc', T0, {}, ['trace msg'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.severityNumber).toBe(1)
+        expect(rec.severityText).toBe('TRACE')
+    })
+
+    it('debug maps to severityNumber 5 and severityText DEBUG', async () => {
+        const { reporter, posts } = mkReporter()
+        reporter.log('debug', 'svc', T0, {}, ['debug msg'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.severityNumber).toBe(5)
+        expect(rec.severityText).toBe('DEBUG')
+    })
+
+    it('info maps to severityNumber 9 and severityText INFO', async () => {
+        const { reporter, posts } = mkReporter()
+        reporter.log('info', 'svc', T0, {}, ['info msg'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.severityNumber).toBe(9)
+        expect(rec.severityText).toBe('INFO')
+    })
+
+    it('warning maps to severityNumber 13 and severityText WARN', async () => {
+        const { reporter, posts } = mkReporter()
+        reporter.log('warning', 'svc', T0, {}, ['warn msg'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.severityNumber).toBe(13)
+        expect(rec.severityText).toBe('WARN')
+    })
+
+    it('error maps to severityNumber 17 and severityText ERROR', async () => {
+        const { reporter, posts } = mkReporter()
+        reporter.log('error', 'svc', T0, {}, ['err msg'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.severityNumber).toBe(17)
+        expect(rec.severityText).toBe('ERROR')
+    })
+})
+
+describe('OTLPReporter — fields become attributes', () => {
+    it('context fields from withContext() appear as OTLP attributes', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('info', 'auth', T0, { requestId: 'r1', userId: 42 }, ['login'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const attrs: Array<{ key: string; value: any }> =
+            posts[0].resourceLogs[0].scopeLogs[0].logRecords[0].attributes
+        const byKey = Object.fromEntries(attrs.map(a => [a.key, a.value]))
+        expect(byKey['requestId']).toEqual({ stringValue: 'r1' })
+        expect(byKey['userId']).toEqual({ intValue: '42' })
+    })
+
+    it('scope appears as the log.scope attribute', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('info', 'payments', T0, {}, ['charged'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const attrs: Array<{ key: string; value: any }> =
+            posts[0].resourceLogs[0].scopeLogs[0].logRecords[0].attributes
+        const byKey = Object.fromEntries(attrs.map(a => [a.key, a.value]))
+        expect(byKey['log.scope']).toEqual({ stringValue: 'payments' })
+    })
+
+    it('scope appears as the instrumentation scope name', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('info', 'db:pool', T0, {}, ['connected'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(posts[0].resourceLogs[0].scopeLogs[0].scope.name).toBe('db:pool')
+    })
+
+    it('resource attributes appear in the resource envelope', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            resource: { 'service.name': 'api', 'deployment.environment': 'prod' },
+            transport,
+        })
+        reporter.log('info', 'svc', T0, {}, ['boot'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const attrs: Array<{ key: string; value: any }> =
+            posts[0].resourceLogs[0].resource.attributes
+        const byKey = Object.fromEntries(attrs.map(a => [a.key, a.value]))
+        expect(byKey['service.name']).toEqual({ stringValue: 'api' })
+        expect(byKey['deployment.environment']).toEqual({ stringValue: 'prod' })
+    })
+
+    it('timeUnixNano is epoch ms converted to nanoseconds as a string', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('info', 'svc', T0, {}, ['msg'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.timeUnixNano).toBe(String(T0 * 1_000_000))
+    })
+
+    it('messages are joined into a string body', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('info', 'svc', T0, {}, ['server started', { port: 3000 }])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.body.stringValue).toBe('server started {"port":3000}')
+    })
+})
+
+describe('OTLPReporter — batching and transport', () => {
+    it('groups multiple entries by scope into separate scopeLogs sections', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 4,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('info', 'auth', T0, {}, ['a'])
+        reporter.log('info', 'db', T0, {}, ['b'])
+        reporter.log('info', 'auth', T0, {}, ['c'])
+        reporter.log('info', 'db', T0, {}, ['d'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const scopeLogs = posts[0].resourceLogs[0].scopeLogs
+        const authScope = scopeLogs.find((s: any) => s.scope.name === 'auth')
+        const dbScope = scopeLogs.find((s: any) => s.scope.name === 'db')
+        expect(authScope.logRecords).toHaveLength(2)
+        expect(dbScope.logRecords).toHaveLength(2)
+    })
+
+    it('sends configured headers to the transport', async () => {
+        const received: Record<string, string>[] = []
+        const transport: OTLPTransport = async (_url, _body, headers) => {
+            received.push(headers)
+            return 200
+        }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            headers: { 'otlp-api-key': 'secret', 'X-Service': 'api' },
+            transport,
+        })
+        reporter.log('info', 't', T0, {}, ['x'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(received[0]['otlp-api-key']).toBe('secret')
+        expect(received[0]['X-Service']).toBe('api')
+    })
+
+    it('retries when the transport returns a non-2xx status', async () => {
+        let callCount = 0
+        const transport: OTLPTransport = async () => {
+            callCount++
+            return callCount < 2 ? 503 : 200
+        }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            retries: 2,
+            retryMinTimeout: 0,
+            transport,
+        })
+        reporter.log('info', 't', T0, {}, ['msg'])
+        await new Promise(resolve => setTimeout(resolve, 50))
+        expect(callCount).toBe(2)
+    })
+
+    it('does not throw when transport permanently fails', async () => {
+        const transport: OTLPTransport = async () => { throw new Error('permanent failure') }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            retries: 1,
+            retryMinTimeout: 0,
+            transport,
+        })
+        expect(() => reporter.log('info', 't', T0, {}, ['msg'])).not.toThrow()
+        await new Promise(resolve => setTimeout(resolve, 50))
+    })
+
+    it('respects factory level filtering', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        const factory = new LoggerFactory([reporter])
+        factory.level = 'warning'
+        factory.getLogger('t').debug('dropped')
+        factory.getLogger('t').info('dropped')
+        factory.getLogger('t').warning('kept')
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(posts).toHaveLength(1)
+        const rec = posts[0].resourceLogs[0].scopeLogs[0].logRecords[0]
+        expect(rec.severityNumber).toBe(13)
+        expect(rec.severityText).toBe('WARN')
+    })
+
+    it('flush() drains buffer immediately', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 100,
+            flushInterval: 99999,
+            transport,
+        })
+        reporter.log('info', 't', T0, {}, ['a'])
+        reporter.log('info', 't', T0, {}, ['b'])
+        reporter.flush()
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(posts).toHaveLength(1)
+        expect(posts[0].resourceLogs[0].scopeLogs[0].logRecords).toHaveLength(2)
+    })
+
+    it('fields from withContext() flow through factory into OTLP attributes', async () => {
+        const posts: any[] = []
+        const transport: OTLPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new OTLPReporter({
+            url: 'https://otel.example.com/v1/logs',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        const factory = new LoggerFactory([reporter])
+        factory.level = 'debug'
+        const log = factory.getLogger('api').withContext({ requestId: 'r-99' })
+        log.info('handled')
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const attrs: Array<{ key: string; value: any }> =
+            posts[0].resourceLogs[0].scopeLogs[0].logRecords[0].attributes
+        const byKey = Object.fromEntries(attrs.map((a: any) => [a.key, a.value]))
+        expect(byKey['requestId']).toEqual({ stringValue: 'r-99' })
     })
 })

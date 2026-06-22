@@ -7,6 +7,7 @@ import ScopePatternDemo from './ScopePatternDemo'
 import RingBufferReporterDemo from './RingBufferReporterDemo'
 import ComposableReportersDemo from './ComposableReportersDemo'
 import HTTPReporterDemo from './HTTPReporterDemo'
+import OTLPReporterDemo from './OTLPReporterDemo'
 
 export type LoggingExampleDef = {
     key: string
@@ -23,4 +24,5 @@ export const loggingExamples: LoggingExampleDef[] = [
     { key: 'ring-buffer', label: 'RingBufferReporter', element: <RingBufferReporterDemo /> },
     { key: 'composable-reporters', label: 'Composable Reporters', element: <ComposableReportersDemo /> },
     { key: 'http-reporter', label: 'HTTPReporter', element: <HTTPReporterDemo /> },
+    { key: 'otlp-reporter', label: 'OTLPReporter', element: <OTLPReporterDemo /> },
 ]

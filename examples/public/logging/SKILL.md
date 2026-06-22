@@ -471,6 +471,79 @@ class HTTPReporter extends LogReporter {
 }
 ```
 
+### OTLPReporter
+
+OpenTelemetry-compatible HTTP transport. Buffers entries internally and POSTs each batch to an OTLP HTTP endpoint as a `LogsData` JSON body. Bridges `level→severityNumber/severityText` and maps `scope/fields→attributes`. Works in Node 18+ (native `fetch`) and modern browsers.
+
+```ts
+import { LoggerFactory, OTLPReporter } from '@toolcase/logging'
+
+const reporter = new OTLPReporter({
+    url: 'https://otel-collector.example.com/v1/logs',
+    headers: { 'otlp-api-key': 'my-api-key' },
+    resource: { 'service.name': 'api', 'deployment.environment': 'prod' },
+    maxSize: 100,          // flush after 100 entries (default 50)
+    flushInterval: 5000,   // or after 5 s (default 1000 ms)
+    retries: 3,            // retry attempts on failure (default 3)
+    retryMinTimeout: 500,  // base back-off ms, doubles each attempt (default 500)
+})
+
+const factory = new LoggerFactory([reporter])
+const log = factory.getLogger('api').withContext({ requestId: 'r1' })
+log.info('server started', { port: 3000 })
+
+// On shutdown:
+reporter.close()
+```
+
+**Level → severity mapping:**
+
+| `LoggerLevel` | `severityNumber` | `severityText` |
+|---------------|-----------------|----------------|
+| `verbose`     | 1               | `TRACE`        |
+| `debug`       | 5               | `DEBUG`        |
+| `info`        | 9               | `INFO`         |
+| `warning`     | 13              | `WARN`         |
+| `error`       | 17              | `ERROR`        |
+
+**Scope and fields → attributes:** each log record carries a `log.scope` attribute set to the logger's scope string, plus one attribute per `withContext()` field. The logger scope also appears as the OTLP `InstrumentationScope.name`.
+
+The POST body is a `LogsData` JSON object. Inject a custom `transport` for testing:
+
+```ts
+import { OTLPReporter, type OTLPTransport } from '@toolcase/logging'
+
+const transport: OTLPTransport = async (url, body, headers) => {
+    const res = await myFetch(url, { method: 'POST', body, headers })
+    return res.status
+}
+
+const reporter = new OTLPReporter({ url: '...', transport })
+```
+
+API:
+
+```ts
+type OTLPTransport = (url: string, body: string, headers: Record<string, string>) => Promise<number>
+
+interface OTLPReporterOptions {
+    url: string
+    headers?: Record<string, string>        // default {}
+    resource?: Record<string, any>          // resource attributes (e.g. service.name)
+    maxSize?: number                        // default 50
+    flushInterval?: number                  // default 1000 ms; 0 disables timer
+    retries?: number                        // default 3
+    retryMinTimeout?: number                // default 500 ms
+    transport?: OTLPTransport               // default: globalThis.fetch
+}
+
+class OTLPReporter extends LogReporter {
+    constructor(options: OTLPReporterOptions)
+    flush(): void    // drain buffer immediately (fire-and-forget POST)
+    close(): void    // flush + cancel timer
+}
+```
+
 ---
 
 ## Examples per level
