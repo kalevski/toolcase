@@ -32,6 +32,7 @@ import MathDemo from './MathDemo'
 import EasingDemo from './EasingDemo'
 import FormattingDemo from './FormattingDemo'
 import StringHelpersDemo from './StringHelpersDemo'
+import ResultOptionDemo from './ResultOptionDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -93,4 +94,6 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'color', label: 'Color', category: 'Utilities & Colors', element: <ColorDemo /> },
 
     { key: 'async', label: 'Async', category: 'Async', element: <AsyncDemo /> },
+
+    { key: 'result-option', label: 'Result / Option', category: 'Utilities & Colors', element: <ResultOptionDemo /> },
 ]

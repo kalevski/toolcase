@@ -1,3 +1,5 @@
+import { ok, err } from './Result'
+import { some, none } from './Option'
 import VectorClock from './VectorClock'
 import EventEmitter from './EventEmitter'
 import Broadcast from './Broadcast'
@@ -65,6 +67,8 @@ const HTTP = {
     RESTResponse
 }
 
+export type { Result } from './Result'
+export type { Option } from './Option'
 export type { FormatNumberOptions } from './formatNumber'
 
 export type { SpatialPoint, SpatialRect } from './spatial'
@@ -104,6 +108,10 @@ export type {
 } from './AStar'
 
 export {
+    ok,
+    err,
+    some,
+    none,
     HTTP,
     Packing,
     Async,
@@ -166,6 +174,10 @@ export {
 }
 
 const BASE = {
+    ok,
+    err,
+    some,
+    none,
     HTTP,
     Packing,
     Async,

@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
 ---
 
 # base — API Reference
@@ -30,8 +30,12 @@ import {
     WeightedRandom, Dijkstra, AStar,
     DisjointSet, Trie,
     BiMap, MultiMap,
-    Vec2
+    Vec2,
+    // tagged-union helpers:
+    ok, err,    // Result<T, E> factories
+    some, none  // Option<T> factories
 } from '@toolcase/base'
+import type { Result, Option } from '@toolcase/base'
 ```
 
 ---
@@ -2177,6 +2181,151 @@ Use before inserting any user-supplied text into `innerHTML`:
 
 ```ts
 element.innerHTML = `<p>${escapeHtml(userInput)}</p>`
+```
+
+---
+
+## Result / Option
+
+Zero-dependency, isomorphic tagged-union helpers for explicit error handling without throwing.
+
+```ts
+import { ok, err, some, none } from '@toolcase/base'
+import type { Result, Option } from '@toolcase/base'
+```
+
+### Result\<T, E\>
+
+A value that is either a success (`Ok<T,E>`) or a failure (`Err<T,E>`). Construct with `ok(value)` / `err(error)`.
+
+```ts
+type Result<T, E> = Ok<T, E> | Err<T, E>
+
+ok<T, E = never>(value: T): Ok<T, E>
+err<T = never, E = unknown>(error: E): Err<T, E>
+```
+
+**`Ok<T, E>` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isOk()` | `this is Ok<T, E>` | always `true` — narrows the union |
+| `isErr()` | `this is Err<T, E>` | always `false` |
+| `map<U>(fn)` | `Ok<U, E>` | apply `fn` to value |
+| `mapErr<F>(fn)` | `Ok<T, F>` | no-op on Ok; preserves value |
+| `andThen<U>(fn)` | `Result<U, E>` | chain a fallible operation |
+| `flatMap<U>(fn)` | `Result<U, E>` | alias for `andThen` |
+| `unwrap()` | `T` | return value; never throws |
+| `unwrapErr()` | `never` | throws `Error('called unwrapErr on an Ok value')` |
+| `unwrapOr(default)` | `T` | returns value, ignores default |
+
+**`Err<T, E>` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isOk()` | `this is Ok<T, E>` | always `false` |
+| `isErr()` | `this is Err<T, E>` | always `true` — narrows the union |
+| `map<U>(fn)` | `Err<U, E>` | no-op on Err; preserves error |
+| `mapErr<F>(fn)` | `Err<T, F>` | apply `fn` to error |
+| `andThen<U>(fn)` | `Err<U, E>` | no-op on Err; short-circuits chain |
+| `flatMap<U>(fn)` | `Err<U, E>` | alias for `andThen` |
+| `unwrap()` | `never` | throws `Error('called unwrap on an Err value')` |
+| `unwrapErr()` | `E` | return error; never throws |
+| `unwrapOr(default)` | `T` | returns default value |
+
+```ts
+import { ok, err } from '@toolcase/base'
+import type { Result } from '@toolcase/base'
+
+function divide(a: number, b: number): Result<number, string> {
+    return b === 0 ? err('division by zero') : ok(a / b)
+}
+
+// Type-guard narrowing
+const r = divide(10, 2)
+if (r.isOk()) {
+    console.log(r.value)   // 5 — TypeScript knows it's Ok here
+}
+
+// Chaining — short-circuits on first error
+ok<number, string>(100)
+    .andThen(n => divide(n, 4))     // ok(25)
+    .andThen(n => divide(n, 0))     // err('division by zero')
+    .map(n => n * 100)              // skipped
+    .unwrapOr(-1)                   // -1
+
+// mapErr transforms the error type
+divide(1, 0)
+    .mapErr(msg => new Error(msg))
+    .unwrapErr()                    // Error('division by zero')
+```
+
+---
+
+### Option\<T\>
+
+A value that is either present (`Some<T>`) or absent (`None`). Construct with `some(value)` / `none()`.
+
+```ts
+type Option<T> = Some<T> | None
+
+some<T>(value: T): Some<T>
+none(): None
+```
+
+**`Some<T>` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isSome()` | `this is Some<T>` | always `true` — narrows the union |
+| `isNone()` | `this is None` | always `false` |
+| `map<U>(fn)` | `Some<U>` | apply `fn` to value |
+| `andThen<U>(fn)` | `Option<U>` | chain a fallible lookup |
+| `flatMap<U>(fn)` | `Option<U>` | alias for `andThen` |
+| `unwrap()` | `T` | return value; never throws |
+| `unwrapOr(default)` | `T` | returns value, ignores default |
+
+**`None` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isSome()` | `this is Some<never>` | always `false` |
+| `isNone()` | `this is None` | always `true` — narrows the union |
+| `map<U>(fn)` | `None` | no-op |
+| `andThen<U>(fn)` | `None` | no-op; short-circuits chain |
+| `flatMap<U>(fn)` | `None` | alias for `andThen` |
+| `unwrap()` | `never` | throws `Error('called unwrap on a None value')` |
+| `unwrapOr<T>(default)` | `T` | returns default value |
+
+`none()` returns a singleton — every call returns the same `None` instance.
+
+```ts
+import { some, none } from '@toolcase/base'
+import type { Option } from '@toolcase/base'
+
+const users: Record<number, string> = { 1: 'Alice', 2: 'Bob' }
+
+function findUser(id: number): Option<string> {
+    return id in users ? some(users[id]) : none()
+}
+
+// Type-guard narrowing
+const user = findUser(1)
+if (user.isSome()) {
+    console.log(user.value)   // 'Alice'
+}
+
+// Chaining — short-circuits at first None
+findUser(2)
+    .map(name => name.toUpperCase())             // some('BOB')
+    .andThen(name => name.length > 2             // some('Hello BOB')
+        ? some(`Hello ${name}`)
+        : none())
+    .unwrapOr('n/a')                             // 'Hello BOB'
+
+findUser(99)
+    .map(name => name.toUpperCase())             // none
+    .unwrapOr('unknown')                         // 'unknown'
 ```
 
 ---
