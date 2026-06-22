@@ -638,6 +638,18 @@ panel.bindTimeline(handle)   // adds TL Scrub slider, TL Progress readout, Repla
 
 Demo: `tween-timeline` — `TweenTimelineDemo.js`.
 
+**`TimelinePanel.bindReplay(recorder)`** — wire a `ReplayRecorder` to this panel. Adds RP State / RP Frame readouts, a scrub slider (seeks the frame cursor during playback via `recorder.seekTo`), and Record / Stop / Replay buttons. Each `REPLAY_FRAME` event is also appended to the history log so it appears in the Window readout.
+
+```ts
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+const panel = dbg.addPanel('timeline', TimelinePanel, 'Replay Timeline')
+
+const recorder = this.features.register('replay', Flow.ReplayRecorder)
+panel.bindReplay(recorder)   // adds RP State, RP Frame, RP Scrub, RP Record/Stop/Replay
+```
+
+Demo: `replay-recorder-timeline` — `ReplayRecorderTimelineDemo.js`.
+
 ---
 
 ## Debugger
@@ -1126,6 +1138,10 @@ replay.on(REPLAY_END, session => log.info('replay finished', session))
 ```
 
 During playback read the active frame's inputs with `replay.readInput(key)`. `replay.state` is `'idle' | 'recording' | 'playing'`; `replay.tick` is the current frame index.
+
+`replay.seekTo(frameIndex)` — jump the playback cursor to the given frame during `'playing'` state. No-op otherwise. Used by `TimelinePanel.bindReplay` for the RP Scrub slider.
+
+See `replay-recorder-timeline` (`ReplayRecorderTimelineDemo.js`) for a full example wiring `bindReplay`.
 
 ---
 

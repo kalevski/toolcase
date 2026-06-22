@@ -38,6 +38,7 @@ import PathFinderDemo from './scenes/PathFinderDemo.js'
 import StateMachineDemo from './scenes/StateMachineDemo.js'
 import BehaviorTreeDemo from './scenes/BehaviorTreeDemo.js'
 import ReplayRecorderDemo from './scenes/ReplayRecorderDemo.js'
+import ReplayRecorderTimelineDemo from './scenes/ReplayRecorderTimelineDemo.js'
 import CameraDirectorDemo from './scenes/CameraDirectorDemo.js'
 import ScreenShakeDemo from './scenes/ScreenShakeDemo.js'
 import ParallaxLayerDemo from './scenes/ParallaxLayerDemo.js'
@@ -402,6 +403,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Record arrow-key inputs at fixed step then play them back deterministically.',
         sceneFile: 'ReplayRecorderDemo.js',
         element: <PhaserCanvas sceneClass={ReplayRecorderDemo} />
+    },
+    {
+        key: 'replay-recorder-timeline',
+        title: 'Replay + Timeline Panel',
+        category: 'Flow',
+        description: 'ReplayRecorder wired to TimelinePanel via bindReplay — frame log, scrub slider, Record/Stop/Replay buttons in the debugger.',
+        sceneFile: 'ReplayRecorderTimelineDemo.js',
+        element: <PhaserCanvas sceneClass={ReplayRecorderTimelineDemo} />
     },
 
     {

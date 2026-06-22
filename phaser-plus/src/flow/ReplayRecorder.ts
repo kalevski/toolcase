@@ -83,6 +83,18 @@ export default class ReplayRecorder extends Feature {
         return this
     }
 
+    /**
+     * Jump playback to the given frame index. No-op when not playing.
+     * Useful for scrubbing from a `TimelinePanel` bound via `bindReplay`.
+     */
+    seekTo(frameIndex: number): this {
+        if (this.mode !== 'playing' || !this.currentSession) return this
+        const total = this.currentSession.frames.length
+        this.playCursor = Math.max(0, Math.min(Math.floor(frameIndex), total))
+        this.currentTick = this.playCursor
+        return this
+    }
+
     readInput<T = unknown>(key: string): T | undefined {
         if (this.mode === 'playing') {
             const frame = this.currentSession?.frames[this.playCursor]
