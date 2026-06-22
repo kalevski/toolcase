@@ -44,7 +44,7 @@ import truncate from './truncate'
 import escapeHtml from './escapeHtml'
 import diff from './diff'
 import patch from './patch'
-import { BPlusIndex, MemoryAdapter } from './BPlusIndex'
+import { BPlusIndex, MemoryAdapter, FsAdapter } from './BPlusIndex'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -189,6 +189,7 @@ export {
     patch,
     BPlusIndex,
     MemoryAdapter,
+    FsAdapter,
 }
 
 const BASE = {
@@ -263,6 +264,7 @@ const BASE = {
     patch,
     BPlusIndex,
     MemoryAdapter,
+    FsAdapter,
 }
 
 export default BASE
