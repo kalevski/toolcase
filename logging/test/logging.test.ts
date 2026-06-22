@@ -517,6 +517,57 @@ describe('Logger — early return for disabled levels', () => {
     })
 })
 
+describe('Logger — lazy thunk evaluation', () => {
+    it('never calls a thunk arg when the level is disabled', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'info'
+        const log = factory.getLogger('thunk')
+        let called = false
+        log.debug(() => { called = true; return 'expensive' })
+        expect(called).toBe(false)
+    })
+
+    it('calls a thunk arg when the level is enabled', () => {
+        const received: any[][] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]) { received.push(msgs) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'debug'
+        const log = factory.getLogger('thunk')
+        log.debug(() => 'lazy-value')
+        expect(received).toHaveLength(1)
+        expect(received[0]).toEqual(['lazy-value'])
+    })
+
+    it('evaluates each thunk in a mixed args list', () => {
+        const received: any[][] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]) { received.push(msgs) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'debug'
+        const log = factory.getLogger('thunk')
+        log.debug('prefix', () => ({ id: 99 }), 'suffix')
+        expect(received[0]).toEqual(['prefix', { id: 99 }, 'suffix'])
+    })
+
+    it('does not call any thunk in a mixed list when the level is disabled', () => {
+        const factory = new LoggerFactory([])
+        factory.level = 'info'
+        const log = factory.getLogger('thunk')
+        let calls = 0
+        log.debug(() => { calls++; return 'a' }, () => { calls++; return 'b' })
+        expect(calls).toBe(0)
+    })
+
+    it('thunk result is subject to context prepend like any other arg', () => {
+        const received: any[][] = []
+        class R extends LogReporter { log(_l: any, _s: any, _t: any, msgs: any[]) { received.push(msgs) } }
+        const factory = new LoggerFactory([new R()])
+        factory.level = 'debug'
+        const log = factory.getLogger('thunk').withContext({ req: 'r1' })
+        log.debug(() => 'lazy')
+        expect(received[0]).toEqual([{ req: 'r1' }, 'lazy'])
+    })
+})
+
 describe('ConsoleLogReporter', () => {
     it('can be instantiated', () => {
         const reporter = new ConsoleLogReporter()

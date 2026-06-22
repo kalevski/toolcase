@@ -52,7 +52,8 @@ class Logger {
             return
         }
         const time = new Date().toISOString()
-        const messages = this.context === null ? args : [this.context, ...args]
+        const evaluated = args.map(a => typeof a === 'function' ? a() : a)
+        const messages = this.context === null ? evaluated : [this.context, ...evaluated]
         this.logMessageFn(level, this.scope, time, messages, this.levelOverride)
     }
 
