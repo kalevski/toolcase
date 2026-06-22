@@ -26,6 +26,7 @@ import {
     Effect, EffectManager, installEffects, EFFECT_REGISTRY,
     // AI
     NavMesh, PathFinder, Path, PATH_FOUND, PATH_FAILED,
+    TilemapNavMesh, TilemapFeature,
     // Cinema
     CameraDirector, EASE_LINEAR, EASE_IN_OUT, EASE_OUT, SHOT_DONE,
     ScreenShake, CameraFlash, DialogCameraCue, ParallaxLayer, LetterboxFeature,
@@ -694,6 +695,119 @@ path.on(PATH_FAILED, (reason: string) => {
 ```
 
 Each `findPath` mints a fresh `Path` backed by an `@toolcase/base` `AStar` stepped cooperatively — `budgetMs` caps the per-frame slice. Heuristic is octile (8-connectivity, diagonal squeeze through two blocked orthogonals is rejected).
+
+### TilemapFeature — tilemap loader + NavMesh bridge
+
+`Feature` that loads Tiled (`.tmj`) or LDtk (`.ldtk`) maps, renders tile layers, wires arcade-physics colliders, and auto-generates a `TilemapNavMesh` from walkable tile IDs.
+
+```ts
+import { TilemapFeature, TilemapNavMesh, PathFinder, PATH_FOUND } from '@toolcase/phaser-plus'
+
+class GameScene extends Scene {
+
+    onLoad() {
+        // queue a Tiled JSON map load (call loadTiled before the load phase ends)
+        const tilemap = this.features.register('tilemap', TilemapFeature)
+        tilemap.loadTiled('level1', 'assets/level1.tmj')
+        this.load.image('tileset', 'assets/tileset.png')
+    }
+
+    onCreate() {
+        const tilemap = this.features.get('tilemap')
+
+        // create the Phaser Tilemap from cache
+        tilemap.create('level1')
+
+        // register the tileset image
+        tilemap.addTileset('tileset', 'tileset')
+
+        // render a tile layer
+        tilemap.createLayer('Ground', 'tileset')
+
+        // render a collision layer (sets collision by `collides: true` tile property)
+        tilemap.buildColliders('Walls', 'tileset')
+
+        // generate a NavMesh — tile IDs 1 & 2 are walkable
+        const navMesh = tilemap.buildNavMesh({ walkable: [1, 2], layer: 'Ground' })
+
+        const pf = this.features.register('finder', PathFinder)
+        pf.setMesh(navMesh)
+
+        const path = pf.findPath(0, 0, 20, 12)
+        path.on(PATH_FOUND, (waypoints) => moveAgent(waypoints))
+    }
+}
+```
+
+#### From inline 2D array (no file load needed)
+
+```ts
+const MAP = [
+    [1,1,1,1],
+    [1,0,0,1],
+    [1,0,0,1],
+    [1,1,1,1],
+]
+
+tilemap.createFromData(MAP, 32, 32)
+const navMesh = tilemap.buildNavMesh({ walkable: [0], layer: 0 })
+```
+
+#### LDtk support
+
+```ts
+tilemap.loadLDtk('world', 'assets/world.ldtk')
+// parse the cached JSON in onCreate:
+const raw = this.cache.json.get('world')
+```
+
+#### Tiled object layer → pooled ObjectLayer
+
+Pre-register the pool key in `onInit`, then let `toObjectLayer` spawn every Tiled object entity:
+
+```ts
+// onInit
+this.pool.register('chest', ChestObject)
+
+// onCreate
+const objectLayer = tilemap.toObjectLayer('entities', 'Pickups', 'chest')
+```
+
+#### Retrieve raw Tiled objects
+
+```ts
+const objects = tilemap.getObjects('Enemies')
+// → TilemapObject[] with { name, type, x, y, width, height, properties }
+```
+
+#### TilemapFeature API
+
+| Method | Returns | Description |
+|---|---|---|
+| `loadTiled(key, url)` | `this` | Queue a Tiled JSON map load (call before load phase ends) |
+| `loadLDtk(key, url)` | `this` | Queue an LDtk JSON load |
+| `create(key)` | `this` | Build tilemap from Phaser cache (call in `onCreate`) |
+| `createFromData(data, tw, th)` | `this` | Build tilemap from inline 2D number array |
+| `addTileset(name, textureKey)` | `Tileset` | Register a tileset image against the map |
+| `createLayer(layerName, tilesetName?)` | `TilemapLayer` | Render a tile layer |
+| `buildColliders(layerName, tilesetName?)` | `TilemapLayer` | Render + enable collision by `collides: true` property |
+| `buildNavMesh(options)` | `TilemapNavMesh` | Generate NavMesh from walkable tile IDs |
+| `toObjectLayer(featureKey, objectLayerName, poolKey)` | `ObjectLayer` | Spawn a pooled ObjectLayer from a Tiled object layer |
+| `getObjects(objectLayerName)` | `TilemapObject[]` | Return raw Tiled object definitions |
+| `tilemap` | `Tilemap \| null` | Direct access to the underlying Phaser Tilemap |
+
+`BuildNavMeshOptions`: `{ walkable: number[], layer?: number | string }`.
+
+#### TilemapNavMesh
+
+`NavMesh` subclass constructed automatically by `TilemapFeature.buildNavMesh`, or manually:
+
+```ts
+import { TilemapNavMesh } from '@toolcase/phaser-plus'
+const navMesh = new TilemapNavMesh(map, [1, 2], 'Ground')
+```
+
+`isBlocked(x, y)` returns `true` when the tile is absent, empty (`index === -1`), or its index is not in the `walkable` set. `cost(x, y)` reads the tile's `cost` custom property (defaults to `1`).
 
 ---
 
@@ -1777,6 +1891,10 @@ class GameScene extends Scene {
 | Shader on object | `obj.effects.add(GrayScaleEffect, { ... })` |
 | Isometric world | Extend `Scene2D`, set `world.projection = Matrix2.createISO(...)` |
 | A* path | Extend `NavMesh` → register `PathFinder` → `findPath(...)` and listen `PATH_FOUND` |
+| Tilemap navmesh | `features.register('tilemap', TilemapFeature)` → `loadTiled(key, url)` → `create(key)` → `buildNavMesh({ walkable })` |
+| Tilemap from inline data | `tilemap.createFromData(data2d, tileWidth, tileHeight)` → `buildNavMesh({ walkable: [0] })` |
+| Tilemap collision layer | `tilemap.buildColliders('Walls', 'tileset')` (uses `collides: true` tile property) |
+| Spawn Tiled objects into pool | `tilemap.toObjectLayer('entities', 'Pickups', 'poolKey')` |
 | In-game UI | Register `Debugger` feature; add panels via `dbg.addPanel(key, PanelCls)` |
 | Game-wide singleton | `engine.services.bind(Cls, factory)` then `engine.services.resolve(Cls)` |
 | Audio bus mixer | `features.register('audio', AudioFeature)` → `play/crossfadeTo/playSfx/playSpatial/duck` |

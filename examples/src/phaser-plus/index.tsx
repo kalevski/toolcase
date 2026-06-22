@@ -49,6 +49,7 @@ import GamepadDemo from './scenes/GamepadDemo.js'
 import InputBufferDemo from './scenes/InputBufferDemo.js'
 import SaveServiceDemo from './scenes/SaveServiceDemo.js'
 import AssetFeatureDemo from './scenes/AssetFeatureDemo.js'
+import TilemapNavMeshDemo from './scenes/TilemapNavMeshDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -364,6 +365,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Time-sliced incremental A* over a grid NavMesh: click to walk, right-click to toggle walls.',
         sceneFile: 'PathFinderDemo.js',
         element: <PhaserCanvas sceneClass={PathFinderDemo} />
+    },
+    {
+        key: 'tilemap-navmesh',
+        title: 'Tilemap NavMesh',
+        category: 'AI',
+        description: 'TilemapFeature.buildNavMesh auto-generates a NavMesh from walkable tiles; agent path-finds around walls.',
+        sceneFile: 'TilemapNavMeshDemo.js',
+        element: <PhaserCanvas sceneClass={TilemapNavMeshDemo} />
     },
 
     {
