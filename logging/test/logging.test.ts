@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { default as Level, getLevelOrder, getLevel } from '../src/Level'
+import { default as Level, getLevelOrder, getLevel, isKnownLevel, KNOWN_LEVELS } from '../src/Level'
 import Logger from '../src/Logger'
 import LoggerFactory from '../src/LoggerFactory'
 import ConsoleLogReporter from '../src/ConsoleLogReporter'
@@ -35,6 +35,27 @@ describe('Level', () => {
 
     it('getLevel returns silent for unknown order', () => {
         expect(getLevel(999)).toBe('silent')
+    })
+
+    it('isKnownLevel identifies valid level tokens', () => {
+        expect(isKnownLevel('silent')).toBe(true)
+        expect(isKnownLevel('error')).toBe(true)
+        expect(isKnownLevel('warning')).toBe(true)
+        expect(isKnownLevel('info')).toBe(true)
+        expect(isKnownLevel('debug')).toBe(true)
+        expect(isKnownLevel('verbose')).toBe(true)
+    })
+
+    it('isKnownLevel rejects unknown strings', () => {
+        expect(isKnownLevel('trace')).toBe(false)
+        expect(isKnownLevel('warn')).toBe(false)
+        expect(isKnownLevel('trase')).toBe(false)
+        expect(isKnownLevel('')).toBe(false)
+        expect(isKnownLevel('VERBOSE')).toBe(false)
+    })
+
+    it('KNOWN_LEVELS contains exactly the six valid level tokens', () => {
+        expect([...KNOWN_LEVELS].sort()).toEqual(['debug', 'error', 'info', 'silent', 'verbose', 'warning'])
     })
 })
 
@@ -189,11 +210,19 @@ describe('Logger', () => {
         expect(captures).toEqual(['error', 'warning', 'info', 'debug', 'verbose'])
     })
 
-    it('log() accepts arbitrary level token', () => {
+    it('log() dispatches known level tokens', () => {
         const captures: string[] = []
         const logger = new Logger('s', (level) => { captures.push(level) })
         logger.log('verbose', 'msg')
         expect(captures).toEqual(['verbose'])
+    })
+
+    it('log() drops unknown level tokens even without a factory isEnabledFn', () => {
+        const captures: string[] = []
+        const logger = new Logger('s', (level) => { captures.push(level) })
+        logger.log('trace' as any, 'should be dropped')
+        logger.log('warn' as any, 'should be dropped')
+        expect(captures).toHaveLength(0)
     })
 })
 

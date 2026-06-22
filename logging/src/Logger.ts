@@ -1,4 +1,4 @@
-import { LoggerLevel, getLevel, getLevelOrder } from './Level'
+import { LoggerLevel, getLevel, getLevelOrder, isKnownLevel } from './Level'
 
 export type LogMessageFn = (level: LoggerLevel, scope: string, time: string, messages: any[], overrideOrder?: number | null) => void
 export type IsEnabledFn = (order: number, overrideOrder: number | null) => boolean
@@ -46,6 +46,7 @@ class Logger {
     }
 
     log(level: LoggerLevel, ...args: any[]): void {
+        if (!isKnownLevel(level)) return
         const order = getLevelOrder(level)
         if (this.isEnabledFn && !this.isEnabledFn(order, this.levelOverride)) {
             return
