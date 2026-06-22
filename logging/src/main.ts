@@ -12,6 +12,7 @@ import ScopeFilterReporter from './ScopeFilterReporter'
 import RedactionReporter from './RedactionReporter'
 import SamplingReporter from './SamplingReporter'
 import FanoutReporter, { MultiReporter } from './FanoutReporter'
+import HTTPReporter from './HTTPReporter'
 
 const logging = new LoggerFactory([
     new ConsoleLogReporter()
@@ -19,8 +20,9 @@ const logging = new LoggerFactory([
 
 export default logging
 
-export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter, RingBufferReporter, isKnownLevel, KNOWN_LEVELS, LevelFilterReporter, ScopeFilterReporter, RedactionReporter, SamplingReporter, FanoutReporter, MultiReporter }
+export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter, RingBufferReporter, isKnownLevel, KNOWN_LEVELS, LevelFilterReporter, ScopeFilterReporter, RedactionReporter, SamplingReporter, FanoutReporter, MultiReporter, HTTPReporter }
 export type { ConsoleLogReporterOptions, LoggerLevel } from './Level'
 export type { ClockFn } from './Logger'
 export type { LogEntry } from './BufferedReporter'
 export type { RedactionKeys } from './RedactionReporter'
+export type { HTTPReporterOptions, HTTPTransport } from './HTTPReporter'

@@ -397,6 +397,80 @@ Either `inner` or `onFlush` must be provided. When both are present, `onFlush` w
 
 Reporters run synchronously in registration order; a throw inside a synchronous reporter bubbles up to the call site of `logger.<level>(...)`. The exception is a reporter that flushes off a timer (e.g. `BufferedReporter`'s `flushInterval` path) — a throw there fires from a `setTimeout` callback and surfaces as an **unhandled exception**, not at the call site. Either way, wrap your I/O. See worked custom-reporter examples below.
 
+### HTTPReporter
+
+Isomorphic HTTP transport. Buffers entries internally (via `BufferedReporter`) and POSTs each batch to a configurable endpoint as a JSON body. Retries on network errors or non-2xx responses using exponential back-off. Works in Node 18+ (native `fetch`) and modern browsers.
+
+```ts
+import { LoggerFactory, HTTPReporter } from '@toolcase/logging'
+
+const reporter = new HTTPReporter({
+    url: 'https://ingest.example.com/logs',
+    headers: { Authorization: 'Bearer my-token' },
+    maxSize: 100,          // flush after 100 entries (default 50)
+    flushInterval: 5000,   // or after 5 s (default 1000 ms)
+    retries: 3,            // retry attempts on failure (default 3)
+    retryMinTimeout: 500,  // base back-off ms, doubles each attempt (default 500)
+})
+
+const factory = new LoggerFactory([reporter])
+factory.getLogger('api').info('boot', { version: '1.0.0' })
+
+// On shutdown:
+reporter.close()
+```
+
+Each POST body is `{ "entries": LogEntry[] }` where each entry carries:
+
+```json
+{
+  "entries": [
+    {
+      "level": "info",
+      "scope": "api",
+      "time": 1767225600000,
+      "fields": {},
+      "messages": ["boot", { "version": "1.0.0" }]
+    }
+  ]
+}
+```
+
+Inject a custom `transport` for testing or for environments with a non-standard fetch:
+
+```ts
+import { HTTPReporter, type HTTPTransport } from '@toolcase/logging'
+
+const transport: HTTPTransport = async (url, body, headers) => {
+    const res = await myCustomFetch(url, { method: 'POST', body, headers })
+    return res.statusCode
+}
+
+const reporter = new HTTPReporter({ url: '...', transport })
+```
+
+API:
+
+```ts
+type HTTPTransport = (url: string, body: string, headers: Record<string, string>) => Promise<number>
+
+interface HTTPReporterOptions {
+    url: string
+    headers?: Record<string, string>      // default {}
+    maxSize?: number                      // default 50
+    flushInterval?: number                // default 1000 ms; 0 disables timer
+    retries?: number                      // default 3
+    retryMinTimeout?: number              // default 500 ms
+    transport?: HTTPTransport             // default: globalThis.fetch
+}
+
+class HTTPReporter extends LogReporter {
+    constructor(options: HTTPReporterOptions)
+    flush(): void    // drain buffer immediately (fire-and-forget POST)
+    close(): void    // flush + cancel timer
+}
+```
+
 ---
 
 ## Examples per level

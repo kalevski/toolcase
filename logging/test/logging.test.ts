@@ -13,6 +13,7 @@ import ScopeFilterReporter from '../src/ScopeFilterReporter'
 import RedactionReporter from '../src/RedactionReporter'
 import SamplingReporter from '../src/SamplingReporter'
 import FanoutReporter, { MultiReporter } from '../src/FanoutReporter'
+import HTTPReporter, { type HTTPTransport } from '../src/HTTPReporter'
 
 // 2026-01-01T00:00:00.000Z in epoch ms
 const T0 = 1767225600000
@@ -2147,5 +2148,158 @@ describe('FanoutReporter', () => {
         factory.getLogger('t').info('i')
         expect(errors).toEqual(['error'])
         expect(all).toEqual(['error', 'info'])
+    })
+})
+
+describe('HTTPReporter', () => {
+    it('batches entries and posts them as a JSON body on flush', async () => {
+        const posts: { url: string; body: any }[] = []
+        const transport: HTTPTransport = async (url, body) => {
+            posts.push({ url, body: JSON.parse(body) })
+            return 200
+        }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 3,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('info', 'svc', T0, {}, ['a'])
+        reporter.log('warning', 'svc', T0, {}, ['b'])
+        reporter.log('error', 'svc', T0, {}, ['c'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(posts).toHaveLength(1)
+        expect(posts[0].url).toBe('https://logs.example.com/ingest')
+        expect(posts[0].body.entries).toHaveLength(3)
+    })
+
+    it('payload entries carry level, scope, time, fields, and messages', async () => {
+        const posts: any[] = []
+        const transport: HTTPTransport = async (_url, body) => {
+            posts.push(JSON.parse(body))
+            return 200
+        }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        reporter.log('warning', 'auth', T0, { requestId: 'r1' }, ['login failed', { ip: '1.2.3.4' }])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        const entry = posts[0].entries[0]
+        expect(entry.level).toBe('warning')
+        expect(entry.scope).toBe('auth')
+        expect(entry.time).toBe(T0)
+        expect(entry.fields).toEqual({ requestId: 'r1' })
+        expect(entry.messages).toEqual(['login failed', { ip: '1.2.3.4' }])
+    })
+
+    it('sends configured headers to the transport', async () => {
+        const received: Record<string, string>[] = []
+        const transport: HTTPTransport = async (_url, _body, headers) => {
+            received.push(headers)
+            return 200
+        }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 1,
+            flushInterval: 0,
+            headers: { Authorization: 'Bearer token123', 'X-Service': 'api' },
+            transport,
+        })
+        reporter.log('info', 't', T0, {}, ['x'])
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(received[0]['Authorization']).toBe('Bearer token123')
+        expect(received[0]['X-Service']).toBe('api')
+    })
+
+    it('retries when the transport throws', async () => {
+        let callCount = 0
+        const transport: HTTPTransport = async () => {
+            callCount++
+            if (callCount < 2) throw new Error('network error')
+            return 200
+        }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 1,
+            flushInterval: 0,
+            retries: 2,
+            retryMinTimeout: 0,
+            transport,
+        })
+        reporter.log('info', 't', T0, {}, ['msg'])
+        await new Promise(resolve => setTimeout(resolve, 50))
+        expect(callCount).toBe(2)
+    })
+
+    it('retries when the transport returns a non-2xx status', async () => {
+        let callCount = 0
+        const transport: HTTPTransport = async () => {
+            callCount++
+            return callCount < 2 ? 503 : 200
+        }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 1,
+            flushInterval: 0,
+            retries: 2,
+            retryMinTimeout: 0,
+            transport,
+        })
+        reporter.log('info', 't', T0, {}, ['msg'])
+        await new Promise(resolve => setTimeout(resolve, 50))
+        expect(callCount).toBe(2)
+    })
+
+    it('does not throw when transport permanently fails', async () => {
+        const transport: HTTPTransport = async () => { throw new Error('permanent failure') }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 1,
+            flushInterval: 0,
+            retries: 1,
+            retryMinTimeout: 0,
+            transport,
+        })
+        expect(() => reporter.log('info', 't', T0, {}, ['msg'])).not.toThrow()
+        await new Promise(resolve => setTimeout(resolve, 50))
+    })
+
+    it('respects factory level filtering', async () => {
+        const posts: any[] = []
+        const transport: HTTPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 1,
+            flushInterval: 0,
+            transport,
+        })
+        const factory = new LoggerFactory([reporter])
+        factory.level = 'warning'
+        factory.getLogger('t').debug('dropped')
+        factory.getLogger('t').info('dropped')
+        factory.getLogger('t').warning('kept')
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(posts).toHaveLength(1)
+        expect(posts[0].entries[0].level).toBe('warning')
+    })
+
+    it('flush() drains buffer immediately and posts the batch', async () => {
+        const posts: any[] = []
+        const transport: HTTPTransport = async (_url, body) => { posts.push(JSON.parse(body)); return 200 }
+        const reporter = new HTTPReporter({
+            url: 'https://logs.example.com/ingest',
+            maxSize: 100,
+            flushInterval: 99999,
+            transport,
+        })
+        reporter.log('info', 't', T0, {}, ['a'])
+        reporter.log('info', 't', T0, {}, ['b'])
+        reporter.flush()
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(posts).toHaveLength(1)
+        expect(posts[0].entries).toHaveLength(2)
     })
 })
