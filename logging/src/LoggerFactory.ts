@@ -7,9 +7,11 @@ class LoggerFactory {
     private loggers: Map<string, Logger> = new Map()
     private reporters: LogReporter[]
     private levelOrder!: number
+    private clockFn: () => number
 
-    constructor(reporters: LogReporter[] = []) {
+    constructor(reporters: LogReporter[] = [], clock: () => number = Date.now) {
         this.reporters = reporters
+        this.clockFn = clock
         this.level = 'info'
     }
 
@@ -26,7 +28,7 @@ class LoggerFactory {
 
     getLogger(scope: string = 'default'): Logger {
         if (!this.loggers.has(scope)) {
-            const logger = new Logger(scope, this.onLog, null, this.isEnabled)
+            const logger = new Logger(scope, this.onLog, null, this.isEnabled, this.clockFn)
             this.loggers.set(scope, logger)
         }
         return this.loggers.get(scope)!
@@ -66,7 +68,7 @@ class LoggerFactory {
         return threshold >= order
     }
 
-    private onLog = (level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[], overrideOrder?: number | null): void => {
+    private onLog = (level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[], overrideOrder?: number | null): void => {
         const order = getLevelOrder(level)
         const threshold = (overrideOrder === null || overrideOrder === undefined) ? this.levelOrder : overrideOrder
         if (threshold < order) {

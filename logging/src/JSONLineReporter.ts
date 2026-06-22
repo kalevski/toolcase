@@ -21,7 +21,7 @@ class JSONLineReporter extends LogReporter {
         this.extra = options.extra ?? {}
     }
 
-    log(level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[]): void {
+    log(level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]): void {
         const record = {
             ...this.extra,
             ...fields,

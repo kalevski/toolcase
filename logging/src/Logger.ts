@@ -1,6 +1,7 @@
 import { LoggerLevel, getLevel, getLevelOrder, isKnownLevel } from './Level'
 
-export type LogMessageFn = (level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[], overrideOrder?: number | null) => void
+export type ClockFn = () => number
+export type LogMessageFn = (level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[], overrideOrder?: number | null) => void
 export type IsEnabledFn = (order: number, overrideOrder: number | null) => boolean
 
 class Logger {
@@ -10,12 +11,14 @@ class Logger {
     private levelOverride: number | null = null
     private context: Record<string, any> | null
     private isEnabledFn: IsEnabledFn | null
+    private clock: ClockFn
 
-    constructor(scope: string, logMessage: LogMessageFn, context: Record<string, any> | null = null, isEnabled: IsEnabledFn | null = null) {
+    constructor(scope: string, logMessage: LogMessageFn, context: Record<string, any> | null = null, isEnabled: IsEnabledFn | null = null, clock: ClockFn = Date.now) {
         this.scope = scope
         this.logMessageFn = logMessage
         this.context = context
         this.isEnabledFn = isEnabled
+        this.clock = clock
     }
 
     error(...args: any[]): void {
@@ -51,7 +54,7 @@ class Logger {
         if (this.isEnabledFn && !this.isEnabledFn(order, this.levelOverride)) {
             return
         }
-        const time = new Date().toISOString()
+        const time = this.clock()
         const evaluated = args.map(a => typeof a === 'function' ? a() : a)
         const fields = this.context ?? {}
         this.logMessageFn(level, this.scope, time, fields, evaluated, this.levelOverride)
@@ -67,7 +70,7 @@ class Logger {
 
     withContext(context: Record<string, any>): Logger {
         const merged = { ...(this.context ?? {}), ...context }
-        const child = new Logger(this.scope, this.logMessageFn, merged, this.isEnabledFn)
+        const child = new Logger(this.scope, this.logMessageFn, merged, this.isEnabledFn, this.clock)
         child.levelOverride = this.levelOverride
         return child
     }

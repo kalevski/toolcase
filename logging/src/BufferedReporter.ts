@@ -4,7 +4,7 @@ import LogReporter from './LogReporter'
 export interface LogEntry {
     level: LoggerLevel
     scope: string
-    time: string
+    time: number
     fields: Record<string, any>
     messages: any[]
 }
@@ -41,7 +41,7 @@ class BufferedReporter extends LogReporter {
         }
     }
 
-    log(level: LoggerLevel, scope: string, time: string, fields: Record<string, any>, messages: any[]): void {
+    log(level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]): void {
         this.buffer.push({ level, scope, time, fields, messages })
         if (this.buffer.length >= this.maxSize) {
             this.flush()

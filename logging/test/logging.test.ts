@@ -8,6 +8,11 @@ import JSONLineReporter from '../src/JSONLineReporter'
 import FileLogReporter from '../src/FileLogReporter'
 import BufferedReporter from '../src/BufferedReporter'
 
+// 2026-01-01T00:00:00.000Z in epoch ms
+const T0 = 1767225600000
+// 2026-01-01T00:00:01.000Z in epoch ms
+const T1 = 1767225601000
+
 describe('Level', () => {
     it('has all expected levels', () => {
         expect(Level.SILENT).toBe('silent')
@@ -105,7 +110,7 @@ describe('LoggerFactory', () => {
         const messages: { level: string; msgs: any[] }[] = []
 
         class DummyReporter extends LogReporter {
-            log(level: string, scope: string, time: string, _fields: any, msgs: any[]): void {
+            log(level: string, scope: string, time: number, _fields: any, msgs: any[]): void {
                 messages.push({ level, msgs })
             }
         }
@@ -272,6 +277,70 @@ describe('LoggerFactory — addReporter / removeReporter', () => {
     })
 })
 
+describe('LoggerFactory — clock injection', () => {
+    it('timestamp delivered to reporter is a number (epoch ms)', () => {
+        const received: number[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, time: number): void { received.push(time) }
+        }
+        const factory = new LoggerFactory([new R()])
+        factory.getLogger('t').info('msg')
+        expect(typeof received[0]).toBe('number')
+        expect(received[0]).toBeGreaterThan(0)
+    })
+
+    it('injected clock determines the timestamp passed to reporters', () => {
+        const received: number[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, time: number): void { received.push(time) }
+        }
+        const factory = new LoggerFactory([new R()], () => 1234567890000)
+        factory.getLogger('t').info('msg')
+        expect(received[0]).toBe(1234567890000)
+    })
+
+    it('clock is not called for disabled levels', () => {
+        let calls = 0
+        const factory = new LoggerFactory([], () => { calls++; return 1000 })
+        factory.level = 'info'
+        factory.getLogger('t').debug('disabled')
+        expect(calls).toBe(0)
+    })
+
+    it('clock is called once per enabled log call', () => {
+        let calls = 0
+        const factory = new LoggerFactory([], () => { calls++; return 1000 })
+        factory.level = 'debug'
+        factory.getLogger('t').debug('enabled')
+        expect(calls).toBe(1)
+    })
+
+    it('withContext child uses the same injected clock', () => {
+        const received: number[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, time: number): void { received.push(time) }
+        }
+        const factory = new LoggerFactory([new R()], () => 9999)
+        const log = factory.getLogger('t')
+        const child = log.withContext({ x: 1 })
+        child.info('msg')
+        expect(received[0]).toBe(9999)
+    })
+
+    it('fixed clock makes timestamps deterministic across multiple calls', () => {
+        const received: number[] = []
+        class R extends LogReporter {
+            log(_l: any, _s: any, time: number): void { received.push(time) }
+        }
+        const factory = new LoggerFactory([new R()], () => 42)
+        const log = factory.getLogger('t')
+        log.info('a')
+        log.info('b')
+        log.warning('c')
+        expect(received).toEqual([42, 42, 42])
+    })
+})
+
 describe('Logger', () => {
     it('passes scope, time, and args through dispatch fn', () => {
         const captures: any[] = []
@@ -284,7 +353,7 @@ describe('Logger', () => {
         expect(captures[0].scope).toBe('billing')
         expect(captures[0].fields).toEqual({})
         expect(captures[0].messages).toEqual(['hello', 42])
-        expect(typeof captures[0].time).toBe('string')
+        expect(typeof captures[0].time).toBe('number')
     })
 
     it('exposes a method per level', () => {
@@ -472,16 +541,14 @@ describe('Logger.isEnabled (public guard predicate)', () => {
 })
 
 describe('Logger — early return for disabled levels', () => {
-    it('does not invoke toISOString or the dispatch fn for a disabled level', () => {
-        const factory = new LoggerFactory([])
+    it('does not invoke the clock or the dispatch fn for a disabled level', () => {
+        let clockCalls = 0
+        const factory = new LoggerFactory([], () => { clockCalls++; return 1000 })
         factory.level = 'info'
         const log = factory.getLogger('perf')
         const child = log.withContext({ requestId: 'r1' })
-
-        const isoSpy = vi.spyOn(Date.prototype, 'toISOString')
         child.debug('expensive payload')
-        expect(isoSpy).not.toHaveBeenCalled()
-        isoSpy.mockRestore()
+        expect(clockCalls).toBe(0)
     })
 
     it('does not invoke dispatch fn for a disabled level', () => {
@@ -494,14 +561,13 @@ describe('Logger — early return for disabled levels', () => {
         expect(dispatched).toHaveLength(0)
     })
 
-    it('still dispatches enabled levels after the short-circuit is wired', () => {
-        const factory = new LoggerFactory([])
+    it('invokes the clock exactly once for an enabled level', () => {
+        let clockCalls = 0
+        const factory = new LoggerFactory([], () => { clockCalls++; return 1000 })
         factory.level = 'debug'
         const log = factory.getLogger('enabled')
-        const isoSpy = vi.spyOn(Date.prototype, 'toISOString')
         log.debug('this should pass')
-        expect(isoSpy).toHaveBeenCalledTimes(1)
-        isoSpy.mockRestore()
+        expect(clockCalls).toBe(1)
     })
 
     it('short-circuits context array allocation when level is disabled', () => {
@@ -582,7 +648,7 @@ describe('ConsoleLogReporter', () => {
     it('routes error level to console.error', () => {
         const reporter = new ConsoleLogReporter()
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
-        reporter.log('error', 'svc', '2026-01-01T00:00:00Z', {}, ['boom'])
+        reporter.log('error', 'svc', T0, {}, ['boom'])
         expect(spy).toHaveBeenCalledTimes(1)
         const call = spy.mock.calls[0].join(' ')
         expect(call).toContain('ERROR')
@@ -594,7 +660,7 @@ describe('ConsoleLogReporter', () => {
     it('routes warning level to console.warn', () => {
         const reporter = new ConsoleLogReporter()
         const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-        reporter.log('warning', 'svc', 't', {}, ['heads up'])
+        reporter.log('warning', 'svc', T0, {}, ['heads up'])
         expect(spy).toHaveBeenCalledTimes(1)
         spy.mockRestore()
     })
@@ -602,9 +668,9 @@ describe('ConsoleLogReporter', () => {
     it('routes info/debug/verbose to console.log', () => {
         const reporter = new ConsoleLogReporter()
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 's', 't', {}, ['x'])
-        reporter.log('debug', 's', 't', {}, ['x'])
-        reporter.log('verbose', 's', 't', {}, ['x'])
+        reporter.log('info', 's', T0, {}, ['x'])
+        reporter.log('debug', 's', T0, {}, ['x'])
+        reporter.log('verbose', 's', T0, {}, ['x'])
         expect(spy).toHaveBeenCalledTimes(3)
         spy.mockRestore()
     })
@@ -614,9 +680,9 @@ describe('ConsoleLogReporter', () => {
         const spyError = vi.spyOn(console, 'error').mockImplementation(() => {})
         const spyWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
         const spyLog = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('error',   'svc', 't', {}, ['msg'])
-        reporter.log('warning', 'svc', 't', {}, ['msg'])
-        reporter.log('info',    'svc', 't', {}, ['msg'])
+        reporter.log('error',   'svc', T0, {}, ['msg'])
+        reporter.log('warning', 'svc', T0, {}, ['msg'])
+        reporter.log('info',    'svc', T0, {}, ['msg'])
         for (const spy of [spyError, spyWarn, spyLog]) {
             for (const call of spy.mock.calls) {
                 expect(call.join(' ')).not.toMatch(/\x1b\[/)
@@ -631,7 +697,7 @@ describe('ConsoleLogReporter', () => {
         try {
             const reporter = new ConsoleLogReporter()
             const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-            reporter.log('info', 's', 't', {}, ['msg'])
+            reporter.log('info', 's', T0, {}, ['msg'])
             const call = spy.mock.calls[0]
             expect(call.join(' ')).not.toMatch(/\x1b\[/)
             expect(call[0]).not.toContain('%c')
@@ -645,27 +711,27 @@ describe('ConsoleLogReporter', () => {
     it('{ timestamp: false } omits time from the default prefix', () => {
         const reporter = new ConsoleLogReporter({ color: false, timestamp: false })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', {}, ['msg'])
+        reporter.log('info', 'svc', T0, {}, ['msg'])
         const call = spy.mock.calls[0].join(' ')
-        expect(call).not.toContain('2026-01-01T00:00:00Z')
+        expect(call).not.toContain('2026-01-01T00:00:00')
         expect(call).toContain('INFO')
         expect(call).toContain('svc')
         spy.mockRestore()
     })
 
-    it('{ timestamp: true } (default) includes time in the prefix', () => {
+    it('{ timestamp: true } (default) includes ISO time in the prefix', () => {
         const reporter = new ConsoleLogReporter({ color: false })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', {}, ['msg'])
+        reporter.log('info', 'svc', T0, {}, ['msg'])
         const call = spy.mock.calls[0].join(' ')
-        expect(call).toContain('2026-01-01T00:00:00Z')
+        expect(call).toContain('2026-01-01T00:00:00.000Z')
         spy.mockRestore()
     })
 
     it('custom string prefix replaces the default prefix', () => {
         const reporter = new ConsoleLogReporter({ color: false, prefix: '[MY-APP]' })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 'svc', 't', {}, ['msg'])
+        reporter.log('info', 'svc', T0, {}, ['msg'])
         const call = spy.mock.calls[0].join(' ')
         expect(call).toContain('[MY-APP]')
         expect(call).not.toContain('INFO')
@@ -673,22 +739,22 @@ describe('ConsoleLogReporter', () => {
         spy.mockRestore()
     })
 
-    it('prefix function receives level/scope/time and its return is used', () => {
+    it('prefix function receives level/scope/time (number) and its return is used', () => {
         const reporter = new ConsoleLogReporter({
             color: false,
-            prefix: (level, scope, time) => `${level}|${scope}|${time}`
+            prefix: (level, scope, time) => `${level}|${scope}|${new Date(time).toISOString()}`
         })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', {}, ['msg'])
+        reporter.log('info', 'svc', T0, {}, ['msg'])
         const call = spy.mock.calls[0].join(' ')
-        expect(call).toContain('info|svc|2026-01-01T00:00:00Z')
+        expect(call).toContain('info|svc|2026-01-01T00:00:00.000Z')
         spy.mockRestore()
     })
 
     it('{ objects: "pretty" } serializes plain objects to indented JSON strings', () => {
         const reporter = new ConsoleLogReporter({ color: false, objects: 'pretty' })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 's', 't', {}, [{ key: 'value' }])
+        reporter.log('info', 's', T0, {}, [{ key: 'value' }])
         const objectArg = spy.mock.calls[0][1]
         expect(typeof objectArg).toBe('string')
         expect(objectArg).toContain('"key"')
@@ -699,7 +765,7 @@ describe('ConsoleLogReporter', () => {
     it('{ objects: "pretty" } serializes Error instances to a string', () => {
         const reporter = new ConsoleLogReporter({ color: false, objects: 'pretty' })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 's', 't', {}, [new Error('boom')])
+        reporter.log('info', 's', T0, {}, [new Error('boom')])
         const objectArg = spy.mock.calls[0][1]
         expect(typeof objectArg).toBe('string')
         expect(objectArg).toContain('boom')
@@ -709,7 +775,7 @@ describe('ConsoleLogReporter', () => {
     it('{ objects: "pretty" } passes primitives through unchanged', () => {
         const reporter = new ConsoleLogReporter({ color: false, objects: 'pretty' })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
-        reporter.log('info', 's', 't', {}, ['hello', 42, true, null])
+        reporter.log('info', 's', T0, {}, ['hello', 42, true, null])
         const args = spy.mock.calls[0].slice(1)
         expect(args).toEqual(['hello', 42, true, null])
         spy.mockRestore()
@@ -719,7 +785,7 @@ describe('ConsoleLogReporter', () => {
         const reporter = new ConsoleLogReporter({ color: false })
         const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
         const obj = { key: 'value' }
-        reporter.log('info', 's', 't', {}, [obj])
+        reporter.log('info', 's', T0, {}, [obj])
         const objectArg = spy.mock.calls[0][1]
         expect(objectArg).toBe(obj)
         spy.mockRestore()
@@ -727,16 +793,16 @@ describe('ConsoleLogReporter', () => {
 })
 
 describe('JSONLineReporter', () => {
-    it('emits a JSON line with level/scope/time/messages', () => {
+    it('emits a JSON line with level/scope/time (epoch ms)/messages', () => {
         const lines: string[] = []
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
-        reporter.log('info', 'auth', '2026-01-01T00:00:00Z', {}, ['ok', { id: 7 }])
+        reporter.log('info', 'auth', T0, {}, ['ok', { id: 7 }])
         expect(lines).toHaveLength(1)
         const parsed = JSON.parse(lines[0])
         expect(parsed).toEqual({
             level: 'info',
             scope: 'auth',
-            time: '2026-01-01T00:00:00Z',
+            time: T0,
             messages: ['ok', { id: 7 }]
         })
     })
@@ -744,7 +810,7 @@ describe('JSONLineReporter', () => {
     it('spreads context fields as top-level keys alongside level/scope/time/messages', () => {
         const lines: string[] = []
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
-        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', { requestId: 'r1', userId: 42 }, ['start'])
+        reporter.log('info', 'svc', T0, { requestId: 'r1', userId: 42 }, ['start'])
         expect(lines).toHaveLength(1)
         const parsed = JSON.parse(lines[0])
         expect(parsed.requestId).toBe('r1')
@@ -766,10 +832,19 @@ describe('JSONLineReporter', () => {
         expect(parsed.messages).toEqual(['start'])
     })
 
+    it('time in JSON record is a number (epoch ms)', () => {
+        const lines: string[] = []
+        const factory = new LoggerFactory([new JSONLineReporter({ write: line => lines.push(line) })], () => T0)
+        factory.getLogger('t').info('msg')
+        const parsed = JSON.parse(lines[0])
+        expect(typeof parsed.time).toBe('number')
+        expect(parsed.time).toBe(T0)
+    })
+
     it('serializes Error instances with stack', () => {
         const lines: string[] = []
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
-        reporter.log('error', 's', 't', {}, [new Error('boom')])
+        reporter.log('error', 's', T0, {}, [new Error('boom')])
         const parsed = JSON.parse(lines[0])
         expect(parsed.messages[0].name).toBe('Error')
         expect(parsed.messages[0].message).toBe('boom')
@@ -782,7 +857,7 @@ describe('JSONLineReporter', () => {
             write: line => lines.push(line),
             extra: { service: 'api', region: 'eu' }
         })
-        reporter.log('info', 's', 't', {}, ['ok'])
+        reporter.log('info', 's', T0, {}, ['ok'])
         const parsed = JSON.parse(lines[0])
         expect(parsed.service).toBe('api')
         expect(parsed.region).toBe('eu')
@@ -794,7 +869,7 @@ describe('JSONLineReporter', () => {
             write: line => lines.push(line),
             extra: { service: 'api', env: 'prod' }
         })
-        reporter.log('info', 's', 't', { env: 'staging', requestId: 'r1' }, ['msg'])
+        reporter.log('info', 's', T0, { env: 'staging', requestId: 'r1' }, ['msg'])
         const parsed = JSON.parse(lines[0])
         expect(parsed.env).toBe('staging')
         expect(parsed.requestId).toBe('r1')
@@ -806,7 +881,7 @@ describe('JSONLineReporter', () => {
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
         const cyc: any = {}
         cyc.self = cyc
-        reporter.log('info', 's', 't', {}, ['ok', cyc])
+        reporter.log('info', 's', T0, {}, ['ok', cyc])
         expect(lines).toHaveLength(1)
         const parsed = JSON.parse(lines[0])
         expect(parsed.messages[0]).toBe('ok')
@@ -816,7 +891,7 @@ describe('JSONLineReporter', () => {
     it('serializes a nested Error with name/message/stack', () => {
         const lines: string[] = []
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
-        reporter.log('error', 's', 't', {}, [{ err: new Error('x') }])
+        reporter.log('error', 's', T0, {}, [{ err: new Error('x') }])
         const parsed = JSON.parse(lines[0])
         expect(parsed.messages[0].err.name).toBe('Error')
         expect(parsed.messages[0].err.message).toBe('x')
@@ -826,7 +901,7 @@ describe('JSONLineReporter', () => {
     it('serializes BigInt messages as strings', () => {
         const lines: string[] = []
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
-        reporter.log('info', 's', 't', {}, [42n])
+        reporter.log('info', 's', T0, {}, [42n])
         const parsed = JSON.parse(lines[0])
         expect(parsed.messages[0]).toBe('42')
     })
@@ -834,7 +909,7 @@ describe('JSONLineReporter', () => {
     it('preserves good fields in an object that also contains a bigint field', () => {
         const lines: string[] = []
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
-        reporter.log('info', 's', 't', {}, [{ label: 'counter', value: 9007199254740993n, unit: 'ops' }])
+        reporter.log('info', 's', T0, {}, [{ label: 'counter', value: 9007199254740993n, unit: 'ops' }])
         expect(lines).toHaveLength(1)
         const parsed = JSON.parse(lines[0])
         expect(parsed.messages[0]).toEqual({ label: 'counter', value: '9007199254740993', unit: 'ops' })
@@ -845,7 +920,7 @@ describe('JSONLineReporter', () => {
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
         const obj: any = { name: 'node', status: 'ok', count: 3 }
         obj.self = obj
-        reporter.log('info', 's', 't', {}, [obj])
+        reporter.log('info', 's', T0, {}, [obj])
         expect(lines).toHaveLength(1)
         const parsed = JSON.parse(lines[0])
         expect(parsed.messages[0].name).toBe('node')
@@ -859,7 +934,7 @@ describe('JSONLineReporter', () => {
         const reporter = new JSONLineReporter({ write: line => lines.push(line) })
         const inner: any = { x: 1 }
         inner.loop = inner
-        reporter.log('info', 's', 't', {}, [
+        reporter.log('info', 's', T0, {}, [
             'prefix',
             { fine: true, nested: { ok: 'yes', circ: inner, big: 42n }, after: 'end' },
             'suffix'
@@ -882,10 +957,10 @@ describe('BufferedReporter', () => {
         const captured: string[][] = []
         class R extends LogReporter { log(level: any) { captured.push([level]) } }
         const buf = new BufferedReporter(new R(), { maxSize: 3, flushInterval: 0 })
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('info', 's', 't', {}, ['b'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('info', 's', T0, {}, ['b'])
         expect(captured).toHaveLength(0)
-        buf.log('info', 's', 't', {}, ['c'])
+        buf.log('info', 's', T0, {}, ['c'])
         expect(captured).toHaveLength(3)
     })
 
@@ -894,8 +969,8 @@ describe('BufferedReporter', () => {
         const captured: number[] = []
         class R extends LogReporter { log() { captured.push(1) } }
         const buf = new BufferedReporter(new R(), { maxSize: 100, flushInterval: 500 })
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('info', 's', 't', {}, ['b'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('info', 's', T0, {}, ['b'])
         expect(captured).toHaveLength(0)
         vi.advanceTimersByTime(500)
         expect(captured).toHaveLength(2)
@@ -907,7 +982,7 @@ describe('BufferedReporter', () => {
         const captured: number[] = []
         class R extends LogReporter { log() { captured.push(1) } }
         const buf = new BufferedReporter(new R(), { maxSize: 100, flushInterval: 1000 })
-        buf.log('info', 's', 't', {}, ['a'])
+        buf.log('info', 's', T0, {}, ['a'])
         buf.flush()
         expect(captured).toHaveLength(1)
         vi.advanceTimersByTime(2000)
@@ -920,8 +995,8 @@ describe('BufferedReporter', () => {
         const captured: number[] = []
         class R extends LogReporter { log() { captured.push(1) } }
         const buf = new BufferedReporter(new R(), { maxSize: 100, flushInterval: 1000 })
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('info', 's', 't', {}, ['b'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('info', 's', T0, {}, ['b'])
         buf.close()
         expect(captured).toHaveLength(2)
         vi.advanceTimersByTime(2000)
@@ -936,12 +1011,24 @@ describe('BufferedReporter', () => {
             flushInterval: 0,
             onFlush: entries => batches.push(entries)
         })
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('warning', 's', 't', {}, ['b'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('warning', 's', T0, {}, ['b'])
         expect(batches).toHaveLength(1)
         expect(batches[0]).toHaveLength(2)
         expect(batches[0][0].level).toBe('info')
         expect(batches[0][1].level).toBe('warning')
+    })
+
+    it('LogEntry.time is a number (epoch ms)', () => {
+        const batches: any[][] = []
+        const buf = new BufferedReporter(null, {
+            maxSize: 1,
+            flushInterval: 0,
+            onFlush: entries => batches.push(entries)
+        })
+        buf.log('info', 's', T0, {}, ['a'])
+        expect(typeof batches[0][0].time).toBe('number')
+        expect(batches[0][0].time).toBe(T0)
     })
 
     it('when both inner and onFlush are provided, both receive the flushed entries', () => {
@@ -955,8 +1042,8 @@ describe('BufferedReporter', () => {
             flushInterval: 0,
             onFlush: entries => batches.push(entries)
         })
-        buf.log('info', 's', 't', {}, ['x'])
-        buf.log('info', 's', 't', {}, ['y'])
+        buf.log('info', 's', T0, {}, ['x'])
+        buf.log('info', 's', T0, {}, ['y'])
         // onFlush received the batch
         expect(batches).toHaveLength(1)
         expect(batches[0]).toHaveLength(2)
@@ -971,8 +1058,8 @@ describe('BufferedReporter', () => {
     it('size() reports buffered entry count', () => {
         const buf = new BufferedReporter(null, { onFlush: () => {}, maxSize: 100, flushInterval: 0 })
         expect(buf.size()).toBe(0)
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('info', 's', 't', {}, ['b'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('info', 's', T0, {}, ['b'])
         expect(buf.size()).toBe(2)
         buf.flush()
         expect(buf.size()).toBe(0)
@@ -987,7 +1074,7 @@ describe('BufferedReporter', () => {
 
     it('flush() is called on process.beforeExit', () => {
         const buf = new BufferedReporter(null, { onFlush: () => {}, maxSize: 100, flushInterval: 0 })
-        buf.log('info', 's', 't', {}, ['pending'])
+        buf.log('info', 's', T0, {}, ['pending'])
         const flushSpy = vi.spyOn(buf, 'flush')
         process.emit('beforeExit', 0)
         expect(flushSpy).toHaveBeenCalledTimes(1)
@@ -1027,8 +1114,8 @@ describe('BufferedReporter — flush isolation', () => {
             flushInterval: 0,
             onFlush: () => { throw new Error('flush failure') }
         })
-        buf.log('info', 's', 't', {}, ['a'])
-        expect(() => buf.log('info', 's', 't', {}, ['b'])).not.toThrow()
+        buf.log('info', 's', T0, {}, ['a'])
+        expect(() => buf.log('info', 's', T0, {}, ['b'])).not.toThrow()
     })
 
     it('does not throw when the inner reporter throws during flush', () => {
@@ -1036,8 +1123,8 @@ describe('BufferedReporter — flush isolation', () => {
             log(): void { throw new Error('inner failure') }
         }
         const buf = new BufferedReporter(new ThrowingReporter(), { maxSize: 2, flushInterval: 0 })
-        buf.log('info', 's', 't', {}, ['a'])
-        expect(() => buf.log('info', 's', 't', {}, ['b'])).not.toThrow()
+        buf.log('info', 's', T0, {}, ['a'])
+        expect(() => buf.log('info', 's', T0, {}, ['b'])).not.toThrow()
     })
 
     it('buffer is cleared even when onFlush throws', () => {
@@ -1046,8 +1133,8 @@ describe('BufferedReporter — flush isolation', () => {
             flushInterval: 0,
             onFlush: () => { throw new Error('flush failure') }
         })
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('info', 's', 't', {}, ['b'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('info', 's', T0, {}, ['b'])
         expect(buf.size()).toBe(0)
     })
 
@@ -1061,8 +1148,8 @@ describe('BufferedReporter — flush isolation', () => {
             flushInterval: 0,
             onFlush: () => { throw new Error('onFlush failure') }
         })
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('info', 's', 't', {}, ['b'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('info', 's', T0, {}, ['b'])
         expect(innerReceived).toEqual(['a', 'b'])
     })
 
@@ -1072,9 +1159,9 @@ describe('BufferedReporter — flush isolation', () => {
             log(): void { callCount++; throw new Error('inner failure') }
         }
         const buf = new BufferedReporter(new R(), { maxSize: 3, flushInterval: 0 })
-        buf.log('info', 's', 't', {}, ['a'])
-        buf.log('info', 's', 't', {}, ['b'])
-        buf.log('info', 's', 't', {}, ['c'])
+        buf.log('info', 's', T0, {}, ['a'])
+        buf.log('info', 's', T0, {}, ['b'])
+        buf.log('info', 's', T0, {}, ['c'])
         expect(callCount).toBe(3)
     })
 })
@@ -1087,8 +1174,8 @@ describe('FileLogReporter', () => {
         const dir = mkdtempSync(join(tmpdir(), 'tc-log-'))
         const file = join(dir, 'app.log')
         const reporter = new FileLogReporter(file)
-        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', {}, ['hello', { k: 1 }])
-        reporter.log('error', 'svc', '2026-01-01T00:00:01Z', {}, [new Error('boom')])
+        reporter.log('info', 'svc', T0, {}, ['hello', { k: 1 }])
+        reporter.log('error', 'svc', T1, {}, [new Error('boom')])
         await reporter.close()
         const content = readFileSync(file, 'utf8')
         expect(content).toContain('INFO')
@@ -1104,7 +1191,7 @@ describe('FileLogReporter', () => {
         const reporter = new FileLogReporter('/nonexistent-dir/does-not-exist/app.log', {
             onError: err => errors.push(err)
         })
-        reporter.log('info', 'svc', 't', {}, ['msg'])
+        reporter.log('info', 'svc', T0, {}, ['msg'])
         await new Promise(resolve => setTimeout(resolve, 200))
         expect(errors).toHaveLength(1)
         expect(errors[0]).toBeInstanceOf(Error)
@@ -1119,7 +1206,7 @@ describe('FileLogReporter', () => {
         const reporter = new FileLogReporter(file, {
             formatter: (level, _scope, _time, _fields, messages) => `[${level}] ${messages.join('|')}`
         })
-        reporter.log('warning', 's', 't', {}, ['a', 'b'])
+        reporter.log('warning', 's', T0, {}, ['a', 'b'])
         await reporter.close()
         const content = readFileSync(file, 'utf8').trim()
         expect(content).toBe('[warning] a|b')
@@ -1137,8 +1224,8 @@ describe('FileLogReporter', () => {
             maxFiles: 3,
             formatter: (_level, _scope, _time, _fields, messages) => messages.join(' ')
         })
-        reporter.log('info', 's', 't', {}, ['line-one-fills-the-file'])
-        reporter.log('info', 's', 't', {}, ['line-two-goes-to-new-file'])
+        reporter.log('info', 's', T0, {}, ['line-one-fills-the-file'])
+        reporter.log('info', 's', T0, {}, ['line-two-goes-to-new-file'])
         await reporter.close()
         expect(existsSync(file)).toBe(true)
         expect(existsSync(`${file}.1`)).toBe(true)
@@ -1163,8 +1250,8 @@ describe('FileLogReporter', () => {
             formatter: (_l, _s, _t, _f, msgs) => msgs.join('')
         })
         // First write fits (6 bytes); second write (21 bytes) pushes over 20 → rotation
-        reporter.log('info', 's', 't', {}, ['hello'])
-        reporter.log('info', 's', 't', {}, ['msg-padded-xxxxxxxxx'])
+        reporter.log('info', 's', T0, {}, ['hello'])
+        reporter.log('info', 's', T0, {}, ['msg-padded-xxxxxxxxx'])
         await reporter.close()
         // Shift: archive-2 dropped, archive-1 → .2, old app.log (hello) → .1
         expect(existsSync(`${file}.2`)).toBe(true)

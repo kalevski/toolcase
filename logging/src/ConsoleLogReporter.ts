@@ -4,7 +4,7 @@ import LogReporter from './LogReporter'
 export interface ConsoleLogReporterOptions {
     color?: boolean
     timestamp?: boolean
-    prefix?: string | ((level: LoggerLevel, scope: string, time: string) => string)
+    prefix?: string | ((level: LoggerLevel, scope: string, time: number) => string)
     objects?: 'compact' | 'pretty'
 }
 
@@ -71,7 +71,7 @@ class ConsoleLogReporter extends LogReporter {
         this.objectMode = options.objects ?? 'compact'
     }
 
-    private buildPrefix(level: LoggerLevel, scope: string, time: string): string {
+    private buildPrefix(level: LoggerLevel, scope: string, time: number): string {
         if (typeof this.prefixOption === 'function') {
             return this.prefixOption(level, scope, time)
         }
@@ -79,7 +79,7 @@ class ConsoleLogReporter extends LogReporter {
             return this.prefixOption
         }
         return this.showTimestamp
-            ? `${level.toUpperCase()} [${time}] | ${scope}:`
+            ? `${level.toUpperCase()} [${new Date(time).toISOString()}] | ${scope}:`
             : `${level.toUpperCase()} | ${scope}:`
     }
 
@@ -88,7 +88,7 @@ class ConsoleLogReporter extends LogReporter {
         return messages.map(serializeMessage)
     }
 
-    log(level: LoggerLevel, scope: string, time: string, _fields: Record<string, any>, messages: any[]): void {
+    log(level: LoggerLevel, scope: string, time: number, _fields: Record<string, any>, messages: any[]): void {
         const prefix = this.buildPrefix(level, scope, time)
         const msgs = this.prepareMessages(messages)
 

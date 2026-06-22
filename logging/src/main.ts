@@ -15,3 +15,4 @@ export default logging
 
 export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter, isKnownLevel, KNOWN_LEVELS }
 export type { ConsoleLogReporterOptions, LoggerLevel } from './Level'
+export type { ClockFn } from './Logger'
