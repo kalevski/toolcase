@@ -10,6 +10,7 @@ import HTTPReporterDemo from './HTTPReporterDemo'
 import OTLPReporterDemo from './OTLPReporterDemo'
 import BeaconReporterDemo from './BeaconReporterDemo'
 import IndexedDBReporterDemo from './IndexedDBReporterDemo'
+import MemoryReporterDemo from './MemoryReporterDemo'
 
 export type LoggingExampleDef = {
     key: string
@@ -29,4 +30,5 @@ export const loggingExamples: LoggingExampleDef[] = [
     { key: 'otlp-reporter', label: 'OTLPReporter', element: <OTLPReporterDemo /> },
     { key: 'beacon-reporter', label: 'BeaconReporter', element: <BeaconReporterDemo /> },
     { key: 'indexed-db-reporter', label: 'IndexedDBReporter', element: <IndexedDBReporterDemo /> },
+    { key: 'memory-reporter', label: 'MemoryReporter', element: <MemoryReporterDemo /> },
 ]

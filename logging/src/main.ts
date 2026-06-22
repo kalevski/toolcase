@@ -14,6 +14,7 @@ import SamplingReporter from './SamplingReporter'
 import FanoutReporter, { MultiReporter } from './FanoutReporter'
 import HTTPReporter from './HTTPReporter'
 import OTLPReporter from './OTLPReporter'
+import MemoryReporter from './MemoryReporter'
 import { textFormatter, jsonFormatter, logfmtFormatter } from './Formatter'
 
 const logging = new LoggerFactory([
@@ -22,7 +23,7 @@ const logging = new LoggerFactory([
 
 export default logging
 
-export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter, RingBufferReporter, isKnownLevel, KNOWN_LEVELS, LevelFilterReporter, ScopeFilterReporter, RedactionReporter, SamplingReporter, FanoutReporter, MultiReporter, HTTPReporter, OTLPReporter, textFormatter, jsonFormatter, logfmtFormatter }
+export { logging, Logger, Level, LoggerFactory, LogReporter, ConsoleLogReporter, JSONLineReporter, BufferedReporter, RingBufferReporter, isKnownLevel, KNOWN_LEVELS, LevelFilterReporter, ScopeFilterReporter, RedactionReporter, SamplingReporter, FanoutReporter, MultiReporter, HTTPReporter, OTLPReporter, MemoryReporter, textFormatter, jsonFormatter, logfmtFormatter }
 export type { LoggerLevel } from './Level'
 export type { ConsoleLogReporterOptions } from './ConsoleLogReporter'
 export type { ClockFn } from './Logger'

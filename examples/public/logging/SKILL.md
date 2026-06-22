@@ -1063,6 +1063,62 @@ class IndexedDBReporter extends LogReporter {
 
 ---
 
+### `MemoryReporter`
+
+Non-draining in-memory reporter for unit tests. Retains every entry it receives — `entries()` and `find(level)` never drain the store. Use `clear()` to reset between test cases.
+
+```ts
+import { LoggerFactory, MemoryReporter } from '@toolcase/logging'
+
+const mem = new MemoryReporter()
+const factory = new LoggerFactory([mem])
+factory.level = 'verbose'
+
+const log = factory.getLogger('app')
+log.info('boot complete')
+log.warning('slow query', { ms: 420 })
+log.error('connection lost')
+log.info('reconnected')
+
+// All entries are retained — no draining on read
+mem.entries()          // → LogEntry[] (all 4)
+mem.find('info')       // → LogEntry[] (2 entries at info level)
+mem.find('error')      // → LogEntry[] (1 entry)
+
+// Reset between test cases
+mem.clear()
+mem.entries()          // → []
+```
+
+Pair with a fixed-clock factory for deterministic timestamps:
+
+```ts
+const mem = new MemoryReporter()
+const factory = new LoggerFactory([mem], () => 1_000_000)
+factory.getLogger('svc').info('event')
+
+const [entry] = mem.entries()
+entry.time    // → 1000000  (fixed epoch ms — no Date.now() drift)
+entry.scope   // → 'svc'
+entry.level   // → 'info'
+entry.fields  // → {}  (populated by withContext)
+entry.messages // → ['event']
+```
+
+API:
+
+```ts
+class MemoryReporter extends LogReporter {
+    entries(): LogEntry[]             // all retained entries, oldest → newest (copy)
+    find(level: LoggerLevel): LogEntry[]  // entries filtered by exact level
+    clear(): void                     // reset; capacity is preserved
+}
+```
+
+**Use when:** writing unit tests that assert on log output without worrying about draining or flush timing.
+
+---
+
 ## Notes
 
 - Package is `sideEffects: false` and zero-dependency.

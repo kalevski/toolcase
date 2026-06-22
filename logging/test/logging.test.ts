@@ -19,6 +19,9 @@ import OTLPReporter, { type OTLPTransport } from '../src/OTLPReporter'
 import BeaconReporter from '../src/BeaconReporter'
 import IndexedDBReporter from '../src/IndexedDBReporter'
 import { textFormatter, jsonFormatter, logfmtFormatter } from '../src/Formatter'
+import AsyncContext from '../src/AsyncContext'
+import ContextualReporter from '../src/ContextualReporter'
+import MemoryReporter from '../src/MemoryReporter'
 
 // 2026-01-01T00:00:00.000Z in epoch ms
 const T0 = 1767225600000
@@ -3336,5 +3339,282 @@ describe('ConsoleLogReporter — formatter option', () => {
         reporter.log('info', 'api', T0, { requestId: 'r1' }, ['start'])
         expect(spy.mock.calls[0][0]).toBe('info api req=r1 start')
         spy.mockRestore()
+    })
+})
+
+describe('AsyncContext', () => {
+    it('getFields() returns {} when no context is active', () => {
+        const ctx = new AsyncContext()
+        expect(ctx.getFields()).toEqual({})
+    })
+
+    it('run() makes fields available inside the callback', () => {
+        const ctx = new AsyncContext()
+        const result = ctx.run({ requestId: 'r1' }, () => ctx.getFields())
+        expect(result).toEqual({ requestId: 'r1' })
+    })
+
+    it('getFields() returns {} after run() exits', () => {
+        const ctx = new AsyncContext()
+        ctx.run({ requestId: 'r1' }, () => {})
+        expect(ctx.getFields()).toEqual({})
+    })
+
+    it('fields propagate across async continuations', async () => {
+        const ctx = new AsyncContext()
+        let captured: Record<string, any> = {}
+        await ctx.run({ requestId: 'async-1' }, async () => {
+            await Promise.resolve()
+            captured = ctx.getFields()
+        })
+        expect(captured).toEqual({ requestId: 'async-1' })
+    })
+
+    it('nested run() merges parent fields, child wins on key conflict', () => {
+        const ctx = new AsyncContext()
+        let inner: Record<string, any> = {}
+        ctx.run({ requestId: 'r1', userId: 1 }, () => {
+            ctx.run({ userId: 2, traceId: 't1' }, () => {
+                inner = ctx.getFields()
+            })
+        })
+        expect(inner).toEqual({ requestId: 'r1', userId: 2, traceId: 't1' })
+    })
+
+    it('parent context is restored after nested run() exits', () => {
+        const ctx = new AsyncContext()
+        let outer: Record<string, any> = {}
+        ctx.run({ requestId: 'r1' }, () => {
+            ctx.run({ traceId: 't1' }, () => {})
+            outer = ctx.getFields()
+        })
+        expect(outer).toEqual({ requestId: 'r1' })
+    })
+
+    it('multiple independent AsyncContext instances do not interfere', () => {
+        const ctxA = new AsyncContext()
+        const ctxB = new AsyncContext()
+        let fieldsA: Record<string, any> = {}
+        let fieldsB: Record<string, any> = {}
+        ctxA.run({ source: 'a' }, () => {
+            ctxB.run({ source: 'b' }, () => {
+                fieldsA = ctxA.getFields()
+                fieldsB = ctxB.getFields()
+            })
+        })
+        expect(fieldsA).toEqual({ source: 'a' })
+        expect(fieldsB).toEqual({ source: 'b' })
+    })
+})
+
+describe('ContextualReporter', () => {
+    it('merges ALS fields into log records', () => {
+        const captured: { fields: any }[] = []
+        class Capture extends LogReporter {
+            log(_l: any, _s: any, _t: any, fields: any): void { captured.push({ fields }) }
+        }
+        const ctx = new AsyncContext()
+        const reporter = new ContextualReporter(new Capture(), ctx)
+        ctx.run({ requestId: 'r1' }, () => {
+            reporter.log('info', 's', T0, {}, ['msg'])
+        })
+        expect(captured[0].fields).toEqual({ requestId: 'r1' })
+    })
+
+    it('static fields (withContext) override ALS fields on key conflict', () => {
+        const captured: { fields: any }[] = []
+        class Capture extends LogReporter {
+            log(_l: any, _s: any, _t: any, fields: any): void { captured.push({ fields }) }
+        }
+        const ctx = new AsyncContext()
+        const reporter = new ContextualReporter(new Capture(), ctx)
+        ctx.run({ requestId: 'r1', env: 'prod' }, () => {
+            reporter.log('info', 's', T0, { env: 'staging' }, ['msg'])
+        })
+        expect(captured[0].fields).toEqual({ requestId: 'r1', env: 'staging' })
+    })
+
+    it('passes through static fields unchanged when no ALS context is active', () => {
+        const captured: { fields: any }[] = []
+        class Capture extends LogReporter {
+            log(_l: any, _s: any, _t: any, fields: any): void { captured.push({ fields }) }
+        }
+        const ctx = new AsyncContext()
+        const reporter = new ContextualReporter(new Capture(), ctx)
+        reporter.log('info', 's', T0, { requestId: 'r1' }, ['msg'])
+        expect(captured[0].fields).toEqual({ requestId: 'r1' })
+    })
+
+    it('ALS fields surface in emitted records via the factory pipeline', async () => {
+        const captured: { fields: any }[] = []
+        class Capture extends LogReporter {
+            log(_l: any, _s: any, _t: any, fields: any): void { captured.push({ fields }) }
+        }
+        const ctx = new AsyncContext()
+        const factory = new LoggerFactory([new ContextualReporter(new Capture(), ctx)])
+        factory.level = 'info'
+
+        await ctx.run({ requestId: 'req-1', traceId: 'trace-1' }, async () => {
+            await Promise.resolve()
+            factory.getLogger('handler').info('handled')
+        })
+
+        expect(captured).toHaveLength(1)
+        expect(captured[0].fields).toEqual({ requestId: 'req-1', traceId: 'trace-1' })
+    })
+
+    it('withContext fields override ALS fields via factory pipeline', () => {
+        const captured: { fields: any }[] = []
+        class Capture extends LogReporter {
+            log(_l: any, _s: any, _t: any, fields: any): void { captured.push({ fields }) }
+        }
+        const ctx = new AsyncContext()
+        const factory = new LoggerFactory([new ContextualReporter(new Capture(), ctx)])
+        factory.level = 'info'
+
+        ctx.run({ requestId: 'r1', env: 'prod' }, () => {
+            const log = factory.getLogger('svc').withContext({ env: 'staging' })
+            log.info('event')
+        })
+
+        expect(captured[0].fields).toEqual({ requestId: 'r1', env: 'staging' })
+    })
+
+    it('respects factory level filtering', () => {
+        const captured: any[] = []
+        class Capture extends LogReporter {
+            log(_l: any, _s: any, _t: any, _f: any, msgs: any[]): void { captured.push(msgs[0]) }
+        }
+        const ctx = new AsyncContext()
+        const factory = new LoggerFactory([new ContextualReporter(new Capture(), ctx)])
+        factory.level = 'warning'
+        ctx.run({ requestId: 'r1' }, () => {
+            factory.getLogger('t').debug('dropped')
+            factory.getLogger('t').warning('shown')
+        })
+        expect(captured).toEqual(['shown'])
+    })
+
+    it('flush() delegates to the inner reporter', () => {
+        let flushed = false
+        class Inner extends LogReporter {
+            log(): void {}
+            flush(): void { flushed = true }
+        }
+        const ctx = new AsyncContext()
+        const reporter = new ContextualReporter(new Inner(), ctx)
+        reporter.flush()
+        expect(flushed).toBe(true)
+    })
+
+    it('close() delegates to the inner reporter', async () => {
+        let closed = false
+        class Inner extends LogReporter {
+            log(): void {}
+            close(): void { closed = true }
+        }
+        const ctx = new AsyncContext()
+        const reporter = new ContextualReporter(new Inner(), ctx)
+        await reporter.close()
+        expect(closed).toBe(true)
+    })
+})
+
+describe('MemoryReporter', () => {
+    it('retains all entries without draining', () => {
+        const reporter = new MemoryReporter()
+        reporter.log('info', 's', T0, {}, ['a'])
+        reporter.log('error', 's', T0, {}, ['b'])
+        expect(reporter.entries()).toHaveLength(2)
+        expect(reporter.entries()).toHaveLength(2)
+    })
+
+    it('entries() returns all entries in insertion order', () => {
+        const reporter = new MemoryReporter()
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.level = 'verbose'
+        const log = factory.getLogger('app')
+        log.info('first')
+        log.warning('second')
+        log.error('third')
+        const entries = reporter.entries()
+        expect(entries).toHaveLength(3)
+        expect(entries[0].level).toBe('info')
+        expect(entries[0].messages).toEqual(['first'])
+        expect(entries[1].level).toBe('warning')
+        expect(entries[2].level).toBe('error')
+    })
+
+    it('entries() returns a copy, not the internal array', () => {
+        const reporter = new MemoryReporter()
+        reporter.log('info', 's', T0, {}, ['a'])
+        const snap1 = reporter.entries()
+        reporter.log('info', 's', T0, {}, ['b'])
+        expect(snap1).toHaveLength(1)
+        expect(reporter.entries()).toHaveLength(2)
+    })
+
+    it('find(level) returns only entries with the specified level', () => {
+        const reporter = new MemoryReporter()
+        reporter.log('info', 's', T0, {}, ['msg1'])
+        reporter.log('error', 's', T0, {}, ['err'])
+        reporter.log('info', 's', T0, {}, ['msg2'])
+        reporter.log('warning', 's', T0, {}, ['warn'])
+        const infos = reporter.find('info')
+        expect(infos).toHaveLength(2)
+        expect(infos[0].messages).toEqual(['msg1'])
+        expect(infos[1].messages).toEqual(['msg2'])
+        const errors = reporter.find('error')
+        expect(errors).toHaveLength(1)
+        expect(errors[0].messages).toEqual(['err'])
+    })
+
+    it('find(level) returns empty array when no entries match', () => {
+        const reporter = new MemoryReporter()
+        reporter.log('info', 's', T0, {}, ['msg'])
+        expect(reporter.find('debug')).toHaveLength(0)
+    })
+
+    it('clear() resets the reporter', () => {
+        const reporter = new MemoryReporter()
+        reporter.log('info', 's', T0, {}, ['a'])
+        reporter.log('error', 's', T0, {}, ['b'])
+        reporter.clear()
+        expect(reporter.entries()).toHaveLength(0)
+        expect(reporter.find('info')).toHaveLength(0)
+        reporter.log('debug', 's', T0, {}, ['c'])
+        expect(reporter.entries()).toHaveLength(1)
+    })
+
+    it('respects factory level filtering', () => {
+        const reporter = new MemoryReporter()
+        const factory = new LoggerFactory([reporter])
+        factory.level = 'warning'
+        const log = factory.getLogger('t')
+        log.debug('dropped')
+        log.info('dropped')
+        log.warning('shown')
+        log.error('shown')
+        expect(reporter.entries()).toHaveLength(2)
+        expect(reporter.entries().map(e => e.level)).toEqual(['warning', 'error'])
+    })
+
+    it('captures scope and time from the factory', () => {
+        const reporter = new MemoryReporter()
+        const factory = new LoggerFactory([reporter], () => T0)
+        factory.getLogger('svc').info('hello')
+        const [entry] = reporter.entries()
+        expect(entry.scope).toBe('svc')
+        expect(entry.time).toBe(T0)
+    })
+
+    it('captures fields from withContext', () => {
+        const reporter = new MemoryReporter()
+        const factory = new LoggerFactory([reporter])
+        const log = factory.getLogger('svc').withContext({ requestId: 'r1' })
+        log.info('event')
+        const [entry] = reporter.entries()
+        expect(entry.fields).toEqual({ requestId: 'r1' })
+        expect(entry.messages).toEqual(['event'])
     })
 })
