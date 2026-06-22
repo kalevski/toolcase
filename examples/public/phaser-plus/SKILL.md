@@ -9,7 +9,7 @@ Unified runtime layer on top of Phaser 4. Adds opinionated scene lifecycle, regi
 
 ```ts
 import {
-    Engine, Scene, GameObject, Events,
+    Engine, Scene, GameObject, GameObjectComponent, Events,
     Feature, FeatureRegistry, ServiceRegistry,
     Layer, ObjectLayer, HTMLFeature, SplitScreen,
     GameObjectPool,
@@ -207,7 +207,7 @@ this.pause(); this.resume()
 
 ## GameObject
 
-Phaser `Container` with stable `id`, lifecycle hooks, lazy `EffectManager`, and absolute-position helper.
+Phaser `Container` with stable `id`, lifecycle hooks, lazy `EffectManager`, absolute-position helper, and an opt-in **component bag**.
 
 ```ts
 class Bullet extends GameObject {
@@ -231,9 +231,57 @@ class Bullet extends GameObject {
 | `add(child \| children)` | Adds children, calls `onAdd(parent)` if defined |
 | `remove(child, destroy?)` | Removes; optional destroy |
 | `removeAll(destroy?)` | |
+| `addComponent<T>(cls)` | Attach a `GameObjectComponent` subclass (idempotent) |
+| `getComponent<T>(cls)` | Return the component, or `null` |
+| `removeComponent(cls)` | Call `onDestroy()` and detach |
 | `onCreate / onAdd / onUpdate / onRemove / onDestroy` | Override hooks |
 
 `onUpdate` only ticks when the GameObject is a direct child of the scene. Nested children must be ticked manually.
+
+### GameObjectComponent
+
+Reusable, composable behaviors attached to `GameObject` without inheritance. Each component is a zero-arg class; `owner` is injected before the first lifecycle call.
+
+```ts
+import { GameObjectComponent, GameObject } from '@toolcase/phaser-plus'
+
+class HealthComponent extends GameObjectComponent {
+    hp = 100
+    maxHp = 100
+
+    onCreate() {
+        this.hp = this.maxHp
+    }
+
+    onUpdate(_time: number, _delta: number) {
+        if (this.hp <= 0) this.owner.destroy()
+    }
+}
+
+class MoverComponent extends GameObjectComponent {
+    speed = 200
+
+    onUpdate(_time: number, delta: number) {
+        this.owner.x += this.speed * (delta / 1000)
+    }
+}
+
+class Enemy extends GameObject {
+    onCreate() {
+        const health = this.addComponent(HealthComponent)
+        health.maxHp = 200
+        this.addComponent(MoverComponent)
+    }
+}
+```
+
+Components participate in the owner's lifecycle:
+
+| Hook | When |
+|---|---|
+| `onCreate()` | After `GameObject.onCreate()` (at pool obtain, or immediately when `addComponent()` is called on a live object) |
+| `onUpdate(time, delta)` | Every frame (via `doUpdate`) |
+| `onDestroy()` | On `removeComponent()`, or when the owner is destroyed |
 
 ---
 

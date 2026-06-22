@@ -142,7 +142,9 @@ export default class GameObjectPool {
     private onObjectCreate(object: Poolable): void {
         if (typeof object.poolable === 'boolean') return
         object.poolable = true
-        if (typeof object.onCreate === 'function') {
+        if (typeof (object as any).doCreate === 'function') {
+            ;(object as any).doCreate()
+        } else if (typeof object.onCreate === 'function') {
             object.onCreate()
         }
     }

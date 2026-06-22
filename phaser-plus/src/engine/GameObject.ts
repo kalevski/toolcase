@@ -2,8 +2,10 @@ import { generateId } from '@toolcase/base'
 import { Game, GameObjects, Math as M } from 'phaser'
 import EffectManager from '../effects/EffectManager'
 import type Scene from './Scene'
+import type GameObjectComponent from './GameObjectComponent'
 
 type Child = GameObjects.GameObject
+type ComponentClass<T extends GameObjectComponent> = new () => T
 
 export default class GameObject extends GameObjects.Container {
 
@@ -16,6 +18,10 @@ export default class GameObject extends GameObjects.Container {
     private readonly _abs: M.Vector2 = new M.Vector2(0, 0)
 
     private _effects: EffectManager | null = null
+
+    private readonly _components: Map<Function, GameObjectComponent> = new Map()
+
+    private _created: boolean = false
 
     constructor(scene: Scene, x: number, y: number) {
         super(scene as unknown as Phaser.Scene, x, y)
@@ -56,6 +62,39 @@ export default class GameObject extends GameObjects.Container {
         return out
     }
 
+    /**
+     * Attach a component to this object. The component is constructed with
+     * `new cls()` and its `owner` is set to this object. If the same class is
+     * added more than once the existing instance is returned unchanged.
+     *
+     * When called on a live object (after pool creation) `onCreate()` is
+     * invoked immediately on the new component.
+     */
+    addComponent<T extends GameObjectComponent>(cls: ComponentClass<T>): T {
+        if (this._components.has(cls)) return this._components.get(cls) as T
+        const instance = new cls()
+        instance.owner = this as any
+        this._components.set(cls, instance)
+        if (this._created) instance.onCreate()
+        return instance
+    }
+
+    /** Return the component instance for `cls`, or `null` if not attached. */
+    getComponent<T extends GameObjectComponent>(cls: ComponentClass<T>): T | null {
+        return (this._components.get(cls) as T) ?? null
+    }
+
+    /**
+     * Detach and destroy a component. Calls `onDestroy()` on the component
+     * before removing it. No-op if the component is not attached.
+     */
+    removeComponent<T extends GameObjectComponent>(cls: ComponentClass<T>): void {
+        const instance = this._components.get(cls)
+        if (!instance) return
+        instance.onDestroy()
+        this._components.delete(cls)
+    }
+
     onCreate(): void {}
 
     onAdd(_parent: GameObjects.GameObject): void {}
@@ -69,6 +108,8 @@ export default class GameObject extends GameObjects.Container {
     protected preDestroy(): void {
         this._effects?.clear()
         this._effects = null
+        for (const c of this._components.values()) c.onDestroy()
+        this._components.clear()
         super.preDestroy()
         this.onDestroy()
     }
@@ -103,9 +144,17 @@ export default class GameObject extends GameObjects.Container {
         return super.removeAll(destroyChild) as this
     }
 
+    /** @internal — called by GameObjectPool instead of onCreate() to ensure components are initialized. */
+    doCreate(): void {
+        this._created = true
+        this.onCreate()
+        for (const c of this._components.values()) c.onCreate()
+    }
+
     /** @internal */
     doUpdate(time: number, delta: number): void {
         this.onUpdate(time, delta)
+        for (const c of this._components.values()) c.onUpdate(time, delta)
         for (const child of this.list) {
             if (child instanceof GameObject) child.doUpdate(time, delta)
         }

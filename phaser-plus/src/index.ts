@@ -3,6 +3,7 @@ import { Level as LogLevel } from '@toolcase/logging'
 import Engine from './engine/Engine'
 import Scene from './engine/Scene'
 import GameObject from './engine/GameObject'
+import GameObjectComponent from './engine/GameObjectComponent'
 import * as Events from './engine/Events'
 
 import Feature from './features/Feature'
@@ -95,6 +96,7 @@ export {
     Engine,
     Scene,
     GameObject,
+    GameObjectComponent,
     Feature,
     FeatureRegistry,
     ServiceRegistry,
