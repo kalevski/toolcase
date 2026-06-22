@@ -877,6 +877,10 @@ Mask: `CircleFadeEffect`, `ClippingEffect`, `EnergyBarEffect`, `GhostEffect`, `F
 
 Lighting: `OutlineEffect`, `PatternEffect`, `PatternAdditiveEffect`, `EdgeColorEffect`, `BlurEffect`, `SharpenEffect`, `GrassFXEffect`, `GrassMultiFXEffect`, `HologramEffect`, `Hologram2Effect`, `Hologram3Effect`, `ShinyReflectEffect`, `SkyCloudEffect`, `WaterAndBackgroundEffect`, `WaterAndBackgroundDeluxeEffect`, `WaterfallEffect`.
 
+### Effects Gallery demo (`effects-gallery`)
+
+A searchable 4-column grid with a live shader thumbnail per `EFFECT_REGISTRY` key, a family filter bar (Color / Procedural / Distortion / Dissolve / Mask / Lighting), a DOM search input, and a right-side preview panel with per-uniform `−` / `+` tweak controls. All 73 built-in effects are browsable in one place without touching the keyboard.
+
 ---
 
 ## AI / Pathfinding
@@ -1389,6 +1393,44 @@ Buttons set virtual booleans (`input.setVirtual(id, …)`); pair with an `{ type
 ---
 
 ## Worked examples
+
+### Searchable effects gallery (all 73 shaders)
+
+```ts
+import { Scene, EFFECT_REGISTRY, EffectManager, HTMLFeature } from '@toolcase/phaser-plus'
+
+// Family ranges match the EFFECT_REGISTRY order
+const FAMILIES = [
+    { name: 'Color',      start: 0,  count: 16, color: 0x3b82f6 },
+    { name: 'Procedural', start: 16, count: 13, color: 0xf59e0b },
+    { name: 'Distortion', start: 29, count: 13, color: 0x10b981 },
+    { name: 'Dissolve',   start: 42, count: 7,  color: 0xef4444 },
+    { name: 'Mask',       start: 49, count: 8,  color: 0x8b5cf6 },
+    { name: 'Lighting',   start: 57, count: 16, color: 0xf472b6 },
+]
+
+// DOM text input via HTMLFeature (requires dom: { createContainer: true })
+class SearchFeature extends HTMLFeature {
+    onInput = null
+    onCreate() {
+        this.node.innerHTML = `<input type="text" placeholder="search…" data-q style="position:absolute;top:9px;left:480px;">`
+        this.node.querySelector('[data-q]').addEventListener('input', e => this.onInput?.(e.target.value))
+    }
+}
+
+// Plain sprite + manual EffectManager — no GameObject subclass needed
+const sprite = scene.add.sprite(cx, cy, 'objects', 'turtle_left')
+const mgr    = new EffectManager(sprite)
+
+// Apply effect, adjust a uniform, then clear
+const fx = mgr.add(EFFECT_REGISTRY[0])   // GrayScaleEffect
+fx.amount = 0.5                           // tweak uniform live
+mgr.clear()                              // remove all effects
+```
+
+See `examples/src/phaser-plus/scenes/EffectsGalleryDemo.js` for the full paginated grid implementation with family filter chips, mouse-wheel scrolling, and per-uniform `−/+` controls.
+
+---
 
 ### Side-scroller mini scene (Layer + Pool + Flow + Effects)
 

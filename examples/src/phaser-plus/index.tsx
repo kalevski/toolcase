@@ -54,6 +54,7 @@ import AssetFeatureDemo from './scenes/AssetFeatureDemo.js'
 import TilemapNavMeshDemo from './scenes/TilemapNavMeshDemo.js'
 import ParticleFeatureDemo from './scenes/ParticleFeatureDemo.js'
 import TweenTimelineDemo from './scenes/TweenTimelineDemo.js'
+import EffectsGalleryDemo from './scenes/EffectsGalleryDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -362,6 +363,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Cycle the entire phaser-plus effect catalogue on a sprite.',
         sceneFile: 'Effects.js',
         element: <PhaserCanvas sceneClass={Effects} />
+    },
+    {
+        key: 'effects-gallery',
+        title: 'Effects Gallery',
+        category: 'Effects',
+        description: 'Searchable grid of all 73 built-in shaders with live thumbnails, family filter, click-to-apply, and per-uniform ±tweak controls.',
+        sceneFile: 'EffectsGalleryDemo.js',
+        element: <PhaserCanvas sceneClass={EffectsGalleryDemo} />
     },
 
     {
