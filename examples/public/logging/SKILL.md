@@ -194,25 +194,33 @@ The default base does nothing — subclass it.
 
 ### ConsoleLogReporter
 
-Built-in transport bound to the default factory.
-
-```ts
-class ConsoleLogReporter extends LogReporter {
-    log(level, scope, time, messages) {
-        // 'error'   → console.error
-        // 'warning' → console.warn
-        // others    → console.log
-        // Format:   "<LEVEL> [<ISO time>] | <scope>: ...messages"
-    }
-}
-```
-
-Example output:
+Built-in transport bound to the default factory. Routes `error` → `console.error`, `warning` → `console.warn`, everything else → `console.log`. Default format: `<LEVEL> [<ISO time>] | <scope>: ...messages`.
 
 ```
 INFO [2026-05-03T12:00:00.000Z] | boot: starting
 ERROR [2026-05-03T12:00:01.123Z] | auth: invalid token { ip: '1.2.3.4' }
 ```
+
+Constructor options (`ConsoleLogReporterOptions`):
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `color` | `boolean` | auto | Force color on/off. Auto-enables on Node TTYs and in browsers; honoured by `NO_COLOR`. |
+| `timestamp` | `boolean` | `true` | Include the ISO timestamp in the default prefix. |
+| `prefix` | `string \| (level, scope, time) => string` | — | Override the prefix entirely (string or function). |
+| `objects` | `'compact' \| 'pretty'` | `'compact'` | `'compact'` passes values to console as-is; `'pretty'` serializes objects/arrays to indented JSON and errors to a string. |
+
+```ts
+new ConsoleLogReporter()                       // auto-detect color, default prefix
+new ConsoleLogReporter({ color: false })       // no color
+new ConsoleLogReporter({ timestamp: false })   // omit time from prefix
+new ConsoleLogReporter({ objects: 'pretty' })  // serialize objects as indented JSON
+new ConsoleLogReporter({
+    prefix: (level, scope) => `[${scope}] ${level.toUpperCase()}`
+})
+```
+
+Color uses ANSI escape codes on Node TTYs and `%c` CSS styling in the browser. Setting `NO_COLOR` in the environment disables auto-detection (explicit `{ color: true }` still overrides it).
 
 ### JSONLineReporter
 

@@ -3,6 +3,9 @@ import LogReporter from './LogReporter'
 
 export interface ConsoleLogReporterOptions {
     color?: boolean
+    timestamp?: boolean
+    prefix?: string | ((level: LoggerLevel, scope: string, time: string) => string)
+    objects?: 'compact' | 'pretty'
 }
 
 const ANSI_RESET = '\x1b[0m'
@@ -39,46 +42,82 @@ function resolveColor(requested: boolean | undefined, node: boolean): boolean {
     return true
 }
 
+function serializeMessage(x: any): any {
+    if (x === null || typeof x !== 'object') return x
+    if (x instanceof Error) {
+        return x.stack ?? `${x.name}: ${x.message}`
+    }
+    try {
+        return JSON.stringify(x, null, 2)
+    } catch {
+        return String(x)
+    }
+}
+
 class ConsoleLogReporter extends LogReporter {
 
     private readonly useColor: boolean
     private readonly node: boolean
+    private readonly showTimestamp: boolean
+    private readonly prefixOption: ConsoleLogReporterOptions['prefix']
+    private readonly objectMode: 'compact' | 'pretty'
 
     constructor(options: ConsoleLogReporterOptions = {}) {
         super()
         this.node = isNode()
         this.useColor = resolveColor(options.color, this.node)
+        this.showTimestamp = options.timestamp !== false
+        this.prefixOption = options.prefix
+        this.objectMode = options.objects ?? 'compact'
+    }
+
+    private buildPrefix(level: LoggerLevel, scope: string, time: string): string {
+        if (typeof this.prefixOption === 'function') {
+            return this.prefixOption(level, scope, time)
+        }
+        if (typeof this.prefixOption === 'string') {
+            return this.prefixOption
+        }
+        return this.showTimestamp
+            ? `${level.toUpperCase()} [${time}] | ${scope}:`
+            : `${level.toUpperCase()} | ${scope}:`
+    }
+
+    private prepareMessages(messages: any[]): any[] {
+        if (this.objectMode === 'compact') return messages
+        return messages.map(serializeMessage)
     }
 
     log(level: LoggerLevel, scope: string, time: string, messages: any[]): void {
-        const prefix = `${level.toUpperCase()} [${time}] | ${scope}:`
+        const prefix = this.buildPrefix(level, scope, time)
+        const msgs = this.prepareMessages(messages)
 
         if (this.useColor && this.node) {
             const ansi = ANSI_COLORS[level] ?? ''
             const colored = `${ansi}${prefix}${ANSI_RESET}`
             if (level === 'error') {
-                console.error(colored, ...messages)
+                console.error(colored, ...msgs)
             } else if (level === 'warning') {
-                console.warn(colored, ...messages)
+                console.warn(colored, ...msgs)
             } else {
-                console.log(colored, ...messages)
+                console.log(colored, ...msgs)
             }
         } else if (this.useColor) {
             const style = BROWSER_STYLES[level] ?? ''
             if (level === 'error') {
-                console.error(`%c${prefix}`, style, ...messages)
+                console.error(`%c${prefix}`, style, ...msgs)
             } else if (level === 'warning') {
-                console.warn(`%c${prefix}`, style, ...messages)
+                console.warn(`%c${prefix}`, style, ...msgs)
             } else {
-                console.log(`%c${prefix}`, style, ...messages)
+                console.log(`%c${prefix}`, style, ...msgs)
             }
         } else {
             if (level === 'error') {
-                console.error(prefix, ...messages)
+                console.error(prefix, ...msgs)
             } else if (level === 'warning') {
-                console.warn(prefix, ...messages)
+                console.warn(prefix, ...msgs)
             } else {
-                console.log(prefix, ...messages)
+                console.log(prefix, ...msgs)
             }
         }
     }

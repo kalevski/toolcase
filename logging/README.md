@@ -94,13 +94,29 @@ A reporter receives every log line and decides what to do with it (print, ship t
 
 ### ConsoleLogReporter options
 
-Color is auto-enabled on Node TTYs and in the browser, auto-disabled under `NO_COLOR` or non-TTY Node output. Override explicitly:
+```ts
+new ConsoleLogReporter(options?: ConsoleLogReporterOptions)
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `color` | `boolean` | auto | Force color on or off. Auto-enables on Node TTYs and in the browser; auto-disables under `NO_COLOR` or non-TTY Node output. |
+| `timestamp` | `boolean` | `true` | Include the ISO timestamp in the default prefix. |
+| `prefix` | `string \| (level, scope, time) => string` | — | Override the prefix. A string is used as-is; a function receives `(level, scope, time)` and must return the prefix string. When set, `timestamp` has no effect. |
+| `objects` | `'compact' \| 'pretty'` | `'compact'` | How plain objects are formatted. `'compact'` passes values to `console` as-is (native expansion in devtools / `util.inspect` in Node). `'pretty'` serializes objects/arrays to indented JSON and errors to `name: message\nstack`. |
 
 ```ts
-new ConsoleLogReporter()               // auto-detect
-new ConsoleLogReporter({ color: true })  // force on
-new ConsoleLogReporter({ color: false }) // force off
+new ConsoleLogReporter()                        // auto-detect color, default prefix, compact objects
+new ConsoleLogReporter({ color: true })         // force color on
+new ConsoleLogReporter({ color: false })        // force color off
+new ConsoleLogReporter({ timestamp: false })    // omit timestamp from prefix
+new ConsoleLogReporter({ objects: 'pretty' })   // serialize objects as indented JSON
+new ConsoleLogReporter({
+    prefix: (level, scope) => `[${scope}] ${level.toUpperCase()}`
+})
 ```
+
+`NO_COLOR` (any value) in the environment disables color auto-detection — the reporter will not emit ANSI codes or `%c` browser styles. `{ color: true }` still overrides this.
 
 ### Multiple reporters
 

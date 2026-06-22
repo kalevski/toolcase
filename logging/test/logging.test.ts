@@ -620,6 +620,106 @@ describe('ConsoleLogReporter', () => {
             spy.mockRestore()
         }
     })
+
+    it('NO_COLOR env var disables color auto-detection', () => {
+        const prev = process.env.NO_COLOR
+        process.env.NO_COLOR = ''
+        try {
+            const reporter = new ConsoleLogReporter()
+            const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+            reporter.log('info', 's', 't', ['msg'])
+            const call = spy.mock.calls[0]
+            expect(call.join(' ')).not.toMatch(/\x1b\[/)
+            expect(call[0]).not.toContain('%c')
+            spy.mockRestore()
+        } finally {
+            if (prev === undefined) delete process.env.NO_COLOR
+            else process.env.NO_COLOR = prev
+        }
+    })
+
+    it('{ timestamp: false } omits time from the default prefix', () => {
+        const reporter = new ConsoleLogReporter({ color: false, timestamp: false })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', ['msg'])
+        const call = spy.mock.calls[0].join(' ')
+        expect(call).not.toContain('2026-01-01T00:00:00Z')
+        expect(call).toContain('INFO')
+        expect(call).toContain('svc')
+        spy.mockRestore()
+    })
+
+    it('{ timestamp: true } (default) includes time in the prefix', () => {
+        const reporter = new ConsoleLogReporter({ color: false })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', ['msg'])
+        const call = spy.mock.calls[0].join(' ')
+        expect(call).toContain('2026-01-01T00:00:00Z')
+        spy.mockRestore()
+    })
+
+    it('custom string prefix replaces the default prefix', () => {
+        const reporter = new ConsoleLogReporter({ color: false, prefix: '[MY-APP]' })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 'svc', 't', ['msg'])
+        const call = spy.mock.calls[0].join(' ')
+        expect(call).toContain('[MY-APP]')
+        expect(call).not.toContain('INFO')
+        expect(call).not.toContain('svc')
+        spy.mockRestore()
+    })
+
+    it('prefix function receives level/scope/time and its return is used', () => {
+        const reporter = new ConsoleLogReporter({
+            color: false,
+            prefix: (level, scope, time) => `${level}|${scope}|${time}`
+        })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 'svc', '2026-01-01T00:00:00Z', ['msg'])
+        const call = spy.mock.calls[0].join(' ')
+        expect(call).toContain('info|svc|2026-01-01T00:00:00Z')
+        spy.mockRestore()
+    })
+
+    it('{ objects: "pretty" } serializes plain objects to indented JSON strings', () => {
+        const reporter = new ConsoleLogReporter({ color: false, objects: 'pretty' })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 's', 't', [{ key: 'value' }])
+        const objectArg = spy.mock.calls[0][1]
+        expect(typeof objectArg).toBe('string')
+        expect(objectArg).toContain('"key"')
+        expect(objectArg).toContain('"value"')
+        spy.mockRestore()
+    })
+
+    it('{ objects: "pretty" } serializes Error instances to a string', () => {
+        const reporter = new ConsoleLogReporter({ color: false, objects: 'pretty' })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 's', 't', [new Error('boom')])
+        const objectArg = spy.mock.calls[0][1]
+        expect(typeof objectArg).toBe('string')
+        expect(objectArg).toContain('boom')
+        spy.mockRestore()
+    })
+
+    it('{ objects: "pretty" } passes primitives through unchanged', () => {
+        const reporter = new ConsoleLogReporter({ color: false, objects: 'pretty' })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        reporter.log('info', 's', 't', ['hello', 42, true, null])
+        const args = spy.mock.calls[0].slice(1)
+        expect(args).toEqual(['hello', 42, true, null])
+        spy.mockRestore()
+    })
+
+    it('{ objects: "compact" } (default) passes objects through unchanged', () => {
+        const reporter = new ConsoleLogReporter({ color: false })
+        const spy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        const obj = { key: 'value' }
+        reporter.log('info', 's', 't', [obj])
+        const objectArg = spy.mock.calls[0][1]
+        expect(objectArg).toBe(obj)
+        spy.mockRestore()
+    })
 })
 
 describe('JSONLineReporter', () => {
