@@ -44,6 +44,7 @@ import truncate from './truncate'
 import escapeHtml from './escapeHtml'
 import diff from './diff'
 import patch from './patch'
+import { BPlusIndex, MemoryAdapter } from './BPlusIndex'
 
 import Status from './http/Status'
 import RESTError from './http/RESTError'
@@ -79,6 +80,7 @@ export type { Schema, RefSchema, ValidationIssue, ValidationError, ValidationFn,
 export type { Delta, ObjectDelta, ArrayDelta, Edit } from './diff'
 export type { FormatNumberOptions } from './formatNumber'
 
+export type { StorageAdapter, BPlusIndexOptions, RangeOptions } from './BPlusIndex'
 export type { SpatialPoint, SpatialRect } from './spatial'
 export type { EasingFn } from './easing'
 export type { Rect } from './Vec2'
@@ -184,7 +186,9 @@ export {
     truncate,
     escapeHtml,
     diff,
-    patch
+    patch,
+    BPlusIndex,
+    MemoryAdapter,
 }
 
 const BASE = {
@@ -256,7 +260,9 @@ const BASE = {
     truncate,
     escapeHtml,
     diff,
-    patch
+    patch,
+    BPlusIndex,
+    MemoryAdapter,
 }
 
 export default BASE

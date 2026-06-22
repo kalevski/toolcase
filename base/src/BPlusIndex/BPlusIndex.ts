@@ -1,0 +1,774 @@
+import {
+    StorageAdapter, BPlusIndexOptions, RangeOptions,
+    SuperblockData, InternalNode, LeafNode,
+    HEADER_SIZE, NULL_PAGE, SB_PAGE_A, SB_PAGE_B, FIRST_TREE_PAGE,
+    PAGE_TYPE_INTERNAL, PAGE_TYPE_LEAF,
+} from './types'
+import {
+    encodeSuperblock, decodeSuperblock,
+    encodeInternal, decodeInternal, internalByteSize,
+    encodeLeaf, decodeLeaf, leafByteSize,
+    encodeOverflow, decodeOverflow, overflowChunkSize,
+    encodeFreelist, decodeFreelist, freelistCapacity,
+} from './page'
+
+// ── constants ────────────────────────────────────────────────────────────────
+
+const ENC = new TextEncoder()
+const DEC = new TextDecoder()
+
+function defaultOrder(pageSize: number): number {
+    return Math.max(4, Math.floor((pageSize - HEADER_SIZE - 2) / 44))
+}
+
+// ── BPlusIndex ───────────────────────────────────────────────────────────────
+
+export class BPlusIndex<K, V> {
+
+    // ── static helpers ──────────────────────────────────────────────────────
+
+    static comparators = {
+        string:     (a: string,     b: string)     => a < b ? -1 : a > b ? 1 : 0,
+        number:     (a: number,     b: number)     => a < b ? -1 : a > b ? 1 : 0,
+        bigint:     (a: bigint,     b: bigint)     => a < b ? -1 : a > b ? 1 : 0,
+        uint8Array: (a: Uint8Array, b: Uint8Array): number => {
+            const len = Math.min(a.length, b.length)
+            for (let i = 0; i < len; i++) if (a[i] !== b[i]) return a[i] < b[i] ? -1 : 1
+            return a.length - b.length
+        },
+    }
+
+    static serializers = {
+        string: (k: string): Uint8Array => ENC.encode(k),
+        number: (k: number): Uint8Array => {
+            const buf = new Uint8Array(8)
+            new DataView(buf.buffer).setFloat64(0, k, true)
+            return buf
+        },
+        bigint: (k: bigint): Uint8Array => {
+            const neg = k < 0n
+            let v = neg ? -k - 1n : k
+            const bytes: number[] = []
+            while (v > 0n) { bytes.push(Number(v & 0xffn)); v >>= 8n }
+            const out = new Uint8Array(3 + bytes.length)
+            const view = new DataView(out.buffer)
+            view.setUint16(0, bytes.length, true)
+            out[2] = neg ? 1 : 0
+            out.set(bytes, 3)
+            return out
+        },
+        uint8Array: (k: Uint8Array): Uint8Array => {
+            const out = new Uint8Array(2 + k.length)
+            new DataView(out.buffer).setUint16(0, k.length, true)
+            out.set(k, 2)
+            return out
+        },
+    }
+
+    static deserializers = {
+        string:     (b: Uint8Array): string => DEC.decode(b),
+        number:     (b: Uint8Array): number => new DataView(b.buffer, b.byteOffset, b.byteLength).getFloat64(0, true),
+        bigint:     (b: Uint8Array): bigint => {
+            const view  = new DataView(b.buffer, b.byteOffset, b.byteLength)
+            const magLen = view.getUint16(0, true)
+            const neg   = b[2] !== 0
+            let v = 0n
+            for (let i = magLen - 1; i >= 0; i--) v = (v << 8n) | BigInt(b[3 + i])
+            return neg ? -(v + 1n) : v
+        },
+        uint8Array: (b: Uint8Array): Uint8Array => {
+            const len = new DataView(b.buffer, b.byteOffset).getUint16(0, true)
+            return b.slice(2, 2 + len)
+        },
+    }
+
+    static keyPreset = {
+        string:     { compare: BPlusIndex.comparators.string,     serializeKey: BPlusIndex.serializers.string,     deserializeKey: BPlusIndex.deserializers.string,     keyEncoding: 'string' },
+        number:     { compare: BPlusIndex.comparators.number,     serializeKey: BPlusIndex.serializers.number,     deserializeKey: BPlusIndex.deserializers.number,     keyEncoding: 'number' },
+        bigint:     { compare: BPlusIndex.comparators.bigint,     serializeKey: BPlusIndex.serializers.bigint,     deserializeKey: BPlusIndex.deserializers.bigint,     keyEncoding: 'bigint' },
+        uint8Array: { compare: BPlusIndex.comparators.uint8Array, serializeKey: BPlusIndex.serializers.uint8Array, deserializeKey: BPlusIndex.deserializers.uint8Array, keyEncoding: 'uint8Array' },
+    }
+
+    // ── static open ─────────────────────────────────────────────────────────
+
+    static async open<K, V>(opts: BPlusIndexOptions<K, V>): Promise<BPlusIndex<K, V>> {
+        const idx = new BPlusIndex<K, V>(opts)
+        await idx._init()
+        return idx
+    }
+
+    // ── private fields ──────────────────────────────────────────────────────
+
+    private readonly adapter:          StorageAdapter
+    private readonly compare:          (a: K, b: K) => number
+    private readonly serializeKey:     (k: K) => Uint8Array
+    private readonly deserializeKey:   (b: Uint8Array) => K
+    private readonly serializeValue:   (v: V) => Uint8Array
+    private readonly deserializeValue: (b: Uint8Array) => V
+    private readonly keyEncoding:      string
+    private readonly overflowThreshold: number
+
+    private pageSize!:            number
+    private order!:               number
+    private rootPageId!:          number
+    private pageCount!:           number
+    private freeListHeadPageId!:  number
+    private _size!:               number
+    private writeSeq!:            number
+    private activeSuperblockSlot!: number
+
+    private constructor(opts: BPlusIndexOptions<K, V>) {
+        this.adapter          = opts.adapter
+        this.compare          = opts.compare
+        this.serializeKey     = opts.serializeKey
+        this.deserializeKey   = opts.deserializeKey
+        this.serializeValue   = opts.serializeValue
+        this.deserializeValue = opts.deserializeValue
+        this.keyEncoding      = opts.keyEncoding ?? 'custom'
+        this.overflowThreshold = opts.overflowThreshold ?? 0.25
+    }
+
+    get size(): number { return this._size }
+
+    // ── lifecycle ───────────────────────────────────────────────────────────
+
+    private async _init(): Promise<void> {
+        const rawA = await this.adapter.read(SB_PAGE_A)
+        const rawB = await this.adapter.read(SB_PAGE_B)
+        const sbA  = rawA ? decodeSuperblock(rawA) : null
+        const sbB  = rawB ? decodeSuperblock(rawB) : null
+
+        if (!sbA && !sbB) {
+            this.pageSize             = 4096
+            this.order                = defaultOrder(this.pageSize)
+            this.writeSeq             = 1
+            this._size                = 0
+            this.freeListHeadPageId   = NULL_PAGE
+            this.pageCount            = FIRST_TREE_PAGE  // pages 0,1 = superblocks
+
+            const rootId = await this._allocatePage()  // = FIRST_TREE_PAGE
+            this.rootPageId = rootId
+            const leaf: LeafNode = {
+                pageId: rootId, pageSeq: this.writeSeq,
+                prevPageId: NULL_PAGE, nextPageId: NULL_PAGE, entries: [],
+            }
+            await this._writeLeaf(leaf)
+            await this._commitSuperblock(SB_PAGE_A)
+            await this._commitSuperblock(SB_PAGE_B)
+            this.activeSuperblockSlot = SB_PAGE_B
+            return
+        }
+
+        let sb: SuperblockData & { pageSeq: number }
+        if (sbA && sbB) {
+            if (sbA.pageSeq >= sbB.pageSeq) {
+                sb = sbA; this.activeSuperblockSlot = SB_PAGE_A
+            } else {
+                sb = sbB; this.activeSuperblockSlot = SB_PAGE_B
+            }
+        } else if (sbA) {
+            sb = sbA; this.activeSuperblockSlot = SB_PAGE_A
+        } else {
+            sb = sbB!; this.activeSuperblockSlot = SB_PAGE_B
+        }
+
+        if (sb.keyEncoding !== this.keyEncoding) {
+            throw new Error(
+                `BPlusIndex: keyEncoding mismatch — file has "${sb.keyEncoding}", caller passed "${this.keyEncoding}"`
+            )
+        }
+        this.pageSize            = sb.pageSize
+        this.order               = sb.order
+        this.rootPageId          = sb.rootPageId
+        this.pageCount           = sb.pageCount
+        this.freeListHeadPageId  = sb.freeListHeadPageId
+        this._size               = sb.totalRecordCount
+        this.writeSeq            = sb.pageSeq + 1
+    }
+
+    private async _commitSuperblock(slot: number): Promise<void> {
+        const buf = new Uint8Array(this.pageSize)
+        encodeSuperblock(buf, {
+            formatVersion: 1,
+            pageSize:   this.pageSize,
+            order:      this.order,
+            rootPageId: this.rootPageId,
+            pageCount:  this.pageCount,
+            freeListHeadPageId: this.freeListHeadPageId,
+            totalRecordCount:   this._size,
+            keyEncoding: this.keyEncoding,
+        }, this.writeSeq)
+        await this.adapter.write(slot, buf)
+    }
+
+    private async _flushSuperblock(): Promise<void> {
+        const stale = this.activeSuperblockSlot === SB_PAGE_A ? SB_PAGE_B : SB_PAGE_A
+        await this._commitSuperblock(stale)
+        this.activeSuperblockSlot = stale
+    }
+
+    async flush(): Promise<void> {
+        await this.adapter.flush?.()
+    }
+
+    async close(): Promise<void> {
+        await this.flush()
+        await this.adapter.close?.()
+    }
+
+    // ── page allocation ─────────────────────────────────────────────────────
+
+    private async _allocatePage(): Promise<number> {
+        if (this.freeListHeadPageId !== NULL_PAGE) {
+            const raw = await this.adapter.read(this.freeListHeadPageId)
+            if (raw) {
+                const fl = decodeFreelist(raw)
+                if (fl && fl.ids.length > 0) {
+                    const id = fl.ids.pop()!
+                    if (fl.ids.length === 0) {
+                        this.freeListHeadPageId = fl.nextPageId
+                    } else {
+                        const buf = new Uint8Array(this.pageSize)
+                        encodeFreelist(buf, fl.nextPageId, fl.ids, this.writeSeq)
+                        await this.adapter.write(this.freeListHeadPageId, buf)
+                    }
+                    return id
+                }
+            }
+        }
+        return this.pageCount++
+    }
+
+    private async _freePage(pageId: number): Promise<void> {
+        if (pageId <= SB_PAGE_B) return  // never free superblock slots
+        const cap = freelistCapacity(this.pageSize)
+        if (this.freeListHeadPageId !== NULL_PAGE) {
+            const raw = await this.adapter.read(this.freeListHeadPageId)
+            if (raw) {
+                const fl = decodeFreelist(raw)
+                if (fl && fl.ids.length < cap) {
+                    fl.ids.push(pageId)
+                    const buf = new Uint8Array(this.pageSize)
+                    encodeFreelist(buf, fl.nextPageId, fl.ids, this.writeSeq)
+                    await this.adapter.write(this.freeListHeadPageId, buf)
+                    return
+                }
+            }
+        }
+        const newFlId = this.pageCount++
+        const buf = new Uint8Array(this.pageSize)
+        encodeFreelist(buf, this.freeListHeadPageId, [pageId], this.writeSeq)
+        await this.adapter.write(newFlId, buf)
+        this.freeListHeadPageId = newFlId
+    }
+
+    // ── page I/O ────────────────────────────────────────────────────────────
+
+    private async _readInternal(pageId: number): Promise<InternalNode> {
+        const raw = await this.adapter.read(pageId)
+        if (!raw) throw new Error(`BPlusIndex: missing page ${pageId}`)
+        const node = decodeInternal(raw, pageId)
+        if (!node) throw new Error(`BPlusIndex: corrupt internal node at page ${pageId}`)
+        return node
+    }
+
+    private async _writeInternal(node: InternalNode): Promise<void> {
+        const buf = new Uint8Array(this.pageSize)
+        encodeInternal(buf, node)
+        await this.adapter.write(node.pageId, buf)
+    }
+
+    private async _readLeaf(pageId: number): Promise<LeafNode> {
+        const raw = await this.adapter.read(pageId)
+        if (!raw) throw new Error(`BPlusIndex: missing leaf page ${pageId}`)
+        const result = decodeLeaf(raw, pageId)
+        if (!result) throw new Error(`BPlusIndex: corrupt leaf at page ${pageId}`)
+        const { node, overflowRefs } = result
+        for (const [idx, { headPageId, totalLen }] of overflowRefs) {
+            node.entries[idx].valueRaw    = await this._readOverflow(headPageId, totalLen)
+            node.entries[idx].overflowHead = headPageId
+        }
+        return node
+    }
+
+    /** Write a leaf. Allocates overflow pages for any entry that needs them (overflowHead === 0 and value too large). */
+    private async _writeLeaf(node: LeafNode): Promise<void> {
+        const ovThresh = Math.floor(this.overflowThreshold * this.pageSize)
+        for (const e of node.entries) {
+            if (e.overflowHead === 0 && e.valueRaw.length > ovThresh) {
+                const pageIds    = await this._writeOverflow(e.valueRaw)
+                e.overflowHead   = pageIds[0]
+            }
+        }
+        const buf = new Uint8Array(this.pageSize)
+        encodeLeaf(buf, node)
+        await this.adapter.write(node.pageId, buf)
+    }
+
+    private async _readOverflow(headPageId: number, totalLen: number): Promise<Uint8Array> {
+        const out = new Uint8Array(totalLen)
+        let written = 0, pageId = headPageId
+        while (pageId !== NULL_PAGE) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) break
+            const ov = decodeOverflow(raw)
+            if (!ov) break
+            out.set(ov.chunk, written)
+            written += ov.chunk.length
+            pageId = ov.nextPageId
+        }
+        return out
+    }
+
+    private async _writeOverflow(value: Uint8Array): Promise<number[]> {
+        const chunkSize = overflowChunkSize(this.pageSize)
+        const chunks: Uint8Array[] = []
+        for (let off = 0; off < value.length; off += chunkSize) {
+            chunks.push(value.slice(off, Math.min(off + chunkSize, value.length)))
+        }
+        const pageIds: number[] = []
+        for (const _ of chunks) pageIds.push(await this._allocatePage())
+        for (let i = 0; i < chunks.length; i++) {
+            const nextId = i + 1 < pageIds.length ? pageIds[i + 1] : NULL_PAGE
+            const buf = new Uint8Array(this.pageSize)
+            encodeOverflow(buf, nextId, chunks[i], this.writeSeq)
+            await this.adapter.write(pageIds[i], buf)
+        }
+        return pageIds
+    }
+
+    private async _freeOverflowChain(headPageId: number): Promise<void> {
+        let pageId = headPageId
+        while (pageId !== NULL_PAGE) {
+            const raw  = await this.adapter.read(pageId)
+            const next = raw ? (decodeOverflow(raw)?.nextPageId ?? NULL_PAGE) : NULL_PAGE
+            await this._freePage(pageId)
+            pageId = next
+        }
+    }
+
+    // ── key search ──────────────────────────────────────────────────────────
+
+    /** Returns index in leaf entries, or bitwise-NOT of insert position. */
+    private _bsearch(keyRaws: Uint8Array[], target: K): number {
+        let lo = 0, hi = keyRaws.length - 1
+        while (lo <= hi) {
+            const mid = (lo + hi) >>> 1
+            const cmp = this.compare(this.deserializeKey(keyRaws[mid]), target)
+            if (cmp === 0) return mid
+            if (cmp < 0) lo = mid + 1
+            else hi = mid - 1
+        }
+        return ~lo
+    }
+
+    /**
+     * Upper bound: first i where keyRaws[i] > target.
+     * Used to route through internal nodes: children[upperBound(keys, k)] contains k.
+     */
+    private _upperBound(keyRaws: Uint8Array[], target: K): number {
+        let lo = 0, hi = keyRaws.length
+        while (lo < hi) {
+            const mid = (lo + hi) >>> 1
+            if (this.compare(this.deserializeKey(keyRaws[mid]), target) <= 0) lo = mid + 1
+            else hi = mid
+        }
+        return lo
+    }
+
+    /** Lower bound: first i where keyRaws[i] >= target. Used for range start. */
+    private _lowerBound(keyRaws: Uint8Array[], target: K): number {
+        let lo = 0, hi = keyRaws.length
+        while (lo < hi) {
+            const mid = (lo + hi) >>> 1
+            if (this.compare(this.deserializeKey(keyRaws[mid]), target) < 0) lo = mid + 1
+            else hi = mid
+        }
+        return lo
+    }
+
+    // ── tree descent ────────────────────────────────────────────────────────
+
+    private async _findLeaf(key: K): Promise<{ leaf: LeafNode; path: PathEntry[] }> {
+        const path: PathEntry[] = []
+        let pageId = this.rootPageId
+
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) throw new Error(`BPlusIndex: missing page ${pageId}`)
+            if (raw[4] === PAGE_TYPE_LEAF) {
+                return { leaf: await this._readLeaf(pageId), path }
+            }
+            const node       = await this._readInternal(pageId)
+            const childIndex = this._upperBound(node.keyRaws, key)
+            path.push({ node, childIndex })
+            pageId = node.children[childIndex]
+        }
+    }
+
+    // ── get ─────────────────────────────────────────────────────────────────
+
+    async get(key: K): Promise<V | undefined> {
+        const { leaf } = await this._findLeaf(key)
+        const idx = this._bsearch(leaf.entries.map(e => e.keyRaw), key)
+        if (idx < 0) return undefined
+        return this.deserializeValue(leaf.entries[idx].valueRaw)
+    }
+
+    async has(key: K): Promise<boolean> {
+        return (await this.get(key)) !== undefined
+    }
+
+    // ── set ─────────────────────────────────────────────────────────────────
+
+    async set(key: K, value: V): Promise<this> {
+        this.writeSeq++
+        const keyRaw   = this.serializeKey(key)
+        const valueRaw = this.serializeValue(value)
+
+        const { leaf, path } = await this._findLeaf(key)
+        const pos = this._bsearch(leaf.entries.map(e => e.keyRaw), key)
+
+        let countDelta = 0
+        if (pos >= 0) {
+            // Update — free old overflow chain
+            if (leaf.entries[pos].overflowHead !== 0) {
+                await this._freeOverflowChain(leaf.entries[pos].overflowHead)
+            }
+            leaf.entries[pos] = { keyRaw, valueRaw, overflowHead: 0 }
+        } else {
+            leaf.entries.splice(~pos, 0, { keyRaw, valueRaw, overflowHead: 0 })
+            this._size++
+            countDelta = 1
+        }
+        leaf.pageSeq = this.writeSeq
+
+        const ovThresh = Math.floor(this.overflowThreshold * this.pageSize)
+        if (leafByteSize(leaf, ovThresh) > this.pageSize) {
+            await this._splitLeaf(leaf, path)
+        } else {
+            await this._cowLeaf(leaf, path, countDelta)
+        }
+
+        await this._flushSuperblock()
+        return this
+    }
+
+    // ── copy-on-write leaf ──────────────────────────────────────────────────
+
+    private async _cowLeaf(leaf: LeafNode, path: PathEntry[], countDelta: number): Promise<void> {
+        const oldId = leaf.pageId
+        const newId = await this._allocatePage()
+        leaf.pageId = newId
+        await this._writeLeaf(leaf)
+        await this._freePage(oldId)
+
+        if (path.length === 0) {
+            this.rootPageId = newId
+        } else {
+            await this._updatePath(path, oldId, newId, countDelta)
+        }
+    }
+
+    // ── split leaf ──────────────────────────────────────────────────────────
+
+    private async _splitLeaf(leaf: LeafNode, path: PathEntry[]): Promise<void> {
+        const mid = Math.ceil(leaf.entries.length / 2)
+        const rightEntries = leaf.entries.splice(mid)  // leaf.entries now = left half
+
+        const oldLeafId  = leaf.pageId
+        const newLeftId  = await this._allocatePage()
+        const newRightId = await this._allocatePage()
+
+        leaf.pageId     = newLeftId
+        leaf.pageSeq    = this.writeSeq
+        // leaf.nextPageId remains the original; right leaf takes it over
+        const origNext  = leaf.nextPageId
+        leaf.nextPageId = newRightId
+
+        const rightLeaf: LeafNode = {
+            pageId:      newRightId, pageSeq: this.writeSeq,
+            prevPageId:  newLeftId,
+            nextPageId:  origNext,  // don't COW the next sibling — prevPageId there becomes stale but we use forward scan for reverse range
+            entries:     rightEntries,
+        }
+
+        await this._writeLeaf(leaf)
+        await this._writeLeaf(rightLeaf)
+        await this._freePage(oldLeafId)
+
+        const separatorRaw = rightEntries[0].keyRaw
+        const leftCount    = leaf.entries.length
+        const rightCount   = rightEntries.length
+
+        if (path.length === 0) {
+            const newRootId = await this._allocatePage()
+            const newRoot: InternalNode = {
+                pageId: newRootId, pageSeq: this.writeSeq,
+                keyRaws:     [separatorRaw],
+                children:    [newLeftId, newRightId],
+                childCounts: [leftCount, rightCount],
+            }
+            await this._writeInternal(newRoot)
+            this.rootPageId = newRootId
+        } else {
+            await this._insertIntoParent(path, newLeftId, newRightId, separatorRaw, oldLeafId, leftCount, rightCount)
+        }
+    }
+
+    // ── insert separator into parent (may propagate splits) ─────────────────
+
+    private async _insertIntoParent(
+        path: PathEntry[],
+        leftId: number, rightId: number,
+        separatorRaw: Uint8Array,
+        _oldChildId: number,
+        leftCount: number, rightCount: number,
+    ): Promise<void> {
+        const { node, childIndex } = path[path.length - 1]
+        node.children[childIndex]    = leftId
+        node.childCounts[childIndex] = leftCount
+        node.keyRaws.splice(childIndex, 0, separatorRaw)
+        node.children.splice(childIndex + 1, 0, rightId)
+        node.childCounts.splice(childIndex + 1, 0, rightCount)
+
+        const oldNodeId = node.pageId  // original page ID from _findLeaf
+        const parentPath = path.slice(0, -1)
+
+        if (internalByteSize(node) > this.pageSize) {
+            // Split internal node — don't write yet; _splitInternal handles it
+            node.pageSeq = this.writeSeq
+            await this._splitInternal(node, oldNodeId, parentPath)
+        } else {
+            const newNodeId = await this._allocatePage()
+            node.pageId  = newNodeId
+            node.pageSeq = this.writeSeq
+            await this._writeInternal(node)
+            await this._freePage(oldNodeId)
+
+            if (parentPath.length === 0) {
+                this.rootPageId = newNodeId
+            } else {
+                await this._updatePath(parentPath, oldNodeId, newNodeId, 0)
+            }
+        }
+    }
+
+    // ── split internal node ─────────────────────────────────────────────────
+
+    private async _splitInternal(
+        node: InternalNode, oldNodeId: number, path: PathEntry[],
+    ): Promise<void> {
+        const mid    = Math.floor(node.keyRaws.length / 2)
+        const pushUp = node.keyRaws[mid]
+
+        // Right half: keys after mid, children after mid
+        const rightKeys     = node.keyRaws.splice(mid + 1)
+        node.keyRaws.splice(mid)  // remove pushed-up key from left
+        const rightChildren = node.children.splice(mid + 1)
+        const rightCounts   = node.childCounts.splice(mid + 1)
+
+        const newLeftId  = await this._allocatePage()
+        const newRightId = await this._allocatePage()
+
+        node.pageId = newLeftId
+        const rightNode: InternalNode = {
+            pageId: newRightId, pageSeq: this.writeSeq,
+            keyRaws: rightKeys, children: rightChildren, childCounts: rightCounts,
+        }
+        await this._writeInternal(node)
+        await this._writeInternal(rightNode)
+        await this._freePage(oldNodeId)
+
+        const leftCount  = node.childCounts.reduce((a, b) => a + b, 0)
+        const rightCount = rightCounts.reduce((a, b) => a + b, 0)
+
+        if (path.length === 0) {
+            const newRootId = await this._allocatePage()
+            const newRoot: InternalNode = {
+                pageId: newRootId, pageSeq: this.writeSeq,
+                keyRaws:     [pushUp],
+                children:    [newLeftId, newRightId],
+                childCounts: [leftCount, rightCount],
+            }
+            await this._writeInternal(newRoot)
+            this.rootPageId = newRootId
+        } else {
+            await this._insertIntoParent(path, newLeftId, newRightId, pushUp, oldNodeId, leftCount, rightCount)
+        }
+    }
+
+    // ── update path after COW ───────────────────────────────────────────────
+
+    private async _updatePath(
+        path: PathEntry[], _oldChildId: number, newChildId: number, countDelta: number,
+    ): Promise<void> {
+        for (let i = path.length - 1; i >= 0; i--) {
+            const { node, childIndex } = path[i]
+            node.children[childIndex]    = newChildId
+            node.childCounts[childIndex] += countDelta
+
+            const oldId = node.pageId
+            const newId = await this._allocatePage()
+            node.pageId  = newId
+            node.pageSeq = this.writeSeq
+            await this._writeInternal(node)
+            await this._freePage(oldId)
+
+            newChildId = newId
+            countDelta = 0
+            if (i === 0) this.rootPageId = newId
+        }
+    }
+
+    // ── delete ──────────────────────────────────────────────────────────────
+
+    async delete(key: K): Promise<boolean> {
+        const { leaf, path } = await this._findLeaf(key)
+        const idx = this._bsearch(leaf.entries.map(e => e.keyRaw), key)
+        if (idx < 0) return false
+
+        if (leaf.entries[idx].overflowHead !== 0) {
+            await this._freeOverflowChain(leaf.entries[idx].overflowHead)
+        }
+        leaf.entries.splice(idx, 1)
+        this._size--
+        this.writeSeq++
+        leaf.pageSeq = this.writeSeq
+
+        // Always COW the leaf (even if now empty) and update the path.
+        // Empty leaves are not removed — they stay in the tree but hold no entries.
+        // This avoids the complex multi-pointer fixup required when removing a leaf.
+        await this._cowLeaf(leaf, path, -1)
+        await this._flushSuperblock()
+        return true
+    }
+
+    // ── clear ────────────────────────────────────────────────────────────────
+
+    async clear(): Promise<void> {
+        this.writeSeq++
+        const rootId = FIRST_TREE_PAGE
+        const leaf: LeafNode = {
+            pageId: rootId, pageSeq: this.writeSeq,
+            prevPageId: NULL_PAGE, nextPageId: NULL_PAGE, entries: [],
+        }
+        await this._writeLeaf(leaf)
+        this.rootPageId         = rootId
+        this.pageCount          = FIRST_TREE_PAGE + 1
+        this.freeListHeadPageId = NULL_PAGE
+        this._size              = 0
+        await this._flushSuperblock()
+    }
+
+    // ── range / iteration ───────────────────────────────────────────────────
+
+    async * range(opts: RangeOptions<K> = {}): AsyncGenerator<[K, V]> {
+        const { gte, gt, lte, lt, reverse = false, limit } = opts
+        let yielded = 0
+
+        if (!reverse) {
+            // ── forward scan ────────────────────────────────────────────────
+            const hasLower = gte !== undefined || gt !== undefined
+            const lowerKey = gte ?? gt
+
+            if (hasLower) {
+                const { leaf } = await this._findLeaf(lowerKey!)
+                const pos = this._lowerBound(leaf.entries.map(e => e.keyRaw), lowerKey!)
+                let startIdx = pos
+                if (gt !== undefined && startIdx < leaf.entries.length) {
+                    if (this.compare(this.deserializeKey(leaf.entries[startIdx].keyRaw), gt) === 0) startIdx++
+                }
+
+                for (let i = startIdx; i < leaf.entries.length; i++) {
+                    const k = this.deserializeKey(leaf.entries[i].keyRaw)
+                    if (lte !== undefined && this.compare(k, lte) > 0) return
+                    if (lt  !== undefined && this.compare(k, lt)  >= 0) return
+                    yield [k, this.deserializeValue(leaf.entries[i].valueRaw)]
+                    if (++yielded === limit) return
+                }
+
+                let nextId = leaf.nextPageId
+                while (nextId !== NULL_PAGE) {
+                    const nl = await this._readLeaf(nextId)
+                    for (const e of nl.entries) {
+                        const k = this.deserializeKey(e.keyRaw)
+                        if (lte !== undefined && this.compare(k, lte) > 0) return
+                        if (lt  !== undefined && this.compare(k, lt)  >= 0) return
+                        yield [k, this.deserializeValue(e.valueRaw)]
+                        if (++yielded === limit) return
+                    }
+                    nextId = nl.nextPageId
+                }
+            } else {
+                // Full scan from leftmost leaf
+                let pageId = await this._leftmostLeafId()
+                while (pageId !== NULL_PAGE) {
+                    const leaf = await this._readLeaf(pageId)
+                    for (const e of leaf.entries) {
+                        const k = this.deserializeKey(e.keyRaw)
+                        if (lte !== undefined && this.compare(k, lte) > 0) return
+                        if (lt  !== undefined && this.compare(k, lt)  >= 0) return
+                        yield [k, this.deserializeValue(e.valueRaw)]
+                        if (++yielded === limit) return
+                    }
+                    pageId = leaf.nextPageId
+                }
+            }
+        } else {
+            // ── reverse scan ─────────────────────────────────────────────────
+            // Collect all leaf IDs by forward scan (avoids stale prevPageId links)
+            const leafIds = await this._collectAllLeafIds()
+            for (let li = leafIds.length - 1; li >= 0; li--) {
+                const leaf = await this._readLeaf(leafIds[li])
+                for (let ei = leaf.entries.length - 1; ei >= 0; ei--) {
+                    const k = this.deserializeKey(leaf.entries[ei].keyRaw)
+                    if (lte !== undefined && this.compare(k, lte) > 0) continue
+                    if (lt  !== undefined && this.compare(k, lt)  >= 0) continue
+                    if (gte !== undefined && this.compare(k, gte) < 0) return
+                    if (gt  !== undefined && this.compare(k, gt)  <= 0) return
+                    yield [k, this.deserializeValue(leaf.entries[ei].valueRaw)]
+                    if (++yielded === limit) return
+                }
+            }
+        }
+    }
+
+    private async _leftmostLeafId(): Promise<number> {
+        let pageId = this.rootPageId
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            if (!raw || raw[4] === PAGE_TYPE_LEAF) return pageId
+            const node = await this._readInternal(pageId)
+            pageId = node.children[0]
+        }
+    }
+
+    private async _collectAllLeafIds(): Promise<number[]> {
+        const ids: number[] = []
+        let pageId = await this._leftmostLeafId()
+        while (pageId !== NULL_PAGE) {
+            ids.push(pageId)
+            const leaf = await this._readLeaf(pageId)
+            pageId = leaf.nextPageId
+        }
+        return ids
+    }
+
+    async * entries(): AsyncGenerator<[K, V]> {
+        yield * this.range()
+    }
+
+    async * keys(): AsyncGenerator<K> {
+        for await (const [k] of this.range()) yield k
+    }
+
+    async * values(): AsyncGenerator<V> {
+        for await (const [, v] of this.range()) yield v
+    }
+}
+
+interface PathEntry {
+    node:       InternalNode
+    childIndex: number
+}
