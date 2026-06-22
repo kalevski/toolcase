@@ -47,8 +47,12 @@ import {
     SaveService, PersistenceFeature, SAVE_DONE, LOAD_DONE, SAVE_DELETED,
     LocalStorageBackend, IndexedDBBackend, MemoryBackend,
     // Particles
-    ParticleFeature, PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP
+    ParticleFeature, PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP,
+    // Net
+    NetFeature, LoopbackTransport, WebSocketTransport,
+    NET_CONNECTED, NET_DISCONNECTED, NET_RTT_UPDATE, NET_ENTITY_STATE
 } from '@toolcase/phaser-plus'
+import type { Transport } from '@toolcase/phaser-plus'
 ```
 
 
@@ -108,6 +112,7 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [VirtualJoystick](#virtualjoystick)
 - [Audio — bus mixer, music, SFX pool, spatial, ducking](#audio--bus-mixer-music-sfx-pool-spatial-ducking)
 - [Particles — ParticleFeature (VFX registry + pool)](#particles--particlefeature-vfx-registry--pool)
+- [Net — NetFeature, Transport, entity sync](#net--netfeature-transport-entity-sync)
 - [Worked examples](#worked-examples)
 - [Cross-library integration](#cross-library-integration)
 - [Theming / styling surfaces](#theming--styling-surfaces)
@@ -2337,6 +2342,235 @@ class GameScene extends Scene {
 
 ---
 
+## Net — NetFeature, Transport, entity sync
+
+`NetFeature` is a scene-lifetime `Feature` that drives any `Transport` implementation and provides:
+- **Ping / pong RTT measurement**, reported into `NetPanel`.
+- **Entity state sync** with snapshot + delta encoding (`syncEntity`).
+- **Interpolation buffer** for smooth remote entity movement (`interpolateEntity`).
+- **Client-side prediction** (`predict` / `getPredicted`).
+- **`bindDebugger`** to wire RTT / loss / sent / recv into `NetPanel`.
+
+Wire format: `[1 byte type][JSON UTF-8 payload]`. Swap for binary by replacing the internal `_sendMessage` / `_onMessage` with a `@toolcase/serializer`-based codec — the rest of the class is transport-agnostic.
+
+### Transport interface
+
+```ts
+interface Transport {
+    readonly connected: boolean
+    connect(): void
+    disconnect(): void
+    send(data: Uint8Array): void
+    onMessage: ((data: Uint8Array) => void) | null
+    onConnect: (() => void) | null
+    onDisconnect: (() => void) | null
+}
+```
+
+Two built-in implementations:
+
+| Class | Use for |
+|---|---|
+| `LoopbackTransport` | In-process loopback for tests and demos |
+| `WebSocketTransport` | Native browser WebSocket |
+
+#### LoopbackTransport
+
+```ts
+import { LoopbackTransport } from '@toolcase/phaser-plus'
+
+// Create a matched pair with configurable latency + jitter
+const [clientT, serverT] = LoopbackTransport.pair(
+    /* latencyMs */ 50,
+    /* jitterMs  */ 10
+)
+
+// Optional seeded RNG for deterministic jitter in tests
+import { Structs } from '@toolcase/phaser-plus'
+const rng = new Structs.Random(42)
+const [a, b] = LoopbackTransport.pair(50, 10, () => rng.next())
+```
+
+`LoopbackTransport.pair(latencyMs, jitterMs, rng?)` creates two linked endpoints. Messages sent on one side are queued and delivered to the other via `setTimeout` after `latencyMs ± jitterMs` ms. Calling `connect()` on either side brings both up simultaneously.
+
+#### WebSocketTransport
+
+```ts
+import { WebSocketTransport } from '@toolcase/phaser-plus'
+
+const transport = new WebSocketTransport('wss://game.example.com/ws')
+```
+
+### NetFeature
+
+```ts
+import { NetFeature, NetPanel, NET_ENTITY_STATE } from '@toolcase/phaser-plus'
+
+// onInit — register Debugger and add NetPanel first
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+dbg.addPanel('net', NetPanel, 'Network')
+
+const [clientT, serverT] = LoopbackTransport.pair(50, 10)
+
+const netClient = this.features.register('net-client', NetFeature)
+netClient.setTransport(clientT)
+netClient.bindDebugger(dbg)          // wire into NetPanel
+
+const netServer = this.features.register('net-server', NetFeature)
+netServer.setTransport(serverT)
+
+// onCreate — connect
+netClient.connect()                  // brings up both sides of the loopback
+
+// Listen for state updates on the server side
+this.features.on(NET_ENTITY_STATE, (id, state) => {
+    if (id === 'player') applyToSprite(state)
+})
+```
+
+#### Configuration
+
+| Property | Default | Description |
+|---|---|---|
+| `pingIntervalMs` | `500` | How often to send a ping (ms) |
+| `pingTimeoutMs` | `5000` | Unanswered ping age before counting as lost |
+| `interpolationDelay` | `100` | Render-delay window for `interpolateEntity` (ms) |
+| `maxStateBuffer` | `10` | Max buffered received states per remote entity |
+
+#### Entity sync
+
+```ts
+// Send local entity state every frame — first call sends full snapshot,
+// subsequent calls send only changed fields (delta encoding).
+netClient.syncEntity('player', { x: sprite.x, y: sprite.y, hp: hero.hp })
+
+// Read the latest received state on the other side
+const state = netServer.getEntityState<{ x: number; y: number; hp: number }>('player')
+// → { x, y, hp } or null
+
+// Interpolated state smoothed over the buffer (100 ms behind by default)
+const smooth = netClient.interpolateEntity<{ x: number; y: number }>('enemy', 80)
+if (smooth) { enemySprite.x = smooth.x; enemySprite.y = smooth.y }
+```
+
+`syncEntity` is idempotent when state hasn't changed — safe to call every frame.
+
+#### Client-side prediction
+
+```ts
+// Apply a predicted state immediately (responsive local display)
+netClient.predict('player', { x: sprite.x + dx, y: sprite.y + dy })
+
+// Retrieve the prediction for local rendering
+const pred = netClient.getPredicted<{ x: number; y: number }>('player')
+if (pred) { sprite.x = pred.x; sprite.y = pred.y }
+
+// Reconcile: when the authoritative server state arrives, snap if diverged
+this.features.on(NET_ENTITY_STATE, (id, serverState) => {
+    if (id !== 'player') return
+    const pred = netClient.getPredicted('player')
+    const dx = Math.abs(serverState.x - pred.x)
+    const dy = Math.abs(serverState.y - pred.y)
+    if (dx > 2 || dy > 2) {
+        sprite.x = serverState.x   // snap to authoritative state
+        sprite.y = serverState.y
+    }
+})
+```
+
+#### Telemetry
+
+```ts
+netClient.rtt          // → number (ms, last measured RTT)
+netClient.loss         // → number (0–100, % unanswered pings)
+netClient.isConnected  // → boolean
+```
+
+#### Event constants
+
+| Constant | Payload | Fired when |
+|---|---|---|
+| `NET_CONNECTED` | — | Transport connected |
+| `NET_DISCONNECTED` | — | Transport disconnected |
+| `NET_RTT_UPDATE` | `(rttMs: number)` | A pong arrived; RTT updated |
+| `NET_ENTITY_STATE` | `(id: string, state: Record<string, unknown>)` | SYNC received and merged |
+
+```ts
+import { NET_CONNECTED, NET_RTT_UPDATE, NET_ENTITY_STATE } from '@toolcase/phaser-plus'
+
+this.features.on(NET_CONNECTED,    ()           => hud.showConnected())
+this.features.on(NET_RTT_UPDATE,   (rtt)        => hud.updatePing(rtt))
+this.features.on(NET_ENTITY_STATE, (id, state)  => applyRemoteState(id, state))
+```
+
+#### Loopback demo
+
+```ts
+import { Scene, Debugger, NetPanel, NetFeature, LoopbackTransport, NET_ENTITY_STATE } from '@toolcase/phaser-plus'
+
+class NetLoopbackDemo extends Scene {
+    onInit() {
+        const dbg = this.features.register('debugger', Debugger).setExpanded()
+        dbg.addPanel('net', NetPanel, 'Network')
+
+        const [clientT, serverT] = LoopbackTransport.pair(50, 10)
+
+        this.netClient = this.features.register('net-client', NetFeature)
+        this.netClient.setTransport(clientT).bindDebugger(dbg)
+
+        this.netServer = this.features.register('net-server', NetFeature)
+        this.netServer.setTransport(serverT)
+    }
+
+    onCreate() {
+        this.local  = this.add.rectangle(400, 300, 44, 44, 0x4fc3f7)  // blue
+        this.remote = this.add.rectangle(460, 300, 44, 44, 0x81c784)  // green
+        this.cursors = this.input.keyboard.createCursorKeys()
+
+        this.netClient.connect()
+
+        this.features.on(NET_ENTITY_STATE, (id, state) => {
+            if (id === 'player') { this.remote.x = state.x; this.remote.y = state.y }
+        })
+    }
+
+    onUpdate() {
+        const speed = 3
+        if (this.cursors.left.isDown)  this.local.x -= speed
+        if (this.cursors.right.isDown) this.local.x += speed
+        if (this.cursors.up.isDown)    this.local.y -= speed
+        if (this.cursors.down.isDown)  this.local.y += speed
+
+        this.netClient.syncEntity('player', { x: this.local.x, y: this.local.y })
+    }
+}
+```
+
+Demo: `net-panel` example scene (`NetPanelDemo.js`).
+
+#### Binary wire format via `@toolcase/serializer`
+
+The default transport codec uses `JSON.stringify / JSON.parse`. For a binary framing,
+swap the encoding in a `NetFeature` subclass:
+
+```ts
+import Serializer from '@toolcase/serializer'
+
+const wire = new Serializer('game.v1')
+wire.define('SyncMsg', [
+    { key: 'id',  type: 'string',  rule: 'required' },
+    { key: 'seq', type: 'uint32',  rule: 'required' },
+    { key: 'x',   type: 'float',   rule: 'optional' },
+    { key: 'y',   type: 'float',   rule: 'optional' },
+])
+
+// Encode before send; decode in onMessage handler
+const payload = wire.encode('SyncMsg', { id, seq, x, y })
+transport.send(payload)
+```
+
+---
+
 ## Cheat sheet
 
 | Need | Do |
@@ -2395,3 +2629,10 @@ class GameScene extends Scene {
 | VFX burst | `features.register('vfx', ParticleFeature)` → `define(name, preset)` → `burst(name, x, y)` |
 | VFX stream | `particles.stream(name, gameObject)` → `handle.stop()` |
 | Screen effect on burst | add `effect: HeatEffect` to preset, call `particles.setEffectTarget(sprite)` |
+| Netplay (loopback) | `LoopbackTransport.pair(50, 10)` → register two `NetFeature`, `setTransport`, `bindDebugger`, `connect` |
+| Sync entity state | `net.syncEntity('player', { x, y })` (delta on subsequent calls) |
+| Read remote state | `net.getEntityState<T>('player')` |
+| Interpolate remote entity | `net.interpolateEntity<T>('player', renderDelayMs)` |
+| Client-side prediction | `net.predict('player', state)` → render `net.getPredicted('player')` |
+| Live RTT / loss | `net.rtt`, `net.loss` (or read from `NetPanel` via `bindDebugger`) |
+| WebSocket transport | `new WebSocketTransport('wss://...')` → `net.setTransport(t)` |

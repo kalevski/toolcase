@@ -259,9 +259,9 @@ export const phaserExamples: PhaserExampleDef[] = [
     },
     {
         key: 'net-panel',
-        title: 'Net Panel',
+        title: 'NetFeature Loopback',
         category: 'Debugging',
-        description: 'RTT graph, loss%, sent/recv rate, message log.',
+        description: 'NetFeature: LoopbackTransport pair (50 ms latency), entity sync with delta encoding, real RTT/throughput in NetPanel.',
         sceneFile: 'NetPanelDemo.js',
         element: <PhaserCanvas sceneClass={NetPanelDemo} />
     },
