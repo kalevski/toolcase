@@ -10,7 +10,7 @@ Opinionated blueprint for Phaser 4 games. Layered, registry-driven, ESM. Every s
 Stack baseline:
 
 - Phaser 4 (`phaser ^4.x`).
-- `@toolcase/phaser-plus` ^4.x — **required** runtime layer. Top-level exports: `Engine`, `Scene`, `GameObject`, `Feature`, `FeatureRegistry`, `ServiceRegistry`, `GameObjectPool`, `Layer`, `ObjectLayer`, `HTMLFeature`, `SplitScreen`, `LogLevel`, plus `Events`, `Flow`, `Structs` namespaces. Re-exports from `effects/` (`installEffects`, shader effects), `perspective2d/` (`Scene2D`, `World`, `GameObject2D`, `Grid`), `cinema/`, `input/`, `ai/`, `flow/`, `debugger/`.
+- `@toolcase/phaser-plus` ^4.x — **required** runtime layer. Top-level exports: `Engine`, `Scene`, `GameObject`, `Feature`, `FeatureRegistry`, `ServiceRegistry`, `GameObjectPool`, `Layer`, `ObjectLayer`, `HTMLFeature`, `SplitScreen`, `LogLevel`, plus `Events`, `Flow`, `Structs` namespaces. Re-exports from `effects/` (`installEffects`, shader effects), `perspective2d/` (`Scene2D`, `World`, `GameObject2D`, `Grid`), `cinema/` (`CameraDirector`, `ScreenShake`, `CameraFlash`, `DialogCameraCue`, `LetterboxFeature`, `ParallaxLayer`), `input/`, `ai/`, `flow/`, `debugger/`, `audio/` (`AudioFeature`), `persistence/` (`PersistenceFeature`, `SaveService`, `LocalStorageBackend`, `IndexedDBBackend`, `MemoryBackend`), `assets/` (`AssetFeature`), `particles/` (`ParticleFeature`), `net/` (`NetFeature`, `WebSocketTransport`, `LoopbackTransport`), `tilemap/` (`TilemapFeature`).
 - `@toolcase/web-components` ^4.x — **required** UI toolkit. Framework-free `tc-*` Web Components for HUDs, menus, inventories, dialogs, settings, screens, minimaps. Every `HTMLFeature` composes these instead of hand-rolling markup.
 - `@toolcase/base` ^4.x — peer of `phaser-plus` and `web-components`. Helpers and data structures (`Broadcast`, `ObjectPool`, etc.).
 - `@toolcase/logging` ^4.x — peer of `phaser-plus`. Scoped loggers wired through `Engine`.
@@ -979,7 +979,7 @@ For enemy AI, dialog flow, scene state — use `phaser-plus`'s `StateMachine` an
 
 ### Cinema / camera
 
-`phaser-plus/cinema` ships `CameraDirector`, `ScreenShake`, `CameraFlash`, `LetterboxFeature`, `ParallaxLayer`. Register as features in your scene; expose triggers via the bus (`cinema:shake`, `cinema:flash`).
+`phaser-plus/cinema` ships `CameraDirector`, `ScreenShake`, `CameraFlash`, `DialogCameraCue`, `LetterboxFeature`, `ParallaxLayer`. Register as features in your scene; expose triggers via the bus (`cinema:shake`, `cinema:flash`). `DialogCameraCue` dims everything outside a supplied `DialogFrame` rectangle and optionally applies a vignette — call `open(frame, opts?)` / `close()` around dialogue sequences.
 
 ### Input
 
@@ -1010,6 +1010,30 @@ save.save(0, { score: this.score })
 ```
 
 `resolve(class)` lazy-instantiates on first call. Use `bind(class, factory)` for constructors that need args, or `provide(class, instance)` to inject a prebuilt singleton.
+
+### Audio
+
+`AudioFeature` is a scene-lifetime `Feature` wrapping Phaser's `Sound` manager with named buses (`music`, `sfx`, `ui`, `ambience`), crossfade, per-voice SFX pools, spatial positioning, and ducking. Register it, then drive it entirely through bus events or direct calls (`play`, `playMusic`, `crossfade`, `duck`, `setVolume`). Three bus events are emitted: `AUDIO_MUSIC_START`, `AUDIO_MUSIC_END`, `AUDIO_BUS_CHANGE`.
+
+### Persistence / save data
+
+`PersistenceFeature` wraps a `SaveService` (game-lifetime) with an async slot API (`save`, `load`, `delete`, `list`, `has`) and emits `SAVE_DONE`, `LOAD_DONE`, `SAVE_DELETED` on the feature bus after each operation. Choose a backend at service binding time: `LocalStorageBackend` (synchronous, browser), `IndexedDBBackend` (async, larger payloads), or `MemoryBackend` (ephemeral / testing). Register `SaveService` in `services/` with the desired backend, then register `PersistenceFeature` in the scene that needs save/load.
+
+### Asset loading (runtime bundles)
+
+`AssetFeature` is a `Feature` for declarative, retry-aware asset loading at runtime (after the initial boot preload). Feed it an `AssetManifest` (named bundles of images, atlases, audio, bitmap fonts) and call `loadBundle(name)`. It emits `ASSET_PROGRESS` per-file, `ASSET_LOAD_COMPLETE` on bundle finish, and `ASSET_LOAD_ERROR` on failure. Useful for lazy-loading level art or DLC content mid-session without restarting the scene.
+
+### Particles
+
+`ParticleFeature` is a `Feature` that manages a registry of named `ParticlePreset` configurations wrapping Phaser's particle emitters. Register presets once in `onCreate`, then call `burst(preset, x, y)` for one-shot FX or `stream(preset, x, y)` for a continuous emitter (returns a `StreamHandle` with `stop()`). Events: `PARTICLE_BURST`, `PARTICLE_STREAM_START`, `PARTICLE_STREAM_STOP`. Presets can optionally attach a per-particle GLSL `Effect`.
+
+### Networking
+
+`NetFeature` drives a pluggable `Transport` (WebSocket or the in-process `LoopbackTransport` for local testing) with ping/pong RTT measurement, snapshot + delta entity sync (`syncEntity`, `interpolateEntity`), and optional client-side prediction (`predict`, `getPredicted`). Wire RTT/loss stats to the `NetPanel` debugger via `bindDebugger(dbg)`. Events: `NET_CONNECTED`, `NET_DISCONNECTED`, `NET_RTT_UPDATE`, `NET_ENTITY_STATE`. Swap the wire format by replacing `_sendMessage`/`_onMessage` with a `@toolcase/serializer` codec — the rest of the class is agnostic.
+
+### Tilemaps
+
+`TilemapFeature` is a `Feature` that loads Tiled (`.tmj`) or LDtk (`.ldtk`) maps, adds tilesets, renders layers, wires arcade-physics colliders via `buildColliders`, and generates a `TilemapNavMesh` for A\* pathfinding via `buildNavMesh({ walkable: [...] })`. Convert a Tiled object layer to an `ObjectLayer` with `toObjectLayer(key, layerName, poolKey)`, or read raw objects with `getObjects(layerName)`.
 
 ---
 
