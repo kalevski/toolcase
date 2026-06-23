@@ -263,6 +263,12 @@ const MIGRATIONS: string[] = [
     `
     ALTER TABLE task ADD COLUMN account TEXT;
     `,
+    // v7 — per-account /usage snapshots. Tags each cached snapshot with the
+    // Claude identity it was fetched under (NULL = the ambient host login) so the
+    // dashboard can present usage across multiple accounts.
+    `
+    ALTER TABLE usage_snapshot ADD COLUMN account TEXT;
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

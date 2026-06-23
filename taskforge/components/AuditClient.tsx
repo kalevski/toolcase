@@ -2,12 +2,36 @@
 
 // D3 — admin audit-log table with filters.
 
-import React, { useCallback, useEffect, useState } from 'react'
-import { useTcEvents } from '@/lib/tc'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTcEvents, useTcProps, escapeHtml } from '@/lib/tc'
 import type { AuditRecord } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 
-type Col = { key: string; header: string; width?: string; render: (e: AuditRecord) => React.ReactNode }
+// Read-only table → tc-table. Cells are emitted as HTML strings (the tc-table
+// `render` contract); all record-derived text is escaped to avoid injection.
+const COLUMNS = [
+    {
+        key: 'at',
+        header: 'When',
+        width: '12rem',
+        render: (e: AuditRecord) => `<tc-text variant="muted">${escapeHtml(new Date(e.at).toLocaleString())}</tc-text>`,
+    },
+    { key: 'login', header: 'Who', width: '9rem', render: (e: AuditRecord) => `<code>${escapeHtml(e.login ?? '—')}</code>` },
+    {
+        key: 'action',
+        header: 'Action',
+        width: '11rem',
+        render: (e: AuditRecord) => `<tc-badge variant="secondary">${escapeHtml(e.action)}</tc-badge>`,
+    },
+    {
+        key: 'project',
+        header: 'Project',
+        width: '10rem',
+        render: (e: AuditRecord) =>
+            e.project ? `<code>${escapeHtml(e.project)}</code>` : `<span style="opacity:0.4">—</span>`,
+    },
+    { key: 'detail', header: 'Detail', render: (e: AuditRecord) => `<tc-text variant="muted">${escapeHtml(e.detail ?? '')}</tc-text>` },
+]
 
 export function AuditClient() {
     const [entries, setEntries] = useState<AuditRecord[]>([])
@@ -51,30 +75,16 @@ export function AuditClient() {
         return () => clearTimeout(t)
     }, [load])
 
-    const columns: Col[] = [
-        {
-            key: 'at',
-            header: 'When',
-            width: '12rem',
-            render: (e) => <tc-text variant="muted">{new Date(e.at).toLocaleString()}</tc-text>,
-        },
-        { key: 'login', header: 'Who', width: '9rem', render: (e) => <code>{e.login ?? '—'}</code> },
-        { key: 'action', header: 'Action', width: '11rem', render: (e) => <tc-badge variant="secondary">{e.action}</tc-badge> },
-        {
-            key: 'project',
-            header: 'Project',
-            width: '10rem',
-            render: (e) => (e.project ? <code>{e.project}</code> : <span style={{ opacity: 0.4 }}>—</span>),
-        },
-        { key: 'detail', header: 'Detail', render: (e) => <tc-text variant="muted">{e.detail ?? ''}</tc-text> },
-    ]
-
     const oldest = entries.length ? entries[entries.length - 1].id : undefined
 
+    const tableRef = useTcProps<HTMLElement>(
+        useMemo(() => ({ columns: COLUMNS, data: entries }), [entries]),
+    )
+
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-helper-text text={helpTexts.audit.intro} />
-            <div className="tf-form-row">
+            <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                 <tc-input ref={projectRef} label="Project" placeholder="filter…" value={project} />
                 <tc-input ref={loginRef} label="User" placeholder="login" value={login} />
                 <div style={{ minWidth: 220 }}>
@@ -87,36 +97,14 @@ export function AuditClient() {
                         ))}
                     </tc-select>
                 </div>
-            </div>
-            <table className="table">
-                <thead>
-                    <tr>
-                        {columns.map((c) => (
-                            <th key={c.key} style={c.width ? { width: c.width } : undefined}>
-                                {c.header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {entries.length === 0 ? (
-                        <tr>
-                            <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
-                                No audit entries match.
-                            </td>
-                        </tr>
-                    ) : (
-                        entries.map((e) => (
-                            <tr key={String(e.id)}>
-                                {columns.map((c) => (
-                                    <td key={c.key}>{c.render(e)}</td>
-                                ))}
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
-            <div className="tf-actions">
+            </tc-stack>
+            <tc-table
+                ref={tableRef}
+                hoverable
+                empty-message="No audit entries match."
+                loading={loading && entries.length === 0 ? true : undefined}
+            />
+            <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                 <tc-text variant="muted">
                     {entries.length} of {total} entries
                 </tc-text>
@@ -125,7 +113,7 @@ export function AuditClient() {
                         Load older
                     </tc-button>
                 )}
-            </div>
-        </div>
+            </tc-stack>
+        </tc-stack>
     )
 }

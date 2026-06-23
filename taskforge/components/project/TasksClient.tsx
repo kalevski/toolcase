@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTcProps, useTcEvents } from '@/lib/tc'
+import { useTc, useTcProps, useTcEvents } from '@/lib/tc'
 import type { ChipGroupItem } from '@toolcase/web-components'
 import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
@@ -33,6 +33,14 @@ type Filter = 'all' | TaskRuntimeStatus
 type Col = { key: string; header: React.ReactNode; width?: string; render: (t: TaskInfo) => React.ReactNode }
 
 const MODEL_ALIASES = ['fast', 'mid', 'deep']
+
+// Archived sub-table header descriptors (tc-advanced-table; rows are slotted
+// React <tr> so the per-row Restore button keeps its handler).
+const ARCHIVE_COLUMNS = [
+    { key: 'id', label: '#', width: '30%' },
+    { key: 'title', label: 'Title' },
+    { key: 'actions', label: '', width: '8rem' },
+]
 
 // Bare checkbox with its own change listener (React 18 won't fire onChange on tc-check).
 function Chk({ checked, indeterminate, onChange }: { checked: boolean; indeterminate?: boolean; onChange: (c: boolean) => void }) {
@@ -117,6 +125,37 @@ export function TasksClient() {
 
     const openTaskInfo = openTask ? tasks.find((t) => t.id === openTask) : undefined
     const pendingIds = useMemo(() => tasks.filter((t) => t.status === 'pending').map((t) => t.id), [tasks])
+
+    // Prune the bulk-selection set to ids still present in the live task list, so
+    // SSE removals/changes don't leave ghost ids that skew the select-all math.
+    useEffect(() => {
+        setSelected((prev) => {
+            if (prev.size === 0) return prev
+            const live = new Set(tasks.map((t) => t.id))
+            let changed = false
+            const next = new Set<string>()
+            for (const id of prev) {
+                if (live.has(id)) next.add(id)
+                else changed = true
+            }
+            return changed ? next : prev
+        })
+    }, [tasks])
+
+    // While reordering, keep orderIds in sync with the live pending ids so a task
+    // that disappears (or appears) via SSE never gets posted as a stale id on save.
+    useEffect(() => {
+        if (!reordering) return
+        setOrderIds((prev) => {
+            if (!prev) return prev
+            const live = new Set(pendingIds)
+            const kept = prev.filter((id) => live.has(id))
+            const added = pendingIds.filter((id) => !prev.includes(id))
+            const next = [...kept, ...added]
+            const same = next.length === prev.length && next.every((id, i) => id === prev[i])
+            return same ? prev : next
+        })
+    }, [pendingIds, reordering])
 
     // ── A3 bulk ─────────────────────────────────────────────────────────────
     const toggleSelect = (id: string, checked: boolean) => {
@@ -271,12 +310,8 @@ export function TasksClient() {
                       width: '6rem',
                       render: (t: TaskInfo) => (
                           <span style={{ display: 'inline-flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
-                              <tc-button size="sm" variant="secondary" outline onClick={() => move(t.id, -1)}>
-                                  ↑
-                              </tc-button>
-                              <tc-button size="sm" variant="secondary" outline onClick={() => move(t.id, 1)}>
-                                  ↓
-                              </tc-button>
+                              <tc-icon-button icon="ArrowUp" label="Move up" size="sm" variant="secondary" outline onClick={() => move(t.id, -1)} />
+                              <tc-icon-button icon="ArrowDown" label="Move down" size="sm" variant="secondary" outline onClick={() => move(t.id, 1)} />
                           </span>
                       ),
                   } as Col,
@@ -290,10 +325,10 @@ export function TasksClient() {
                 <span style={{ display: 'inline-flex', gap: '0.3rem', flexWrap: 'wrap' }}>
                     {t.severity && <tc-tag static variant="warning">{t.severity}</tc-tag>}
                     {t.project && <tc-tag static variant="info">{t.project}</tc-tag>}
-                    {t.model && <tc-tag static variant="secondary">⚡ {t.model}</tc-tag>}
+                    {t.model && <tc-tag static variant="secondary"><tc-icon name="Zap" /> {t.model}</tc-tag>}
                     {t.depends && t.depends.length > 0 && (
                         <tc-tooltip content={`Depends on: ${t.depends.join(', ')}`}>
-                            <tc-tag static variant="secondary">⛓ {t.depends.join(',')}</tc-tag>
+                            <tc-tag static variant="secondary"><tc-icon name="Link" /> {t.depends.join(',')}</tc-tag>
                         </tc-tooltip>
                     )}
                 </span>
@@ -326,9 +361,12 @@ export function TasksClient() {
 
     const selectedCount = selected.size
 
+    const archiveTableKey = archived.map((a) => a.id).join('_')
+    const archiveTableRef = useTc<HTMLElement>({ columns: ARCHIVE_COLUMNS })
+
     return (
-        <div className="tf-stack">
-            <div className="tf-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <tc-stack gap="1.25rem">
+            <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                 <tc-chip-group ref={chipRef} />
                 <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <tc-button
@@ -337,7 +375,7 @@ export function TasksClient() {
                         disabled={busy || reordering || undefined}
                         onClick={() => openNewTask({ project, onCreated: (t) => setTasks(t) })}
                     >
-                        <span>＋</span> New task
+                        <tc-icon name="Plus" /> New task
                     </tc-button>
                     <tc-button
                         size="sm"
@@ -346,7 +384,7 @@ export function TasksClient() {
                         disabled={busy || reordering || undefined}
                         onClick={() => openImportIssues({ project, onImported: (t) => setTasks(t) })}
                     >
-                        ⇩ Import from GitHub
+                        <tc-icon name="Download" /> Import from GitHub
                     </tc-button>
                     {!reordering ? (
                         <tc-button
@@ -361,7 +399,7 @@ export function TasksClient() {
                                 setOrderIds(pendingIds)
                             }}
                         >
-                            ⇅ Reorder
+                            <tc-icon name="ArrowUpDown" /> Reorder
                         </tc-button>
                     ) : (
                         <>
@@ -381,7 +419,7 @@ export function TasksClient() {
                         title={helpTexts.tasks.archive}
                         onClick={() => void archiveDone()}
                     >
-                        🗄 Archive completed
+                        <tc-icon name="Archive" /> Archive completed
                     </tc-button>
                     <tc-tooltip content={helpTexts.tasks.resetErrors}>
                         <tc-button
@@ -396,13 +434,17 @@ export function TasksClient() {
                         </tc-button>
                     </tc-tooltip>
                 </span>
-            </div>
+            </tc-stack>
 
             {selectedCount > 0 && !reordering && (
-                <div className="tf-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <tc-stack direction="horizontal" gap="0.5rem" wrap align="center">
                     <tc-badge variant="info">{selectedCount} selected</tc-badge>
+                    {/* TODO: onRunTasks returns Promise<void> with no started/cancelled signal,
+                        so we can't tell whether the confirm was cancelled — selection is cleared
+                        unconditionally to preserve existing behavior. Surface a boolean from
+                        ProjectContext.onRunTasks to only clear on an actual run. */}
                     <tc-button size="sm" variant="primary" outline disabled={busy || bulkBusy || undefined} onClick={() => void onRunTasks([...selected]).then(() => setSelected(new Set()))}>
-                        ▶ Re-run selected
+                        <tc-icon name="Play" /> Re-run selected
                     </tc-button>
                     <tc-button size="sm" variant="warning" outline disabled={busy || bulkBusy || undefined} onClick={() => void bulk('reset')}>
                         Reset to pending
@@ -431,11 +473,15 @@ export function TasksClient() {
                     <tc-button size="sm" variant="secondary" outline onClick={() => setSelected(new Set())}>
                         Clear selection
                     </tc-button>
-                </div>
+                </tc-stack>
             )}
 
             <tc-helper-text text={reordering ? helpTexts.tasks.reorderActive : helpTexts.tasks.statuses} />
 
+            {/* The main task table stays a raw <table>: its header carries a React
+                select-all <tc-check> and its columns switch between select/reorder
+                modes — neither is expressible through tc-advanced-table's
+                string-label, component-rendered header. It keeps the .table skin. */}
             <table className="table table-hover">
                 <thead>
                     <tr>
@@ -460,7 +506,16 @@ export function TasksClient() {
                             <tr
                                 key={t.id}
                                 style={{ cursor: reordering ? 'default' : 'pointer' }}
+                                tabIndex={reordering ? undefined : 0}
+                                role={reordering ? undefined : 'button'}
+                                aria-label={reordering ? undefined : `Open task ${t.id}`}
                                 onClick={() => !reordering && setOpenTask(t.id)}
+                                onKeyDown={(e) => {
+                                    if (!reordering && (e.key === 'Enter' || e.key === ' ')) {
+                                        e.preventDefault()
+                                        setOpenTask(t.id)
+                                    }
+                                }}
                             >
                                 {columns.map((c) => (
                                     <td key={c.key}>{c.render(t)}</td>
@@ -472,37 +527,28 @@ export function TasksClient() {
             </table>
 
             {archived.length > 0 && (
-                <div className="tf-stack-sm">
+                <tc-stack gap="0.75rem">
                     <tc-button size="sm" variant="secondary" outline onClick={() => setShowArchived((v) => !v)}>
-                        {showArchived ? '▾' : '▸'} Archived ({archived.length})
+                        <tc-icon name={showArchived ? 'ChevronDown' : 'ChevronRight'} /> Archived ({archived.length})
                     </tc-button>
                     {showArchived && (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th style={{ width: '30%' }}>#</th>
-                                    <th>Title</th>
-                                    <th style={{ width: '8rem' }} />
+                        <tc-advanced-table key={archiveTableKey} ref={archiveTableRef}>
+                            {archived.map((a) => (
+                                <tr key={a.id}>
+                                    <td>
+                                        <code>archive/{a.id}</code>
+                                    </td>
+                                    <td>{a.title}</td>
+                                    <td>
+                                        <tc-button size="sm" variant="secondary" outline disabled={busy || undefined} onClick={() => void restore(a.id)}>
+                                            Restore
+                                        </tc-button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {archived.map((a) => (
-                                    <tr key={a.id}>
-                                        <td>
-                                            <code>archive/{a.id}</code>
-                                        </td>
-                                        <td>{a.title}</td>
-                                        <td>
-                                            <tc-button size="sm" variant="secondary" outline disabled={busy || undefined} onClick={() => void restore(a.id)}>
-                                                Restore
-                                            </tc-button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                            ))}
+                        </tc-advanced-table>
                     )}
-                </div>
+                </tc-stack>
             )}
 
             <TaskDrawer
@@ -517,6 +563,6 @@ export function TasksClient() {
                     void refresh()
                 }}
             />
-        </div>
+        </tc-stack>
     )
 }

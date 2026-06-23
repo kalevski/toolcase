@@ -3,8 +3,8 @@
 // B1 — run history: one row per run, with a drawer that replays the run's
 // terminal from the persisted run_event log.
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useTc, useTcProps } from '@/lib/tc'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTc, useTcProps, escapeHtml } from '@/lib/tc'
 import { toTcLines, type TerminalLine } from '@/lib/terminal'
 import type { RunRecord, SseEvent } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
@@ -64,7 +64,67 @@ function eventsToLines(events: SseEvent[]): TerminalLine[] {
     return lines
 }
 
-type Col = { key: string; header: string; width?: string; render: (r: RunRecord) => React.ReactNode }
+// Read-only cells + a row click that opens the replay drawer → tc-table. Cells
+// are HTML strings (the tc-table render contract); record-derived text is
+// escaped. Row click / keyboard activation is handled by tc-table's onrowclick.
+function optionsText(r: RunRecord): string {
+    return (
+        `${r.options.model ?? '—'}` +
+        `${r.options.dryRun ? ' · dry' : ''}` +
+        `${r.options.commitAfter ? ' · commit' : ''}` +
+        `${r.options.pushAfter ? ' · push' : ''}` +
+        `${r.options.review ? ' · review' : ''}` +
+        `${r.branch ? ` · ⎇ ${r.branch}` : ''}`
+    )
+}
+
+const COLUMNS = [
+    { key: 'id', header: '#', width: '4rem', render: (r: RunRecord) => `<code>${escapeHtml(r.id)}</code>` },
+    {
+        key: 'started',
+        header: 'Started',
+        width: '12rem',
+        render: (r: RunRecord) => `<tc-text variant="muted">${escapeHtml(new Date(r.startedAt).toLocaleString())}</tc-text>`,
+    },
+    { key: 'duration', header: 'Duration', width: '7rem', render: (r: RunRecord) => escapeHtml(fmtDuration(r.startedAt, r.finishedAt)) },
+    {
+        key: 'trigger',
+        header: 'Trigger',
+        width: '9rem',
+        render: (r: RunRecord) =>
+            `<tc-badge variant="${r.startedBy === 'schedule' ? 'info' : 'secondary'}">${escapeHtml(r.startedBy ?? '—')}</tc-badge>`,
+    },
+    {
+        key: 'options',
+        header: 'Options',
+        render: (r: RunRecord) => `<tc-text variant="muted" style="font-size:0.8rem">${escapeHtml(optionsText(r))}</tc-text>`,
+    },
+    {
+        key: 'outcome',
+        header: 'Outcome',
+        width: '9rem',
+        render: (r: RunRecord) =>
+            r.finishedAt
+                ? `<tc-badge variant="${REASON_BADGE[r.reason ?? ''] ?? 'secondary'}">${escapeHtml(r.reason ?? '')}</tc-badge>`
+                : `<tc-badge variant="info">running</tc-badge>`,
+    },
+    {
+        key: 'counts',
+        header: 'Done / Error',
+        width: '8rem',
+        render: (r: RunRecord) =>
+            `<tc-badge variant="success">${r.done}</tc-badge> ` +
+            `<tc-badge variant="${r.error ? 'danger' : 'secondary'}">${r.error}</tc-badge> ` +
+            `<tc-text variant="muted" style="margin-left:4px">/ ${r.total}</tc-text>`,
+    },
+    {
+        key: 'cost',
+        header: 'Cost',
+        width: '6rem',
+        render: (r: RunRecord) =>
+            r.costUsd != null && r.costUsd > 0 ? `<code>$${r.costUsd.toFixed(2)}</code>` : `<span style="opacity:0.4">—</span>`,
+    },
+]
 
 export function RunsClient() {
     const { project, snapshot } = useProject()
@@ -99,9 +159,17 @@ export function RunsClient() {
         void load()
     }, [load])
 
-    // refresh the list when the live engine finishes a run
+    // Refresh the list when the engine settles (IDLE) AND when it transitions
+    // into a running state (RUNNING/SLEEPING/STOPPING) — the latter so a run
+    // started from another page shows up immediately, not only once it finishes.
+    // Track the previous state to fire only on the edge into "running".
+    const prevState = useRef(snapshot.state)
     useEffect(() => {
-        if (snapshot.state === 'IDLE') void load()
+        const was = prevState.current
+        const now = snapshot.state
+        prevState.current = now
+        const RUNNING = (s: typeof now) => s === 'RUNNING' || s === 'SLEEPING' || s === 'STOPPING'
+        if (now === 'IDLE' || (RUNNING(now) && !RUNNING(was))) void load()
     }, [snapshot.state, load])
 
     useEffect(() => {
@@ -120,109 +188,26 @@ export function RunsClient() {
         }
     }, [project, openRun])
 
-    const columns: Col[] = [
-        { key: 'id', header: '#', width: '4rem', render: (r) => <code>{r.id}</code> },
-        { key: 'started', header: 'Started', width: '12rem', render: (r) => <tc-text variant="muted">{new Date(r.startedAt).toLocaleString()}</tc-text> },
-        { key: 'duration', header: 'Duration', width: '7rem', render: (r) => fmtDuration(r.startedAt, r.finishedAt) },
-        { key: 'trigger', header: 'Trigger', width: '9rem', render: (r) => <tc-badge variant={r.startedBy === 'schedule' ? 'info' : 'secondary'}>{r.startedBy ?? '—'}</tc-badge> },
-        {
-            key: 'options',
-            header: 'Options',
-            render: (r) => (
-                <tc-text variant="muted" style={{ fontSize: '0.8rem' }}>
-                    {r.options.model ?? '—'}
-                    {r.options.dryRun ? ' · dry' : ''}
-                    {r.options.commitAfter ? ' · commit' : ''}
-                    {r.options.pushAfter ? ' · push' : ''}
-                    {r.options.review ? ' · review' : ''}
-                    {r.branch ? ` · ⎇ ${r.branch}` : ''}
-                </tc-text>
-            ),
-        },
-        {
-            key: 'outcome',
-            header: 'Outcome',
-            width: '9rem',
-            render: (r) =>
-                r.finishedAt ? (
-                    <tc-badge variant={REASON_BADGE[r.reason ?? ''] ?? 'secondary'}>{r.reason}</tc-badge>
-                ) : (
-                    <tc-badge variant="info">running</tc-badge>
-                ),
-        },
-        {
-            key: 'counts',
-            header: 'Done / Error',
-            width: '8rem',
-            render: (r) => (
-                <span>
-                    <tc-badge variant="success">{r.done}</tc-badge> <tc-badge variant={r.error ? 'danger' : 'secondary'}>{r.error}</tc-badge>
-                    <tc-text variant="muted" style={{ marginLeft: 4 }}>
-                        / {r.total}
-                    </tc-text>
-                </span>
-            ),
-        },
-        {
-            key: 'cost',
-            header: 'Cost',
-            width: '6rem',
-            render: (r) => (r.costUsd != null && r.costUsd > 0 ? <code>${r.costUsd.toFixed(2)}</code> : <span style={{ opacity: 0.4 }}>—</span>),
-        },
-    ]
+    const openRunDetail = useCallback((row: RunRecord) => setOpenRun(row.id), [])
+    const tableRef = useTc<HTMLElement>(
+        useMemo(
+            () => ({ columns: COLUMNS, data: runs ?? [], rowKey: (r: RunRecord) => r.id, onrowclick: openRunDetail }),
+            [runs, openRunDetail],
+        ),
+    )
 
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-helper-text text={helpTexts.run.history} />
-            {runs === null ? (
-                <div style={{ padding: '2rem', textAlign: 'center' }}>
-                    <tc-spinner />
-                </div>
-            ) : (
-                <table className="table table-hover">
-                    <thead>
-                        <tr>
-                            {columns.map((c) => (
-                                <th key={c.key} style={c.width ? { width: c.width } : undefined}>
-                                    {c.header}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {runs.length === 0 ? (
-                            <tr>
-                                <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
-                                    No runs recorded yet — runs land here once started.
-                                </td>
-                            </tr>
-                        ) : (
-                            runs.map((r) => (
-                                <tr
-                                    key={String(r.id)}
-                                    style={{ cursor: 'pointer' }}
-                                    tabIndex={0}
-                                    aria-label={`Open run #${r.id}`}
-                                    onClick={() => setOpenRun(r.id)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault()
-                                            setOpenRun(r.id)
-                                        }
-                                    }}
-                                >
-                                    {columns.map((c) => (
-                                        <td key={c.key}>{c.render(r)}</td>
-                                    ))}
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            )}
+            <tc-table
+                ref={tableRef}
+                hoverable
+                loading={runs === null ? true : undefined}
+                empty-message="No runs recorded yet — runs land here once started."
+            />
 
             <tc-drawer ref={drawerRef} side="right" size="large" title={`Run #${openRun ?? ''}`}>
-                <div style={{ padding: '1.25rem' }} className="tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1.25rem' }}>
                     {openDetail === null && (
                         <div style={{ padding: '2rem', textAlign: 'center' }}>
                             <tc-spinner />
@@ -255,22 +240,28 @@ export function RunsClient() {
                             {openDetail.run.branch && (
                                 <div className="tf-kv">
                                     <span>Branch</span>
-                                    <tc-badge variant="secondary">⎇ {openDetail.run.branch}</tc-badge>
+                                    <tc-badge variant="secondary"><tc-icon name="GitBranch" /> {openDetail.run.branch}</tc-badge>
                                 </div>
                             )}
                             {openDetail.run.prUrl && (
                                 <div className="tf-kv">
                                     <span>PR</span>
-                                    <a href={openDetail.run.prUrl} target="_blank" rel="noreferrer">
-                                        {openDetail.run.prUrl}
+                                    <a
+                                        href={openDetail.run.prUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        title={openDetail.run.prUrl}
+                                        style={{ maxWidth: '60%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                                    >
+                                        View PR ↗
                                     </a>
                                 </div>
                             )}
                             <tc-terminal-window ref={termRef} title={`run #${openDetail.id} — replay`} />
                         </>
                     )}
-                </div>
+                </tc-stack>
             </tc-drawer>
-        </div>
+        </tc-stack>
     )
 }

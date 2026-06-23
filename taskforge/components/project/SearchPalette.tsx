@@ -62,6 +62,9 @@ export function SearchPalette() {
             setQuery('')
             setHits([])
             setActive(0)
+            // Reset availability too — otherwise an earlier `available:false`
+            // response leaves the "unavailable" banner stuck across re-opens.
+            setAvailable(true)
             setTimeout(() => inputRef.current?.focus(), 0)
         } else if (debounce.current) {
             // Cancel any in-flight debounced search when the palette closes.

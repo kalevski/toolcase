@@ -20,6 +20,14 @@ const STATE_BADGE: Record<EngineState, 'info' | 'success' | 'warning' | 'seconda
     IDLE: 'secondary',
 }
 
+// Icon-tile tint on the rich page header, keyed off engine state.
+const STATE_ICON_COLOR: Record<EngineState, 'cyan' | 'amber' | 'slate'> = {
+    RUNNING: 'cyan',
+    SLEEPING: 'amber',
+    STOPPING: 'amber',
+    IDLE: 'slate',
+}
+
 const SUB_LABEL: Record<string, string> = {
     overview: 'Overview',
     tasks: 'Tasks',
@@ -47,7 +55,7 @@ export function ProjectHeader() {
     }
 
     return (
-        <div className="tf-repo-header">
+        <tc-stack gap="0.75rem" style={{ marginBottom: '1.25rem' }}>
             <tc-breadcrumb>
                 <tc-breadcrumb-item href="/" onClick={nav('/')}>
                     Projects
@@ -58,39 +66,46 @@ export function ProjectHeader() {
                 <tc-breadcrumb-item active>{subLabel}</tc-breadcrumb-item>
             </tc-breadcrumb>
 
-            <div className="tf-repo-header__bar">
-                <div className="tf-repo-header__title">
-                    <tc-heading as="h1">{project}</tc-heading>
-                    <span className="tf-repo-header__status">
-                        <tc-status-dot status={STATE_DOT[snapshot.state]} pulse={snapshot.state === 'RUNNING' || undefined} />
-                        <tc-badge variant={STATE_BADGE[snapshot.state]}>{snapshot.state}</tc-badge>
-                    </span>
-                    {git?.branch && <tc-badge variant="secondary">⎇ {git.branch}</tc-badge>}
-                </div>
+            <tc-rich-page-header
+                title-text={project}
+                sub={subLabel}
+                icon-name="FolderGit2"
+                icon-color={STATE_ICON_COLOR[snapshot.state]}
+            >
+                <tc-stack slot="chips" inline direction="horizontal" gap="0.4rem" align="center">
+                    <tc-status-dot status={STATE_DOT[snapshot.state]} pulse={snapshot.state === 'RUNNING' || undefined} />
+                    <tc-badge variant={STATE_BADGE[snapshot.state]}>{snapshot.state}</tc-badge>
+                </tc-stack>
+                {git?.branch && (
+                    <tc-badge slot="chips" variant="secondary">
+                        <tc-icon name="GitBranch" /> {git.branch}
+                    </tc-badge>
+                )}
 
                 {running && (
-                    <div className="tf-repo-header__actions">
-                        <tc-icon-button
-                            icon={tcIcon('pause')}
-                            label="Stop after current"
-                            variant="warning"
-                            outline
-                            disabled={snapshot.state === 'STOPPING' || undefined}
-                            onClick={onStop}
-                        />
-                        <tc-icon-button icon={tcIcon('stop-fill')} label="Force stop" variant="danger" onClick={onForce} />
-                    </div>
+                    <tc-icon-button
+                        slot="actions"
+                        icon={tcIcon('pause')}
+                        label="Stop after current"
+                        variant="warning"
+                        outline
+                        disabled={snapshot.state === 'STOPPING' || undefined}
+                        onClick={onStop}
+                    />
                 )}
-            </div>
+                {running && (
+                    <tc-icon-button slot="actions" icon={tcIcon('stop-fill')} label="Force stop" variant="danger" onClick={onForce} />
+                )}
+            </tc-rich-page-header>
 
             {running && (
-                <div className="tf-repo-header__progress">
+                <div>
                     <tc-progress-bar value={progressPct} variant={snapshot.error > 0 ? 'warning' : 'success'} />
                     <tc-text variant="muted" style={{ fontSize: '0.8rem', display: 'block', marginTop: '0.15rem' }}>
                         {snapshot.done} / {snapshot.total} done{snapshot.error ? ` · ${snapshot.error} error` : ''}
                     </tc-text>
                 </div>
             )}
-        </div>
+        </tc-stack>
     )
 }

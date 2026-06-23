@@ -158,7 +158,7 @@ export function TaskDrawer({
     return (
         <tc-drawer ref={drawerRef} side="right" size="large" title={taskId ?? ''}>
             <div style={{ padding: '1.25rem' }}>
-                <div className="tf-actions" style={{ marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+                <tc-stack direction="horizontal" gap="0.75rem" wrap align="center" style={{ marginBottom: '0.75rem' }}>
                     <tc-badge variant="secondary">{taskId}</tc-badge>
                     {task && <tc-badge variant={STATUS_BADGE[task.status]}>{task.status}</tc-badge>}
                     <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: '0.5rem' }}>
@@ -171,7 +171,7 @@ export function TaskDrawer({
                                 title={helpTexts.tasks.edit}
                                 onClick={() => content !== null && setEditing({ id: taskId, draft: content })}
                             >
-                                ✎ Edit
+                                <tc-icon name="Pencil" /> Edit
                             </tc-button>
                         )}
                         {taskId && (task?.status === 'error' || task?.status === 'done' || task?.status === 'needs-review') && (
@@ -183,7 +183,7 @@ export function TaskDrawer({
                                 title={helpTexts.tasks.feedback}
                                 onClick={onFeedback}
                             >
-                                ↻ Redo with feedback
+                                <tc-icon name="RotateCcw" /> Redo with feedback
                             </tc-button>
                         )}
                         {onReRun && taskId && (
@@ -195,13 +195,13 @@ export function TaskDrawer({
                                 title={running ? 'Stop the active run first.' : helpTexts.tasks.reRun}
                                 onClick={() => onReRun(taskId)}
                             >
-                                ▶ Re-run task
+                                <tc-icon name="Play" /> Re-run task
                             </tc-button>
                         )}
                     </span>
-                </div>
+                </tc-stack>
 
-                <div className="tf-stack-sm" style={{ marginBottom: '0.75rem' }}>
+                <tc-stack gap="0.75rem" style={{ marginBottom: '0.75rem' }}>
                     <div style={{ maxWidth: 280 }}>
                         <tc-select
                             ref={modelRef}
@@ -217,10 +217,10 @@ export function TaskDrawer({
                         </tc-select>
                     </div>
                     <tc-helper-text text={helpTexts.tasks.modelOverride} />
-                </div>
+                </tc-stack>
 
                 {task && (task.lastModel || task.lastElapsed != null || task.lastCommit || task.lastError || task.costUsd != null || task.review) && (
-                    <div className="tf-stack-sm" style={{ marginBottom: '0.5rem' }}>
+                    <tc-stack gap="0.75rem" style={{ marginBottom: '0.5rem' }}>
                         {task.lastModel && (
                             <div className="tf-kv">
                                 <span>Last model</span>
@@ -272,7 +272,7 @@ export function TaskDrawer({
                             </div>
                         )}
                         <tc-divider />
-                    </div>
+                    </tc-stack>
                 )}
 
                 {loading && (
@@ -281,18 +281,18 @@ export function TaskDrawer({
                     </div>
                 )}
                 {editDraft !== null && taskId ? (
-                    <div className="tf-stack-sm">
+                    <tc-stack gap="0.75rem">
                         <tc-helper-text text={helpTexts.tasks.editStatusNote} />
                         <tc-markdown-editor ref={editorRef} value={editDraft} height="420" />
-                        <div className="tf-actions">
+                        <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                             <tc-button variant="primary" loading={saving || undefined} disabled={saving || undefined} onClick={() => void onSaveEdit()}>
                                 Save
                             </tc-button>
                             <tc-button variant="secondary" outline onClick={() => setEditing(null)}>
                                 Cancel
                             </tc-button>
-                        </div>
-                    </div>
+                        </tc-stack>
+                    </tc-stack>
                 ) : (
                     content !== null && (
                         <pre

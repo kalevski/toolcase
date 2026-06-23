@@ -68,9 +68,20 @@ tc-switch {
         box-shadow var(--tc-transition-base);
 
     // Coarse pointers get a 44px hit area without changing the visual track.
+    // A min-width/min-height on the track itself would inflate the 40×22 pill to
+    // ≥44×44 — and with border-radius:999px that squares-then-rounds into a full
+    // circle. Instead overlay a transparent, centred hit area that extends the
+    // clickable region past the visual pill without resizing it.
     @media (pointer: coarse) {
-        min-width: 44px;
-        min-height: 44px;
+        &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: max(100%, 44px);
+            height: 44px;
+        }
     }
 
     &:hover {

@@ -16,11 +16,12 @@
         "web-components",
         "phaser-plus",
         "node",
+        "taskforge",
         "examples"
     ],
     "devDependencies": {
         "@eslint/js": "^10.0.1",
-        "concurrently": "9.2.1",
+        "concurrently": "^9.2.3",
         "eslint": "^10.1.0",
         "eslint-config-prettier": "^10.1.8",
         "phaser": "^4.1.0",
@@ -46,5 +47,14 @@
     },
     "engines": {
         "node": ">=18"
+    },
+    "dependencies": {
+        "next": "16.2.9"
+    },
+    "overrides": {
+        "postcss": "^8.5.15",
+        "tsup": {
+            "esbuild": "^0.28.1"
+        }
     }
 }

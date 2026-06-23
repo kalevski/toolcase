@@ -46,7 +46,14 @@ export function ScheduleCard() {
     const onlyIfPendingRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setOnlyIfPending(detailValue<boolean>(e)) })
     const commitAfterRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setCommitAfter(detailValue<boolean>(e)) })
     const pushAfterRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setPushAfter(detailValue<boolean>(e)) })
-    const usageGateRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setUsageGate(detailValue<number | ''>(e)) })
+    const usageGateRef = useTcEvents<HTMLElement>({
+        // Mirror the save-time clamp (1–100) here so the field can't display a
+        // value — 0, 500 — that differs from what gets persisted. Blank = off.
+        'tc-change': (e) => {
+            const v = detailValue<number | ''>(e)
+            setUsageGate(v === '' ? '' : Math.min(100, Math.max(1, v)))
+        },
+    })
 
     useEffect(() => {
         let cancelled = false
@@ -134,9 +141,9 @@ export function ScheduleCard() {
                     <tc-badge variant={enabled ? 'success' : 'secondary'}>{enabled ? 'enabled' : 'disabled'}</tc-badge>
                 )}
             </div>
-            <div className="tf-card-body tf-stack-sm">
+            <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                 <tc-helper-text text={helpTexts.run.schedule} />
-                <div className="tf-form-row">
+                <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                     <tc-select ref={presetRef} label="Preset" value={PRESETS.some((p) => p.value === cron) ? cron : ''}>
                         {PRESETS.map((p) => (
                             <tc-option key={p.value} value={p.value}>
@@ -158,8 +165,8 @@ export function ScheduleCard() {
                             </tc-option>
                         ))}
                     </tc-select>
-                </div>
-                <div className="tf-form-row">
+                </tc-stack>
+                <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                     <tc-switch ref={enabledRef} label="Enabled" checked={enabled || undefined} />
                     <tc-switch ref={onlyIfPendingRef} label="Only if pending > 0" checked={onlyIfPending || undefined} />
                     <tc-switch ref={commitAfterRef} label="Commit after each task" checked={commitAfter || undefined} />
@@ -175,9 +182,9 @@ export function ScheduleCard() {
                             value={usageGate}
                         />
                     </div>
-                </div>
+                </tc-stack>
                 {lastFired && <tc-text variant="muted">Last fired: {new Date(lastFired).toLocaleString()}</tc-text>}
-                <div className="tf-actions">
+                <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                     <tc-button variant="primary" loading={saving || undefined} disabled={saving || undefined} onClick={() => void save()}>
                         {exists ? 'Update schedule' : 'Create schedule'}
                     </tc-button>
@@ -186,8 +193,8 @@ export function ScheduleCard() {
                             Remove
                         </tc-button>
                     )}
-                </div>
-            </div>
+                </tc-stack>
+            </tc-stack>
         </tc-card>
     )
 }

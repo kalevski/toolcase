@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from '@/lib/toast'
 import { useTcEvents, detailValue } from '@/lib/tc'
-import type { ProjectSettings } from '@/server/domain/types'
+import type { AccountSummary, ProjectSettings } from '@/server/domain/types'
 import { NOTIFY_EVENTS } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'
@@ -73,7 +73,9 @@ export function SettingsClient() {
 
     const [loaded, setLoaded] = useState(false)
     const [effective, setEffective] = useState<Record<string, unknown>>({})
+    const [accounts, setAccounts] = useState<AccountSummary[]>([])
     const [defaultModel, setDefaultModel] = useState('')
+    const [defaultAccount, setDefaultAccount] = useState('')
     const [commitAfter, setCommitAfter] = useState<Tri>('')
     const [commitMode, setCommitMode] = useState('')
     const [commitModel, setCommitModel] = useState('')
@@ -96,14 +98,23 @@ export function SettingsClient() {
     const load = useCallback(async () => {
         setLoadError(false)
         try {
-            const d = await fetch(`/api/projects/${project}/settings`).then((r) => (r.ok ? r.json() : null))
+            // Account registry is admin-gated — fetch best-effort so non-admins
+            // still load settings (they just get an empty account list).
+            const [d, accs] = await Promise.all([
+                fetch(`/api/projects/${project}/settings`).then((r) => (r.ok ? r.json() : null)),
+                fetch('/api/accounts')
+                    .then((r) => (r.ok ? r.json() : []))
+                    .catch(() => []),
+            ])
             if (!d) {
                 setLoadError(true)
                 return
             }
             const o: ProjectSettings = d.overrides
             setEffective(d.effective)
+            setAccounts(Array.isArray(accs) ? accs : [])
             setDefaultModel(o.defaultModel ?? '')
+            setDefaultAccount(o.defaultAccount ?? '')
             setCommitAfter(toTri(o.commitAfter))
             setCommitMode(o.commitMessageMode ?? '')
             setCommitModel(o.commitModel ?? '')
@@ -137,6 +148,7 @@ export function SettingsClient() {
         try {
             const body: ProjectSettings = {
                 defaultModel: defaultModel || undefined,
+                defaultAccount: defaultAccount || undefined,
                 commitAfter: fromTri(commitAfter),
                 commitMessageMode: (commitMode || undefined) as ProjectSettings['commitMessageMode'],
                 commitModel: commitModel || undefined,
@@ -171,14 +183,14 @@ export function SettingsClient() {
         return (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
                 {loadError ? (
-                    <div className="tf-stack-sm">
+                    <tc-stack gap="0.75rem">
                         <tc-text variant="muted">Couldn’t load project settings.</tc-text>
                         <div>
                             <tc-button size="sm" variant="secondary" outline onClick={() => void load()}>
                                 Retry
                             </tc-button>
                         </div>
-                    </div>
+                    </tc-stack>
                 ) : (
                     <tc-spinner />
                 )}
@@ -189,21 +201,36 @@ export function SettingsClient() {
     const eff = (k: string) => String(effective[k] ?? '—')
 
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-helper-text text={helpTexts.settings.intro} />
 
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Run defaults
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
-                    <div className="tf-form-row">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
+                    <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                         <div style={{ minWidth: 220 }}>
                             <Sel label={`Default model (env: ${eff('defaultModel')})`} value={defaultModel} onChange={setDefaultModel}>
                                 <tc-option value="">Use default</tc-option>
                                 {modelOptions.map((m) => (
                                     <tc-option key={m.value} value={m.value}>
                                         {m.label}
+                                    </tc-option>
+                                ))}
+                            </Sel>
+                        </div>
+                        <div style={{ minWidth: 220 }}>
+                            <Sel
+                                label={`Default account (default: ${effective.defaultAccount ? String(effective.defaultAccount) : 'ambient login'})`}
+                                value={defaultAccount}
+                                onChange={setDefaultAccount}
+                            >
+                                <tc-option value="">Use default</tc-option>
+                                {accounts.map((a) => (
+                                    <tc-option key={a.alias} value={a.alias}>
+                                        {a.alias}
+                                        {a.label ? ` — ${a.label}` : ''}
                                     </tc-option>
                                 ))}
                             </Sel>
@@ -225,21 +252,21 @@ export function SettingsClient() {
                                 ))}
                             </Sel>
                         </div>
-                    </div>
-                    <div className="tf-form-row">
+                    </tc-stack>
+                    <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                         <TriSel label="Branch per run" value={branchPerRun} onChange={setBranchPerRun} />
                         <TriSel label="Push after run" value={pushAfter} onChange={setPushAfter} />
                         <TriSel label="Open PR after push" value={openPr} onChange={setOpenPr} />
                         <TriSel label="Reviewer pass" value={review} onChange={setReview} />
-                    </div>
-                </div>
+                    </tc-stack>
+                </tc-stack>
             </tc-card>
 
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Knowledge &amp; usage
                 </tc-heading>
-                <div className="tf-card-body tf-form-row">
+                <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end" style={{ padding: '1rem' }}>
                     <TriSel label="Knowledge auto-update" value={knowledgeAuto} onChange={setKnowledgeAuto} />
                     <div style={{ maxWidth: 240 }}>
                         <tc-number-input
@@ -250,14 +277,14 @@ export function SettingsClient() {
                             value={usageGate}
                         />
                     </div>
-                </div>
+                </tc-stack>
             </tc-card>
 
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Notifications
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                     <tc-helper-text text={helpTexts.settings.notify} />
                     <Chk
                         label="Override the global event selection for this project"
@@ -265,7 +292,7 @@ export function SettingsClient() {
                         onChange={setNotifyOverridden}
                     />
                     {notifyOverridden && (
-                        <div className="tf-form-row">
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                             {NOTIFY_EVENTS.map((ev) => (
                                 <Chk
                                     key={ev}
@@ -282,7 +309,7 @@ export function SettingsClient() {
                                     }
                                 />
                             ))}
-                        </div>
+                        </tc-stack>
                     )}
                     <tc-input
                         ref={webhookRef}
@@ -290,15 +317,15 @@ export function SettingsClient() {
                         placeholder="https://ntfy.sh/my-topic"
                         value={webhookUrl}
                     />
-                </div>
+                </tc-stack>
             </tc-card>
 
-            <div className="tf-actions">
+            <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                 <tc-button variant="primary" loading={saving || undefined} disabled={saving || undefined} onClick={() => void save()}>
                     Save settings
                 </tc-button>
                 <tc-text variant="muted">Empty / “Use default” values fall back to the environment configuration.</tc-text>
-            </div>
-        </div>
+            </tc-stack>
+        </tc-stack>
     )
 }

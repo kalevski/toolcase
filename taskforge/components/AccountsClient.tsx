@@ -8,13 +8,24 @@
 
 import React, { useState } from 'react'
 import { toast } from '@/lib/toast'
-import { useTcEvents } from '@/lib/tc'
+import { useTc, useTcEvents } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import type { Account, AccountHealth, AccountSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
 import { helpTexts } from './helpTexts'
 
 type AuthMethod = 'oauth' | 'apikey'
+
+// tc-advanced-table header descriptors; body rows stay slotted React <tr> so the
+// per-row Verify/Remove buttons keep their onClick handlers.
+const ADV_COLUMNS = [
+    { key: 'account', label: 'Account' },
+    { key: 'auth', label: 'Auth', width: '8rem' },
+    { key: 'lastUsed', label: 'Last used', width: '12rem' },
+    { key: 'state', label: 'State', width: '9rem' },
+    { key: 'health', label: 'Health' },
+    { key: 'actions', label: 'Actions', width: '14rem' },
+]
 
 // Live verify state per alias — absent = never run this session, 'pending' =
 // in-flight, otherwise the last AccountHealth outcome.
@@ -96,8 +107,14 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
         setRows((rs) => [...rs, summaryOf(account)].sort((a, b) => a.alias.localeCompare(b.alias)))
     }
 
+    // tc-advanced-table moves slotted <tr> into its own tbody, so remount with a
+    // fresh key when the account set changes (add/remove). In-place verify-state
+    // updates keep the same key — React patches those cells in place.
+    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
+    const tableKey = rows.map((r) => r.alias).join('_')
+
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-helper-text text={helpTexts.accounts.intro} />
 
             <AddAccountForm existing={rows.map((r) => r.alias)} onCreated={onCreated} />
@@ -108,21 +125,10 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
                     <p>Register a Claude identity above to let TaskForge dispatch under it.</p>
                 </tc-empty-state>
             ) : (
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Account</th>
-                            <th style={{ width: '8rem' }}>Auth</th>
-                            <th style={{ width: '12rem' }}>Last used</th>
-                            <th style={{ width: '9rem' }}>State</th>
-                            <th>Health</th>
-                            <th style={{ width: '14rem' }}>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.map((a) => {
-                            const v = verify[a.alias]
-                            return (
+                <tc-advanced-table key={tableKey} ref={tableRef}>
+                    {rows.map((a) => {
+                        const v = verify[a.alias]
+                        return (
                                 <tr key={a.alias}>
                                     <td>
                                         <strong>{a.alias}</strong>
@@ -149,20 +155,20 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
                                                 cooling{a.coolingUntil ? ` · ${new Date(a.coolingUntil).toLocaleTimeString()}` : ''}
                                             </tc-badge>
                                         ) : (
-                                            <span className="tf-inline">
+                                            <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
                                                 <tc-status-dot status="online" />
                                                 ready
-                                            </span>
+                                            </tc-stack>
                                         )}
                                     </td>
                                     <td>
                                         {v === 'pending' ? (
                                             <tc-text variant="muted">checking…</tc-text>
                                         ) : v ? (
-                                            <span className="tf-inline">
+                                            <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
                                                 <tc-status-dot status={v.ok ? 'online' : 'offline'} />
                                                 <tc-text variant={v.ok ? undefined : 'muted'}>{v.detail}</tc-text>
-                                            </span>
+                                            </tc-stack>
                                         ) : a.lastUsedAt ? (
                                             <tc-text variant="muted">last good {new Date(a.lastUsedAt).toLocaleDateString()}</tc-text>
                                         ) : (
@@ -193,12 +199,11 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
                                         </span>
                                     </td>
                                 </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
+                        )
+                    })}
+                </tc-advanced-table>
             )}
-        </div>
+        </tc-stack>
     )
 }
 
@@ -265,8 +270,8 @@ function AddAccountForm({ existing, onCreated }: { existing: string[]; onCreated
             <tc-heading slot="header" as="h3">
                 Add account
             </tc-heading>
-            <div className="tf-card-body tf-stack-sm">
-                <div className="tf-form-row">
+            <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
+                <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                     <tc-input
                         ref={aliasRef}
                         label="Alias"
@@ -299,14 +304,14 @@ function AddAccountForm({ existing, onCreated }: { existing: string[]; onCreated
                             disabled={submitting || undefined}
                         />
                     )}
-                </div>
+                </tc-stack>
 
                 {trimmedAlias !== '' && !kebab && (
                     <tc-text variant="muted">Alias must be kebab-case — lowercase letters, digits, single dashes.</tc-text>
                 )}
                 {duplicate && <tc-text variant="muted">An account with that alias already exists.</tc-text>}
 
-                <div className="tf-actions">
+                <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                     <tc-button
                         variant="primary"
                         loading={submitting || undefined}
@@ -315,14 +320,14 @@ function AddAccountForm({ existing, onCreated }: { existing: string[]; onCreated
                     >
                         Add account
                     </tc-button>
-                </div>
+                </tc-stack>
 
                 {guidance && (
                     <tc-banner variant="info">
                         <strong>Finish authorization on the host.</strong> {guidance}
                     </tc-banner>
                 )}
-            </div>
+            </tc-stack>
         </tc-card>
     )
 }

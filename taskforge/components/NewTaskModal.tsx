@@ -16,13 +16,14 @@ export interface NewTaskInput {
 
 const KEY = 'newTask'
 const MODEL_OPTIONS = ['', 'fast', 'mid', 'deep']
+const DEFAULT_BODY = '## Problem\n\n\n## Task\n\n'
 
 export function NewTaskModal() {
     const input = Modal.useModalInput<NewTaskInput>()
     const close = Modal.useModalClose<boolean>()
 
     const [title, setTitle] = useState('')
-    const [body, setBody] = useState('## Problem\n\n\n## Task\n\n')
+    const [body, setBody] = useState(DEFAULT_BODY)
     const [severity, setSeverity] = useState('')
     const [facetProject, setFacetProject] = useState('')
     const [model, setModel] = useState('')
@@ -40,9 +41,9 @@ export function NewTaskModal() {
     const seenInput = useRef<NewTaskInput | null>(null)
     if (input && seenInput.current !== input) {
         seenInput.current = input
-        if (title || severity || facetProject || model || depends) {
+        if (title || body !== DEFAULT_BODY || severity || facetProject || model || depends) {
             setTitle('')
-            setBody('## Problem\n\n\n## Task\n\n')
+            setBody(DEFAULT_BODY)
             setSeverity('')
             setFacetProject('')
             setModel('')
@@ -95,7 +96,7 @@ export function NewTaskModal() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                 <tc-helper-text text={helpTexts.tasks.newTask} />
                 <tc-input ref={titleRef} label="Title" placeholder="Add /healthz endpoint" value={title} />
-                <div className="tf-form-row">
+                <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                     <tc-select ref={sevRef} label="Severity" value={severity}>
                         <tc-option value="">—</tc-option>
                         <tc-option value="low">low</tc-option>
@@ -112,7 +113,7 @@ export function NewTaskModal() {
                         ))}
                     </tc-select>
                     <tc-input ref={dependsRef} label="Depends (CSV)" placeholder="003, 007" value={depends} />
-                </div>
+                </tc-stack>
                 <tc-markdown-editor ref={bodyRef} value={body} height="280" />
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                     <tc-button variant="secondary" outline onClick={() => close(false)}>

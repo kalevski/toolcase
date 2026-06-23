@@ -30,8 +30,12 @@ export interface PromptComposerProps {
     onModelChange: (v: string) => void
     modelOptions: { value: string; label: string }[]
     lastPrompt: AgentPromptRecord | null
-    /** Executor or any agent running (this one included). */
-    busy: boolean
+    /**
+     * Another Claude process holds this composer: a different agent session, or —
+     * for the task-creator only — an executing run. Computed by the parent so the
+     * executor no longer locks the knowledge/notes/custom composers.
+     */
+    lockedByOther: boolean
     /** THIS agent running → submit flips to Stop and the textarea locks. */
     running: boolean
     onSubmit: () => void
@@ -70,7 +74,7 @@ export function PromptComposer({
     onModelChange,
     modelOptions,
     lastPrompt,
-    busy,
+    lockedByOther,
     running,
     onSubmit,
     onStop,
@@ -96,6 +100,10 @@ export function PromptComposer({
             setPanel(which)
             try {
                 if (which === 'history') {
+                    // Always refetch on open: a just-used prompt won't appear if we
+                    // keep a stale cache, so clear it first to force the spinner +
+                    // a fresh request every time the panel opens.
+                    setHistory(null)
                     const d = await fetch(`/api/projects/${project}/agents/${agentKind}/prompts`).then((r) =>
                         r.ok ? r.json() : null,
                     )
@@ -142,9 +150,6 @@ export function PromptComposer({
         }
     }, [])
 
-    // Locked while another Claude process holds the project (but not when it is
-    // this agent — then the composer shows Stop instead).
-    const lockedByOther = busy && !running
     const valid = value.trim().length > 0
 
     const rows = useMemo(() => {
@@ -153,7 +158,7 @@ export function PromptComposer({
     }, [value])
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && valid && !busy) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && valid && !lockedByOther && !running) {
             e.preventDefault()
             onSubmit()
         }
@@ -180,7 +185,7 @@ export function PromptComposer({
             {lastPrompt && (
                 <div className="tf-composer__last">
                     <div className="tf-composer__last-meta">
-                        <span className="tf-composer__last-label">⟲ Last prompt</span>
+                        <span className="tf-composer__last-label"><tc-icon name="History" /> Last prompt</span>
                         <tc-text variant="muted">{relativeTime(lastPrompt.usedAt)}</tc-text>
                         <tc-tag static variant="secondary">
                             {lastPrompt.model}
@@ -218,9 +223,13 @@ export function PromptComposer({
                 onKeyDown={onKeyDown}
             />
 
+            {lockedByOther && (
+                <tc-text variant="muted">Locked while another agent or run is active for this project.</tc-text>
+            )}
+
             <div className="tf-composer__footer">
                 <div style={{ minWidth: 200 }}>
-                    <tc-select ref={modelRef} label="Model" value={model} disabled={busy || undefined}>
+                    <tc-select ref={modelRef} label="Model" value={model} disabled={lockedByOther || running || undefined}>
                         {modelOptions.map((o) => (
                             <tc-option key={o.value} value={o.value}>
                                 {o.label}
@@ -232,7 +241,7 @@ export function PromptComposer({
                 <span className="tf-composer__spacer" />
                 <span className="tf-composer__history">
                     <tc-button size="sm" variant="secondary" outline onClick={() => void togglePanel('history')}>
-                        ⟲ History
+                        <tc-icon name="History" /> History
                     </tc-button>
                     {panel !== null && (
                         <div className="tf-composer__history-panel">
@@ -302,7 +311,7 @@ export function PromptComposer({
                                                         }
                                                     }}
                                                 >
-                                                    ✕
+                                                    <tc-icon name="X" />
                                                 </span>
                                             </span>
                                             <span className="tf-composer__history-row-text">{t.prompt}</span>
@@ -313,7 +322,7 @@ export function PromptComposer({
                     )}
                 </span>
                 <tc-button size="sm" variant="secondary" outline onClick={() => void togglePanel('templates')}>
-                    ☰ Templates
+                    <tc-icon name="List" /> Templates
                 </tc-button>
                 <tc-button
                     size="sm"
@@ -323,7 +332,7 @@ export function PromptComposer({
                     title="Save the current prompt as a reusable cross-project template"
                     onClick={() => void saveTemplate()}
                 >
-                    ★ Save
+                    <tc-icon name="Star" /> Save
                 </tc-button>
                 <tc-text variant="muted">⌘/Ctrl+Enter</tc-text>
                 {lockedByOther ? (

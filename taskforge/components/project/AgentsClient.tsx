@@ -10,6 +10,8 @@ import { useConfirm } from '../ConfirmModal'
 import { helpTexts } from '../helpTexts'
 import { AgentPanel } from './AgentPanel'
 
+const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
+
 const BUNDLED_HELP: Record<string, string> = {
     'task-creator': helpTexts.agents.taskCreator,
     'knowledge-writer': helpTexts.agents.knowledgeWriter,
@@ -71,13 +73,18 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
     const noteTargetRef = useTcEvents<HTMLElement>({ change: (e) => setTargetNote((e.target as HTMLSelectElement).value) })
 
     const saveDef = async () => {
+        const kind = defKind.trim()
+        if (!SLUG_RE.test(kind)) {
+            toast.error('Use lowercase letters, digits and dashes.')
+            return
+        }
         setSavingDef(true)
         try {
             const res = await fetch('/api/agent-defs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    kind: defKind.trim(),
+                    kind,
                     label: defLabel.trim(),
                     target: defTarget,
                     post: defPost,
@@ -88,7 +95,7 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                 toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to save agent')
                 return
             }
-            toast.success(`Agent “${defKind.trim()}” saved — reload to see its tab`)
+            toast.success(`Agent “${kind}” saved — its tab is ready`)
             router.refresh()
         } finally {
             setSavingDef(false)
@@ -118,14 +125,27 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
     const active = tabKinds.find((k) => k.kind === activeTab)
 
     const renderPanel = (k: (typeof tabKinds)[number]) => (
-        <div className="tf-stack-sm" style={{ paddingTop: '1rem' }}>
+        // key by kind: switching tabs must REMOUNT the panel, not reuse it. The
+        // panel's tc-* elements relocate their light-DOM children on connect, so
+        // letting React mutate a reused tc-button's children (e.g. a changed submit
+        // label/icon across tabs) corrupts the render. A fresh mount per tab gives
+        // each tc-button a clean connectedCallback. Draft/terminal state lives in
+        // ProjectContext (keyed by kind), so remounting loses nothing.
+        <tc-stack
+            key={k.kind}
+            gap="0.75rem"
+            style={{ paddingTop: '1rem' }}
+            id={`agent-panel-${k.kind}`}
+            role="tabpanel"
+            aria-labelledby={`agent-tab-${k.kind}`}
+        >
             <tc-helper-text text={BUNDLED_HELP[k.kind] ?? helpTexts.agents.custom} />
             {k.custom && isAdmin && (
-                <div className="tf-actions">
+                <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                     <tc-button size="sm" variant="danger" outline onClick={() => void deleteDef(k.kind)}>
                         Delete this agent kind
                     </tc-button>
-                </div>
+                </tc-stack>
             )}
             {k.kind === 'note-writer' ? (
                 <AgentPanel
@@ -134,7 +154,7 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                     submitLabel={targetNote ? 'Edit note' : 'Create note'}
                     submitOptions={() => ({ targetNote: targetNote || undefined })}
                     beforeComposer={
-                        <div className="tf-stack-sm">
+                        <tc-stack gap="0.75rem">
                             <div style={{ maxWidth: 320 }}>
                                 <tc-select
                                     ref={noteTargetRef}
@@ -142,7 +162,7 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                                     value={targetNote}
                                     disabled={noteAgentRunning || undefined}
                                 >
-                                    <tc-option value="">➕ Create new note</tc-option>
+                                    <tc-option value="">Create new note</tc-option>
                                     {notes.map((n) => (
                                         <tc-option key={n.id} value={n.id}>
                                             {n.title}
@@ -151,7 +171,7 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                                 </tc-select>
                             </div>
                             <tc-helper-text text={helpTexts.notes.agentTarget} />
-                        </div>
+                        </tc-stack>
                     }
                 />
             ) : (
@@ -161,11 +181,11 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                     submitLabel={BUNDLED_SUBMIT[k.kind] ?? 'Run agent'}
                 />
             )}
-        </div>
+        </tc-stack>
     )
 
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <div>
                 <ul className="nav nav-tabs" role="tablist">
                     {tabKinds.map((k) => (
@@ -173,7 +193,9 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                             <button
                                 type="button"
                                 role="tab"
+                                id={`agent-tab-${k.kind}`}
                                 aria-selected={activeTab === k.kind}
+                                aria-controls={`agent-panel-${k.kind}`}
                                 className={`nav-link${activeTab === k.kind ? ' active' : ''}`}
                                 onClick={() => onTabChange(k.kind)}
                             >
@@ -190,9 +212,9 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                     <tc-heading slot="header" as="h3">
                         Custom agents (admin)
                     </tc-heading>
-                    <div className="tf-card-body tf-stack-sm">
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                         <tc-helper-text text={helpTexts.agents.custom} />
-                        <div className="tf-form-row">
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                             <tc-input ref={kindRef} label="Kind (kebab-case)" placeholder="test-writer" value={defKind} />
                             <tc-input ref={labelRef} label="Label" placeholder="Test writer" value={defLabel} />
                             <tc-select ref={targetRef} label="Target directory" value={defTarget}>
@@ -208,7 +230,7 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                                 <tc-option value="knowledge">refresh knowledge</tc-option>
                                 <tc-option value="notes">refresh notes</tc-option>
                             </tc-select>
-                        </div>
+                        </tc-stack>
                         <tc-textarea
                             ref={preambleRef}
                             label="Prompt preamble (prepended to every prompt)"
@@ -216,7 +238,7 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                             placeholder="You write focused unit tests for the change described below…"
                             value={defPreamble}
                         />
-                        <div className="tf-actions">
+                        <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                             <tc-button
                                 variant="primary"
                                 loading={savingDef || undefined}
@@ -226,10 +248,10 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                                 Save custom agent
                             </tc-button>
                             <tc-text variant="muted">Custom agents are global — every project gets the tab.</tc-text>
-                        </div>
-                    </div>
+                        </tc-stack>
+                    </tc-stack>
                 </tc-card>
             )}
-        </div>
+        </tc-stack>
     )
 }

@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
 import { tcIcon } from '@/lib/icons'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject, AGENT_LABELS } from '../ProjectContext'
@@ -10,23 +9,23 @@ import { useProject, AGENT_LABELS } from '../ProjectContext'
  * Global per-project activity bar (§3.8): rendered above the header on every
  * project sub-page. Shows the single Claude process currently holding the
  * project (sleep notice > executor > agent session) and deep-links to its page.
- * The whole bar is clickable (router.push keeps the SSE connection); the inline
- * controls (§5) stop/skip without leaving the current page.
+ * Navigation is via the announcement bar's own CTA link ("View run"/"View
+ * output"); the inline controls (§5) stop/skip without leaving the current page.
  */
 export function ActivityBar() {
-    const router = useRouter()
     const { project, config, snapshot, wakeAt, running, agentSessions, onSkipCurrent, onForce, onStopAgent } = useProject()
 
-    const go = (href: string) => (e: React.MouseEvent) => {
-        e.preventDefault()
-        router.push(href)
-    }
+    // Navigation is owned solely by the announcement-bar's own CTA link
+    // (cta-href/cta-label). The previous whole-bar onClick competed with that
+    // CTA and forced an inner stopPropagation around the controls just to keep
+    // Skip/Stop from navigating — both are dropped here for a single, explicit
+    // affordance (less code, no event-propagation footgun).
 
     // 1) usage-limit sleep (moved out of RunClient so every sub-page shows it)
     if (snapshot.state === 'SLEEPING' && wakeAt) {
         const href = `/projects/${project}/run`
         return (
-            <div className="tf-activity-bar" onClick={go(href)}>
+            <div className="tf-activity-bar">
                 <tc-announcement-bar variant="warning" icon-name={tcIcon('moon')} cta-label="View run" cta-href={href}>
                     {`Usage limit — sleeping until ~${new Date(wakeAt).toLocaleTimeString()}, will resume the current task.`}
                 </tc-announcement-bar>
@@ -38,13 +37,13 @@ export function ActivityBar() {
     if (running) {
         const href = `/projects/${project}/run`
         return (
-            <div className="tf-activity-bar" onClick={go(href)}>
+            <div className="tf-activity-bar">
                 <tc-announcement-bar variant="info" icon-name={tcIcon('play-circle')} cta-label="View run" cta-href={href}>
                     <span className="tf-activity-bar__message">
                         <span>
                             Task executor running — {snapshot.current ?? '…'} ({snapshot.done}/{snapshot.total} done)
                         </span>
-                        <span className="tf-activity-bar__controls" onClick={(e) => e.stopPropagation()}>
+                        <span className="tf-activity-bar__controls">
                             <tc-icon-button
                                 icon={tcIcon('skip-forward')}
                                 label="Skip current task"
@@ -74,11 +73,11 @@ export function ActivityBar() {
         const label = AGENT_LABELS[kind] ?? config.agentKinds.find((k) => k.kind === kind)?.label ?? kind
         const href = `/projects/${project}/agents?tab=${kind}`
         return (
-            <div className="tf-activity-bar" onClick={go(href)}>
+            <div className="tf-activity-bar">
                 <tc-announcement-bar variant="info" icon-name={tcIcon('robot')} cta-label="View output" cta-href={href}>
                     <span className="tf-activity-bar__message">
                         <span>{label} agent running…</span>
-                        <span className="tf-activity-bar__controls" onClick={(e) => e.stopPropagation()}>
+                        <span className="tf-activity-bar__controls">
                             <tc-icon-button
                                 icon={tcIcon('stop-fill')}
                                 label={`Kill ${label.toLowerCase()}`}

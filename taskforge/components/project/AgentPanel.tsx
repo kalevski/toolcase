@@ -34,7 +34,7 @@ export function AgentPanel({
     beforeComposer?: React.ReactNode
     submitOptions?: () => { targetNote?: string }
 }) {
-    const { project, config, agentSessions, agentLines, drafts, setDraft, lastPrompts, busy, modelOptions, onStartAgent, onStopAgent, clearAgentLines } =
+    const { project, config, agentSessions, agentLines, drafts, setDraft, lastPrompts, running: executorRunning, modelOptions, onStartAgent, onStopAgent, clearAgentLines } =
         useProject()
 
     // Custom kinds (C4) may not have a seeded record yet — degrade to idle/empty.
@@ -44,6 +44,12 @@ export function AgentPanel({
     const lines = useMemo(() => agentLines[kind] ?? [], [agentLines, kind])
     const draft = drafts[kind] ?? { prompt: '', model: config.defaultModel }
     const running = session.status === 'running'
+
+    // What locks THIS composer: another agent session (one agent at a time), or —
+    // for the task-creator only — an executing run (it writes tasks/ the executor
+    // is iterating). Knowledge/notes/custom composers stay usable during a run.
+    const otherAgentRunning = Object.entries(agentSessions).some(([k, s]) => k !== kind && s.status === 'running')
+    const lockedByOther = otherAgentRunning || (executorRunning && kind === 'task-creator')
     const label = AGENT_LABELS[kind] ?? config.agentKinds.find((k) => k.kind === kind)?.label ?? kind
 
     // 1s ticker for the elapsed label while this agent streams.
@@ -90,7 +96,7 @@ export function AgentPanel({
     }
 
     return (
-        <div className="tf-stack-sm">
+        <tc-stack gap="0.75rem">
             {beforeComposer}
             <PromptComposer
                 project={project}
@@ -101,7 +107,7 @@ export function AgentPanel({
                 onModelChange={(v) => setDraft(kind, { model: v })}
                 modelOptions={modelOptions}
                 lastPrompt={lastPrompts[kind] ?? null}
-                busy={busy}
+                lockedByOther={lockedByOther}
                 running={running}
                 onSubmit={() => void onStartAgent(kind, submitOptions?.())}
                 onStop={() => void onStopAgent(kind)}
@@ -109,22 +115,22 @@ export function AgentPanel({
                 submitLabel={submitLabel}
             />
 
-            <div className="tf-actions">
-                <span className="tf-inline">
+            <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
+                <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
                     <tc-status-dot status={running ? 'busy' : 'offline'} pulse={running || undefined} />
                     <tc-badge variant={running ? 'info' : 'secondary'}>
                         {running ? `running · ${elapsedLabel(session.startedAt, now)}` : 'idle'}
                     </tc-badge>
                     {session.model && <tc-badge variant="secondary">{session.model}</tc-badge>}
-                </span>
+                </tc-stack>
                 <tc-text variant="muted" style={{ marginLeft: 'auto' }}>
                     {lines.length} line(s)
                 </tc-text>
                 <tc-button size="sm" variant="secondary" outline disabled={!lines.length || undefined} onClick={onCopyLog}>
-                    <span>⧉</span> Copy
+                    <tc-icon name="Copy" /> Copy
                 </tc-button>
                 <tc-button size="sm" variant="secondary" outline disabled={!lines.length || undefined} onClick={onDownloadLog}>
-                    <span>↓</span> Download
+                    <tc-icon name="Download" /> Download
                 </tc-button>
                 <tc-button
                     size="sm"
@@ -133,11 +139,11 @@ export function AgentPanel({
                     disabled={!lines.length || running || undefined}
                     onClick={() => clearAgentLines(kind)}
                 >
-                    <span>✕</span> Clear
+                    <tc-icon name="X" /> Clear
                 </tc-button>
-            </div>
+            </tc-stack>
 
             <tc-terminal-window ref={termRef} title={`${label.toLowerCase()} — ${project}`} />
-        </div>
+        </tc-stack>
     )
 }

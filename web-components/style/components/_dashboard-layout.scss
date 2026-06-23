@@ -133,7 +133,10 @@ tc-dashboard-layout {
 // ── Sidebar (mobile drawer) ─────────────────────────────────────────────────────
 
 .tc-dashboard-layout__sidebar {
-    position: absolute;
+    // Fixed to the viewport (not the component box) so the mobile/tablet drawer
+    // pins to the screen and stays put while the content scrolls behind it.
+    // ≥lg overrides this to a static grid rail.
+    position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
@@ -142,6 +145,10 @@ tc-dashboard-layout {
     flex-direction: column;
     width: var(--bs-dashboard-layout-sidebar-width);
     max-width: 85%;
+    // Always full viewport height so the flex column has a fixed box to divide:
+    // brand + panel stay pinned (flex: 0 0 auto), menu fills the rest and scrolls.
+    // Avoids the height:100% chain collapsing when an ancestor has no set height.
+    height: 100vh;
     background: var(--bs-dashboard-layout-sidebar-bg);
     border-right: 1px solid var(--bs-dashboard-layout-sidebar-border);
     border-radius: 0;
@@ -177,7 +184,8 @@ tc-dashboard-layout {
 // ── Backdrop overlay (mobile only) ──────────────────────────────────────────────
 
 .tc-dashboard-layout__overlay {
-    position: absolute;
+    // Fixed so the dim backdrop covers the whole screen behind the drawer.
+    position: fixed;
     inset: 0;
     z-index: 20;
     background: var(--bs-dashboard-layout-overlay-bg);

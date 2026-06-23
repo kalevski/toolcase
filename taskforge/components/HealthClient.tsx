@@ -4,6 +4,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTcEvents } from '@/lib/tc'
+import { tcIcon } from '@/lib/icons'
+import { toast } from '@/lib/toast'
 import type { HealthDetails } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 
@@ -44,22 +46,22 @@ export function HealthClient({ projects }: { projects: string[] }) {
     }
 
     const check = (ok: boolean, okText: string, failText: string) => (
-        <span className="tf-inline">
+        <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
             <tc-status-dot status={ok ? 'online' : 'offline'} />
             {ok ? okText : failText}
-        </span>
+        </tc-stack>
     )
 
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-helper-text text={helpTexts.health.intro} />
 
-            <div className="tf-grid-2">
+            <tc-grid columns="2" gap="1.25rem">
                 <tc-card>
                     <tc-heading slot="header" as="h3">
                         Environment
                     </tc-heading>
-                    <div className="tf-card-body tf-stack-sm">
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                         <div className="tf-kv">
                             <span>Agent CLI ({details.agentBin})</span>
                             {check(details.agentVersion !== null, details.agentVersion ?? '', 'not found / not executable')}
@@ -82,17 +84,29 @@ export function HealthClient({ projects }: { projects: string[] }) {
                             <span>Workspace search (FTS5)</span>
                             {check(details.searchAvailable, 'available', 'unavailable on this runtime')}
                         </div>
-                    </div>
+                    </tc-stack>
                 </tc-card>
 
                 <tc-card>
                     <tc-heading slot="header" as="h3">
                         Database
                     </tc-heading>
-                    <div className="tf-card-body tf-stack-sm">
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                         <div className="tf-kv">
                             <span>Path</span>
-                            <code>{details.db.path}</code>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
+                                <code style={{ wordBreak: 'break-all', textAlign: 'right' }}>{details.db.path}</code>
+                                <tc-icon-button
+                                    icon={tcIcon('Copy')}
+                                    label="Copy path"
+                                    variant="secondary"
+                                    outline
+                                    onClick={() => {
+                                        void navigator.clipboard?.writeText(details.db.path)
+                                        toast.success('Path copied')
+                                    }}
+                                />
+                            </span>
                         </div>
                         <div className="tf-kv">
                             <span>Size</span>
@@ -102,15 +116,15 @@ export function HealthClient({ projects }: { projects: string[] }) {
                             <span>Migration version</span>
                             <tc-badge variant="secondary">v{details.db.migrationVersion}</tc-badge>
                         </div>
-                    </div>
+                    </tc-stack>
                 </tc-card>
-            </div>
+            </tc-grid>
 
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Engines
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                     {details.engines.length === 0 && <tc-text variant="muted">No engine state tracked this process.</tc-text>}
                     {details.engines.map((e) => (
                         <div className="tf-kv" key={e.project}>
@@ -118,32 +132,32 @@ export function HealthClient({ projects }: { projects: string[] }) {
                             <tc-badge variant={e.state === 'IDLE' ? 'secondary' : 'info'}>{e.state}</tc-badge>
                         </div>
                     ))}
-                </div>
+                </tc-stack>
             </tc-card>
 
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Config (env-derived)
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                     {Object.entries(details.config).map(([k, v]) => (
                         <div className="tf-kv" key={k}>
                             <span>{k}</span>
                             <code>{String(v)}</code>
                         </div>
                     ))}
-                </div>
+                </tc-stack>
             </tc-card>
 
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Backups
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                     <tc-helper-text text={helpTexts.health.backup} />
-                    <div className="tf-actions" style={{ flexWrap: 'wrap' }}>
+                    <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                         <tc-button variant="primary" outline onClick={() => window.open('/api/admin/backup/db', '_blank')}>
-                            ⬇ Download DB backup
+                            <tc-icon name={tcIcon('Download')} /> Download DB backup
                         </tc-button>
                         {projects.length > 0 && (
                             <span style={{ display: 'inline-flex', gap: '0.5rem', alignItems: 'flex-end' }}>
@@ -162,13 +176,13 @@ export function HealthClient({ projects }: { projects: string[] }) {
                                     disabled={!exportProject || undefined}
                                     onClick={() => window.open(`/api/admin/backup/project/${exportProject}`, '_blank')}
                                 >
-                                    ⬇ Export tasks/knowledge/notes
+                                    <tc-icon name={tcIcon('Download')} /> Export tasks/knowledge/notes
                                 </tc-button>
                             </span>
                         )}
-                    </div>
-                </div>
+                    </tc-stack>
+                </tc-stack>
             </tc-card>
-        </div>
+        </tc-stack>
     )
 }

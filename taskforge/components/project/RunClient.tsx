@@ -16,9 +16,26 @@ const COMMIT_MODE_OPTIONS = [
     { value: 'ai', label: 'AI-generated' },
 ]
 
+/** Small uppercase divider label that groups related run-config controls. */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+    return (
+        <div
+            style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                opacity: 0.55,
+            }}
+        >
+            {children}
+        </div>
+    )
+}
+
 export function RunClient() {
     const {
-        project, config, snapshot, lines, running, busy, progressPct, startDisabled, modelOptions,
+        project, config, snapshot, lines, running, busy, dirty, progressPct, startDisabled, modelOptions,
         model, setModel, warmSession, setWarmSession, commitAfter, setCommitAfter, commitMode, setCommitMode,
         commitModel, setCommitModel, pushAfter, setPushAfter, branchPerRun, setBranchPerRun, review, setReview,
         openPr, setOpenPr, filter, setFilter, severity, setSeverity, projectFilter, setProjectFilter,
@@ -81,99 +98,124 @@ export function RunClient() {
     }
 
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-card>
-                <div className="tf-card-body tf-stack">
+                <tc-stack gap="1.25rem" style={{ padding: '1rem' }}>
                     <tc-heading as="h3">Run configuration</tc-heading>
-                    <div className="tf-form-row">
-                        <div style={{ minWidth: 200 }}>
-                            <tc-select ref={modelRef} label="Model" value={model} disabled={busy || undefined}>
-                                {modelOptions.map((o) => (
-                                    <tc-option key={o.value} value={o.value}>
-                                        {o.label}
-                                    </tc-option>
-                                ))}
-                            </tc-select>
-                        </div>
-                        <tc-tooltip content={helpTexts.run.warmSession}>
-                            <span>
-                                <tc-switch ref={warmRef} label="Warm session" checked={warmSession || undefined} disabled={busy || undefined} />
-                            </span>
-                        </tc-tooltip>
-                        <tc-tooltip content={helpTexts.run.commitAfter}>
-                            <span>
-                                <tc-switch ref={commitAfterRef} label="Commit after each task" checked={commitAfter || undefined} disabled={busy || undefined} />
-                            </span>
-                        </tc-tooltip>
-                        {commitAfter && (
-                            <>
-                                <tc-radio-group ref={commitModeRef} label="Commit message" inline value={commitMode} />
-                                {commitMode === 'ai' && (
-                                    <div style={{ minWidth: 180 }}>
-                                        <tc-select ref={commitModelRef} label="Commit model" value={commitModel} disabled={busy || undefined}>
-                                            {modelOptions.map((o) => (
-                                                <tc-option key={o.value} value={o.value}>
-                                                    {o.label}
-                                                </tc-option>
-                                            ))}
-                                        </tc-select>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                    <div className="tf-form-row">
-                        <tc-tooltip content={helpTexts.run.branchPerRun}>
-                            <span>
-                                <tc-switch ref={branchRef} label="Branch per run" checked={branchPerRun || undefined} disabled={busy || undefined} />
-                            </span>
-                        </tc-tooltip>
-                        <tc-tooltip content={helpTexts.run.pushAfter}>
-                            <span>
-                                <tc-switch ref={pushRef} label="Push after run" checked={pushAfter || undefined} disabled={busy || !config.canPush || undefined} />
-                            </span>
-                        </tc-tooltip>
-                        {branchPerRun && pushAfter && (
-                            <tc-tooltip content={helpTexts.run.openPr}>
+
+                    {/* ── Which tasks run ─────────────────────────────────── */}
+                    <tc-stack gap="0.75rem">
+                        <SectionLabel>Which tasks run</SectionLabel>
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
+                            <tc-input ref={filterRef} label="Task filter" placeholder="substring of path" value={filter} disabled={busy || undefined} />
+                            <tc-input ref={severityRef} label="Severity (CSV)" placeholder="high,critical" value={severity} disabled={busy || undefined} />
+                            <tc-input ref={projectFilterRef} label="Project (CSV)" placeholder="api,web" value={projectFilter} disabled={busy || undefined} />
+                            <tc-input ref={resumeRef} label="Resume from" placeholder="003-" value={resumeFrom} disabled={busy || undefined} />
+                        </tc-stack>
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
+                            <tc-tooltip content={helpTexts.run.reset}>
                                 <span>
-                                    <tc-switch ref={openPrRef} label="Open PR" checked={openPr || undefined} disabled={busy || undefined} />
+                                    <tc-switch ref={resetRef} label="Re-run all (reset)" checked={reset || undefined} disabled={busy || undefined} />
                                 </span>
                             </tc-tooltip>
-                        )}
-                        <tc-tooltip content={helpTexts.run.review}>
-                            <span>
-                                <tc-switch ref={reviewRef} label="Reviewer pass" checked={review || undefined} disabled={busy || undefined} />
-                            </span>
-                        </tc-tooltip>
-                    </div>
-                    <div className="tf-form-row">
-                        <tc-input ref={filterRef} label="Task filter" placeholder="substring of path" value={filter} disabled={busy || undefined} />
-                        <tc-input ref={severityRef} label="Severity (CSV)" placeholder="high,critical" value={severity} disabled={busy || undefined} />
-                        <tc-input ref={projectFilterRef} label="Project (CSV)" placeholder="api,web" value={projectFilter} disabled={busy || undefined} />
-                        <tc-input ref={resumeRef} label="Resume from" placeholder="003-" value={resumeFrom} disabled={busy || undefined} />
-                        <tc-tooltip content={helpTexts.run.reset}>
-                            <span>
-                                <tc-switch ref={resetRef} label="Re-run all (reset)" checked={reset || undefined} disabled={busy || undefined} />
-                            </span>
-                        </tc-tooltip>
-                        <tc-tooltip content={helpTexts.run.dryRun}>
-                            <span>
-                                <tc-switch ref={dryRunRef} label="Preview (dry run)" checked={dryRun || undefined} disabled={busy || undefined} />
-                            </span>
-                        </tc-tooltip>
-                    </div>
+                            <tc-tooltip content={helpTexts.run.dryRun}>
+                                <span>
+                                    <tc-switch ref={dryRunRef} label="Preview (dry run)" checked={dryRun || undefined} disabled={busy || undefined} />
+                                </span>
+                            </tc-tooltip>
+                        </tc-stack>
+                        <tc-helper-text text={helpTexts.run.filter} />
+                    </tc-stack>
 
-                    <tc-helper-text text={helpTexts.run.filter} />
+                    {/* ── Execution ───────────────────────────────────────── */}
+                    <tc-stack gap="0.75rem" style={{ borderTop: '1px solid var(--tc-border, #e7eaee)', paddingTop: '1rem' }}>
+                        <SectionLabel>Execution</SectionLabel>
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
+                            <div style={{ minWidth: 200 }}>
+                                <tc-select ref={modelRef} label="Model" value={model} disabled={busy || undefined}>
+                                    {modelOptions.map((o) => (
+                                        <tc-option key={o.value} value={o.value}>
+                                            {o.label}
+                                        </tc-option>
+                                    ))}
+                                </tc-select>
+                            </div>
+                            <tc-tooltip content={helpTexts.run.warmSession}>
+                                <span>
+                                    <tc-switch ref={warmRef} label="Warm session" checked={warmSession || undefined} disabled={busy || undefined} />
+                                </span>
+                            </tc-tooltip>
+                            <tc-tooltip content={helpTexts.run.review}>
+                                <span>
+                                    <tc-switch ref={reviewRef} label="Reviewer pass" checked={review || undefined} disabled={busy || undefined} />
+                                </span>
+                            </tc-tooltip>
+                        </tc-stack>
+                    </tc-stack>
 
+                    {/* ── Commit & push ───────────────────────────────────── */}
+                    <tc-stack gap="0.75rem" style={{ borderTop: '1px solid var(--tc-border, #e7eaee)', paddingTop: '1rem' }}>
+                        <SectionLabel>Commit &amp; push</SectionLabel>
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
+                            <tc-tooltip content={helpTexts.run.commitAfter}>
+                                <span>
+                                    <tc-switch ref={commitAfterRef} label="Commit after each task" checked={commitAfter || undefined} disabled={busy || undefined} />
+                                </span>
+                            </tc-tooltip>
+                            {commitAfter && (
+                                <>
+                                    <tc-radio-group ref={commitModeRef} label="Commit message" inline value={commitMode} />
+                                    {commitMode === 'ai' && (
+                                        <div style={{ minWidth: 180 }}>
+                                            <tc-select ref={commitModelRef} label="Commit model" value={commitModel} disabled={busy || undefined}>
+                                                {modelOptions.map((o) => (
+                                                    <tc-option key={o.value} value={o.value}>
+                                                        {o.label}
+                                                    </tc-option>
+                                                ))}
+                                            </tc-select>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </tc-stack>
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
+                            <tc-tooltip content={helpTexts.run.branchPerRun}>
+                                <span>
+                                    <tc-switch ref={branchRef} label="Branch per run" checked={branchPerRun || undefined} disabled={busy || undefined} />
+                                </span>
+                            </tc-tooltip>
+                            <tc-tooltip content={helpTexts.run.pushAfter}>
+                                <span>
+                                    <tc-switch ref={pushRef} label="Push after run" checked={pushAfter || undefined} disabled={busy || !config.canPush || undefined} />
+                                </span>
+                            </tc-tooltip>
+                            {branchPerRun && pushAfter && (
+                                <tc-tooltip content={helpTexts.run.openPr}>
+                                    <span>
+                                        <tc-switch ref={openPrRef} label="Open PR" checked={openPr || undefined} disabled={busy || undefined} />
+                                    </span>
+                                </tc-tooltip>
+                            )}
+                        </tc-stack>
+                    </tc-stack>
+
+                    {/* ── Launch ──────────────────────────────────────────── */}
+                    <tc-stack gap="0.75rem" style={{ borderTop: '1px solid var(--tc-border, #e7eaee)', paddingTop: '1rem' }}>
                     <tc-text variant="muted">
                         {matchingCount === 0
                             ? 'No tasks match the current selection.'
                             : `${matchingCount} task(s) match · ${willRunCount} will run${reset ? ' (reset)' : ''}.`}
                     </tc-text>
+                    {dirty && !dryRun && !busy && (
+                        <tc-text variant="muted">
+                            Working tree is dirty — clean it on the Git page, or enable Preview.
+                        </tc-text>
+                    )}
 
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                         <tc-button variant="success" onClick={onStart} disabled={startDisabled || undefined}>
-                            <span>▶</span> Start
+                            <tc-icon name="Play" /> Start
                         </tc-button>
                         {running && (
                             <>
@@ -191,32 +233,33 @@ export function RunClient() {
                         <tc-badge variant={running ? 'info' : 'secondary'}>{snapshot.state}</tc-badge>
                         <tc-tooltip content={helpTexts.run.history}>
                             <tc-button size="sm" variant="secondary" outline onClick={() => router.push(`/projects/${project}/runs`)}>
-                                ⏱ Run history
+                                <tc-icon name="History" /> Run history
                             </tc-button>
                         </tc-tooltip>
                     </div>
-                </div>
+                    </tc-stack>
+                </tc-stack>
             </tc-card>
 
             <ScheduleCard />
 
-            <div className="tf-stack-sm">
-                <div className="tf-actions" style={{ justifyContent: 'flex-end' }}>
+            <tc-stack gap="0.75rem">
+                <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                     <tc-text variant="muted" style={{ marginRight: 'auto' }}>
                         {lines.length} line(s)
                     </tc-text>
                     <tc-button size="sm" variant="secondary" outline disabled={!lines.length || undefined} onClick={onCopyLog}>
-                        <span>⧉</span> Copy
+                        <tc-icon name="Copy" /> Copy
                     </tc-button>
                     <tc-button size="sm" variant="secondary" outline disabled={!lines.length || undefined} onClick={onDownloadLog}>
-                        <span>↓</span> Download
+                        <tc-icon name="Download" /> Download
                     </tc-button>
                     <tc-button size="sm" variant="secondary" outline disabled={!lines.length || running || undefined} onClick={clearLines}>
-                        <span>✕</span> Clear
+                        <tc-icon name="X" /> Clear
                     </tc-button>
-                </div>
+                </tc-stack>
                 <tc-terminal-window ref={termRef} title={`run — ${project}`} />
-            </div>
-        </div>
+            </tc-stack>
+        </tc-stack>
     )
 }

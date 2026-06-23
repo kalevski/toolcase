@@ -3,14 +3,52 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTcProps } from '@/lib/tc'
 import { toTcLines, type TerminalLine } from '@/lib/terminal'
-import type { GitBranchList } from '@/server/domain/types'
+import type { GitBranchList, GitCommit } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'
 
+/** Compact relative time for commit dates ("2h ago"). */
+function relativeTime(iso: string): string {
+    const delta = Date.now() - new Date(iso).getTime()
+    if (!Number.isFinite(delta) || delta < 0) return 'just now'
+    const minutes = Math.floor(delta / 60000)
+    if (minutes < 1) return 'just now'
+    if (minutes < 60) return `${minutes}m ago`
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `${hours}h ago`
+    return `${Math.floor(hours / 24)}d ago`
+}
+
+function CommitRow({ c }: { c: GitCommit }) {
+    return (
+        <div className="tf-kv">
+            <tc-stack inline direction="horizontal" gap="0.4rem" align="center" style={{ minWidth: 0 }}>
+                <tc-badge variant="secondary">{c.sha.slice(0, 8)}</tc-badge>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {c.subject}
+                </span>
+            </tc-stack>
+            <tc-text variant="muted" style={{ whiteSpace: 'nowrap' }}>
+                {c.author} · {relativeTime(c.date)}
+            </tc-text>
+        </div>
+    )
+}
+
 export function GitClient() {
-    const { project, git, busy, running, dirty, refreshGit } = useProject()
+    const { project, git, busy, running, dirty, refreshGit, commits, onPush, onGitOp, onNewBranch, loadCommits } =
+        useProject()
 
     const [branches, setBranches] = useState<GitBranchList | null>(null)
+
+    // Load the unpushed + recent commit lists once on mount; SSE `commit`/`git`
+    // frames keep the status fresh, and every op handler refreshes commits itself.
+    useEffect(() => {
+        void loadCommits()
+    }, [loadCommits])
+
+    const canPush = git?.canPush ?? false
+    const hasRemote = (git?.remotes?.length ?? 0) > 0
 
     const loadBranches = useCallback(async () => {
         try {
@@ -87,9 +125,13 @@ export function GitClient() {
         } finally {
             setPending(false)
             void refreshGit()
+            // A checkout/branch/commit can change the branch list and commit
+            // history — refresh both so the cards above don't go stale.
+            void loadBranches()
+            void loadCommits()
             inputRef.current?.focus()
         }
-    }, [input, pending, busy, project, refreshGit])
+    }, [input, pending, busy, project, refreshGit, loadBranches, loadCommits])
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -118,15 +160,17 @@ export function GitClient() {
     // ── render ────────────────────────────────────────────────────────────────
 
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Repository status
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                     <div className="tf-kv">
                         <span>Branch</span>
-                        <tc-badge variant="secondary">⎇ {git?.branch ?? '—'}</tc-badge>
+                        <tc-badge variant="secondary">
+                            <tc-icon name="GitBranch" /> {git?.branch ?? '—'}
+                        </tc-badge>
                     </div>
                     {branches && branches.local.length > 1 && (
                         <div className="tf-kv">
@@ -144,16 +188,18 @@ export function GitClient() {
                     )}
                     <div className="tf-kv">
                         <span>Working tree</span>
-                        <span className="tf-inline">
+                        <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
                             <tc-status-dot status={dirty ? 'busy' : 'online'} />
                             {dirty ? `dirty · ${git?.dirtyFiles.length ?? 0} file(s)` : 'clean'}
-                        </span>
+                        </tc-stack>
                     </div>
                     {git && (git.ahead > 0 || git.behind > 0) && (
                         <div className="tf-kv">
                             <span>Sync</span>
                             <tc-badge variant="info">
-                                ↑{git.ahead} ↓{git.behind}
+                                <tc-icon name="ArrowUp" />
+                                {git.ahead} <tc-icon name="Download" />
+                                {git.behind}
                             </tc-badge>
                         </div>
                     )}
@@ -163,14 +209,109 @@ export function GitClient() {
                             <tc-text variant="muted">{git.remotes.join(', ')}</tc-text>
                         </div>
                     ) : null}
-                </div>
+                </tc-stack>
+            </tc-card>
+
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Git actions
+                </tc-heading>
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
+                    <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
+                        <tc-button
+                            variant="primary"
+                            disabled={busy || !canPush || git?.ahead === 0 || undefined}
+                            onClick={() => void onPush()}
+                        >
+                            <tc-icon name="ArrowUp" /> Push
+                            {git && git.ahead > 0 ? ` (${git.ahead})` : ''}
+                        </tc-button>
+                        <tc-button
+                            variant="secondary"
+                            outline
+                            disabled={busy || !hasRemote || undefined}
+                            onClick={() => void onGitOp('pull')}
+                        >
+                            <tc-icon name="Download" /> Pull
+                        </tc-button>
+                        <tc-button
+                            variant="secondary"
+                            outline
+                            disabled={busy || !hasRemote || undefined}
+                            onClick={() => void onGitOp('fetch')}
+                        >
+                            <tc-icon name="Download" /> Fetch
+                        </tc-button>
+                        <tc-button variant="secondary" outline disabled={busy || undefined} onClick={() => void onNewBranch()}>
+                            <tc-icon name="GitBranch" /> New branch
+                        </tc-button>
+                        <tc-button
+                            variant="secondary"
+                            outline
+                            disabled={busy || !dirty || undefined}
+                            onClick={() => void onGitOp('stash-push')}
+                        >
+                            Stash
+                        </tc-button>
+                        <tc-button
+                            variant="secondary"
+                            outline
+                            disabled={busy || undefined}
+                            onClick={() => void onGitOp('stash-pop')}
+                        >
+                            Stash pop
+                        </tc-button>
+                        <tc-button
+                            variant="danger"
+                            outline
+                            disabled={busy || !dirty || undefined}
+                            onClick={() => void onGitOp('discard')}
+                        >
+                            <tc-icon name="X" /> Discard
+                        </tc-button>
+                    </tc-stack>
+                </tc-stack>
+            </tc-card>
+
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Unpushed commits
+                </tc-heading>
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
+                    {commits.unpushed.length === 0 ? (
+                        <tc-text variant="muted">Nothing to push — local is in sync with the remote.</tc-text>
+                    ) : (
+                        <tc-stack gap="0.75rem">
+                            {commits.unpushed.map((c) => (
+                                <CommitRow key={c.sha} c={c} />
+                            ))}
+                        </tc-stack>
+                    )}
+                </tc-stack>
+            </tc-card>
+
+            <tc-card>
+                <tc-heading slot="header" as="h3">
+                    Recent history
+                </tc-heading>
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
+                    {commits.recent.length === 0 ? (
+                        <tc-text variant="muted">No commits yet.</tc-text>
+                    ) : (
+                        <tc-stack gap="0.75rem">
+                            {commits.recent.map((c) => (
+                                <CommitRow key={c.sha} c={c} />
+                            ))}
+                        </tc-stack>
+                    )}
+                </tc-stack>
             </tc-card>
 
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Terminal
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                     <div
                         ref={wrapRef}
                         className="tf-git-terminal"
@@ -209,14 +350,16 @@ export function GitClient() {
                         </div>
                     </div>
                     <tc-helper-text text={helpTexts.git.terminal} />
-                </div>
+                </tc-stack>
             </tc-card>
 
-            {dirty && git && running && (
+            {dirty && git && (
                 <tc-banner variant="warning">
-                    <strong>Working tree is dirty.</strong> Start is blocked until it is clean.
+                    <strong>Working tree is dirty</strong> ({git.dirtyFiles.length} file(s)). Start on the Run page is
+                    blocked until it is clean — commit, stash, or discard the changes
+                    {running ? ', or wait for the current run to finish.' : '.'}
                 </tc-banner>
             )}
-        </div>
+        </tc-stack>
     )
 }

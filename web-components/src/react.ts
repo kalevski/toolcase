@@ -1,3 +1,5 @@
+'use client'
+
 // React bridge for @toolcase/web-components.
 //
 // Import this module once in your React app to:

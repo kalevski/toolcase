@@ -3,12 +3,21 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
+import { useTc } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import type { SkillSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
 import { helpTexts } from './helpTexts'
 
 type Col = { key: string; header: string; align?: 'right'; render: (s: SkillSummary) => React.ReactNode }
+
+// tc-advanced-table header descriptors; body rows stay slotted React <tr> so the
+// edit/delete icon buttons keep their onClick handlers.
+const ADV_COLUMNS = [
+    { key: 'name', label: 'Name' },
+    { key: 'description', label: 'Description' },
+    { key: 'actions', label: '', align: 'right' as const },
+]
 
 export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
     const router = useRouter()
@@ -32,6 +41,9 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
         }
     }
 
+    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
+    const tableKey = rows.map((s) => s.name).join('_')
+
     const columns: Col[] = [
         { key: 'name', header: 'Name', render: (s) => <code>{s.name}</code> },
         { key: 'description', header: 'Description', render: (s) => s.description || <em>—</em> },
@@ -54,7 +66,7 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
                 <tc-heading as="h1">Skills</tc-heading>
                 <div style={{ flex: 1 }} />
                 <tc-button variant="primary" onClick={() => router.push('/skills/new')}>
-                    <span>＋</span> New skill
+                    <tc-icon name="Plus" /> New skill
                 </tc-button>
             </div>
 
@@ -66,28 +78,17 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
                     <p>Create a user-level skill that Claude will auto-discover while solving tasks.</p>
                 </tc-empty-state>
             ) : (
-                <table className="table table-hover">
-                    <thead>
-                        <tr>
+                <tc-advanced-table key={tableKey} ref={tableRef}>
+                    {rows.map((s) => (
+                        <tr key={s.name}>
                             {columns.map((c) => (
-                                <th key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
-                                    {c.header}
-                                </th>
+                                <td key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
+                                    {c.render(s)}
+                                </td>
                             ))}
                         </tr>
-                    </thead>
-                    <tbody>
-                        {rows.map((s) => (
-                            <tr key={s.name}>
-                                {columns.map((c) => (
-                                    <td key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
-                                        {c.render(s)}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                    ))}
+                </tc-advanced-table>
             )}
         </div>
     )

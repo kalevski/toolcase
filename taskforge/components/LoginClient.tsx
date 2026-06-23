@@ -34,7 +34,9 @@ export function LoginClient({ error }: { error?: string }) {
                 ref={ref}
                 title="TaskForge"
                 description="Drive the Claude Code CLI over your local repositories."
-            />
+            >
+                <tc-brand slot="logo" primary-text="Task Forge" color="#6c5ce7" />
+            </tc-login>
         </div>
     )
 }

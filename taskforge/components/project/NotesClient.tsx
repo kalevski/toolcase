@@ -3,13 +3,22 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTcEvents, detailValue } from '@/lib/tc'
+import { useTc, useTcEvents, detailValue } from '@/lib/tc'
 import type { NoteDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm, usePrompt } from '../ConfirmModal'
 import { helpTexts } from '../helpTexts'
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
+
+// tc-advanced-table header descriptors; rows stay slotted React <tr> so the
+// per-row Delete button and row-open navigation keep their handlers.
+const ADV_COLUMNS = [
+    { key: 'id', label: 'File', width: '30%' },
+    { key: 'title', label: 'Title' },
+    { key: 'updated', label: 'Updated', width: '9rem' },
+    { key: 'actions', label: '', width: '7rem' },
+]
 
 function relativeTime(iso: string): string {
     const delta = Date.now() - new Date(iso).getTime()
@@ -37,7 +46,7 @@ export function NotesClient() {
 
     const editorRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setEditor(detailValue<string>(e)) })
 
-    const noteAgentRunning = agentSessions['note-writer'].status === 'running'
+    const noteAgentRunning = agentSessions['note-writer']?.status === 'running'
     const dirtyEditor = loaded !== null && editor !== loaded.content
 
     // The id of the note whose content we currently want loaded. Lets a slow
@@ -99,7 +108,7 @@ export function NotesClient() {
             return
         }
         if (!dirtyEditor) {
-            void loadNote(openId).catch(() => {})
+            void loadNote(openId).catch(() => toast.error('Failed to refresh note content.'))
         }
         // eslint-disable-next-line
     }, [notes, noteAgentRunning])
@@ -210,43 +219,47 @@ export function NotesClient() {
         },
     ]
 
+    const tableKey = notes.map((n) => n.id).join('_')
+    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
+
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-card>
                 <div slot="header" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <tc-heading as="h3">Notes</tc-heading>
                     <tc-button size="sm" variant="primary" style={{ marginLeft: 'auto' }} onClick={() => void onNew()}>
-                        <span>＋</span> New note
+                        <tc-icon name="Plus" /> New note
                     </tc-button>
                 </div>
-                <table className="table table-hover">
-                    <thead>
+                <tc-advanced-table key={tableKey} ref={tableRef}>
+                    {notes.length === 0 && (
                         <tr>
+                            <td colSpan={4} style={{ textAlign: 'center', opacity: 0.6 }}>
+                                No notes yet — create one, or let the notes agent (Agents page) write one.
+                            </td>
+                        </tr>
+                    )}
+                    {notes.map((n) => (
+                        <tr
+                            key={n.id}
+                            style={{ cursor: 'pointer' }}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Open notes/${n.id}`}
+                            onClick={() => void openNote(n.id)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    void openNote(n.id)
+                                }
+                            }}
+                        >
                             {columns.map((c) => (
-                                <th key={c.key} style={c.width ? { width: c.width } : undefined}>
-                                    {c.header}
-                                </th>
+                                <td key={c.key}>{c.render(n)}</td>
                             ))}
                         </tr>
-                    </thead>
-                    <tbody>
-                        {notes.length === 0 ? (
-                            <tr>
-                                <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
-                                    No notes yet — create one, or let the notes agent (Agents page) write one.
-                                </td>
-                            </tr>
-                        ) : (
-                            notes.map((n) => (
-                                <tr key={n.id} style={{ cursor: 'pointer' }} onClick={() => void openNote(n.id)}>
-                                    {columns.map((c) => (
-                                        <td key={c.key}>{c.render(n)}</td>
-                                    ))}
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                    ))}
+                </tc-advanced-table>
                 <div className="tf-card-body">
                     <tc-helper-text text={helpTexts.notes.storage} />
                 </div>
@@ -257,14 +270,14 @@ export function NotesClient() {
                     <tc-heading slot="header" as="h3">
                         Edit — {openId}
                     </tc-heading>
-                    <div className="tf-card-body tf-stack-sm">
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                         {noteAgentRunning && <tc-helper-text variant="warning" text={helpTexts.notes.agentRunning} />}
                         {loaded === null ? (
                             <tc-text variant="muted">Loading…</tc-text>
                         ) : (
                             <tc-markdown-editor ref={editorRef} value={editor} height="420" disabled={noteAgentRunning || undefined} />
                         )}
-                        <div className="tf-actions">
+                        <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                             <tc-button
                                 variant="primary"
                                 loading={saving || undefined}
@@ -281,10 +294,10 @@ export function NotesClient() {
                             >
                                 Discard local changes
                             </tc-button>
-                        </div>
-                    </div>
+                        </tc-stack>
+                    </tc-stack>
                 </tc-card>
             )}
-        </div>
+        </tc-stack>
     )
 }

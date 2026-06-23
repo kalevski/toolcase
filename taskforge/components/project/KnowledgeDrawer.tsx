@@ -74,7 +74,7 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
     return (
         <tc-drawer ref={drawerRef} side="right" size="large" title={docId ?? ''}>
             <div style={{ padding: '1.25rem' }}>
-                <div className="tf-actions" style={{ marginBottom: '0.75rem' }}>
+                <tc-stack direction="horizontal" gap="0.75rem" wrap align="center" style={{ marginBottom: '0.75rem' }}>
                     <tc-badge variant="secondary">knowledge/{docId}</tc-badge>
                     {docId && !isIndex && editDraft === null && (
                         <tc-button
@@ -86,28 +86,28 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
                             title={helpTexts.knowledge.edit}
                             onClick={() => content !== null && setEditing({ id: docId, draft: content })}
                         >
-                            ✎ Edit
+                            <tc-icon name="Pencil" /> Edit
                         </tc-button>
                     )}
-                </div>
+                </tc-stack>
                 {loading && (
                     <div style={{ padding: '2rem', textAlign: 'center' }}>
                         <tc-spinner />
                     </div>
                 )}
                 {editDraft !== null && docId ? (
-                    <div className="tf-stack-sm">
+                    <tc-stack gap="0.75rem">
                         <tc-helper-text text={helpTexts.knowledge.edit} />
                         <tc-markdown-editor ref={editorRef} value={editDraft} height="440" />
-                        <div className="tf-actions">
+                        <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                             <tc-button variant="primary" loading={saving || undefined} disabled={saving || undefined} onClick={() => void onSave()}>
                                 Save
                             </tc-button>
                             <tc-button variant="secondary" outline onClick={() => setEditing(null)}>
                                 Cancel
                             </tc-button>
-                        </div>
-                    </div>
+                        </tc-stack>
+                    </tc-stack>
                 ) : (
                     content !== null && (
                         <pre

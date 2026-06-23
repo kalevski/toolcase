@@ -52,11 +52,61 @@ export class Button extends HTMLElement {
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-button-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
-        this.render()
-        const newInner = this.querySelector('.tc-button-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
+        const control = this.firstElementChild as HTMLElement | null
+        const content = this.querySelector('.tc-button-content')
+        const wantAnchor = this.href != null
+        const isAnchor = control?.tagName === 'A'
+
+        // Structural changes (metal skin, or switching between <a> and <button>)
+        // can't be patched in place — fall back to a full re-render, preserving the
+        // slotted content's child nodes across it.
+        if (!control || !content || this.skin === 'metal' || wantAnchor !== isAnchor) {
+            const slotContent = content ? Array.from(content.childNodes) : []
+            this.render()
+            const newInner = this.querySelector('.tc-button-content')
+            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
+            return
+        }
+
+        // Cosmetic/state attribute change (variant, outline, size, disabled,
+        // loading, type): patch the existing control IN PLACE. Rewriting innerHTML
+        // here would detach the `.tc-button-content` node — and any framework-managed
+        // children inside it (e.g. React's text/elements) — which then fights the
+        // host's DOM reconciliation and blanks the button on the next render.
+        const variant = this.variant
+        const outline = this.outline
+        const size = this.size
+        const isDisabled = this.disabled || this.loading
+        control.className =
+            `btn ${outline ? `btn-outline-${variant}` : `btn-${variant}`}${size ? ` btn-${size}` : ''}` +
+            (wantAnchor && isDisabled ? ' disabled' : '')
+
+        if (wantAnchor) {
+            control.setAttribute('href', this.href as string)
+            if (isDisabled) {
+                control.setAttribute('aria-disabled', 'true')
+                control.setAttribute('tabindex', '-1')
+            } else {
+                control.removeAttribute('aria-disabled')
+                control.removeAttribute('tabindex')
+            }
+        } else {
+            control.setAttribute('type', this.type)
+            if (isDisabled) control.setAttribute('disabled', '')
+            else control.removeAttribute('disabled')
+        }
+
+        // The loading spinner sits just before `.tc-button-content`.
+        const spinner = control.querySelector(':scope > .spinner-border')
+        if (this.loading && !spinner) {
+            const s = document.createElement('span')
+            s.className = 'spinner-border spinner-border-sm'
+            s.setAttribute('role', 'status')
+            s.setAttribute('aria-hidden', 'true')
+            control.insertBefore(s, content)
+        } else if (!this.loading && spinner) {
+            spinner.remove()
+        }
     }
 
     get variant(): ButtonVariant {

@@ -1,24 +1,40 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTcProps } from '@/lib/tc'
+import { useTcProps, escapeHtml } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import type { TelemetrySummary } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
+import { useConfirm } from '../ConfirmModal'
 import { helpTexts } from '../helpTexts'
 
 const yFmt = (v: number) => `$${v.toFixed(2)}`
 
+// Read-only per-model breakdown → tc-table (HTML-string cells; model name escaped).
+type PerModelRow = TelemetrySummary['perModel'][number]
+const PERMODEL_COLUMNS = [
+    { key: 'model', header: 'Model', render: (m: PerModelRow) => `<code>${escapeHtml(m.model)}</code>` },
+    { key: 'count', header: 'Attempts', width: '7rem', render: (m: PerModelRow) => String(m.count) },
+    { key: 'avgElapsed', header: 'Avg elapsed', width: '8rem', render: (m: PerModelRow) => `${escapeHtml(m.avgElapsed)}s` },
+    {
+        key: 'cost',
+        header: 'Cost',
+        width: '7rem',
+        render: (m: PerModelRow) => (m.costUsd > 0 ? `$${m.costUsd.toFixed(2)}` : '—'),
+    },
+]
+
 export function OverviewClient() {
     const router = useRouter()
+    const confirm = useConfirm()
     const { project, tasks, git, snapshot, wakeAt } = useProject()
 
-    // D1 — telemetry aggregates (loaded lazily; absent until first run)
+    // D1 — telemetry aggregates (loaded lazily; absent until first run).
     const [summary, setSummary] = useState<TelemetrySummary | null>(null)
-    useEffect(() => {
+    const fetchSummary = useCallback(() => {
         let cancelled = false
         fetch(`/api/projects/${project}/telemetry/summary`)
             .then((r) => (r.ok ? r.json() : null))
@@ -29,10 +45,36 @@ export function OverviewClient() {
         return () => {
             cancelled = true
         }
-    }, [project, snapshot.state])
+    }, [project])
+
+    // Initial load (and on project change).
+    useEffect(() => fetchSummary(), [fetchSummary])
+
+    // Refetch only when the run settles (state === 'IDLE'); depending on the raw
+    // snapshot.state would refetch on every mid-run transition (IDLE→RUNNING→
+    // SLEEPING→…). The `settled` boolean is stable across those transitions, so
+    // this fires once when the engine returns to IDLE. Mount is already covered
+    // by the initial-load effect above, so skip the first run to avoid a
+    // duplicate fetch when the page opens while already IDLE.
+    const settled = snapshot.state === 'IDLE'
+    const mounted = useRef(false)
+    useEffect(() => {
+        if (!mounted.current) {
+            mounted.current = true
+            return
+        }
+        if (settled) return fetchSummary()
+    }, [settled, fetchSummary])
 
     const [generating, setGenerating] = useState(false)
     const resetClaudeMd = async () => {
+        const ok = await confirm({
+            title: 'Reset CLAUDE.md to template?',
+            body: 'This overwrites the project CLAUDE.md with the default template. Any local edits will be lost. This cannot be undone.',
+            confirmLabel: 'Reset CLAUDE.md',
+            confirmVariant: 'warning',
+        })
+        if (!ok) return
         setGenerating(true)
         try {
             const res = await fetch(`/api/projects/${project}/claude-md`, { method: 'POST' })
@@ -122,30 +164,34 @@ export function OverviewClient() {
     )
     const barChartRef = useTcProps<HTMLElement>({ data: modelBars })
 
+    const perModelRef = useTcProps<HTMLElement>(
+        useMemo(() => ({ columns: PERMODEL_COLUMNS, data: summary?.perModel ?? [] }), [summary]),
+    )
+
     return (
-        <div className="tf-stack">
+        <tc-stack gap="1.25rem">
             <tc-helper-text text={helpTexts.overview.how} />
 
             <tc-metric-grid ref={topMetricsRef} columns={4} />
 
-            <div className="tf-grid-2">
+            <tc-grid columns="2" gap="1.25rem">
                 <tc-card>
                     <tc-heading slot="header" as="h3">
                         Git
                     </tc-heading>
-                    <div className="tf-card-body tf-stack-sm">
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                         {git ? (
                             <>
                                 <div className="tf-kv">
                                     <span>Branch</span>
-                                    <tc-badge variant="secondary">⎇ {git.branch}</tc-badge>
+                                    <tc-badge variant="secondary"><tc-icon name="GitBranch" /> {git.branch}</tc-badge>
                                 </div>
                                 <div className="tf-kv">
                                     <span>Working tree</span>
-                                    <span className="tf-inline">
+                                    <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
                                         <tc-status-dot status={git.dirty ? 'busy' : 'online'} />
                                         {git.dirty ? `dirty · ${git.dirtyFiles.length} file(s)` : 'clean'}
-                                    </span>
+                                    </tc-stack>
                                 </div>
                                 {(git.ahead > 0 || git.behind > 0) && (
                                     <div className="tf-kv">
@@ -162,14 +208,14 @@ export function OverviewClient() {
                         ) : (
                             <tc-text variant="muted">Not a git repository, or status unavailable.</tc-text>
                         )}
-                    </div>
+                    </tc-stack>
                 </tc-card>
 
                 <tc-card>
                     <tc-heading slot="header" as="h3">
                         Run
                     </tc-heading>
-                    <div className="tf-card-body tf-stack-sm">
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                         <div className="tf-kv">
                             <span>State</span>
                             <tc-badge variant={snapshot.state === 'IDLE' ? 'secondary' : 'info'}>{snapshot.state}</tc-badge>
@@ -181,61 +227,38 @@ export function OverviewClient() {
                             <span>Last model</span>
                             <tc-text>{snapshot.model ?? '—'}</tc-text>
                         </div>
-                        <div className="tf-actions">
+                        <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                             <tc-button variant="primary" onClick={() => router.push(`/projects/${project}/run`)}>
                                 Open run console
                             </tc-button>
                             <tc-button variant="secondary" outline onClick={() => router.push(`/projects/${project}/tasks`)}>
                                 Manage tasks
                             </tc-button>
-                        </div>
-                    </div>
+                        </tc-stack>
+                    </tc-stack>
                 </tc-card>
-            </div>
+            </tc-grid>
 
             {summary && (summary.totals.done > 0 || summary.totals.error > 0) && (
                 <tc-card>
                     <tc-heading slot="header" as="h3">
                         Insights (last 30 days)
                     </tc-heading>
-                    <div className="tf-card-body tf-stack-sm">
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                         <tc-metric-grid ref={insightsMetricsRef} columns={4} />
                         {summary.perDay.length > 0 && (
-                            <div className="tf-grid-2">
+                            <tc-grid columns="2" gap="1.25rem">
                                 <tc-line-chart ref={tasksChartRef} title="Tasks per day" height="200" />
                                 {showCostChart ? (
                                     <tc-line-chart ref={costChartRef} title="Cost per day (USD)" height="200" />
                                 ) : (
                                     <tc-bar-chart ref={barChartRef} title="Attempts by model" height="200" />
                                 )}
-                            </div>
+                            </tc-grid>
                         )}
-                        {summary.perModel.length > 0 && (
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>Model</th>
-                                        <th style={{ width: '7rem' }}>Attempts</th>
-                                        <th style={{ width: '8rem' }}>Avg elapsed</th>
-                                        <th style={{ width: '7rem' }}>Cost</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {summary.perModel.map((m) => (
-                                        <tr key={m.model}>
-                                            <td>
-                                                <code>{m.model}</code>
-                                            </td>
-                                            <td>{m.count}</td>
-                                            <td>{m.avgElapsed}s</td>
-                                            <td>{m.costUsd > 0 ? `$${m.costUsd.toFixed(2)}` : '—'}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
+                        {summary.perModel.length > 0 && <tc-table ref={perModelRef} />}
                         {(summary.slowest.length > 0 || summary.expensive.length > 0 || summary.retried.length > 0) && (
-                            <div className="tf-grid-2">
+                            <tc-grid columns="2" gap="1.25rem">
                                 {summary.slowest.length > 0 && (
                                     <div>
                                         <tc-text variant="muted">Slowest tasks</tc-text>
@@ -274,9 +297,9 @@ export function OverviewClient() {
                                         ))}
                                     </div>
                                 ) : null}
-                            </div>
+                            </tc-grid>
                         )}
-                    </div>
+                    </tc-stack>
                 </tc-card>
             )}
 
@@ -284,14 +307,14 @@ export function OverviewClient() {
                 <tc-heading slot="header" as="h3">
                     Workspace
                 </tc-heading>
-                <div className="tf-card-body tf-stack-sm">
+                <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
                     <tc-text variant="muted">{helpTexts.overview.claudeMd}</tc-text>
-                    <div className="tf-actions">
+                    <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                         <tc-button variant="secondary" outline loading={generating || undefined} disabled={generating || undefined} onClick={resetClaudeMd}>
                             Reset CLAUDE.md to template
                         </tc-button>
-                    </div>
-                </div>
+                    </tc-stack>
+                </tc-stack>
             </tc-card>
 
             {total === 0 && (
@@ -303,6 +326,6 @@ export function OverviewClient() {
                     </p>
                 </tc-empty-state>
             )}
-        </div>
+        </tc-stack>
     )
 }
