@@ -1190,3 +1190,183 @@ new ConsoleLogReporter({ formatter: myFmt })
 - Importing the default export instantiates one `LoggerFactory` + one `ConsoleLogReporter` — safe in both Node and browser.
 - No async / no buffering — every `logger.x()` call dispatches synchronously.
 - Timestamps are epoch milliseconds from `this.clock()` (default `Date.now()`). ISO formatting happens in reporters and formatters, not in the logger.
+
+---
+
+## @toolcase/logging/node
+
+Node-only exports. Uses `node:fs` (write streams) and `node:async_hooks` (`AsyncLocalStorage`). Import from the `/node` subpath:
+
+```ts
+import {
+    StreamReporter,          // writable-stream transport (base of FileLogReporter)
+    FileLogReporter,         // file-backed reporter with rotation
+    defaultStreamFormatter,  // textFormatter alias — default for StreamReporter
+    AsyncContext,            // AsyncLocalStorage wrapper for per-request fields
+    ContextualReporter,      // reporter decorator that injects AsyncContext fields
+} from '@toolcase/logging/node'
+
+// Types:
+import type {
+    StreamLogFormatter,      // alias for LogFormatter
+    StreamReporterOptions,
+    FileLogFormatter,        // alias for StreamLogFormatter
+    FileLogReporterOptions,
+} from '@toolcase/logging/node'
+```
+
+### `StreamReporter`
+
+Base class for writable-stream transports. Writes one formatted line per entry. Supports optional size-based rotation via `maxBytes` — when the accumulated byte count of the current stream exceeds the threshold, new lines are queued while `openRotatedStream()` runs asynchronously, then flushed to the new stream.
+
+```ts
+import { createWriteStream } from 'node:fs'
+import { StreamReporter, defaultStreamFormatter } from '@toolcase/logging/node'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new StreamReporter(
+    createWriteStream('./app.log', { flags: 'a' }),
+    {
+        formatter: defaultStreamFormatter,  // default; textFormatter output
+        maxBytes: 5 * 1024 * 1024,         // rotate at 5 MB (0 = never rotate)
+        onError: err => console.error('stream error', err),
+    }
+)
+
+const factory = new LoggerFactory([reporter])
+factory.getLogger('boot').info('started')
+
+await reporter.close()   // flushes pending rotation, then ends the stream
+```
+
+API:
+
+```ts
+interface StreamReporterOptions {
+    formatter?: LogFormatter   // default: defaultStreamFormatter (textFormatter)
+    maxBytes?: number          // rotation threshold in bytes; 0 = disabled (default)
+    onError?: (err: Error) => void
+}
+
+type StreamLogFormatter = LogFormatter   // alias
+
+class StreamReporter extends LogReporter {
+    constructor(stream: Writable, options?: StreamReporterOptions)
+    log(level, scope, time, fields, messages): void
+    close(): Promise<void>   // waits for any in-progress rotation, then ends the stream
+}
+```
+
+`defaultStreamFormatter` is the same as `textFormatter` from `@toolcase/logging` — produces `LEVEL [ISO-timestamp] | scope: …messages`.
+
+Subclass `StreamReporter` and override the protected `openRotatedStream(): Promise<void>` hook to swap in a new destination when `maxBytes` is exceeded. `FileLogReporter` uses this hook to rename archive files and open a fresh `createWriteStream`.
+
+### `FileLogReporter`
+
+File-backed reporter that extends `StreamReporter`. Opens `filePath` for writing and rotates when the file grows past `maxBytes`. During rotation the current file is renamed to `filePath.1`, older archives shift up (`filePath.1` → `filePath.2`, …), and any archive numbered above `maxFiles` is deleted.
+
+```ts
+import { FileLogReporter } from '@toolcase/logging/node'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new FileLogReporter('./logs/app.log', {
+    append: true,              // default — append; false truncates on open
+    maxBytes: 10 * 1024 * 1024,  // rotate at 10 MB
+    maxFiles: 5,               // keep app.log.1 … app.log.5 (default)
+    formatter: defaultStreamFormatter,
+    onError: err => console.error(err),
+})
+
+const factory = new LoggerFactory([reporter])
+factory.getLogger('app').info('boot complete')
+
+await reporter.close()
+```
+
+API:
+
+```ts
+interface FileLogReporterOptions extends StreamReporterOptions {
+    append?: boolean    // default true (append); false → truncate on open
+    maxFiles?: number   // default 5; archives kept are filePath.1 … filePath.maxFiles
+}
+
+type FileLogFormatter = StreamLogFormatter   // alias
+
+class FileLogReporter extends StreamReporter {
+    constructor(filePath: string, options?: FileLogReporterOptions)
+}
+```
+
+Rotation sequence: end current stream → delete `filePath.maxFiles` → rename `filePath.N` → `filePath.N+1` (from highest down) → rename `filePath` → `filePath.1` → open new `filePath` in append mode.
+
+### `AsyncContext`
+
+Thin wrapper around Node.js `AsyncLocalStorage`. Stores a `Record<string, any>` that is visible throughout an `async_hooks` continuation. Each `run()` call merges new fields on top of the parent store — deeper calls extend, not replace.
+
+```ts
+import { AsyncContext } from '@toolcase/logging/node'
+
+const ctx = new AsyncContext()
+
+// Wrap an incoming request handler:
+ctx.run({ requestId: 'r-42', userId: 7 }, async () => {
+    ctx.getFields()                  // → { requestId: 'r-42', userId: 7 }
+
+    // Nested run merges on top:
+    ctx.run({ route: 'POST /orders' }, async () => {
+        ctx.getFields()              // → { requestId: 'r-42', userId: 7, route: 'POST /orders' }
+    })
+})
+
+ctx.getFields()                      // → {} (outside any run)
+```
+
+API:
+
+```ts
+class AsyncContext {
+    constructor()
+    run<T>(fields: Record<string, any>, fn: () => T): T
+    getFields(): Record<string, any>   // current store, or {} when called outside a run
+}
+```
+
+### `ContextualReporter`
+
+Reporter decorator that reads the current `AsyncContext` fields on every log call and merges them into `fields` before forwarding to an inner reporter. Lets you inject per-request or per-task context into log entries without threading a logger through every call site.
+
+```ts
+import { AsyncContext, ContextualReporter } from '@toolcase/logging/node'
+import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
+
+const ctx = new AsyncContext()
+const factory = new LoggerFactory([
+    new ContextualReporter(new ConsoleLogReporter(), ctx),
+])
+factory.level = 'debug'
+
+const log = factory.getLogger('http')
+
+async function handleRequest(req: Request) {
+    await ctx.run({ requestId: req.headers.get('x-request-id'), path: new URL(req.url).pathname }, async () => {
+        log.info('start')        // ConsoleLogReporter receives fields: { requestId, path }
+        await processRequest(req, log)
+        log.info('done')
+    })
+}
+```
+
+API:
+
+```ts
+class ContextualReporter extends LogReporter {
+    constructor(inner: LogReporter, context: AsyncContext)
+    log(level, scope, time, fields, messages): void
+        // merges context.getFields() with fields (own fields win on collision)
+    flush(): void
+    close(): void | Promise<void>
+}
+```
+
+`ContextualReporter` does not buffer — it calls `inner.log()` synchronously. `flush()` and `close()` are forwarded to `inner`.
