@@ -1,6 +1,6 @@
 ---
 name: node
-description: Use when reaching for @toolcase/node — backend helpers for Node.js. Single entrypoint exposing Fastify endpoints (RouteHandler, RESTRouteHandler, Router, HttpServer), engine-agnostic repositories (BaseRepository, EntityService — you implement the verbs for your engine), Redis KV service (KVService — Locker, RateLimiter, Leaderboard, ValueStore, Versioned, SubscriberPool, KeyBuilder, LuaScriptCache), OAuth2/OIDC helpers, ImageProcessor + AtlasBuilder (sharp), typed env() loader, plus isomorphic sanitize / pagination / filter / sort / domain-error helpers and FieldSchema → JSON Schema derivation.
+description: Use when reaching for @toolcase/node — backend helpers for Node.js. Single entrypoint exposing Fastify endpoints (RouteHandler, RESTRouteHandler, Router, HttpServer), engine-agnostic repositories (BaseRepository, EntityService — you implement the verbs for your engine), Redis KV service (KVService — Locker, RateLimiter, Leaderboard, ValueStore, Versioned, SubscriberPool, KeyBuilder, LuaScriptCache), NodeStore + BlockStore (two-file persistent key-value store: B+ tree index + append-mostly heap), OAuth2/OIDC helpers, ImageProcessor + AtlasBuilder (sharp), typed env() loader, plus isomorphic sanitize / pagination / filter / sort / domain-error helpers and FieldSchema → JSON Schema derivation.
 ---
 
 # @toolcase/node — API Reference
@@ -24,6 +24,9 @@ import {
     type Filter, type Sort, FILTER_OP_SET, encodeCursor, decodeCursor,
     // redis peers: redis, @toolcase/serializer (serializer optional)
     KVService, KeyBuilder, LuaScriptCache, KV_LUA_SCRIPTS,
+    // file store — no extra peers beyond node:fs (built-in)
+    NodeStore, BlockStore, type NodeStoreOptions, type BlockRef,
+    serializeBlockRef, deserializeBlockRef, BLOCK_REF_SIZE,
 } from '@toolcase/node'
 ```
 
@@ -34,6 +37,7 @@ import {
 | `BaseRepository`, `EntityService` | `@toolcase/base` — engine-agnostic; you implement the verbs against any driver |
 | `KVService` (string surface only) | `@toolcase/base`, `redis` |
 | `KVService.*Value*` methods (typed binary) | adds `@toolcase/serializer` |
+| `NodeStore`, `BlockStore` | `@toolcase/base`, `node:fs` (Node built-in) |
 | `ImageProcessor`, `AtlasBuilder` | `@toolcase/base`, `sharp` |
 
 ---
@@ -1409,4 +1413,150 @@ const discord = defineOAuth2Provider({
     clientAuthMethod: 'client_secret_post',
     defaultScope: ['identify', 'email']
 })
+```
+
+---
+
+## Store
+
+Two-file persistent key-value store backed by a B+ tree index and an append-mostly data heap. Node-only (uses `FileHandle` from `node:fs/promises`). No extra peer deps beyond `@toolcase/base`. Storage is split across:
+
+- `<path>.idx` — `BPlusIndex<K, BlockRef>` from `@toolcase/base` (managed by `FsAdapter`), maps keys to 12-byte `BlockRef` pointers.
+- `<path>.dat.N` — append-mostly heap segments; each block is a raw serialised value blob.
+
+### BlockRef / helpers
+
+```ts
+interface BlockRef {
+    segment: number   // uint32 — which .dat.N segment file
+    offset:  number   // uint32 — byte offset within that segment
+    length:  number   // uint32 — byte length of the block
+}
+
+const BLOCK_REF_SIZE = 12   // bytes (fixed-size struct)
+
+function serializeBlockRef(ref: BlockRef): Uint8Array
+function deserializeBlockRef(buf: Uint8Array): BlockRef
+```
+
+### NodeStoreOptions<K, V>
+
+```ts
+interface NodeStoreOptions<K, V> {
+    path:              string                         // base path; .idx and .dat.N are appended
+    compare:           (a: K, b: K) => number        // key ordering function
+    serializeKey:      (k: K) => Uint8Array
+    deserializeKey:    (b: Uint8Array) => K
+    serializeValue:    (v: V) => Uint8Array
+    deserializeValue:  (b: Uint8Array) => V
+    keyEncoding?:      string                        // forwarded to BPlusIndex for guard checks
+    pageSize?:         number                        // B+ tree page size in bytes (default 4096)
+}
+```
+
+`BPlusIndex.keyPreset` from `@toolcase/base` supplies pre-wired `{ compare, serializeKey, deserializeKey, keyEncoding }` bundles for `'string'`, `'number'`, and `'bigint'` key types — spread one into the options to skip the boilerplate:
+
+```ts
+const store = await NodeStore.open({
+    path: '/data/mystore',
+    ...BPlusIndex.keyPreset.string,
+    serializeValue:   v => new TextEncoder().encode(v),
+    deserializeValue: b => new TextDecoder().decode(b),
+})
+```
+
+### NodeStore<K, V>
+
+```ts
+class NodeStore<K, V> {
+    static open<K, V>(opts: NodeStoreOptions<K, V>): Promise<NodeStore<K, V>>
+
+    // Accessors
+    get size(): number        // live entry count
+    get liveRatio(): number   // live heap bytes / total heap bytes; 1.0 = no dead space
+
+    // CRUD
+    get(key: K): Promise<V | undefined>
+    set(key: K, value: V): Promise<void>
+    delete(key: K): Promise<boolean>
+
+    // Iteration — all in B+ tree key order
+    entries(): AsyncGenerator<[K, V]>
+    range(opts?: RangeOptions<K>): AsyncGenerator<[K, V]>   // bounded scan; RangeOptions<K> from @toolcase/base
+    keys(): AsyncGenerator<K>
+    values(): AsyncGenerator<V>
+
+    // Maintenance
+    optimize(): Promise<void>   // compact: copy live blocks to new segment, reclaim dead space
+    flush(): Promise<void>      // fsync both heap and index
+    close(): Promise<void>
+}
+```
+
+`RangeOptions<K>` from `@toolcase/base`: `{ gte?, gt?, lte?, lt? }` compared with the store's `compare` function.
+
+```ts
+import { NodeStore } from '@toolcase/node'
+import { BPlusIndex } from '@toolcase/base'
+
+const store = await NodeStore.open({
+    path: '/data/mystore',
+    ...BPlusIndex.keyPreset.string,
+    serializeValue:   v => new TextEncoder().encode(v),
+    deserializeValue: b => new TextDecoder().decode(b),
+})
+
+await store.set('hello', 'world')
+const v = await store.get('hello')    // 'world'
+await store.delete('hello')
+
+// Bounded range scan
+for await (const [key, value] of store.range({ gte: 'a', lte: 'z' })) {
+    console.log(key, value)
+}
+
+// Compaction metrics and maintenance
+console.log(store.liveRatio)   // < 1 means dead heap space; run optimize() to reclaim
+await store.optimize()
+await store.flush()
+await store.close()
+```
+
+**Crash safety.** `set()` fsyncs the heap segment before committing the index entry — a crash between the two steps leaves at most a harmless orphan block in `.dat.N`. The index stays consistent. On the next `open()`, segment files not referenced by the index are detected as crash orphans and deleted automatically.
+
+**Compaction (`optimize()`).** Copies all live blocks to a fresh segment in key order, atomically updates the index with a single `setMany` call (one superblock commit), then deletes the old segments. A crash before the `setMany` leaves the new segment as an orphan, cleaned up on `open()`. A crash after `setMany` but before old-segment deletion leaves extra files that are cleaned up on `open()` — both paths are safe.
+
+**`NodeStore` vs `KVService`.** Use `NodeStore` for durable file-based storage with no infrastructure dependency (embedded caches, local feature stores, offline-capable worker state). Use `KVService` (Redis) for distributed in-memory state with TTL, pub/sub, and horizontal scale.
+
+### BlockStore
+
+Append-mostly heap manager that `NodeStore` wraps internally. Exported as a public API for advanced use cases that need raw segment-level access (e.g. a standalone append-only log).
+
+```ts
+class BlockStore {
+    constructor(basePath: string)
+
+    segmentPath(segId: number): string
+
+    get activeSegment(): number
+    get activeOffset():  number
+
+    // Discovery — returns { segId → file size } for all .dat.N files found on disk
+    scanSegments(): Promise<Map<number, number>>
+    setActive(segId: number, writeOffset: number): void
+    nextSegmentId(): number   // returns activeSegment + 1 (for a fresh compaction segment)
+
+    // I/O
+    append(data: Uint8Array): Promise<BlockRef>                        // write to active segment
+    read(ref: BlockRef): Promise<Uint8Array>                           // read any block by ref
+    writeAt(segId: number, offset: number, data: Uint8Array): Promise<void>  // used during compaction
+
+    // Durability
+    fsyncActive(): Promise<void>
+    fsyncSegment(segId: number): Promise<void>
+
+    // Lifecycle
+    deleteSegment(segId: number): Promise<void>   // closes handle + unlinks file; unlink errors swallowed
+    close(): Promise<void>
+}
 ```
