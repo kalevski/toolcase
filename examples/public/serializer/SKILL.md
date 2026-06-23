@@ -48,13 +48,14 @@ serializer.define(key: string, fields: FieldType[]): void
 
 interface FieldType {
     key: string
-    type: string                                // one of Serializer.FieldType.*
+    type: FieldTypeRef                          // string literal, EnumMarker, MapMarker, or PackedMarker
     rule: 'required' | 'optional' | 'repeated'
     default?: any
+    tag?: number                               // explicit protobuf field number; defaults to index + 1
 }
 ```
 
-- Field tags are auto-assigned by array order (1-indexed). **Order matters** — once data is on the wire, reordering fields will break decoding for old buffers. Append-only is safe.
+- Field tags are auto-assigned by array order (1-indexed) unless `tag` is supplied explicitly. **Order matters** — inserting, removing, or reordering a field shifts every subsequent positional tag and silently corrupts existing buffers. Append-only is safe. Protobuf reserves tags 19000–19999 for internal use; positional schemas with ≥ 18999 fields will hit this range and be rejected by `protobufjs`.
 - `default` is applied on decode when the field is absent. `null` is used internally if `default` is undefined.
 - `'repeated'` ⇒ field is encoded as `T[]`.
 
@@ -130,7 +131,7 @@ serializer.fields('Player')     // → [{ key: 'id', type: 'string', rule: 'opti
 
 ### Versioning — `version()`, `getVersion()`, `defineVersion()`, `migrate()`, `encodeVersioned()`, `decodeVersioned()`
 
-Stamps a 2-byte version header (`major`, `minor`) onto encoded frames and dispatches per-type migrations on decode when the frame is older than current. Both `major` and `minor` are byte-sized (0–255).
+Stamps a 3-byte version header (magic byte `0xB5`, `major`, `minor`) onto encoded frames and dispatches per-type migrations on decode when the frame is older than current. Both `major` and `minor` are byte-sized (0–255).
 
 ```ts
 const s = new Serializer()
@@ -142,7 +143,7 @@ s.define('Player', [
 s.migrate('Player', 1, msg => ({ name: msg.name, level: 1 }))   // hop v1 → v2
 
 const frame = s.encodeVersioned('Player', { name: 'Alice', level: 7 })
-// frame[0] = 2, frame[1] = 0, frame[2..] = protobuf body
+// frame[0] = 0xB5 (MAGIC_VERSIONED), frame[1] = 2 (major), frame[2] = 0 (minor), frame[3..] = body
 
 const out = s.decodeVersioned('Player', incomingV1Frame)
 // out.version = { major: 1, minor: 0 }
@@ -153,6 +154,11 @@ Decode rules:
 - `major === current.major` → no migration, just decode.
 - `major < current.major` → walk single-step migrations from `major` → `major+1` → … → `current.major`. Throws if any hop is missing.
 - `major > current.major` → throws (frame is from the future).
+
+`decodeVersioned` throws on:
+- `Serializer.decodeVersioned[<key>] failed: missing versioned magic byte` — buffer does not start with `0xB5`.
+- `Serializer.decodeVersioned[<key>] failed: buffer too small for version header (bytes=<n>)` — buffer is fewer than 3 bytes.
+- `Serializer.decodeVersioned[<key>] failed: migrated message invalid: <reason>` — after all migrations, the result fails re-verification against the current schema.
 
 `getVersion(): { major, minor }` returns the current marker.
 
@@ -184,16 +190,16 @@ const out = s.decodeVersioned('Item', v1Frame)
 
 ### Streaming — `fragment()`, `reassemble()`
 
-Split an encoded buffer into transport-sized chunks and reassemble out-of-order on the receiving side. Each chunk carries an 8-byte header: 4-byte random `frameId`, 2-byte `index`, 2-byte `total`. Up to 65535 chunks per frame.
+Split an encoded buffer into transport-sized chunks and reassemble out-of-order on the receiving side. Each chunk carries a 9-byte header: byte 0 = `MAGIC_FRAGMENT` (`0xF5`), 4-byte random `frameId` [1–4], 2-byte `index` [5–6], 2-byte `total` [7–8]; payload begins at offset 9. Up to 65535 chunks per frame.
 
 ```ts
 const buf = serializer.encode('Snapshot', big)            // e.g. 80 KB
 const chunks = serializer.fragment(buf, 16384)            // payload bytes per chunk; default 16384
 
-for (const chunk of chunks) ws.send(chunk)                // each chunk has the 8-byte header
+for (const chunk of chunks) ws.send(chunk)                // each chunk has the 9-byte header
 
-// on the receiver — total lives at bytes [6,7] of every chunk header:
-const peekTotal = (chunk: Uint8Array) => (chunk[6] << 8) | chunk[7]
+// on the receiver — total lives at bytes [7,8] of every chunk header:
+const peekTotal = (chunk: Uint8Array) => (chunk[7] << 8) | chunk[8]
 
 const incoming: Uint8Array[] = []
 ws.addEventListener('message', e => {
@@ -206,7 +212,52 @@ ws.addEventListener('message', e => {
 })
 ```
 
-`reassemble()` validates: header length, matching `frameId` across all chunks, exact chunk count, no duplicate indexes. Use it as the membrane between unreliable transports and `decode()`.
+`fragment(buffer, maxChunkSize?)` throws:
+- `Serializer.fragment: maxChunkSize must be a positive integer, got <n>` — value is zero, negative, or non-integer.
+- `Serializer.fragment: <n> chunks exceeds the 65535 limit; raise maxChunkSize` — the buffer requires more than 65535 chunks at the given size.
+
+`reassemble(chunks)` throws on:
+- `Serializer.reassemble: missing fragment magic byte` — a chunk does not start with `0xF5`.
+- `Serializer.reassemble: chunk header truncated (need 9 bytes)` — a chunk is shorter than 9 bytes.
+- `Serializer.reassemble: chunk count mismatch — got <n>, header says <total>` — wrong number of chunks supplied.
+- `Serializer.reassemble: total mismatch — chunk says <t>, expected <total>` — chunks disagree on total count.
+- `Serializer.reassemble: index <n> out of range [0, <total>)` — an index falls outside the expected range.
+- `Serializer.reassemble: frameId mismatch — chunks belong to different frames` — mixed-frame interleaving.
+- `Serializer.reassemble: duplicate chunk at index <n>` — same index received twice.
+
+Use `reassemble` as the membrane between unreliable transports and `decode()`.
+
+---
+
+## Public types
+
+The following interfaces and type aliases are exported from `@toolcase/serializer` and can be imported directly:
+
+```ts
+import type {
+    FieldType,
+    FieldTypeRef,
+    EnumMarker,
+    MapMarker,
+    PackedMarker,
+    Version,
+    VersionedFrame,
+    MigrationFn,
+    SafeResult,
+} from '@toolcase/serializer'
+```
+
+| Type | Description |
+|------|-------------|
+| `FieldType` | Field descriptor passed to `define()` / `defineVersion()` |
+| `FieldTypeRef` | Union of `string \| EnumMarker \| MapMarker \| PackedMarker` — the `type` property of `FieldType` |
+| `EnumMarker` | Opaque marker returned by `Serializer.FieldType.ENUM(...)` |
+| `MapMarker` | Opaque marker returned by `Serializer.FieldType.MAP(...)` |
+| `PackedMarker` | Opaque marker returned by `Serializer.FieldType.PACKED_ARRAY(...)` |
+| `Version` | `{ major: number, minor: number }` |
+| `VersionedFrame<T>` | `{ version: Version, message: T }` — return type of `decodeVersioned()` |
+| `MigrationFn` | `(message: any) => Record<string, any>` — handler passed to `migrate()` |
+| `SafeResult<T>` | `{ ok: boolean, value?: T, error?: Error }` — return type of `safeEncode()` / `safeDecode()` |
 
 ---
 
