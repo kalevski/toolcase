@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (Accordion, AccordionItem, ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -60,6 +60,8 @@ After `register()` you can author markup directly:
   - [tc-scroll-area](#tc-scroll-area)
   - [tc-artboard-backdrop](#tc-artboard-backdrop)
 - [Content](#content)
+  - [tc-accordion](#tc-accordion)
+  - [tc-accordion-item](#tc-accordion-item)
   - [tc-action-header](#tc-action-header)
   - [tc-action-items](#tc-action-items)
   - [tc-action-row-list](#tc-action-row-list)
@@ -1277,6 +1279,50 @@ None. `tc-artboard-backdrop` is a purely presentational surface.
 ---
 
 ## Content
+
+### tc-accordion
+
+Collapsible accordion container. Wrap `tc-accordion-item` children inside to build a group where only one item can be open at a time (unless `always-open` is set).
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `flush` | boolean | false | Removes borders and rounded corners so the accordion sits edge-to-edge with its parent |
+| `always-open` | boolean | false | Allows multiple items to be expanded simultaneously |
+
+```html
+<tc-accordion>
+    <tc-accordion-item header="First item" open>Body of the first item.</tc-accordion-item>
+    <tc-accordion-item header="Second item">Body of the second item.</tc-accordion-item>
+    <tc-accordion-item header="Third item">Body of the third item.</tc-accordion-item>
+</tc-accordion>
+```
+
+---
+
+### tc-accordion-item
+
+Single panel inside a `tc-accordion`. Renders a clickable header button and a collapsible body region; default slot content becomes the body.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `header` | string | — | Text for the clickable header button |
+| `open` | boolean | false | Expanded state of this item |
+
+**Events:** `tc-show`, `tc-shown`, `tc-hide`, `tc-hidden`
+
+```html
+<tc-accordion>
+    <tc-accordion-item header="Details" open>
+        <p>Any body content goes here.</p>
+    </tc-accordion-item>
+</tc-accordion>
+```
+
+---
 
 ### tc-action-header
 
