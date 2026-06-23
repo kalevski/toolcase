@@ -11,29 +11,121 @@ const configExample = `# /etc/nginxpilot/config.yml — globals + includes
 data_dir: /var/lib/nginxpilot
 admin:
   listen: 127.0.0.1:9090          # health + status + manual sync trigger
+  # token_env: NGINXPILOT_TOKEN   # bearer auth on all admin routes; omit to disable
+
 defaults:
   interval: 5m
   keep_releases: 3
-include:
-  - sites.d/*.yml                 # drop a file in, kill -HUP — that's onboarding
 
-# /etc/nginxpilot/sites.d/example.com.yml
+include:
+  - sites.d/*.yml                 # fragments may contain only sites: lists
+                                  # duplicate domains across files are a validation error
+                                  # drop a file in, kill -HUP — that's onboarding`
+
+const gitSourceExample = `# /etc/nginxpilot/sites.d/example.com.yml
 sites:
   - domain: example.com
     source:
-      type: git                   # or: http-zip (CI artifact URL)
+      type: git
       url: git@github.com:acme/example-site.git
-      branch: gh-pages
+      branch: main
+      interval: 2m                # min 30s; defaults to defaults.interval
       auth:
-        method: ssh-key
-        key_file: /etc/nginxpilot/keys/example_ed25519`
+        method: ssh-key           # ssh-key | https-token | none
+        key_file: /etc/nginxpilot/keys/example_ed25519
+        # known_hosts: /etc/nginxpilot/known_hosts   # strict check; default: accept-new (TOFU)
+      subdir: dist/               # serve only this subtree of the repo
+      require_file: [index.html]  # post-fetch gate: reject release if file is absent
+    exclude: ["*.map"]            # extends defaults strip list:
+                                  # .env*, .htaccess, .DS_Store  (.git* always stripped)`
 
-const cliReference = `nginxpilot run                  # the daemon (default)
+const httpZipSourceExample = `sites:
+  - domain: blog.example.com
+    source:
+      type: http-zip
+      url: https://ci.example.com/artifacts/blog/latest.zip   # https required
+      # allow_insecure: true      # permit http:// URLs (not recommended)
+      interval: 10m
+      auth:
+        method: bearer            # bearer | basic | header | none
+        token_env: BLOG_ARTIFACT_TOKEN
+      checksum_url: https://ci.example.com/artifacts/blog/latest.zip.sha256  # optional
+      # strip_components: 1       # explicit; a single shared root dir is auto-stripped
+      limits:                     # zip-bomb guards (these are the defaults)
+        max_archive_size: 512MiB
+        max_uncompressed_size: 2GiB
+        max_entries: 100000
+        max_compression_ratio: 100
+
+# Downloads use conditional GET (ETag / Last-Modified) — unchanged content is a cheap no-op.
+# Extraction rejects zip-slip paths and symlinks outright.`
+
+const secretsExample = `# Inline secrets are a PARSE-TIME ERROR — only _env / _file refs are accepted.
+# Config files stay safe to commit.
+auth:
+  method: https-token
+  token_env: MY_TOKEN           # reads $MY_TOKEN at runtime
+  # token_file: /run/secrets/my_token   # or point at a file
+
+# Secret files must be 0600 or 0640 and owned by the daemon user or root.
+# The daemon refuses to start if permissions are wrong.
+
+# systemd LoadCredential integration:
+# [Service]
+# LoadCredential=my_token:/etc/nginxpilot/tokens/my_token
+# then in config:
+#   token_file: /run/credentials/nginxpilot.service/my_token`
+
+const cliReference = `nginxpilot run [--config PATH] [--log-format logfmt|json] [--prune-orphans]
+                        # the daemon; --prune-orphans deletes content dirs for sites
+                        # that were removed from config (orphans are warned, not deleted, by default)
 nginxpilot validate             # parse + validate merged config, CI exit codes
 nginxpilot sync <domain>        # one-shot sync, no daemon needed (onboarding)
 nginxpilot print-vhost <domain> # nginx server-block starting snippet
 nginxpilot status [--json]      # per-site table from the daemon
 nginxpilot version              # build info`
+
+const adminEndpoints = `GET  /healthz           — liveness probe
+GET  /status            — per-site JSON: deployed ref, last success/error,
+                          failure_streak, never_synced, next sync time
+POST /sync/<domain>     — force an immediate out-of-schedule sync
+
+# admin.token_env enables bearer auth on all three routes:
+# admin:
+#   listen: 127.0.0.1:9090
+#   token_env: NGINXPILOT_TOKEN
+
+curl -H "Authorization: Bearer $NGINXPILOT_TOKEN" http://127.0.0.1:9090/status
+curl -X POST -H "Authorization: Bearer $NGINXPILOT_TOKEN" http://127.0.0.1:9090/sync/example.com`
+
+const signalsSnippet = `SIGHUP   — diff-based reload
+           added sites:    start and sync immediately
+           removed sites:  stop the watcher; content stays on disk (orphan, warned)
+                           remove orphaned content by restarting with --prune-orphans
+           invalid config: rejected wholesale; running config stays active
+
+SIGTERM / SIGINT — graceful shutdown
+           in-flight symlink swaps finish; downloads abort cleanly`
+
+const releasesSnippet = `data_dir/sites/<domain>/
+  releases/
+    20240601T120000-abc1234/    # <RFC3339-ts>-<git-ref|etag>
+    20240601T120512-def5678/
+    20240602T080000-ghi9012/    # newest successful sync
+  current -> releases/20240602T080000-ghi9012   # atomic rename(2) swap
+
+# keep_releases: 3 (default) — oldest release dirs pruned after each sync
+# Manual rollback: point current at an older release directory (no restart needed)`
+
+const backoffSnippet = `# Retry formula: interval × 2^streak — capped at 4× interval
+# streak resets to 0 on success; visible in GET /status as failure_streak
+# current symlink is never overwritten on failure — last good content stays live
+#
+# Example with defaults.interval: 5m
+#   streak 0 → next retry in  5m
+#   streak 1 → next retry in 10m
+#   streak 2 → next retry in 20m
+#   streak 3+ → retry in 20m  (4 × 5m cap)`
 
 const nginxSnippet = `server {
     listen 80;
@@ -47,6 +139,23 @@ const nginxSnippet = `server {
         try_files $uri $uri/ =404;
     }
 }`
+
+const systemdSnippet = `# packaging/nginxpilot.service (ships in the repo)
+[Service]
+Type=notify
+Restart=on-failure
+User=nginxpilot
+UMask=0027
+ProtectSystem=strict
+NoNewPrivileges=true
+PrivateTmp=true
+# Run as a dedicated nginxpilot user owning data_dir;
+# the nginx worker user joins the nginxpilot group.
+# Dirs 0750, files 0640 (enforced by umask 027).
+
+# SELinux — RHEL-family only:
+semanage fcontext -a -t httpd_sys_content_t '/var/lib/nginxpilot/sites(/.*)?' \\
+  && restorecon -R /var/lib/nginxpilot/sites`
 
 const features = [
     {
@@ -132,9 +241,27 @@ export const NginxPilotPage = () => {
 
             <div className="section-head">
                 <h2>Configuration</h2>
-                <span className="count">declarative YAML + sites.d/ fragments</span>
+                <span className="count">declarative YAML · strict unknown-key errors · sites.d/ fragments</span>
             </div>
             <CodeBlock file="config.yml" code={configExample} />
+
+            <div className="section-head">
+                <h2>git source</h2>
+                <span className="count">shallow single-branch · subdir · require_file · TOFU or known_hosts</span>
+            </div>
+            <CodeBlock file="sites.d/example.com.yml" code={gitSourceExample} />
+
+            <div className="section-head">
+                <h2>http-zip source</h2>
+                <span className="count">conditional GET · checksum · zip-bomb limits · bearer / basic / header auth</span>
+            </div>
+            <CodeBlock file="sites.d/blog.example.com.yml" code={httpZipSourceExample} />
+
+            <div className="section-head">
+                <h2>Secrets</h2>
+                <span className="count">_env / _file refs only · 0600/0640 enforcement · systemd LoadCredential</span>
+            </div>
+            <CodeBlock file="secrets.yml" code={secretsExample} />
 
             <div className="section-head">
                 <h2>CLI</h2>
@@ -143,10 +270,40 @@ export const NginxPilotPage = () => {
             <CodeBlock file="cli-reference.sh" code={cliReference} />
 
             <div className="section-head">
+                <h2>Admin endpoint</h2>
+                <span className="count">loopback HTTP · /healthz · /status · /sync/&lt;domain&gt;</span>
+            </div>
+            <CodeBlock file="admin.sh" code={adminEndpoints} />
+
+            <div className="section-head">
+                <h2>Signals</h2>
+                <span className="count">SIGHUP diff-reload · SIGTERM/SIGINT graceful shutdown</span>
+            </div>
+            <CodeBlock file="signals.txt" code={signalsSnippet} />
+
+            <div className="section-head">
+                <h2>Release retention</h2>
+                <span className="count">keep_releases · timestamped dirs · atomic current symlink</span>
+            </div>
+            <CodeBlock file="releases.txt" code={releasesSnippet} />
+
+            <div className="section-head">
+                <h2>Failure &amp; backoff</h2>
+                <span className="count">interval × 2^streak · capped at 4× · streak visible in /status</span>
+            </div>
+            <CodeBlock file="backoff.txt" code={backoffSnippet} />
+
+            <div className="section-head">
                 <h2>nginx integration</h2>
                 <span className="count">the daemon never touches nginx config</span>
             </div>
             <CodeBlock file="example.com.conf" code={nginxSnippet} />
+
+            <div className="section-head">
+                <h2>systemd &amp; SELinux</h2>
+                <span className="count">Type=notify · hardening · 0750/0640 umask · httpd_sys_content_t</span>
+            </div>
+            <CodeBlock file="nginxpilot.service" code={systemdSnippet} />
 
             <div className="section-head">
                 <h2>Run it</h2>
