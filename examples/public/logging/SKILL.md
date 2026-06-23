@@ -26,7 +26,20 @@ import {
     LogReporter,             // base class for transports
     ConsoleLogReporter,
     JSONLineReporter,        // structured JSON-line transport
-    BufferedReporter         // batching/debounce wrapper for slow sinks
+    BufferedReporter,        // batching/debounce wrapper for slow sinks
+    isKnownLevel,            // (level: string) => level is LoggerLevel
+    KNOWN_LEVELS,            // LoggerLevel[] — all valid level strings
+    textFormatter,           // LogFormatter — human-readable text line
+    jsonFormatter,           // LogFormatter — JSON record (default for JSONLineReporter)
+    logfmtFormatter,         // LogFormatter — logfmt key=value line
+} from '@toolcase/logging'
+
+// Types:
+import type {
+    LogFormatter,            // (level, scope, time, fields, messages) => string
+    ClockFn,                 // () => number  (epoch ms)
+    JSONLineReporterOptions,
+    JSONLineWriter,
 } from '@toolcase/logging'
 
 // Node-only transports live on the /node subpath (uses fs):
@@ -81,13 +94,21 @@ class Logger {
     verbose(...args: any[]): void
     log(level: LoggerLevel, ...args: any[]): void
 
-    setLevel(level: LoggerLevel | null): void   // per-logger override; null = inherit factory
-    getLevel(): LoggerLevel | null              // current override, or null
+    isEnabled(level: LoggerLevel): boolean       // true when the level would be dispatched
+    setLevel(level: LoggerLevel | null): void    // per-logger override; null = inherit factory
+    getLevel(): LoggerLevel | null               // current override, or null
     withContext(ctx: Record<string, any>): Logger  // child logger that prepends ctx
 }
 ```
 
-Each call timestamps with `new Date().toISOString()` and forwards `(level, scope, time, args)` to every reporter (gated by per-logger override if set, otherwise factory level).
+Each call timestamps with `this.clock()` (defaulting to `Date.now()`) and forwards `(level, scope, time, fields, messages)` to every reporter (gated by per-logger override if set, otherwise factory level). The `time` value is epoch milliseconds; ISO formatting happens inside reporters and formatters, not in the logger itself.
+
+Any arg that is a function is called lazily — the function is invoked only when the level is enabled:
+
+```ts
+log.debug(() => JSON.stringify(heavySnapshot))  // only evaluated when debug is enabled
+log.verbose(() => computeStats(), 'stats')       // mixed: thunk + plain arg
+```
 
 ```ts
 const auth = logging.getLogger('auth')
@@ -160,9 +181,15 @@ async function handle(req: Request) {
 
 ```ts
 class LoggerFactory {
-    constructor(reporters?: LogReporter[])
-    level: LoggerLevel               // get/set; setter writes underlying numeric order
+    constructor(reporters?: LogReporter[], clock?: ClockFn)  // clock defaults to Date.now
+    level: LoggerLevel               // get/set; throws RangeError on unknown level
     getLogger(scope: string = 'default'): Logger
+    addReporter(reporter: LogReporter): void       // append a reporter after construction
+    removeReporter(reporter: LogReporter): void    // detach a reporter by reference
+    flush(): void                                  // synchronously flush all reporters
+    close(): Promise<void>                         // flush + close all reporters (await on shutdown)
+    setLevel(pattern: string, level: LoggerLevel): void  // scope-pattern override (see below)
+    parseEnv(env: Record<string, string | undefined>): void  // reads LOG_LEVEL + DEBUG (see below)
 }
 ```
 
@@ -176,7 +203,7 @@ audit.level = 'verbose'
 audit.getLogger('audit').verbose('login', { userId })
 ```
 
-There is **no** `addReporter()` method — pass reporters via the constructor. (To extend the default singleton, build your own factory.)
+Add or remove reporters after construction with `addReporter` / `removeReporter`. Call `flush()` to synchronously drain all reporters, and `await close()` on shutdown to flush and close every reporter in the factory's list.
 
 ---
 
@@ -186,11 +213,13 @@ Base class. Override `log()` to ship messages to any sink.
 
 ```ts
 class LogReporter {
-    log(level: LoggerLevel, scope: string, time: string, messages: any[]): void
+    log(level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]): void
+    flush(): void
+    close(): void | Promise<void>
 }
 ```
 
-The default base does nothing — subclass it.
+`time` is epoch milliseconds (`Date.now()` by default). The default base does nothing — subclass it.
 
 ### ConsoleLogReporter
 
@@ -209,6 +238,7 @@ Constructor options (`ConsoleLogReporterOptions`):
 | `timestamp` | `boolean` | `true` | Include the ISO timestamp in the default prefix. |
 | `prefix` | `string \| (level, scope, time) => string` | — | Override the prefix entirely (string or function). |
 | `objects` | `'compact' \| 'pretty'` | `'compact'` | `'compact'` passes values to console as-is; `'pretty'` serializes objects/arrays to indented JSON and errors to a string. |
+| `formatter` | `LogFormatter` | — | When set, bypasses the prefix/objects pipeline; calls `formatter(level, scope, time, fields, messages)` and writes the returned string as a single colored line. |
 
 ```ts
 new ConsoleLogReporter()                       // auto-detect color, default prefix
@@ -234,12 +264,14 @@ const factory = new LoggerFactory([
         // optional: where to write each line (default: console.log)
         write: line => process.stdout.write(line + '\n'),
         // optional: static fields merged into every record
-        extra: { service: 'api', region: 'eu' }
+        extra: { service: 'api', region: 'eu' },
+        // optional: custom formatter (default: jsonFormatter)
+        // formatter: logfmtFormatter,
     })
 ])
 const log = factory.getLogger('auth')
 log.info('login ok', { userId: 42 })
-// {"service":"api","region":"eu","level":"info","scope":"auth","time":"…","messages":["login ok",{"userId":42}]}
+// {"service":"api","region":"eu","level":"info","scope":"auth","time":1748950800000,"messages":["login ok",{"userId":42}]}
 ```
 
 Errors are serialized to `{ name, message, stack }`. Circular references fall back to `'<unserializable>'`.
@@ -640,8 +672,8 @@ factory.level = 'info'
 ```ts
 class RingBuffer extends LogReporter {
     private events: any[] = []
-    log(level: any, scope: string, time: string, messages: any[]) {
-        this.events.push({ level, scope, time, messages })
+    log(level: any, scope: string, time: number, fields: Record<string, any>, messages: any[]) {
+        this.events.push({ level, scope, time, fields, messages })
         if (this.events.length > 500) this.events.shift()
     }
     snapshot() { return this.events.slice() }
@@ -678,9 +710,9 @@ new BufferedReporter(null, {
 ```ts
 class ScopedReporter extends LogReporter {
     constructor(private prefix: string, private inner: LogReporter) { super() }
-    log(level, scope, time, messages) {
+    log(level, scope, time, fields, messages) {
         if (!scope.startsWith(this.prefix)) return
-        this.inner.log(level, scope, time, messages)
+        this.inner.log(level, scope, time, fields, messages)
     }
 }
 
@@ -691,7 +723,7 @@ new LoggerFactory([new ScopedReporter('http.', new ConsoleLogReporter())])
 
 ```ts
 class GroupedReporter extends LogReporter {
-    log(level, scope, time, messages) {
+    log(level, scope, time, fields, messages) {
         const fn = level === 'error' ? console.error
             : level === 'warning' ? console.warn : console.log
         console.groupCollapsed(`${level.toUpperCase()} ${scope} ${time}`)
@@ -1111,11 +1143,44 @@ API:
 class MemoryReporter extends LogReporter {
     entries(): LogEntry[]             // all retained entries, oldest → newest (copy)
     find(level: LoggerLevel): LogEntry[]  // entries filtered by exact level
-    clear(): void                     // reset; capacity is preserved
+    clear(): void                     // reset all entries
 }
 ```
 
 **Use when:** writing unit tests that assert on log output without worrying about draining or flush timing.
+
+---
+
+## Formatters
+
+Three ready-made `LogFormatter` implementations are exported. A `LogFormatter` has the signature:
+
+```ts
+type LogFormatter = (level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]) => string
+```
+
+Pass one to `ConsoleLogReporter` or `JSONLineReporter` via the `formatter` option, or call them directly in a custom reporter.
+
+| Export | Output style |
+|--------|-------------|
+| `textFormatter` | `LEVEL [ISO-timestamp] \| scope: msg1 msg2 …` |
+| `jsonFormatter` | JSON object: `{ ...fields, level, scope, time, messages }` (default for `JSONLineReporter`) |
+| `logfmtFormatter` | `level=info scope=auth ts=ISO msg="login ok"` with per-field pairs from `fields` |
+
+```ts
+import { textFormatter, jsonFormatter, logfmtFormatter, ConsoleLogReporter, JSONLineReporter } from '@toolcase/logging'
+
+// Human-readable text via ConsoleLogReporter:
+new ConsoleLogReporter({ formatter: textFormatter })
+
+// logfmt lines via JSONLineReporter:
+new JSONLineReporter({ formatter: logfmtFormatter, write: line => process.stdout.write(line + '\n') })
+
+// Custom formatter:
+const myFmt: LogFormatter = (level, scope, time, fields, messages) =>
+    `[${scope}] ${level}: ${messages.join(' ')}`
+new ConsoleLogReporter({ formatter: myFmt })
+```
 
 ---
 
@@ -1124,4 +1189,4 @@ class MemoryReporter extends LogReporter {
 - Package is `sideEffects: false` and zero-dependency.
 - Importing the default export instantiates one `LoggerFactory` + one `ConsoleLogReporter` — safe in both Node and browser.
 - No async / no buffering — every `logger.x()` call dispatches synchronously.
-- ISO timestamps are generated per call (one `new Date()` per log).
+- Timestamps are epoch milliseconds from `this.clock()` (default `Date.now()`). ISO formatting happens in reporters and formatters, not in the logger.
