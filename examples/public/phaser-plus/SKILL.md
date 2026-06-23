@@ -381,7 +381,19 @@ class Hud extends HTMLFeature {
 }
 ```
 
-> Note: a `ReactFeature` exists in source (`features/ReactFeature.ts`) for mounting a React tree into the DOM overlay, but it is **not** re-exported from the package root, so `import { ReactFeature } from '@toolcase/phaser-plus'` does not resolve. Until that export gap is closed, mount React manually inside an `HTMLFeature.onCreate()` (`createRoot(this.node).render(...)`).
+Use `ReactFeature` (extends `HTMLFeature`) to mount a React tree into the DOM overlay:
+
+```ts
+import { ReactFeature } from '@toolcase/phaser-plus'
+
+class Hud extends ReactFeature {
+    onCreate() {
+        this.render(<HudComponent />)
+    }
+}
+```
+
+`render(element)` is safe to call before `react-dom` has loaded — the latest element is buffered and flushed once the root is ready. Use `renderAsync(element)` when you need to `await` the initial mount. Call `unmount()` to tear down the React tree early (also called automatically on feature destroy).
 
 ### SplitScreen
 
