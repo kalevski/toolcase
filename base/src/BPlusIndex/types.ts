@@ -80,3 +80,17 @@ export interface RangeOptions<K> {
     reverse?: boolean
     limit?: number
 }
+
+export interface BPlusIndexStats {
+    /** Number of levels in the tree (1 = root is a leaf). */
+    height: number
+    /** Total number of pages allocated (including the two superblock slots). */
+    pageCount: number
+    /** Number of page IDs stored across all free-list pages — pages available for reuse. */
+    freePages: number
+    /**
+     * Fraction of non-superblock allocated pages that are live tree data.
+     * 1.0 = no waste; 0.5 = half the file is free slots that compact() can reclaim.
+     */
+    fillFactor: number
+}

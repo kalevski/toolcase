@@ -80,7 +80,7 @@ export type { Schema, RefSchema, ValidationIssue, ValidationError, ValidationFn,
 export type { Delta, ObjectDelta, ArrayDelta, Edit } from './diff'
 export type { FormatNumberOptions } from './formatNumber'
 
-export type { StorageAdapter, BPlusIndexOptions, RangeOptions } from './BPlusIndex'
+export type { StorageAdapter, BPlusIndexOptions, RangeOptions, BPlusIndexStats } from './BPlusIndex'
 export type { SpatialPoint, SpatialRect } from './spatial'
 export type { EasingFn } from './easing'
 export type { Rect } from './Vec2'

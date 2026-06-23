@@ -1,8 +1,8 @@
 import {
-    StorageAdapter, BPlusIndexOptions, RangeOptions,
+    StorageAdapter, BPlusIndexOptions, RangeOptions, BPlusIndexStats,
     SuperblockData, InternalNode, LeafNode, LeafEntry,
-    HEADER_SIZE, NULL_PAGE, SB_PAGE_A, SB_PAGE_B, FIRST_TREE_PAGE,
-    PAGE_TYPE_INTERNAL, PAGE_TYPE_LEAF,
+    HEADER_SIZE, CRC_SIZE, NULL_PAGE, SB_PAGE_A, SB_PAGE_B, FIRST_TREE_PAGE,
+    PAGE_TYPE_INTERNAL, PAGE_TYPE_LEAF, PAGE_TYPE_OVERFLOW, OVERFLOW_FLAG,
 } from './types'
 import {
     encodeSuperblock, decodeSuperblock,
@@ -11,6 +11,8 @@ import {
     encodeOverflow, decodeOverflow, overflowChunkSize,
     encodeFreelist, decodeFreelist, freelistCapacity,
 } from './page'
+import { readU16, readU32, writeU32, writeU64 } from './encode'
+import { crc32 } from './crc32'
 
 // ── constants ────────────────────────────────────────────────────────────────
 
@@ -1187,6 +1189,189 @@ export class BPlusIndex<K, V> {
         }
 
         return undefined
+    }
+
+    // ── stats ────────────────────────────────────────────────────────────────
+
+    async stats(): Promise<BPlusIndexStats> {
+        // Measure tree height by descending the leftmost path
+        let height = 0
+        let pageId = this.rootPageId
+        while (true) {
+            const raw = await this.adapter.read(pageId)
+            height++
+            if (!raw || raw[4] === PAGE_TYPE_LEAF) break
+            const node = decodeInternal(raw, pageId)
+            if (!node) break
+            pageId = node.children[0]
+        }
+
+        // Count free page IDs stored across all free-list pages
+        let freePages = 0
+        let flId = this.freeListHeadPageId
+        while (flId !== NULL_PAGE) {
+            const raw = await this.adapter.read(flId)
+            if (!raw) break
+            const fl = decodeFreelist(raw)
+            if (!fl) break
+            freePages += fl.ids.length
+            flId = fl.nextPageId
+        }
+
+        const allocated = this.pageCount - FIRST_TREE_PAGE
+        const fillFactor = allocated > 0 ? (allocated - freePages) / allocated : 1
+
+        return { height, pageCount: this.pageCount, freePages, fillFactor }
+    }
+
+    // ── compact ──────────────────────────────────────────────────────────────
+
+    /**
+     * Pack all live tree pages to the front of the file, then truncate the
+     * tail.  After returning:
+     *   - `freeListHeadPageId` is `NULL_PAGE` (the free list is gone)
+     *   - `pageCount` equals `FIRST_TREE_PAGE + livePageCount`
+     *   - the backing adapter is truncated if it supports `truncate()`
+     *   - the new layout is committed via the dual-superblock flip so a crash
+     *     mid-compact leaves the old superblock intact and consistent
+     *
+     * Must be called exclusively — no concurrent reads, writes, or open
+     * iterators.  Outstanding in-memory page IDs are invalidated; callers
+     * should re-open or discard any held references after `compact()` returns.
+     */
+    async compact(): Promise<void> {
+        // 1. Collect every live tree page (DFS from root + overflow chains)
+        const liveIds = await this._collectCompactLiveIds()
+        const newPageCount = FIRST_TREE_PAGE + liveIds.length
+
+        // Nothing to do when the file is already fully packed
+        if (newPageCount >= this.pageCount) return
+
+        this.writeSeq++
+
+        // 2. Assign new sequential IDs packed from FIRST_TREE_PAGE
+        liveIds.sort((a, b) => a - b)
+        const remap = new Map<number, number>()
+        for (let i = 0; i < liveIds.length; i++) remap.set(liveIds[i], FIRST_TREE_PAGE + i)
+
+        // 3. Read all live pages into memory before any writes to avoid
+        //    overwriting a live page before it is moved
+        const contents = new Map<number, Uint8Array>()
+        for (const id of liveIds) {
+            const raw = await this.adapter.read(id)
+            if (raw) contents.set(id, raw)
+        }
+
+        // 4. Re-encode each page with remapped page-ID references and write
+        //    to its new position
+        for (const oldId of liveIds) {
+            const raw = contents.get(oldId)
+            if (!raw) continue
+            const newId = remap.get(oldId)!
+            await this.adapter.write(newId, this._compactRemapPage(raw, remap))
+        }
+
+        // 5. Update in-memory state
+        this.rootPageId         = remap.get(this.rootPageId)!
+        this.pageCount          = newPageCount
+        this.freeListHeadPageId = NULL_PAGE
+
+        // 6. Atomic superblock flip — crash-safe: old slot still valid until here
+        await this._flushSuperblock()
+
+        // 7. Shrink the backing store (optional — not all adapters support it)
+        await this.adapter.truncate?.(this.pageCount)
+    }
+
+    private async _collectCompactLiveIds(): Promise<number[]> {
+        const visited = new Set<number>()
+        const ids: number[] = []
+
+        const walkPage = async (pageId: number): Promise<void> => {
+            if (pageId === NULL_PAGE || visited.has(pageId)) return
+            visited.add(pageId)
+            const raw = await this.adapter.read(pageId)
+            if (!raw) return
+            ids.push(pageId)
+
+            if (raw[4] === PAGE_TYPE_INTERNAL) {
+                const node = decodeInternal(raw, pageId)
+                if (!node) return
+                for (const childId of node.children) await walkPage(childId)
+            } else if (raw[4] === PAGE_TYPE_LEAF) {
+                const result = decodeLeaf(raw, pageId)
+                if (!result) return
+                for (const [, { headPageId }] of result.overflowRefs) {
+                    let ovId = headPageId
+                    while (ovId !== NULL_PAGE && !visited.has(ovId)) {
+                        visited.add(ovId)
+                        ids.push(ovId)
+                        const ovRaw = await this.adapter.read(ovId)
+                        if (!ovRaw) break
+                        const ov = decodeOverflow(ovRaw)
+                        if (!ov) break
+                        ovId = ov.nextPageId
+                    }
+                }
+            }
+        }
+
+        await walkPage(this.rootPageId)
+        return ids
+    }
+
+    /**
+     * Patch all page-ID references inside `raw` according to `remap`, update
+     * the page's `pageSeq` to the current `writeSeq`, recompute the CRC, and
+     * return the modified copy.  Operates in-place on a copy of the raw bytes
+     * to avoid decoding + re-encoding (which would lose the overflow totalLen
+     * stored in leaf entries whose value data lives in overflow chains).
+     */
+    private _compactRemapPage(raw: Uint8Array, remap: Map<number, number>): Uint8Array {
+        const buf  = new Uint8Array(raw)  // copy — do not mutate the original
+        const view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength)
+        const type = raw[4]
+        const r    = (id: number): number => id === NULL_PAGE ? NULL_PAGE : (remap.get(id) ?? id)
+
+        // Update the stored sequence number
+        writeU64(view, 6, this.writeSeq)
+
+        if (type === PAGE_TYPE_INTERNAL) {
+            // Layout: HEADER | keyCount(2) | [keyLen(2)+keyBytes]×n | [childId(4)+childCount(6)]×(n+1)
+            const keyCount = readU16(view, HEADER_SIZE)
+            let off = HEADER_SIZE + 2
+            for (let i = 0; i < keyCount; i++) {
+                const kLen = readU16(view, off); off += 2 + kLen
+            }
+            for (let i = 0; i <= keyCount; i++) {
+                writeU32(view, off, r(readU32(view, off)))
+                off += 10  // childPageId(4) + childEntryCount(6)
+            }
+        } else if (type === PAGE_TYPE_LEAF) {
+            // Layout: HEADER | keyCount(2) | prevPageId(4) | nextPageId(4) | entries…
+            writeU32(view, HEADER_SIZE + 2, r(readU32(view, HEADER_SIZE + 2)))  // prevPageId
+            writeU32(view, HEADER_SIZE + 6, r(readU32(view, HEADER_SIZE + 6)))  // nextPageId
+            const keyCount = readU16(view, HEADER_SIZE)
+            let off = HEADER_SIZE + 10  // keyCount(2) + prev(4) + next(4)
+            for (let i = 0; i < keyCount; i++) {
+                const kLen = readU16(view, off); off += 2 + kLen
+                const spec = readU16(view, off); off += 2
+                if (spec & OVERFLOW_FLAG) {
+                    writeU32(view, off, r(readU32(view, off)))  // overflowPageId
+                    off += 8  // overflowPageId(4) + totalLen(4)
+                } else {
+                    off += spec  // skip inline value bytes
+                }
+            }
+        } else if (type === PAGE_TYPE_OVERFLOW) {
+            // Layout: HEADER | nextPageId(4) | chunkLen(2) | chunk…
+            writeU32(view, HEADER_SIZE, r(readU32(view, HEADER_SIZE)))
+        }
+
+        // Recompute CRC (covers bytes CRC_SIZE..end)
+        writeU32(view, 0, crc32(buf, CRC_SIZE, buf.length - CRC_SIZE))
+
+        return buf
     }
 }
 
