@@ -6,6 +6,7 @@ import ErrorsDemo from './ErrorsDemo'
 import RepositoryDemo from './RepositoryDemo'
 import EndpointDemo from './EndpointDemo'
 import KVServiceDemo from './KVServiceDemo'
+import NodeStoreDemo from './NodeStoreDemo'
 
 export type NodeExampleDef = {
     key: string
@@ -21,4 +22,5 @@ export const nodeExamples: NodeExampleDef[] = [
     { key: 'repository', label: 'Repository', element: <RepositoryDemo /> },
     { key: 'endpoint', label: 'Endpoint', element: <EndpointDemo /> },
     { key: 'kv', label: 'KVService', element: <KVServiceDemo /> },
+    { key: 'node-store', label: 'NodeStore', element: <NodeStoreDemo /> },
 ]
