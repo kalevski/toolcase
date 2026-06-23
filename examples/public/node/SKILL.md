@@ -1213,6 +1213,57 @@ const nonce = generateNonce()                // base64url, 32 bytes
 
 `byteLength < 16` throws. `generatePKCE('plain')` returns `codeChallenge === codeVerifier`.
 
+### `callback.ts` — CSRF state verification
+
+```ts
+import { verifyCallback, type VerifyCallbackInput } from '@toolcase/node'
+
+interface VerifyCallbackInput {
+    stored: string    // state your server generated and saved before the authorize redirect
+    received: string  // state returned by the authorization server in the callback URL
+}
+
+// Constant-time CSRF guard.
+// Throws OAuth2CallbackError('state mismatch') when lengths differ or values do not match.
+function verifyCallback(input: VerifyCallbackInput): void
+```
+
+`state` is the CSRF token for the Authorization Code flow. A naive `===` check is vulnerable to timing side-channels: an attacker who can measure response latency may infer characters of the stored value one byte at a time. `verifyCallback` wraps Node's `crypto.timingSafeEqual` to close that window.
+
+Call it as the first action inside the callback handler — before `exchangeCode` — so a forged `state` is rejected before any token request is made.
+
+```ts
+// authorize handler — store state inside the session blob alongside the rest of the flow data
+const state = generateState()
+const nonce = generateNonce()
+const pkce  = generatePKCE()
+
+await kv.set(`oauth2:session:${sessionId}`, JSON.stringify({
+    state, nonce, codeVerifier: pkce.codeVerifier, redirectUri
+}), { EX: 600 })
+
+reply.redirect(303, buildAuthorizeURL(provider, {
+    state, nonce,
+    codeChallenge: pkce.codeChallenge, codeChallengeMethod: pkce.method,
+    redirectUri, scope: ['openid', 'email', 'profile']
+}))
+
+// callback handler
+const { code, state: receivedState, error, error_description } = req.query
+if (error) throw new OAuth2CallbackError(error, error_description)
+
+const raw = await kv.getDel(`oauth2:session:${sessionId}`)
+if (!raw) throw new OAuth2ProtocolError('session_missing_or_expired')
+const flow = JSON.parse(raw)
+
+verifyCallback({ stored: flow.state, received: receivedState })   // CSRF guard — before exchangeCode
+
+const tokens = await exchangeCode(provider, { code, codeVerifier: flow.codeVerifier, redirectUri: flow.redirectUri })
+// then verifyIdToken(..., { nonce: flow.nonce, ... })
+```
+
+> **Nonce replay protection.** `verifyCallback` guards only `state`. Always also pass `nonce` to `verifyIdToken` — omitting it silently skips the nonce check and leaves the OIDC flow open to replay attacks.
+
 ### `flow.ts` — Authorization Code
 
 ```ts
