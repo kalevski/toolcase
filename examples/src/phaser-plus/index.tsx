@@ -58,6 +58,7 @@ import EffectsGalleryDemo from './scenes/EffectsGalleryDemo.js'
 import FlowLandingDemo from './scenes/FlowLandingDemo.js'
 import InputLandingDemo from './scenes/InputLandingDemo.js'
 import CinemaLandingDemo from './scenes/CinemaLandingDemo.js'
+import BroadPhaseDemo from './scenes/BroadPhaseDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -75,6 +76,7 @@ export type PhaserCategory =
     | 'Net'
     | 'Persistence'
     | 'Assets'
+    | 'Structs'
 
 export type PhaserExampleDef = {
     key: string
@@ -99,6 +101,7 @@ export const phaserCategories: PhaserCategory[] = [
     'Assets',
     'Persistence',
     'AI',
+    'Structs',
     'Perspective2D',
     'Debugging'
 ]
@@ -573,5 +576,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Landing demo: whole Cinema surface — CameraDirector shots, ScreenShake (impact/rumble/sine), CameraFlash, ParallaxLayer, LetterboxFeature, DialogCameraCue.',
         sceneFile: 'CinemaLandingDemo.js',
         element: <PhaserCanvas sceneClass={CinemaLandingDemo} />
+    },
+
+    {
+        key: 'broad-phase',
+        title: 'Broad-phase Queries',
+        category: 'Structs',
+        description: 'Structs.SpatialHash + Structs.Quadtree: 260 moving bodies indexed in both broad-phases; cursor drives a range query() and a nearest() lookup. Press S to switch which structure answers.',
+        sceneFile: 'BroadPhaseDemo.js',
+        element: <PhaserCanvas sceneClass={BroadPhaseDemo} />
     }
 ]

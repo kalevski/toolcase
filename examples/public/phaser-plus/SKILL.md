@@ -838,6 +838,8 @@ qt.clear()
 - `SpatialHash` — uniform object sizes, high throughput, frequent moves.
 - `Quadtree` — varying object sizes or sparse density; culling and AI perception over irregular distributions.
 
+Demo: `broad-phase` example scene (`examples/src/phaser-plus/scenes/BroadPhaseDemo.js`) — 260 moving bodies re-indexed in both a `SpatialHash` and a `Quadtree` every frame; the cursor drives a range `query()` (highlighting overlapping bodies) and a `nearest()` lookup (ringed + connected to the cursor), with `S` switching which structure answers. Registered under category `Structs`.
+
 ### Vec2
 
 Immutable 2D vector. All operations return a new `Vec2`; `Vec2.ZERO` and `Vec2.ONE` are shared singletons.
