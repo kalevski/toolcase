@@ -6,7 +6,8 @@ import type { AgentKind } from '@/server/domain/types'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function POST(_req: Request, { params }: { params: { project: string; agent: string } }) {
+export async function POST(_req: Request, ctx: { params: Promise<{ project: string; agent: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     if (!listAgentKinds().some((k) => k.kind === params.agent)) return error('unknown agent', 400)

@@ -38,6 +38,7 @@ import TokenBucketDemo from './TokenBucketDemo'
 import StopwatchDemo from './StopwatchDemo'
 import TickerDemo from './TickerDemo'
 import DiffPatchDemo from './DiffPatchDemo'
+import BPlusIndexDemo from './BPlusIndexDemo'
 
 export type BaseCategory =
     | 'Events & State'
@@ -81,6 +82,7 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'multimap', label: 'MultiMap', category: 'Data Structures', element: <MultiMapDemo /> },
     { key: 'vec2', label: 'Vec2', category: 'Data Structures', element: <Vec2Demo /> },
     { key: 'spatial', label: 'Spatial', category: 'Data Structures', element: <SpatialDemo /> },
+    { key: 'bplus-index', label: 'BPlusIndex', category: 'Data Structures', element: <BPlusIndexDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
     { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },
     { key: 'dijkstra', label: 'Dijkstra', category: 'Data Structures', element: <DijkstraDemo /> },

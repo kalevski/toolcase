@@ -74,9 +74,20 @@ func cmdValidate(args []string) int {
 	if failed {
 		return 1
 	}
-	fmt.Printf("OK: %d site(s), data_dir %s\n", len(cfg.Sites), cfg.DataDir)
+	fmt.Printf("OK: %d site(s), %d upstream(s), %d proxy(ies), data_dir %s\n",
+		len(cfg.Sites), len(cfg.Upstreams), len(cfg.Proxies), cfg.DataDir)
 	for _, site := range cfg.Sites {
 		fmt.Printf("  %-30s %-9s %s\n", site.Domain, site.Source.Type, site.Source.URL)
+	}
+	for _, u := range cfg.Upstreams {
+		fmt.Printf("  %-30s %-9s %d server(s)\n", u.Name, "upstream", len(u.Servers))
+	}
+	for _, p := range cfg.Proxies {
+		target := p.Upstream
+		if target == "" {
+			target = p.Pass
+		}
+		fmt.Printf("  %-30s %-9s %s\n", p.Domain, "proxy", target)
 	}
 	return 0
 }

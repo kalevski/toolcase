@@ -5,7 +5,8 @@ import type { Metadata } from 'next'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export function generateMetadata({ params }: { params: { project: string } }): Metadata {
+export async function generateMetadata(ctx: { params: Promise<{ project: string }> }): Promise<Metadata> {
+    const params = await ctx.params
     return { title: `Knowledge · ${params.project}` }
 }
 

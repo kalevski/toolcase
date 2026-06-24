@@ -11,7 +11,8 @@ import { projectExists, projectPath, UnsafePathError } from '@/server/infrastruc
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(_req: Request, { params }: { params: { project: string } }) {
+export async function GET(_req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('admin')
     if ('res' in auth) return auth.res
     try {

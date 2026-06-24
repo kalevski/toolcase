@@ -45,7 +45,7 @@ const ARCHIVE_COLUMNS = [
 // Bare checkbox with its own change listener (React 18 won't fire onChange on tc-check).
 function Chk({ checked, indeterminate, onChange }: { checked: boolean; indeterminate?: boolean; onChange: (c: boolean) => void }) {
     const ref = useTcEvents<HTMLElement>({ change: (e) => onChange((e.target as HTMLInputElement).checked) })
-    return <tc-check ref={ref} checked={checked || undefined} indeterminate={indeterminate ? '' : undefined} />
+    return <tc-check ref={ref} checked={checked || undefined} indeterminate={indeterminate || undefined} />
 }
 
 export function TasksClient() {

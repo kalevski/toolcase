@@ -85,8 +85,12 @@ func (s *Syncer) extract(archivePath string, archiveSize int64, stagingDir strin
 			return fmt.Errorf("extract %q: %w", f.Name, err)
 		}
 		writtenTotal += n
-		// Belt-and-braces: actual bytes may exceed declared sizes on a
-		// crafted archive; enforce the cap on real output too.
+		// Belt-and-braces backstop: the archive (CD-declared sizes) is
+		// pre-flighted above, and the stdlib zip reader already rejects an
+		// entry whose real content disagrees with its declared size/CRC, so
+		// a size-lying archive fails inside writeEntry before reaching here.
+		// This cap on actual output is the last line of defence in case that
+		// ever changes (e.g. a zip64 edge case).
 		if writtenTotal > maxUncompressed {
 			return fmt.Errorf("limit exceeded: max_uncompressed_size (%s)", s.limits.MaxUncompressedSize)
 		}

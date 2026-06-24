@@ -19,7 +19,8 @@ export const dynamic = 'force-dynamic'
  * - `{ switchTo }`          → switch to an existing branch
  * - `{ delete, force? }`    → delete a local branch
  */
-export async function POST(req: Request, { params }: { params: { project: string } }) {
+export async function POST(req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     if (engine.isLocked(params.project) || agentSessions.isBusy(params.project)) {

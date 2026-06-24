@@ -151,6 +151,6 @@ export class WebSocketTransport implements Transport {
     }
 
     send(data: Uint8Array): void {
-        if (this.connected) this._socket!.send(data)
+        if (this.connected) this._socket!.send(data as Uint8Array<ArrayBuffer>)
     }
 }

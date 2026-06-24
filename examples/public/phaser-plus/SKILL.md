@@ -14,7 +14,7 @@ import {
     Layer, ObjectLayer, HTMLFeature, SplitScreen,
     GameObjectPool,
     Flow,    // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, StateMachine, BehaviorTreeProcessor, ReplayRecorder, Timer, Tween, Timeline, TweenProcessor, EASE, resolveEase, Parallel, throttle, debounce, BT: {...} }
-    Structs, // { Matrix2, SpatialHash, Quadtree }
+    Structs, // { Vec2, AABB, Transform, Easing, Random, Matrix2, SpatialHash, Quadtree }
     LogLevel,
     // Debugger
     Debugger, Panel,
@@ -56,7 +56,7 @@ import type { Transport } from '@toolcase/phaser-plus'
 ```
 
 
-Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional peers: `react` / `react-dom` >=18.
+Peers: `phaser@4.x`, `@toolcase/base@5.x`, `@toolcase/logging@5.x`. Optional peers: `react` / `react-dom` >=18.
 
 ---
 
@@ -87,6 +87,11 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [World](#world)
   - [GameObject2D](#gameobject2d)
   - [Grid](#grid)
+  - [Vec2](#vec2)
+  - [AABB](#aabb)
+  - [Transform](#transform)
+  - [Easing](#easing)
+  - [Random](#random)
   - [Matrix2](#matrix2)
   - [SpatialHash](#spatialhash)
   - [Quadtree](#quadtree)
@@ -376,7 +381,19 @@ class Hud extends HTMLFeature {
 }
 ```
 
-> Note: a `ReactFeature` exists in source (`features/ReactFeature.ts`) for mounting a React tree into the DOM overlay, but it is **not** re-exported from the package root, so `import { ReactFeature } from '@toolcase/phaser-plus'` does not resolve. Until that export gap is closed, mount React manually inside an `HTMLFeature.onCreate()` (`createRoot(this.node).render(...)`).
+Use `ReactFeature` (extends `HTMLFeature`) to mount a React tree into the DOM overlay:
+
+```ts
+import { ReactFeature } from '@toolcase/phaser-plus'
+
+class Hud extends ReactFeature {
+    onCreate() {
+        this.render(<HudComponent />)
+    }
+}
+```
+
+`render(element)` is safe to call before `react-dom` has loaded — the latest element is buffered and flushed once the root is ready. Use `renderAsync(element)` when you need to `await` the initial mount. Call `unmount()` to tear down the React tree early (also called automatically on feature destroy).
 
 ### SplitScreen
 
@@ -820,6 +837,115 @@ qt.clear()
 **Choosing between the two:**
 - `SpatialHash` — uniform object sizes, high throughput, frequent moves.
 - `Quadtree` — varying object sizes or sparse density; culling and AI perception over irregular distributions.
+
+Demo: `broad-phase` example scene (`examples/src/phaser-plus/scenes/BroadPhaseDemo.js`) — 260 moving bodies re-indexed in both a `SpatialHash` and a `Quadtree` every frame; the cursor drives a range `query()` (highlighting overlapping bodies) and a `nearest()` lookup (ringed + connected to the cursor), with `S` switching which structure answers. Registered under category `Structs`.
+
+### Vec2
+
+Immutable 2D vector. All operations return a new `Vec2`; `Vec2.ZERO` and `Vec2.ONE` are shared singletons.
+
+```ts
+const a = new Structs.Vec2(3, 4)
+const b = new Structs.Vec2(1, 2)
+
+a.add(b)          // Vec2(4, 6)
+a.subtract(b)     // Vec2(2, 2)
+a.scale(2)        // Vec2(6, 8)
+a.dot(b)          // 11
+a.length          // 5
+a.lengthSq        // 25
+a.normalize()     // unit vector
+a.lerp(b, 0.5)   // midpoint
+a.rotate(Math.PI) // 180° rotation
+a.negate()        // Vec2(-3, -4)
+a.distanceTo(b)   // Euclidean distance
+a.equals(b)       // false
+a.toArray()       // [3, 4]
+```
+
+### AABB
+
+Axis-aligned bounding box for broad-phase collision checks and region queries. Mutable — `set` / `reset` update in place; `clone` makes a copy.
+
+```ts
+const box = new Structs.AABB(10, 20, 100, 80)  // x, y, width, height
+
+// Derived edges
+box.left; box.right; box.top; box.bottom       // 10, 110, 20, 100
+box.centerX; box.centerY                        // 60, 60
+
+// Predicates
+box.contains(50, 50)        // true — point inside
+box.intersects(otherBox)    // AABB overlap test
+box.containsRect(otherBox)  // other fully inside this
+
+// Mutation
+box.set(0, 0, 200, 200)
+box.reset()                 // → (0, 0, 0, 0)
+box.copyFrom(otherBox)
+
+// Factory helpers
+const b2 = Structs.AABB.from({ x: 0, y: 0, width: 64, height: 64 })
+const b3 = Structs.AABB.fromCenter(cx, cy, width, height)
+```
+
+### Transform
+
+Mutable 2D transform snapshot (position, rotation, scale). Useful for pooled objects that need to cache or diff state without allocating new objects.
+
+```ts
+const t = new Structs.Transform()
+t.set(100, 200, Math.PI / 4, 1.5, 1.5)  // x, y, rotation, scaleX, scaleY
+
+t.x; t.y; t.rotation; t.scaleX; t.scaleY
+
+// Apply to any Phaser-compatible target
+t.applyTo(sprite)   // sets sprite.x, .y, .rotation, .scaleX, .scaleY
+
+t.copyFrom(other)   // in-place update
+t.clone()           // new Transform with same values
+t.reset()           // → (0, 0, 0, 1, 1)
+```
+
+### Easing
+
+Namespace of named easing functions (`(t: number) => number`, t ∈ [0, 1]). Sourced from `@toolcase/base`; identical to the keys available via `Flow.EASE`. Use directly when you need an easing function outside of a Tween/Timeline context.
+
+```ts
+import type { EasingFn } from '@toolcase/phaser-plus'
+
+Structs.Easing.easeOutCubic(0.5)    // 0.875
+Structs.Easing.easeInBack(0.8)
+Structs.Easing.easeOutBounce(1)     // 1
+
+// Custom bezier (equivalent to CSS cubic-bezier)
+const ease: EasingFn = Structs.Easing.cubicBezier(0.25, 0.1, 0.25, 1)
+ease(0.5)
+```
+
+Families available: `Sine`, `Quad`, `Cubic`, `Quart`, `Quint`, `Expo`, `Circ`, `Back`, `Elastic`, `Bounce` — each in `easeIn`, `easeOut`, `easeInOut` variants, plus `cubicBezier`.
+
+### Random
+
+Seeded, deterministic PRNG (mulberry32). Reproducible across platforms — pass the same seed to replay a sequence.
+
+```ts
+const rng = new Structs.Random(42)
+
+rng.next()                  // float [0, 1)
+rng.int(1, 6)               // integer in [min, max]
+rng.float(0.5, 1.5)         // float in [min, max]
+rng.bool(0.3)               // true with probability 0.3
+rng.pick(['a', 'b', 'c'])   // random element
+rng.shuffle([1, 2, 3, 4])   // new shuffled array (original untouched)
+
+// Weighted selection
+rng.weighted([
+    { item: 'common', weight: 70 },
+    { item: 'rare',   weight: 25 },
+    { item: 'epic',   weight: 5 },
+])
+```
 
 ---
 

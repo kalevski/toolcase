@@ -28,6 +28,9 @@
         "dev": "tsup --watch",
         "build": "tsup"
     },
+    "devDependencies": {
+        "@types/node": "^20.0.0"
+    },
     "author": {
         "name": "Daniel Kalevski",
         "url": "https://kalevski.dev"

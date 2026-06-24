@@ -92,8 +92,8 @@ function verifySession(token: string | undefined): SessionPayload | null {
 }
 
 /** Read + verify the session from the request cookies (Node runtime). */
-export function getSession(): SessionPayload | null {
-    const token = cookies().get(SESSION_COOKIE)?.value
+export async function getSession(): Promise<SessionPayload | null> {
+    const token = (await cookies()).get(SESSION_COOKIE)?.value
     return verifySession(token)
 }
 
@@ -196,7 +196,7 @@ export type AuthzResult =
  * re-login. Returns a discriminated result for route handlers to act on.
  */
 export async function authorize(minRole: Role): Promise<AuthzResult> {
-    const session = getSession()
+    const session = await getSession()
     if (!session) return { ok: false, status: 401 }
     const role = (await getRole(session.sub)) ?? 'guest'
     if (ROLE_RANK[role] < ROLE_RANK[minRole]) return { ok: false, status: 403 }

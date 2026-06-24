@@ -8,7 +8,8 @@ import { verifyAccount, getAccount, UnknownAccountError, MissingApiKeyError } fr
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function POST(_req: Request, { params }: { params: { alias: string } }) {
+export async function POST(_req: Request, ctx: { params: Promise<{ alias: string }> }) {
+    const params = await ctx.params
     const auth = await guard('admin')
     if ('res' in auth) return auth.res
 

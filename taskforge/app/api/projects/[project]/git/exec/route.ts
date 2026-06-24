@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic'
 const COMMAND_MAX = 2000
 
 /** Git-page terminal: run one user-typed git command inside the repo checkout. */
-export async function POST(req: Request, { params }: { params: { project: string } }) {
+export async function POST(req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     // the command may touch the working tree or refs — never while a run/agent is active.

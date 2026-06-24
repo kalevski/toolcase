@@ -3,6 +3,7 @@
 //	GET  /healthz        daemon liveness
 //	GET  /status         per-site status JSON
 //	POST /sync/<domain>  force an immediate sync (tick-now)
+//	GET  /vhost/<domain> generated nginx config for a site or reverse proxy
 //
 // Loopback only by default; an optional bearer token (admin.token_env)
 // guards reverse-proxied setups.
@@ -19,6 +20,7 @@ import (
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
+	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
 )
 
 // Server is the admin HTTP endpoint.
@@ -76,6 +78,7 @@ func (s *Server) routes() http.Handler {
 	})
 	mux.HandleFunc("GET /status", s.auth(s.handleStatus))
 	mux.HandleFunc("POST /sync/{domain}", s.auth(s.handleSync))
+	mux.HandleFunc("GET /vhost/{domain}", s.auth(s.handleVhost))
 	return mux
 }
 
@@ -105,11 +108,39 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 
 func (s *Server) handleSync(w http.ResponseWriter, r *http.Request) {
 	domain := r.PathValue("domain")
-	if !s.mgr.Kick(domain) {
-		http.Error(w, "unknown domain", http.StatusNotFound)
+	if s.mgr.Kick(domain) {
+		s.log.Info("manual sync triggered", "domain", domain)
+		w.WriteHeader(http.StatusAccepted)
+		_, _ = w.Write([]byte("sync scheduled\n"))
 		return
 	}
-	s.log.Info("manual sync triggered", "domain", domain)
-	w.WriteHeader(http.StatusAccepted)
-	_, _ = w.Write([]byte("sync scheduled\n"))
+	// Not a managed site. Distinguish a configured reverse proxy (which has no
+	// content to sync) from a genuinely unknown domain so the caller isn't told
+	// a domain it can see in /vhost is "unknown".
+	cfg := s.mgr.Config()
+	for i := range cfg.Proxies {
+		if cfg.Proxies[i].Domain == domain {
+			http.Error(w, "domain is a reverse proxy, not a synced site", http.StatusBadRequest)
+			return
+		}
+	}
+	http.Error(w, "unknown domain", http.StatusNotFound)
+}
+
+// handleVhost renders the nginx config for a site or reverse proxy. The
+// daemon only generates text here — it never writes nginx config or reloads.
+func (s *Server) handleVhost(w http.ResponseWriter, r *http.Request) {
+	domain := r.PathValue("domain")
+	out, err := nginxconf.Vhost(s.mgr.Config(), domain)
+	if err != nil {
+		if errors.Is(err, nginxconf.ErrUnknownDomain) {
+			http.Error(w, "unknown domain", http.StatusNotFound)
+			return
+		}
+		s.log.Warn("vhost generation failed", "domain", domain, "error", err)
+		http.Error(w, "vhost generation failed", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write([]byte(out))
 }

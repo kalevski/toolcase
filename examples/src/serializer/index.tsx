@@ -4,6 +4,10 @@ import FieldTypesDemo from './FieldTypesDemo'
 import RepeatedFieldsDemo from './RepeatedFieldsDemo'
 import MultipleTypesDemo from './MultipleTypesDemo'
 import ErrorHandlingDemo from './ErrorHandlingDemo'
+import AdvancedFieldsDemo from './AdvancedFieldsDemo'
+import VersioningDemo from './VersioningDemo'
+import StreamingDemo from './StreamingDemo'
+import ValidationDemo from './ValidationDemo'
 
 export type SerializerExampleDef = {
     key: string
@@ -17,4 +21,8 @@ export const serializerExamples: SerializerExampleDef[] = [
     { key: 'repeated', label: 'Repeated Fields', element: <RepeatedFieldsDemo /> },
     { key: 'multiple', label: 'Multiple Types', element: <MultipleTypesDemo /> },
     { key: 'errors', label: 'Error Handling', element: <ErrorHandlingDemo /> },
+    { key: 'advanced-fields', label: 'Advanced Fields', element: <AdvancedFieldsDemo /> },
+    { key: 'versioning', label: 'Versioning & Migration', element: <VersioningDemo /> },
+    { key: 'streaming', label: 'Streaming', element: <StreamingDemo /> },
+    { key: 'validation', label: 'Validation & Introspection', element: <ValidationDemo /> },
 ]

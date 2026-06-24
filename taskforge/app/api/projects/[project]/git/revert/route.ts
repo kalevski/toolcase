@@ -7,7 +7,8 @@ import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function POST(req: Request, { params }: { params: { project: string } }) {
+export async function POST(req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     if (engine.isLocked(params.project) || agentSessions.isBusy(params.project)) {

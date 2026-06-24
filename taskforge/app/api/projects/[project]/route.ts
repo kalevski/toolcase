@@ -5,7 +5,8 @@ import { deleteProject, ProjectLockedError } from '@/server/services/provision'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function DELETE(_req: Request, { params }: { params: { project: string } }) {
+export async function DELETE(_req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     try {

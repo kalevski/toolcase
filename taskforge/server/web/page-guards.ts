@@ -9,7 +9,7 @@ import { ROLE_RANK, type MeResponse, type Role } from '@/server/domain/types'
 
 /** Require a valid session; returns the current user (`MeResponse`). */
 export async function requireSession(): Promise<MeResponse> {
-    const session = getSession()
+    const session = await getSession()
     if (!session) redirect('/login')
     const user = await getUser(session.sub)
     return {

@@ -8,7 +8,8 @@ import type { AgentKind } from '@/server/domain/types'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function POST(req: Request, { params }: { params: { project: string; agent: string } }) {
+export async function POST(req: Request, ctx: { params: Promise<{ project: string; agent: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
 

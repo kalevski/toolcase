@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers, diff — structural delta for plain objects/arrays, patch — apply delta so patch(a,diff(a,b)) deep-equals b), timing (Stopwatch — start/stop/lap/elapsed with injectable clock; Ticker — fixed-step/variable-step update dispatcher driven by tick(delta)), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers, diff — structural delta for plain objects/arrays, patch — apply delta so patch(a,diff(a,b)) deep-equals b), timing (Stopwatch — start/stop/lap/elapsed with injectable clock; Ticker — fixed-step/variable-step update dispatcher driven by tick(delta)), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr), and BPlusIndex — persistent ordered B+ tree key-value index with MemoryAdapter/FsAdapter/OpfsAdapter/LocalStorageAdapter storage backends and PageCache LRU buffer pool (set/get/has/delete, setMany/getMany/deleteMany, first/last/floor/ceil/rank/nth/count/range, entries/keys/values, flush/close/clear/compact/stats).
 ---
 
 # base — API Reference
@@ -38,9 +38,10 @@ import {
     Stopwatch,
     Ticker,
     diff,
-    patch
+    patch,
+    BPlusIndex, MemoryAdapter, FsAdapter, OpfsAdapter, LocalStorageAdapter, PageCache,
 } from '@toolcase/base'
-import type { Result, Option, Delta } from '@toolcase/base'
+import type { Result, Option, Delta, StorageAdapter, BPlusIndexOptions, RangeOptions, BPlusIndexStats } from '@toolcase/base'
 ```
 
 ---
@@ -114,6 +115,14 @@ import type { Result, Option, Delta } from '@toolcase/base'
   - [AsyncQueue](#asyncqueue)
 - [TokenBucket](#tokenbucket)
 - [diff / patch](#diff--patch)
+- [BPlusIndex](#bplusindex)
+  - [BPlusIndex\<K, V\>](#bplusindexk-v)
+  - [Storage adapters](#storage-adapters)
+    - [MemoryAdapter](#memoryadapter)
+    - [FsAdapter](#fsadapter)
+    - [OpfsAdapter](#opfsadapter)
+    - [LocalStorageAdapter](#localstorageadapter)
+  - [PageCache](#pagecache)
 
 ---
 
@@ -2598,6 +2607,306 @@ patch(a, null)        // returns a (same reference)
 const x = [1, 2, 3]
 const y = [1, 99, 3, 4]
 patch(x, diff(x, y))  // [1, 99, 3, 4]
+```
+
+---
+
+## BPlusIndex
+
+Persistent ordered key-value index backed by a B+ tree. Isomorphic — works in Node.js, the browser main thread, and Web Workers. Supports ordered queries, rank/nth access by sorted position, and large values stored across overflow pages. All writes are copy-on-write with an atomic dual-superblock checkpoint so a crash mid-write never corrupts the existing data.
+
+```ts
+import {
+    BPlusIndex,
+    MemoryAdapter, FsAdapter, OpfsAdapter, LocalStorageAdapter, PageCache,
+} from '@toolcase/base'
+import type { StorageAdapter, BPlusIndexOptions, RangeOptions, BPlusIndexStats } from '@toolcase/base'
+```
+
+### BPlusIndex\<K, V\>
+
+Generic B+ tree index. The constructor is private — open with `BPlusIndex.open()` (resume or create) or `BPlusIndex.bulkLoad()` (pre-sorted initial load).
+
+```ts
+BPlusIndex.open<K, V>(opts: BPlusIndexOptions<K, V>): Promise<BPlusIndex<K, V>>
+```
+
+**`BPlusIndexOptions<K, V>`:**
+
+| Field | Type | Notes |
+|---|---|---|
+| `adapter` | `StorageAdapter` | Backing store (required) |
+| `compare` | `(a: K, b: K) => number` | Key ordering — negative / zero / positive (required) |
+| `serializeKey` | `(k: K) => Uint8Array` | Key encoder (required) |
+| `deserializeKey` | `(b: Uint8Array) => K` | Key decoder (required) |
+| `serializeValue` | `(v: V) => Uint8Array` | Value encoder (required) |
+| `deserializeValue` | `(b: Uint8Array) => V` | Value decoder (required) |
+| `pageSize?` | `number` | Default `4096` |
+| `order?` | `number` | Fan-out; derived from `pageSize` when omitted |
+| `keyEncoding?` | `string` | Stored in the superblock; reopening an existing file must pass the same value |
+| `overflowThreshold?` | `number` | Fraction of `pageSize` above which a value is stored in overflow pages; default `0.25` |
+
+**`BPlusIndex.keyPreset`** bundles `{compare, serializeKey, deserializeKey, keyEncoding}` for the four built-in key types — pass one as a spread and supply only the value codecs:
+
+```ts
+const idx = await BPlusIndex.open({
+    ...BPlusIndex.keyPreset.string,          // string keys
+    adapter: new MemoryAdapter(),
+    serializeValue:   (v: string) => new TextEncoder().encode(v),
+    deserializeValue: b           => new TextDecoder().decode(b),
+})
+```
+
+Available presets: `string`, `number`, `bigint`, `uint8Array`. The raw components are also available individually as `BPlusIndex.comparators.*`, `BPlusIndex.serializers.*`, and `BPlusIndex.deserializers.*`.
+
+**Properties:**
+- `size: number` — number of stored entries (read-only).
+
+**Core CRUD:**
+- `get(key: K): Promise<V | undefined>` — look up by key; `undefined` when absent.
+- `has(key: K): Promise<boolean>` — existence check.
+- `set(key: K, value: V): Promise<this>` — insert or overwrite; flushes the superblock. Chainable-style (returns `this`).
+- `delete(key: K): Promise<boolean>` — remove key; returns `true` if it existed.
+
+**Batch:**
+- `setMany(entries: [K, V][]): Promise<this>` — sort by key (last-wins on duplicates), then insert all with a single superblock flush.
+- `getMany(keys: K[]): Promise<(V | undefined)[]>` — look up each key in order; preserves input index.
+- `deleteMany(keys: K[]): Promise<number>` — delete each key; returns count of keys that actually existed.
+
+**Ordered queries:**
+- `first(): Promise<[K, V] | undefined>` — O(log n) minimum entry; `undefined` if empty.
+- `last(): Promise<[K, V] | undefined>` — O(log n) maximum entry; `undefined` if empty.
+- `floor(target: K): Promise<[K, V] | undefined>` — O(log n) largest entry whose key ≤ `target`; `undefined` if none.
+- `ceil(target: K): Promise<[K, V] | undefined>` — O(log n) smallest entry whose key ≥ `target`; `undefined` if none.
+- `rank(key: K): Promise<number>` — O(log n) 0-based position in sorted order (= count of entries strictly less than `key`). Returns the insertion rank even when `key` is absent.
+- `nth(i: number): Promise<[K, V] | undefined>` — O(log n) entry at 0-based sorted position `i`; `undefined` when out of range.
+- `count(opts?: RangeOptions<K>): Promise<number>` — O(log n) entries in range; O(1) when called with no bounds (returns `size` directly).
+- `range(opts?: RangeOptions<K>): AsyncGenerator<[K, V]>` — ordered async iteration; yields `[key, value]` pairs.
+
+**`RangeOptions<K>`:**
+
+```ts
+interface RangeOptions<K> {
+    gte?: K           // include entries with key >= gte
+    gt?: K            // include entries with key >  gt
+    lte?: K           // include entries with key <= lte
+    lt?: K            // include entries with key <  lt
+    reverse?: boolean // default false; iterate from high to low
+    limit?: number    // stop after yielding this many entries
+}
+```
+
+**Iteration (full ordered scan):**
+- `entries(): AsyncGenerator<[K, V]>` — all entries in sorted order (equivalent to `range()`).
+- `keys(): AsyncGenerator<K>` — key-only forward scan.
+- `values(): AsyncGenerator<V>` — value-only forward scan.
+
+**Lifecycle:**
+- `flush(): Promise<void>` — call the adapter's `flush()` (e.g. `fsync`). No-op when the adapter omits `flush`.
+- `close(): Promise<void>` — flush then close the adapter.
+- `clear(): Promise<void>` — reset to an empty tree; sets `size` to 0 and shrinks page count.
+- `compact(): Promise<void>` — pack all live tree pages to the front of the file and truncate the tail. Requires exclusive access — no concurrent reads, writes, or open iterators. Invalidates outstanding in-memory page IDs; re-open or discard held references after returning.
+- `stats(): Promise<BPlusIndexStats>` — read tree health metadata.
+
+**`BPlusIndexStats`:**
+
+```ts
+interface BPlusIndexStats {
+    height:     number  // levels in the tree (1 = root is a leaf)
+    pageCount:  number  // total allocated pages (including the two superblock slots)
+    freePages:  number  // page IDs on the free list — reusable without growing the file
+    fillFactor: number  // live-page fraction of non-superblock pages; 1.0 = no waste
+}
+```
+
+**Static factory methods:**
+- `BPlusIndex.open<K, V>(opts): Promise<BPlusIndex<K, V>>` — create-if-new, resume-if-existing.
+- `BPlusIndex.bulkLoad<K, V>(opts, entries: [K, V][]): Promise<BPlusIndex<K, V>>` — build a balanced tree bottom-up from pre-sorted, de-duplicated `entries`. Throws when entries are out-of-order or contain duplicate keys, or when the adapter is not fresh (non-empty).
+
+---
+
+### Storage adapters
+
+All adapters implement `StorageAdapter`:
+
+```ts
+interface StorageAdapter {
+    read(pageId: number): Promise<Uint8Array | null>
+    write(pageId: number, data: Uint8Array): Promise<void>
+    truncate?(pageCount: number): Promise<void>  // optional
+    flush?(): Promise<void>                       // optional
+    close?(): Promise<void>                       // optional
+}
+```
+
+#### MemoryAdapter
+
+In-memory adapter. Default for development and testing. Not persistent across restarts.
+
+```ts
+new MemoryAdapter()
+```
+
+Implements `truncate`, `flush` (no-op), and `close` (no-op).
+
+#### FsAdapter
+
+Single-file Node.js adapter. Stores page N at byte offset `N × pageSize`. Opens with `O_RDWR | O_CREAT` — creates the file on first use and never truncates on open. The `node:fs` import is deferred so browser bundlers can tree-shake it when `FsAdapter` is never instantiated.
+
+```ts
+new FsAdapter(path: string, pageSize = 4096)
+```
+
+#### OpfsAdapter
+
+Browser Web Worker adapter backed by the Origin Private File System (OPFS). **Must run in a dedicated Web Worker** — `FileSystemSyncAccessHandle` is unavailable on the main thread. Acquires an exclusive lock for the lifetime of the handle, enforcing the single-writer guarantee without additional locking. The OPFS API is accessed lazily so bundlers can tree-shake it from non-browser builds.
+
+```ts
+new OpfsAdapter(name: string, pageSize = 4096)
+// name — OPFS file name relative to the OPFS root directory
+```
+
+#### LocalStorageAdapter
+
+Browser main-thread adapter backed by `localStorage`. Each page is stored under `<prefix>page:<pageId>` encoded as a latin-1 string (1 byte → 1 char), staying within the ~5 MB origin quota without base64 overhead. Synchronous under the hood; single-tab only. `truncate` is intentionally absent — `localStorage` provides no way to shrink the key namespace atomically.
+
+```ts
+new LocalStorageAdapter(prefix = 'bplus:')
+// prefix — namespace prepended to every key; use a unique prefix per index to avoid collisions
+```
+
+---
+
+### PageCache
+
+LRU buffer pool that wraps any `StorageAdapter`. Read hits are served from memory; misses delegate to the inner adapter and cache the result. Writes are write-through: the inner adapter receives the write and the cache is updated immediately. Truncate evicts cached entries outside the new page boundary. Implements the full `StorageAdapter` interface and delegates `flush` and `close` to the inner adapter.
+
+```ts
+new PageCache(inner: StorageAdapter, maxSize = 64)
+// maxSize — maximum pages to keep cached; throws if < 1
+```
+
+```ts
+import { BPlusIndex, FsAdapter, PageCache } from '@toolcase/base'
+
+const adapter = new PageCache(new FsAdapter('/data/index.bin'), 128)
+const idx = await BPlusIndex.open({
+    ...BPlusIndex.keyPreset.string,
+    adapter,
+    serializeValue:   v => new TextEncoder().encode(v),
+    deserializeValue: b => new TextDecoder().decode(b),
+})
+```
+
+---
+
+### Examples
+
+**In-memory index — development / testing:**
+
+```ts
+import { BPlusIndex, MemoryAdapter } from '@toolcase/base'
+
+const idx = await BPlusIndex.open({
+    ...BPlusIndex.keyPreset.string,
+    adapter: new MemoryAdapter(),
+    serializeValue:   (v: string) => new TextEncoder().encode(v),
+    deserializeValue: b           => new TextDecoder().decode(b),
+})
+
+await idx.set('hello', 'world')
+await idx.get('hello')    // 'world'
+await idx.has('missing')  // false
+idx.size                  // 1
+
+await idx.setMany([['a', '1'], ['b', '2'], ['c', '3']])
+for await (const [k, v] of idx.range({ gte: 'a', lt: 'c' })) {
+    console.log(k, v)     // 'a' '1'  then  'b' '2'
+}
+
+await idx.delete('hello')
+await idx.close()
+```
+
+**Node.js persistent index with FsAdapter + PageCache:**
+
+```ts
+import { BPlusIndex, FsAdapter, PageCache } from '@toolcase/base'
+
+const adapter = new PageCache(new FsAdapter('/data/myindex.bin'), 128)
+const idx = await BPlusIndex.open({
+    ...BPlusIndex.keyPreset.number,
+    adapter,
+    serializeValue:   (v: object) => new TextEncoder().encode(JSON.stringify(v)),
+    deserializeValue: b           => JSON.parse(new TextDecoder().decode(b)),
+})
+
+// Ordered queries
+await idx.first()               // smallest [key, value] or undefined
+await idx.last()                // largest [key, value] or undefined
+await idx.floor(500)            // largest entry with key <= 500
+await idx.ceil(500)             // smallest entry with key >= 500
+await idx.rank(42)              // 0-based sorted position of key 42
+await idx.nth(0)                // entry at position 0 (the minimum)
+await idx.count({ gte: 100, lt: 200 })  // entries in [100, 200)
+
+const s = await idx.stats()
+console.log(s.height, s.fillFactor)
+
+// Compact when fill factor drops below 70%
+if (s.fillFactor < 0.7) await idx.compact()
+
+await idx.close()
+```
+
+**Bulk-load pre-sorted data:**
+
+```ts
+import { BPlusIndex, MemoryAdapter } from '@toolcase/base'
+
+const entries: [string, number][] = [['a', 1], ['b', 2], ['c', 3]]  // must be sorted + unique
+const idx = await BPlusIndex.bulkLoad(
+    {
+        ...BPlusIndex.keyPreset.string,
+        adapter: new MemoryAdapter(),
+        serializeValue:   (v: number) => { const b = new Uint8Array(8); new DataView(b.buffer).setFloat64(0, v, true); return b },
+        deserializeValue: b           => new DataView(b.buffer, b.byteOffset).getFloat64(0, true),
+    },
+    entries,
+)
+await idx.first()  // ['a', 1]
+await idx.size     // 3
+```
+
+**Browser OPFS index inside a Web Worker:**
+
+```ts
+import { BPlusIndex, OpfsAdapter, PageCache } from '@toolcase/base'
+
+// Must run inside a dedicated Web Worker
+const idx = await BPlusIndex.open({
+    ...BPlusIndex.keyPreset.string,
+    adapter: new PageCache(new OpfsAdapter('myapp.idx'), 64),
+    serializeValue:   v => new TextEncoder().encode(v),
+    deserializeValue: b => new TextDecoder().decode(b),
+})
+await idx.set('key', 'value')
+await idx.flush()
+```
+
+**Browser localStorage index (main thread):**
+
+```ts
+import { BPlusIndex, LocalStorageAdapter } from '@toolcase/base'
+
+const idx = await BPlusIndex.open({
+    ...BPlusIndex.keyPreset.string,
+    adapter: new LocalStorageAdapter('myapp:config:'),
+    serializeValue:   v => new TextEncoder().encode(v),
+    deserializeValue: b => new TextDecoder().decode(b),
+})
+await idx.set('theme', 'dark')
+await idx.get('theme')  // 'dark'
 ```
 
 ---

@@ -31,7 +31,7 @@ export type TcEventMap = Record<string, TcEventHandler | EventListener>
 export function useTc<E extends HTMLElement = HTMLElement>(
     instanceProps: Record<string, unknown>,
     on: TcEventMap = {}
-): RefObject<E> {
+): RefObject<E | null> {
     const ref = useRef<E>(null)
 
     // Keep a ref to the latest handlers so wrappers attached on mount always
@@ -71,7 +71,7 @@ export function useTc<E extends HTMLElement = HTMLElement>(
         })
     })
 
-    return ref as RefObject<E>
+    return ref as RefObject<E | null>
 }
 
 /**
@@ -84,7 +84,7 @@ export function useTc<E extends HTMLElement = HTMLElement>(
  */
 export function useTcEvents<E extends HTMLElement = HTMLElement>(
     on: TcEventMap
-): RefObject<E> {
+): RefObject<E | null> {
     return useTc<E>({}, on)
 }
 

@@ -13,10 +13,13 @@ npm install redis @toolcase/serializer`
 
 const subpathTable = `// One entrypoint — peers are optional, install only what you use
 import {
-    createAPISanitizer, NotFoundError, ValidationError, // utils + errors
+    createSanitizer, NotFoundError, ValidationError,   // utils + errors
     RouteHandler, HttpServer,                           // peers: fastify, @fastify/cors
     BaseRepository, EntityService,                      // peer:  pg (or any SQL executor)
     KVService,                                          // peers: redis, @toolcase/serializer
+    OAuth2Flow, verifyIdToken,                          // OAuth2 / OIDC
+    ImageProcessor, AtlasBuilder,                       // imaging: sharp
+    NodeStore, BlockStore,                              // persistent store
 } from '@toolcase/node'`
 
 export const NodePage = () => {
@@ -29,10 +32,10 @@ export const NodePage = () => {
                     name: 'node',
                     eyebrow: 'Library · Backend · Node',
                     tagline:
-                        'Backend helpers — Fastify endpoints, raw-SQL repositories, Redis KV service, isomorphic sanitize / pagination / domain-error helpers. One entrypoint, peers are optional so you only pay for what you import.',
+                        'Backend helpers — Fastify endpoints, raw-SQL repositories, Redis KV service, OAuth2/OIDC, image processing, persistent store, and isomorphic sanitize / pagination / domain-error helpers. One entrypoint, peers are optional so you only pay for what you import.',
                     version: versions.node,
                     examples: nodeExamples.length,
-                    chips: ['Fastify', 'Postgres', 'Redis', 'ESM + CJS'],
+                    chips: ['Fastify', 'Postgres', 'Redis', 'OAuth2 / OIDC', 'Imaging', 'Store', 'ESM + CJS'],
                 }}
             />
             <InstallBlock pkg="@toolcase/node" />

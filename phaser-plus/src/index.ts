@@ -13,6 +13,7 @@ import type { Disposable } from './features/ServiceRegistry'
 import Layer from './features/Layer'
 import ObjectLayer from './features/ObjectLayer'
 import HTMLFeature from './features/HTMLFeature'
+import ReactFeature from './features/ReactFeature'
 import SplitScreen from './features/SplitScreen'
 
 import GameObjectPool from './pool/GameObjectPool'
@@ -109,6 +110,7 @@ export {
     Layer,
     ObjectLayer,
     HTMLFeature,
+    ReactFeature,
     SplitScreen,
 
     LogLevel

@@ -68,7 +68,7 @@ class TilemapFeature extends Feature {
     createLayer(layerName: string | number, tilesetName?: string): Tilemaps.TilemapLayer {
         if (this.activeMap === null) throw new Error('TilemapFeature: call create() or createFromData() first')
         const tileset = tilesetName !== undefined ? (this.tilesets.get(tilesetName) ?? []) : []
-        const layer = this.activeMap.createLayer(layerName, tileset as any, 0, 0)
+        const layer = this.activeMap.createLayer(layerName, tileset as any, 0, 0) as Tilemaps.TilemapLayer | null
         if (layer === null) throw new Error(`TilemapFeature: layer "${layerName}" not found`)
         if (typeof layerName === 'string') this.layers.set(layerName, layer)
         return layer

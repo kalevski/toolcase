@@ -9,7 +9,8 @@ import type { Metadata } from 'next'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export function generateMetadata({ params }: { params: { name: string } }): Metadata {
+export async function generateMetadata(ctx: { params: Promise<{ name: string }> }): Promise<Metadata> {
+    const params = await ctx.params
     return { title: params.name === 'new' ? 'New skill' : params.name }
 }
 
@@ -23,7 +24,8 @@ description: One-line summary of what this skill does.
 Describe how Claude should use this skill.
 `
 
-export default async function SkillEditorPage({ params }: { params: { name: string } }) {
+export default async function SkillEditorPage(ctx: { params: Promise<{ name: string }> }) {
+    const params = await ctx.params
     const me = await requireRole('standard')
     const projects = await getProjectNav()
 

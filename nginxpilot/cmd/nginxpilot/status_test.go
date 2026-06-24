@@ -1,6 +1,35 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/kalevski/toolcase/nginxpilot/internal/config"
+)
+
+// TestClientAdminToken verifies the status client resolves the bearer token
+// from BOTH admin.token_env and admin.token_file (matching the daemon), not
+// just token_env — otherwise `status` against a token_file-secured daemon
+// always 401s.
+func TestClientAdminToken(t *testing.T) {
+	if got := clientAdminToken(config.Admin{}); got != "" {
+		t.Fatalf("no auth configured: want empty, got %q", got)
+	}
+
+	t.Setenv("NP_TEST_ADMIN_TOKEN", "envtok")
+	if got := clientAdminToken(config.Admin{TokenEnv: "NP_TEST_ADMIN_TOKEN"}); got != "envtok" {
+		t.Fatalf("token_env: want %q, got %q", "envtok", got)
+	}
+
+	f := filepath.Join(t.TempDir(), "tok")
+	if err := os.WriteFile(f, []byte("filetok\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if got := clientAdminToken(config.Admin{TokenFile: f}); got != "filetok" {
+		t.Fatalf("token_file: want %q, got %q", "filetok", got)
+	}
+}
 
 func TestTruncate(t *testing.T) {
 	tests := []struct {

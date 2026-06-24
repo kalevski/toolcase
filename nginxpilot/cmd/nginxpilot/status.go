@@ -40,10 +40,8 @@ func cmdStatus(args []string) int {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
-	if res.Config.Admin.TokenEnv != "" {
-		if token := os.Getenv(res.Config.Admin.TokenEnv); token != "" {
-			req.Header.Set("Authorization", "Bearer "+token)
-		}
+	if token := clientAdminToken(res.Config.Admin); token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
@@ -85,6 +83,23 @@ func cmdStatus(args []string) int {
 	}
 	_ = w.Flush()
 	return 0
+}
+
+// clientAdminToken resolves the bearer token the status client should present,
+// matching the daemon's own resolution (admin.token_env OR admin.token_file).
+// Returns "" when no auth is configured, or when a configured ref can't be
+// resolved here — in which case we still issue the request and let the daemon's
+// 401 surface a clear message rather than failing silently.
+func clientAdminToken(a config.Admin) string {
+	if a.TokenEnv == "" && a.TokenFile == "" {
+		return ""
+	}
+	token, err := config.ResolveSecret(a.TokenEnv, a.TokenFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "warning: cannot resolve admin token (%v); requesting without auth\n", err)
+		return ""
+	}
+	return token
 }
 
 func fmtTime(t *time.Time) string {

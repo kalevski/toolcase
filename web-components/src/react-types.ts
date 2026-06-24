@@ -23,18 +23,18 @@ export type TcProps<T = {}> = React.DetailedHTMLProps<
 export interface ToolcaseIntrinsicElements {
     'tc-ability-card': TcProps<{ 'ability-name'?: string | number; 'cooldown'?: string | number; 'cost'?: string | number; 'description'?: string | number; 'icon'?: string | number; 'keybind'?: string | number; 'range'?: string | number; 'rarity'?: string | number }>
     'tc-accordion': TcProps<{ 'always-open'?: boolean; 'flush'?: boolean }>
-    'tc-accordion-item': TcProps<{ 'header'?: string | number; 'open'?: boolean; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-accordion-item': TcProps<{ 'header'?: string | number; 'open'?: boolean; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-action-header': TcProps<{ 'disabled'?: boolean; onTcExec?: (e: CustomEvent) => void }>
     'tc-action-items': TcProps<{ 'label'?: string | number; onTcActionClick?: (e: CustomEvent) => void }>
     'tc-action-row-list': TcProps<{ 'outline'?: boolean; 'trailing-icon'?: string | number; onTcActionClick?: (e: CustomEvent) => void }>
     'tc-activity-card': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
-    'tc-advanced-table': TcProps<{ 'limit'?: string | number; 'loading'?: boolean; 'offset'?: string | number; 'total'?: string | number; onTcFilterChange?: (e: CustomEvent) => void; onTcSortChange?: (e: CustomEvent) => void; onTcPageChange?: (e: CustomEvent) => void }>
+    'tc-advanced-table': TcProps<{ 'limit'?: string | number; 'loading'?: boolean; 'offset'?: string | number; 'total'?: string | number; onTcFilterChange?: (e: CustomEvent) => void; onTcPageChange?: (e: CustomEvent) => void; onTcSortChange?: (e: CustomEvent) => void }>
     'tc-alert': TcProps<{ 'dismissible'?: boolean; 'variant'?: string | number; onTcClosed?: (e: CustomEvent) => void }>
     'tc-ammo-counter': TcProps<{ 'mag'?: string | number; 'mag-max'?: string | number; 'reloading'?: boolean; 'reserve'?: string | number; 'weapon-name'?: string | number }>
     'tc-anchor': TcProps<{ 'inset'?: string | number; 'position'?: string | number }>
-    'tc-announcement-bar': TcProps<{ 'cta-href'?: string | number; 'cta-label'?: string | number; 'dismissible'?: boolean; 'icon'?: string | number; 'icon-name'?: string | number; 'persist-dismiss-key'?: string | number; 'storage-key'?: string | number; 'variant'?: string | number }>
+    'tc-announcement-bar': TcProps<{ 'cta-href'?: string | number; 'cta-label'?: string | number; 'dismissible'?: boolean; 'icon'?: string | number; 'icon-name'?: string | number; 'persist-dismiss-key'?: string | number; 'storage-key'?: string | number; 'variant'?: string | number; onTcDismiss?: (e: CustomEvent) => void }>
     'tc-api-reference-table': TcProps<{ 'title'?: string | number }>
-    'tc-area-chart': TcProps<{ onTcPointHover?: (e: CustomEvent) => void }>
+    'tc-area-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'show-grid'?: string | number; 'show-legend'?: string | number; 'stacked'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; onTcPointHover?: (e: CustomEvent) => void }>
     'tc-artboard-backdrop': TcProps<{ 'kind'?: string | number; 'padding'?: string | number }>
     'tc-aspect-ratio-box': TcProps<{ 'ratio'?: string | number }>
     'tc-asset-bundle': TcProps<{ 'build-tag'?: string | number; 'category'?: string | number; 'default-build-tag'?: string | number; 'latest-build-ref'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'target'?: string | number; 'target-icon'?: string | number; onTcAdvancedToggle?: (e: CustomEvent) => void; onTcBuildTagChange?: (e: CustomEvent) => void; onTcMenuClick?: (e: CustomEvent) => void }>
@@ -45,11 +45,11 @@ export interface ToolcaseIntrinsicElements {
     'tc-badge': TcProps<{ 'pill'?: boolean; 'text'?: string | number; 'variant'?: string | number }>
     'tc-badge-row': TcProps<{ 'size'?: string | number }>
     'tc-banner': TcProps<{ 'cta-href'?: string | number; 'cta-label'?: string | number; 'dismissible'?: boolean; 'icon'?: string | number; 'icon-name'?: string | number; 'persist-dismiss-key'?: string | number; 'storage-key'?: string | number; 'variant'?: string | number; onTcDismiss?: (e: CustomEvent) => void }>
-    'tc-bar-chart': TcProps<{ onTcBarClick?: (e: CustomEvent) => void }>
-    'tc-basic-card': TcProps
+    'tc-bar-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'orientation'?: string | number; 'show-values'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; onTcBarClick?: (e: CustomEvent) => void }>
+    'tc-basic-card': TcProps<{ 'color'?: string | number; 'icon'?: string | number; 'loading'?: boolean; 'text'?: string | number; 'text-a'?: string | number; 'text-b'?: string | number; 'value'?: string | number }>
     'tc-basic-layout': TcProps<{ 'brand'?: string | number }>
     'tc-battle-pass': TcProps<{ 'current-level'?: string | number; 'current-xp'?: string | number; 'has-premium'?: boolean; 'season-end'?: string | number; 'season-name'?: string | number; onTcClaim?: (e: CustomEvent) => void }>
-    'tc-benchmark-chart': TcProps<{ onTcBarClick?: (e: CustomEvent) => void }>
+    'tc-benchmark-chart': TcProps<{ 'interactive'?: boolean; 'lower-is-better'?: boolean; 'scale'?: string | number; 'title'?: string | number; onTcBarClick?: (e: CustomEvent) => void }>
     'tc-bitmap-font-generator': TcProps<{ 'background'?: string | number; 'disabled'?: boolean; 'export-format'?: string | number; 'font-family'?: string | number; 'font-size'?: string | number; 'glyphs'?: string | number; 'glyphs-per-row'?: string | number; 'letter-spacing'?: string | number; 'line-height'?: string | number; 'padding'?: string | number; 'power-of-two'?: boolean; 'scale'?: string | number; 'text'?: string | number }>
     'tc-blur-overlay': TcProps<{ 'background'?: string | number; 'blur-amount'?: string | number }>
     'tc-boss-bar': TcProps<{ 'epithet'?: string | number; 'hp'?: string | number; 'hp-max'?: string | number; 'name'?: string | number; 'phase'?: string | number }>
@@ -64,14 +64,14 @@ export interface ToolcaseIntrinsicElements {
     'tc-bundle-bar': TcProps<{ 'filled-segments'?: string | number; 'meta'?: string | number; 'name'?: string | number; 'segments'?: string | number }>
     'tc-button': TcProps<{ 'disabled'?: boolean; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
     'tc-button-group': TcProps<{ 'aria-label'?: string | number; 'size'?: string | number; 'vertical'?: boolean }>
-    'tc-callout-quote': TcProps<{ 'attribution'?: string | number; 'quote'?: string | number; 'source'?: string | number; 'source-href'?: string | number }>
+    'tc-callout-quote': TcProps<{ 'attribution'?: string | number; 'quote'?: boolean; 'source'?: string | number; 'source-href'?: string | number }>
     'tc-card': TcProps<{ 'img'?: string | number; 'img-position'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; 'variant'?: string | number }>
     'tc-card-options': TcProps<{ 'columns'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-carousel': TcProps<{ 'controls'?: boolean; 'fade'?: boolean; 'indicators'?: boolean; 'interval'?: string | number; 'pause'?: string | number; 'ride'?: string | number; onTcSlide?: (e: CustomEvent) => void; onTcSlid?: (e: CustomEvent) => void }>
+    'tc-carousel': TcProps<{ 'controls'?: boolean; 'fade'?: boolean; 'indicators'?: boolean; 'interval'?: string | number; 'pause'?: string | number; 'ride'?: string | number; onTcSlid?: (e: CustomEvent) => void; onTcSlide?: (e: CustomEvent) => void }>
     'tc-cdn-map': TcProps<{ 'height'?: string | number }>
     'tc-changelog': TcProps<{ 'loading'?: boolean; 'max-visible'?: string | number; 'read-more-href'?: string | number; 'read-more-label'?: string | number }>
-    'tc-character-create': TcProps<{ 'confirm-label'?: string | number; 'heading'?: string | number; 'name'?: string | number; 'name-placeholder'?: string | number; onTcName?: (e: CustomEvent) => void; onTcChange?: (e: CustomEvent) => void; onTcConfirm?: (e: CustomEvent) => void }>
-    'tc-character-select': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void; onTcConfirm?: (e: CustomEvent) => void }>
+    'tc-character-create': TcProps<{ 'confirm-label'?: string | number; 'heading'?: string | number; 'name'?: string | number; 'name-placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void; onTcConfirm?: (e: CustomEvent) => void; onTcName?: (e: CustomEvent) => void }>
+    'tc-character-select': TcProps<{ 'selected-id'?: string | number; onTcConfirm?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-chart-container': TcProps<{ 'empty'?: boolean; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number }>
     'tc-chat-window': TcProps<{ 'active-channel'?: string | number; 'height'?: string | number; 'placeholder'?: string | number; 'width'?: string | number; onTcChannelChange?: (e: CustomEvent) => void; onTcSend?: (e: CustomEvent) => void }>
     'tc-check': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'indeterminate'?: boolean; 'inline'?: boolean; 'label'?: string | number; 'reverse'?: boolean; 'state'?: string | number; 'value'?: string | number }>
@@ -84,21 +84,21 @@ export interface ToolcaseIntrinsicElements {
     'tc-code-snippet': TcProps<{ 'code'?: string | number; 'language'?: string | number; 'loading'?: boolean; 'show-copy-button'?: string | number; 'title'?: string | number; onTcCopy?: (e: CustomEvent) => void }>
     'tc-code-with-output': TcProps<{ 'code'?: string | number; 'language'?: string | number; 'layout'?: string | number; 'title'?: string | number }>
     'tc-codex': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-col': TcProps<{ 'order'?: string | number; 'span'?: string | number }>
-    'tc-collapse': TcProps<{ 'horizontal'?: boolean; 'open'?: boolean; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-col': TcProps<{ 'lg'?: string | number; 'md'?: string | number; 'order'?: string | number; 'sm'?: string | number; 'span'?: string | number; 'xl'?: string | number; 'xxl'?: string | number }>
+    'tc-collapse': TcProps<{ 'horizontal'?: boolean; 'open'?: boolean; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-color-picker': TcProps<{ 'columns'?: string | number; 'disabled'?: boolean; 'label'?: string | number; 'loading'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-colored-card': TcProps
+    'tc-colored-card': TcProps<{ 'color'?: string | number; 'icon'?: string | number; 'loading'?: boolean; 'text'?: string | number; 'text-a'?: string | number; 'text-b'?: string | number; 'value'?: string | number }>
     'tc-combo-box': TcProps<{ 'disabled'?: boolean; 'placeholder'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-combo-counter': TcProps<{ 'combo'?: string | number; 'font-size'?: string | number; 'label'?: string | number; 'timer'?: string | number }>
     'tc-command-palette': TcProps<{ 'loading'?: boolean; 'open'?: boolean; 'placeholder'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-command-reference': TcProps<{ 'search-placeholder'?: string | number; 'searchable'?: string | number; 'title'?: string | number; onTcSearch?: (e: CustomEvent) => void }>
-    'tc-community-links': TcProps<{ 'title'?: string | number }>
+    'tc-community-links': TcProps<{ 'title'?: boolean }>
     'tc-comparator': TcProps<{ 'description'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'show-summary'?: string | number; 'title'?: string | number }>
     'tc-compass-bar': TcProps<{ 'fov'?: string | number; 'heading'?: string | number; 'height'?: string | number; 'show-cardinals'?: boolean; 'width'?: string | number }>
     'tc-compass-rose': TcProps<{ 'heading'?: string | number; 'size'?: string | number }>
     'tc-compatibility-matrix': TcProps<{ 'title'?: string | number }>
     'tc-config-preview': TcProps<{ 'live-label'?: string | number }>
-    'tc-confirm-dialog': TcProps<{ 'cancel-label'?: string | number; 'confirm-label'?: string | number; 'danger'?: boolean; 'dialog-title'?: string | number; 'eyebrow'?: string | number; 'message'?: string | number; 'open'?: boolean; onTcConfirm?: (e: CustomEvent) => void; onTcCancel?: (e: CustomEvent) => void }>
+    'tc-confirm-dialog': TcProps<{ 'cancel-label'?: string | number; 'confirm-label'?: string | number; 'danger'?: boolean; 'dialog-title'?: string | number; 'eyebrow'?: string | number; 'message'?: string | number; 'open'?: boolean; onTcCancel?: (e: CustomEvent) => void; onTcConfirm?: (e: CustomEvent) => void }>
     'tc-container': TcProps<{ 'breakpoint'?: string | number; 'fluid'?: boolean }>
     'tc-context-menu': TcProps<{ onTcSelect?: (e: CustomEvent) => void }>
     'tc-contributor-wall': TcProps<{ 'max-visible'?: string | number; 'title'?: string | number }>
@@ -109,7 +109,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-cool-nav': TcProps<{ 'brand'?: string | number; 'expand-breakpoint'?: string | number; 'login-href'?: string | number; 'login-label'?: string | number; 'login-variant'?: string | number; 'scroll-offset'?: string | number; 'sticky'?: boolean; 'theme'?: string | number; onTcLogin?: (e: CustomEvent) => void; onTcNavToggle?: (e: CustomEvent) => void }>
     'tc-cooldown-badge': TcProps<{ 'label'?: string | number; 'max'?: string | number; 'show-label'?: boolean; 'size'?: string | number; 'value'?: string | number }>
     'tc-countdown-timer': TcProps<{ 'compact'?: boolean; 'label'?: string | number; 'sub-label'?: string | number; 'target'?: string | number; 'units'?: string | number; onTcExpire?: (e: CustomEvent) => void }>
-    'tc-crafting-panel': TcProps<{ 'crafting'?: boolean; 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void; onTcCraft?: (e: CustomEvent) => void }>
+    'tc-crafting-panel': TcProps<{ 'crafting'?: boolean; 'selected-id'?: string | number; onTcCraft?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-credits-scroll': TcProps<{ 'scroll-title'?: string | number; 'speed'?: string | number; onTcComplete?: (e: CustomEvent) => void }>
     'tc-crosshair': TcProps<{ 'color'?: string | number; 'gap'?: string | number; 'size'?: string | number; 'spread'?: string | number; 'thickness'?: string | number; 'variant'?: string | number }>
     'tc-currency-chip': TcProps<{ 'amount'?: string | number; 'color'?: string | number; 'glyph'?: string | number }>
@@ -120,9 +120,9 @@ export interface ToolcaseIntrinsicElements {
     'tc-dashboard-content': TcProps
     'tc-dashboard-layout': TcProps<{ 'sidebar-open'?: boolean; onTcToggleSidebar?: (e: CustomEvent) => void }>
     'tc-dashboard-sidebar': TcProps
-    'tc-data-list': TcProps<{ 'empty-text'?: string | number; 'list-title'?: string | number; 'selectable'?: boolean; 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void; onTcAction?: (e: CustomEvent) => void }>
+    'tc-data-list': TcProps<{ 'empty-text'?: string | number; 'list-title'?: string | number; 'selectable'?: boolean; 'selected-id'?: string | number; onTcAction?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-date-picker': TcProps<{ 'disabled'?: boolean; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-deadzone-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean }>
+    'tc-deadzone-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
     'tc-debug-overlay': TcProps<{ 'draw-calls'?: string | number; 'fps'?: string | number; 'mem-mb'?: string | number; 'triangles'?: string | number }>
     'tc-dialogue-box': TcProps<{ 'speaker'?: string | number; 'text'?: string | number; 'typing-speed'?: string | number }>
     'tc-diff-viewer': TcProps<{ 'after'?: string | number; 'before'?: string | number; 'filename'?: string | number; 'language'?: string | number; 'mode'?: string | number; onTcRender?: (e: CustomEvent) => void }>
@@ -130,18 +130,18 @@ export interface ToolcaseIntrinsicElements {
     'tc-divider': TcProps<{ 'label'?: string | number; 'vertical'?: boolean }>
     'tc-download-stats': TcProps<{ 'monthly'?: string | number; 'package-name'?: string | number; 'registry'?: string | number; 'total'?: string | number; 'weekly'?: string | number }>
     'tc-drawer': TcProps<{ 'open'?: boolean; 'pinned'?: boolean; 'side'?: string | number; 'size'?: string | number; 'title'?: string | number; onTcClose?: (e: CustomEvent) => void }>
-    'tc-dropdown': TcProps<{ 'auto-close'?: string | number; 'direction'?: string | number; 'label'?: string | number; 'split'?: boolean; 'variant'?: string | number; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-dropdown': TcProps<{ 'auto-close'?: string | number; 'direction'?: string | number; 'label'?: string | number; 'split'?: boolean; 'variant'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-dropdown-item': TcProps<{ 'active'?: boolean; 'disabled'?: boolean; 'divider'?: boolean; 'href'?: string | number }>
     'tc-early-signup-form': TcProps<{ 'cta-label'?: string | number; 'eyebrow'?: string | number; 'field-label'?: string | number; 'helper-text'?: string | number; 'loading'?: boolean; 'placeholder'?: string | number; 'stat'?: string | number; 'subtitle'?: string | number; 'success-message'?: string | number; 'success-title'?: string | number; 'title'?: string | number; 'variant'?: string | number; onTcSubmit?: (e: CustomEvent) => void }>
     'tc-ecosystem-map': TcProps<{ 'size'?: string | number; 'title'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-editable-text': TcProps<{ 'aria-label'?: string | number; 'default-value'?: string | number; 'disabled'?: boolean; 'placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-empty-state': TcProps<{ 'icon'?: string | number }>
     'tc-entity-cell': TcProps<{ 'clickable'?: boolean; 'color'?: string | number; 'initial'?: string | number; 'name'?: string | number; 'size'?: string | number; 'sub-label'?: string | number; onTcClick?: (e: CustomEvent) => void }>
-    'tc-entity-profile-card': TcProps
+    'tc-entity-profile-card': TcProps<{ 'loading'?: boolean; 'title'?: string | number }>
     'tc-equipment-doll': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'silhouette'?: string | number; 'slot-size'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-extended-select': TcProps<{ 'loading'?: boolean; 'name'?: string | number; 'no-results-text'?: string | number; 'placeholder'?: string | number; 'search-placeholder'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-eyebrow': TcProps
-    'tc-faq-list': TcProps<{ onTcToggle?: (e: CustomEvent) => void }>
+    'tc-faq-list': TcProps<{ 'schema'?: boolean; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
     'tc-feature-card': TcProps<{ 'description'?: string | number; 'eyebrow'?: string | number; 'icon'?: string | number; 'inline'?: boolean; 'size'?: string | number; 'title'?: string | number }>
     'tc-feature-matrix': TcProps<{ 'title'?: string | number }>
     'tc-file': TcProps<{ onTcMenuItemClick?: (e: CustomEvent) => void; onTcNameChange?: (e: CustomEvent) => void }>
@@ -150,24 +150,24 @@ export interface ToolcaseIntrinsicElements {
     'tc-floating-label': TcProps<{ 'for'?: string | number; 'label'?: string | number }>
     'tc-form': TcProps<{ 'novalidate'?: boolean; 'validated'?: boolean }>
     'tc-form-input': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'helper'?: string | number; 'id'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'rows'?: string | number; 'step'?: string | number; 'type'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-form-wizard': TcProps<{ 'complete-icon'?: string | number; 'complete-label'?: string | number; 'loading'?: boolean; onTcStepChange?: (e: CustomEvent) => void; onTcComplete?: (e: CustomEvent) => void }>
-    'tc-fov-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean }>
+    'tc-form-wizard': TcProps<{ 'complete-icon'?: string | number; 'complete-label'?: string | number; 'loading'?: boolean; onTcComplete?: (e: CustomEvent) => void; onTcStepChange?: (e: CustomEvent) => void }>
+    'tc-fov-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
     'tc-fps-cap-select': TcProps<{ 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-fullscreen-toggle': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-funnel-chart': TcProps<{ onTcSelect?: (e: CustomEvent) => void }>
-    'tc-game-over-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number }>
-    'tc-game-showcase-card': TcProps<{ onTcClick?: (e: CustomEvent) => void }>
+    'tc-funnel-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'show-labels'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
+    'tc-game-over-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number; onTcAction?: (e: CustomEvent) => void }>
+    'tc-game-showcase-card': TcProps<{ 'pitch'?: string | number; 'title'?: string | number; onTcClick?: (e: CustomEvent) => void }>
     'tc-gamepad-button-prompt': TcProps<{ 'glyph'?: string | number; 'label'?: string | number; 'size'?: string | number }>
-    'tc-gantt-chart': TcProps<{ onTcTaskClick?: (e: CustomEvent) => void }>
+    'tc-gantt-chart': TcProps<{ 'end-date'?: string | number; 'loading'?: boolean; 'start-date'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcTaskClick?: (e: CustomEvent) => void }>
     'tc-gilded-frame': TcProps<{ 'padding'?: string | number; 'tone'?: string | number }>
-    'tc-github-stars-card': TcProps<{ 'cta-label'?: string | number; 'fetch-live'?: boolean; 'owner'?: string | number; 'repo'?: string | number; onTcStats?: (e: CustomEvent) => void; onTcCtaClick?: (e: CustomEvent) => void }>
+    'tc-github-stars-card': TcProps<{ 'cta-label'?: string | number; 'fetch-live'?: boolean; 'owner'?: string | number; 'repo'?: string | number; onTcCtaClick?: (e: CustomEvent) => void; onTcStats?: (e: CustomEvent) => void }>
     'tc-good-first-issues': TcProps<{ 'title'?: string | number; onTcIssueClick?: (e: CustomEvent) => void }>
     'tc-graphics-preset-picker': TcProps<{ 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-grid': TcProps<{ 'cell-size'?: string | number; 'columns'?: string | number; 'gap'?: string | number; 'rows'?: string | number }>
-    'tc-group': TcProps<{ 'action-icon'?: string | number; 'action-label'?: string | number; 'badge'?: string | number; 'default-collapsed'?: boolean; 'label'?: string | number; onTcToggle?: (e: CustomEvent) => void; onTcActionClick?: (e: CustomEvent) => void }>
+    'tc-group': TcProps<{ 'action-icon'?: string | number; 'action-label'?: string | number; 'badge'?: string | number; 'default-collapsed'?: boolean; 'label'?: string | number; onTcActionClick?: (e: CustomEvent) => void; onTcToggle?: (e: CustomEvent) => void }>
     'tc-guild-panel': TcProps<{ 'guild-name'?: string | number; 'level'?: string | number; 'member-cap'?: string | number; 'motto'?: string | number; 'tag'?: string | number }>
     'tc-heading': TcProps<{ 'as'?: string | number; 'gradient'?: boolean }>
-    'tc-health-bar': TcProps<{ 'ghost'?: boolean; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
+    'tc-health-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
     'tc-heatmap': TcProps<{ 'cell-size'?: string | number; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; onTcCellHover?: (e: CustomEvent) => void }>
     'tc-helper-text': TcProps<{ 'class-name'?: string | number; 'icon'?: string | number; 'id'?: string | number; 'text'?: string | number; 'variant'?: string | number }>
     'tc-hero': TcProps<{ 'background-pattern-src'?: string | number; 'description'?: string | number; 'eyebrow'?: string | number; 'title'?: string | number; 'title-as'?: string | number; onTcAction?: (e: CustomEvent) => void }>
@@ -178,10 +178,10 @@ export interface ToolcaseIntrinsicElements {
     'tc-icon-badge': TcProps<{ 'bg'?: string | number; 'color'?: string | number; 'glyph'?: string | number; 'size'?: string | number }>
     'tc-icon-button': TcProps<{ 'disabled'?: boolean; 'icon'?: string | number; 'label'?: string | number; 'outline'?: boolean; 'size'?: string | number; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void }>
     'tc-icon-picker': TcProps<{ 'columns'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-image': TcProps<{ onTcLoad?: (e: CustomEvent) => void; onTcError?: (e: CustomEvent) => void }>
+    'tc-image': TcProps<{ onTcError?: (e: CustomEvent) => void; onTcLoad?: (e: CustomEvent) => void }>
     'tc-image-crop': TcProps<{ 'aspect-ratio'?: string | number; 'circular'?: boolean; 'src'?: string | number; onTcCrop?: (e: CustomEvent) => void; onTcError?: (e: CustomEvent) => void }>
     'tc-infinite-scroll': TcProps<{ 'has-more'?: boolean; 'loading'?: boolean; 'root-margin'?: string | number; 'threshold'?: string | number; onTcLoadMore?: (e: CustomEvent) => void }>
-    'tc-input': TcProps<{ 'type'?: string | number }>
+    'tc-input': TcProps<{ 'autocomplete'?: string | number; 'disabled'?: boolean; 'help'?: string | number; 'inputmode'?: string | number; 'label'?: string | number; 'max'?: string | number; 'maxlength'?: string | number; 'min'?: string | number; 'minlength'?: string | number; 'name'?: string | number; 'pattern'?: string | number; 'placeholder'?: string | number; 'readonly'?: boolean; 'required'?: boolean; 'size'?: string | number; 'state'?: string | number; 'step'?: string | number; 'type'?: string | number; 'value'?: string | number }>
     'tc-input-group': TcProps<{ 'size'?: string | number }>
     'tc-input-group-text': TcProps
     'tc-install-tabs': TcProps<{ 'default-manager'?: string | number; 'dev'?: boolean; 'global'?: boolean; 'package'?: string | number; onTcChange?: (e: CustomEvent) => void; onTcCopy?: (e: CustomEvent) => void }>
@@ -201,12 +201,12 @@ export interface ToolcaseIntrinsicElements {
     'tc-label': TcProps<{ 'required'?: boolean; 'size'?: string | number; 'tooltip'?: string | number }>
     'tc-leaderboard': TcProps<{ onTcSelect?: (e: CustomEvent) => void }>
     'tc-leaderboard-trend': TcProps<{ 'direction'?: string | number; 'size'?: string | number; 'value'?: string | number }>
-    'tc-legal-screen': TcProps<{ 'initial-section'?: string | number; 'screen-title'?: string | number; 'show-accept'?: boolean; onTcClose?: (e: CustomEvent) => void; onTcAccept?: (e: CustomEvent) => void }>
+    'tc-legal-screen': TcProps<{ 'initial-section'?: string | number; 'screen-title'?: string | number; 'show-accept'?: boolean; onTcAccept?: (e: CustomEvent) => void; onTcClose?: (e: CustomEvent) => void }>
     'tc-letterbox-bars': TcProps<{ 'bar-color'?: string | number; 'bar-height'?: string | number; 'duration'?: string | number; 'show'?: boolean }>
     'tc-level-header': TcProps<{ 'level'?: string | number; 'next-label'?: string | number; 'title'?: string | number; 'xp'?: string | number; 'xp-max'?: string | number }>
-    'tc-level-select': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void; onTcConfirm?: (e: CustomEvent) => void }>
+    'tc-level-select': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'width'?: string | number; onTcConfirm?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-lightbox': TcProps<{ 'initial-index'?: string | number; 'open'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcClose?: (e: CustomEvent) => void }>
-    'tc-line-chart': TcProps<{ onTcPointHover?: (e: CustomEvent) => void }>
+    'tc-line-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'show-grid'?: string | number; 'show-legend'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcPointHover?: (e: CustomEvent) => void }>
     'tc-link': TcProps<{ 'external'?: boolean; 'href'?: string | number; 'underline'?: string | number; 'variant'?: string | number }>
     'tc-linked-providers-card': TcProps<{ 'empty-label'?: string | number; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
     'tc-list': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
@@ -221,22 +221,22 @@ export interface ToolcaseIntrinsicElements {
     'tc-login': TcProps<{ 'background-pattern-src'?: string | number; 'description'?: string | number; 'loading'?: boolean; 'title'?: string | number; onTcConnect?: (e: CustomEvent) => void }>
     'tc-logo-cloud': TcProps<{ 'columns'?: string | number; 'grayscale'?: boolean; 'title'?: string | number }>
     'tc-loot-list': TcProps<{ 'list-title'?: string | number; onTcTake?: (e: CustomEvent) => void; onTcTakeAll?: (e: CustomEvent) => void }>
-    'tc-loot-popup': TcProps<{ 'auto-fade-ms'?: string | number; 'discard-label'?: string | number; 'eyebrow'?: string | number; 'open'?: boolean; 'popup-title'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcTake?: (e: CustomEvent) => void; onTcTakeAll?: (e: CustomEvent) => void; onTcDiscard?: (e: CustomEvent) => void }>
+    'tc-loot-popup': TcProps<{ 'auto-fade-ms'?: string | number; 'discard-label'?: string | number; 'eyebrow'?: string | number; 'open'?: boolean; 'popup-title'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcDiscard?: (e: CustomEvent) => void; onTcTake?: (e: CustomEvent) => void; onTcTakeAll?: (e: CustomEvent) => void }>
     'tc-lore-text': TcProps
     'tc-main-menu': TcProps<{ 'menu-title'?: string | number; 'selected-id'?: string | number; 'subtitle'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-maintainer-card': TcProps<{ 'avatar-url'?: string | number; 'bio'?: string | number; 'location'?: string | number; 'name'?: string | number; 'role'?: string | number; 'sponsor-href'?: string | number; 'sponsor-label'?: string | number }>
-    'tc-mana-bar': TcProps<{ 'ghost'?: boolean; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-markdown-editor': TcProps<{ 'disabled'?: boolean; 'height'?: string | number; 'label'?: string | number; 'placeholder'?: string | number; 'toolbar'?: string | number; 'value'?: string | number }>
+    'tc-mana-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
+    'tc-markdown-editor': TcProps<{ 'disabled'?: boolean; 'height'?: string | number; 'label'?: string | number; 'placeholder'?: string | number; 'toolbar'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-marquee': TcProps<{ 'direction'?: string | number; 'pause-on-hover'?: boolean; 'separator'?: string | number; 'speed'?: string | number }>
     'tc-matchmaking-screen': TcProps<{ 'elapsed'?: string | number; 'estimated'?: string | number; 'found-label'?: string | number; 'mode'?: string | number; 'region'?: string | number; 'state'?: string | number }>
     'tc-menu-item': TcProps<{ 'disabled'?: boolean; 'hotkey'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'selected'?: boolean; onTcSelect?: (e: CustomEvent) => void }>
     'tc-metal-button': TcProps<{ 'disabled'?: boolean; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
-    'tc-metric-card': TcProps
+    'tc-metric-card': TcProps<{ 'icon'?: string | number; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; 'trend-color'?: string | number; 'value'?: string | number }>
     'tc-metric-grid': TcProps<{ 'columns'?: string | number }>
     'tc-metric-tile': TcProps<{ 'hint'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'unit'?: string | number; 'value'?: string | number }>
     'tc-migration-guide': TcProps<{ 'from'?: string | number; 'title'?: string | number; 'to'?: string | number }>
     'tc-minimap': TcProps<{ 'background-image'?: string | number; 'rotation'?: string | number; 'size'?: string | number; 'world-height'?: string | number; 'world-width'?: string | number; 'world-x'?: string | number; 'world-y'?: string | number }>
-    'tc-modal': TcProps<{ 'centered'?: boolean; 'fullscreen'?: string | number; 'open'?: boolean; 'scrollable'?: boolean; 'size'?: string | number; 'static-backdrop'?: boolean; 'title'?: string | number; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-modal': TcProps<{ 'centered'?: boolean; 'fullscreen'?: string | number; 'open'?: boolean; 'scrollable'?: boolean; 'size'?: string | number; 'static-backdrop'?: boolean; 'title'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-mouse-sensitivity': TcProps<{ 'ads'?: string | number; 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-multi-card-select': TcProps<{ 'columns'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'name'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-nav': TcProps<{ 'fill'?: boolean; 'justified'?: boolean; 'variant'?: string | number; 'vertical'?: boolean }>
@@ -245,11 +245,11 @@ export interface ToolcaseIntrinsicElements {
     'tc-navbar': TcProps<{ 'bg'?: string | number; 'brand'?: string | number; 'expand'?: string | number; 'fixed'?: string | number; 'sticky'?: string | number; 'variant'?: string | number }>
     'tc-network-status-icon': TcProps<{ 'connected'?: boolean; 'loss'?: string | number; 'ping'?: string | number; 'show-label'?: boolean; 'size'?: string | number }>
     'tc-newsletter-signup': TcProps<{ 'cta-label'?: string | number; 'description'?: string | number; 'placeholder'?: string | number; 'privacy-href'?: string | number; 'success-message'?: string | number; 'title'?: string | number; onTcSubmit?: (e: CustomEvent) => void }>
-    'tc-node-editor': TcProps<{ 'disabled'?: boolean; 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void; onTcMoveNode?: (e: CustomEvent) => void; onTcConnect?: (e: CustomEvent) => void }>
+    'tc-node-editor': TcProps<{ 'disabled'?: boolean; 'selected-id'?: string | number; onTcConnect?: (e: CustomEvent) => void; onTcMoveNode?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-normal-map-generator': TcProps<{ 'bevel-width'?: string | number; 'disabled'?: boolean; 'editable'?: boolean; 'emboss-height'?: string | number; 'preview-mode'?: string | number; 'source'?: string | number; 'strength'?: string | number; 'tool'?: string | number }>
     'tc-number-input': TcProps<{ 'error'?: string | number; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'precision'?: string | number; 'prefix'?: string | number; 'step'?: string | number; 'suffix'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-objective-marker': TcProps<{ 'color'?: string | number; 'distance'?: string | number; 'label'?: string | number; 'pulse'?: boolean; 'size'?: string | number; 'x'?: string | number; 'y'?: string | number }>
-    'tc-offcanvas': TcProps<{ 'backdrop'?: string | number; 'open'?: boolean; 'placement'?: string | number; 'scroll'?: boolean; 'title'?: string | number; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-offcanvas': TcProps<{ 'backdrop'?: string | number; 'open'?: boolean; 'placement'?: string | number; 'scroll'?: boolean; 'title'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-option': TcProps<{ 'disabled'?: boolean; 'selected'?: boolean; 'value'?: string | number }>
     'tc-otp-input': TcProps<{ 'error'?: string | number; 'label'?: string | number; 'length'?: string | number; 'masked'?: boolean; 'mode'?: string | number; 'name'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void; onTcComplete?: (e: CustomEvent) => void }>
     'tc-page-footer': TcProps<{ 'brand'?: string | number; 'description'?: string | number; 'legal-text'?: string | number; 'tagline'?: string | number }>
@@ -259,13 +259,13 @@ export interface ToolcaseIntrinsicElements {
     'tc-panel-header': TcProps<{ 'heading'?: string | number; 'icon'?: string | number }>
     'tc-particle-emitter': TcProps<{ 'burst'?: string | number; 'count'?: string | number; 'gravity'?: string | number; 'height'?: string | number; 'lifetime'?: string | number; 'particle-size'?: string | number; 'speed'?: string | number; 'width'?: string | number; onTcBurst?: (e: CustomEvent) => void }>
     'tc-party-panel': TcProps<{ 'capacity'?: string | number }>
-    'tc-pause-menu': TcProps<{ 'default-items'?: boolean; 'menu-title'?: string | number; 'open'?: boolean; 'resume-footer'?: boolean; 'screen-title'?: string | number; onTcResume?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void; onTcRestart?: (e: CustomEvent) => void; onTcQuit?: (e: CustomEvent) => void; onTcClose?: (e: CustomEvent) => void }>
-    'tc-pause-screen': TcProps<{ 'default-items'?: boolean; 'menu-title'?: string | number; 'open'?: boolean; 'resume-footer'?: boolean; 'screen-title'?: string | number }>
+    'tc-pause-menu': TcProps<{ 'default-items'?: boolean; 'menu-title'?: string | number; 'open'?: boolean; 'resume-footer'?: boolean; 'screen-title'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcQuit?: (e: CustomEvent) => void; onTcRestart?: (e: CustomEvent) => void; onTcResume?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
+    'tc-pause-screen': TcProps<{ 'default-items'?: boolean; 'menu-title'?: string | number; 'open'?: boolean; 'resume-footer'?: boolean; 'screen-title'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcQuit?: (e: CustomEvent) => void; onTcRestart?: (e: CustomEvent) => void; onTcResume?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-perk-picker': TcProps<{ 'columns'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-phase-grid': TcProps<{ 'columns'?: string | number }>
     'tc-phone-input': TcProps<{ 'default-country'?: string | number; 'error'?: string | number; 'label'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-physics-editor': TcProps<{ 'alpha-threshold'?: string | number; 'disabled'?: boolean; 'source'?: string | number; 'tool'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-pie-chart': TcProps<{ onTcSliceSelect?: (e: CustomEvent) => void }>
+    'tc-pie-chart': TcProps<{ 'center-label'?: string | number; 'donut'?: boolean; 'height'?: string | number; 'loading'?: boolean; 'show-legend'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcSliceSelect?: (e: CustomEvent) => void }>
     'tc-ping-display': TcProps<{ 'ping'?: string | number }>
     'tc-pinned-feature-showcase': TcProps<{ 'description'?: string | number; 'eyebrow'?: string | number; 'image-alt'?: string | number; 'image-src'?: string | number; 'title'?: string | number }>
     'tc-pipeline': TcProps
@@ -274,7 +274,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-player-card': TcProps<{ 'card-title'?: string | number; 'level'?: string | number; 'online-status'?: string | number; 'player-name'?: string | number; 'rank'?: string | number; onTcAction?: (e: CustomEvent) => void }>
     'tc-player-frame': TcProps<{ 'class-name'?: string | number; 'glyph'?: string | number; 'hp'?: string | number; 'hp-max'?: string | number; 'level'?: string | number; 'mp'?: string | number; 'mp-max'?: string | number; 'name'?: string | number; 'show-mp'?: boolean; 'show-stamina'?: boolean; 'stamina'?: string | number; 'stamina-max'?: string | number }>
     'tc-plugin-grid': TcProps<{ 'columns'?: string | number; 'title-text'?: string | number; onTcCopy?: (e: CustomEvent) => void }>
-    'tc-popover': TcProps<{ onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-popover': TcProps<{ onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-portrait': TcProps<{ 'circle'?: boolean; 'glyph'?: string | number; 'level'?: string | number; 'ring'?: string | number; 'size'?: string | number }>
     'tc-press-any-key': TcProps<{ 'disabled'?: boolean; 'text'?: string | number }>
     'tc-pricing-card': TcProps<{ 'badge-text'?: string | number; 'description'?: string | number; 'highlight'?: boolean; 'name'?: string | number; 'period'?: string | number; 'price'?: string | number; onTcAction?: (e: CustomEvent) => void }>
@@ -285,7 +285,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-queued-file': TcProps<{ 'extension'?: string | number; 'format'?: string | number; 'name'?: string | number; 'size'?: string | number; onTcDismiss?: (e: CustomEvent) => void }>
     'tc-quick-start': TcProps<{ 'title-text'?: string | number; onTcCopy?: (e: CustomEvent) => void }>
     'tc-radial-wheel': TcProps<{ 'center-label'?: string | number; 'open'?: boolean; 'option-size'?: string | number; 'per-page'?: string | number; 'radius'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-radio': TcProps<{ 'checked'?: string | number; 'disabled'?: boolean; 'inline'?: boolean; 'label'?: string | number; 'name'?: string | number; 'reverse'?: boolean; 'value'?: string | number }>
+    'tc-radio': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'inline'?: boolean; 'label'?: string | number; 'name'?: string | number; 'reverse'?: boolean; 'value'?: string | number }>
     'tc-radio-group': TcProps<{ 'inline'?: boolean; 'label'?: string | number; 'name'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-range': TcProps<{ 'disabled'?: boolean; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'step'?: string | number; 'value'?: string | number }>
     'tc-range-slider': TcProps<{ 'disabled'?: boolean; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'show-tooltip'?: boolean; 'step'?: string | number; 'ticks'?: boolean; onTcChange?: (e: CustomEvent) => void }>
@@ -295,7 +295,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-report-dialog': TcProps<{ 'open'?: boolean; 'player-name'?: string | number; onTcCancel?: (e: CustomEvent) => void; onTcSubmit?: (e: CustomEvent) => void }>
     'tc-reset-to-defaults': TcProps<{ 'disabled'?: boolean; onTcReset?: (e: CustomEvent) => void }>
     'tc-resizable-panel': TcProps<{ 'direction'?: string | number; 'min-size'?: string | number; 'storage-key'?: string | number; onTcResize?: (e: CustomEvent) => void }>
-    'tc-resource-bar': TcProps<{ 'ghost'?: boolean; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
+    'tc-resource-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
     'tc-result-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number; onTcAction?: (e: CustomEvent) => void }>
     'tc-rich-page-header': TcProps<{ 'description'?: string | number; 'icon-color'?: string | number; 'icon-name'?: string | number; 'sub'?: string | number; 'title-text'?: string | number }>
     'tc-roadmap': TcProps<{ 'layout'?: string | number; 'title-text'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
@@ -310,7 +310,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-scrollspy': TcProps<{ 'offset'?: string | number; 'smooth-scroll'?: boolean; 'target'?: string | number; onTcActivate?: (e: CustomEvent) => void }>
     'tc-section-card': TcProps<{ 'icon'?: string | number; 'title'?: string | number; 'variant'?: string | number }>
     'tc-section-flag': TcProps<{ 'align'?: string | number; 'subtitle'?: string | number; 'title'?: string | number }>
-    'tc-select': TcProps<{ 'disabled'?: boolean; 'label'?: string | number; 'multiple'?: boolean; 'size'?: string | number; 'state'?: string | number; 'value'?: string | number }>
+    'tc-select': TcProps<{ 'disabled'?: boolean; 'label'?: string | number; 'multiple'?: boolean; 'name'?: string | number; 'size'?: string | number; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-select-row': TcProps<{ 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-setting-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
     'tc-settings-category-list': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
@@ -322,7 +322,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-skeleton': TcProps<{ 'count'?: string | number; 'height'?: string | number; 'variant'?: string | number; 'width'?: string | number }>
     'tc-skill-bar': TcProps<{ 'gap'?: string | number; 'slot-size'?: string | number; onTcActivate?: (e: CustomEvent) => void }>
     'tc-skill-tree': TcProps<{ 'height'?: string | number; 'points'?: string | number; 'selected-id'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void; onTcUnlock?: (e: CustomEvent) => void }>
-    'tc-slices-card': TcProps
+    'tc-slices-card': TcProps<{ 'loading'?: boolean; 'size'?: string | number; 'stroke-width'?: string | number; 'title'?: string | number }>
     'tc-slider': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'show-tooltip'?: boolean; 'step'?: string | number; 'ticks'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-social-links': TcProps<{ 'size'?: string | number; 'variant'?: string | number }>
     'tc-spacer': TcProps<{ 'axis'?: string | number; 'size'?: string | number }>
@@ -331,7 +331,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-sponsor-wall': TcProps<{ 'title'?: string | number }>
     'tc-sprint-chain': TcProps<{ 'columns'?: string | number; 'current-id'?: string | number }>
     'tc-stack': TcProps<{ 'align'?: string | number; 'direction'?: string | number; 'gap'?: string | number; 'inline'?: boolean; 'justify'?: string | number; 'wrap'?: boolean }>
-    'tc-stamina-bar': TcProps<{ 'ghost'?: boolean; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
+    'tc-stamina-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
     'tc-stamp': TcProps<{ 'angle'?: string | number; 'color'?: string | number; 'label'?: string | number; 'position'?: string | number }>
     'tc-stat-card': TcProps<{ 'delta'?: string | number; 'delta-kind'?: string | number; 'footer'?: string | number; 'helper'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'unit'?: string | number; 'value'?: string | number }>
     'tc-stat-row': TcProps<{ 'accent'?: string | number; 'label'?: string | number; 'trend'?: string | number; 'value'?: string | number }>
@@ -341,41 +341,41 @@ export interface ToolcaseIntrinsicElements {
     'tc-status-dot': TcProps<{ 'label'?: string | number; 'pulse'?: boolean; 'size'?: string | number; 'status'?: string | number }>
     'tc-stepper': TcProps<{ 'active-step'?: string | number; 'clickable'?: boolean; 'orientation'?: string | number; onTcStepClick?: (e: CustomEvent) => void }>
     'tc-subtitle': TcProps<{ 'align'?: string | number; 'boxed'?: boolean; 'font-size'?: string | number; 'max-width'?: string | number; 'speaker'?: string | number; 'text'?: string | number }>
-    'tc-switch': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'label'?: string | number; 'reverse'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
+    'tc-switch': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'label'?: string | number; 'name'?: string | number; 'reverse'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-tab-bar': TcProps<{ 'active-id'?: string | number; 'size'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-tab-sections': TcProps<{ 'active-key'?: boolean; 'default-active-key'?: string | number; 'loading'?: boolean; onTcChange?: (e: CustomEvent) => void }>
     'tc-table': TcProps<{ 'borderless'?: boolean; 'compact'?: boolean; 'empty-message'?: string | number; 'hoverable'?: boolean; 'loading'?: boolean; 'loading-rows'?: string | number; 'sticky-header'?: boolean; 'striped'?: boolean; onTcRowClick?: (e: CustomEvent) => void }>
-    'tc-tag': TcProps<{ 'count'?: string | number; 'disabled'?: boolean; 'icon'?: string | number; 'removable'?: boolean; 'selected'?: boolean; 'static'?: boolean; 'variant'?: string | number }>
+    'tc-tag': TcProps<{ 'count'?: string | number; 'disabled'?: boolean; 'icon'?: string | number; 'removable'?: boolean; 'selected'?: boolean; 'static'?: boolean; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void; onTcRemove?: (e: CustomEvent) => void }>
     'tc-tag-input': TcProps<{ 'allow-create'?: boolean; 'disabled'?: boolean; 'label'?: string | number; 'loading'?: boolean; 'max-tags'?: string | number; 'placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-terminal-window': TcProps<{ 'animate-typing'?: boolean; 'prompt'?: string | number; 'speed'?: string | number; 'title'?: string | number }>
     'tc-testimonial-carousel': TcProps<{ 'autoplay'?: boolean; 'interval'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-text': TcProps<{ 'as'?: string | number; 'size'?: string | number; 'variant'?: string | number }>
-    'tc-textarea': TcProps<{ 'rows'?: string | number }>
+    'tc-textarea': TcProps<{ 'autocomplete'?: string | number; 'disabled'?: boolean; 'help'?: string | number; 'inputmode'?: string | number; 'label'?: string | number; 'max'?: string | number; 'maxlength'?: string | number; 'min'?: string | number; 'minlength'?: string | number; 'name'?: string | number; 'pattern'?: string | number; 'placeholder'?: string | number; 'readonly'?: boolean; 'required'?: boolean; 'rows'?: string | number; 'size'?: string | number; 'state'?: string | number; 'step'?: string | number; 'value'?: string | number }>
     'tc-theme': TcProps<{ 'name'?: string | number }>
     'tc-tier-ladder': TcProps<{ 'current-tier-id'?: string | number; 'summary'?: string | number; 'title'?: string | number }>
     'tc-time-picker': TcProps<{ 'clearable'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'format'?: string | number; 'label'?: string | number; 'minute-step'?: string | number; 'placeholder'?: string | number; 'show-seconds'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-timeline': TcProps<{ 'connector'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'overlap'?: string | number; 'variant'?: string | number }>
     'tc-title': TcProps<{ 'align'?: string | number; 'size'?: string | number }>
     'tc-title-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-text'?: string | number }>
-    'tc-toast': TcProps<{ 'autohide'?: string | number; 'delay'?: string | number; 'open'?: boolean; 'title'?: string | number; 'variant'?: string | number; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-toast': TcProps<{ 'autohide'?: string | number; 'delay'?: string | number; 'open'?: boolean; 'title'?: string | number; 'variant'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-toggle': TcProps<{ 'disabled'?: boolean; 'label'?: string | number; 'on'?: boolean; onTcChange?: (e: CustomEvent) => void }>
     'tc-toggle-card': TcProps<{ 'badge'?: string | number; 'checked'?: boolean; 'disabled'?: boolean; 'hint'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-toggle-row': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-tooltip': TcProps<{ onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcHidden?: (e: CustomEvent) => void }>
+    'tc-tooltip': TcProps<{ onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-transition-wipe': TcProps<{ 'direction'?: string | number; 'duration'?: string | number; 'show'?: boolean; 'wipe-color'?: string | number; onTcComplete?: (e: CustomEvent) => void }>
     'tc-tree-view': TcProps<{ 'checkbox-mode'?: boolean; onTcExpandChange?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-trend-indicator': TcProps<{ 'direction'?: string | number; 'size'?: string | number; 'value'?: string | number }>
     'tc-usage-summary-panel': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
-    'tc-user-panel': TcProps<{ 'avatar-src'?: string | number; 'icon'?: string | number; 'icon-highlighted'?: boolean; 'initials'?: string | number; 'loading'?: boolean; 'plan'?: string | number; 'username'?: string | number; onTcMenuClick?: (e: CustomEvent) => void; onTcIconClick?: (e: CustomEvent) => void }>
+    'tc-user-panel': TcProps<{ 'avatar-src'?: string | number; 'icon'?: string | number; 'icon-highlighted'?: boolean; 'initials'?: string | number; 'loading'?: boolean; 'plan'?: string | number; 'username'?: string | number; onTcIconClick?: (e: CustomEvent) => void; onTcMenuClick?: (e: CustomEvent) => void }>
     'tc-version-label': TcProps<{ 'branch'?: string | number; 'build'?: string | number; 'version'?: string | number }>
     'tc-version-picker': TcProps<{ 'name'?: string | number; 'value'?: string | number; 'variant'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-vertical-item-list': TcProps<{ 'active-key'?: boolean; 'default-active-key'?: string | number; 'disabled'?: boolean; 'loading'?: boolean; 'loading-count'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-victory-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number }>
-    'tc-video-embed': TcProps
+    'tc-victory-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number; onTcAction?: (e: CustomEvent) => void }>
+    'tc-video-embed': TcProps<{ 'aspect-ratio'?: string | number; 'autoplay'?: boolean; 'controls'?: string | number; 'loop'?: boolean; 'muted'?: boolean; 'poster'?: string | number; 'src'?: string | number; 'title'?: string | number }>
     'tc-vignette-overlay': TcProps<{ 'intensity'?: string | number; 'vignette-color'?: string | number }>
     'tc-virtual-list': TcProps<{ 'end-reached-threshold'?: string | number; 'height'?: string | number; 'overscan'?: string | number; onTcEndReached?: (e: CustomEvent) => void }>
     'tc-visually-hidden': TcProps<{ 'as'?: string | number }>
-    'tc-volume-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean }>
+    'tc-volume-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
     'tc-waypoint-marker': TcProps<{ 'color'?: string | number; 'distance'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'size'?: string | number; 'x'?: string | number; 'y'?: string | number }>
     'tc-welcome-guide': TcProps<{ 'background-pattern-alt'?: string | number; 'background-pattern-src'?: string | number; 'loading'?: boolean; 'title'?: string | number }>
 }

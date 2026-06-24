@@ -13,7 +13,8 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 120
 
 /** §6.2 — manual commit of the whole working tree, with optional AI message. */
-export async function POST(req: Request, { params }: { params: { project: string } }) {
+export async function POST(req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     try {

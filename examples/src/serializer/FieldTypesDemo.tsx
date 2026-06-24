@@ -36,17 +36,26 @@ export const FieldTypesDemo = () => {
         console.log('Decoded:', JSON.stringify(dec))
 
         console.log('')
-        console.log('Available FieldType constants:')
+        console.log('Scalar FieldType constants (15):')
         for (const [name, value] of Object.entries(Serializer.FieldType)) {
-            console.log(`  ${name}: '${value}'`)
+            if (typeof value === 'string') {
+                console.log(`  ${name}: '${value}'`)
+            }
         }
+        console.log('')
+        console.log('FieldType constructors (advanced types):')
+        console.log('  ENUM(values)            — inline enum marker')
+        console.log('  MAP(keyType, valueType) — map field marker')
+        console.log('  PACKED_ARRAY(type)      — packed repeated marker')
     }))
     return (
         <SerializerDemoCard
             title="Field Types"
             description={
                 <>
-                    All 15 protobuf field types are supported via <code>Serializer.FieldType</code> constants.
+                    <code>Serializer.FieldType</code> provides 15 scalar field-type constants plus three
+                    constructor helpers (<code>ENUM</code>, <code>MAP</code>, <code>PACKED_ARRAY</code>) for
+                    advanced field descriptors.
                 </>
             }
             code={code}

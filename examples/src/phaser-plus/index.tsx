@@ -41,6 +41,8 @@ import ReplayRecorderDemo from './scenes/ReplayRecorderDemo.js'
 import ReplayRecorderTimelineDemo from './scenes/ReplayRecorderTimelineDemo.js'
 import CameraDirectorDemo from './scenes/CameraDirectorDemo.js'
 import ScreenShakeDemo from './scenes/ScreenShakeDemo.js'
+import CameraFlashDemo from './scenes/CameraFlashDemo.js'
+import DialogCameraCueDemo from './scenes/DialogCameraCueDemo.js'
 import ParallaxLayerDemo from './scenes/ParallaxLayerDemo.js'
 import LetterboxDemo from './scenes/LetterboxDemo.js'
 import InputFeatureDemo from './scenes/InputFeatureDemo.js'
@@ -58,6 +60,7 @@ import EffectsGalleryDemo from './scenes/EffectsGalleryDemo.js'
 import FlowLandingDemo from './scenes/FlowLandingDemo.js'
 import InputLandingDemo from './scenes/InputLandingDemo.js'
 import CinemaLandingDemo from './scenes/CinemaLandingDemo.js'
+import BroadPhaseDemo from './scenes/BroadPhaseDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -75,6 +78,7 @@ export type PhaserCategory =
     | 'Net'
     | 'Persistence'
     | 'Assets'
+    | 'Structs'
 
 export type PhaserExampleDef = {
     key: string
@@ -99,6 +103,7 @@ export const phaserCategories: PhaserCategory[] = [
     'Assets',
     'Persistence',
     'AI',
+    'Structs',
     'Perspective2D',
     'Debugging'
 ]
@@ -466,6 +471,22 @@ export const phaserExamples: PhaserExampleDef[] = [
         sceneFile: 'LetterboxDemo.js',
         element: <PhaserCanvas sceneClass={LetterboxDemo} />
     },
+    {
+        key: 'camera-flash',
+        title: 'Camera Flash',
+        category: 'Cinema',
+        description: 'CameraFlash overlay: click for a white hit, stack additive color flashes, hold frames. 1: red, 2: cyan, 3: stack, C: clear.',
+        sceneFile: 'CameraFlashDemo.js',
+        element: <PhaserCanvas sceneClass={CameraFlashDemo} />
+    },
+    {
+        key: 'dialog-camera-cue',
+        title: 'Dialog Camera Cue',
+        category: 'Cinema',
+        description: 'DialogCameraCue dims everything outside a focus frame around an NPC, with optional vignette ring. SPACE: toggle, F: full dim, V: vignette, C: clear.',
+        sceneFile: 'DialogCameraCueDemo.js',
+        element: <PhaserCanvas sceneClass={DialogCameraCueDemo} />
+    },
 
     {
         key: 'input-feature',
@@ -573,5 +594,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Landing demo: whole Cinema surface — CameraDirector shots, ScreenShake (impact/rumble/sine), CameraFlash, ParallaxLayer, LetterboxFeature, DialogCameraCue.',
         sceneFile: 'CinemaLandingDemo.js',
         element: <PhaserCanvas sceneClass={CinemaLandingDemo} />
+    },
+
+    {
+        key: 'broad-phase',
+        title: 'Broad-phase Queries',
+        category: 'Structs',
+        description: 'Structs.SpatialHash + Structs.Quadtree: 260 moving bodies indexed in both broad-phases; cursor drives a range query() and a nearest() lookup. Press S to switch which structure answers.',
+        sceneFile: 'BroadPhaseDemo.js',
+        element: <PhaserCanvas sceneClass={BroadPhaseDemo} />
     }
 ]
