@@ -159,8 +159,11 @@ export async function fetchGithubProfile(token: string): Promise<GithubProfile> 
 
 /** Optional allowlist enforcement (§4.4) — runs before any role assignment. */
 export async function checkAllowlist(profile: GithubProfile, token: string): Promise<boolean> {
-    if (config.allowedLogins.length > 0 && !config.allowedLogins.includes(profile.login)) {
-        return false
+    if (config.allowedLogins.length > 0) {
+        // GitHub logins are case-insensitive; compare case-folded so a config of
+        // `octocat` still matches a user signing in as `OctoCat`.
+        const login = profile.login.toLowerCase()
+        if (!config.allowedLogins.some((l) => l.toLowerCase() === login)) return false
     }
     if (config.allowedOrg) {
         try {

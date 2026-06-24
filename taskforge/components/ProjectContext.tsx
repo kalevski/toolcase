@@ -50,6 +50,10 @@ export const AGENT_LABELS: Record<string, string> = {
 
 const TERMINAL_MAX = 1500
 const AGENT_TERMINAL_MAX = 500
+// Bound the dedupe set so a long-lived dashboard session can't grow it without
+// limit. Replays are gated by the `replay` flag (not this set), so evicting old
+// keys can never cause a replayed toast to re-fire.
+const TOAST_KEY_MAX = 500
 
 export interface AgentSessionState {
     status: 'idle' | 'running'
@@ -225,6 +229,11 @@ export function ProjectProvider({
     // Keys of toasts already fired, so a reconnect/ring-replay never re-toasts the
     // same commit / run-complete / agent-done message.
     const toastedKeys = useRef<Set<string>>(new Set())
+    // Latest agentKinds reachable from the (project-scoped) SSE handler without
+    // being an effect dependency — a new config object identity from the parent
+    // would otherwise tear down and reconnect the EventSource on every render.
+    const agentKindsRef = useRef(config.agentKinds)
+    agentKindsRef.current = config.agentKinds
 
     // run config
     const [model, setModelState] = useState(config.defaultModel)
@@ -376,6 +385,11 @@ export function ProjectProvider({
             const toastOnce = (key: string, fn: () => void) => {
                 if (replayed || toastedKeys.current.has(key)) return
                 toastedKeys.current.add(key)
+                if (toastedKeys.current.size > TOAST_KEY_MAX) {
+                    // Set preserves insertion order — drop the oldest key.
+                    const oldest = toastedKeys.current.values().next().value
+                    if (oldest !== undefined) toastedKeys.current.delete(oldest)
+                }
                 fn()
             }
             switch (event.type) {
@@ -423,7 +437,7 @@ export function ProjectProvider({
                 case 'agent:done': {
                     const label =
                         AGENT_LABELS[event.agent] ??
-                        config.agentKinds.find((k) => k.kind === event.agent)?.label ??
+                        agentKindsRef.current.find((k) => k.kind === event.agent)?.label ??
                         event.agent
                     toastOnce(`agent:done:${event.agent}:${event.startedAt ?? 'x'}`, () => {
                         if (event.stopped) toast.info(`${label} killed`)
@@ -462,7 +476,10 @@ export function ProjectProvider({
             /* browser auto-reconnects; ring buffer replays */
         }
         return () => es.close()
-    }, [project, appendLine, appendAgentLine, refresh, refreshKnowledge, refreshNotes, refreshGit, config.agentKinds])
+        // config.agentKinds is read via agentKindsRef (above) so it isn't a dep —
+        // the connection is rebuilt only when the project (or a stable callback)
+        // changes, never on a bare parent re-render.
+    }, [project, appendLine, appendAgentLine, refresh, refreshKnowledge, refreshNotes, refreshGit])
 
     // Open-PR only applies when both branch-per-run and push-after are on (and
     // startRun gates it the same way). Disarm it when either toggles off, so

@@ -8,7 +8,8 @@
 // `a,b`, ranges `a-b`, and steps `*/n`. dow: 0–6, 0 = Sunday (7 ≡ 0).
 
 import 'server-only'
-import { engine, LockHeldError, DirtyTreeError } from '@/server/services/execution-manager'
+import { engine, LockHeldError, DirtyTreeError, modelFamily } from '@/server/services/execution-manager'
+import { resolveModel } from '@/server/infrastructure/agent'
 import { agentSessionsBusy } from '@/server/services/locks'
 import { effectiveSettings } from '@/server/services/settings'
 import { refreshUsage } from '@/server/services/usage'
@@ -105,10 +106,20 @@ async function fire(project: string, options: Partial<RunOptions>, skipAboveUsag
         slog('info', 'scheduler', 'skip: project busy', { project })
         return
     }
+    const eff = effectiveSettings(project)
+    const runModel = options.model ?? eff.defaultModel
     if (skipAboveUsage !== null) {
         try {
             const snap = await refreshUsage(Date.now())
-            const peak = snap.entries.reduce((m, e) => Math.max(m, e.percent), 0)
+            // Only count buckets that constrain this run's model — a model-specific
+            // bucket (e.g. the Sonnet-only weekly limit) must not skip a run that
+            // uses a different model. Generic buckets apply to every run.
+            const runFamily = modelFamily(resolveModel(runModel))
+            const peak = snap.entries.reduce((m, e) => {
+                const fam = modelFamily(e.label)
+                if (fam && fam !== runFamily) return m
+                return Math.max(m, e.percent)
+            }, 0)
             if (peak >= skipAboveUsage) {
                 slog('info', 'scheduler', 'skip: usage above threshold', { project, peak, threshold: skipAboveUsage })
                 return
@@ -117,9 +128,8 @@ async function fire(project: string, options: Partial<RunOptions>, skipAboveUsag
             /* fail-open: a usage-probe hiccup must not cancel the night run */
         }
     }
-    const eff = effectiveSettings(project)
     const opts: RunOptions = {
-        model: options.model ?? eff.defaultModel,
+        model: runModel,
         warmSession: options.warmSession,
         commitAfter: options.commitAfter,
         commitMessageMode: options.commitMessageMode,
@@ -160,8 +170,14 @@ async function tick(): Promise<void> {
         let spec: CronSpec
         try {
             spec = parseCron(s.cron)
-        } catch {
-            continue // invalid stored cron — ignore
+        } catch (err) {
+            // invalid stored cron — skip, but surface it so a typo isn't silent forever
+            slog('warn', 'scheduler', 'invalid stored cron — schedule ignored', {
+                project: s.project,
+                cron: s.cron,
+                error: String(err),
+            })
+            continue
         }
         if (!spec.matches(now)) continue
         // one fire per cron minute, even across ticker drift / multiple ticks

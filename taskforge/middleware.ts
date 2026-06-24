@@ -10,6 +10,26 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const SESSION_COOKIE = 'atm_session'
 
+/**
+ * Operator-configured public origin, from trusted server env only
+ * (PUBLIC_ORIGIN, else the origin of OAUTH_REDIRECT_URI). Used to build the
+ * login redirect so a spoofed `x-forwarded-host` can't turn an anonymous
+ * redirect into an open redirect. Empty when neither is set.
+ */
+function trustedOrigin(): string {
+    const explicit = process.env.PUBLIC_ORIGIN
+    if (explicit && explicit.trim() !== '') return explicit.trim().replace(/\/+$/, '')
+    const redirect = process.env.OAUTH_REDIRECT_URI
+    if (redirect) {
+        try {
+            return new URL(redirect).origin
+        } catch {
+            /* malformed — fall through to forwarded headers */
+        }
+    }
+    return ''
+}
+
 // Paths that never require a session. `/api/health` (exact) is the D4 liveness
 // probe for Docker HEALTHCHECK — details stay admin-gated at /api/health/details.
 const PUBLIC_PREFIXES = ['/login', '/api/auth/github']
@@ -32,12 +52,20 @@ export function middleware(req: NextRequest) {
         return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
     }
 
-    // Behind a reverse proxy, `req.url` carries the internal listen host
-    // (e.g. 0.0.0.0:3000). Rebuild the redirect from the forwarded headers the
-    // proxy sets so the browser is sent to the public origin, not the container.
-    const fwdHost = req.headers.get('x-forwarded-host') ?? req.headers.get('host')
-    const fwdProto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
-    const base = fwdHost ? `${fwdProto}://${fwdHost}` : req.url
+    // Prefer the operator-configured public origin (trusted env). Behind a
+    // reverse proxy, `req.url` carries the internal listen host (e.g.
+    // 0.0.0.0:3000), so when no public origin is configured we fall back to the
+    // forwarded headers the proxy sets — but those are attacker-controllable, so
+    // the trusted origin takes precedence to avoid an open redirect.
+    const trusted = trustedOrigin()
+    let base: string
+    if (trusted) {
+        base = trusted
+    } else {
+        const fwdHost = req.headers.get('x-forwarded-host') ?? req.headers.get('host')
+        const fwdProto = req.headers.get('x-forwarded-proto') ?? req.nextUrl.protocol.replace(':', '')
+        base = fwdHost ? `${fwdProto}://${fwdHost}` : req.url
+    }
 
     const loginUrl = new URL('/login', base)
     return NextResponse.redirect(loginUrl)

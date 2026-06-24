@@ -9,7 +9,7 @@ import {
     UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 import { engine } from '@/server/services/execution-manager'
-import { agentSessionsBusy } from '@/server/services/locks'
+import { agentSessionsBusy, withProjectLock } from '@/server/services/locks'
 import { getTasks } from '@/server/services/projects'
 
 export const runtime = 'nodejs'
@@ -29,7 +29,11 @@ export async function POST(req: Request, { params }: { params: { project: string
             : []
         if (!ids.length) return error('ids required', 400)
 
-        const mapping = await reorderPendingTasks(params.project, ids)
+        // Serialize against any concurrent reorder for the same project — the
+        // two-phase rename uses fixed temp names that would otherwise collide.
+        const mapping = await withProjectLock(params.project, () =>
+            reorderPendingTasks(params.project, ids),
+        )
         audit(auth, 'task.reorder', params.project, `${Object.keys(mapping).length} renamed`)
         return json({ mapping, tasks: await getTasks(params.project) })
     } catch (e) {

@@ -20,6 +20,20 @@ function required(name: string): string {
     return value
 }
 
+/** Like `required`, but also rejects a too-short secret (weak HMAC key). */
+function requiredSecret(name: string, minLen: number): string {
+    const value = required(name)
+    // `required` returns '' during `next build` tracing — skip the length gate
+    // there and let the runtime boot enforce it on the real value.
+    if (value && value.length < minLen) {
+        throw new Error(
+            `[taskforge] ${name} must be at least ${minLen} characters (got ${value.length}). ` +
+                `Use a long random string, e.g. \`openssl rand -hex 32\`.`,
+        )
+    }
+    return value
+}
+
 function optional(name: string, fallback: string): string {
     const value = process.env[name]
     return value && value.trim() !== '' ? value : fallback
@@ -67,7 +81,7 @@ export const config = {
             return ''
         }
     },
-    authSecret: required('AUTH_SECRET'),
+    authSecret: requiredSecret('AUTH_SECRET', 16),
     sessionTtl: num('SESSION_TTL', 86400),
     allowedLogins: csv('GITHUB_ALLOWED_LOGINS'),
     allowedOrg: optional('GITHUB_ALLOWED_ORG', ''),
@@ -163,6 +177,11 @@ export const config = {
     gitAuthorName: optional('GIT_AUTHOR_NAME', 'taskforge'),
     gitAuthorEmail: optional('GIT_AUTHOR_EMAIL', 'bot@taskforge.local'),
     gitRemoteToken: optional('GIT_REMOTE_TOKEN', ''),
+    // Git op timeouts so a hung command (stuck index.lock, dead/black-hole
+    // remote) can't wedge a run forever. Local ops are fast; remote ops (clone /
+    // fetch / pull / push) get a generous budget for large repos. 0 = no timeout.
+    gitTimeoutMs: num('GIT_TIMEOUT_MS', 120000),
+    gitRemoteTimeoutMs: num('GIT_REMOTE_TIMEOUT_MS', 600000),
 
     // ── logs / notify ──
     logRetentionHours: num('LOG_RETENTION_HOURS', 168),
