@@ -59,6 +59,7 @@ After `register()` you can author markup directly:
   - [tc-resizable-panel](#tc-resizable-panel)
   - [tc-scroll-area](#tc-scroll-area)
   - [tc-artboard-backdrop](#tc-artboard-backdrop)
+  - [tc-theme](#tc-theme)
 - [Content](#content)
   - [tc-accordion](#tc-accordion)
   - [tc-accordion-item](#tc-accordion-item)
@@ -1274,6 +1275,68 @@ None. `tc-artboard-backdrop` is a purely presentational surface.
 <tc-artboard-backdrop kind="parch" padding="none">
     <canvas></canvas>
 </tc-artboard-backdrop>
+```
+
+---
+
+### tc-theme
+
+Theming host element — the `--tc-*` token override container. Every `tc-*` component drives its cosmetics through `--bs-<component>-*` custom properties whose defaults resolve to the design-system `--tc-*` tokens (e.g. `--bs-panel-bg: var(--tc-surface)`). Wrapping a subtree in `<tc-theme>` and re-pointing those tokens on it therefore re-skins **every nested component at once** — no per-component overrides needed. The default tokens are already applied globally at `:root`, so components are themed out of the box; reach for `tc-theme` only when you want a *subtree* to differ from the ambient skin.
+
+`tc-theme` is `display: contents` — it adds no layout box. Inherited properties (the `--tc-*` / `--bs-*` custom properties, plus `color` and `font-family`) pass straight through to descendants, but box properties (`background`, `padding`, `border`) will **not** paint because there is no box. For a themed backdrop, wrap the content in [`tc-artboard-backdrop`](#tc-artboard-backdrop) or set the background on your own container.
+
+Two ways to theme a subtree:
+
+1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy) and `aurora` (dark "production-AI") are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon` and `aurora` skins reference display fonts (Cinzel / EB Garamond for dungeon) that are **not** bundled — load them on the host page for the full look; both degrade to system serifs/sans.
+2. **Ad-hoc token overrides** — set `--tc-*` (or the finer-grained `--bs-<component>-*`) custom properties directly on the `tc-theme` element via `style` or a class. Because the tokens inherit through the `display: contents` box, every descendant component picks them up.
+
+**Tag:** `tc-theme`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | `default\|dungeon\|aurora` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Reflects the `name` attribute. Returns `''` when absent. Setting a truthy value writes the attribute; setting `''`/falsy removes it. |
+
+**Events**
+
+None.
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| *(default)* | The themed subtree. Rendered in place (the host is `display: contents`, so children participate in the parent's layout directly — no projection, no wrapper box). |
+
+**CSS Custom Properties**
+
+`tc-theme` defines no custom properties of its own — it is a passthrough host for the design-system tokens. Override any `--tc-*` token (or `--bs-<component>-*` contract variable) on the element to re-skin its descendants. Common roots: `--tc-surface`, `--tc-surface-muted`, `--tc-border`, `--tc-text`, `--tc-text-muted`, `--tc-accent`, `--tc-app-accent`, `--tc-success`/`--tc-info`/`--tc-warning`/`--tc-danger`, `--tc-font-sans`, `--tc-font-mono`.
+
+```html
+<!-- Named theme — re-skins the whole subtree to the dungeon palette -->
+<tc-theme name="dungeon">
+    <tc-panel bordered>
+        <tc-panel-header heading="Quest Log"></tc-panel-header>
+        <tc-button variant="primary">Accept</tc-button>
+    </tc-panel>
+</tc-theme>
+
+<!-- Ad-hoc token overrides — recolour nested components via --tc-* tokens -->
+<tc-theme style="--tc-accent: #7c3aed; --tc-app-accent: #7c3aed; --tc-border: #e9d5ff; --tc-surface-muted: #faf5ff;">
+    <tc-card>
+        <tc-button variant="primary">Themed action</tc-button>
+        <tc-badge variant="primary">New</tc-badge>
+    </tc-card>
+</tc-theme>
+
+<!-- Untouched components outside the wrapper keep the global default skin -->
+<tc-button variant="primary">Default action</tc-button>
 ```
 
 ---

@@ -4,6 +4,7 @@ import AspectRatioBoxDemo from './AspectRatioBoxDemo'
 import GildedFrameDemo from './GildedFrameDemo'
 import AvatarDemo from './AvatarDemo'
 import ArtboardBackdropDemo from './ArtboardBackdropDemo'
+import ThemeDemo from './ThemeDemo'
 import BlurOverlayDemo from './BlurOverlayDemo'
 import ActionHeaderDemo from './ActionHeaderDemo'
 import ActionItemsDemo from './ActionItemsDemo'
@@ -362,6 +363,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'col', complexity: 'Simple', element: <ColDemo /> },
     { key: 'scroll-area', complexity: 'Primitives', element: <ScrollAreaDemo /> },
     { key: 'artboard-backdrop', complexity: 'Primitives', element: <ArtboardBackdropDemo /> },
+    { key: 'theme', complexity: 'Primitives', element: <ThemeDemo /> },
     { key: 'accordion', complexity: 'Primitives', element: <AccordionDemo /> },
     { key: 'alert', complexity: 'Primitives', element: <AlertDemo /> },
     { key: 'badge', complexity: 'Primitives', element: <BadgeDemo /> },

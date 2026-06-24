@@ -1,0 +1,117 @@
+import React from 'react'
+
+// A small cluster of nested components reused under each theme wrapper, so the
+// effect of a token swap is obvious side-by-side.
+const Cluster: React.FC = () => (
+    <div className="d-flex flex-column gap-3">
+        {/* @ts-ignore */}
+        <tc-panel bordered>
+            {/* @ts-ignore */}
+            <tc-panel-header heading="Project status" icon="Activity"></tc-panel-header>
+            <p className="m-0">
+                Every component below inherits its colours, borders, and type from the wrapping{' '}
+                <code>tc-theme</code> — no per-element overrides.
+            </p>
+        </tc-panel>
+
+        <div className="d-flex flex-wrap gap-2 align-items-center">
+            <tc-button variant="primary">Primary</tc-button>
+            {/* @ts-ignore */}
+            <tc-button variant="secondary" outline>
+                Secondary
+            </tc-button>
+            <tc-badge variant="primary">New</tc-badge>
+            <tc-badge variant="success">Stable</tc-badge>
+        </div>
+
+        <tc-alert variant="info">Tokens cascade to nested components through inheritance.</tc-alert>
+
+        <div className="d-flex flex-wrap gap-3">
+            {/* @ts-ignore */}
+            <tc-metric-tile label="Builds" value="1,284" icon="Hammer"></tc-metric-tile>
+            {/* @ts-ignore */}
+            <tc-metric-tile label="Uptime" value="99.98" unit="%" icon="Activity"></tc-metric-tile>
+        </div>
+    </div>
+)
+
+const ThemeDemo: React.FC = () => {
+    return (
+        <div className="py-4">
+            <div className="container">
+                <div className="row">
+                    <div className="col-12">
+                        <tc-rich-page-header
+                            title-text="Theme"
+                            description="The theming host element — a display:contents wrapper that hosts --tc-* token overrides. Re-pointing the design-system tokens on a tc-theme re-skins every nested tc-* component at once, because each component's cosmetics flow through --bs-<component>-* properties that default to --tc-* tokens."
+                        >
+                            <tc-badge slot="chips" variant="secondary">
+                                Web Components
+                            </tc-badge>
+                        </tc-rich-page-header>
+
+                        <div className="d-flex flex-column gap-4 mt-4">
+                            <tc-section-card title="Ambient (default) theme — no wrapper">
+                                <p className="text-muted small mb-3">
+                                    The default toolcase tokens apply globally at <code>:root</code>,
+                                    so components are themed out of the box with no{' '}
+                                    <code>tc-theme</code> wrapper.
+                                </p>
+                                <Cluster />
+                            </tc-section-card>
+
+                            <tc-section-card title="Ad-hoc token overrides — set --tc-* on the wrapper">
+                                <p className="text-muted small mb-3">
+                                    The simplest re-skin: set <code>--tc-*</code> design tokens
+                                    directly on a <code>tc-theme</code>. They inherit through the{' '}
+                                    <code>display:contents</code> box, so every descendant picks
+                                    them up.
+                                </p>
+                                {/* @ts-ignore */}
+                                <tc-theme
+                                    style={
+                                        {
+                                            '--tc-accent': '#7c3aed',
+                                            '--tc-app-accent': '#7c3aed',
+                                            '--tc-app-accent-hover': '#6d28d9',
+                                            '--tc-border': '#e9d5ff',
+                                            '--tc-surface-muted': '#faf5ff',
+                                        } as React.CSSProperties
+                                    }
+                                >
+                                    <Cluster />
+                                </tc-theme>
+                            </tc-section-card>
+
+                            <tc-section-card title='Named theme — name="dungeon"'>
+                                <p className="text-muted small mb-3">
+                                    Opt into a bundled skin via the <code>name</code> attribute. The
+                                    fantasy <code>dungeon</code> palette stays inert until a wrapper
+                                    requests it. (Display fonts are not bundled — they degrade to
+                                    system serifs.)
+                                </p>
+                                {/* @ts-ignore */}
+                                <tc-theme name="dungeon">
+                                    <Cluster />
+                                </tc-theme>
+                            </tc-section-card>
+
+                            <tc-section-card title='Named theme — name="aurora"'>
+                                <p className="text-muted small mb-3">
+                                    The dark <code>aurora</code> skin re-skins the same subtree
+                                    without touching any nested markup.
+                                </p>
+                                {/* @ts-ignore */}
+                                <tc-theme name="aurora">
+                                    <Cluster />
+                                </tc-theme>
+                            </tc-section-card>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default ThemeDemo
