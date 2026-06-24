@@ -65,7 +65,7 @@ class Vec2 {
     }
 
     negate(): Vec2 {
-        return new Vec2(-this.x, -this.y)
+        return new Vec2(this.x === 0 ? 0 : -this.x, this.y === 0 ? 0 : -this.y)
     }
 
     distanceTo(other: Vec2): number {

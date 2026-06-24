@@ -286,7 +286,7 @@ export class CoolNav extends HTMLElement {
         this.classList.add(`tc-cool-nav--${theme}`)
 
         // Brand area
-        let brandHtml = ''
+        let brandHtml: string
         if (brand !== null) {
             brandHtml =
                 `<a class="tc-cool-nav-brand" href="#" aria-label="${esc(brand)}">` +

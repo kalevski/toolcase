@@ -153,6 +153,7 @@ export default class TweenProcessor extends FlowProcessor {
         this._timelines.push(inst)
         this._log('timeline:start', `${steps.length}steps`)
 
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- handle methods need the processor instance
         const self = this
         const handle: TimelineHandle = {
             cancel() { inst.cancelled = true },

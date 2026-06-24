@@ -18,6 +18,7 @@ function throttle<T extends ThrottleFn>(fn: T, ms: number): ThrottledFn<T> {
         const now = Date.now()
         const remaining = ms - (now - lastCall)
         lastArgs = args
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- preserve caller context for deferred apply()
         lastCtx = this
 
         if (remaining <= 0 || remaining > ms) {

@@ -45,18 +45,17 @@ class BeaconReporter extends LogReporter {
     }
 
     private installErrorHandlers(): void {
-        const self = this
         if (typeof window === 'undefined') return
         const prevOnError = typeof window.onerror === 'function' ? window.onerror : null
-        window.onerror = function (message, source, lineno, colno, error) {
+        window.onerror = (message, source, lineno, colno, error) => {
             const msg = error ?? (typeof message === 'string' ? message : String(message))
-            self.log('error', self.errorScope, Date.now(), {}, [msg, { source, lineno, colno }])
+            this.log('error', this.errorScope, Date.now(), {}, [msg, { source, lineno, colno }])
             if (prevOnError) return (prevOnError as any)(message, source, lineno, colno, error)
             return false
         }
         window.addEventListener('unhandledrejection', (evt: PromiseRejectionEvent) => {
             const reason = evt.reason instanceof Error ? evt.reason : { reason: evt.reason }
-            self.log('error', self.errorScope, Date.now(), {}, ['Unhandled promise rejection', reason])
+            this.log('error', this.errorScope, Date.now(), {}, ['Unhandled promise rejection', reason])
         })
     }
 

@@ -287,7 +287,7 @@ describe('BPlusIndex — comparators / serializers round-trip', () => {
     it('number round-trips', () => {
         for (const n of [0, -1, 1.5, Math.PI, Number.MAX_SAFE_INTEGER, -0]) {
             const b = BPlusIndex.serializers.number(n)
-            expect(BPlusIndex.deserializers.number(b)).toBe(n === -0 ? 0 : n)
+            expect(BPlusIndex.deserializers.number(b)).toBe(Object.is(n, -0) ? 0 : n)
         }
     })
 

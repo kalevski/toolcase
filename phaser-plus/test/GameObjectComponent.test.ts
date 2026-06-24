@@ -1,4 +1,32 @@
 import { describe, it, expect, vi } from 'vitest'
+
+// Phaser's ESM bundle touches browser-only globals (window, Image, canvas) at
+// module-init time, which throws under the plain-Node vitest environment. The
+// GameObject component-bag logic under test never instantiates Phaser, so we
+// mock the module with minimal class stubs for the symbols read while the
+// src/engine + src/effects import chain evaluates.
+vi.mock('phaser', () => {
+    class PhaserGameObject {}
+    class Container extends PhaserGameObject {
+        preDestroy() {}
+    }
+    class Vector2 {
+        x = 0
+        y = 0
+        constructor(x = 0, y = 0) { this.x = x; this.y = y }
+        set(x: number, y: number) { this.x = x; this.y = y; return this }
+    }
+    class Controller {}
+    class Game {}
+    return {
+        Game,
+        GameObjects: { Container, GameObject: PhaserGameObject },
+        Math: { Vector2 },
+        Filters: { Controller },
+        Cameras: {}
+    }
+})
+
 import GameObject from '../src/engine/GameObject'
 import GameObjectComponent from '../src/engine/GameObjectComponent'
 

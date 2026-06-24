@@ -82,8 +82,8 @@ class MaxRects extends Algorithm {
         const shortLeftover = Math.min(leftoverHorizontal, leftoverVertical)
         const longLeftover = Math.max(leftoverHorizontal, leftoverVertical)
 
-        let score1 = 0
-        let score2 = 0
+        let score1: number
+        let score2: number
         switch (this.heuristic) {
             case 'best-short-side-fit':
                 score1 = shortLeftover

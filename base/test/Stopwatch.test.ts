@@ -9,7 +9,7 @@ describe('Stopwatch', () => {
     })
 
     it('starts not running with zero elapsed', () => {
-        let t = 0
+        const t = 0
         const sw = new Stopwatch(() => t)
         expect(sw.running).toBe(false)
         expect(sw.elapsed).toBe(0)
@@ -47,7 +47,7 @@ describe('Stopwatch', () => {
     })
 
     it('stop is a no-op when not running', () => {
-        let t = 0
+        const t = 0
         const sw = new Stopwatch(() => t)
         sw.stop()
         expect(sw.elapsed).toBe(0)
@@ -125,7 +125,7 @@ describe('Stopwatch', () => {
     })
 
     it('start, stop, reset all return this', () => {
-        let t = 0
+        const t = 0
         const sw = new Stopwatch(() => t)
         expect(sw.start()).toBe(sw)
         expect(sw.stop()).toBe(sw)

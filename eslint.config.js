@@ -34,12 +34,21 @@ export default tseslint.config(
         },
     },
     {
-        files: ['scripts/**'],
+        files: ['**/scripts/**'],
         languageOptions: {
             globals: {
                 console: 'readonly',
                 process: 'readonly',
             },
+        },
+    },
+    {
+        // Generated JSX typings: module/global augmentation of React.JSX requires
+        // `namespace` and empty `interface … extends …` — both unavoidable here.
+        files: ['**/react-types.ts'],
+        rules: {
+            '@typescript-eslint/no-namespace': 'off',
+            '@typescript-eslint/no-empty-object-type': 'off',
         },
     },
 )

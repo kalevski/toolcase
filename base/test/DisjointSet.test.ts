@@ -129,7 +129,8 @@ describe('DisjointSet', () => {
         ds.union('2', '3')
         ds.union('4', '5')
         ds.union('0', '2')
-        expect(ds.count).toBe(7)
+        // 10 singletons, 4 distinct-root unions → 6 components: {0,1,2,3},{4,5},{6},{7},{8},{9}
+        expect(ds.count).toBe(6)
         expect(ds.connected('0', '3')).toBe(true)
         expect(ds.connected('0', '4')).toBe(false)
         expect(ds.connected('6', '7')).toBe(false)

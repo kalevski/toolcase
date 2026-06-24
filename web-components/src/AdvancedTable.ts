@@ -117,7 +117,8 @@ export class AdvancedTable extends HTMLElement {
         return this.hasAttribute('loading')
     }
     set loading(v: boolean) {
-        v ? this.setAttribute('loading', '') : this.removeAttribute('loading')
+        if (v) this.setAttribute('loading', '')
+        else this.removeAttribute('loading')
     }
 
     // ── JS properties ─────────────────────────────────────────────────────────

@@ -54,7 +54,6 @@ export class ChipGroup extends HTMLElement {
     get title(): string {
         return this.getAttribute('title') ?? ''
     }
-    // @ts-ignore — intentionally widens setter to accept Node alongside string
     set title(v: string | Node) {
         if (v instanceof Node) {
             this._titleProp = v

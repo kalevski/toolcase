@@ -184,7 +184,7 @@ export class Banner extends HTMLElement {
         if (key) {
             try {
                 localStorage.setItem(key, 'dismissed')
-            } catch {}
+            } catch { /* storage unavailable */ }
         }
         this.hidden = true
         this.dispatchEvent(new CustomEvent('tc-dismiss', { bubbles: true, composed: true }))

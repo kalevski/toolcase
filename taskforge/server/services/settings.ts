@@ -54,6 +54,7 @@ export function saveProjectSettings(project: string, settings: ProjectSettings):
         // must name a known account.
         let accounts: typeof import('@/server/services/accounts') | undefined
         try {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports -- intentional sync conditional load; module may be absent
             accounts = require('@/server/services/accounts')
         } catch {
             accounts = undefined

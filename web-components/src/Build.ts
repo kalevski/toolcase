@@ -26,10 +26,10 @@ function lucideHtml(name: string, className?: string): string {
 }
 
 function formatBytes(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`
-    if (bytes < 1073741824) return `${(bytes / 1048576).toFixed(1)} MB`
-    return `${(bytes / 1073741824).toFixed(2)} GB`
+    if (bytes < 1024) return `${bytes}\u00A0B`
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)}\u00A0KB`
+    if (bytes < 1073741824) return `${(bytes / 1048576).toFixed(1)}\u00A0MB`
+    return `${(bytes / 1073741824).toFixed(2)}\u00A0GB`
 }
 
 function formatDuration(ms: number): string {
@@ -37,10 +37,10 @@ function formatDuration(ms: number): string {
     if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
     const m = Math.floor(ms / 60000)
     const s = Math.round((ms % 60000) / 1000)
-    if (ms < 3600000) return s > 0 ? `${m}m ${s}s` : `${m}m`
+    if (ms < 3600000) return s > 0 ? `${m}m\u00A0${s}s` : `${m}m`
     const h = Math.floor(ms / 3600000)
     const rem = Math.floor((ms % 3600000) / 60000)
-    return rem > 0 ? `${h}h ${rem}m` : `${h}h`
+    return rem > 0 ? `${h}h\u00A0${rem}m` : `${h}h`
 }
 
 // Resolved once at module load — always rendered when a menu is present

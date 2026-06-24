@@ -49,7 +49,8 @@ export class Row extends HTMLElement {
         return this.getAttribute('cols')
     }
     set cols(v: string | null) {
-        v != null ? this.setAttribute('cols', v) : this.removeAttribute('cols')
+        if (v != null) this.setAttribute('cols', v)
+        else this.removeAttribute('cols')
     }
 
     get align(): AlignItems | null {
@@ -57,7 +58,8 @@ export class Row extends HTMLElement {
         return v === 'start' || v === 'center' || v === 'end' ? v : null
     }
     set align(v: AlignItems | null) {
-        v ? this.setAttribute('align', v) : this.removeAttribute('align')
+        if (v) this.setAttribute('align', v)
+        else this.removeAttribute('align')
     }
 
     get justify(): JustifyContent | null {
@@ -72,7 +74,8 @@ export class Row extends HTMLElement {
             : null
     }
     set justify(v: JustifyContent | null) {
-        v ? this.setAttribute('justify', v) : this.removeAttribute('justify')
+        if (v) this.setAttribute('justify', v)
+        else this.removeAttribute('justify')
     }
 
     private resolveGutterClasses(): string[] {

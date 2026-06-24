@@ -44,7 +44,7 @@ class StreamReporter extends LogReporter {
 
     private writeLine(line: string): void {
         const lineBytes = Buffer.byteLength(line)
-        if (this.maxBytes > 0 && this.bytesWritten + lineBytes > this.maxBytes) {
+        if (this.maxBytes > 0 && this.bytesWritten > 0 && this.bytesWritten + lineBytes >= this.maxBytes) {
             this.pending.push(line)
             this.rotate()
             return

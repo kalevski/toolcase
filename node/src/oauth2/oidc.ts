@@ -99,10 +99,28 @@ let jwksCache = new Cache<any>(async (jwksUri: string) => createJwksGetter(jwksU
 async function createJwksGetter(jwksUri: string, opts: HttpOptions): Promise<any> {
 	const j = await loadJose()
 	// jose v5's createRemoteJWKSet has no custom-fetch hook (customFetch is a v6 export),
-	// so opts.fetchImpl cannot be threaded into JWKS retrieval here — it uses global fetch.
-	return j.createRemoteJWKSet(new URL(jwksUri), {
-		timeoutDuration: opts.timeoutMs,
-	})
+	// so we fetch the JWKS ourselves through fetchWithOptions — which honours opts.fetchImpl,
+	// opts.timeoutMs (via AbortController), opts.headers and retry — then build a *local*
+	// key set from the result. This keeps every caller's fetch implementation isolated.
+	let response: Response
+	try {
+		response = await fetchWithOptions(jwksUri, { method: 'GET' }, opts)
+	} catch (error) {
+		throw new OIDCVerificationError(`jwks fetch failed: ${(error as Error).message}`)
+	}
+	if (response.status < 200 || response.status >= 300) {
+		throw new OIDCVerificationError(`jwks fetch returned ${response.status}`)
+	}
+	let jwks: any
+	try {
+		jwks = await response.json()
+	} catch {
+		throw new OIDCVerificationError('jwks response is not valid JSON')
+	}
+	if (!jwks || !Array.isArray(jwks.keys)) {
+		throw new OIDCVerificationError('jwks response is missing a keys array')
+	}
+	return j.createLocalJWKSet(jwks)
 }
 
 export function clearJwksCache(jwksUri?: string): void {
@@ -162,9 +180,10 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 			throw new OIDCVerificationError('verifyIdToken: jwksUri or jwks is required')
 		}
 		const httpOpts = options.http ?? {}
-		// Bypass the shared cache when caller supplies a custom fetchImpl — per-call
-		// fetch impls cannot be keyed into a shared cache without SSRF / confused-deputy hazard.
-		if (httpOpts.fetchImpl !== undefined) {
+		// Bypass the shared cache when caller supplies a custom fetchImpl or headers — these
+		// are caller-specific and cannot be keyed into a shared cache without a confused-deputy
+		// / SSRF hazard or leaking one caller's keys to another.
+		if (httpOpts.fetchImpl !== undefined || httpOpts.headers !== undefined) {
 			jwks = await createJwksGetter(options.jwksUri, httpOpts)
 		} else {
 			if (typeof options.jwksCacheMs === 'number' && options.jwksCacheMs > 0) {

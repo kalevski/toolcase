@@ -173,7 +173,7 @@ export class EquipmentDoll extends HTMLElement {
         if (!item) return ''
         const icon = item.icon
         const name = item.name ?? item.id
-        let glyphMarkup = ''
+        let glyphMarkup: string
         if (icon && isImageSrc(icon)) {
             glyphMarkup = `<img class="tc-equipment-doll__icon" src="${esc(icon)}" alt="" />`
         } else {

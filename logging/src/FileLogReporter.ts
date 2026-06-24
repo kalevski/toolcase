@@ -33,11 +33,11 @@ class FileLogReporter extends StreamReporter {
     }
 
     private shiftFiles(): void {
-        try { unlinkSync(`${this.filePath}.${this.maxFiles}`) } catch {}
+        try { unlinkSync(`${this.filePath}.${this.maxFiles}`) } catch { /* file may not exist */ }
         for (let i = this.maxFiles - 1; i >= 1; i--) {
-            try { renameSync(`${this.filePath}.${i}`, `${this.filePath}.${i + 1}`) } catch {}
+            try { renameSync(`${this.filePath}.${i}`, `${this.filePath}.${i + 1}`) } catch { /* file may not exist */ }
         }
-        try { renameSync(this.filePath, `${this.filePath}.1`) } catch {}
+        try { renameSync(this.filePath, `${this.filePath}.1`) } catch { /* file may not exist */ }
     }
 
 }
