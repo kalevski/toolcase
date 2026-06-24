@@ -41,6 +41,8 @@ import ReplayRecorderDemo from './scenes/ReplayRecorderDemo.js'
 import ReplayRecorderTimelineDemo from './scenes/ReplayRecorderTimelineDemo.js'
 import CameraDirectorDemo from './scenes/CameraDirectorDemo.js'
 import ScreenShakeDemo from './scenes/ScreenShakeDemo.js'
+import CameraFlashDemo from './scenes/CameraFlashDemo.js'
+import DialogCameraCueDemo from './scenes/DialogCameraCueDemo.js'
 import ParallaxLayerDemo from './scenes/ParallaxLayerDemo.js'
 import LetterboxDemo from './scenes/LetterboxDemo.js'
 import InputFeatureDemo from './scenes/InputFeatureDemo.js'
@@ -468,6 +470,22 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'LetterboxFeature applies black bars when canvas aspect ≠ target aspect.',
         sceneFile: 'LetterboxDemo.js',
         element: <PhaserCanvas sceneClass={LetterboxDemo} />
+    },
+    {
+        key: 'camera-flash',
+        title: 'Camera Flash',
+        category: 'Cinema',
+        description: 'CameraFlash overlay: click for a white hit, stack additive color flashes, hold frames. 1: red, 2: cyan, 3: stack, C: clear.',
+        sceneFile: 'CameraFlashDemo.js',
+        element: <PhaserCanvas sceneClass={CameraFlashDemo} />
+    },
+    {
+        key: 'dialog-camera-cue',
+        title: 'Dialog Camera Cue',
+        category: 'Cinema',
+        description: 'DialogCameraCue dims everything outside a focus frame around an NPC, with optional vignette ring. SPACE: toggle, F: full dim, V: vignette, C: clear.',
+        sceneFile: 'DialogCameraCueDemo.js',
+        element: <PhaserCanvas sceneClass={DialogCameraCueDemo} />
     },
 
     {
