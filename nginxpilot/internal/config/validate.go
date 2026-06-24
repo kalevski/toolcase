@@ -113,8 +113,10 @@ func validateGitSource(src *Source) error {
 		if !sshURL {
 			return fmt.Errorf("auth.method ssh-key requires a git@/ssh:// URL")
 		}
-		if src.Auth.KeyFile == "" {
-			return fmt.Errorf("auth.key_file is required for ssh-key auth")
+		// The private key comes either from a path (key_file) or from an
+		// env var holding the key material (key_env) — exactly one.
+		if err := exactlyOneRef("key", src.Auth.KeyEnv, src.Auth.KeyFile); err != nil {
+			return err
 		}
 	case AuthHTTPSToken:
 		if !httpsURL {
@@ -126,8 +128,22 @@ func validateGitSource(src *Source) error {
 		if err := exactlyOneRef("token", src.Auth.TokenEnv, src.Auth.TokenFile); err != nil {
 			return err
 		}
+	case AuthGitHubToken:
+		// Token-only: the GitHub access token alone authenticates (no
+		// username). Suits a token minted from a social/web login —
+		// `gh auth login` then `gh auth token`, a Personal Access Token,
+		// or an OAuth/app token.
+		if !httpsURL {
+			return fmt.Errorf("auth.method github-token requires an https:// URL")
+		}
+		if src.Auth.Username != "" {
+			return fmt.Errorf("auth.username must not be set for github-token (the token alone authenticates)")
+		}
+		if err := exactlyOneRef("token", src.Auth.TokenEnv, src.Auth.TokenFile); err != nil {
+			return err
+		}
 	default:
-		return fmt.Errorf("auth.method %q: git sources support ssh-key | https-token | none", src.Auth.Method)
+		return fmt.Errorf("auth.method %q: git sources support ssh-key | https-token | github-token | none", src.Auth.Method)
 	}
 	return nil
 }
@@ -182,7 +198,7 @@ func validateHTTPZipSource(src *Source) error {
 // checkNoInlineSecrets turns inline secret keys into a targeted parse-time
 // error — config files must stay safe to commit (spec Q9).
 func checkNoInlineSecrets(a Auth) error {
-	for key, val := range map[string]string{"token": a.Token, "password": a.Password, "value": a.Value} {
+	for key, val := range map[string]string{"token": a.Token, "password": a.Password, "value": a.Value, "key": a.Key} {
 		if val != "" {
 			return fmt.Errorf("inline secrets are not allowed: use auth.%s_env or auth.%s_file instead of auth.%s", key, key, key)
 		}

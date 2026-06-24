@@ -285,6 +285,168 @@ func TestValidateGitHTTPSTokenOK(t *testing.T) {
 	}
 }
 
+func TestValidateGitGitHubTokenOK(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "https://github.com/example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthGitHubToken, TokenEnv: "GH_TOKEN"},
+		},
+		File: "test",
+	}}
+	if err := Validate(&cfg); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateGitGitHubTokenRejectsUsername(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "https://github.com/example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthGitHubToken, Username: "git", TokenEnv: "GH_TOKEN"},
+		},
+		File: "test",
+	}}
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected error for username set with github-token, got nil")
+	}
+	if !strings.Contains(err.Error(), "username") {
+		t.Fatalf("expected username error, got: %v", err)
+	}
+}
+
+func TestValidateGitGitHubTokenRequiresTokenRef(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "https://github.com/example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthGitHubToken},
+		},
+		File: "test",
+	}}
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected error for missing token ref, got nil")
+	}
+	if !strings.Contains(err.Error(), "token") {
+		t.Fatalf("expected token error, got: %v", err)
+	}
+}
+
+func TestValidateGitGitHubTokenRejectsSSHURL(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "git@github.com:example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthGitHubToken, TokenEnv: "GH_TOKEN"},
+		},
+		File: "test",
+	}}
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected error for github-token with ssh URL, got nil")
+	}
+	if !strings.Contains(err.Error(), "https") {
+		t.Fatalf("expected https error, got: %v", err)
+	}
+}
+
+// ---- ssh-key: key_file vs key_env ----------------------------------------
+
+func TestValidateGitSSHKeyEnvOK(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "git@github.com:example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthSSHKey, KeyEnv: "SSH_KEY"},
+		},
+		File: "test",
+	}}
+	if err := Validate(&cfg); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateGitSSHKeyRequiresAKeyRef(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "git@github.com:example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthSSHKey},
+		},
+		File: "test",
+	}}
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected error for ssh-key with no key_file/key_env, got nil")
+	}
+	if !strings.Contains(err.Error(), "key_env") || !strings.Contains(err.Error(), "key_file") {
+		t.Fatalf("expected key_env/key_file error, got: %v", err)
+	}
+}
+
+func TestValidateGitSSHKeyEnvAndFileExclusive(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "git@github.com:example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthSSHKey, KeyEnv: "SSH_KEY", KeyFile: "/etc/keys/id"},
+		},
+		File: "test",
+	}}
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected error for key_env and key_file both set, got nil")
+	}
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Fatalf("expected mutually-exclusive error, got: %v", err)
+	}
+}
+
+func TestValidateGitInlineKeyRejected(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{
+			Type:   SourceGit,
+			URL:    "git@github.com:example/repo.git",
+			Branch: "main",
+			Auth:   Auth{Method: AuthSSHKey, Key: "-----BEGIN OPENSSH PRIVATE KEY-----"},
+		},
+		File: "test",
+	}}
+	err := Validate(&cfg)
+	if err == nil {
+		t.Fatal("expected error for inline key, got nil")
+	}
+	if !strings.Contains(err.Error(), "inline secrets") {
+		t.Fatalf("expected inline-secrets error, got: %v", err)
+	}
+}
+
 // ---- http-zip auth matrix -------------------------------------------------
 
 func TestValidateHTTPZipBearerRequiresTokenRef(t *testing.T) {

@@ -76,5 +76,6 @@ func (a Auth) SecretRefs() [][2]string {
 	add(a.TokenEnv, a.TokenFile)
 	add(a.PasswordEnv, a.PasswordFile)
 	add(a.ValueEnv, a.ValueFile)
+	add(a.KeyEnv, "") // key_file is path-checked separately (CheckSecretFile)
 	return refs
 }

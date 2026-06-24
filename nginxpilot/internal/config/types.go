@@ -22,12 +22,13 @@ const (
 
 // Auth methods.
 const (
-	AuthNone       = "none"
-	AuthSSHKey     = "ssh-key"
-	AuthHTTPSToken = "https-token"
-	AuthBearer     = "bearer"
-	AuthBasic      = "basic"
-	AuthHeader     = "header"
+	AuthNone        = "none"
+	AuthSSHKey      = "ssh-key"
+	AuthHTTPSToken  = "https-token"
+	AuthGitHubToken = "github-token"
+	AuthBearer      = "bearer"
+	AuthBasic       = "basic"
+	AuthHeader      = "header"
 )
 
 // Config is the merged result of the main file and all included fragments.
@@ -148,8 +149,12 @@ func stripOrMinusOne(p *int) int {
 type Auth struct {
 	Method string `yaml:"method"`
 
-	// ssh-key
+	// ssh-key: supply the private key either by path (key_file) or by
+	// reference to an env var holding the key material (key_env). Exactly
+	// one is required. key_env materializes the key into a daemon-owned
+	// 0600 temp file at sync time — no on-host staging/ownership dance.
 	KeyFile    string `yaml:"key_file"`
+	KeyEnv     string `yaml:"key_env"`
 	KnownHosts string `yaml:"known_hosts"`
 
 	// https-token / basic
@@ -173,6 +178,7 @@ type Auth struct {
 	Token    string `yaml:"token"`
 	Password string `yaml:"password"`
 	Value    string `yaml:"value"`
+	Key      string `yaml:"key"`
 }
 
 // MethodOrNone returns the effective auth method.

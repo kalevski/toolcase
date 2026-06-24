@@ -3,6 +3,7 @@ package git
 import (
 	"archive/tar"
 	"bytes"
+	"encoding/base64"
 	"io"
 	"log/slog"
 	"os"
@@ -11,6 +12,110 @@ import (
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 )
+
+// TestGitEnvGitHubToken verifies that github-token auth injects the access
+// token as an `Authorization: Basic` header under the fixed
+// "x-access-token" username — via GIT_CONFIG_*, never in argv.
+func TestGitEnvGitHubToken(t *testing.T) {
+	t.Setenv("GH_TOKEN", "ghs_exampletoken")
+	s := &Syncer{
+		url:  "https://github.com/example/repo.git",
+		auth: config.Auth{Method: config.AuthGitHubToken, TokenEnv: "GH_TOKEN"},
+		log:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+	}
+
+	env, err := s.gitEnv()
+	if err != nil {
+		t.Fatalf("gitEnv: %v", err)
+	}
+
+	want := "Authorization: Basic " + base64.StdEncoding.EncodeToString([]byte("x-access-token:ghs_exampletoken"))
+	var gotHeader, gotKey bool
+	for _, e := range env {
+		if e == "GIT_CONFIG_VALUE_0="+want {
+			gotHeader = true
+		}
+		if e == "GIT_CONFIG_KEY_0=http.https://github.com/example/repo.git.extraHeader" {
+			gotKey = true
+		}
+	}
+	if !gotKey {
+		t.Errorf("extraHeader config key not set; env=%v", env)
+	}
+	if !gotHeader {
+		t.Errorf("expected %q in env, got %v", want, env)
+	}
+}
+
+// TestMaterializeKeyFromEnv verifies that key_env writes the key material to
+// a 0600 daemon-owned temp file, gitEnv points ssh at it, and cleanup removes
+// it — the no-staging path for containers.
+func TestMaterializeKeyFromEnv(t *testing.T) {
+	dir := t.TempDir()
+	const keyBody = "-----BEGIN OPENSSH PRIVATE KEY-----\nabc123\n-----END OPENSSH PRIVATE KEY-----"
+	t.Setenv("SSH_KEY", keyBody)
+	s := &Syncer{
+		url:     "git@github.com:example/repo.git",
+		auth:    config.Auth{Method: config.AuthSSHKey, KeyEnv: "SSH_KEY"},
+		dataDir: dir,
+		log:     slog.New(slog.NewTextHandler(io.Discard, nil)),
+	}
+
+	cleanup, err := s.materializeKey()
+	if err != nil {
+		t.Fatalf("materializeKey: %v", err)
+	}
+	if s.keyPath == "" {
+		t.Fatal("keyPath not set")
+	}
+	fi, err := os.Stat(s.keyPath)
+	if err != nil {
+		t.Fatalf("stat key: %v", err)
+	}
+	if fi.Mode().Perm() != 0o600 {
+		t.Errorf("key file mode = %o, want 0600", fi.Mode().Perm())
+	}
+	got, _ := os.ReadFile(s.keyPath)
+	if string(got) != keyBody+"\n" {
+		t.Errorf("key content = %q, want body + trailing newline", got)
+	}
+
+	env, err := s.gitEnv()
+	if err != nil {
+		t.Fatalf("gitEnv: %v", err)
+	}
+	var ok bool
+	for _, e := range env {
+		if strings.HasPrefix(e, "GIT_SSH_COMMAND=") && strings.Contains(e, s.keyPath) {
+			ok = true
+		}
+	}
+	if !ok {
+		t.Errorf("GIT_SSH_COMMAND missing materialized key path; env=%v", env)
+	}
+
+	cleanup()
+	if _, err := os.Stat(s.keyPath); !os.IsNotExist(err) {
+		t.Error("cleanup did not remove the temp key file")
+	}
+}
+
+// TestMaterializeKeyFromFileIsNoop verifies key_file is used in place (no
+// temp file, cleanup is a no-op).
+func TestMaterializeKeyFromFileIsNoop(t *testing.T) {
+	s := &Syncer{
+		auth: config.Auth{Method: config.AuthSSHKey, KeyFile: "/etc/keys/id_ed25519"},
+		log:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+	}
+	cleanup, err := s.materializeKey()
+	if err != nil {
+		t.Fatalf("materializeKey: %v", err)
+	}
+	defer cleanup()
+	if s.keyPath != "/etc/keys/id_ed25519" {
+		t.Errorf("keyPath = %q, want the key_file path", s.keyPath)
+	}
+}
 
 func TestCacheDir(t *testing.T) {
 	const dataDir = "/data"
