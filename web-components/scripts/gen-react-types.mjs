@@ -10,7 +10,7 @@
 // the global JSX namespace (React 18).
 //
 // Run:  npm -w @toolcase/web-components run gen:react-types
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -34,8 +34,10 @@ for (const m of register.matchAll(/import\s*\{([^}]+)\}\s*from\s*'\.\/([A-Za-z0-
 //   define('tc-x', SomeClass)  /  define('tc-x', SomeClass as unknown as ...)
 //   define('tc-x', class extends BaseClass {})  ← anonymous subclass, inherits attrs
 const tagToClass = []
+// register.ts wraps registration in a local `define(tag, ctor)` helper, so match
+// both the wrapper calls `define('tc-x', Class)` and bare `customElements.define`.
 for (const m of register.matchAll(
-    /customElements\.define\(\s*'(tc-[a-z0-9-]+)'\s*,\s*(?:class\s+extends\s+([A-Za-z0-9_]+)|([A-Za-z0-9_]+))/g
+    /(?:customElements\.)?\bdefine\(\s*'(tc-[a-z0-9-]+)'\s*,\s*(?:class\s+extends\s+([A-Za-z0-9_]+)|([A-Za-z0-9_]+))/g
 )) {
     tagToClass.push({ tag: m[1], cls: m[2] || m[3] })
 }
@@ -51,6 +53,35 @@ const readInternal = (name) => {
         return readFileSync(join(srcDir, 'internal', `${name}.ts`), 'utf8')
     } catch {
         return ''
+    }
+}
+
+// NAME -> [string members] for every `(export) const NAME = [ ... ]` array across
+// all source files. Used to expand `...NAME` spreads inside observedAttributes()
+// (e.g. `return ['type', ...TEXT_FIELD_ATTRIBUTES]`), which the per-class literal
+// scan in attrsFor cannot resolve on its own.
+const constMap = new Map()
+const scanConsts = (src) => {
+    for (const m of src.matchAll(/const\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(\[[\s\S]*?\])/g)) {
+        const members = []
+        for (const s of m[2].matchAll(/['"]([^'"]+)['"]/g)) members.push(s[1])
+        if (members.length) constMap.set(m[1], members)
+    }
+}
+for (const dir of [srcDir, join(srcDir, 'internal')]) {
+    let files = []
+    try {
+        files = readdirSync(dir)
+    } catch {
+        files = []
+    }
+    for (const f of files) {
+        if (!f.endsWith('.ts')) continue
+        try {
+            scanConsts(readFileSync(join(dir, f), 'utf8'))
+        } catch {
+            // skip unreadable file
+        }
     }
 }
 
@@ -70,10 +101,16 @@ const attrsFor = (localName) => {
     const i = decls.findIndex(d => d[1] === entry.realName)
     if (i === -1) return []
     const body = src.slice(decls[i].index, i + 1 < decls.length ? decls[i + 1].index : undefined)
-    const obs = body.match(/observedAttributes\s*\(\s*\)\s*:\s*[^{]*\{\s*return\s*(\[[\s\S]*?\])/)
+    const obs = body.match(/observedAttributes\s*\(\s*\)\s*:\s*[^{]*\{[\s\S]*?\breturn\s*(\[[\s\S]*?\])/)
     if (!obs) return []
     const attrs = []
     for (const s of obs[1].matchAll(/['"]([^'"]+)['"]/g)) attrs.push(s[1])
+    // Expand `...CONST` spreads (shared/base-class attribute lists) the literal
+    // scan above can't see, e.g. `return ['type', ...TEXT_FIELD_ATTRIBUTES]`.
+    for (const sp of obs[1].matchAll(/\.\.\.([A-Za-z_][A-Za-z0-9_]*)/g)) {
+        const members = constMap.get(sp[1])
+        if (members) attrs.push(...members)
+    }
     return [...new Set(attrs)].sort()
 }
 
@@ -129,11 +166,16 @@ const booleanAttrsFor = (localName) => {
     }
     const boolSet = new Set()
     const collectBooleans = (text) => {
-        // Match simple getter pattern: `return this.hasAttribute('name')`
-        // and compound getter patterns: `return x?.y ?? this.hasAttribute('name')`
-        // The `[^\n;{}]*` allows arbitrary prefix expressions within the same return statement
-        // but stops at statement boundaries so `if (!this.hasAttribute(...))` guards don't match.
-        for (const m of text.matchAll(/return\s+[^\n;{}]*this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+        // A boolean attribute is one whose getter RETURNS `this.hasAttribute('name')`.
+        // Two return shapes occur; both stop at statement boundaries (`;{}`) so guards
+        // like `if (!this.hasAttribute(...))` after a bare `return` don't leak in:
+        //   1) single-line:        `return … this.hasAttribute('name')`  (no newline crossing)
+        //   2) parenthesised body: `return (\n  … ?? this.hasAttribute('name')\n)`
+        // A bare `return` is never followed by `(`, so case 2 can't bridge into a later guard.
+        for (const m of text.matchAll(/return\s+[^\n;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+            boolSet.add(m[1])
+        }
+        for (const m of text.matchAll(/return\s*\([^;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
             boolSet.add(m[1])
         }
     }

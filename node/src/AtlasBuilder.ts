@@ -240,8 +240,10 @@ export class AtlasBuilder {
 						height: page.height,
 						channels: 4,
 						background: this.options.background ?? { r: 0, g: 0, b: 0, alpha: 0 }
-					}
-				}, { limitInputPixels: this.options.maxInputPixels ?? 50_000_000, failOn: 'error' }).composite(composites)
+					},
+					limitInputPixels: this.options.maxInputPixels ?? 50_000_000,
+					failOn: 'error'
+				}).composite(composites)
 
 				const composedBuffer = await canvas.png().toBuffer()
 				let writer = ImageProcessor.fromBuffer(composedBuffer).format({

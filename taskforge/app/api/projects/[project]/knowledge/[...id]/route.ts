@@ -21,7 +21,8 @@ function knowledgeBusy(project: string): boolean {
     )
 }
 
-export async function GET(_req: Request, { params }: { params: { project: string; id: string[] } }) {
+export async function GET(_req: Request, ctx: { params: Promise<{ project: string; id: string[] }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     const id = params.id.join('/')
@@ -35,7 +36,8 @@ export async function GET(_req: Request, { params }: { params: { project: string
 }
 
 /** C2 — manual save of a knowledge doc; the index rebuilds so summaries propagate. */
-export async function PUT(req: Request, { params }: { params: { project: string; id: string[] } }) {
+export async function PUT(req: Request, ctx: { params: Promise<{ project: string; id: string[] }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     const id = params.id.join('/')
@@ -55,7 +57,8 @@ export async function PUT(req: Request, { params }: { params: { project: string;
     }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { project: string; id: string[] } }) {
+export async function DELETE(_req: Request, ctx: { params: Promise<{ project: string; id: string[] }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     const id = params.id.join('/')

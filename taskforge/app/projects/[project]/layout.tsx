@@ -20,12 +20,13 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export default async function ProjectLayout({
-    params,
+    params: paramsPromise,
     children,
 }: {
-    params: { project: string }
+    params: Promise<{ project: string }>
     children: React.ReactNode
 }) {
+    const params = await paramsPromise
     const me = await requireRole('standard')
     if (!(await projectExists(params.project))) notFound()
     ensureSchedulerStarted() // belt-and-braces next to instrumentation.ts

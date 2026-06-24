@@ -8,7 +8,8 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { title: 'Sign in' }
 
-export default function LoginPage({ searchParams }: { searchParams: { error?: string } }) {
-    if (getSession()) redirect('/')
-    return <LoginClient error={searchParams?.error} />
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+    if (await getSession()) redirect('/')
+    const { error } = await searchParams
+    return <LoginClient error={error} />
 }

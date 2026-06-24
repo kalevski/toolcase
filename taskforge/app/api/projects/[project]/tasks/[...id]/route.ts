@@ -16,7 +16,8 @@ import { config } from '@/server/config'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(_req: Request, { params }: { params: { project: string; id: string[] } }) {
+export async function GET(_req: Request, ctx: { params: Promise<{ project: string; id: string[] }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     const id = params.id.join('/')
@@ -36,7 +37,8 @@ const MODEL_ALIASES = ['fast', 'mid', 'deep']
  * §9 — pin (or clear, with null/'') the task's preferred model, and/or
  * A1 — replace the task body (`{ content }`). Both 409 while the task runs.
  */
-export async function PATCH(req: Request, { params }: { params: { project: string; id: string[] } }) {
+export async function PATCH(req: Request, ctx: { params: Promise<{ project: string; id: string[] }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     const id = params.id.join('/')
@@ -75,7 +77,8 @@ export async function PATCH(req: Request, { params }: { params: { project: strin
 }
 
 /** A3 — delete one task file (its telemetry history is removed with it). */
-export async function DELETE(_req: Request, { params }: { params: { project: string; id: string[] } }) {
+export async function DELETE(_req: Request, ctx: { params: Promise<{ project: string; id: string[] }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     const id = params.id.join('/')

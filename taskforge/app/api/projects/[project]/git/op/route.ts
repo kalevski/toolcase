@@ -34,7 +34,8 @@ const OPS: Record<GitOp, (project: string, body: OpBody) => Promise<void>> = {
     'stash-drop': (p, b) => stashDrop(p, typeof b.index === 'number' ? b.index : 0),
 }
 
-export async function POST(req: Request, { params }: { params: { project: string } }) {
+export async function POST(req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     // every op touches the working tree or refs — never while a run/agent is active.

@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic'
 
 const ROLES: Role[] = ['admin', 'standard', 'guest']
 
-export async function PUT(req: Request, { params }: { params: { githubId: string } }) {
+export async function PUT(req: Request, ctx: { params: Promise<{ githubId: string }> }) {
+    const params = await ctx.params
     const auth = await guard('admin')
     if ('res' in auth) return auth.res
 

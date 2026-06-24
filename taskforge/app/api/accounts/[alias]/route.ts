@@ -7,7 +7,8 @@ import { removeAccount } from '@/server/services/accounts'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function DELETE(_req: Request, { params }: { params: { alias: string } }) {
+export async function DELETE(_req: Request, ctx: { params: Promise<{ alias: string }> }) {
+    const params = await ctx.params
     const auth = await guard('admin')
     if ('res' in auth) return auth.res
 

@@ -4,7 +4,8 @@ import { readSkill, writeSkill, deleteSkill, skillExists, UnsafePathError } from
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(_req: Request, { params }: { params: { name: string } }) {
+export async function GET(_req: Request, ctx: { params: Promise<{ name: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     try {
@@ -16,7 +17,8 @@ export async function GET(_req: Request, { params }: { params: { name: string } 
     }
 }
 
-export async function PUT(req: Request, { params }: { params: { name: string } }) {
+export async function PUT(req: Request, ctx: { params: Promise<{ name: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     const body = (await req.json().catch(() => ({}))) as { content?: string }
@@ -30,7 +32,8 @@ export async function PUT(req: Request, { params }: { params: { name: string } }
     }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { name: string } }) {
+export async function DELETE(_req: Request, ctx: { params: Promise<{ name: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     try {

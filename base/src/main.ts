@@ -81,6 +81,7 @@ export type { Delta, ObjectDelta, ArrayDelta, Edit } from './diff'
 export type { FormatNumberOptions } from './formatNumber'
 
 export type { StorageAdapter, BPlusIndexOptions, RangeOptions, BPlusIndexStats } from './BPlusIndex'
+export { SpatialHash, Quadtree } from './spatial'
 export type { SpatialPoint, SpatialRect } from './spatial'
 export type { EasingFn } from './easing'
 export type { Rect } from './Vec2'

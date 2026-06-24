@@ -98,8 +98,9 @@ let jwksCache = new Cache<any>(async (jwksUri: string) => createJwksGetter(jwksU
 
 async function createJwksGetter(jwksUri: string, opts: HttpOptions): Promise<any> {
 	const j = await loadJose()
+	// jose v5's createRemoteJWKSet has no custom-fetch hook (customFetch is a v6 export),
+	// so opts.fetchImpl cannot be threaded into JWKS retrieval here — it uses global fetch.
 	return j.createRemoteJWKSet(new URL(jwksUri), {
-		[j.customFetch]: opts.fetchImpl,
 		timeoutDuration: opts.timeoutMs,
 	})
 }

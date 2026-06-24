@@ -26,8 +26,8 @@
     ],
     "scripts": {
         "dev": "tsup --watch",
-        "build": "tsup && sass style/index.scss:lib/index.css --no-source-map --style=compressed",
-        "build:css": "sass style/index.scss:lib/index.css --no-source-map --style=compressed",
+        "build": "tsup && sass style/index.scss:lib/index.css --no-source-map --no-charset --style=compressed",
+        "build:css": "sass style/index.scss:lib/index.css --no-source-map --no-charset --style=compressed",
         "gen:react-types": "node scripts/gen-react-types.mjs"
     },
     "peerDependencies": {

@@ -7,7 +7,8 @@ import { config } from '@/server/config'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(_req: Request, { params }: { params: { project: string } }) {
+export async function GET(_req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     try {
@@ -22,7 +23,8 @@ export async function GET(_req: Request, { params }: { params: { project: string
 const MODEL_ALIASES = ['fast', 'mid', 'deep']
 
 /** A1 — manual task creation (no agent round-trip). */
-export async function POST(req: Request, { params }: { params: { project: string } }) {
+export async function POST(req: Request, ctx: { params: Promise<{ project: string }> }) {
+    const params = await ctx.params
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
     try {
