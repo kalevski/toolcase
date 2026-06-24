@@ -2793,20 +2793,27 @@ function makeFakeIDB() {
 
 describe('BeaconReporter', () => {
 
+    // On Node 21+ `globalThis.navigator` is a getter-only accessor, so a plain
+    // assignment throws "Cannot set property navigator ... which has only a getter".
+    // Define it as a configurable/writable property so tests can stub and restore it.
+    const setNavigator = (value: any) => {
+        Object.defineProperty(globalThis, 'navigator', { value, configurable: true, writable: true })
+    }
+
     it('throws when navigator.sendBeacon is absent', () => {
         const orig = (globalThis as any).navigator
-        ;(globalThis as any).navigator = undefined
+        setNavigator(undefined)
         try {
             expect(() => new BeaconReporter({ url: '/logs' })).toThrow('navigator.sendBeacon')
         } finally {
-            ;(globalThis as any).navigator = orig
+            setNavigator(orig)
         }
     })
 
     it('buffers entries and sends them via sendBeacon on flush', () => {
         const orig = (globalThis as any).navigator
         const calls: { url: string; data: string }[] = []
-        ;(globalThis as any).navigator = { sendBeacon: (url: string, data: string) => { calls.push({ url, data }); return true } }
+        setNavigator({ sendBeacon: (url: string, data: string) => { calls.push({ url, data }); return true } })
         try {
             const reporter = new BeaconReporter({ url: '/logs', maxSize: 100, flushInterval: 0 })
             reporter.log('info', 'svc', T0, {}, ['hello'])
@@ -2819,14 +2826,14 @@ describe('BeaconReporter', () => {
             expect(entries[0].level).toBe('info')
             expect(entries[1].level).toBe('warning')
         } finally {
-            ;(globalThis as any).navigator = orig
+            setNavigator(orig)
         }
     })
 
     it('each entry carries level, scope, time, fields, and messages', () => {
         const orig = (globalThis as any).navigator
         const calls: any[] = []
-        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } }
+        setNavigator({ sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } })
         try {
             const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0 })
             reporter.log('error', 'auth', T0, { reqId: 'r1' }, ['boom', { code: 42 }])
@@ -2837,7 +2844,7 @@ describe('BeaconReporter', () => {
             expect(entry.fields).toEqual({ reqId: 'r1' })
             expect(entry.messages).toEqual(['boom', { code: 42 }])
         } finally {
-            ;(globalThis as any).navigator = orig
+            setNavigator(orig)
         }
     })
 
@@ -2846,7 +2853,7 @@ describe('BeaconReporter', () => {
         const origWin = (globalThis as any).window
         const beaconCalls: string[] = []
         const pageHideListeners: Array<() => void> = []
-        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(data); return true } }
+        setNavigator({ sendBeacon: (_url: string, data: string) => { beaconCalls.push(data); return true } })
         ;(globalThis as any).window = {
             onerror: null,
             addEventListener: (event: string, fn: () => void, _opts?: any) => {
@@ -2861,26 +2868,26 @@ describe('BeaconReporter', () => {
             const entries = JSON.parse(beaconCalls[0])
             expect(entries[0].messages[0]).toBe('critical')
         } finally {
-            ;(globalThis as any).navigator = origNav
+            setNavigator(origNav)
             ;(globalThis as any).window = origWin
         }
     })
 
     it('does not throw when sendBeacon throws', () => {
         const orig = (globalThis as any).navigator
-        ;(globalThis as any).navigator = { sendBeacon: () => { throw new Error('beacon failed') } }
+        setNavigator({ sendBeacon: () => { throw new Error('beacon failed') } })
         try {
             const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0 })
             expect(() => reporter.log('error', 's', T0, {}, ['msg'])).not.toThrow()
         } finally {
-            ;(globalThis as any).navigator = orig
+            setNavigator(orig)
         }
     })
 
     it('respects factory level filtering', () => {
         const orig = (globalThis as any).navigator
         const calls: any[] = []
-        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } }
+        setNavigator({ sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } })
         try {
             const reporter = new BeaconReporter({ url: '/logs', maxSize: 10, flushInterval: 0 })
             const factory = new LoggerFactory([reporter])
@@ -2893,7 +2900,7 @@ describe('BeaconReporter', () => {
             expect(calls[0]).toHaveLength(1)
             expect(calls[0][0].level).toBe('warning')
         } finally {
-            ;(globalThis as any).navigator = orig
+            setNavigator(orig)
         }
     })
 
@@ -2901,7 +2908,7 @@ describe('BeaconReporter', () => {
         const origNav = (globalThis as any).navigator
         const origWin = (globalThis as any).window
         const beaconCalls: any[] = []
-        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } }
+        setNavigator({ sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } })
         const mockWindow: any = { onerror: null, addEventListener: () => {} }
         ;(globalThis as any).window = mockWindow
         try {
@@ -2911,7 +2918,7 @@ describe('BeaconReporter', () => {
             expect(beaconCalls[0][0].level).toBe('error')
             expect(beaconCalls[0][0].scope).toBe('window')
         } finally {
-            ;(globalThis as any).navigator = origNav
+            setNavigator(origNav)
             ;(globalThis as any).window = origWin
         }
     })
@@ -2920,7 +2927,7 @@ describe('BeaconReporter', () => {
         const origNav = (globalThis as any).navigator
         const origWin = (globalThis as any).window
         const beaconCalls: any[] = []
-        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } }
+        setNavigator({ sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } })
         const mockWindow: any = { onerror: null, addEventListener: () => {} }
         ;(globalThis as any).window = mockWindow
         try {
@@ -2928,7 +2935,7 @@ describe('BeaconReporter', () => {
             mockWindow.onerror('err', 'app.js', 1, 1, new Error('x'))
             expect(beaconCalls[0][0].scope).toBe('global')
         } finally {
-            ;(globalThis as any).navigator = origNav
+            setNavigator(origNav)
             ;(globalThis as any).window = origWin
         }
     })
@@ -2937,7 +2944,7 @@ describe('BeaconReporter', () => {
         const origNav = (globalThis as any).navigator
         const origWin = (globalThis as any).window
         const beaconCalls: any[] = []
-        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } }
+        setNavigator({ sendBeacon: (_url: string, data: string) => { beaconCalls.push(JSON.parse(data)); return true } })
         const listeners: Array<(evt: any) => void> = []
         const mockWindow: any = { onerror: null, addEventListener: (_evt: string, fn: any) => listeners.push(fn) }
         ;(globalThis as any).window = mockWindow
@@ -2948,7 +2955,7 @@ describe('BeaconReporter', () => {
             expect(beaconCalls[0][0].level).toBe('error')
             expect(beaconCalls[0][0].messages[0]).toBe('Unhandled promise rejection')
         } finally {
-            ;(globalThis as any).navigator = origNav
+            setNavigator(origNav)
             ;(globalThis as any).window = origWin
         }
     })
@@ -2956,14 +2963,14 @@ describe('BeaconReporter', () => {
     it('close() flushes pending entries', () => {
         const orig = (globalThis as any).navigator
         const calls: any[] = []
-        ;(globalThis as any).navigator = { sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } }
+        setNavigator({ sendBeacon: (_url: string, data: string) => { calls.push(JSON.parse(data)); return true } })
         try {
             const reporter = new BeaconReporter({ url: '/logs', maxSize: 100, flushInterval: 0 })
             reporter.log('info', 's', T0, {}, ['closing'])
             reporter.close()
             expect(calls).toHaveLength(1)
         } finally {
-            ;(globalThis as any).navigator = orig
+            setNavigator(orig)
         }
     })
 

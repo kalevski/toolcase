@@ -187,7 +187,8 @@ export abstract class DialogBase extends HTMLElement {
         if (inert) {
             // Collect ancestors so we can exclude the dialog's own branch.
             const ancestors = new Set<Element>()
-            let el: Element | null = this
+            ancestors.add(this)
+            let el: Element | null = this.parentElement
             while (el && el !== document.body) {
                 ancestors.add(el)
                 el = el.parentElement

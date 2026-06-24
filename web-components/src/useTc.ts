@@ -58,7 +58,6 @@ export function useTc<E extends HTMLElement = HTMLElement>(
             pairs.forEach(({ event, fn }) => el.removeEventListener(event, fn))
         }
         // Mount-only: event names are static; handlers stay current via onRef.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Apply instance props after every render so the element stays in sync with

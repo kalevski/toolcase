@@ -50,7 +50,6 @@ function RoleSelect({
     // attribute, so a rejected pick would otherwise linger in the native select.
     useEffect(() => {
         if (ref.current) (ref.current as HTMLSelectElement).value = value
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value])
     return (
         <tc-select ref={ref} value={value} disabled={disabled || undefined}>

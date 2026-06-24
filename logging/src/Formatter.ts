@@ -45,7 +45,7 @@ export const jsonFormatter: LogFormatter = (level, scope, time, fields, messages
 
 function logfmtEscape(v: string): string {
     if (v === '') return '""'
-    if (/[\s"=]/.test(v)) return `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+    if (/[\s"=]/.test(v)) return `"${v}"`
     return v
 }
 

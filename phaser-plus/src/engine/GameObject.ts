@@ -19,7 +19,7 @@ export default class GameObject extends GameObjects.Container {
 
     private _effects: EffectManager | null = null
 
-    private readonly _components: Map<Function, GameObjectComponent> = new Map()
+    private readonly _components: Map<ComponentClass<GameObjectComponent>, GameObjectComponent> = new Map()
 
     private _created: boolean = false
 

@@ -112,42 +112,48 @@ export class Table extends HTMLElement {
         return this.hasAttribute('striped')
     }
     set striped(v: boolean) {
-        v ? this.setAttribute('striped', '') : this.removeAttribute('striped')
+        if (v) this.setAttribute('striped', '')
+        else this.removeAttribute('striped')
     }
 
     get hoverable(): boolean {
         return this.hasAttribute('hoverable')
     }
     set hoverable(v: boolean) {
-        v ? this.setAttribute('hoverable', '') : this.removeAttribute('hoverable')
+        if (v) this.setAttribute('hoverable', '')
+        else this.removeAttribute('hoverable')
     }
 
     get compact(): boolean {
         return this.hasAttribute('compact')
     }
     set compact(v: boolean) {
-        v ? this.setAttribute('compact', '') : this.removeAttribute('compact')
+        if (v) this.setAttribute('compact', '')
+        else this.removeAttribute('compact')
     }
 
     get borderless(): boolean {
         return this.hasAttribute('borderless')
     }
     set borderless(v: boolean) {
-        v ? this.setAttribute('borderless', '') : this.removeAttribute('borderless')
+        if (v) this.setAttribute('borderless', '')
+        else this.removeAttribute('borderless')
     }
 
     get stickyHeader(): boolean {
         return this.hasAttribute('sticky-header')
     }
     set stickyHeader(v: boolean) {
-        v ? this.setAttribute('sticky-header', '') : this.removeAttribute('sticky-header')
+        if (v) this.setAttribute('sticky-header', '')
+        else this.removeAttribute('sticky-header')
     }
 
     get loading(): boolean {
         return this.hasAttribute('loading')
     }
     set loading(v: boolean) {
-        v ? this.setAttribute('loading', '') : this.removeAttribute('loading')
+        if (v) this.setAttribute('loading', '')
+        else this.removeAttribute('loading')
     }
 
     get loadingRows(): number {

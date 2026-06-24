@@ -98,6 +98,7 @@ class SpatialHash<T> {
     }
 
     nearest(point: SpatialPoint, maxDist = Infinity): T | null {
+        if (this._size === 0) return null
         const { cs } = this
         const cx0 = Math.floor(point.x / cs)
         const cy0 = Math.floor(point.y / cs)
@@ -105,7 +106,9 @@ class SpatialHash<T> {
         let bestDist = maxDist
         const seen = new Set<T>()
         for (let r = 0; r <= 1e4; r++) {
-            if (best !== null && (r - 1) * cs >= bestDist) break
+            // Once the nearest cell edge in this ring is beyond the best distance
+            // found so far (or the maxDist cap), no closer item can exist.
+            if ((r - 1) * cs >= bestDist) break
             if (r === 0) {
                 this.scanCell(cx0, cy0, point, seen, (item, d) => {
                     if (d < bestDist) { bestDist = d; best = item }

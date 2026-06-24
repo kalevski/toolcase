@@ -69,7 +69,10 @@ export class BPlusIndex<K, V> {
 
     static deserializers = {
         string:     (b: Uint8Array): string => DEC.decode(b),
-        number:     (b: Uint8Array): number => new DataView(b.buffer, b.byteOffset, b.byteLength).getFloat64(0, true),
+        number:     (b: Uint8Array): number => {
+            const v = new DataView(b.buffer, b.byteOffset, b.byteLength).getFloat64(0, true)
+            return Object.is(v, -0) ? 0 : v   // normalize negative zero to +0
+        },
         bigint:     (b: Uint8Array): bigint => {
             const view  = new DataView(b.buffer, b.byteOffset, b.byteLength)
             const magLen = view.getUint16(0, true)
@@ -838,38 +841,35 @@ export class BPlusIndex<K, V> {
             const hasLower = gte !== undefined || gt !== undefined
             const lowerKey = gte ?? gt
 
+            // Leaf IDs in ascending key order via authoritative tree descent;
+            // the `nextPageId` sibling chain is not trustworthy after COW.
+            const leafIds = await this._collectAllLeafIds()
+
             if (hasLower) {
+                // Locate the leaf that should contain the lower bound, then scan
+                // it and every subsequent leaf in order.
                 const { leaf } = await this._findLeaf(lowerKey!)
+                const startLeafIdx = leafIds.indexOf(leaf.pageId)
                 const pos = this._lowerBound(leaf.entries.map(e => e.keyRaw), lowerKey!)
-                let startIdx = pos
-                if (gt !== undefined && startIdx < leaf.entries.length) {
-                    if (this.compare(this.deserializeKey(leaf.entries[startIdx].keyRaw), gt) === 0) startIdx++
+                let startEntry = pos
+                if (gt !== undefined && startEntry < leaf.entries.length) {
+                    if (this.compare(this.deserializeKey(leaf.entries[startEntry].keyRaw), gt) === 0) startEntry++
                 }
 
-                for (let i = startIdx; i < leaf.entries.length; i++) {
-                    const k = this.deserializeKey(leaf.entries[i].keyRaw)
-                    if (lte !== undefined && this.compare(k, lte) > 0) return
-                    if (lt  !== undefined && this.compare(k, lt)  >= 0) return
-                    yield [k, this.deserializeValue(leaf.entries[i].valueRaw)]
-                    if (++yielded === limit) return
-                }
-
-                let nextId = leaf.nextPageId
-                while (nextId !== NULL_PAGE) {
-                    const nl = await this._readLeaf(nextId)
-                    for (const e of nl.entries) {
-                        const k = this.deserializeKey(e.keyRaw)
+                for (let li = Math.max(startLeafIdx, 0); li < leafIds.length; li++) {
+                    const cur = li === startLeafIdx ? leaf : await this._readLeaf(leafIds[li])
+                    const from = li === startLeafIdx ? startEntry : 0
+                    for (let i = from; i < cur.entries.length; i++) {
+                        const k = this.deserializeKey(cur.entries[i].keyRaw)
                         if (lte !== undefined && this.compare(k, lte) > 0) return
                         if (lt  !== undefined && this.compare(k, lt)  >= 0) return
-                        yield [k, this.deserializeValue(e.valueRaw)]
+                        yield [k, this.deserializeValue(cur.entries[i].valueRaw)]
                         if (++yielded === limit) return
                     }
-                    nextId = nl.nextPageId
                 }
             } else {
-                // Full scan from leftmost leaf
-                let pageId = await this._leftmostLeafId()
-                while (pageId !== NULL_PAGE) {
+                // Full scan in ascending leaf order
+                for (const pageId of leafIds) {
                     const leaf = await this._readLeaf(pageId)
                     for (const e of leaf.entries) {
                         const k = this.deserializeKey(e.keyRaw)
@@ -878,12 +878,11 @@ export class BPlusIndex<K, V> {
                         yield [k, this.deserializeValue(e.valueRaw)]
                         if (++yielded === limit) return
                     }
-                    pageId = leaf.nextPageId
                 }
             }
         } else {
             // ── reverse scan ─────────────────────────────────────────────────
-            // Collect all leaf IDs by forward scan (avoids stale prevPageId links)
+            // Collect all leaf IDs via tree descent (avoids stale prev/next links)
             const leafIds = await this._collectAllLeafIds()
             for (let li = leafIds.length - 1; li >= 0; li--) {
                 const leaf = await this._readLeaf(leafIds[li])
@@ -900,24 +899,29 @@ export class BPlusIndex<K, V> {
         }
     }
 
-    private async _leftmostLeafId(): Promise<number> {
-        let pageId = this.rootPageId
-        while (true) {
-            const raw = await this.adapter.read(pageId)
-            if (!raw || raw[4] === PAGE_TYPE_LEAF) return pageId
-            const node = await this._readInternal(pageId)
-            pageId = node.children[0]
-        }
-    }
-
+    /**
+     * Gather every leaf page ID in ascending key order by descending the tree
+     * via internal-node children (which are kept authoritative on every COW
+     * split/update).  The leaf `nextPageId` sibling chain is NOT used: a leaf
+     * that is copied or split is relocated to a fresh page and freed, but its
+     * left sibling's `nextPageId` is intentionally not rewritten (see
+     * `_splitLeaf`), so that chain can dangle to a freed/reused page.
+     */
     private async _collectAllLeafIds(): Promise<number[]> {
         const ids: number[] = []
-        let pageId = await this._leftmostLeafId()
-        while (pageId !== NULL_PAGE) {
-            ids.push(pageId)
-            const leaf = await this._readLeaf(pageId)
-            pageId = leaf.nextPageId
+
+        const descend = async (pageId: number): Promise<void> => {
+            const raw = await this.adapter.read(pageId)
+            if (!raw) throw new Error(`BPlusIndex: missing page ${pageId}`)
+            if (raw[4] === PAGE_TYPE_LEAF) {
+                ids.push(pageId)
+                return
+            }
+            const node = await this._readInternal(pageId)
+            for (const childId of node.children) await descend(childId)
         }
+
+        await descend(this.rootPageId)
         return ids
     }
 

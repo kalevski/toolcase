@@ -5,3 +5,5 @@ import ContextualReporter from './ContextualReporter'
 
 export { StreamReporter, FileLogReporter, defaultStreamFormatter, AsyncContext, ContextualReporter }
 export type { StreamLogFormatter, StreamReporterOptions, FileLogFormatter, FileLogReporterOptions }
+
+export default FileLogReporter

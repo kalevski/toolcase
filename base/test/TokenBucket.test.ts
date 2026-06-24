@@ -35,7 +35,7 @@ describe('TokenBucket', () => {
     })
 
     it('starts full at capacity', () => {
-        let t = 0
+        const t = 0
         const bucket = new TokenBucket(10, 1, () => t)
         expect(bucket.tokens).toBe(10)
         expect(bucket.capacity).toBe(10)
@@ -43,14 +43,14 @@ describe('TokenBucket', () => {
     })
 
     it('removes tokens when sufficient', () => {
-        let t = 0
+        const t = 0
         const bucket = new TokenBucket(10, 1, () => t)
         expect(bucket.tryRemove(3)).toBe(true)
         expect(bucket.tokens).toBe(7)
     })
 
     it('returns false when not enough tokens', () => {
-        let t = 0
+        const t = 0
         const bucket = new TokenBucket(5, 1, () => t)
         expect(bucket.tryRemove(6)).toBe(false)
         expect(bucket.tokens).toBe(5)
@@ -88,7 +88,7 @@ describe('TokenBucket', () => {
     })
 
     it('take is an alias for tryRemove', () => {
-        let t = 0
+        const t = 0
         const bucket = new TokenBucket(10, 1, () => t)
         expect(bucket.take(4)).toBe(true)
         expect(bucket.tokens).toBe(6)
@@ -97,14 +97,14 @@ describe('TokenBucket', () => {
     })
 
     it('tryRemove defaults n to 1', () => {
-        let t = 0
+        const t = 0
         const bucket = new TokenBucket(5, 1, () => t)
         expect(bucket.tryRemove()).toBe(true)
         expect(bucket.tokens).toBe(4)
     })
 
     it('take defaults n to 1', () => {
-        let t = 0
+        const t = 0
         const bucket = new TokenBucket(5, 1, () => t)
         expect(bucket.take()).toBe(true)
         expect(bucket.tokens).toBe(4)
@@ -132,7 +132,7 @@ describe('TokenBucket', () => {
     })
 
     it('allows removing all tokens exactly', () => {
-        let t = 0
+        const t = 0
         const bucket = new TokenBucket(7, 1, () => t)
         expect(bucket.tryRemove(7)).toBe(true)
         expect(bucket.tokens).toBe(0)

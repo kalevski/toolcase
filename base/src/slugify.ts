@@ -4,7 +4,7 @@ function slugify(input: string): string {
         .toLowerCase()
         .normalize('NFD')
         .replace(/[̀-ͯ]/g, '')
-        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/[^a-z0-9\s_-]/g, '')
         .replace(/[\s_-]+/g, '-')
         .replace(/^-+|-+$/g, '')
 }

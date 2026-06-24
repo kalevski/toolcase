@@ -69,7 +69,7 @@ const scanConsts = (src) => {
     }
 }
 for (const dir of [srcDir, join(srcDir, 'internal')]) {
-    let files = []
+    let files
     try {
         files = readdirSync(dir)
     } catch {

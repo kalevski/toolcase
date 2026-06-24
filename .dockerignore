@@ -1,0 +1,38 @@
+# Root .dockerignore — applies ONLY to root-context image builds. Currently that
+# is the taskforge image (.github/workflows/taskforge.yml uses `context: .`).
+# The nginxpilot image keeps `context: nginxpilot` + its own .dockerignore, so it
+# is unaffected by this file.
+
+# version control / CI
+.git
+.github
+
+# all workspace dependencies + build outputs — reinstalled/rebuilt inside the image.
+# NOTE: only the published packages' build dirs are listed; taskforge/lib is SOURCE
+# (the @/lib/* modal+toast helpers) and must NOT be ignored.
+**/node_modules
+base/lib
+logging/lib
+serializer/lib
+web-components/lib
+phaser-plus/lib
+node/lib
+examples/dist
+**/.next
+**/*.tsbuildinfo
+
+# taskforge runtime state & secrets — MUST never enter the image
+taskforge/.workspace
+taskforge/.claude-accounts
+**/taskforge.db
+**/taskforge.db-*
+**/*.db-wal
+**/*.db-shm
+
+# env / secrets
+**/.env
+**/.env*.local
+
+# misc noise
+**/npm-debug.log*
+**/.DS_Store

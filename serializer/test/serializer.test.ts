@@ -505,15 +505,17 @@ describe('Serializer explicit field tags', () => {
 
 describe('Serializer default constructor — Node 18 crypto compatibility', () => {
     it('constructs and produces a non-empty id when globalThis.crypto is absent', () => {
-        const savedCrypto = (globalThis as any).crypto
+        // globalThis.crypto is a getter-only accessor on modern Node, so a plain
+        // assignment throws; override it via defineProperty (it is configurable).
+        const savedCrypto = Object.getOwnPropertyDescriptor(globalThis, 'crypto')
         try {
-            (globalThis as any).crypto = undefined
+            Object.defineProperty(globalThis, 'crypto', { value: undefined, configurable: true, writable: true })
             const s = new Serializer()
             const id: string = (s as any).namespace.name
             expect(id).toBeTruthy()
             expect(id.length).toBeGreaterThan(0)
         } finally {
-            (globalThis as any).crypto = savedCrypto
+            if (savedCrypto) Object.defineProperty(globalThis, 'crypto', savedCrypto)
         }
     })
 })

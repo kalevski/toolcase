@@ -75,10 +75,11 @@ describe('Color — WCAG contrast utilities', () => {
             expect(Color.luminance('#000000')).toBeCloseTo(0.0, 5)
         })
 
-        it('mid-grey #767676 has luminance ~0.2158', () => {
-            // WCAG reference: relative luminance of #767676 ≈ 0.2158
-            // linearC ≈ 0.2158 for equal R, G, B channels at 118/255
-            expect(Color.luminance('#767676')).toBeCloseTo(0.2158, 3)
+        it('mid-grey #767676 has luminance ~0.1812', () => {
+            // WCAG reference: relative luminance of #767676 ≈ 0.1812
+            // 118/255 = 0.46275 → linearized = ((0.46275 + 0.055) / 1.055)^2.4 ≈ 0.1812
+            // (equal R, G, B channels, so luminance == the linearized channel value)
+            expect(Color.luminance('#767676')).toBeCloseTo(0.1812, 3)
         })
 
         it('accepts 3-digit shorthand hex', () => {

@@ -26,14 +26,16 @@ describe('withTimeout', () => {
     it('rejects with a timeout error when fn takes too long', async () => {
         const slow = () => new Promise<void>(resolve => setTimeout(resolve, 500))
         const p = withTimeout(slow, 100)
+        const assertion = expect(p).rejects.toThrow('timed out after 100ms')
         await vi.advanceTimersByTimeAsync(200)
-        await expect(p).rejects.toThrow('timed out after 100ms')
+        await assertion
     })
 
     it('propagates fn rejection before timeout', async () => {
         const p = withTimeout(() => Promise.reject(new Error('nope')), 100)
+        const assertion = expect(p).rejects.toThrow('nope')
         await vi.runAllTimersAsync()
-        await expect(p).rejects.toThrow('nope')
+        await assertion
     })
 
     it('composes with retry — retries on timeout', async () => {

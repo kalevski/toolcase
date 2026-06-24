@@ -100,7 +100,7 @@ export default class InspectorPanel extends Panel {
         if (this.recorder !== null) {
             this.recorder.ondataavailable = null
             this.recorder.onstop = null
-            try { if (this.recorder.state !== 'inactive') this.recorder.stop() } catch {}
+            try { if (this.recorder.state !== 'inactive') this.recorder.stop() } catch { /* recorder already stopped */ }
             this.recorder = null
         }
         this.videoChunks = []

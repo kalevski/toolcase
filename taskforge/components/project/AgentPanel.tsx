@@ -71,7 +71,6 @@ export function AgentPanel({
     useEffect(() => {
         const body = termRef.current?.querySelector('.tc-terminal-window-body')
         if (body) body.scrollTop = body.scrollHeight
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tcLines])
 
     const logText = () => lines.map((l) => l.text).join('\n')

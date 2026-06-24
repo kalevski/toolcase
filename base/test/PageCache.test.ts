@@ -174,12 +174,12 @@ describe('PageCache — LRU eviction', () => {
         await cache.read(3)
         expect(spy.readCount).toBe(1)
 
-        // Page 2 was evicted
-        await cache.read(2)
-        expect(spy.readCount).toBe(2)
-
-        // Page 1 is still cached
+        // Page 1 was refreshed by the touch, so it survived eviction → still cached
         await cache.read(1)
+        expect(spy.readCount).toBe(1)
+
+        // Page 2 was the LRU victim → no longer cached
+        await cache.read(2)
         expect(spy.readCount).toBe(2)
     })
 })
@@ -268,18 +268,26 @@ describe('PageCache + FsAdapter — transparent composition', () => {
 
     it('cache reduces adapter reads on repeated lookups', async () => {
         const spy = new SpyAdapter()
-        const cache = new PageCache(spy, 32)
 
+        // Build the data. The write-through cache used while writing warms itself,
+        // so to measure a genuine cold→hot transition we reopen with a fresh
+        // (cold) cache over the same underlying storage for the read passes.
+        const writer = await BPlusIndex.open<string, string>({
+            ...strOpts,
+            adapter: new PageCache(spy, 32),
+        })
+        for (let i = 0; i < 10; i++) {
+            await writer.set(`k${i}`, `v${i}`)
+        }
+        await writer.close()
+
+        const cache = new PageCache(spy, 32)
         const idx = await BPlusIndex.open<string, string>({
             ...strOpts,
             adapter: cache,
         })
 
-        for (let i = 0; i < 10; i++) {
-            await idx.set(`k${i}`, `v${i}`)
-        }
-
-        // First pass: cold reads
+        // First pass: cold reads (fresh cache must fetch pages from the adapter)
         spy.readCount = 0
         for (let i = 0; i < 10; i++) {
             await idx.get(`k${i}`)
@@ -293,6 +301,7 @@ describe('PageCache + FsAdapter — transparent composition', () => {
         }
         const hotReads = spy.readCount
 
+        expect(coldReads).toBeGreaterThan(0)
         expect(hotReads).toBeLessThan(coldReads)
     })
 })

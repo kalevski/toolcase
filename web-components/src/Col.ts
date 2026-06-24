@@ -53,14 +53,16 @@ export class Col extends HTMLElement {
         return this.getAttribute('span')
     }
     set span(v: string | null) {
-        v != null ? this.setAttribute('span', v) : this.removeAttribute('span')
+        if (v != null) this.setAttribute('span', v)
+        else this.removeAttribute('span')
     }
 
     get order(): string | null {
         return this.getAttribute('order')
     }
     set order(v: string | null) {
-        v != null ? this.setAttribute('order', v) : this.removeAttribute('order')
+        if (v != null) this.setAttribute('order', v)
+        else this.removeAttribute('order')
     }
 
     private resolveSpanClasses(): string[] {

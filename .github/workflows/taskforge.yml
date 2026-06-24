@@ -3,9 +3,23 @@ name: taskforge
 on:
   push:
     branches: [main]
-    paths: ['taskforge/**', '.github/workflows/taskforge.yml']
+    # the image bundles built @toolcase/base + web-components, so changes there
+    # must rebuild taskforge too (build context is the repo root).
+    paths:
+      - 'taskforge/**'
+      - 'base/**'
+      - 'web-components/**'
+      - 'package-lock.json'
+      - '.dockerignore'
+      - '.github/workflows/taskforge.yml'
   pull_request:
-    paths: ['taskforge/**', '.github/workflows/taskforge.yml']
+    paths:
+      - 'taskforge/**'
+      - 'base/**'
+      - 'web-components/**'
+      - 'package-lock.json'
+      - '.dockerignore'
+      - '.github/workflows/taskforge.yml'
 
 permissions:
   contents: read
@@ -44,7 +58,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: taskforge
+          # repo root: taskforge's @toolcase/* deps are file:../ workspace
+          # siblings, so the build needs the whole monorepo (see taskforge/Dockerfile).
+          context: .
+          file: taskforge/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}

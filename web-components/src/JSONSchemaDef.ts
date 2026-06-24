@@ -577,7 +577,7 @@ export class JSONSchemaDef extends HTMLElement {
             `.tc-json-schema-def-row[data-idx="${focus.idx}"]`,
         )
         if (!row) return
-        let el: HTMLElement | null = null
+        let el: HTMLElement | null
         if (focus.field === 'key') el = row.querySelector('.tc-json-schema-def-key')
         else if (focus.field === 'type') el = row.querySelector('.tc-json-schema-def-type')
         else el = row.querySelector(`[data-action="${focus.field}"]`)

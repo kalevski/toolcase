@@ -274,7 +274,7 @@ export class Slider extends HTMLElement {
         const max = this.max
         const bigStep = step * 10
         const value = this._currentValue()
-        let next = value
+        let next: number
 
         switch (e.key) {
             case 'ArrowLeft':
